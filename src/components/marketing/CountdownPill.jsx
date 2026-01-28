@@ -32,14 +32,14 @@ export default function CountdownPill() {
       <div className="
         relative max-w-4xl w-full 
         rounded-full overflow-hidden
-        bg-[rgba(10,2,25,0.6)]
+        bg-[rgba(2,25,10,0.6)]
         backdrop-blur-2xl
-        border border-violet-500/50
-        shadow-[0_0_55px_rgba(139,92,246,0.45)]
+        border border-green-500/50
+        shadow-[0_0_55px_rgba(34,197,94,0.45)]
         px-10 py-6 sm:px-14 sm:py-7
 
         before:absolute before:inset-0 before:rounded-full
-        before:bg-gradient-to-r before:from-violet-600/30 before:via-indigo-500/20 before:to-fuchsia-600/25
+        before:bg-gradient-to-r before:from-green-600/30 before:via-emerald-500/20 before:to-teal-600/25
         before:blur-xl before:opacity-70
 
         after:absolute after:inset-0 after:rounded-full 
@@ -51,13 +51,13 @@ export default function CountdownPill() {
 
         {/* Title */}
         <div className="relative z-10 flex flex-col items-center">
-          <p className="text-[0.7rem] sm:text-xs tracking-[0.3em] text-violet-300 uppercase">
+          <p className="text-[0.7rem] sm:text-xs tracking-[0.3em] text-green-300 uppercase">
             Pre-Launch Engineering Mode
           </p>
 
-          <p className="text-lg sm:text-xl md:text-2xl font-semibold text-violet-100 mt-1">
+          <p className="text-lg sm:text-xl md:text-2xl font-semibold text-green-100 mt-1">
             Launching{" "}
-            <span className="font-bold text-violet-300">
+            <span className="font-bold text-green-300">
               January 1st, 2026
             </span>
           </p>
@@ -75,14 +75,14 @@ export default function CountdownPill() {
               <div key={label} className="flex flex-col items-center">
                 <span className="
                   text-2xl sm:text-3xl md:text-4xl 
-                  font-bold text-violet-100 
+                  font-bold text-green-100 
                   tracking-widest tabular-nums
-                  drop-shadow-[0_0_8px_rgba(147,51,234,0.65)]
+                  drop-shadow-[0_0_8px_rgba(34,197,94,0.65)]
                 ">
                   {pad(val)}
                 </span>
                 <span className="
-                  text-[0.55rem] sm:text-xs uppercase tracking-[0.18em] text-violet-300 mt-1
+                  text-[0.55rem] sm:text-xs uppercase tracking-[0.18em] text-green-300 mt-1
                 ">
                   {label}
                 </span>
@@ -90,13 +90,13 @@ export default function CountdownPill() {
             ))}
           </div>
         ) : (
-          <p className="relative z-10 mt-5 text-center text-violet-200 font-medium text-sm">
+          <p className="relative z-10 mt-5 text-center text-green-200 font-medium text-sm">
             Launch Phase Activated — Systems Online.
           </p>
         )}
 
         {/* Micro text */}
-        <p className="relative z-10 text-center text-[0.6rem] mt-4 text-violet-400/70 tracking-wide">
+        <p className="relative z-10 text-center text-[0.6rem] mt-4 text-green-400/70 tracking-wide">
           Countdown is globally synchronized using UTC for accuracy.
         </p>
       </div>
@@ -104,9 +104,9 @@ export default function CountdownPill() {
       {/* Animations */}
       <style>{`
         @keyframes cardGlow {
-          0% { box-shadow: 0 0 38px rgba(139,92,246,0.25); }
-          50% { box-shadow: 0 0 70px rgba(139,92,246,0.55); }
-          100% { box-shadow: 0 0 38px rgba(139,92,246,0.25); }
+          0% { box-shadow: 0 0 38px rgba(34,197,94,0.25); }
+          50% { box-shadow: 0 0 70px rgba(34,197,94,0.55); }
+          100% { box-shadow: 0 0 38px rgba(34,197,94,0.25); }
         }
       `}</style>
     </div>
