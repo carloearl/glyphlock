@@ -866,7 +866,7 @@ export default function GlyphBotPage() {
                   savedChats={savedChats}
                   isLoading={persistenceLoading}
                   onSave={handleSaveChat}
-                  onArchive={() => archiveChat(currentChatId)}
+                  onArchive={() => currentChatId ? archiveChat(currentChatId) : toast.error('No active chat to archive')}
                   onLoadChat={handleLoadChat}
                   onNewChat={handleNewChat}
                   onGetArchived={getArchivedChats}
