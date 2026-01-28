@@ -28,7 +28,7 @@ export default function PaywallGuard({ serviceName, children, requirePlan = "pro
       const userData = await base44.auth.me();
       setUser(userData);
 
-      // Admin bypass
+      // Admin bypass - intentional for testing and support
       if (userData.role === 'admin') {
         setHasAccess(true);
         setLoading(false);

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Lock, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-export default function FreeTrialGuard({ serviceName, children, bypassDuringDev = true }) {
+export default function FreeTrialGuard({ serviceName, children, allowAdminBypass = true }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [canAccess, setCanAccess] = useState(false);
@@ -26,8 +26,8 @@ export default function FreeTrialGuard({ serviceName, children, bypassDuringDev 
         const userData = await base44.auth.me();
         setUser(userData);
 
-        // Allow admin users full access during development
-        if (bypassDuringDev && userData.role === 'admin') {
+        // Allow admin users full access if enabled
+        if (allowAdminBypass && userData.role === 'admin') {
           setCanAccess(true);
           setLoading(false);
           return;
