@@ -19,7 +19,7 @@ function InteractiveImageStudioContent() {
           const userData = await base44.auth.me();
           setUser(userData);
         } else {
-          await base44.auth.redirectToLogin();
+          await base44.auth.redirectToLogin('/InteractiveImageStudio');
         }
       } catch (error) {
         console.error("Auth error:", error);

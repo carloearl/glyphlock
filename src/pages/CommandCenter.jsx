@@ -692,7 +692,12 @@ function ResourcesTab({ user }) {
           
           return (
             <Wrapper key={resource.name} {...wrapperProps}>
-              <Card className={`bg-slate-900/50 border-slate-800 hover:border-${resource.color}-500/30 transition-all cursor-pointer`}>
+              <Card className={`bg-slate-900/50 border-slate-800 ${
+                resource.color === 'cyan' ? 'hover:border-cyan-500/30' :
+                resource.color === 'purple' ? 'hover:border-purple-500/30' :
+                resource.color === 'green' ? 'hover:border-green-500/30' :
+                'hover:border-blue-500/30'
+              } transition-all cursor-pointer`}>
                 <CardContent className="p-6">
                   <div className={`w-12 h-12 rounded-xl ${colorClasses[resource.color]} flex items-center justify-center mb-4 border`}>
                     <Icon className="w-6 h-6" />

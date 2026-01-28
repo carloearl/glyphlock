@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 
 export async function generate(options) {
   try {
-    const response = await base44.functions.invoke('textToSpeechAdvanced', options);
+    const response = await base44.functions.invoke('textToSpeech', options);
     return response.data;
   } catch (error) {
     console.error('[TTS Service] Error:', error);

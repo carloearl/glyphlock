@@ -359,7 +359,7 @@ export default function QrStudio({ initialTab = 'create' }) {
         payload,
         payload_sha256: await generateSHA256(payload),
         size,
-        creator_id: "guest",
+        creator_id: currentUser?.email || "anonymous",
         status: combinedResult ? (combinedResult.final_score >= 80 ? "safe" : "suspicious") : "safe",
         type: qrType,
         image_format: "png",
