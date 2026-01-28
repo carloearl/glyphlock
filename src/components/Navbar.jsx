@@ -266,17 +266,23 @@ const NavItem = ({ section, isOpen, onToggle, index }) => {
                 <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/30 via-blue-600/25 to-indigo-500/30 blur-xl -z-10"></div>
 
                 <div className="relative p-2">
-                  {section.items.map((item, idx) => (
-                    <motion.div
-                      key={item.page}
-                      initial={{ opacity: 0, x: -30, filter: "blur(8px)" }}
-                      animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                      transition={{ delay: idx * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    >
-                      <Link
-                        to={createPageUrl(item.page)}
-                        className="group/item relative flex items-center justify-between px-4 py-3.5 rounded-lg text-blue-100 hover:text-white transition-all duration-300 overflow-hidden"
-                      >
+                 {section.items.filter(item => {
+                   // Filter out admin-only items for non-admin users
+                   if (item.visibility === 'admin' && (!user || user.role !== 'admin')) {
+                     return false;
+                   }
+                   return true;
+                 }).map((item, idx) => (
+                   <motion.div
+                     key={item.page}
+                     initial={{ opacity: 0, x: -30, filter: "blur(8px)" }}
+                     animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                     transition={{ delay: idx * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                   >
+                     <Link
+                       to={createPageUrl(item.page)}
+                       className="group/item relative flex items-center justify-between px-4 py-3.5 rounded-lg text-blue-100 hover:text-white transition-all duration-300 overflow-hidden"
+                     >
                         {/* Animated hover background sweep */}
                         <motion.div
                           className="absolute inset-0 rounded-lg"
@@ -601,22 +607,28 @@ export default function Navbar({ user, onLogin, onLogout }) {
                     {section.label}
                   </h3>
                   <div className="grid grid-cols-1 gap-1 pl-4 border-l border-cyan-500/20">
-                    {section.items && section.items.map((item, itemIdx) => (
-                      <motion.div
-                        key={item.page}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: sectionIdx * 0.1 + itemIdx * 0.05 }}
-                      >
-                        <Link
-                          to={createPageUrl(item.page)}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="text-gray-300 hover:text-white text-sm py-3 px-3 block rounded-lg hover:bg-white/5 transition-all min-h-[48px] flex items-center"
-                        >
-                          {item.label}
-                        </Link>
-                      </motion.div>
-                    ))}
+                   {section.items && section.items.filter(item => {
+                     // Filter out admin-only items for non-admin users
+                     if (item.visibility === 'admin' && (!user || user.role !== 'admin')) {
+                       return false;
+                     }
+                     return true;
+                   }).map((item, itemIdx) => (
+                     <motion.div
+                       key={item.page}
+                       initial={{ opacity: 0, x: -20 }}
+                       animate={{ opacity: 1, x: 0 }}
+                       transition={{ delay: sectionIdx * 0.1 + itemIdx * 0.05 }}
+                     >
+                       <Link
+                         to={createPageUrl(item.page)}
+                         onClick={() => setMobileMenuOpen(false)}
+                         className="text-gray-300 hover:text-white text-sm py-3 px-3 block rounded-lg hover:bg-white/5 transition-all min-h-[48px] flex items-center"
+                       >
+                         {item.label}
+                       </Link>
+                     </motion.div>
+                   ))}
                   </div>
                 </motion.div>
               ))}
