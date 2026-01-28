@@ -82,7 +82,7 @@ export default function Consultation() {
               name: 'GlyphLock Protocol Verification',
               description: 'Controlled protocol verification engagement under Master Covenant governance',
             },
-            unit_amount: 1200000, // $12,000.00 in cents
+            unit_amount: parseInt(Deno.env?.get?.('CONSULTATION_PRICE_CENTS') || '1200000'), // Default $12,000.00 in cents
           },
           quantity: 1,
         }],
