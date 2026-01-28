@@ -12,7 +12,7 @@ export function useGlyphBotAudit(currentUser) {
     setIsLoading(true);
     try {
       const results = await base44.entities.GlyphBotAudit.filter(
-        { userId: currentUser.email, isArchived: false },
+        { user_id: currentUser.email, isArchived: false },
         '-created_date',
         100
       );
@@ -40,7 +40,7 @@ export function useGlyphBotAudit(currentUser) {
 
     try {
       const data = {
-        userId: currentUser.email,
+        user_id: currentUser.email,
         targetType: auditData.targetType || 'business',
         targetIdentifier: auditData.targetIdentifier,
         auditMode: auditData.auditMode || 'SURFACE',
@@ -83,7 +83,7 @@ export function useGlyphBotAudit(currentUser) {
 
     try {
       const results = await base44.entities.GlyphBotAudit.filter(
-        { userId: currentUser.email },
+        { user_id: currentUser.email },
         '-created_date',
         100
       );
@@ -167,7 +167,7 @@ export function useGlyphBotAudit(currentUser) {
 
     try {
       const results = await base44.entities.GlyphBotAudit.filter(
-        { userId: currentUser.email, isArchived: true },
+        { user_id: currentUser.email, isArchived: true },
         '-created_date',
         100
       );
