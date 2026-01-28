@@ -91,6 +91,7 @@ import PartnerPortal from './pages/PartnerPortal';
 import Partners from './pages/Partners';
 import PaymentCancel from './pages/PaymentCancel';
 import PaymentSuccess from './pages/PaymentSuccess';
+import Pricing from './pages/Pricing';
 import Privacy from './pages/Privacy';
 import ProjectUpdates from './pages/ProjectUpdates';
 import ProviderConsole from './pages/ProviderConsole';
@@ -119,7 +120,6 @@ import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
-import Pricing from './pages/Pricing';
 import __Layout from './Layout.jsx';
 
 
@@ -168,6 +168,7 @@ export const PAGES = {
     "Partners": Partners,
     "PaymentCancel": PaymentCancel,
     "PaymentSuccess": PaymentSuccess,
+    "Pricing": Pricing,
     "Privacy": Privacy,
     "ProjectUpdates": ProjectUpdates,
     "ProviderConsole": ProviderConsole,
@@ -196,7 +197,6 @@ export const PAGES = {
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
-    "Pricing": Pricing,
 }
 
 export const pagesConfig = {
