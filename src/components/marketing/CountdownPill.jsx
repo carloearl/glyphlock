@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 
-// FIXED GLOBAL LAUNCH (AZ 00:00 => UTC 07:00)
+// Launch date: Jan 1, 2026 00:00 Arizona Time (UTC-7 => UTC 07:00)
 const LAUNCH_UTC = Date.UTC(2026, 0, 1, 7, 0, 0);
 
-function getRemaining() {
+function getTimeSinceLaunch() {
   const nowUTC = Date.now();
-  const diff = LAUNCH_UTC - nowUTC;
+  const diff = nowUTC - LAUNCH_UTC;
 
-  if (diff <= 0) return { over: true, d: 0, h: 0, m: 0, s: 0 };
+  if (diff <= 0) return { notLaunched: true, d: 0, h: 0, m: 0, s: 0 };
 
   return {
-    over: false,
+    notLaunched: false,
     d: Math.floor(diff / 86400000),
     h: Math.floor((diff / 3600000) % 24),
     m: Math.floor((diff / 60000) % 60),
@@ -19,14 +19,15 @@ function getRemaining() {
 }
 
 export default function CountdownPill() {
-  const [t, setT] = useState(getRemaining());
+  const [t, setT] = useState(getTimeSinceLaunch());
   useEffect(() => {
-    const i = setInterval(() => setT(getRemaining()), 1000);
+    const i = setInterval(() => setT(getTimeSinceLaunch()), 1000);
     return () => clearInterval(i);
   }, []);
 
   const pad = (n) => n.toString().padStart(2, "0");
 
+  // System is LIVE - show operational status
   return (
     <div className="w-full flex justify-center mt-10 mb-4 px-4 select-none">
       <div className="
@@ -52,52 +53,32 @@ export default function CountdownPill() {
         {/* Title */}
         <div className="relative z-10 flex flex-col items-center">
           <p className="text-[0.7rem] sm:text-xs tracking-[0.3em] text-green-300 uppercase">
-            Pre-Launch Engineering Mode
+            Platform Status
           </p>
 
           <p className="text-lg sm:text-xl md:text-2xl font-semibold text-green-100 mt-1">
-            Launching{" "}
             <span className="font-bold text-green-300">
-              January 1st, 2026
+              Live — All Systems Operational
             </span>
           </p>
         </div>
 
-        {/* Countdown */}
-        {!t.over ? (
-          <div className="relative z-10 mt-5 flex justify-center gap-6 sm:gap-10 md:gap-12">
-            {[
-              ["Days", t.d],
-              ["Hours", t.h],
-              ["Minutes", t.m],
-              ["Seconds", t.s],
-            ].map(([label, val]) => (
-              <div key={label} className="flex flex-col items-center">
-                <span className="
-                  text-2xl sm:text-3xl md:text-4xl 
-                  font-bold text-green-100 
-                  tracking-widest tabular-nums
-                  drop-shadow-[0_0_8px_rgba(34,197,94,0.65)]
-                ">
-                  {pad(val)}
-                </span>
-                <span className="
-                  text-[0.55rem] sm:text-xs uppercase tracking-[0.18em] text-green-300 mt-1
-                ">
-                  {label}
-                </span>
-              </div>
-            ))}
+        {/* Time Since Launch */}
+        <div className="relative z-10 mt-5 flex justify-center">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="absolute inset-0 bg-green-400 rounded-full blur-md opacity-60 animate-ping"></div>
+              <div className="relative w-3 h-3 bg-green-400 rounded-full"></div>
+            </div>
+            <span className="text-green-200/90 text-sm sm:text-base font-medium">
+              {t.notLaunched ? 'Initializing...' : `Day ${t.d} — Runtime ${pad(t.h)}:${pad(t.m)}:${pad(t.s)}`}
+            </span>
           </div>
-        ) : (
-          <p className="relative z-10 mt-5 text-center text-green-200 font-medium text-sm">
-            Launch Phase Activated — Systems Online.
-          </p>
-        )}
+        </div>
 
         {/* Micro text */}
         <p className="relative z-10 text-center text-[0.6rem] mt-4 text-green-400/70 tracking-wide">
-          Countdown is globally synchronized using UTC for accuracy.
+          Operational since January 1st, 2026 00:00 Arizona Time (UTC-7)
         </p>
       </div>
 
