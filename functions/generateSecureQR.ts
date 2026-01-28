@@ -1,13 +1,12 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    
+    // Auth is optional - allow anonymous QR generation
+    const isAuth = await base44.auth.isAuthenticated();
+    const user = isAuth ? await base44.auth.me() : null;
 
     const { payload, stegoMessage, security_level, customization } = await req.json();
 
@@ -77,7 +76,7 @@ Calculate final_score and determine risk_level.`,
       payload: payload,
       payload_sha256: await generateSHA256(payload),
       size: size,
-      creator_id: user.email,
+      creator_id: user?.email || 'anonymous',
       status: securityResult ? (securityResult.final_score >= 80 ? 'safe' : 'suspicious') : 'safe',
       type: 'url',
       image_format: 'png',
