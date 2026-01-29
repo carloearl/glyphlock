@@ -334,6 +334,7 @@ p {
   contain: layout style paint;
   -webkit-transform: translateZ(0);
   -webkit-backface-visibility: hidden;
+  pointer-events: none !important;
 }
 
 /* Global stacking context isolation */
@@ -431,6 +432,8 @@ html, body {
   -webkit-overflow-scrolling: touch;
   pointer-events: auto !important;
   scroll-snap-type: none !important;
+  overflow-x: hidden;
+  overflow-y: auto !important;
 }
 
 /* Mobile-specific fixes for Samsung and Android */
@@ -492,10 +495,15 @@ footer, [role="contentinfo"] {
 
 /* CRITICAL: Restore pointer events on all interactive elements */
 button, a, input, textarea, select, [role="button"], [type="button"], [type="submit"], label {
-  touch-action: manipulation;
+  touch-action: manipulation !important;
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto !important;
   cursor: pointer;
+}
+
+/* Ensure scroll containers allow wheel and touch events */
+*, *::before, *::after {
+  touch-action: pan-y pan-x !important;
 }
 
 /* Ensure all input types are interactive */

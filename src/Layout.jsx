@@ -147,7 +147,9 @@ export default function Layout({ children, currentPageName }) {
           background: 'transparent',
           paddingBottom: 'env(safe-area-inset-bottom)',
           overscrollBehavior: 'none',
-          position: 'relative'
+          position: 'relative',
+          overflowY: 'auto',
+          touchAction: 'pan-y pan-x'
         }}
       >
         <MobileTouchOptimizer />
