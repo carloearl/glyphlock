@@ -25,9 +25,9 @@ export default function Services() {
 
   const services = [
     {
-      id: "visual-cryptography",
-      icon: Eye,
-      title: "Visual Cryptography Module",
+      id: "qr-verification",
+      icon: QrCode,
+      title: "QR Verification Module",
       description: "QR verification and steganographic encoding module – governed by protocol, accessible only with provisioned credentials.",
       features: [
         "Quantum-resistant QR code generation with embedded encryption",
@@ -37,7 +37,7 @@ export default function Services() {
         "Custom branding and logo embedding",
         "Multiple format support (PNG, SVG, JPG)"
       ],
-      page: "SecurityTools",
+      page: "Qr",
       color: "blue"
     },
     {
