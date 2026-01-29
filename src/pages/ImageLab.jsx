@@ -17,10 +17,15 @@ import InteractiveTab from '@/components/imageLab/tabs/InteractiveTab.jsx';
 import GalleryTab from '@/components/imageLab/tabs/GalleryTab.jsx';
 
 export default function ImageLab() {
-  const [activeTab, setActiveTab] = useState('generate');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('gl_imagelab_active_tab') || 'generate');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
+
+  // Persist active tab
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_active_tab', activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     (async () => {
