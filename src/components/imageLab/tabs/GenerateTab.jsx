@@ -23,28 +23,140 @@ const STYLE_PRESETS = [
 ];
 
 export default function GenerateTab() {
-  const [prompt, setPrompt] = useState('');
-  const [expandedPrompt, setExpandedPrompt] = useState(null);
-  const [promptSpecId, setPromptSpecId] = useState(null);
-  const [references, setReferences] = useState([]);
-  const [weights, setWeights] = useState([]);
-  const [seed, setSeed] = useState(Math.floor(Math.random() * 2147483647));
-  const [seedLocked, setSeedLocked] = useState(false);
-  const [deltaMode, setDeltaMode] = useState('balanced');
-  const [identityLock, setIdentityLock] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [selectedStyle, setSelectedStyle] = useState(null);
+  // Load state from localStorage on mount
+  const [prompt, setPrompt] = useState(() => localStorage.getItem('gl_imagelab_prompt') || '');
+  const [expandedPrompt, setExpandedPrompt] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_expanded');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [promptSpecId, setPromptSpecId] = useState(() => localStorage.getItem('gl_imagelab_spec_id') || null);
+  const [references, setReferences] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_refs');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [weights, setWeights] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_weights');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [seed, setSeed] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_seed');
+    return saved ? parseInt(saved) : Math.floor(Math.random() * 2147483647);
+  });
+  const [seedLocked, setSeedLocked] = useState(() => localStorage.getItem('gl_imagelab_seed_locked') === 'true');
+  const [deltaMode, setDeltaMode] = useState(() => localStorage.getItem('gl_imagelab_delta') || 'balanced');
+  const [identityLock, setIdentityLock] = useState(() => localStorage.getItem('gl_imagelab_identity_lock') === 'true');
+  const [generatedImage, setGeneratedImage] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_result');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_history');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [selectedStyle, setSelectedStyle] = useState(() => localStorage.getItem('gl_imagelab_style') || null);
   
   // Advanced controls
-  const [aspectRatio, setAspectRatio] = useState('1:1');
-  const [modelStrength, setModelStrength] = useState(50);
-  const [sharpness, setSharpness] = useState(50);
-  const [creativity, setCreativity] = useState(50);
-  const [guidanceScale, setGuidanceScale] = useState(7.5);
-  const [qualityMode, setQualityMode] = useState('Standard');
-  const [negativePrompt, setNegativePrompt] = useState('blurry, low quality, watermark, deformed hands, text');
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState(() => localStorage.getItem('gl_imagelab_aspect') || '1:1');
+  const [modelStrength, setModelStrength] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_model_strength');
+    return saved ? parseInt(saved) : 50;
+  });
+  const [sharpness, setSharpness] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_sharpness');
+    return saved ? parseInt(saved) : 50;
+  });
+  const [creativity, setCreativity] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_creativity');
+    return saved ? parseInt(saved) : 50;
+  });
+  const [guidanceScale, setGuidanceScale] = useState(() => {
+    const saved = localStorage.getItem('gl_imagelab_guidance');
+    return saved ? parseFloat(saved) : 7.5;
+  });
+  const [qualityMode, setQualityMode] = useState(() => localStorage.getItem('gl_imagelab_quality') || 'Standard');
+  const [negativePrompt, setNegativePrompt] = useState(() => localStorage.getItem('gl_imagelab_negative') || 'blurry, low quality, watermark, deformed hands, text');
+  const [showAdvanced, setShowAdvanced] = useState(() => localStorage.getItem('gl_imagelab_show_advanced') === 'true');
+
+  // Auto-save to localStorage
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_prompt', prompt);
+  }, [prompt]);
+
+  useEffect(() => {
+    if (expandedPrompt) localStorage.setItem('gl_imagelab_expanded', JSON.stringify(expandedPrompt));
+  }, [expandedPrompt]);
+
+  useEffect(() => {
+    if (promptSpecId) localStorage.setItem('gl_imagelab_spec_id', promptSpecId);
+  }, [promptSpecId]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_refs', JSON.stringify(references));
+  }, [references]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_weights', JSON.stringify(weights));
+  }, [weights]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_seed', seed.toString());
+  }, [seed]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_seed_locked', seedLocked.toString());
+  }, [seedLocked]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_delta', deltaMode);
+  }, [deltaMode]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_identity_lock', identityLock.toString());
+  }, [identityLock]);
+
+  useEffect(() => {
+    if (generatedImage) localStorage.setItem('gl_imagelab_result', JSON.stringify(generatedImage));
+  }, [generatedImage]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_history', JSON.stringify(history));
+  }, [history]);
+
+  useEffect(() => {
+    if (selectedStyle) localStorage.setItem('gl_imagelab_style', selectedStyle);
+  }, [selectedStyle]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_aspect', aspectRatio);
+  }, [aspectRatio]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_model_strength', modelStrength.toString());
+  }, [modelStrength]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_sharpness', sharpness.toString());
+  }, [sharpness]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_creativity', creativity.toString());
+  }, [creativity]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_guidance', guidanceScale.toString());
+  }, [guidanceScale]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_quality', qualityMode);
+  }, [qualityMode]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_negative', negativePrompt);
+  }, [negativePrompt]);
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_show_advanced', showAdvanced.toString());
+  }, [showAdvanced]);
 
   const expandMutation = useMutation({
     mutationFn: async (p) => {
@@ -150,16 +262,23 @@ export default function GenerateTab() {
   const weightsValid = references.length === 0 || Math.abs(totalWeight - 100) < 0.01;
 
   return (
-    <div className="space-y-4 p-4 md:p-6">
+    <div className="space-y-4 p-4 md:p-6 relative">
+      {/* Holographic scan line */}
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50 animate-pulse pointer-events-none" />
+      
       {/* Prompt Section */}
-      <Card id="prompt-section" className="bg-slate-900/80 border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2 text-base md:text-lg">
-            <Wand2 className="w-5 h-5 text-cyan-400" />
-            Prompt Engineering
+      <Card id="prompt-section" className="relative bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border-2 border-cyan-500/40 shadow-[0_0_40px_rgba(6,182,212,0.3),0_0_80px_rgba(139,92,246,0.2)] backdrop-blur-xl overflow-hidden">
+        {/* Animated glow border */}
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 opacity-50 blur-xl animate-pulse pointer-events-none" />
+        <CardHeader className="pb-3 relative z-10 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 border-b border-cyan-500/20">
+          <CardTitle className="text-white flex items-center gap-3 text-lg md:text-xl font-bold">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+              <Wand2 className="w-5 h-5 text-white" />
+            </div>
+            <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Prompt Engineering</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 relative z-10">
           {/* Style Presets */}
           <div>
             <label className="text-xs text-slate-400 mb-2 block uppercase tracking-wider">Style Preset</label>
@@ -189,30 +308,33 @@ export default function GenerateTab() {
           <Button
             onClick={handleExpandPrompt}
             disabled={!prompt.trim() || expandMutation.isPending}
-            className="w-full"
+            className="w-full h-12 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] transition-all font-bold text-base"
           >
             {expandMutation.isPending ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Expanding...
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                AI Enhancing Prompt...
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Expand Prompt
+                <Sparkles className="w-5 h-5 mr-2" />
+                🚀 Expand with AI
               </>
             )}
           </Button>
 
           {expandedPrompt && (
-            <div className="mt-4 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <p className="text-sm text-blue-300 font-semibold mb-2">Expanded Prompt:</p>
-              <p className="text-xs text-slate-300">{expandedPrompt.expanded_prompt}</p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-4 p-5 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-2 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.2)] backdrop-blur-md">
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                <p className="text-sm text-cyan-300 font-bold uppercase tracking-wider">AI-Enhanced Prompt</p>
+              </div>
+              <p className="text-sm text-white leading-relaxed mb-4 font-medium">{expandedPrompt.expanded_prompt}</p>
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-cyan-500/20">
                 {Object.entries(expandedPrompt.structured_spec || {}).map(([key, val]) => (
-                  <div key={key} className="text-xs">
-                    <span className="text-blue-400">{key}:</span>
-                    <span className="text-slate-400 ml-1">{val}</span>
+                  <div key={key} className="bg-black/30 rounded-lg p-2 border border-cyan-500/10">
+                    <span className="text-[10px] text-cyan-400 uppercase tracking-wider block mb-1">{key}:</span>
+                    <span className="text-xs text-slate-300">{val}</span>
                   </div>
                 ))}
               </div>
@@ -222,13 +344,16 @@ export default function GenerateTab() {
       </Card>
 
       {/* Reference Images */}
-      <Card id="reference-section" className="bg-slate-900/80 border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.15)]">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center justify-between text-base md:text-lg">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-purple-400" />
-              <span>Reference Images</span>
-              <Badge variant="outline" className="text-xs text-purple-400 border-purple-500/30">
+      <Card id="reference-section" className="relative bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border-2 border-purple-500/40 shadow-[0_0_40px_rgba(168,85,247,0.3)] backdrop-blur-xl overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 opacity-50 blur-xl animate-pulse pointer-events-none" />
+        <CardHeader className="pb-3 relative z-10 bg-gradient-to-r from-purple-500/5 to-pink-500/5 border-b border-purple-500/20">
+          <CardTitle className="text-white flex items-center justify-between text-lg md:text-xl font-bold">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.5)]">
+                <ImageIcon className="w-5 h-5 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Reference Images</span>
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs font-bold">
                 {references.length}/4
               </Badge>
             </div>
@@ -293,24 +418,27 @@ export default function GenerateTab() {
       </Card>
 
       {/* Advanced Controls - Restored */}
-      <Card id="controls-section" className="bg-slate-900/80 border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
-        <CardHeader className="pb-3">
+      <Card id="controls-section" className="relative bg-gradient-to-br from-slate-900/90 via-blue-900/20 to-slate-900/90 border-2 border-blue-500/40 shadow-[0_0_40px_rgba(59,130,246,0.3)] backdrop-blur-xl overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-blue-500/20 opacity-50 blur-xl animate-pulse pointer-events-none" />
+        <CardHeader className="pb-3 relative z-10 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 border-b border-blue-500/20">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2 text-base md:text-lg">
-              <Sliders className="w-5 h-5 text-cyan-400" />
-              Advanced Controls
+            <CardTitle className="text-white flex items-center gap-3 text-lg md:text-xl font-bold">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+                <Sliders className="w-5 h-5 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Advanced Controls</span>
             </CardTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="text-cyan-400 hover:text-cyan-300"
+              className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 font-semibold"
             >
-              {showAdvanced ? 'Collapse' : 'Expand'}
+              {showAdvanced ? '▼ Collapse' : '▶ Expand'}
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-5 relative z-10">
           {/* Aspect Ratio */}
           <div>
             <label className="text-xs text-slate-400 mb-2 block uppercase tracking-wider">Aspect Ratio</label>
@@ -507,24 +635,35 @@ export default function GenerateTab() {
       </Card>
 
       {/* Generate Button */}
-      <div id="generate-section" className="space-y-3">
-        <Button
-          onClick={() => handleGenerate('generate')}
-          disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
-          className="w-full h-14 text-lg font-bold bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] transition-all"
-        >
-          {generateMutation.isPending ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Forging Image...
-            </>
-          ) : (
-            <>
-              <Zap className="w-5 h-5 mr-2" />
-              Generate Image
-            </>
-          )}
-        </Button>
+      <div id="generate-section" className="space-y-3 relative">
+        {/* Holographic CTA Card */}
+        <div className="relative overflow-hidden rounded-2xl">
+          {/* Animated background glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 opacity-20 blur-2xl animate-pulse" />
+          
+          <Button
+            onClick={() => handleGenerate('generate')}
+            disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
+            className="relative w-full h-16 text-xl font-black bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 shadow-[0_0_50px_rgba(6,182,212,0.6),0_0_100px_rgba(139,92,246,0.4)] hover:shadow-[0_0_80px_rgba(6,182,212,0.8),0_0_120px_rgba(139,92,246,0.6)] transition-all duration-300 border-2 border-cyan-400/50 overflow-hidden group"
+          >
+            {/* Shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+            
+            <span className="relative z-10 flex items-center justify-center gap-3">
+              {generateMutation.isPending ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  ⚡ FORGING IMAGE...
+                </>
+              ) : (
+                <>
+                  <Zap className="w-6 h-6" />
+                  ⚡ IGNITE RENDER ⚡
+                </>
+              )}
+            </span>
+          </Button>
+        </div>
 
         {generatedImage && (
           <div className="grid grid-cols-2 gap-2">
@@ -552,7 +691,8 @@ export default function GenerateTab() {
 
       {/* Results - Enhanced Display */}
       {generatedImage && (
-        <Card className="bg-slate-900/90 border-green-500/30 shadow-[0_0_40px_rgba(16,185,129,0.2)]">
+        <Card className="relative bg-gradient-to-br from-slate-900/95 via-emerald-900/20 to-slate-900/95 border-2 border-emerald-500/40 shadow-[0_0_60px_rgba(16,185,129,0.4)] backdrop-blur-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-emerald-500/20 opacity-50 blur-xl animate-pulse pointer-events-none" />
           <CardHeader className="pb-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-b border-green-500/20">
             <CardTitle className="text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
