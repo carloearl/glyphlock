@@ -208,37 +208,37 @@ export default function GenerateTab() {
       {/* SCAN LINE */}
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70 animate-pulse pointer-events-none z-50" />
       
-      {/* PROMPT ENGINEERING CARD */}
-      <Card id="prompt-section" className="card-glow-pulse relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-pink-500/10 blur-2xl opacity-60 pointer-events-none" />
+      {/* PROMPT ENGINEERING CARD - NEUROMORPHISM STYLE */}
+      <Card id="prompt-section" className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-2 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.25)] backdrop-blur-xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-indigo-600/5 blur-xl pointer-events-none" />
         
-        <CardHeader className="pb-4 relative z-10 border-b border-cyan-500/20">
+        <CardHeader className="pb-4 relative z-10 border-b border-indigo-500/30">
           <CardTitle className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.6)]">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.6)]">
               <Wand2 className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-              PROMPT ENGINEERING
+            <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent">
+              Prompt Engineering
             </span>
           </CardTitle>
         </CardHeader>
         
         <CardContent className="space-y-5 relative z-10 pt-6">
-          {/* STYLE PRESETS */}
+          {/* STYLE PRESETS - CLEAN */}
           <div>
-            <label className="text-xs text-cyan-400 mb-3 block uppercase tracking-[0.2em] font-black flex items-center gap-2">
-              <Sparkles className="w-3 h-3" />
-              STYLE PRESET
+            <label className="text-sm text-indigo-400 mb-3 block font-semibold flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Style Preset
             </label>
             <div className="flex flex-wrap gap-2">
               {STYLE_PRESETS.map(style => (
                 <button
                   key={style.id}
                   onClick={() => setSelectedStyle(style.id)}
-                  className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wide transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
                     selectedStyle === style.id
-                      ? 'bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 text-white shadow-[0_0_25px_rgba(6,182,212,0.8),0_0_50px_rgba(168,85,247,0.5)] border-2 border-white/40 scale-105'
-                      : 'bg-slate-800/70 text-slate-400 hover:text-white hover:bg-slate-700/80 border-2 border-slate-700 hover:border-purple-500/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] border-2 border-indigo-400/50'
+                      : 'bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-700/80 border-2 border-slate-700 hover:border-indigo-500/40'
                   }`}
                 >
                   {style.name}
@@ -261,17 +261,17 @@ export default function GenerateTab() {
           <Button
             onClick={handleExpandPrompt}
             disabled={!prompt.trim() || expandMutation.isPending}
-            className="w-full h-14 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 shadow-[0_0_35px_rgba(6,182,212,0.5),0_0_70px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(6,182,212,0.7),0_0_100px_rgba(139,92,246,0.5)] transition-all font-black text-lg border-2 border-cyan-400/30"
+            className="w-full h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_40px_rgba(99,102,241,0.6)] transition-all font-bold text-base border-2 border-indigo-400/30"
           >
             {expandMutation.isPending ? (
               <>
-                <Loader2 className="w-6 h-6 mr-2 animate-spin" />
-                ⚡ AI ENHANCING...
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Expanding with AI...
               </>
             ) : (
               <>
-                <Sparkles className="w-6 h-6 mr-2" />
-                🚀 EXPAND WITH AI
+                <Sparkles className="w-5 h-5 mr-2" />
+                Expand Prompt
               </>
             )}
           </Button>
@@ -296,9 +296,9 @@ export default function GenerateTab() {
         </CardContent>
       </Card>
 
-      {/* REFERENCE IMAGES CARD */}
-      <Card id="reference-section" className="card-glow-pulse relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-purple-500/10 blur-2xl opacity-60 pointer-events-none" />
+      {/* REFERENCE IMAGES CARD - NEUROMORPHISM */}
+      <Card id="reference-section" className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-2 border-purple-500/30 shadow-[0_0_40px_rgba(168,85,247,0.25)] backdrop-blur-xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-indigo-600/5 to-purple-600/5 blur-xl pointer-events-none" />
         
         <CardHeader className="pb-4 relative z-10 border-b border-purple-500/20">
           <CardTitle className="flex items-center justify-between flex-wrap gap-3">
@@ -388,9 +388,9 @@ export default function GenerateTab() {
         </CardContent>
       </Card>
 
-      {/* ADVANCED CONTROLS CARD */}
-      <Card id="controls-section" className="card-glow-pulse relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-blue-500/10 blur-2xl opacity-60 pointer-events-none" />
+      {/* ADVANCED CONTROLS CARD - NEUROMORPHISM */}
+      <Card id="controls-section" className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-2 border-blue-500/30 shadow-[0_0_40px_rgba(59,130,246,0.25)] backdrop-blur-xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-indigo-600/5 to-blue-600/5 blur-xl pointer-events-none" />
         
         <CardHeader className="pb-4 relative z-10 border-b border-blue-500/20">
           <div className="flex items-center justify-between">
@@ -566,51 +566,46 @@ export default function GenerateTab() {
         </CardContent>
       </Card>
 
-      {/* IGNITE CTA */}
+      {/* GENERATE BUTTON - PROFESSIONAL */}
       <div id="generate-section" className="space-y-3">
-        <div className="relative p-1 rounded-2xl bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 shadow-[0_0_60px_rgba(6,182,212,0.5),0_0_100px_rgba(139,92,246,0.3)] animate-pulse">
-          <Button
-            onClick={() => handleGenerate('generate')}
-            disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
-            className="w-full h-20 text-2xl font-black bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 shadow-[inset_0_0_60px_rgba(6,182,212,0.2)] relative overflow-hidden group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-            <span className="relative z-10">
-              {generateMutation.isPending ? (
-                <><Loader2 className="w-7 h-7 inline mr-3 animate-spin" />⚡ FORGING...</>
-              ) : (
-                <><Zap className="w-7 h-7 inline mr-3" />⚡ IGNITE RENDER ⚡</>
-              )}
-            </span>
-          </Button>
-        </div>
+        <Button
+          onClick={() => handleGenerate('generate')}
+          disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
+          className="w-full h-16 text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] hover:shadow-[0_0_50px_rgba(99,102,241,0.6)] transition-all border-2 border-indigo-400/30"
+        >
+          {generateMutation.isPending ? (
+            <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Generating...</>
+          ) : (
+            <><Zap className="w-5 h-5 mr-2" />Generate Image</>
+          )}
+        </Button>
 
         {generatedImage && (
           <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => handleGenerate('restyle')}
               disabled={generateMutation.isPending}
-              className="h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_30px_rgba(168,85,247,0.5)] hover:shadow-[0_0_50px_rgba(168,85,247,0.7)] border-2 border-purple-400/40 font-black text-base"
+              className="h-12 bg-purple-600/80 hover:bg-purple-600 shadow-[0_0_20px_rgba(168,85,247,0.3)] border-2 border-purple-400/30 font-semibold"
             >
-              <Repeat className="w-5 h-5 mr-2" />
-              🎨 RESTYLE
+              <Repeat className="w-4 h-4 mr-2" />
+              Restyle
             </Button>
             <Button
               onClick={() => handleGenerate('reinterpret')}
               disabled={generateMutation.isPending}
-              className="h-14 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-[0_0_30px_rgba(236,72,153,0.5)] hover:shadow-[0_0_50px_rgba(236,72,153,0.7)] border-2 border-pink-400/40 font-black text-base"
+              className="h-12 bg-pink-600/80 hover:bg-pink-600 shadow-[0_0_20px_rgba(236,72,153,0.3)] border-2 border-pink-400/30 font-semibold"
             >
-              <Wand2 className="w-5 h-5 mr-2" />
-              ✨ REINTERPRET
+              <Wand2 className="w-4 h-4 mr-2" />
+              Reinterpret
             </Button>
           </div>
         )}
       </div>
 
-      {/* RESULTS */}
+      {/* RESULTS - NEUROMORPHISM */}
       {generatedImage && (
-        <Card className="card-glow-pulse relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-green-500/10 to-emerald-500/10 blur-2xl opacity-70 pointer-events-none" />
+        <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-2 border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.25)] backdrop-blur-xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/5 via-green-600/5 to-emerald-600/5 blur-xl pointer-events-none" />
           
           <CardHeader className="pb-4 relative z-10 border-b border-emerald-500/20">
             <div className="flex items-center justify-between flex-wrap gap-3">
