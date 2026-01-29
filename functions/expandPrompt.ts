@@ -18,8 +18,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
     }
 
-    // Use Gemini via REST API directly
-    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    // Use latest stable Gemini model
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
     
     const expansionPrompt = `You are an expert image generation prompt engineer. Expand the following short prompt into:
 1. A detailed natural language prompt (200-300 words) that captures visual details, mood, style, lighting, and composition
@@ -43,7 +43,7 @@ Return ONLY valid JSON in this exact format:
   "negative_constraints": ["constraint1", "constraint2", "constraint3"]
 }`;
 
-    const response = await fetch(`${endpoint}?key=${apiKey}`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
