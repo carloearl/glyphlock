@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     const expansionPrompt = `You are an expert image generation prompt engineer. Expand the following short prompt into:
 1. A detailed natural language prompt (200-300 words) that captures visual details, mood, style, lighting, and composition

@@ -102,15 +102,15 @@ export default function ImageLabHelp() {
 
   return (
     <>
-      {/* Help Trigger Button */}
+      {/* Help Trigger Button - NEUROMORPHISM */}
       <motion.button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 border-2 border-cyan-400/30 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] transition-all z-50"
-        whileHover={{ scale: 1.1 }}
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-xl bg-slate-800/80 backdrop-blur-md border-2 border-indigo-500/40 flex items-center justify-center shadow-[0_0_25px_rgba(99,102,241,0.3)] hover:shadow-[0_0_35px_rgba(99,102,241,0.5)] transition-all z-50"
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Image Lab Help"
       >
-        <HelpCircle className="w-7 h-7 text-white" />
+        <HelpCircle className="w-6 h-6 text-indigo-400" />
       </motion.button>
 
       {/* Help Panel */}
@@ -131,17 +131,17 @@ export default function ImageLabHelp() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-slate-900/98 backdrop-blur-xl border-2 border-cyan-500/30 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.4)]"
+              className="relative bg-slate-900/95 backdrop-blur-xl border-2 border-indigo-500/30 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden shadow-[0_0_60px_rgba(99,102,241,0.3)]"
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-cyan-600/20 to-purple-600/20 border-b border-cyan-500/20 p-6 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-indigo-600/15 to-purple-600/15 border-b border-indigo-500/20 p-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
-                    <HelpCircle className="w-6 h-6 text-cyan-400" />
+                  <div className="w-10 h-10 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
+                    <HelpCircle className="w-6 h-6 text-indigo-400" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-white">Image Lab Guide</h2>
-                    <p className="text-xs text-cyan-300">Advanced AI Generation Manual</p>
+                    <p className="text-sm text-indigo-300">Advanced AI Generation Manual</p>
                   </div>
                 </div>
                 <button
@@ -155,14 +155,14 @@ export default function ImageLabHelp() {
               {/* Content */}
               <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-6">
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-black/40 p-2 mb-6">
+                  <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-black/30 p-2 mb-6">
                     {Object.entries(HELP_SECTIONS).map(([key, section]) => {
                       const Icon = section.icon;
                       return (
                         <TabsTrigger
                           key={key}
                           value={key}
-                          className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border data-[state=active]:border-cyan-500/30"
+                          className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600/30 data-[state=active]:to-purple-600/30 data-[state=active]:border data-[state=active]:border-indigo-500/40"
                         >
                           <Icon className="w-4 h-4" />
                           <span className="hidden sm:inline text-xs">{section.title}</span>
@@ -174,9 +174,9 @@ export default function ImageLabHelp() {
                   {Object.entries(HELP_SECTIONS).map(([key, section]) => (
                     <TabsContent key={key} value={key} className="space-y-4">
                       {section.content.map((item, idx) => (
-                        <Card key={idx} className="bg-slate-800/50 border-slate-700">
+                        <Card key={idx} className="bg-slate-800/60 border-2 border-slate-700/60 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
                           <CardHeader className="pb-3">
-                            <CardTitle className="text-sm text-cyan-300">{item.q}</CardTitle>
+                            <CardTitle className="text-sm text-indigo-300 font-semibold">{item.q}</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <p className="text-sm text-slate-300 leading-relaxed">{item.a}</p>
@@ -194,7 +194,7 @@ export default function ImageLabHelp() {
                   variant="ghost"
                   onClick={() => {
                     localStorage.removeItem('glyphlock_imagelab_onboarding_seen');
-                    setIsVisible(false);
+                    setIsOpen(false);
                   }}
                   className="text-slate-400 hover:text-white text-xs"
                 >
@@ -202,7 +202,7 @@ export default function ImageLabHelp() {
                 </Button>
                 <Button
                   onClick={() => setIsOpen(false)}
-                  className="bg-gradient-to-r from-cyan-600 to-purple-600"
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-[0_0_20px_rgba(99,102,241,0.4)]"
                 >
                   Close Guide
                 </Button>
