@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import GlyphLoader from "@/components/GlyphLoader";
 import MobileScalingSystem from "@/components/mobile/mobile-utils";
 import MobileTouchOptimizer from "@/components/mobile/MobileTouchOptimizer";
+import MobileScrollFix from "@/components/mobile/MobileScrollFix";
 import ThemeProvider from "@/components/ThemeProvider";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import StructuredDataOrg from "@/components/StructuredDataOrg";
@@ -158,6 +159,7 @@ export default function Layout({ children, currentPageName }) {
         }}
       >
         <MobileTouchOptimizer />
+        <MobileScrollFix />
         <SecurityMonitor />
 
         {/* Navbar */}

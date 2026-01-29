@@ -327,28 +327,28 @@ export default function Blockchain() {
             </div>
 
             <Tabs defaultValue="hash" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 bg-gray-900">
-                <TabsTrigger value="hash" className="text-white data-[state=active]:text-blue-400">
-                  <Hash className="w-4 h-4 mr-2" />
-                  Hashing
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 bg-gray-900 p-2">
+                <TabsTrigger value="hash" className="text-white data-[state=active]:text-blue-400 min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                  <Hash className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="text-xs md:text-sm">Hashing</span>
                 </TabsTrigger>
-                <TabsTrigger value="merkle" className="text-white data-[state=active]:text-blue-400">
-                  <Blocks className="w-4 h-4 mr-2" />
-                  Merkle Tree
+                <TabsTrigger value="merkle" className="text-white data-[state=active]:text-blue-400 min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                  <Blocks className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="text-xs md:text-sm">Merkle</span>
                 </TabsTrigger>
-                <TabsTrigger value="mining" className="text-white data-[state=active]:text-blue-400">
-                  <Lock className="w-4 h-4 mr-2" />
-                  Block Mining
+                <TabsTrigger value="mining" className="text-white data-[state=active]:text-blue-400 min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                  <Lock className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="text-xs md:text-sm">Mining</span>
                 </TabsTrigger>
-                <TabsTrigger value="verify" className="text-white data-[state=active]:text-blue-400">
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Verification
+                <TabsTrigger value="verify" className="text-white data-[state=active]:text-blue-400 min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                  <CheckCircle2 className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="text-xs md:text-sm">Verify</span>
                 </TabsTrigger>
               </TabsList>
 
               {/* Cryptographic Hashing */}
               <TabsContent value="hash">
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-6 md:grid md:grid-cols-2">
                   <Card className="bg-gray-900 border-gray-800">
                     <CardHeader>
                       <CardTitle className="text-white">Generate Cryptographic Hash</CardTitle>
@@ -459,7 +459,7 @@ export default function Blockchain() {
 
               {/* Merkle Tree */}
               <TabsContent value="merkle">
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-6 md:grid md:grid-cols-2">
                   <Card className="bg-gray-900 border-gray-800">
                     <CardHeader>
                       <CardTitle className="text-white">Generate Merkle Tree</CardTitle>
@@ -555,7 +555,7 @@ export default function Blockchain() {
 
               {/* Block Mining */}
               <TabsContent value="mining">
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-6 md:grid md:grid-cols-2">
                   <Card className="bg-gray-900 border-gray-800">
                     <CardHeader>
                       <CardTitle className="text-white">Mine Block</CardTitle>
@@ -687,7 +687,7 @@ export default function Blockchain() {
 
               {/* Verification */}
               <TabsContent value="verify">
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-6 md:grid md:grid-cols-2">
                   <Card className="bg-gray-900 border-gray-800">
                     <CardHeader>
                       <CardTitle className="text-white">Verify Hash Integrity</CardTitle>
@@ -785,7 +785,7 @@ export default function Blockchain() {
             </Tabs>
 
             {/* Features Grid */}
-            <div ref={featuresRef} className="mt-12 grid md:grid-cols-4 gap-6">
+            <div ref={featuresRef} className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { icon: Shield, title: "Immutable", desc: "Tamper-proof verification" },
                 { icon: Hash, title: "Cryptographic", desc: "Industry-standard algorithms" },

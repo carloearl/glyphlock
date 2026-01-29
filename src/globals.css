@@ -7,6 +7,13 @@ css
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  box-sizing: border-box;
+}
+
+/* Prevent horizontal overflow globally */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden !important;
 }
 
 :root {
@@ -75,15 +82,33 @@ body, #root, #__next, main, section {
   }
 }
 
-/* Minimum Touch Target Sizes (44x44px) */
+/* Minimum Touch Target Sizes (48x48px - iOS/Android standard) */
 button,
-a,
+a[role="button"],
 input[type="checkbox"],
 input[type="radio"],
+input[type="submit"],
+input[type="button"],
 select {
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   touch-action: manipulation;
+}
+
+/* Prevent accidental zoom on inputs */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Increase tap target spacing */
+@media (max-width: 768px) {
+  button + button,
+  a + button,
+  button + a {
+    margin-left: 8px;
+  }
 }
 
 /* Input Enhancement for Mobile */
@@ -95,24 +120,31 @@ select {
   appearance: none;
 }
 
-/* Responsive Typography - BRIGHT WHITE & ROYAL BLUE */
+/* Responsive Typography - Mobile-First Scaling */
 h1 {
-  @apply text-3xl md:text-4xl lg:text-5xl font-bold;
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.2;
   color: #ffffff !important;
 }
 
 h2 {
-  @apply text-2xl md:text-3xl lg:text-4xl font-bold;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.3;
   color: #ffffff !important;
 }
 
 h3 {
-  @apply text-xl md:text-2xl lg:text-3xl font-semibold;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: 600;
+  line-height: 1.4;
   color: #ffffff !important;
 }
 
 p {
-  @apply text-base md:text-lg leading-relaxed;
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+  line-height: 1.6;
   color: #ffffff !important;
 }
 
@@ -133,6 +165,14 @@ p {
 /* Mobile-Optimized Containers */
 .container-responsive {
   @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Prevent container overflow */
+.container, [class*="container"] {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Smooth Scrolling */
@@ -224,6 +264,7 @@ p {
 
 /* Mobile input optimization */
 @media (max-width: 768px) {
+  /* Larger touch targets for all inputs */
   input[type="text"],
   input[type="email"],
   input[type="tel"],
@@ -232,32 +273,70 @@ p {
   input[type="password"],
   textarea,
   select {
-    min-height: 48px !important;
+    min-height: 52px !important;
     font-size: 16px !important;
-    padding: 12px 16px !important;
+    padding: 14px 16px !important;
     touch-action: pan-y pinch-zoom !important;
     user-select: text !important;
     -webkit-user-select: text !important;
   }
   
-  button,
-  [role="button"],
+  /* Larger buttons with proper spacing */
+  button:not([class*="icon"]),
+  [role="button"]:not([class*="icon"]),
   .btn,
-  a {
-    min-height: 48px !important;
-    padding: 12px 24px !important;
+  a.btn {
+    min-height: 52px !important;
+    padding: 14px 24px !important;
     font-size: 16px !important;
     touch-action: manipulation !important;
     user-select: none !important;
     -webkit-user-select: none !important;
   }
   
+  /* Icon buttons remain smaller but still touchable */
+  button[class*="icon"],
+  [role="button"][class*="icon"] {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  /* Ensure tabs are finger-friendly */
+  [role="tab"],
+  [data-state] {
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+  }
+  
   /* Prevent scroll hijacking on containers */
   .chat-scroll-container,
   [class*="scroll"],
-  [style*="overflow"] {
-    touch-action: pan-y pan-x !important;
+  [style*="overflow-y"] {
+    touch-action: pan-y !important;
     -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Cards should stack on mobile */
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Responsive grid override */
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4,
+  .md\:grid-cols-2,
+  .md\:grid-cols-3,
+  .md\:grid-cols-4,
+  .lg\:grid-cols-2,
+  .lg\:grid-cols-3,
+  .lg\:grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Preserve 2-col for stats only */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
@@ -428,17 +507,26 @@ section, main {
 }
 
 /* Mobile Scroll Optimization - FIXED */
-html, body {
-  overscroll-behavior-y: auto;
-  overscroll-behavior-x: none;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+html {
   overflow-x: hidden !important;
   overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   height: 100%;
   width: 100%;
+}
+
+body {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
   min-height: 100vh;
+  width: 100%;
   position: relative;
+  margin: 0;
+  padding: 0;
 }
 
 /* Mobile-specific fixes for Samsung and Android */

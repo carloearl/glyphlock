@@ -90,33 +90,33 @@ export default function ImageLab() {
         url="/image-lab"
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950/20 to-black relative">
-        {/* Cosmic Background */}
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950/20 to-black relative overflow-x-hidden">
+        {/* Cosmic Background - Performance optimized for mobile */}
         <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/30 via-cyan-900/10 to-transparent pointer-events-none z-0" />
-        <div className="fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDYsIDE4MiwgMjEyLCAwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20 pointer-events-none z-0" />
-        <div className="glyph-orb fixed top-20 right-20 opacity-20" style={{ animation: 'float-orb 8s ease-in-out infinite', background: 'radial-gradient(circle, rgba(6,182,212,0.3), rgba(59,130,246,0.2))' }}></div>
-        <div className="glyph-orb fixed bottom-40 left-40 opacity-15" style={{ animation: 'float-orb 10s ease-in-out infinite', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(168,85,247,0.3), rgba(59,130,246,0.2))' }}></div>
+        <div className="hidden md:block fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDYsIDE4MiwgMjEyLCAwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20 pointer-events-none z-0" />
+        <div className="hidden lg:block glyph-orb fixed top-20 right-20 opacity-20" style={{ animation: 'float-orb 8s ease-in-out infinite', background: 'radial-gradient(circle, rgba(6,182,212,0.3), rgba(59,130,246,0.2))' }}></div>
+        <div className="hidden lg:block glyph-orb fixed bottom-40 left-40 opacity-15" style={{ animation: 'float-orb 10s ease-in-out infinite', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(168,85,247,0.3), rgba(59,130,246,0.2))' }}></div>
 
-        {/* Header */}
+        {/* Header - Mobile optimized */}
         <div className="border-b border-cyan-500/20 glyph-glass-dark sticky top-0 z-50 shadow-2xl glyph-glow">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+            <div className="flex flex-col gap-3 md:gap-4">
               <div className="flex flex-col space-y-2">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-3">
-                  <Zap className="w-10 h-10 text-cyan-400" style={{ animation: 'pulse-glow 3s ease-in-out infinite' }} />
-                  GlyphLock Image Lab
+                <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent flex items-center gap-2 md:gap-3">
+                  <Zap className="w-7 h-7 md:w-10 md:h-10 text-cyan-400 flex-shrink-0" style={{ animation: 'pulse-glow 3s ease-in-out infinite' }} />
+                  <span className="leading-tight">Image Lab</span>
                 </h1>
-                <p className="text-sm sm:text-base text-gray-400 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  AI generation, interactive hotspots, cryptographic security & verification
+                <p className="text-xs sm:text-sm text-gray-400 flex items-center gap-2">
+                  <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-purple-400 flex-shrink-0" />
+                  <span className="leading-tight">AI generation, interactive hotspots, cryptographic security</span>
                 </p>
               </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="px-4 py-2 glyph-glass border border-cyan-500/50 rounded-lg glyph-glow">
-                  <p className="text-xs text-cyan-300 font-semibold">Generate • Interact • Secure</p>
+              <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                <div className="px-3 py-1.5 md:px-4 md:py-2 glyph-glass border border-cyan-500/50 rounded-lg glyph-glow">
+                  <p className="text-[10px] md:text-xs text-cyan-300 font-semibold whitespace-nowrap">Generate • Interact • Secure</p>
                 </div>
-                <div className="px-4 py-2 glyph-glass border border-purple-500/50 rounded-lg">
-                  <p className="text-xs text-purple-300 font-semibold flex items-center gap-1">
+                <div className="px-3 py-1.5 md:px-4 md:py-2 glyph-glass border border-purple-500/50 rounded-lg">
+                  <p className="text-[10px] md:text-xs text-purple-300 font-semibold flex items-center gap-1 whitespace-nowrap">
                     <Sparkles className="w-3 h-3" />
                     Premium Lab
                   </p>
@@ -126,7 +126,7 @@ export default function ImageLab() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-7xl relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 lg:py-8 max-w-7xl relative z-10 w-full overflow-x-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {/* Desktop Tabs - Technical Segmented */}
             <TabsList className="hidden lg:flex w-full mb-6 bg-black/40 backdrop-blur-md border-t-2 border-b-2 border-cyan-500/20 p-0 h-auto rounded-none">

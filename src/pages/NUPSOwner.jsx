@@ -76,38 +76,40 @@ export default function NUPSOwner() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <header className="glass-nav border-b border-purple-500/20 p-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="w-6 h-6 text-purple-400" />
-            <div>
-              <h1 className="text-xl font-bold text-white">N.U.P.S. Administration</h1>
-              <p className="text-sm text-gray-400">Owner Dashboard</p>
+      <header className="glass-nav border-b border-purple-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <Shield className="w-6 h-6 text-purple-400" />
+              <div>
+                <h1 className="text-lg md:text-xl font-bold text-white">N.U.P.S. Admin</h1>
+                <p className="text-xs md:text-sm text-gray-400 hidden sm:block">Owner Dashboard</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Suspense fallback={null}>
-              <EntertainerContract onContractSigned={() => queryClient.invalidateQueries({ queryKey: ['entertainers'] })} />
-            </Suspense>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-white">{user?.email}</span>
-              <Badge variant="outline" className="border-purple-500/50 text-purple-400">Owner</Badge>
+            <div className="flex items-center gap-2 md:gap-4">
+              <Suspense fallback={null}>
+                <EntertainerContract onContractSigned={() => queryClient.invalidateQueries({ queryKey: ['entertainers'] })} />
+              </Suspense>
+              <div className="hidden md:flex items-center gap-2">
+                <Users className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-white truncate max-w-[150px]">{user?.email}</span>
+                <Badge variant="outline" className="border-purple-500/50 text-purple-400 text-xs">Owner</Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => base44.auth.logout()}
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10 min-h-[44px]"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => base44.auth.logout()}
-              className="border-red-500/50 text-red-400 hover:bg-red-500/10"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto p-6">
-        <div className="grid md:grid-cols-5 gap-6 mb-8">
+      <div className="container mx-auto p-4 md:p-6">
+        <div className="stats-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 mb-6 md:mb-8">
           <Card className="glass-card-hover border-cyan-500/30">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
@@ -163,22 +165,22 @@ export default function NUPSOwner() {
         </div>
 
         <Tabs defaultValue="floor" className="space-y-6">
-          <TabsList className="glass-card-dark border-gray-800">
-            <TabsTrigger value="floor">
-              <UserCheck className="w-4 h-4 mr-2" />
-              Floor
+          <TabsList className="glass-card-dark border-gray-800 grid grid-cols-2 md:grid-cols-4 gap-2 p-2 w-full">
+            <TabsTrigger value="floor" className="min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+              <UserCheck className="w-5 h-5 md:w-4 md:h-4" />
+              <span className="text-xs md:text-sm">Floor</span>
             </TabsTrigger>
-            <TabsTrigger value="vip">
-              <DoorOpen className="w-4 h-4 mr-2" />
-              VIP Rooms
+            <TabsTrigger value="vip" className="min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+              <DoorOpen className="w-5 h-5 md:w-4 md:h-4" />
+              <span className="text-xs md:text-sm">VIP</span>
             </TabsTrigger>
-            <TabsTrigger value="guests">
-              <Users className="w-4 h-4 mr-2" />
-              Guests
+            <TabsTrigger value="guests" className="min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+              <Users className="w-5 h-5 md:w-4 md:h-4" />
+              <span className="text-xs md:text-sm">Guests</span>
             </TabsTrigger>
-            <TabsTrigger value="zreport">
-              <FileText className="w-4 h-4 mr-2" />
-              Z-Report
+            <TabsTrigger value="zreport" className="min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+              <FileText className="w-5 h-5 md:w-4 md:h-4" />
+              <span className="text-xs md:text-sm">Z-Report</span>
             </TabsTrigger>
           </TabsList>
 
