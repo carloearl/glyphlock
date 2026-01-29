@@ -314,7 +314,7 @@ async function validateGeneration(base44, image_url, identityEmbedding = null) {
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     const { GoogleGenerativeAI } = await import('npm:@google/generative-ai');
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
     const imageResponse = await fetch(image_url);
     const imageBuffer = await imageResponse.arrayBuffer();
