@@ -94,13 +94,13 @@ export default function Pricing() {
           {/* Header */}
           <div className="text-center mb-16">
             <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 mb-4">
-              Transparent Pricing
+              Authorization Tiers
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">
-              Choose Your Security Level
+              Access Classification
             </h1>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Quantum-resistant protection for individuals, teams, and enterprises
+              Protocol-governed authorization classes
             </p>
           </div>
 
@@ -205,16 +205,16 @@ export default function Pricing() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="text-white font-semibold mb-2">Can I cancel anytime?</h3>
-                <p className="text-slate-400 text-sm">Yes, you can cancel your subscription at any time from your account settings.</p>
+                <h3 className="text-white font-semibold mb-2">Can I revoke access?</h3>
+                <p className="text-slate-400 text-sm">Yes, authorization can be revoked at any time from account settings.</p>
               </div>
               <div>
-                <h3 className="text-white font-semibold mb-2">What payment methods do you accept?</h3>
-                <p className="text-slate-400 text-sm">We accept all major credit cards through our secure Stripe integration.</p>
+                <h3 className="text-white font-semibold mb-2">What payment methods are accepted?</h3>
+                <p className="text-slate-400 text-sm">All major credit cards through secure Stripe integration.</p>
               </div>
               <div>
-                <h3 className="text-white font-semibold mb-2">Is there a free trial?</h3>
-                <p className="text-slate-400 text-sm">Yes, most tools offer a one-time free trial. Create an account to start exploring.</p>
+                <h3 className="text-white font-semibold mb-2">Is there trial access?</h3>
+                <p className="text-slate-400 text-sm">Yes, most modules offer one-time trial access. Create account to begin verification.</p>
               </div>
             </CardContent>
           </Card>

@@ -160,9 +160,9 @@ export default function TrustSecurity() {
 
           {/* Foundation Statement */}
           <div className="glass-card rounded-2xl border border-white/10 p-6 md:p-8 lg:p-12 mb-8 md:mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6">Security Built Into Our Foundation</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Security Foundation</h2>
             <p className="text-gray-300 leading-relaxed text-lg">
-              Security is engineered into every layer of the GlyphLock credentialed integrity system. Our architecture and operational controls are designed for evaluation by enterprise customers and standards bodies, with a clear roadmap toward formal certification.
+              Security is engineered into every layer of the GlyphLock verification protocol. Architecture and operational controls are designed for evaluation by standards bodies, with roadmap toward formal certification.
             </p>
           </div>
 
@@ -358,7 +358,7 @@ export default function TrustSecurity() {
             <Lock className="w-12 h-12 text-[#00E4FF] mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-white mb-4">Security Inquiries</h2>
             <p className="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto">
-              For security concerns, audit requests, or compliance documentation inquiries, contact the GlyphLock security team. Official certification documentation is provided under NDA once formal audits are complete.
+              For security concerns, audit requests, or compliance documentation, contact GlyphLock authority. Certification documentation provided under NDA once formal audits complete.
             </p>
             
             <div className="space-y-2 text-sm text-gray-400 mb-8">
