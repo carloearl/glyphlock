@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -164,8 +164,13 @@ export default function GenerateTab() {
       return res.data;
     },
     onSuccess: (data) => {
+      console.log('Expand response:', data);
       setExpandedPrompt(data.expansion);
       setPromptSpecId(data.prompt_spec_id);
+    },
+    onError: (error) => {
+      console.error('Expand error:', error);
+      alert('Prompt expansion failed: ' + (error.message || 'Unknown error'));
     }
   });
 
@@ -190,12 +195,18 @@ export default function GenerateTab() {
 
   const generateMutation = useMutation({
     mutationFn: async (params) => {
+      console.log('Generate params:', params);
       const res = await base44.functions.invoke('generateImageImagen', params);
       return res.data;
     },
     onSuccess: (data) => {
+      console.log('Generate response:', data);
       setGeneratedImage(data);
       setHistory(data.attempts || []);
+    },
+    onError: (error) => {
+      console.error('Generate error:', error);
+      alert('Image generation failed: ' + (error.message || 'Unknown error. Check console for details.'));
     }
   });
 
@@ -279,32 +290,46 @@ export default function GenerateTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 relative z-10">
-          {/* Style Presets */}
+          {/* Style Presets - NEON PILLS */}
           <div>
-            <label className="text-xs text-slate-400 mb-2 block uppercase tracking-wider">Style Preset</label>
+            <label className="text-xs text-cyan-400 mb-3 block uppercase tracking-widest font-bold flex items-center gap-2">
+              <div className="w-1 h-4 bg-gradient-to-b from-cyan-400 to-purple-500 rounded-full" />
+              Style Preset
+            </label>
             <div className="flex flex-wrap gap-2">
-              {STYLE_PRESETS.map(style => (
-                <button
-                  key={style.id}
-                  onClick={() => setSelectedStyle(style.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    selectedStyle === style.id
-                      ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg'
-                      : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 border border-slate-700'
-                  }`}
-                >
-                  {style.name}
-                </button>
-              ))}
+              {STYLE_PRESETS.map(style => {
+                const isActive = selectedStyle === style.id;
+                return (
+                  <button
+                    key={style.id}
+                    onClick={() => setSelectedStyle(style.id)}
+                    className={`relative px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-300 overflow-hidden ${
+                      isActive
+                        ? 'bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.6),0_0_40px_rgba(168,85,247,0.4)] border-2 border-white/30'
+                        : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-700 border-2 border-slate-700 hover:border-purple-500/40'
+                    }`}
+                  >
+                    {isActive && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-200%] animate-shimmer" />
+                    )}
+                    <span className="relative z-10">{style.name}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <Textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe your image in detail... (e.g., 'neon biomechanical wolf, 8K ultra detailed, cosmic background, volumetric lighting')"
-            className="min-h-[120px] bg-black/60 border-2 border-cyan-500/20 focus:border-cyan-500/50 text-white placeholder:text-slate-500 resize-none"
-          />
+          <div className="relative">
+            {/* Glow effect on focus */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-xl blur-xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="⚡ Describe your visual... (e.g., 'neon biomechanical wolf, 8K ultra detailed, cosmic background, volumetric fog, rim lighting, cinematic composition')"
+              className="relative min-h-[140px] bg-gradient-to-br from-black/80 to-slate-900/80 border-2 border-cyan-500/30 focus:border-cyan-400/60 text-white placeholder:text-slate-500 resize-none font-medium text-base leading-relaxed shadow-[inset_0_0_30px_rgba(6,182,212,0.1)] focus:shadow-[inset_0_0_40px_rgba(6,182,212,0.2),0_0_40px_rgba(6,182,212,0.3)] transition-all"
+            />
+          </div>
           <Button
             onClick={handleExpandPrompt}
             disabled={!prompt.trim() || expandMutation.isPending}
@@ -359,14 +384,14 @@ export default function GenerateTab() {
             </div>
             <Button
               size="sm"
-              variant="outline"
               onClick={() => document.getElementById('ref-upload').click()}
               disabled={references.length >= 4 || uploadReferenceMutation.isPending}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.4)] border-none font-bold"
             >
               {uploadReferenceMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <><Upload className="w-4 h-4 mr-2" /> Add</>
+                <><Upload className="w-4 h-4 mr-2" /> Add Reference</>
               )}
             </Button>
             <input
@@ -439,49 +464,67 @@ export default function GenerateTab() {
           </div>
         </CardHeader>
         <CardContent className="space-y-5 relative z-10">
-          {/* Aspect Ratio */}
+          {/* Aspect Ratio - NEON GRID */}
           <div>
-            <label className="text-xs text-slate-400 mb-2 block uppercase tracking-wider">Aspect Ratio</label>
+            <label className="text-xs text-cyan-400 mb-2 block uppercase tracking-widest font-bold flex items-center gap-2">
+              <div className="w-1 h-4 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full" />
+              Aspect Ratio
+            </label>
             <div className="grid grid-cols-5 gap-2">
-              {['1:1', '3:4', '4:3', '9:16', '16:9'].map(ratio => (
-                <button
-                  key={ratio}
-                  onClick={() => setAspectRatio(ratio)}
-                  className={`py-2 rounded-lg text-xs font-medium transition-all ${
-                    aspectRatio === ratio
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                      : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 border border-slate-700'
-                  }`}
-                >
-                  {ratio}
-                </button>
-              ))}
+              {['1:1', '3:4', '4:3', '9:16', '16:9'].map(ratio => {
+                const isActive = aspectRatio === ratio;
+                return (
+                  <button
+                    key={ratio}
+                    onClick={() => setAspectRatio(ratio)}
+                    className={`py-3 rounded-xl text-xs font-black transition-all ${
+                      isActive
+                        ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-[0_0_20px_rgba(6,182,212,0.5)] border-2 border-cyan-300/40'
+                        : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700 border-2 border-slate-700 hover:border-cyan-500/30'
+                    }`}
+                  >
+                    {ratio}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Delta Mode */}
+          {/* Delta Mode - POWER GRID */}
           <div>
-            <label className="text-xs text-slate-400 mb-2 block uppercase tracking-wider">Generation Mode</label>
+            <label className="text-xs text-purple-400 mb-2 block uppercase tracking-widest font-bold flex items-center gap-2">
+              <div className="w-1 h-4 bg-gradient-to-b from-purple-400 to-pink-500 rounded-full" />
+              Generation Mode (Delta Strength)
+            </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
-                { key: 'refinement', label: 'Refinement', value: 0.3 },
-                { key: 'balanced', label: 'Balanced', value: 0.5 },
-                { key: 'restyle', label: 'Restyle', value: 0.7 },
-                { key: 'reinterpret', label: 'Reinterpret', value: 0.9 }
-              ].map(mode => (
-                <button
-                  key={mode.key}
-                  onClick={() => setDeltaMode(mode.key)}
-                  className={`py-2 px-3 rounded-lg text-xs font-medium transition-all ${
-                    deltaMode === mode.key
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]'
-                      : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 border border-slate-700'
-                  }`}
-                >
-                  <div>{mode.label}</div>
-                  <div className="text-[10px] opacity-70">{mode.value}</div>
-                </button>
-              ))}
+                { key: 'refinement', label: 'Refinement', value: 0.3, color: 'blue' },
+                { key: 'balanced', label: 'Balanced', value: 0.5, color: 'cyan' },
+                { key: 'restyle', label: 'Restyle', value: 0.7, color: 'purple' },
+                { key: 'reinterpret', label: 'Reinterpret', value: 0.9, color: 'pink' }
+              ].map(mode => {
+                const isActive = deltaMode === mode.key;
+                return (
+                  <button
+                    key={mode.key}
+                    onClick={() => setDeltaMode(mode.key)}
+                    className={`py-3 px-3 rounded-xl text-xs font-black transition-all relative overflow-hidden ${
+                      isActive
+                        ? `bg-gradient-to-br ${
+                            mode.color === 'blue' ? 'from-blue-500 to-cyan-500' :
+                            mode.color === 'cyan' ? 'from-cyan-500 to-blue-500' :
+                            mode.color === 'purple' ? 'from-purple-500 to-pink-500' :
+                            'from-pink-500 to-rose-500'
+                          } text-white shadow-[0_0_20px_rgba(168,85,247,0.5)] border-2 border-white/30`
+                        : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700 border-2 border-slate-700 hover:border-purple-500/30'
+                    }`}
+                  >
+                    {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] animate-shimmer" />}
+                    <div className="relative z-10">{mode.label}</div>
+                    <div className="relative z-10 text-[10px] opacity-80 font-mono">Δ {mode.value}</div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -552,36 +595,55 @@ export default function GenerateTab() {
                 <p className="text-[10px] text-slate-500 mt-1">7-12 recommended. Higher = stricter prompt adherence</p>
               </div>
 
-              {/* Quality Mode */}
+              {/* Quality Mode - TIER SELECTOR */}
               <div>
-                <label className="text-xs text-slate-400 mb-2 block uppercase tracking-wider">Quality Mode</label>
+                <label className="text-xs text-emerald-400 mb-2 block uppercase tracking-widest font-bold flex items-center gap-2">
+                  <div className="w-1 h-4 bg-gradient-to-b from-emerald-400 to-green-500 rounded-full" />
+                  Quality Tier
+                </label>
                 <div className="grid grid-cols-3 gap-2">
-                  {['Fast', 'Standard', 'Ultra'].map(mode => (
-                    <button
-                      key={mode}
-                      onClick={() => setQualityMode(mode)}
-                      className={`py-2 rounded-lg text-xs font-medium transition-all ${
-                        qualityMode === mode
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]'
-                          : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700 border border-slate-700'
-                      }`}
-                    >
-                      {mode}
-                    </button>
-                  ))}
+                  {[
+                    { key: 'Fast', icon: '⚡', glow: 'yellow' },
+                    { key: 'Standard', icon: '⭐', glow: 'blue' },
+                    { key: 'Ultra', icon: '💎', glow: 'emerald' }
+                  ].map(mode => {
+                    const isActive = qualityMode === mode.key;
+                    return (
+                      <button
+                        key={mode.key}
+                        onClick={() => setQualityMode(mode.key)}
+                        className={`py-3 rounded-xl text-xs font-black transition-all ${
+                          isActive
+                            ? `bg-gradient-to-br ${
+                                mode.glow === 'yellow' ? 'from-yellow-500 to-orange-500' :
+                                mode.glow === 'blue' ? 'from-blue-500 to-cyan-500' :
+                                'from-emerald-500 to-green-500'
+                              } text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] border-2 border-white/30`
+                            : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700 border-2 border-slate-700 hover:border-emerald-500/30'
+                        }`}
+                      >
+                        <div>{mode.icon} {mode.key}</div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Negative Prompt */}
+              {/* Negative Prompt - EXCLUSION ZONE */}
               <div>
-                <label className="text-xs text-slate-400 mb-2 block uppercase tracking-wider">Negative Prompt</label>
-                <Textarea
-                  value={negativePrompt}
-                  onChange={(e) => setNegativePrompt(e.target.value)}
-                  placeholder="What to avoid in generation..."
-                  rows={3}
-                  className="bg-black/60 border-2 border-red-500/20 focus:border-red-500/40 text-white placeholder:text-slate-500 resize-none text-sm"
-                />
+                <label className="text-xs text-red-400 mb-2 block uppercase tracking-widest font-bold flex items-center gap-2">
+                  <div className="w-1 h-4 bg-gradient-to-b from-red-400 to-rose-500 rounded-full" />
+                  Exclusion Prompt (Avoid These)
+                </label>
+                <div className="relative">
+                  <Textarea
+                    value={negativePrompt}
+                    onChange={(e) => setNegativePrompt(e.target.value)}
+                    placeholder="⛔ Elements to avoid: blurry, distorted, watermark, text..."
+                    rows={3}
+                    className="bg-gradient-to-br from-black/80 to-red-900/20 border-2 border-red-500/30 focus:border-red-400/50 text-white placeholder:text-red-300/30 resize-none text-sm shadow-[inset_0_0_20px_rgba(239,68,68,0.1)] focus:shadow-[inset_0_0_30px_rgba(239,68,68,0.2),0_0_30px_rgba(239,68,68,0.3)] transition-all"
+                  />
+                </div>
               </div>
             </>
           )}
@@ -666,24 +728,22 @@ export default function GenerateTab() {
         </div>
 
         {generatedImage && (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => handleGenerate('restyle')}
               disabled={generateMutation.isPending}
-              variant="outline"
-              className="border-purple-500/30 hover:border-purple-500/50 hover:bg-purple-500/10"
+              className="h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_25px_rgba(168,85,247,0.5)] hover:shadow-[0_0_40px_rgba(168,85,247,0.7)] border-2 border-purple-400/30 font-bold text-base"
             >
-              <Repeat className="w-4 h-4 mr-2" />
-              Restyle
+              <Repeat className="w-5 h-5 mr-2" />
+              🎨 Restyle
             </Button>
             <Button
               onClick={() => handleGenerate('reinterpret')}
               disabled={generateMutation.isPending}
-              variant="outline"
-              className="border-pink-500/30 hover:border-pink-500/50 hover:bg-pink-500/10"
+              className="h-14 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-[0_0_25px_rgba(236,72,153,0.5)] hover:shadow-[0_0_40px_rgba(236,72,153,0.7)] border-2 border-pink-400/30 font-bold text-base"
             >
-              <Wand2 className="w-4 h-4 mr-2" />
-              Reinterpret
+              <Wand2 className="w-5 h-5 mr-2" />
+              ✨ Reinterpret
             </Button>
           </div>
         )}
@@ -705,42 +765,68 @@ export default function GenerateTab() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
-            {/* Image Preview */}
-            <div className="relative rounded-xl overflow-hidden border-2 border-green-500/30 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-              <img
-                src={generatedImage.image_url}
-                alt="Generated"
-                className="w-full h-auto"
-              />
-              <div className="absolute top-3 right-3 flex gap-2">
-                <Badge className="bg-black/80 text-white border-white/20 text-xs">
-                  {aspectRatio}
-                </Badge>
-                <Badge className="bg-black/80 text-cyan-400 border-cyan-500/30 text-xs">
-                  {qualityMode}
-                </Badge>
+            {/* Image Preview - HOLOGRAPHIC FRAME */}
+            <div className="relative rounded-2xl overflow-hidden border-4 border-emerald-500/40 shadow-[0_0_60px_rgba(16,185,129,0.4),inset_0_0_40px_rgba(16,185,129,0.1)] bg-gradient-to-br from-emerald-500/5 to-green-500/5 p-2">
+              <div className="relative rounded-xl overflow-hidden border-2 border-white/10">
+                <img
+                  src={generatedImage.image_url}
+                  alt="Generated"
+                  className="w-full h-auto"
+                />
+                {/* Holographic corner accents */}
+                <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-cyan-400/60" />
+                <div className="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-purple-400/60" />
+                <div className="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-purple-400/60" />
+                <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-cyan-400/60" />
+                
+                <div className="absolute top-3 right-3 flex gap-2">
+                  <Badge className="bg-black/90 text-white border-2 border-emerald-400/50 text-xs font-bold shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                    📐 {aspectRatio}
+                  </Badge>
+                  <Badge className="bg-black/90 text-cyan-400 border-2 border-cyan-500/50 text-xs font-bold shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                    ⚡ {qualityMode}
+                  </Badge>
+                </div>
               </div>
             </div>
 
-            {/* Validation Scores - Restored Full Display */}
+            {/* Validation Scores - HOLOGRAPHIC METRICS */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {Object.entries(generatedImage.best_attempt?.validation_scores || {}).map(([key, value]) => {
                 const score = value * 100;
                 const isGood = score >= 70;
+                const isPerfect = score >= 90;
                 return (
-                  <div key={key} className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">
+                  <div key={key} className={`relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl p-4 border-2 overflow-hidden ${
+                    isPerfect ? 'border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.4)]' :
+                    isGood ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
+                    'border-yellow-500/40 shadow-[0_0_20px_rgba(234,179,8,0.3)]'
+                  }`}>
+                    {/* Corner accent */}
+                    <div className={`absolute top-0 right-0 w-8 h-8 ${
+                      isPerfect ? 'bg-cyan-500/20' : isGood ? 'bg-emerald-500/20' : 'bg-yellow-500/20'
+                    } blur-xl`} />
+                    
+                    <p className={`text-[10px] uppercase tracking-widest mb-2 font-bold ${
+                      isPerfect ? 'text-cyan-400' : isGood ? 'text-emerald-400' : 'text-yellow-400'
+                    }`}>
                       {key.replace(/_/g, ' ')}
                     </p>
                     <div className="flex items-baseline gap-2">
-                      <span className={`text-2xl font-bold ${isGood ? 'text-green-400' : 'text-yellow-400'}`}>
+                      <span className={`text-3xl font-black ${
+                        isPerfect ? 'text-cyan-300' : isGood ? 'text-emerald-300' : 'text-yellow-300'
+                      }`}>
                         {score.toFixed(0)}
                       </span>
-                      <span className="text-xs text-slate-500">%</span>
+                      <span className="text-sm text-slate-500 font-bold">%</span>
                     </div>
-                    <div className="w-full bg-slate-700 h-1 rounded-full mt-2 overflow-hidden">
+                    <div className="w-full bg-black/50 h-2 rounded-full mt-3 overflow-hidden border border-slate-700">
                       <div
-                        className={`h-full ${isGood ? 'bg-green-400' : 'bg-yellow-400'}`}
+                        className={`h-full ${
+                          isPerfect ? 'bg-gradient-to-r from-cyan-400 to-blue-500' :
+                          isGood ? 'bg-gradient-to-r from-emerald-400 to-green-500' :
+                          'bg-gradient-to-r from-yellow-400 to-orange-500'
+                        } shadow-[0_0_10px_currentColor]`}
                         style={{ width: `${score}%` }}
                       />
                     </div>
@@ -749,28 +835,43 @@ export default function GenerateTab() {
               })}
             </div>
 
-            {/* Generation History - Enhanced Timeline */}
+            {/* Generation History - NEURAL TIMELINE */}
             {history.length > 0 && (
-              <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700">
-                <p className="text-xs text-slate-400 mb-3 uppercase tracking-wider flex items-center gap-2">
-                  <Repeat className="w-3 h-3" />
-                  Generation History ({history.length} attempts)
-                </p>
+              <div className="relative bg-gradient-to-br from-slate-800/60 to-purple-900/20 rounded-xl p-5 border-2 border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.2)] backdrop-blur-sm overflow-hidden">
+                {/* Animated scan line */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse" />
+                
+                <div className="flex items-center gap-2 mb-4">
+                  <Repeat className="w-4 h-4 text-purple-400" />
+                  <p className="text-xs text-purple-300 uppercase tracking-widest font-black">
+                    Neural Timeline • {history.length} Attempts
+                  </p>
+                </div>
                 <div className="space-y-2">
-                  {history.map((h, i) => (
-                    <div key={i} className="flex items-center gap-3 p-2 rounded bg-slate-900/50">
-                      <div className={`w-2 h-2 rounded-full ${h.status === 'success' ? 'bg-green-400' : 'bg-yellow-400'}`} />
-                      <span className="text-xs text-slate-300 flex-1">Attempt #{h.attempt}</span>
-                      <Badge className={`text-[10px] ${h.status === 'success' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'}`}>
-                        {h.status}
-                      </Badge>
-                      {h.validation_scores && (
-                        <span className="text-[10px] text-slate-500 font-mono">
-                          avg: {(Object.values(h.validation_scores).reduce((a, b) => a + b, 0) / Object.keys(h.validation_scores).length * 100).toFixed(0)}%
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                  {history.map((h, i) => {
+                    const avgScore = h.validation_scores 
+                      ? (Object.values(h.validation_scores).reduce((a, b) => a + b, 0) / Object.keys(h.validation_scores).length * 100)
+                      : 0;
+                    const isSuccess = h.status === 'success';
+                    return (
+                      <div key={i} className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                        isSuccess 
+                          ? 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 border border-emerald-500/40' 
+                          : 'bg-slate-900/60 border border-slate-700'
+                      }`}>
+                        <div className={`w-3 h-3 rounded-full ${isSuccess ? 'bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.6)]'} animate-pulse`} />
+                        <span className="text-xs text-white font-bold flex-1">Attempt #{h.attempt}</span>
+                        <Badge className={`text-[10px] font-bold ${isSuccess ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50' : 'bg-yellow-500/30 text-yellow-300 border-yellow-400/50'}`}>
+                          {h.status}
+                        </Badge>
+                        {h.validation_scores && (
+                          <span className="text-[10px] text-cyan-400 font-mono font-bold bg-black/40 px-2 py-1 rounded border border-cyan-500/30">
+                            ⚡ {avgScore.toFixed(0)}%
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

@@ -5,10 +5,35 @@ css
 
 @import './components/mobile/MobileLayoutFix.css';
 
-/* Image Lab Authority Styling - Restored */
+/* Image Lab Authority Styling - NEON RESTORATION */
 .image-lab-section {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(168, 85, 247, 0.05));
-  border-left: 3px solid rgba(6, 182, 212, 0.3);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(168, 85, 247, 0.08));
+  border-left: 4px solid rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.2);
+}
+
+/* Shimmer animation for active tabs */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Card pulsing glow */
+@keyframes cardPulse {
+  0%, 100% { 
+    box-shadow: 0 0 40px rgba(6, 182, 212, 0.3), 0 0 80px rgba(139, 92, 246, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 60px rgba(6, 182, 212, 0.5), 0 0 100px rgba(139, 92, 246, 0.4);
+  }
+}
+
+.card-glow-animate {
+  animation: cardPulse 4s ease-in-out infinite;
 }
 
 /* Slider Enhancements */

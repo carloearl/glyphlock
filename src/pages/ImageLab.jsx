@@ -88,7 +88,9 @@ export default function ImageLab() {
       <ImageLabOnboarding />
       <ImageLabHelp />
 
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950/20 to-black relative overflow-x-hidden">
+      <div className="min-h-screen relative overflow-x-hidden" style={{ 
+        background: 'radial-gradient(ellipse at top, rgba(87, 61, 255, 0.15), transparent 50%), radial-gradient(ellipse at bottom right, rgba(168, 60, 255, 0.12), transparent 50%), radial-gradient(ellipse at bottom left, rgba(6, 182, 212, 0.1), transparent 50%), #000000'
+      }}>
         {/* Cosmic Background - Performance optimized for mobile */}
         <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/30 via-cyan-900/10 to-transparent pointer-events-none z-0" />
         <div className="hidden md:block fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDYsIDE4MiwgMjEyLCAwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20 pointer-events-none z-0" />
