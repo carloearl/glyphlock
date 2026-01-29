@@ -53,7 +53,7 @@ function MagneticButton({ children, className, ...props }) {
 }
 
 // Animated nav item with stagger
-const NavItem = ({ section, isOpen, onToggle, index }) => {
+const NavItem = ({ section, isOpen, onToggle, index, user }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -456,6 +456,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
               index={idx}
               isOpen={openSection === section.label}
               onToggle={setOpenSection}
+              user={user}
             />
           ))}
         </div>

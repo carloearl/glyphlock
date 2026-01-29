@@ -1,7 +1,7 @@
 import { base44 } from '@/api/base44Client';
 
 /**
- * TTS Service - Wrapper around textToSpeechAdvanced backend function
+ * TTS Service - Wrapper around textToSpeech backend function
  */
 
 export async function generate(options) {
