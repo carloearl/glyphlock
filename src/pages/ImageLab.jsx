@@ -8,13 +8,8 @@ import { toast } from 'sonner';
 
 import SEOHead from '@/components/SEOHead';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
-import {
-  GlyphImageCard,
-  GlyphImageButton,
-  GlyphImageTypography,
-  GlyphImageGradients,
-  GlyphImageShadows,
-} from '@/components/imageLab/design/GlyphImageDesignSystem';
+import ImageLabOnboarding from '@/components/imageLab/ImageLabOnboarding';
+import ImageLabHelp from '@/components/imageLab/ImageLabHelp';
 
 // Tab Components
 import GenerateTab from '@/components/imageLab/tabs/GenerateTab.jsx';
@@ -89,6 +84,9 @@ export default function ImageLab() {
         keywords="AI image generation, interactive images, steganography, secure media, GlyphLock, cryptographic images, hotspot editor"
         url="/image-lab"
       />
+
+      <ImageLabOnboarding />
+      <ImageLabHelp />
 
       <div className="min-h-screen bg-gradient-to-br from-black via-purple-950/20 to-black relative overflow-x-hidden">
         {/* Cosmic Background - Performance optimized for mobile */}
