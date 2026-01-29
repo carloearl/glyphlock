@@ -3,6 +3,8 @@ css
 @tailwind components;
 @tailwind utilities;
 
+@import './components/mobile/MobileLayoutFix.css';
+
 /* Mobile-First Responsive Base */
 * {
   -webkit-tap-highlight-color: transparent;
@@ -1207,11 +1209,11 @@ html {
   transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* GL Preview Block - QR Studio */
+/* GL Preview Block - QR Studio - Mobile Optimized */
 .gl-preview-block {
   width: 100%;
-  max-width: 540px;
-  margin: 0;
+  max-width: min(540px, 100vw - 32px);
+  margin: 0 auto;
 }
 
 .gl-preview-inner {
@@ -1221,10 +1223,17 @@ html {
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(16px);
   border-radius: 14px;
-  padding: 16px;
+  padding: 12px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 25px rgba(87, 61, 255, 0.25);
+}
+
+@media (max-width: 768px) {
+  .gl-preview-inner {
+    padding: 8px;
+    border-radius: 12px;
+  }
 }
 
 .gl-logo-frame {
