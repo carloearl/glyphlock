@@ -29,11 +29,31 @@ export default function Contact() {
 
   const sendEmail = useMutation({
     mutationFn: async (data) => {
-      await base44.integrations.Core.SendEmail({
-        to: "glyphlock@gmail.com",
-        subject: `Contact Form: ${data.subject}`,
-        body: `Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`
+      // Create evidence record first
+      const contactEvent = await base44.entities.ContactEvent.create({
+        contact_email: data.email,
+        contact_name: data.name,
+        subject: data.subject,
+        message: data.message,
+        status: "pending",
+        ip_address: "client_ip"
       });
+
+      // Send email
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: "glyphlock@gmail.com",
+          subject: `Contact Form: ${data.subject}`,
+          body: `Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`
+        });
+        
+        // Update status to sent
+        await base44.entities.ContactEvent.update(contactEvent.id, { status: "sent" });
+      } catch (err) {
+        // Update status to failed
+        await base44.entities.ContactEvent.update(contactEvent.id, { status: "failed" });
+        throw err;
+      }
     },
     onSuccess: () => {
       setSubmitted(true);

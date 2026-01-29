@@ -116,7 +116,7 @@ export default function About() {
               transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="text-2xl md:text-3xl text-[#00E4FF] font-bold max-w-4xl mx-auto leading-tight"
             >
-              Quantum-Resistant Security for a World That's Already Under Attack
+              Quantum-Resistant Verification Protocol
             </motion.p>
           </div>
 
