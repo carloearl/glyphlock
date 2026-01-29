@@ -75,20 +75,20 @@ export default function Contact() {
         keywords="contact GlyphLock, cybersecurity consultation, partnership inquiry, licensing request, enterprise security contact, GlyphLock email, security consultation, El Mirage Arizona, technology partnership"
         url="/contact"
       />
-      <div className="min-h-screen bg-black text-white pt-32 pb-24 relative overflow-hidden">
+      <div className="min-h-screen bg-black text-white pt-20 md:pt-32 pb-16 md:pb-24 relative overflow-x-hidden w-full">
         {/* Background Elements */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#3B82F6]/5 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#7C3AED]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div className="container mx-auto px-6 max-w-6xl relative z-10">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10 w-full overflow-x-hidden">
           
           {/* Hero */}
-          <div ref={heroRef} className="text-center mb-20">
+          <div ref={heroRef} className="text-center mb-12 md:mb-20">
             <motion.h1 
               initial={{ opacity: 0, x: -100 }}
               animate={heroInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl md:text-7xl font-black mb-6 tracking-tighter"
+              className="text-3xl sm:text-5xl md:text-7xl font-black mb-4 md:mb-6 tracking-tighter px-4"
             >
               INITIATE <span className="text-transparent bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] bg-clip-text drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]">VERIFICATION</span>
             </motion.h1>
@@ -96,13 +96,13 @@ export default function Contact() {
               initial={{ opacity: 0, x: 100 }}
               animate={heroInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="text-xl text-gray-400 max-w-2xl mx-auto"
+              className="text-base md:text-xl text-gray-400 max-w-2xl mx-auto px-4"
             >
               Establish credentialed communication channel with GlyphLock.
             </motion.p>
           </div>
 
-          <div ref={cardsRef} className="grid md:grid-cols-3 gap-8 mb-16">
+          <div ref={cardsRef} className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-8 mb-12 md:mb-16">
             {[
               { icon: Mail, title: "Email", content: "glyphlock@gmail.com", href: "mailto:glyphlock@gmail.com", color: "text-[#3B82F6]" },
               { icon: Phone, title: "Phone", content: "(424) 246-6499", href: "tel:+14242466499", color: "text-[#8B5CF6]" },
@@ -130,7 +130,7 @@ export default function Contact() {
             ))}
           </div>
 
-          <div ref={formRef} className="grid lg:grid-cols-[1fr_1fr] gap-12">
+          <div ref={formRef} className="flex flex-col lg:grid lg:grid-cols-[1fr_1fr] gap-8 md:gap-12">
             {/* Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: -80 }}
@@ -153,8 +153,8 @@ export default function Contact() {
                   </Alert>
                 ) : null}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-5 w-full">
+                  <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="text-white/80 text-xs uppercase tracking-wider font-bold">Identity</Label>
                       <GlyphInput
