@@ -18,56 +18,56 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
     }
 
-    // Use latest stable Gemini model
-    const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
-    
-    const expansionPrompt = `You are an expert image generation prompt engineer. Expand the following short prompt into:
-1. A detailed natural language prompt (200-300 words) that captures visual details, mood, style, lighting, and composition
-2. A structured specification with these exact fields: subject, style, lighting, camera, realism, mood, technical_details
-3. A list of negative constraints (things to avoid)
+    // Use Base44's InvokeLLM as fallback for prompt expansion
+    const llmResponse = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are an expert image generation prompt engineer. Expand the following short prompt into a detailed description for AI image generation.
 
 Original prompt: "${prompt}"
 
-Return ONLY valid JSON in this exact format:
-{
-  "expanded_prompt": "detailed natural language prompt here",
-  "structured_spec": {
-    "subject": "description",
-    "style": "art style or aesthetic",
-    "lighting": "lighting setup",
-    "camera": "camera angle and lens",
-    "realism": "photorealistic, stylized, etc",
-    "mood": "emotional tone",
-    "technical_details": "resolution, quality markers"
-  },
-  "negative_constraints": ["constraint1", "constraint2", "constraint3"]
-}`;
+Provide:
+1. A detailed natural language prompt (200-300 words) with visual details, mood, style, lighting, composition
+2. A structured breakdown: subject, style, lighting, camera, realism, mood, technical_details
+3. Negative constraints (things to avoid)
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: expansionPrompt }]
-        }]
-      })
+Return ONLY valid JSON:
+{
+  "expanded_prompt": "detailed prompt",
+  "structured_spec": {
+    "subject": "...",
+    "style": "...",
+    "lighting": "...",
+    "camera": "...",
+    "realism": "...",
+    "mood": "...",
+    "technical_details": "..."
+  },
+  "negative_constraints": ["blurry", "low quality", "watermark"]
+}`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          expanded_prompt: { type: "string" },
+          structured_spec: {
+            type: "object",
+            properties: {
+              subject: { type: "string" },
+              style: { type: "string" },
+              lighting: { type: "string" },
+              camera: { type: "string" },
+              realism: { type: "string" },
+              mood: { type: "string" },
+              technical_details: { type: "string" }
+            }
+          },
+          negative_constraints: {
+            type: "array",
+            items: { type: "string" }
+          }
+        }
+      }
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${errorData}`);
-    }
-
-    const data = await response.json();
-    const text = data.candidates[0].content.parts[0].text;
-    
-    // Extract JSON from response
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Failed to parse expansion response');
-    }
-    
-    const expansion = JSON.parse(jsonMatch[0]);
+    const expansion = llmResponse;
 
     // Create PromptSpec entity
     const promptSpec = await base44.entities.PromptSpec.create({
