@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,13 +10,29 @@ import { Blocks, Hash, Shield, CheckCircle2, Copy, FileCheck, Lock, AlertTriangl
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion, useInView } from "framer-motion";
+import { toast } from "sonner";
 export default function Blockchain() {
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
   const heroInView = useInView(heroRef, { once: true, amount: 0.4 });
   const featuresInView = useInView(featuresRef, { once: true, amount: 0.3 });
 
+  const [user, setUser] = useState(null);
   const [inputText, setInputText] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const isAuth = await base44.auth.isAuthenticated();
+        if (isAuth) {
+          const userData = await base44.auth.me();
+          setUser(userData);
+        }
+      } catch (err) {
+        console.error("Auth error:", err);
+      }
+    })();
+  }, []);
   const [hashes, setHashes] = useState({});
   const [merkleTree, setMerkleTree] = useState(null);
   const [blockData, setBlockData] = useState({
@@ -63,6 +80,23 @@ export default function Blockchain() {
     results.length = inputText.length;
 
     setHashes(results);
+
+    // LOG TO LEDGER
+    if (user) {
+      try {
+        await base44.entities.BlockchainActivity.create({
+          user_email: user.email,
+          operation_type: "hash_generation",
+          input_data: inputText.substring(0, 100),
+          input_hash: results.sha256,
+          output_hash: results.sha256,
+          algorithm: "SHA-256/SHA-512/SHA-1",
+          metadata: { sha256: results.sha256, sha512: results.sha512, sha1: results.sha1 }
+        });
+      } catch (err) {
+        console.error("Failed to log blockchain activity:", err);
+      }
+    }
   };
 
   // Merkle Tree Generation
@@ -102,12 +136,36 @@ export default function Blockchain() {
       tree.push(currentLevel);
     }
 
+    const merkleRoot = currentLevel[0];
+
     setMerkleTree({
-      root: currentLevel[0],
+      root: merkleRoot,
       leaves: leaves,
       tree: tree,
       transactionCount: transactions.length
     });
+
+    // LOG TO LEDGER
+    if (user) {
+      try {
+        const encoder = new TextEncoder();
+        const inputBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(inputText));
+        const inputHashArray = Array.from(new Uint8Array(inputBuffer));
+        const inputHash = inputHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        await base44.entities.BlockchainActivity.create({
+          user_email: user.email,
+          operation_type: "merkle_tree",
+          input_data: inputText.substring(0, 100),
+          input_hash: inputHash,
+          output_hash: merkleRoot,
+          algorithm: "SHA-256 Merkle",
+          metadata: { transactionCount: transactions.length, treeDepth: tree.length }
+        });
+      } catch (err) {
+        console.error("Failed to log merkle tree activity:", err);
+      }
+    }
   };
 
   // Block Mining Simulation
@@ -157,6 +215,29 @@ export default function Blockchain() {
         hash
       });
       setIsMining(false);
+
+      // LOG TO LEDGER
+      if (user) {
+        try {
+          const blockString = `${blockData.index}${timestamp}${blockData.data}${blockData.previousHash || '0'.repeat(64)}`;
+          const encoder = new TextEncoder();
+          const inputBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(blockString));
+          const inputHashArray = Array.from(new Uint8Array(inputBuffer));
+          const inputHash = inputHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+          await base44.entities.BlockchainActivity.create({
+            user_email: user.email,
+            operation_type: "block_mining",
+            input_data: blockData.data.substring(0, 100),
+            input_hash: inputHash,
+            output_hash: hash,
+            algorithm: "SHA-256 PoW",
+            metadata: { nonce, difficulty: blockData.difficulty, blockIndex: blockData.index }
+          });
+        } catch (err) {
+          console.error("Failed to log block mining activity:", err);
+        }
+      }
     };
 
     await mine();
@@ -182,6 +263,23 @@ export default function Blockchain() {
         providedHash: verificationData.hash.toLowerCase()
       }
     });
+
+    // LOG TO LEDGER
+    if (user) {
+      try {
+        await base44.entities.BlockchainActivity.create({
+          user_email: user.email,
+          operation_type: "hash_verification",
+          input_data: verificationData.original.substring(0, 100),
+          input_hash: calculatedHash,
+          output_hash: verificationData.hash.toLowerCase(),
+          algorithm: "SHA-256 Verify",
+          metadata: { isValid, providedHash: verificationData.hash.toLowerCase() }
+        });
+      } catch (err) {
+        console.error("Failed to log verification activity:", err);
+      }
+    }
   };
 
   const copyToClipboard = (text) => {

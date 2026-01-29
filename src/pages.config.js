@@ -72,9 +72,7 @@ import GlyphBot from './pages/GlyphBot';
 import GlyphBotJunior from './pages/GlyphBotJunior';
 import GlyphLockPlayground from './pages/GlyphLockPlayground';
 import GovernanceHub from './pages/GovernanceHub';
-import HSSS from './pages/HSSS';
 import Home from './pages/Home';
-import HotzoneMapper from './pages/HotzoneMapper';
 import ImageGenerator from './pages/ImageGenerator';
 import ImageLab from './pages/ImageLab';
 import IntegrationTests from './pages/IntegrationTests';
@@ -149,9 +147,7 @@ export const PAGES = {
     "GlyphBotJunior": GlyphBotJunior,
     "GlyphLockPlayground": GlyphLockPlayground,
     "GovernanceHub": GovernanceHub,
-    "HSSS": HSSS,
     "Home": Home,
-    "HotzoneMapper": HotzoneMapper,
     "ImageGenerator": ImageGenerator,
     "ImageLab": ImageLab,
     "IntegrationTests": IntegrationTests,

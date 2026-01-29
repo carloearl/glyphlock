@@ -12,6 +12,7 @@ import ScanAutomation from "@/components/sie/ScanAutomation";
 import AIRemediationPanel from "@/components/sie/AIRemediationPanel";
 
 export default function Sie() {
+  const [user, setUser] = useState(null);
   const [scanRun, setScanRun] = useState(null);
   const [history, setHistory] = useState([]);
   const [config, setConfig] = useState(null);
@@ -24,10 +25,35 @@ export default function Sie() {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
 
+  // Admin guard
+  useEffect(() => {
+    (async () => {
+      try {
+        const isAuth = await base44.auth.isAuthenticated();
+        if (!isAuth) {
+          window.location.href = '/';
+          return;
+        }
+        const userData = await base44.auth.me();
+        if (userData.role !== 'admin') {
+          toast.error('Site Intelligence Engine is admin-only');
+          window.location.href = '/';
+          return;
+        }
+        setUser(userData);
+      } catch (err) {
+        console.error('Auth error:', err);
+        window.location.href = '/';
+      }
+    })();
+  }, []);
+
   // Initial Data Load via Middleware
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
 
   const loadDashboardData = async () => {
     try {
@@ -108,7 +134,7 @@ export default function Sie() {
     }
   };
 
-  if (initializing) {
+  if (initializing || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
       <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
     </div>;

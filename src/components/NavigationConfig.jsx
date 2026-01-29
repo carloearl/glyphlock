@@ -33,12 +33,12 @@ export const NAV_SECTIONS = [
       { label: "QR Verification", page: "Qr", visibility: "public" },
       { label: "Image Processing", page: "ImageLab", visibility: "public" },
       { label: "GlyphBot Intelligence", page: "GlyphBot", visibility: "public" },
-      { label: "Site Builder", page: "SiteBuilder", visibility: "admin" }, // Admin only
+      { label: "Site Builder", page: "SiteBuilder", visibility: "admin" },
       { label: "NUPS Transaction Verification", page: "NUPSLogin", visibility: "public" },
       { label: "Security Modules", page: "SecurityTools", visibility: "public" },
       { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
       { label: "SDK Documentation", page: "SDKDocs", visibility: "public" },
-      { label: "Site Intelligence", page: "Sie", visibility: "admin" } // New SIE module
+      { label: "Site Intelligence", page: "Sie", visibility: "admin" }
     ]
   },
   {

@@ -533,6 +533,8 @@ main, section, article, div, form {
 /* Prevent canvas overlays from blocking interaction */
 canvas {
   pointer-events: none !important;
+  touch-action: none !important;
+  user-select: none !important;
 }
 
 /* Prevent Text Overflow */
