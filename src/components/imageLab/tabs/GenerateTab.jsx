@@ -531,10 +531,10 @@ export default function GenerateTab() {
           {showAdvanced && (
             <>
               {/* Model Strength */}
-              <div>
-                <label className="text-xs text-slate-400 mb-2 block flex justify-between uppercase tracking-wider">
-                  <span>Model Strength</span>
-                  <span className="text-cyan-400 font-mono">{modelStrength}%</span>
+              <div className="bg-black/30 rounded-xl p-4 border border-cyan-500/20">
+                <label className="text-xs text-cyan-400 mb-3 block flex justify-between uppercase tracking-widest font-bold">
+                  <span>⚡ Model Strength</span>
+                  <span className="text-cyan-300 font-mono text-base">{modelStrength}%</span>
                 </label>
                 <Slider
                   value={[modelStrength]}
@@ -544,6 +544,10 @@ export default function GenerateTab() {
                   step={5}
                   className="w-full"
                 />
+                <div className="flex justify-between mt-2">
+                  <span className="text-[10px] text-slate-500">Subtle</span>
+                  <span className="text-[10px] text-cyan-400">Maximum</span>
+                </div>
               </div>
 
               {/* Sharpness */}
@@ -649,35 +653,38 @@ export default function GenerateTab() {
           )}
 
           {/* Seed Control */}
-          <div>
-            <label className="text-xs text-slate-400 mb-2 block uppercase tracking-wider">Seed Control</label>
+          <div className="bg-black/30 rounded-xl p-4 border border-yellow-500/20">
+            <label className="text-xs text-yellow-400 mb-3 block uppercase tracking-widest font-bold flex items-center gap-2">
+              <Shuffle className="w-3 h-3" />
+              Seed Control
+            </label>
             <div className="flex gap-2">
               <Input
                 type="number"
                 value={seed}
                 onChange={(e) => setSeed(parseInt(e.target.value) || 0)}
                 disabled={!seedLocked}
-                className="flex-1 bg-black/60 border-cyan-500/20 text-white disabled:opacity-50 font-mono text-sm"
+                className="flex-1 bg-black/80 border-2 border-yellow-500/30 text-yellow-300 disabled:opacity-40 font-mono text-base focus:border-yellow-400 focus:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all"
               />
               <Button
                 size="icon"
                 variant="outline"
                 onClick={() => setSeed(Math.floor(Math.random() * 2147483647))}
                 disabled={seedLocked}
-                className="border-cyan-500/30 hover:border-cyan-500/50"
+                className="border-2 border-yellow-500/30 hover:border-yellow-400 hover:bg-yellow-500/10 hover:shadow-[0_0_15px_rgba(234,179,8,0.3)] h-12 w-12"
               >
-                <Shuffle className="w-4 h-4" />
+                <Shuffle className="w-5 h-5 text-yellow-400" />
               </Button>
               <Button
                 size="icon"
                 variant={seedLocked ? 'default' : 'outline'}
                 onClick={() => setSeedLocked(!seedLocked)}
-                className={seedLocked ? 'bg-yellow-500/20 border-yellow-500/50' : 'border-slate-700'}
+                className={`h-12 w-12 ${seedLocked ? 'bg-yellow-500/30 border-2 border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.6)]' : 'border-2 border-slate-700 hover:border-yellow-500/30'}`}
               >
-                <Lock className={`w-4 h-4 ${seedLocked ? 'text-yellow-400' : 'text-slate-400'}`} />
+                <Lock className={`w-5 h-5 ${seedLocked ? 'text-yellow-300' : 'text-slate-500'}`} />
               </Button>
             </div>
-            <p className="text-[10px] text-slate-500 mt-1">Lock seed for reproducible generations</p>
+            <p className="text-[10px] text-yellow-400/60 mt-2 font-mono">🔒 Lock for deterministic output</p>
           </div>
 
           <div className="flex items-center gap-2 pt-2">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +18,13 @@ import InteractiveTab from '@/components/imageLab/tabs/InteractiveTab.jsx';
 import GalleryTab from '@/components/imageLab/tabs/GalleryTab.jsx';
 
 export default function ImageLab() {
-  const [activeTab, setActiveTab] = useState('generate');
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('gl_imagelab_active_tab') || 'generate';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('gl_imagelab_active_tab', activeTab);
+  }, [activeTab]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
