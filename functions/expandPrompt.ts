@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { GoogleGenerativeAI } from 'npm:@google/generative-ai';
 
 Deno.serve(async (req) => {
   try {
@@ -19,9 +18,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-
+    // Use Gemini via REST API directly
+    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    
     const expansionPrompt = `You are an expert image generation prompt engineer. Expand the following short prompt into:
 1. A detailed natural language prompt (200-300 words) that captures visual details, mood, style, lighting, and composition
 2. A structured specification with these exact fields: subject, style, lighting, camera, realism, mood, technical_details
@@ -44,9 +43,23 @@ Return ONLY valid JSON in this exact format:
   "negative_constraints": ["constraint1", "constraint2", "constraint3"]
 }`;
 
-    const result = await model.generateContent(expansionPrompt);
-    const response = result.response;
-    const text = response.text();
+    const response = await fetch(`${endpoint}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: expansionPrompt }]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${errorData}`);
+    }
+
+    const data = await response.json();
+    const text = data.candidates[0].content.parts[0].text;
     
     // Extract JSON from response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
