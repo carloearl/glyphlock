@@ -41,13 +41,12 @@ html.dark {
 body {
   @apply antialiased;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
   min-height: 100vh;
-  touch-action: manipulation;
-  will-change: auto;
-  contain: layout style;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+  height: 100%;
+  width: 100%;
+  position: relative;
   background: transparent;
   color: #ffffff !important;
 }
@@ -335,6 +334,8 @@ p {
   -webkit-transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   pointer-events: none !important;
+  touch-action: none !important;
+  user-select: none !important;
 }
 
 /* Global stacking context isolation */
@@ -430,10 +431,12 @@ section, main {
 html, body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
-  pointer-events: auto !important;
   scroll-snap-type: none !important;
-  overflow-x: hidden;
-  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
 
 /* Mobile-specific fixes for Samsung and Android */
@@ -499,11 +502,6 @@ button, a, input, textarea, select, [role="button"], [type="button"], [type="sub
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto !important;
   cursor: pointer;
-}
-
-/* Ensure scroll containers allow wheel and touch events */
-*, *::before, *::after {
-  touch-action: pan-y pan-x !important;
 }
 
 /* Ensure all input types are interactive */

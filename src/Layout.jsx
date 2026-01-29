@@ -113,7 +113,9 @@ export default function Layout({ children, currentPageName }) {
           right: 0, 
           bottom: 0, 
           zIndex: 0, 
-          pointerEvents: 'none !important',
+          pointerEvents: 'none',
+          touchAction: 'none',
+          userSelect: 'none',
           transform: 'translateZ(0)',
           willChange: 'transform',
           backfaceVisibility: 'hidden'
@@ -132,7 +134,9 @@ export default function Layout({ children, currentPageName }) {
           right: 0, 
           bottom: 0, 
           zIndex: 1, 
-          pointerEvents: 'none !important',
+          pointerEvents: 'none',
+          touchAction: 'none',
+          userSelect: 'none',
           transform: 'translateZ(0)',
           willChange: 'transform',
           backfaceVisibility: 'hidden'
@@ -148,8 +152,8 @@ export default function Layout({ children, currentPageName }) {
           paddingBottom: 'env(safe-area-inset-bottom)',
           overscrollBehavior: 'none',
           position: 'relative',
-          overflowY: 'auto',
-          touchAction: 'pan-y pan-x'
+          height: '100%',
+          width: '100%'
         }}
       >
         <MobileTouchOptimizer />
