@@ -150,9 +150,10 @@ export default function Layout({ children, currentPageName }) {
         style={{ 
           background: 'transparent',
           paddingBottom: 'env(safe-area-inset-bottom)',
-          overscrollBehavior: 'none',
+          overscrollBehavior: 'auto',
           position: 'relative',
-          height: '100%',
+          height: 'auto',
+          minHeight: '100vh',
           width: '100%'
         }}
       >
@@ -165,7 +166,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {/* Main content */}
-        <main className="flex-1 relative pt-4" style={{ background: 'transparent', zIndex: 10, pointerEvents: 'auto', position: 'relative' }}>
+        <main className="flex-1 relative pt-4" style={{ background: 'transparent', zIndex: 10, pointerEvents: 'auto', position: 'relative', minHeight: 'auto', overflow: 'visible' }}>
           {children}
         </main>
 

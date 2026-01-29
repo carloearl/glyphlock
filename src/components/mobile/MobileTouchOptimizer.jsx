@@ -130,8 +130,10 @@ export default function MobileTouchOptimizer() {
 
     // Fix scroll snap issues
     const fixScrollSnap = () => {
-      document.body.style.overscrollBehavior = 'none';
-      document.documentElement.style.overscrollBehavior = 'none';
+      document.body.style.overscrollBehavior = 'auto';
+      document.documentElement.style.overscrollBehavior = 'auto';
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
       
       // Disable scroll-snap on mobile to prevent accidental navigation
       const snapContainers = document.querySelectorAll('[style*="scroll-snap"]');

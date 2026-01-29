@@ -427,15 +427,17 @@ section, main {
   }
 }
 
-/* Prevent scroll bounce and overscroll issues on mobile */
+/* Mobile Scroll Optimization - FIXED */
 html, body {
-  overscroll-behavior: none;
+  overscroll-behavior-y: auto;
+  overscroll-behavior-x: none;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: none !important;
+  scroll-behavior: smooth;
   overflow-x: hidden !important;
-  overflow-y: scroll !important;
+  overflow-y: auto !important;
   height: 100%;
   width: 100%;
+  min-height: 100vh;
   position: relative;
 }
 
@@ -443,6 +445,21 @@ html, body {
 @media (max-width: 768px) {
   * {
     -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  html, body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: auto !important;
+    scroll-behavior: smooth !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+  
+  body {
+    touch-action: pan-y pan-x !important;
   }
   
   button, a, [role="button"], [onclick], .cursor-pointer, input[type="button"], input[type="submit"] {
@@ -455,8 +472,8 @@ html, body {
     user-select: none !important;
   }
   
-  /* Disable scroll snap on mobile */
-  html, body, main, section, div {
+  /* Enable smooth scrolling on mobile */
+  html, body, main, section {
     scroll-snap-type: none !important;
     scroll-snap-align: none !important;
   }
@@ -469,7 +486,14 @@ html, body {
   /* Fix card flip containers */
   [style*="perspective"] {
     -webkit-tap-highlight-color: transparent !important;
-    touch-action: manipulation !important;
+    touch-action: pan-y !important;
+  }
+  
+  /* Ensure main content is scrollable */
+  main {
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: auto !important;
   }
 }
 
