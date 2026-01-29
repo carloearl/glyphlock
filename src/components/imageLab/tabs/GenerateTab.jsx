@@ -408,25 +408,30 @@ export default function GenerateTab() {
             <div key={idx} className="flex items-center gap-4 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
               <img src={ref.features?.color_palette?.[0] || '#888'} alt="ref" className="w-12 h-12 rounded object-cover bg-slate-700" />
               <div className="flex-1">
-                <p className="text-sm text-white mb-2">Reference {idx + 1}</p>
-                <div className="flex items-center gap-2">
-                  <Slider
-                    value={[weights[idx] || 0]}
-                    onValueChange={([val]) => handleWeightChange(idx, val)}
-                    min={0}
-                    max={100}
-                    step={1}
-                    className="flex-1"
-                  />
-                  <span className="text-xs text-slate-400 w-12">{Math.round(weights[idx] || 0)}%</span>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm text-purple-300 font-bold">Reference #{idx + 1}</p>
+                  <span className="text-base text-white font-mono font-black">{Math.round(weights[idx] || 0)}%</span>
+                </div>
+                <Slider
+                  value={[weights[idx] || 0]}
+                  onValueChange={([val]) => handleWeightChange(idx, val)}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+                <div className="flex justify-between mt-1">
+                  <span className="text-[10px] text-slate-500">No influence</span>
+                  <span className="text-[10px] text-purple-400">Dominant</span>
                 </div>
               </div>
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => handleRemoveReference(idx)}
+                className="hover:bg-red-500/20 hover:border-red-500/40 border-2 border-transparent transition-all h-12 w-12"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5 text-red-400" />
               </Button>
             </div>
           ))}
