@@ -19,15 +19,15 @@ const certifications = [
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-gradient-to-br from-indigo-950/20 via-violet-950/10 to-blue-950/20 border-t border-white/10 text-violet-200 pt-24 pb-12 relative overflow-hidden backdrop-blur-2xl">
+    <footer className="w-full bg-gradient-to-br from-indigo-950/20 via-violet-950/10 to-blue-950/20 border-t border-white/10 text-violet-200 pt-16 md:pt-24 pb-8 md:pb-12 relative overflow-x-hidden backdrop-blur-2xl">
     {/* Decorative Glows */}
     <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/15 rounded-full blur-[120px] pointer-events-none"></div>
     <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/15 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-20">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-12 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12 mb-12 md:mb-20">
           {/* Brand Column */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="md:col-span-2 lg:col-span-4 space-y-6">
             <div className="flex items-center gap-3">
               <img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
@@ -70,7 +70,7 @@ export default function Footer() {
           </div>
 
           {/* Company Column */}
-          <div className="lg:col-span-2">
+          <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Company</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.company && FOOTER_LINKS.company.map((link) => (
@@ -82,7 +82,7 @@ export default function Footer() {
           </div>
 
           {/* Modules Column */}
-          <div className="lg:col-span-2">
+          <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Modules</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.modules && FOOTER_LINKS.modules.map((link) => (
@@ -94,7 +94,7 @@ export default function Footer() {
           </div>
 
           {/* Protocols Column */}
-          <div className="lg:col-span-2">
+          <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Protocols</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.protocols && FOOTER_LINKS.protocols.map((link) => (
@@ -106,7 +106,7 @@ export default function Footer() {
           </div>
 
           {/* Resources Column */}
-          <div className="lg:col-span-2">
+          <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Resources</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.resources && FOOTER_LINKS.resources.map((link) => (
@@ -118,7 +118,7 @@ export default function Footer() {
           </div>
           
           {/* Account Column */}
-          <div className="lg:col-span-2">
+          <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Account</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.account && FOOTER_LINKS.account.map((link) => (
@@ -130,7 +130,7 @@ export default function Footer() {
           </div>
           
           {/* Contact Column */}
-          <div className="lg:col-span-2">
+          <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Contact</h4>
             <div className="flex flex-col gap-4">
               <a href="mailto:glyphlock@gmail.com" className="flex items-center gap-2 text-white font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
@@ -258,14 +258,14 @@ export default function Footer() {
           <p className="text-center text-xs text-slate-500 tracking-wide mb-6">
             Compliance & Standards
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-6">
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6 mb-6">
             {certifications.map((cert) => (
               <Link 
                 key={cert.name} 
                 to={createPageUrl(cert.page)}
                 className="group flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all duration-300"
               >
-                <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity group-hover:scale-105 duration-300">
+                <div className="w-14 h-14 md:w-20 md:h-20 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity group-hover:scale-105 duration-300">
                   <img src={cert.image} alt={cert.name} className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]" />
                 </div>
                 <div className="text-center">
@@ -281,9 +281,9 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar - Legal Links */}
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
-          <p className="text-white font-medium">© {new Date().getFullYear()} GlyphLock Security LLC. All rights reserved.</p>
-          <div className="flex items-center gap-8">
+        <div className="border-t border-white/10 pt-6 md:pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs md:text-sm">
+          <p className="text-white font-medium text-center md:text-left">© {new Date().getFullYear()} GlyphLock Security LLC. All rights reserved.</p>
+          <div className="flex items-center gap-4 md:gap-8 flex-wrap justify-center">
             {FOOTER_LINKS.legal && FOOTER_LINKS.legal.map((link) => (
             <Link key={link.page} to={createPageUrl(link.page)} className="text-white font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
               {link.label}

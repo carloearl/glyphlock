@@ -591,6 +591,9 @@ body {
 footer, [role="contentinfo"] {
   position: relative !important;
   background-attachment: scroll !important;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* Ensure nebula animations persist during scroll */
