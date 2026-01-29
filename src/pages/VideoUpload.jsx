@@ -50,10 +50,10 @@ export default function VideoUpload() {
 
     setUploading(true);
     try {
-      const response = await base44.functions.invoke('uploadMedia', { file });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
       
-      if (response.data?.file_url) {
-        setFileUrl(response.data.file_url);
+      if (file_url) {
+        setFileUrl(file_url);
         toast.success('File uploaded successfully!');
       } else {
         throw new Error('No URL returned');

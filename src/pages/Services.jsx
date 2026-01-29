@@ -75,23 +75,7 @@ export default function Services() {
       page: "NUPSLogin",
       color: "emerald"
     },
-    {
-      id: "hotzone-mapper",
-      icon: Map,
-      title: "Hotzone Verification Module",
-      description: "Facility verification module – operating under protocol-governed authorization with credentialed access.",
-      features: [
-        "Interactive security map creation",
-        "Threat hotspot marking with severity levels",
-        "Real-time threat monitoring and alerts",
-        "Incident tracking and resolution workflow",
-        "Multiple map types (network, physical, infrastructure)",
-        "Team collaboration and assignment",
-        "Analytics dashboard with threat trends"
-      ],
-      page: "HotzoneMapper",
-      color: "orange"
-    },
+
     {
       id: "security-operations",
       icon: Shield,
