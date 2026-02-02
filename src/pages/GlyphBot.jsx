@@ -8,6 +8,7 @@ import { Activity, Zap, Shield, Bot, AlertTriangle, X, PanelRightOpen, PanelRigh
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
+import HelpPanel from '@/components/global/HelpPanel';
 
 const { 
   useGlyphBotPersistence, 
@@ -622,10 +623,41 @@ export default function GlyphBotPage() {
   const currentProviderLabel = lastMeta?.providerLabel || providers.find(p => p.id === (lastMeta?.providerUsed || provider))?.label || 'Awaiting Response...';
 
   return (
+    <>
+    <HelpPanel
+      title="GlyphBot Guide"
+      sections={[
+        {
+          title: 'Overview',
+          content: [
+            { heading: 'What GlyphBot Does', text: 'AI assistant for cybersecurity analysis, code auditing, threat detection, and general technical questions. Can search the web in real-time and analyze files.' },
+            { heading: 'How to Use', text: 'Type your question or request in the input field. GlyphBot responds using AI models. Enable voice mode for audio responses. Enable live mode for real-time web search.' },
+            { heading: 'Persona Modes', text: 'GENERAL (all topics), SECURITY (cybersecurity focus), CODER (code analysis), CASUAL (friendly tone). Select based on your needs.' }
+          ]
+        },
+        {
+          title: 'Features',
+          content: [
+            { heading: 'Voice Mode', text: 'Toggle voice icon to enable text-to-speech. Adjust speed, pitch, emotion, and voice profile in settings. GlyphBot reads responses aloud.' },
+            { heading: 'Live Mode', text: 'Enable real-time web search for current information. GlyphBot searches Google, analyzes sources, and provides up-to-date answers.' },
+            { heading: 'Audit Mode', text: 'Run comprehensive security audits on websites, businesses, or individuals. Open audit panel to configure and start audits. Results saved to history.' },
+            { heading: 'Provider Selection', text: 'AUTO (recommended): chains multiple AI providers for best results. Manual: select specific provider (Gemini, OpenAI, etc.).' }
+          ]
+        },
+        {
+          title: 'Saving & History',
+          content: [
+            { heading: 'Auto-Save', text: 'Settings and preferences save automatically every 5 chats. Chat history persists in browser storage.' },
+            { heading: 'Manual Save', text: 'Click History panel > Save Chat to store conversation permanently. Name your chats for easy retrieval.' },
+            { heading: 'Load Chat', text: 'Open History panel. Click any saved chat to restore it. Archived chats available in separate tab.' }
+          ]
+        }
+      ]}
+    />
     <div className="min-h-screen text-white flex flex-col pt-16 pb-0 relative" style={{ color: '#ffffff', background: 'transparent', zIndex: 200, position: 'relative', pointerEvents: 'auto' }}>
       <SEOHead 
-        title="GlyphBot - Elite AI Security Assistant | GlyphLock"
-        description="Chat with GlyphBot, your elite AI security assistant for code auditing, blockchain analysis, threat detection, and debugging."
+        title="GlyphBot - AI Security Assistant | GlyphLock"
+        description="Chat with GlyphBot, your AI security assistant for code auditing, blockchain analysis, threat detection, and debugging."
         url="/glyphbot"
       />
       
@@ -993,5 +1025,6 @@ export default function GlyphBotPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
