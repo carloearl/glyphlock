@@ -31,6 +31,7 @@ import { generateSHA256, performStaticURLChecks } from '@/components/utils/secur
 import { useQrPreviewStorage } from './QrPreviewStorage';
 import QrPreviewSidebar from './QrPreviewSidebar';
 import QrVaultPanel from './QrVaultPanel';
+import QrDiagnosticsPanel from './QrDiagnosticsPanel';
 
 
 export default function QrStudio({ initialTab = 'create' }) {
@@ -1092,6 +1093,38 @@ export default function QrStudio({ initialTab = 'create' }) {
               </Card>
 
               {securityResult && <SecurityStatus securityResult={securityResult} />}
+              
+              {qrAssetDraft && (
+                <QrDiagnosticsPanel
+                  qrData={{
+                    payload: qrAssetDraft.payload,
+                    error_correction: qrAssetDraft.errorCorrectionLevel,
+                    foreground_color: qrAssetDraft.customization?.foregroundColor,
+                    background_color: qrAssetDraft.customization?.background?.color,
+                    dynamic_config: { rules: [] }
+                  }}
+                  onRunDiagnostics={async (results) => {
+                    // Log scan event
+                    await base44.entities.QRScanEvent.create({
+                      qr_asset_id: qrAssetDraft.id,
+                      decoded_content: results.decoded_content,
+                      device_context: {
+                        userAgent: navigator.userAgent,
+                        platform: navigator.platform,
+                        screenWidth: window.screen.width,
+                        screenHeight: window.screen.height
+                      },
+                      scan_velocity: 0,
+                      resolved_slots: results.resolved_slots,
+                      rejection_reasons: results.rejection_reasons,
+                      error_correction_level: results.error_correction_level,
+                      contrast_score: results.contrast_score,
+                      quiet_zone_valid: results.quiet_zone_valid
+                    });
+                    toast.success('Scan event logged');
+                  }}
+                />
+              )}
             </div>
           </TabsContent>
 

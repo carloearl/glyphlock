@@ -5,6 +5,7 @@ import SEOHead from "@/components/SEOHead";
 import EditorTab from "@/components/studio/EditorTab";
 import VerifyTab from "@/components/studio/VerifyTab";
 import { StudioProvider, useStudio } from "@/components/studio/state/StudioContext";
+import HelpPanel from '@/components/global/HelpPanel';
 
 function InteractiveImageStudioContent() {
   const [user, setUser] = useState(null);
@@ -45,6 +46,29 @@ function InteractiveImageStudioContent() {
   }
 
   return (
+    <>
+    <HelpPanel
+      title="Interactive Studio Guide"
+      sections={[
+        {
+          title: 'Getting Started',
+          content: [
+            { heading: 'What This Does', text: 'Create interactive images with clickable hotspots. Add hidden links, media, or actions to any image. Finalize to cryptographically secure the image and hotspot configuration.' },
+            { heading: 'Upload an Image', text: 'Drag and drop or click to upload any JPG, PNG, or WEBP image. The system supports images up to 10MB.' },
+            { heading: 'Add Hotspots', text: 'Click anywhere on the image. AI detects what you clicked and creates a bounding box. Set a URL or action for each hotspot.' }
+          ]
+        },
+        {
+          title: 'Features',
+          content: [
+            { heading: 'AI Detection', text: 'When you click on the image, AI analyzes that region and identifies the object (button, logo, face, product, etc.). It suggests a label and bounding box automatically.' },
+            { heading: 'Action Types', text: 'Open URL (links to external site), Play Audio (trigger audio file), Show Modal (display text), Invoke Agent (call AI agent), Verify Access (authentication gate).' },
+            { heading: 'Finalize & Lock', text: 'Generates a cryptographic hash of the image + hotspot configuration. Once finalized, the image cannot be altered without invalidating the hash.' },
+            { heading: 'Share Links', text: 'Create hosted share URLs or downloadable packages. Hotspots remain hidden until user hovers/taps. Clicks trigger the configured action.' }
+          ]
+        }
+      ]}
+    />
     <div className="min-h-screen bg-black text-white py-8">
       <SEOHead
         title="Interactive Image Studio | GlyphLock Security"
@@ -88,6 +112,7 @@ function InteractiveImageStudioContent() {
         </Tabs>
       </div>
     </div>
+    </>
   );
 }
 

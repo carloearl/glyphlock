@@ -164,9 +164,16 @@ export default function Layout({ children, currentPageName }) {
         <SecurityMonitor />
 
         {/* Version Badge - Top Right */}
-        <div className="fixed top-4 right-4 z-[9997] pointer-events-none">
+        <div className="fixed top-20 right-4 z-[9997] pointer-events-none hidden md:block">
           <Badge className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-2 border-indigo-400/40 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-xs font-bold px-3 py-1.5">
             Beta Version 2.0
+          </Badge>
+        </div>
+
+        {/* Mobile Version Badge - Bottom Left */}
+        <div className="fixed bottom-20 left-4 z-[9997] pointer-events-none md:hidden">
+          <Badge className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-2 border-indigo-400/40 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] font-bold px-2 py-1">
+            v2.0
           </Badge>
         </div>
 
