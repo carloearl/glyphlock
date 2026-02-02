@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import ScanHistory from "@/components/sie/ScanHistory";
 import ScanAutomation from "@/components/sie/ScanAutomation";
 import AIRemediationPanel from "@/components/sie/AIRemediationPanel";
+import HelpPanel from '@/components/global/HelpPanel';
 
 export default function Sie() {
   const [user, setUser] = useState(null);
@@ -25,7 +26,6 @@ export default function Sie() {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
 
-  // Admin guard
   useEffect(() => {
     (async () => {
       try {
@@ -48,7 +48,6 @@ export default function Sie() {
     })();
   }, []);
 
-  // Initial Data Load via Middleware
   useEffect(() => {
     if (user) {
       loadDashboardData();
@@ -57,7 +56,6 @@ export default function Sie() {
 
   const loadDashboardData = async () => {
     try {
-      // Use the unified middleware to fetch all dashboard data
       const res = await base44.functions.invoke("sieOps", { action: "get_dashboard" });
       const { history: fetchedHistory, config: fetchedConfig } = res.data;
       
@@ -65,7 +63,6 @@ export default function Sie() {
       setConfig(fetchedConfig);
 
       if (fetchedHistory && fetchedHistory.length > 0) {
-        // Load details for the latest scan
         await loadScanDetails(fetchedHistory[0]);
       }
     } catch (e) {
@@ -81,7 +78,7 @@ export default function Sie() {
     try {
       const res = await base44.functions.invoke("sieOps", { 
         action: "get_scan_details", 
-        payload: { scan_id: run.scan_id } // scan_id matches the foreign key
+        payload: { scan_id: run.scan_id }
       });
       
       const { nav, routes, sitemaps, backend } = res.data;
@@ -98,17 +95,12 @@ export default function Sie() {
   const runScan = async () => {
     setLoading(true);
     try {
-      // 1. Trigger the unified scan
       const res = await base44.functions.invoke("runFullScan");
       
-      // 2. Handle immediate completion (Unified scan is now awaited backend-side)
       if (res.data?.status === "success" || res.data?.status === "warning" || res.data?.status === "critical") {
         toast.success(`Scan completed: ${res.data.status.toUpperCase()}`);
         
-        // 3. Immediately fetch the fresh data for this specific run to update UI
-        // We use the run_id from the response to be precise
         if (res.data?.run_id) {
-            // First update the history list
             await loadDashboardData(); 
         }
       } else {
@@ -141,6 +133,38 @@ export default function Sie() {
   }
 
   return (
+    <>
+      <HelpPanel
+        title="Site Intelligence Engine Guide"
+        sections={[
+          {
+            title: 'Overview',
+            content: [
+              { heading: 'What SIE Does', text: 'Automated system audit for navigation structure, route configuration, sitemap completeness, and backend function health. Identifies issues with severity ratings.' },
+              { heading: 'How to Use', text: 'Click "Run Full Scan" to analyze the entire site. Results appear in tabs: Navigation, Routes, Sitemaps, Backend. AI Fixes tab generates remediation code.' },
+              { heading: 'Admin Only', text: 'SIE requires admin role. Unauthorized users are redirected to home page.' }
+            ]
+          },
+          {
+            title: 'Scan Results',
+            content: [
+              { heading: 'Severity Levels', text: 'OK (green): No issues. Warning (yellow): Minor problems, site functional. Critical (red): Major issues requiring immediate attention.' },
+              { heading: 'Navigation Tab', text: 'Shows all navigation links, their paths, visibility settings, HTTP status, and required actions. Identifies broken links or missing pages.' },
+              { heading: 'Routes Tab', text: 'Lists all site routes, associated components, public/private status, and authentication guards. Flags misconfigured routes.' },
+              { heading: 'Sitemaps Tab', text: 'Verifies sitemap existence for humans and search engines. Checks XML and HTML sitemaps for completeness.' },
+              { heading: 'Backend Tab', text: 'Tests all backend functions for existence and correct responses. Flags functions that fail or return errors.' }
+            ]
+          },
+          {
+            title: 'AI Remediation',
+            content: [
+              { heading: 'AI Fixes Tab', text: 'Generates code suggestions to fix issues found during scan. Organized by scan type (navigation, routes, sitemaps, backend).' },
+              { heading: 'Automation', text: 'Configure automatic scans on a schedule. Set scan frequency and notification preferences.' },
+              { heading: 'History', text: 'View past scan results. Click any scan to load its details and compare with current state.' }
+            ]
+          }
+        ]}
+      />
     <div className="container mx-auto p-6 space-y-6">
       <Card className="bg-slate-950 border-slate-800 text-white">
         <CardHeader className="flex flex-row items-center justify-between">
@@ -298,6 +322,7 @@ export default function Sie() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }
 

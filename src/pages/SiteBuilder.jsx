@@ -34,6 +34,7 @@ import ReactMarkdown from 'react-markdown';
 import DevModeLayout from '@/components/devengine/DevModeLayout';
 import AgentBrainPanel from '@/components/devengine/AgentBrainPanel';
 import DeployPanel from '@/components/devengine/DeployPanel';
+import HelpPanel from '@/components/global/HelpPanel';
 
 export default function SiteBuilder() {
   const [user, setUser] = useState(null);
@@ -42,14 +43,13 @@ export default function SiteBuilder() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const [mode, setMode] = useState('chat'); // 'plan', 'chat', 'code'
+  const [mode, setMode] = useState('chat');
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [viewMode, setViewMode] = useState('visual'); // 'visual' or 'dev'
+  const [viewMode, setViewMode] = useState('visual');
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
 
-  // Safety guards
   const safeMessages = Array.isArray(messages) ? messages : [];
 
   useEffect(() => {
@@ -72,7 +72,6 @@ export default function SiteBuilder() {
       }
       const userData = await base44.auth.me();
       
-      // Check if user is authorized for Site Builder
       const authorizedUsers = ['carloearl@glyphlock.com', 'carloearl@gmail.com'];
       const isAuthorized = userData.role === 'admin' || authorizedUsers.includes(userData.email);
       
@@ -108,7 +107,6 @@ export default function SiteBuilder() {
       const initialMessages = Array.isArray(conv.messages) ? conv.messages : [];
       setMessages(initialMessages);
       
-      // Subscribe to updates
       const unsubscribe = base44.agents.subscribeToConversation(conv.id, (data) => {
         if (data && data.messages) {
           const newMessages = Array.isArray(data.messages) ? data.messages : [];
@@ -177,7 +175,6 @@ export default function SiteBuilder() {
         const formData = new FormData();
         formData.append('file', file);
         
-        // Determine file type
         let fileType = 'document';
         if (file.type.startsWith('image/')) fileType = 'image';
         if (file.name.match(/\.(js|jsx|ts|tsx|json|css)$/)) fileType = 'code';
@@ -219,9 +216,37 @@ export default function SiteBuilder() {
         title="Site Builder Agent | GlyphLock Development Console"
         description="Autonomous AI agent that can build and modify your entire GlyphLock site"
       />
+      
+      <HelpPanel
+        title="Site Builder Guide"
+        sections={[
+          {
+            title: 'Overview',
+            content: [
+              { heading: 'What This Does', text: 'AI agent that builds and modifies site components, pages, entities, and backend functions. Operates in three modes: Chat (discuss), Plan (architect), Code (execute).' },
+              { heading: 'How to Use', text: 'Select a mode. Type your request. Agent responds with analysis or executes changes. Review tool calls to see what was modified.' },
+              { heading: 'Admin Only', text: 'Site Builder requires admin privileges. Dev Engine, Agent Brain, and Deploy panels are restricted to authorized emails.' }
+            ]
+          },
+          {
+            title: 'Modes',
+            content: [
+              { heading: 'Chat Mode', text: 'Discuss ideas, get explanations, ask questions. No code changes are executed. Use for learning and planning.' },
+              { heading: 'Plan Mode', text: 'Strategic analysis, architecture design, implementation roadmaps. Agent outlines approach without executing changes.' },
+              { heading: 'Code Mode', text: 'Execute code changes. Agent creates files, modifies components, updates entities. Changes are applied immediately to codebase.' }
+            ]
+          },
+          {
+            title: 'File Uploads',
+            content: [
+              { heading: 'Attach Files', text: 'Click paperclip icon to upload images, code files, or documents. Agent can analyze uploaded files for context.' },
+              { heading: 'Supported Formats', text: 'Images (PNG, JPG), code (JS, JSX, JSON, CSS), documents (PDF, TXT). Max 10MB per file.' }
+            ]
+          }
+        ]}
+      />
 
       <div className="min-h-screen bg-gradient-to-br from-black via-indigo-950/20 to-black">
-        {/* Header */}
         <div className="border-b border-blue-500/20 bg-white/5 backdrop-blur-xl sticky top-0 z-50">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
@@ -235,7 +260,6 @@ export default function SiteBuilder() {
                 </div>
                 </div>
                 <div className="flex items-center gap-3">
-                {/* View Mode Toggle - Admin Only */}
                 {isAdmin && (
                   <div className="flex gap-2 bg-white/5 rounded-lg p-1">
                     <button
@@ -284,7 +308,6 @@ export default function SiteBuilder() {
                     </button>
                   </div>
                 )}
-                {/* Mode Selector */}
                 {viewMode === 'visual' && (
                   <div className="flex gap-2 bg-white/5 rounded-lg p-1">
                   <button
@@ -328,7 +351,6 @@ export default function SiteBuilder() {
           </div>
         </div>
 
-        {/* Render Dev Engine, Agent Brain, or Visual Builder */}
         {viewMode === 'dev' && isAdmin ? (
           <div className="h-[calc(100vh-120px)]">
             <DevModeLayout />
@@ -359,7 +381,6 @@ export default function SiteBuilder() {
           </div>
         ) : (
           <>
-            {/* Mode Info Banner - MOBILE RESPONSIVE */}
             <div className="container mx-auto px-3 md:px-4 pt-4 md:pt-6">
           <div className="mb-4 md:mb-6 p-3 md:p-4 rounded-xl border-2 transition-all" style={{
             background: mode === 'chat' ? 'rgba(59,130,246,0.1)' : mode === 'plan' ? 'rgba(99,102,241,0.1)' : 'rgba(139,92,246,0.1)',
@@ -401,11 +422,9 @@ export default function SiteBuilder() {
           </div>
         </div>
 
-        {/* Modules Panel */}
         <div className="container mx-auto px-3 md:px-4 mb-6">
           <h2 className="text-sm font-bold text-blue-400 uppercase tracking-widest mb-4">Modules</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* SIE Module */}
             <Card className="bg-white/5 border-indigo-500/30 hover:border-indigo-500/60 transition-all cursor-pointer group" onClick={() => window.location.href = '/SiteAudit'}>
               <CardContent className="p-5">
                 <div className="flex items-center gap-4 mb-3">
@@ -426,7 +445,6 @@ export default function SiteBuilder() {
           </div>
         </div>
 
-        {/* Agent Capabilities Panel - MOBILE RESPONSIVE */}
         <div className="container mx-auto px-3 md:px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
             <Card className="bg-white/5 border-blue-500/20">
@@ -467,7 +485,6 @@ export default function SiteBuilder() {
             </Card>
           </div>
 
-          {/* Main Chat Interface - MOBILE RESPONSIVE */}
           <Card className="bg-white/5 border-blue-500/20 shadow-[0_0_40px_rgba(59,130,246,0.2)]">
             <CardHeader className="border-b border-blue-500/20 p-3 md:p-6">
               <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
@@ -476,7 +493,6 @@ export default function SiteBuilder() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              {/* Messages Area - MOBILE RESPONSIVE */}
               <ScrollArea 
                 ref={scrollRef}
                 className="h-[400px] md:h-[500px] p-3 md:p-6 space-y-3 md:space-y-4"
@@ -534,9 +550,7 @@ export default function SiteBuilder() {
                 )}
               </ScrollArea>
 
-              {/* Input Area - MOBILE TOUCH-FRIENDLY */}
               <div className="border-t border-blue-500/20 p-3 md:p-4 bg-white/5">
-                {/* Uploaded Files Preview - MOBILE RESPONSIVE */}
                 {uploadedFiles.length > 0 && (
                   <div className="mb-2 md:mb-3 flex flex-wrap gap-2">
                     {uploadedFiles.map((file, idx) => (
@@ -569,7 +583,6 @@ export default function SiteBuilder() {
                     className="hidden"
                   />
 
-                  {/* Mobile: Full-width buttons stacked */}
                   <div className="flex gap-2 md:hidden">
                     <Button
                       onClick={() => fileInputRef.current?.click()}
@@ -586,7 +599,6 @@ export default function SiteBuilder() {
                     </Button>
                   </div>
 
-                  {/* Desktop: Side-by-side layout */}
                   <HoverTooltip content="Upload files to attach to your message">
                     <Button
                       onClick={() => fileInputRef.current?.click()}
@@ -660,7 +672,6 @@ function MessageBubble({ message }) {
           ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white' 
           : 'bg-white/10 backdrop-blur-md border border-white/10 text-white'
       }`}>
-        {/* Message Content */}
         {message.content && (
           <ReactMarkdown
             className="prose prose-invert prose-sm max-w-none"
@@ -681,7 +692,6 @@ function MessageBubble({ message }) {
           </ReactMarkdown>
         )}
 
-        {/* Tool Calls */}
         {hasToolCalls && (
           <div className="mt-3 space-y-2">
             {(message.tool_calls || []).map((tool, idx) => (
@@ -690,7 +700,6 @@ function MessageBubble({ message }) {
           </div>
         )}
 
-        {/* Timestamp */}
         <div className="flex items-center gap-1 mt-2 text-xs opacity-60">
           <Clock className="w-3 h-3" />
           {new Date().toLocaleTimeString()}
