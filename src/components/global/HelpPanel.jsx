@@ -336,6 +336,7 @@ export default function HelpPanel({ title = "System Guide", sections = [] }) {
                       </div>
                     </div>
                   )}
+                </div>
 
                 <div className="p-5 border-t-2 border-cyan-500/20 bg-gradient-to-r from-slate-950/95 to-slate-900/95 flex items-center justify-between">
                   <div className="flex items-center gap-3">
