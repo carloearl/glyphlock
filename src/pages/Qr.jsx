@@ -57,7 +57,7 @@ export default function Qr() {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "GlyphLock QR Studio",
-      "description": "Military-grade QR code generation with anti-quishing protection, steganography, hot zones, and blockchain security. Unified QR system with 90+ payload types.",
+      "description": "Secure QR code generation with anti-quishing protection, steganography, hot zones, and blockchain security. Unified QR system with 90+ payload types.",
       "url": "https://glyphlock.io/qr",
       "applicationCategory": "SecurityApplication",
       "operatingSystem": "Web Browser",

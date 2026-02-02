@@ -6,7 +6,7 @@ import { Loader2, Sparkles, Layers, Image as ImageIcon, Database, Zap } from 'lu
 
 import SEOHead from '@/components/SEOHead';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
-import ImageLabOnboarding from '@/components/imageLab/ImageLabOnboarding';
+
 import ImageLabHelp from '@/components/imageLab/ImageLabHelp';
 import HelpPanel from '@/components/global/HelpPanel';
 
