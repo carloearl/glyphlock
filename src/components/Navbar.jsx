@@ -553,8 +553,9 @@ export default function Navbar({ user, onLogin, onLogout }) {
 
         {/* Mobile Toggle */}
         <motion.button
-          whileTap={{ scale: 0.95 }}
-          className="lg:hidden relative w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 border border-white/10"
+          whileTap={{ scale: 0.9 }}
+          style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minWidth: '52px', minHeight: '52px' }}
+          className="lg:hidden relative w-14 h-14 flex items-center justify-center rounded-xl bg-white/5 border-2 border-white/10 hover:border-cyan-400/50 transition-all active:bg-cyan-500/20"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -624,7 +625,8 @@ export default function Navbar({ user, onLogin, onLogout }) {
                        <Link
                          to={createPageUrl(item.page)}
                          onClick={() => setMobileMenuOpen(false)}
-                         className="text-gray-300 hover:text-white text-sm py-3 px-3 block rounded-lg hover:bg-white/5 transition-all min-h-[48px] flex items-center"
+                         style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                         className="text-gray-300 hover:text-white text-base py-4 px-4 block rounded-xl hover:bg-cyan-500/10 hover:border-cyan-400/30 border-2 border-transparent transition-all min-h-[56px] flex items-center font-semibold active:scale-95 active:bg-cyan-500/20"
                        >
                          {item.label}
                        </Link>
@@ -643,24 +645,40 @@ export default function Navbar({ user, onLogin, onLogout }) {
                 {user ? (
                   <>
                     <Link to={createPageUrl("CommandCenter")} onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-400/30 text-white">
-                        <Terminal className="w-4 h-4 mr-2" />
-                        Command Center
+                      <Button 
+                        style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                        className="w-full h-14 bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border-2 border-cyan-400/40 text-white font-black text-base hover:from-cyan-500/30 hover:to-violet-500/30 hover:border-cyan-400/60 active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                      >
+                        <Terminal className="w-5 h-5 mr-2" />
+                        COMMAND CENTER
                       </Button>
                     </Link>
-                    <Button onClick={onLogout} variant="ghost" className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
+                    <Button 
+                      onClick={onLogout} 
+                      variant="ghost" 
+                      style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                      className="w-full h-14 text-red-400 hover:text-red-300 hover:bg-red-500/10 border-2 border-transparent hover:border-red-500/30 font-bold text-base active:scale-95"
+                    >
+                      <LogOut className="w-5 h-5 mr-2" />
+                      SIGN OUT
                     </Button>
                   </>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
-                    <Button onClick={onLogin} variant="ghost" className="text-white hover:bg-white/10 border border-white/10">
-                      Sign In
+                    <Button 
+                      onClick={onLogin} 
+                      variant="ghost" 
+                      style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                      className="text-white hover:bg-white/10 border-2 border-white/10 hover:border-cyan-400/40 h-14 text-base font-bold active:scale-95"
+                    >
+                      SIGN IN
                     </Button>
                     <Link to={createPageUrl("Consultation")} onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-violet-500 text-white border-none">
-                        Get Started
+                      <Button 
+                        style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                        className="w-full h-14 bg-gradient-to-r from-cyan-500 to-violet-500 text-white border-none font-black text-base shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] active:scale-95"
+                      >
+                        GET STARTED
                       </Button>
                     </Link>
                   </div>
