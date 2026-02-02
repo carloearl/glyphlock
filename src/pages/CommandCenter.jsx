@@ -32,8 +32,9 @@ import {
   QrCode, Image, Bot, CreditCard, ExternalLink, Loader2,
   HardDrive, Cpu, Wifi, Cloud, Package, Layers, GitBranch,
   Monitor, Smartphone, ArrowUpRight, ArrowDownRight, Circle,
-  ShieldAlert, Radio
+  ShieldAlert, Radio, HelpCircle
 } from "lucide-react";
+import HelpPanel from '@/components/global/HelpPanel';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area
@@ -2162,6 +2163,14 @@ export default function CommandCenter() {
           return;
         }
         const userData = await base44.auth.me();
+        
+        // ADMIN LOCK: Only carloearl@glyphlock.com can access
+        if (userData.email !== 'carloearl@glyphlock.com') {
+          toast.error('Access denied: Admin privileges required');
+          navigate("/");
+          return;
+        }
+        
         setUser(userData);
       } catch (err) {
         console.error("Auth error:", err);
@@ -2209,6 +2218,27 @@ export default function CommandCenter() {
         title="Command Center | GlyphLock Security"
         description="GlyphLock Command Center - Manage API keys, monitor security, view analytics."
         url="/CommandCenter"
+      />
+      <HelpPanel
+        title="Command Center Guide"
+        sections={[
+          {
+            title: 'Overview',
+            content: [
+              { heading: 'What This Is', text: 'Admin control panel for managing GlyphLock resources, API keys, security settings, and system analytics. Access restricted to admin email.' },
+              { heading: 'Real-Time Data', text: 'All metrics and charts display actual data from your account. No demo data or placeholders. Empty states appear when no data exists yet.' }
+            ]
+          },
+          {
+            title: 'Features',
+            content: [
+              { heading: 'Overview Tab', text: 'View system status, resource counts, activity charts, and quick action links. All numbers are live from the database.' },
+              { heading: 'API Keys', text: 'Generate, rotate, and delete API keys. Public keys are safe to share. Secret keys must be kept secure.' },
+              { heading: 'Analytics', text: 'View activity trends, event distribution, and resource usage over configurable date ranges. Filter by event type.' },
+              { heading: 'Security', text: 'Monitor security score, check status, and view active threats from AI detection engine.' }
+            ]
+          }
+        ]}
       />
 
       <MobileSidebar 

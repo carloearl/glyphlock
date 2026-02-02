@@ -6,11 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Blocks, Hash, Shield, CheckCircle2, Copy, FileCheck, Lock, AlertTriangle, Clock } from "lucide-react";
+import { Blocks, Hash, Shield, CheckCircle2, Copy, FileCheck, Lock, AlertTriangle, Clock, Download, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion, useInView } from "framer-motion";
 import { toast } from "sonner";
+import HelpPanel from '@/components/global/HelpPanel';
+
 export default function Blockchain() {
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
@@ -50,6 +52,9 @@ export default function Blockchain() {
     hash: "",
     result: null
   });
+  const [exportData, setExportData] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [importData, setImportData] = useState(null);
 
   // Generate multiple hash algorithms
   const generateHashes = async () => {
@@ -286,7 +291,83 @@ export default function Blockchain() {
     navigator.clipboard.writeText(text);
   };
 
+  const exportProof = async () => {
+    if (!user) return;
+    setIsExporting(true);
+    try {
+      // Get recent operations
+      const activities = await base44.entities.BlockchainActivity.filter({ 
+        user_email: user.email 
+      });
+      
+      if (activities.length === 0) {
+        toast.error('No operations to export');
+        setIsExporting(false);
+        return;
+      }
+
+      const res = await base44.functions.invoke('exportBlockchainProof', {
+        operation_ids: activities.slice(0, 50).map(a => a.id)
+      });
+
+      setExportData(res.data);
+      toast.success('Proof bundle exported');
+    } catch (err) {
+      console.error('Export error:', err);
+      toast.error('Export failed');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const downloadProof = () => {
+    if (!exportData?.proof_bundle_url) return;
+    window.open(exportData.proof_bundle_url, '_blank');
+  };
+
+  const verifyImportedProof = async (proofUrl) => {
+    try {
+      const res = await base44.functions.invoke('verifyBlockchainProof', {
+        proof_bundle_url: proofUrl
+      });
+      setImportData(res.data);
+      toast.success('Proof verified');
+    } catch (err) {
+      console.error('Verify error:', err);
+      toast.error('Verification failed');
+    }
+  };
+
   return (
+      <>
+      <HelpPanel
+        title="Blockchain Tools Guide"
+        sections={[
+          {
+            title: 'Overview',
+            content: [
+              { heading: 'What This Does', text: 'Generate cryptographic hashes, build Merkle trees, simulate proof-of-work mining, and verify data integrity. All operations are logged to an immutable ledger.' },
+              { heading: 'Use Cases', text: 'Hash sensitive data for tamper detection. Build Merkle trees for efficient verification of large datasets. Mine blocks to demonstrate proof-of-work. Verify data integrity by comparing hashes.' }
+            ]
+          },
+          {
+            title: 'Operations',
+            content: [
+              { heading: 'Hashing', text: 'Enter text or data. System generates SHA-256, SHA-512, and SHA-1 hashes. Copy hashes for storage or verification.' },
+              { heading: 'Merkle Trees', text: 'Enter transactions (one per line). System builds a Merkle tree and computes the root hash. Use for efficient verification of transaction sets.' },
+              { heading: 'Block Mining', text: 'Enter block data and set difficulty (1-5). System performs proof-of-work to find a valid hash. Higher difficulty = more computational work.' },
+              { heading: 'Verification', text: 'Enter original data and a hash. System re-computes the hash and compares. Match = data is intact. Mismatch = data was altered.' }
+            ]
+          },
+          {
+            title: 'Export/Import',
+            content: [
+              { heading: 'Export Proof Bundle', text: 'Creates a JSON file containing all your operations with hashes and metadata. Use this as cryptographic evidence of your work.' },
+              { heading: 'Verify Bundle', text: 'Import a proof bundle URL. System re-verifies all hashes and confirms integrity. Useful for auditing or sharing proofs with third parties.' }
+            ]
+          }
+        ]}
+      />
       <div className="min-h-screen bg-black text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
@@ -327,7 +408,7 @@ export default function Blockchain() {
             </div>
 
             <Tabs defaultValue="hash" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 bg-gray-900 p-2">
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2 bg-gray-900 p-2">
                 <TabsTrigger value="hash" className="text-white data-[state=active]:text-blue-400 min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                   <Hash className="w-5 h-5 md:w-4 md:h-4" />
                   <span className="text-xs md:text-sm">Hashing</span>
@@ -343,6 +424,10 @@ export default function Blockchain() {
                 <TabsTrigger value="verify" className="text-white data-[state=active]:text-blue-400 min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                   <CheckCircle2 className="w-5 h-5 md:w-4 md:h-4" />
                   <span className="text-xs md:text-sm">Verify</span>
+                </TabsTrigger>
+                <TabsTrigger value="export" className="text-white data-[state=active]:text-blue-400 min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                  <Download className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="text-xs md:text-sm">Export</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -782,6 +867,130 @@ export default function Blockchain() {
                   )}
                 </div>
               </TabsContent>
+
+              {/* Proof Export/Import */}
+              <TabsContent value="export">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="bg-gray-900 border-gray-800">
+                    <CardHeader>
+                      <CardTitle className="text-white">Export Proof Bundle</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-slate-400">
+                        Export your blockchain operations as a verifiable proof bundle. Includes operation inputs (truncated), hashes, timestamps, and metadata.
+                      </p>
+
+                      <Button
+                        onClick={exportProof}
+                        disabled={isExporting}
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                      >
+                        {isExporting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Exporting...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Proof Bundle
+                          </>
+                        )}
+                      </Button>
+
+                      {exportData && (
+                        <div className="space-y-3">
+                          <Alert className="bg-green-500/10 border-green-500/30">
+                            <CheckCircle2 className="h-4 w-4 text-green-400" />
+                            <AlertDescription className="text-white">
+                              <strong>Proof bundle created</strong>
+                              <div className="text-xs text-gray-400 mt-1">
+                                {exportData.operation_count} operations • Hash: {exportData.export_hash.substring(0, 16)}...
+                              </div>
+                            </AlertDescription>
+                          </Alert>
+
+                          <Button
+                            onClick={downloadProof}
+                            variant="outline"
+                            className="w-full border-green-500/50"
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download Bundle
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gray-900 border-gray-800">
+                    <CardHeader>
+                      <CardTitle className="text-white">Verify Proof Bundle</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-slate-400">
+                        Import and verify a proof bundle. The system will re-hash all operations and confirm integrity.
+                      </p>
+
+                      <div>
+                        <Label className="text-white text-sm mb-2 block">Proof Bundle URL</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="https://..."
+                            className="bg-gray-800 border-gray-700 text-white flex-1"
+                            id="proof-url"
+                          />
+                          <Button
+                            onClick={() => {
+                              const url = document.getElementById('proof-url').value;
+                              if (url) verifyImportedProof(url);
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            Verify
+                          </Button>
+                        </div>
+                      </div>
+
+                      {importData && (
+                        <div className={`p-4 rounded-lg border-2 ${
+                          importData.all_operations_verified 
+                            ? 'bg-green-500/10 border-green-500/40'
+                            : 'bg-red-500/10 border-red-500/40'
+                        }`}>
+                          <div className="flex items-center gap-2 mb-3">
+                            {importData.all_operations_verified ? (
+                              <CheckCircle2 className="w-5 h-5 text-green-400" />
+                            ) : (
+                              <AlertTriangle className="w-5 h-5 text-red-400" />
+                            )}
+                            <p className="text-white font-bold">
+                              {importData.all_operations_verified ? 'Proof Valid' : 'Proof Invalid'}
+                            </p>
+                          </div>
+                          <div className="space-y-2 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Bundle Hash:</span>
+                              <span className="text-white font-mono">{importData.calculated_hash?.substring(0, 16)}...</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Operations:</span>
+                              <span className="text-white">{importData.operation_count}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Verified:</span>
+                              <span className={importData.all_operations_verified ? 'text-green-400' : 'text-red-400'}>
+                                {importData.verifications?.filter(v => v.verified).length || 0} / {importData.operation_count}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
             </Tabs>
 
             {/* Features Grid */}
@@ -811,5 +1020,6 @@ export default function Blockchain() {
           </div>
         </div>
       </div>
+      </>
   );
 }

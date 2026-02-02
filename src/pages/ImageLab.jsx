@@ -8,6 +8,7 @@ import SEOHead from '@/components/SEOHead';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
 import ImageLabOnboarding from '@/components/imageLab/ImageLabOnboarding';
 import ImageLabHelp from '@/components/imageLab/ImageLabHelp';
+import HelpPanel from '@/components/global/HelpPanel';
 
 // Tab Components
 import GenerateTab from '@/components/imageLab/tabs/GenerateTab.jsx';
@@ -91,6 +92,36 @@ export default function ImageLab() {
 
       <ImageLabOnboarding />
       <ImageLabHelp />
+      <HelpPanel
+        title="Image Lab Guide"
+        sections={[
+          {
+            title: 'Basics',
+            content: [
+              { heading: 'What This Does', text: 'Generate AI images from text prompts. Upload reference images to guide style and composition. Control generation parameters for precise results.' },
+              { heading: 'How to Start', text: 'Enter a text prompt describing your desired image. Click "Expand Prompt" to enhance it with AI. Upload 1-4 reference images if needed. Click "Generate Image".' },
+              { heading: 'Generation Time', text: 'Typical generation takes 10-30 seconds. The system validates output quality and may retry automatically up to 3 times.' }
+            ]
+          },
+          {
+            title: 'Controls',
+            content: [
+              { heading: 'Delta Mode', text: 'REFINE (0.3): Minor adjustments. BALANCE (0.5): Moderate changes. RESTYLE (0.7): Major style shift. REINTERPRET (0.9): Complete reimagining.' },
+              { heading: 'Seed Lock', text: 'Lock the random seed to reproduce exact outputs. Unlock to get variations. Same seed + same prompt = same image.' },
+              { heading: 'Identity Lock', text: 'Enforces 87% facial similarity when reference faces are present. Requires clear face in reference image. Error E001 appears if no face detected.' },
+              { heading: 'Reference Weights', text: 'When using multiple references, adjust weight sliders. Total must equal 100%. Higher weight = stronger influence on final output.' }
+            ]
+          },
+          {
+            title: 'Errors',
+            content: [
+              { heading: 'E001: No Face Detected', text: 'Identity lock requires a clear face in the reference image. Either upload a different reference with a visible face, or disable identity lock.', errorCode: 'E001' },
+              { heading: 'Rate Limit', text: 'Free tier: 20 generations per hour. If exceeded, wait or upgrade to Pro for unlimited generations.' },
+              { heading: 'Validation Failed', text: 'System automatically retries up to 3 times if quality scores are below 70%. You receive the best attempt.' }
+            ]
+          }
+        ]}
+      />
 
       <div className="min-h-screen relative overflow-x-hidden" style={{ 
         background: 'radial-gradient(ellipse at top, rgba(87, 61, 255, 0.15), transparent 50%), radial-gradient(ellipse at bottom right, rgba(168, 60, 255, 0.12), transparent 50%), radial-gradient(ellipse at bottom left, rgba(6, 182, 212, 0.1), transparent 50%), #000000'

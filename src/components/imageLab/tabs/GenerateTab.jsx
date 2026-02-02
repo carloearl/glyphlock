@@ -87,7 +87,7 @@ export default function GenerateTab() {
 
   const expandMutation = useMutation({
     mutationFn: async (p) => {
-      const res = await base44.functions.invoke('expandPrompt', { prompt: p });
+      const res = await base44.functions.invoke('expandPromptHybrid', { prompt: p, opts: {} });
       return res.data;
     },
     onSuccess: (data) => {
@@ -105,9 +105,9 @@ export default function GenerateTab() {
   const uploadReferenceMutation = useMutation({
     mutationFn: async ({ file, enableIdentity }) => {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const res = await base44.functions.invoke('extractImageFeatures', {
-        image_url: file_url,
-        enable_identity_lock: enableIdentity
+      const res = await base44.functions.invoke('extractReferenceFeaturesHybrid', {
+        imageUrl: file_url,
+        opts: { enable_identity_lock: enableIdentity }
       });
       return res.data;
     },
@@ -120,21 +120,83 @@ export default function GenerateTab() {
     },
     onError: (error) => {
       console.error('Upload error:', error);
-      toast.error(`Reference upload failed: ${error.message}`);
+      const msg = error.message || '';
+      if (msg.includes('E001')) {
+        toast.error('❌ E001: No face detected. Identity lock requires a clear face in reference image.');
+      } else {
+        toast.error(`Reference upload failed: ${msg}`);
+      }
     }
   });
 
   const generateMutation = useMutation({
     mutationFn: async (params) => {
       console.log('Generate params:', params);
-      const res = await base44.functions.invoke('generateImageImagen', params);
+      const functionName = params.action === 'restyle' || params.action === 'reinterpret' 
+        ? 'restyleImageHybrid' 
+        : 'generateImageHybrid';
+      
+      // Build payload
+      const payload = functionName === 'restyleImageHybrid' ? {
+        inputImageUrl: generatedImage?.image_url,
+        promptSpec: { 
+          expanded_prompt: expandedPrompt.expanded_prompt,
+          structured_spec: expandedPrompt.structured_spec,
+          original_prompt: prompt,
+          id: promptSpecId
+        },
+        references: references.map(r => ({ 
+          id: r.reference_image_id,
+          extracted_features: r.features 
+        })),
+        params: {
+          delta_strength: params.delta_strength,
+          seed: seedLocked ? seed : (seed + 1),
+          aspect_ratio: params.aspect_ratio,
+          guidance_scale: guidanceScale,
+          model_strength: params.model_strength,
+          quality_mode: params.quality_mode,
+          negative_prompt: params.negative_prompt
+        }
+      } : {
+        promptSpec: {
+          expanded_prompt: expandedPrompt.expanded_prompt,
+          structured_spec: expandedPrompt.structured_spec,
+          original_prompt: prompt,
+          id: promptSpecId
+        },
+        references: references.map(r => ({ 
+          id: r.reference_image_id,
+          extracted_features: r.features 
+        })),
+        params: {
+          seed: params.seed,
+          aspect_ratio: params.aspect_ratio,
+          guidance_scale: guidanceScale,
+          model_strength: params.model_strength,
+          quality_mode: params.quality_mode,
+          negative_prompt: params.negative_prompt
+        }
+      };
+      
+      const res = await base44.functions.invoke(functionName, payload);
       return res.data;
     },
     onSuccess: (data) => {
       console.log('Generate success:', data);
       setGeneratedImage(data);
       setHistory(data.attempts || []);
-      toast.success(`✅ Image generated! ${data.attempts?.length || 1} attempt(s)`);
+      if (!seedLocked) {
+        setSeed(data.seed + 1);
+      }
+      const bestScore = data.best_attempt?.validation_scores?.overall || 0;
+      if (bestScore >= 0.9) {
+        toast.success(`✅ Exceptional quality! Score: ${(bestScore * 100).toFixed(0)}% • ${data.attempts?.length || 1} attempt(s)`);
+      } else if (bestScore >= 0.7) {
+        toast.success(`✅ Generated successfully! Score: ${(bestScore * 100).toFixed(0)}% • ${data.attempts?.length || 1} attempt(s)`);
+      } else {
+        toast.warning(`⚠️ Generated with issues. Score: ${(bestScore * 100).toFixed(0)}% • Best of ${data.attempts?.length || 1} attempt(s)`);
+      }
     },
     onError: (error) => {
       console.error('Generate error:', error);
