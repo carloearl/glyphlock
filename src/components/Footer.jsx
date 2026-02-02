@@ -133,8 +133,8 @@ export default function Footer() {
           <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Contact</h4>
             <div className="flex flex-col gap-4">
-              <a href="mailto:glyphlock@gmail.com" className="flex items-center gap-2 text-white font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
-                <Mail size={16} /> glyphlock@gmail.com
+              <a href="mailto:support@glyphlock.io" className="flex items-center gap-2 text-white font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
+                <Mail size={16} /> support@glyphlock.io
               </a>
               <a href="tel:+14242466499" className="flex items-center gap-2 text-white font-medium hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
                 <Phone size={16} /> (424) 246-6499
