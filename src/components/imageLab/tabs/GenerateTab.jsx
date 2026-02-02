@@ -397,16 +397,16 @@ Provide your response as a JSON object with:
           <Button
             onClick={handleExpandPrompt}
             disabled={!prompt.trim() || expandMutation.isPending}
-            className="w-full h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_40px_rgba(99,102,241,0.6)] transition-all font-bold text-base border-2 border-indigo-400/30"
+            className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_40px_rgba(99,102,241,0.6)] transition-all font-black text-base md:text-lg border-2 border-indigo-400/30 touch-manipulation"
           >
             {expandMutation.isPending ? (
               <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <Loader2 className="w-5 h-5 md:w-6 md:h-6 mr-2 animate-spin" />
                 Expanding with AI...
               </>
             ) : (
               <>
-                <Sparkles className="w-5 h-5 mr-2" />
+                <Sparkles className="w-5 h-5 md:w-6 md:h-6 mr-2" />
                 Expand Prompt
               </>
             )}
@@ -453,12 +453,12 @@ Provide your response as a JSON object with:
               size="sm"
               onClick={() => document.getElementById('ref-upload').click()}
               disabled={references.length >= 4 || uploadReferenceMutation.isPending}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_25px_rgba(168,85,247,0.5)] border-2 border-purple-400/30 font-bold h-11 px-5"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_25px_rgba(168,85,247,0.5)] hover:shadow-[0_0_35px_rgba(168,85,247,0.7)] border-2 border-purple-400/30 font-black h-12 md:h-14 px-6 md:px-8 text-sm md:text-base touch-manipulation active:scale-95 transition-all"
             >
               {uploadReferenceMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
               ) : (
-                <><Upload className="w-4 h-4 mr-2" /> ADD</>
+                <><Upload className="w-4 h-4 md:w-5 md:h-5 mr-2" /> UPLOAD</>
               )}
             </Button>
             <input id="ref-upload" type="file" accept="image/*" className="hidden" onChange={handleUploadReference} />
@@ -707,32 +707,38 @@ Provide your response as a JSON object with:
         <Button
           onClick={() => handleGenerate('generate')}
           disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
-          className="w-full h-16 text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] hover:shadow-[0_0_50px_rgba(99,102,241,0.6)] transition-all border-2 border-indigo-400/30"
+          className="w-full h-20 text-lg md:text-xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_40px_rgba(99,102,241,0.5)] hover:shadow-[0_0_60px_rgba(99,102,241,0.8)] transition-all border-2 border-indigo-400/40 touch-manipulation active:scale-95"
         >
           {generateMutation.isPending ? (
-            <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Generating...</>
+            <><Loader2 className="w-6 h-6 md:w-7 md:h-7 mr-2 animate-spin" />GENERATING...</>
           ) : (
-            <><Zap className="w-5 h-5 mr-2" />Generate Image</>
+            <><Zap className="w-6 h-6 md:w-7 md:h-7 mr-2 drop-shadow-[0_0_8px_rgba(99,102,241,1)]" />GENERATE IMAGE</>
           )}
         </Button>
 
         {generatedImage && (
           <div className="grid grid-cols-2 gap-3">
             <Button
-              onClick={() => handleGenerate('restyle')}
-              disabled={generateMutation.isPending}
-              className="h-12 bg-purple-600/80 hover:bg-purple-600 shadow-[0_0_20px_rgba(168,85,247,0.3)] border-2 border-purple-400/30 font-semibold"
+              onClick={() => {
+                if (!generatedImage?.image_url) {
+                  toast.error('Generate an image first');
+                  return;
+                }
+                handleGenerate('restyle');
+              }}
+              disabled={generateMutation.isPending || !generatedImage}
+              className="h-14 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 shadow-[0_0_25px_rgba(168,85,247,0.4)] hover:shadow-[0_0_35px_rgba(168,85,247,0.6)] border-2 border-purple-400/30 font-bold text-sm md:text-base transition-all"
             >
-              <Repeat className="w-4 h-4 mr-2" />
-              Restyle
+              <Repeat className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+              Restyle Current
             </Button>
             <Button
-              onClick={() => handleGenerate('reinterpret')}
-              disabled={generateMutation.isPending}
-              className="h-12 bg-pink-600/80 hover:bg-pink-600 shadow-[0_0_20px_rgba(236,72,153,0.3)] border-2 border-pink-400/30 font-semibold"
+              onClick={() => setShowEditor(true)}
+              disabled={!generatedImage}
+              className="h-14 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] border-2 border-cyan-400/30 font-bold text-sm md:text-base transition-all"
             >
-              <Wand2 className="w-4 h-4 mr-2" />
-              Reinterpret
+              <Edit className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+              Edit Image
             </Button>
           </div>
         )}

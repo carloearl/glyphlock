@@ -21,7 +21,12 @@ export default function CTASection() {
   const glowOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 1, 0.5]);
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.98]);
 
-  const handleGetStarted = () => {
+  const handleGetStarted = (e) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address');
+      return;
+    }
     window.location.href = createPageUrl("Consultation") + `?email=${encodeURIComponent(email)}`;
   };
 
@@ -222,7 +227,8 @@ export default function CTASection() {
               </motion.p>
 
               {/* Email form - Scale up with bounce */}
-              <motion.div
+              <motion.form
+                onSubmit={handleGetStarted}
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.9 }}
                 transition={{ duration: 1, delay: 0.7, type: "spring", stiffness: 100, damping: 14 }}
@@ -235,20 +241,20 @@ export default function CTASection() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-white/8 backdrop-blur-md border-2 border-white/20 text-white placeholder:text-white/50 focus:border-indigo-400 focus:shadow-[0_0_30px_rgba(87,61,255,0.5)] transition-all h-14 rounded-xl text-base"
+                    className="bg-white/8 backdrop-blur-md border-2 border-white/20 text-white placeholder:text-white/50 focus:border-indigo-400 focus:shadow-[0_0_30px_rgba(87,61,255,0.5)] transition-all h-14 md:h-16 rounded-xl text-base px-5"
                   />
                   {/* Focus glow */}
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-indigo-500/20 opacity-0 group-focus-within:opacity-100 blur-xl transition-opacity pointer-events-none" />
                 </div>
                 
                 <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <Button 
-                    onClick={handleGetStarted}
+                    type="submit"
                     size="lg"
-                    className="relative overflow-hidden h-14 px-8 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] hover:from-[#2563EB] hover:to-[#60A5FA] text-white font-black tracking-wide shadow-[0_0_25px_rgba(59,130,246,0.5)] hover:shadow-[0_0_40px_rgba(30,64,175,0.7)] transition-all duration-300 rounded-xl"
+                    className="relative overflow-hidden h-14 md:h-16 px-6 md:px-10 bg-gradient-to-r from-[#1E40AF] to-[#3B82F6] hover:from-[#2563EB] hover:to-[#60A5FA] text-white font-black tracking-wide shadow-[0_0_25px_rgba(59,130,246,0.5)] hover:shadow-[0_0_40px_rgba(30,64,175,0.7)] transition-all duration-300 rounded-xl w-full sm:w-auto"
                   >
                     {/* Shine effect */}
                     <motion.div
@@ -257,7 +263,7 @@ export default function CTASection() {
                       animate={{ x: '100%' }}
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                     />
-                    <span className="relative flex items-center gap-2">
+                    <span className="relative flex items-center gap-2 text-sm md:text-base">
                       INITIATE VERIFICATION
                       <motion.span
                         animate={{ x: [0, 4, 0] }}
@@ -268,7 +274,7 @@ export default function CTASection() {
                     </span>
                   </Button>
                 </motion.div>
-              </motion.div>
+              </motion.form>
 
               {/* Benefits grid - Alternating slide from LEFT and RIGHT */}
               <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
