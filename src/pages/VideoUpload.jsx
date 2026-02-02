@@ -9,8 +9,8 @@ import HelpPanel from '@/components/global/HelpPanel';
 export default function VideoUpload() {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [fileUrl, setFileUrl] = useState('');
-  const [fileType, setFileType] = useState('');
+  const [fileUrl, setFileUrl] = useState(() => localStorage.getItem('gl_last_uploaded_url') || '');
+  const [fileType, setFileType] = useState(() => localStorage.getItem('gl_last_uploaded_type') || '');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [generatingQr, setGeneratingQr] = useState(false);
   const qrCanvasRef = useRef(null);
@@ -51,17 +51,27 @@ export default function VideoUpload() {
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      console.log('[VideoUpload] Starting upload for:', file.name);
+      const result = await base44.integrations.Core.UploadFile({ file });
+      console.log('[VideoUpload] Upload result:', result);
       
-      if (file_url) {
-        setFileUrl(file_url);
+      const url = result?.file_url || result?.data?.file_url;
+      
+      if (url) {
+        console.log('[VideoUpload] Setting file URL:', url);
+        setFileUrl(url);
+        // Persist to localStorage
+        localStorage.setItem('gl_last_uploaded_url', url);
+        localStorage.setItem('gl_last_uploaded_type', fileType);
         toast.success('File uploaded successfully!');
       } else {
-        throw new Error('No URL returned');
+        console.error('[VideoUpload] No URL in response:', result);
+        throw new Error('No URL returned from upload');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('[VideoUpload] Upload error:', error);
       toast.error('Upload failed: ' + (error.message || 'Unknown error'));
+      setFileUrl('');
     } finally {
       setUploading(false);
     }

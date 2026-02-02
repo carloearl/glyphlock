@@ -101,6 +101,7 @@ import SecurityDocs from './pages/SecurityDocs';
 import SecurityOperationsCenter from './pages/SecurityOperationsCenter';
 import SecurityTools from './pages/SecurityTools';
 import Services from './pages/Services';
+import Share from './pages/Share';
 import Sie from './pages/Sie';
 import SiteAudit from './pages/SiteAudit';
 import SiteBuilder from './pages/SiteBuilder';
@@ -118,7 +119,6 @@ import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
-import Share from './pages/Share';
 import __Layout from './Layout.jsx';
 
 
@@ -177,6 +177,7 @@ export const PAGES = {
     "SecurityOperationsCenter": SecurityOperationsCenter,
     "SecurityTools": SecurityTools,
     "Services": Services,
+    "Share": Share,
     "Sie": Sie,
     "SiteAudit": SiteAudit,
     "SiteBuilder": SiteBuilder,
@@ -194,7 +195,6 @@ export const PAGES = {
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
-    "Share": Share,
 }
 
 export const pagesConfig = {

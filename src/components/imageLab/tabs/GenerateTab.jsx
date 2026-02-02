@@ -8,8 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sparkles, Upload, X, Shuffle, Lock, Loader2, CheckCircle2, AlertTriangle, Image as ImageIcon, Sliders, Repeat, Wand2, Zap } from 'lucide-react';
+import { Sparkles, Upload, X, Shuffle, Lock, Loader2, CheckCircle2, AlertTriangle, Image as ImageIcon, Sliders, Repeat, Wand2, Zap, Edit } from 'lucide-react';
 import { toast } from 'sonner';
+import ImageEditor from '@/components/imageLab/ImageEditor';
 
 const STYLE_PRESETS = [
   { id: 'photorealistic', name: 'Photorealistic' },
@@ -62,6 +63,7 @@ export default function GenerateTab() {
   const [qualityMode, setQualityMode] = useState(() => localStorage.getItem('gl_imagelab_quality') || 'Standard');
   const [negativePrompt, setNegativePrompt] = useState(() => localStorage.getItem('gl_imagelab_negative') || 'blurry, low quality, watermark, deformed hands, text');
   const [showAdvanced, setShowAdvanced] = useState(() => localStorage.getItem('gl_imagelab_show_advanced') === 'true');
+  const [showEditor, setShowEditor] = useState(false);
 
   // Auto-save
   useEffect(() => { localStorage.setItem('gl_imagelab_prompt', prompt); }, [prompt]);
@@ -262,10 +264,32 @@ export default function GenerateTab() {
     });
   };
 
+  const handleEditorSave = (editedData) => {
+    if (editedData.fineTune) {
+      // Re-run generation with feedback
+      const fineTunedPrompt = `${prompt} (adjust: ${editedData.feedback})`;
+      setPrompt(fineTunedPrompt);
+      setShowEditor(false);
+      toast.success('🔄 Prompt adjusted for fine-tuning. Click Generate to re-run.');
+    } else {
+      setGeneratedImage(editedData);
+      setShowEditor(false);
+    }
+  };
+
   const totalWeight = weights.reduce((a, b) => a + b, 0);
   const weightsValid = references.length === 0 || Math.abs(totalWeight - 100) < 0.01;
 
   return (
+    <>
+    {showEditor && generatedImage && (
+      <ImageEditor
+        imageUrl={generatedImage.image_url}
+        imageData={generatedImage}
+        onSave={handleEditorSave}
+        onClose={() => setShowEditor(false)}
+      />
+    )}
     <div className="space-y-5 p-4 md:p-6 relative">
       {/* SCAN LINE */}
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70 animate-pulse pointer-events-none z-50" />
@@ -704,6 +728,13 @@ export default function GenerateTab() {
                   </Badge>
                 </div>
               </div>
+              <Button
+                onClick={() => setShowEditor(true)}
+                className="absolute bottom-4 left-4 h-11 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-[0_0_25px_rgba(6,182,212,0.5)] border-2 border-cyan-400/30 font-bold"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Image
+              </Button>
             </div>
 
             {/* VALIDATION SCORES */}
@@ -788,5 +819,6 @@ export default function GenerateTab() {
         </Card>
       )}
     </div>
+    </>
   );
 }
