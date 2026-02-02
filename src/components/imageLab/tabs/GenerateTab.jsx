@@ -506,9 +506,9 @@ Provide your response as a JSON object with:
               <Button
                 size="icon"
                 onClick={() => handleRemoveReference(idx)}
-                className="bg-red-500/20 hover:bg-red-500/40 border-2 border-red-500/40 hover:border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)] h-12 w-12 transition-all"
+                className="bg-red-500/20 hover:bg-red-500/40 border-2 border-red-500/40 hover:border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:shadow-[0_0_25px_rgba(239,68,68,0.5)] h-12 w-12 md:h-14 md:w-14 transition-all touch-manipulation active:scale-90"
               >
-                <X className="w-5 h-5 text-red-300" />
+                <X className="w-5 h-5 md:w-6 md:h-6 text-red-300" />
               </Button>
             </div>
           ))}
@@ -540,7 +540,7 @@ Provide your response as a JSON object with:
             </div>
             <Button
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="bg-cyan-500/20 hover:bg-cyan-500/30 border-2 border-cyan-400/40 text-cyan-300 font-black text-xs px-4 h-10 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+              className="bg-cyan-500/20 hover:bg-cyan-500/30 border-2 border-cyan-400/40 text-cyan-300 font-black text-xs md:text-sm px-4 md:px-6 h-11 md:h-12 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all touch-manipulation active:scale-95"
             >
               {showAdvanced ? '▼ HIDE' : '▶ SHOW'}
             </Button>
@@ -673,16 +673,16 @@ Provide your response as a JSON object with:
                 size="icon"
                 onClick={() => setSeed(Math.floor(Math.random() * 2147483647))}
                 disabled={seedLocked}
-                className="border-2 border-yellow-500/40 hover:border-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] h-12 w-12"
+                className="border-2 border-yellow-500/40 hover:border-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] h-14 w-14 transition-all touch-manipulation active:scale-90"
               >
-                <Shuffle className="w-5 h-5 text-yellow-400" />
+                <Shuffle className="w-5 h-5 md:w-6 md:h-6 text-yellow-400" />
               </Button>
               <Button
                 size="icon"
                 onClick={() => setSeedLocked(!seedLocked)}
-                className={`h-12 w-12 transition-all ${seedLocked ? 'bg-yellow-500/30 border-2 border-yellow-400 shadow-[0_0_25px_rgba(234,179,8,0.7)]' : 'border-2 border-slate-700 hover:border-yellow-500/40 bg-slate-800/50'}`}
+                className={`h-14 w-14 transition-all touch-manipulation active:scale-90 ${seedLocked ? 'bg-yellow-500/30 border-2 border-yellow-400 shadow-[0_0_25px_rgba(234,179,8,0.7)]' : 'border-2 border-slate-700 hover:border-yellow-500/40 bg-slate-800/50'}`}
               >
-                <Lock className={`w-5 h-5 ${seedLocked ? 'text-yellow-200' : 'text-slate-500'}`} />
+                <Lock className={`w-5 h-5 md:w-6 md:h-6 ${seedLocked ? 'text-yellow-200' : 'text-slate-500'}`} />
               </Button>
             </div>
             <p className="text-[10px] text-yellow-400/70 mt-2 font-mono font-semibold">🔒 LOCK for reproducible output</p>

@@ -67,10 +67,12 @@ export default function HomeDreamTeamCTA() {
         <div className="absolute inset-0 flex items-center justify-center z-20">
           <Link 
             to={createPageUrl("DreamTeam")} 
-            className="group"
+            className="group block"
           >
-            <div 
-              className="relative cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 flex flex-col items-center" 
+            <motion.div 
+              whileHover={{ scale: 1.15, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative cursor-pointer transition-all duration-300 flex flex-col items-center" 
               style={{ 
                 isolation: 'isolate', 
                 pointerEvents: 'auto',
@@ -99,10 +101,12 @@ export default function HomeDreamTeamCTA() {
               ></div>
               
               {/* LOGO - THE BALL IS THE BUTTON */}
-              <img
+              <motion.img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/48ca17dba_c44b0deb.png"
-                alt="Click the Ball"
-                className="relative w-48 sm:w-56 md:w-64 h-auto dream-team-logo-glow"
+                alt="Click to Meet The Dream Team"
+                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5 }}
+                className="relative w-48 sm:w-56 md:w-64 lg:w-72 h-auto dream-team-logo-glow"
                 style={{ 
                   zIndex: 100,
                   pointerEvents: 'auto',
@@ -116,10 +120,15 @@ export default function HomeDreamTeamCTA() {
               />
 
               {/* SUBTLE TEXT */}
-              <p className="relative mt-4 text-white/60 text-sm font-medium uppercase tracking-widest" style={{ zIndex: 100 }}>
-                Click the Ball
-              </p>
-            </div>
+              <motion.p 
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="relative mt-6 text-white/80 text-sm md:text-base font-black uppercase tracking-[0.3em] drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]" 
+                style={{ zIndex: 100 }}
+              >
+                ↑ CLICK THE BALL ↑
+              </motion.p>
+            </motion.div>
           </Link>
         </div>
       </motion.section>
