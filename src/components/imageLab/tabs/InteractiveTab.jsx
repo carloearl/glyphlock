@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Upload, Save, Lock, Trash2, Sparkles, MousePointer, Link2, ExternalLink } from 'lucide-react';
+import { Loader2, Upload, Save, Lock, Trash2, Sparkles, MousePointer, Link2, ExternalLink, Share2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   GlyphImageCard,
@@ -25,8 +26,26 @@ export default function InteractiveTab({ user, selectedImage, onImageSelect }) {
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [pendingClick, setPendingClick] = useState(null);
+  const [shareUrl, setShareUrl] = useState(null);
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
+
+  const shareMutation = useMutation({
+    mutationFn: async (mode) => {
+      const res = await base44.functions.invoke('createInteractiveImageShare', {
+        interactive_image_id: imageAsset.id,
+        mode
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      setShareUrl(data.full_url);
+      toast.success('Share link created!');
+    },
+    onError: (error) => {
+      toast.error('Share creation failed: ' + error.message);
+    }
+  });
 
   useEffect(() => {
     if (selectedImage) {
@@ -424,11 +443,66 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                 <Lock className="w-4 h-4 mr-2" />
                 {imageAsset?.status === 'active' ? 'Finalized' : 'Finalize & Lock'}
               </Button>
+              
+              {imageAsset?.status === 'active' && (
+                <>
+                  <Button
+                    onClick={() => shareMutation.mutate('hosted')}
+                    disabled={shareMutation.isPending}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500"
+                  >
+                    {shareMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Share2 className="w-4 h-4 mr-2" />
+                    )}
+                    Create Share Link
+                  </Button>
+                  
+                  <Button
+                    onClick={() => shareMutation.mutate('downloadable')}
+                    disabled={shareMutation.isPending}
+                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500"
+                  >
+                    {shareMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4 mr-2" />
+                    )}
+                    Export Package
+                  </Button>
+                </>
+              )}
             </div>
-            {imageAsset?.status === 'active' && (
+            
+            {imageAsset?.status === 'active' && !shareUrl && (
               <div className={`mt-3 ${GlyphImageBadge.success}`}>
                 <Lock className="w-3 h-3" />
                 Cryptographically Secured
+              </div>
+            )}
+            
+            {shareUrl && (
+              <div className="mt-3 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                <p className="text-xs text-green-400 font-bold mb-2">Share Link Created</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={shareUrl}
+                    readOnly
+                    className="flex-1 px-2 py-1 bg-black/50 border border-green-500/30 rounded text-xs text-white font-mono"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(shareUrl);
+                      toast.success('Share link copied!');
+                    }}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Copy
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
