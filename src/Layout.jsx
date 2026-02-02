@@ -9,8 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GlyphLoader from "@/components/GlyphLoader";
 import MobileScalingSystem from "@/components/mobile/mobile-utils";
-import MobileTouchOptimizer from "@/components/mobile/MobileTouchOptimizer";
-import MobileScrollFix from "@/components/mobile/MobileScrollFix";
+
 import ThemeProvider from "@/components/ThemeProvider";
 import { Badge } from "@/components/ui/badge";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
@@ -152,15 +151,13 @@ export default function Layout({ children, currentPageName }) {
         style={{ 
           background: 'transparent',
           paddingBottom: 'env(safe-area-inset-bottom)',
-          overscrollBehavior: 'auto',
-          position: 'relative',
-          height: 'auto',
+          width: '100%',
+          maxWidth: '100vw',
           minHeight: '100vh',
-          width: '100%'
+          height: 'auto',
+          boxSizing: 'border-box'
         }}
       >
-        <MobileTouchOptimizer />
-        <MobileScrollFix />
         <SecurityMonitor />
 
         {/* Version Badge - Top Right */}
@@ -183,7 +180,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {/* Main content */}
-        <main className="flex-1 relative pt-4" style={{ background: 'transparent', zIndex: 10, pointerEvents: 'auto', position: 'relative', minHeight: 'auto', overflow: 'visible' }}>
+        <main className="flex-1 relative pt-4 w-full" style={{ background: 'transparent', zIndex: 10, width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}>
           {children}
         </main>
 
