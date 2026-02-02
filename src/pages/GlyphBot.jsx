@@ -691,34 +691,35 @@ export default function GlyphBotPage() {
                 <>
                   <button
                     onClick={() => setShowAuditPanel(!showAuditPanel)}
-                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '44px' }}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
+                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '48px', minWidth: '48px' }}
+                    className={`flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-sm md:text-base font-black transition-all duration-300 shadow-lg active:scale-95 ${
                       showAuditPanel 
-                        ? 'bg-cyan-500/30 border-2 border-cyan-400 text-cyan-300'
-                        : 'bg-purple-500/20 border-2 border-purple-500/50 text-purple-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20'
+                        ? 'bg-cyan-500/30 border-2 border-cyan-400 text-cyan-300 shadow-[0_0_25px_rgba(6,182,212,0.5)]'
+                        : 'bg-purple-500/20 border-2 border-purple-500/50 text-purple-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]'
                     }`}
                     title={showAuditPanel ? 'Hide Audit' : 'Show Audit'}
                   >
-                    <Shield className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Audit</span>
+                    <Shield className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="hidden sm:inline">AUDIT</span>
                   </button>
                   <button
                     onClick={() => setShowHistoryPanel(!showHistoryPanel)}
-                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '44px' }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/20 border-2 border-emerald-500/50 text-emerald-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all duration-300"
+                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '48px', minWidth: '48px' }}
+                    className="flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-sm md:text-base font-black bg-emerald-500/20 border-2 border-emerald-500/50 text-emerald-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all duration-300 shadow-lg active:scale-95 hover:shadow-[0_0_20px_rgba(52,211,153,0.4)]"
                     title={showHistoryPanel ? 'Hide History' : 'Show History'}
                   >
-                    {showHistoryPanel ? <PanelRightClose className="w-3.5 h-3.5" /> : <PanelRightOpen className="w-3.5 h-3.5" />}
-                    <span className="hidden sm:inline">History</span>
+                    {showHistoryPanel ? <PanelRightClose className="w-4 h-4 md:w-5 md:h-5" /> : <PanelRightOpen className="w-4 h-4 md:w-5 md:h-5" />}
+                    <span className="hidden sm:inline">HISTORY</span>
                   </button>
                 </>
               )}
               <Link
                 to={createPageUrl('ProviderConsole')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-purple-500/20 border-2 border-purple-500/50 text-purple-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]"
+                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minHeight: '48px', minWidth: '48px' }}
+                className="flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-sm md:text-base font-black bg-purple-500/20 border-2 border-purple-500/50 text-purple-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] active:scale-95"
               >
-                <Activity className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Console</span>
+                <Activity className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">CONSOLE</span>
               </Link>
             </div>
           </header>

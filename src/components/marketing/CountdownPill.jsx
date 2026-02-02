@@ -52,12 +52,12 @@ export default function CountdownPill() {
 
         {/* Title */}
         <div className="relative z-10 flex flex-col items-center">
-          <p className="text-[0.7rem] sm:text-xs tracking-[0.3em] text-green-300 uppercase">
-            Platform Status
+          <p className="text-[0.7rem] sm:text-xs tracking-[0.3em] text-green-300 uppercase font-bold">
+            Beta Version 2.0
           </p>
 
-          <p className="text-lg sm:text-xl md:text-2xl font-semibold text-green-100 mt-1">
-            <span className="font-bold text-green-300">
+          <p className="text-lg sm:text-xl md:text-2xl font-black text-green-100 mt-1">
+            <span className="font-black text-green-300 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]">
               Live — All Systems Operational
             </span>
           </p>

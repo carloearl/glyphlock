@@ -622,7 +622,7 @@ body {
   body {
     touch-action: auto;
   }
-  
+
   button, a, [role="button"], [onclick], .cursor-pointer, input[type="button"], input[type="submit"] {
     min-width: 48px;
     min-height: 48px;
@@ -631,6 +631,11 @@ body {
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  button:active, a:active, [role="button"]:active {
+    transform: scale(0.95);
   }
   
   /* Enable smooth scrolling on mobile */

@@ -114,15 +114,17 @@ You MUST search and scrape ALL publicly available information from:
 
   fullPrompt += `
 CRITICAL INSTRUCTIONS FOR ${targetType.toUpperCase()} AUDIT:
-1. YOU MUST use web search capabilities to gather REAL PUBLIC DATA
-2. For businesses: scrape website, check Google Reviews, BBB, news articles, domain history
-3. For people: search social media, news mentions, court records, public profiles
-4. For agencies: search government databases, FOIA results, news coverage, lawsuits
-4. DO NOT make up data or provide generic responses
-5. If you cannot find information, explicitly state "No public information found" and explain why
-6. Cross-reference multiple sources and provide URLs
 
-Return a structured JSON response with the following schema:
+Hey, I need you to run a REAL security audit here. This isn't a simulation.
+
+1. **Use live web search** to gather actual public data (you have this capability)
+2. For businesses: Check their website, Google Reviews, BBB rating, news articles, WHOIS data, SEC filings (if public)
+3. For people: Search LinkedIn, news mentions, court records, social media profiles, domain ownership
+4. For agencies: Hit government databases, FOIA.gov, Inspector General reports, news coverage, lawsuits
+5. **Don't make anything up** — if you can't find data, say "No public info found" and explain your search process
+6. Cross-check at least 3 sources for major findings and include URLs
+
+Give me results as clean JSON following this schema:
 {
   "target": "${targetIdentifier}",
   "targetType": "${targetType}",

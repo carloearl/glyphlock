@@ -238,17 +238,17 @@ export default function AuditPanel({ onStartAudit, isProcessing }) {
         <Button
           type="submit"
           disabled={isProcessing || !targetIdentifier.trim()}
-          className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-semibold min-h-[44px] shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+          className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-black text-base md:text-lg min-h-[56px] md:min-h-[64px] shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] transition-all touch-manipulation active:scale-95"
         >
           {isProcessing ? (
             <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Running {targetType.toUpperCase()} Audit...
+              <div className="w-5 h-5 md:w-6 md:h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              RUNNING {targetType.toUpperCase()} AUDIT...
             </>
           ) : (
             <>
-              <Shield className="w-4 h-4 mr-2" />
-              Run {auditMode} Audit
+              <Shield className="w-5 h-5 md:w-6 md:h-6 mr-2" />
+              RUN {auditMode} AUDIT
             </>
           )}
         </Button>
