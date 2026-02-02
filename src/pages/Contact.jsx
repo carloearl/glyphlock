@@ -42,7 +42,7 @@ export default function Contact() {
       // Send email
       try {
         await base44.integrations.Core.SendEmail({
-          to: "glyphlock@gmail.com",
+          to: "support@glyphlock.io",
           subject: `Contact Form: ${data.subject}`,
           body: `Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`
         });
@@ -71,7 +71,7 @@ export default function Contact() {
     <>
       <SEOHead 
         title="Contact GlyphLock - Security Consultation & Partnership Inquiries"
-        description="Contact GlyphLock Security for cybersecurity solutions, partnership opportunities, licensing inquiries, and enterprise security consultations. El Mirage, AZ | (424) 246-6499 | glyphlock@gmail.com"
+        description="Contact GlyphLock Security for cybersecurity solutions, partnership opportunities, licensing inquiries, and enterprise security consultations. El Mirage, AZ | (424) 246-6499 | support@glyphlock.io"
         keywords="contact GlyphLock, cybersecurity consultation, partnership inquiry, licensing request, enterprise security contact, GlyphLock email, security consultation, El Mirage Arizona, technology partnership"
         url="/contact"
       />
@@ -104,7 +104,7 @@ export default function Contact() {
 
           <div ref={cardsRef} className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-8 mb-12 md:mb-16">
             {[
-              { icon: Mail, title: "Email", content: "glyphlock@gmail.com", href: "mailto:glyphlock@gmail.com", color: "text-[#3B82F6]" },
+              { icon: Mail, title: "Email", content: "support@glyphlock.io", href: "mailto:support@glyphlock.io", color: "text-[#3B82F6]" },
               { icon: Phone, title: "Phone", content: "(424) 246-6499", href: "tel:+14242466499", color: "text-[#8B5CF6]" },
               { icon: MapPin, title: "Location", content: "El Mirage, Arizona", color: "text-white" }
             ].map((item, idx) => (

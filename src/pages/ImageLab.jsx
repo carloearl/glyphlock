@@ -92,31 +92,103 @@ export default function ImageLab() {
 
       <ImageLabHelp />
       <HelpPanel
-        title="Image Lab Guide"
+        title="Image Lab System Guide"
         sections={[
           {
-            title: 'Basics',
+            title: 'Getting Started',
             content: [
-              { heading: 'What This Does', text: 'Generate AI images from text prompts. Upload reference images to guide style and composition. Control generation parameters for precise results.' },
-              { heading: 'How to Start', text: 'Enter a text prompt describing your desired image. Click "Expand Prompt" to enhance it with AI. Upload 1-4 reference images if needed. Click "Generate Image".' },
-              { heading: 'Generation Time', text: 'Typical generation takes 10-30 seconds. The system validates output quality and may retry automatically up to 3 times.' }
+              { 
+                heading: 'Prompt Input', 
+                text: 'Type a detailed description of the image you want. Be specific about subject, style, lighting, mood, and composition. More detail = better results.',
+                targetId: 'prompt-section',
+                tip: 'Use descriptive adjectives and mention artistic styles (e.g., "cinematic lighting", "photorealistic", "watercolor style")',
+                action: 'Type your prompt in the text area above'
+              },
+              { 
+                heading: 'Expand Prompt with AI', 
+                text: 'Click "Expand Prompt" to let AI enhance your description with technical specifications, lighting details, and artistic refinements. This improves generation quality significantly.',
+                targetId: 'expand-prompt-btn',
+                tip: 'Expanded prompts include camera settings, color palettes, and negative constraints automatically'
+              },
+              { 
+                heading: 'Reference Images', 
+                text: 'Upload 1-4 reference images to guide style, composition, or identity. The system extracts visual features (colors, lighting, textures) and blends them based on your weight settings.',
+                targetId: 'reference-section',
+                tip: 'Use reference images for consistent character design or specific artistic styles',
+                action: 'Upload reference images if you want style/identity guidance'
+              }
             ]
           },
           {
-            title: 'Controls',
+            title: 'Advanced Controls',
             content: [
-              { heading: 'Delta Mode', text: 'REFINE (0.3): Minor adjustments. BALANCE (0.5): Moderate changes. RESTYLE (0.7): Major style shift. REINTERPRET (0.9): Complete reimagining.' },
-              { heading: 'Seed Lock', text: 'Lock the random seed to reproduce exact outputs. Unlock to get variations. Same seed + same prompt = same image.' },
-              { heading: 'Identity Lock', text: 'Enforces 87% facial similarity when reference faces are present. Requires clear face in reference image. Error E001 appears if no face detected.' },
-              { heading: 'Reference Weights', text: 'When using multiple references, adjust weight sliders. Total must equal 100%. Higher weight = stronger influence on final output.' }
+              { 
+                heading: 'Delta Strength', 
+                text: 'Controls how much the output changes from the base concept. REFINE (0.3): subtle tweaks. BALANCE (0.5): moderate changes. RESTYLE (0.7): major artistic shift. REINTERPRET (0.9): complete reimagining.',
+                targetId: 'delta-slider',
+                tip: 'Use lower delta for small adjustments, higher delta for creative variations'
+              },
+              { 
+                heading: 'Seed Control', 
+                text: 'Random seed determines output variation. Lock seed to reproduce exact results. Unlock to generate different variations with same prompt. Same seed + same prompt + same settings = identical image.',
+                targetId: 'seed-control',
+                tip: 'Lock seed when you find a good result and want to iterate on it'
+              },
+              { 
+                heading: 'Identity Lock', 
+                text: 'When enabled, enforces 87% facial similarity to reference image(s). Requires clear, visible face in at least one reference. System validates face presence before generation.',
+                targetId: 'identity-lock',
+                action: 'Enable this only when using reference images with faces',
+                tip: 'Error E001 means no face was detected in your reference image'
+              },
+              { 
+                heading: 'Aspect Ratio', 
+                text: 'Select output dimensions: Square (1:1), Landscape (16:9), Portrait (9:16), Widescreen (21:9). Affects composition and framing.',
+                targetId: 'aspect-ratio-select',
+                tip: 'Landscape works best for scenes, portrait for characters, square for social media'
+              }
             ]
           },
           {
-            title: 'Errors',
+            title: 'Generation & Results',
             content: [
-              { heading: 'E001: No Face Detected', text: 'Identity lock requires a clear face in the reference image. Either upload a different reference with a visible face, or disable identity lock.', errorCode: 'E001' },
-              { heading: 'Rate Limit', text: 'Free tier: 20 generations per hour. If exceeded, wait or upgrade to Pro for unlimited generations.' },
-              { heading: 'Validation Failed', text: 'System automatically retries up to 3 times if quality scores are below 70%. You receive the best attempt.' }
+              { 
+                heading: 'Generate Image', 
+                text: 'Initiates AI generation with your settings. Process takes 10-30 seconds. System validates output for quality (faces, hands, realism). Auto-retries up to 3 times if scores are below 70%.',
+                targetId: 'generate-btn',
+                action: 'Click "Generate Image" to start',
+                tip: 'You receive the best attempt from up to 3 validation rounds'
+              },
+              { 
+                heading: 'Edit & Fine-Tune', 
+                text: 'After generation, click "Edit Image" to open the editor. Crop, adjust brightness/contrast, change aspect ratio. Click "Fine-Tune" to regenerate with modified parameters.',
+                tip: 'Fine-tune adjusts the prompt and settings based on your edits, then regenerates'
+              },
+              { 
+                heading: 'Save to Gallery', 
+                text: 'Generated images auto-save to your gallery (tab 03). Access them anytime. Images include generation history, settings used, and validation scores.',
+                action: 'Switch to Gallery tab to view all your images'
+              }
+            ]
+          },
+          {
+            title: 'Troubleshooting',
+            content: [
+              { 
+                heading: 'E001: No Face Detected', 
+                text: 'Identity lock is enabled but reference image has no detectable face. Solution: Upload a reference with a clear, front-facing face, or disable identity lock.',
+                tip: 'Face detection requires front-facing, well-lit faces. Profile shots may fail.'
+              },
+              { 
+                heading: 'Rate Limit Exceeded', 
+                text: 'Free tier: 20 generations/hour. Pro tier: unlimited. If exceeded, wait 60 minutes or upgrade. Rate resets every hour.',
+                action: 'Upgrade to Pro in settings for unlimited generations'
+              },
+              { 
+                heading: 'Generation Failed', 
+                text: 'Check console for detailed error. Common causes: Invalid reference image format, prompt too short (<10 chars), network timeout. Retry after checking inputs.',
+                tip: 'Press F12 to open console and view detailed error messages'
+              }
             ]
           }
         ]}
