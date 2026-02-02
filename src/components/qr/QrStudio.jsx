@@ -535,8 +535,8 @@ export default function QrStudio({ initialTab = 'create' }) {
                 GlyphLock QR Intelligence Platform
               </h1>
               <p className="text-sm sm:text-base text-gray-400 flex items-center gap-2">
-                <Shield className="w-4 h-4 text-purple-400" />
-                Advanced QR creation with embedded security, steganography, and real-time threat scoring.
+              <Shield className="w-4 h-4 text-purple-400" />
+              QR code creation with security scanning, steganography, and real-time threat detection.
               </p>
             </div>
             <div className="flex items-center gap-3 flex-wrap">

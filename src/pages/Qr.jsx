@@ -76,8 +76,7 @@ export default function Qr() {
         "Bulk Generation",
         "Analytics Dashboard",
         "90+ Payload Types",
-        "Dynamic QR Codes",
-        "Art Style Generation"
+        "Dynamic QR Codes"
       ],
       "provider": {
         "@type": "Organization",
@@ -127,7 +126,7 @@ export default function Qr() {
       />
       <SEOHead
         title="GlyphLock QR Studio | Secure QR Code Generator with Anti-Quishing Protection"
-        description="Create secure QR codes with GlyphLock's unified QR Studio. Features anti-quishing protection, steganography, hot zones, 90+ payload types, and advanced encryption."
+        description="Create secure QR codes with GlyphLock's unified QR Studio. Features anti-quishing protection, steganography, hot zones, 90+ payload types, and security scanning."
         keywords="QR code generator, secure QR codes, anti-quishing, steganography QR, QR security, hot zones QR, bulk QR generation, GlyphLock QR Studio, dynamic QR codes"
         url="/qr"
       />
