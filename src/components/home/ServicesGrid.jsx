@@ -110,8 +110,13 @@ export default function ServicesGrid() {
               }}
               whileHover={{ y: -10, scale: 1.03 }}
             >
-              <Link to={createPageUrl(service.link)}>
-                <div className="backdrop-blur-md border-2 border-indigo-500/60 rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 h-full shadow-[0_0_30px_rgba(87,61,255,0.4)] hover:shadow-[0_0_60px_rgba(87,61,255,0.7)] hover:border-indigo-400/80" style={{ background: 'rgba(87,61,255,0.08)' }}>
+              <Link to={createPageUrl(service.link)} className="block h-full touch-manipulation">
+                <motion.div 
+                  whileHover={{ boxShadow: '0 0 80px rgba(87,61,255,0.9)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="backdrop-blur-md border-2 border-indigo-500/60 rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 h-full shadow-[0_0_30px_rgba(87,61,255,0.4)] hover:shadow-[0_0_60px_rgba(87,61,255,0.7)] hover:border-indigo-400/80 active:border-cyan-400" 
+                  style={{ background: 'rgba(87,61,255,0.08)' }}
+                >
                   <div className="relative h-48 overflow-hidden">
                     <img 
                       src={service.image} 
@@ -131,9 +136,9 @@ export default function ServicesGrid() {
                       </motion.div>
                       <h3 className="text-xl font-bold text-white">{service.title}</h3>
                     </div>
-                    <p className="text-white/90">{service.description}</p>
+                    <p className="text-white/90 text-sm md:text-base">{service.description}</p>
                   </div>
-                </div>
+                </motion.div>
               </Link>
             </motion.div>
           );
