@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { HelpCircle, X, ChevronRight, ChevronLeft, Sparkles, Target, CheckCircle2, Circle } from 'lucide-react';
+import { HelpCircle, X, ChevronRight, ChevronLeft, Sparkles, Target, CheckCircle2, Circle, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function HelpPanel({ title = "System Guide", sections = [], mode = "help" }) {
+export default function HelpPanel({ title = "System Guide", sections = [] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [activeSection, setActiveSection] = useState(0);
@@ -70,7 +70,7 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
 
   return (
     <>
-      {/* Floating Help Button - CYBER STYLED */}
+      {/* Floating Help Button - CYBER NEON */}
       <motion.button
         onClick={() => setIsOpen(true)}
         whileHover={{ scale: 1.1, rotate: 5 }}
@@ -82,11 +82,10 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
         <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-400 border-2 border-slate-950 shadow-[0_0_12px_rgba(6,182,212,1)] animate-pulse" />
       </motion.button>
 
-      {/* Help Modal - CYBER UI */}
+      {/* Help Modal */}
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-[99998] flex items-center justify-center p-4" onClick={() => setIsOpen(false)}>
-            {/* Animated Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -94,7 +93,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
               className="absolute inset-0 bg-black/90 backdrop-blur-md"
             />
 
-            {/* Modal Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -103,13 +101,11 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
               className="relative w-full max-w-4xl max-h-[85vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Outer Glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/30 to-purple-600/30 blur-2xl -z-10" />
               
-              {/* Main Container */}
               <div className="bg-gradient-to-br from-slate-900/98 via-slate-950/98 to-slate-900/98 border-2 border-cyan-500/40 rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5),inset_0_0_60px_rgba(168,85,247,0.15)]">
                 
-                {/* Header - NEON TECH */}
+                {/* Header */}
                 <div className="relative overflow-hidden border-b-2 border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-blue-500/10">
                   <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSg2LDE4MiwyMTIsMC4xKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30" />
                   
@@ -153,7 +149,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                     </div>
                   </div>
 
-                  {/* Progress Bar - Walkthrough Mode */}
                   {walkthroughMode && (
                     <div className="px-6 pb-4">
                       <div className="flex items-center gap-3 mb-2">
@@ -175,10 +170,9 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                   )}
                 </div>
 
-                {/* Content Area */}
+                {/* Content */}
                 <div className="relative">
                   {walkthroughMode ? (
-                    /* WALKTHROUGH MODE - INTERACTIVE STEPS */
                     <div className="p-8 min-h-[400px] flex flex-col">
                       <AnimatePresence mode="wait">
                         <motion.div
@@ -189,7 +183,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                           transition={{ duration: 0.3 }}
                           className="flex-1"
                         >
-                          {/* Step Indicator */}
                           <div className="flex items-center gap-3 mb-6">
                             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border-2 border-cyan-400/60 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.4)]">
                               <span className="text-lg font-black text-cyan-300">
@@ -206,7 +199,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                             </div>
                           </div>
 
-                          {/* Step Content */}
                           <div className="space-y-6">
                             <div className="p-6 rounded-xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border-2 border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
                               <p className="text-base text-slate-200 leading-relaxed">
@@ -214,7 +206,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                               </p>
                             </div>
 
-                            {/* Tips Section */}
                             {sections[activeSection].content[currentStep].tip && (
                               <div className="flex items-start gap-3 p-4 rounded-xl bg-purple-500/10 border border-purple-400/30">
                                 <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
@@ -225,7 +216,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                               </div>
                             )}
 
-                            {/* Action Hint */}
                             {sections[activeSection].content[currentStep].action && (
                               <div className="flex items-start gap-3 p-4 rounded-xl bg-cyan-500/10 border border-cyan-400/30">
                                 <Target className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
@@ -239,7 +229,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                         </motion.div>
                       </AnimatePresence>
 
-                      {/* Navigation Footer */}
                       <div className="flex items-center justify-between pt-6 mt-6 border-t-2 border-slate-800/50">
                         <Button
                           onClick={handlePrev}
@@ -284,9 +273,7 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                       </div>
                     </div>
                   ) : (
-                    /* REFERENCE MODE - TABBED SECTIONS */
                     <div className="flex flex-col md:flex-row min-h-[500px] max-h-[65vh]">
-                      {/* Section Tabs */}
                       <div className="w-full md:w-64 border-b md:border-b-0 md:border-r-2 border-slate-800/50 bg-slate-950/60 p-4 space-y-2 overflow-y-auto">
                         {sections.map((section, idx) => (
                           <button
@@ -310,7 +297,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                         ))}
                       </div>
 
-                      {/* Content Panel */}
                       <div className="flex-1 p-6 overflow-y-auto">
                         <AnimatePresence mode="wait">
                           <motion.div
@@ -323,7 +309,7 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                             {sections[activeSection]?.content?.map((item, idx) => (
                               <div key={idx} className="space-y-3">
                                 <div className="flex items-start gap-3 p-5 rounded-xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-2 border-purple-500/20 hover:border-cyan-400/40 transition-all shadow-[0_0_15px_rgba(168,85,247,0.1)] hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]">
-                                  <ChevronRight className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+                                  <Zap className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
                                   <div className="flex-1 space-y-2">
                                     <h4 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-purple-300">
                                       {item.heading}
@@ -351,7 +337,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
                     </div>
                   )}
 
-                {/* Footer - CTA */}
                 <div className="p-5 border-t-2 border-cyan-500/20 bg-gradient-to-r from-slate-950/95 to-slate-900/95 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="px-3 py-1.5 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.3)]">
@@ -388,7 +373,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], mode 
         )}
       </AnimatePresence>
 
-      {/* Walkthrough Highlight Styles */}
       <style>{`
         .glyph-walkthrough-highlight {
           position: relative;
