@@ -4,6 +4,7 @@ import { Upload, Copy, CheckCircle2, AlertCircle, QrCode, Image, Music, Video, D
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
 import SEOHead from '@/components/SEOHead';
+import HelpPanel from '@/components/global/HelpPanel';
 
 export default function VideoUpload() {
   const [file, setFile] = useState(null);
@@ -118,6 +119,28 @@ export default function VideoUpload() {
   };
 
   return (
+    <>
+    <HelpPanel
+      title="Media Upload Guide"
+      sections={[
+        {
+          title: 'How It Works',
+          content: [
+            { heading: 'Upload Process', text: 'Select a video (MP4, MOV), audio (MP3, WAV), or image file (PNG, JPG). Click upload. System returns a permanent URL.' },
+            { heading: 'URL Usage', text: 'The returned URL is permanent and can be embedded in websites, shared via email, or converted to QR codes.' },
+            { heading: 'QR Code Generation', text: 'After upload completes, click "Generate QR Code" to create a scannable code. Download the QR image for print or digital use.' }
+          ]
+        },
+        {
+          title: 'Troubleshooting',
+          content: [
+            { heading: 'No URL After Upload', text: 'If upload succeeds but no URL appears, check browser console for errors. Ensure file size is under 50MB. Try refreshing and re-uploading.' },
+            { heading: 'File Size Limits', text: 'Maximum file size: 50MB. For larger files, compress before uploading or use external hosting.' },
+            { heading: 'Supported Formats', text: 'Videos: MP4, MOV. Audio: MP3, WAV, OGG. Images: PNG, JPG, GIF, WEBP. Other formats may fail silently.' }
+          ]
+        }
+      ]}
+    />
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/10 to-slate-900 text-white p-4 md:p-8">
       <SEOHead 
         title="Media Upload Hub - Get URLs & QR Codes | GlyphLock"
@@ -340,5 +363,6 @@ export default function VideoUpload() {
         </div>
       </div>
     </div>
+    </>
   );
 }

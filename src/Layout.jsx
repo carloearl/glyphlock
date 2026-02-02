@@ -12,6 +12,7 @@ import MobileScalingSystem from "@/components/mobile/mobile-utils";
 import MobileTouchOptimizer from "@/components/mobile/MobileTouchOptimizer";
 import MobileScrollFix from "@/components/mobile/MobileScrollFix";
 import ThemeProvider from "@/components/ThemeProvider";
+import { Badge } from "@/components/ui/badge";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import StructuredDataOrg from "@/components/StructuredDataOrg";
 import SecurityHeaders from "@/components/security/SecurityHeaders";
@@ -161,6 +162,13 @@ export default function Layout({ children, currentPageName }) {
         <MobileTouchOptimizer />
         <MobileScrollFix />
         <SecurityMonitor />
+
+        {/* Version Badge - Top Right */}
+        <div className="fixed top-4 right-4 z-[9997] pointer-events-none">
+          <Badge className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-2 border-indigo-400/40 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-xs font-bold px-3 py-1.5">
+            Beta Version 2.0
+          </Badge>
+        </div>
 
         {/* Navbar */}
         <div style={{ position: 'relative', zIndex: 9998, pointerEvents: 'auto' }}>

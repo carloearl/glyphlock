@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import QrStudio from "@/components/qr/QrStudio";
 import SEOHead from "@/components/SEOHead";
+import HelpPanel from '@/components/global/HelpPanel';
 
 /**
  * UNIFIED QR PAGE - /qr
@@ -94,9 +95,39 @@ export default function Qr() {
 
   return (
     <>
+      <HelpPanel
+        title="QR Studio Guide"
+        sections={[
+          {
+            title: 'Basics',
+            content: [
+              { heading: 'What This Does', text: 'Generate QR codes with customizable designs, payload types, and security features. Supports URLs, text, email, phone, WiFi, and 90+ other formats.' },
+              { heading: 'Quick Start', text: 'Select payload type. Enter data (URL, text, etc.). Customize colors, logo, and error correction. Click generate. Download QR code as PNG or SVG.' },
+              { heading: 'Scan Accuracy', text: 'Error correction levels: L (7%), M (15%), Q (25%), H (30%). Higher levels allow scanning even when QR code is partially damaged.' }
+            ]
+          },
+          {
+            title: 'Features',
+            content: [
+              { heading: 'Payload Types', text: 'URL, plain text, email, phone, SMS, WiFi credentials, vCard contact, event/calendar, location coordinates, and custom JSON payloads.' },
+              { heading: 'Customization', text: 'Adjust foreground/background colors. Upload custom logo (centered, respects error correction). Set size and margin.' },
+              { heading: 'Hot Zones', text: 'Advanced: Define interactive regions within QR code for multi-action codes. Requires special scanner or app.' },
+              { heading: 'Security Analysis', text: 'AI-powered threat detection scans payloads for phishing, malware, and suspicious patterns before generation.' }
+            ]
+          },
+          {
+            title: 'Diagnostics',
+            content: [
+              { heading: 'Contrast Score', text: 'Measures foreground/background contrast. Scores below 60% may cause scan failures. Use high-contrast colors for reliability.' },
+              { heading: 'Quiet Zone', text: 'White space border around QR code. Required for proper scanning. System validates automatically.' },
+              { heading: 'Payload Resolution', text: 'Shows which payload slots are accepted or rejected based on rules and conditions. Useful for dynamic QR codes.' }
+            ]
+          }
+        ]}
+      />
       <SEOHead
         title="GlyphLock QR Studio | Secure QR Code Generator with Anti-Quishing Protection"
-        description="Create secure QR codes with GlyphLock's unified QR Studio. Features anti-quishing protection, steganography, hot zones, 90+ payload types, and military-grade encryption."
+        description="Create secure QR codes with GlyphLock's unified QR Studio. Features anti-quishing protection, steganography, hot zones, 90+ payload types, and advanced encryption."
         keywords="QR code generator, secure QR codes, anti-quishing, steganography QR, QR security, hot zones QR, bulk QR generation, GlyphLock QR Studio, dynamic QR codes"
         url="/qr"
       />
