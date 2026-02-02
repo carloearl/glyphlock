@@ -85,12 +85,11 @@ export default function ImageLab() {
     <>
       <SEOHead
         title="GlyphLock Image Lab | Generate & Secure Interactive Images"
-        description="Military-grade AI image generation with cryptographic security, interactive hotspots, and steganographic protection. Create, secure, and verify visual assets."
+        description="AI image generation with cryptographic security, interactive hotspots, and steganographic protection. Create, secure, and verify visual assets."
         keywords="AI image generation, interactive images, steganography, secure media, GlyphLock, cryptographic images, hotspot editor"
         url="/image-lab"
       />
 
-      <ImageLabOnboarding />
       <ImageLabHelp />
       <HelpPanel
         title="Image Lab Guide"
