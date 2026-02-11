@@ -40,7 +40,6 @@ export const GlyphIcon = ({
       loading="eager"
       className={cn(
         'select-none transition-all duration-300',
-        glow && 'drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]',
         animate && 'hover:scale-110 active:scale-95',
         onClick && 'cursor-pointer',
         className
@@ -66,10 +65,10 @@ export const IconButton = ({
   disabled = false 
 }) => {
   const variants = {
-    default: 'bg-white/5 hover:bg-white/10 border-white/15 hover:border-cyan-400/50',
-    danger: 'bg-red-500/10 hover:bg-red-500/20 border-red-500/30 hover:border-red-400',
-    success: 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 hover:border-emerald-400',
-    primary: 'bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/30 hover:border-cyan-400'
+    default: 'bg-white hover:bg-white/90 border-slate-300 hover:border-slate-400',
+    danger: 'bg-white hover:bg-white/90 border-red-500/40 hover:border-red-400',
+    success: 'bg-white hover:bg-white/90 border-emerald-500/40 hover:border-emerald-400',
+    primary: 'bg-white hover:bg-white/90 border-cyan-500/40 hover:border-cyan-400'
   };
 
   return (
@@ -78,8 +77,8 @@ export const IconButton = ({
       disabled={disabled}
       title={title}
       className={cn(
-        'rounded-xl border-2 p-3 transition-all duration-300 backdrop-blur-xl flex items-center justify-center',
-        'hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] active:scale-95',
+        'rounded-xl border-2 p-3 transition-all duration-300 flex items-center justify-center',
+        'hover:shadow-lg active:scale-95',
         'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none',
         variants[variant],
         className
@@ -91,7 +90,7 @@ export const IconButton = ({
         WebkitTapHighlightColor: 'transparent'
       }}
     >
-      <GlyphIcon type={type} size={size} glow animate={!disabled} />
+      <GlyphIcon type={type} size={size} animate={!disabled} />
     </button>
   );
 };
@@ -102,7 +101,7 @@ export const IconBadge = ({ type, label, size = 20, className = '' }) => (
     'bg-white/5 border border-white/15 backdrop-blur-xl',
     className
   )}>
-    <GlyphIcon type={type} size={size} glow />
+    <GlyphIcon type={type} size={size} />
     {label && <span className="text-sm font-semibold text-white">{label}</span>}
   </div>
 );
@@ -122,7 +121,7 @@ export const FeatureCard = ({
   )}>
     <div className="flex flex-col items-center text-center space-y-4">
       <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border-2 border-cyan-400/40 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.3)] group-hover:shadow-[0_0_50px_rgba(6,182,212,0.5)] transition-all duration-500">
-        <GlyphIcon type={icon} size={64} glow animate />
+        <GlyphIcon type={icon} size={64} animate />
       </div>
       <div>
         <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-purple-300 mb-2">
