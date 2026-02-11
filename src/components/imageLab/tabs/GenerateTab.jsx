@@ -181,15 +181,25 @@ Provide your response as a JSON object with:
         throw new Error('Expand prompt first before generating');
       }
       
-      // Use Base44's built-in GenerateImage integration
+      // Use OpenAI DALL-E 3 via backend function
       const finalPrompt = expandedPrompt.expanded_prompt + 
-        (selectedStyle ? `, ${selectedStyle} style` : '') +
-        (params.negative_prompt ? `. Avoid: ${params.negative_prompt}` : '');
+        (selectedStyle ? `, ${selectedStyle} style` : '');
       
-      const result = await base44.integrations.Core.GenerateImage({
+      const sizeMap = {
+        '1:1': '1024x1024',
+        '16:9': '1792x1024',
+        '9:16': '1024x1792',
+        '4:3': '1024x1024',
+        '3:4': '1024x1024'
+      };
+      
+      const response = await base44.functions.invoke('generateImageOpenAI', {
         prompt: finalPrompt,
-        existing_image_urls: references.map(r => r.original_image_url).filter(Boolean)
+        size: sizeMap[params.aspect_ratio] || '1024x1024',
+        quality: params.quality_mode === 'Ultra' ? 'hd' : 'standard'
       });
+      
+      const result = { url: response.data.url };
       
       // Create InteractiveImage record
       const imageData = {
@@ -458,7 +468,7 @@ Provide your response as a JSON object with:
               size="sm"
               onClick={() => document.getElementById('ref-upload').click()}
               disabled={references.length >= 4 || uploadReferenceMutation.isPending}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_25px_rgba(168,85,247,0.5)] hover:shadow-[0_0_35px_rgba(168,85,247,0.7)] border-2 border-purple-400/30 font-black h-12 md:h-14 px-6 md:px-8 text-sm md:text-base touch-manipulation active:scale-95 transition-all flex items-center gap-2"
+              className="bg-white hover:bg-white/90 text-black shadow-[0_0_25px_rgba(255,255,255,0.5)] hover:shadow-[0_0_35px_rgba(255,255,255,0.7)] border-2 border-white/30 font-black h-12 md:h-14 px-6 md:px-8 text-sm md:text-base touch-manipulation active:scale-95 transition-all flex items-center gap-2"
             >
               {uploadReferenceMutation.isPending ? (
                 <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
@@ -713,7 +723,7 @@ Provide your response as a JSON object with:
         <Button
           onClick={() => handleGenerate('generate')}
           disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
-          className="w-full h-20 text-lg md:text-xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_40px_rgba(99,102,241,0.5)] hover:shadow-[0_0_60px_rgba(99,102,241,0.8)] transition-all border-2 border-indigo-400/40 touch-manipulation active:scale-95 flex items-center justify-center gap-3"
+          className="w-full h-20 text-lg md:text-xl font-black bg-white hover:bg-white/90 text-black shadow-[0_0_40px_rgba(255,255,255,0.5)] hover:shadow-[0_0_60px_rgba(255,255,255,0.8)] transition-all border-2 border-white/40 touch-manipulation active:scale-95 flex items-center justify-center gap-3"
         >
           {generateMutation.isPending ? (
             <><Loader2 className="w-6 h-6 md:w-7 md:h-7 animate-spin" />GENERATING...</>
