@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GlyphLoader from "@/components/GlyphLoader";
 import MobileScalingSystem from "@/components/mobile/mobile-utils";
+import HelpPanel from "@/components/global/HelpPanel";
 
 import ThemeProvider from "@/components/ThemeProvider";
 import { Badge } from "@/components/ui/badge";
@@ -183,6 +184,38 @@ export default function Layout({ children, currentPageName }) {
         <main className="flex-1 relative pt-4 w-full" style={{ background: 'transparent', zIndex: 10, width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}>
           {children}
         </main>
+
+        {/* Global Help System */}
+        <HelpPanel 
+          title="GlyphLock Guide"
+          sections={[
+            {
+              title: 'Getting Started',
+              content: [
+                { heading: 'Welcome to GlyphLock', text: 'GlyphLock is your quantum-resistant cybersecurity platform. Navigate using the top menu to access QR Studio, Image Lab, GlyphBot AI, and more.' },
+                { heading: 'Command Center', text: 'Access your admin dashboard by clicking your profile icon (top right) and selecting Command Center. Manage API keys, view analytics, and monitor security.' },
+                { heading: 'Quick Actions', text: 'Use the floating GlyphBot Jr assistant (bottom right) for instant help and guidance on any page.' }
+              ]
+            },
+            {
+              title: 'Core Features',
+              content: [
+                { heading: 'QR Studio', text: 'Create secure, credentialed QR codes with multi-slot payloads. Access via Tools → QR Studio in the navigation menu.' },
+                { heading: 'Image Lab', text: 'Generate AI images and add interactive hotspots. Click anywhere on images to create smart zones that link to URLs or trigger actions.' },
+                { heading: 'GlyphBot AI', text: 'Chat with our security AI assistant. Switch personas for audits, debugging, security analysis, and more.' },
+                { heading: 'Site Builder', text: 'Build and audit websites with AI assistance. Access comprehensive SIE architecture scanning.' }
+              ]
+            },
+            {
+              title: 'Security',
+              content: [
+                { heading: 'Authentication', text: 'All data is protected with role-based access control. Admin features require admin privileges.' },
+                { heading: 'API Keys', text: 'Generate and manage API keys from Command Center. Rotate keys regularly for optimal security.' },
+                { heading: 'Threat Detection', text: 'AI-powered threat detection monitors your assets automatically. View alerts in Command Center → Threats tab.' }
+              ]
+            }
+          ]}
+        />
 
         {/* GlyphBot Jr */}
         <div style={{ 
