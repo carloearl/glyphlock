@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { payloadType, payloadValue } = body;
+    const { payloadType, payloadValue, credentialedSlots } = body;
 
     if (!payloadType || !payloadValue) {
       return Response.json({ error: 'Missing payload data' }, { status: 400 });
@@ -64,10 +64,31 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ENHANCED: Check credentialed slots if present
+    let credentialRisks = [];
+    if (credentialedSlots && Array.isArray(credentialedSlots)) {
+      for (const slot of credentialedSlots) {
+        if (slot.credential_level === 'public' && slot.payload_data?.content) {
+          // Scan public slots
+          try {
+            const slotUrl = new URL(slot.payload_data.content);
+            const hostname = slotUrl.hostname.toLowerCase();
+            
+            if (hostname.includes('xn--')) {
+              credentialRisks.push(`slot_${slot.id}_punycode`);
+              riskScore += 15;
+            }
+          } catch (e) {
+            // Not a URL
+          }
+        }
+      }
+    }
+
     // AI-enhanced classification (optional)
-    if (riskFlags.length > 0) {
+    if (riskFlags.length > 0 || credentialRisks.length > 0) {
       const aiAnalysis = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analyze this URL/payload for phishing indicators: "${payloadValue}". Detected issues: ${riskFlags.join(', ')}. Provide additional risk classification. Return JSON with: { "additionalFlags": ["flag1", "flag2"], "summary": "brief explanation" }`,
+        prompt: `Analyze this URL/payload for phishing indicators: "${payloadValue}". Detected issues: ${[...riskFlags, ...credentialRisks].join(', ')}. ${credentialedSlots ? `Credentialed slots: ${credentialedSlots.length}` : ''}. Provide additional risk classification. Return JSON with: { "additionalFlags": ["flag1", "flag2"], "summary": "brief explanation", "credentialSafety": "safe/warning/danger" }`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -75,7 +96,8 @@ Deno.serve(async (req) => {
               type: "array",
               items: { type: "string" }
             },
-            summary: { type: "string" }
+            summary: { type: "string" },
+            credentialSafety: { type: "string" }
           }
         }
       });
@@ -84,6 +106,11 @@ Deno.serve(async (req) => {
         riskFlags.push(...aiAnalysis.additionalFlags);
         riskScore += aiAnalysis.additionalFlags.length * 10;
       }
+      
+      if (aiAnalysis.credentialSafety === 'danger') {
+        riskScore += 20;
+        riskFlags.push('credential_security_concern');
+      }
     }
 
     // Cap at 100
@@ -91,7 +118,8 @@ Deno.serve(async (req) => {
 
     return Response.json({
       riskScore,
-      riskFlags
+      riskFlags: [...riskFlags, ...credentialRisks],
+      credentialAnalysis: credentialRisks.length > 0 ? 'analyzed' : 'none'
     });
 
   } catch (error) {

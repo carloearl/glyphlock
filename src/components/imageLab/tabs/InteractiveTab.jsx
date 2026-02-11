@@ -582,7 +582,7 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                 />
               )}
 
-              {/* Render hotspots */}
+              {/* Render hotspots - NEON GLOW ENHANCEMENT */}
               {hotspots.map((hotspot) => (
                 <div
                   key={hotspot.id}
@@ -594,12 +594,12 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                       setSelectedHotspot(hotspot);
                     }
                   }}
-                  className={`absolute border-2 cursor-pointer transition-all group ${
+                  className={`absolute border-2 cursor-pointer transition-all group rounded-lg ${
                     selectedHotspot?.id === hotspot.id
-                      ? 'border-cyan-400 bg-cyan-400/20 shadow-[0_0_15px_rgba(6,182,212,0.5)]'
+                      ? 'border-cyan-400 bg-cyan-400/20 shadow-[0_0_25px_rgba(6,182,212,0.8),0_0_50px_rgba(6,182,212,0.4)] animate-pulse'
                       : hotspot.actionValue
-                        ? 'border-green-400 bg-green-400/10 hover:bg-green-400/30 hover:shadow-[0_0_15px_rgba(74,222,128,0.5)]'
-                        : 'border-purple-400 bg-purple-400/10 hover:bg-purple-400/20'
+                        ? 'border-green-400 bg-green-400/10 hover:bg-green-400/30 hover:shadow-[0_0_30px_rgba(74,222,128,0.7),0_0_60px_rgba(74,222,128,0.3)]'
+                        : 'border-purple-400 bg-purple-400/10 hover:bg-purple-400/20 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)]'
                   }`}
                   style={{
                     left: `${hotspot.x}%`,

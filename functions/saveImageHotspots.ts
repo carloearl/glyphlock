@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
@@ -15,7 +15,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid request' }, { status: 400 });
     }
 
-    const existingHotspots = await base44.entities.ImageHotspot.filter({ imageId });
+    // FIXED: Update InteractiveImage entity directly with hotspots array
+    await base44.entities.InteractiveImage.update(imageId, {
+      hotspots: hotspots
+    });
+
+    // Also create individual hotspot records for analytics tracking
+    const existingHotspots = await base44.entities.ImageHotspot.filter({ 
+      interactive_image_id: imageId 
+    });
     
     for (const existing of existingHotspots) {
       await base44.asServiceRole.entities.ImageHotspot.delete(existing.id);
@@ -24,7 +32,7 @@ Deno.serve(async (req) => {
     const savedHotspots = [];
     for (const hotspot of hotspots) {
       const saved = await base44.entities.ImageHotspot.create({
-        imageId,
+        interactive_image_id: imageId,
         x: hotspot.x,
         y: hotspot.y,
         width: hotspot.width,
@@ -32,7 +40,8 @@ Deno.serve(async (req) => {
         label: hotspot.label,
         description: hotspot.description || '',
         actionType: hotspot.actionType || 'none',
-        actionValue: hotspot.actionValue || ''
+        actionValue: hotspot.actionValue || '',
+        shape: hotspot.shape || 'rect'
       });
       savedHotspots.push(saved);
     }
@@ -40,7 +49,8 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true, 
       hotspots: savedHotspots,
-      count: savedHotspots.length
+      count: savedHotspots.length,
+      persisted_to_entity: true
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
