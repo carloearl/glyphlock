@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Sparkles, Upload, X, Shuffle, Lock, Loader2, CheckCircle2, AlertTriangle, Image as ImageIcon, Sliders, Repeat, Wand2, Zap, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageEditor from '@/components/imageLab/ImageEditor';
+import { GlyphIcon, IconButton } from '@/components/icons/GlyphIcons';
 
 const STYLE_PRESETS = [
   { id: 'photorealistic', name: 'Photorealistic' },
@@ -457,12 +458,12 @@ Provide your response as a JSON object with:
               size="sm"
               onClick={() => document.getElementById('ref-upload').click()}
               disabled={references.length >= 4 || uploadReferenceMutation.isPending}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_25px_rgba(168,85,247,0.5)] hover:shadow-[0_0_35px_rgba(168,85,247,0.7)] border-2 border-purple-400/30 font-black h-12 md:h-14 px-6 md:px-8 text-sm md:text-base touch-manipulation active:scale-95 transition-all"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_25px_rgba(168,85,247,0.5)] hover:shadow-[0_0_35px_rgba(168,85,247,0.7)] border-2 border-purple-400/30 font-black h-12 md:h-14 px-6 md:px-8 text-sm md:text-base touch-manipulation active:scale-95 transition-all flex items-center gap-2"
             >
               {uploadReferenceMutation.isPending ? (
                 <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
               ) : (
-                <><Upload className="w-4 h-4 md:w-5 md:h-5 mr-2" /> UPLOAD</>
+                <><GlyphIcon type="upload" size={20} glow /> UPLOAD</>
               )}
             </Button>
             <input id="ref-upload" type="file" accept="image/*" className="hidden" onChange={handleUploadReference} />
@@ -507,13 +508,14 @@ Provide your response as a JSON object with:
                   <span className="text-[10px] text-purple-400 font-semibold">Dominant</span>
                 </div>
               </div>
-              <Button
-                size="icon"
+              <IconButton
+                type="delete"
+                size={28}
                 onClick={() => handleRemoveReference(idx)}
-                className="bg-red-500/20 hover:bg-red-500/40 border-2 border-red-500/40 hover:border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:shadow-[0_0_25px_rgba(239,68,68,0.5)] h-12 w-12 md:h-14 md:w-14 transition-all touch-manipulation active:scale-90"
-              >
-                <X className="w-5 h-5 md:w-6 md:h-6 text-red-300" />
-              </Button>
+                variant="danger"
+                title="Remove reference"
+                className="h-12 w-12 md:h-14 md:w-14"
+              />
             </div>
           ))}
 
@@ -711,12 +713,12 @@ Provide your response as a JSON object with:
         <Button
           onClick={() => handleGenerate('generate')}
           disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
-          className="w-full h-20 text-lg md:text-xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_40px_rgba(99,102,241,0.5)] hover:shadow-[0_0_60px_rgba(99,102,241,0.8)] transition-all border-2 border-indigo-400/40 touch-manipulation active:scale-95"
+          className="w-full h-20 text-lg md:text-xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_40px_rgba(99,102,241,0.5)] hover:shadow-[0_0_60px_rgba(99,102,241,0.8)] transition-all border-2 border-indigo-400/40 touch-manipulation active:scale-95 flex items-center justify-center gap-3"
         >
           {generateMutation.isPending ? (
-            <><Loader2 className="w-6 h-6 md:w-7 md:h-7 mr-2 animate-spin" />GENERATING...</>
+            <><Loader2 className="w-6 h-6 md:w-7 md:h-7 animate-spin" />GENERATING...</>
           ) : (
-            <><Zap className="w-6 h-6 md:w-7 md:h-7 mr-2 drop-shadow-[0_0_8px_rgba(99,102,241,1)]" />GENERATE IMAGE</>
+            <><GlyphIcon type="launch" size={40} glow />GENERATE IMAGE</>
           )}
         </Button>
 
