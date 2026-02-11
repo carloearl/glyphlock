@@ -483,8 +483,8 @@ Be precise with the bounding box - make it fit the detected object tightly but i
             )}
             
             {shareUrl && (
-              <div className="mt-3 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-                <p className="text-xs text-green-400 font-bold mb-2">Share Link Created</p>
+              <div className="mt-3 p-4 rounded-lg bg-green-500/10 border border-green-500/30 space-y-3">
+                <p className="text-xs text-green-400 font-bold">📤 Share Your Interactive Image</p>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -496,13 +496,50 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                     size="sm"
                     onClick={() => {
                       navigator.clipboard.writeText(shareUrl);
-                      toast.success('Share link copied!');
+                      toast.success('Link copied to clipboard!');
                     }}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 text-white"
                   >
                     Copy
                   </Button>
                 </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const subject = `Check out this interactive image: ${imageAsset.name}`;
+                      const body = `I created an interactive image with AI-powered hotspots. Click to explore:\n\n${shareUrl}`;
+                      window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+                      toast.success('Email composer opened');
+                    }}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                  >
+                    📧 Email
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const text = `Check out my interactive image: ${shareUrl}`;
+                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'width=600,height=400');
+                      toast.success('Twitter opened');
+                    }}
+                    className="flex-1 bg-sky-600 hover:bg-sky-700 text-white text-xs"
+                  >
+                    𝕏 Tweet
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const text = `Check out my interactive image: ${shareUrl}`;
+                      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=400');
+                      toast.success('LinkedIn opened');
+                    }}
+                    className="flex-1 bg-blue-700 hover:bg-blue-800 text-white text-xs"
+                  >
+                    💼 LinkedIn
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-400">Share this link via text, email, or social media. Hotspots work on all devices.</p>
               </div>
             )}
           </CardContent>
@@ -582,7 +619,7 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                 />
               )}
 
-              {/* Render hotspots - NEON GLOW ENHANCEMENT */}
+              {/* Render hotspots - clean overlay, tooltip on hover */}
               {hotspots.map((hotspot) => (
                 <div
                   key={hotspot.id}
@@ -594,12 +631,13 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                       setSelectedHotspot(hotspot);
                     }
                   }}
-                  className={`absolute border-2 cursor-pointer transition-all group rounded-lg ${
+                  title={hotspot.actionValue ? `${hotspot.label}: ${hotspot.actionValue}` : hotspot.label}
+                  className={`absolute border-2 transition-all group rounded-lg ${
                     selectedHotspot?.id === hotspot.id
-                      ? 'border-cyan-400 bg-cyan-400/20 shadow-[0_0_25px_rgba(6,182,212,0.8),0_0_50px_rgba(6,182,212,0.4)] animate-pulse'
+                      ? 'border-cyan-400 bg-cyan-400/20 shadow-[0_0_25px_rgba(6,182,212,0.8)]'
                       : hotspot.actionValue
-                        ? 'border-green-400 bg-green-400/10 hover:bg-green-400/30 hover:shadow-[0_0_30px_rgba(74,222,128,0.7),0_0_60px_rgba(74,222,128,0.3)]'
-                        : 'border-purple-400 bg-purple-400/10 hover:bg-purple-400/20 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)]'
+                        ? 'border-green-400/0 bg-transparent hover:border-green-400/60 hover:bg-green-400/10 cursor-pointer'
+                        : 'border-purple-400/50 bg-purple-400/10 hover:bg-purple-400/20 cursor-default'
                   }`}
                   style={{
                     left: `${hotspot.x}%`,
@@ -608,19 +646,24 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                     height: `${hotspot.height}%`,
                   }}
                 >
-                  {/* Label */}
-                  <div className="absolute -top-7 left-0 text-xs font-semibold text-white bg-black/80 px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                    {hotspot.label}
-                    {hotspot.actionValue && (
-                      <ExternalLink className="w-3 h-3 inline ml-1 text-green-400" />
-                    )}
+                  {/* Tooltip - shows on hover */}
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-xs font-bold text-white bg-black/90 px-3 py-2 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 border border-white/20">
+                    <div className="flex items-center gap-2">
+                      <span>{hotspot.label}</span>
+                      {hotspot.actionValue && (
+                        <>
+                          <span className="text-gray-400">→</span>
+                          <span className="text-green-400 max-w-[200px] truncate">{hotspot.actionValue}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Action indicator */}
+                  {/* Click indicator icon - only shows on hover for links */}
                   {hotspot.actionValue && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="bg-green-500/90 rounded-full p-2">
-                        <ExternalLink className="w-4 h-4 text-white" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                      <div className="bg-green-500 rounded-full p-2 shadow-[0_0_20px_rgba(74,222,128,0.8)]">
+                        <ExternalLink className="w-5 h-5 text-white" />
                       </div>
                     </div>
                   )}
