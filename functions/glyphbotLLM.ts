@@ -172,7 +172,12 @@ async function callPuter(prompt) {
   const data = await response.json();
   console.log('[Puter] Response:', JSON.stringify(data).slice(0, 400));
   
-  const text = data.result?.message?.content || data.message?.content || data.content;
+  const text = data.result?.message?.content || 
+               data.message?.content || 
+               data.content || 
+               data.result?.content ||
+               (typeof data === 'string' ? data : null);
+  
   if (!text) {
     console.error('[Puter] No text in response:', JSON.stringify(data));
     throw new Error('Puter: No text in response');
@@ -639,13 +644,17 @@ Deno.serve(async (req) => {
         // Parse audit results if in audit mode
         let resultText = llmResult;
         if (auditMode && typeof llmResult === 'string') {
-          // Try to extract JSON if LLM returned it in markdown code blocks
-          const jsonMatch = llmResult.match(/```json\s*([\s\S]*?)\s*```/);
+          // Try multiple extraction patterns
+          const jsonMatch = llmResult.match(/```json\s*([\s\S]*?)\s*```/) || 
+                           llmResult.match(/```\s*([\s\S]*?)\s*```/) ||
+                           llmResult.match(/\{[\s\S]*"target"[\s\S]*\}/);
           if (jsonMatch) {
             try {
-              const parsed = JSON.parse(jsonMatch[1]);
+              const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
               resultText = JSON.stringify(parsed);
-            } catch {
+            } catch (parseError) {
+              console.warn('[Audit JSON Parse] Failed:', parseError.message);
+              // Keep original text if parsing fails
               resultText = llmResult;
             }
           }

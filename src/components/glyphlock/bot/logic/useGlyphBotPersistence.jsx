@@ -41,7 +41,7 @@ export function useGlyphBotPersistence(currentUser) {
       const isDuplicate = prev.some(m => 
         (m.id === messageId) || 
         (m.role === message.role && m.content === message.content && 
-         Math.abs(new Date(m.timestamp || 0).getTime() - new Date(message.timestamp || Date.now()).getTime()) < 1000)
+         Math.abs(new Date(m.timestamp || 0).getTime() - new Date(message.timestamp || Date.now()).getTime()) < 200)
       );
 
       if (isDuplicate) {

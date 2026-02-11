@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Send, Square, RotateCcw, Mic, MicOff, Paperclip, X } from 'lucide-react';
+import { Send, Square, RotateCcw, Mic, MicOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ChatInput({ 
@@ -15,7 +15,6 @@ export default function ChatInput({
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
   const [isListening, setIsListening] = useState(false);
-  const [attachedFiles, setAttachedFiles] = useState([]);
   const recognitionRef = useRef(null);
 
   useEffect(() => {
@@ -50,9 +49,14 @@ export default function ChatInput({
       recognitionRef.current.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
-        if (event.error === 'aborted' || event.error === 'not-allowed') {
-          // Don't restart on user-initiated stops or permission issues
-          return;
+        
+        // Show user-friendly error messages
+        if (event.error === 'not-allowed') {
+          toast.error('Microphone access denied. Please enable permissions.');
+        } else if (event.error === 'no-speech') {
+          toast.error('No speech detected. Please try again.');
+        } else if (event.error !== 'aborted') {
+          toast.error('Voice input failed. Please try again.');
         }
       };
       
@@ -103,64 +107,16 @@ export default function ChatInput({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (value.trim() && !isSending) {
-        onSend(attachedFiles);
-        setAttachedFiles([]);
+        onSend();
       }
     }
-  };
-
-  const handleFileSelect = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    const validFiles = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB limit
-    if (validFiles.length < files.length) {
-      toast.error('Some files exceeded 10MB limit');
-    }
-
-    setAttachedFiles(prev => [...prev, ...validFiles]);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const removeFile = (idx) => {
-    setAttachedFiles(prev => prev.filter((_, i) => i !== idx));
   };
 
   return (
     <div className="border-t-2 border-purple-500/30 px-4 py-5" style={{ position: 'relative', zIndex: 9999, background: 'rgba(10, 10, 20, 0.9)', backdropFilter: 'blur(20px)' }}>
       <div className="max-w-4xl mx-auto" style={{ position: 'relative', zIndex: 10000 }}>
-        {attachedFiles.length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-2">
-            {attachedFiles.map((file, idx) => (
-              <div key={idx} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/60 border border-purple-500/30 text-xs">
-                <Paperclip className="w-3 h-3 text-cyan-400" />
-                <span className="text-slate-300 truncate max-w-[150px]">{file.name}</span>
-                <button onClick={() => removeFile(idx)} className="text-slate-400 hover:text-red-400">
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
         <div className="relative flex items-end gap-3 border-2 border-purple-500/40 rounded-2xl p-3 focus-within:border-cyan-400 focus-within:shadow-[0_0_30px_rgba(6,182,212,0.4),inset_0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300 backdrop-blur-xl shadow-[0_0_20px_rgba(168,85,247,0.2)]" style={{ position: 'relative', zIndex: 10001, background: 'rgba(10, 10, 20, 0.8)' }}>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={handleFileSelect}
-            accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json"
-          />
           <div className="flex items-center gap-1 pb-1">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minHeight: '44px', minWidth: '44px' }}
-              className="p-2.5 rounded-xl text-purple-400 hover:text-cyan-300 hover:bg-purple-500/20 border border-purple-500/30 hover:border-cyan-400/50 transition-all duration-300 shadow-[0_0_10px_rgba(168,85,247,0.2)] hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-              title="Attach file"
-            >
-              <Paperclip className="w-4 h-4" />
-            </button>
             <button
               type="button"
               onClick={toggleVoiceInput}
@@ -212,10 +168,7 @@ export default function ChatInput({
             ) : (
               <button
                 type="button"
-                onClick={() => {
-                  onSend(attachedFiles);
-                  setAttachedFiles([]);
-                }}
+                onClick={onSend}
                 disabled={!value.trim()}
                 style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minHeight: '44px', minWidth: '44px' }}
                 className="p-3 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold hover:from-cyan-400 hover:via-blue-400 hover:to-purple-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_0_25px_rgba(6,182,212,0.6),0_0_50px_rgba(168,85,247,0.3)] disabled:shadow-none hover:shadow-[0_0_35px_rgba(6,182,212,0.8),0_0_60px_rgba(168,85,247,0.5)]"
