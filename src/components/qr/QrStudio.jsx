@@ -9,6 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Loader2, Wand2, Layers, Shield, Sparkles, Zap, Lock, Eye, Download, Info, BarChart3, Upload, Archive } from 'lucide-react';
 import { toast } from 'sonner';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { GlyphIcon } from '@/components/icons/GlyphIcons';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   GlyphCard, 
@@ -751,7 +752,7 @@ export default function QrStudio({ initialTab = 'create' }) {
                       <Button
                         onClick={generateQR}
                         disabled={isScanning}
-                        className={`${GlyphButton.primary} w-full ${GlyphShadows.neonCyan} min-h-[48px]`}
+                        className={`${GlyphButton.primary} w-full ${GlyphShadows.neonCyan} min-h-[48px] flex items-center justify-center gap-2`}
                       >
                         {isScanning ? (
                           <>
@@ -760,7 +761,7 @@ export default function QrStudio({ initialTab = 'create' }) {
                           </>
                         ) : (
                           <>
-                            <Shield className="w-4 h-4 mr-2" />
+                            <GlyphIcon type="launch" size={24} glow />
                             Generate Secure QR
                           </>
                         )}
