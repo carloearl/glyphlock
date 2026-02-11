@@ -146,10 +146,18 @@ body, #root, #__next, main, section {
 @media (max-width: 768px) {
   html, body, #root, #__next {
     background: transparent !important;
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  /* Prevent any horizontal scroll */
+  *, *::before, *::after {
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 }
 
-/* Minimum Touch Target Sizes (44x44px - accessibility standard) */
+/* ENHANCED: Minimum Touch Target Sizes (48x48px for mobile - better UX) */
 button,
 a[role="button"],
 input[type="checkbox"],
@@ -157,9 +165,23 @@ input[type="radio"],
 input[type="submit"],
 input[type="button"],
 select {
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   touch-action: manipulation;
+  cursor: pointer;
+}
+
+@media (min-width: 769px) {
+  button,
+  a[role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"],
+  input[type="button"],
+  select {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* Prevent accidental zoom on inputs - iOS fix */
