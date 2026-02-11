@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 export default Deno.serve(async (req) => {
   try {
@@ -12,25 +12,19 @@ export default Deno.serve(async (req) => {
     const { name = "Default Key", environment = "live" } = await req.json();
     const envTag = environment.toUpperCase();
 
-    // Helper to generate random string
-    const rand = (len) => {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    // REAL crypto-secure random generation
+    const cryptoRandom = (len, charset) => {
+      const array = new Uint8Array(len);
+      crypto.getRandomValues(array);
       let result = '';
       for (let i = 0; i < len; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        result += charset.charAt(array[i] % charset.length);
       }
       return result;
     };
 
-    // Helper to generate pseudo-hash
-    const hash = (len) => {
-      const chars = '0123456789ABCDEF';
-      let result = '';
-      for (let i = 0; i < len; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
-    };
+    const rand = (len) => cryptoRandom(len, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789');
+    const hash = (len) => cryptoRandom(len, '0123456789ABCDEF');
 
     // 1. Public Key: GLX-PUB-{ENV}-{GlyphHash4}-{Entropy6}
     const publicKey = `GLX-PUB-${envTag}-${hash(4)}-${rand(6)}`;
@@ -42,41 +36,51 @@ export default Deno.serve(async (req) => {
     // Using 'CORE' as default service name for now
     const envKey = `GLX-ENV-CORE-${envTag}-${hash(3)}`;
 
-    // Mock Blockchain Hash (SHA-256 like)
-    const blockchainHash = `0x${hash(64)}`;
+    // REAL SHA-256 hash using Web Crypto API
+    const encoder = new TextEncoder();
+    const data = encoder.encode(`${publicKey}:${secretKey}:${Date.now()}`);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const blockchainHash = `0x${hashArray.map(b => b.toString(16).padStart(2, '0')).join('')}`;
+
+    // Hash secret key before storage (NEVER store plaintext secrets)
+    const secretHashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(secretKey));
+    const secretHashArray = Array.from(new Uint8Array(secretHashBuffer));
+    const secret_key_hash = secretHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
     // Save to DB
-    const apiKey = await base44.entities.APIKey.create({
+    const apiKey = await base44.asServiceRole.entities.APIKey.create({
       name,
       public_key: publicKey,
-      secret_key: secretKey,
-      env_key: envKey,
+      secret_key_hash,
+      owner_id: user.email,
       status: 'active',
-      environment,
-      created_date: new Date().toISOString(),
-      last_rotated: new Date().toISOString(),
-      blockchain_hash: blockchainHash,
-      rotation_schedule: "none",
-      ip_allowlist: "",
-      geo_lock: false,
-      device_lock: false
+      permissions: ['read', 'write'],
+      last_used: null
     });
 
     // Log creation to Audit System
-    await base44.entities.SystemAuditLog.create({
+    await base44.asServiceRole.entities.SystemAuditLog.create({
       event_type: 'KEY_CREATION',
       description: `Created new API Key: ${name}`,
       actor_email: user.email,
       resource_id: apiKey.id,
       metadata: {
         environment,
-        blockchain_hash: blockchainHash
+        blockchain_hash: blockchainHash,
+        public_key: publicKey
       },
       ip_address: "Unknown (SDK)",
       status: "success"
     });
 
-    return Response.json(apiKey);
+    // Return with REAL secret key (only shown once)
+    return Response.json({
+      ...apiKey,
+      secret_key: secretKey, // Only returned on creation
+      blockchain_hash: blockchainHash,
+      environment
+    });
 
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
