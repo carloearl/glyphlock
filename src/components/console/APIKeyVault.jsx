@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
+import { GlyphIcon, IconButton } from "@/components/icons/GlyphIcons";
 
 export default function APIKeyVault({ user }) {
   const [keys, setKeys] = useState([]);
@@ -100,9 +101,9 @@ export default function APIKeyVault({ user }) {
         </div>
         <Button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="bg-gradient-to-r from-[#8C4BFF] to-[#9F00FF] hover:opacity-90"
+          className="bg-gradient-to-r from-[#8C4BFF] to-[#9F00FF] hover:opacity-90 flex items-center gap-2"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <GlyphIcon type="blockchain" size={20} glow />
           Create New Key
         </Button>
       </div>
@@ -213,13 +214,13 @@ export default function APIKeyVault({ user }) {
                         <code className="flex-1 bg-[#020617] px-3 py-2 rounded text-sm text-white font-mono">
                           {key.public_key}
                         </code>
-                        <Button
-                          size="sm"
-                          variant="ghost"
+                        <IconButton
+                          type="attachment"
+                          size={16}
                           onClick={() => copyToClipboard(key.public_key, "Public key")}
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
+                          variant="primary"
+                          title="Copy public key"
+                        />
                       </div>
                     </div>
 
@@ -237,13 +238,13 @@ export default function APIKeyVault({ user }) {
                         >
                           {visibleKeys[key.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
+                        <IconButton
+                          type="download"
+                          size={16}
                           onClick={() => copyToClipboard(key.secret_key, "Secret key")}
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
+                          variant="success"
+                          title="Copy secret key"
+                        />
                       </div>
                     </div>
                   </div>
