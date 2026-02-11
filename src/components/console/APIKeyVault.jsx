@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { glyphLockAPI } from "@/components/api/glyphLockAPI";
+import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 
 export default function APIKeyVault({ user }) {
@@ -24,9 +24,10 @@ export default function APIKeyVault({ user }) {
 
   const loadKeys = async () => {
     try {
-      const data = await glyphLockAPI.listAPIKeys();
-      setKeys(data.keys || []);
+      const result = await base44.entities.APIKey.list();
+      setKeys(result || []);
     } catch (err) {
+      console.error('Load keys error:', err);
       toast.error("Failed to load API keys");
     } finally {
       setLoading(false);
@@ -36,23 +37,42 @@ export default function APIKeyVault({ user }) {
   const handleCreateKey = async (e) => {
     e.preventDefault();
     try {
-      const newKey = await glyphLockAPI.generateAPIKey(formData.name, formData.environment);
+      const response = await base44.functions.invoke('generateAPIKey', {
+        name: formData.name,
+        environment: formData.environment
+      });
+      
+      const newKey = response.data;
+      
+      // Show secret key in modal/alert (only shown once)
+      if (newKey.secret_key) {
+        alert(`🔐 SECRET KEY (save this now - won't be shown again!):\n\n${newKey.secret_key}\n\nPublic Key: ${newKey.public_key}`);
+      }
+      
       toast.success("API key created successfully");
       setKeys([newKey, ...keys]);
       setShowCreateForm(false);
       setFormData({ name: "", environment: "live" });
     } catch (err) {
-      toast.error("Failed to create API key");
+      console.error('API Key Creation Error:', err);
+      toast.error(err.message || "Failed to create API key");
     }
   };
 
   const handleRotateKey = async (keyId) => {
     try {
-      const rotated = await glyphLockAPI.rotateAPIKey(keyId);
+      const response = await base44.functions.invoke('rotateAPIKey', { keyId });
+      const rotated = response.data;
+      
+      if (rotated.secret_key) {
+        alert(`🔐 NEW SECRET KEY (save this now!):\n\n${rotated.secret_key}`);
+      }
+      
       toast.success("API key rotated successfully");
       setKeys(keys.map(k => k.id === keyId ? rotated : k));
     } catch (err) {
-      toast.error("Failed to rotate key");
+      console.error('Rotate key error:', err);
+      toast.error(err.message || "Failed to rotate key");
     }
   };
 

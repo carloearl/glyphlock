@@ -6,15 +6,31 @@ import { base44 } from '@/api/base44Client';
 
 export async function generate(options) {
   try {
-    const response = await base44.functions.invoke('textToSpeech', options);
-    return response.data;
+    console.log('[TTS] Invoking backend with options:', options);
+    const response = await base44.functions.invoke('textToSpeechOpenAI', {
+      text: options.text,
+      voice: options.voice || 'alloy',
+      speed: options.speed || 1.0
+    });
+    
+    console.log('[TTS] Backend response:', response);
+    
+    if (response?.data?.audioUrl) {
+      return {
+        success: true,
+        audioUrl: response.data.audioUrl,
+        provider: 'openai'
+      };
+    }
+    
+    throw new Error('No audio URL in response');
   } catch (error) {
     console.error('[TTS Service] Error:', error);
     return { 
       success: false, 
       error: error.message,
       fallback: true,
-      audioUrl: generateFallbackUrl(options.text, options.voice)
+      audioUrl: null
     };
   }
 }
