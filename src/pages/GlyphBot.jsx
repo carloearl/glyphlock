@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { UI, Logic, Config } from '@/components/glyphlock/bot';
 import ChatMessageMemo from '@/components/glyphlock/bot/ui/ChatMessageMemo';
+import ChatErrorBoundary from '@/components/glyphlock/bot/ui/ChatErrorBoundary';
 import SEOHead from '@/components/SEOHead';
 import { base44 } from '@/api/base44Client';
 import { Activity, Zap, Shield, Bot, AlertTriangle, X, PanelRightOpen, PanelRightClose } from 'lucide-react';
@@ -1002,15 +1003,17 @@ export default function GlyphBotPage() {
           </div>
 
           {/* Input Bar */}
-          <UI.ChatInput
-            value={input}
-            onChange={setInput}
-            onSend={handleSend}
-            onStop={handleStop}
-            onRegenerate={handleRegenerate}
-            isSending={isSending}
-            disabled={isSending}
-          />
+          <ChatErrorBoundary>
+            <UI.ChatInput
+              value={input}
+              onChange={setInput}
+              onSend={handleSend}
+              onStop={handleStop}
+              onRegenerate={handleRegenerate}
+              isSending={isSending}
+              disabled={isSending}
+            />
+          </ChatErrorBoundary>
         </div>
       </div>
 
