@@ -16,6 +16,8 @@ export default function ChatInput({
   const fileInputRef = useRef(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
+  const recognitionTimeoutRef = useRef(null);
+  const restartAttemptsRef = useRef(0);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -61,11 +63,33 @@ export default function ChatInput({
       };
       
       recognitionRef.current.onend = () => {
-        setIsListening(false);
+        if (recognitionTimeoutRef.current) {
+          clearTimeout(recognitionTimeoutRef.current);
+        }
+        
+        // Only auto-restart if user intended to keep listening
+        if (isListening && restartAttemptsRef.current < 3) {
+          recognitionTimeoutRef.current = setTimeout(() => {
+            try {
+              recognitionRef.current?.start();
+              restartAttemptsRef.current++;
+            } catch (err) {
+              console.warn('[Voice] Auto-restart failed:', err);
+              setIsListening(false);
+              restartAttemptsRef.current = 0;
+            }
+          }, 500);
+        } else {
+          setIsListening(false);
+          restartAttemptsRef.current = 0;
+        }
       };
     }
     
     return () => {
+      if (recognitionTimeoutRef.current) {
+        clearTimeout(recognitionTimeoutRef.current);
+      }
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
@@ -78,13 +102,17 @@ export default function ChatInput({
 
   const toggleVoiceInput = () => {
     if (!recognitionRef.current) {
-      alert('Speech recognition not supported in this browser');
+      toast.error('Speech recognition not supported in this browser');
       return;
     }
     
     if (isListening) {
       try {
+        if (recognitionTimeoutRef.current) {
+          clearTimeout(recognitionTimeoutRef.current);
+        }
         recognitionRef.current.stop();
+        restartAttemptsRef.current = 0;
       } catch (err) {
         console.error('Stop recognition error:', err);
       }
@@ -93,11 +121,14 @@ export default function ChatInput({
       try {
         recognitionRef.current.start();
         setIsListening(true);
+        restartAttemptsRef.current = 0;
       } catch (err) {
         console.error('Start recognition error:', err);
         if (err.message.includes('already started')) {
-          // Already running, just update state
           setIsListening(true);
+        } else {
+          toast.error('Failed to start voice input');
+          setIsListening(false);
         }
       }
     }
