@@ -457,21 +457,8 @@ export default function useTTS(options = {}) {
     setIsLoading(true);
     setLastError(null);
 
-    // CRITICAL: Merge settings properly - customSettings override currentSettings
-    let settings = { ...currentSettings };
+    let settings = { ...currentSettings, ...customSettings };
     
-    // Apply custom settings explicitly
-    if (customSettings.voiceProfile !== undefined) settings.voiceProfile = customSettings.voiceProfile;
-    if (customSettings.emotion !== undefined) settings.emotion = customSettings.emotion;
-    if (customSettings.speed !== undefined) settings.speed = customSettings.speed;
-    if (customSettings.pitch !== undefined) settings.pitch = customSettings.pitch;
-    if (customSettings.volume !== undefined) settings.volume = customSettings.volume;
-    if (customSettings.bass !== undefined) settings.bass = customSettings.bass;
-    if (customSettings.clarity !== undefined) settings.clarity = customSettings.clarity;
-    
-    console.log('[TTS] Merged settings:', settings);
-    
-    // Apply emotion preset ONLY for values not explicitly set in customSettings
     if (settings.emotion && EMOTION_PRESETS[settings.emotion]) {
       const emotionPreset = EMOTION_PRESETS[settings.emotion];
       if (customSettings.pitch === undefined && emotionPreset.pitch !== undefined) {
@@ -480,58 +467,24 @@ export default function useTTS(options = {}) {
       if (customSettings.speed === undefined && emotionPreset.speed !== undefined) {
         settings.speed = emotionPreset.speed;
       }
-      if (customSettings.volume === undefined && emotionPreset.volume !== undefined) {
-        settings.volume = emotionPreset.volume;
-      }
     }
     
-    // Normalize all values for safety
     settings.speed = normalizeSpeed(settings.speed);
     settings.pitch = normalizePitch(settings.pitch);
     settings.volume = Math.max(0, Math.min(1, settings.volume || 1.0));
-    settings.bass = Math.max(-1, Math.min(1, settings.bass || 0));
-    settings.clarity = Math.max(-1, Math.min(1, settings.clarity || 0));
 
-    console.log('[TTS] Final normalized settings:', settings);
+    console.log('[TTS] Using OpenAI TTS with settings:', settings);
 
-    const voiceProfile = VOICE_PROFILES[settings.voiceProfile] || VOICE_PROFILES.neutral_female;
-    const voiceId = voiceProfile.id;
-
-    // GLYPHLOCK: Try Web Speech API first (built-in, most reliable)
-    console.log('[TTS] Attempting Web Speech API with settings:', {
-      speed: settings.speed,
-      pitch: settings.pitch,
-      volume: settings.volume,
-      voiceProfile: settings.voiceProfile,
-      emotion: settings.emotion
-    });
-    
+    // ALWAYS USE OPENAI TTS - NO WEB SPEECH
     try {
-      const webSpeechResult = await playWithWebSpeech(cleanText, settings);
-      
-      if (webSpeechResult) {
-        console.log('[TTS] Web Speech succeeded');
-        return true;
-      }
-    } catch (webErr) {
-      console.warn('[TTS] Web Speech failed:', webErr);
+      return await playWithOpenAI(cleanText, settings, settings.voiceProfile);
+    } catch (err) {
+      console.error('[TTS] OpenAI failed:', err);
+      setLastError(err.message);
+      setIsLoading(false);
+      return false;
     }
-    
-    // If Web Speech fails and OpenAI provider is requested, try that
-    if (provider === 'openai') {
-      try {
-        console.log('[TTS] Trying OpenAI TTS as fallback...');
-        return await playWithOpenAI(cleanText, settings, settings.voiceProfile);
-      } catch (err) {
-        console.error('[TTS] OpenAI TTS also failed:', err);
-        setLastError(err.message);
-      }
-    }
-    
-    setIsLoading(false);
-    console.warn('[TTS] All TTS methods failed');
-    return false;
-  }, [provider, stop, playWithOpenAI, playWithWebSpeech, currentSettings]);
+  }, [provider, stop, playWithOpenAI, currentSettings]);
 
   const testTTS = useCallback(async () => {
     return playText('Hello! This is GlyphBot, your elite security assistant.');
