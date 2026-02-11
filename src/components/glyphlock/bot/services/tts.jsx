@@ -6,30 +6,35 @@ import { base44 } from '@/api/base44Client';
 
 export async function generate(options) {
   try {
-    console.log('[TTS] Invoking backend with options:', options);
+    console.log('[TTS] Generating with OpenAI TTS:', options);
+    
     const response = await base44.functions.invoke('textToSpeechOpenAI', {
       text: options.text,
-      voice: options.voice || 'alloy',
+      voiceProfile: options.voiceProfile || 'neutral_female',
       speed: options.speed || 1.0
     });
     
-    console.log('[TTS] Backend response:', response);
-    
-    if (response?.data?.audioUrl) {
-      return {
-        success: true,
-        audioUrl: response.data.audioUrl,
-        provider: 'openai'
-      };
+    if (!response?.data) {
+      throw new Error('No audio data received');
     }
     
-    throw new Error('No audio URL in response');
+    // Backend returns MP3 audio buffer - create blob URL
+    const blob = new Blob([response.data], { type: 'audio/mpeg' });
+    const audioUrl = URL.createObjectURL(blob);
+    
+    console.log('[TTS] OpenAI audio generated successfully');
+    
+    return {
+      success: true,
+      audioUrl,
+      provider: 'openai',
+      voice: options.voiceProfile
+    };
   } catch (error) {
-    console.error('[TTS Service] Error:', error);
+    console.error('[TTS Service] OpenAI TTS failed:', error);
     return { 
       success: false, 
       error: error.message,
-      fallback: true,
       audioUrl: null
     };
   }
