@@ -181,25 +181,14 @@ Provide your response as a JSON object with:
         throw new Error('Expand prompt first before generating');
       }
       
-      // Use OpenAI DALL-E 3 via backend function
+      // Use Base44's built-in GenerateImage
       const finalPrompt = expandedPrompt.expanded_prompt + 
         (selectedStyle ? `, ${selectedStyle} style` : '');
       
-      const sizeMap = {
-        '1:1': '1024x1024',
-        '16:9': '1792x1024',
-        '9:16': '1024x1792',
-        '4:3': '1024x1024',
-        '3:4': '1024x1024'
-      };
-      
-      const response = await base44.functions.invoke('generateImageOpenAI', {
+      const result = await base44.integrations.Core.GenerateImage({
         prompt: finalPrompt,
-        size: sizeMap[params.aspect_ratio] || '1024x1024',
-        quality: params.quality_mode === 'Ultra' ? 'hd' : 'standard'
+        existing_image_urls: references.map(r => r.original_image_url).filter(Boolean)
       });
-      
-      const result = { url: response.data.url };
       
       // Create InteractiveImage record
       const imageData = {
