@@ -52,7 +52,8 @@ export async function testProvider(provider, voice) {
 }
 
 function generateFallbackUrl(text, voice = 'Matthew') {
-  return `https://api.streamelements.com/kappa/v2/speech?voice=${voice}&text=${encodeURIComponent(text)}`;
+  // NO WEB SPEECH API FALLBACK - force proper TTS only
+  return null;
 }
 
 export default { generate, getProviders, testProvider };
