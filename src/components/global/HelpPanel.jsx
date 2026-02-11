@@ -9,17 +9,31 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
   const [activeSection, setActiveSection] = useState(0);
   const [walkthroughMode, setWalkthroughMode] = useState(false);
 
-  // Auto-popup on first visit
+  // Auto-popup on first visit OR keyboard shortcut
   useEffect(() => {
     if (autoPopup && sections.length > 0) {
-      const hasSeenHelp = localStorage.getItem('glyphlock_help_seen');
+      const hasSeenHelp = sessionStorage.getItem('glyphlock_help_seen');
       if (!hasSeenHelp) {
         setTimeout(() => {
           setIsOpen(true);
-          localStorage.setItem('glyphlock_help_seen', 'true');
-        }, 1500);
+          sessionStorage.setItem('glyphlock_help_seen', 'true');
+        }, 2000);
       }
     }
+
+    // Keyboard shortcut: ? to open help
+    const handleKeyPress = (e) => {
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        const target = e.target;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          setIsOpen(true);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
   }, [autoPopup, sections.length]);
 
   useEffect(() => {
