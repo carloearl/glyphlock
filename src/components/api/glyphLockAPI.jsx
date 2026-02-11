@@ -97,17 +97,20 @@ export const glyphLockAPI = {
     }
   },
 
-  // API Key Management
+  // API Key Management (Direct calls - no supabaseProxy)
   generateAPIKey: async (name, environment = 'live') => {
-    return callFunction('generateAPIKey', { name, environment });
+    const response = await base44.functions.invoke('generateAPIKey', { name, environment });
+    return response.data;
   },
 
   listAPIKeys: async () => {
-    return callFunction('listAPIKeys');
+    const keys = await base44.entities.APIKey.list('-created_date', 50);
+    return { keys };
   },
 
   rotateAPIKey: async (keyId) => {
-    return callFunction('rotateAPIKey', { keyId });
+    const response = await base44.functions.invoke('rotateAPIKey', { keyId });
+    return response.data;
   },
 
   updateKeySettings: async (keyId, settings) => {
