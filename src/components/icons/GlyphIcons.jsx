@@ -65,10 +65,10 @@ export const IconButton = ({
   disabled = false 
 }) => {
   const variants = {
-    default: 'bg-white hover:bg-white/90 border-slate-300 hover:border-slate-400',
-    danger: 'bg-white hover:bg-white/90 border-red-500/40 hover:border-red-400',
-    success: 'bg-white hover:bg-white/90 border-emerald-500/40 hover:border-emerald-400',
-    primary: 'bg-white hover:bg-white/90 border-cyan-500/40 hover:border-cyan-400'
+    default: 'bg-white border-slate-300 hover:shadow-[0_0_20px_rgba(148,163,184,0.5)]',
+    danger: 'bg-white border-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.5)]',
+    success: 'bg-white border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)]',
+    primary: 'bg-white border-cyan-500/40 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]'
   };
 
   return (
@@ -78,7 +78,7 @@ export const IconButton = ({
       title={title}
       className={cn(
         'rounded-xl border-2 p-3 transition-all duration-300 flex items-center justify-center',
-        'hover:shadow-lg active:scale-95',
+        'active:scale-95',
         'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none',
         variants[variant],
         className
