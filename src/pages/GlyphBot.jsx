@@ -626,6 +626,7 @@ export default function GlyphBotPage() {
     <>
     <HelpPanel
       title="GlyphBot Guide"
+      autoPopup={true}
       sections={[
         {
           title: 'Overview',
