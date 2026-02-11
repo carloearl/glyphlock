@@ -36,19 +36,33 @@ export function useGlyphBotPersistence(currentUser) {
     if (!message?.role) return;
 
     setFullHistory(prev => {
-      const updated = [...prev, message];
+      // DEDUPLICATION: Prevent duplicate messages
+      const messageId = message.id || `${message.role}-${Date.now()}`;
+      const isDuplicate = prev.some(m => 
+        (m.id === messageId) || 
+        (m.role === message.role && m.content === message.content && 
+         Math.abs(new Date(m.timestamp || 0).getTime() - new Date(message.timestamp || Date.now()).getTime()) < 1000)
+      );
+
+      if (isDuplicate) {
+        console.warn('[Persistence] Duplicate message blocked:', messageId);
+        return prev;
+      }
+
+      const messageWithId = { ...message, id: messageId };
+      const updated = [...prev, messageWithId];
+      
       // AUTOSAVE: Always save to backend after each message
       if (currentUser?.email) {
         const chatIdToUse = currentChatId;
         base44.functions.invoke('saveGlyphBotChat', {
-          chatId: chatIdToUse || null, // null creates new chat
+          chatId: chatIdToUse || null,
           messages: updated,
           title: generateChatTitle(updated),
           provider: 'AUTO',
           persona: 'GENERAL'
         }).then(response => {
           if (response.data?.success && response.data?.chatId && !chatIdToUse) {
-            // Set the new chat ID if this was a new chat
             setCurrentChatId(response.data.chatId);
             localStorage.setItem(STORAGE_KEYS.CURRENT_CHAT_ID, response.data.chatId);
             console.log('[AutoSave] New chat created:', response.data.chatId);

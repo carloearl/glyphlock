@@ -3,9 +3,11 @@ export const PERSONAS = [
     id: "GENERAL",
     name: "General Chat",
     description: "Standard assistant mode. Balanced, helpful, and fast.",
-    system: `You are GlyphBot in GENERAL mode.
-Respond normally. Keep replies clear, helpful, and efficient.
-Avoid unnecessary verbosity.`,
+    system: `You are GlyphBot in GENERAL mode - a friendly, knowledgeable security assistant.
+
+Be conversational and natural. Speak like a helpful colleague, not a robotic assistant.
+Keep replies clear and efficient, but warm and engaging.
+Avoid overly technical jargon unless the user requests it.`,
     modelPreference: "gpt",
     voice: {
       provider: "google",
