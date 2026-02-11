@@ -462,7 +462,7 @@ Provide your response as a JSON object with:
               {uploadReferenceMutation.isPending ? (
                 <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
               ) : (
-                <><GlyphIcon type="upload" size={20} glow /> UPLOAD</>
+                <><GlyphIcon type="upload" size={20} /> UPLOAD</>
               )}
             </Button>
             <input id="ref-upload" type="file" accept="image/*" className="hidden" onChange={handleUploadReference} />
@@ -717,7 +717,7 @@ Provide your response as a JSON object with:
           {generateMutation.isPending ? (
             <><Loader2 className="w-6 h-6 md:w-7 md:h-7 animate-spin" />GENERATING...</>
           ) : (
-            <><GlyphIcon type="launch" size={40} glow />GENERATE IMAGE</>
+            <><GlyphIcon type="launch" size={40} />GENERATE IMAGE</>
           )}
         </Button>
 

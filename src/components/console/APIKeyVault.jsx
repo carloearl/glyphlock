@@ -103,7 +103,7 @@ export default function APIKeyVault({ user }) {
           onClick={() => setShowCreateForm(!showCreateForm)}
           className="bg-gradient-to-r from-[#8C4BFF] to-[#9F00FF] hover:opacity-90 flex items-center gap-2"
         >
-          <GlyphIcon type="blockchain" size={20} glow />
+          <GlyphIcon type="blockchain" size={20} />
           Create New Key
         </Button>
       </div>

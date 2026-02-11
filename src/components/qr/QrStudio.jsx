@@ -761,7 +761,7 @@ export default function QrStudio({ initialTab = 'create' }) {
                           </>
                         ) : (
                           <>
-                            <GlyphIcon type="launch" size={24} glow />
+                            <GlyphIcon type="launch" size={24} />
                             Generate Secure QR
                           </>
                         )}
