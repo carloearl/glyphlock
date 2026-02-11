@@ -3,11 +3,24 @@ import { HelpCircle, X, ChevronRight, ChevronLeft, Sparkles, Target, CheckCircle
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function HelpPanel({ title = "System Guide", sections = [] }) {
+export default function HelpPanel({ title = "System Guide", sections = [], autoPopup = true }) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [activeSection, setActiveSection] = useState(0);
   const [walkthroughMode, setWalkthroughMode] = useState(false);
+
+  // Auto-popup on first visit
+  useEffect(() => {
+    if (autoPopup && sections.length > 0) {
+      const hasSeenHelp = localStorage.getItem('glyphlock_help_seen');
+      if (!hasSeenHelp) {
+        setTimeout(() => {
+          setIsOpen(true);
+          localStorage.setItem('glyphlock_help_seen', 'true');
+        }, 1500);
+      }
+    }
+  }, [autoPopup, sections.length]);
 
   useEffect(() => {
     if (!isOpen) {
