@@ -153,22 +153,50 @@ Give me results as clean JSON following this schema:
 
 export function parseAuditResults(response) {
   try {
+    let parsed = response;
+    
+    // Handle nested response structures
     if (typeof response === 'string') {
-      return JSON.parse(response);
+      parsed = JSON.parse(response);
     }
-    return response;
+    
+    // STABILITY FIX: Validate required fields
+    const validated = {
+      target: parsed.target || 'Unknown Target',
+      targetType: parsed.targetType || 'unknown',
+      auditMode: parsed.auditMode || 'SURFACE',
+      overallGrade: parsed.overallGrade || 'N/A',
+      riskScore: typeof parsed.riskScore === 'number' ? parsed.riskScore : 0,
+      summary: parsed.summary || 'Audit completed successfully',
+      sourcesAnalyzed: parsed.sourcesAnalyzed || 0,
+      historicalDataRange: parsed.historicalDataRange || 'N/A',
+      technicalFindings: Array.isArray(parsed.technicalFindings) ? parsed.technicalFindings : [],
+      businessRisks: Array.isArray(parsed.businessRisks) ? parsed.businessRisks : [],
+      fixPlan: Array.isArray(parsed.fixPlan) ? parsed.fixPlan : [],
+      intelligenceReport: parsed.intelligenceReport || {}
+    };
+    
+    return validated;
   } catch (error) {
     console.error('[Audit Service] Parse error:', error);
     return {
-      target: 'Unknown',
-      targetType: 'unknown',
-      auditMode: 'UNKNOWN',
-      overallGrade: 'N/A',
-      riskScore: 0,
-      summary: 'Failed to parse audit results',
-      technicalFindings: [],
+      target: 'Parse Error',
+      targetType: 'error',
+      auditMode: 'ERROR',
+      overallGrade: 'F',
+      riskScore: 100,
+      summary: `Failed to parse audit results: ${error.message}`,
+      sourcesAnalyzed: 0,
+      historicalDataRange: 'N/A',
+      technicalFindings: [{
+        title: 'Audit Parse Failure',
+        description: error.message,
+        severity: 'CRITICAL',
+        sources: []
+      }],
       businessRisks: [],
-      fixPlan: []
+      fixPlan: [],
+      intelligenceReport: {}
     };
   }
 }

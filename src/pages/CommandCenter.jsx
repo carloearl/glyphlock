@@ -2164,8 +2164,8 @@ export default function CommandCenter() {
         }
         const userData = await base44.auth.me();
         
-        // ADMIN LOCK: Only carloearl@glyphlock.com can access
-        if (userData.email !== 'carloearl@glyphlock.com') {
+        // ADMIN LOCK: Only admin role can access
+        if (userData.role !== 'admin') {
           toast.error('Access denied: Admin privileges required');
           navigate("/");
           return;
