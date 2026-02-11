@@ -176,6 +176,10 @@ Provide your response as a JSON object with:
     mutationFn: async (params) => {
       console.log('Generate params:', params);
       
+      if (!expandedPrompt?.expanded_prompt) {
+        throw new Error('Expand prompt first before generating');
+      }
+      
       // Use Base44's built-in GenerateImage integration
       const finalPrompt = expandedPrompt.expanded_prompt + 
         (selectedStyle ? `, ${selectedStyle} style` : '') +

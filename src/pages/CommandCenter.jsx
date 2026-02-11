@@ -916,22 +916,25 @@ function APIKeysTab({ user }) {
 
   const createKeyMutation = useMutation({
     mutationFn: async (data) => {
-      const publicKey = `glk_pub_${crypto.randomUUID().replace(/-/g, '').substring(0, 24)}`;
-      const secretKey = `glk_sec_${crypto.randomUUID().replace(/-/g, '')}${crypto.randomUUID().replace(/-/g, '').substring(0, 8)}`;
-      
-      return base44.entities.APIKey.create({
+      const response = await base44.functions.invoke('generateAPIKey', {
         name: data.name,
-        public_key: publicKey,
-        secret_key: secretKey,
-        environment: data.environment,
-        status: 'active',
-        last_rotated: new Date().toISOString()
+        environment: data.environment
       });
+      
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+      
+      return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (newKey) => {
       queryClient.invalidateQueries(['apiKeys']);
       setShowCreate(false);
       setNewKeyName("");
+      
+      if (newKey.secret_key) {
+        alert(`🔐 SECRET KEY (save now - won't show again!):\n\n${newKey.secret_key}\n\nPublic Key: ${newKey.public_key}`);
+      }
       toast.success("API key created");
     }
   });
