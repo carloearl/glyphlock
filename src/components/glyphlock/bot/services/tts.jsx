@@ -6,23 +6,34 @@ import { base44 } from '@/api/base44Client';
 
 export async function generate(options) {
   try {
-    console.log('[TTS] Generating with OpenAI TTS:', options);
+    console.log('[TTS] Using OpenAI TTS with settings:', options);
     
-    const response = await base44.functions.invoke('textToSpeechOpenAI', {
-      text: options.text,
-      voiceProfile: options.voiceProfile || 'neutral_female',
-      speed: options.speed || 1.0
+    const user = await base44.auth.me();
+    if (!user) throw new Error('Not authenticated');
+
+    const appUrl = window.location.origin;
+    const functionUrl = `${appUrl}/.netlify/functions/textToSpeechOpenAI`;
+
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        text: options.text,
+        voiceProfile: options.voiceProfile || 'neutral_female',
+        speed: options.speed || 1.0
+      })
     });
-    
-    if (!response?.data) {
-      throw new Error('No audio data received');
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`TTS failed: ${response.status} ${errorText}`);
     }
+
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
     
-    // Backend returns MP3 audio buffer - create blob URL
-    const blob = new Blob([response.data], { type: 'audio/mpeg' });
-    const audioUrl = URL.createObjectURL(blob);
-    
-    console.log('[TTS] OpenAI audio generated successfully');
+    console.log('[TTS] OpenAI audio ready:', audioBlob.size, 'bytes');
     
     return {
       success: true,
@@ -31,7 +42,7 @@ export async function generate(options) {
       voice: options.voiceProfile
     };
   } catch (error) {
-    console.error('[TTS Service] OpenAI TTS failed:', error);
+    console.error('[TTS] OpenAI failed:', error);
     return { 
       success: false, 
       error: error.message,
