@@ -397,8 +397,8 @@ export default function Navbar({ user, onLogin, onLogout }) {
       transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
       className={`w-full text-white sticky top-0 transition-all duration-500 ${
         scrolled 
-          ? 'bg-gradient-to-r from-blue-950/70 via-indigo-950/80 to-blue-950/70 backdrop-blur-2xl shadow-[0_4px_60px_rgba(59,130,246,0.5),0_0_100px_rgba(37,99,235,0.3)]' 
-          : 'bg-gradient-to-r from-blue-950/50 via-indigo-950/60 to-blue-950/50 backdrop-blur-xl'
+          ? 'bg-gradient-to-r from-blue-950/95 via-indigo-950/98 to-blue-950/95 backdrop-blur-2xl shadow-[0_4px_60px_rgba(59,130,246,0.5),0_0_100px_rgba(37,99,235,0.3)]' 
+          : 'bg-gradient-to-r from-blue-950/90 via-indigo-950/95 to-blue-950/90 backdrop-blur-xl'
       }`}
       style={{ 
         zIndex: 10000, 

@@ -121,20 +121,19 @@ When answering questions, use the knowledge bases to provide accurate informatio
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-[99999] w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 text-white shadow-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+        className="fixed bottom-6 right-6 z-[99999] w-14 h-14 rounded-xl bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 text-white shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
         style={{ 
-          boxShadow: '0 0 30px rgba(37, 99, 235, 0.6), 0 0 60px rgba(37, 99, 235, 0.3)',
           pointerEvents: 'auto',
           touchAction: 'manipulation',
           WebkitTapHighlightColor: 'transparent',
           display: 'flex',
           visibility: 'visible',
-          minWidth: '64px',
-          minHeight: '64px'
+          minWidth: '56px',
+          minHeight: '56px'
         }}
         aria-label="Open GlyphBot Junior"
       >
-        <Sparkles className="w-8 h-8" />
+        <Sparkles className="w-6 h-6 text-cyan-400" />
       </button>
     );
   }
