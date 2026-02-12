@@ -93,20 +93,20 @@ export default function About() {
         url="/about"
       />
       
-      <div className="min-h-screen bg-black text-white pt-24 pb-24 relative overflow-hidden">
+      <div className="min-h-screen bg-black text-white pt-16 md:pt-24 pb-16 md:pb-24 relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#00E4FF]/5 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-[#8C4BFF]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div className="container mx-auto px-6 max-w-6xl relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
           
           {/* HERO */}
-          <div ref={heroRef} className="text-center mb-24">
+          <div ref={heroRef} className="text-center mb-16 md:mb-24">
             <motion.h1 
               initial={{ opacity: 0, x: -100 }}
               animate={heroInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl md:text-8xl font-black mb-8 tracking-tighter font-space"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-black mb-4 md:mb-8 tracking-tighter font-space"
             >
               ABOUT <span className="text-transparent bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] bg-clip-text">GLYPHLOCK</span>
             </motion.h1>
@@ -114,7 +114,7 @@ export default function About() {
               initial={{ opacity: 0, x: 100 }}
               animate={heroInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-2xl md:text-3xl text-[#00E4FF] font-bold max-w-4xl mx-auto leading-tight"
+              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-[#00E4FF] font-bold max-w-4xl mx-auto leading-tight px-3"
             >
               Protected Creative Ecosystem
             </motion.p>
@@ -137,7 +137,7 @@ export default function About() {
               <Sparkles className="w-8 h-8 text-[#00E4FF]" />
               Our Origin
             </motion.h2>
-            <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
+            <div className="space-y-4 md:space-y-6 text-gray-300 leading-relaxed text-sm md:text-base lg:text-lg px-2">
               <p>
                 GlyphLock did not begin as a company. It began as a rupture in expectation. A moment where a simple conversation forced a reexamination of what images are allowed to be.
               </p>
