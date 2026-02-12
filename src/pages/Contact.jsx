@@ -75,20 +75,20 @@ export default function Contact() {
         keywords="contact GlyphLock, creative infrastructure, ecosystem partnership, creator protection, licensing inquiry, enterprise consultation, GlyphLock support, El Mirage Arizona"
         url="/contact"
       />
-      <div className="min-h-screen bg-black text-white pt-20 md:pt-32 pb-16 md:pb-24 relative overflow-x-hidden w-full">
+      <div className="min-h-screen bg-black text-white pt-16 md:pt-32 pb-12 md:pb-24 relative overflow-x-hidden w-full">
         {/* Background Elements */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#3B82F6]/5 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#7C3AED]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10 w-full overflow-x-hidden">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 max-w-6xl relative z-10 w-full overflow-x-hidden">
           
           {/* Hero */}
-          <div ref={heroRef} className="text-center mb-12 md:mb-20">
+          <div ref={heroRef} className="text-center mb-8 md:mb-20">
             <motion.h1 
               initial={{ opacity: 0, x: -100 }}
               animate={heroInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-3xl sm:text-5xl md:text-7xl font-black mb-4 md:mb-6 tracking-tighter px-4"
+              className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-black mb-3 md:mb-6 tracking-tighter px-2"
             >
               START <span className="text-transparent bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] bg-clip-text drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]">BUILDING</span>
             </motion.h1>
