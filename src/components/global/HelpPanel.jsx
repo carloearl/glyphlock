@@ -97,40 +97,31 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
 
   return (
     <>
-      {/* Floating Help Button - CYBER NEON */}
-      <motion.button
-        onClick={() => setIsOpen(true)}
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.95 }}
-        className="fixed bottom-24 right-6 z-[9998] w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-600/20 backdrop-blur-xl border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.6),inset_0_0_20px_rgba(168,85,247,0.2)] flex items-center justify-center transition-all group hover:shadow-[0_0_60px_rgba(6,182,212,0.9)]"
-        aria-label="Open help guide"
+      {/* Help Tab - Left Side Hover */}
+      <div
+        onMouseEnter={() => setIsOpen(true)}
+        className="fixed left-0 top-1/3 z-[9998] w-12 h-32 flex items-center justify-center cursor-pointer"
+        style={{ pointerEvents: 'auto' }}
       >
-        <HelpCircle className="w-7 h-7 text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,1)] group-hover:drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
-        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-400 border-2 border-slate-950 shadow-[0_0_12px_rgba(6,182,212,1)] animate-pulse" />
-      </motion.button>
+        <div className="w-8 h-24 rounded-r-xl bg-white/10 hover:bg-white/15 backdrop-blur-md border-r border-t border-b border-white/20 flex flex-col items-center justify-center gap-2 transition-all hover:w-10">
+          <HelpCircle className="w-5 h-5 text-blue-400" />
+          <div className="text-[10px] text-white/70 font-bold -rotate-90 whitespace-nowrap">GUIDE</div>
+        </div>
+      </div>
 
-      {/* Help Modal */}
+      {/* Help Panel Slide-in */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[99998] flex items-center justify-center p-4" onClick={() => setIsOpen(false)}>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/90 backdrop-blur-md"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="relative w-full max-w-4xl max-h-[85vh] overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/30 to-purple-600/30 blur-2xl -z-10" />
-              
-              <div className="bg-gradient-to-br from-slate-900/98 via-slate-950/98 to-slate-900/98 border-2 border-cyan-500/40 rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5),inset_0_0_60px_rgba(168,85,247,0.15)]">
+          <motion.div
+            initial={{ x: -480 }}
+            animate={{ x: 0 }}
+            exit={{ x: -480 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            onMouseLeave={() => setIsOpen(false)}
+            className="fixed left-0 top-0 bottom-0 z-[99998] w-[480px] max-w-[90vw]"
+            onClick={(e) => e.stopPropagation()}
+          >
+              <div className="bg-gradient-to-br from-slate-900/98 via-slate-950/98 to-slate-900/98 border-r-2 border-cyan-500/40 overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5),inset_0_0_60px_rgba(168,85,247,0.15)] h-full">
                 
                 {/* Header */}
                 <div className="relative overflow-hidden border-b-2 border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-blue-500/10">
@@ -396,8 +387,8 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
                   </div>
                 </div>
               </div>
-            </motion.div>
-          </div>
+              </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
