@@ -139,9 +139,10 @@ When answering questions, use the knowledge bases to provide accurate informatio
   return (
     <div 
       onMouseLeave={() => setIsOpen(false)}
-      className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] flex flex-col overflow-hidden rounded-l-2xl shadow-2xl border-l border-t border-b glyph-glass-dark"
+      className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] flex flex-col overflow-hidden rounded-l-2xl shadow-2xl border-l border-t border-b"
       style={{ 
-        borderColor: 'rgba(37, 99, 235, 0.3)',
+        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
+        borderColor: 'rgba(37, 99, 235, 0.5)',
         width: '400px',
         height: '600px',
         maxWidth: 'calc(100vw - 48px)',
@@ -155,9 +156,8 @@ When answering questions, use the knowledge bases to provide accurate informatio
         isolation: 'isolate'
       }}
     >
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM2YTAwZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20 pointer-events-none"></div>
       
-      <header className="glyph-glass-dark border-b border-blue-400/20 shadow-lg relative z-10 glyph-glow">
+      <header className="border-b border-blue-400/30 shadow-lg relative z-10" style={{ background: 'rgba(30, 41, 59, 0.95)' }}>
         <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -179,7 +179,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-4 py-6 space-y-4 relative z-10">
+      <main className="flex-1 overflow-y-auto px-4 py-6 space-y-4 relative z-10" style={{ background: 'rgba(15, 23, 42, 0.95)' }}>
         {messages.map((msg, idx) => (
           <div
             key={idx}
@@ -232,7 +232,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
         <div ref={messagesEndRef} />
       </main>
 
-      <footer className="glyph-glass-dark border-t border-blue-400/20 px-4 py-4 relative z-10">
+      <footer className="border-t border-blue-400/30 px-4 py-4 relative z-10" style={{ background: 'rgba(30, 41, 59, 0.95)' }}>
         <div className="flex items-center gap-3">
           <input
             type="text"
