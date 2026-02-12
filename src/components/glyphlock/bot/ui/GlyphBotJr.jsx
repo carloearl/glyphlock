@@ -129,10 +129,10 @@ When answering questions, use the knowledge bases to provide accurate informatio
       >
         <div 
           onClick={() => setIsOpen(true)}
-          className="w-12 h-12 group-hover:w-32 group-hover:h-14 rounded-l-2xl bg-gradient-to-br from-blue-600/30 to-purple-600/30 backdrop-blur-xl border-2 border-blue-400/50 flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] overflow-hidden"
+          className="w-14 h-14 group-hover:w-40 group-hover:h-16 rounded-l-2xl bg-gradient-to-br from-blue-600/40 to-purple-600/40 backdrop-blur-xl border-2 border-blue-400/60 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_30px_rgba(37,99,235,0.5)] overflow-hidden px-3"
         >
-          <Sparkles className="w-6 h-6 text-blue-300 flex-shrink-0" />
-          <div className="opacity-0 group-hover:opacity-100 text-sm text-blue-200 font-bold whitespace-nowrap tracking-wider transition-opacity">CHAT</div>
+          <Sparkles className="w-7 h-7 text-blue-300 flex-shrink-0" />
+          <div className="opacity-0 group-hover:opacity-100 text-base text-blue-100 font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">CHAT</div>
         </div>
       </div>
     );

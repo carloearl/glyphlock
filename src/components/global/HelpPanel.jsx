@@ -102,9 +102,9 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
         onClick={() => setIsOpen(true)}
         className="fixed right-0 bottom-20 z-[9997] group cursor-pointer"
       >
-        <div className="w-12 h-12 group-hover:w-32 group-hover:h-14 rounded-l-2xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 backdrop-blur-xl border-2 border-cyan-400/50 flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(6,182,212,0.4)] overflow-hidden">
-          <HelpCircle className="w-6 h-6 text-cyan-300 flex-shrink-0" />
-          <div className="opacity-0 group-hover:opacity-100 text-sm text-cyan-200 font-bold whitespace-nowrap tracking-wider transition-opacity">HELP</div>
+        <div className="w-14 h-14 group-hover:w-40 group-hover:h-16 rounded-l-2xl bg-gradient-to-br from-cyan-500/40 to-blue-600/40 backdrop-blur-xl border-2 border-cyan-400/60 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.5)] overflow-hidden px-3">
+          <HelpCircle className="w-7 h-7 text-cyan-300 flex-shrink-0" />
+          <div className="opacity-0 group-hover:opacity-100 text-base text-cyan-100 font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">HELP</div>
         </div>
       </div>
 
@@ -124,7 +124,7 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="relative w-full max-w-6xl max-h-[90vh] overflow-hidden"
+              className="relative w-full max-w-7xl max-h-[92vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-2 border-cyan-500/40 rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5),inset_0_0_60px_rgba(168,85,247,0.15)] h-full">
@@ -297,8 +297,8 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col md:flex-row min-h-[500px] max-h-[65vh]">
-                      <div className="w-full md:w-64 border-b md:border-b-0 md:border-r-2 border-slate-800/50 bg-slate-950/60 p-4 space-y-2 overflow-y-auto">
+                  <div className="flex flex-col md:flex-row min-h-[500px] max-h-[70vh]">
+                    <div className="w-full md:w-72 border-b md:border-b-0 md:border-r-2 border-slate-800/50 bg-slate-950/60 p-5 space-y-2 overflow-y-auto">
                         {sections.map((section, idx) => (
                           <button
                             key={idx}
@@ -321,7 +321,7 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
                         ))}
                       </div>
 
-                      <div className="flex-1 p-6 overflow-y-auto">
+                      <div className="flex-1 p-8 overflow-y-auto">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={activeSection}
@@ -331,27 +331,47 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
                             className="space-y-6"
                           >
                             {sections[activeSection]?.content?.map((item, idx) => (
-                              <div key={idx} className="space-y-3">
-                                <div className="flex items-start gap-3 p-5 rounded-xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-2 border-purple-500/20 hover:border-cyan-400/40 transition-all shadow-[0_0_15px_rgba(168,85,247,0.1)] hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]">
-                                  <Zap className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                                  <div className="flex-1 space-y-2">
-                                    <h4 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-purple-300">
-                                      {item.heading}
-                                    </h4>
-                                    <p className="text-sm text-slate-300 leading-relaxed">
-                                      {item.text}
-                                    </p>
-                                    {item.code && (
-                                      <pre className="mt-3 p-3 rounded-lg bg-black/60 border border-cyan-500/30 overflow-x-auto">
-                                        <code className="text-xs font-mono text-green-400">
-                                          {item.code}
-                                        </code>
-                                      </pre>
-                                    )}
+                              <div key={idx} className="space-y-4">
+                                <div className="p-6 rounded-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-purple-500/30 hover:border-cyan-400/50 transition-all shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]">
+                                  <div className="flex items-start gap-4">
+                                    <Zap className="w-6 h-6 text-cyan-400 flex-shrink-0 mt-1 drop-shadow-[0_0_10px_rgba(6,182,212,0.9)]" />
+                                    <div className="flex-1 space-y-3">
+                                      <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-purple-300">
+                                        {item.heading}
+                                      </h4>
+                                      <p className="text-base text-slate-200 leading-relaxed">
+                                        {item.text}
+                                      </p>
+                                      {item.tip && (
+                                        <div className="flex items-start gap-3 p-4 rounded-lg bg-purple-500/10 border border-purple-400/30 mt-3">
+                                          <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                                          <div>
+                                            <p className="text-xs text-purple-400 font-bold uppercase tracking-wider mb-1">Pro Tip</p>
+                                            <p className="text-sm text-purple-200 leading-relaxed">{item.tip}</p>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {item.action && (
+                                        <div className="flex items-start gap-3 p-4 rounded-lg bg-cyan-500/10 border border-cyan-400/30 mt-3">
+                                          <Target className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                                          <div>
+                                            <p className="text-xs text-cyan-400 font-bold uppercase tracking-wider mb-1">Action Required</p>
+                                            <p className="text-sm text-cyan-200 leading-relaxed">{item.action}</p>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {item.code && (
+                                        <pre className="mt-4 p-4 rounded-lg bg-black/70 border border-cyan-500/40 overflow-x-auto">
+                                          <code className="text-sm font-mono text-green-400 leading-relaxed">
+                                            {item.code}
+                                          </code>
+                                        </pre>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                                 {idx < sections[activeSection].content.length - 1 && (
-                                  <div className="border-b border-slate-800/30" />
+                                  <div className="border-b border-slate-800/40 my-4" />
                                 )}
                               </div>
                             ))}
