@@ -120,7 +120,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
   if (!isOpen) {
     return (
       <div
-        className="fixed right-0 bottom-36 z-[99999] group cursor-pointer"
+        className="fixed right-2 bottom-36 z-[99999] group cursor-pointer"
         style={{ 
           pointerEvents: 'auto',
           touchAction: 'manipulation',
@@ -129,10 +129,10 @@ When answering questions, use the knowledge bases to provide accurate informatio
       >
         <div 
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 group-hover:w-40 group-hover:h-16 rounded-l-2xl bg-gradient-to-br from-blue-600/40 to-purple-600/40 backdrop-blur-xl border-2 border-blue-400/60 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_30px_rgba(37,99,235,0.5)] overflow-hidden px-3"
+          className="w-16 h-16 group-hover:w-44 group-hover:h-18 rounded-2xl bg-gradient-to-br from-blue-600/50 to-purple-600/50 backdrop-blur-xl border-2 border-blue-400/70 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_35px_rgba(37,99,235,0.6)] overflow-hidden px-4"
         >
-          <Sparkles className="w-7 h-7 text-blue-300 flex-shrink-0" />
-          <div className="opacity-0 group-hover:opacity-100 text-base text-blue-100 font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">CHAT</div>
+          <Sparkles className="w-8 h-8 text-blue-200 flex-shrink-0 drop-shadow-[0_0_8px_rgba(59,130,246,0.9)]" />
+          <div className="opacity-0 group-hover:opacity-100 text-lg text-blue-50 font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">CHAT</div>
         </div>
       </div>
     );

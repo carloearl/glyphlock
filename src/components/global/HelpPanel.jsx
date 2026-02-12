@@ -100,11 +100,11 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
       {/* Help Tab - Lower Right */}
       <div
         onClick={() => setIsOpen(true)}
-        className="fixed right-0 bottom-20 z-[9997] group cursor-pointer"
+        className="fixed right-2 bottom-20 z-[9997] group cursor-pointer"
       >
-        <div className="w-14 h-14 group-hover:w-40 group-hover:h-16 rounded-l-2xl bg-gradient-to-br from-cyan-500/40 to-blue-600/40 backdrop-blur-xl border-2 border-cyan-400/60 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.5)] overflow-hidden px-3">
-          <HelpCircle className="w-7 h-7 text-cyan-300 flex-shrink-0" />
-          <div className="opacity-0 group-hover:opacity-100 text-base text-cyan-100 font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">HELP</div>
+        <div className="w-16 h-16 group-hover:w-44 group-hover:h-18 rounded-2xl bg-gradient-to-br from-cyan-500/50 to-blue-600/50 backdrop-blur-xl border-2 border-cyan-400/70 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_35px_rgba(6,182,212,0.6)] overflow-hidden px-4">
+          <HelpCircle className="w-8 h-8 text-cyan-200 flex-shrink-0 drop-shadow-[0_0_8px_rgba(6,182,212,0.9)]" />
+          <div className="opacity-0 group-hover:opacity-100 text-lg text-cyan-50 font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">HELP</div>
         </div>
       </div>
 
