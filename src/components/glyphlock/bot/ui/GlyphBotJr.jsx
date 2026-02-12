@@ -127,7 +127,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
       >
         <div 
           onClick={() => setIsOpen(true)}
-          className="relative w-14 h-14 group-hover:w-36 group-hover:h-14 rounded-xl bg-gradient-to-br from-blue-600/60 to-purple-600/60 backdrop-blur-xl border-2 border-blue-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(37,99,235,0.7)] overflow-hidden flex items-center"
+          className="relative w-14 h-14 group-hover:w-28 group-hover:h-14 rounded-xl bg-gradient-to-br from-blue-600/60 to-purple-600/60 backdrop-blur-xl border-2 border-blue-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(37,99,235,0.7)] overflow-hidden flex items-center"
         >
           <div className="absolute inset-0 flex items-center justify-center group-hover:left-2">
             <Sparkles className="w-5 h-5 text-blue-100 drop-shadow-[0_0_12px_rgba(59,130,246,1)]" />

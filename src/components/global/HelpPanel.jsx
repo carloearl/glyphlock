@@ -103,7 +103,7 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
         className="fixed right-4 z-[9997] group cursor-pointer"
         style={{ bottom: '40px' }}
       >
-        <div className="relative w-14 h-14 group-hover:w-36 group-hover:h-14 rounded-xl bg-gradient-to-br from-cyan-500/60 to-blue-600/60 backdrop-blur-xl border-2 border-cyan-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] overflow-hidden flex items-center">
+        <div className="relative w-14 h-14 group-hover:w-28 group-hover:h-14 rounded-xl bg-gradient-to-br from-cyan-500/60 to-blue-600/60 backdrop-blur-xl border-2 border-cyan-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] overflow-hidden flex items-center">
           <div className="absolute inset-0 flex items-center justify-center group-hover:left-2">
             <HelpCircle className="w-5 h-5 text-cyan-100 drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
           </div>
