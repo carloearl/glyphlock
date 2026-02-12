@@ -173,7 +173,7 @@ export default function Services() {
               initial={{ opacity: 0, y: 40, scale: 0.9 }}
               animate={heroInView ? { opacity: 1, y: 0, scale: 1 } : {}}
               transition={{ duration: 0.9, delay: 0.3, type: "spring", stiffness: 120 }}
-              className="flex flex-wrap justify-center gap-4"
+              className="flex flex-wrap justify-center gap-3 px-2"
             >
               <Link to={createPageUrl("Consultation")}>
                 <Button className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white">
