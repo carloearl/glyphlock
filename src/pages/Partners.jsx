@@ -106,34 +106,35 @@ export default function Partners() {
               PARTNERSHIP <span className="text-transparent bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] bg-clip-text">OVERVIEW</span>
             </h1>
             <p className="text-lg text-[#00E4FF] font-bold mb-4">
-              Credentialed Integrity System – Protocol-Governed Access Control
+              Credentialed Integrity System
+            </p>
+            <p className="text-base text-gray-400 font-semibold mb-6">
+              Protocol Governed Access Control
             </p>
             <p className="text-gray-300 text-lg mb-8 leading-relaxed">
-              System-enforced verification modules addressing the $283 billion IP theft crisis. 
-              Below is protocol architecture, credential provisioning framework, and licensing structure.
+              GlyphLock provisions cryptographic verification infrastructure addressing the $283B annual IP theft crisis. This document outlines architecture posture, credential framework, and licensing model for early operators.
             </p>
 
             <div className="grid gap-4 sm:grid-cols-3 mb-8">
               <div className="glass-card rounded-xl p-4 border border-[#00E4FF]/20">
-                <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">Conservative floor</p>
+                <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">Current valuation band</p>
                 <p className="text-xl font-black text-white font-space">$1.6M – $3.6M</p>
-                <p className="text-xs text-gray-500 mt-1">Berkus & pre‑seed comparable methods.</p>
+                <p className="text-xs text-gray-500 mt-1">Berkus and comparable pre-seed frameworks</p>
               </div>
               <div className="glass-card rounded-xl p-4 border border-[#8C4BFF]/50 bg-[#8C4BFF]/5 shadow-[0_0_20px_rgba(140,75,255,0.2)]">
-                <p className="text-[10px] uppercase tracking-widest text-[#8C4BFF] mb-1 font-bold">Revenue‑anchored band</p>
+                <p className="text-[10px] uppercase tracking-widest text-[#8C4BFF] mb-1 font-bold">Revenue anchored band</p>
                 <p className="text-xl font-black text-white font-space">$6.8M – $13.6M</p>
-                <p className="text-xs text-gray-400 mt-1">Based on sustained revenue and live deployments.</p>
+                <p className="text-xs text-gray-400 mt-1">Live deployment multiple</p>
               </div>
               <div className="glass-card rounded-xl p-4 border border-emerald-500/30 bg-emerald-500/5">
                 <p className="text-[10px] uppercase tracking-widest text-emerald-400 mb-1 font-bold">Execution target</p>
                 <p className="text-xl font-black text-white font-space">$8M – $10M</p>
-                <p className="text-xs text-gray-500 mt-1">Working band for upcoming rounds.</p>
+                <p className="text-xs text-gray-500 mt-1">Working range for partnership rounds</p>
               </div>
             </div>
 
             <p className="text-xs text-gray-500 italic">
-              This page is a high‑level snapshot for partners and licensees. Detailed financials, deployment models,
-              and legal documentation are available on request under NDA.
+              This snapshot reflects present valuation frameworks. Forward projections and strategic scale models are available under NDA.
             </p>
           </div>
 
@@ -184,14 +185,13 @@ export default function Partners() {
               <div>
                 <h3 className="text-xs font-bold text-[#00E4FF] mb-2 uppercase tracking-widest">Mission</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  Deploy credentialed integrity system with protocol-governed verification modules addressing 
-                  the $283 billion IP theft crisis through cryptographic governance.
+                  Deploy a credentialed integrity system governed by cryptographic protocol to counter the global IP theft economy and establish verifiable authorship infrastructure.
                 </p>
               </div>
               <div>
                 <h3 className="text-xs font-bold text-[#00E4FF] mb-2 uppercase tracking-widest">Founded</h3>
                 <p className="text-white font-medium">2025 • El Mirage, Arizona</p>
-                <p className="text-gray-500 text-xs mt-1">Active Early-Stage Company</p>
+                <p className="text-gray-500 text-xs mt-1">Active early stage infrastructure company</p>
               </div>
             </div>
           </div>
@@ -201,44 +201,47 @@ export default function Partners() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="text-3xl font-black text-red-500 font-space">$283B</p>
-                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">IP Theft Crisis Annually</p>
+                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">annual IP theft exposure</p>
               </div>
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="text-3xl font-black text-[#00E4FF] font-space">$10T+</p>
-                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">Total Addressable Market</p>
+                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">addressable digital infrastructure market</p>
               </div>
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="text-3xl font-black text-[#8C4BFF] font-space">$3.78B</p>
-                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">QR Code Market 2025</p>
+                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">QR identity market 2025</p>
               </div>
               <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                 <p className="text-3xl font-black text-emerald-400 font-space">$2.7T</p>
-                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">Mobile QR Payments 2025</p>
+                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">mobile QR payments 2025</p>
               </div>
             </div>
+            <p className="text-xs text-gray-400 mt-6 leading-relaxed">
+              GlyphLock positions as protocol infrastructure inside these sectors.
+            </p>
           </div>
         </section>
 
         {/* Financial Highlights */}
         <section className="mb-24 glass-card rounded-2xl border border-emerald-500/30 p-8 bg-emerald-900/5">
-          <h2 className="text-2xl font-bold text-emerald-400 mb-8 font-space">Financial Highlights - First 90 Days</h2>
+          <h2 className="text-2xl font-bold text-emerald-400 mb-8 font-space">First 90 Day Performance</h2>
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { label: "Revenue Generated", val: "$340K", sub: "First 90 days", color: "text-white" },
-              { label: "Insurance Escrows", val: "$14M", sub: "Secured pre-rollout", color: "text-[#00E4FF]" },
-              { label: "Enterprise Contracts", val: "$225K+", sub: "Per contract value", color: "text-[#8C4BFF]" },
-              { label: "Annualized Run Rate", val: "$1.36M", sub: "Based on trajectory", color: "text-emerald-400" }
+              { label: "Revenue generated", val: "$340K", sub: "", color: "text-white" },
+              { label: "Insurance escrow pipeline", val: "$14M", sub: "secured", color: "text-[#00E4FF]" },
+              { label: "Enterprise contract band", val: "$225K+", sub: "per deployment", color: "text-[#8C4BFF]" },
+              { label: "Annualized run rate", val: "$1.36M", sub: "", color: "text-emerald-400" }
             ].map((item, i) => (
               <div key={i} className="bg-black/40 p-6 rounded-xl border border-white/10">
                 <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">{item.label}</p>
                 <p className={`text-3xl font-black font-space ${item.color}`}>{item.val}</p>
-                <p className="text-xs text-gray-400 mt-2">{item.sub}</p>
+                {item.sub && <p className="text-xs text-gray-400 mt-2">{item.sub}</p>}
               </div>
             ))}
           </div>
           <div className="mt-6 pt-6 border-t border-emerald-500/20">
             <p className="text-sm text-emerald-200/80 leading-relaxed">
-              <strong>Growth Trajectory:</strong> Early performance demonstrates strong market demand and successful enterprise client acquisition, experiencing aggressive growth typical of high-potential SaaS and cybersecurity platforms.
+              Early traction demonstrates enterprise demand for protocol governed verification systems.
             </p>
           </div>
         </section>
@@ -247,11 +250,12 @@ export default function Partners() {
         <section className="mb-24">
           <div className="rounded-3xl p-12 text-center bg-gradient-to-b from-[#001F54] to-black border border-[#00E4FF]/30 relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-            <h2 className="text-3xl font-bold text-white mb-6 font-space relative z-10">OUR VISION</h2>
+            <h2 className="text-3xl font-bold text-white mb-6 font-space relative z-10">VISION</h2>
             <p className="text-xl text-gray-300 leading-relaxed max-w-4xl mx-auto relative z-10">
-              To become the global leader in AI-powered cybersecurity solutions, protecting enterprises from the 
-              growing $283 billion IP theft crisis while pioneering quantum-resistant security technologies for 
-              the next generation of digital infrastructure.
+              Build the global verification layer for digital identity and authorship.
+            </p>
+            <p className="text-base text-gray-400 mt-6 max-w-3xl mx-auto relative z-10">
+              Target outcome: billion scale protocol infrastructure securing creative and enterprise ecosystems.
             </p>
           </div>
         </section>
@@ -318,12 +322,12 @@ export default function Partners() {
         <section className="mb-12 glass-card rounded-3xl border border-[#8C4BFF]/50 p-8 bg-gradient-to-r from-[#8C4BFF]/10 to-[#00E4FF]/10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-2 font-space">Protocol Licensing Only</h2>
+              <h2 className="text-2xl font-bold text-white mb-2 font-space">Protocol Licensing Model</h2>
               <p className="text-gray-300 text-sm max-w-xl mb-4">
-                <strong>Equity is not available.</strong> GlyphLock provisions protocol access to credentialed operators with verified deployment capability.
+                <strong>Equity is not offered.</strong> GlyphLock provisions access through credentialed licensing.
               </p>
               <p className="text-xs text-gray-500 italic">
-                No equity. No dilution. Protocol-governed licensing only.
+                No dilution • No equity sale • Protocol governed operator network
               </p>
             </div>
             <div className="flex gap-4">
@@ -342,8 +346,8 @@ export default function Partners() {
         </section>
 
         <footer className="border-t border-white/10 pt-8 flex justify-between text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} GlyphLock LLC. This page is not an offer to sell securities.</p>
-          <p>Confidential Snapshot.</p>
+          <p>© GlyphLock LLC</p>
+          <p>Not an offer to sell securities</p>
         </footer>
       </main>
       </div>
