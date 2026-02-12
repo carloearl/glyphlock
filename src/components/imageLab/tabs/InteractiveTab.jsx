@@ -619,7 +619,7 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                 />
               )}
 
-              {/* Render hotspots - clean overlay, tooltip on hover */}
+              {/* Render hotspots - fully transparent zones, only visible on hover */}
               {hotspots.map((hotspot) => (
                 <div
                   key={hotspot.id}
@@ -631,13 +631,10 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                       setSelectedHotspot(hotspot);
                     }
                   }}
-                  title={hotspot.actionValue ? `${hotspot.label}: ${hotspot.actionValue}` : hotspot.label}
                   className={`absolute border-2 transition-all group rounded-lg ${
                     selectedHotspot?.id === hotspot.id
                       ? 'border-cyan-400 bg-cyan-400/20 shadow-[0_0_25px_rgba(6,182,212,0.8)]'
-                      : hotspot.actionValue
-                        ? 'border-green-400/0 bg-transparent hover:border-green-400/60 hover:bg-green-400/10 cursor-pointer'
-                        : 'border-purple-400/50 bg-purple-400/10 hover:bg-purple-400/20 cursor-default'
+                      : 'border-transparent bg-transparent hover:border-green-400/60 hover:bg-green-400/10 cursor-pointer'
                   }`}
                   style={{
                     left: `${hotspot.x}%`,
