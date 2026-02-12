@@ -8,24 +8,24 @@ import SEOHead from "@/components/SEOHead";
 export default function TrustSecurity() {
   const currentMeasures = [
     {
-      title: "Secure Infrastructure",
+      title: "Battle-Tested Infrastructure",
       status: "Active",
-      description: "Enterprise cloud infrastructure with leading providers. Encrypted communications using TLS 1.3. Secure session management. DDoS protection. Regular security updates."
+      description: "Enterprise-grade resilience engineered for creators under pressure. Encrypted communications (TLS 1.3), DDoS protection, and regular hardening updates ensure your work cannot be quietly erased."
     },
     {
-      title: "Intellectual Property Protection",
+      title: "Creator IP Protection",
       status: "Active",
-      description: "Patent pending (USPTO App. No. 18/584,961). Legal frameworks protecting cryptographic protocols, steganographic encryption methods, proprietary interfaces, and trade secrets."
+      description: "Patent pending (USPTO App. No. 18/584,961). Legal frameworks protecting independent authorship with cryptographic proof, blockchain timestamping, and Master Covenant governance — leveling the field against larger hostile forces."
     },
     {
-      title: "Privacy First Design",
+      title: "Audit-Ready Transparency",
       status: "Active",
-      description: "Privacy by design principles. Minimal data collection. User consent management. Defined data retention policies. Transparent data handling practices."
+      description: "Every action logged. Every change traceable. Minimal data collection with user consent. AI behavior and system operations recorded on tamper-resistant ledgers for long-term trust and accountability."
     },
     {
-      title: "Development Security",
+      title: "Human-Overseen AI Safety",
       status: "Active",
-      description: "Secure development lifecycle. Mandatory code reviews. Dependency scanning. Version control protections. Role based access control."
+      description: "AI operates inside accountable guardrails. Secure development lifecycle with mandatory human review. Machine intelligence paired with structural oversight to prevent runaway automation."
     }
   ];
 
@@ -135,9 +135,9 @@ export default function TrustSecurity() {
   return (
     <>
       <SEOHead 
-        title="Trust & Security Center - GlyphLock Security Controls & Compliance"
-        description="GlyphLock's security architecture, operational controls, and compliance roadmap. Transparent documentation of current security measures and certification progress."
-        keywords="security controls, compliance roadmap, data protection, encryption, SOC 2, ISO 27001, GDPR, security framework"
+        title="Trust & Infrastructure - GlyphLock Ecosystem Resilience & Compliance"
+        description="GlyphLock's infrastructure architecture, audit-ready controls, and compliance framework. Transparent documentation of the protection layer securing independent creators and verified ecosystems."
+        keywords="infrastructure resilience, audit trails, creator protection, blockchain ledgers, AI accountability, SOC 2, ISO 27001, GDPR, tamper-resistant systems"
         url="/trust-security"
       />
       
@@ -150,25 +150,25 @@ export default function TrustSecurity() {
             <div className="flex items-center justify-center gap-2 mb-6">
               <Shield className="w-6 h-6 md:w-8 md:h-8 text-[#00E4FF]" />
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight">
-                Trust & Security Center
+                Trust & Infrastructure
               </h1>
             </div>
             <p className="text-base md:text-xl text-gray-400 max-w-3xl mx-auto px-4">
-              GlyphLock's commitment to security, privacy, and compliance
+              Battle-tested infrastructure protecting independent creators with audit-ready compliance
             </p>
           </div>
 
           {/* Foundation Statement */}
           <div className="glass-card rounded-2xl border border-white/10 p-6 md:p-8 lg:p-12 mb-8 md:mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6">Security Foundation</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Infrastructure Foundation</h2>
             <p className="text-gray-300 leading-relaxed text-lg">
-              Security is engineered into every layer of the GlyphLock verification protocol. Architecture and operational controls are designed for evaluation by standards bodies, with roadmap toward formal certification.
+              Protection is engineered into every layer of the GlyphLock ecosystem. Independent creators deserve infrastructure that cannot be quietly erased or overridden — our architecture and operational controls are designed for audit-ready transparency and long-term resilience, with roadmap toward formal certification.
             </p>
           </div>
 
           {/* Compliance & Standards - NEW SECTION */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center">Compliance & Standards</h2>
+            <h2 className="text-3xl font-bold text-white mb-8 text-center">Infrastructure Standards & Compliance</h2>
             <div className="glass-card rounded-2xl border border-white/10 p-8 md:p-12 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none"></div>
               
@@ -201,7 +201,7 @@ export default function TrustSecurity() {
 
               <div className="mt-10 pt-8 border-t border-white/10 text-center">
                 <p className="text-slate-400 max-w-3xl mx-auto leading-relaxed">
-                  GlyphLock aligns its internal security controls with widely recognized industry frameworks. While we operate in alignment with these standards, specific certifications are subject to audit cycles and formal attestation timelines.
+                  GlyphLock's infrastructure is engineered to protect independent creators against power imbalance. Our controls align with industry frameworks to ensure your work operates inside auditable, resilient systems — not as security theater, but as structural protection. Certifications are subject to audit cycles and formal attestation.
                 </p>
               </div>
             </div>
@@ -209,7 +209,7 @@ export default function TrustSecurity() {
 
           {/* Current Security Measures */}
           <div className="mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">Current Security Measures</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">Active Protection Measures</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {currentMeasures.map((measure, idx) => (
                 <div key={idx} className="glass-card rounded-xl border border-[#00E4FF]/20 p-6">
@@ -273,7 +273,7 @@ export default function TrustSecurity() {
 
           {/* Security Controls Summary */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-white mb-8">Security Controls Summary</h2>
+            <h2 className="text-3xl font-bold text-white mb-8">Infrastructure Controls Summary</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {controls.map((control, idx) => (
                 <div key={idx} className="glass-card rounded-xl border border-white/10 p-6">
@@ -356,9 +356,9 @@ export default function TrustSecurity() {
           {/* Security Inquiries */}
           <div className="glass-card rounded-2xl border border-[#00E4FF]/30 p-6 md:p-8 lg:p-12 text-center">
             <Lock className="w-12 h-12 text-[#00E4FF] mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-4">Security Inquiries</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Infrastructure Inquiries</h2>
             <p className="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto">
-              For security concerns, audit requests, or compliance documentation, contact GlyphLock authority. Certification documentation provided under NDA once formal audits complete.
+              For infrastructure questions, audit requests, or compliance documentation, contact the GlyphLock team. Certification docs provided under NDA once formal audits complete. We're here to protect your creative sovereignty with transparency.
             </p>
             
             <div className="space-y-2 text-sm text-gray-400 mb-8">
@@ -369,7 +369,7 @@ export default function TrustSecurity() {
 
             <Link to={createPageUrl("Contact")}>
               <Button className="bg-[#00E4FF] hover:bg-[#0099FF] text-black font-bold px-8 py-6 text-lg rounded-xl">
-                Contact Security Team
+                Contact Infrastructure Team
               </Button>
             </Link>
           </div>
