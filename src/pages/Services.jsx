@@ -231,7 +231,7 @@ export default function Services() {
               <span className="text-white">Ecosystems We </span>
               <span className="text-blue-400">Enable</span>
             </motion.h2>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {industries.map((industry, idx) => (
                 <motion.div 
                   key={idx} 
