@@ -1,20 +1,11 @@
 import { base44 } from '@/api/base44Client';
 
-/**
- * TTS Service - Wrapper around textToSpeech backend function
- */
-
 export async function generate(options) {
   try {
-    console.log('[TTS] Using OpenAI TTS with settings:', options);
-    
     const user = await base44.auth.me();
     if (!user) throw new Error('Not authenticated');
 
-    const appUrl = window.location.origin;
-    const functionUrl = `${appUrl}/.netlify/functions/textToSpeechOpenAI`;
-
-    const response = await fetch(functionUrl, {
+    const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -25,29 +16,28 @@ export async function generate(options) {
       })
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`TTS failed: ${response.status} ${errorText}`);
-    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const audioBlob = await response.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
+    const blob = await response.blob();
+    if (blob.size === 0) throw new Error('Empty audio response');
     
-    console.log('[TTS] OpenAI audio ready:', audioBlob.size, 'bytes');
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio();
+    audio.src = url;
     
-    return {
-      success: true,
-      audioUrl,
-      provider: 'openai',
-      voice: options.voiceProfile
-    };
+    await new Promise((resolve, reject) => {
+      audio.addEventListener('canplaythrough', resolve, { once: true });
+      audio.addEventListener('error', reject, { once: true });
+      audio.load();
+    });
+
+    await audio.play();
+    audio.onended = () => URL.revokeObjectURL(url);
+    
+    return { success: true, audioUrl: url, provider: 'openai', voice: options.voiceProfile };
   } catch (error) {
-    console.error('[TTS] OpenAI failed:', error);
-    return { 
-      success: false, 
-      error: error.message,
-      audioUrl: null
-    };
+    console.error('[TTS] Failed:', error);
+    return { success: false, error: error.message, audioUrl: null };
   }
 }
 

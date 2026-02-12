@@ -25,38 +25,24 @@ export default function GlyphBotJr() {
     if (!cleanText) return;
 
     try {
-      const user = await base44.auth.me();
-      if (!user) throw new Error('Not authenticated');
-
-      const appUrl = window.location.origin;
-      const functionUrl = `${appUrl}/.netlify/functions/textToSpeechOpenAI`;
-
-      const response = await fetch(functionUrl, {
+      const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          text: cleanText,
-          voiceProfile: 'neutral_female',
-          speed: 1.1
-        })
+        body: JSON.stringify({ text: cleanText, voiceProfile: 'neutral_female', speed: 1.1 })
       });
 
-      if (!response.ok) {
-        throw new Error(`TTS failed: ${response.status} ${response.statusText}`);
-      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio();
+      audio.src = url;
+      audio.load();
       await audio.play();
-      audio.onended = () => URL.revokeObjectURL(audioUrl);
-      
+      audio.onended = () => URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Voice error:', err);
+      console.error('Voice failed:', err);
     }
   };
 
