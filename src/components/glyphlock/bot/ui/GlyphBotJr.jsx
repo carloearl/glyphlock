@@ -25,37 +25,30 @@ export default function GlyphBotJr() {
       const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
       if (!cleanText) return;
 
-      console.log('[GlyphBotJr] Playing voice:', cleanText);
-
-      const response = await base44.functions.invoke('textToSpeechOpenAI', {
-        text: cleanText,
-        voiceProfile: 'neutral_female',
-        speed: 1.1
+      const response = await fetch(`https://${window.location.hostname}/api/functions/textToSpeechOpenAI`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('base44_token') || ''}`
+        },
+        body: JSON.stringify({
+          text: cleanText,
+          voiceProfile: 'neutral_female',
+          speed: 1.1
+        }),
+        credentials: 'include'
       });
 
-      console.log('[GlyphBotJr] TTS response:', response);
+      if (!response.ok) throw new Error(`TTS failed: ${response.status}`);
 
-      // Backend returns raw audio buffer - create blob URL
-      if (response?.data) {
-        const blob = new Blob([response.data], { type: 'audio/mpeg' });
-        const audioUrl = URL.createObjectURL(blob);
-        
-        const audio = new Audio(audioUrl);
-        audio.playbackRate = 1.0;
-        
-        audio.onloadeddata = () => console.log('[GlyphBotJr] Audio loaded, playing...');
-        audio.onerror = (e) => console.error('[GlyphBotJr] Audio error:', e);
-        
-        await audio.play();
-        console.log('[GlyphBotJr] Audio playing successfully');
-        
-        // Cleanup blob URL after playback
-        audio.onended = () => URL.revokeObjectURL(audioUrl);
-      } else {
-        console.error('[GlyphBotJr] No audio data in response');
-      }
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      await audio.play();
+      audio.onended = () => URL.revokeObjectURL(audioUrl);
     } catch (err) {
-      console.error("[GlyphBotJr] Voice playback failed:", err);
+      console.error("Voice failed:", err);
     }
   };
 
