@@ -184,14 +184,14 @@ export default function Services() {
           </div>
 
           {/* Services Grid */}
-          <div ref={servicesRef} className="space-y-8 md:space-y-12 mb-12 md:mb-16">
+          <div ref={servicesRef} className="space-y-6 md:space-y-12 mb-12 md:mb-16">
             {services.map((service, idx) => (
               <motion.div 
                 key={service.id} 
                 initial={{ opacity: 0, x: idx % 2 === 0 ? -80 : 80 }}
                 animate={servicesInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 1, delay: 0.15 + (idx * 0.12), ease: [0.16, 1, 0.3, 1] }}
-                className="glass-card-dark border border-blue-500/30 rounded-xl p-6 md:p-8" 
+                className="glass-card-dark border border-blue-500/30 rounded-xl p-5 md:p-8" 
                 style={{ background: 'rgba(30, 58, 138, 0.2)', backdropFilter: 'blur(16px)' }}
               >
                 <div className="flex items-start gap-4 mb-6">
