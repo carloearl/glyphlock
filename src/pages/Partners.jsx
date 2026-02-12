@@ -87,22 +87,22 @@ export default function Partners() {
         <div className="absolute top-40 right-0 h-96 w-96 rounded-full bg-[#00E4FF] blur-[120px]" />
       </div>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 w-full">
         {/* Badge */}
-        <div className="flex flex-wrap items-center gap-3 mb-8">
-          <Badge className="bg-[#00E4FF]/10 text-[#00E4FF] border-[#00E4FF]/30 px-3 py-1">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6 md:mb-8">
+          <Badge className="bg-[#00E4FF]/10 text-[#00E4FF] border-[#00E4FF]/30 px-2 sm:px-3 py-1 text-xs">
             <div className="h-1.5 w-1.5 rounded-full bg-[#00E4FF] mr-2 animate-pulse" />
             GlyphLock • Public Snapshot
           </Badge>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-400 line-clamp-2 sm:line-clamp-none">
             Valuation scenarios based on live traction, IP, and market comps.
           </span>
         </div>
 
         {/* Hero section */}
-        <section className="grid gap-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start mb-24">
+        <section className="grid gap-8 md:gap-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start mb-16 md:mb-24">
           <div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter font-space text-white mb-6 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black tracking-tighter font-space text-white mb-4 md:mb-6 leading-tight">
               PARTNERSHIP <span className="text-transparent bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] bg-clip-text">OVERVIEW</span>
             </h1>
             <p className="text-lg text-[#00E4FF] font-bold mb-4">
