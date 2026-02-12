@@ -97,14 +97,14 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
 
   return (
     <>
-      {/* Help Tab - Left Side Hover */}
+      {/* Help Tab - Lower Right */}
       <div
-        onMouseEnter={() => setIsOpen(true)}
-        className="fixed left-0 top-1/3 z-[9998] w-12 h-32 flex items-center justify-center cursor-pointer"
+        onClick={() => setIsOpen(true)}
+        className="fixed right-0 bottom-20 z-[9997] group cursor-pointer"
       >
-        <div className="w-10 h-28 rounded-r-2xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 backdrop-blur-xl border-2 border-cyan-400/50 flex flex-col items-center justify-center gap-2 transition-all hover:w-12 shadow-[0_0_30px_rgba(6,182,212,0.4)]">
-          <HelpCircle className="w-6 h-6 text-cyan-300" />
-          <div className="text-[9px] text-cyan-200 font-bold -rotate-90 whitespace-nowrap tracking-wider">HELP</div>
+        <div className="w-12 h-12 group-hover:w-32 group-hover:h-14 rounded-l-2xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 backdrop-blur-xl border-2 border-cyan-400/50 flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(6,182,212,0.4)] overflow-hidden">
+          <HelpCircle className="w-6 h-6 text-cyan-300 flex-shrink-0" />
+          <div className="opacity-0 group-hover:opacity-100 text-sm text-cyan-200 font-bold whitespace-nowrap tracking-wider transition-opacity">HELP</div>
         </div>
       </div>
 
