@@ -656,27 +656,27 @@ export default function GlyphBotPage() {
         }
       ]}
     />
-    <div className="min-h-screen text-white flex flex-col pt-16 pb-0 relative" style={{ color: '#ffffff', background: 'transparent', zIndex: 200, position: 'relative', pointerEvents: 'auto' }}>
+    <div className="min-h-screen text-white flex flex-col pt-14 md:pt-16 pb-0 relative" style={{ color: '#ffffff', background: 'transparent', zIndex: 200, position: 'relative', pointerEvents: 'auto' }}>
       <SEOHead 
         title="GlyphBot - AI Security Assistant | GlyphLock"
         description="Chat with GlyphBot, your AI security assistant for code auditing, blockchain analysis, threat detection, and debugging."
         url="/glyphbot"
       />
       
-      <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full">
+      <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full px-2 sm:px-4">
         {/* Main Console Container */}
-        <div className="flex-1 flex flex-col bg-transparent border-x-2 border-purple-500/30 shadow-[0_0_60px_rgba(168,85,247,0.15)] overflow-hidden" style={{ position: 'relative', zIndex: 300, pointerEvents: 'auto' }}>
-          
-          {/* Header */}
-          <header className="flex items-center justify-between px-5 py-4 border-b-2 border-purple-500/40 bg-transparent backdrop-blur-xl shadow-[0_4px_30px_rgba(168,85,247,0.2)]">
-            <div className="flex items-center gap-4">
-              <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border-2 border-cyan-400/60 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.5),inset_0_0_15px_rgba(168,85,247,0.3)]">
-                <Bot className="w-6 h-6 text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-950 shadow-[0_0_12px_rgba(52,211,153,0.9)] animate-pulse" />
+        <div className="flex-1 flex flex-col bg-transparent border-x-2 border-purple-500/30 shadow-[0_0_60px_rgba(168,85,247,0.15)] overflow-hidden rounded-lg md:rounded-none" style={{ position: 'relative', zIndex: 300, pointerEvents: 'auto' }}>
+
+        {/* Header */}
+        <header className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 border-b-2 border-purple-500/40 bg-transparent backdrop-blur-xl shadow-[0_4px_30px_rgba(168,85,247,0.2)] gap-2 overflow-x-auto">
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              <div className="relative w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border-2 border-cyan-400/60 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.5),inset_0_0_15px_rgba(168,85,247,0.3)]">
+                <Bot className="w-5 sm:w-6 h-5 sm:h-6 text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+                <div className="absolute -top-1 -right-1 w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full bg-emerald-400 border-2 border-slate-950 shadow-[0_0_12px_rgba(52,211,153,0.9)] animate-pulse" />
               </div>
-              <div>
-                <h1 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-wide drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">GlyphBot</h1>
-                <p className="text-[10px] text-purple-400/80 uppercase tracking-[0.3em] font-semibold">Elite AI Security</p>
+              <div className="hidden sm:block">
+                <h1 className="text-xs sm:text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-wide drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">GlyphBot</h1>
+                <p className="text-[9px] sm:text-[10px] text-purple-400/80 uppercase tracking-[0.3em] font-semibold">Elite AI Security</p>
               </div>
             </div>
 
