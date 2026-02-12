@@ -31,25 +31,25 @@ export default function About() {
     {
       name: "Carlo Rene Earl",
       title: "Founder & Chief Executive Officer (CEO)",
-      role: "Carlo Earl is the Founder and Chief Executive Officer of GlyphLock, responsible for shaping the company’s core vision, technological direction, and long-term strategic roadmap. With a multidisciplinary background that spans creative design, systems thinking, and security innovation, Carlo leads GlyphLock with a rare combination of technical insight and business acuity. Under his leadership, GlyphLock has developed a proprietary ecosystem centered on quantum-resistant authentication, steganographic glyph technologies, blockchain-anchored audit systems, and secure AI-driven contract automation. Carlo oversees the architecture of the Master Covenant framework, the company’s cryptographic compliance infrastructure, and the intellectual property portfolio that forms the backbone of GlyphLock’s market advantage. His executive focus lies in enterprise integration, cross-industry scalability, and future-proofed digital identity. Carlo’s governance blends creative innovation with operational discipline, positioning GlyphLock as a rising authority in secure identity verification, AI policy, and next-generation authentication ecosystems.",
+      role: "Carlo Earl is the Founder and Chief Executive Officer of GlyphLock, responsible for shaping the company's core vision, technological direction, and long-term strategic roadmap. With a multidisciplinary background that spans creative design, systems thinking, and security innovation, Carlo leads GlyphLock with a rare combination of technical insight and business acuity. Under his leadership, GlyphLock has developed a proprietary ecosystem centered on quantum-resistant authentication, steganographic glyph technologies, blockchain-anchored audit systems, and secure AI-driven contract automation. Carlo oversees the architecture of the Master Covenant framework, the company's cryptographic compliance infrastructure, and the intellectual property portfolio that forms the backbone of GlyphLock's market advantage. His executive focus lies in enterprise integration, cross-industry scalability, and future-proofed digital identity. Carlo's governance blends creative innovation with operational discipline, positioning GlyphLock as a rising authority in secure identity verification, AI policy, and next-generation authentication ecosystems.",
       icon: Crown
     },
     {
       name: "Jacub Lough",
       title: "Chief Financial Officer (CFO) & Chief Strategy Officer (CSO)",
-      role: "As Chief Financial Officer and Chief Strategy Officer, Jacub Lough directs GlyphLock’s financial operations, capital structure, strategic planning, and long-range corporate development. A long-term collaborator with Carlo in the music industry and marketing sectors, Jacub is also the owner of IceVault88. He plays a central role in risk management, compliance oversight, and multi-vertical expansion planning across enterprise, government, medical, defense, and high-integrity commercial environments. Jacub brings a deep analytical framework rooted in disciplined financial modeling, operational forecasting, and scalable growth alignment. His background in asset management, organizational architecture, and creative-industry operations enables him to bridge financial precision with practical execution. At the strategic level, Jacub evaluates market positioning, prepares valuation pathways, supports IP-driven expansion, and leads scenario planning for acquisition readiness, licensing partnerships, and international deployment models. His dual role strengthens GlyphLock’s foundation for sustainable, compliant, and high-credibility growth in rapidly evolving security and AI markets.",
+      role: "As Chief Financial Officer and Chief Strategy Officer, Jacub Lough directs GlyphLock's financial operations, capital structure, strategic planning, and long-range corporate development. A long-term collaborator with Carlo in the music industry and marketing sectors, Jacub is also the owner of IceVault88. He plays a central role in risk management, compliance oversight, and multi-vertical expansion planning across enterprise, government, medical, defense, and high-integrity commercial environments. Jacub brings a deep analytical framework rooted in disciplined financial modeling, operational forecasting, and scalable growth alignment. His background in asset management, organizational architecture, and creative-industry operations enables him to bridge financial precision with practical execution. At the strategic level, Jacub evaluates market positioning, prepares valuation pathways, supports IP-driven expansion, and leads scenario planning for acquisition readiness, licensing partnerships, and international deployment models. His dual role strengthens GlyphLock's foundation for sustainable, compliant, and high-credibility growth in rapidly evolving security and AI markets.",
       icon: TrendingUp
     },
     {
       name: "Collin Vanderginst",
       title: "Chief Technology Officer (CTO)",
-      role: "Collin Vanderginst, GlyphLock’s Chief Technology Officer, oversees the design, deployment, and engineering integrity of the company’s technical infrastructure. His expertise spans advanced systems engineering, security architecture, distributed surveillance networks, and high-availability backend environments. A key contributor to GlyphLock’s foundational prototypes, Collin converts conceptual innovations into functional, scalable software systems. He currently manages all Jiffy Lube surveillance SEC systems across Arizona and leads the surveillance chore integration for the NUPS Point of Sale system. He manages engineering operations, DevSecOps processes, platform optimization, and system-level integrations across the GlyphLock ecosystem — including authentication engines, SDK frameworks, and enterprise-grade API infrastructure. Collin brings a disciplined, methodical engineering philosophy that ensures reliability, resilience, and security at every level of the platform. His work underpins the company’s stability as GlyphLock continues expanding into mission-critical, compliance-sensitive industries.",
+      role: "Collin Vanderginst, GlyphLock's Chief Technology Officer, oversees the design, deployment, and engineering integrity of the company's technical infrastructure. His expertise spans advanced systems engineering, security architecture, distributed surveillance networks, and high-availability backend environments. A key contributor to GlyphLock's foundational prototypes, Collin converts conceptual innovations into functional, scalable software systems. He currently manages all Jiffy Lube surveillance SEC systems across Arizona and leads the surveillance chore integration for the NUPS Point of Sale system. He manages engineering operations, DevSecOps processes, platform optimization, and system-level integrations across the GlyphLock ecosystem — including authentication engines, SDK frameworks, and enterprise-grade API infrastructure. Collin brings a disciplined, methodical engineering philosophy that ensures reliability, resilience, and security at every level of the platform. His work underpins the company's stability as GlyphLock continues expanding into mission-critical, compliance-sensitive industries.",
       icon: Code
     },
     {
       name: "Angel Sticka",
       title: "Director of Administration, Regulatory Affairs & Operational Compliance",
-      role: "Angel Sticka serves as GlyphLock’s Director of Administration, Regulatory Affairs, and Operational Compliance. She manages corporate documentation, legal coordination, organizational governance, and procedural execution across all departments. Angel oversees the administrative systems that support GlyphLock’s operational rhythm — including contract handling, licensing paperwork, compliance tracking, and executive scheduling. Her work ensures alignment between product development, legal processes, and organizational structure. Her administrative precision provides stability throughout GlyphLock’s rapid innovation cycles, supporting executive leadership and acting as a central point of continuity for filings, deadlines, communications, and organizational records. Angel’s role safeguards operational integrity as the company scales into more regulated markets.",
+      role: "Angel Sticka serves as GlyphLock's Director of Administration, Regulatory Affairs, and Operational Compliance. She manages corporate documentation, legal coordination, organizational governance, and procedural execution across all departments. Angel oversees the administrative systems that support GlyphLock's operational rhythm — including contract handling, licensing paperwork, compliance tracking, and executive scheduling. Her work ensures alignment between product development, legal processes, and organizational structure. Her administrative precision provides stability throughout GlyphLock's rapid innovation cycles, supporting executive leadership and acting as a central point of continuity for filings, deadlines, communications, and organizational records. Angel's role safeguards operational integrity as the company scales into more regulated markets.",
       icon: Shield
     }
   ];
@@ -139,19 +139,55 @@ export default function About() {
             </motion.h2>
             <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
               <p>
-                GlyphLock began with a conversation that shouldn’t have mattered as much as it did — two friends in Arizona in early 2025 talking about camouflage, patterns, and military stealth. Collin mentioned how patterns hide people. Carlo pushed further and asked the question that changed everything: <span className="text-[#00E4FF] font-bold italic">“What if the pattern isn’t hiding you… what if the pattern itself is the intelligence?”</span> That moment cracked open an entirely new idea: imagery as encrypted communication, invisible data embedded inside everyday surfaces, information that could move, react, and protect itself.
+                GlyphLock did not begin as a company. It began as a rupture in expectation. A moment where a simple conversation forced a reexamination of what images are allowed to be.
               </p>
               <p>
-                But the vision didn’t take off instantly. Behind the scenes were long nights, financial setbacks, early collaborators who didn’t deliver, people who stalled progress, partners who talked more than they built, and the constant pressure of raising a family while trying to hold onto a concept that felt bigger than life.
+                In early 2025 a discussion about camouflage and military patterning exposed a deeper layer of reality. Patterns do not only hide bodies. Patterns can carry intention. The question that followed was not casual. It was catalytic. <span className="text-[#00E4FF] font-bold italic">What if imagery was not concealment but intelligence itself.</span> What if a surface could store encrypted meaning, respond to the environment, and actively defend the information it contained. That realization did not feel like invention. It felt like discovery. A category that had always existed but had not yet been named. <span className="text-white font-semibold">Images as living infrastructure.</span>
+              </p>
+              <p className="text-white font-semibold">
+                Once seen it could not be unseen.
               </p>
               <p>
-                There were moments Carlo nearly quit — not because the idea was weak, but because the path was heavy. When outside promises failed and unreliable contributors slowed the project down, he made the toughest but clearest decision: <span className="text-[#00E4FF] font-bold">bootstrap everything and trust no one but the people who actually show up.</span>
+                The early path was punishing. Progress slowed under financial pressure. Resources were stretched thin. Collaborators appeared and disappeared. Promises collapsed. Momentum was lost and rebuilt more than once. There were periods where the weight of the project collided directly with the realities of family life, responsibility, and survival. The vision did not fail because it was weak. It nearly failed because building something new demands endurance that most systems are never required to prove.
               </p>
               <p>
-                That pivot reshaped the entire trajectory. What started as a clever thought about camouflage became a full-blown security ecosystem built through sheer discipline, creative intelligence, and refusal to fold. With Collin turning theory into functioning systems, Jacub providing structure and strategic direction, and Angel keeping the entire operation organized and compliant, GlyphLock grew from a raw concept into a quantum-resistant authentication framework, complete with encrypted glyph signatures, interactive image intelligence, and the Master Covenant — a binding blueprint for how humans, AI, and digital truth are verified.
+                At several points the project stood at the edge of abandonment. Not because the idea lacked power but because the cost of carrying it forward was real. The decision that followed defined everything that came next. <span className="text-[#00E4FF] font-bold">Strip the system to its core. Remove dependency on unreliable actors. Bootstrap the architecture. Trust only what can be built, tested, and verified.</span>
+              </p>
+              <p className="text-white font-semibold">
+                That pivot transformed GlyphLock from an idea into a discipline.
               </p>
               <p>
-                GlyphLock wasn’t built in a boardroom or funded by VCs. It was built through perseverance, real struggle, and the belief that the world needed a new way to protect identity, information, and integrity. The story isn’t glamorous — it’s earned. And that’s why GlyphLock exists today: because Carlo refused to let a world-changing idea die in silence.
+                Every component from that moment forward had to survive stress. Every design choice had to justify itself under hostile conditions. If a mechanism could be broken it was broken deliberately and rebuilt stronger. If a structure failed it was replaced. Nothing ornamental survived. Only what functioned under pressure remained.
+              </p>
+              <p className="text-white font-semibold">
+                Constraint became the forge.
+              </p>
+              <p>
+                From that environment emerged a protected creative ecosystem engineered for endurance. Encrypted glyph signatures capable of anchoring authorship. Interactive image intelligence that treats visuals as active systems rather than static artifacts. Quantum resistant identity layers built to outlast current attack models. And the Master Covenant, a structural framework that binds authorship verification, auditability, and digital truth into a unified operating architecture.
+              </p>
+              <p>
+                The Master Covenant is not decoration. It is a spine. It ensures that what is created inside the ecosystem carries proof of origin, traceable lineage, and resistance to quiet erasure. <span className="text-white font-semibold">Work cannot simply disappear. Authorship cannot be casually rewritten. Systems cannot drift without record.</span> Integrity is embedded at the structural level.
+              </p>
+              <p>
+                GlyphLock was not assembled for optics. It was not shaped in a boardroom or optimized for investor theater. It was constructed in the presence of pressure, scarcity, and repeated failure. That environment did not weaken the system. It filtered it. What remains is architecture that has already survived adversity before ever meeting the public.
+              </p>
+              <p className="text-[#00E4FF] font-semibold">
+                This origin matters because infrastructure inherits the character of its birth.
+              </p>
+              <p>
+                Systems designed in comfort behave differently than systems forged under constraint. GlyphLock was forced to prove its resilience before it was allowed to scale. That proof is embedded in its design philosophy. Expect stress. Engineer for it. Assume adversarial conditions. Build anyway.
+              </p>
+              <p className="text-white font-semibold">
+                The result is not a product. It is a stance.
+              </p>
+              <p>
+                GlyphLock exists because the idea refused to die and the people carrying it refused to surrender to friction. The ecosystem stands on persistence, technical rigor, and the belief that creators deserve environments where their work is defended as fiercely as it is imagined.
+              </p>
+              <p>
+                Systems born under pressure do not panic when pressure returns. They hold. They adapt. They continue.
+              </p>
+              <p className="text-[#00E4FF] font-bold text-xl">
+                And that is why GlyphLock exists.
               </p>
             </div>
           </motion.div>
@@ -186,7 +222,7 @@ export default function About() {
               initial={{ opacity: 0, x: 80 }}
               animate={missionInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="glass-card rounded-2xl p-8 border border-red-500/20 bg-gradient-to-br from-red-950/10 to-black"
+              className="glass-card rounded-2xl p-8 border border-cyan-500/20 bg-gradient-to-br from-cyan-950/10 to-black"
             >
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                 <Shield className="w-6 h-6 text-cyan-500" />
