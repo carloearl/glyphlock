@@ -194,24 +194,73 @@ export default function Layout({ children, currentPageName }) {
               content: [
                 { heading: 'Welcome to GlyphLock', text: 'GlyphLock is your quantum-resistant cybersecurity platform. Navigate using the top menu to access QR Studio, Image Lab, GlyphBot AI, and more.' },
                 { heading: 'Command Center', text: 'Access your admin dashboard by clicking your profile icon (top right) and selecting Command Center. Manage API keys, view analytics, and monitor security.' },
-                { heading: 'Quick Actions', text: 'Use the floating GlyphBot Jr assistant (bottom right) for instant help and guidance on any page.' }
+                { heading: 'Quick Actions', text: 'Press ? key anytime to open this help guide. Use GlyphBot Jr (right side) for instant AI assistance on any page.' },
+                { heading: 'Account Security', text: 'Enable MFA (Multi-Factor Authentication) from your profile menu → Account Security for enhanced protection.' }
               ]
             },
             {
-              title: 'Core Features',
+              title: 'QR Studio',
               content: [
-                { heading: 'QR Studio', text: 'Create secure, credentialed QR codes with multi-slot payloads. Access via Tools → QR Studio in the navigation menu.' },
-                { heading: 'Image Lab', text: 'Generate AI images and add interactive hotspots. Click anywhere on images to create smart zones that link to URLs or trigger actions.' },
-                { heading: 'GlyphBot AI', text: 'Chat with our security AI assistant. Switch personas for audits, debugging, security analysis, and more.' },
-                { heading: 'Site Builder', text: 'Build and audit websites with AI assistance. Access comprehensive SIE architecture scanning.' }
+                { heading: 'Create Secure QR Codes', text: 'QR Studio lets you create quantum-resistant QR codes with credentialed payloads. Navigate to Tools → QR Studio to begin.' },
+                { heading: 'Multi-Slot Payloads', text: 'Add multiple payload slots with different credential levels (public, authenticated, admin). Each slot can contain URLs, vCards, WiFi credentials, or custom data.' },
+                { heading: 'Design Customization', text: 'Customize colors, add logos, adjust error correction levels, and preview your QR code in real-time before downloading.' },
+                { heading: 'Analytics & Tracking', text: 'Track scans, view analytics, and monitor QR code performance from the QR Vault panel.' }
               ]
             },
             {
-              title: 'Security',
+              title: 'Image Lab',
               content: [
-                { heading: 'Authentication', text: 'All data is protected with role-based access control. Admin features require admin privileges.' },
-                { heading: 'API Keys', text: 'Generate and manage API keys from Command Center. Rotate keys regularly for optimal security.' },
-                { heading: 'Threat Detection', text: 'AI-powered threat detection monitors your assets automatically. View alerts in Command Center → Threats tab.' }
+                { heading: 'AI Image Generation', text: 'Generate high-quality images using AI. Enter prompts, upload reference images, and adjust advanced controls like seed, creativity, and quality mode.' },
+                { heading: 'Interactive Hotspots', text: 'Add clickable zones to any image. Upload an image, click to add hotspots, and configure actions like opening URLs, showing modals, or triggering custom events.' },
+                { heading: 'Share & Export', text: 'Generate shareable links for interactive images or download them for use in presentations, websites, and marketing materials.' },
+                { heading: 'Prompt Engineering', text: 'Use the AI Expand feature to enhance your prompts. Upload reference images to extract features and apply styles to new generations.' }
+              ]
+            },
+            {
+              title: 'GlyphBot AI',
+              content: [
+                { heading: 'AI Assistant', text: 'GlyphBot is your security-focused AI assistant. Access it from Tools → GlyphBot to ask questions, run audits, and get technical guidance.' },
+                { heading: 'Multiple Personas', text: 'Switch between personas: Security Architect, Code Debugger, Site Auditor, and more. Each persona specializes in different tasks.' },
+                { heading: 'Website Audits', text: 'Run comprehensive security audits on any website. GlyphBot analyzes vulnerabilities, performance, SEO, and compliance issues.' },
+                { heading: 'Voice Assistance', text: 'Enable text-to-speech to hear responses. Customize voice speed, pitch, and provider from the settings panel.' }
+              ]
+            },
+            {
+              title: 'Site Builder & SIE',
+              content: [
+                { heading: 'AI-Powered Site Building', text: 'Describe your website vision and let AI generate the structure, pages, and components. Access via Tools → Site Builder.' },
+                { heading: 'SIE Architecture', text: 'System Intelligence Engine (SIE) scans your entire application architecture, analyzing routes, components, features, and dependencies.' },
+                { heading: 'Automated Remediation', text: 'Get AI-generated fixes for detected issues. Review, approve, or modify suggestions before applying changes.' },
+                { heading: 'Scan History', text: 'Track all scans, compare results over time, and export detailed audit reports for compliance and documentation.' }
+              ]
+            },
+            {
+              title: 'Security & Privacy',
+              content: [
+                { heading: 'Role-Based Access', text: 'All features respect user roles. Admins have full access, while regular users see only their own data and permitted features.' },
+                { heading: 'API Key Management', text: 'Generate API keys from Command Center → API Keys. Each key can have custom permissions and can be rotated or revoked anytime.' },
+                { heading: 'MFA Protection', text: 'Enable Multi-Factor Authentication from Account Security. Use authenticator apps like Google Authenticator or Authy for 2FA codes.' },
+                { heading: 'Trusted Devices', text: 'Mark devices as trusted to skip MFA prompts. Revoke access to any device from the Account Security panel.' },
+                { heading: 'Data Encryption', text: 'All data is encrypted at rest and in transit. Sensitive information like API keys uses additional encryption layers.' }
+              ]
+            },
+            {
+              title: 'Blockchain Tools',
+              content: [
+                { heading: 'Hash Generation', text: 'Create SHA-256, MD5, and other cryptographic hashes. Access via Tools → Blockchain in the navigation.' },
+                { heading: 'Merkle Trees', text: 'Build and verify Merkle trees for data integrity. Perfect for audit trails and tamper-proof records.' },
+                { heading: 'Proof Export', text: 'Export blockchain proofs as JSON bundles for verification. Share immutable records with stakeholders.' },
+                { heading: 'Verification', text: 'Verify blockchain proofs by uploading proof bundles. Instantly validate data integrity and authenticity.' }
+              ]
+            },
+            {
+              title: 'Tips & Shortcuts',
+              content: [
+                { heading: 'Keyboard Shortcuts', text: 'Press ? to open help guide. Use Ctrl/Cmd + K for quick navigation. Tab through forms for faster data entry.' },
+                { heading: 'Mobile Access', text: 'GlyphLock is fully responsive. Access all features from mobile devices with optimized touch interfaces.' },
+                { heading: 'Save Your Work', text: 'Most tools auto-save your progress. Look for the save icon or status indicator in the top-right of panels.' },
+                { heading: 'Export & Share', text: 'Export QR codes, images, audit reports, and blockchain proofs. Generate shareable links for collaboration.' },
+                { heading: 'Need Help?', text: 'Use GlyphBot Jr (right sidebar) for instant answers. Contact support from the footer or visit our documentation.' }
               ]
             }
           ]}
