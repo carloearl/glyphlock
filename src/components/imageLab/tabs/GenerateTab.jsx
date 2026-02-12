@@ -732,9 +732,9 @@ Provide your response as a JSON object with:
                 handleGenerate('restyle');
               }}
               disabled={generateMutation.isPending || !generatedImage}
-              className="h-14 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 shadow-[0_0_25px_rgba(168,85,247,0.4)] hover:shadow-[0_0_35px_rgba(168,85,247,0.6)] border-2 border-purple-400/30 font-bold text-sm md:text-base transition-all"
+              className="h-14 bg-white hover:bg-white/90 text-black shadow-[0_0_25px_rgba(255,255,255,0.5)] hover:shadow-[0_0_35px_rgba(255,255,255,0.7)] border-2 border-white/30 font-bold text-sm md:text-base transition-all active:scale-95"
             >
-              <Repeat className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+              <GlyphIcon type="blockchain" size={24} />
               Restyle Current
             </Button>
             <Button

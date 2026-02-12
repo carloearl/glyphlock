@@ -50,7 +50,6 @@
 import About from './pages/About';
 import AboutCarlo from './pages/AboutCarlo';
 import Accessibility from './pages/Accessibility';
-import AccountSecurity from './pages/AccountSecurity';
 import BillingAndPayments from './pages/BillingAndPayments';
 import Blockchain from './pages/Blockchain';
 import CaseStudies from './pages/CaseStudies';
@@ -126,7 +125,6 @@ export const PAGES = {
     "About": About,
     "AboutCarlo": AboutCarlo,
     "Accessibility": Accessibility,
-    "AccountSecurity": AccountSecurity,
     "BillingAndPayments": BillingAndPayments,
     "Blockchain": Blockchain,
     "CaseStudies": CaseStudies,

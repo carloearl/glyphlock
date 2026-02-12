@@ -34,6 +34,7 @@ import {
   Monitor, Smartphone, ArrowUpRight, ArrowDownRight, Circle,
   ShieldAlert, Radio, HelpCircle
 } from "lucide-react";
+import AccountSecurityTab from '@/components/console/AccountSecurityTab';
 import HelpPanel from '@/components/global/HelpPanel';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
@@ -111,7 +112,7 @@ function SidebarContent({ activeTab, setActiveTab, user, onLogout, threatCount =
     { id: "threats", label: "Threat Detection", icon: ShieldAlert, badge: threatCount },
     { id: "resources", label: "Resources", icon: Layers },
     { id: "api-keys", label: "API Keys", icon: Key },
-    { id: "security", label: "Security", icon: Shield },
+    { id: "account-security", label: "Account Security", icon: Shield },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "tools", label: "Tools", icon: Zap },
     { id: "logs", label: "Logs", icon: FileText },
@@ -2091,12 +2092,6 @@ function SettingsTab({ user }) {
           <CardTitle className="text-white text-sm">Quick Links</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Link to={createPageUrl('AccountSecurity')}>
-            <Button variant="outline" className="w-full justify-start border-slate-700 hover:border-cyan-500/50">
-              <Lock className="w-4 h-4 mr-2 text-cyan-400" />
-              Account Security
-            </Button>
-          </Link>
           <Link to={createPageUrl('SDKDocs')}>
             <Button variant="outline" className="w-full justify-start border-slate-700 hover:border-blue-500/50">
               <Code className="w-4 h-4 mr-2 text-blue-400" />
@@ -2152,7 +2147,7 @@ export default function CommandCenter() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
-    if (tabParam && ['overview', 'threats', 'resources', 'security', 'api-keys', 'analytics', 'tools', 'logs', 'settings'].includes(tabParam)) {
+    if (tabParam && ['overview', 'threats', 'resources', 'account-security', 'api-keys', 'analytics', 'tools', 'logs', 'settings'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, []);
@@ -2205,7 +2200,7 @@ export default function CommandCenter() {
       case "overview": return <OverviewTab user={user} threatDetection={threatDetection} />;
       case "threats": return <ThreatDetectionTab user={user} threatDetection={threatDetection} />;
       case "resources": return <ResourcesTab user={user} />;
-      case "security": return <SecurityTab threatDetection={threatDetection} />;
+      case "account-security": return <AccountSecurityTab />;
       case "api-keys": return <APIKeysTab user={user} />;
       case "analytics": return <AnalyticsTab />;
       case "tools": return <ToolsTab />;
