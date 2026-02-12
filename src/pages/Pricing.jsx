@@ -107,18 +107,18 @@ export default function Pricing() {
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-16">
             {plans.map((plan) => {
-              const Icon = plan.icon;
-              const isEnterprise = plan.key === 'enterprise';
-              
-              return (
-                <Card 
-                  key={plan.key}
-                  className={`bg-slate-900/60 backdrop-blur-xl border-2 ${
-                    plan.popular 
-                      ? 'border-purple-500/50 shadow-lg shadow-purple-500/20 scale-105' 
-                      : 'border-slate-700/50'
-                  } overflow-hidden relative`}
-                >
+               const Icon = plan.icon;
+               const isEnterprise = plan.key === 'enterprise';
+
+               return (
+                 <Card 
+                   key={plan.key}
+                   className={`bg-slate-900/60 backdrop-blur-xl border-2 ${
+                     plan.popular 
+                       ? 'border-purple-500/50 shadow-lg shadow-purple-500/20 md:scale-105' 
+                       : 'border-slate-700/50'
+                   } overflow-hidden relative`}
+                 >
                   {plan.popular && (
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500" />
                   )}
