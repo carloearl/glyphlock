@@ -57,18 +57,18 @@ export default function About() {
 
 
   const technologies = [
-    "Quantum-resistant encryption",
-    "Visual cryptography",
-    "Steganographic QR systems",
-    "Interactive hotzones",
-    "Dynamic glyph layers",
-    "Blockchain Merkle verification",
-    "Legal auto-binding (CAB + BPAAA)",
-    "Secure POS (NUPS)",
-    "AI-forensic auditing",
-    "Emotional-reactive biometric triggers",
-    "Geo-locking + time-locking",
-    "Full IP lifecycle protection"
+    "QR identity imaging",
+    "AI site building engine",
+    "Master Covenant authorship",
+    "Interactive hotspot layers",
+    "Blockchain timestamping",
+    "Image Lab generation",
+    "Open source framework",
+    "Ecosystem-scale verification",
+    "Cross-platform identity",
+    "Creative sovereignty tools",
+    "Decentralized ownership proof",
+    "Extensible infrastructure"
   ];
 
   const whatGlyphLockIs = [
@@ -87,9 +87,9 @@ export default function About() {
   return (
     <>
       <SEOHead 
-        title="About GlyphLock - Quantum-Resistant Security for a World Already Under Attack"
-        description="Born from a dangerous idea: What if camouflage could hide QR codes? GlyphLock is survival-grade security built to eliminate digital theft, end fraud, and protect creators for 200 years."
-        keywords="GlyphLock about, quantum-resistant security, Carlo Earl DACO, Collin Vanderginst CTO, Master Covenant, steganographic QR, AI governance, IP protection, TruthStrike Protocol, Base44 platform, Dream Team AI"
+        title="About GlyphLock - Protected Creative Ecosystem for Verified Digital Worlds"
+        description="Born from a question: What if imagery itself carried intelligence? GlyphLock is an open framework combining QR identity, site building, and Master Covenant architecture for creative sovereignty at scale."
+        keywords="GlyphLock about, creative ecosystem, Carlo Earl founder, open source framework, Master Covenant authorship, QR identity layer, site building infrastructure, verified ownership, digital sovereignty"
         url="/about"
       />
       
@@ -116,7 +116,7 @@ export default function About() {
               transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="text-2xl md:text-3xl text-[#00E4FF] font-bold max-w-4xl mx-auto leading-tight"
             >
-              Quantum-Resistant Verification Protocol
+              Protected Creative Ecosystem
             </motion.p>
           </div>
 
@@ -169,15 +169,16 @@ export default function About() {
                 Our Mission
               </h2>
               <p className="text-gray-300 leading-relaxed mb-6 text-lg">
-                GlyphLock's mission is simple:<br />
+                GlyphLock's mission:<br />
                 <span className="text-[#8C4BFF] font-bold text-xl">
-                  Eliminate digital theft. End fraud. Protect creators. 
-                  Build quantum-resistant systems that will still work 200 years from now.
+                  Build infrastructure for creative sovereignty. 
+                  Make ownership verifiable. Make authorship provable. 
+                  Make digital worlds trustworthy by design.
                 </span>
               </p>
               <p className="text-xl text-white font-bold mt-8">
-                GlyphLock is not trendy security.<br/>
-                <span className="text-[#00E4FF]">It is survival-grade security.</span>
+                GlyphLock is not a security product.<br/>
+                <span className="text-[#00E4FF]">It is an open framework for verified creation.</span>
               </p>
             </motion.div>
 
@@ -188,25 +189,25 @@ export default function About() {
               className="glass-card rounded-2xl p-8 border border-red-500/20 bg-gradient-to-br from-red-950/10 to-black"
             >
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                <Shield className="w-6 h-6 text-red-500" />
-                We Protect Against
+                <Shield className="w-6 h-6 text-cyan-500" />
+                We Enable
               </h2>
               <div className="space-y-3">
                 {[
-                  "AI-powered plagiarism",
-                  "Identity spoofing",
-                  "Deepfake manufacturing",
-                  "Industrial IP theft",
-                  "POS skimmers + hospitality fraud",
-                  "Data manipulation",
-                  "Unverified claims",
-                  "Synthetic evidence",
-                  "AI impersonation systems",
-                  "Quantum attacks against legacy encryption"
-                ].map((threat, idx) => (
+                  "Verified creative ownership",
+                  "QR-based asset identity",
+                  "AI-powered site building",
+                  "Blockchain authorship proof",
+                  "Interactive image ecosystems",
+                  "Covenant-backed contracts",
+                  "Open source extensibility",
+                  "Cross-platform verification",
+                  "Decentralized creative infrastructure",
+                  "Limitless construction at scale"
+                ].map((capability, idx) => (
                   <div key={idx} className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0" />
-                    <span className="text-gray-300">{threat}</span>
+                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full flex-shrink-0" />
+                    <span className="text-gray-300">{capability}</span>
                   </div>
                 ))}
               </div>
@@ -231,16 +232,16 @@ export default function About() {
               The Pivot
             </motion.h2>
             <p className="text-gray-300 leading-relaxed mb-8 text-lg">
-              GlyphLock did <span className="font-bold text-white">not</span> start as a company. 
-              It started as a simple interactive-image experiment. 
-              Carlo and Collin originally thought they were building "QR codes on steroids." 
-              Then the technology began outgrowing the category.
+              GlyphLock did <span className="font-bold text-white">not</span> start as a security company. 
+              It started as an interactive-image experiment. 
+              Carlo and Collin thought they were building "smart QR codes." 
+              Then the technology outgrew the category.
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
               {[
-                "Steganography", "Dynamic Glyphs", "Hotzones", "Blockchain", "Contracts",
-                "Verification", "POS Sync", "TruthStrike", "Geo-Locking", "Bio-Triggers"
+                "QR Identity", "Site Builder", "Image Lab", "Blockchain", "Covenant",
+                "Authorship", "Hotzones", "AI Audit", "Open Source", "Ecosystem"
               ].map((tech, idx) => (
                 <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-3 text-center text-xs font-bold text-[#00E4FF] uppercase tracking-wide">
                   {tech}
@@ -250,8 +251,8 @@ export default function About() {
             
             <div className="bg-[#00E4FF]/10 border border-[#00E4FF]/30 rounded-xl p-6 text-center">
               <p className="text-xl text-[#00E4FF] font-bold">
-                Get away from being just a QR project. <br/>
-                Become the world's most advanced IP protection and digital truth system.
+                From smart QR codes to a complete creative infrastructure. <br/>
+                The framework for building verified digital ecosystems.
               </p>
             </div>
           </motion.div>
@@ -352,7 +353,7 @@ export default function About() {
                 transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 className="text-4xl md:text-5xl font-black text-white mb-6 font-space"
               >
-                READY TO DEPLOY CREDENTIALED VERIFICATION?
+                READY TO BUILD YOUR ECOSYSTEM?
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, x: 100 }}
@@ -360,7 +361,7 @@ export default function About() {
                 transition={{ duration: 1.1, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 className="text-gray-400 mb-10 text-xl max-w-2xl mx-auto"
               >
-                Initiate protocol-governed access with GlyphLock security specialists.
+                Start with GlyphLock's open framework for verified creative infrastructure.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 40, scale: 0.9 }}
@@ -369,7 +370,7 @@ export default function About() {
               >
                 <Link to={createPageUrl("Consultation")}>
                   <Button className="bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] hover:scale-105 transition-transform text-white text-lg font-bold uppercase tracking-wide px-10 py-6 shadow-[0_0_30px_rgba(0,228,255,0.3)] border-none">
-                    Request Credentials
+                    Start Building
                   </Button>
                 </Link>
               </motion.div>

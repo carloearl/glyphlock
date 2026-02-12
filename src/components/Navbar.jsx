@@ -443,7 +443,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
               <span className="text-white">GLYPH</span>
               <span className="text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-500 bg-clip-text">LOCK</span>
             </span>
-            <span className="text-[9px] uppercase tracking-[0.3em] text-cyan-400/70 font-medium">Security</span>
+            <span className="text-[9px] uppercase tracking-[0.3em] text-cyan-400/70 font-medium">Ecosystem</span>
           </div>
         </Link>
 

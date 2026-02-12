@@ -41,11 +41,11 @@ export default function Pricing() {
       icon: Shield,
       color: 'cyan',
       features: [
-        'Visual Cryptography Tools',
-        'Blockchain Security Suite',
-        'GlyphBot AI Assistant',
-        'Up to 1,000 QR codes/month',
-        'Standard Support'
+        'QR Identity Studio',
+        'Image Lab with AI generation',
+        'GlyphBot site audits',
+        'Up to 1,000 verified assets/month',
+        'Community support'
       ]
     },
     {
@@ -57,11 +57,11 @@ export default function Pricing() {
       popular: true,
       features: [
         'Everything in Creator',
-        'Unlimited QR Generation',
-        'Priority AI Processing',
-        'Security Operations Center',
-        'N.U.P.S. POS System',
-        '24/7 Premium Support'
+        'Unlimited verified assets',
+        'Priority AI site building',
+        'Master Covenant authorship',
+        'Advanced ecosystem tools',
+        '24/7 builder support'
       ]
     },
     {
@@ -72,11 +72,11 @@ export default function Pricing() {
       color: 'blue',
       features: [
         'Everything in Professional',
-        'Custom Security Solutions',
-        'Dedicated Account Manager',
-        'SLA Guarantees',
-        'White-label Options',
-        'Custom Integrations'
+        'Custom ecosystem architecture',
+        'Dedicated infrastructure engineer',
+        'SLA guarantees',
+        'White-label framework',
+        'Custom protocol integrations'
       ]
     }
   ];
@@ -84,8 +84,8 @@ export default function Pricing() {
   return (
     <div className="min-h-screen text-white py-20" style={{ background: 'transparent' }}>
       <SEOHead
-        title="Pricing Plans | GlyphLock Security"
-        description="Choose the right GlyphLock security plan for your needs. From Creator to Enterprise, quantum-resistant cybersecurity solutions for every scale."
+        title="Pricing Plans | GlyphLock Creative Ecosystem"
+        description="Choose the right GlyphLock plan for your creative infrastructure needs. From Creator to Enterprise, open framework tools for verified digital ecosystems at every scale."
         url="/pricing"
       />
 
@@ -94,13 +94,13 @@ export default function Pricing() {
           {/* Header */}
           <div className="text-center mb-16">
             <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 mb-4">
-              Authorization Tiers
+              Creative Infrastructure
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">
-              Access Classification
+              Ecosystem Plans
             </h1>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Protocol-governed authorization classes
+              Open framework access for creators, builders, and enterprises
             </p>
           </div>
 
@@ -205,16 +205,16 @@ export default function Pricing() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="text-white font-semibold mb-2">Can I revoke access?</h3>
-                <p className="text-slate-400 text-sm">Yes, authorization can be revoked at any time from account settings.</p>
+                <h3 className="text-white font-semibold mb-2">Can I cancel anytime?</h3>
+                <p className="text-slate-400 text-sm">Yes, cancel from account settings. Your ecosystems remain accessible in read-only mode.</p>
               </div>
               <div>
-                <h3 className="text-white font-semibold mb-2">What payment methods are accepted?</h3>
-                <p className="text-slate-400 text-sm">All major credit cards through secure Stripe integration.</p>
+                <h3 className="text-white font-semibold mb-2">What payment methods work?</h3>
+                <p className="text-slate-400 text-sm">All major credit cards via Stripe. Invoicing available for Enterprise.</p>
               </div>
               <div>
-                <h3 className="text-white font-semibold mb-2">Is there trial access?</h3>
-                <p className="text-slate-400 text-sm">Yes, most modules offer one-time trial access. Create account to begin verification.</p>
+                <h3 className="text-white font-semibold mb-2">Is there a free tier?</h3>
+                <p className="text-slate-400 text-sm">Yes, core framework access is free. Upgrade for unlimited assets and advanced tools.</p>
               </div>
             </CardContent>
           </Card>

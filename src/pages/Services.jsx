@@ -25,17 +25,17 @@ export default function Services() {
 
   const services = [
     {
-      id: "qr-verification",
+      id: "qr-identity",
       icon: QrCode,
-      title: "QR Verification Module",
-      description: "QR verification and steganographic encoding module – governed by protocol, accessible only with provisioned credentials.",
+      title: "QR Identity Studio",
+      description: "Visual identity layer – embed verified metadata into scannable assets across your creative ecosystem.",
       features: [
-        "Quantum-resistant QR code generation with embedded encryption",
-        "Steganographic encoding - hide encrypted data within images",
-        "AI-powered threat detection to prevent quishing attacks",
-        "Blockchain immutability for transaction verification",
-        "Custom branding and logo embedding",
-        "Multiple format support (PNG, SVG, JPG)"
+        "QR-based identity for every asset",
+        "Steganographic data embedding",
+        "Multi-slot credentialed payloads",
+        "Blockchain timestamping",
+        "Custom branding and design",
+        "Cross-platform verification"
       ],
       page: "Qr",
       color: "blue"
@@ -43,68 +43,68 @@ export default function Services() {
     {
       id: "glyphbot-ai",
       icon: Brain,
-      title: "GlyphBot Intelligence Module",
-      description: "Autonomous threat suppression module – AI-driven security analysis restricted to credentialed operators.",
+      title: "GlyphBot Builder AI",
+      description: "AI assistant for site audits, architecture analysis, and ecosystem design guidance.",
       features: [
-        "Real-time threat analysis and detection",
-        "Secure code execution in isolated environments",
-        "Automated vulnerability scanning",
-        "Security audit report generation",
-        "Natural language security consultations",
-        "WhatsApp integration for mobile access",
+        "Site architecture analysis",
+        "Code quality audits",
+        "Automated optimization suggestions",
+        "Knowledge synthesis and documentation",
+        "Natural language builder consultations",
+        "WhatsApp integration",
         "Multiple AI personas for specialized tasks"
       ],
       page: "GlyphBot",
       color: "violet"
     },
     {
-      id: "nups-pos",
+      id: "nups-commerce",
       icon: ShoppingCart,
-      title: "NUPS Transaction Verification",
-      description: "Protocol-governed transaction module – system-enforced verification restricted to authorized venues.",
+      title: "NUPS Commerce Infrastructure",
+      description: "Covenant-backed commerce platform with verified transactions and ownership trails.",
       features: [
-        "Real-time inventory tracking with low-stock alerts",
-        "Customer loyalty programs and rewards",
-        "VIP room management and tracking",
-        "Entertainer check-in and contract management",
-        "Multi-location support with centralized reporting",
-        "Z-report generation for daily reconciliation",
-        "Marketing campaign management (Email/SMS)",
-        "AI-powered product recommendations"
+        "Real-time inventory with blockchain sync",
+        "Customer loyalty with verified rewards",
+        "VIP access management",
+        "Contract automation with Covenant proof",
+        "Multi-location ecosystem support",
+        "Automated reconciliation reports",
+        "Marketing with verified attribution",
+        "AI-powered recommendations"
       ],
       page: "NUPSLogin",
       color: "emerald"
     },
 
     {
-      id: "security-operations",
+      id: "site-builder",
       icon: Shield,
-      title: "Security Operations Module",
-      description: "System-enforced monitoring module – credentialed threat intelligence restricted to provisioned operators.",
+      title: "AI Site Building Engine",
+      description: "Build verified web ecosystems with AI-powered architecture, design, and deployment tools.",
       features: [
-        "24/7 real-time threat monitoring",
-        "Automated vulnerability scanning",
-        "Incident response workflow automation",
-        "Threat intelligence integration",
-        "Security audit logging and compliance",
-        "Custom security policies and rules",
-        "Enterprise-grade encryption and access control"
+        "AI-powered site generation",
+        "Component library access",
+        "Real-time collaboration",
+        "Automated optimization",
+        "SEO and performance audits",
+        "Master Covenant integration",
+        "Open source extensibility"
       ],
-      page: "SecurityOperationsCenter",
+      page: "SiteBuilder",
       color: "red"
     },
     {
-      id: "blockchain-security",
+      id: "blockchain-authorship",
       icon: Database,
-      title: "Blockchain Verification Module",
-      description: "Immutable ledger module – protocol-enforced integrity verification with cryptographic governance.",
+      title: "Blockchain Authorship Proof",
+      description: "Immutable timestamping – lock creative work to verifiable on-chain records with Master Covenant architecture.",
       features: [
-        "Immutable transaction records",
-        "Smart contract integration",
-        "Cryptographic verification",
-        "Audit trail generation",
-        "Tamper-proof data storage",
-        "Multi-signature authentication"
+        "Immutable creation timestamps",
+        "Smart contract authorship",
+        "Cryptographic ownership proof",
+        "Full audit trail generation",
+        "Tamper-evident asset registry",
+        "Multi-signature verification"
       ],
       page: "Blockchain",
       color: "cyan"
@@ -113,37 +113,37 @@ export default function Services() {
 
   const industries = [
     {
-      name: "Hospitality & Entertainment",
-      description: "Clubs, bars, restaurants, hotels, and entertainment venues requiring secure payment processing, customer tracking, and VIP management."
+      name: "Creators & Artists",
+      description: "Protect creative work with verifiable authorship, QR-linked portfolios, and Covenant-backed ownership proof."
     },
     {
-      name: "Enterprise & Corporate",
-      description: "Large organizations needing comprehensive security operations, threat monitoring, and compliance management."
+      name: "Web Agencies & Builders",
+      description: "Build verified client sites with AI infrastructure, covenant contracts, and blockchain-anchored deliverables."
     },
     {
-      name: "Technology & Software",
-      description: "Tech companies requiring AI security, intellectual property protection, and secure development workflows."
+      name: "Technology & Platforms",
+      description: "Extend your platform with GlyphLock's open framework for identity, verification, and creative infrastructure."
     },
     {
-      name: "Healthcare & Finance",
-      description: "Regulated industries needing HIPAA and PCI DSS compliant security solutions with audit trails."
+      name: "Commerce & Hospitality",
+      description: "Verified transactions, customer identity, and covenant-backed contracts for trust at scale."
     },
     {
-      name: "Retail & E-commerce",
-      description: "Online and brick-and-mortar retailers needing secure payment processing and fraud prevention."
+      name: "Education & Publishing",
+      description: "Protect intellectual property with Master Covenant authorship and immutable creative records."
     },
     {
-      name: "Government & Defense",
-      description: "Public sector organizations requiring quantum-resistant encryption and classified data protection."
+      name: "Enterprise & Government",
+      description: "Custom ecosystem architecture with compliance-ready verification and open source auditability."
     }
   ];
 
   return (
     <>
       <SEOHead 
-        title="Services - Cybersecurity Solutions | GlyphLock Platform"
-        description="Explore GlyphLock's comprehensive cybersecurity services including Visual Cryptography, GlyphBot AI, NUPS POS System, Security Operations Center, Blockchain Security, and Hotzone Mapper. Quantum-resistant protection for enterprises."
-        keywords="cybersecurity services, visual cryptography, QR security, steganography, GlyphBot AI, NUPS POS, security operations center, blockchain security, hotzone mapper, threat detection, vulnerability scanning"
+        title="Services - Creative Infrastructure Modules | GlyphLock Ecosystem"
+        description="Explore GlyphLock's creative infrastructure: QR Identity Studio, Image Lab, GlyphBot AI builder, Site Building tools, Blockchain authorship, and Master Covenant verification. Open framework for verified digital worlds."
+        keywords="creative infrastructure, QR identity, image generation, site building, GlyphBot AI, blockchain authorship, Master Covenant, verified ownership, digital ecosystem, open source framework"
         url="/services"
       />
       
@@ -158,7 +158,7 @@ export default function Services() {
               className="text-3xl md:text-4xl lg:text-6xl font-bold mb-4 md:mb-6"
             >
               <span className="bg-gradient-to-r from-blue-400 via-violet-500 to-emerald-400 bg-clip-text text-transparent">
-                GlyphLock System Modules
+                GlyphLock Creative Modules
               </span>
             </motion.h1>
             <motion.p 
@@ -167,7 +167,7 @@ export default function Services() {
               transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               className="text-base md:text-xl text-white/70 max-w-3xl mx-auto mb-6 md:mb-8"
             >
-              Protocol-governed verification modules – credentialed integrity system operating under cryptographic governance.
+              Build verified ecosystems with QR identity, AI site infrastructure, and Covenant-backed authorship proof.
             </motion.p>
             <motion.div 
               initial={{ opacity: 0, y: 40, scale: 0.9 }}
@@ -177,7 +177,7 @@ export default function Services() {
             >
               <Link to={createPageUrl("Consultation")}>
                 <Button className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white">
-                  Request Credentials
+                  Start Building
                 </Button>
               </Link>
             </motion.div>
@@ -213,7 +213,7 @@ export default function Services() {
                 </div>
                 <Link to={createPageUrl(service.page)}>
                   <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                    Access Module
+                    Explore Module
                   </Button>
                 </Link>
               </motion.div>
@@ -228,8 +228,8 @@ export default function Services() {
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
               className="text-3xl font-bold text-center mb-8"
             >
-              <span className="text-white">Industries We </span>
-              <span className="text-blue-400">Protect</span>
+              <span className="text-white">Ecosystems We </span>
+              <span className="text-blue-400">Enable</span>
             </motion.h2>
             <div className="grid md:grid-cols-3 gap-6">
               {industries.map((industry, idx) => (
@@ -263,7 +263,7 @@ export default function Services() {
               transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               className="text-3xl font-bold text-white mb-4"
             >
-              System-Enforced Verification Architecture
+              Open Framework Architecture
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, x: 80 }}
@@ -271,8 +271,8 @@ export default function Services() {
               transition={{ duration: 1, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="text-white/70 mb-6 max-w-3xl mx-auto"
             >
-              Quantum-resistant cryptographic governance with autonomous threat suppression. 
-              Protocol-enforced compliance with SOC 2, GDPR, ISO 27001, PCI DSS, and HIPAA.
+              Build on verified infrastructure with QR identity, blockchain authorship, and Master Covenant proof. 
+              Extensible, auditable, and designed for creative sovereignty at scale.
             </motion.p>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-white/60">
               <div className="flex items-center gap-2">
@@ -312,7 +312,7 @@ export default function Services() {
               transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               className="text-3xl font-bold text-white mb-4"
             >
-              Ready to Deploy Protocol-Governed Verification?
+              Ready to Build Your Creative Ecosystem?
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, x: 100 }}
@@ -320,7 +320,7 @@ export default function Services() {
               transition={{ duration: 1.1, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="text-white/70 mb-8 max-w-2xl mx-auto"
             >
-              Initiate credentialed access verification with GlyphLock specialists to provision system-enforced capabilities.
+              Start with GlyphLock's open framework for QR identity, site building, and verified ownership infrastructure.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 40, scale: 0.9 }}
@@ -329,7 +329,7 @@ export default function Services() {
             >
               <Link to={createPageUrl("Consultation")}>
                 <Button size="lg" className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white">
-                  Request Credentials
+                  Start Building
                 </Button>
               </Link>
             </motion.div>

@@ -40,17 +40,17 @@ export default function Footer() {
             </div>
             <div className="space-y-4 max-w-md">
               <p className="text-white text-lg font-black leading-tight">
-                IF THEY CAN BREAK IT, IT WASN'T GLYPHLOCK.
+                BUILD VERIFIED WORLDS, NOT JUST WEBSITES.
               </p>
               <p className="text-gray-400 leading-relaxed text-sm">
-                Quantum-immune keys, visual authentication that can't be forged, and an autonomous defense engine that analyzes, predicts, and shuts down threats before humans even see them.
+                QR identity for every asset, AI site building infrastructure, and Master Covenant authorship proof in one open framework for creative sovereignty.
               </p>
               <div className="flex flex-wrap gap-2 pt-2">
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">POST-QUANTUM SECURITY</span>
+                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">QR IDENTITY LAYER</span>
                 <span className="text-violet-400">•</span>
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">AI PREDICTIVE DEFENSE</span>
+                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">SITE BUILDING AI</span>
                 <span className="text-violet-400">•</span>
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">UNMATCHED VERIFICATION</span>
+                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">COVENANT AUTHORSHIP</span>
               </div>
             </div>
             <div className="flex items-center gap-4 pt-4">
