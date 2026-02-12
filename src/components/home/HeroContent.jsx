@@ -53,30 +53,6 @@ export default function HeroContent() {
           </Badge>
         </motion.div>
         
-        {/* Security badges - Alternating pop from different directions */}
-        <div className="flex items-center justify-center gap-6 mb-12">
-          <motion.div 
-            initial={{ opacity: 0, x: -70, rotateY: -30 }}
-            animate={isInView ? { opacity: 1, x: 0, rotateY: 0 } : {}}
-            transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            whileHover={{ scale: 1.08, rotateY: 10 }}
-            className="bg-gradient-to-br from-blue-600/20 via-cyan-500/15 to-indigo-500/20 backdrop-blur-md border border-cyan-400/20 px-6 py-4 rounded-xl shadow-[0_0_35px_rgba(6,182,212,0.4)] hover:shadow-[0_0_55px_rgba(6,182,212,0.6)] hover:border-cyan-400/40 transition-all duration-600 ease-out"
-          >
-            <Lock className="w-6 h-6 text-cyan-300 mx-auto mb-2 drop-shadow-[0_0_15px_rgba(6,182,212,1)]" />
-            <div className="text-sm text-white font-bold tracking-wider">AES-256</div>
-          </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, x: 70, rotateY: 30 }}
-            animate={isInView ? { opacity: 1, x: 0, rotateY: 0 } : {}}
-            transition={{ duration: 1, delay: 0.75, ease: [0.16, 1, 0.3, 1] }}
-            whileHover={{ scale: 1.08, rotateY: -10 }}
-            className="bg-gradient-to-br from-indigo-600/20 via-blue-500/15 to-cyan-500/20 backdrop-blur-md border border-blue-400/20 px-6 py-4 rounded-xl shadow-[0_0_35px_rgba(59,130,246,0.4)] hover:shadow-[0_0_55px_rgba(59,130,246,0.6)] hover:border-blue-400/40 transition-all duration-600 ease-out"
-          >
-            <Shield className="w-6 h-6 text-blue-300 mx-auto mb-2 drop-shadow-[0_0_15px_rgba(59,130,246,1)]" />
-            <div className="text-sm text-white font-bold tracking-wider">PQC KEY EXCHANGE</div>
-          </motion.div>
-        </div>
-
         {/* CTA Buttons - Slide in from opposite sides */}
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-4">
           <motion.div
