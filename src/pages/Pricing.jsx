@@ -123,37 +123,37 @@ export default function Pricing() {
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500" />
                   )}
                   
-                  <CardHeader className="text-center pb-8">
+                  <CardHeader className="text-center pb-6 md:pb-8">
                     {plan.popular && (
-                      <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 mx-auto mb-4">
+                      <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 mx-auto mb-3 md:mb-4 inline-block">
                         MOST POPULAR
                       </Badge>
                     )}
-                    
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${
+
+                    <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br ${
                       plan.color === 'cyan' ? 'from-cyan-500/20 to-blue-500/20' :
                       plan.color === 'purple' ? 'from-purple-500/20 to-pink-500/20' :
                       'from-blue-500/20 to-indigo-500/20'
-                    } flex items-center justify-center mx-auto mb-4`}>
-                      <Icon className={`w-8 h-8 ${
+                    } flex items-center justify-center mx-auto mb-3 md:mb-4`}>
+                      <Icon className={`w-7 h-7 md:w-8 md:h-8 ${
                         plan.color === 'cyan' ? 'text-cyan-400' :
                         plan.color === 'purple' ? 'text-purple-400' :
                         'text-blue-400'
                       }`} />
                     </div>
-                    
-                    <CardTitle className="text-2xl font-bold text-white mb-2">
+
+                    <CardTitle className="text-xl md:text-2xl font-bold text-white mb-2">
                       {plan.name}
                     </CardTitle>
-                    
-                    <div className="text-4xl font-bold text-white">
+
+                    <div className="text-3xl md:text-4xl font-bold text-white">
                       {plan.price ? (
                         <>
                           ${plan.price}
-                          <span className="text-lg text-slate-400 font-normal">/mo</span>
+                          <span className="text-sm md:text-lg text-slate-400 font-normal">/mo</span>
                         </>
                       ) : (
-                        <span className="text-2xl">Custom</span>
+                        <span className="text-xl md:text-2xl">Custom</span>
                       )}
                     </div>
                   </CardHeader>
