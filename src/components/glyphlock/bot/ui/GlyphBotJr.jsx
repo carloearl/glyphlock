@@ -25,19 +25,37 @@ export default function GlyphBotJr() {
       const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
       if (!cleanText) return;
 
+      console.log('[GlyphBotJr] Playing voice:', cleanText);
+
       const response = await base44.functions.invoke('textToSpeechOpenAI', {
         text: cleanText,
-        voice: 'nova',
+        voiceProfile: 'neutral_female',
         speed: 1.1
       });
 
-      if (response?.data?.audioUrl) {
-        const audio = new Audio(response.data.audioUrl);
-        audio.playbackRate = 1.1;
-        await audio.play().catch(e => console.warn("Audio play failed:", e));
+      console.log('[GlyphBotJr] TTS response:', response);
+
+      // Backend returns raw audio buffer - create blob URL
+      if (response?.data) {
+        const blob = new Blob([response.data], { type: 'audio/mpeg' });
+        const audioUrl = URL.createObjectURL(blob);
+        
+        const audio = new Audio(audioUrl);
+        audio.playbackRate = 1.0;
+        
+        audio.onloadeddata = () => console.log('[GlyphBotJr] Audio loaded, playing...');
+        audio.onerror = (e) => console.error('[GlyphBotJr] Audio error:', e);
+        
+        await audio.play();
+        console.log('[GlyphBotJr] Audio playing successfully');
+        
+        // Cleanup blob URL after playback
+        audio.onended = () => URL.revokeObjectURL(audioUrl);
+      } else {
+        console.error('[GlyphBotJr] No audio data in response');
       }
     } catch (err) {
-      console.error("Voice playback failed:", err);
+      console.error("[GlyphBotJr] Voice playback failed:", err);
     }
   };
 
