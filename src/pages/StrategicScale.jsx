@@ -46,7 +46,7 @@ export default function StrategicScale() {
               </h2>
               <p className="text-xl text-gray-300 mb-4">enterprise valuation</p>
               <p className="text-base text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                through protocol licensing, global identity infrastructure, and credential governance networks.
+                Establish a global protocol infrastructure capable of operating at billion dollar scale across creative and enterprise ecosystems.
               </p>
             </div>
           </div>
