@@ -30,8 +30,8 @@ export default function FAQ() {
     <>
       <SEOHead 
         title="FAQ - Frequently Asked Questions | GlyphLock Help Center"
-        description="Find answers to common questions about GlyphLock's cybersecurity platform, pricing, security tools, AI features, NUPS POS system, and technical support."
-        keywords="FAQ, help center, support, pricing questions, security tools, GlyphBot AI, NUPS POS, technical support, customer service"
+        description="Find answers about GlyphLock's creative ecosystem platform, QR identity tools, site building AI, Master Covenant authorship, pricing, and creator protection infrastructure."
+        keywords="FAQ, help center, creator support, ecosystem questions, QR identity, site building, GlyphBot AI, Master Covenant, technical support, audit trails"
         url="/faq"
       />
       
@@ -50,7 +50,7 @@ export default function FAQ() {
               FREQUENTLY ASKED <span className="text-transparent bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] bg-clip-text">QUESTIONS</span>
             </h1>
             <p className="text-base md:text-xl text-gray-400 px-4">
-              Protocol authority governance, credentialed access, and verification modules.
+              Creator protection, ecosystem infrastructure, and Master Covenant authorship framework.
             </p>
           </div>
 
@@ -59,7 +59,7 @@ export default function FAQ() {
           <div className="glyph-glass-dark rounded-2xl border-2 border-purple-500/40 p-8 text-center mt-16 glyph-glow">
             <h3 className="text-2xl font-bold text-white mb-4 font-space">Still Need Help?</h3>
             <p className="text-gray-400 mb-8 max-w-lg mx-auto">
-              Our security specialists are available 24/7 for enterprise clients, and within 24 hours for all users.
+              Our infrastructure team protects creators 24/7. Enterprise clients get immediate support, all users receive responses within 24 hours.
             </p>
             <a
               href="mailto:glyphlock@gmail.com"

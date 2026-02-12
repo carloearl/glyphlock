@@ -70,9 +70,9 @@ export default function Contact() {
   return (
     <>
       <SEOHead 
-        title="Contact GlyphLock - Security Consultation & Partnership Inquiries"
-        description="Contact GlyphLock Security for cybersecurity solutions, partnership opportunities, licensing inquiries, and enterprise security consultations. El Mirage, AZ | (424) 246-6499 | support@glyphlock.io"
-        keywords="contact GlyphLock, cybersecurity consultation, partnership inquiry, licensing request, enterprise security contact, GlyphLock email, security consultation, El Mirage Arizona, technology partnership"
+        title="Contact GlyphLock - Creative Infrastructure & Partnership Inquiries"
+        description="Contact GlyphLock for ecosystem architecture, partnership opportunities, creator protection infrastructure, and enterprise consultations. El Mirage, AZ | (424) 246-6499 | support@glyphlock.io"
+        keywords="contact GlyphLock, creative infrastructure, ecosystem partnership, creator protection, licensing inquiry, enterprise consultation, GlyphLock support, El Mirage Arizona"
         url="/contact"
       />
       <div className="min-h-screen bg-black text-white pt-20 md:pt-32 pb-16 md:pb-24 relative overflow-x-hidden w-full">
@@ -90,7 +90,7 @@ export default function Contact() {
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               className="text-3xl sm:text-5xl md:text-7xl font-black mb-4 md:mb-6 tracking-tighter px-4"
             >
-              INITIATE <span className="text-transparent bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] bg-clip-text drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]">VERIFICATION</span>
+              START <span className="text-transparent bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] bg-clip-text drop-shadow-[0_0_30px_rgba(124,58,237,0.5)]">BUILDING</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, x: 100 }}
@@ -98,7 +98,7 @@ export default function Contact() {
               transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               className="text-base md:text-xl text-gray-400 max-w-2xl mx-auto px-4"
             >
-              Establish credentialed communication channel with GlyphLock.
+              Connect with the team protecting independent creators with battle-tested infrastructure.
             </motion.p>
           </div>
 
@@ -141,7 +141,7 @@ export default function Contact() {
               <div className="w-full">
                 <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                   <Send className="w-6 h-6 text-[#3B82F6] drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-                  Secure Messaging
+                  Verified Messaging
                 </h2>
 
                 {submitted ? (
@@ -200,7 +200,7 @@ export default function Contact() {
                       style={{
                         boxShadow: '6px 6px 10px rgba(0,0,0,0.8), 1px 1px 10px rgba(59, 130, 246, 0.2)'
                       }}
-                      placeholder="Describe your security requirements..."
+                      placeholder="Describe your creative infrastructure needs or partnership vision..."
                     />
                   </div>
 
@@ -215,7 +215,7 @@ export default function Contact() {
                         Encrypting Transmission...
                       </div>
                     ) : (
-                      "Initiate Secure Transmission"
+                      "Send Verified Message"
                     )}
                   </GlyphButton>
                 </form>
@@ -231,34 +231,34 @@ export default function Contact() {
               className="space-y-8"
             >
               <div className="bg-slate-900/80 rounded-2xl p-8 border-2 border-[#8B5CF6]/30 shadow-[0_0_25px_rgba(139,92,246,0.2)]">
-                <h3 className="text-2xl font-bold text-white mb-4">Global Operations</h3>
+                <h3 className="text-2xl font-bold text-white mb-4">Global Infrastructure</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">
-                  GlyphLock operates globally with Arizona as our primary jurisdiction and legal enforcement zone. 
-                  Our systems are deployed across enterprise networks, hospitality venues, and secure facilities worldwide.
+                  GlyphLock protects creators worldwide with Arizona-based governance and audit-ready compliance. 
+                  Our infrastructure is deployed across creative studios, agencies, enterprises, and independent operators building verified ecosystems.
                 </p>
                 <div className="flex items-center gap-3 text-[#8B5CF6] font-bold uppercase tracking-wide text-sm">
                   <Globe className="w-5 h-5 drop-shadow-[0_0_6px_rgba(139,92,246,0.8)]" />
-                  <span>Operating in 12 Time Zones</span>
+                  <span>Resilient Infrastructure, Global Reach</span>
                 </div>
               </div>
 
               <div className="bg-slate-900/80 rounded-2xl p-8 border-2 border-[#3B82F6]/30 shadow-[0_0_25px_rgba(59,130,246,0.2)]">
-                <h3 className="text-2xl font-bold text-white mb-4">Partnership Inquiries</h3>
+                <h3 className="text-2xl font-bold text-white mb-4">Ecosystem Partnerships</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">
-                  For enterprise licensing, white-label solutions, or strategic integration requests, please use the contact form with subject "Partnership".
+                  For ecosystem licensing, white-label framework deployment, or strategic integrations, use the contact form with subject "Partnership". We protect your creative infrastructure the same way we protect ours.
                 </p>
                 <ul className="space-y-3 text-sm text-gray-300">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-[#3B82F6] drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]" />
-                    <span>Enterprise volume licensing</span>
+                    <span>Open framework licensing</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-[#3B82F6] drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]" />
-                    <span>Custom API integration</span>
+                    <span>Custom ecosystem integration</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-[#3B82F6] drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]" />
-                    <span>Dedicated support channels</span>
+                    <span>Auditable support infrastructure</span>
                   </li>
                 </ul>
               </div>

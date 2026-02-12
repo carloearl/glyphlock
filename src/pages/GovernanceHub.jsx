@@ -34,13 +34,13 @@ export default function GovernanceHub() {
               
               <div className="glass-card rounded-2xl border border-[#00E4FF]/30 p-8 space-y-6 bg-[#00E4FF]/5">
                 <p className="text-gray-300 leading-relaxed">
-                  The GlyphLock Master Covenant defines the governance, authority, and enforcement architecture underlying all GlyphLock protocol operations.
+                  The GlyphLock Master Covenant is the structural shield protecting independent creators from power imbalance. It defines authorship governance, AI accountability guardrails, and ledger-backed enforcement architecture — ensuring creative work cannot be quietly erased, stolen, or overridden.
                 </p>
                 
                 <div className="bg-black/40 border border-[#00E4FF]/20 rounded-xl p-6">
-                  <p className="text-white font-semibold mb-3">It is a governing framework, not a passive agreement.</p>
+                  <p className="text-white font-semibold mb-3">It is battle-tested infrastructure, not a passive agreement.</p>
                   <p className="text-sm text-gray-300 leading-relaxed">
-                    Binding obligations arise only through <strong className="text-white">credentialed access</strong>, <strong className="text-white">explicit execution</strong>, or <strong className="text-white">authorized protocol interaction</strong>, as defined in applicable GlyphLock engagements.
+                    Binding obligations arise through <strong className="text-white">credentialed access</strong>, <strong className="text-white">explicit execution</strong>, or <strong className="text-white">authorized protocol interaction</strong>. Every action is logged on tamper-resistant ledgers. Every AI operation runs inside human-overseen guardrails.
                   </p>
                 </div>
               </div>
@@ -72,22 +72,22 @@ export default function GovernanceHub() {
         return (
           <div className="space-y-8">
             <h2 className="text-3xl md:text-4xl font-black text-white mb-4 font-space">
-              What the Master Covenant Governs
+              What the Master Covenant Protects
             </h2>
             
             <div className="glass-card rounded-2xl border border-[#00E4FF]/20 p-8 space-y-6">
               <p className="text-gray-300 leading-relaxed text-lg">
-                The Master Covenant serves as the unifying authority layer governing:
+                The Master Covenant is the unified governance layer defending creators and ensuring accountability:
               </p>
               
               <div className="grid md:grid-cols-2 gap-4">
                 {[
-                  "Confidentiality and disclosure controls",
-                  "Intellectual property protection",
-                  "Protocol enforcement conditions",
-                  "Credentialed system access",
-                  "Participation of AI and automated systems",
-                  "Execution and agreement terms"
+                  "Creator authorship proof with blockchain timestamps",
+                  "Intellectual property that cannot be silently stolen",
+                  "AI operations inside auditable guardrails",
+                  "Credentialed access with tamper-evident logs",
+                  "Machine intelligence paired with human oversight",
+                  "Execution terms enforced through verifiable ledgers"
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3 p-4 bg-black/40 rounded-lg border border-white/5">
                     <ChevronRight className="w-5 h-5 text-[#00E4FF] flex-shrink-0 mt-0.5" />
@@ -98,7 +98,7 @@ export default function GovernanceHub() {
 
               <div className="bg-[#00E4FF]/10 border border-[#00E4FF]/30 rounded-xl p-6 mt-6">
                 <p className="text-white font-semibold text-sm">
-                  All GlyphLock engagements operate within this framework.
+                  All GlyphLock ecosystems operate inside this protective framework — engineered for resilience, not hype.
                 </p>
               </div>
             </div>
@@ -114,16 +114,16 @@ export default function GovernanceHub() {
             
             <div className="glass-card rounded-2xl border border-emerald-500/20 p-8 space-y-6">
               <p className="text-gray-300 leading-relaxed text-lg mb-6">
-                Constructive Binding Architecture (CAB) defines how and when obligations become binding within the GlyphLock ecosystem.
+                Constructive Binding Architecture (CAB) defines how obligations become binding within the GlyphLock ecosystem — protecting small operators from ambiguous terms and ensuring every commitment is traceable, auditable, and enforceable on tamper-resistant ledgers.
               </p>
 
               <div className="bg-black/40 rounded-xl border border-emerald-500/20 p-6">
-                <h3 className="font-bold text-white mb-4">CAB recognizes binding events through:</h3>
+                <h3 className="font-bold text-white mb-4">CAB recognizes binding events through verifiable actions:</h3>
                 <div className="space-y-3">
                   {[
-                    "Executed agreements",
-                    "Credentialed system access",
-                    "Authorized protocol interactions"
+                    "Executed agreements with cryptographic signatures",
+                    "Credentialed system access logged on blockchain",
+                    "Authorized protocol interactions with audit trails"
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
@@ -135,7 +135,7 @@ export default function GovernanceHub() {
 
               <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  <strong className="text-white">CAB operates within established legal frameworks</strong> and does not replace statutory law or formal execution requirements.
+                  <strong className="text-white">CAB operates within established legal frameworks</strong> and does not replace statutory law. It strengthens enforcement through machine-readable accountability — every obligation, every action, every change recorded for long-term trust.
                 </p>
               </div>
             </div>
@@ -151,16 +151,16 @@ export default function GovernanceHub() {
             
             <div className="glass-card rounded-2xl border border-[#8C4BFF]/20 p-8 space-y-6">
               <p className="text-gray-300 leading-relaxed text-lg">
-                Enforcement authority under the Master Covenant is exercised only by designated GlyphLock principals or governed entities, as defined in executed agreements.
+                Enforcement authority under the Master Covenant protects independent creators by leveling the field. Authority is exercised only by designated GlyphLock principals or governed entities, as defined in executed agreements — ensuring larger forces cannot quietly override creator rights.
               </p>
 
               <div className="bg-black/40 border border-[#8C4BFF]/20 rounded-xl p-6">
-                <h3 className="font-bold text-white mb-4">No enforcement action occurs without:</h3>
+                <h3 className="font-bold text-white mb-4">No enforcement action without verifiable proof:</h3>
                 <div className="space-y-3">
                   {[
-                    "Verification",
-                    "Authorization",
-                    "Documented scope"
+                    "Cryptographic verification on blockchain ledgers",
+                    "Explicit authorization logged with audit trails",
+                    "Documented scope with tamper-evident timestamps"
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-1.5 h-1.5 bg-[#8C4BFF] rounded-full"></div>
@@ -212,9 +212,9 @@ export default function GovernanceHub() {
   return (
     <>
       <SEOHead 
-        title="Master Covenant - GlyphLock Protocol Governance Framework"
-        description="The GlyphLock Master Covenant - Protocol governance framework defining intellectual property protections, enforcement conditions, and credentialed access mechanisms."
-        keywords="master covenant, protocol governance, intellectual property framework, enforcement conditions, credentialed access, IP protection, governance authority"
+        title="Master Covenant - GlyphLock Authorship Governance Framework"
+        description="The GlyphLock Master Covenant - Structural shield protecting independent creators with ledger-backed accountability, AI safety guardrails, and tamper-resistant authorship proof."
+        keywords="master covenant, creator protection, authorship governance, AI accountability, blockchain ledgers, IP protection, audit trails, tamper-resistant systems"
         url="/governancehub"
       />
       
@@ -242,7 +242,7 @@ export default function GovernanceHub() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-gray-400 max-w-2xl">
-              Protocol Governance Framework
+              Structural Shield for Independent Creators
             </p>
           </div>
 
@@ -287,14 +287,14 @@ export default function GovernanceHub() {
           {/* Bottom CTA */}
           <div className="mt-12 md:mt-16 text-center glass-card rounded-2xl border border-[#00E4FF]/20 p-6 md:p-8 lg:p-12">
             <h3 className="text-2xl font-bold text-white mb-4">
-              Protocol Verification Required
+              Build Inside Protected Infrastructure
             </h3>
             <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-              Access to full enforcement mechanisms and binding terms requires credentialed protocol verification.
+              Access the full enforcement framework with credentialed verification. Your work deserves infrastructure that cannot be quietly erased — Master Covenant provides the shield.
             </p>
             <Link to={createPageUrl("Consultation")}>
               <Button className="bg-[#00E4FF] hover:bg-[#0099FF] text-black font-bold px-8 py-6 text-lg rounded-xl shadow-[0_0_30px_rgba(0,228,255,0.4)]">
-                Request Credential Review
+                Start Protected Building
               </Button>
             </Link>
           </div>
