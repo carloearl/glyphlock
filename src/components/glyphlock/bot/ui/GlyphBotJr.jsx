@@ -25,19 +25,16 @@ export default function GlyphBotJr() {
       const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
       if (!cleanText) return;
 
-      const result = await ttsService.generate({
+      const response = await base44.functions.invoke('textToSpeechOpenAI', {
         text: cleanText,
-        provider: 'google',
-        voice: 'en-US-Neural2-F',
-        speed: 1.1,
-        pitch: 1.0,
-        volume: 1.0
+        voice: 'nova',
+        speed: 1.1
       });
 
-      if (result?.audioUrl) {
-        const audio = new Audio(result.audioUrl);
+      if (response?.data?.audioUrl) {
+        const audio = new Audio(response.data.audioUrl);
         audio.playbackRate = 1.1;
-        await audio.play();
+        await audio.play().catch(e => console.warn("Audio play failed:", e));
       }
     } catch (err) {
       console.error("Voice playback failed:", err);
@@ -120,7 +117,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
   if (!isOpen) {
     return (
       <div
-        className="fixed right-2 bottom-36 z-[99999] group cursor-pointer"
+        className="fixed right-6 bottom-36 z-[99999] group cursor-pointer"
         style={{ 
           pointerEvents: 'auto',
           touchAction: 'manipulation',
@@ -129,10 +126,10 @@ When answering questions, use the knowledge bases to provide accurate informatio
       >
         <div 
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 group-hover:w-44 group-hover:h-18 rounded-2xl bg-gradient-to-br from-blue-600/50 to-purple-600/50 backdrop-blur-xl border-2 border-blue-400/70 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_35px_rgba(37,99,235,0.6)] overflow-hidden px-4"
+          className="w-20 h-20 group-hover:w-48 group-hover:h-20 rounded-2xl bg-gradient-to-br from-blue-600/60 to-purple-600/60 backdrop-blur-xl border-2 border-blue-400/80 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_40px_rgba(37,99,235,0.7)] overflow-visible px-5"
         >
-          <Sparkles className="w-8 h-8 text-blue-200 flex-shrink-0 drop-shadow-[0_0_8px_rgba(59,130,246,0.9)]" />
-          <div className="opacity-0 group-hover:opacity-100 text-lg text-blue-50 font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">CHAT</div>
+          <Sparkles className="w-10 h-10 text-blue-100 flex-shrink-0 drop-shadow-[0_0_12px_rgba(59,130,246,1)]" />
+          <div className="opacity-0 group-hover:opacity-100 text-lg text-white font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">CHAT</div>
         </div>
       </div>
     );

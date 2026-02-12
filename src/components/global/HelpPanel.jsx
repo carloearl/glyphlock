@@ -100,11 +100,11 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
       {/* Help Tab - Lower Right */}
       <div
         onClick={() => setIsOpen(true)}
-        className="fixed right-2 bottom-20 z-[9997] group cursor-pointer"
+        className="fixed right-6 bottom-20 z-[9997] group cursor-pointer"
       >
-        <div className="w-16 h-16 group-hover:w-44 group-hover:h-18 rounded-2xl bg-gradient-to-br from-cyan-500/50 to-blue-600/50 backdrop-blur-xl border-2 border-cyan-400/70 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_35px_rgba(6,182,212,0.6)] overflow-hidden px-4">
-          <HelpCircle className="w-8 h-8 text-cyan-200 flex-shrink-0 drop-shadow-[0_0_8px_rgba(6,182,212,0.9)]" />
-          <div className="opacity-0 group-hover:opacity-100 text-lg text-cyan-50 font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">HELP</div>
+        <div className="w-20 h-20 group-hover:w-48 group-hover:h-20 rounded-2xl bg-gradient-to-br from-cyan-500/60 to-blue-600/60 backdrop-blur-xl border-2 border-cyan-400/80 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] overflow-visible px-5">
+          <HelpCircle className="w-10 h-10 text-cyan-100 flex-shrink-0 drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
+          <div className="opacity-0 group-hover:opacity-100 text-lg text-white font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">HELP</div>
         </div>
       </div>
 
@@ -321,25 +321,25 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
                         ))}
                       </div>
 
-                      <div className="flex-1 p-8 overflow-y-auto">
+                      <div className="flex-1 p-8 overflow-y-auto overflow-x-hidden">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={activeSection}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className="space-y-6"
+                            className="space-y-6 max-w-full"
                           >
                             {sections[activeSection]?.content?.map((item, idx) => (
                               <div key={idx} className="space-y-4">
                                 <div className="p-6 rounded-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-purple-500/30 hover:border-cyan-400/50 transition-all shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]">
                                   <div className="flex items-start gap-4">
                                     <Zap className="w-6 h-6 text-cyan-400 flex-shrink-0 mt-1 drop-shadow-[0_0_10px_rgba(6,182,212,0.9)]" />
-                                    <div className="flex-1 space-y-3">
-                                      <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-purple-300">
+                                    <div className="flex-1 space-y-3 min-w-0">
+                                      <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-purple-300 break-words">
                                         {item.heading}
                                       </h4>
-                                      <p className="text-base text-slate-200 leading-relaxed">
+                                      <p className="text-base text-slate-200 leading-relaxed break-words">
                                         {item.text}
                                       </p>
                                       {item.tip && (
@@ -361,8 +361,8 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
                                         </div>
                                       )}
                                       {item.code && (
-                                        <pre className="mt-4 p-4 rounded-lg bg-black/70 border border-cyan-500/40 overflow-x-auto">
-                                          <code className="text-sm font-mono text-green-400 leading-relaxed">
+                                        <pre className="mt-4 p-4 rounded-lg bg-black/70 border border-cyan-500/40 overflow-x-auto max-w-full">
+                                          <code className="text-sm font-mono text-green-400 leading-relaxed whitespace-pre-wrap break-all">
                                             {item.code}
                                           </code>
                                         </pre>
