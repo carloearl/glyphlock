@@ -51,7 +51,7 @@ export default function APIKeyVault({ user }) {
       }
       
       toast.success("API key created successfully");
-      setKeys([newKey, ...keys]);
+      await loadKeys(); // Reload to show new key in list
       setShowCreateForm(false);
       setFormData({ name: "", environment: "live" });
     } catch (err) {
@@ -61,6 +61,7 @@ export default function APIKeyVault({ user }) {
   };
 
   const handleRotateKey = async (keyId) => {
+    if (!confirm('Rotate this API key? The old secret will stop working immediately.')) return;
     try {
       const response = await base44.functions.invoke('rotateAPIKey', { keyId });
       const rotated = response.data;
@@ -70,10 +71,22 @@ export default function APIKeyVault({ user }) {
       }
       
       toast.success("API key rotated successfully");
-      setKeys(keys.map(k => k.id === keyId ? rotated : k));
+      await loadKeys(); // Reload to show updated key
     } catch (err) {
       console.error('Rotate key error:', err);
       toast.error(err.message || "Failed to rotate key");
+    }
+  };
+
+  const handleDeleteKey = async (keyId, keyName) => {
+    if (!confirm(`Delete "${keyName}"? This cannot be undone.`)) return;
+    try {
+      await base44.entities.APIKey.delete(keyId);
+      toast.success("API key deleted");
+      await loadKeys(); // Reload list
+    } catch (err) {
+      console.error('Delete key error:', err);
+      toast.error("Failed to delete key");
     }
   };
 
@@ -198,9 +211,19 @@ export default function APIKeyVault({ user }) {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleRotateKey(key.id)}
-                        className="text-white/70 hover:text-white"
+                        className="text-cyan-400 hover:text-cyan-300"
+                        title="Re-roll key"
                       >
                         <RefreshCw className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteKey(key.id, key.name)}
+                        className="text-red-400 hover:text-red-300"
+                        title="Delete key"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -224,27 +247,14 @@ export default function APIKeyVault({ user }) {
                       </div>
                     </div>
 
-                    {/* Secret Key */}
+                    {/* Secret Key - Hidden by default */}
                     <div>
                       <Label className="text-xs text-white/50">Secret Key</Label>
                       <div className="flex items-center gap-2 mt-1">
-                        <code className="flex-1 bg-[#020617] px-3 py-2 rounded text-sm text-white font-mono">
-                          {visibleKeys[key.id] ? key.secret_key : maskKey(key.secret_key)}
+                        <code className="flex-1 bg-[#020617] px-3 py-2 rounded text-sm text-white/40 font-mono">
+                          ••••••••••••••••••••••••••••
                         </code>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => toggleKeyVisibility(key.id)}
-                        >
-                          {visibleKeys[key.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </Button>
-                        <IconButton
-                          type="download"
-                          size={16}
-                          onClick={() => copyToClipboard(key.secret_key, "Secret key")}
-                          variant="success"
-                          title="Copy secret key"
-                        />
+                        <span className="text-xs text-white/40 italic">Hidden for security</span>
                       </div>
                     </div>
                   </div>
