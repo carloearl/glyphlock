@@ -2,21 +2,21 @@ import { base44 } from '@/api/base44Client';
 
 export async function synthesizeTTS(text, options = {}) {
   try {
-    const response = await base44.functions.invoke('textToSpeechAdvanced', {
-      text,
-      voice: options.voice || 'nova',
-      speed: options.speed || 1.0,
-      emotion: options.emotion || 'neutral'
+    const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        text,
+        voiceProfile: options.voice || 'nova',
+        speed: options.speed || 1.0
+      })
     });
 
-    if (response.data?.audioUrl) {
-      const audioResponse = await fetch(response.data.audioUrl);
-      return await audioResponse.arrayBuffer();
-    }
-
-    return null;
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.arrayBuffer();
   } catch (error) {
-    console.error('[TTS Client] Synthesis error:', error);
+    console.error('[TTS Client] Failed:', error);
     throw error;
   }
 }
