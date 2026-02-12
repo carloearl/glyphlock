@@ -127,7 +127,7 @@ export default function HeroContent() {
                   animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 />
-                <span className="relative">EXPLORE FRAMEWORK</span>
+                <span className="relative">EXPLORE THE FRAMEWORK</span>
               </Button>
             </Link>
           </motion.div>
@@ -135,12 +135,14 @@ export default function HeroContent() {
       </div>
 
       {/* Stats grid - Staggered pop-up with unique animations */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 px-4">
         {[
-          { label: "ECOSYSTEMS BUILT", value: "500K+", icon: Shield },
-          { label: "SITES VERIFIED", value: "24/7", icon: Lock },
-          { label: "QR IDENTITIES", value: "1M+", icon: Lock },
-          { label: "COVENANT PROOFS", value: "∞", icon: Shield }
+          { label: "AES 256 ENCRYPTION", value: "●", icon: Shield },
+          { label: "POST QUANTUM READY KEYS", value: "●", icon: Lock },
+          { label: "REAL TIME SITE VERIFICATION", value: "●", icon: Shield },
+          { label: "PERSISTENT IDENTITY LAYER", value: "●", icon: Lock },
+          { label: "ZERO TRUST ARCHITECTURE", value: "●", icon: Shield },
+          { label: "INFINITE PROOF CHAIN", value: "●", icon: Lock }
         ].map((stat, idx) => {
           const Icon = stat.icon;
           // Alternate animation directions
