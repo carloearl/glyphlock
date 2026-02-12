@@ -101,11 +101,10 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
       <div
         onMouseEnter={() => setIsOpen(true)}
         className="fixed left-0 top-1/3 z-[9998] w-12 h-32 flex items-center justify-center cursor-pointer"
-        style={{ pointerEvents: 'auto' }}
       >
-        <div className="w-8 h-24 rounded-r-xl bg-white/10 hover:bg-white/15 backdrop-blur-md border-r border-t border-b border-white/20 flex flex-col items-center justify-center gap-2 transition-all hover:w-10">
-          <HelpCircle className="w-5 h-5 text-blue-400" />
-          <div className="text-[10px] text-white/70 font-bold -rotate-90 whitespace-nowrap">GUIDE</div>
+        <div className="w-10 h-28 rounded-r-2xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 backdrop-blur-xl border-2 border-cyan-400/50 flex flex-col items-center justify-center gap-2 transition-all hover:w-12 shadow-[0_0_30px_rgba(6,182,212,0.4)]">
+          <HelpCircle className="w-6 h-6 text-cyan-300" />
+          <div className="text-[9px] text-cyan-200 font-bold -rotate-90 whitespace-nowrap tracking-wider">HELP</div>
         </div>
       </div>
 
