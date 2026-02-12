@@ -231,20 +231,19 @@ export default function MessageBubble({ message, autoRead = false }) {
 
             const audioBuffers = [];
 
-            for (let i = 0; i < chunks.length; i++) {
-                const chunk = chunks[i];
-                const apiUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceId}&text=${encodeURIComponent(chunk)}`;
+            // USE GLYPHLOCK OPENAI TTS INSTEAD OF STREAMELEMENTS
+            const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ text, voiceProfile: 'neutral_female', speed: playbackSpeed })
+            });
 
-                const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error(`TTS failed: ${response.status}`);
 
-                if (!response.ok) {
-                    throw new Error(`TTS API error: ${response.status}`);
-                }
-
-                const audioBuffer = await response.arrayBuffer();
-                const decodedData = await audioContext.decodeAudioData(audioBuffer);
-                audioBuffers.push(decodedData);
-            }
+            const audioBuffer = await response.arrayBuffer();
+            const decodedData = await audioContext.decodeAudioData(audioBuffer);
+            audioBuffers.push(decodedData);
 
             if (audioBuffers.length === 0) {
                 throw new Error('No audio data received');
