@@ -108,19 +108,26 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
         </div>
       </div>
 
-      {/* Help Panel Slide-in */}
+      {/* Help Panel Full-Page Overlay */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ x: -480 }}
-            animate={{ x: 0 }}
-            exit={{ x: -480 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            onMouseLeave={() => setIsOpen(false)}
-            className="fixed left-0 top-0 bottom-0 z-[99998] w-[480px] max-w-[90vw]"
-            onClick={(e) => e.stopPropagation()}
-          >
-              <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-r-2 border-cyan-500/40 overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5),inset_0_0_60px_rgba(168,85,247,0.15)] h-full">
+          <div className="fixed inset-0 z-[99998] flex items-center justify-center p-4" onClick={() => setIsOpen(false)}>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="relative w-full max-w-6xl max-h-[90vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-2 border-cyan-500/40 rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5),inset_0_0_60px_rgba(168,85,247,0.15)] h-full">
                 
                 {/* Header */}
                 <div className="relative overflow-hidden border-b-2 border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-blue-500/10">
@@ -386,7 +393,8 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
                   </div>
                 </div>
               </div>
-          </motion.div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

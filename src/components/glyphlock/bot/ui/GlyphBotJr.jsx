@@ -138,7 +138,6 @@ When answering questions, use the knowledge bases to provide accurate informatio
 
   return (
     <div 
-      onMouseLeave={() => setIsOpen(false)}
       className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] flex flex-col overflow-hidden rounded-l-2xl shadow-2xl border-l border-t border-b"
       style={{ 
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
