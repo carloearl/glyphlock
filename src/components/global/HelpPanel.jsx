@@ -103,9 +103,9 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
         className="fixed right-4 z-[9997] group cursor-pointer"
         style={{ bottom: '40px' }}
       >
-        <div className="w-20 h-20 group-hover:w-48 group-hover:h-20 rounded-2xl bg-gradient-to-br from-cyan-500/60 to-blue-600/60 backdrop-blur-xl border-2 border-cyan-400/80 flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] overflow-visible px-5">
-          <HelpCircle className="w-10 h-10 text-cyan-100 flex-shrink-0 drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
-          <div className="opacity-0 group-hover:opacity-100 text-lg text-white font-bold whitespace-nowrap tracking-wide transition-opacity duration-300">HELP</div>
+        <div className="w-16 h-16 group-hover:w-40 group-hover:h-16 rounded-xl bg-gradient-to-br from-cyan-500/60 to-blue-600/60 backdrop-blur-xl border-2 border-cyan-400/80 flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] px-3">
+          <HelpCircle className="w-7 h-7 text-cyan-100 flex-shrink-0 drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
+          <div className="opacity-0 group-hover:opacity-100 text-base text-white font-bold whitespace-nowrap transition-opacity duration-300">HELP</div>
         </div>
       </div>
 
