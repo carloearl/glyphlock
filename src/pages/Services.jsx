@@ -147,15 +147,15 @@ export default function Services() {
         url="/services"
       />
       
-      <div className="min-h-screen bg-black text-white py-20">
-        <div className="container mx-auto px-4 max-w-7xl">
+      <div className="min-h-screen bg-black text-white py-12 md:py-20">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
           {/* Header */}
-          <div ref={heroRef} className="text-center mb-12 md:mb-16 px-4">
+          <div ref={heroRef} className="text-center mb-10 md:mb-16 px-2 sm:px-4">
             <motion.h1 
               initial={{ opacity: 0, x: -100 }}
               animate={heroInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-3xl md:text-4xl lg:text-6xl font-bold mb-4 md:mb-6"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-3 md:mb-6 leading-tight"
             >
               <span className="bg-gradient-to-r from-blue-400 via-violet-500 to-emerald-400 bg-clip-text text-transparent">
                 GlyphLock Creative Modules
@@ -165,7 +165,7 @@ export default function Services() {
               initial={{ opacity: 0, x: 100 }}
               animate={heroInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="text-base md:text-xl text-white/70 max-w-3xl mx-auto mb-6 md:mb-8"
+              className="text-sm sm:text-base md:text-xl text-white/70 max-w-3xl mx-auto mb-6 md:mb-8"
             >
               Build verified ecosystems with QR identity, AI site infrastructure, and Covenant-backed authorship proof.
             </motion.p>
