@@ -21,34 +21,44 @@ export default function GlyphBotJr() {
   }, [messages]);
 
   const playVoice = async (text) => {
+    const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
+    if (!cleanText) return;
+
+    console.log('🎤 VOICE BUTTON CLICKED');
+    
     try {
-      const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
-      if (!cleanText) return;
-
-      const response = await fetch(`https://${window.location.hostname}/api/functions/textToSpeechOpenAI`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('base44_token') || ''}`
-        },
-        body: JSON.stringify({
-          text: cleanText,
-          voiceProfile: 'neutral_female',
-          speed: 1.1
-        }),
-        credentials: 'include'
+      console.log('📡 Calling TTS backend...');
+      const result = await base44.functions.invoke('textToSpeechOpenAI', {
+        text: cleanText,
+        voiceProfile: 'neutral_female',
+        speed: 1.1
       });
+      
+      console.log('✅ TTS response received:', result);
 
-      if (!response.ok) throw new Error(`TTS failed: ${response.status}`);
+      if (!result?.data) {
+        throw new Error('No audio data in response');
+      }
 
-      const audioBlob = await response.blob();
+      const audioBlob = new Blob([result.data], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
+      
+      console.log('🔊 Creating audio element...');
       const audio = new Audio(audioUrl);
       
+      audio.onloadeddata = () => console.log('✅ Audio loaded successfully');
+      audio.onplay = () => console.log('▶️ Audio started playing');
+      audio.onerror = (e) => console.error('❌ Audio playback error:', e);
+      audio.onended = () => {
+        console.log('⏹️ Audio finished');
+        URL.revokeObjectURL(audioUrl);
+      };
+      
       await audio.play();
-      audio.onended = () => URL.revokeObjectURL(audioUrl);
+      
     } catch (err) {
-      console.error("Voice failed:", err);
+      console.error('❌ VOICE PLAYBACK FAILED:', err);
+      alert(`Voice failed: ${err.message}`);
     }
   };
 
