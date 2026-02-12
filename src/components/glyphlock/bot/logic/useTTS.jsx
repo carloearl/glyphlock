@@ -152,34 +152,21 @@ export default function useTTS(options = {}) {
         await audioContext.resume();
       }
 
-      // GLYPHLOCK: Call OpenAI TTS backend with retry logic
-      let audioData;
-      try {
-        const response = await base44.functions.invoke('textToSpeechOpenAI', {
+      // DIRECT FETCH - SDK corrupts binary data
+      const fetchResponse = await fetch('/.netlify/functions/textToSpeechOpenAI', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
           text,
           voiceProfile: voiceProfile || settings.voiceProfile || 'neutral_female',
           speed: normalizeSpeed(settings.speed)
-        });
+        })
+      });
 
-        if (response.data?.error) {
-          throw new Error(response.data.error);
-        }
+      if (!fetchResponse.ok) throw new Error(`HTTP ${fetchResponse.status}`);
 
-        // Handle binary audio response
-        if (response.data instanceof ArrayBuffer) {
-          audioData = response.data;
-        } else if (response.data instanceof Blob) {
-          audioData = await response.data.arrayBuffer();
-        } else {
-          // Fallback: assume it's a URL or base64
-          const blob = new Blob([response.data], { type: 'audio/mpeg' });
-          audioData = await blob.arrayBuffer();
-        }
-      } catch (openaiError) {
-        console.warn('[TTS] OpenAI failed, retrying with fallback...', openaiError);
-        throw openaiError; // Will trigger fallback to Web Speech
-      }
-
+      const audioData = await fetchResponse.arrayBuffer();
       let audioBuffer = await audioContext.decodeAudioData(audioData);
       
       // GLYPHLOCK: Apply audio filters (bass/clarity/pitch)

@@ -1,10 +1,5 @@
-import { base44 } from '@/api/base44Client';
-
 export async function generate(options) {
   try {
-    const user = await base44.auth.me();
-    if (!user) throw new Error('Not authenticated');
-
     const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -19,18 +14,10 @@ export async function generate(options) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const blob = await response.blob();
-    if (blob.size === 0) throw new Error('Empty audio response');
-    
     const url = URL.createObjectURL(blob);
-    const audio = new Audio();
-    audio.src = url;
+    const audio = new Audio(url);
     
-    await new Promise((resolve, reject) => {
-      audio.addEventListener('canplaythrough', resolve, { once: true });
-      audio.addEventListener('error', reject, { once: true });
-      audio.load();
-    });
-
+    audio.load();
     await audio.play();
     audio.onended = () => URL.revokeObjectURL(url);
     
