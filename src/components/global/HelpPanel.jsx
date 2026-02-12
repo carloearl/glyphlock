@@ -120,7 +120,7 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
             className="fixed left-0 top-0 bottom-0 z-[99998] w-[480px] max-w-[90vw]"
             onClick={(e) => e.stopPropagation()}
           >
-              <div className="bg-gradient-to-br from-slate-900/98 via-slate-950/98 to-slate-900/98 border-r-2 border-cyan-500/40 overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5),inset_0_0_60px_rgba(168,85,247,0.15)] h-full">
+              <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-r-2 border-cyan-500/40 overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5),inset_0_0_60px_rgba(168,85,247,0.15)] h-full">
                 
                 {/* Header */}
                 <div className="relative overflow-hidden border-b-2 border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-blue-500/10">

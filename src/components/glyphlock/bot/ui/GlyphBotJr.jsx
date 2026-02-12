@@ -128,9 +128,9 @@ When answering questions, use the knowledge bases to provide accurate informatio
           WebkitTapHighlightColor: 'transparent'
         }}
       >
-        <div className="w-8 h-24 rounded-l-xl bg-white/10 hover:bg-white/15 backdrop-blur-md border-l border-t border-b border-white/20 flex flex-col items-center justify-center gap-2 transition-all hover:w-10">
-          <Sparkles className="w-5 h-5 text-cyan-400" />
-          <div className="text-[10px] text-white/70 font-bold rotate-90 whitespace-nowrap">HELP</div>
+        <div className="w-10 h-28 rounded-l-2xl bg-gradient-to-br from-blue-600/30 to-purple-600/30 backdrop-blur-xl border-2 border-blue-400/50 flex flex-col items-center justify-center gap-2 transition-all hover:w-12 shadow-[0_0_30px_rgba(37,99,235,0.4)]">
+          <Sparkles className="w-6 h-6 text-blue-300" />
+          <div className="text-[9px] text-blue-200 font-bold rotate-90 whitespace-nowrap tracking-wider">CHAT</div>
         </div>
       </div>
     );
