@@ -82,30 +82,30 @@ export default function Pricing() {
   ];
 
   return (
-    <div className="min-h-screen text-white py-20" style={{ background: 'transparent' }}>
+    <div className="min-h-screen text-white py-12 md:py-20" style={{ background: 'transparent' }}>
       <SEOHead
         title="Pricing Plans | GlyphLock Creative Ecosystem"
         description="Choose the right GlyphLock plan for your creative infrastructure needs. From Creator to Enterprise, open framework tools for verified digital ecosystems at every scale."
         url="/pricing"
       />
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-16">
-            <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 mb-4">
+          <div className="text-center mb-12 md:mb-16">
+            <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 mb-3 md:mb-4 inline-block">
               Creative Infrastructure
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent leading-tight">
               Ecosystem Plans
             </h1>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto px-2">
               Open framework access for creators, builders, and enterprises
             </p>
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-16">
             {plans.map((plan) => {
               const Icon = plan.icon;
               const isEnterprise = plan.key === 'enterprise';
