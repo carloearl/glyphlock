@@ -20,7 +20,7 @@ export default function HeroContent() {
           transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4 md:mb-6 text-white tracking-tight drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] leading-tight px-2"
         >
-          BUILD VERIFIED WORLDS — <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(139,92,246,0.9)] animate-pulse">NOT JUST WEBSITES.</span>
+          BUILD <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(139,92,246,0.9)] animate-pulse">VERIFIED</span> DIGITAL WORLDS
         </motion.h1>
         
         {/* Subtitle - Slide from right */}
@@ -28,9 +28,18 @@ export default function HeroContent() {
           initial={{ opacity: 0, x: 100 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-base sm:text-lg md:text-xl lg:text-2xl text-white max-w-4xl mx-auto mb-4 md:mb-6 font-medium leading-relaxed px-4"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl text-[#00E4FF] max-w-4xl mx-auto mb-4 md:mb-6 font-bold leading-relaxed px-4"
         >
-          QR identity imaging, AI site infrastructure, and Master Covenant authorship in one open framework for creative sovereignty.
+          Identity. Infrastructure. Sovereignty.
+        </motion.p>
+        
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 1, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="text-sm sm:text-base md:text-lg text-gray-300 max-w-3xl mx-auto mb-3 leading-relaxed px-4"
+        >
+          QR based identity imaging and AI backed site architecture secured under the Master Covenant.
         </motion.p>
         
         {/* Badge - Pop up with bounce */}
@@ -40,7 +49,7 @@ export default function HeroContent() {
           transition={{ duration: 0.9, delay: 0.4, type: "spring", stiffness: 120, damping: 14 }}
         >
           <Badge className="mb-10 bg-blue-600/10 backdrop-blur-md border-2 border-cyan-400/40 text-white px-6 py-2 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
-            <span className="font-black tracking-[0.2em] text-sm">OPEN SOURCE | COVENANT BACKED | LIMITLESS CONSTRUCTION</span>
+            <span className="font-black tracking-[0.2em] text-sm">OPEN SOURCE FRAMEWORK FOR CREATIVE CONTROL</span>
           </Badge>
         </motion.div>
         
