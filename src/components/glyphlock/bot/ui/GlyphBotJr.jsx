@@ -120,17 +120,19 @@ When answering questions, use the knowledge bases to provide accurate informatio
   if (!isOpen) {
     return (
       <div
-        onMouseEnter={() => setIsOpen(true)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] w-12 h-32 flex items-center justify-center cursor-pointer"
+        className="fixed right-0 bottom-36 z-[99999] group cursor-pointer"
         style={{ 
           pointerEvents: 'auto',
           touchAction: 'manipulation',
           WebkitTapHighlightColor: 'transparent'
         }}
       >
-        <div className="w-10 h-28 rounded-l-2xl bg-gradient-to-br from-blue-600/30 to-purple-600/30 backdrop-blur-xl border-2 border-blue-400/50 flex flex-col items-center justify-center gap-2 transition-all hover:w-12 shadow-[0_0_30px_rgba(37,99,235,0.4)]">
-          <Sparkles className="w-6 h-6 text-blue-300" />
-          <div className="text-[9px] text-blue-200 font-bold rotate-90 whitespace-nowrap tracking-wider">CHAT</div>
+        <div 
+          onClick={() => setIsOpen(true)}
+          className="w-12 h-12 group-hover:w-32 group-hover:h-14 rounded-l-2xl bg-gradient-to-br from-blue-600/30 to-purple-600/30 backdrop-blur-xl border-2 border-blue-400/50 flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] overflow-hidden"
+        >
+          <Sparkles className="w-6 h-6 text-blue-300 flex-shrink-0" />
+          <div className="opacity-0 group-hover:opacity-100 text-sm text-blue-200 font-bold whitespace-nowrap tracking-wider transition-opacity">CHAT</div>
         </div>
       </div>
     );
@@ -138,7 +140,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
 
   return (
     <div 
-      className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] flex flex-col overflow-hidden rounded-l-2xl shadow-2xl border-l border-t border-b"
+      className="fixed right-0 bottom-4 z-[99999] flex flex-col overflow-hidden rounded-2xl shadow-2xl border-2"
       style={{ 
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
         borderColor: 'rgba(37, 99, 235, 0.5)',
