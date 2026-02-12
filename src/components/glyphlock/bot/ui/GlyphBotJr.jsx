@@ -119,28 +119,27 @@ When answering questions, use the knowledge bases to provide accurate informatio
 
   if (!isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-[99999] w-14 h-14 rounded-xl bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 text-white shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+      <div
+        onMouseEnter={() => setIsOpen(true)}
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] w-12 h-32 flex items-center justify-center cursor-pointer"
         style={{ 
           pointerEvents: 'auto',
           touchAction: 'manipulation',
-          WebkitTapHighlightColor: 'transparent',
-          display: 'flex',
-          visibility: 'visible',
-          minWidth: '56px',
-          minHeight: '56px'
+          WebkitTapHighlightColor: 'transparent'
         }}
-        aria-label="Open GlyphBot Junior"
       >
-        <Sparkles className="w-6 h-6 text-cyan-400" />
-      </button>
+        <div className="w-8 h-24 rounded-l-xl bg-white/10 hover:bg-white/15 backdrop-blur-md border-l border-t border-b border-white/20 flex flex-col items-center justify-center gap-2 transition-all hover:w-10">
+          <Sparkles className="w-5 h-5 text-cyan-400" />
+          <div className="text-[10px] text-white/70 font-bold rotate-90 whitespace-nowrap">HELP</div>
+        </div>
+      </div>
     );
   }
 
   return (
     <div 
-      className="fixed bottom-6 right-6 z-[99999] flex flex-col overflow-hidden rounded-2xl shadow-2xl border glyph-glass-dark"
+      onMouseLeave={() => setIsOpen(false)}
+      className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] flex flex-col overflow-hidden rounded-l-2xl shadow-2xl border-l border-t border-b glyph-glass-dark"
       style={{ 
         borderColor: 'rgba(37, 99, 235, 0.3)',
         width: '400px',
