@@ -387,7 +387,6 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
                   </div>
                 </div>
               </div>
-              </div>
           </motion.div>
         )}
       </AnimatePresence>
