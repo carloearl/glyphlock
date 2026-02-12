@@ -117,8 +117,9 @@ When answering questions, use the knowledge bases to provide accurate informatio
   if (!isOpen) {
     return (
       <div
-        className="fixed right-6 bottom-36 z-[99999] group cursor-pointer"
+        className="fixed right-4 z-[99999] group cursor-pointer"
         style={{ 
+          bottom: '140px',
           pointerEvents: 'auto',
           touchAction: 'manipulation',
           WebkitTapHighlightColor: 'transparent'
@@ -137,8 +138,9 @@ When answering questions, use the knowledge bases to provide accurate informatio
 
   return (
     <div 
-      className="fixed right-0 bottom-4 z-[99999] flex flex-col overflow-hidden rounded-2xl shadow-2xl border-2"
-      style={{ 
+      className="fixed right-4 z-[99999] flex flex-col overflow-hidden rounded-2xl shadow-2xl border-2"
+      style={{
+        bottom: '40px', 
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
         borderColor: 'rgba(37, 99, 235, 0.5)',
         width: '400px',
