@@ -24,40 +24,23 @@ export async function synthesizeTTS(text, settings = {}) {
   console.log('[TTS Client] Synthesizing:', { voice, speed, emotion, textLength: text.length });
 
   try {
-    // Call backend function that uses OpenAI TTS
-    const response = await base44.functions.invoke('textToSpeechAdvanced', {
-      text,
-      provider: 'openai',
-      voice,
-      speed
+    const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ text, voiceProfile: voice || 'nova', speed: speed || 1.0 })
     });
 
-    if (!response?.data?.success) {
-      throw new Error(response?.data?.error || 'TTS service failed');
-    }
-
-    // Backend returns audioUrl, fetch it and return as ArrayBuffer
-    const audioUrl = response.data.audioUrl;
-    if (!audioUrl) {
-      throw new Error('No audio URL received from TTS service');
-    }
-
-    console.log('[TTS Client] Fetching audio from:', audioUrl);
-
-    // Fetch the audio file
-    const audioResponse = await fetch(audioUrl);
-    if (!audioResponse.ok) {
-      throw new Error(`Failed to fetch audio: ${audioResponse.status}`);
-    }
-
-    const audioData = await audioResponse.arrayBuffer();
-    console.log('[TTS Client] Audio fetched successfully:', audioData.byteLength, 'bytes');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const audioData = await response.arrayBuffer();
+    console.log('[TTS Client] Audio fetched:', audioData.byteLength, 'bytes');
     
     return audioData;
 
   } catch (error) {
-    console.error('[TTS Client] Synthesis failed:', error);
-    throw new Error(`TTS synthesis failed: ${error.message}`);
+    console.error('[TTS Client] Failed:', error);
+    throw new Error(`TTS failed: ${error.message}`);
   }
 }
 

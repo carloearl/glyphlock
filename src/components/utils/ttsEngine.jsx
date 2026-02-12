@@ -119,39 +119,24 @@ export async function generateAudio(provider, voiceId, text, settings = {}) {
   const finalSettings = { ...defaultSettings, ...settings, effects: { ...defaultSettings.effects, ...(settings.effects || {}) } };
 
   try {
-    // Call unified backend function
-    const response = await base44.functions.invoke('textToSpeechAdvanced', {
-      text: cleanText,
-      provider: provider || 'google',
-      voice: voiceId,
-      speed: finalSettings.speed,
-      pitch: finalSettings.pitch,
-      volume: finalSettings.volume,
-      bass: finalSettings.bass,
-      treble: finalSettings.treble,
-      mid: finalSettings.mid,
-      warmth: finalSettings.warmth,
-      stability: finalSettings.stability,
-      similarity: finalSettings.similarity,
-      style: finalSettings.style,
-      useSpeakerBoost: finalSettings.useSpeakerBoost,
-      echo: finalSettings.effects.echo,
-      delay: finalSettings.effects.delay,
-      noiseGate: finalSettings.effects.gate,
-      enhancement: finalSettings.effects.enhance,
-      humanize: finalSettings.effects.humanize
+    const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        text: cleanText,
+        voiceProfile: voiceId || 'nova',
+        speed: finalSettings.speed || 1.0
+      })
     });
 
-    if (response.data?.audioUrl) {
-      return response.data.audioUrl;
-    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    // Fallback to StreamElements
-    return generateStreamElements(voiceId, cleanText);
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
   } catch (error) {
-    console.error(`TTS Error [${provider}]:`, error);
-    // Final fallback
-    return generateStreamElements('Matthew', cleanText);
+    console.error(`TTS Error:`, error);
+    throw error;
   }
 }
 
