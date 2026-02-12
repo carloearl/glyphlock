@@ -20,7 +20,7 @@ export default function HeroContent() {
           transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4 md:mb-6 text-white tracking-tight drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] leading-tight px-2"
         >
-          THE FUTURE OF SECURITY ISN'T COMING — <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(139,92,246,0.9)] animate-pulse">IT'S ALREADY HERE.</span>
+          BUILD VERIFIED WORLDS — <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(139,92,246,0.9)] animate-pulse">NOT JUST WEBSITES.</span>
         </motion.h1>
         
         {/* Subtitle - Slide from right */}
@@ -30,7 +30,7 @@ export default function HeroContent() {
           transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="text-base sm:text-lg md:text-xl lg:text-2xl text-white max-w-4xl mx-auto mb-4 md:mb-6 font-medium leading-relaxed px-4"
         >
-          Quantum-immune authentication, autonomous threat suppression, and AI-driven audit intelligence designed for infrastructures that cannot afford to fail.
+          QR identity imaging, AI site infrastructure, and Master Covenant authorship in one open framework for creative sovereignty.
         </motion.p>
         
         {/* Badge - Pop up with bounce */}
@@ -40,7 +40,7 @@ export default function HeroContent() {
           transition={{ duration: 0.9, delay: 0.4, type: "spring", stiffness: 120, damping: 14 }}
         >
           <Badge className="mb-10 bg-blue-600/10 backdrop-blur-md border-2 border-cyan-400/40 text-white px-6 py-2 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
-            <span className="font-black tracking-[0.2em] text-sm">PQC-HARDENED | ZERO-TRUST AI | SUB-MILLISECOND RESPONSE</span>
+            <span className="font-black tracking-[0.2em] text-sm">OPEN SOURCE | COVENANT BACKED | LIMITLESS CONSTRUCTION</span>
           </Badge>
         </motion.div>
         
@@ -87,7 +87,7 @@ export default function HeroContent() {
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                 />
                 <span className="relative flex items-center gap-2">
-                  REQUEST CREDENTIALS
+                  START YOUR ECOSYSTEM
                   <motion.span
                     animate={{ x: [0, 6, 0] }}
                     transition={{ duration: 1.2, repeat: Infinity }}
@@ -118,7 +118,7 @@ export default function HeroContent() {
                   animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 />
-                <span className="relative">REQUEST MODULE ACCESS</span>
+                <span className="relative">EXPLORE FRAMEWORK</span>
               </Button>
             </Link>
           </motion.div>
@@ -128,10 +128,10 @@ export default function HeroContent() {
       {/* Stats grid - Staggered pop-up with unique animations */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-4">
         {[
-          { label: "THREATS DETECTED", value: "500K+", icon: Shield },
-          { label: "AI MONITORING", value: "24/7", icon: Lock },
-          { label: "ENCRYPTION", value: "AES-256", icon: Lock },
-          { label: "RESPONSE TIME", value: "<1ms", icon: Shield }
+          { label: "ECOSYSTEMS BUILT", value: "500K+", icon: Shield },
+          { label: "SITES VERIFIED", value: "24/7", icon: Lock },
+          { label: "QR IDENTITIES", value: "1M+", icon: Lock },
+          { label: "COVENANT PROOFS", value: "∞", icon: Shield }
         ].map((stat, idx) => {
           const Icon = stat.icon;
           // Alternate animation directions

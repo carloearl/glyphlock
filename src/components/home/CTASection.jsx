@@ -31,10 +31,10 @@ export default function CTASection() {
   };
 
   const benefits = [
-    { text: "Protocol-governed access control", icon: Shield },
-    { text: "System-enforced verification", icon: Zap },
-    { text: "Credentialed integrity framework", icon: CheckCircle2 },
-    { text: "Provisioned support channel", icon: Sparkles }
+    { text: "QR identity for every asset", icon: Shield },
+    { text: "AI site building infrastructure", icon: Zap },
+    { text: "Master Covenant authorship proof", icon: CheckCircle2 },
+    { text: "Open source creative framework", icon: Sparkles }
   ];
 
   // Stagger animation variants
@@ -201,7 +201,7 @@ export default function CTASection() {
                 transition={{ duration: 1.1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]"
               >
-                READY TO SECURE YOUR{' '}
+                READY TO BUILD YOUR{' '}
                 <motion.span 
                   className="bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6] bg-clip-text text-transparent"
                   animate={{
@@ -212,7 +212,7 @@ export default function CTASection() {
                   }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  DIGITAL ASSETS?
+                  ECOSYSTEM?
                 </motion.span>
               </motion.h2>
 
@@ -223,7 +223,7 @@ export default function CTASection() {
                 transition={{ duration: 1.1, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
                 className="text-base md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto font-medium"
               >
-                Protocol-governed verification for credentialed operators
+                Open framework. Covenant verified. Built for creators who own their work.
               </motion.p>
 
               {/* Email form - Scale up with bounce */}
@@ -264,7 +264,7 @@ export default function CTASection() {
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                     />
                     <span className="relative flex items-center gap-2 text-sm md:text-base">
-                      INITIATE VERIFICATION
+                      START BUILDING
                       <motion.span
                         animate={{ x: [0, 4, 0] }}
                         transition={{ duration: 1.5, repeat: Infinity }}

@@ -13,42 +13,42 @@ import { motion, useInView } from "framer-motion";
 const services = [
   {
     title: "NEXUS N.U.P.S.",
-    description: "Transaction verification module – governed by protocol, accessible only with provisioned credentials",
+    description: "Commerce infrastructure with covenant-backed transactions and verified ownership trails",
     link: "NUPSLogin",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/9184b512b_Whisk_b9fd7532ee1e87a9152439bac427f256dr.jpg",
     icon: Zap
   },
   {
     title: "Master Covenant",
-    description: "Binding protocol system – cryptographic governance restricted to authorized accounts",
+    description: "Authorship protocol – cryptographic proof of origin for creative work at ecosystem scale",
     link: "MasterCovenant",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/8f4e28351_Whisk_05f17d65a57cf59bf1a4fdd31ffd7d8edr.jpg",
     icon: FileCode
   },
   {
-    title: "QR Verification Module",
-    description: "Cryptographic QR generation with steganographic encoding – protocol-enforced access control",
+    title: "QR Identity Studio",
+    description: "Visual identity layer – embed verified metadata into scannable assets across your ecosystem",
     link: "Qr",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ef8ed5e35_ee8d4930-e046-49b0-8beb-87745181d506.jpg",
     icon: Eye
   },
   {
-    title: "Blockchain Verification",
-    description: "Immutable ledger module – system-enforced capability restricted to credentialed operators",
+    title: "Blockchain Anchoring",
+    description: "Immutable timestamping – lock creative assets to verifiable on-chain records",
     link: "Blockchain",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/b91660fea_Whisk_8fdb6d2b015dc9e846648880fcd03ca1dr.jpg",
     icon: Lock
   },
   {
-    title: "Image Processing Module",
-    description: "Steganographic encoding system – operating under protocol-governed authorization",
+    title: "Image Lab",
+    description: "AI generation + interactive hotspots – turn static visuals into verified, linkable ecosystems",
     link: "ImageLab",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/9167e5df2_08f33231-115f-4c95-9719-682f4e9679cc.jpg",
     icon: Image
   },
   {
-    title: "GlyphBot Intelligence Module",
-    description: "Autonomous security analysis – AI-driven threat suppression with credentialed access",
+    title: "GlyphBot Intelligence",
+    description: "AI builder assistant – site audits, architecture analysis, and knowledge synthesis for your ecosystem",
     link: "GlyphBot",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0e2155dc3_Whisk_df925aca34d95e09a3b4274e0bd16f08dr.jpg",
     icon: Brain
@@ -79,7 +79,7 @@ export default function ServicesGrid() {
           transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]"
         >
-          Credentialed Integrity <span className="bg-gradient-to-r from-[#1E40AF] via-[#3B82F6] to-[#60A5FA] bg-clip-text text-transparent">System</span>
+          Creative Infrastructure <span className="bg-gradient-to-r from-[#1E40AF] via-[#3B82F6] to-[#60A5FA] bg-clip-text text-transparent">Modules</span>
         </motion.h2>
         
         {/* Subtitle - Slide from right */}
@@ -89,7 +89,7 @@ export default function ServicesGrid() {
           transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="text-lg text-white/90"
         >
-          Protocol-governed modules restricted to provisioned access
+          Build, verify, and protect digital ecosystems with open covenant architecture
         </motion.p>
       </div>
 
