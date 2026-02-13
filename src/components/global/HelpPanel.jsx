@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HelpPanel({ title = "System Guide", sections = [], autoPopup = true }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [activeSection, setActiveSection] = useState(0);
   const [walkthroughMode, setWalkthroughMode] = useState(false);
