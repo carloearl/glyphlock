@@ -13,20 +13,32 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
     <>
       {/* Unified Sidebar Tab - Right Edge */}
       <div
-        className="fixed right-0 z-[99999]"
+        className="fixed right-0 z-[999999]"
         style={{ 
-          bottom: '120px',
-          pointerEvents: 'auto',
-          touchAction: 'manipulation',
-          WebkitTapHighlightColor: 'transparent'
+          top: '50%',
+          transform: 'translateY(-50%)',
+          pointerEvents: 'auto !important',
+          touchAction: 'manipulation !important',
+          WebkitTapHighlightColor: 'rgba(168, 85, 247, 0.3)',
+          cursor: 'pointer'
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={() => setIsHovered(true)}
       >
         {/* Collapsed Tab */}
-        <div className="absolute right-0 w-14 h-32 rounded-l-2xl bg-gradient-to-br from-purple-600/70 to-indigo-600/70 backdrop-blur-xl border-2 border-r-0 border-purple-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(168,85,247,0.7)] flex flex-col items-center justify-center gap-2 cursor-pointer hover:w-16">
-          <MessageSquare className="w-6 h-6 text-purple-100 drop-shadow-[0_0_12px_rgba(168,85,247,1)]" />
-          <span className="text-xs text-white font-bold -rotate-90 whitespace-nowrap tracking-wider">ASSIST</span>
+        <div 
+          className="absolute right-0 w-16 h-40 rounded-l-2xl bg-gradient-to-br from-purple-600/90 to-indigo-600/90 backdrop-blur-xl border-2 border-r-0 border-purple-400/80 transition-all duration-300 shadow-[0_0_60px_rgba(168,85,247,0.9)] flex flex-col items-center justify-center gap-3 cursor-pointer hover:w-20 active:scale-95"
+          style={{
+            pointerEvents: 'auto !important',
+            touchAction: 'manipulation !important',
+            WebkitTapHighlightColor: 'rgba(168, 85, 247, 0.4)',
+            minWidth: '64px',
+            minHeight: '160px'
+          }}
+        >
+          <MessageSquare className="w-8 h-8 text-purple-100 drop-shadow-[0_0_15px_rgba(168,85,247,1)]" />
+          <span className="text-sm text-white font-bold -rotate-90 whitespace-nowrap tracking-wider">ASSIST</span>
         </div>
 
         {/* Hover Preview - Shows Both Options */}
@@ -37,7 +49,11 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 300, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="absolute right-14 bottom-0 w-80 rounded-l-2xl bg-slate-900/98 backdrop-blur-2xl border-2 border-r-0 border-purple-500/50 shadow-[0_0_60px_rgba(168,85,247,0.6)] overflow-hidden"
+              className="absolute right-16 top-0 w-80 rounded-l-2xl bg-slate-900/98 backdrop-blur-2xl border-2 border-r-0 border-purple-500/50 shadow-[0_0_60px_rgba(168,85,247,0.6)] overflow-hidden"
+              style={{
+                pointerEvents: 'auto !important',
+                touchAction: 'manipulation !important'
+              }}
             >
               <div className="p-4 border-b border-purple-500/30 bg-gradient-to-r from-purple-600/20 to-indigo-600/20">
                 <h3 className="text-base font-bold text-white mb-1">Quick Assist</h3>
@@ -51,7 +67,12 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                   onClick={() => setActiveModal('bot')}
-                  className="p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-400/40 hover:border-purple-400/80 hover:from-purple-500/30 hover:to-indigo-500/30 transition-all cursor-pointer group"
+                  className="p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-400/40 hover:border-purple-400/80 hover:from-purple-500/30 hover:to-indigo-500/30 transition-all cursor-pointer group active:scale-95"
+                  style={{
+                    minHeight: '80px',
+                    pointerEvents: 'auto !important',
+                    touchAction: 'manipulation !important'
+                  }}
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/40 to-indigo-500/40 border-2 border-purple-400/60 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.6)]">
@@ -73,7 +94,12 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                   onClick={() => setActiveModal('help')}
-                  className="p-4 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-400/40 hover:border-cyan-400/80 hover:from-cyan-500/30 hover:to-blue-500/30 transition-all cursor-pointer group"
+                  className="p-4 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-400/40 hover:border-cyan-400/80 hover:from-cyan-500/30 hover:to-blue-500/30 transition-all cursor-pointer group active:scale-95"
+                  style={{
+                    minHeight: '80px',
+                    pointerEvents: 'auto !important',
+                    touchAction: 'manipulation !important'
+                  }}
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/40 to-blue-500/40 border-2 border-cyan-400/60 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.6)]">
@@ -100,14 +126,14 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
 
       {/* GlyphBot Jr Modal */}
       {activeModal === 'bot' && (
-        <div className="fixed inset-0 z-[99999]" style={{ pointerEvents: 'auto' }}>
+        <div className="fixed inset-0 z-[999999]" style={{ pointerEvents: 'auto !important', touchAction: 'manipulation !important' }}>
           <GlyphBotJr onClose={() => setActiveModal(null)} />
         </div>
       )}
 
       {/* Help Panel Modal */}
       {activeModal === 'help' && helpSections.length > 0 && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4" style={{ pointerEvents: 'auto' }}>
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4" style={{ pointerEvents: 'auto !important', touchAction: 'manipulation !important' }}>
           <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setActiveModal(null)} />
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
