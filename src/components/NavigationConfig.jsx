@@ -7,10 +7,9 @@
 
 export const NAV = [
   { label: "Home", href: "/", visibility: "public" },
-  { label: "Dream Team", href: "/DreamTeam", visibility: "public" },
+  { label: "Solutions", href: "/Solutions", visibility: "public" },
   { label: "GlyphBot", href: "/GlyphBot", visibility: "public" },
-  { label: "Media Hub", href: "/VideoUpload", visibility: "public" },
-  { label: "Command Center", href: "/CommandCenter", visibility: "public" }, // Accessible to users, but protected
+  { label: "Security Tools", href: "/SecurityTools", visibility: "public" },
   { label: "Protocol Verification", href: "/Consultation", visibility: "public" }
 ];
 
@@ -34,8 +33,9 @@ export const NAV_SECTIONS = [
       { label: "Image Processing", page: "ImageLab", visibility: "public" },
       { label: "GlyphBot Intelligence", page: "GlyphBot", visibility: "public" },
       { label: "Site Builder", page: "SiteBuilder", visibility: "admin" },
-      { label: "NUPS Transaction Verification", page: "NUPSLogin", visibility: "public" },
-      { label: "Security Modules", page: "SecurityTools", visibility: "public" },
+      { label: "NUPS Transaction System", page: "NUPSLogin", visibility: "public" },
+      { label: "Security Operations", page: "SecurityOperationsCenter", visibility: "public" },
+      { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
       { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
       { label: "SDK Documentation", page: "SDKDocs", visibility: "public" },
       { label: "Site Intelligence", page: "Sie", visibility: "admin" }
@@ -86,9 +86,11 @@ export const FOOTER_LINKS = {
     { label: "QR Verification", page: "Qr", visibility: "public" },
     { label: "Image Processing", page: "ImageLab", visibility: "public" },
     { label: "GlyphBot Intelligence", page: "GlyphBot", visibility: "public" },
-    { label: "NUPS Transaction Verification", page: "NUPSLogin", visibility: "public" },
+    { label: "NUPS Transaction System", page: "NUPSLogin", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
+    { label: "Security Operations", page: "SecurityOperationsCenter", visibility: "public" },
     { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
+    { label: "All Security Tools", page: "SecurityTools", visibility: "public" },
     { label: "SDK Documentation", page: "SDKDocs", visibility: "public" }
   ],
   protocols: [

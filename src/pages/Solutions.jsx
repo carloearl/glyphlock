@@ -127,75 +127,75 @@ export default function Solutions() {
         url="/solutions"
       />
       
-      <div className="min-h-screen bg-black text-white py-20">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center mb-12 md:mb-16 px-4">
-            <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold mb-4 md:mb-6">
+      <div className="min-h-screen text-white pt-14 md:pt-20 pb-12 md:pb-20" style={{ background: 'transparent' }}>
+        <div className="container mx-auto px-3 sm:px-4 max-w-7xl">
+          <div className="text-center mb-10 md:mb-12 lg:mb-16 px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-3 md:mb-4 lg:mb-6">
               <span className="text-white">Verification Modules for </span>
               <span className="bg-gradient-to-r from-blue-400 to-violet-600 bg-clip-text text-transparent">
                 Credentialed Industries
               </span>
             </h1>
-            <p className="text-base md:text-xl text-white/70 max-w-3xl mx-auto mb-6 md:mb-8">
+            <p className="text-xs sm:text-sm md:text-base lg:text-xl text-white/70 max-w-3xl mx-auto mb-4 md:mb-6 lg:mb-8">
               Protocol-governed verification modules restricted to provisioned operators with industry-specific credential frameworks.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16">
+          <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8 mb-10 md:mb-12 lg:mb-16">
             {solutions.map((solution, idx) => (
-              <div key={idx} className="glass-card-dark border border-blue-500/30 hover:border-blue-500/50 transition-all rounded-xl p-6 md:p-8" style={{ background: 'rgba(30, 58, 138, 0.2)', backdropFilter: 'blur(16px)' }}>
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/50">
-                    <solution.icon className="w-8 h-8 text-blue-400" />
+              <div key={idx} className="glass-card-dark border border-blue-500/30 hover:border-blue-500/50 transition-all rounded-lg md:rounded-xl p-4 md:p-6 lg:p-8" style={{ background: 'rgba(30, 58, 138, 0.2)', backdropFilter: 'blur(16px)' }}>
+                <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-6">
+                  <div className="p-2 md:p-3 rounded-lg md:rounded-xl bg-blue-500/20 border border-blue-500/50 flex-shrink-0">
+                    <solution.icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-blue-400" />
                   </div>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-white mb-2">{solution.industry}</h2>
-                    <p className="text-white/70">{solution.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-1 md:mb-2">{solution.industry}</h2>
+                    <p className="text-xs sm:text-sm md:text-base text-white/70 line-clamp-2">{solution.description}</p>
                   </div>
                 </div>
 
-                <div className="space-y-2 mb-6">
+                <div className="space-y-1.5 md:space-y-2 mb-4 md:mb-6">
                   {solution.features.map((feature, fIdx) => (
                     <div key={fIdx} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-white/80">{feature}</span>
+                      <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-white/80">{feature}</span>
                     </div>
                   ))}
                 </div>
 
                 <Link to={createPageUrl(solution.page)}>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 md:h-auto text-sm md:text-base" style={{ touchAction: 'manipulation' }}>
                     {solution.cta}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2" />
                   </Button>
                 </Link>
               </div>
             ))}
           </div>
 
-          <div className="glass-card-dark border border-blue-500/30 rounded-xl p-8 mb-16" style={{ background: 'rgba(30, 58, 138, 0.2)', backdropFilter: 'blur(16px)' }}>
-            <h2 className="text-3xl font-bold text-white mb-6 text-center">
+          <div className="glass-card-dark border border-blue-500/30 rounded-lg md:rounded-xl p-5 md:p-6 lg:p-8 mb-10 md:mb-12 lg:mb-16" style={{ background: 'rgba(30, 58, 138, 0.2)', backdropFilter: 'blur(16px)' }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6 text-center">
               Why Choose GlyphLock?
             </h2>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {benefits.map((benefit, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-white/80">{benefit}</span>
+                <div key={idx} className="flex items-start gap-2 md:gap-3">
+                  <Shield className="w-4 h-4 md:w-5 md:h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm md:text-base text-white/80">{benefit}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
+          <div className="text-center px-2">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 md:mb-4">
               Ready to Deploy Industry-Specific Verification?
             </h2>
-            <p className="text-white/70 mb-8 max-w-2xl mx-auto">
+            <p className="text-xs sm:text-sm md:text-base text-white/70 mb-6 md:mb-8 max-w-2xl mx-auto">
               Initiate credential provisioning for protocol-governed access to industry-specific verification modules.
             </p>
             <Link to={createPageUrl("Consultation")}>
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white h-12 md:h-auto text-sm md:text-base" style={{ touchAction: 'manipulation' }}>
                 Request Credentials
               </Button>
             </Link>
