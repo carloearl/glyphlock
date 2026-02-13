@@ -2,24 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import SecurityMonitor from "@/components/SecurityMonitor";
-import { UI } from "@/components/glyphlock/bot";
 import NebulaLayer from "@/components/global/NebulaLayer";
 import CursorOrb from "@/components/global/CursorOrb";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GlyphLoader from "@/components/GlyphLoader";
 import MobileScalingSystem from "@/components/mobile/mobile-utils";
-import HelpPanel from "@/components/global/HelpPanel";
+import UnifiedSidebar from "@/components/global/UnifiedSidebar";
 
 import ThemeProvider from "@/components/ThemeProvider";
-import { Badge } from "@/components/ui/badge";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import StructuredDataOrg from "@/components/StructuredDataOrg";
 import SecurityHeaders from "@/components/security/SecurityHeaders";
 import CrawlerFallback from "@/components/seo/CrawlerFallback";
 import PrerenderHints from "@/components/seo/PrerenderHints";
-
-const { GlyphBotJr } = UI;
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -176,10 +172,10 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </main>
 
-        {/* Global Help System */}
-        <HelpPanel 
-          title="Quick Help Guide"
-          sections={[
+        {/* Unified Sidebar - GlyphBot Jr + Help Guide */}
+        <UnifiedSidebar
+          helpTitle="Quick Help Guide"
+          helpSections={[
             {
               title: 'Getting Started',
               content: [
@@ -371,23 +367,7 @@ export default function Layout({ children, currentPageName }) {
               ]
             }
           ]}
-        />
-
-        {/* GlyphBot Jr */}
-        <div style={{ 
-          position: 'fixed', 
-          bottom: 0, 
-          right: 0, 
-          zIndex: 99999, 
-          pointerEvents: 'auto !important',
-          isolation: 'isolate',
-          touchAction: 'manipulation',
-          WebkitTapHighlightColor: 'transparent',
-          display: 'block !important',
-          visibility: 'visible !important'
-        }}>
-          <GlyphBotJr />
-        </div>
+          />
 
         {/* Footer - always rendered */}
         <footer className="relative overflow-hidden" style={{ zIndex: 100, pointerEvents: 'auto', isolation: 'isolate' }}>
