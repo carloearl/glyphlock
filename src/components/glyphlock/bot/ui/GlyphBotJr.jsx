@@ -4,11 +4,13 @@ import { Sparkles, Send, Loader2, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { PERSONAS } from '../config';
 import { tts as ttsService } from '../services';
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function GlyphBotJr() {
   const jrPersona = PERSONAS.find(p => p.id === "glyphbot_jr") || PERSONAS[4];
   
   const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Hi there! I'm GlyphBot Junior! 🌟 How can I help you today?", timestamp: Date.now() }
   ]);
@@ -122,21 +124,78 @@ When answering questions, use the knowledge bases to provide accurate informatio
   if (!isOpen) {
     return (
       <div
-        className="fixed right-4 z-[99999] group cursor-pointer"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] group"
         style={{ 
-          bottom: '140px',
           pointerEvents: 'auto',
           touchAction: 'manipulation',
           WebkitTapHighlightColor: 'transparent'
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
+        {/* Collapsed Sidebar Tab */}
         <div 
           onClick={() => setIsOpen(true)}
-          className="w-12 h-12 group-hover:w-24 rounded-lg bg-gradient-to-br from-blue-600/60 to-purple-600/60 backdrop-blur-xl border-2 border-blue-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(37,99,235,0.7)] flex items-center justify-center gap-1.5 px-2"
+          className="absolute right-0 w-14 h-36 rounded-l-2xl bg-gradient-to-br from-blue-600/70 to-purple-600/70 backdrop-blur-xl border-2 border-r-0 border-blue-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(37,99,235,0.7)] flex flex-col items-center justify-center gap-2 cursor-pointer group-hover:w-16"
         >
-          <Sparkles className="w-5 h-5 text-blue-100 drop-shadow-[0_0_12px_rgba(59,130,246,1)] flex-shrink-0" />
-          <span className="opacity-0 group-hover:opacity-100 text-xs text-white font-bold whitespace-nowrap transition-opacity duration-300 overflow-hidden">CHAT</span>
+          <Sparkles className="w-7 h-7 text-blue-100 drop-shadow-[0_0_12px_rgba(59,130,246,1)]" />
+          <span className="text-xs text-white font-bold -rotate-90 whitespace-nowrap tracking-wider">CHAT</span>
         </div>
+
+        {/* Hover Sidebar Preview */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              initial={{ x: 320, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 320, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="absolute right-14 top-0 w-72 h-80 rounded-l-2xl bg-slate-900/98 backdrop-blur-2xl border-2 border-r-0 border-blue-500/50 shadow-[0_0_60px_rgba(37,99,235,0.6)] overflow-hidden"
+              onClick={() => setIsOpen(true)}
+            >
+              <div className="p-4 border-b border-blue-500/30 bg-gradient-to-r from-blue-600/20 to-purple-600/20">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.6)]">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">GlyphBot Jr</h3>
+                    <p className="text-xs text-blue-300">AI Assistant</p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Your 24/7 helper for quick questions, troubleshooting, and guidance.
+                </p>
+              </div>
+
+              <div className="p-4 space-y-3">
+                <div className="text-xs text-cyan-400 font-semibold mb-2">QUICK ACTIONS</div>
+                {[
+                  "How do I create a QR code?",
+                  "Enable MFA on my account",
+                  "What's my current usage?",
+                  "Troubleshoot image generation"
+                ].map((suggestion, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="p-2 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-blue-500/50 hover:bg-slate-800 transition-all cursor-pointer text-xs text-slate-300"
+                  >
+                    {suggestion}
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 to-transparent">
+                <div className="text-center text-xs text-blue-400 font-semibold">
+                  Click to open full chat →
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
