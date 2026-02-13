@@ -97,16 +97,49 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
 
   return (
     <>
-      {/* Help Tab - Lower Right */}
+      {/* Help Sidebar - Right Edge */}
       <div
-        onClick={() => setIsOpen(true)}
-        className="fixed right-4 z-[9997] group cursor-pointer"
-        style={{ bottom: '40px' }}
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-[9997] group cursor-pointer"
+        style={{ touchAction: 'manipulation' }}
       >
-        <div className="w-12 h-12 group-hover:w-24 rounded-lg bg-gradient-to-br from-cyan-500/60 to-blue-600/60 backdrop-blur-xl border-2 border-cyan-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] flex items-center justify-center gap-1.5 px-2">
-          <HelpCircle className="w-5 h-5 text-cyan-100 flex-shrink-0 drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
-          <span className="opacity-0 group-hover:opacity-100 text-xs text-white font-bold whitespace-nowrap transition-opacity duration-300 overflow-hidden">HELP</span>
+        {/* Collapsed Tab */}
+        <div
+          onClick={() => setIsOpen(true)}
+          className="absolute right-0 w-12 h-32 rounded-l-2xl bg-gradient-to-br from-cyan-500/70 to-blue-600/70 backdrop-blur-xl border-2 border-r-0 border-cyan-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] flex flex-col items-center justify-center gap-2 group-hover:w-16 group-hover:pr-1"
+        >
+          <HelpCircle className="w-6 h-6 text-cyan-100 drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
+          <span className="text-xs text-white font-bold -rotate-90 whitespace-nowrap tracking-wider">HELP</span>
         </div>
+
+        {/* Hover Sidebar Preview */}
+        <motion.div
+          initial={{ x: 320, opacity: 0 }}
+          whileHover={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="absolute right-12 top-0 w-72 h-96 rounded-l-2xl bg-slate-900/95 backdrop-blur-2xl border-2 border-r-0 border-cyan-500/40 shadow-[0_0_50px_rgba(6,182,212,0.5)] pointer-events-none group-hover:pointer-events-auto overflow-hidden"
+        >
+          <div className="p-4 border-b border-cyan-500/30">
+            <h3 className="text-sm font-bold text-cyan-300 mb-1">Quick Help</h3>
+            <p className="text-xs text-slate-400">Click to open full guide</p>
+          </div>
+          <div className="p-3 space-y-2 overflow-y-auto h-[calc(100%-60px)]">
+            {sections.slice(0, 5).map((section, idx) => (
+              <div
+                key={idx}
+                onClick={() => { setActiveSection(idx); setIsOpen(true); }}
+                className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-cyan-500/50 hover:bg-slate-800 transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+                  <span className="text-xs font-semibold text-white">{section.title}</span>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">
+                  {section.content[0]?.heading || 'Click to learn more'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
 
       {/* Help Panel Full-Page Overlay */}
