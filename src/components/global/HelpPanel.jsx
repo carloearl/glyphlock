@@ -100,47 +100,81 @@ export default function HelpPanel({ title = "System Guide", sections = [], autoP
     <>
       {/* Help Sidebar - Right Edge */}
       <div
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-[9997] group cursor-pointer"
-        style={{ touchAction: 'manipulation' }}
+        className="fixed right-0 z-[9997] group"
+        style={{ 
+          bottom: '220px',
+          pointerEvents: 'auto',
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent'
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Collapsed Tab */}
+        {/* Collapsed Sidebar Tab */}
         <div
           onClick={() => setIsOpen(true)}
-          className="absolute right-0 w-12 h-32 rounded-l-2xl bg-gradient-to-br from-cyan-500/70 to-blue-600/70 backdrop-blur-xl border-2 border-r-0 border-cyan-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] flex flex-col items-center justify-center gap-2 group-hover:w-16 group-hover:pr-1"
+          className="absolute right-0 w-14 h-36 rounded-l-2xl bg-gradient-to-br from-cyan-500/70 to-blue-600/70 backdrop-blur-xl border-2 border-r-0 border-cyan-400/80 transition-all duration-300 shadow-[0_0_40px_rgba(6,182,212,0.7)] flex flex-col items-center justify-center gap-2 cursor-pointer group-hover:w-16"
         >
-          <HelpCircle className="w-6 h-6 text-cyan-100 drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
+          <HelpCircle className="w-7 h-7 text-cyan-100 drop-shadow-[0_0_12px_rgba(6,182,212,1)]" />
           <span className="text-xs text-white font-bold -rotate-90 whitespace-nowrap tracking-wider">HELP</span>
         </div>
 
         {/* Hover Sidebar Preview */}
-        <motion.div
-          initial={{ x: 320, opacity: 0 }}
-          whileHover={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="absolute right-12 top-0 w-72 h-96 rounded-l-2xl bg-slate-900/95 backdrop-blur-2xl border-2 border-r-0 border-cyan-500/40 shadow-[0_0_50px_rgba(6,182,212,0.5)] pointer-events-none group-hover:pointer-events-auto overflow-hidden"
-        >
-          <div className="p-4 border-b border-cyan-500/30">
-            <h3 className="text-sm font-bold text-cyan-300 mb-1">Quick Help</h3>
-            <p className="text-xs text-slate-400">Click to open full guide</p>
-          </div>
-          <div className="p-3 space-y-2 overflow-y-auto h-[calc(100%-60px)]">
-            {sections.slice(0, 5).map((section, idx) => (
-              <div
-                key={idx}
-                onClick={() => { setActiveSection(idx); setIsOpen(true); }}
-                className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-cyan-500/50 hover:bg-slate-800 transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                  <span className="text-xs font-semibold text-white">{section.title}</span>
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              initial={{ x: 320, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 320, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="absolute right-14 bottom-0 w-72 h-96 rounded-l-2xl bg-slate-900/98 backdrop-blur-2xl border-2 border-r-0 border-cyan-500/50 shadow-[0_0_60px_rgba(6,182,212,0.6)] overflow-hidden"
+              onClick={() => setIsOpen(true)}
+            >
+              <div className="p-4 border-b border-cyan-500/30 bg-gradient-to-r from-cyan-600/20 to-blue-600/20">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 border-2 border-cyan-400/60 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.6)]">
+                    <HelpCircle className="w-5 h-5 text-cyan-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">{title}</h3>
+                    <p className="text-xs text-cyan-300">Quick Reference</p>
+                  </div>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">
-                  {section.content[0]?.heading || 'Click to learn more'}
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Step-by-step guides, troubleshooting, and how-to tutorials.
                 </p>
               </div>
-            ))}
-          </div>
-        </motion.div>
+
+              <div className="p-4 space-y-2 overflow-y-auto h-[calc(100%-140px)]">
+                <div className="text-xs text-cyan-400 font-semibold mb-2">TOPICS</div>
+                {sections.slice(0, 6).map((section, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    onClick={() => { setActiveSection(idx); setIsOpen(true); }}
+                    className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-cyan-500/50 hover:bg-slate-800 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+                      <span className="text-xs font-semibold text-white">{section.title}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">
+                      {section.content[0]?.heading || 'Click to learn more'}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-950 to-transparent">
+                <div className="text-center text-xs text-cyan-400 font-semibold">
+                  Click to open full guide →
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Help Panel Full-Page Overlay */}
