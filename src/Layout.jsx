@@ -114,7 +114,7 @@ export default function Layout({ children, currentPageName }) {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          zIndex: 0, 
+          zIndex: -1, 
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
@@ -135,7 +135,7 @@ export default function Layout({ children, currentPageName }) {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          zIndex: 1, 
+          zIndex: -1, 
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
@@ -156,32 +156,23 @@ export default function Layout({ children, currentPageName }) {
           maxWidth: '100vw',
           minHeight: '100vh',
           height: 'auto',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          isolation: 'isolate',
+          zIndex: 1,
+          position: 'relative'
         }}
       >
         <SecurityMonitor />
 
-        {/* Version Badge - Top Right */}
-        <div className="fixed top-20 right-4 z-[9997] pointer-events-none hidden md:block">
-          <Badge className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-2 border-indigo-400/40 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-xs font-bold px-3 py-1.5">
-            Beta Version 3.0
-          </Badge>
-        </div>
 
-        {/* Mobile Version Badge - Bottom Left */}
-        <div className="fixed bottom-20 left-4 z-[9997] pointer-events-none md:hidden">
-          <Badge className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-2 border-indigo-400/40 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] font-bold px-2 py-1">
-            v3.0
-          </Badge>
-        </div>
 
         {/* Navbar */}
-        <div style={{ position: 'relative', zIndex: 9998, pointerEvents: 'auto' }}>
+        <div style={{ position: 'relative', zIndex: 9998, pointerEvents: 'auto', touchAction: 'manipulation' }}>
           <Navbar user={user} onLogin={handleLogin} onLogout={handleLogout} />
         </div>
 
         {/* Main content */}
-        <main className="flex-1 relative pt-4 w-full" style={{ background: 'transparent', zIndex: 10, width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}>
+        <main className="flex-1 relative pt-4 w-full" style={{ background: 'transparent', zIndex: 10, width: '100%', maxWidth: '100vw', boxSizing: 'border-box', pointerEvents: 'auto', touchAction: 'manipulation' }}>
           {children}
         </main>
 
