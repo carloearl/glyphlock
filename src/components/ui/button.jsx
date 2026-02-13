@@ -40,6 +40,15 @@ const Button = React.forwardRef(({ className, variant, size, asChild = false, ..
     (<Comp
       className={cn(buttonVariants({ variant, size, className }))}
       ref={ref}
+      style={{
+        pointerEvents: 'auto',
+        touchAction: 'manipulation',
+        WebkitTapHighlightColor: 'rgba(6, 182, 212, 0.3)',
+        cursor: 'pointer',
+        minWidth: '48px',
+        minHeight: '48px',
+        ...props.style
+      }}
       {...props} />)
   );
 })

@@ -102,15 +102,16 @@ export default function Layout({ children, currentPageName }) {
       <CrawlerFallback />
       <PrerenderHints />
       
-      {/* SITE-WIDE NEBULA - Absolute bottom layer */}
+      {/* SITE-WIDE NEBULA - Desktop only */}
       <div 
+        className="hidden md:block"
         style={{ 
           position: 'fixed', 
           top: 0, 
           left: 0, 
           right: 0, 
           bottom: 0, 
-          zIndex: -1, 
+          zIndex: -100, 
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
@@ -122,7 +123,7 @@ export default function Layout({ children, currentPageName }) {
         <NebulaLayer intensity={1.0} />
       </div>
 
-      {/* CURSOR ORB - Desktop only, above nebula */}
+      {/* CURSOR ORB - Desktop only */}
       <div 
         className="hidden md:block" 
         style={{ 
@@ -131,7 +132,7 @@ export default function Layout({ children, currentPageName }) {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          zIndex: -1, 
+          zIndex: -100, 
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
