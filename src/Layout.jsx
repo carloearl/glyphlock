@@ -187,32 +187,34 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Global Help System */}
         <HelpPanel 
-          title="GlyphLock Guide"
+          title="Quick Help Guide"
           sections={[
             {
               title: 'Getting Started',
               content: [
                 { 
-                  heading: 'Welcome to GlyphLock', 
-                  text: 'GlyphLock is a quantum-resistant cybersecurity platform designed for enterprise-grade protection. The platform integrates AI-powered tools, blockchain verification, and advanced cryptography. Navigate using the top menu where you\'ll find: QR Studio (create secure QR codes), Image Lab (AI image generation with interactive hotspots), GlyphBot AI (security audits & assistance), Site Builder (AI-powered development), and Security Tools (blockchain, hashing, encryption). Each tool is designed to work together as a unified security ecosystem.',
-                  tip: 'Start with the Command Center to get an overview of your account, usage stats, and security status before diving into specific tools.'
+                  heading: 'First Login & Account Setup', 
+                  text: 'Step 1: Sign up or sign in using the button in the top-right corner. Step 2: Verify your email (check spam if not received). Step 3: Complete your profile by clicking your avatar > Account Settings. Step 4: Enable Multi-Factor Authentication immediately for security (Account Security page). Step 5: Explore the Command Center to see your dashboard and usage stats.',
+                  tip: 'Save your MFA recovery codes in a password manager immediately after setup—you\'ll need them if you lose your device.',
+                  action: 'Click the profile icon (top-right) → Account Security → Enable MFA now.'
                 },
                 { 
-                  heading: 'Command Center Access', 
-                  text: 'Your Command Center is the mission control hub for your entire GlyphLock account. Click your profile icon in the top-right corner and select "Command Center" to access: Dashboard Home (real-time metrics, activity feed, quick stats), API Keys (create, rotate, and manage programmatic access), Security Settings (MFA setup, trusted devices, session management), Billing & Payments (subscription, invoices, usage tracking), and SDK Downloads (integration libraries for your apps). The dashboard provides a unified view of all your GlyphLock activities with actionable insights.',
-                  tip: 'Pin your most-used sections to the Command Center sidebar for instant access. The dashboard refreshes in real-time, so you always see live data.'
+                  heading: 'Navigate the Interface', 
+                  text: 'Top Navigation Bar: Click any menu item to see available tools. Hover over "Modules" or "Protocols" to view dropdown menus. Mobile: Tap the hamburger menu icon (three lines) in top-right for full navigation. Command Center: Click your profile picture → Command Center for account settings, API keys, and billing. GlyphBot Jr: The chat icon on the right side provides instant AI assistance—ask it anything. Help: Press the ? key anytime (or click Help icon bottom-right) to reopen this guide.',
+                  tip: 'Use keyboard shortcuts: ? for help, Esc to close modals, Tab to navigate forms.',
+                  action: 'Try it now: Press Esc to close this panel, then press ? to reopen it.'
                 },
                 { 
-                  heading: 'Keyboard Shortcuts & Quick Actions', 
-                  text: 'GlyphLock is optimized for power users with extensive keyboard navigation. Press ? anytime (except when typing in forms) to open this help guide. Use GlyphBot Jr on the right side for instant AI assistance—it understands context and can help debug issues, explain features, or guide you through complex workflows. The bot supports file uploads, voice input, and can even generate code snippets. Use Ctrl+K (Cmd+K on Mac) for global search across all tools. Tab through forms for rapid data entry. Esc closes modals and dialogs.',
-                  tip: 'GlyphBot Jr remembers your conversation history during your session, so you can ask follow-up questions without repeating context.',
-                  action: 'Try pressing ? right now to see this help guide in action, then click the CHAT tab on the right to test GlyphBot Jr.'
+                  heading: 'Common Issues & Fixes', 
+                  text: 'Can\'t sign in? Clear browser cache and try again, or click "Forgot Password" on login screen. Page not loading? Refresh with Ctrl+Shift+R (hard refresh) to clear cached resources. Feature not working? Check if you\'re logged in—some tools require authentication. Mobile layout broken? Rotate device or zoom out—try landscape mode for complex tools. GlyphBot not responding? Close chat, wait 5 seconds, reopen, and try a simpler question. API key not working? Rotate it from Command Center → API Keys → click Rotate icon.',
+                  tip: 'If you see "Unauthorized" errors, your session expired—just log out and log back in to refresh your token.',
+                  action: 'Still stuck? Open GlyphBot Jr (right sidebar) and describe your issue—it has access to your account and can diagnose problems.'
                 },
                 { 
-                  heading: 'Account Security Best Practices', 
-                  text: 'Security is paramount at GlyphLock. Enable Multi-Factor Authentication (MFA) immediately by going to Profile → Account Security → Enable MFA. You\'ll scan a QR code with apps like Google Authenticator, Authy, or 1Password. Save your recovery codes in a secure password manager—these are your backup if you lose your device. Manage trusted devices to skip MFA on known computers. Review your session history regularly for suspicious activity. Set up API keys with minimal permissions (principle of least privilege). Rotate API keys quarterly or after team member changes. Never share your secret keys—they grant full account access.',
-                  tip: 'Use different authenticator apps for work vs. personal accounts. If your phone is lost, recovery codes are the ONLY way to regain access.',
-                  action: 'Navigate to Account Security now and enable MFA if you haven\'t already. It takes 60 seconds and prevents 99.9% of account takeovers.'
+                  heading: 'Secure Your Account', 
+                  text: 'How to enable MFA: Go to profile icon → Account Security → click "Enable MFA" → scan QR code with Google Authenticator or Authy → enter the 6-digit code → save recovery codes to password manager. How to create API keys: Command Center → API Keys tab → click "Generate New Key" → name it → set permissions → copy secret immediately (shown once only). How to rotate keys: API Keys page → find key → click rotate icon → confirm → update apps with new secret. How to manage trusted devices: Account Security → Trusted Devices → revoke any unfamiliar device → verify login history.',
+                  tip: 'Recovery codes are your backup if you lose your phone. Store them offline in a password manager, NOT in email or notes apps.',
+                  action: 'Enable MFA now: Profile icon → Account Security → Enable MFA button → follow prompts.'
                 }
               ]
             },
@@ -220,38 +222,28 @@ export default function Layout({ children, currentPageName }) {
               title: 'QR Studio',
               content: [
                 { 
-                  heading: 'Create Quantum-Resistant QR Codes', 
-                  text: 'QR Studio is our flagship tool for creating next-generation secure QR codes with built-in cryptographic verification. Unlike standard QR codes, GlyphLock QR codes support multi-slot credentialed payloads, meaning different users see different content based on their authentication level. Navigate to Tools → QR Studio to begin. The workflow: (1) Choose your base payload type (URL, vCard, WiFi, text, email, phone, SMS, location, or event). (2) Add multiple slots with different credential requirements (public, authenticated, admin). (3) Customize visual design (colors, logo, error correction). (4) Generate and preview. (5) Download as PNG/SVG or get shareable links. Each QR code is tamper-evident with blockchain anchoring.',
-                  tip: 'Start with a simple single-slot public URL to learn the interface, then graduate to multi-slot authenticated payloads for sensitive use cases.',
-                  action: 'Create your first QR code: Go to Tools → QR Studio → click "New QR Code" → select "URL" type → enter https://glyphlock.com → click Generate.'
+                  heading: 'Create Your First QR Code', 
+                  text: 'Step 1: Navigate to Tools → QR Verification (or top menu → Security Tools → QR Module). Step 2: Click "New QR Code" or "Generate" button. Step 3: Select payload type: URL (website link), vCard (contact info), WiFi (network credentials), Text (plain message), or other options. Step 4: Enter your data (e.g., paste a URL). Step 5: Click "Generate QR Code" and wait 2-5 seconds. Step 6: Preview appears—test by scanning with your phone camera. Step 7: Download as PNG or SVG using the download buttons. Done!',
+                  tip: 'For business cards: Choose vCard type → fill in name, phone, email → generate → download → print on your cards.',
+                  action: 'Try now: Navigate to QR Verification page → click Generate → select URL → paste glyphlock.com → generate → scan with phone.'
                 },
                 { 
-                  heading: 'Multi-Slot Credentialed Payloads', 
-                  text: 'This is GlyphLock\'s killer feature: one QR code, multiple hidden payloads unlocked by user authentication. Add slots with different credential levels: PUBLIC (anyone who scans sees this), AUTHENTICATED (requires logged-in GlyphLock account), ADMIN (requires admin role). Each slot has its own priority, conditions (time range, geofence, device type), and payload data. Use cases: Event tickets (public shows event info, authenticated shows personalized agenda, admin shows backstage access). Product labels (public = marketing site, authenticated = warranty registration, admin = supply chain data). Business cards (public = LinkedIn, authenticated = calendar booking link, admin = private contact). The system automatically resolves the highest-priority slot the user qualifies for.',
-                  tip: 'Set slot priorities strategically: higher priority = checked first. Use 100 for critical authenticated content, 50 for general auth, 10 for public fallback.',
-                  code: '// Example 3-slot structure\n{\n  slots: [\n    { id: "admin", type: "url", credential_level: "admin", priority: 100, payload_data: { url: "admin.glyphlock.com/backstage" } },\n    { id: "user", type: "vcard", credential_level: "authenticated", priority: 50, payload_data: { name: "John Doe", email: "john@company.com" } },\n    { id: "public", type: "url", credential_level: "public", priority: 10, payload_data: { url: "company.com" } }\n  ],\n  fallback_url: "glyphlock.com/scan-failed"\n}'
+                  heading: 'Customize QR Code Design', 
+                  text: 'How to change colors: After generating QR code → click "Design" or "Customize" tab → select Foreground Color (dark squares) → select Background Color (light areas) → preview updates in real-time. How to add your logo: Click "Upload Logo" button → select PNG/SVG file (max 200KB) → position preview shows logo placement → adjust Error Correction to "High" for best scannability. How to adjust size: Use the Size slider (Small/Medium/Large) → larger codes scan faster from distance. How to change style: Choose preset: Classic (square), Modern (rounded), Dots (circular) → apply style → preview updates instantly.',
+                  tip: 'Always use Error Correction "H" (highest) when adding logos—it reserves 30% of the code for damage tolerance.',
+                  action: 'Experiment: Generate any QR code → click Design tab → try different foreground/background colors → upload a logo → see live preview.'
                 },
                 { 
-                  heading: 'Advanced Design Customization', 
-                  text: 'Make your QR codes beautiful and brand-aligned while maintaining scannability. Color customization: Foreground color (the dark modules), background color (the light areas), gradient overlays (optional). Logo embedding: Upload your brand logo (PNG/SVG), auto-positioned in the center "quiet zone", automatically scaled to maintain QR readability. Error correction levels: L (7% recovery - smallest codes), M (15% recovery - standard), Q (25% recovery - recommended for logos), H (30% recovery - maximum damage tolerance). Style presets: Modern (rounded corners), Classic (sharp squares), Dots (circular modules), Custom (full control). Real-time preview shows exactly what will be generated. The system validates scannability before allowing download.',
-                  tip: 'Use error correction level Q or H when adding logos—it reserves space for the logo without breaking the code. Test scans with multiple devices before printing.',
-                  action: 'Experiment with the color picker: Click "Design" tab → try gradient backgrounds → upload a logo → adjust error correction to H → preview the result.'
+                  heading: 'Download & Share QR Codes', 
+                  text: 'How to download: After generating → click "Download PNG" for images or "Download SVG" for vector graphics → file saves to Downloads folder → open and verify it scans properly. How to get shareable link: Click "Share" button → copy the glyphlock.com/share/xyz URL → send to others → they scan the QR code from the shared page (no download needed). How to track scans: After creating QR code → go to QR Vault (in QR Studio) → find your code → click Analytics → see total scans, devices, locations, and timestamps. How to revoke: QR Vault → find code → click "Revoke" → code stops working immediately (scans show "expired" message).',
+                  tip: 'Always test QR codes on multiple devices (iPhone, Android, different apps) before printing thousands of copies.',
+                  action: 'Test workflow: Generate QR code → download PNG → open file → scan with phone camera → verify it opens correct URL.'
                 },
                 { 
-                  heading: 'Analytics, Tracking & Security Monitoring', 
-                  text: 'Every QR code you create gets automatic analytics and security monitoring. Track scans in real-time: Total scans, unique scanners, geographic distribution (country/city), device breakdown (iOS/Android/desktop), timestamp history. Detect anomalies: Sudden scan spikes (possible viral spread or bot attack), geographic anomalies (scans from unexpected countries), velocity checks (too many scans too fast = spam). Security alerts: Tamper detection (QR code modified after generation), unauthorized slot access attempts (user trying to access admin slot), suspicious scan patterns (automated bots). Access the QR Vault panel to view all your codes, search by name/tag, filter by status (active/revoked), and export analytics as CSV/JSON for reporting.',
-                  tip: 'Set up email alerts for critical QR codes (like payment links or access badges) so you know immediately if suspicious activity occurs.',
-                  code: '// Access analytics via SDK\nconst analytics = await base44.entities.QRScanEvent.filter({ qr_asset_id: "qr_abc123" });\nconsole.log(`Total scans: ${analytics.length}`);\nconsole.log(`Avg scans/day: ${analytics.length / 30}`);\n\n// Detect velocity anomaly\nconst lastHour = analytics.filter(e => new Date(e.created_date) > Date.now() - 3600000);\nif (lastHour.length > 100) alert("Possible bot attack!");'
-                },
-                { 
-                  heading: 'Steganography & Hidden Data', 
-                  text: 'GlyphLock QR codes support visual steganography—hiding encrypted data inside the QR code image itself, invisible to scanners but recoverable with GlyphLock tools. Use cases: Proof of authenticity (embed creation timestamp + signature), Ownership tracking (embed creator ID invisibly), Anti-counterfeiting (embed unique serial number), Forensic watermarking (trace leak sources). The hidden data uses LSB (Least Significant Bit) encoding in the PNG—visually identical to original but contains encrypted payload. Only users with the decryption key can extract hidden data. To use: Enable "Steganography" in advanced settings → enter your secret message → optionally encrypt with password → generate QR code. The visible QR code works normally, but the image file contains your hidden payload.',
-                  tip: 'Steganography works best with PNG format. JPEG compression destroys hidden data. Always test extraction before deploying to production.'
-                },
-                {
-                  heading: 'Bulk Generation & API Integration',
-                  text: 'Generate hundreds of QR codes programmatically using the GlyphLock API. Perfect for: Event ticketing (unique code per attendee), Product serialization (unique code per unit), Access badges (unique code per employee), Marketing campaigns (unique code per channel). Use the API: (1) Get API key from Command Center. (2) POST to /api/qr/generate with payload array. (3) Receive batch ID. (4) Poll /api/qr/batch/{id} for status. (5) Download ZIP of all generated codes. Supports CSV upload for bulk personalization (mail merge for QR codes). Each code gets unique tracking and can be revoked individually. Use webhooks to get notified when codes are scanned.',
-                  code: '// Bulk generate via API\nconst response = await fetch("https://api.glyphlock.com/v1/qr/generate", {\n  method: "POST",\n  headers: { "Authorization": "Bearer YOUR_API_KEY", "Content-Type": "application/json" },\n  body: JSON.stringify({\n    batch_name: "Conference 2026 Tickets",\n    template: { type: "url", credential_level: "authenticated", design: { foreground: "#3B82F6" } },\n    data: [\n      { id: "ticket_001", url: "event.com/attendee/001", name: "Alice" },\n      { id: "ticket_002", url: "event.com/attendee/002", name: "Bob" }\n    ]\n  })\n});\nconst { batch_id } = await response.json();\nconsole.log(`Batch created: ${batch_id}`);\n\n// Poll for completion\nconst poll = setInterval(async () => {\n  const status = await fetch(`https://api.glyphlock.com/v1/qr/batch/${batch_id}`);\n  const { state, download_url } = await status.json();\n  if (state === "completed") {\n    clearInterval(poll);\n    console.log(`Download: ${download_url}`);\n  }\n}, 2000);'
+                  heading: 'QR Code Troubleshooting', 
+                  text: 'QR code won\'t scan? Increase Error Correction level (Design tab → Error Correction → High). Ensure sufficient contrast—dark foreground, light background. Remove logos if scanning fails. Print size too small? QR codes need minimum 2cm × 2cm to scan reliably. Export at higher resolution or use SVG for print. Upload failed? File must be under 5MB. Compress images at tinypng.com before uploading logos. Can\'t find my QR codes? Navigate to QR Vault (QR Studio page → Vault tab) → all your codes listed there. Use search to find by name. Colors not showing? Some QR scanners ignore color. Always test with multiple scanner apps (default camera, QR scanner apps) before finalizing design.',
+                  tip: 'For outdoor/printed QR codes: Use high error correction (H level), avoid gradients, keep colors simple, and test in different lighting conditions.',
+                  action: 'If code won\'t scan: Regenerate with Error Correction H → remove logo → use black foreground + white background → test again.'
                 }
               ]
             },
@@ -259,40 +251,22 @@ export default function Layout({ children, currentPageName }) {
               title: 'Image Lab',
               content: [
                 { 
-                  heading: 'AI Image Generation Masterclass', 
-                  text: 'Image Lab uses state-of-the-art generative AI models (Google Imagen 3, Gemini Vision) to create photorealistic images from text prompts. The workflow: (1) Enter a detailed prompt describing your vision (the more specific, the better). (2) Optionally upload reference images to guide style, composition, or identity. (3) Adjust advanced parameters: Seed (deterministic results for reproducibility), Creativity (0.0-1.0, lower=strict to prompt, higher=artistic freedom), Guidance Scale (how closely AI follows your prompt), Quality Mode (speed vs. detail trade-off). (4) Click Generate and wait 10-30 seconds. The system generates the image, validates quality (face anatomy, hand anatomy, realism scores using Gemini), and presents the result. If validation fails, it auto-retries with adjusted parameters. You can regenerate with different seeds for variations.',
-                  tip: 'Describe lighting, camera angle, mood, and technical details for best results. "Portrait of a woman, soft natural window light, 85mm lens, shallow depth of field, warm color grading" produces better results than "woman photo".',
-                  code: '// Example advanced prompt structure\nSubject: "Professional headshot of a 30-year-old Asian woman"\nStyle: "Corporate, clean, modern"\nLighting: "Soft key light from left, subtle rim light, light gray background"\nTechnical: "Shot on Canon 5D Mark IV, 85mm f/1.8, ISO 100"\nMood: "Confident, approachable, professional"\nQuality: "8K resolution, sharp focus on eyes, natural skin texture"\n\n// Full prompt:\n"Professional headshot of a 30-year-old Asian woman, corporate style, soft key light from left with subtle rim light, light gray background, shot on Canon 5D Mark IV with 85mm f/1.8 lens at ISO 100, confident and approachable expression, 8K resolution with sharp focus on eyes and natural skin texture"'
+                  heading: 'Generate AI Images', 
+                  text: 'Step 1: Navigate to Modules → Image Processing (Image Lab page). Step 2: Click the "Generate" tab. Step 3: Type your prompt in the text box (e.g., "sunset over mountains"). Step 4: Click "Generate Image" and wait 10-30 seconds. Step 5: Image appears in preview panel—right-click to download, or click Save to gallery. How to improve results: Be specific—describe lighting, style, mood, and details. Use descriptive words: "photorealistic sunset with golden hour lighting and wispy clouds" beats "sunset". Adjust creativity slider: Low (0.3) = strict to prompt, High (0.9) = artistic interpretation.',
+                  tip: 'Getting weird results? Simplify your prompt. Instead of "epic cinematic dramatic sunset", try "peaceful sunset with warm colors".',
+                  action: 'Try now: Go to Image Lab → Generate tab → type "mountain landscape at sunrise" → click Generate → wait for result.'
                 },
                 { 
-                  heading: 'Interactive Hotspots System', 
-                  text: 'Transform static images into interactive experiences by adding clickable hotspots. Use cases: Product demos (click parts to see specs), Virtual tours (click rooms to navigate), Infographics (click sections for details), Educational content (click anatomy parts for explanations), Marketing (click products to purchase). Workflow: (1) Upload an image or use a generated one. (2) Click anywhere on the image to place a hotspot. (3) GlyphBot AI automatically detects what you clicked (using vision AI) and suggests a label. (4) Configure the hotspot: Label (visible text), Description (tooltip on hover), Shape (rectangle/circle/polygon), Action Type (open URL, show modal, play audio, invoke agent, verify access), Action Value (URL, text content, audio file, etc.). (5) Save hotspots—they\'re stored as coordinates + metadata. (6) Share or embed the interactive image.',
-                  tip: 'Use polygon hotspots for irregular shapes. Click multiple points to define the boundary, then double-click to complete. The AI helps trace object outlines automatically.',
-                  action: 'Try it now: Go to Image Lab → Interactive tab → upload any image → click an object → watch AI detect it → configure the action → test by clicking the hotspot.'
+                  heading: 'Add Interactive Hotspots', 
+                  text: 'Step 1: Go to Image Lab → Interactive tab. Step 2: Upload an image or select one from gallery. Step 3: Click anywhere on the image where you want a hotspot. Step 4: AI detects what you clicked and suggests a label (edit if needed). Step 5: Configure action: Choose "Open URL" → paste link → or choose "Show Text" → type message. Step 6: Click "Save Hotspot" → repeat for more hotspots. Step 7: Click "Finalize" to publish. Step 8: Share link or download interactive image + data file. How to edit hotspots: Click existing hotspot → edit panel appears → change label/action → save. How to delete: Right-click hotspot → delete.',
+                  tip: 'Hotspots must be at least 40×40 pixels for reliable mobile tapping. Avoid tiny clickable areas.',
+                  action: 'Try: Upload product photo → click product → set action "Open URL" → paste buy link → save → test clicking hotspot.'
                 },
                 { 
-                  heading: 'Sharing, Embedding & Export', 
-                  text: 'Share your interactive images in multiple ways: (1) Hosted Mode: Generate a public glyphlock.com/share/xyz link. Anyone with the link can view the interactive image. Hotspot clicks are tracked in analytics. (2) Downloadable Mode: Download the image + separate hotspot manifest JSON. Host on your own server. Use the GlyphLock SDK to render hotspots client-side. Full control over styling and behavior. (3) Embed Mode: Get an iframe embed code for your website. Responsive and mobile-optimized. (4) API Export: Fetch hotspot data via API for custom integrations. Export formats: PNG (image), JSON (hotspot manifest), SVG (vector hotspots), HTML (standalone viewer). All exports are cryptographically signed to prevent tampering.',
-                  tip: 'Use hosted mode for quick sharing and analytics. Use downloadable mode for white-label solutions or offline applications.',
-                  code: '// Embed interactive image in your site\n<iframe \n  src="https://glyphlock.com/share/abc123xyz" \n  width="100%" \n  height="600px" \n  frameborder="0" \n  allow="fullscreen"\n  style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"\n></iframe>\n\n// Or use SDK for custom rendering\nimport { GlyphImage } from "@glyphlock/sdk";\n\nconst hotspots = await fetch("https://glyphlock.com/api/image/abc123/hotspots").then(r => r.json());\n\n<GlyphImage \n  src="your-image.png" \n  hotspots={hotspots} \n  onHotspotClick={(hotspot) => console.log("Clicked:", hotspot.label)}\n  theme="dark"\n  enableAnalytics={true}\n/>'
-                },
-                { 
-                  heading: 'Advanced Prompt Engineering', 
-                  text: 'The AI Expand feature transforms simple prompts into detailed, professional specifications. How it works: (1) Enter a basic prompt like "sunset beach". (2) Click "AI Expand". (3) GlyphBot analyzes your prompt and expands it with: Subject details (what\'s in the scene), Style directives (artistic style, era, influences), Lighting specs (time of day, quality, direction), Camera settings (lens, aperture, film stock), Mood/atmosphere (emotional tone), Technical quality markers (resolution, sharpness). The expanded prompt produces dramatically better results. You can also upload reference images to extract features: Color palettes (dominant colors extracted), Lighting signatures (direction, quality, contrast), Texture patterns (material types, surface qualities), Composition rules (rule of thirds, golden ratio), Visual mood (extracted via sentiment analysis). These features are blended into your generation as guidance.',
-                  tip: 'Combine text prompt expansion with reference image features for maximum control. Use 2-3 reference images with different aspects (one for composition, one for color, one for style).',
-                  code: '// Prompt expansion example\n\nInput: "sunset beach"\n\nAI Expanded Output:\n"Breathtaking sunset over a pristine tropical beach at golden hour, warm orange and pink sky with wispy clouds, gentle waves lapping at white sand shore, silhouette of palm trees on the right, soft ambient lighting with sun positioned low on horizon casting long shadows, shot with vintage film camera aesthetic, Kodak Portra 400 film stock, 35mm lens, wide-angle composition following rule of thirds, dreamy and peaceful atmosphere, 8K resolution with subtle film grain, natural color grading with warm tones, professional landscape photography"\n\nValidation Scores After Generation:\n- Composition: 0.94/1.0\n- Lighting Quality: 0.91/1.0\n- Realism: 0.88/1.0\n- Overall: 0.91/1.0 ✅ PASS'
-                },
-                {
-                  heading: 'Reference Image Blending',
-                  text: 'Upload up to 5 reference images and blend their features into your generation. Each reference has an adjustable weight (0-100%) controlling its influence. Use cases: Style transfer (apply Monet painting style to your photo), Identity preservation (maintain person\'s face across generations), Composition guidance (use one image\'s layout for another subject), Color grading (apply film stock look to new images). The system extracts: Face embeddings (if faces present), Color histograms, Texture signatures, Composition vectors, Style fingerprints. These are combined with your text prompt to guide generation. Adjust weights in real-time and see preview updates. Higher weight = stronger influence from that reference.',
-                  tip: 'Use face references at 80-90% weight for identity preservation. Use style references at 40-60% weight to avoid overpowering the prompt. Test different weight combinations.',
-                  code: '// Example reference blend setup\n\nText Prompt: "Professional business portrait"\n\nReferences:\n1. Face Photo (weight 85%) - Preserves person\'s identity\n2. Studio Lighting Example (weight 60%) - Applies lighting style  \n3. Corporate Headshot (weight 45%) - Guides composition\n4. Color Grading Reference (weight 30%) - Applies color palette\n\nResult: New image with person\'s face, studio lighting, corporate composition, and color palette—all combined seamlessly.'
-                },
-                {
-                  heading: 'Validation & Quality Control',
-                  text: 'Every generated image undergoes automated quality validation using Gemini Vision Pro. Validation checks: Face Anatomy (0-1 score, checks eyes/nose/mouth alignment, symmetry, natural proportions), Hand Anatomy (detects extra/missing fingers, unnatural poses), Realism Score (overall photorealism vs. AI artifacts), Lighting Consistency (shadows match light sources), Composition Quality (follows photographic principles). Images scoring <0.75 overall trigger automatic retry with adjusted parameters. Failed validations show detailed scores so you can diagnose issues. You can disable auto-retry for artistic/abstract work where traditional rules don\'t apply. Validation history is saved so you can track model performance over time.',
-                  tip: 'If hands keep failing validation, try prompting "hands behind back" or crop hands out of frame. AI struggles with hand anatomy—it\'s a known limitation.',
-                  code: '// Validation result example\n{\n  "attempt": 3,\n  "validation_scores": {\n    "face_anatomy": 0.92,\n    "hand_anatomy": 0.68,  // Failed - triggered retry\n    "realism": 0.89,\n    "composition": 0.94,\n    "lighting": 0.88,\n    "overall": 0.86\n  },\n  "status": "retry",\n  "retry_reason": "Hand anatomy score below 0.75 threshold",\n  "retry_params": {\n    "seed": 42857,  // Changed seed\n    "guidance_scale": 8.5,  // Increased from 7.5\n    "negative_prompt": "malformed hands, extra fingers, missing fingers"  // Added constraint\n  }\n}'
+                  heading: 'Image Lab Troubleshooting', 
+                  text: 'Generation failed? Your prompt might be too vague—add more details (lighting, style, camera angle). If it says "inappropriate content", rephrase to remove flagged words. Try again with simpler language. Image looks weird? Regenerate with different seed (Advanced settings → change Seed number → generate again). Lower creativity slider if results are too abstract. Hands look wrong? Add "hands behind back" or "hands out of frame" to prompt—AI struggles with hand anatomy. Upload failed? Images must be under 10MB. Compress at tinypng.com before uploading. Can\'t find saved images? Go to Gallery tab in Image Lab—all generated images saved there automatically. Hotspots not clickable? Make sure you clicked "Finalize" after adding hotspots—unfinalizedimages don\'t activate interactions.',
+                  tip: 'If generation keeps failing, contact support via GlyphBot Jr and describe your prompt—it can suggest fixes.',
+                  action: 'Failed generation? Click "Regenerate" button → adjust creativity slider to 0.5 → change seed value → try again.'
                 }
               ]
             },
@@ -300,79 +274,109 @@ export default function Layout({ children, currentPageName }) {
               title: 'GlyphBot AI',
               content: [
                 { 
-                  heading: 'Your AI Security & Development Partner', 
-                  text: 'GlyphBot is a multi-modal AI assistant trained specifically for cybersecurity, web development, and technical analysis. Access via Tools → GlyphBot for the full interface, or use GlyphBot Jr (right sidebar) for quick questions. Capabilities: Security auditing (scan websites for vulnerabilities), Code analysis (debug, optimize, refactor), Technical documentation (explain complex concepts), Threat intelligence (CVE lookups, exploit analysis), Architecture review (system design feedback), Compliance checking (GDPR, HIPAA, SOC2), Performance optimization (speed, scalability, cost). GlyphBot uses context from your entire GlyphLock account—it knows your QR codes, images, API usage, and can reference your data to provide personalized answers. Supports file uploads (images, code, PDFs) and multi-turn conversations with full context retention.',
-                  tip: 'GlyphBot remembers your conversation history across sessions. Reference previous discussions by saying "as we discussed last week" and it will recall the context.',
-                  action: 'Try asking GlyphBot: "Audit glyphlock.com for security vulnerabilities" or "Explain how quantum-resistant cryptography works in simple terms"'
+                  heading: 'Ask GlyphBot Anything', 
+                  text: 'How to use GlyphBot: Click "GlyphBot" in top menu → type your question in the chat box → press Enter → wait 3-10 seconds for response. What to ask: "How do I create a QR code?", "Audit my website for vulnerabilities", "Explain this error message", "Help me debug this code", "What are the security risks of X?". GlyphBot Jr (right sidebar): Quick version for simple questions. Click chat icon → ask question → get instant answer. Both bots remember your conversation, so you can ask follow-up questions. How to upload files: Click paperclip icon → select file (image, PDF, code) → GlyphBot analyzes it → ask questions about the file.',
+                  tip: 'GlyphBot understands context from your account. Ask "Why did my last QR generation fail?" and it checks your recent activity automatically.',
+                  action: 'Test: Open GlyphBot Jr (right sidebar) → type "How do I enable MFA?" → get instant step-by-step answer.'
                 },
                 { 
-                  heading: 'Specialized Personas & Expert Modes', 
-                  text: 'Switch between expert personas optimized for specific tasks. Each persona has specialized knowledge, vocabulary, and problem-solving approaches: SECURITY ARCHITECT (system hardening, threat modeling, zero-trust design), CODE DEBUGGER (step-by-step troubleshooting, root cause analysis, fix generation), SITE AUDITOR (comprehensive website analysis, performance, SEO, accessibility), COMPLIANCE OFFICER (regulatory requirements, documentation templates, audit prep), API INTEGRATOR (SDK usage, webhook setup, authentication flows), PERFORMANCE ENGINEER (optimization strategies, caching, CDN, database tuning). To switch personas: Click the persona dropdown in GlyphBot UI → select new persona → conversation context adapts automatically. Each persona has different default settings (verbosity, technical depth, code examples).',
-                  tip: 'Use Security Architect for strategic planning, Code Debugger for tactical fixes. Switch mid-conversation if needed—context transfers seamlessly.',
-                  code: '// Example persona-specific responses to "How do I secure my API?"\n\nSECURITY ARCHITECT:\n"Implement defense-in-depth: (1) API Gateway with rate limiting, (2) OAuth 2.0 + JWT tokens, (3) Input validation + sanitization, (4) HTTPS only with TLS 1.3, (5) CORS policies, (6) SQL injection prevention, (7) Security headers, (8) Audit logging. Threat model: Consider DDoS, injection, MITM, token theft. Reference: OWASP API Security Top 10."\n\nCODE DEBUGGER:\n"Here\'s a production-ready implementation:\n\nconst rateLimit = require(\'express-rate-limit\');\nconst helmet = require(\'helmet\');\nconst jwt = require(\'jsonwebtoken\');\n\napp.use(helmet());\napp.use(rateLimit({ windowMs: 15*60*1000, max: 100 }));\napp.use((req, res, next) => {\n  const token = req.headers.authorization?.split(\' \')[1];\n  if (!token) return res.status(401).json({ error: \'No token\' });\n  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {\n    if (err) return res.status(403).json({ error: \'Invalid token\' });\n    req.user = user;\n    next();\n  });\n});\n\nReady to deploy. Test with: curl -H \'Authorization: Bearer TOKEN\' https://api.example.com"'
+                  heading: 'Run Security Audits', 
+                  text: 'How to audit a website: Go to GlyphBot page → select "Site Auditor" mode → type or paste website URL (e.g., "audit https://example.com") → press Enter → wait 2-5 minutes for comprehensive scan. What you get: Security vulnerabilities (SSL issues, exposed credentials, outdated software), Performance analysis (load time, resource size, optimization tips), SEO check (meta tags, mobile-friendliness, structured data), Accessibility report (WCAG compliance, screen reader support). How to download report: After audit completes → click "Download PDF" → save for compliance records or client presentations. How to save audits: Results auto-save to your account → view past audits in Audit History panel.',
+                  tip: 'Run audits monthly on production sites. Export PDFs for compliance documentation required by insurance or regulators.',
+                  action: 'Try now: Go to GlyphBot → type "audit https://glyphlock.com" → wait for results → review findings → download PDF report.'
                 },
                 { 
-                  heading: 'Website Security Audits', 
-                  text: 'Run comprehensive security audits on any website (yours or third-party). GlyphBot performs 50+ security checks: SSL/TLS configuration (cipher strength, certificate validity, HSTS), HTTP security headers (CSP, X-Frame-Options, XSS protection), Vulnerability scanning (known CVEs, outdated libraries), Subdomain enumeration (find forgotten staging servers), Port scanning (open services, misconfigurations), DNS analysis (SPF, DMARC, DKIM records), Third-party scripts (risky dependencies), Cookie security (HttpOnly, Secure, SameSite flags), Authentication mechanisms (password policies, MFA support), Data exposure (sensitive info in HTML/JS). Results include: Severity scores (Critical/High/Medium/Low), Remediation steps (exact fixes with code examples), Compliance mapping (which regulations are affected), Export as PDF report (for stakeholders/auditors). Audits complete in 2-5 minutes.',
-                  tip: 'Run audits monthly on production sites and weekly on staging. Export PDF reports for compliance documentation and insurance claims.',
-                  action: 'Test it: Type "Audit https://example.com" in GlyphBot and watch it perform a live security scan. Try your own website next.'
-                },
-                { 
-                  heading: 'Voice & Multimodal Interactions', 
-                  text: 'GlyphBot supports full voice interaction: Text-to-Speech (TTS): Enable in settings to hear all responses. Choose from 10+ neural voices (male/female, accents, speaking styles). Adjust speed (0.5x-2.0x), pitch (-5 to +5), and emphasis. Great for hands-free use or accessibility. Speech-to-Text (STT): Click microphone icon to speak your query. Supports 40+ languages with auto-detection. Works in noisy environments (noise cancellation built-in). Vision Input: Upload images for analysis (screenshots, diagrams, code, error messages). GlyphBot uses Gemini Vision to understand visual context. Ask "What\'s wrong with this design?" while sharing a mockup. File Analysis: Upload code files, logs, config files for debugging. GlyphBot parses content and provides line-by-line feedback. Supports Python, JavaScript, TypeScript, JSON, YAML, and more.',
-                  tip: 'Use voice mode during code reviews—dictate your thoughts while reviewing pull requests. The hands-free flow speeds up feedback by 3x.',
-                  code: '// Customize TTS settings\nconst ttsConfig = {\n  provider: "openai",  // or "elevenlabs", "google"\n  voice: "nova",  // shimmer, echo, fable, onyx, nova, alloy\n  speed: 1.2,  // 0.5-2.0\n  pitch: 0,  // -5 to +5\n  emotion: "neutral",  // neutral, excited, calm, professional\n  language: "en-US"\n};\n\n// Enable auto-play on responses\nglyphbot.setTTS(ttsConfig);\nglyphbot.autoPlay = true;  // Plays audio automatically\n\n// Or manual control\nconst audio = await glyphbot.speakText("Your API key has been rotated successfully.");\naudio.play();'
-                },
-                {
-                  heading: 'Context-Aware Assistance',
-                  text: 'GlyphBot has deep integration with your GlyphLock account and can reference your data: Account Context (knows your API keys, QR codes, images, usage stats), Session Memory (remembers entire conversation history, even across days), Cross-Tool Awareness (if you just created a QR code, GlyphBot knows and can help debug it), Real-Time Data Access (fetches live data from your entities, not cached). Example queries that use context: "Show me my most-scanned QR code this month" → GlyphBot queries your QR analytics. "Why did my image generation fail?" → GlyphBot checks your recent generations and error logs. "How many API calls did I use today?" → GlyphBot fetches usage metrics. "Debug my latest interactive image" → GlyphBot loads the image + hotspots and analyzes. This eliminates repetitive context-setting—just ask naturally.',
-                  tip: 'GlyphBot can also execute actions: "Create a new API key called \'mobile-app\'" or "Rotate my admin API key" work as voice commands.',
-                  code: '// Behind the scenes: How GlyphBot accesses your data\n\n// User asks: "What\'s my most popular QR code?"\n\n// GlyphBot executes:\nconst qrCodes = await base44.entities.QrAsset.filter({ created_by: user.email });\nconst scans = await base44.entities.QRScanEvent.list();\n\nconst analytics = qrCodes.map(qr => ({\n  id: qr.id,\n  name: qr.name,\n  scans: scans.filter(s => s.qr_asset_id === qr.id).length\n})).sort((a, b) => b.scans - a.scans);\n\n// GlyphBot responds:\n"Your most popular QR code is \'Conference 2026 Badge\' with 1,247 scans this month. It\'s 340% above your average. The spike started on Feb 8th at 9am—likely when the conference began. Geographic breakdown: 78% from San Francisco, 12% from New York, 10% international. Would you like me to export the full analytics?"'
-                },
-                {
-                  heading: 'Collaborative Problem Solving',
-                  text: 'GlyphBot excels at multi-step problem solving with iterative refinement. Workflow: (1) Describe your problem in plain language. (2) GlyphBot asks clarifying questions to narrow scope. (3) Proposes 2-3 solution approaches with pros/cons. (4) You choose an approach. (5) GlyphBot generates implementation (code, configs, step-by-step guide). (6) You test and report results. (7) GlyphBot debugs issues and refines solution. (8) Repeat until solved. Example: You: "My API is slow". Bot: "Is it slow for all endpoints or specific ones? What\'s your current response time?". You: "The /users endpoint takes 3 seconds. Should be <500ms". Bot: "I see you\'re using base44.entities.User.list() without pagination. That loads all 50k users. Solution: (A) Add pagination with limit=50. (B) Add caching with Redis. (C) Database indexing on commonly-queried fields. Recommend starting with A+C. Here\'s the code…"',
-                  tip: 'Be specific about constraints: "I can\'t change the database schema" or "Must work on free tier" helps GlyphBot propose realistic solutions.',
-                  action: 'Try collaborative debugging: Upload a broken code file and say "This isn\'t working, help me fix it". Follow GlyphBot\'s questions and watch it guide you to the root cause.'
+                  heading: 'GlyphBot Tips & Tricks', 
+                  text: 'Ask GlyphBot to "explain X in simple terms" for beginner-friendly answers. Upload screenshots of errors—GlyphBot reads text from images and diagnoses issues. Use voice input (click microphone icon) for hands-free operation while working. Save important conversations: Click "Save Chat" → name it → access later from History panel. Clear chat to start fresh: Click three-dot menu → Clear Conversation → confirm. GlyphBot not answering? Wait 10 seconds—might be processing large request. If still stuck, refresh page and ask again with simpler phrasing. Enable TTS (text-to-speech): Settings icon → toggle "Speak Responses" → choose voice → responses read aloud automatically.',
+                  tip: 'For complex questions, break them into smaller parts. Ask "How do I set up MFA?" first, then "What if I lose my device?" separately.',
+                  action: 'Test voice: Open GlyphBot → click microphone icon → say "What is GlyphLock?" → watch it transcribe and answer.'
                 }
               ]
             },
             {
-              title: 'Site Builder & SIE',
+              title: 'Account & Billing',
               content: [
-                { heading: 'AI-Powered Site Building', text: 'Describe your website vision and let AI generate the structure, pages, and components. Access via Tools → Site Builder.' },
-                { heading: 'SIE Architecture', text: 'System Intelligence Engine (SIE) scans your entire application architecture, analyzing routes, components, features, and dependencies.' },
-                { heading: 'Automated Remediation', text: 'Get AI-generated fixes for detected issues. Review, approve, or modify suggestions before applying changes.' },
-                { heading: 'Scan History', text: 'Track all scans, compare results over time, and export detailed audit reports for compliance and documentation.' }
+                { 
+                  heading: 'Manage Subscription', 
+                  text: 'How to upgrade: Profile icon → Command Center → Billing tab → click "Upgrade Plan" → choose Professional ($49/mo) or Enterprise ($199/mo) → enter payment details → confirm. Current plan shows at top of billing page. How to cancel: Billing tab → scroll to bottom → click "Cancel Subscription" → confirm → access continues until period ends. How to update payment: Billing tab → Payment Methods → click "Update Card" → enter new details → save. How to view invoices: Billing tab → Invoice History → click any invoice to download PDF. Billing issues? Email glyphlock@gmail.com with your account email.',
+                  tip: 'Subscription renews automatically. Cancel at least 24 hours before renewal date to avoid next charge.',
+                  action: 'Check current plan: Profile icon → Command Center → Billing tab → see plan name at top.'
+                },
+                { 
+                  heading: 'API Keys & Integration', 
+                  text: 'How to create API key: Command Center → API Keys tab → click "Generate New Key" → name it (e.g., "mobile-app") → set permissions (read-only or read-write) → click Generate → COPY SECRET IMMEDIATELY (shown only once) → save to password manager. How to use key: Add to request headers: Authorization: Bearer YOUR_SECRET_KEY. Test with curl: curl -H "Authorization: Bearer YOUR_KEY" https://api.glyphlock.com/v1/qr/list. How to rotate key: API Keys tab → find key → click rotate icon → old key stops working, new one issued → update apps with new secret within 24 hours. How to revoke: Click trash icon → confirm → key invalidated immediately.',
+                  tip: 'Never commit API keys to Git repos. Use environment variables: process.env.GLYPHLOCK_API_KEY in your code.',
+                  action: 'Create test key: Command Center → API Keys → Generate → name it "test-key" → copy secret → test with curl command.'
+                },
+                { 
+                  heading: 'Usage Limits & Quotas', 
+                  text: 'How to check usage: Command Center → Dashboard → see real-time counters for QR generations, image generations, API calls, storage used. Free tier limits: 50 QR codes/month, 20 AI images/month, 1,000 API calls/month, 1GB storage. Pro tier limits: 1,000 QR codes/month, 500 images/month, 100k API calls/month, 50GB storage. Enterprise: Unlimited everything. What happens at limit? Free users see upgrade prompt. Pro users can purchase add-ons. Enterprise never hits limits. How to buy add-ons: Billing tab → Add-Ons → select what you need (e.g., +100 QR codes for $10) → pay → quota increases immediately.',
+                  tip: 'Usage resets on your billing cycle date (shown in Billing tab). Plan ahead if you\'re close to limits.',
+                  action: 'Monitor usage: Command Center → Dashboard → check gauges showing % of monthly quota used.'
+                },
+                { 
+                  heading: 'Data Export & Backup', 
+                  text: 'How to export all data: Command Center → Settings → scroll to "Data Export" → click "Export All Data" → wait 5-15 minutes → download ZIP file with all QR codes, images, hotspots, analytics in JSON format. How to backup specific items: QR Vault → select codes → click "Export Selected" → download JSON. Image Gallery → select images → click "Download Batch" → gets ZIP of images + metadata. How to delete account: Command Center → Settings → scroll to bottom → click "Delete Account" → verify email → confirm (WARNING: irreversible, deletes all data after 7 days). How to restore: Within 7-day grace period, contact support to cancel deletion.',
+                  tip: 'Export data before canceling subscription—you lose access immediately upon cancellation, but data persists for 30 days for exports.',
+                  action: 'Backup now: Command Center → Settings → Export All Data → wait for email with download link (arrives within 1 hour).'
+                }
               ]
             },
             {
-              title: 'Security & Privacy',
+              title: 'Security Tools',
               content: [
-                { heading: 'Role-Based Access', text: 'All features respect user roles. Admins have full access, while regular users see only their own data and permitted features.' },
-                { heading: 'API Key Management', text: 'Generate API keys from Command Center → API Keys. Each key can have custom permissions and can be rotated or revoked anytime.' },
-                { heading: 'MFA Protection', text: 'Enable Multi-Factor Authentication from Account Security. Use authenticator apps like Google Authenticator or Authy for 2FA codes.' },
-                { heading: 'Trusted Devices', text: 'Mark devices as trusted to skip MFA prompts. Revoke access to any device from the Account Security panel.' },
-                { heading: 'Data Encryption', text: 'All data is encrypted at rest and in transit. Sensitive information like API keys uses additional encryption layers.' }
+                { 
+                  heading: 'Hash Generator', 
+                  text: 'How to create hash: Navigate to Security Tools → Blockchain tab → find "Hash Generator" section → paste or type your text → select algorithm (SHA-256 recommended) → click "Generate Hash" → hash appears instantly → click "Copy" icon to clipboard. Use cases: Verify file integrity (hash file before/after transfer—if hashes match, file unmodified), Password hashing (never store plain passwords), Digital signatures, Data verification. Supported algorithms: SHA-256 (most secure), SHA-512, MD5 (legacy only), SHA-1 (legacy only).',
+                  tip: 'SHA-256 is quantum-resistant and industry standard. Avoid MD5/SHA-1 for new projects—they\'re crackable.',
+                  action: 'Try: Blockchain page → Hash Generator → type "hello world" → generate SHA-256 hash → copy result.'
+                },
+                { 
+                  heading: 'Blockchain Verification', 
+                  text: 'How to create proof: Blockchain page → "Create Proof" button → enter data to verify (text, file hash, transaction ID) → click "Generate Proof" → blockchain record created with timestamp → download proof bundle (JSON file). How to verify proof: Blockchain page → "Verify Proof" tab → upload proof bundle JSON → click "Verify" → see result (Valid/Invalid/Tampered) with original data and timestamp. Use cases: Prove document existed at specific time (legal evidence), Verify contract wasn\'t altered after signing, Timestamping intellectual property before public disclosure.',
+                  tip: 'Blockchain proofs are immutable. Once created, they\'re permanent evidence of data state at creation time.',
+                  action: 'Create proof: Blockchain page → Create tab → paste "Important document hash: abc123" → generate → download proof.json → share with recipient.'
+                },
+                { 
+                  heading: 'Security Operations Center', 
+                  text: 'How to access: Navigate to Modules → Security Operations (or Security Tools → SOC Module). What it shows: Real-time threat monitor (live alerts for suspicious activity on your account), Security alerts (failed login attempts, API key misuse, unusual scan patterns), Compliance dashboard (GDPR/HIPAA/SOC2 status), Audit logs (all account actions timestamped). How to set alerts: SOC page → Alert Settings → define rules (e.g., "Alert if >100 API calls/minute") → save → get email when triggered. How to respond to alerts: Click alert → see details → click "Investigate" → GlyphBot provides remediation steps.',
+                  tip: 'Enable email alerts for critical events so you\'re notified immediately of security incidents, even when not logged in.',
+                  action: 'Check security status: Navigate to Security Operations Center → view live threat monitor → review recent alerts → acknowledge any warnings.'
+                }
               ]
             },
             {
-              title: 'Blockchain Tools',
+              title: 'Mobile Usage',
               content: [
-                { heading: 'Hash Generation', text: 'Create SHA-256, MD5, and other cryptographic hashes. Access via Tools → Blockchain in the navigation.' },
-                { heading: 'Merkle Trees', text: 'Build and verify Merkle trees for data integrity. Perfect for audit trails and tamper-proof records.' },
-                { heading: 'Proof Export', text: 'Export blockchain proofs as JSON bundles for verification. Share immutable records with stakeholders.' },
-                { heading: 'Verification', text: 'Verify blockchain proofs by uploading proof bundles. Instantly validate data integrity and authenticity.' }
+                { 
+                  heading: 'Mobile Navigation', 
+                  text: 'How to open menu: Tap hamburger icon (three horizontal lines) in top-right corner → full menu slides in → tap any section to expand → tap item to navigate → menu auto-closes. How to scroll long pages: Use finger swipe up/down → pages optimized for touch scrolling → snap scroll disabled for smooth control. How to zoom: Pinch to zoom works on images and previews (not forms—prevents accidental zoom when typing). How to go back: Use browser back button or swipe from left edge on iOS/Android. Bottom navigation: Some tools show tabs at bottom for easy thumb reach.',
+                  tip: 'Rotate to landscape mode for tools with complex interfaces (Image Lab, QR Studio) for more screen space.',
+                  action: 'Test: Tap menu icon → expand Modules section → tap QR Verification → page loads → menu closes automatically.'
+                },
+                { 
+                  heading: 'Mobile Performance', 
+                  text: 'Slow loading? Switch to WiFi from cellular data—some features like AI generation require faster connection. Close other browser tabs to free memory. Images not loading? Scroll past them then scroll back—lazy loading triggers on second pass. Force refresh: Pull down from top of page → release → page reloads. App feels laggy? Close browser completely → clear cache (browser settings → clear data) → reopen → speed improves. Animations stuttering? Disable animations in device settings (iOS: Settings → Accessibility → Motion → Reduce Motion ON. Android: Settings → Accessibility → Remove Animations).',
+                  tip: 'For best mobile experience: Use Chrome or Safari (latest version), enable JavaScript, allow cookies, update OS to latest version.',
+                  action: 'Speed up mobile: Device settings → clear browser cache → restart browser → reload GlyphLock → performance improved.'
+                }
               ]
             },
             {
-              title: 'Tips & Shortcuts',
+              title: 'Contact & Support',
               content: [
-                { heading: 'Keyboard Shortcuts', text: 'Press ? to open help guide. Use Ctrl/Cmd + K for quick navigation. Tab through forms for faster data entry.' },
-                { heading: 'Mobile Access', text: 'GlyphLock is fully responsive. Access all features from mobile devices with optimized touch interfaces.' },
-                { heading: 'Save Your Work', text: 'Most tools auto-save your progress. Look for the save icon or status indicator in the top-right of panels.' },
-                { heading: 'Export & Share', text: 'Export QR codes, images, audit reports, and blockchain proofs. Generate shareable links for collaboration.' },
-                { heading: 'Need Help?', text: 'Use GlyphBot Jr (right sidebar) for instant answers. Contact support from the footer or visit our documentation.' }
+                { 
+                  heading: 'Get Help Fast', 
+                  text: 'GlyphBot Jr (right sidebar): Fastest way to get answers. Click chat icon → type question → instant response. Knows your account context. Email Support: glyphlock@gmail.com for billing, technical issues, or partnership inquiries. Response within 24 hours (usually faster). Phone: +1-424-246-6499 for urgent issues (enterprise customers only). Knowledge Base: Press ? key anytime to open this guide. Search sections on left sidebar. Community: Check FAQ page (footer → FAQ) for common questions and troubleshooting guides.',
+                  tip: 'Before contacting support: Try GlyphBot Jr first—it resolves 80% of issues instantly and has access to your account data.',
+                  action: 'Need help right now? Click GlyphBot Jr icon (right side) → describe your issue → get immediate assistance with account context.'
+                },
+                { 
+                  heading: 'Report Bugs & Feedback', 
+                  text: 'How to report bug: Describe issue to GlyphBot Jr with screenshot → or email glyphlock@gmail.com with: (1) What you tried to do, (2) What happened instead, (3) Browser/device info, (4) Screenshot if possible. How to request features: GlyphBot Jr → say "I want feature X" → it logs request → or email glyphlock@gmail.com with "Feature Request: [your idea]". How to give feedback: After using any tool → look for feedback button/icon → rate experience → add comment → submit. Your input shapes roadmap!',
+                  tip: 'Include your browser (Chrome/Safari/Firefox) and device (iPhone/Android/Desktop) when reporting bugs for faster diagnosis.',
+                  action: 'Found a bug? Open GlyphBot Jr → say "I found a bug with [feature]" → describe what happened → it logs issue and may provide immediate fix.'
+                }
               ]
             }
           ]}
