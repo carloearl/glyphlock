@@ -9,24 +9,33 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
 
   return (
     <>
-      {/* MOBILE-FIRST: Unified Sidebar Tab - Auto-Hide Until Hover */}
+      {/* Sidebar Tab - Always Visible on Mobile, Auto-Hide on Desktop */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed z-[999999] w-20 h-48 md:w-16 md:h-40 rounded-l-3xl bg-gradient-to-br from-purple-600 to-indigo-600 backdrop-blur-xl border-2 border-r-0 border-purple-400 shadow-[0_0_60px_rgba(168,85,247,0.9)] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all duration-300 hover:right-0"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        className="fixed right-0 md:right-[-64px] md:hover:right-0 z-[999999] w-20 h-48 md:w-16 md:h-40 rounded-l-3xl bg-gradient-to-br from-purple-600 to-indigo-600 backdrop-blur-xl border-2 border-r-0 border-purple-400 shadow-[0_0_60px_rgba(168,85,247,0.9)] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all duration-300"
         style={{ 
           top: '50%',
           transform: 'translateY(-50%)',
-          right: '-64px',
           pointerEvents: 'auto',
           touchAction: 'manipulation',
           WebkitTapHighlightColor: 'rgba(168, 85, 247, 0.5)',
           cursor: 'pointer',
           minWidth: '80px',
-          minHeight: '192px'
+          minHeight: '192px',
+          zIndex: 999999
         }}
       >
-        <MessageSquare className="w-10 h-10 md:w-8 md:h-8 text-purple-100 drop-shadow-[0_0_15px_rgba(168,85,247,1)]" />
-        <span className="text-base md:text-sm text-white font-black -rotate-90 whitespace-nowrap tracking-wider">ASSIST</span>
+        <MessageSquare className="w-10 h-10 md:w-8 md:h-8 text-purple-100 drop-shadow-[0_0_15px_rgba(168,85,247,1)] pointer-events-none" />
+        <span className="text-base md:text-sm text-white font-black -rotate-90 whitespace-nowrap tracking-wider pointer-events-none">ASSIST</span>
       </button>
 
         {/* Slide-Out Menu */}
@@ -49,11 +58,20 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   <p className="text-sm text-purple-300">AI help & system guides</p>
                 </div>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsOpen(false);
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsOpen(false);
+                  }}
                   className="p-3 rounded-xl hover:bg-white/10 active:scale-95 transition-all"
-                  style={{ touchAction: 'manipulation', minWidth: '48px', minHeight: '48px' }}
+                  style={{ touchAction: 'manipulation', minWidth: '48px', minHeight: '48px', pointerEvents: 'auto' }}
                 >
-                  <X className="w-6 h-6 text-purple-300" />
+                  <X className="w-6 h-6 text-purple-300 pointer-events-none" />
                 </button>
               </div>
 
@@ -63,12 +81,25 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
-                  onClick={() => { setActiveModal('bot'); setIsOpen(false); }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveModal('bot');
+                    setIsOpen(false);
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveModal('bot');
+                    setIsOpen(false);
+                  }}
                   className="p-6 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-400/40 active:border-purple-400/80 active:scale-98 transition-all cursor-pointer"
                   style={{
                     minHeight: '120px',
                     pointerEvents: 'auto',
-                    touchAction: 'manipulation'
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none'
                   }}
                 >
                   <div className="flex items-center gap-4 mb-3">
@@ -90,12 +121,25 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
-                  onClick={() => { setActiveModal('help'); setIsOpen(false); }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveModal('help');
+                    setIsOpen(false);
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveModal('help');
+                    setIsOpen(false);
+                  }}
                   className="p-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-400/40 active:border-cyan-400/80 active:scale-98 transition-all cursor-pointer"
                   style={{
                     minHeight: '120px',
                     pointerEvents: 'auto',
-                    touchAction: 'manipulation'
+                    touchAction: 'manipulation',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none'
                   }}
                 >
                   <div className="flex items-center gap-4 mb-3">
@@ -158,10 +202,20 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                 </div>
               </div>
               <button
-                onClick={() => setActiveModal(null)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveModal(null);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveModal(null);
+                }}
                 className="p-2 rounded-xl hover:bg-white/10 transition-all"
+                style={{ touchAction: 'manipulation', minWidth: '48px', minHeight: '48px', pointerEvents: 'auto' }}
               >
-                <X className="w-5 h-5 text-slate-400 hover:text-red-400" />
+                <X className="w-5 h-5 text-slate-400 hover:text-red-400 pointer-events-none" />
               </button>
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
