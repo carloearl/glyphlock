@@ -5,7 +5,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 
-export default function useTTS(defaultSettings = {}) {
+export default function useTTSClean(defaultSettings = {}) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [lastError, setLastError] = useState(null);
