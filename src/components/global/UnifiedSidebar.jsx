@@ -121,6 +121,21 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
           )}
         </AnimatePresence>
 
+      {/* GlyphBot Jr Modal */}
+      <AnimatePresence>
+        {activeModal === 'bot' && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[999999]" 
+            style={{ pointerEvents: 'auto', touchAction: 'manipulation' }}
+          >
+            <GlyphBotJr onClose={() => setActiveModal(null)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Help Panel Modal */}
       <AnimatePresence>
         {activeModal === 'help' && helpSections.length > 0 && (
