@@ -11,6 +11,7 @@ export default function GlyphBotJr({ onClose, forceExpanded = false }) {
   
   const [isOpen, setIsOpen] = useState(forceExpanded);
   const [isHovered, setIsHovered] = useState(false);
+  const { playText, stop: stopTTS, isSpeaking } = useTTSClean();
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Hi there! I'm GlyphBot Junior! 🌟 How can I help you today?", timestamp: Date.now() }
   ]);

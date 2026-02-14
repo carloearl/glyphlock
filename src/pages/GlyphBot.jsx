@@ -77,15 +77,18 @@ export default function GlyphBotPage() {
     };
   });
 
-  // Phase 7C: TTS Hook (production-ready)
+  // GLYPHLOCK: Canonical TTS Hook (rebuilt 2026-02-14)
+  const useTTSClean = (await import('@/components/glyphlock/bot/logic/useTTSClean')).default;
   const { 
     playText, 
     stop: stopTTS, 
     isSpeaking, 
-    getVoiceProfiles, 
-    getEmotionPresets,
-    metadata: ttsMetadata
-  } = useTTS(voiceSettings);
+    isLoading: ttsLoading,
+    lastError: ttsError,
+    settings: ttsSettings,
+    updateSettings: updateTTSSettings,
+    testTTS
+  } = useTTSClean(voiceSettings);
 
   // Phase 7C: Voice profiles and emotions
   const [voiceProfiles, setVoiceProfiles] = useState([]);
