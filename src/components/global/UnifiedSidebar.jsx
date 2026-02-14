@@ -9,13 +9,14 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
 
   return (
     <>
-      {/* MOBILE-FIRST: Unified Sidebar Tab */}
+      {/* MOBILE-FIRST: Unified Sidebar Tab - Auto-Hide Until Hover */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed right-0 z-[999999] w-20 h-48 md:w-16 md:h-40 rounded-l-3xl bg-gradient-to-br from-purple-600 to-indigo-600 backdrop-blur-xl border-2 border-r-0 border-purple-400 shadow-[0_0_60px_rgba(168,85,247,0.9)] flex flex-col items-center justify-center gap-4 active:scale-95 transition-transform"
+        className="fixed z-[999999] w-20 h-48 md:w-16 md:h-40 rounded-l-3xl bg-gradient-to-br from-purple-600 to-indigo-600 backdrop-blur-xl border-2 border-r-0 border-purple-400 shadow-[0_0_60px_rgba(168,85,247,0.9)] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all duration-300 hover:right-0"
         style={{ 
           top: '50%',
           transform: 'translateY(-50%)',
+          right: '-64px',
           pointerEvents: 'auto',
           touchAction: 'manipulation',
           WebkitTapHighlightColor: 'rgba(168, 85, 247, 0.5)',
