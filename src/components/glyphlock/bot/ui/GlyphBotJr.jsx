@@ -23,31 +23,7 @@ export default function GlyphBotJr({ onClose, forceExpanded = false }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const playVoice = async (text) => {
-    const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
-    if (!cleanText) return;
-
-    try {
-      const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ text: cleanText, voiceProfile: 'neutral_female', speed: 1.1 })
-      });
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio();
-      audio.src = url;
-      audio.load();
-      await audio.play();
-      audio.onended = () => URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Voice failed:', err);
-    }
-  };
+  // REMOVED: Old voice implementation - now using useTTSClean hook
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -109,7 +85,13 @@ When answering questions, use the knowledge bases to provide accurate informatio
       
       setMessages(prev => [...prev, assistantMessage]);
       
-      setTimeout(() => playVoice(response), 300);
+      // Auto-speak response
+      setTimeout(() => {
+        console.log('GLYPH VOICE: GlyphBot Jr auto-speak triggered');
+        playText(response).catch(err => {
+          console.error('GLYPH VOICE: auto-speak failed', err);
+        });
+      }, 300);
       
     } catch (error) {
       setMessages(prev => [...prev, {
@@ -289,12 +271,34 @@ When answering questions, use the knowledge bases to provide accurate informatio
               
               {msg.role === "assistant" && (
                 <button
-                  onClick={() => playVoice(msg.text)}
-                  className="mt-3 text-xs bg-blue-600/30 hover:bg-blue-600/50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-blue-400/30"
-                  style={{ boxShadow: '0 0 10px rgba(37, 99, 235, 0.2)' }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('GLYPH VOICE: manual playback button clicked');
+                    playText(msg.text).catch(err => {
+                      console.error('GLYPH VOICE: manual playback failed', err);
+                    });
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('GLYPH VOICE: manual playback touch triggered');
+                    playText(msg.text).catch(err => {
+                      console.error('GLYPH VOICE: manual playback failed', err);
+                    });
+                  }}
+                  disabled={isSpeaking}
+                  className="mt-3 text-xs bg-blue-600/30 hover:bg-blue-600/50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-blue-400/30 disabled:opacity-50"
+                  style={{ 
+                    boxShadow: '0 0 10px rgba(37, 99, 235, 0.2)',
+                    touchAction: 'manipulation',
+                    pointerEvents: 'auto',
+                    minWidth: '80px',
+                    minHeight: '36px'
+                  }}
                 >
-                  <Volume2 className="w-3 h-3" />
-                  Listen
+                  <Volume2 className={`w-3 h-3 ${isSpeaking ? 'animate-pulse' : ''} pointer-events-none`} />
+                  {isSpeaking ? 'Playing...' : 'Listen'}
                 </button>
               )}
             </div>
