@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Sparkles, Send, Loader2, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { PERSONAS } from '../config';
-import { tts as ttsService } from '../services';
+import { PERSONAS } from '../config/personas';
+import useTTSClean from '@/components/glyphlock/bot/logic/useTTSClean';
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function GlyphBotJr({ onClose, forceExpanded = false }) {
@@ -22,8 +22,6 @@ export default function GlyphBotJr({ onClose, forceExpanded = false }) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  // REMOVED: Old voice implementation - now using useTTSClean hook
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -85,7 +83,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
       
       setMessages(prev => [...prev, assistantMessage]);
       
-      // Auto-speak response
+      // Auto-speak response using new TTS hook
       setTimeout(() => {
         console.log('GLYPH VOICE: GlyphBot Jr auto-speak triggered');
         playText(response).catch(err => {
