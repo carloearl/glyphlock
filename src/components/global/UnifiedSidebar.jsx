@@ -119,10 +119,12 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
           )}
         </AnimatePresence>
 
-      {/* GlyphBot Jr Modal - Full Screen Chat */}
+      {/* GlyphBot Jr Modal - Force Expanded State */}
       {activeModal === 'bot' && (
-        <div className="fixed inset-0 z-[999999]" style={{ pointerEvents: 'auto', touchAction: 'manipulation' }}>
-          <GlyphBotJr onClose={() => setActiveModal(null)} />
+        <div className="fixed inset-0 z-[999999] bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center" style={{ pointerEvents: 'auto', touchAction: 'manipulation' }}>
+          <div className="w-full h-[90vh] md:w-[480px] md:h-[700px] md:rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(168,85,247,0.8)]">
+            <GlyphBotJr onClose={() => setActiveModal(null)} forceExpanded={true} />
+          </div>
         </div>
       )}
 
