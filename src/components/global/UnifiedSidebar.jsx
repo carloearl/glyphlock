@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, MessageSquare, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UI } from '@/components/glyphlock/bot';
-
-const { GlyphBotJr } = UI;
+import GlyphBotJr from '@/components/glyphlock/bot/ui/GlyphBotJr';
 
 export default function UnifiedSidebar({ helpSections = [], helpTitle = "System Guide" }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -121,20 +119,12 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
           )}
         </AnimatePresence>
 
-      {/* GlyphBot Jr Modal */}
-      <AnimatePresence>
-        {activeModal === 'bot' && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999999]" 
-            style={{ pointerEvents: 'auto', touchAction: 'manipulation' }}
-          >
-            <GlyphBotJr onClose={() => setActiveModal(null)} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* GlyphBot Jr Modal - Full Screen Chat */}
+      {activeModal === 'bot' && (
+        <div className="fixed inset-0 z-[999999]" style={{ pointerEvents: 'auto', touchAction: 'manipulation' }}>
+          <GlyphBotJr onClose={() => setActiveModal(null)} />
+        </div>
+      )}
 
       {/* Help Panel Modal */}
       <AnimatePresence>
