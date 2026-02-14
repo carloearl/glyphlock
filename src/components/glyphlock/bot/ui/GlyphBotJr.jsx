@@ -6,10 +6,10 @@ import { PERSONAS } from '../config';
 import { tts as ttsService } from '../services';
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function GlyphBotJr() {
+export default function GlyphBotJr({ onClose, forceExpanded = false }) {
   const jrPersona = PERSONAS.find(p => p.id === "glyphbot_jr") || PERSONAS[4];
   
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(forceExpanded);
   const [isHovered, setIsHovered] = useState(false);
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Hi there! I'm GlyphBot Junior! 🌟 How can I help you today?", timestamp: Date.now() }
@@ -121,7 +121,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
     setLoading(false);
   };
 
-  if (!isOpen) {
+  if (!isOpen && !forceExpanded) {
     return (
       <div
         className="fixed right-0 top-1/2 -translate-y-1/2 z-[99999] group"
@@ -202,8 +202,15 @@ When answering questions, use the knowledge bases to provide accurate informatio
 
   return (
     <div 
-      className="fixed right-4 z-[99999] flex flex-col overflow-hidden rounded-2xl shadow-2xl border-2"
-      style={{
+      className={forceExpanded ? "w-full h-full flex flex-col overflow-hidden" : "fixed right-4 z-[99999] flex flex-col overflow-hidden rounded-2xl shadow-2xl border-2"}
+      style={forceExpanded ? {
+        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
+        borderColor: 'rgba(37, 99, 235, 0.5)',
+        pointerEvents: 'auto',
+        touchAction: 'manipulation',
+        display: 'flex',
+        isolation: 'isolate'
+      } : {
         bottom: '40px', 
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
         borderColor: 'rgba(37, 99, 235, 0.5)',
@@ -234,8 +241,15 @@ When answering questions, use the knowledge bases to provide accurate informatio
               </div>
             </div>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                if (onClose) {
+                  onClose();
+                } else {
+                  setIsOpen(false);
+                }
+              }}
               className="w-8 h-8 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 flex items-center justify-center text-white transition-colors"
+              style={{ minWidth: '48px', minHeight: '48px' }}
             >
               ✕
             </button>
