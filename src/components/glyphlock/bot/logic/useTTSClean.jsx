@@ -75,10 +75,12 @@ export default function useTTSClean(defaultSettings = {}) {
 
     // Merge settings
     const finalSettings = { ...settings, ...customSettings };
-    const voice = finalSettings.voice || 'nova';
+    // PHASE 3: Resolve voiceProfile → voice (voiceProfile is the key used by ControlBar/GlyphBot.jsx)
+    const voice = finalSettings.voiceProfile || finalSettings.voice || 'nova';
     const speed = Math.max(0.25, Math.min(4.0, finalSettings.speed || 1.0));
+    const emotion = finalSettings.emotion || 'neutral';
 
-    console.log('GLYPH VOICE: request started', { text: cleanText.slice(0, 50), voice, speed });
+    console.log('GLYPH VOICE: request started', { text: cleanText.slice(0, 50), voice, speed, emotion });
 
     stop(); // Stop any current playback
     setIsLoading(true);
@@ -88,10 +90,12 @@ export default function useTTSClean(defaultSettings = {}) {
       console.log('GLYPH VOICE: invoking Base44 function tts');
 
       // CRITICAL: Use Base44 SDK - NOT direct fetch
+      // PHASE 3: Pass emotion for backend prompt engineering
       const response = await base44.functions.invoke('tts', {
         text: cleanText,
         voice,
-        speed
+        speed,
+        emotion
       });
 
       console.log('GLYPH VOICE: Base44 response received', { status: response.status, hasData: !!response.data });
@@ -128,6 +132,8 @@ export default function useTTSClean(defaultSettings = {}) {
 
       // Create and play audio
       const audio = new Audio(audioUrl);
+      // PHASE 3: Apply client-side volume from voiceSettings
+      audio.volume = Math.max(0, Math.min(1, finalSettings.volume ?? 1.0));
       audioRef.current = audio;
 
       audio.onended = () => {

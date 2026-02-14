@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
-    const { text, voice = 'nova', speed = 1.0 } = await req.json();
+    const { text, voice = 'nova', speed = 1.0, emotion = 'neutral' } = await req.json();
 
     if (!text || typeof text !== 'string') {
       console.error('GLYPH VOICE BACKEND: invalid input - no text');
@@ -62,11 +62,29 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'No valid text to speak' }, { status: 400 });
     }
 
+    // PHASE 3: Emotion-aware prompt engineering
+    // OpenAI TTS-1-HD responds to bracketed stage directions in the input text
+    const EMOTION_INSTRUCTIONS = {
+      neutral: '',
+      excited: '[Speaking with excitement and energy] ',
+      calm: '[Speaking in a calm, soothing tone] ',
+      confident: '[Speaking with authority and confidence] ',
+      friendly: '[Speaking warmly and cheerfully] ',
+      professional: '[Speaking in a formal, professional manner] ',
+      empathetic: '[Speaking with empathy and understanding] ',
+      energetic: '[Speaking with high energy and enthusiasm] ',
+      authoritative: '[Speaking with commanding authority] ',
+      whisper: '[Speaking softly in a whisper] ',
+      intense: '[Speaking with intensity and urgency] '
+    };
+    const emotionPrefix = EMOTION_INSTRUCTIONS[emotion] || '';
+    const finalText = (emotionPrefix + cleanText).slice(0, 4096);
+
     // Map profile to OpenAI voice
     const openaiVoice = VOICE_MAPPING[voice] || voice || 'nova';
     const normalizedSpeed = Math.max(0.25, Math.min(4.0, speed));
 
-    console.log(`GLYPH VOICE BACKEND: calling OpenAI | voice=${openaiVoice} speed=${normalizedSpeed} length=${cleanText.length}`);
+    console.log(`GLYPH VOICE BACKEND: calling OpenAI | voice=${openaiVoice} speed=${normalizedSpeed} emotion=${emotion} length=${finalText.length}`);
 
     // Call OpenAI TTS API
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
@@ -77,7 +95,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'tts-1-hd',
-        input: cleanText,
+        input: finalText,
         voice: openaiVoice,
         speed: normalizedSpeed,
         response_format: 'mp3'
