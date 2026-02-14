@@ -10,6 +10,7 @@ import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
 import HelpPanel from '@/components/global/HelpPanel';
+import useTTSClean from '@/components/glyphlock/bot/logic/useTTSClean';
 
 const { 
   useGlyphBotPersistence, 
@@ -78,7 +79,6 @@ export default function GlyphBotPage() {
   });
 
   // GLYPHLOCK: Canonical TTS Hook (rebuilt 2026-02-14)
-  const useTTSClean = (await import('@/components/glyphlock/bot/logic/useTTSClean')).default;
   const { 
     playText, 
     stop: stopTTS, 
