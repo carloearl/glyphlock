@@ -214,10 +214,10 @@ export default function ControlBar({
                     </select>
                   </div>
 
-                  {/* Pitch - Native Input Range */}
+                  {/* Pitch - UI Preview Only (OpenAI TTS does not support pitch) */}
                   <div className="space-y-2">
                     <label className="text-xs text-slate-400 flex items-center justify-between">
-                      <span>Pitch</span>
+                      <span>Pitch <span className="text-[8px] text-slate-600 ml-1">(preview)</span></span>
                       <span className="text-cyan-400 font-mono">{voiceSettings?.pitch?.toFixed(2) || '1.00'}x</span>
                     </label>
                     <input
@@ -276,10 +276,10 @@ export default function ControlBar({
                     />
                   </div>
 
-                  {/* Bass - Native Input Range */}
+                  {/* Bass - UI Preview Only (OpenAI TTS does not support bass) */}
                   <div className="space-y-2">
                     <label className="text-xs text-slate-400 flex items-center justify-between">
-                      <span>Bass</span>
+                      <span>Bass <span className="text-[8px] text-slate-600 ml-1">(preview)</span></span>
                       <span className="text-purple-400 font-mono">{((voiceSettings?.bass || 0) * 100).toFixed(0)}%</span>
                     </label>
                     <input
@@ -298,10 +298,10 @@ export default function ControlBar({
                     </div>
                   </div>
 
-                  {/* Clarity - Native Input Range */}
+                  {/* Clarity - UI Preview Only (OpenAI TTS does not support clarity) */}
                   <div className="space-y-2">
                     <label className="text-xs text-slate-400 flex items-center justify-between">
-                      <span>Clarity</span>
+                      <span>Clarity <span className="text-[8px] text-slate-600 ml-1">(preview)</span></span>
                       <span className="text-purple-400 font-mono">{((voiceSettings?.clarity || 0) * 100).toFixed(0)}%</span>
                     </label>
                     <input

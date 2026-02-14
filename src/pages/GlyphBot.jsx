@@ -5,7 +5,7 @@ import ChatMessageMemo from '@/components/glyphlock/bot/ui/ChatMessageMemo';
 import ChatErrorBoundary from '@/components/glyphlock/bot/ui/ChatErrorBoundary';
 import SEOHead from '@/components/SEOHead';
 import { base44 } from '@/api/base44Client';
-import { Activity, Zap, Shield, Bot, AlertTriangle, X, PanelRightOpen, PanelRightClose } from 'lucide-react';
+import { Activity, Shield, Bot, AlertTriangle, X, PanelRightOpen, PanelRightClose } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
@@ -593,14 +593,6 @@ export default function GlyphBotPage() {
       }
     }
     setModes(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  // Phase 7C: Manual TTS trigger for individual messages
-  const handlePlayTTS = (messageId) => {
-    const msg = messages.find(m => m.id === messageId);
-    if (msg?.content) {
-      playText(msg.content);
-    }
   };
 
   const handleReplayWithSettings = useCallback((messageId, ttsSettings) => {
