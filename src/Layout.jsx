@@ -155,8 +155,9 @@ export default function Layout({ children, currentPageName }) {
           height: 'auto',
           boxSizing: 'border-box',
           isolation: 'isolate',
-          zIndex: 1,
-          position: 'relative'
+          zIndex: 10,
+          position: 'relative',
+          touchAction: 'manipulation'
         }}
       >
         <SecurityMonitor />
