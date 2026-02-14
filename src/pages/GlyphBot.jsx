@@ -15,7 +15,6 @@ import useTTSClean from '@/components/glyphlock/bot/logic/useTTSClean';
 const { 
   useGlyphBotPersistence, 
   useGlyphBotAudit, 
-  useTTS, 
   glyphbotClient, 
   GlyphProviderChain 
 } = Logic;
@@ -90,22 +89,23 @@ export default function GlyphBotPage() {
     testTTS
   } = useTTSClean(voiceSettings);
 
-  // Phase 7C: Voice profiles and emotions
-  const [voiceProfiles, setVoiceProfiles] = useState([]);
-  const [emotionPresets, setEmotionPresets] = useState([]);
-
-  useEffect(() => {
-    if (getVoiceProfiles) {
-      const profiles = getVoiceProfiles();
-      const validProfiles = Array.isArray(profiles) ? profiles.filter(p => p && p.id && p.label) : [];
-      setVoiceProfiles(validProfiles);
-    }
-    if (getEmotionPresets) {
-      const presets = getEmotionPresets();
-      const validPresets = Array.isArray(presets) ? presets.filter(p => p && p.id && p.label) : [];
-      setEmotionPresets(validPresets);
-    }
-  }, [getVoiceProfiles, getEmotionPresets]);
+  // Phase 7C: Voice profiles and emotions (static defaults)
+  const voiceProfiles = [
+    { id: 'neutral_female', label: 'Nova (Neutral Female)' },
+    { id: 'neutral_male', label: 'Onyx (Neutral Male)' },
+    { id: 'warm_female', label: 'Shimmer (Warm Female)' },
+    { id: 'warm_male', label: 'Echo (Warm Male)' },
+    { id: 'professional_female', label: 'Alloy (Professional)' },
+    { id: 'professional_male', label: 'Fable (Storyteller)' }
+  ];
+  const emotionPresets = [
+    { id: 'neutral', label: 'Neutral' },
+    { id: 'excited', label: 'Excited' },
+    { id: 'calm', label: 'Calm' },
+    { id: 'confident', label: 'Confident' },
+    { id: 'friendly', label: 'Friendly' },
+    { id: 'professional', label: 'Professional' }
+  ];
 
   // Persistence hook - Phase 5
   const {
