@@ -8,7 +8,8 @@ Deno.serve(async (req) => {
       token, signature, guest_name, serial_number,
       date_of_birth, government_id_type, government_id_number, government_id_state,
       card_last_four, card_type, phone,
-      id_photo_url, id_photo_back_url, thumbprint_url
+      id_photo_url, id_photo_back_url, thumbprint_url,
+      host_name, host_signature, manager_name, manager_signature
     } = body;
 
     if (!token || !signature || !guest_name) {
