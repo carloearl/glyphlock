@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, Shield, User, CreditCard, Calendar, Eye } from "lucide-react";
+import { Search, FileText, Shield, User, CreditCard, Calendar, Eye, Archive } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ContractDetailCard from "@/components/nups/ContractDetailCard";
 
@@ -14,8 +14,12 @@ export default function ContractArchive() {
   const [selectedContract, setSelectedContract] = useState(null);
 
   const { data: contracts = [], isLoading } = useQuery({
-    queryKey: ["signed-contracts"],
-    queryFn: () => base44.entities.VIPContractRecord.filter({ status: "signed" }, "-signed_at", 200),
+    queryKey: ["archived-contracts"],
+    queryFn: async () => {
+      const signed = await base44.entities.VIPContractRecord.filter({ status: "signed" }, "-signed_at", 200);
+      const archived = await base44.entities.VIPContractRecord.filter({ status: "archived" }, "-signed_at", 200);
+      return [...archived, ...signed];
+    },
   });
 
   const filtered = contracts.filter(c => {
@@ -26,11 +30,13 @@ export default function ContractArchive() {
       (c.card_last_four || "").includes(q) ||
       (c.serial_number || "").toLowerCase().includes(q) ||
       (c.government_id_type || "").toLowerCase().includes(q) ||
-      (c.government_id_state || "").toLowerCase().includes(q)
+      (c.government_id_state || "").toLowerCase().includes(q) ||
+      (c.signed_copy_barcode || "").toLowerCase().includes(q)
     );
   });
 
   const statusColor = (s) => {
+    if (s === "archived") return "bg-purple-500/20 text-purple-400 border-purple-500/40";
     if (s === "signed") return "bg-green-500/20 text-green-400 border-green-500/40";
     if (s === "expired") return "bg-red-500/20 text-red-400 border-red-500/40";
     if (s === "revoked") return "bg-orange-500/20 text-orange-400 border-orange-500/40";
@@ -44,7 +50,7 @@ export default function ContractArchive() {
           <Shield className="w-8 h-8 text-purple-400" />
           <div>
             <h1 className="text-2xl font-bold">Contract Archive</h1>
-            <p className="text-sm text-gray-400">Search signed VIP contracts by name, last 4 of card, serial number, or ID type</p>
+            <p className="text-sm text-gray-400">Search VIP contracts by name, last 4 of card, serial number, barcode, or ID type</p>
           </div>
         </div>
 
@@ -54,7 +60,7 @@ export default function ContractArchive() {
           <Input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search by guest name, last 4 digits of card, serial number, ID type..."
+            placeholder="Search by name, last 4 of card, serial number, barcode, ID type..."
             className="pl-10 h-12 text-lg bg-gray-900/60 border-gray-700"
           />
         </div>
@@ -115,6 +121,12 @@ export default function ContractArchive() {
                           <span>{c.government_id_type} {c.government_id_state ? `(${c.government_id_state})` : ""}</span>
                         )}
                       </div>
+                      {c.physical_sign_confirmed && (
+                        <div className="flex items-center gap-1 text-[10px] text-purple-400 mt-1">
+                          <Archive className="w-3 h-3" /> Physical copy archived
+                          {c.signed_copy_barcode && <span className="font-mono">• {c.signed_copy_barcode}</span>}
+                        </div>
+                      )}
                     </div>
 
                     <Button size="sm" variant="outline" className="border-gray-700 text-gray-400 flex-shrink-0">
