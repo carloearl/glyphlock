@@ -21,8 +21,8 @@ export default function SecurityTools() {
   const tools = [
     {
       title: "QR Verification Module",
-      description: "Cryptographic QR generation with steganographic encoding – governed by protocol, accessible only with provisioned credentials.",
-      price: "Credentialed",
+      description: "Cryptographic QR generation with steganographic encoding – governed by protocol with full framework access.",
+      price: "Open Access",
       link: "Qr",
       icon: Eye,
       image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/584a72f27_quantum-encryption-visualization-with-glowing-part.jpg"
@@ -30,31 +30,31 @@ export default function SecurityTools() {
     {
       title: "Blockchain Verification Module",
       description: "Immutable ledger integrity – protocol-enforced verification with cryptographic governance.",
-      price: "Credentialed",
+      price: "Open Access",
       link: "Blockchain",
       icon: Lock,
       image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/9be80d6ca_Whisk_43831818b9d5e77953345c3626f3d976eg.jpg"
     },
     {
       title: "Security Operations Module",
-      description: "System-enforced threat monitoring – credentialed access to real-time intelligence.",
-      price: "Credentialed",
+      description: "System-enforced threat monitoring – full access to real-time intelligence.",
+      price: "Open Access",
       link: "SecurityOperationsCenter",
       icon: Activity,
       image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/7e319a981_Whisk_429a6543b81e30d9bab4065457f3b62ddr.jpg"
     },
     {
       title: "GlyphBot Intelligence Module",
-      description: "Autonomous security analysis – AI-driven threat suppression restricted to credentialed operators.",
-      price: "Credentialed",
+      description: "Autonomous security analysis – AI-driven threat suppression with full platform access.",
+      price: "Open Access",
       link: "GlyphBot",
       icon: Zap,
       image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/9774d266e_openai-logo-inspired-abstract.png"
     },
     {
       title: "NUPS Transaction Verification",
-      description: "Protocol-governed transaction module – system-enforced verification restricted to authorized venues.",
-      price: "Credentialed",
+      description: "Protocol-governed transaction module – system-enforced verification for authorized venues.",
+      price: "Open Access",
       link: "NUPSLogin",
       icon: Server,
       image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/b6f63d51b_Whisk_b9fd7532ee1e87a9152439bac427f256dr.jpg"
@@ -91,7 +91,7 @@ export default function SecurityTools() {
               transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight"
             >
-              Credentialed Verification <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">System</span>
+              Security Verification <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">System</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, x: 100 }}
@@ -171,14 +171,14 @@ export default function SecurityTools() {
               transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="text-sm md:text-base text-gray-400 mb-8 md:mb-12"
             >
-              System-enforced capabilities restricted to credentialed operators
+              System-enforced capabilities with full framework access
             </motion.p>
 
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
               {[
                 { icon: Shield, title: "System-Enforced Verification", desc: "Quantum-resistant cryptographic governance", gradient: "from-green-600 to-emerald-700" },
                 { icon: Eye, title: "Autonomous Intelligence", desc: "AI-driven threat suppression with protocol enforcement", gradient: "from-blue-600 to-blue-700" },
-                { icon: Lock, title: "Credentialed Integrity", desc: "Protocol-governed modules with provisioned access", gradient: "from-purple-600 to-purple-700" }
+                { icon: Lock, title: "Framework Integrity", desc: "Protocol-governed modules with open framework access", gradient: "from-purple-600 to-purple-700" }
               ].map((item, idx) => (
                 <motion.div 
                   key={idx}
@@ -208,7 +208,7 @@ export default function SecurityTools() {
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-white"
             >
-              Ready to Deploy Credentialed Verification?
+              Ready to Deploy Security Verification?
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, x: 100 }}
@@ -216,7 +216,7 @@ export default function SecurityTools() {
               transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
               className="text-sm md:text-base lg:text-xl text-gray-400 mb-6 md:mb-8"
             >
-              Initiate protocol-governed access to system-enforced modules
+              Access protocol-governed, system-enforced security modules
             </motion.p>
             <motion.div 
               initial={{ opacity: 0, y: 40, scale: 0.9 }}
@@ -231,7 +231,7 @@ export default function SecurityTools() {
               </Link>
               <Link to={createPageUrl("Consultation")}>
                 <Button size="lg" variant="outline" className="border-blue-500/50 hover:bg-blue-500/10 text-white">
-                  Request Credentials
+                  Get Started
                 </Button>
               </Link>
             </motion.div>

@@ -547,7 +547,7 @@ export default function QrStudio({ initialTab = 'create' }) {
               <div className="px-4 py-2 glyph-glass border border-purple-500/50 rounded-lg">
                 <p className="text-xs text-purple-300 font-semibold flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />
-                  Premium Features
+                  Full Access
                 </p>
               </div>
             </div>
@@ -677,7 +677,7 @@ export default function QrStudio({ initialTab = 'create' }) {
                             <p className="text-xs text-gray-400">{selectedPayloadType.description}</p>
                           </div>
                           {selectedPayloadType.premium && (
-                            <span className="ml-auto px-2 py-1 text-xs bg-purple-500/20 text-purple-400 rounded border border-purple-500/50">Premium</span>
+                            <span className="ml-auto px-2 py-1 text-xs bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/50">Advanced</span>
                           )}
                         </>
                       )}

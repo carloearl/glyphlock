@@ -47,7 +47,7 @@ export default function MultiSlotManager({ slots = [], onChange }) {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-white">Multi-Slot Payload Management</h3>
-          <p className="text-sm text-gray-400">Create credential-gated payloads with priority resolution</p>
+          <p className="text-sm text-gray-400">Create access-gated payloads with priority resolution</p>
         </div>
         <Button onClick={addSlot} className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500">
           <Plus className="w-4 h-4 mr-2" />
@@ -150,7 +150,7 @@ export default function MultiSlotManager({ slots = [], onChange }) {
                         </div>
 
                         <div>
-                          <Label className="text-gray-300">Credential Level</Label>
+                          <Label className="text-gray-300">Access Level</Label>
                           <Select
                             value={slot.credential_level}
                             onValueChange={(value) => updateSlot(slot.id, { credential_level: value })}
