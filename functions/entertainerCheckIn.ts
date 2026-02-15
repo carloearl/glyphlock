@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
@@ -42,21 +42,20 @@ Deno.serve(async (req) => {
       status: "active"
     });
 
-    // Log signature for non-repudiation
-    await base44.asServiceRole.entities.SecureDataHistory.create({
-      action_id: `contract_${Date.now()}_${entertainer_id}`,
-      action_type: "entertainer_contract",
-      payload: signature,
-      payload_sha256: await crypto.subtle.digest('SHA-256', new TextEncoder().encode(signature))
-        .then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')),
-      user_id: user.email,
-      metadata: {
+    // Log signature for non-repudiation via SystemAuditLog
+    const sigHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(signature))
+      .then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''));
+
+    await base44.asServiceRole.entities.SystemAuditLog.create({
+      action_type: "entertainer_contract_signed",
+      user_email: user.email,
+      details: {
+        entertainer_id,
+        signature_hash: sigHash,
         ip_address: clientIP,
         user_agent: userAgent,
         timestamp: new Date().toISOString(),
-        entertainer_id,
-      },
-      status: "safe"
+      }
     });
 
     return Response.json({ 
