@@ -110,38 +110,26 @@ export default function useTTSClean(defaultSettings = {}) {
         throw new Error(`HTTP ${response.status}: ${response.data?.error || 'TTS failed'}`);
       }
 
-      // Response.data is the raw audio buffer (ArrayBuffer or Blob)
-      const audioData = response.data;
+      const responseData = response.data;
 
-      if (!audioData) {
-        throw new Error('No audio data received from backend');
+      if (!responseData || !responseData.audio_base64) {
+        throw new Error(responseData?.error || 'No audio data received from backend');
       }
 
-      console.log('GLYPH VOICE: audio bytes received', { 
-        type: audioData.constructor.name,
-        size: audioData.size || audioData.byteLength || 'unknown'
+      console.log('GLYPH VOICE: base64 audio received', { 
+        base64Length: responseData.audio_base64.length,
+        bytes: responseData.bytes,
+        voice: responseData.voice
       });
 
-      // Create audio URL from response
-      let audioUrl;
-      if (audioData instanceof Blob) {
-        audioUrl = URL.createObjectURL(audioData);
-      } else if (audioData instanceof ArrayBuffer) {
-        const blob = new Blob([audioData], { type: 'audio/mpeg' });
-        audioUrl = URL.createObjectURL(blob);
-      } else if (typeof audioData === 'string') {
-        // Base44 SDK deserializes binary audio as a JS string.
-        // Convert each char code to a byte. For chars > 255 (non-Latin1),
-        // use modulo 256 to extract the byte value.
-        const bytes = new Uint8Array(audioData.length);
-        for (let i = 0; i < audioData.length; i++) {
-          bytes[i] = audioData.charCodeAt(i) & 0xFF;
-        }
-        const blob = new Blob([bytes], { type: 'audio/mpeg' });
-        audioUrl = URL.createObjectURL(blob);
-      } else {
-        throw new Error('Unexpected audio data type: ' + typeof audioData);
+      // Decode base64 to binary
+      const binaryStr = atob(responseData.audio_base64);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
       }
+      const blob = new Blob([bytes], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(blob);
 
       console.log('GLYPH VOICE: play attempt', { url: audioUrl });
 
