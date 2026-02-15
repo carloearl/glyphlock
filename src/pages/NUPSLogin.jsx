@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 import { Shield, Lock, User } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { GlyphInput, GlyphButton, GlyphFormPanel } from "@/components/ui/GlyphForm";
 
 export default function NUPSLogin() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,12 +22,12 @@ export default function NUPSLogin() {
       if (isAuthenticated) {
         const user = await base44.auth.me();
         if (user.role === 'admin') {
-          navigate('/nups-owner');
+          window.location.href = createPageUrl("NUPSOwner");
         } else {
-          navigate('/nups-staff');
+          window.location.href = createPageUrl("NUPSStaff");
         }
       } else {
-        base44.auth.redirectToLogin('/nups-login');
+        base44.auth.redirectToLogin(createPageUrl("NUPSLogin"));
       }
     } catch (err) {
       setError("Authentication failed. Please try again.");
