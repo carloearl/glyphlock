@@ -2,7 +2,7 @@
 // Single audio pipeline: useTTS → Base44 invoke → OpenAI → HTMLAudio playback
 // NO WEB SPEECH API | NO FALLBACKS | FAIL LOUDLY
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
 export default function useTTSClean(defaultSettings = {}) {
@@ -27,6 +27,11 @@ export default function useTTSClean(defaultSettings = {}) {
       ...defaultSettings
     };
   });
+
+  // Keep defaultSettingsRef in sync with parent prop changes
+  useEffect(() => {
+    defaultSettingsRef.current = defaultSettings;
+  }, [defaultSettings]);
 
   // Save settings to localStorage whenever they change
   const updateSettings = useCallback((newSettings) => {
