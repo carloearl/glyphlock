@@ -10,10 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Banknote, FileText, Search, Sparkles, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-import ControlPanel from "@/components/nups/press/components/ControlPanel";
-import VoucherCanvas from "@/components/nups/press/components/VoucherCanvas";
-import ContractTerminal from "@/components/nups/press/components/ContractTerminal";
-import ArchiveSearch from "@/components/nups/press/components/ArchiveSearch";
+import ControlPanel from "@/components/nups/press/ControlPanel";
+import VoucherCanvas from "@/components/nups/press/VoucherCanvas";
+import ContractTerminal from "@/components/nups/press/ContractTerminal";
+import ArchiveSearch from "@/components/nups/press/ArchiveSearch";
 
 import { DEFAULT_PRESS_CONFIG } from "@/components/nups/press/types";
 import {
