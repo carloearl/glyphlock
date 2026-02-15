@@ -110,6 +110,21 @@ export default function ContractDetailCard({ contract }) {
         </div>
       )}
 
+      {/* Hardcopy Archive */}
+      {c.signed_hardcopy_photo_url && (
+        <div>
+          <div className="flex items-center gap-2 text-sm font-bold text-amber-400 mb-2">
+            <FileText className="w-4 h-4" /> Signed Hardcopy Archive
+          </div>
+          <div className="bg-gray-900/50 rounded-lg p-3 space-y-3">
+            <img src={c.signed_hardcopy_photo_url} alt="Signed Hardcopy" className="w-full rounded-lg border border-amber-500/30" />
+            <Row label="Barcode/Serial" value={c.hardcopy_barcode_scan} color="text-purple-400 font-mono text-xs" />
+            <Row label="Logged At" value={c.hardcopy_logged_at ? new Date(c.hardcopy_logged_at).toLocaleString() : null} />
+            <Row label="Logged By" value={c.hardcopy_logged_by} />
+          </div>
+        </div>
+      )}
+
       {/* Audit */}
       <div>
         <div className="flex items-center gap-2 text-sm font-bold text-gray-400 mb-2">
