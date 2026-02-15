@@ -53,7 +53,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.URL_REDIRECT,
     description: 'URL only accessible during specific time windows',
     placeholder: 'https://example.com (Available: 9AM-5PM)',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'url_geolock', 
@@ -62,7 +62,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.URL_REDIRECT,
     description: 'URL only accessible from specific locations',
     placeholder: 'https://example.com (Radius: 100m)',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'url_velocity', 
@@ -71,7 +71,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.URL_REDIRECT,
     description: 'Requires specific scanning velocity/pattern',
     placeholder: 'https://example.com (Speed threshold: 5 scans/min)',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'url_device', 
@@ -80,7 +80,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.URL_REDIRECT,
     description: 'Only accessible from specific device types',
     placeholder: 'https://example.com (iOS only)',
-    premium: true,
+    premium: false,
   },
 
   // Contact & Identity
@@ -118,7 +118,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.CONTACT,
     description: 'Enhanced vCard with branding',
     placeholder: 'Full contact + logo + company info',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'tap_call', 
@@ -192,7 +192,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.PAYMENT,
     description: 'Direct Stripe checkout link',
     placeholder: 'https://buy.stripe.com/...',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'crypto_btc', 
@@ -228,7 +228,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.PAYMENT,
     description: 'GlyphLock NUPS driver compensation QR',
     placeholder: 'nups://payout?driver_id=xxx',
-    premium: true,
+    premium: false,
   },
 
   // Authentication & Security
@@ -239,7 +239,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'Trigger OAuth authentication flow',
     placeholder: 'oauth://authorize?client_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'auth_sso', 
@@ -248,7 +248,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'Enterprise single sign-on trigger',
     placeholder: 'sso://login?provider=okta',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'auth_2fa', 
@@ -257,7 +257,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'Multi-factor authentication code',
     placeholder: 'totp://username?secret=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'auth_session', 
@@ -266,7 +266,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'Initiate authenticated session',
     placeholder: 'session://start?token=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'auth_temp_access', 
@@ -275,7 +275,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'Time-limited access token',
     placeholder: 'access://temp?code=xxx&expires=3600',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'auth_encrypted', 
@@ -284,7 +284,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'E2EE session initialization',
     placeholder: 'encrypted://session?key=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'auth_badge', 
@@ -293,7 +293,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'Enterprise employee verification',
     placeholder: 'badge://employee?id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'auth_visitor', 
@@ -302,7 +302,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'Temporary building access',
     placeholder: 'visitor://pass?id=xxx&valid_until=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'auth_nfc', 
@@ -311,7 +311,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.AUTH,
     description: 'Combined NFC and QR authentication',
     placeholder: 'dual://auth?qr_id=xxx&nfc_id=xxx',
-    premium: true,
+    premium: false,
   },
 
   // Medical & Healthcare
@@ -322,7 +322,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MEDICAL,
     description: 'HIPAA-compliant patient data access',
     placeholder: 'medical://record?patient_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'medical_prescription', 
@@ -331,7 +331,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MEDICAL,
     description: 'Verify prescription authenticity',
     placeholder: 'rx://verify?prescription_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'medical_allergy', 
@@ -340,7 +340,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MEDICAL,
     description: 'Critical medical information',
     placeholder: 'emergency://info?patient_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'medical_id', 
@@ -349,7 +349,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MEDICAL,
     description: 'Wearable medical ID QR',
     placeholder: 'medid://patient?id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'medical_insurance', 
@@ -358,7 +358,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MEDICAL,
     description: 'Insurance card QR',
     placeholder: 'insurance://verify?policy=xxx',
-    premium: true,
+    premium: false,
   },
 
   // Retail & Events
@@ -396,7 +396,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.RETAIL,
     description: 'Secure event entry verification',
     placeholder: 'entry://verify?pass_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'retail_membership', 
@@ -423,7 +423,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.RETAIL,
     description: 'Product inventory check',
     placeholder: 'inventory://lookup?sku=xxx',
-    premium: true,
+    premium: false,
   },
 
   // File & Data
@@ -535,7 +535,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MEDIA,
     description: 'Steganographic hidden layer',
     placeholder: 'stego://reveal?key=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'media_interactive', 
@@ -544,7 +544,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MEDIA,
     description: 'Trigger interactive art experience',
     placeholder: 'art://interact?piece_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'media_merch', 
@@ -562,7 +562,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MEDIA,
     description: 'Load augmented reality content',
     placeholder: 'ar://load?model=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'media_video', 
@@ -582,7 +582,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.IOT,
     description: 'Configure IoT device',
     placeholder: 'iot://config?device_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'iot_smarthome', 
@@ -591,7 +591,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.IOT,
     description: 'Pair smart home device',
     placeholder: 'smarthome://pair?device=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'iot_industrial', 
@@ -600,7 +600,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.IOT,
     description: 'Equipment service log access',
     placeholder: 'industrial://log?equipment_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'iot_router', 
@@ -618,7 +618,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.IOT,
     description: 'Equipment diagnostic data',
     placeholder: 'diagnostics://machine?id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'iot_factory', 
@@ -627,7 +627,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.IOT,
     description: 'Factory floor authorization',
     placeholder: 'factory://access?zone=xxx',
-    premium: true,
+    premium: false,
   },
 
   // Military & High Security
@@ -638,7 +638,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MILITARY,
     description: 'Military-grade dual encryption',
     placeholder: 'encrypted://dual?key1=xxx&key2=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'military_camo', 
@@ -647,7 +647,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MILITARY,
     description: 'Visually disguised QR code',
     placeholder: 'camo://embed?image=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'military_motion', 
@@ -656,7 +656,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MILITARY,
     description: 'Requires specific motion pattern to unlock',
     placeholder: 'motion://verify?pattern=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'military_geoproof', 
@@ -665,7 +665,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MILITARY,
     description: 'Cryptographic location verification',
     placeholder: 'geoproof://verify?coords=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'military_offline', 
@@ -674,7 +674,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MILITARY,
     description: 'Air-gapped command verification',
     placeholder: 'offline://command?hash=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'military_onetime', 
@@ -683,7 +683,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MILITARY,
     description: 'Self-destructing single-use QR',
     placeholder: 'onetime://mission?token=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'military_tamper', 
@@ -692,7 +692,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MILITARY,
     description: 'Detects and reacts to tampering',
     placeholder: 'tamper://reactive?signature=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'military_stego', 
@@ -701,7 +701,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.MILITARY,
     description: 'Hidden data in QR image',
     placeholder: 'stego://layer2?key=xxx',
-    premium: true,
+    premium: false,
   },
 
   // Blockchain
@@ -712,7 +712,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.BLOCKCHAIN,
     description: 'Verify blockchain wallet ownership',
     placeholder: 'blockchain://verify?wallet=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'blockchain_nft', 
@@ -721,7 +721,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.BLOCKCHAIN,
     description: 'Prove NFT ownership',
     placeholder: 'nft://claim?token_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'blockchain_contract', 
@@ -730,7 +730,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.BLOCKCHAIN,
     description: 'Execute smart contract function',
     placeholder: 'contract://execute?address=xxx&function=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'blockchain_timestamp', 
@@ -739,7 +739,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.BLOCKCHAIN,
     description: 'OpenTimestamps verification',
     placeholder: 'ots://verify?hash=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'blockchain_id', 
@@ -748,7 +748,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.BLOCKCHAIN,
     description: 'Bind identity to blockchain',
     placeholder: 'id://bind?chain=xxx&address=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'blockchain_handshake', 
@@ -757,7 +757,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.BLOCKCHAIN,
     description: 'Bridge off-chain and on-chain data',
     placeholder: 'bridge://handshake?proof=xxx',
-    premium: true,
+    premium: false,
   },
 
   // GlyphLock Proprietary
@@ -768,7 +768,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'GlyphLock trust verification system',
     placeholder: 'glx://truststrike?signature=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_covenant', 
@@ -777,7 +777,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Automatic covenant binding',
     placeholder: 'covenant://bind?master_id=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_cab', 
@@ -786,7 +786,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Cryptographic Authorization Bundle',
     placeholder: 'cab://signature?bundle=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_bpaaa', 
@@ -795,7 +795,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Biometric-Predictive AI Authentication',
     placeholder: 'bpaaa://verify?identity=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_touch', 
@@ -804,7 +804,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Proprietary touch interaction system',
     placeholder: 'glyphtouch://trigger?action=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_emotion', 
@@ -813,7 +813,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Bio-signal reactive payload',
     placeholder: 'emotion://react?biometric=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_dac', 
@@ -822,7 +822,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Distributed Authority Command',
     placeholder: 'dac://command?authority=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_voucher', 
@@ -831,7 +831,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Dream Palace, Skin/Bones Cabaret voucher',
     placeholder: 'voucher://nups?club=xxx&amount=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_hotzone', 
@@ -840,7 +840,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Multi-zone interactive image',
     placeholder: 'hotzone://image?zones=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_driver_payout', 
@@ -849,7 +849,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'NUPS driver compensation routing',
     placeholder: 'payout://driver?route=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_story', 
@@ -858,7 +858,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'Narrative fragment QR system',
     placeholder: 'story://fragment?chapter=xxx',
-    premium: true,
+    premium: false,
   },
   { 
     id: 'glx_intelligence', 
@@ -867,7 +867,7 @@ export const PAYLOAD_TYPES = [
     category: PAYLOAD_CATEGORIES.GLYPHLOCK,
     description: 'AI knowledge transfer QR',
     placeholder: 'glyphbot://inherit?kb=xxx',
-    premium: true,
+    premium: false,
   },
 ];
 
