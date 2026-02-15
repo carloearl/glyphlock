@@ -92,12 +92,12 @@ export default function GlyphBotPage() {
 
   // Phase 7C: Voice profiles and emotions (static defaults)
   const voiceProfiles = [
-    { id: 'neutral_female', label: '♀ Nova (Neutral Female)' },
-    { id: 'warm_female', label: '♀ Shimmer (Warm Female)' },
-    { id: 'professional_female', label: '♀ Alloy (Professional)' },
-    { id: 'neutral_male', label: '♂ Onyx (Deep Male)' },
-    { id: 'warm_male', label: '♂ Echo (Warm Male)' },
-    { id: 'professional_male', label: '♂ Fable (Storyteller)' }
+    { id: 'neutral_female', label: 'Nova (Neutral Female)' },
+    { id: 'neutral_male', label: 'Onyx (Neutral Male)' },
+    { id: 'warm_female', label: 'Shimmer (Warm Female)' },
+    { id: 'warm_male', label: 'Echo (Warm Male)' },
+    { id: 'professional_female', label: 'Alloy (Professional)' },
+    { id: 'professional_male', label: 'Fable (Storyteller)' }
   ];
   const emotionPresets = [
     { id: 'neutral', label: 'Neutral' },
@@ -331,8 +331,14 @@ export default function GlyphBotPage() {
       });
 
       if (modes.voice && botText) {
-        console.log('[GlyphBot] Auto-speaking with voice settings:', voiceSettings);
-        playText(botText, voiceSettings).catch(e => {
+        // CRITICAL: Read latest voiceSettings from localStorage to avoid stale closure
+        let latestVoiceSettings = voiceSettings;
+        try {
+          const saved = localStorage.getItem('glyphbot_voice_settings');
+          if (saved) latestVoiceSettings = JSON.parse(saved);
+        } catch (e) { /* use state value */ }
+        console.log('[GlyphBot] Auto-speaking with voice settings:', latestVoiceSettings);
+        playText(botText, latestVoiceSettings).catch(e => {
           console.warn('[TTS Auto-speak]', e);
         });
       }
