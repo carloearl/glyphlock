@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,7 +20,7 @@ export default function NUPSStaff() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
       } catch (error) {
-        base44.auth.redirectToLogin('/nups-login');
+        base44.auth.redirectToLogin(createPageUrl("NUPSLogin"));
       }
     };
     checkAuth();
