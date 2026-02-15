@@ -54,10 +54,12 @@ export default function VIPContract() {
   const [idFrontUrl, setIdFrontUrl] = useState("");
   const [idBackUrl, setIdBackUrl] = useState("");
   const [thumbprintUrl, setThumbprintUrl] = useState("");
+  const [guestPhotoUrl, setGuestPhotoUrl] = useState("");
   const [uploading, setUploading] = useState({});
   const idFrontRef = useRef(null);
   const idBackRef = useRef(null);
   const thumbprintRef = useRef(null);
+  const guestPhotoRef = useRef(null);
 
   // Step 3 - Guest Signature
   const [signature, setSignature] = useState("");
@@ -90,6 +92,7 @@ export default function VIPContract() {
     if (field === "id_front") setIdFrontUrl(file_url);
     else if (field === "id_back") setIdBackUrl(file_url);
     else if (field === "thumbprint") setThumbprintUrl(file_url);
+    else if (field === "guest_photo") setGuestPhotoUrl(file_url);
     setUploading(prev => ({ ...prev, [field]: false }));
   };
 
@@ -510,7 +513,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
 
   const steps = ["Identity", "Biometrics", "Contract", "Guest Sign", "Staff Sign"];
   const canProceedStep0 = guestName.trim() && dateOfBirth && idNumber.trim() && cardLast4.length === 4;
-  const canProceedStep1 = idFrontUrl && thumbprintUrl;
+  const canProceedStep1 = idFrontUrl && thumbprintUrl && guestPhotoUrl;
   const canProceedStep3 = signature.trim() && signature.toLowerCase() === guestName.toLowerCase() && initialsAcknowledged;
   const canFinalizeStep4 = hostName.trim() && hostSignature.trim() && hostSignature.toLowerCase() === hostName.toLowerCase() && managerName.trim() && managerSignature.trim() && managerSignature.toLowerCase() === managerName.toLowerCase();
 
