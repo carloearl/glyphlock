@@ -123,6 +123,7 @@ import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
 import ContractSearch from './pages/ContractSearch';
+import ContractArchive from './pages/ContractArchive';
 import __Layout from './Layout.jsx';
 
 
@@ -203,6 +204,7 @@ export const PAGES = {
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
     "ContractSearch": ContractSearch,
+    "ContractArchive": ContractArchive,
 }
 
 export const pagesConfig = {

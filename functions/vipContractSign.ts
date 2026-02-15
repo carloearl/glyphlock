@@ -111,6 +111,7 @@ Deno.serve(async (req) => {
       government_id_state: government_id_state || undefined,
       id_photo_url,
       id_photo_back_url: id_photo_back_url || undefined,
+      profile_photo_url: guest_photo_url || undefined,
       card_last_four,
       card_type: card_type || "Visa",
       payment_method_on_file: true,
