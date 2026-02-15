@@ -116,18 +116,23 @@ Deno.serve(async (req) => {
     const bytes = audioBuffer.byteLength;
 
     console.log(`GLYPH VOICE BACKEND: OpenAI response received | bytes=${bytes}`);
-    console.log(`GLYPH VOICE BACKEND: returning audio | success=true bytes=${bytes}`);
 
-    return new Response(audioBuffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': bytes.toString(),
-        'Cache-Control': 'public, max-age=3600',
-        'X-Voice-Provider': 'openai',
-        'X-Voice-Used': openaiVoice,
-        'X-Audio-Bytes': bytes.toString()
-      }
+    // Encode as base64 JSON to avoid binary corruption through SDK
+    const uint8 = new Uint8Array(audioBuffer);
+    let binary = '';
+    for (let i = 0; i < uint8.length; i++) {
+      binary += String.fromCharCode(uint8[i]);
+    }
+    const base64Audio = btoa(binary);
+
+    console.log(`GLYPH VOICE BACKEND: returning base64 audio | success=true bytes=${bytes} base64Length=${base64Audio.length}`);
+
+    return Response.json({
+      success: true,
+      audio_base64: base64Audio,
+      content_type: 'audio/mpeg',
+      bytes: bytes,
+      voice: openaiVoice
     });
 
   } catch (error) {
