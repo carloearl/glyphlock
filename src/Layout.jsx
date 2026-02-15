@@ -174,8 +174,8 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </main>
 
-        {/* Unified Sidebar - GlyphBot Jr + Help Guide */}
-        <UnifiedSidebar
+        {/* Unified Sidebar - GlyphBot Jr + Help Guide (hidden on GlyphBot page) */}
+        {currentPageName !== 'GlyphBot' && <UnifiedSidebar
           helpTitle="Quick Help Guide"
           helpSections={[
             {
@@ -369,9 +369,9 @@ export default function Layout({ children, currentPageName }) {
               ]
             }
           ]}
-          />
+          />}
 
-        {/* Footer - always rendered */}
+          {/* Footer - always rendered */}
         <footer className="relative overflow-hidden" style={{ zIndex: 100, pointerEvents: 'auto', isolation: 'isolate' }}>
           <Footer />
         </footer>
