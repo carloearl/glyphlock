@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Shield, DollarSign, ShoppingCart, TrendingUp, 
   Users, LogOut, UserCheck, DoorOpen, FileText,
-  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3
+  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,6 +23,7 @@ import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import LiveFloorView from "../components/nups/LiveFloorView.jsx";
 import OwnerAnalytics from "../components/nups/OwnerAnalytics.jsx";
+import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -186,7 +187,7 @@ export default function NUPSOwner() {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-5 md:grid-cols-9 gap-1 p-1.5 w-full">
+          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-5 md:grid-cols-10 gap-1 p-1.5 w-full">
             <TabsTrigger value="analytics" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
               <BarChart3 className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Analytics</span>
@@ -223,6 +224,10 @@ export default function NUPSOwner() {
               <FileText className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Z-Report</span>
             </TabsTrigger>
+            <TabsTrigger value="press" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Banknote className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Press</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics">
@@ -254,6 +259,9 @@ export default function NUPSOwner() {
           </TabsContent>
           <TabsContent value="zreport">
             <ZReportGenerator user={user} />
+          </TabsContent>
+          <TabsContent value="press">
+            <ClubCurrencyPressView />
           </TabsContent>
         </Tabs>
       </div>

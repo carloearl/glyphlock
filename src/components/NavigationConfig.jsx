@@ -38,6 +38,7 @@ export const NAV_SECTIONS = [
       { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
       { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
       { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" },
+      { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
       { label: "SDK Documentation", page: "SDKDocs", visibility: "public" },
       { label: "Site Intelligence", page: "Sie", visibility: "admin" }
     ]
