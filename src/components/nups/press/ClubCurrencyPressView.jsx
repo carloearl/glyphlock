@@ -14,7 +14,7 @@ import ControlPanel from "@/components/nups/press/ControlPanel";
 import VoucherCanvas from "@/components/nups/press/VoucherCanvas";
 import ContractTerminal from "@/components/nups/press/ContractTerminal";
 import ArchiveSearch from "@/components/nups/press/ArchiveSearch";
-import AIPanel from "@/components/nups/press/AIPanel";
+import AIAssistant from "@/components/nups/press/AIAssistant";
 
 import { DEFAULT_PRESS_CONFIG } from "@/components/nups/press/types";
 import {
@@ -119,7 +119,7 @@ export default function ClubCurrencyPressView() {
           <TabsTrigger value="ai" className="min-h-[44px] flex items-center gap-1.5">
             <Sparkles className="w-4 h-4" />
             <span className="text-xs">AI</span>
-            <Badge className="text-[8px] bg-purple-500/30 text-purple-400 ml-1">LIVE</Badge>
+            <Badge className="text-[8px] bg-purple-500/30 text-purple-300 ml-1">LIVE</Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -169,7 +169,18 @@ export default function ClubCurrencyPressView() {
 
         {/* AI TAB */}
         <TabsContent value="ai" className="flex-1 mt-4">
-          <AIPanel config={config} />
+          <div className="max-w-2xl mx-auto">
+            <AIAssistant
+              config={config}
+              onConfigSuggestion={(suggestions) => {
+                const updated = { ...config };
+                if (suggestions.serialPrefix) updated.serialPrefix = suggestions.serialPrefix;
+                if (suggestions.billWidthInches) updated.billWidthInches = suggestions.billWidthInches;
+                if (suggestions.billHeightInches) updated.billHeightInches = suggestions.billHeightInches;
+                setConfig(updated);
+              }}
+            />
+          </div>
         </TabsContent>
       </Tabs>
 
