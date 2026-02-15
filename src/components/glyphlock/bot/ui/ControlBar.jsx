@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, Wifi, FileSearch, Braces, Layout, Trash2, Settings2, ChevronDown, Bot } from 'lucide-react';
-import AgentMode from './AgentMode';
+import { Volume2, Wifi, FileSearch, Braces, Layout, Trash2, Settings2, ChevronDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 // Using native HTML inputs for reliability
@@ -63,7 +62,6 @@ export default function ControlBar({
   emotionPresets = []
 }) {
   const [showVoiceControls, setShowVoiceControls] = useState(false);
-  const [showAgent, setShowAgent] = useState(false);
 
   const handleVoiceChange = (key, value) => {
     console.log('[ControlBar] Voice setting changed:', key, '=', value);
@@ -386,15 +384,6 @@ export default function ControlBar({
           />
           
           <button
-            onClick={() => setShowAgent(true)}
-            style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '44px' }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-wide bg-gradient-to-r from-cyan-950/60 to-blue-950/60 border-2 border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-all duration-300"
-          >
-            <Bot className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Agent</span>
-          </button>
-
-          <button
             onClick={onClear}
             style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '44px' }}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-wide bg-rose-950/40 border-2 border-rose-500/50 text-rose-300 hover:bg-rose-500/30 hover:border-rose-400 hover:shadow-[0_0_20px_rgba(244,63,94,0.5)] transition-all duration-300"
@@ -405,8 +394,6 @@ export default function ControlBar({
         </div>
       </div>
 
-      {/* Agent Mode Modal */}
-      {showAgent && <AgentMode onClose={() => setShowAgent(false)} />}
     </div>
   );
 }
