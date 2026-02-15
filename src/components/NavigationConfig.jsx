@@ -33,14 +33,22 @@ export const NAV_SECTIONS = [
       { label: "Image Processing", page: "ImageLab", visibility: "public" },
       { label: "GlyphBot Intelligence", page: "GlyphBot", visibility: "public" },
       { label: "Site Builder", page: "SiteBuilder", visibility: "admin" },
-      { label: "NUPS Transaction System", page: "NUPSLogin", visibility: "public" },
       { label: "Security Operations", page: "SecurityOperationsCenter", visibility: "public" },
-      { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
       { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
-      { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" },
-      { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
       { label: "SDK Documentation", page: "SDKDocs", visibility: "public" },
       { label: "Site Intelligence", page: "Sie", visibility: "admin" }
+    ]
+  },
+  {
+    label: "GlyphLock Financial",
+    visibility: "public",
+    items: [
+      { label: "Financial Overview", page: "GlyphLockFinancial", visibility: "public" },
+      { label: "N.U.P.S. POS System", page: "NUPSLogin", visibility: "public" },
+      { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
+      { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
+      { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" },
+      { label: "Contract Archive", page: "ContractArchive", visibility: "public" }
     ]
   },
   {
@@ -88,13 +96,17 @@ export const FOOTER_LINKS = {
     { label: "QR Verification", page: "Qr", visibility: "public" },
     { label: "Image Processing", page: "ImageLab", visibility: "public" },
     { label: "GlyphBot Intelligence", page: "GlyphBot", visibility: "public" },
-    { label: "NUPS Transaction System", page: "NUPSLogin", visibility: "public" },
-    { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Operations", page: "SecurityOperationsCenter", visibility: "public" },
     { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
-    { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" },
     { label: "All Security Tools", page: "SecurityTools", visibility: "public" },
     { label: "SDK Documentation", page: "SDKDocs", visibility: "public" }
+  ],
+  financial: [
+    { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
+    { label: "N.U.P.S. POS", page: "NUPSLogin", visibility: "public" },
+    { label: "Blockchain Suite", page: "Blockchain", visibility: "public" },
+    { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
+    { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" }
   ],
   protocols: [
     { label: "Master Covenant", page: "GovernanceHub", visibility: "public" },
