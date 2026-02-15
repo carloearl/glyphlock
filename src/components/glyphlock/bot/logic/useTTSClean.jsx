@@ -57,9 +57,8 @@ export default function useTTSClean(defaultSettings = {}) {
       return false;
     }
 
-    // Clean markdown and emojis
+    // Clean markdown only (backend also cleans emojis, so only strip markdown structure here)
     const cleanText = text
-      .replace(/[#*`🦕💠🦖🌟✨🔒⚡️💡🛡️•]/g, '')
       .replace(/```[\s\S]*?```/g, '')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .replace(/\*\*([^*]+)\*\*/g, '$1')
@@ -73,8 +72,8 @@ export default function useTTSClean(defaultSettings = {}) {
       return false;
     }
 
-    // Merge settings
-    const finalSettings = { ...settings, ...customSettings };
+    // Merge: customSettings (per-call) > defaultSettings passed at hook init > internal settings
+    const finalSettings = { ...settings, ...defaultSettings, ...customSettings };
     // PHASE 3: Resolve voiceProfile → voice (voiceProfile is the key used by ControlBar/GlyphBot.jsx)
     const voice = finalSettings.voiceProfile || finalSettings.voice || 'nova';
     const speed = Math.max(0.25, Math.min(4.0, finalSettings.speed || 1.0));
