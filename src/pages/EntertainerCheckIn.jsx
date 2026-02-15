@@ -25,7 +25,7 @@ export default function EntertainerCheckIn() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
     } catch {
-      base44.auth.redirectToLogin('/entertainer-checkin');
+      base44.auth.redirectToLogin(window.location.href);
     }
   };
 
