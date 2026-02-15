@@ -57,6 +57,7 @@ import CaseStudies from './pages/CaseStudies';
 import CaseStudyAIBinding from './pages/CaseStudyAIBinding';
 import CaseStudyCovenantVictory from './pages/CaseStudyCovenantVictory';
 import CaseStudyTruthStrike from './pages/CaseStudyTruthStrike';
+import ClubCurrencyPress from './pages/ClubCurrencyPress';
 import CommandCenter from './pages/CommandCenter';
 import Consultation from './pages/Consultation';
 import ConsultationSuccess from './pages/ConsultationSuccess';
@@ -70,6 +71,7 @@ import FAQ from './pages/FAQ';
 import FullExport from './pages/FullExport';
 import GlyphBot from './pages/GlyphBot';
 import GlyphBotJunior from './pages/GlyphBotJunior';
+import GlyphBotMixer from './pages/GlyphBotMixer';
 import GlyphLockPlayground from './pages/GlyphLockPlayground';
 import GovernanceHub from './pages/GovernanceHub';
 import Home from './pages/Home';
@@ -120,8 +122,6 @@ import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
-import GlyphBotMixer from './pages/GlyphBotMixer';
-import ClubCurrencyPress from './pages/ClubCurrencyPress';
 import __Layout from './Layout.jsx';
 
 
@@ -136,6 +136,7 @@ export const PAGES = {
     "CaseStudyAIBinding": CaseStudyAIBinding,
     "CaseStudyCovenantVictory": CaseStudyCovenantVictory,
     "CaseStudyTruthStrike": CaseStudyTruthStrike,
+    "ClubCurrencyPress": ClubCurrencyPress,
     "CommandCenter": CommandCenter,
     "Consultation": Consultation,
     "ConsultationSuccess": ConsultationSuccess,
@@ -149,6 +150,7 @@ export const PAGES = {
     "FullExport": FullExport,
     "GlyphBot": GlyphBot,
     "GlyphBotJunior": GlyphBotJunior,
+    "GlyphBotMixer": GlyphBotMixer,
     "GlyphLockPlayground": GlyphLockPlayground,
     "GovernanceHub": GovernanceHub,
     "Home": Home,
@@ -199,8 +201,6 @@ export const PAGES = {
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
-    "GlyphBotMixer": GlyphBotMixer,
-    "ClubCurrencyPress": ClubCurrencyPress,
 }
 
 export const pagesConfig = {

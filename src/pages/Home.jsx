@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import HeroSection from '@/components/home/HeroSection';
-import HeroContent from '@/components/home/HeroContent';
+import IndependenceDayCTA from '@/components/home/IndependenceDayCTA';
 import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
 import ServicesGrid from '@/components/home/ServicesGrid';
 import CTASection from '@/components/home/CTASection';
@@ -170,9 +170,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Value Proposition */}
+        {/* Independence Day Protocol Launch */}
         <ScrollSection className="container-responsive">
-          <HeroContent />
+          <IndependenceDayCTA />
         </ScrollSection>
 
         {/* Dream Team CTA */}
