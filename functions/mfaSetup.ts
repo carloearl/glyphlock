@@ -1,9 +1,10 @@
 /**
  * POST /api/mfa/setup
  * Initialize MFA setup - generate TOTP secret and QR code
+ * SELF-CONTAINED: No local imports (Deno deploy limitation)
  */
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import speakeasy from 'npm:speakeasy@2.0.0';
 import QRCode from 'npm:qrcode@1.5.3';
 
@@ -18,9 +19,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Check if MFA is already enabled
-    const userEntity = await base44.entities.User.filter({ email: user.email });
-    const userData = userEntity[0] || {};
+    // Use service role to read User entity (User entity has RLS restrictions)
+    const userEntities = await base44.asServiceRole.entities.User.filter({ email: user.email });
+    const userData = userEntities[0] || {};
     
     if (userData.mfaEnabled) {
       return Response.json({ 
@@ -35,7 +36,7 @@ Deno.serve(async (req) => {
       length: 32
     });
     
-    // Generate QR code
+    // Generate QR code as data URL (scannable by Google Authenticator, Authy, etc.)
     const qrCodeDataUrl = await QRCode.toDataURL(secret.otpauth_url, {
       errorCorrectionLevel: 'H',
       type: 'image/png',
@@ -45,6 +46,7 @@ Deno.serve(async (req) => {
     
     return Response.json({
       qrCodeDataUrl,
+      otpauthUrl: secret.otpauth_url,
       manualKey: secret.base32,
       tempSecret: secret.base32
     });

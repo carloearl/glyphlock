@@ -1,9 +1,10 @@
 /**
  * POST /api/mfa/revoke-trusted-device
  * Revoke a trusted device
+ * SELF-CONTAINED: No local imports (Deno deploy limitation)
  */
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
@@ -21,26 +22,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Device ID required' }, { status: 400 });
     }
     
-    const userEntities = await base44.entities.User.filter({ email: user.email });
+    const userEntities = await base44.asServiceRole.entities.User.filter({ email: user.email });
     const userData = userEntities[0];
     
     if (!userData || !userData.trustedDevices) {
       return Response.json({ error: 'No trusted devices found' }, { status: 404 });
     }
     
-    // Remove device matching the prefix
     const updatedDevices = userData.trustedDevices.filter(
       d => !d.deviceId.startsWith(deviceIdPrefix)
     );
     
-    await base44.entities.User.update(userData.id, {
+    await base44.asServiceRole.entities.User.update(userData.id, {
       trustedDevices: updatedDevices
     });
     
-    return Response.json({ 
-      success: true,
-      message: 'Device trust revoked successfully'
-    });
+    return Response.json({ success: true, message: 'Device trust revoked successfully' });
     
   } catch (error) {
     console.error('[MFA Revoke Trusted Device]', error);

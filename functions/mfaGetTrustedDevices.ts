@@ -1,9 +1,10 @@
 /**
- * GET /api/mfa/trusted-devices
+ * POST /api/mfa/trusted-devices
  * Get list of user's trusted devices
+ * SELF-CONTAINED: No local imports (Deno deploy limitation)
  */
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
@@ -14,14 +15,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const userEntities = await base44.entities.User.filter({ email: user.email });
+    const userEntities = await base44.asServiceRole.entities.User.filter({ email: user.email });
     const userData = userEntities[0];
     
     if (!userData) {
       return Response.json({ trustedDevices: [] });
     }
     
-    // Filter out expired devices and clean sensitive data
     const now = new Date();
     const activeTrustedDevices = (userData.trustedDevices || [])
       .filter(d => new Date(d.expiresAt) > now)
@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
         trustGrantedAt: d.trustGrantedAt,
         expiresAt: d.expiresAt,
         lastUsedAt: d.lastUsedAt,
-        deviceId: d.deviceId.slice(0, 8) + '...' // Show partial ID for identification
+        deviceId: d.deviceId.slice(0, 8) + '...'
       }));
     
     return Response.json({ trustedDevices: activeTrustedDevices });
