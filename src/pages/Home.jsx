@@ -161,16 +161,92 @@ export default function Home() {
         
         {/* Bootstrap Quote + Hero Section */}
         <section className="w-full">
-          <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4">
-            <blockquote className="max-w-3xl mx-auto">
-              <p className="text-sm sm:text-base md:text-lg italic text-white/70 leading-relaxed">
+          <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
+            {/* Ambient glow orbs */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[200px] rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse, rgba(87,61,255,0.25) 0%, rgba(59,130,246,0.12) 40%, transparent 70%)',
+                filter: 'blur(40px)',
+                animation: 'quoteGlow 4s ease-in-out infinite',
+              }}
+            />
+            <div className="absolute top-1/2 left-[30%] -translate-y-1/2 w-[250px] h-[120px] rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse, rgba(168,60,255,0.2) 0%, transparent 70%)',
+                filter: 'blur(50px)',
+                animation: 'quoteGlow 5s ease-in-out 1s infinite',
+              }}
+            />
+            <div className="absolute top-1/2 right-[25%] -translate-y-1/2 w-[200px] h-[100px] rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse, rgba(6,182,212,0.18) 0%, transparent 70%)',
+                filter: 'blur(45px)',
+                animation: 'quoteGlow 6s ease-in-out 2s infinite',
+              }}
+            />
+
+            {/* Horizontal light beam */}
+            <div className="absolute top-1/2 left-0 right-0 h-[1px] pointer-events-none"
+              style={{
+                background: 'linear-gradient(90deg, transparent 5%, rgba(87,61,255,0.4) 30%, rgba(6,182,212,0.5) 50%, rgba(168,60,255,0.4) 70%, transparent 95%)',
+                boxShadow: '0 0 20px rgba(87,61,255,0.4), 0 0 40px rgba(6,182,212,0.2)',
+                animation: 'beamPulse 3s ease-in-out infinite',
+              }}
+            />
+
+            <blockquote className="max-w-3xl mx-auto relative z-10">
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: 'easeOut' }}
+                className="text-sm sm:text-base md:text-lg italic leading-relaxed"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(147,197,253,0.9) 50%, rgba(255,255,255,0.75) 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow: 'none',
+                  filter: 'drop-shadow(0 0 12px rgba(87,61,255,0.3))',
+                }}
+              >
                 "We didn't wait for permission. We didn't ask for funding. We built it from nothing —
-                <span className="text-[#5b9fd4] font-semibold not-italic"> and we own every line.</span>"
-              </p>
-              <footer className="mt-3 text-[10px] sm:text-xs uppercase tracking-[3px] text-white/30 font-semibold">
+                <span style={{
+                  background: 'linear-gradient(135deg, #06b6d4 0%, #818cf8 50%, #a78bfa 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  fontWeight: 700,
+                  fontStyle: 'normal',
+                  filter: 'drop-shadow(0 0 16px rgba(6,182,212,0.5))',
+                }}> and we own every line.</span>"
+              </motion.p>
+              <motion.footer 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.2, delay: 0.4 }}
+                className="mt-3 text-[10px] sm:text-xs uppercase tracking-[3px] font-semibold"
+                style={{
+                  background: 'linear-gradient(90deg, rgba(87,61,255,0.6), rgba(6,182,212,0.5), rgba(168,60,255,0.5))',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 0 8px rgba(87,61,255,0.3))',
+                }}
+              >
                 — GlyphLock Founding Protocol · Bootstrapped Since Day One
-              </footer>
+              </motion.footer>
             </blockquote>
+
+            <style>{`
+              @keyframes quoteGlow {
+                0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+                50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+              }
+              @keyframes beamPulse {
+                0%, 100% { opacity: 0.3; }
+                50% { opacity: 0.8; }
+              }
+            `}</style>
           </div>
 
           <ScrollSection>
