@@ -159,6 +159,19 @@ export default function Home() {
 
       <main className="w-full relative" style={{ background: 'transparent' }}>
         
+        {/* Bootstrap Quote */}
+        <div className="w-full text-center py-6 sm:py-8 px-4">
+          <blockquote className="max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg italic text-white/70 leading-relaxed">
+              "We didn't wait for permission. We didn't ask for funding. We built it from nothing —
+              <span className="text-[#5b9fd4] font-semibold not-italic"> and we own every line.</span>"
+            </p>
+            <footer className="mt-3 text-[10px] sm:text-xs uppercase tracking-[3px] text-white/30 font-semibold">
+              — GlyphLock Founding Protocol · Bootstrapped Since Day One
+            </footer>
+          </blockquote>
+        </div>
+
         {/* Hero Section */}
         <section className="w-full">
           <ScrollSection>
