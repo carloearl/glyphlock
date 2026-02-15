@@ -646,68 +646,193 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
           </Card>
         )}
 
-        {/* ===================== STEP 3: SIGN ===================== */}
+        {/* ===================== STEP 3: GUEST SIGN ===================== */}
         {step === 3 && (
-          <form onSubmit={handleSign}>
-            <Card className="bg-gray-900/60 border-green-500/30">
+          <Card className="bg-gray-900/60 border-green-500/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Hash className="w-5 h-5 text-green-400" />
+                Guest Signature
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div 
+                className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3 cursor-pointer"
+                onClick={() => setInitialsAcknowledged(!initialsAcknowledged)}
+              >
+                <div className={`w-5 h-5 mt-0.5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                  initialsAcknowledged ? 'bg-green-500 border-green-500' : 'border-gray-600'
+                }`}>
+                  {initialsAcknowledged && <CheckCircle2 className="w-3 h-3 text-white" />}
+                </div>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  I, <span className="text-white font-bold">{guestName}</span>, hereby acknowledge that I have 
+                  read and fully understood all ten (10) sections of the VIP Private Entertainment Agreement 
+                  (Serial: <span className="text-purple-400 font-mono">{serialNumber}</span>). I agree to all 
+                  terms and conditions, including biometric data collection (Section 1), payment authorization 
+                  (Section 3), code of conduct (Section 4), and data retention (Section 7). I certify I am 
+                  at least 21 years of age, am of sound mind, and execute this agreement voluntarily.
+                </p>
+              </div>
+
+              <div>
+                <Label>Guest — Type your full legal name to sign *</Label>
+                <Input
+                  value={signature}
+                  onChange={e => setSignature(e.target.value)}
+                  placeholder={guestName}
+                  className="text-lg text-center font-bold tracking-wide"
+                  style={{ fontFamily: 'cursive, serif' }}
+                />
+                {signature.trim() && signature.toLowerCase() !== guestName.toLowerCase() && (
+                  <p className="text-xs text-red-400 mt-1">Signature must exactly match: "{guestName}"</p>
+                )}
+              </div>
+
+              <div className="text-xs text-gray-500 space-y-1 bg-gray-800/50 rounded-lg p-3">
+                <p className="font-bold text-gray-300 mb-2">By signing, you irrevocably acknowledge:</p>
+                <p>✓ Thumbprint captured & hashed (SHA-256)</p>
+                <p>✓ Government ID ({idType}) photographed & archived</p>
+                <p>✓ Card ({cardType} ending {cardLast4}) authorized per Section 3</p>
+                <p>✓ IP address & device fingerprint recorded</p>
+                <p>✓ Legally binding under E-SIGN Act (15 U.S.C. § 7001)</p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setStep(2)} className="flex-1 border-gray-700">← Back</Button>
+                <Button onClick={() => setStep(4)} disabled={!canProceedStep3}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-black font-bold h-12">
+                  Guest Signed — Next: Staff Signatures →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ===================== STEP 4: HOST + MANAGER SIGN ===================== */}
+        {step === 4 && (
+          <form onSubmit={handleFinalSubmit}>
+            <Card className="bg-gray-900/60 border-purple-500/30">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Hash className="w-5 h-5 text-green-400" />
-                  Execute Agreement — Digital Signature
+                  <Shield className="w-5 h-5 text-purple-400" />
+                  Host & Manager Signatures Required
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Acknowledgment checkbox */}
-                <div 
-                  className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3 cursor-pointer"
-                  onClick={() => setInitialsAcknowledged(!initialsAcknowledged)}
-                >
-                  <div className={`w-5 h-5 mt-0.5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                    initialsAcknowledged ? 'bg-green-500 border-green-500' : 'border-gray-600'
-                  }`}>
-                    {initialsAcknowledged && <CheckCircle2 className="w-3 h-3 text-white" />}
-                  </div>
-                  <p className="text-xs text-gray-300 leading-relaxed">
-                    I, <span className="text-white font-bold">{guestName}</span>, hereby acknowledge that I have 
-                    read and fully understood all ten (10) sections of the VIP Private Entertainment Agreement 
-                    (Serial: <span className="text-purple-400 font-mono">{serialNumber}</span>). I agree to all 
-                    terms and conditions, including biometric data collection (Section 1), payment authorization 
-                    (Section 3), code of conduct (Section 4), and data retention (Section 7). I certify I am 
-                    at least 21 years of age, am of sound mind, and execute this agreement voluntarily.
-                  </p>
+              <CardContent className="space-y-5">
+                <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 text-xs text-purple-300">
+                  <p className="font-bold">⚠️ STAFF ONLY — Hand the device to each staff member to sign below.</p>
+                  <p>Both the VIP Host and a Manager on Duty must sign before this contract can be finalized and printed.</p>
                 </div>
 
-                <div>
-                  <Label>Type your full legal name exactly as it appears above *</Label>
-                  <Input
-                    value={signature}
-                    onChange={e => setSignature(e.target.value)}
-                    placeholder={guestName}
-                    className="text-lg text-center font-bold tracking-wide"
-                    style={{ fontFamily: 'cursive, serif' }}
-                    required
-                  />
-                  {signature.trim() && signature.toLowerCase() !== guestName.toLowerCase() && (
-                    <p className="text-xs text-red-400 mt-1">Signature must exactly match: "{guestName}"</p>
+                {/* Guest signature confirmation */}
+                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 space-y-1">
+                  <div className="flex items-center gap-2 text-green-400 text-sm font-bold">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Guest Signature Recorded
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>Guest:</span>
+                    <span className="text-white font-bold" style={{ fontFamily: 'cursive, serif' }}>{signature}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>Biometrics:</span>
+                    <span className="text-green-400">✓ Thumbprint + ID + Card Verified</span>
+                  </div>
+                </div>
+
+                {/* Host Signature */}
+                <div className="border border-cyan-500/30 rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-bold text-cyan-400">VIP Host / Entertainer Signature</h4>
+                  <div>
+                    <Label>Host Full Name *</Label>
+                    <Input
+                      value={hostName}
+                      onChange={e => setHostName(e.target.value)}
+                      placeholder="Host legal name or stage name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label>Host Signature — Type name to sign *</Label>
+                    <Input
+                      value={hostSignature}
+                      onChange={e => setHostSignature(e.target.value)}
+                      placeholder={hostName || "Type name exactly"}
+                      className="text-lg text-center font-bold tracking-wide"
+                      style={{ fontFamily: 'cursive, serif' }}
+                      required
+                    />
+                    {hostSignature.trim() && hostName.trim() && hostSignature.toLowerCase() !== hostName.toLowerCase() && (
+                      <p className="text-xs text-red-400 mt-1">Must match: "{hostName}"</p>
+                    )}
+                  </div>
+                  {hostSignature.trim() && hostName.trim() && hostSignature.toLowerCase() === hostName.toLowerCase() && (
+                    <div className="flex items-center gap-2 text-green-400 text-xs">
+                      <CheckCircle2 className="w-3 h-3" /> Host signature verified
+                    </div>
                   )}
                 </div>
 
-                <div className="text-xs text-gray-500 space-y-1 bg-gray-800/50 rounded-lg p-3">
-                  <p className="font-bold text-gray-300 mb-2">By signing below, you irrevocably acknowledge:</p>
-                  <p>✓ Your right thumbprint has been captured and cryptographically hashed (SHA-256)</p>
-                  <p>✓ Your government ID ({idType}) has been photographed and archived</p>
-                  <p>✓ Your payment card ({cardType} ending {cardLast4}) is authorized per Section 3</p>
-                  <p>✓ Your IP address and device fingerprint will be recorded with this signature</p>
-                  <p>✓ Contract serial: <span className="text-purple-400 font-mono">{serialNumber}</span></p>
-                  <p>✓ This digital signature is legally binding under E-SIGN Act (15 U.S.C. § 7001)</p>
-                  <p>✓ You consent to biometric data retention per Section 7</p>
+                {/* Manager Signature */}
+                <div className="border border-amber-500/30 rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-bold text-amber-400">Manager on Duty Signature</h4>
+                  <div>
+                    <Label>Manager Full Name *</Label>
+                    <Input
+                      value={managerName}
+                      onChange={e => setManagerName(e.target.value)}
+                      placeholder="Manager legal name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label>Manager Signature — Type name to sign *</Label>
+                    <Input
+                      value={managerSignature}
+                      onChange={e => setManagerSignature(e.target.value)}
+                      placeholder={managerName || "Type name exactly"}
+                      className="text-lg text-center font-bold tracking-wide"
+                      style={{ fontFamily: 'cursive, serif' }}
+                      required
+                    />
+                    {managerSignature.trim() && managerName.trim() && managerSignature.toLowerCase() !== managerName.toLowerCase() && (
+                      <p className="text-xs text-red-400 mt-1">Must match: "{managerName}"</p>
+                    )}
+                  </div>
+                  {managerSignature.trim() && managerName.trim() && managerSignature.toLowerCase() === managerName.toLowerCase() && (
+                    <div className="flex items-center gap-2 text-green-400 text-xs">
+                      <CheckCircle2 className="w-3 h-3" /> Manager signature verified
+                    </div>
+                  )}
+                </div>
+
+                {/* Signature summary */}
+                <div className="bg-gray-800/50 rounded-lg p-3 text-xs space-y-1">
+                  <div className="text-sm font-bold text-white mb-2">Signature Status:</div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Guest ({guestName}):</span>
+                    <span className="text-green-400 font-bold">✓ Signed</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Host ({hostName || '—'}):</span>
+                    <span className={hostSignature.trim() && hostName.trim() && hostSignature.toLowerCase() === hostName.toLowerCase() ? 'text-green-400 font-bold' : 'text-red-400'}>
+                      {hostSignature.trim() && hostName.trim() && hostSignature.toLowerCase() === hostName.toLowerCase() ? '✓ Signed' : '✗ Pending'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Manager ({managerName || '—'}):</span>
+                    <span className={managerSignature.trim() && managerName.trim() && managerSignature.toLowerCase() === managerName.toLowerCase() ? 'text-green-400 font-bold' : 'text-red-400'}>
+                      {managerSignature.trim() && managerName.trim() && managerSignature.toLowerCase() === managerName.toLowerCase() ? '✓ Signed' : '✗ Pending'}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex gap-3">
-                  <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1 border-gray-700">← Back</Button>
-                  <Button type="submit" disabled={loading || !canProceedStep3}
-                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-black font-bold h-12">
-                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying & Recording...</> : "Sign & Execute Agreement"}
+                  <Button type="button" variant="outline" onClick={() => setStep(3)} className="flex-1 border-gray-700">← Back</Button>
+                  <Button type="submit" disabled={loading || !canFinalizeStep4}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold h-12">
+                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Finalizing...</> : "Finalize & Submit All Signatures"}
                   </Button>
                 </div>
               </CardContent>
