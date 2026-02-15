@@ -33,14 +33,19 @@ Deno.serve(async (req) => {
       vip_sessions: 0,
     });
 
-    // Update entertainer contract status
-    await base44.asServiceRole.entities.Entertainer.update(entertainer_id, {
-      contract_signed: true,
-      contract_signature: signature,
-      contract_signed_date: new Date().toISOString(),
-      contract_ip_address: clientIP,
-      status: "active"
-    });
+    // Update entertainer contract status (skip if entertainer_id is a user ID, not an Entertainer record)
+    try {
+      await base44.asServiceRole.entities.Entertainer.update(entertainer_id, {
+        contract_signed: true,
+        contract_signature: signature,
+        contract_signed_date: new Date().toISOString(),
+        contract_ip_address: clientIP,
+        status: "active"
+      });
+    } catch (updateErr) {
+      // Entertainer record may not exist yet if user is self-checking in
+      console.warn('Entertainer update skipped:', updateErr.message);
+    }
 
     // Log signature for non-repudiation via SystemAuditLog
     const sigHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(signature))
