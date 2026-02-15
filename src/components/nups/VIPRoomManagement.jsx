@@ -10,11 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { DoorOpen, Video, Clock, DollarSign, User, UserCheck } from "lucide-react";
 import VIPSessionTimer from "./VIPSessionTimer";
+import VIPContractFlow from "./VIPContractFlow";
 
 export default function VIPRoomManagement() {
   const queryClient = useQueryClient();
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [contractStep, setContractStep] = useState("form"); // form | contract
   const [sessionForm, setSessionForm] = useState({
     entertainer_id: "",
     guest_name: "",
