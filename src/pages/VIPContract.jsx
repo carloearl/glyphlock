@@ -13,7 +13,6 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
-// Step indicator component
 function StepIndicator({ current, steps }) {
   return (
     <div className="flex items-center justify-center gap-2 mb-8">
@@ -35,7 +34,7 @@ function StepIndicator({ current, steps }) {
 }
 
 export default function VIPContract() {
-  const [step, setStep] = useState(0); // 0=identity, 1=biometrics, 2=contract, 3=sign, 4=done
+  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -62,9 +61,10 @@ export default function VIPContract() {
 
   // Step 3 - Signature
   const [signature, setSignature] = useState("");
+  const [initialsAcknowledged, setInitialsAcknowledged] = useState(false);
 
-  // Serial number auto-generated
   const [serialNumber] = useState(`VIP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`);
+  const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -86,39 +86,202 @@ export default function VIPContract() {
     setUploading(prev => ({ ...prev, [field]: false }));
   };
 
-  const contractText = `VIP SHOW CONTRACT — LEGALLY BINDING AGREEMENT
-Serial Number: ${serialNumber}
+  const contractText = `VIP PRIVATE ENTERTAINMENT AGREEMENT
+CONTRACT SERIAL: ${serialNumber}
+DATE: ${todayFormatted}
 
-IDENTIFICATION & BIOMETRIC VERIFICATION:
-This contract includes biometric data (thumbprint scan), government-issued 
-identification, and payment card verification. All biometric data is 
-cryptographically hashed and stored securely per BIPA/GDPR compliance.
+THIS VIP PRIVATE ENTERTAINMENT AGREEMENT ("Agreement") is entered into 
+as of the date set forth above, between the ESTABLISHMENT ("Venue") and 
+the undersigned PATRON ("Guest"), identified by the information and 
+biometric verification provided herein.
 
-TERMS AND CONDITIONS:
+GUEST IDENTIFICATION:
+Name: ${guestName || "[PENDING]"}
+Date of Birth: ${dateOfBirth || "[PENDING]"}
+Government ID: ${idType} — ${idNumber || "[PENDING]"} (${idState || "N/A"})
+Card on File: ${cardType} ending in ${cardLast4 || "XXXX"}
 
-1. CONSENT TO BIOMETRIC CAPTURE: By signing, you consent to the capture, 
-   storage, and verification of your thumbprint and government ID for 
-   identity verification purposes. Data retained for 3 years per state law.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-2. PAYMENT: Full payment must be settled before departing the premises. 
-   Card on file (ending ${cardLast4 || "XXXX"}) may be charged for any 
-   outstanding balance.
+SECTION 1 — CONSENT TO BIOMETRIC IDENTIFICATION & VERIFICATION
 
-3. NO RECORDING: Recording, photography, or live-streaming of any kind 
-   is strictly prohibited. Violators will be removed and may face legal action.
+1.1  By executing this Agreement, Guest voluntarily consents to the 
+     capture, digital storage, and cryptographic hashing of the 
+     following biometric identifiers:
+     (a) Thumbprint scan (right thumb)
+     (b) Photograph of government-issued identification (front and back)
+     (c) Digital signature
 
-4. CONDUCT: All venue rules and staff directives must be followed. 
-   Management reserves the right to terminate services without refund 
-   for policy violations.
+1.2  All biometric data shall be processed using SHA-256 cryptographic 
+     hashing and stored in encrypted form. Raw biometric images are 
+     retained for verification purposes only and are subject to the 
+     retention policy in Section 7.
 
-5. LIABILITY: Guest assumes all responsibility for personal belongings. 
-   The venue is not liable for loss, theft, or damage.
+1.3  Guest acknowledges this biometric collection is conducted in 
+     compliance with applicable state biometric privacy laws, including 
+     but not limited to BIPA (740 ILCS 14), CCPA (Cal. Civ. Code 
+     § 1798.100), and any analogous state statutes.
 
-6. ACKNOWLEDGMENT: Guest confirms they are of legal age, not under the 
-   influence of substances impairing judgment, and entering voluntarily.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-This digital signature, combined with biometric verification, constitutes 
-a legally binding agreement enforceable under state and federal law.`;
+SECTION 2 — VIP PRIVATE ROOM TERMS & CONDITIONS
+
+2.1  SCOPE OF SERVICES: Guest is entitled to private entertainment 
+     services in the designated VIP room for the duration and rate 
+     agreed upon at the time of booking. Services include private 
+     performance, bottle service (if applicable), and dedicated 
+     host/hostess attention.
+
+2.2  DURATION & EXTENSION: Session duration begins upon entry into 
+     the private room. Extensions are available at the prevailing 
+     rate and must be approved by management prior to the session 
+     expiration. Overstay beyond the contracted time without 
+     authorization will be billed at 1.5x the standard rate.
+
+2.3  PRICING: All prices are quoted exclusive of applicable taxes, 
+     gratuities, and service charges unless otherwise specified. 
+     A mandatory service charge may apply. Guest acknowledges and 
+     agrees to the quoted rate at the time of booking.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 3 — PAYMENT AUTHORIZATION
+
+3.1  Guest authorizes the Venue to charge the payment card on file 
+     (${cardType} ending ${cardLast4 || "XXXX"}) for:
+     (a) The agreed VIP room rate and any extensions
+     (b) Food, beverage, and bottle service charges
+     (c) Any damages to Venue property caused by Guest or Guest's party
+     (d) Outstanding balance if Guest departs without settling
+
+3.2  Guest understands that a pre-authorization hold may be placed 
+     on the card for the estimated session cost plus incidentals.
+
+3.3  All charges are in U.S. Dollars. Gratuities for service staff 
+     are at Guest's discretion but are customary and appreciated.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 4 — CODE OF CONDUCT & PROHIBITED ACTIVITIES
+
+4.1  NO RECORDING: Audio recording, video recording, photography, 
+     live-streaming, or any form of electronic capture is STRICTLY 
+     PROHIBITED in all VIP and private areas. Violation will result 
+     in immediate removal, device confiscation (pending review), 
+     and potential legal action.
+
+4.2  NO PHYSICAL CONTACT: Guest shall not initiate unauthorized 
+     physical contact with entertainers or staff. All interactions 
+     must comply with Venue rules and applicable law. Entertainers 
+     may terminate the session at any time if they feel unsafe.
+
+4.3  NO SOLICITATION: Solicitation of illegal activities, including 
+     but not limited to solicitation of prostitution, drug 
+     transactions, or any conduct violating federal, state, or 
+     local law is grounds for immediate removal and reporting 
+     to law enforcement.
+
+4.4  NO INTOXICATION: Management reserves the right to refuse or 
+     terminate service to any Guest who, in the Venue's sole 
+     judgment, is excessively intoxicated or under the influence 
+     of controlled substances.
+
+4.5  RESPECT & COMPLIANCE: Guest shall comply with all directions 
+     from Venue staff and security personnel. Abusive, threatening, 
+     or disruptive behavior will result in immediate removal 
+     without refund.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 5 — SURVEILLANCE & SECURITY
+
+5.1  Guest acknowledges that all common areas and VIP room 
+     entrances/exits are monitored by CCTV for security purposes. 
+     Interior VIP room cameras (where installed) record video 
+     only — no audio — for the protection of both Guest and staff.
+
+5.2  Guest consents to security screening upon entry and re-entry, 
+     including metal detection and bag inspection.
+
+5.3  The Venue employs armed and unarmed security personnel. Guest 
+     shall cooperate with all security directives.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 6 — LIABILITY & ASSUMPTION OF RISK
+
+6.1  Guest assumes full responsibility for personal belongings. The 
+     Venue is not liable for loss, theft, or damage to personal 
+     property.
+
+6.2  Guest acknowledges that entertainment services involve inherent 
+     risks and voluntarily assumes all risks arising from 
+     participation.
+
+6.3  Guest agrees to indemnify, defend, and hold harmless the Venue, 
+     its owners, managers, employees, and entertainers from any 
+     claims, damages, or liabilities arising from Guest's conduct 
+     or breach of this Agreement.
+
+6.4  IN NO EVENT SHALL THE VENUE'S LIABILITY EXCEED THE TOTAL 
+     AMOUNT PAID BY GUEST FOR THE CURRENT SESSION.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 7 — DATA RETENTION & PRIVACY
+
+7.1  Biometric data (hashes) shall be retained for a period of three 
+     (3) years from the date of capture, or as required by law, 
+     whichever is longer.
+
+7.2  Government ID photographs shall be retained for one (1) year 
+     for identity verification, then permanently deleted.
+
+7.3  Guest may request deletion of biometric data by submitting a 
+     written request to management, subject to legal retention 
+     requirements.
+
+7.4  The Venue shall not sell, lease, or trade biometric data to 
+     any third party.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 8 — AGE VERIFICATION & LEGAL CAPACITY
+
+8.1  By signing, Guest certifies under penalty of perjury that:
+     (a) Guest is at least 21 years of age
+     (b) The identification provided is authentic and unaltered
+     (c) Guest is not impaired to the degree that they cannot 
+         understand and consent to this Agreement
+     (d) Guest enters into this Agreement voluntarily
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 9 — DISPUTE RESOLUTION
+
+9.1  Any disputes arising from this Agreement shall be resolved 
+     through binding arbitration in the county where the Venue 
+     is located, under the rules of the American Arbitration 
+     Association.
+
+9.2  Guest waives any right to participate in a class action 
+     lawsuit or class-wide arbitration.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 10 — DIGITAL SIGNATURE & ACKNOWLEDGMENT
+
+This Agreement is executed digitally and constitutes a legally binding 
+contract under the Electronic Signatures in Global and National Commerce 
+Act (E-SIGN Act, 15 U.S.C. § 7001) and the Uniform Electronic 
+Transactions Act (UETA).
+
+The digital signature, combined with biometric thumbprint verification, 
+government ID authentication, and IP/device logging, shall have the 
+same legal force and effect as a handwritten signature.
+
+CONTRACT SERIAL: ${serialNumber}
+EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
 
   const handleSign = async (e) => {
     e.preventDefault();
@@ -182,10 +345,14 @@ a legally binding agreement enforceable under state and federal law.`;
               Welcome to VIP. Your identity, biometrics, and signature have been cryptographically recorded.
             </p>
             <div className="text-xs text-gray-600 space-y-1 pt-4 border-t border-gray-800">
-              <p>✓ Thumbprint hashed & stored</p>
-              <p>✓ Government ID verified & archived</p>
-              <p>✓ Card ({cardType} •••• {cardLast4}) linked</p>
-              <p>✓ Digital signature timestamped</p>
+              <p>✓ Thumbprint hashed (SHA-256) & archived</p>
+              <p>✓ Government ID verified & stored</p>
+              <p>✓ Card ({cardType} •••• {cardLast4}) authorized</p>
+              <p>✓ Digital signature timestamped & logged</p>
+              <p>✓ IP address & device fingerprint recorded</p>
+            </div>
+            <div className="pt-3 text-[10px] text-gray-700">
+              A copy of this executed agreement has been archived. Retain your serial number for your records.
             </div>
           </CardContent>
         </Card>
@@ -194,10 +361,9 @@ a legally binding agreement enforceable under state and federal law.`;
   }
 
   const steps = ["Identity", "Biometrics", "Contract", "Sign"];
-
   const canProceedStep0 = guestName.trim() && dateOfBirth && idNumber.trim() && cardLast4.length === 4;
   const canProceedStep1 = idFrontUrl && thumbprintUrl;
-  const canProceedStep3 = signature.trim() && signature.toLowerCase() === guestName.toLowerCase();
+  const canProceedStep3 = signature.trim() && signature.toLowerCase() === guestName.toLowerCase() && initialsAcknowledged;
 
   return (
     <div className="min-h-screen bg-black text-white py-8 md:py-16">
@@ -205,8 +371,8 @@ a legally binding agreement enforceable under state and federal law.`;
         {/* Header */}
         <div className="text-center mb-6">
           <Shield className="w-12 h-12 text-purple-400 mx-auto mb-3" />
-          <h1 className="text-3xl font-bold mb-1">VIP Biometric Contract</h1>
-          <p className="text-gray-400 text-sm">Secure Identity & Thumbprint Verification</p>
+          <h1 className="text-3xl font-bold mb-1">VIP Private Entertainment Agreement</h1>
+          <p className="text-gray-400 text-sm">Biometric Identity Verification & Contract Execution</p>
           <Badge className="mt-2 bg-purple-500/20 text-purple-400 border-purple-500/40 font-mono text-xs">
             {serialNumber}
           </Badge>
@@ -233,8 +399,8 @@ a legally binding agreement enforceable under state and federal law.`;
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <Label>Full Legal Name *</Label>
-                  <Input value={guestName} onChange={e => setGuestName(e.target.value)} placeholder="As shown on government ID" required />
+                  <Label>Full Legal Name (as on government ID) *</Label>
+                  <Input value={guestName} onChange={e => setGuestName(e.target.value)} placeholder="First Middle Last" required />
                 </div>
                 <div>
                   <Label>Date of Birth *</Label>
@@ -247,7 +413,7 @@ a legally binding agreement enforceable under state and federal law.`;
               </div>
 
               <div className="border-t border-gray-800 pt-4">
-                <h4 className="text-sm font-semibold text-gray-300 mb-3">Government ID</h4>
+                <h4 className="text-sm font-semibold text-gray-300 mb-3">Government-Issued Photo ID</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label>ID Type *</Label>
@@ -265,14 +431,14 @@ a legally binding agreement enforceable under state and federal law.`;
                     <Input value={idNumber} onChange={e => setIdNumber(e.target.value)} placeholder="Full ID number" required />
                   </div>
                   <div>
-                    <Label>Issuing State/Country</Label>
-                    <Input value={idState} onChange={e => setIdState(e.target.value)} placeholder="e.g. California" />
+                    <Label>Issuing State / Country</Label>
+                    <Input value={idState} onChange={e => setIdState(e.target.value)} placeholder="e.g. Nevada" />
                   </div>
                 </div>
               </div>
 
               <div className="border-t border-gray-800 pt-4">
-                <h4 className="text-sm font-semibold text-gray-300 mb-3">Payment Card on File</h4>
+                <h4 className="text-sm font-semibold text-gray-300 mb-3">Payment Card Authorization</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label>Card Type *</Label>
@@ -297,7 +463,7 @@ a legally binding agreement enforceable under state and federal law.`;
                 disabled={!canProceedStep0}
                 className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 font-bold h-12"
               >
-                Next: Biometric Scan →
+                Next: Biometric Capture →
               </Button>
             </CardContent>
           </Card>
@@ -309,16 +475,17 @@ a legally binding agreement enforceable under state and federal law.`;
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Fingerprint className="w-5 h-5 text-purple-400" />
-                Biometric Capture
+                Biometric Capture & ID Scan
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-300">
-                <p className="font-bold mb-1">📋 Scan Instructions:</p>
+                <p className="font-bold mb-1">📋 Instructions — Read Before Proceeding:</p>
                 <ol className="list-decimal ml-4 space-y-0.5">
-                  <li>Place thumb firmly on scanner pad or take photo of thumbprint</li>
-                  <li>Photograph front & back of government ID</li>
-                  <li>Upload all images below — they will be hashed and stored securely</li>
+                  <li>Press your right thumb firmly onto the scanner or photograph your thumbprint clearly</li>
+                  <li>Photograph the FRONT of your government ID (ensure all text is legible)</li>
+                  <li>Photograph the BACK of your government ID (optional but recommended)</li>
+                  <li>All images will be cryptographically hashed (SHA-256) and securely stored</li>
                 </ol>
               </div>
 
@@ -326,7 +493,7 @@ a legally binding agreement enforceable under state and federal law.`;
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Fingerprint className="w-4 h-4 text-purple-400" />
-                  Thumbprint Scan *
+                  Right Thumbprint Scan *
                 </Label>
                 <input ref={thumbprintRef} type="file" accept="image/*" capture="environment" className="hidden"
                   onChange={e => handleFileUpload(e.target.files[0], "thumbprint")} />
@@ -338,7 +505,7 @@ a legally binding agreement enforceable under state and federal law.`;
                     </Badge>
                     <Button size="sm" variant="outline" className="mt-2 w-full border-gray-700 text-gray-400"
                       onClick={() => thumbprintRef.current?.click()}>
-                      Rescan
+                      Rescan Thumbprint
                     </Button>
                   </div>
                 ) : (
@@ -380,11 +547,11 @@ a legally binding agreement enforceable under state and federal law.`;
                 )}
               </div>
 
-              {/* ID Back (optional) */}
+              {/* ID Back */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Camera className="w-4 h-4 text-gray-400" />
-                  Government ID — Back (optional)
+                  Government ID — Back (recommended)
                 </Label>
                 <input ref={idBackRef} type="file" accept="image/*" capture="environment" className="hidden"
                   onChange={e => handleFileUpload(e.target.files[0], "id_back")} />
@@ -426,30 +593,40 @@ a legally binding agreement enforceable under state and federal law.`;
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-amber-400" />
-                Contract Terms — Read Carefully
+                VIP Private Entertainment Agreement — READ CAREFULLY
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-300">
+                <p className="font-bold">⚠️ LEGAL DOCUMENT — You are about to sign a legally binding agreement.</p>
+                <p>Read ALL sections below before proceeding. By continuing, you acknowledge you have read, understood, and agree to every term.</p>
+              </div>
+
               <Textarea
                 value={contractText}
                 readOnly
-                rows={20}
+                rows={24}
                 className="bg-black/60 border-gray-700 font-mono text-xs leading-relaxed"
               />
+
               <div className="bg-gray-800/50 rounded-lg p-3 text-xs text-gray-400 space-y-1">
+                <div className="text-sm font-bold text-white mb-2">Verified Guest Information:</div>
                 <div className="flex justify-between"><span>Guest:</span><span className="text-white font-semibold">{guestName}</span></div>
                 <div className="flex justify-between"><span>DOB:</span><span className="text-white">{dateOfBirth}</span></div>
                 <div className="flex justify-between"><span>ID:</span><span className="text-white">{idType} — {idNumber}</span></div>
+                <div className="flex justify-between"><span>Issuing State:</span><span className="text-white">{idState || 'N/A'}</span></div>
                 <div className="flex justify-between"><span>Card:</span><span className="text-white">{cardType} •••• {cardLast4}</span></div>
                 <div className="flex justify-between"><span>Serial:</span><span className="text-purple-400 font-mono">{serialNumber}</span></div>
-                <div className="flex justify-between"><span>Thumbprint:</span><span className="text-green-400">{thumbprintUrl ? "✓ Captured" : "✗ Missing"}</span></div>
-                <div className="flex justify-between"><span>ID Photo:</span><span className="text-green-400">{idFrontUrl ? "✓ Uploaded" : "✗ Missing"}</span></div>
+                <div className="flex justify-between"><span>Thumbprint:</span><span className="text-green-400">{thumbprintUrl ? "✓ Captured & Hashed" : "✗ Missing"}</span></div>
+                <div className="flex justify-between"><span>ID Front:</span><span className="text-green-400">{idFrontUrl ? "✓ Uploaded" : "✗ Missing"}</span></div>
+                <div className="flex justify-between"><span>ID Back:</span><span className={idBackUrl ? "text-green-400" : "text-gray-600"}>{idBackUrl ? "✓ Uploaded" : "— Skipped"}</span></div>
               </div>
+
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep(1)} className="flex-1 border-gray-700">← Back</Button>
                 <Button onClick={() => setStep(3)}
                   className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-black font-bold">
-                  I Agree — Proceed to Sign →
+                  I Have Read & Agree — Proceed to Sign →
                 </Button>
               </div>
             </CardContent>
@@ -463,39 +640,61 @@ a legally binding agreement enforceable under state and federal law.`;
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Hash className="w-5 h-5 text-green-400" />
-                  Digital Signature
+                  Execute Agreement — Digital Signature
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Acknowledgment checkbox */}
+                <div 
+                  className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3 cursor-pointer"
+                  onClick={() => setInitialsAcknowledged(!initialsAcknowledged)}
+                >
+                  <div className={`w-5 h-5 mt-0.5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                    initialsAcknowledged ? 'bg-green-500 border-green-500' : 'border-gray-600'
+                  }`}>
+                    {initialsAcknowledged && <CheckCircle2 className="w-3 h-3 text-white" />}
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    I, <span className="text-white font-bold">{guestName}</span>, hereby acknowledge that I have 
+                    read and fully understood all ten (10) sections of the VIP Private Entertainment Agreement 
+                    (Serial: <span className="text-purple-400 font-mono">{serialNumber}</span>). I agree to all 
+                    terms and conditions, including biometric data collection (Section 1), payment authorization 
+                    (Section 3), code of conduct (Section 4), and data retention (Section 7). I certify I am 
+                    at least 21 years of age, am of sound mind, and execute this agreement voluntarily.
+                  </p>
+                </div>
+
                 <div>
-                  <Label>Type your full legal name to sign *</Label>
+                  <Label>Type your full legal name exactly as it appears above *</Label>
                   <Input
                     value={signature}
                     onChange={e => setSignature(e.target.value)}
                     placeholder={guestName}
                     className="text-lg text-center font-bold tracking-wide"
+                    style={{ fontFamily: 'cursive, serif' }}
                     required
                   />
                   {signature.trim() && signature.toLowerCase() !== guestName.toLowerCase() && (
-                    <p className="text-xs text-red-400 mt-1">Signature must match: "{guestName}"</p>
+                    <p className="text-xs text-red-400 mt-1">Signature must exactly match: "{guestName}"</p>
                   )}
                 </div>
 
                 <div className="text-xs text-gray-500 space-y-1 bg-gray-800/50 rounded-lg p-3">
-                  <p className="font-bold text-gray-300 mb-2">By signing, you acknowledge:</p>
-                  <p>✓ Your thumbprint has been captured and will be cryptographically hashed</p>
-                  <p>✓ Your government ID has been photographed and archived</p>
-                  <p>✓ Your card ending {cardLast4} is linked to this contract</p>
-                  <p>✓ Your IP address and device fingerprint will be recorded</p>
+                  <p className="font-bold text-gray-300 mb-2">By signing below, you irrevocably acknowledge:</p>
+                  <p>✓ Your right thumbprint has been captured and cryptographically hashed (SHA-256)</p>
+                  <p>✓ Your government ID ({idType}) has been photographed and archived</p>
+                  <p>✓ Your payment card ({cardType} ending {cardLast4}) is authorized per Section 3</p>
+                  <p>✓ Your IP address and device fingerprint will be recorded with this signature</p>
                   <p>✓ Contract serial: <span className="text-purple-400 font-mono">{serialNumber}</span></p>
-                  <p>✓ This digital signature is legally binding</p>
+                  <p>✓ This digital signature is legally binding under E-SIGN Act (15 U.S.C. § 7001)</p>
+                  <p>✓ You consent to biometric data retention per Section 7</p>
                 </div>
 
                 <div className="flex gap-3">
                   <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1 border-gray-700">← Back</Button>
                   <Button type="submit" disabled={loading || !canProceedStep3}
                     className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-black font-bold h-12">
-                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : "Sign & Finalize Contract"}
+                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying & Recording...</> : "Sign & Execute Agreement"}
                   </Button>
                 </div>
               </CardContent>
