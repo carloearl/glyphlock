@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Shield, DollarSign, ShoppingCart, TrendingUp, 
-  Users, LogOut, UserCheck, DoorOpen, FileText
+  Users, LogOut, UserCheck, DoorOpen, FileText,
+  Eye, Clock, Receipt, CreditCard
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -16,6 +17,11 @@ const EntertainerCheckIn = lazy(() => import("../components/nups/EntertainerChec
 const VIPRoomManagement = lazy(() => import("../components/nups/VIPRoomManagement.jsx"));
 const GuestTracking = lazy(() => import("../components/nups/GuestTracking.jsx"));
 const ZReportGenerator = lazy(() => import("../components/nups/ZReportGenerator.jsx"));
+const POSCashRegister = lazy(() => import("../components/nups/POSCashRegister.jsx"));
+const BatchManagement = lazy(() => import("../components/nups/BatchManagement.jsx"));
+const TransactionHistory = lazy(() => import("../components/nups/TransactionHistory.jsx"));
+const TimeClock = lazy(() => import("../components/nups/TimeClock.jsx"));
+const LiveFloorView = lazy(() => import("../components/nups/LiveFloorView.jsx"));
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -110,82 +116,101 @@ export default function NUPSOwner() {
       </header>
 
       <div className="container mx-auto p-4 md:p-6">
-        <div className="stats-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 mb-6 md:mb-8">
+        {/* Stats */}
+        <div className="stats-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
           <Card className="glass-card-hover border-cyan-500/30">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <DollarSign className="w-8 h-8 text-cyan-400" />
-                <TrendingUp className="w-4 h-4 text-green-400" />
-              </div>
-              <div className="text-3xl font-bold text-cyan-400 mb-1">
-                ${todayRevenue.toFixed(2)}
-              </div>
-              <div className="text-sm text-gray-400">Today's Revenue</div>
+            <CardContent className="p-4">
+              <DollarSign className="w-6 h-6 text-cyan-400 mb-1" />
+              <div className="text-2xl font-bold text-cyan-400">${todayRevenue.toFixed(2)}</div>
+              <div className="text-xs text-gray-400">Today Revenue</div>
             </CardContent>
           </Card>
-
           <Card className="glass-card-hover border-purple-500/30">
-            <CardContent className="p-6">
-              <ShoppingCart className="w-8 h-8 text-purple-400 mb-2" />
-              <div className="text-3xl font-bold text-purple-400 mb-1">
-                {todayTransactions.length}
-              </div>
-              <div className="text-sm text-gray-400">Today's Transactions</div>
+            <CardContent className="p-4">
+              <ShoppingCart className="w-6 h-6 text-purple-400 mb-1" />
+              <div className="text-2xl font-bold text-purple-400">{todayTransactions.length}</div>
+              <div className="text-xs text-gray-400">Transactions</div>
             </CardContent>
           </Card>
-
           <Card className="glass-card-hover border-green-500/30">
-            <CardContent className="p-6">
-              <UserCheck className="w-8 h-8 text-green-400 mb-2" />
-              <div className="text-3xl font-bold text-green-400 mb-1">
-                {activeShifts.length}/{entertainers.length}
-              </div>
-              <div className="text-sm text-gray-400">Entertainers Active</div>
+            <CardContent className="p-4">
+              <UserCheck className="w-6 h-6 text-green-400 mb-1" />
+              <div className="text-2xl font-bold text-green-400">{activeShifts.length}/{entertainers.length}</div>
+              <div className="text-xs text-gray-400">Staff Active</div>
             </CardContent>
           </Card>
-
           <Card className="glass-card-hover border-pink-500/30">
-            <CardContent className="p-6">
-              <DoorOpen className="w-8 h-8 text-pink-400 mb-2" />
-              <div className="text-3xl font-bold text-pink-400 mb-1">
-                {occupiedRooms}/{vipRooms.length}
-              </div>
-              <div className="text-sm text-gray-400">VIP Rooms Occupied</div>
+            <CardContent className="p-4">
+              <DoorOpen className="w-6 h-6 text-pink-400 mb-1" />
+              <div className="text-2xl font-bold text-pink-400">{occupiedRooms}/{vipRooms.length}</div>
+              <div className="text-xs text-gray-400">VIP Rooms</div>
             </CardContent>
           </Card>
-
+          <Card className="glass-card-hover border-blue-500/30">
+            <CardContent className="p-4">
+              <Users className="w-6 h-6 text-blue-400 mb-1" />
+              <div className="text-2xl font-bold text-blue-400">{activeGuestsCount}</div>
+              <div className="text-xs text-gray-400">Guests In</div>
+            </CardContent>
+          </Card>
           <Card className="glass-card-hover border-orange-500/30">
-            <CardContent className="p-6">
-              <DollarSign className="w-8 h-8 text-orange-400 mb-2" />
-              <div className="text-3xl font-bold text-orange-400 mb-1">
-                ${totalRevenue.toFixed(2)}
-              </div>
-              <div className="text-sm text-gray-400">Total Revenue</div>
+            <CardContent className="p-4">
+              <TrendingUp className="w-6 h-6 text-orange-400 mb-1" />
+              <div className="text-2xl font-bold text-orange-400">${totalRevenue.toFixed(2)}</div>
+              <div className="text-xs text-gray-400">Total Revenue</div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="floor" className="space-y-6">
-          <TabsList className="glass-card-dark border-gray-800 grid grid-cols-2 md:grid-cols-4 gap-2 p-2 w-full">
-            <TabsTrigger value="floor" className="min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
-              <UserCheck className="w-5 h-5 md:w-4 md:h-4" />
-              <span className="text-xs md:text-sm">Floor</span>
+        {/* Tabs */}
+        <Tabs defaultValue="live" className="space-y-6">
+          <TabsList className="glass-card-dark border-gray-800 grid grid-cols-4 md:grid-cols-8 gap-1 p-1.5 w-full">
+            <TabsTrigger value="live" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Eye className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Live View</span>
             </TabsTrigger>
-            <TabsTrigger value="vip" className="min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
-              <DoorOpen className="w-5 h-5 md:w-4 md:h-4" />
-              <span className="text-xs md:text-sm">VIP</span>
+            <TabsTrigger value="pos" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <CreditCard className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">POS</span>
             </TabsTrigger>
-            <TabsTrigger value="guests" className="min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
-              <Users className="w-5 h-5 md:w-4 md:h-4" />
-              <span className="text-xs md:text-sm">Guests</span>
+            <TabsTrigger value="floor" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <UserCheck className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Floor</span>
             </TabsTrigger>
-            <TabsTrigger value="zreport" className="min-h-[52px] flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
-              <FileText className="w-5 h-5 md:w-4 md:h-4" />
-              <span className="text-xs md:text-sm">Z-Report</span>
+            <TabsTrigger value="vip" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <DoorOpen className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">VIP</span>
+            </TabsTrigger>
+            <TabsTrigger value="guests" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Users className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Guests</span>
+            </TabsTrigger>
+            <TabsTrigger value="timeclock" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Clock className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Time Clock</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Receipt className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">History</span>
+            </TabsTrigger>
+            <TabsTrigger value="zreport" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <FileText className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Z-Report</span>
             </TabsTrigger>
           </TabsList>
 
           <Suspense fallback={<div className="text-center py-8 text-gray-400">Loading...</div>}>
+            <TabsContent value="live">
+              <LiveFloorView />
+            </TabsContent>
+
+            <TabsContent value="pos">
+              <div className="space-y-4">
+                <BatchManagement user={user} />
+                <POSCashRegister user={user} />
+              </div>
+            </TabsContent>
+
             <TabsContent value="floor">
               <EntertainerCheckIn />
             </TabsContent>
@@ -196,6 +221,14 @@ export default function NUPSOwner() {
 
             <TabsContent value="guests">
               <GuestTracking />
+            </TabsContent>
+
+            <TabsContent value="timeclock">
+              <TimeClock user={user} role="admin" />
+            </TabsContent>
+
+            <TabsContent value="history">
+              <TransactionHistory transactions={transactions} showReceipt={true} />
             </TabsContent>
 
             <TabsContent value="zreport">

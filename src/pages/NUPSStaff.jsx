@@ -4,11 +4,12 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Store, ShoppingCart, LogOut, Users, FileText, Clock } from "lucide-react";
+import { Store, ShoppingCart, LogOut, Users, FileText, Clock, CreditCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import POSCashRegister from "../components/nups/POSCashRegister.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
+import TimeClock from "../components/nups/TimeClock.jsx";
 import { useQuery } from "@tanstack/react-query";
 
 export default function NUPSStaff() {
@@ -46,30 +47,30 @@ export default function NUPSStaff() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <header className="glass-nav border-b border-cyan-500/20 p-4 sticky top-0 z-50">
-        <div className="container mx-auto flex items-center justify-between">
+      <header className="glass-nav border-b border-cyan-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
+        <div className="container mx-auto flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <Store className="w-6 h-6 text-cyan-400" />
             <div>
-              <h1 className="text-xl font-bold text-white">N.U.P.S. Point of Sale</h1>
-              <p className="text-sm text-gray-400">Staff Terminal</p>
+              <h1 className="text-lg md:text-xl font-bold text-white">N.U.P.S. POS</h1>
+              <p className="text-xs text-gray-400 hidden sm:block">Staff Terminal</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="glass-card px-4 py-2">
-              <div className="text-xs text-gray-400">Today's Sales</div>
-              <div className="text-lg font-bold text-green-400">${todayRevenue.toFixed(2)}</div>
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="glass-card px-3 py-1.5 hidden sm:block">
+              <div className="text-xs text-gray-400">Today</div>
+              <div className="text-base font-bold text-green-400">${todayRevenue.toFixed(2)}</div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Users className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-white">{user?.email}</span>
-              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400">Staff</Badge>
+              <span className="text-sm text-white truncate max-w-[120px]">{user?.email}</span>
+              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-xs">Staff</Badge>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => base44.auth.logout()}
-              className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+              className="border-red-500/50 text-red-400 hover:bg-red-500/10 min-h-[44px]"
             >
               <LogOut className="w-4 h-4" />
             </Button>
@@ -77,20 +78,24 @@ export default function NUPSStaff() {
         </div>
       </header>
 
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 md:p-6">
         <Tabs defaultValue="register" className="space-y-6">
-          <TabsList className="glass-card-dark border-gray-800">
-            <TabsTrigger value="register">
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Cash Register
+          <TabsList className="glass-card-dark border-gray-800 grid grid-cols-4 gap-1 p-1.5 w-full">
+            <TabsTrigger value="register" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <ShoppingCart className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Register</span>
             </TabsTrigger>
-            <TabsTrigger value="batch">
-              <Clock className="w-4 h-4 mr-2" />
-              Batch Management
+            <TabsTrigger value="batch" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <CreditCard className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Batch</span>
             </TabsTrigger>
-            <TabsTrigger value="history">
-              <FileText className="w-4 h-4 mr-2" />
-              My Transactions
+            <TabsTrigger value="timeclock" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Clock className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Time Clock</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <FileText className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">My Sales</span>
             </TabsTrigger>
           </TabsList>
 
@@ -102,8 +107,12 @@ export default function NUPSStaff() {
             <BatchManagement user={user} />
           </TabsContent>
 
+          <TabsContent value="timeclock">
+            <TimeClock user={user} role="staff" />
+          </TabsContent>
+
           <TabsContent value="history">
-            <TransactionHistory transactions={todayTransactions} />
+            <TransactionHistory transactions={todayTransactions} showReceipt={true} />
           </TabsContent>
         </Tabs>
       </div>
