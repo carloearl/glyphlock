@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Shield, Zap, Lock, Rocket, Radio } from "lucide-react";
+import { Shield, Zap, Lock, Rocket, Radio, Check, Circle, Target } from "lucide-react";
 
 // LAUNCH DATE: July 4th, 2026 00:00 Arizona Time (UTC-7 => UTC 07:00)
 const LAUNCH_UTC = Date.UTC(2026, 6, 4, 7, 0, 0);
@@ -101,7 +101,7 @@ export default function CountdownPill() {
             <div className="text-center">
               <span className="inline-flex items-center gap-2 bg-[#00ff88]/10 border border-[#00ff88]/30 px-4 py-1 rounded-full text-[10px] uppercase tracking-[1px] text-[#00ff88] font-semibold">
                 <span className="w-2 h-2 rounded-full bg-[#00ff88] shadow-[0_0_10px_#00ff88] animate-pulse" />
-                LIVE BETA 2.0
+                LIVE BETA 3.0
               </span>
             </div>
           </div>
@@ -136,25 +136,73 @@ export default function CountdownPill() {
             <CountdownDigit value={t.s} label="Sec" />
           </div>
 
-          {/* ─── Progress Bar ─── */}
-          <div className="max-w-lg mx-auto mb-6 px-1">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase tracking-[2px] text-[#8b92a8]">Beta Progress</span>
-              <span className="text-[12px] text-[#5b9fd4] font-semibold">{t.pct}% Complete</span>
+          {/* ─── Milestone Timeline ─── */}
+          <div className="max-w-xl mx-auto mb-6 px-1">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] uppercase tracking-[2px] text-[#8b92a8]">Mission Milestones</span>
+              <span className="text-[12px] text-[#00ff88] font-semibold">7 / 10 ACHIEVED</span>
             </div>
-            <div className="h-1.5 bg-[#141a2e] rounded-full overflow-hidden">
+
+            {/* Timeline Track */}
+            <div className="relative">
+              {/* Background track */}
+              <div className="absolute top-[9px] left-[9px] right-[9px] h-[3px] bg-[#1a2040] rounded-full" />
+              {/* Filled track */}
               <motion.div
+                className="absolute top-[9px] left-[9px] h-[3px] rounded-full"
+                style={{ background: "linear-gradient(90deg, #00ff88 0%, #5b9fd4 50%, #a855f7 100%)" }}
                 initial={{ width: 0 }}
-                animate={isInView ? { width: `${t.pct}%` } : { width: 0 }}
+                animate={isInView ? { width: "70%" } : { width: 0 }}
                 transition={{ delay: 0.8, duration: 2, ease: [0.16, 1, 0.3, 1] }}
-                className="h-full rounded-full"
-                style={{ background: "linear-gradient(90deg, #5b9fd4 0%, #a855f7 100%)" }}
               />
+
+              {/* Milestone dots */}
+              <div className="relative flex justify-between">
+                {[
+                  { label: "Beta 1.0", done: true },
+                  { label: "QR Engine", done: true },
+                  { label: "Image Lab", done: true },
+                  { label: "GlyphBot AI", done: true },
+                  { label: "Beta 2.0", done: true },
+                  { label: "Voice Studio", done: true },
+                  { label: "Beta 3.0", done: true, current: true },
+                  { label: "SOC Module", done: false },
+                  { label: "Enterprise", done: false },
+                  { label: "LAUNCH", done: false, launch: true },
+                ].map((m, i) => (
+                  <div key={i} className="flex flex-col items-center" style={{ width: '10%' }}>
+                    <div className={`w-[18px] h-[18px] rounded-full flex items-center justify-center relative z-10 ${
+                      m.current 
+                        ? 'bg-[#00ff88] shadow-[0_0_12px_#00ff88]' 
+                        : m.done 
+                          ? 'bg-[#5b9fd4]' 
+                          : m.launch 
+                            ? 'bg-[#141a2e] border-2 border-[#a855f7]' 
+                            : 'bg-[#141a2e] border-2 border-[#2a3050]'
+                    }`}>
+                      {m.done ? (
+                        <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                      ) : m.launch ? (
+                        <Rocket className="w-2.5 h-2.5 text-[#a855f7]" />
+                      ) : (
+                        <Circle className="w-2 h-2 text-[#2a3050]" />
+                      )}
+                    </div>
+                    <span className={`text-[7px] sm:text-[8px] mt-1.5 text-center leading-tight font-semibold ${
+                      m.current ? 'text-[#00ff88]' : m.done ? 'text-[#5b9fd4]' : m.launch ? 'text-[#a855f7]' : 'text-[#3a4060]'
+                    }`}>
+                      {m.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-[9px] text-[#8b92a8]/60">Jan 1, 2026</span>
-              <span className="text-[9px] text-[#5b9fd4] font-bold flex items-center gap-1">
-                <Rocket className="w-3 h-3" /> JULY 4TH, 2026
+
+            {/* Current milestone callout */}
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Target className="w-3.5 h-3.5 text-[#00ff88]" />
+              <span className="text-[10px] sm:text-xs text-[#8b92a8]">
+                Currently: <span className="text-[#00ff88] font-bold">Beta 3.0</span> — Next: <span className="text-[#a855f7] font-bold">SOC Module</span>
               </span>
             </div>
           </div>
@@ -162,10 +210,10 @@ export default function CountdownPill() {
           {/* ─── Stats Grid ─── */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mb-6">
             {[
-              { label: "Modules Deployed", value: "47", color: "text-[#00ff88]" },
-              { label: "Security Audits", value: "312", color: "text-[#5b9fd4]" },
+              { label: "Modules Deployed", value: "63", color: "text-[#00ff88]" },
+              { label: "Security Audits", value: "1,247", color: "text-[#5b9fd4]" },
               { label: "Zero Breaches", value: "0", color: "text-[#a855f7]" },
-              { label: "Uptime", value: "99.97%", color: "text-[#00ff88]" },
+              { label: "Uptime", value: "99.99%", color: "text-[#00ff88]" },
             ].map((stat, i) => (
               <div key={i} className="bg-[#141a2e] border border-white/10 rounded-xl p-3 sm:p-4 text-center">
                 <div className={`text-2xl sm:text-3xl font-extrabold ${stat.color} mb-1`}>{stat.value}</div>
