@@ -11,7 +11,7 @@ export default function StructuredDataOrg() {
       "legalName": "GlyphLock Security LLC",
       "url": "https://glyphlock.io",
       "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
-      "description": "Enterprise-grade quantum-resistant cybersecurity platform offering AI-powered threat detection, visual cryptography, blockchain security, and secure POS systems. Creator of the Master Covenant - humanity's first legal framework for AI governance.",
+      "description": "Open source creation layer for building, owning, and protecting digital ecosystems. Full framework access, no vendor lock-in, and legal protection under the Master Covenant. Stop getting robbed by locked-box SaaS — GlyphLock gives you the creation layer. This is what enterprise companies have — now you have it too.",
       "foundingDate": "2025-01",
       "founders": [
         {
@@ -62,28 +62,27 @@ export default function StructuredDataOrg() {
         "https://instagram.com/glyphlock",
         "https://tiktok.com/@glyphlock"
       ],
-      "slogan": "Quantum-Grade Security for the AI Era",
+      "slogan": "Stop Getting Robbed. Start Creating.",
       "areaServed": "Worldwide",
       "numberOfEmployees": "3",
       "knowsAbout": [
+        "Open source frameworks",
+        "Creator sovereignty",
+        "No vendor lock-in",
+        "Full framework access",
         "Quantum-resistant encryption",
         "Cybersecurity",
         "Artificial Intelligence Security",
         "Blockchain Security",
         "Visual Cryptography",
-        "Threat Detection",
-        "Data Protection",
         "Identity Verification",
-        "Fraud Prevention",
-        "Security Auditing",
-        "POS Security",
         "QR Code Security",
         "AI Governance",
         "Master Covenant Framework",
         "AI Legal Binding",
         "Exposure-Based Binding",
-        "PROBE Violation Classification",
-        "TruthStrike Protocol"
+        "Creator rights protection",
+        "Open source security tools"
       ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
