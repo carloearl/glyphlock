@@ -104,7 +104,12 @@ export default function GlyphBotPage() {
     { id: 'calm', label: 'Calm' },
     { id: 'confident', label: 'Confident' },
     { id: 'friendly', label: 'Friendly' },
-    { id: 'professional', label: 'Professional' }
+    { id: 'professional', label: 'Professional' },
+    { id: 'empathetic', label: 'Empathetic' },
+    { id: 'energetic', label: 'Energetic' },
+    { id: 'authoritative', label: 'Authoritative' },
+    { id: 'whisper', label: 'Whisper' },
+    { id: 'intense', label: 'Intense' }
   ];
 
   // Persistence hook - Phase 5
