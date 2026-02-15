@@ -95,6 +95,52 @@ export default function useTTSClean(defaultSettings = {}) {
 
     console.log('GLYPH VOICE: request started', { text: cleanText.slice(0, 50), voice, speed, emotion });
 
+    // Cache key: hash of text + voice + speed + emotion
+    const cacheKey = `tts_${btoa(unescape(encodeURIComponent(cleanText.slice(0, 200) + voice + speed + emotion))).slice(0, 64)}`;
+
+    // Check sessionStorage cache
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        console.log('GLYPH VOICE: cache HIT', cacheKey.slice(0, 20));
+        stop();
+        playingRef.current = true;
+        setIsLoading(false);
+        setIsSpeaking(true);
+
+        const blob = new Blob(
+          [Uint8Array.from(atob(cached), c => c.charCodeAt(0))],
+          { type: 'audio/mpeg' }
+        );
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        audio.volume = Math.max(0, Math.min(1, finalSettings.volume ?? 1.0));
+        audioRef.current = audio;
+
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          setIsSpeaking(false);
+          playingRef.current = false;
+          audioRef.current = null;
+        };
+        audio.onerror = () => {
+          URL.revokeObjectURL(audioUrl);
+          setIsSpeaking(false);
+          playingRef.current = false;
+          audioRef.current = null;
+          // Cache corrupted — remove and fall through next time
+          sessionStorage.removeItem(cacheKey);
+        };
+
+        await audio.play();
+        return true;
+      }
+    } catch (e) {
+      console.warn('GLYPH VOICE: cache read failed', e);
+    }
+
+    console.log('GLYPH VOICE: cache MISS, calling backend');
+
     stop(); // Stop any current playback
     playingRef.current = true;
     setIsLoading(true);
@@ -130,6 +176,16 @@ export default function useTTSClean(defaultSettings = {}) {
         bytes: responseData.bytes,
         voice: responseData.voice
       });
+
+      // Cache in sessionStorage (skip if too large — sessionStorage limit ~5MB)
+      try {
+        if (responseData.audio_base64.length < 500000) {
+          sessionStorage.setItem(cacheKey, responseData.audio_base64);
+          console.log('GLYPH VOICE: cached audio', cacheKey.slice(0, 20));
+        }
+      } catch (e) {
+        console.warn('GLYPH VOICE: cache write failed (storage full?)', e);
+      }
 
       // Decode base64 to binary
       const binaryStr = atob(responseData.audio_base64);
