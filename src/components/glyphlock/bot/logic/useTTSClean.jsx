@@ -130,15 +130,25 @@ export default function useTTSClean(defaultSettings = {}) {
         const blob = new Blob([audioData], { type: 'audio/mpeg' });
         audioUrl = URL.createObjectURL(blob);
       } else if (typeof audioData === 'string') {
-        // Base44 SDK may return base64-encoded string for binary responses
-        // Try to decode base64 to binary
-        const binaryString = atob(audioData);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+        // Base44 SDK may return binary data as a string
+        // Try base64 first, fall back to raw binary string encoding
+        try {
+          const binaryString = atob(audioData);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          const blob = new Blob([bytes], { type: 'audio/mpeg' });
+          audioUrl = URL.createObjectURL(blob);
+        } catch (base64Err) {
+          console.warn('GLYPH VOICE: atob failed, trying TextEncoder fallback', base64Err.message);
+          // The string contains raw binary characters outside Latin1 range
+          // Use TextEncoder to convert to bytes
+          const encoder = new TextEncoder();
+          const bytes = encoder.encode(audioData);
+          const blob = new Blob([bytes], { type: 'audio/mpeg' });
+          audioUrl = URL.createObjectURL(blob);
         }
-        const blob = new Blob([bytes], { type: 'audio/mpeg' });
-        audioUrl = URL.createObjectURL(blob);
       } else {
         throw new Error('Unexpected audio data type: ' + typeof audioData);
       }
