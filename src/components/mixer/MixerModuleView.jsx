@@ -22,6 +22,7 @@ import KeyboardShortcutsDialog from "@/components/mixer/KeyboardShortcutsDialog"
 import DJPlayerSection from "@/components/mixer/DJPlayerSection";
 import SongUploadDialog from "@/components/mixer/SongUploadDialog";
 import AIPlaylistGenerator from "@/components/mixer/AIPlaylistGenerator";
+import MusicSearchPanel from "@/components/mixer/MusicSearchPanel";
 
 export default function MixerModuleView() {
   // ─── State hydration ───
@@ -39,6 +40,7 @@ export default function MixerModuleView() {
   const [playerCollapsed, setPlayerCollapsed] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showAIPlaylist, setShowAIPlaylist] = useState(false);
+  const [showMusicSearch, setShowMusicSearch] = useState(false);
 
   const activeProfile = useMemo(() => profiles.find((p) => p.id === uiState.activeProfileId), [profiles, uiState.activeProfileId]);
 
@@ -301,16 +303,58 @@ export default function MixerModuleView() {
           onFocusZone={setFocusZone}
         />
 
-        {/* Right: AI panel (desktop only) */}
+        {/* Right: AI panel OR Music Search (desktop only) */}
         {!isMobile && (
-          <div className={`${isDesktop ? "w-[320px]" : "w-[260px]"} flex-shrink-0`}>
-            <AISidePanel
-              profile={activeProfile}
-              songs={songs}
-              selectedSong={selectedSong}
-              profileSongs={profileSongs}
-              onApplySuggestion={handleApplyAISuggestion}
-            />
+          <div className={`${isDesktop ? "w-[320px]" : "w-[260px]"} flex-shrink-0 flex flex-col border-l border-slate-700/30`}>
+            {/* Tab toggle between AI and Search */}
+            <div className="flex border-b border-slate-700/30 bg-slate-900/80">
+              <button
+                onClick={() => setShowMusicSearch(false)}
+                className={`flex-1 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition-colors ${
+                  !showMusicSearch ? 'text-purple-400 border-b-2 border-purple-400' : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                AI Assistant
+              </button>
+              <button
+                onClick={() => setShowMusicSearch(true)}
+                className={`flex-1 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition-colors ${
+                  showMusicSearch ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                🔍 Music API
+              </button>
+            </div>
+            {showMusicSearch ? (
+              <MusicSearchPanel
+                onAddTrack={(trackData) => handleUploadedSong(trackData)}
+                onPreviewTrack={(track) => {
+                  // Create a temp song and play it on Deck A
+                  const tempSong = createSongEntry({
+                    title: track.title,
+                    artist: track.artist,
+                    uploadUrl: track.audio_url,
+                  });
+                  setSongs(prev => {
+                    const exists = prev.find(s => s.title === track.title && s.artist === track.artist);
+                    if (exists) {
+                      setPlayingSongId(exists.id);
+                      return prev;
+                    }
+                    setPlayingSongId(tempSong.id);
+                    return [...prev, tempSong];
+                  });
+                }}
+              />
+            ) : (
+              <AISidePanel
+                profile={activeProfile}
+                songs={songs}
+                selectedSong={selectedSong}
+                profileSongs={profileSongs}
+                onApplySuggestion={handleApplyAISuggestion}
+              />
+            )}
           </div>
         )}
       </div>
