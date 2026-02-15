@@ -663,7 +663,7 @@ export default function GlyphBotPage() {
       
       <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full">
         {/* Main Console Container */}
-        <div className="flex-1 flex flex-col bg-transparent border-x-2 border-purple-500/30 shadow-[0_0_60px_rgba(168,85,247,0.15)] overflow-hidden" style={{ position: 'relative', zIndex: 300, pointerEvents: 'auto' }}>
+        <div className="flex-1 flex flex-col bg-transparent border-x border-white/5 overflow-hidden" style={{ position: 'relative', zIndex: 300, pointerEvents: 'auto' }}>
           
           {/* Header */}
           <header className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-transparent backdrop-blur-md">
@@ -794,46 +794,33 @@ export default function GlyphBotPage() {
 
           {/* Trim Warning */}
           {showTrimWarning && (
-            <div className="mx-4 mt-3 p-3 rounded-xl bg-amber-500/15 border-2 border-amber-400/50 flex items-center justify-between shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-              <div className="flex items-center gap-2 text-xs text-amber-300 font-medium">
-                <AlertTriangle className="w-4 h-4 drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]" />
-                <span>Older messages trimmed to optimize memory (keeping last {MAX_MESSAGES})</span>
-              </div>
-              <button 
-                onClick={() => setShowTrimWarning(false)} 
-                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '44px', minWidth: '44px' }}
-                className="text-amber-400 hover:text-amber-200 transition-colors p-1 rounded-lg hover:bg-amber-500/20"
-              >
-                <X className="w-4 h-4" />
+            <div className="mx-4 mt-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+              <span className="text-xs text-amber-300">Older messages trimmed (keeping last {MAX_MESSAGES})</span>
+              <button onClick={() => setShowTrimWarning(false)} className="text-amber-400 hover:text-amber-200 p-1">
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
 
           {/* Chat Area */}
           <div className="flex-1 flex min-h-0 overflow-hidden">
-            {/* GLYPHLOCK: Audit Panel - FRONT AND CENTER */}
+            {/* Audit Panel */}
             {showAuditPanel && currentUser && (
-              <aside className="w-80 flex flex-col border-r-2 border-purple-500/30 bg-gradient-to-b from-slate-950/90 via-purple-950/10 to-slate-950/90 overflow-hidden flex relative" style={{ zIndex: 50, order: -1 }}>
-                <div className="p-4 border-b-2 border-purple-500/30 bg-purple-500/10">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2 text-xs">
-                      <Shield className="w-4 h-4 text-cyan-400" />
-                      <span className="uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 font-bold">
-                        Security Audits
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setShowAuditHistory(!showAuditHistory)}
-                      style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '44px', minWidth: '44px' }}
-                      className={`px-2 py-1 rounded text-[10px] uppercase tracking-wider transition-all ${
-                        showAuditHistory
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50'
-                          : 'bg-slate-800/40 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      History
-                    </button>
+              <aside className="w-80 flex flex-col border-r border-white/5 bg-slate-950/50 overflow-hidden" style={{ zIndex: 50, order: -1 }}>
+                <div className="p-3 border-b border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs">
+                    <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-sm font-semibold text-white">Audits</span>
                   </div>
+                  <button
+                    onClick={() => setShowAuditHistory(!showAuditHistory)}
+                    style={{ touchAction: 'manipulation', minHeight: '32px' }}
+                    className={`px-2 py-1 rounded text-[10px] font-medium transition-all ${
+                      showAuditHistory ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-500 hover:text-white'
+                    }`}
+                  >
+                    History
+                  </button>
                 </div>
 
                 {showAuditHistory ? (
@@ -876,20 +863,23 @@ export default function GlyphBotPage() {
                     })}
 
               {isSending && (
-                <div className="flex items-center gap-3 text-sm animate-in fade-in p-4 rounded-xl bg-purple-500/10 border border-purple-500/30">
-                  <div className="flex gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-purple-400 animate-bounce shadow-[0_0_8px_rgba(6,182,212,0.8)]" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 animate-bounce shadow-[0_0_8px_rgba(168,85,247,0.8)]" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 animate-bounce shadow-[0_0_8px_rgba(59,130,246,0.8)]" style={{ animationDelay: '300ms' }} />
+                <div className="flex items-center gap-3 px-4 py-3 mx-auto max-w-[80%]">
+                  <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-cyan-400 animate-pulse" />
                   </div>
-                  <span className="font-bold drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" style={{ color: '#39ff14' }}>GlyphBot is thinking...</span>
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                  <span className="text-sm text-slate-400">Thinking...</span>
                 </div>
               )}
             </div>
 
-            {/* Chat History Panel - Phase 5 */}
+            {/* Chat History Panel */}
             {showHistoryPanel && currentUser && (
-              <aside className="w-64 flex-col border-l-2 border-purple-500/30 bg-gradient-to-b from-slate-950/90 via-purple-950/10 to-slate-950/90 overflow-hidden hidden md:flex relative" style={{ zIndex: 30 }}>
+              <aside className="w-64 flex-col border-l border-white/5 bg-slate-950/50 overflow-hidden hidden md:flex relative" style={{ zIndex: 30 }}>
                 <UI.ChatHistoryPanel
                   currentChatId={currentChatId}
                   savedChats={savedChats}
