@@ -37,31 +37,26 @@ function getUptime() {
 }
 
 const pad = (n) => n.toString().padStart(2, "0");
+const pad3 = (n) => n.toString().padStart(3, "0");
 
-const CountdownDigit = ({ value, label }) => (
+const CountdownDigit = ({ value, label, padFn = pad }) => (
   <div className="flex flex-col items-center">
-    <div className="relative">
-      <div className="absolute -inset-1 bg-gradient-to-b from-cyan-500/30 to-blue-600/20 rounded-lg blur-sm" />
-      <div className="relative bg-gradient-to-b from-slate-800/90 to-slate-900/90 border border-cyan-500/30 rounded-lg px-2.5 py-1.5 sm:px-4 sm:py-3 min-w-[44px] sm:min-w-[64px] backdrop-blur-xl">
-        <span className="text-xl sm:text-3xl md:text-4xl font-black text-white tabular-nums tracking-tight drop-shadow-[0_0_20px_rgba(6,182,212,0.8)]">
-          {pad(value)}
-        </span>
-      </div>
+    <div className="bg-[#141a2e] border border-[#5b9fd4]/30 rounded-lg px-2 py-1.5 sm:px-3.5 sm:py-3 min-w-[40px] sm:min-w-[60px]">
+      <span className="text-xl sm:text-3xl md:text-4xl font-extrabold text-[#5b9fd4] tabular-nums tracking-tight block text-center">
+        {padFn(value)}
+      </span>
     </div>
-    <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-cyan-400/80 font-bold mt-1.5">{label}</span>
+    <span className="text-[8px] sm:text-[10px] uppercase tracking-[0.2em] text-[#5b9fd4] font-bold mt-1">{label}</span>
   </div>
 );
 
 const StatusBadge = ({ icon: Icon, text, pulse }) => (
-  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+  <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-[1px] text-[#8b92a8]">
     {pulse && (
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-      </span>
+      <span className="w-2 h-2 rounded-full bg-[#00ff88] shadow-[0_0_10px_#00ff88] animate-pulse flex-shrink-0" />
     )}
-    {Icon && <Icon className="w-3 h-3 text-cyan-400" />}
-    <span className="text-[10px] sm:text-xs text-white/80 font-medium">{text}</span>
+    {Icon && <Icon className="w-3 h-3 flex-shrink-0" />}
+    <span>{text}</span>
   </div>
 );
 
@@ -69,7 +64,7 @@ export default function CountdownPill() {
   const [t, setT] = useState(getCountdown());
   const [up, setUp] = useState(getUptime());
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   useEffect(() => {
     const i = setInterval(() => {
@@ -85,147 +80,105 @@ export default function CountdownPill() {
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-        className="relative max-w-5xl w-full overflow-hidden rounded-2xl sm:rounded-3xl"
+        className="relative max-w-[800px] w-full rounded-2xl border border-white/10 overflow-hidden"
+        style={{ background: "linear-gradient(180deg, #0f1525 0%, #0a0e1a 100%)" }}
       >
-        {/* Outer glow */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/40 via-blue-600/30 to-purple-600/40 rounded-2xl sm:rounded-3xl blur-xl opacity-60" />
-        <div className="absolute -inset-px bg-gradient-to-r from-cyan-500/50 via-blue-500/40 to-purple-500/50 rounded-2xl sm:rounded-3xl" />
+        {/* Grid overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `linear-gradient(rgba(91,159,212,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(91,159,212,0.5) 1px, transparent 1px)`,
+          backgroundSize: '40px 40px'
+        }} />
 
-        {/* Main container */}
-        <div className="relative bg-gradient-to-br from-slate-950 via-[#0a0e27] to-slate-950 rounded-2xl sm:rounded-3xl px-5 py-6 sm:px-10 sm:py-10 md:px-14 md:py-12 overflow-hidden">
+        <div className="relative px-5 py-6 sm:px-8 sm:py-8">
 
-          {/* Grid overlay */}
-          <div className="absolute inset-0 opacity-[0.04]" style={{
-            backgroundImage: `linear-gradient(rgba(6,182,212,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.5) 1px, transparent 1px)`,
-            backgroundSize: '40px 40px'
-          }} />
-
-          {/* Scanning line */}
-          <motion.div
-            className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent"
-            animate={{ top: ['0%', '100%', '0%'] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-          />
-
-          {/* Corner accents */}
-          <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-cyan-500/40 rounded-tl-2xl sm:rounded-tl-3xl" />
-          <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-purple-500/40 rounded-tr-2xl sm:rounded-tr-3xl" />
-          <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-blue-500/40 rounded-bl-2xl sm:rounded-bl-3xl" />
-          <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-cyan-500/40 rounded-br-2xl sm:rounded-br-3xl" />
-
-          {/* ─── Top Status Row ─── */}
-          <div className="relative z-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-5 sm:mb-8">
-            <StatusBadge icon={Shield} text="ALL SYSTEMS NOMINAL" pulse />
-            <StatusBadge icon={Lock} text="ENCRYPTED" />
-            <StatusBadge icon={Zap} text={`UPTIME: ${up.d}d ${pad(up.h)}h ${pad(up.m)}m`} />
-            <StatusBadge icon={Radio} text="LIVE BETA 2.0" pulse />
-          </div>
-
-          {/* ─── Pre-Launch Label ─── */}
-          <div className="relative z-10 text-center mb-2">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 0.3, duration: 0.8 }}
-            >
-              <span className="inline-block px-4 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 text-[10px] sm:text-xs tracking-[0.35em] uppercase font-bold text-cyan-300">
-                FINAL COUNTDOWN TO FULL LAUNCH
+          {/* ─── System Status Bar ─── */}
+          <div className="bg-[#141a2e] rounded-xl py-3 px-4 mb-6">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mb-3">
+              <StatusBadge text="ALL SYSTEMS NOMINAL" pulse />
+              <StatusBadge icon={Lock} text="ENCRYPTED" />
+              <StatusBadge text={`⏱ UPTIME: ${up.d}d ${pad(up.h)}h ${pad(up.m)}m`} />
+            </div>
+            <div className="text-center">
+              <span className="inline-flex items-center gap-2 bg-[#00ff88]/10 border border-[#00ff88]/30 px-4 py-1 rounded-full text-[10px] uppercase tracking-[1px] text-[#00ff88] font-semibold">
+                <span className="w-2 h-2 rounded-full bg-[#00ff88] shadow-[0_0_10px_#00ff88] animate-pulse" />
+                LIVE BETA 2.0
               </span>
-            </motion.div>
+            </div>
           </div>
 
-          {/* ─── Headline ─── */}
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.4, duration: 1 }}
-            className="relative z-10 text-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-2 sm:mb-3 leading-tight"
-          >
-            <span className="drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]">INDEPENDENCE DAY</span>
-            <br />
-            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(6,182,212,0.8)]">
+          {/* ─── Header ─── */}
+          <div className="text-center mb-6">
+            <div className="text-[10px] sm:text-[11px] uppercase tracking-[3px] text-[#5b9fd4] font-semibold mb-4">
+              Final Countdown to Full Launch
+            </div>
+            <h2 className="text-2xl sm:text-[36px] md:text-[42px] font-extrabold text-white mb-1 leading-tight">
+              INDEPENDENCE DAY
+            </h2>
+            <h3 className="text-xl sm:text-3xl md:text-4xl font-bold text-[#5b9fd4] mb-5">
               PROTOCOL LAUNCH
-            </span>
-          </motion.h2>
-
-          {/* ─── Sub-tagline ─── */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="relative z-10 text-center text-xs sm:text-sm md:text-base text-slate-400 max-w-2xl mx-auto mb-6 sm:mb-10 leading-relaxed"
-          >
-            On <span className="text-white font-bold">July 4th, 2026</span> — GlyphLock exits beta and goes fully operational.
-            <br className="hidden sm:block" />
-            <span className="text-cyan-400 font-semibold">No more locked boxes. No more permission slips. Full sovereignty.</span>
-          </motion.p>
+            </h3>
+            <p className="text-xs sm:text-sm text-[#8b92a8] leading-relaxed">
+              On <strong className="text-white">July 4th, 2026</strong> — GlyphLock exits beta and goes fully operational.
+            </p>
+            <p className="text-[#00ff88] font-semibold text-xs sm:text-sm mt-1.5">
+              No more locked boxes. No more permission slips. Full sovereignty.
+            </p>
+          </div>
 
           {/* ─── Countdown Digits ─── */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 0.7, duration: 0.8, type: "spring" }}
-            className="relative z-10 flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-10"
-          >
-            <CountdownDigit value={t.d} label="Days" />
-            <span className="text-2xl sm:text-3xl text-cyan-500/60 font-bold mt-[-12px]">:</span>
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 md:gap-3 mb-6">
+            <CountdownDigit value={t.d} label="Days" padFn={pad3} />
+            <span className="text-xl sm:text-2xl text-[#5b9fd4]/50 font-bold mt-[-14px]">:</span>
             <CountdownDigit value={t.h} label="Hours" />
-            <span className="text-2xl sm:text-3xl text-cyan-500/60 font-bold mt-[-12px]">:</span>
+            <span className="text-xl sm:text-2xl text-[#5b9fd4]/50 font-bold mt-[-14px]">:</span>
             <CountdownDigit value={t.m} label="Min" />
-            <span className="text-2xl sm:text-3xl text-cyan-500/60 font-bold mt-[-12px]">:</span>
+            <span className="text-xl sm:text-2xl text-[#5b9fd4]/50 font-bold mt-[-14px]">:</span>
             <CountdownDigit value={t.s} label="Sec" />
-          </motion.div>
+          </div>
 
           {/* ─── Progress Bar ─── */}
-          <div className="relative z-10 max-w-xl mx-auto mb-5 sm:mb-8 px-2">
+          <div className="max-w-lg mx-auto mb-6 px-1">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-xs text-slate-500 font-medium tracking-wide">BETA PROGRESS</span>
-              <span className="text-[10px] sm:text-xs text-cyan-400 font-bold tracking-wide">{t.pct}% COMPLETE</span>
+              <span className="text-[10px] uppercase tracking-[2px] text-[#8b92a8]">Beta Progress</span>
+              <span className="text-[12px] text-[#5b9fd4] font-semibold">{t.pct}% Complete</span>
             </div>
-            <div className="h-2 sm:h-2.5 w-full bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
+            <div className="h-1.5 bg-[#141a2e] rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={isInView ? { width: `${t.pct}%` } : { width: 0 }}
-                transition={{ delay: 1, duration: 2, ease: [0.16, 1, 0.3, 1] }}
-                className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
-              </motion.div>
+                transition={{ delay: 0.8, duration: 2, ease: [0.16, 1, 0.3, 1] }}
+                className="h-full rounded-full"
+                style={{ background: "linear-gradient(90deg, #5b9fd4 0%, #a855f7 100%)" }}
+              />
             </div>
             <div className="flex justify-between mt-1.5">
-              <span className="text-[9px] text-slate-600">Jan 1, 2026</span>
-              <span className="text-[9px] text-cyan-500/80 font-bold flex items-center gap-1">
+              <span className="text-[9px] text-[#8b92a8]/60">Jan 1, 2026</span>
+              <span className="text-[9px] text-[#5b9fd4] font-bold flex items-center gap-1">
                 <Rocket className="w-3 h-3" /> JULY 4TH, 2026
               </span>
             </div>
           </div>
 
-          {/* ─── Mission Stats ─── */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 1.2, duration: 0.8 }}
-            className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto mb-5 sm:mb-8"
-          >
+          {/* ─── Stats Grid ─── */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mb-6">
             {[
-              { label: "MODULES DEPLOYED", value: "47", color: "text-emerald-400" },
-              { label: "SECURITY AUDITS", value: "312", color: "text-cyan-400" },
-              { label: "ZERO BREACHES", value: "0", color: "text-green-400" },
-              { label: "UPTIME", value: "99.97%", color: "text-blue-400" },
+              { label: "Modules Deployed", value: "47", color: "text-[#00ff88]" },
+              { label: "Security Audits", value: "312", color: "text-[#5b9fd4]" },
+              { label: "Zero Breaches", value: "0", color: "text-[#a855f7]" },
+              { label: "Uptime", value: "99.97%", color: "text-[#00ff88]" },
             ].map((stat, i) => (
-              <div key={i} className="text-center bg-white/[0.03] rounded-xl border border-white/[0.06] px-3 py-3 sm:py-4 backdrop-blur-sm">
-                <div className={`text-lg sm:text-2xl font-black ${stat.color} drop-shadow-[0_0_10px_currentColor]`}>{stat.value}</div>
-                <div className="text-[8px] sm:text-[10px] text-slate-500 uppercase tracking-[0.15em] font-bold mt-0.5">{stat.label}</div>
+              <div key={i} className="bg-[#141a2e] border border-white/10 rounded-xl p-3 sm:p-4 text-center">
+                <div className={`text-2xl sm:text-3xl font-extrabold ${stat.color} mb-1`}>{stat.value}</div>
+                <div className="text-[8px] sm:text-[10px] uppercase tracking-[2px] text-[#8b92a8]">{stat.label}</div>
               </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* ─── Bottom Declaration ─── */}
-          <div className="relative z-10 text-center">
-            <p className="text-[10px] sm:text-xs text-slate-500 leading-relaxed max-w-lg mx-auto">
-              <span className="text-slate-400 font-semibold">Operational since January 1st, 2026</span> · Arizona Time (UTC-7)
-              <br />
-              <span className="text-cyan-500/70">Protected under the Master Covenant · All rights sovereign</span>
+          <div className="text-center">
+            <p className="text-[10px] sm:text-xs text-[#8b92a8] leading-relaxed">
+              Operational since January 1st, 2026 · Arizona Time (UTC-7)<br />
+              <span className="text-[#5b9fd4]/70">Protected under the Master Covenant · All rights reserved</span>
             </p>
           </div>
         </div>
