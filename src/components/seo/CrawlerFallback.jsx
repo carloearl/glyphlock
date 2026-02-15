@@ -108,20 +108,19 @@ const MASTER_COVENANT_CONTENT = {
 };
 
 const HOME_CONTENT = {
-  title: 'GlyphLock Security - Quantum-Resistant Cybersecurity & AI Governance',
-  h1: 'GlyphLock Security LLC',
-  tagline: 'Quantum-Grade Security for the AI Era',
-  description: `GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity 
-  with AI-powered threat detection, visual cryptography, blockchain security, and the revolutionary 
-  Master Covenant AI governance framework. Founded January 2025 in El Mirage, Arizona.`,
+  title: 'GlyphLock — Open Source Creation Layer | Stop Getting Robbed, Start Creating',
+  h1: 'Stop Getting Robbed. Start Creating.',
+  tagline: 'The Creation Layer — Own Your Code, Own Your Future',
+  description: `Most tech companies give you a locked box: "Here's our software. Pay monthly. Can't change it. Trust us." GlyphLock gives you THE CREATION LAYER. Full framework access — modify anything. Build custom features yourself — no permission needed. Hire ANY developer — it's open source. Extend the platform — your business, your rules. No vendor lock-in — you own the code. This is what enterprise companies have. Now you have it too. Open source framework proves it works. Master Covenant framework protects your rights.`,
   services: [
-    'Quantum-Resistant Encryption',
-    'AI-Powered Threat Detection',
-    'Visual Cryptography & Steganography',
-    'Secure QR Code Generation',
-    'Master Covenant AI Governance',
-    'GlyphBot AI Security Assistant',
-    'N.U.P.S. Point of Sale System'
+    'Full Framework Access — Modify Anything',
+    'Open Source Code — No Black Boxes',
+    'No Vendor Lock-In — Own Your Code',
+    'Master Covenant Legal Protection',
+    'QR Studio — Secure QR Code Generation',
+    'Image Lab — AI Image Generation & Hotspots',
+    'GlyphBot — AI Security Assistant',
+    'Blockchain Verification & Cryptographic Proofing'
   ],
   team: [
     { name: 'Carlo Rene Earl', title: 'Founder & Owner, DACO¹' },
@@ -356,17 +355,18 @@ function generateCovenantContent() {
 function generateDefaultContent() {
   return `
     <article>
-      <h1>GlyphLock Security LLC</h1>
-      <p><strong>Quantum-Grade Security for the AI Era</strong></p>
-      <p>Enterprise cybersecurity platform offering quantum-resistant encryption, AI threat detection, 
-      visual cryptography, and the Master Covenant AI governance framework.</p>
+      <h1>GlyphLock — The Creation Layer</h1>
+      <p><strong>Stop Getting Robbed. Start Creating.</strong></p>
+      <p>GlyphLock is an open source creation layer for building, owning, and protecting your digital ecosystem. 
+      Full framework access, no vendor lock-in, and legal protection under the Master Covenant. 
+      This is what enterprise companies have — now you have it too.</p>
       
       <nav>
         <h2>Quick Links</h2>
         <ul>
           <li><a href="/">Home</a></li>
+          <li><a href="/master-covenant">Master Covenant — Your Rights Protected</a></li>
           <li><a href="/case-studies">Case Studies</a></li>
-          <li><a href="/master-covenant">Master Covenant</a></li>
           <li><a href="/glyphbot">GlyphBot AI</a></li>
           <li><a href="/qr">QR Studio</a></li>
           <li><a href="/about">About</a></li>

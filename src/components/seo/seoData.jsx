@@ -1,17 +1,17 @@
 export const SEO_DATA = {
   // --- CORE PAGES ---
   "Home": {
-    title: "GlyphLock | AI Cybersecurity & Quantum-Resistant QR Authentication",
-    description: "Enterprise-grade AI cybersecurity platform featuring steganographic QR codes, blockchain verification, and quantum-resistant encryption for identity protection.",
-    keywords: ["AI cybersecurity", "QR code security", "Steganography", "Blockchain verification", "Quantum-resistant encryption", "Arizona cybersecurity company", "Phoenix AI security startup"],
-    h1: "Next-Gen AI Cybersecurity & Authentication",
+    title: "GlyphLock | Open Source Creation Layer — Stop Getting Robbed, Start Creating",
+    description: "GlyphLock is the open source creation layer for building, owning, and protecting your digital ecosystem. Full framework access, no vendor lock-in, and legal protection under the Master Covenant. This is what enterprise companies have — now you have it too.",
+    keywords: ["open source framework", "creation layer", "no vendor lock-in", "full framework access", "open source security", "Master Covenant", "developer platform", "build your own tools", "enterprise security open source", "GlyphLock"],
+    h1: "Stop Getting Robbed. Start Creating.",
     url: "/",
-    ogTitle: "GlyphLock | The Future of AI Cybersecurity",
-    ogDescription: "Secure your digital assets with military-grade steganography and quantum-resistant blockchain verification.",
+    ogTitle: "GlyphLock | The Creation Layer — Own Your Code, Own Your Future",
+    ogDescription: "Full framework access. Open source code. No vendor lock-in. Legal protection under the Master Covenant. This is what enterprise companies have — now you have it too.",
     schemaType: "Organization",
     priority: 1.0,
     changefreq: "daily",
-    internalLinks: ["/services/qr-generator", "/pricing", "/contact"]
+    internalLinks: ["/master-covenant", "/pricing", "/consultation", "/security-tools"]
   },
   "About": {
     title: "About GlyphLock | Arizona AI Cybersecurity & Blockchain Firm",
@@ -228,17 +228,17 @@ export const SEO_DATA = {
     internalLinks: ["/contact", "/dream-team"]
   },
   "MasterCovenant": {
-    title: "Master Covenant | GlyphLock Governance & Ethics",
-    description: "The foundational ethical framework and governance model driving GlyphLock's AI and security operations.",
-    keywords: ["corporate governance", "AI ethics", "master covenant", "legal framework", "digital trust"],
+    title: "Master Covenant | Legal Framework Protecting Creator Rights & Code Ownership",
+    description: "The Master Covenant legally binds GlyphLock to transparency, open source access, and creator sovereignty. Your work stays yours. The legal framework that protects your rights as a builder.",
+    keywords: ["Master Covenant", "creator rights", "code ownership", "open source legal framework", "no vendor lock-in", "digital sovereignty", "AI governance", "creator protection"],
     h1: "The Master Covenant",
     url: "/governance/covenant",
-    ogTitle: "GlyphLock Master Covenant",
-    ogDescription: "Our commitment to ethical AI and unbreakable security standards.",
+    ogTitle: "Master Covenant | Your Rights, Legally Protected",
+    ogDescription: "The legal framework that guarantees open source access, creator sovereignty, and no vendor lock-in. Your work stays yours.",
     schemaType: "Article",
-    priority: 0.6,
-    changefreq: "yearly",
-    internalLinks: ["/about", "/legal/privacy"]
+    priority: 0.95,
+    changefreq: "monthly",
+    internalLinks: ["/case-studies", "/case-study-ai-binding", "/case-study-covenant-victory", "/about"]
   },
 
   // --- ACCOUNT ---
