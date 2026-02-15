@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label"; // Ensure Label is imported
+import { Label } from "@/components/ui/label";
+import ReceiptPrinter from "./ReceiptPrinter";
 
 export default function POSCashRegister({ user }) {
   const queryClient = useQueryClient();
@@ -29,6 +29,7 @@ export default function POSCashRegister({ user }) {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [cashTendered, setCashTendered] = useState(0);
   const [discount, setDiscount] = useState(0);
+  const [lastTransaction, setLastTransaction] = useState(null);
 
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products'],
@@ -50,9 +51,10 @@ export default function POSCashRegister({ user }) {
 
   const createTransaction = useMutation({
     mutationFn: (data) => base44.entities.POSTransaction.create(data),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries(['pos-transactions']);
       queryClient.invalidateQueries(['active-batch']);
+      setLastTransaction(result);
       setCart([]);
       setSelectedCustomer(null);
       setDiscount(0);
@@ -335,6 +337,12 @@ export default function POSCashRegister({ user }) {
                   <Receipt className="w-5 h-5 mr-2" />
                   Checkout
                 </Button>
+
+                {lastTransaction && (
+                  <div className="mt-2 flex justify-center">
+                    <ReceiptPrinter transaction={lastTransaction} />
+                  </div>
+                )}
               </>
             )}
           </CardContent>
