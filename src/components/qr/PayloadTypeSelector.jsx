@@ -87,9 +87,9 @@ export default function PayloadTypeSelector({ value, onChange, onTypeSelect }) {
               <div className="flex items-center gap-2 mb-1">
                 <h3 className={`${GlyphTypography.heading.sm} text-white`}>{selectedType.label}</h3>
                 {selectedType.premium && (
-                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/50 gap-1">
+                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/50 gap-1">
                     <Sparkles className="w-3 h-3" />
-                    Premium
+                    Advanced
                   </Badge>
                 )}
               </div>
@@ -148,7 +148,7 @@ export default function PayloadTypeSelector({ value, onChange, onTypeSelect }) {
       {/* Stats */}
       <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-800">
         <span>{filteredTypes.length} payload types available</span>
-        <span>{PAYLOAD_TYPES.filter(t => t.premium).length} premium features</span>
+        <span>Full access — all features included</span>
       </div>
     </div>
   );
