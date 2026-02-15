@@ -105,7 +105,6 @@ Deno.serve(async (req) => {
       guest_name,
       date_of_birth,
       phone: phone || undefined,
-      profile_photo_url: guest_photo_url || undefined,
       government_id_type,
       government_id_number,
       government_id_state: government_id_state || undefined,
