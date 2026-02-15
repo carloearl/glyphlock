@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,16 +13,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 // Lazy load all NUPS components — NONE are modified, all existing
-const EntertainerContract = lazy(() => import("../components/nups/EntertainerContract.jsx"));
-const EntertainerCheckIn = lazy(() => import("../components/nups/EntertainerCheckIn.jsx"));
-const VIPRoomManagement = lazy(() => import("../components/nups/VIPRoomManagement.jsx"));
-const GuestTracking = lazy(() => import("../components/nups/GuestTracking.jsx"));
-const ZReportGenerator = lazy(() => import("../components/nups/ZReportGenerator.jsx"));
-const POSCashRegister = lazy(() => import("../components/nups/POSCashRegister.jsx"));
-const BatchManagement = lazy(() => import("../components/nups/BatchManagement.jsx"));
-const TransactionHistory = lazy(() => import("../components/nups/TransactionHistory.jsx"));
-const TimeClock = lazy(() => import("../components/nups/TimeClock.jsx"));
-const LiveFloorView = lazy(() => import("../components/nups/LiveFloorView.jsx"));
+import EntertainerContract from "../components/nups/EntertainerContract.jsx";
+import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
+import VIPRoomManagement from "../components/nups/VIPRoomManagement.jsx";
+import GuestTracking from "../components/nups/GuestTracking.jsx";
+import ZReportGenerator from "../components/nups/ZReportGenerator.jsx";
+import POSCashRegister from "../components/nups/POSCashRegister.jsx";
+import BatchManagement from "../components/nups/BatchManagement.jsx";
+import TransactionHistory from "../components/nups/TransactionHistory.jsx";
+import TimeClock from "../components/nups/TimeClock.jsx";
+import LiveFloorView from "../components/nups/LiveFloorView.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
