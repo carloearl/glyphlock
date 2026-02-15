@@ -233,7 +233,7 @@ export default function NUPSOwner() {
               <span className="text-[10px] md:text-xs">Z-Report</span>
             </TabsTrigger>
             <TabsTrigger value="products" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Tags className="w-4 h-4" />
+              <Tag className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Products</span>
             </TabsTrigger>
             <TabsTrigger value="inventory" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
