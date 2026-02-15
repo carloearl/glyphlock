@@ -37,6 +37,7 @@ export const NAV_SECTIONS = [
       { label: "Security Operations", page: "SecurityOperationsCenter", visibility: "public" },
       { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
       { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
+      { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" },
       { label: "SDK Documentation", page: "SDKDocs", visibility: "public" },
       { label: "Site Intelligence", page: "Sie", visibility: "admin" }
     ]
@@ -90,6 +91,7 @@ export const FOOTER_LINKS = {
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Operations", page: "SecurityOperationsCenter", visibility: "public" },
     { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
+    { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" },
     { label: "All Security Tools", page: "SecurityTools", visibility: "public" },
     { label: "SDK Documentation", page: "SDKDocs", visibility: "public" }
   ],
