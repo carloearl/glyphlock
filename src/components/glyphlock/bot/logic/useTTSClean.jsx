@@ -55,9 +55,17 @@ export default function useTTSClean(defaultSettings = {}) {
     }
     setIsSpeaking(false);
     setIsLoading(false);
+    playingRef.current = false;
   }, []);
 
+  const playingRef = useRef(false);
+
   const playText = useCallback(async (text, customSettings = {}) => {
+    if (playingRef.current) {
+      console.log('GLYPH VOICE: already playing, stopping previous');
+      stop();
+    }
+
     if (!text || typeof text !== 'string') {
       console.error('GLYPH VOICE: invalid input - text is', typeof text);
       return false;
@@ -88,6 +96,7 @@ export default function useTTSClean(defaultSettings = {}) {
     console.log('GLYPH VOICE: request started', { text: cleanText.slice(0, 50), voice, speed, emotion });
 
     stop(); // Stop any current playback
+    playingRef.current = true;
     setIsLoading(true);
     setLastError(null);
 
@@ -143,6 +152,7 @@ export default function useTTSClean(defaultSettings = {}) {
         console.log('GLYPH VOICE: play complete');
         URL.revokeObjectURL(audioUrl);
         setIsSpeaking(false);
+        playingRef.current = false;
         audioRef.current = null;
       };
 
@@ -150,6 +160,7 @@ export default function useTTSClean(defaultSettings = {}) {
         console.error('GLYPH VOICE: audio element error', e);
         URL.revokeObjectURL(audioUrl);
         setIsSpeaking(false);
+        playingRef.current = false;
         setLastError('Audio playback failed');
         audioRef.current = null;
       };
@@ -169,6 +180,7 @@ export default function useTTSClean(defaultSettings = {}) {
       setLastError(errorMsg);
       setIsLoading(false);
       setIsSpeaking(false);
+      playingRef.current = false;
 
       return false;
     }
