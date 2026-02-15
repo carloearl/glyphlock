@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Shield, DollarSign, ShoppingCart, TrendingUp, 
   Users, LogOut, UserCheck, DoorOpen, FileText,
-  Eye, Clock, Receipt, CreditCard, Loader2
+  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -22,6 +22,7 @@ import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import LiveFloorView from "../components/nups/LiveFloorView.jsx";
+import OwnerAnalytics from "../components/nups/OwnerAnalytics.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -184,8 +185,12 @@ export default function NUPSOwner() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="live" className="space-y-6">
-          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-4 md:grid-cols-8 gap-1 p-1.5 w-full">
+        <Tabs defaultValue="analytics" className="space-y-6">
+          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-5 md:grid-cols-9 gap-1 p-1.5 w-full">
+            <TabsTrigger value="analytics" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <BarChart3 className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Analytics</span>
+            </TabsTrigger>
             <TabsTrigger value="live" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
               <Eye className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Live View</span>
@@ -220,6 +225,9 @@ export default function NUPSOwner() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="analytics">
+            <OwnerAnalytics transactions={transactions} />
+          </TabsContent>
           <TabsContent value="live">
             <LiveFloorView />
           </TabsContent>
