@@ -217,4 +217,10 @@ export const FeatureCard = ({
   </div>
 );
 
+/** Get all available icon type keys */
+export const GLYPH_ICON_TYPES = Object.keys(ICON_URLS);
+
+/** Get URL for a specific icon type */
+export const getIconUrl = (type) => ICON_URLS[type] || null;
+
 export default GlyphIcon;
