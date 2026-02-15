@@ -290,9 +290,9 @@ same legal force and effect as a handwritten signature.
 CONTRACT SERIAL: ${serialNumber}
 EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
 
-  const handleSign = async (e) => {
+  const handleFinalSubmit = async (e) => {
     e.preventDefault();
-    if (!signature.trim() || !guestName.trim()) return;
+    if (!canFinalizeStep4) return;
 
     setLoading(true);
     setError(null);
@@ -312,10 +312,15 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
       id_photo_url: idFrontUrl,
       id_photo_back_url: idBackUrl,
       thumbprint_url: thumbprintUrl,
+      host_name: hostName,
+      host_signature: hostSignature,
+      manager_name: managerName,
+      manager_signature: managerSignature,
     });
 
     if (response.data?.success) {
       setSuccess(true);
+      setAllSigned(true);
     } else {
       setError(response.data?.error || 'Contract signing failed');
     }
