@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Shield, DollarSign, ShoppingCart, TrendingUp, 
   Users, LogOut, UserCheck, DoorOpen, FileText,
-  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tags
+  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
