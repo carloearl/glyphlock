@@ -31,9 +31,6 @@ export default function VIPContractFlow({ room, guestName, onContractSigned, onC
       } else {
         setError(res.data?.error || "Failed to generate contract");
         setStep("error");
-      } else {
-        setError(res.data?.error || "Failed to generate contract");
-        setStep("error");
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || "Contract generation failed");
