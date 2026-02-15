@@ -57,12 +57,15 @@ For image_url, use: https://picsum.photos/seed/{unique-seed}/300/300 with a uniq
       }
     });
 
-    const tracks = (llmResult.tracks || []).map(t => ({
+    console.log("LLM result type:", typeof llmResult, "keys:", llmResult ? Object.keys(llmResult) : "null");
+    console.log("LLM result:", JSON.stringify(llmResult).slice(0, 500));
+    
+    const tracks = (llmResult?.tracks || []).map(t => ({
       ...t,
       license: "CC0 / Public Domain Sample",
     }));
 
-    return Response.json({ tracks });
+    return Response.json({ tracks, debug: typeof llmResult });
 
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
