@@ -40,15 +40,15 @@ export const NAV_SECTIONS = [
     ]
   },
   {
-    label: "GlyphLock Financial",
+    label: "Financial",
     visibility: "public",
     items: [
-      { label: "Financial Overview", page: "GlyphLockFinancial", visibility: "public" },
-      { label: "N.U.P.S. POS System", page: "NUPSLogin", visibility: "public" },
-      { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
+      { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
+      { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public" },
       { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
-      { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" },
-      { label: "Contract Archive", page: "ContractArchive", visibility: "public" }
+      { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
+      { label: "Crypto & Security Tools", page: "SecurityTools", visibility: "public" },
+      { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" }
     ]
   },
   {
@@ -103,9 +103,10 @@ export const FOOTER_LINKS = {
   ],
   financial: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
-    { label: "N.U.P.S. POS", page: "NUPSLogin", visibility: "public" },
-    { label: "Blockchain Suite", page: "Blockchain", visibility: "public" },
+    { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public" },
     { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
+    { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
+    { label: "Crypto & Security Tools", page: "SecurityTools", visibility: "public" },
     { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" }
   ],
   protocols: [
