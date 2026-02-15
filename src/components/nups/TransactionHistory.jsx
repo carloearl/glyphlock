@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, CreditCard, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import ReceiptPrinter from "./ReceiptPrinter";
 
-export default function TransactionHistory({ transactions }) {
+export default function TransactionHistory({ transactions, showReceipt = false }) {
   return (
     <Card className="bg-gray-900 border-gray-800">
       <CardHeader>
-        <CardTitle>Transaction History</CardTitle>
+        <CardTitle className="text-white">Transaction History</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3 max-h-[600px] overflow-y-auto">
@@ -21,21 +22,24 @@ export default function TransactionHistory({ transactions }) {
                 <div className="flex items-center gap-3">
                   <ShoppingCart className="w-5 h-5 text-cyan-400" />
                   <div>
-                    <div className="font-semibold">{transaction.transaction_id}</div>
+                    <div className="font-semibold text-white">{transaction.transaction_id}</div>
                     <div className="text-sm text-gray-400 flex items-center gap-2 mt-1">
                       <Calendar className="w-3 h-3" />
                       {format(new Date(transaction.created_date), "MMM d, yyyy h:mm a")}
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold text-cyan-400">
-                    ${transaction.total?.toFixed(2)}
+                <div className="text-right flex items-start gap-2">
+                  <div>
+                    <div className="text-xl font-bold text-cyan-400">
+                      ${transaction.total?.toFixed(2)}
+                    </div>
+                    <Badge variant="outline" className="mt-1">
+                      <CreditCard className="w-3 h-3 mr-1" />
+                      {transaction.payment_method}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="mt-1">
-                    <CreditCard className="w-3 h-3 mr-1" />
-                    {transaction.payment_method}
-                  </Badge>
+                  {showReceipt && <ReceiptPrinter transaction={transaction} />}
                 </div>
               </div>
 
@@ -58,7 +62,7 @@ export default function TransactionHistory({ transactions }) {
               </div>
             </div>
           ))}
-          {transactions.length === 0 && (
+          {(!transactions || transactions.length === 0) && (
             <div className="text-center py-12 text-gray-500">
               <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>No transactions yet</p>

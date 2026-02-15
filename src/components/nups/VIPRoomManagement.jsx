@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { DoorOpen, Video, Clock, DollarSign, User, UserCheck } from "lucide-react";
+import VIPSessionTimer from "./VIPSessionTimer";
 
 export default function VIPRoomManagement() {
   const queryClient = useQueryClient();
@@ -135,10 +136,7 @@ export default function VIPRoomManagement() {
                         <User className="w-4 h-4" />
                         <span>{room.guest_name}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Clock className="w-4 h-4" />
-                        <span>{getRemainingTime(room.end_time)}</span>
-                      </div>
+                      <VIPSessionTimer endTime={room.end_time} startTime={room.start_time} />
                       <div className="flex items-center gap-2 text-cyan-400">
                         <DollarSign className="w-4 h-4" />
                         <span className="font-bold">${room.total_charge?.toFixed(2)}</span>
