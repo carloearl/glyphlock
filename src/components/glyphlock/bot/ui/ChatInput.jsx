@@ -144,24 +144,22 @@ export default function ChatInput({
   };
 
   return (
-    <div className="border-t-2 border-purple-500/30 px-4 py-5" style={{ position: 'relative', zIndex: 9999, background: 'rgba(10, 10, 20, 0.9)', backdropFilter: 'blur(20px)' }}>
-      <div className="max-w-4xl mx-auto" style={{ position: 'relative', zIndex: 10000 }}>
-        <div className="relative flex items-end gap-3 border-2 border-purple-500/40 rounded-2xl p-3 focus-within:border-cyan-400 focus-within:shadow-[0_0_30px_rgba(6,182,212,0.4),inset_0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300 backdrop-blur-xl shadow-[0_0_20px_rgba(168,85,247,0.2)]" style={{ position: 'relative', zIndex: 10001, background: 'rgba(10, 10, 20, 0.8)' }}>
-          <div className="flex items-center gap-1 pb-1">
-            <button
-              type="button"
-              onClick={toggleVoiceInput}
-              style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minHeight: '44px', minWidth: '44px' }}
-              className={`p-2.5 rounded-xl border transition-all duration-300 ${
-                isListening 
-                  ? 'text-red-400 bg-red-500/20 border-red-400 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.6)]' 
-                  : 'text-purple-400 hover:text-cyan-300 hover:bg-purple-500/20 border-purple-500/30 hover:border-cyan-400/50 shadow-[0_0_10px_rgba(168,85,247,0.2)] hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              }`}
-              title={isListening ? 'Stop voice input' : 'Start voice input'}
-            >
-              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            </button>
-          </div>
+    <div className="border-t border-white/10 px-4 py-3" style={{ position: 'relative', zIndex: 9999, background: 'rgba(10, 10, 20, 0.95)', backdropFilter: 'blur(20px)' }}>
+      <div className="max-w-4xl mx-auto">
+        <div className="relative flex items-end gap-2 border border-white/10 rounded-xl p-2.5 focus-within:border-cyan-400/50 transition-all bg-white/[0.03]">
+          <button
+            type="button"
+            onClick={toggleVoiceInput}
+            style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
+            className={`p-2 rounded-lg transition-all ${
+              isListening 
+                ? 'text-red-400 bg-red-500/20 border border-red-400/50 animate-pulse' 
+                : 'text-slate-500 hover:text-white hover:bg-white/5'
+            }`}
+            title={isListening ? 'Stop voice input' : 'Start voice input'}
+          >
+            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </button>
 
           <textarea
             ref={textareaRef}
@@ -169,19 +167,19 @@ export default function ChatInput({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask GlyphBot about security, code, blockchain..."
+            placeholder="Ask anything..."
             disabled={disabled}
-            className="flex-1 resize-none bg-transparent text-white placeholder:text-purple-400/60 focus:outline-none text-sm leading-relaxed max-h-[150px] py-2"
-            style={{ fontSize: '16px', color: '#ffffff', position: 'relative', zIndex: 10002, fontWeight: '500' }}
+            className="flex-1 resize-none bg-transparent text-white placeholder:text-slate-500 focus:outline-none text-sm leading-relaxed max-h-[150px] py-2"
+            style={{ fontSize: '16px' }}
           />
 
-          <div className="flex items-center gap-2 pb-1">
+          <div className="flex items-center gap-1.5">
             {!isSending && (
               <button
                 type="button"
                 onClick={onRegenerate}
-                className="p-2.5 rounded-xl text-purple-400 hover:text-cyan-300 hover:bg-purple-500/20 border border-purple-500/30 hover:border-cyan-400/50 transition-all duration-300 shadow-[0_0_10px_rgba(168,85,247,0.2)] hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-                title="Regenerate last response"
+                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                title="Regenerate"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -191,31 +189,29 @@ export default function ChatInput({
               <button
                 type="button"
                 onClick={onStop}
-                className="p-3 rounded-xl bg-rose-500/30 border-2 border-rose-400 text-rose-300 hover:bg-rose-500/40 transition-all duration-300 shadow-[0_0_25px_rgba(244,63,94,0.5),inset_0_0_10px_rgba(244,63,94,0.2)]"
-                title="Stop generation"
+                className="p-2.5 rounded-lg bg-red-500/20 border border-red-400/30 text-red-300 hover:bg-red-500/30 transition-all"
+                title="Stop"
               >
-                <Square className="w-4 h-4 fill-current drop-shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
+                <Square className="w-4 h-4 fill-current" />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onSend}
                 disabled={!value.trim()}
-                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minHeight: '44px', minWidth: '44px' }}
-                className="p-3 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold hover:from-cyan-400 hover:via-blue-400 hover:to-purple-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_0_25px_rgba(6,182,212,0.6),0_0_50px_rgba(168,85,247,0.3)] disabled:shadow-none hover:shadow-[0_0_35px_rgba(6,182,212,0.8),0_0_60px_rgba(168,85,247,0.5)]"
-                title="Send message"
+                style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
+                className="p-2.5 rounded-lg bg-cyan-500 text-white hover:bg-cyan-400 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                title="Send"
               >
-                <Send className="w-4 h-4 drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
+                <Send className="w-4 h-4" />
               </button>
             )}
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-3 px-3 text-[11px]">
-          <span className="text-purple-400/70">Enter to send · Shift+Enter for new line</span>
-          {isSending && (
-            <span className="text-cyan-400 font-medium animate-pulse drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">Processing chain response...</span>
-          )}
+        <div className="flex items-center justify-between mt-1.5 px-2 text-[10px] text-slate-600">
+          <span>Enter to send · Shift+Enter for new line</span>
+          {isSending && <span className="text-cyan-500">Processing...</span>}
         </div>
       </div>
     </div>
