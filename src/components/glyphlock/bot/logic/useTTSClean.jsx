@@ -89,8 +89,8 @@ export default function useTTSClean(defaultSettings = {}) {
     // Merge: customSettings (per-call) > latest defaultSettings from parent > internal settings
     const finalSettings = { ...settings, ...defaultSettingsRef.current, ...customSettings };
     // PHASE 3: Resolve voiceProfile → voice (voiceProfile is the key used by ControlBar/GlyphBot.jsx)
-    const voice = finalSettings.voiceProfile || finalSettings.voice || 'nova';
-    const speed = Math.max(0.25, Math.min(4.0, finalSettings.speed || 1.0));
+    const voice = customSettings?.voiceProfile || customSettings?.voice || defaultSettingsRef.current?.voiceProfile || defaultSettingsRef.current?.voice || finalSettings.voiceProfile || finalSettings.voice || 'nova';
+    const speed = Math.max(0.25, Math.min(4.0, customSettings?.speed || defaultSettingsRef.current?.speed || finalSettings.speed || 1.0));
     const emotion = finalSettings.emotion || 'neutral';
 
     console.log('GLYPH VOICE: request started', { text: cleanText.slice(0, 50), voice, speed, emotion });
