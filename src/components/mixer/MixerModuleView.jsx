@@ -19,6 +19,9 @@ import AISidePanel from "@/components/mixer/AISidePanel";
 import SearchBar from "@/components/mixer/SearchBar";
 import DialogManager from "@/components/mixer/DialogManager";
 import KeyboardShortcutsDialog from "@/components/mixer/KeyboardShortcutsDialog";
+import DJPlayerSection from "@/components/mixer/DJPlayerSection";
+import SongUploadDialog from "@/components/mixer/SongUploadDialog";
+import AIPlaylistGenerator from "@/components/mixer/AIPlaylistGenerator";
 
 export default function MixerModuleView() {
   // ─── State hydration ───
@@ -33,6 +36,9 @@ export default function MixerModuleView() {
   const [editingProfile, setEditingProfile] = useState(null);
   const [focusZone, setFocusZone] = useState(null); // "deck" | "profile"
   const [showAIMobile, setShowAIMobile] = useState(false);
+  const [playerCollapsed, setPlayerCollapsed] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showAIPlaylist, setShowAIPlaylist] = useState(false);
 
   const activeProfile = useMemo(() => profiles.find((p) => p.id === uiState.activeProfileId), [profiles, uiState.activeProfileId]);
 
@@ -147,6 +153,25 @@ export default function MixerModuleView() {
     toast.success(`Duplicated "${src.name}"`);
   }, [profiles]);
 
+  // ─── Upload song handler ───
+  const handleUploadedSong = useCallback((songData) => {
+    const song = createSongEntry(songData);
+    setSongs((prev) => [...prev, song]);
+    if (activeProfile) {
+      setProfiles((prev) => prev.map((p) => (p.id === activeProfile.id ? { ...p, songIds: [...p.songIds, song.id] } : p)));
+    }
+  }, [activeProfile]);
+
+  // ─── AI bulk add songs ───
+  const handleAIBulkAddSongs = useCallback((songDataArray) => {
+    const newSongs = songDataArray.map((d) => createSongEntry(d));
+    setSongs((prev) => [...prev, ...newSongs]);
+    if (activeProfile) {
+      const newIds = newSongs.map((s) => s.id);
+      setProfiles((prev) => prev.map((p) => (p.id === activeProfile.id ? { ...p, songIds: [...p.songIds, ...newIds] } : p)));
+    }
+  }, [activeProfile]);
+
   // ─── AI apply ───
   const handleApplyAISuggestion = useCallback((type, data) => {
     if (type === "classify" && selectedSongId) {
@@ -229,6 +254,8 @@ export default function MixerModuleView() {
           onViewModeChange={(v) => setUiState((s) => ({ ...s, viewMode: v }))}
           onVibeFilterChange={(v) => setUiState((s) => ({ ...s, vibeFilter: v }))}
           onAddSong={() => { setEditingSong(null); setDialogMode(DialogMode.addSong); }}
+          onUploadSong={() => setShowUploadDialog(true)}
+          onAIPlaylist={() => setShowAIPlaylist(true)}
           onOpenArchive={() => setDialogMode(DialogMode.archive)}
           onOpenShortcuts={() => setDialogMode(DialogMode.shortcuts)}
         />
@@ -288,6 +315,16 @@ export default function MixerModuleView() {
         )}
       </div>
 
+      {/* DJ Player with crossfader */}
+      <DJPlayerSection
+        playingSongId={playingSongId}
+        songs={songs}
+        profileSongs={profileSongs}
+        onSkip={handleSkip}
+        collapsed={playerCollapsed}
+        onToggleCollapse={() => setPlayerCollapsed((c) => !c)}
+      />
+
       {/* Mobile profiles */}
       {isMobile && (
         <div className="h-16 flex-shrink-0 border-t border-slate-700/50 bg-slate-900/80 flex items-center gap-2 px-3 overflow-x-auto">
@@ -331,6 +368,21 @@ export default function MixerModuleView() {
       <KeyboardShortcutsDialog
         isOpen={dialogMode === DialogMode.shortcuts}
         onClose={() => setDialogMode(null)}
+      />
+
+      {/* Upload dialog */}
+      <SongUploadDialog
+        isOpen={showUploadDialog}
+        onClose={() => setShowUploadDialog(false)}
+        onSongCreated={handleUploadedSong}
+      />
+
+      {/* AI Playlist Generator */}
+      <AIPlaylistGenerator
+        isOpen={showAIPlaylist}
+        onClose={() => setShowAIPlaylist(false)}
+        profileName={activeProfile?.name}
+        onAddSongs={handleAIBulkAddSongs}
       />
 
       {/* Mobile AI modal */}
