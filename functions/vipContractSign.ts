@@ -90,6 +90,13 @@ Deno.serve(async (req) => {
       id_photo_back_url: id_photo_back_url || "",
       ip_address: clientIP,
       user_agent: userAgent,
+      metadata: {
+        host_name,
+        host_signature_hash: hostSignatureHash,
+        manager_name,
+        manager_signature_hash: managerSignatureHash,
+        signatures_count: 3,
+      },
     });
 
     // Create VIPGuest record with full biometric data
