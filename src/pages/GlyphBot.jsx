@@ -764,35 +764,29 @@ export default function GlyphBotPage() {
               emotionPresets={emotionPresets}
             />
 
-          {/* GLYPHLOCK: Provider Chain - Restored */}
-          {providerMeta && (
-            <div className="px-4 py-2 border-b border-slate-800/50 bg-slate-950/40">
-              <Logic.GlyphProviderChain
-                availableProviders={providerMeta.availableProviders}
-                providerStats={providerMeta.providerStats}
-                providerUsed={lastMeta?.providerUsed || provider}
+          {/* Provider panels — only visible when Panel mode toggled */}
+          {modes.panel && (
+            <div className="px-4 py-2 border-b border-slate-800/50 bg-slate-950/40 space-y-2">
+              {providerMeta && (
+                <Logic.GlyphProviderChain
+                  availableProviders={providerMeta.availableProviders}
+                  providerStats={providerMeta.providerStats}
+                  providerUsed={lastMeta?.providerUsed || provider}
+                />
+              )}
+              <UI.ProviderDebugPanel
+                providerMeta={providerMeta}
+                lastMeta={lastMeta}
               />
-            </div>
-          )}
-
-          {/* Provider Debug Panel - Always visible for monitoring */}
-          <div className="px-4 py-3 border-b border-slate-800/50 bg-slate-900/40">
-            <UI.ProviderDebugPanel
-              providerMeta={providerMeta}
-              lastMeta={lastMeta}
-            />
-          </div>
-
-          {/* GLYPHLOCK: Provider Status Panel - Restored (conditional) */}
-          {modes.panel && providerMeta && (
-            <div className="px-4 py-3 border-b border-slate-800/50 bg-slate-900/40">
-              <UI.ProviderStatusPanel
-                availableProviders={providerMeta.availableProviders}
-                providerStats={providerMeta.providerStats}
-                providerUsed={lastMeta?.providerUsed || provider}
-                jsonModeEnabled={modes.json || modes.struct || modes.audit}
-                onProviderSelect={(id) => setProvider(id)}
-              />
+              {providerMeta && (
+                <UI.ProviderStatusPanel
+                  availableProviders={providerMeta.availableProviders}
+                  providerStats={providerMeta.providerStats}
+                  providerUsed={lastMeta?.providerUsed || provider}
+                  jsonModeEnabled={modes.json || modes.struct || modes.audit}
+                  onProviderSelect={(id) => setProvider(id)}
+                />
+              )}
             </div>
           )}
 
@@ -912,92 +906,60 @@ export default function GlyphBotPage() {
               </aside>
             )}
 
-            {/* GLYPHLOCK: Telemetry Sidebar - Restored */}
-            <aside className="hidden xl:flex w-72 flex-col border-l-2 border-purple-500/30 bg-gradient-to-b from-slate-950/90 via-purple-950/10 to-slate-950/90 overflow-hidden">
-              <div className="px-4 py-4 border-b-2 border-purple-500/30 bg-purple-500/10">
-                <div className="flex items-center gap-2 text-xs">
-                  <Activity className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                  <span className="uppercase tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 font-bold">Telemetry</span>
+            {/* Telemetry Sidebar — only on xl screens, compact */}
+            {modes.panel && (
+              <aside className="hidden xl:flex w-64 flex-col border-l border-white/5 bg-slate-950/50 overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/5">
+                  <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Session</span>
                 </div>
-              </div>
-
-              <div className="flex-1 chat-scroll-container p-4 space-y-3">
-                {/* GLYPHLOCK: Rolling feed of last 5 messages */}
-                {messages.slice(-5).reverse().filter(m => m && m.content && m.role !== 'system').map((m, idx) => (
-                  <div key={m.id || `telem-${idx}`} className="rounded-xl border-2 border-purple-500/30 bg-slate-900/60 p-3 hover:border-cyan-400/50 transition-all duration-300 shadow-[0_0_10px_rgba(168,85,247,0.15)]">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-[9px] uppercase tracking-wider font-bold px-2 py-1 rounded-lg ${
-                        m.role === 'assistant' 
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.3)]' 
-                          : 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                      }`}>
-                        {m.role === 'assistant' ? 'Bot' : 'You'}
-                      </span>
-                      {m.latencyMs && (
-                        <span className="text-[9px] text-cyan-400/70 font-mono">{m.latencyMs}ms</span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-slate-300 line-clamp-2">{m.content}</p>
-                  </div>
-                ))}
-
-                {/* Current Session Stats */}
-                <div className="space-y-2 pt-3 border-t border-purple-500/20">
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Current Session</div>
+                <div className="flex-1 chat-scroll-container p-3 space-y-3">
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-slate-900/60 border border-purple-500/30 rounded-lg p-2">
+                    <div className="bg-white/[0.03] border border-white/5 rounded-lg p-2 text-center">
                       <div className="text-lg font-bold text-cyan-300">{messages.length - 1}</div>
-                      <div className="text-[9px] text-slate-400 uppercase">Messages</div>
+                      <div className="text-[9px] text-slate-500 uppercase">Messages</div>
                     </div>
-                    <div className="bg-slate-900/60 border border-purple-500/30 rounded-lg p-2">
+                    <div className="bg-white/[0.03] border border-white/5 rounded-lg p-2 text-center">
                       <div className="text-lg font-bold text-purple-300">{chatCount}</div>
-                      <div className="text-[9px] text-slate-400 uppercase">Total Chats</div>
+                      <div className="text-[9px] text-slate-500 uppercase">Total</div>
                     </div>
+                  </div>
+
+                  {lastMeta && (
+                    <div className="p-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5">
+                      <div className="text-[9px] uppercase tracking-wider text-cyan-400 font-bold mb-2">Last Response</div>
+                      <div className="space-y-1 text-[10px] text-slate-400">
+                        <div className="text-cyan-200 font-medium">{lastMeta.providerLabel || lastMeta.model}</div>
+                        {lastMeta.realTimeUsed && <div className="text-emerald-400">✓ Web search</div>}
+                        {lastMeta.shouldSpeak && <div className="text-purple-400">✓ Voice</div>}
+                      </div>
+                    </div>
+                  )}
+
+                  {modes.voice && (
+                    <div className="p-3 rounded-lg border border-purple-500/20 bg-purple-500/5">
+                      <div className="text-[9px] uppercase tracking-wider text-purple-400 font-bold mb-2">Voice</div>
+                      <div className="space-y-0.5 text-[10px] text-slate-400">
+                        <div>{voiceSettings.voiceProfile} · {voiceSettings.speed}x</div>
+                        <div>{voiceSettings.emotion}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recent messages feed */}
+                  <div className="space-y-2 pt-2 border-t border-white/5">
+                    <div className="text-[9px] text-slate-500 uppercase tracking-wider">Recent</div>
+                    {messages.slice(-4).reverse().filter(m => m?.content && m.role !== 'system').map((m, idx) => (
+                      <div key={m.id || `telem-${idx}`} className="bg-white/[0.02] border border-white/5 rounded-lg p-2">
+                        <span className={`text-[8px] uppercase tracking-wider font-bold ${m.role === 'assistant' ? 'text-cyan-400' : 'text-purple-400'}`}>
+                          {m.role === 'assistant' ? 'Bot' : 'You'}
+                        </span>
+                        <p className="text-[10px] text-slate-400 line-clamp-2 mt-0.5">{m.content}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
-
-                {/* Last Response Metadata */}
-                {lastMeta && (
-                  <div className="p-4 rounded-xl border-2 border-cyan-500/40 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
-                    <div className="text-[9px] uppercase tracking-[0.25em] text-cyan-400 font-bold mb-3">Last Response</div>
-                    <div className="space-y-2 text-[11px]">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-3.5 h-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
-                        <span className="text-cyan-200 font-medium">{lastMeta.providerLabel || lastMeta.model}</span>
-                      </div>
-                      {lastMeta.realTimeUsed && (
-                        <div className="text-emerald-400 flex items-center gap-1">
-                          <span className="drop-shadow-[0_0_4px_rgba(52,211,153,0.8)]">✓</span> Web search active
-                        </div>
-                      )}
-                      {lastMeta.shouldSpeak && (
-                        <div className="text-purple-400 flex items-center gap-1">
-                          <span className="drop-shadow-[0_0_4px_rgba(168,85,247,0.8)]">✓</span> Voice enabled
-                        </div>
-                      )}
-                      {(modes.json || modes.struct || modes.audit) && (
-                        <div className="text-amber-400 flex items-center gap-1">
-                          <span className="drop-shadow-[0_0_4px_rgba(245,158,11,0.8)]">✓</span> JSON mode
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Voice Settings Quick View */}
-                {modes.voice && (
-                  <div className="p-3 rounded-xl border border-purple-500/30 bg-slate-900/40">
-                    <div className="text-[9px] uppercase tracking-wider text-purple-400 font-bold mb-2">Active Voice</div>
-                    <div className="space-y-1 text-[10px] text-slate-300">
-                      <div>Profile: <span className="text-cyan-300">{voiceSettings.voiceProfile}</span></div>
-                      <div>Speed: <span className="text-cyan-300">{voiceSettings.speed}x</span></div>
-                      <div>Pitch: <span className="text-cyan-300">{voiceSettings.pitch}x</span></div>
-                      <div>Emotion: <span className="text-cyan-300">{voiceSettings.emotion}</span></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </aside>
+              </aside>
+            )}
           </div>
 
           {/* Input Bar */}
