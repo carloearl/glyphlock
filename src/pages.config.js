@@ -125,6 +125,7 @@ import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
 import NUPSReport from './pages/NUPSReport';
+import GlyphLockFinancial from './pages/GlyphLockFinancial';
 import __Layout from './Layout.jsx';
 
 
@@ -207,6 +208,7 @@ export const PAGES = {
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
     "NUPSReport": NUPSReport,
+    "GlyphLockFinancial": GlyphLockFinancial,
 }
 
 export const pagesConfig = {
