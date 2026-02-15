@@ -3,6 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 const MAX_DAILY_SESSIONS = 3;
 const MAX_STEPS_PER_SESSION = 15;
+// GlyphBot Browser Agent v1.0
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
