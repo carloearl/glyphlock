@@ -5,8 +5,8 @@ import React from "react";
 import { Star, Archive, Play, SkipForward, ExternalLink, Copy, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import VibeBadge from "./VibeBadge";
-import { VIBE_META } from "../types/mixerTypes";
+import VibeBadge from "@/components/mixer/components/VibeBadge";
+import { VIBE_META } from "@/components/mixer/types/mixerTypes";
 
 function energyColor(level) {
   if (level <= 3) return "#06b6d4"; // cool

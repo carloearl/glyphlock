@@ -5,8 +5,8 @@ import React, { useState } from "react";
 import { Sparkles, Zap, BarChart3, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { classifySong, suggestPlaylist, optimizeProfile } from "../services/aiMixerAssistant";
-import { VIBE_META } from "../types/mixerTypes";
+import { classifySong, suggestPlaylist, optimizeProfile } from "@/components/mixer/services/aiMixerAssistant";
+import { VIBE_META } from "@/components/mixer/types/mixerTypes";
 
 export default function AISidePanel({ profile, songs, selectedSong, profileSongs, onApplySuggestion }) {
   const [suggestions, setSuggestions] = useState(null);

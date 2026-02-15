@@ -4,7 +4,7 @@
  * Handles classify, suggest, optimize with retry logic
  */
 import { base44 } from "@/api/base44Client";
-import { emitTelemetry } from "../events/mixerTelemetry";
+import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 
 const MAX_RETRIES = 3;
 const BACKOFF = [1000, 2000, 4000];

@@ -5,7 +5,7 @@ import React from "react";
 import { Plus, Archive, HelpCircle, LayoutGrid, List, Disc3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrackVibe, VIBE_META, ViewMode } from "../types/mixerTypes";
+import { TrackVibe, VIBE_META, ViewMode } from "@/components/mixer/types/mixerTypes";
 
 const viewIcons = { grid: LayoutGrid, list: List, mixer: Disc3 };
 

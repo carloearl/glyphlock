@@ -2,7 +2,7 @@
  * VibeBadge - Color-coded vibe label with tooltip
  */
 import React from "react";
-import { VIBE_META } from "../types/mixerTypes";
+import { VIBE_META } from "@/components/mixer/types/mixerTypes";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function VibeBadge({ vibe, size = "sm" }) {

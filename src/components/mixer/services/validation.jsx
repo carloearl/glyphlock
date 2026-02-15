@@ -2,8 +2,8 @@
  * Mixer Validation
  * Song and Profile validation with user-friendly error messages
  */
-import { TrackVibe } from "../types/mixerTypes";
-import { emitTelemetry } from "../events/mixerTelemetry";
+import { TrackVibe } from "@/components/mixer/types/mixerTypes";
+import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 
 const YT_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?].*)?$/;
 

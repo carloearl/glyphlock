@@ -3,7 +3,7 @@
  * localStorage persistence with atomic writes and quota error handling
  */
 import { toast } from "sonner";
-import { emitTelemetry } from "../events/mixerTelemetry";
+import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 
 const KEYS = {
   songs: "glyphbot_mixer_songs_v1",

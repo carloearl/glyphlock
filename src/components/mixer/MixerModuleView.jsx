@@ -7,18 +7,18 @@ import { toast } from "sonner";
 import { Disc3, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-import { createSongEntry, createDancerProfile, DialogMode, ViewMode } from "./types/mixerTypes";
-import { loadSongs, saveSongs, loadProfiles, saveProfiles, loadState, saveState } from "./services/storageService";
-import { emitTelemetry } from "./events/mixerTelemetry";
-import { parseYoutubeUrl } from "./services/validation";
+import { createSongEntry, createDancerProfile, DialogMode, ViewMode } from "@/components/mixer/types/mixerTypes";
+import { loadSongs, saveSongs, loadProfiles, saveProfiles, loadState, saveState } from "@/components/mixer/services/storageService";
+import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
+import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 
-import ProfilePanel from "./components/ProfilePanel";
-import SongDeck from "./components/SongDeck";
-import MixerControls from "./components/MixerControls";
-import AISidePanel from "./components/AISidePanel";
-import SearchBar from "./components/SearchBar";
-import DialogManager from "./components/DialogManager";
-import KeyboardShortcutsDialog from "./components/KeyboardShortcutsDialog";
+import ProfilePanel from "@/components/mixer/components/ProfilePanel";
+import SongDeck from "@/components/mixer/components/SongDeck";
+import MixerControls from "@/components/mixer/components/MixerControls";
+import AISidePanel from "@/components/mixer/components/AISidePanel";
+import SearchBar from "@/components/mixer/components/SearchBar";
+import DialogManager from "@/components/mixer/components/DialogManager";
+import KeyboardShortcutsDialog from "@/components/mixer/components/KeyboardShortcutsDialog";
 
 export default function MixerModuleView() {
   // ─── State hydration ───

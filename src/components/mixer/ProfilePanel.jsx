@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { Plus, Trash2, Pencil, Copy, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { emitTelemetry } from "../events/mixerTelemetry";
+import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 
 export default function ProfilePanel({
   profiles,

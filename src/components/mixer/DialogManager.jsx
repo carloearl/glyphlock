@@ -10,9 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { TrackVibe, VIBE_META, createSongEntry, createDancerProfile } from "../types/mixerTypes";
-import { validateSong, validateProfile, parseYoutubeUrl } from "../services/validation";
-import { classifySong } from "../services/aiMixerAssistant";
+import { TrackVibe, VIBE_META, createSongEntry, createDancerProfile } from "@/components/mixer/types/mixerTypes";
+import { validateSong, validateProfile, parseYoutubeUrl } from "@/components/mixer/services/validation";
+import { classifySong } from "@/components/mixer/services/aiMixerAssistant";
 import { Sparkles, Loader2, Archive, RotateCcw } from "lucide-react";
 
 // ─── Song Form (shared for add/edit) ───
