@@ -130,6 +130,10 @@ Deno.serve(async (req) => {
       verification_status: "verified",
       id_verified_date: now,
       membership_number: serial_number,
+      manager_witness: manager_name,
+      manager_signature: manager_signature,
+      second_witness: host_name,
+      second_witness_signature: host_signature,
     });
 
     // Update contract record with guest reference
