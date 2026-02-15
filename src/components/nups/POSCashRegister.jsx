@@ -350,74 +350,186 @@ export default function POSCashRegister({ user }) {
         </Card>
       </div>
 
-      {/* Payment Dialog */}
+      {/* Payment Dialog — Robust Multi-Method */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="glass-card-dark border-cyan-500/30 text-white max-w-md">
+        <DialogContent className="glass-card-dark border-cyan-500/30 text-white max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Complete Payment</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-green-400" />
+              Complete Payment
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="glass-card p-4 text-center">
-              <div className="text-sm text-gray-400 mb-1">Total Amount</div>
+            {/* Total Display */}
+            <div className="glass-card p-4 text-center border-green-500/30">
+              <div className="text-xs text-gray-400 mb-1">TOTAL DUE</div>
               <div className="text-4xl font-bold text-green-400">${total.toFixed(2)}</div>
+              <div className="text-xs text-gray-500 mt-1">{cart.length} item{cart.length !== 1 ? 's' : ''} • Tax ${tax.toFixed(2)}</div>
             </div>
 
+            {/* Payment Method Selection — Large Tap Buttons */}
             <div>
-              <Label className="text-sm text-gray-400 mb-2 block">Payment Method</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger className="glass-input">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass-card-dark border-gray-700">
-                  <SelectItem value="Cash">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      Cash
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Credit Card">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" />
-                      Credit Card
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Debit Card">Debit Card</SelectItem>
-                  <SelectItem value="Digital Wallet">Digital Wallet</SelectItem>
-                  <SelectItem value="Gift Card">Gift Card</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-xs text-gray-400 mb-2 block">SELECT PAYMENT METHOD</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: "Cash", icon: <DollarSign className="w-5 h-5" />, color: "green" },
+                  { value: "Credit Card", icon: <CreditCard className="w-5 h-5" />, label: "Card Swipe", color: "cyan" },
+                  { value: "Debit Card", icon: <CreditCard className="w-5 h-5" />, label: "Debit", color: "blue" },
+                ].map(m => (
+                  <Button key={m.value} variant="outline"
+                    onClick={() => setPaymentMethod(m.value)}
+                    className={`h-16 flex-col gap-1 ${paymentMethod === m.value 
+                      ? `bg-${m.color}-500/20 border-${m.color}-500/60 text-${m.color}-400` 
+                      : 'border-gray-700 text-gray-400'}`}
+                    style={paymentMethod === m.value ? { 
+                      background: m.color === 'green' ? 'rgba(34,197,94,0.15)' : m.color === 'cyan' ? 'rgba(6,182,212,0.15)' : 'rgba(59,130,246,0.15)',
+                      borderColor: m.color === 'green' ? 'rgba(34,197,94,0.5)' : m.color === 'cyan' ? 'rgba(6,182,212,0.5)' : 'rgba(59,130,246,0.5)'
+                    } : {}}>
+                    {m.icon}
+                    <span className="text-xs font-bold">{m.label || m.value}</span>
+                  </Button>
+                ))}
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {[
+                  { value: "Digital Wallet", label: "Tap / NFC", color: "purple" },
+                  { value: "Gift Card", label: "Gift Card", color: "amber" },
+                  { value: "Tab", label: "Room Tab", color: "pink" },
+                ].map(m => (
+                  <Button key={m.value} variant="outline"
+                    onClick={() => setPaymentMethod(m.value)}
+                    className={`h-12 flex-col gap-0.5 ${paymentMethod === m.value ? 'border-white/40 text-white' : 'border-gray-700 text-gray-500'}`}
+                    style={paymentMethod === m.value ? { background: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.3)' } : {}}>
+                    <span className="text-xs font-bold">{m.label}</span>
+                  </Button>
+                ))}
+              </div>
             </div>
 
+            {/* CASH — Quick Tender + Numpad + Change */}
             {paymentMethod === "Cash" && (
-              <>
+              <div className="space-y-3">
+                <Label className="text-xs text-gray-400">QUICK TENDER</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    Math.ceil(total),
+                    Math.ceil(total / 5) * 5,
+                    Math.ceil(total / 10) * 10,
+                    Math.ceil(total / 20) * 20,
+                    50, 100, 200, 500
+                  ].filter((v, i, a) => a.indexOf(v) === i && v >= total).slice(0, 4).map(amt => (
+                    <Button key={amt} variant="outline"
+                      onClick={() => setCashTendered(amt)}
+                      className={`h-12 text-lg font-bold ${cashTendered === amt ? 'bg-green-500/20 border-green-500/50 text-green-400' : 'border-gray-700 text-gray-300'}`}>
+                      ${amt}
+                    </Button>
+                  ))}
+                </div>
                 <POSNumpad
                   value={String(cashTendered || "0")}
                   onChange={(val) => setCashTendered(parseFloat(val) || 0)}
                 />
                 {cashTendered >= total && (
-                  <div className="glass-card p-4 border-green-500/30">
-                    <div className="text-sm text-gray-400 mb-1">Change Due</div>
+                  <div className="glass-card p-4 border-green-500/30 text-center">
+                    <div className="text-xs text-gray-400 mb-1">CHANGE DUE</div>
                     <div className="text-3xl font-bold text-green-400">${change.toFixed(2)}</div>
                   </div>
                 )}
-              </>
+                {cashTendered > 0 && cashTendered < total && (
+                  <div className="text-center text-xs text-red-400">
+                    Short ${(total - cashTendered).toFixed(2)} — need ${total.toFixed(2)} total
+                  </div>
+                )}
+              </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowPaymentDialog(false)}
-                className="border-gray-700"
-              >
+            {/* CARD — Swipe/Insert/Tap prompt */}
+            {(paymentMethod === "Credit Card" || paymentMethod === "Debit Card") && (
+              <div className="glass-card p-6 border-cyan-500/30 text-center space-y-3">
+                <CreditCard className="w-12 h-12 text-cyan-400 mx-auto animate-pulse" />
+                <h3 className="text-lg font-bold text-cyan-400">
+                  {paymentMethod === "Credit Card" ? "Swipe, Insert, or Tap Card" : "Insert Debit Card"}
+                </h3>
+                <div className="grid grid-cols-3 gap-3 text-xs text-gray-400">
+                  <div className="bg-gray-800/50 rounded-lg p-3">
+                    <div className="text-2xl mb-1">👆</div>
+                    <div>Tap / NFC</div>
+                  </div>
+                  <div className="bg-gray-800/50 rounded-lg p-3">
+                    <div className="text-2xl mb-1">💳</div>
+                    <div>Insert Chip</div>
+                  </div>
+                  <div className="bg-gray-800/50 rounded-lg p-3">
+                    <div className="text-2xl mb-1">↔️</div>
+                    <div>Swipe</div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">Waiting for card reader...</p>
+                <div className="flex gap-2">
+                  <Input placeholder="Manual card last 4 (optional)" className="glass-input text-center font-mono" maxLength={4} />
+                </div>
+              </div>
+            )}
+
+            {/* DIGITAL WALLET / TAP */}
+            {paymentMethod === "Digital Wallet" && (
+              <div className="glass-card p-6 border-purple-500/30 text-center space-y-3">
+                <div className="text-5xl">📱</div>
+                <h3 className="text-lg font-bold text-purple-400">Tap Phone or Watch</h3>
+                <p className="text-xs text-gray-400">Apple Pay • Google Pay • Samsung Pay</p>
+                <p className="text-xs text-gray-500">Hold device near terminal...</p>
+              </div>
+            )}
+
+            {/* GIFT CARD */}
+            {paymentMethod === "Gift Card" && (
+              <div className="space-y-3">
+                <div className="glass-card p-4 border-amber-500/30 text-center">
+                  <div className="text-3xl mb-2">🎁</div>
+                  <h3 className="text-sm font-bold text-amber-400">Scan or Enter Gift Card</h3>
+                </div>
+                <Input placeholder="Gift card number or scan barcode..." className="glass-input text-center font-mono text-lg" />
+              </div>
+            )}
+
+            {/* ROOM TAB */}
+            {paymentMethod === "Tab" && (
+              <div className="space-y-3">
+                <div className="glass-card p-4 border-pink-500/30 text-center">
+                  <div className="text-3xl mb-2">🏨</div>
+                  <h3 className="text-sm font-bold text-pink-400">Charge to Room / VIP Tab</h3>
+                </div>
+                <Input placeholder="Room number or guest name..." className="glass-input text-center font-mono text-lg" />
+              </div>
+            )}
+
+            {/* Tip Line */}
+            <div className="border-t border-gray-800 pt-3">
+              <Label className="text-xs text-gray-400 mb-2 block">ADD TIP (Optional)</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {[15, 18, 20, 25].map(pct => {
+                  const tipAmt = (subtotal * pct / 100);
+                  return (
+                    <Button key={pct} size="sm" variant="outline" className="border-gray-700 text-gray-300 flex-col h-12"
+                      onClick={() => {/* Tip would be added to total in production */}}>
+                      <span className="text-xs font-bold">{pct}%</span>
+                      <span className="text-[10px] text-gray-500">${tipAmt.toFixed(2)}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Button variant="outline" onClick={() => setShowPaymentDialog(false)} className="border-gray-700 h-12">
                 Cancel
               </Button>
-              <Button
-                onClick={completeTransaction}
+              <Button onClick={completeTransaction}
                 disabled={paymentMethod === "Cash" && cashTendered < total}
-                className="bg-gradient-to-r from-green-500 to-emerald-600"
-              >
-                <Receipt className="w-4 h-4 mr-2" />
-                Complete Sale
+                className="bg-gradient-to-r from-green-500 to-emerald-600 h-12 text-lg font-bold">
+                <Receipt className="w-5 h-5 mr-2" />
+                Complete
               </Button>
             </div>
           </div>

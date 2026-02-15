@@ -72,9 +72,9 @@ export default function VIPContract() {
   const [managerName, setManagerName] = useState("");
   const [managerSignature, setManagerSignature] = useState("");
   const [allSigned, setAllSigned] = useState(false);
-  const [contractRecordId, setContractRecordId] = useState("");
   const [printed, setPrinted] = useState(false);
   const [hardcopyDone, setHardcopyDone] = useState(false);
+  const [contractRecordId, setContractRecordId] = useState(null);
 
   const [serialNumber] = useState(`VIP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`);
   const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -329,8 +329,9 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
     if (response.data?.success) {
       setSuccess(true);
       setAllSigned(true);
-      // Store the contract record ID for hardcopy rescan
-      if (response.data?.contract_id) setContractRecordId(response.data.contract_id);
+      // Try to find the contract record ID for rescan
+      const records = await base44.entities.VIPContractRecord.filter({ serial_number: serialNumber });
+      if (records.length > 0) setContractRecordId(records[0].id);
     } else {
       setError(response.data?.error || 'Contract signing failed');
     }
@@ -462,79 +463,62 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
   // --- SUCCESS ---
   if (success) {
     return (
-      <div className="min-h-screen bg-black text-white py-8 md:py-16">
-        <div className="container mx-auto px-4 max-w-2xl space-y-6">
-
+      <div className="min-h-screen bg-black text-white py-8 px-4">
+        <div className="max-w-lg mx-auto space-y-6">
           {/* Header */}
           <Card className="bg-gray-900/80 border-green-500/30">
-            <CardContent className="p-8 space-y-4">
+            <CardContent className="p-6 space-y-4">
               <div className="text-center">
-                <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-3" />
-                <h1 className="text-2xl font-bold">Contract Fully Executed</h1>
+                <CheckCircle2 className="w-14 h-14 text-green-400 mx-auto mb-2" />
+                <h1 className="text-xl font-bold">Contract Fully Executed</h1>
                 <Badge className="mt-2 bg-green-500/20 text-green-400 border-green-500/40 text-sm px-4 py-1">
                   Serial: {serialNumber}
                 </Badge>
               </div>
 
-              {/* All 3 signatures */}
-              <div className="space-y-2 pt-4 border-t border-gray-800">
+              {/* Signatures */}
+              <div className="space-y-2 pt-3 border-t border-gray-800">
                 <div className="text-xs font-bold text-gray-300 mb-2">EXECUTED SIGNATURES (3 of 3):</div>
-                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-gray-400">Guest / Patron</div>
-                    <div className="text-sm font-bold text-white" style={{ fontFamily: 'cursive, serif' }}>{signature}</div>
-                  </div>
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-2 flex items-center justify-between">
+                  <div><div className="text-[10px] text-gray-400">Guest</div><div className="text-sm font-bold" style={{ fontFamily: 'cursive, serif' }}>{signature}</div></div>
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
                 </div>
-                <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-gray-400">VIP Host / Entertainer</div>
-                    <div className="text-sm font-bold text-white" style={{ fontFamily: 'cursive, serif' }}>{hostSignature}</div>
-                  </div>
-                  <CheckCircle2 className="w-5 h-5 text-cyan-400" />
+                <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-2 flex items-center justify-between">
+                  <div><div className="text-[10px] text-gray-400">Host</div><div className="text-sm font-bold" style={{ fontFamily: 'cursive, serif' }}>{hostSignature}</div></div>
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400" />
                 </div>
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-gray-400">Manager on Duty</div>
-                    <div className="text-sm font-bold text-white" style={{ fontFamily: 'cursive, serif' }}>{managerSignature}</div>
-                  </div>
-                  <CheckCircle2 className="w-5 h-5 text-amber-400" />
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2 flex items-center justify-between">
+                  <div><div className="text-[10px] text-gray-400">Manager</div><div className="text-sm font-bold" style={{ fontFamily: 'cursive, serif' }}>{managerSignature}</div></div>
+                  <CheckCircle2 className="w-4 h-4 text-amber-400" />
                 </div>
               </div>
 
-              <div className="text-xs text-gray-600 space-y-1 pt-3 border-t border-gray-800">
-                <p>✓ Guest photo captured at signing</p>
-                <p>✓ Thumbprint hashed (SHA-256) & archived</p>
-                <p>✓ Government ID verified & stored</p>
+              <div className="text-xs text-gray-600 space-y-0.5 pt-2 border-t border-gray-800">
+                <p>✓ Guest photo captured</p>
+                <p>✓ Thumbprint hashed (SHA-256)</p>
+                <p>✓ Government ID verified</p>
                 <p>✓ Card ({cardType} •••• {cardLast4}) authorized</p>
-                <p>✓ All 3 digital signatures timestamped</p>
-                <p>✓ IP address & device fingerprint recorded</p>
+                <p>✓ All 3 signatures timestamped</p>
               </div>
 
+              {/* Print Button */}
               {!printed ? (
                 <Button onClick={handlePrintAndAdvance}
                   className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold">
                   <FileText className="w-5 h-5 mr-2" />
-                  Print Contract — Guest Signs Paper Copy Next
+                  Print Contract — Guest Signs Physical Copy Next
                 </Button>
-              ) : !hardcopyDone ? (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-center">
-                  <p className="text-sm font-bold text-amber-400">✓ Printed — Now have the guest sign the paper copy, then rescan below</p>
-                  <Button onClick={() => printContract()} variant="outline" size="sm"
-                    className="mt-2 border-gray-700 text-gray-400">
-                    <FileText className="w-3 h-3 mr-1" /> Reprint
-                  </Button>
-                </div>
               ) : (
-                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-center">
-                  <p className="text-sm font-bold text-green-400">✓ Hardcopy archived — Contract fully complete</p>
+                <div className="flex items-center gap-2 text-green-400 text-xs bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Contract printed. Now have guest sign the physical copy, then rescan below.
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Hardcopy Rescan — appears after printing */}
-          {printed && !hardcopyDone && (
+          {/* Post-Print Hardcopy Rescan — appears after print */}
+          {printed && !hardcopyDone && contractRecordId && (
             <HardcopyRescan
               serialNumber={serialNumber}
               contractId={contractRecordId}
@@ -543,14 +527,15 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
             />
           )}
 
+          {/* Final confirmation */}
           {hardcopyDone && (
-            <Card className="bg-gray-900/60 border-green-500/30">
-              <CardContent className="p-6 text-center text-xs text-gray-600 space-y-1">
-                <p>✓ Digital contract signed (3 signatures)</p>
-                <p>✓ Printed & physically signed</p>
-                <p>✓ Hardcopy photographed & barcode scanned</p>
-                <p>✓ Permanently archived — searchable in Contract Archive</p>
-                <p className="font-mono text-purple-400 pt-2">{serialNumber}</p>
+            <Card className="bg-green-500/10 border-green-500/40">
+              <CardContent className="p-6 text-center space-y-2">
+                <Shield className="w-12 h-12 text-green-400 mx-auto" />
+                <h2 className="text-lg font-bold text-green-400">Contract Complete & Archived</h2>
+                <p className="text-xs text-gray-400">
+                  Digital + physical signed copies archived. Searchable by name, card, or serial in Contract Archive.
+                </p>
               </CardContent>
             </Card>
           )}
