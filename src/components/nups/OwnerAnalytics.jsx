@@ -55,6 +55,9 @@ export default function OwnerAnalytics({ transactions = [] }) {
 
   return (
     <div className="space-y-6">
+      {/* Top Line & Tip Breakdown */}
+      <TopLineTipBreakdown transactions={transactions} />
+
       {/* Revenue Cards */}
       <div className="stats-grid grid grid-cols-2 lg:grid-cols-4 gap-3">
         {cards.map((c) => (
