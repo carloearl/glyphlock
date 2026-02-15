@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import ReceiptPrinter from "./ReceiptPrinter";
+import POSNumpad from "./POSNumpad";
 
 export default function POSCashRegister({ user }) {
   const queryClient = useQueryClient();
@@ -389,17 +390,10 @@ export default function POSCashRegister({ user }) {
 
             {paymentMethod === "Cash" && (
               <>
-                <div>
-                  <Label className="text-sm text-gray-400 mb-2 block">Cash Tendered</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={cashTendered}
-                    onChange={(e) => setCashTendered(parseFloat(e.target.value) || 0)}
-                    className="glass-input text-white text-2xl text-center"
-                    placeholder="0.00"
-                  />
-                </div>
+                <POSNumpad
+                  value={String(cashTendered || "0")}
+                  onChange={(val) => setCashTendered(parseFloat(val) || 0)}
+                />
                 {cashTendered >= total && (
                   <div className="glass-card p-4 border-green-500/30">
                     <div className="text-sm text-gray-400 mb-1">Change Due</div>
