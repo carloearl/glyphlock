@@ -92,12 +92,12 @@ export default function GlyphBotPage() {
 
   // Phase 7C: Voice profiles and emotions (static defaults)
   const voiceProfiles = [
-    { id: 'neutral_female', label: 'Nova (Neutral Female)' },
-    { id: 'neutral_male', label: 'Onyx (Neutral Male)' },
-    { id: 'warm_female', label: 'Shimmer (Warm Female)' },
-    { id: 'warm_male', label: 'Echo (Warm Male)' },
-    { id: 'professional_female', label: 'Alloy (Professional)' },
-    { id: 'professional_male', label: 'Fable (Storyteller)' }
+    { id: 'neutral_female', label: '♀ Nova (Neutral Female)' },
+    { id: 'warm_female', label: '♀ Shimmer (Warm Female)' },
+    { id: 'professional_female', label: '♀ Alloy (Professional)' },
+    { id: 'neutral_male', label: '♂ Onyx (Deep Male)' },
+    { id: 'warm_male', label: '♂ Echo (Warm Male)' },
+    { id: 'professional_male', label: '♂ Fable (Storyteller)' }
   ];
   const emotionPresets = [
     { id: 'neutral', label: 'Neutral' },
