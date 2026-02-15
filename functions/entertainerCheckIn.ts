@@ -47,12 +47,15 @@ Deno.serve(async (req) => {
       .then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''));
 
     await base44.asServiceRole.entities.SystemAuditLog.create({
-      action_type: "entertainer_contract_signed",
-      user_email: user.email,
-      details: {
-        entertainer_id,
+      event_type: "ENTERTAINER_CONTRACT_SIGNED",
+      description: `Entertainer ${user.full_name || user.email} signed contract`,
+      actor_email: user.email,
+      resource_id: entertainer_id,
+      ip_address: clientIP,
+      status: "success",
+      severity: "low",
+      metadata: {
         signature_hash: sigHash,
-        ip_address: clientIP,
         user_agent: userAgent,
         timestamp: new Date().toISOString(),
       }
