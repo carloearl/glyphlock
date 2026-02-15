@@ -64,9 +64,11 @@ Deno.serve(async (req) => {
     }
 
     const signatureHash = await sha256(signature);
+    const hostSignatureHash = await sha256(host_signature);
+    const managerSignatureHash = await sha256(manager_signature);
     const thumbprintHash = await sha256(`${thumbprint_url}:${guest_name}:${serial_number}`);
     const idHash = await sha256(`${government_id_number}:${guest_name}:${date_of_birth}`);
-    const contractHash = await sha256(`${serial_number}:${guest_name}:${card_last_four}:${thumbprintHash}:${signatureHash}:${now}`);
+    const contractHash = await sha256(`${serial_number}:${guest_name}:${card_last_four}:${thumbprintHash}:${signatureHash}:${hostSignatureHash}:${managerSignatureHash}:${now}`);
 
     // Mark token record as used
     await base44.asServiceRole.entities.VIPContractRecord.update(tokenRecord.id, {
