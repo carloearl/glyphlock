@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, TrendingUp, Calendar, BarChart3 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import TopLineTipBreakdown from "./TopLineTipBreakdown";
 
 const COLORS = ["#06b6d4", "#8b5cf6", "#f59e0b", "#10b981", "#ef4444"];
 
