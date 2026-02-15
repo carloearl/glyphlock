@@ -27,7 +27,6 @@ export default function AccountSecurity() {
   const [showRegenerateModal, setShowRegenerateModal] = useState(false);
   
   // Disable MFA form
-  const [disablePassword, setDisablePassword] = useState('');
   const [disableCode, setDisableCode] = useState('');
   const [isDisabling, setIsDisabling] = useState(false);
   
@@ -78,25 +77,26 @@ export default function AccountSecurity() {
   };
 
   const handleDisable = async () => {
-    if (!disablePassword || !disableCode) {
-      toast.error('Please fill in all fields');
+    if (!disableCode) {
+      toast.error('Please enter a verification code');
       return;
     }
 
     setIsDisabling(true);
     try {
-      await base44.functions.invoke('mfaDisable', {
-        password: disablePassword,
-        totpCode: disableCode
-      });
+      // Determine if it's a TOTP code (6 digits) or recovery code
+      const isTotpCode = /^\d{6}$/.test(disableCode);
+      await base44.functions.invoke('mfaDisable', isTotpCode
+        ? { totpCode: disableCode }
+        : { recoveryCode: disableCode }
+      );
 
       toast.success('MFA disabled successfully');
       setShowDisableModal(false);
-      setDisablePassword('');
       setDisableCode('');
       loadUserAndStatus();
     } catch (error) {
-      toast.error(error.message || 'Failed to disable MFA');
+      toast.error(error?.response?.data?.error || 'Failed to disable MFA');
     } finally {
       setIsDisabling(false);
     }
@@ -322,30 +322,20 @@ export default function AccountSecurity() {
             <Alert variant="destructive">
               <AlertTriangle className="w-4 h-4" />
               <AlertDescription>
-                Warning: Disabling MFA makes your account less secure
+                Warning: Disabling MFA makes your account less secure. You will need to set it up again if you want to re-enable it.
               </AlertDescription>
             </Alert>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-white">Password</label>
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                value={disablePassword}
-                onChange={(e) => setDisablePassword(e.target.value)}
-                className="bg-slate-800 border-slate-700 text-white"
-              />
-            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-white">Authenticator Code or Recovery Code</label>
               <Input
                 type="text"
-                placeholder="000000 or recovery code"
+                placeholder="6-digit code or recovery code"
                 value={disableCode}
                 onChange={(e) => setDisableCode(e.target.value)}
                 className="bg-slate-800 border-slate-700 text-white"
               />
+              <p className="text-xs text-slate-500">Enter a 6-digit code from your authenticator app, or one of your recovery codes</p>
             </div>
 
             <div className="flex gap-2">
@@ -353,7 +343,6 @@ export default function AccountSecurity() {
                 variant="outline"
                 onClick={() => {
                   setShowDisableModal(false);
-                  setDisablePassword('');
                   setDisableCode('');
                 }}
                 className="flex-1"
@@ -362,7 +351,7 @@ export default function AccountSecurity() {
               </Button>
               <Button
                 onClick={handleDisable}
-                disabled={isDisabling}
+                disabled={isDisabling || !disableCode}
                 className="flex-1 bg-red-600 hover:bg-red-700"
               >
                 {isDisabling ? 'Disabling...' : 'Disable MFA'}
