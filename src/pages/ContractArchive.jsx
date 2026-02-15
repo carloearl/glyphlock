@@ -25,7 +25,6 @@ export default function ContractArchive() {
       (c.guest_name || "").toLowerCase().includes(q) ||
       (c.card_last_four || "").includes(q) ||
       (c.serial_number || "").toLowerCase().includes(q) ||
-      (c.hardcopy_barcode_scan || "").toLowerCase().includes(q) ||
       (c.government_id_type || "").toLowerCase().includes(q) ||
       (c.government_id_state || "").toLowerCase().includes(q)
     );
@@ -45,7 +44,7 @@ export default function ContractArchive() {
           <Shield className="w-8 h-8 text-purple-400" />
           <div>
             <h1 className="text-2xl font-bold">Contract Archive</h1>
-            <p className="text-sm text-gray-400">Search by name, last 4 of card, serial number, barcode, or ID type</p>
+            <p className="text-sm text-gray-400">Search signed VIP contracts by name, last 4 of card, serial number, or ID type</p>
           </div>
         </div>
 
@@ -55,7 +54,7 @@ export default function ContractArchive() {
           <Input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search by guest name, card last 4, serial number, barcode..."
+            placeholder="Search by guest name, last 4 digits of card, serial number, ID type..."
             className="pl-10 h-12 text-lg bg-gray-900/60 border-gray-700"
           />
         </div>
@@ -112,20 +111,22 @@ export default function ContractArchive() {
                             {new Date(c.signed_at).toLocaleDateString()}
                           </span>
                         )}
-                        {c.hardcopy_logged_at && (
-                          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/40 text-[9px]">
-                            Hardcopy ✓
-                          </Badge>
-                        )}
                         {c.government_id_type && (
                           <span>{c.government_id_type} {c.government_id_state ? `(${c.government_id_state})` : ""}</span>
                         )}
                       </div>
                     </div>
 
-                    <Button size="sm" variant="outline" className="border-gray-700 text-gray-400 flex-shrink-0">
-                      <Eye className="w-4 h-4 mr-1" /> View
-                    </Button>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {c.signed_hardcopy_photo_url && (
+                        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/40 text-[10px]">
+                          Hardcopy
+                        </Badge>
+                      )}
+                      <Button size="sm" variant="outline" className="border-gray-700 text-gray-400">
+                        <Eye className="w-4 h-4 mr-1" /> View
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

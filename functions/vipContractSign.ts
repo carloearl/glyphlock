@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       success: true,
       serial_number,
       guest_id: guestRecord.id,
-      contract_record_id: tokenRecord.id,
+      contract_id: tokenRecord.id,
       contract_hash: contractHash,
       message: 'Contract signed with biometric verification. Welcome to VIP.'
     });
