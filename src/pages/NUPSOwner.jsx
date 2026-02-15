@@ -88,6 +88,12 @@ export default function NUPSOwner() {
     enabled: !!user,
   });
 
+  const { data: products = [] } = useQuery({
+    queryKey: ["pos-products"],
+    queryFn: () => base44.entities.POSProduct.list(),
+    enabled: !!user,
+  });
+
   if (!authChecked || !user) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
