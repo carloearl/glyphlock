@@ -666,60 +666,62 @@ export default function GlyphBotPage() {
         <div className="flex-1 flex flex-col bg-transparent border-x-2 border-purple-500/30 shadow-[0_0_60px_rgba(168,85,247,0.15)] overflow-hidden" style={{ position: 'relative', zIndex: 300, pointerEvents: 'auto' }}>
           
           {/* Header */}
-          <header className="flex items-center justify-between px-5 py-4 border-b-2 border-purple-500/40 bg-transparent backdrop-blur-xl shadow-[0_4px_30px_rgba(168,85,247,0.2)]">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border-2 border-cyan-400/60 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.5),inset_0_0_15px_rgba(168,85,247,0.3)]">
-                <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-400 border-2 border-slate-950 shadow-[0_0_12px_rgba(52,211,153,0.9)] animate-pulse" />
+          <header className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-transparent backdrop-blur-md">
+            <div className="flex items-center gap-3">
+              <div className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 flex items-center justify-center">
+                <Bot className="w-5 h-5 text-cyan-300" />
+                <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-950" />
               </div>
-              <div className="min-w-0">
-                <h1 className="text-sm sm:text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-wide drop-shadow-[0_0_10px_rgba(6,182,212,0.5)] truncate">GlyphBot</h1>
-                <p className="text-[8px] sm:text-[10px] text-purple-400/80 uppercase tracking-[0.3em] font-semibold truncate">Elite AI Security</p>
+              <div>
+                <h1 className="text-sm font-bold text-white">GlyphBot</h1>
+                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                  <span className="text-emerald-400">Online</span>
+                  {lastMeta?.providerLabel && (
+                    <>
+                      <span className="text-slate-600">·</span>
+                      <span>{lastMeta.providerLabel}</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex items-center gap-3 text-xs px-3 py-2 rounded-xl bg-slate-900/60 border border-purple-500/30">
-                    <span className="flex items-center gap-1.5 text-cyan-300">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,1)]" />
-                      Online
-                    </span>
-                    <span className="text-purple-500/60">|</span>
-                    <span className="text-purple-300 font-medium">{currentProviderLabel || 'Gemini (Primary)'}</span>
-                  </div>
+            <div className="flex items-center gap-2">
               {currentUser && (
                 <>
                   <button
                     onClick={() => setShowAuditPanel(!showAuditPanel)}
-                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '48px', minWidth: '48px' }}
-                    className={`flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-sm md:text-base font-black transition-all duration-300 shadow-lg active:scale-95 ${
+                    style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                       showAuditPanel 
-                        ? 'bg-cyan-500/30 border-2 border-cyan-400 text-cyan-300 shadow-[0_0_25px_rgba(6,182,212,0.5)]'
-                        : 'bg-purple-500/20 border-2 border-purple-500/50 text-purple-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]'
+                        ? 'bg-cyan-500/20 border border-cyan-400/50 text-cyan-300'
+                        : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20'
                     }`}
-                    title={showAuditPanel ? 'Hide Audit' : 'Show Audit'}
                   >
-                    <Shield className="w-4 h-4 md:w-5 md:h-5" />
-                    <span className="hidden sm:inline">AUDIT</span>
+                    <Shield className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Audit</span>
                   </button>
                   <button
                     onClick={() => setShowHistoryPanel(!showHistoryPanel)}
-                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '48px', minWidth: '48px' }}
-                    className="flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-sm md:text-base font-black bg-emerald-500/20 border-2 border-emerald-500/50 text-emerald-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all duration-300 shadow-lg active:scale-95 hover:shadow-[0_0_20px_rgba(52,211,153,0.4)]"
-                    title={showHistoryPanel ? 'Hide History' : 'Show History'}
+                    style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                      showHistoryPanel
+                        ? 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-300'
+                        : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                    }`}
                   >
-                    {showHistoryPanel ? <PanelRightClose className="w-4 h-4 md:w-5 md:h-5" /> : <PanelRightOpen className="w-4 h-4 md:w-5 md:h-5" />}
-                    <span className="hidden sm:inline">HISTORY</span>
+                    {showHistoryPanel ? <PanelRightClose className="w-3.5 h-3.5" /> : <PanelRightOpen className="w-3.5 h-3.5" />}
+                    <span className="hidden sm:inline">History</span>
                   </button>
                 </>
               )}
               <Link
                 to={createPageUrl('ProviderConsole')}
-                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minHeight: '48px', minWidth: '48px' }}
-                className="flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-sm md:text-base font-black bg-purple-500/20 border-2 border-purple-500/50 text-purple-300 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] active:scale-95"
+                style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all"
               >
-                <Activity className="w-4 h-4 md:w-5 md:h-5" />
-                <span className="hidden sm:inline">CONSOLE</span>
+                <Activity className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Console</span>
               </Link>
             </div>
           </header>
