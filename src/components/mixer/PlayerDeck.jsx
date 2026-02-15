@@ -1,43 +1,26 @@
 /**
- * PlayerDeck — Embedded YouTube iframe player for a single deck (A or B)
- * Extracts YouTube video ID and renders an iframe with autoplay.
- * Also supports uploaded file playback via <audio>.
+ * PlayerDeck — Single deck (A or B) for the DJ Player.
+ * Uses AudioEngine for uploaded/direct audio with full transport controls.
+ * Falls back to YouTube iframe for YouTube URLs.
  */
-import React, { useRef, useEffect, useState } from "react";
-import { Play, Pause, SkipForward, Volume2, VolumeX } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
+import AudioEngine from "@/components/mixer/AudioEngine";
 
 function extractVideoId(url) {
   if (!url) return null;
   const parsed = parseYoutubeUrl(url);
   if (parsed?.videoId) return parsed.videoId;
-  // fallback regex
   const m = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return m ? m[1] : null;
 }
 
 export default function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded }) {
-  const audioRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null;
   const isUpload = song?.uploadUrl && !videoId;
-
-  // Sync volume to audio element for uploads
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = muted ? 0 : volume;
-    }
-  }, [volume, muted]);
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) { audioRef.current.pause(); }
-    else { audioRef.current.play(); }
-    setIsPlaying(!isPlaying);
-  };
 
   if (!song) {
     return (
@@ -52,7 +35,7 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
 
   return (
     <div className="flex-1 flex flex-col bg-slate-900/40 rounded-lg border border-slate-700/30 overflow-hidden">
-      {/* Deck label */}
+      {/* Deck label + volume */}
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-700/30">
         <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">{label}</span>
         <div className="flex items-center gap-1">
@@ -69,48 +52,39 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
       </div>
 
       {/* Player area */}
-      <div className="relative w-full aspect-video bg-black">
-        {videoId ? (
+      {videoId ? (
+        <div className="relative w-full aspect-video bg-black">
           <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1&volume=${Math.round(volume * 100)}`}
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`}
             className="absolute inset-0 w-full h-full"
             allow="autoplay; encrypted-media"
             allowFullScreen
             title={song.title}
           />
-        ) : isUpload ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <audio
-              ref={audioRef}
-              src={song.uploadUrl}
-              onEnded={onEnded}
-              className="hidden"
-            />
-            <div className="text-center space-y-2">
-              <div className="w-16 h-16 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center mx-auto">
-                {isPlaying ? (
-                  <Pause className="w-6 h-6 text-purple-400" />
-                ) : (
-                  <Play className="w-6 h-6 text-purple-400 ml-0.5" />
-                )}
-              </div>
-              <Button size="sm" variant="ghost" onClick={togglePlay} className="text-xs text-slate-300">
-                {isPlaying ? "Pause" : "Play"}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs">
-            No playable source
-          </div>
-        )}
-      </div>
+        </div>
+      ) : isUpload ? (
+        <div className="p-3">
+          <AudioEngine
+            src={song.uploadUrl}
+            title={song.title}
+            artist={song.artist}
+            autoPlay={true}
+            onEnded={onEnded}
+          />
+        </div>
+      ) : (
+        <div className="w-full aspect-video bg-black/40 flex items-center justify-center">
+          <span className="text-xs text-slate-600">No playable source</span>
+        </div>
+      )}
 
-      {/* Track info */}
-      <div className="px-3 py-1.5 bg-slate-900/60">
-        <p className="text-xs text-white truncate font-medium">{song.title}</p>
-        <p className="text-[10px] text-slate-500 truncate">{song.artist}</p>
-      </div>
+      {/* Track info (for YouTube — AudioEngine shows its own) */}
+      {videoId && (
+        <div className="px-3 py-1.5 bg-slate-900/60">
+          <p className="text-xs text-white truncate font-medium">{song.title}</p>
+          <p className="text-[10px] text-slate-500 truncate">{song.artist}</p>
+        </div>
+      )}
     </div>
   );
 }
