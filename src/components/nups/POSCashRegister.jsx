@@ -210,14 +210,14 @@ export default function POSCashRegister({ user }) {
           <CardContent className="p-4">
             <Label className="text-sm text-gray-400 mb-2 block">Customer (Optional)</Label>
             <Select
-              value={selectedCustomer?.id || ""}
-              onValueChange={(id) => setSelectedCustomer(customers.find(c => c.id === id) || null)}
+              value={selectedCustomer?.id || "walk-in"}
+              onValueChange={(id) => setSelectedCustomer(id === "walk-in" ? null : customers.find(c => c.id === id) || null)}
             >
               <SelectTrigger className="glass-input text-white">
                 <SelectValue placeholder="Walk-in Customer" />
               </SelectTrigger>
               <SelectContent className="glass-card-dark border-gray-700">
-                <SelectItem value={null}>Walk-in Customer</SelectItem> {/* Option to deselect customer */}
+                <SelectItem value="walk-in">Walk-in Customer</SelectItem>
                 {customers.map((customer) => (
                   <SelectItem key={customer.id} value={customer.id}>
                     {customer.full_name} - {customer.loyalty_tier}
