@@ -192,23 +192,36 @@ export default function ControlBar({
                   {/* Voice Profile - Native Select */}
                   <div className="space-y-2">
                     <label className="text-xs text-slate-400 flex items-center justify-between">
-                      <span>Voice Profile</span>
+                      <span>Voice Character</span>
                       <span className="text-[9px] text-purple-400 font-mono">{voiceSettings?.voiceProfile || 'neutral_female'}</span>
                     </label>
-                    <select 
-                      value={voiceSettings?.voiceProfile || 'neutral_female'} 
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        console.log('[ControlBar] Voice profile selected:', val);
-                        handleVoiceChange('voiceProfile', val);
-                      }}
-                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
-                      style={{ pointerEvents: 'auto', touchAction: 'manipulation', minHeight: '44px' }}
-                    >
-                      {voiceProfiles.map(vp => (
-                        <option key={vp.id} value={vp.id}>{vp.label || vp.id}</option>
-                      ))}
-                    </select>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {voiceProfiles.map(vp => {
+                        const isActive = (voiceSettings?.voiceProfile || 'neutral_female') === vp.id;
+                        const isMale = vp.id.includes('male') && !vp.id.includes('female');
+                        return (
+                          <button
+                            key={vp.id}
+                            type="button"
+                            onClick={() => {
+                              console.log('[ControlBar] Voice profile selected:', vp.id);
+                              handleVoiceChange('voiceProfile', vp.id);
+                            }}
+                            style={{ pointerEvents: 'auto', touchAction: 'manipulation', minHeight: '44px' }}
+                            className={`px-2.5 py-2 rounded-lg text-[11px] font-medium text-left transition-all border ${
+                              isActive
+                                ? 'bg-purple-500/25 border-purple-400 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
+                                : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm">{isMale ? '♂' : '♀'}</span>
+                              <span className="truncate">{vp.label.replace(/^[♀♂] /, '')}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Pitch - UI Preview Only (OpenAI TTS does not support pitch) */}
