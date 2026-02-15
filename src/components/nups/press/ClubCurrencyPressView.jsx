@@ -15,6 +15,7 @@ import VoucherCanvas from "@/components/nups/press/VoucherCanvas";
 import ContractTerminal from "@/components/nups/press/ContractTerminal";
 import ArchiveSearch from "@/components/nups/press/ArchiveSearch";
 import AIAssistant from "@/components/nups/press/AIAssistant";
+import DreamPalaceContract from "@/components/nups/DreamPalaceContract";
 
 import { DEFAULT_PRESS_CONFIG } from "@/components/nups/press/types";
 import {
@@ -31,6 +32,8 @@ export default function ClubCurrencyPressView() {
   const [showPreview, setShowPreview] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("press");
+  const [currencyAmount, setCurrencyAmount] = useState(0);
+  const [currencyOrderNumber, setCurrencyOrderNumber] = useState("");
 
   // Auto-save
   useEffect(() => { savePressConfig(config); }, [config]);
@@ -107,14 +110,18 @@ export default function ClubCurrencyPressView() {
 
       {/* Tab navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col no-print">
-        <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-3 gap-1 p-1 w-full max-w-md">
+        <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-4 gap-1 p-1 w-full max-w-lg">
+          <TabsTrigger value="order" className="min-h-[44px] flex items-center gap-1.5">
+            <FileText className="w-4 h-4" />
+            <span className="text-xs">Order Form</span>
+          </TabsTrigger>
           <TabsTrigger value="press" className="min-h-[44px] flex items-center gap-1.5">
             <Banknote className="w-4 h-4" />
             <span className="text-xs">Press</span>
           </TabsTrigger>
           <TabsTrigger value="contract" className="min-h-[44px] flex items-center gap-1.5">
             <FileText className="w-4 h-4" />
-            <span className="text-xs">Contract</span>
+            <span className="text-xs">Legacy</span>
           </TabsTrigger>
           <TabsTrigger value="ai" className="min-h-[44px] flex items-center gap-1.5">
             <Sparkles className="w-4 h-4" />
@@ -122,6 +129,23 @@ export default function ClubCurrencyPressView() {
             <Badge className="text-[8px] bg-purple-500/30 text-purple-300 ml-1">LIVE</Badge>
           </TabsTrigger>
         </TabsList>
+
+        {/* ORDER FORM TAB — Dream Palace Sales/Order Receipt */}
+        <TabsContent value="order" className="flex-1 mt-4">
+          <div className="max-w-3xl mx-auto">
+            <DreamPalaceContract
+              onComplete={(orderId) => {
+                toast.success('Contract archived successfully');
+              }}
+              onPrintCurrency={(amount, orderNum) => {
+                setCurrencyAmount(amount);
+                setCurrencyOrderNumber(orderNum);
+                setActiveTab("press");
+                toast.success(`Club Currency $${amount} queued for printing`);
+              }}
+            />
+          </div>
+        </TabsContent>
 
         {/* PRESS TAB */}
         <TabsContent value="press" className="flex-1 mt-4">
