@@ -5,7 +5,7 @@ import React from "react";
 import { Star, Archive, Play, SkipForward, ExternalLink, Copy, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import VibeBadge from "@/components/mixer/components/VibeBadge";
+import VibeBadge from "@/components/mixer/VibeBadge";
 import { VIBE_META } from "@/components/mixer/types/mixerTypes";
 
 function energyColor(level) {

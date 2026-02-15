@@ -5,7 +5,7 @@
 import React, { useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Music } from "lucide-react";
-import SongCard from "@/components/mixer/components/SongCard";
+import SongCard from "@/components/mixer/SongCard";
 import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 
 export default function SongDeck({
