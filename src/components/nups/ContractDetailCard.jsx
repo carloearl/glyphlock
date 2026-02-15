@@ -110,17 +110,22 @@ export default function ContractDetailCard({ contract }) {
         </div>
       )}
 
-      {/* Hardcopy Archive */}
-      {c.signed_hardcopy_photo_url && (
+      {/* Physical Signed Copy */}
+      {c.physical_sign_confirmed && (
         <div>
           <div className="flex items-center gap-2 text-sm font-bold text-amber-400 mb-2">
-            <FileText className="w-4 h-4" /> Signed Hardcopy Archive
+            <FileText className="w-4 h-4" /> Physical Signed Copy
           </div>
-          <div className="bg-gray-900/50 rounded-lg p-3 space-y-3">
-            <img src={c.signed_hardcopy_photo_url} alt="Signed Hardcopy" className="w-full rounded-lg border border-amber-500/30" />
-            <Row label="Barcode/Serial" value={c.hardcopy_barcode_scan} color="text-purple-400 font-mono text-xs" />
-            <Row label="Logged At" value={c.hardcopy_logged_at ? new Date(c.hardcopy_logged_at).toLocaleString() : null} />
-            <Row label="Logged By" value={c.hardcopy_logged_by} />
+          <div className="bg-gray-900/50 rounded-lg p-3 space-y-2">
+            <Row label="Status" value="✓ Archived" color="text-green-400" />
+            <Row label="Barcode / Serial" value={c.signed_copy_barcode} color="text-purple-400 font-mono text-xs" />
+            <Row label="Archived At" value={c.physical_sign_at ? new Date(c.physical_sign_at).toLocaleString() : null} />
+            {c.signed_copy_photo_url && (
+              <div className="mt-2">
+                <img src={c.signed_copy_photo_url} alt="Signed Physical Copy" className="w-full rounded-lg border border-amber-500/30" />
+                <p className="text-[10px] text-gray-500 text-center mt-1">Photo of wet-ink signed contract</p>
+              </div>
+            )}
           </div>
         </div>
       )}
