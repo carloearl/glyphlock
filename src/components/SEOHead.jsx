@@ -15,12 +15,10 @@ export default function SEOHead({
   
   // Auto-resolve SEO data
   let autoData = {};
-  // Try to find key by matching url property in SEO_DATA values
   const path = location.pathname;
-  const key = Object.keys(getSeoData("")).find(k => {
-      const data = getSeoData(k);
-      return data && data.url === path;
-  }) || (path === "/" ? "Home" : null);
+  // Import SEO_DATA directly to iterate over all entries
+  const allKeys = Object.keys(SEO_DATA);
+  const key = allKeys.find(k => SEO_DATA[k] && SEO_DATA[k].url === path) || (path === "/" ? "Home" : null);
   
   if (key) {
       autoData = getSeoData(key);
