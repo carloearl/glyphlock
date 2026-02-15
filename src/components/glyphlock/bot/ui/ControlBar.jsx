@@ -320,10 +320,10 @@ export default function ControlBar({
                   <div className="flex gap-2 pt-3 border-t border-slate-700">
                     <button
                       type="button"
+                      disabled={voiceSettings?._isSpeaking || voiceSettings?._isLoading}
                       onClick={() => {
                         console.log('[ControlBar] Test Voice clicked with settings:', voiceSettings);
                         if (onVoiceSettingsChange?.playText) {
-                          // Pass the CURRENT voiceSettings explicitly
                           onVoiceSettingsChange.playText(
                             "Hello! This is a test of your current voice settings. The emotion is " + (voiceSettings?.emotion || 'neutral') + " and the profile is " + (voiceSettings?.voiceProfile || 'neutral female') + ".",
                             { ...voiceSettings }
@@ -331,10 +331,10 @@ export default function ControlBar({
                         }
                       }}
                       style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', minHeight: '44px' }}
-                      className="flex-1 px-3 py-2.5 rounded-lg text-xs bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/30 transition-all flex items-center justify-center gap-1.5"
+                      className="flex-1 px-3 py-2.5 rounded-lg text-xs bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/30 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Volume2 className="w-3.5 h-3.5" />
-                      Test Voice
+                      {voiceSettings?._isLoading ? 'Loading...' : voiceSettings?._isSpeaking ? 'Playing...' : 'Test Voice'}
                     </button>
                     <button
                       type="button"
