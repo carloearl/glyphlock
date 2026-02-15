@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
         'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'tts-1-hd',
+        model: 'tts-1',
         input: finalText,
         voice: openaiVoice,
         speed: normalizedSpeed,
