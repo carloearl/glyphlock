@@ -28,10 +28,11 @@ export default function useTTSClean(defaultSettings = {}) {
     };
   });
 
-  // Keep defaultSettingsRef in sync with parent prop changes
+  // Keep defaultSettingsRef in sync with parent prop changes - use JSON comparison for object deps
   useEffect(() => {
     defaultSettingsRef.current = defaultSettings;
-  }, [defaultSettings]);
+    console.log('GLYPH VOICE: defaultSettings updated from parent:', { voiceProfile: defaultSettings?.voiceProfile, voice: defaultSettings?.voice, speed: defaultSettings?.speed, emotion: defaultSettings?.emotion });
+  }, [JSON.stringify(defaultSettings)]);
 
   // Save settings to localStorage whenever they change
   const updateSettings = useCallback((newSettings) => {
