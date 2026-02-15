@@ -42,6 +42,7 @@ export default function GlyphBotPage() {
   const [selectedAuditView, setSelectedAuditView] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [isProcessingAudit, setIsProcessingAudit] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState('none');
 
   const [modes, setModes] = useState({
     voice: false,
@@ -964,6 +965,8 @@ export default function GlyphBotPage() {
               onRegenerate={handleRegenerate}
               isSending={isSending}
               disabled={isSending}
+              selectedAgent={selectedAgent}
+              onAgentChange={setSelectedAgent}
             />
           </ChatErrorBoundary>
         </div>
