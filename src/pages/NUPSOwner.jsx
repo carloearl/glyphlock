@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-// Lazy load all NUPS components — NONE are modified, all existing
 import EntertainerContract from "../components/nups/EntertainerContract.jsx";
 import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
 import VIPRoomManagement from "../components/nups/VIPRoomManagement.jsx";
