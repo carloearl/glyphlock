@@ -150,15 +150,19 @@ export default function ControlBar({
                         // Find the preset from available presets or use hardcoded values
                         const presetMap = {
                           neutral: { pitch: 1.0, speed: 1.0, bass: 0, clarity: 0, volume: 1.0 },
+                          excited: { pitch: 1.1, speed: 1.1, bass: 0.1, clarity: 0.2, volume: 1.0 },
+                          calm: { pitch: 0.9, speed: 0.9, bass: -0.1, clarity: -0.1, volume: 0.95 },
+                          confident: { pitch: 1.05, speed: 1.0, bass: 0.2, clarity: 0.1, volume: 1.0 },
+                          friendly: { pitch: 1.08, speed: 1.05, bass: 0, clarity: 0.15, volume: 1.0 },
+                          professional: { pitch: 1.0, speed: 1.0, bass: 0.05, clarity: 0.05, volume: 1.0 },
+                          empathetic: { pitch: 0.98, speed: 0.95, bass: 0.0, clarity: -0.05, volume: 0.95 },
                           energetic: { pitch: 1.2, speed: 1.2, bass: 0.3, clarity: 0.4, volume: 1.0 },
-                          calm: { pitch: 0.88, speed: 0.85, bass: 0.15, clarity: -0.05, volume: 0.9 },
                           authoritative: { pitch: 0.82, speed: 0.92, bass: 0.5, clarity: 0.25, volume: 1.0 },
-                          friendly: { pitch: 1.12, speed: 1.08, bass: 0, clarity: 0.15, volume: 1.0 },
                           whisper: { pitch: 0.95, speed: 0.8, bass: -0.2, clarity: -0.3, volume: 0.7 },
                           intense: { pitch: 1.0, speed: 1.25, bass: 0.4, clarity: 0.5, volume: 1.0 }
                         };
                         
-                        const preset = emotionPresets?.find(ep => ep.id === val) || presetMap[val];
+                        const preset = presetMap[val];
                         
                         if (onVoiceSettingsChange?.setVoiceSettings) {
                           onVoiceSettingsChange.setVoiceSettings(prev => {
@@ -179,13 +183,9 @@ export default function ControlBar({
                       className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
                       style={{ pointerEvents: 'auto', touchAction: 'manipulation', minHeight: '44px' }}
                     >
-                      <option value="neutral">Neutral</option>
-                      <option value="energetic">Energetic</option>
-                      <option value="calm">Calm</option>
-                      <option value="authoritative">Authoritative</option>
-                      <option value="friendly">Friendly</option>
-                      <option value="whisper">Whisper</option>
-                      <option value="intense">Intense</option>
+                      {emotionPresets.map(ep => (
+                        <option key={ep.id} value={ep.id}>{ep.label || ep.id}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -205,12 +205,9 @@ export default function ControlBar({
                       className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
                       style={{ pointerEvents: 'auto', touchAction: 'manipulation', minHeight: '44px' }}
                     >
-                      <option value="neutral_female">Nova (Neutral Female)</option>
-                      <option value="neutral_male">Onyx (Neutral Male)</option>
-                      <option value="warm_female">Shimmer (Warm Female)</option>
-                      <option value="warm_male">Echo (Warm Male)</option>
-                      <option value="professional_female">Alloy (Professional)</option>
-                      <option value="professional_male">Fable (Storyteller)</option>
+                      {voiceProfiles.map(vp => (
+                        <option key={vp.id} value={vp.id}>{vp.label || vp.id}</option>
+                      ))}
                     </select>
                   </div>
 
