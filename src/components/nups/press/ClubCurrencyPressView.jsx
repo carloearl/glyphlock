@@ -14,6 +14,7 @@ import ControlPanel from "@/components/nups/press/ControlPanel";
 import VoucherCanvas from "@/components/nups/press/VoucherCanvas";
 import ContractTerminal from "@/components/nups/press/ContractTerminal";
 import ArchiveSearch from "@/components/nups/press/ArchiveSearch";
+import AIPanel from "@/components/nups/press/AIPanel";
 
 import { DEFAULT_PRESS_CONFIG } from "@/components/nups/press/types";
 import {
@@ -115,10 +116,10 @@ export default function ClubCurrencyPressView() {
             <FileText className="w-4 h-4" />
             <span className="text-xs">Contract</span>
           </TabsTrigger>
-          <TabsTrigger value="ai" className="min-h-[44px] flex items-center gap-1.5" disabled>
+          <TabsTrigger value="ai" className="min-h-[44px] flex items-center gap-1.5">
             <Sparkles className="w-4 h-4" />
             <span className="text-xs">AI</span>
-            <Badge className="text-[8px] bg-gray-700 text-gray-400 ml-1">OFF</Badge>
+            <Badge className="text-[8px] bg-purple-500/30 text-purple-400 ml-1">LIVE</Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -166,15 +167,9 @@ export default function ClubCurrencyPressView() {
           </div>
         </TabsContent>
 
-        {/* AI TAB (disabled) */}
+        {/* AI TAB */}
         <TabsContent value="ai" className="flex-1 mt-4">
-          <div className="flex items-center justify-center h-64 text-gray-500">
-            <div className="text-center space-y-2">
-              <AlertCircle className="w-10 h-10 mx-auto text-gray-600" />
-              <p className="text-sm">AI tools unavailable in this build</p>
-              <p className="text-xs text-gray-600">OpenAI integration planned for future release</p>
-            </div>
-          </div>
+          <AIPanel config={config} />
         </TabsContent>
       </Tabs>
 
