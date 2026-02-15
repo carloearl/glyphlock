@@ -10,6 +10,7 @@ export default function useTTSClean(defaultSettings = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [lastError, setLastError] = useState(null);
   const audioRef = useRef(null);
+  const defaultSettingsRef = useRef(defaultSettings);
 
   const [settings, setSettings] = useState(() => {
     try {
@@ -72,8 +73,8 @@ export default function useTTSClean(defaultSettings = {}) {
       return false;
     }
 
-    // Merge: customSettings (per-call) > defaultSettings passed at hook init > internal settings
-    const finalSettings = { ...settings, ...defaultSettings, ...customSettings };
+    // Merge: customSettings (per-call) > latest defaultSettings from parent > internal settings
+    const finalSettings = { ...settings, ...defaultSettingsRef.current, ...customSettings };
     // PHASE 3: Resolve voiceProfile → voice (voiceProfile is the key used by ControlBar/GlyphBot.jsx)
     const voice = finalSettings.voiceProfile || finalSettings.voice || 'nova';
     const speed = Math.max(0.25, Math.min(4.0, finalSettings.speed || 1.0));
