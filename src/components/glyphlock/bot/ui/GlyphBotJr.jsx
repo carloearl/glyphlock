@@ -83,14 +83,6 @@ When answering questions, use the knowledge bases to provide accurate informatio
       
       setMessages(prev => [...prev, assistantMessage]);
       
-      // Auto-speak response using new TTS hook
-      setTimeout(() => {
-        console.log('GLYPH VOICE: GlyphBot Jr auto-speak triggered');
-        playText(response).catch(err => {
-          console.error('GLYPH VOICE: auto-speak failed', err);
-        });
-      }, 300);
-      
     } catch (error) {
       setMessages(prev => [...prev, {
         role: "assistant",
