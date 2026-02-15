@@ -489,6 +489,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
             </div>
 
             <div className="text-xs text-gray-600 space-y-1 pt-3 border-t border-gray-800">
+              <p>✓ Guest photo captured at signing</p>
               <p>✓ Thumbprint hashed (SHA-256) & archived</p>
               <p>✓ Government ID verified & stored</p>
               <p>✓ Card ({cardType} •••• {cardLast4}) authorized</p>
@@ -638,6 +639,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
                 <ol className="list-decimal ml-4 space-y-0.5">
                   <li>Press your right thumb firmly onto the scanner or photograph your thumbprint clearly</li>
                   <li>Photograph the FRONT of your government ID (ensure all text is legible)</li>
+                  <li>Take a clear front-facing photo of the guest (face clearly visible)</li>
                   <li>Photograph the BACK of your government ID (optional but recommended)</li>
                   <li>All images will be cryptographically hashed (SHA-256) and securely stored</li>
                 </ol>
