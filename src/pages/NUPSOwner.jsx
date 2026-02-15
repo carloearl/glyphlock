@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Shield, DollarSign, ShoppingCart, TrendingUp, 
   Users, LogOut, UserCheck, DoorOpen, FileText,
-  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag
+  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -26,6 +26,7 @@ import OwnerAnalytics from "../components/nups/OwnerAnalytics.jsx";
 import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView";
 import ProductManagement from "../components/nups/ProductManagement.jsx";
 import InventoryManagement from "../components/nups/InventoryManagement.jsx";
+import DreamPalaceContract from "../components/nups/DreamPalaceContract.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -195,7 +196,7 @@ export default function NUPSOwner() {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-6 md:grid-cols-12 gap-1 p-1.5 w-full">
+          <TabsList className="bg-gray-900/80 border border-gray-800 flex flex-wrap gap-1 p-1.5 w-full">
             <TabsTrigger value="analytics" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
               <BarChart3 className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Analytics</span>
@@ -240,6 +241,10 @@ export default function NUPSOwner() {
               <Package className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Inventory</span>
             </TabsTrigger>
+            <TabsTrigger value="contract" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <ScrollText className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Contract</span>
+            </TabsTrigger>
             <TabsTrigger value="press" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
               <Banknote className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Press</span>
@@ -281,6 +286,15 @@ export default function NUPSOwner() {
           </TabsContent>
           <TabsContent value="inventory">
             <InventoryManagement products={products} />
+          </TabsContent>
+          <TabsContent value="contract">
+            <DreamPalaceContract
+              onCurrencyPrint={(amount) => {
+                // Auto-switch to press tab to print currency
+                document.querySelector('[value="press"]')?.click();
+              }}
+              onComplete={() => queryClient.invalidateQueries({ queryKey: ['dream-palace-orders'] })}
+            />
           </TabsContent>
           <TabsContent value="press">
             <ClubCurrencyPressView />
