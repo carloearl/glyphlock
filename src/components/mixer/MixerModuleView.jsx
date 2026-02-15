@@ -12,13 +12,13 @@ import { loadSongs, saveSongs, loadProfiles, saveProfiles, loadState, saveState 
 import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 
-import ProfilePanel from "@/components/mixer/components/ProfilePanel";
-import SongDeck from "@/components/mixer/components/SongDeck";
-import MixerControls from "@/components/mixer/components/MixerControls";
-import AISidePanel from "@/components/mixer/components/AISidePanel";
-import SearchBar from "@/components/mixer/components/SearchBar";
-import DialogManager from "@/components/mixer/components/DialogManager";
-import KeyboardShortcutsDialog from "@/components/mixer/components/KeyboardShortcutsDialog";
+import ProfilePanel from "@/components/mixer/ProfilePanel";
+import SongDeck from "@/components/mixer/SongDeck";
+import MixerControls from "@/components/mixer/MixerControls";
+import AISidePanel from "@/components/mixer/AISidePanel";
+import SearchBar from "@/components/mixer/SearchBar";
+import DialogManager from "@/components/mixer/DialogManager";
+import KeyboardShortcutsDialog from "@/components/mixer/KeyboardShortcutsDialog";
 
 export default function MixerModuleView() {
   // ─── State hydration ───
