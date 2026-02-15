@@ -1,27 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import SEOHead from "@/components/SEOHead";
 import FinancialHero from "@/components/financial/FinancialHero";
 import FinancialModules from "@/components/financial/FinancialModules";
-import FinancialFooter from "@/components/financial/FinancialFooter";
+import FinancialFooterCTA from "@/components/financial/FinancialFooterCTA";
 
 export default function GlyphLockFinancial() {
-  // Replace with your actual uploaded video URL when ready
-  const heroVideoUrl = null; 
+  // Video URL — user can upload their hero video and set it here
+  const [heroVideo] = useState(null);
 
   return (
     <>
       <SEOHead
-        title="GlyphLock Financial, LLC — Enterprise POS, Blockchain, Currency & Entertainment"
-        description="GlyphLock Financial is the commerce and technology arm of the GlyphLock ecosystem. N.U.P.S. point-of-sale, blockchain verification, club currency press, and DJ entertainment systems."
-        keywords="GlyphLock Financial, NUPS POS, blockchain verification, club currency, Dream Dollars, DJ mixer, entertainment technology"
-        url="/GlyphLockFinancial"
+        title="GlyphLock Financial LLC | POS, Blockchain, Club Currency & Venue Technology"
+        description="GlyphLock Financial is the fintech arm of the GlyphLock ecosystem. NUPS point-of-sale, club currency press, blockchain verification, crypto tools, and DJ Pro Mixer for entertainment venues."
+        keywords="GlyphLock Financial, NUPS POS, club currency, Dream Dollars, blockchain verification, entertainment venue technology, fintech, DJ mixer"
+        url="/glyphlock-financial"
       />
 
-      <main className="w-full relative" style={{ background: 'transparent' }}>
-        <FinancialHero videoUrl={heroVideoUrl} />
+      <div className="text-white min-h-screen" style={{ background: 'transparent' }}>
+        <FinancialHero videoUrl={heroVideo} />
         <FinancialModules />
-        <FinancialFooter />
-      </main>
+        <FinancialFooterCTA />
+      </div>
     </>
   );
 }
