@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import PostPrintRescan from "@/components/nups/PostPrintRescan";
 
 function StepIndicator({ current, steps }) {
   return (
@@ -71,6 +72,9 @@ export default function VIPContract() {
   const [managerName, setManagerName] = useState("");
   const [managerSignature, setManagerSignature] = useState("");
   const [allSigned, setAllSigned] = useState(false);
+  const [contractRecordId, setContractRecordId] = useState(null);
+  const [printed, setPrinted] = useState(false);
+  const [archived, setArchived] = useState(false);
 
   const [serialNumber] = useState(`VIP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`);
   const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -325,6 +329,10 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
     if (response.data?.success) {
       setSuccess(true);
       setAllSigned(true);
+      // Store the contract record ID for the rescan step
+      if (response.data?.contract_record_id) {
+        setContractRecordId(response.data.contract_record_id);
+      }
     } else {
       setError(response.data?.error || 'Contract signing failed');
     }
@@ -497,19 +505,47 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
               <p>✓ IP address & device fingerprint recorded</p>
             </div>
 
-            <Button
-              onClick={printContract}
-              className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold"
-            >
-              <FileText className="w-5 h-5 mr-2" />
-              Print Executed Contract
-            </Button>
+            {!printed ? (
+              <Button
+                onClick={() => { printContract(); setPrinted(true); }}
+                className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold"
+              >
+                <FileText className="w-5 h-5 mr-2" />
+                Print Executed Contract
+              </Button>
+            ) : (
+              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex items-center gap-2 text-green-400 text-sm">
+                <CheckCircle2 className="w-4 h-4" />
+                Contract Printed — Now have guest sign the physical copy below
+              </div>
+            )}
 
             <div className="text-[10px] text-gray-700 text-center">
               This contract cannot be printed until all three signatures are recorded.
             </div>
           </CardContent>
         </Card>
+
+        {/* POST-PRINT RESCAN: After printing, guest signs paper, staff rescans */}
+        {printed && !archived && contractRecordId && (
+          <div className="mt-6">
+            <PostPrintRescan
+              serialNumber={serialNumber}
+              contractRecordId={contractRecordId}
+              onComplete={() => setArchived(true)}
+            />
+          </div>
+        )}
+
+        {archived && (
+          <Card className="mt-6 bg-green-500/10 border-green-500/40">
+            <CardContent className="p-6 text-center">
+              <CheckCircle2 className="w-10 h-10 text-green-400 mx-auto mb-2" />
+              <p className="text-green-400 font-bold">Contract fully archived and searchable.</p>
+              <p className="text-xs text-gray-500 mt-1">Serial: {serialNumber} — available in Contract Archive</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
