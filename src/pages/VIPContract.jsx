@@ -342,29 +342,165 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
     );
   }
 
+  const printContract = () => {
+    const printHtml = `<html><head><title>VIP Contract - ${serialNumber}</title>
+    <style>
+      @media print { @page { margin: 20mm; } }
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { font-family: 'Times New Roman', serif; font-size: 11px; color: #000; line-height: 1.5; padding: 20px; max-width: 800px; margin: 0 auto; }
+      h1 { font-size: 18px; text-align: center; margin-bottom: 4px; letter-spacing: 2px; }
+      h2 { font-size: 13px; text-align: center; margin-bottom: 16px; color: #444; }
+      .section { margin: 12px 0; }
+      .section-title { font-weight: bold; font-size: 12px; border-bottom: 1px solid #000; margin-bottom: 6px; padding-bottom: 2px; }
+      .info-grid { display: grid; grid-template-columns: 140px 1fr; gap: 2px 12px; margin: 8px 0; font-size: 11px; }
+      .info-grid .label { font-weight: bold; }
+      .contract-body { white-space: pre-wrap; font-size: 10px; line-height: 1.6; margin: 12px 0; }
+      .sig-block { border: 1px solid #000; padding: 12px; margin: 8px 0; page-break-inside: avoid; }
+      .sig-line { border-bottom: 1px solid #000; min-height: 28px; margin: 4px 0; padding: 4px; font-family: cursive, serif; font-size: 16px; font-weight: bold; }
+      .sig-label { font-size: 9px; color: #666; margin-top: 2px; }
+      .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; font-size: 10px; }
+      .footer { text-align: center; margin-top: 20px; font-size: 9px; color: #666; border-top: 2px solid #000; padding-top: 8px; }
+      .stamp { font-size: 10px; font-weight: bold; color: green; text-align: center; margin: 8px 0; padding: 6px; border: 2px solid green; }
+    </style></head><body>
+      <h1>VIP PRIVATE ENTERTAINMENT AGREEMENT</h1>
+      <h2>EXECUTED CONTRACT — ALL PARTIES SIGNED</h2>
+
+      <div class="stamp">✓ ALL THREE (3) SIGNATURES VERIFIED — CONTRACT FULLY EXECUTED</div>
+
+      <div class="section">
+        <div class="section-title">CONTRACT IDENTIFICATION</div>
+        <div class="info-grid">
+          <span class="label">Serial Number:</span><span>${serialNumber}</span>
+          <span class="label">Date of Execution:</span><span>${todayFormatted}</span>
+          <span class="label">Timestamp:</span><span>${new Date().toISOString()}</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">GUEST IDENTIFICATION</div>
+        <div class="info-grid">
+          <span class="label">Full Legal Name:</span><span>${guestName}</span>
+          <span class="label">Date of Birth:</span><span>${dateOfBirth}</span>
+          <span class="label">Government ID:</span><span>${idType} — ${idNumber} (${idState || 'N/A'})</span>
+          <span class="label">Card on File:</span><span>${cardType} ending ${cardLast4}</span>
+          <span class="label">Phone:</span><span>${phone || 'Not provided'}</span>
+          <span class="label">Thumbprint:</span><span>✓ Captured & SHA-256 Hashed</span>
+          <span class="label">ID Photo (Front):</span><span>✓ Archived</span>
+          <span class="label">ID Photo (Back):</span><span>${idBackUrl ? '✓ Archived' : '— Not provided'}</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">AGREEMENT TEXT (10 SECTIONS)</div>
+        <div class="contract-body">${contractText}</div>
+      </div>
+
+      <div class="section" style="page-break-before: auto;">
+        <div class="section-title">SIGNATURES — ALL PARTIES</div>
+
+        <div class="sig-block">
+          <div style="font-weight:bold;font-size:11px;margin-bottom:6px;">1. GUEST / PATRON</div>
+          <div class="sig-line">${signature}</div>
+          <div class="sig-grid">
+            <div><span class="sig-label">Printed Name:</span> ${guestName}</div>
+            <div><span class="sig-label">Date:</span> ${todayFormatted}</div>
+          </div>
+          <div style="font-size:9px;color:#666;margin-top:4px;">Biometric verification: Thumbprint ✓ | Gov ID ✓ | Card ✓</div>
+        </div>
+
+        <div class="sig-block">
+          <div style="font-weight:bold;font-size:11px;margin-bottom:6px;">2. VIP HOST / ENTERTAINER</div>
+          <div class="sig-line">${hostSignature}</div>
+          <div class="sig-grid">
+            <div><span class="sig-label">Printed Name:</span> ${hostName}</div>
+            <div><span class="sig-label">Date:</span> ${todayFormatted}</div>
+          </div>
+          <div style="font-size:9px;color:#666;margin-top:4px;">I witnessed the guest's identity verification and consent to the session terms.</div>
+        </div>
+
+        <div class="sig-block">
+          <div style="font-weight:bold;font-size:11px;margin-bottom:6px;">3. MANAGER ON DUTY</div>
+          <div class="sig-line">${managerSignature}</div>
+          <div class="sig-grid">
+            <div><span class="sig-label">Printed Name:</span> ${managerName}</div>
+            <div><span class="sig-label">Date:</span> ${todayFormatted}</div>
+          </div>
+          <div style="font-size:9px;color:#666;margin-top:4px;">I approve this VIP session and confirm all identification was verified per venue policy.</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE<br/>
+        Contract Serial: ${serialNumber} | Executed: ${new Date().toISOString()}<br/>
+        This document is a true and complete copy of the executed agreement.<br/>
+        Retain for a minimum of three (3) years per data retention policy (Section 7).
+      </div>
+    </body></html>`;
+
+    const win = window.open('', '_blank', 'width=850,height=1100');
+    win.document.write(printHtml);
+    win.document.close();
+    setTimeout(() => win.print(), 400);
+  };
+
   // --- SUCCESS ---
   if (success) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
-        <Card className="max-w-md w-full bg-gray-900/80 border-green-500/30">
-          <CardContent className="p-12 text-center space-y-4">
-            <CheckCircle2 className="w-20 h-20 text-green-400 mx-auto" />
-            <h1 className="text-2xl font-bold">Contract Signed & Verified</h1>
-            <Badge className="bg-green-500/20 text-green-400 border-green-500/40 text-sm px-4 py-1">
-              Serial: {serialNumber}
-            </Badge>
-            <p className="text-gray-400">
-              Welcome to VIP. Your identity, biometrics, and signature have been cryptographically recorded.
-            </p>
-            <div className="text-xs text-gray-600 space-y-1 pt-4 border-t border-gray-800">
+        <Card className="max-w-lg w-full bg-gray-900/80 border-green-500/30">
+          <CardContent className="p-8 space-y-4">
+            <div className="text-center">
+              <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-3" />
+              <h1 className="text-2xl font-bold">Contract Fully Executed</h1>
+              <Badge className="mt-2 bg-green-500/20 text-green-400 border-green-500/40 text-sm px-4 py-1">
+                Serial: {serialNumber}
+              </Badge>
+            </div>
+
+            {/* All 3 signatures */}
+            <div className="space-y-2 pt-4 border-t border-gray-800">
+              <div className="text-xs font-bold text-gray-300 mb-2">EXECUTED SIGNATURES (3 of 3):</div>
+              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-xs text-gray-400">Guest / Patron</div>
+                  <div className="text-sm font-bold text-white" style={{ fontFamily: 'cursive, serif' }}>{signature}</div>
+                </div>
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+              </div>
+              <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-xs text-gray-400">VIP Host / Entertainer</div>
+                  <div className="text-sm font-bold text-white" style={{ fontFamily: 'cursive, serif' }}>{hostSignature}</div>
+                </div>
+                <CheckCircle2 className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-xs text-gray-400">Manager on Duty</div>
+                  <div className="text-sm font-bold text-white" style={{ fontFamily: 'cursive, serif' }}>{managerSignature}</div>
+                </div>
+                <CheckCircle2 className="w-5 h-5 text-amber-400" />
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-600 space-y-1 pt-3 border-t border-gray-800">
               <p>✓ Thumbprint hashed (SHA-256) & archived</p>
               <p>✓ Government ID verified & stored</p>
               <p>✓ Card ({cardType} •••• {cardLast4}) authorized</p>
-              <p>✓ Digital signature timestamped & logged</p>
+              <p>✓ All 3 digital signatures timestamped</p>
               <p>✓ IP address & device fingerprint recorded</p>
             </div>
-            <div className="pt-3 text-[10px] text-gray-700">
-              A copy of this executed agreement has been archived. Retain your serial number for your records.
+
+            <Button
+              onClick={printContract}
+              className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              Print Executed Contract
+            </Button>
+
+            <div className="text-[10px] text-gray-700 text-center">
+              This contract cannot be printed until all three signatures are recorded.
             </div>
           </CardContent>
         </Card>
