@@ -118,9 +118,7 @@ export default function NUPSOwner() {
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-4">
-              <Suspense fallback={null}>
-                <EntertainerContract onContractSigned={() => queryClient.invalidateQueries({ queryKey: ["entertainers"] })} />
-              </Suspense>
+              <EntertainerContract onContractSigned={() => queryClient.invalidateQueries({ queryKey: ["entertainers"] })} />
               <div className="hidden md:flex items-center gap-2">
                 <Users className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-white truncate max-w-[150px]">{user?.email}</span>
@@ -223,35 +221,33 @@ export default function NUPSOwner() {
             </TabsTrigger>
           </TabsList>
 
-          <Suspense fallback={<div className="text-center py-8 text-gray-400">Loading...</div>}>
-            <TabsContent value="live">
-              <LiveFloorView />
-            </TabsContent>
-            <TabsContent value="pos">
-              <div className="space-y-4">
-                <BatchManagement user={user} />
-                <POSCashRegister user={user} />
-              </div>
-            </TabsContent>
-            <TabsContent value="floor">
-              <EntertainerCheckIn />
-            </TabsContent>
-            <TabsContent value="vip">
-              <VIPRoomManagement />
-            </TabsContent>
-            <TabsContent value="guests">
-              <GuestTracking />
-            </TabsContent>
-            <TabsContent value="timeclock">
-              <TimeClock user={user} role="admin" />
-            </TabsContent>
-            <TabsContent value="history">
-              <TransactionHistory transactions={transactions} showReceipt={true} />
-            </TabsContent>
-            <TabsContent value="zreport">
-              <ZReportGenerator user={user} />
-            </TabsContent>
-          </Suspense>
+          <TabsContent value="live">
+            <LiveFloorView />
+          </TabsContent>
+          <TabsContent value="pos">
+            <div className="space-y-4">
+              <BatchManagement user={user} />
+              <POSCashRegister user={user} />
+            </div>
+          </TabsContent>
+          <TabsContent value="floor">
+            <EntertainerCheckIn />
+          </TabsContent>
+          <TabsContent value="vip">
+            <VIPRoomManagement />
+          </TabsContent>
+          <TabsContent value="guests">
+            <GuestTracking />
+          </TabsContent>
+          <TabsContent value="timeclock">
+            <TimeClock user={user} role="admin" />
+          </TabsContent>
+          <TabsContent value="history">
+            <TransactionHistory transactions={transactions} showReceipt={true} />
+          </TabsContent>
+          <TabsContent value="zreport">
+            <ZReportGenerator user={user} />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
