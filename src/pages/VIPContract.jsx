@@ -59,9 +59,16 @@ export default function VIPContract() {
   const idBackRef = useRef(null);
   const thumbprintRef = useRef(null);
 
-  // Step 3 - Signature
+  // Step 3 - Guest Signature
   const [signature, setSignature] = useState("");
   const [initialsAcknowledged, setInitialsAcknowledged] = useState(false);
+
+  // Step 4 - Host & Manager Signatures
+  const [hostName, setHostName] = useState("");
+  const [hostSignature, setHostSignature] = useState("");
+  const [managerName, setManagerName] = useState("");
+  const [managerSignature, setManagerSignature] = useState("");
+  const [allSigned, setAllSigned] = useState(false);
 
   const [serialNumber] = useState(`VIP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`);
   const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
