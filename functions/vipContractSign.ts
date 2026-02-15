@@ -15,6 +15,12 @@ Deno.serve(async (req) => {
     if (!token || !signature || !guest_name) {
       return Response.json({ error: 'Missing required fields: token, signature, guest_name' }, { status: 400 });
     }
+    if (!host_name || !host_signature) {
+      return Response.json({ error: 'Host signature is required' }, { status: 400 });
+    }
+    if (!manager_name || !manager_signature) {
+      return Response.json({ error: 'Manager signature is required' }, { status: 400 });
+    }
     if (!thumbprint_url) {
       return Response.json({ error: 'Thumbprint scan is required' }, { status: 400 });
     }
