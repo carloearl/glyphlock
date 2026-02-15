@@ -177,87 +177,141 @@ export default function VIPRoomManagement() {
       </Card>
 
       {/* Start Session Dialog */}
-      <Dialog open={showStartDialog} onOpenChange={setShowStartDialog}>
-        <DialogContent className="glass-modal border-purple-500/30">
+      <Dialog open={showStartDialog} onOpenChange={(open) => {
+        setShowStartDialog(open);
+        if (!open) setContractStep("form");
+      }}>
+        <DialogContent className="glass-modal border-purple-500/30 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">
-              Start VIP Session - {selectedRoom?.room_name || `Room ${selectedRoom?.room_number}`}
+              {contractStep === "form" ? "Start VIP Session" : "VIP Contract"} - {selectedRoom?.room_name || `Room ${selectedRoom?.room_number}`}
             </DialogTitle>
           </DialogHeader>
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              startSession.mutate(sessionForm);
-            }} 
-            className="space-y-4"
-          >
-            <div>
-              <Label className="text-white">Entertainer *</Label>
-              <Select 
-                value={sessionForm.entertainer_id} 
-                onValueChange={(value) => setSessionForm({...sessionForm, entertainer_id: value})}
-                required
-              >
-                <SelectTrigger className="glass-input">
-                  <SelectValue placeholder="Select entertainer..." />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-gray-700">
-                  {entertainers.map(shift => (
-                    <SelectItem key={shift.entertainer_id} value={shift.entertainer_id}>
-                      {shift.stage_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div>
-              <Label className="text-white">Guest Name *</Label>
-              <Input
-                value={sessionForm.guest_name}
-                onChange={(e) => setSessionForm({...sessionForm, guest_name: e.target.value})}
-                placeholder="Guest name or membership #"
-                className="glass-input"
-                required
+          {contractStep === "form" && (
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!sessionForm.entertainer_id || !sessionForm.guest_name.trim()) return;
+                setContractStep("contract");
+              }} 
+              className="space-y-4"
+            >
+              <div>
+                <Label className="text-white">Entertainer *</Label>
+                <Select 
+                  value={sessionForm.entertainer_id} 
+                  onValueChange={(value) => setSessionForm({...sessionForm, entertainer_id: value})}
+                  required
+                >
+                  <SelectTrigger className="glass-input">
+                    <SelectValue placeholder="Select entertainer..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 border-gray-700">
+                    {entertainers.map(shift => (
+                      <SelectItem key={shift.entertainer_id} value={shift.entertainer_id}>
+                        {shift.stage_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-white">Guest Name *</Label>
+                <Input
+                  value={sessionForm.guest_name}
+                  onChange={(e) => setSessionForm({...sessionForm, guest_name: e.target.value})}
+                  placeholder="Guest name or membership #"
+                  className="glass-input"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label className="text-white">Duration (minutes) *</Label>
+                <Select 
+                  value={String(sessionForm.duration_minutes)} 
+                  onValueChange={(value) => setSessionForm({...sessionForm, duration_minutes: Number(value)})}
+                >
+                  <SelectTrigger className="glass-input">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 border-gray-700">
+                    <SelectItem value="30">30 minutes - ${(selectedRoom?.rate_per_hour * 0.5).toFixed(2)}</SelectItem>
+                    <SelectItem value="60">60 minutes - ${selectedRoom?.rate_per_hour.toFixed(2)}</SelectItem>
+                    <SelectItem value="90">90 minutes - ${(selectedRoom?.rate_per_hour * 1.5).toFixed(2)}</SelectItem>
+                    <SelectItem value="120">120 minutes - ${(selectedRoom?.rate_per_hour * 2).toFixed(2)}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Price breakdown */}
+              {selectedRoom && (
+                <Card className="bg-gray-800/50 border-gray-700/50">
+                  <CardContent className="p-3 space-y-1">
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>Room Rate</span>
+                      <span>${selectedRoom.rate_per_hour?.toFixed(2)}/hr</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>Duration</span>
+                      <span>{sessionForm.duration_minutes} min</span>
+                    </div>
+                    <div className="border-t border-gray-700 pt-1 flex justify-between text-sm font-bold text-cyan-400">
+                      <span>Total Charge</span>
+                      <span>${((sessionForm.duration_minutes / 60) * (selectedRoom.rate_per_hour || 300)).toFixed(2)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowStartDialog(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!sessionForm.entertainer_id || !sessionForm.guest_name.trim()}
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-black font-bold"
+                >
+                  Next: Contract →
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {contractStep === "contract" && selectedRoom && (
+            <div className="space-y-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setContractStep("form")}
+                className="text-gray-400 text-xs"
+              >
+                ← Back to details
+              </Button>
+              <VIPContractFlow
+                room={{
+                  ...selectedRoom,
+                  duration_minutes: sessionForm.duration_minutes,
+                }}
+                guestName={sessionForm.guest_name}
+                onContractSigned={() => {
+                  startSession.mutate(sessionForm);
+                }}
+                onClose={() => {
+                  setShowStartDialog(false);
+                  setContractStep("form");
+                }}
               />
             </div>
-
-            <div>
-              <Label className="text-white">Duration (minutes) *</Label>
-              <Select 
-                value={String(sessionForm.duration_minutes)} 
-                onValueChange={(value) => setSessionForm({...sessionForm, duration_minutes: Number(value)})}
-              >
-                <SelectTrigger className="glass-input">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-gray-700">
-                  <SelectItem value="30">30 minutes - ${(selectedRoom?.rate_per_hour * 0.5).toFixed(2)}</SelectItem>
-                  <SelectItem value="60">60 minutes - ${selectedRoom?.rate_per_hour.toFixed(2)}</SelectItem>
-                  <SelectItem value="90">90 minutes - ${(selectedRoom?.rate_per_hour * 1.5).toFixed(2)}</SelectItem>
-                  <SelectItem value="120">120 minutes - ${(selectedRoom?.rate_per_hour * 2).toFixed(2)}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowStartDialog(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={startSession.isPending}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600"
-              >
-                {startSession.isPending ? "Starting..." : "Start Session"}
-              </Button>
-            </div>
-          </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
