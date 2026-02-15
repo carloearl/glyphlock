@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,11 +26,11 @@ export default function NUPSOwner() {
       try {
         const currentUser = await base44.auth.me();
         if (currentUser.role !== 'admin') {
-          window.location.href = '/nups-staff';
+          window.location.href = createPageUrl("NUPSStaff");
         }
         setUser(currentUser);
       } catch (error) {
-        base44.auth.redirectToLogin('/nups-login');
+        base44.auth.redirectToLogin(createPageUrl("NUPSLogin"));
       }
     };
     checkAuth();
