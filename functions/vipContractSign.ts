@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
       token, signature, guest_name, serial_number,
       date_of_birth, government_id_type, government_id_number, government_id_state,
       card_last_four, card_type, phone,
-      id_photo_url, id_photo_back_url, thumbprint_url,
+      id_photo_url, id_photo_back_url, thumbprint_url, guest_photo_url,
       host_name, host_signature, manager_name, manager_signature
     } = body;
 
@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
       contract_hash: contractHash,
       id_photo_url,
       id_photo_back_url: id_photo_back_url || "",
+      guest_photo_url: guest_photo_url || "",
       ip_address: clientIP,
       user_agent: userAgent,
       metadata: {
@@ -104,6 +105,7 @@ Deno.serve(async (req) => {
       guest_name,
       date_of_birth,
       phone: phone || undefined,
+      profile_photo_url: guest_photo_url || undefined,
       government_id_type,
       government_id_number,
       government_id_state: government_id_state || undefined,
@@ -130,10 +132,6 @@ Deno.serve(async (req) => {
       verification_status: "verified",
       id_verified_date: now,
       membership_number: serial_number,
-      manager_witness: manager_name,
-      manager_signature: manager_signature,
-      second_witness: host_name,
-      second_witness_signature: host_signature,
     });
 
     // Update contract record with guest reference

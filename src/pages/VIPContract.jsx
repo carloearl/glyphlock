@@ -315,6 +315,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
       id_photo_url: idFrontUrl,
       id_photo_back_url: idBackUrl,
       thumbprint_url: thumbprintUrl,
+      guest_photo_url: guestPhotoUrl,
       host_name: hostName,
       host_signature: hostSignature,
       manager_name: managerName,
@@ -389,6 +390,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
           <span class="label">Phone:</span><span>${phone || 'Not provided'}</span>
           <span class="label">Thumbprint:</span><span>✓ Captured & SHA-256 Hashed</span>
           <span class="label">ID Photo (Front):</span><span>✓ Archived</span>
+          <span class="label">Guest Photo:</span><span>✓ Captured at signing</span>
           <span class="label">ID Photo (Back):</span><span>${idBackUrl ? '✓ Archived' : '— Not provided'}</span>
         </div>
       </div>
@@ -699,6 +701,36 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
                 )}
               </div>
 
+              {/* Guest Photo */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-green-400" />
+                  Guest Photo — Face Photo *
+                </Label>
+                <input ref={guestPhotoRef} type="file" accept="image/*" capture="user" className="hidden"
+                  onChange={e => handleFileUpload(e.target.files[0], "guest_photo")} />
+                {guestPhotoUrl ? (
+                  <div className="relative">
+                    <img src={guestPhotoUrl} alt="Guest Photo" className="w-full max-w-[200px] mx-auto rounded-xl border-2 border-green-500/50" />
+                    <Badge className="absolute top-2 right-2 bg-green-500/20 text-green-400 border-green-500/40">
+                      <CheckCircle2 className="w-3 h-3 mr-1" /> Captured
+                    </Badge>
+                    <Button size="sm" variant="outline" className="mt-2 w-full border-gray-700 text-gray-400"
+                      onClick={() => guestPhotoRef.current?.click()}>
+                      Retake Photo
+                    </Button>
+                  </div>
+                ) : (
+                  <Button onClick={() => guestPhotoRef.current?.click()} disabled={uploading.guest_photo}
+                    className="w-full h-24 bg-green-500/10 border-2 border-dashed border-green-500/40 text-green-400 hover:bg-green-500/20 flex-col gap-2"
+                    variant="outline">
+                    {uploading.guest_photo ? <Loader2 className="w-6 h-6 animate-spin" /> : <Camera className="w-8 h-8" />}
+                    {uploading.guest_photo ? "Uploading..." : "Take Guest Photo (Front-Facing)"}
+                  </Button>
+                )}
+                <p className="text-[10px] text-gray-500">Photo of the guest's face taken at time of contract. Opens front-facing camera.</p>
+              </div>
+
               {/* ID Back */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
@@ -771,6 +803,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
                 <div className="flex justify-between"><span>Serial:</span><span className="text-purple-400 font-mono">{serialNumber}</span></div>
                 <div className="flex justify-between"><span>Thumbprint:</span><span className="text-green-400">{thumbprintUrl ? "✓ Captured & Hashed" : "✗ Missing"}</span></div>
                 <div className="flex justify-between"><span>ID Front:</span><span className="text-green-400">{idFrontUrl ? "✓ Uploaded" : "✗ Missing"}</span></div>
+                <div className="flex justify-between"><span>Guest Photo:</span><span className="text-green-400">{guestPhotoUrl ? "✓ Captured" : "✗ Missing"}</span></div>
                 <div className="flex justify-between"><span>ID Back:</span><span className={idBackUrl ? "text-green-400" : "text-gray-600"}>{idBackUrl ? "✓ Uploaded" : "— Skipped"}</span></div>
               </div>
 
@@ -830,6 +863,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
 
               <div className="text-xs text-gray-500 space-y-1 bg-gray-800/50 rounded-lg p-3">
                 <p className="font-bold text-gray-300 mb-2">By signing, you irrevocably acknowledge:</p>
+                <p>✓ Guest photo captured at signing</p>
                 <p>✓ Thumbprint captured & hashed (SHA-256)</p>
                 <p>✓ Government ID ({idType}) photographed & archived</p>
                 <p>✓ Card ({cardType} ending {cardLast4}) authorized per Section 3</p>
