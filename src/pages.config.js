@@ -63,6 +63,8 @@ import Consultation from './pages/Consultation';
 import ConsultationSuccess from './pages/ConsultationSuccess';
 import Contact from './pages/Contact';
 import ContentGenerator from './pages/ContentGenerator';
+import ContractArchive from './pages/ContractArchive';
+import ContractSearch from './pages/ContractSearch';
 import Cookies from './pages/Cookies';
 import DreamTeam from './pages/DreamTeam';
 import EmergencyBackup from './pages/EmergencyBackup';
@@ -122,8 +124,6 @@ import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
-import ContractSearch from './pages/ContractSearch';
-import ContractArchive from './pages/ContractArchive';
 import __Layout from './Layout.jsx';
 
 
@@ -144,6 +144,8 @@ export const PAGES = {
     "ConsultationSuccess": ConsultationSuccess,
     "Contact": Contact,
     "ContentGenerator": ContentGenerator,
+    "ContractArchive": ContractArchive,
+    "ContractSearch": ContractSearch,
     "Cookies": Cookies,
     "DreamTeam": DreamTeam,
     "EmergencyBackup": EmergencyBackup,
@@ -203,8 +205,6 @@ export const PAGES = {
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
-    "ContractSearch": ContractSearch,
-    "ContractArchive": ContractArchive,
 }
 
 export const pagesConfig = {
