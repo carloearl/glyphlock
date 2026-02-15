@@ -66,6 +66,7 @@ export function createSongEntry(overrides = {}) {
     title: "",
     artist: "",
     youtubeUrl: "",
+    uploadUrl: "",
     vibeTag: TrackVibe.crowdControl,
     energyLevel: 5,
     notes: "",

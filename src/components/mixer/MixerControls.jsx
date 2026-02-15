@@ -2,7 +2,7 @@
  * MixerControls - Global actions bar
  */
 import React from "react";
-import { Plus, Archive, HelpCircle, LayoutGrid, List, Disc3 } from "lucide-react";
+import { Plus, Archive, HelpCircle, LayoutGrid, List, Disc3, Upload, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrackVibe, VIBE_META, ViewMode } from "@/components/mixer/types/mixerTypes";
@@ -17,6 +17,8 @@ export default function MixerControls({
   onAddSong,
   onOpenArchive,
   onOpenShortcuts,
+  onUploadSong,
+  onAIPlaylist,
 }) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -53,6 +55,12 @@ export default function MixerControls({
 
       <Button size="sm" onClick={onAddSong} className="bg-gradient-to-r from-cyan-600 to-blue-600 h-9 gap-1.5">
         <Plus className="w-4 h-4" /> Add Song
+      </Button>
+      <Button size="sm" variant="outline" onClick={onUploadSong} className="h-9 border-slate-700 gap-1.5">
+        <Upload className="w-4 h-4" /> Upload
+      </Button>
+      <Button size="sm" variant="outline" onClick={onAIPlaylist} className="h-9 border-purple-500/40 text-purple-300 gap-1.5">
+        <Sparkles className="w-4 h-4" /> AI Playlist
       </Button>
       <Button size="sm" variant="outline" onClick={onOpenArchive} className="h-9 border-slate-700 gap-1.5">
         <Archive className="w-4 h-4" /> Archive
