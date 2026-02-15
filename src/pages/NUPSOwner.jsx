@@ -36,7 +36,7 @@ export default function NUPSOwner() {
         }
         setUser(currentUser);
       } catch (error) {
-        base44.auth.redirectToLogin(createPageUrl("NUPSLogin"));
+        window.location.href = createPageUrl("NUPSLogin");
       }
     };
     checkAuth();
