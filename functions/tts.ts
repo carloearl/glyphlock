@@ -57,6 +57,8 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'Text is required' }, { status: 400 });
     }
 
+    const t0 = performance.now();
+
     // Clean text
     const cleanText = text
       .replace(/[#*`🦕💠🦖🌟✨🔒⚡️💡🛡️•]/g, '')
@@ -91,6 +93,8 @@ Deno.serve(async (req) => {
     const openaiVoice = VOICE_MAPPING[voice] || voice || 'nova';
     const normalizedSpeed = Math.max(0.25, Math.min(4.0, speed));
 
+    const t1 = performance.now();
+    console.log(`GLYPH VOICE BACKEND: preprocessing took ${(t1 - t0).toFixed(1)}ms`);
     console.log(`GLYPH VOICE BACKEND: calling OpenAI | voice=${openaiVoice} speed=${normalizedSpeed} emotion=${emotion} length=${finalText.length}`);
 
     // Call OpenAI TTS API
@@ -109,6 +113,9 @@ Deno.serve(async (req) => {
       })
     });
 
+    const t2 = performance.now();
+    console.log(`GLYPH VOICE BACKEND: OpenAI API call took ${(t2 - t1).toFixed(1)}ms`);
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('GLYPH VOICE BACKEND: OpenAI error', response.status, errorText);
@@ -119,10 +126,12 @@ Deno.serve(async (req) => {
       }, { status: response.status });
     }
 
+    const t3 = performance.now();
     const audioBuffer = await response.arrayBuffer();
+    const t4 = performance.now();
     const bytes = audioBuffer.byteLength;
 
-    console.log(`GLYPH VOICE BACKEND: OpenAI response received | bytes=${bytes}`);
+    console.log(`GLYPH VOICE BACKEND: response body read took ${(t4 - t3).toFixed(1)}ms | bytes=${bytes}`);
 
     // Encode as base64 JSON to avoid binary corruption through SDK
     const uint8 = new Uint8Array(audioBuffer);
@@ -131,8 +140,10 @@ Deno.serve(async (req) => {
       binary += String.fromCharCode(uint8[i]);
     }
     const base64Audio = btoa(binary);
+    const t5 = performance.now();
 
-    console.log(`GLYPH VOICE BACKEND: returning base64 audio | success=true bytes=${bytes} base64Length=${base64Audio.length}`);
+    console.log(`GLYPH VOICE BACKEND: base64 encoding took ${(t5 - t4).toFixed(1)}ms | base64Length=${base64Audio.length}`);
+    console.log(`GLYPH VOICE BACKEND: TOTAL TIME ${(t5 - t0).toFixed(1)}ms | breakdown: preprocess=${(t1-t0).toFixed(1)}ms openai_call=${(t2-t1).toFixed(1)}ms body_read=${(t4-t3).toFixed(1)}ms base64=${(t5-t4).toFixed(1)}ms`);
 
     return Response.json({
       success: true,
