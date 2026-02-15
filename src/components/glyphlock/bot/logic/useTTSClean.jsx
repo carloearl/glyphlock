@@ -176,14 +176,13 @@ export default function useTTSClean(defaultSettings = {}) {
       return true;
 
     } catch (error) {
-      const errorMsg = error.message || 'Unknown TTS error';
+      const errorMsg = error?.message || 'Unknown TTS error';
       console.error('GLYPH VOICE: play failed', errorMsg, error);
       setLastError(errorMsg);
       setIsLoading(false);
       setIsSpeaking(false);
-      
-      // DO NOT MASK ERROR - throw it
-      throw error;
+
+      return false;
     }
   }, [settings, stop]);
 
