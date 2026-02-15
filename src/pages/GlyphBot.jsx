@@ -330,12 +330,10 @@ export default function GlyphBotPage() {
       });
 
       if (modes.voice && botText) {
-        try {
-          console.log('[GlyphBot] Auto-speaking with voice settings:', voiceSettings);
-          playText(botText, voiceSettings);
-        } catch (e) {
+        console.log('[GlyphBot] Auto-speaking with voice settings:', voiceSettings);
+        playText(botText, voiceSettings).catch(e => {
           console.warn('[TTS Auto-speak]', e);
-        }
+        });
       }
 
       if (response.meta) {
