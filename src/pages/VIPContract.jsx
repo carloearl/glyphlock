@@ -367,10 +367,11 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
     );
   }
 
-  const steps = ["Identity", "Biometrics", "Contract", "Sign"];
+  const steps = ["Identity", "Biometrics", "Contract", "Guest Sign", "Staff Sign"];
   const canProceedStep0 = guestName.trim() && dateOfBirth && idNumber.trim() && cardLast4.length === 4;
   const canProceedStep1 = idFrontUrl && thumbprintUrl;
   const canProceedStep3 = signature.trim() && signature.toLowerCase() === guestName.toLowerCase() && initialsAcknowledged;
+  const canFinalizeStep4 = hostName.trim() && hostSignature.trim() && hostSignature.toLowerCase() === hostName.toLowerCase() && managerName.trim() && managerSignature.trim() && managerSignature.toLowerCase() === managerName.toLowerCase();
 
   return (
     <div className="min-h-screen bg-black text-white py-8 md:py-16">
