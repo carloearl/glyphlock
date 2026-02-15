@@ -121,6 +121,7 @@ import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
 import GlyphBotMixer from './pages/GlyphBotMixer';
+import ClubCurrencyPress from './pages/ClubCurrencyPress';
 import __Layout from './Layout.jsx';
 
 
@@ -199,6 +200,7 @@ export const PAGES = {
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
     "GlyphBotMixer": GlyphBotMixer,
+    "ClubCurrencyPress": ClubCurrencyPress,
 }
 
 export const pagesConfig = {
