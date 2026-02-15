@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, Send, Loader2, Volume2 } from "lucide-react";
+import { Sparkles, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { PERSONAS } from '../config/personas';
-import useTTSClean from '@/components/glyphlock/bot/logic/useTTSClean';
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function GlyphBotJr({ onClose, forceExpanded = false }) {
@@ -11,7 +10,6 @@ export default function GlyphBotJr({ onClose, forceExpanded = false }) {
   
   const [isOpen, setIsOpen] = useState(forceExpanded);
   const [isHovered, setIsHovered] = useState(false);
-  const { playText, stop: stopTTS, isSpeaking } = useTTSClean();
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Hi there! I'm GlyphBot Junior! 🌟 How can I help you today?", timestamp: Date.now() }
   ]);
@@ -259,38 +257,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
                 {msg.text}
               </ReactMarkdown>
               
-              {msg.role === "assistant" && (
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('GLYPH VOICE: manual playback button clicked');
-                    playText(msg.text).catch(err => {
-                      console.error('GLYPH VOICE: manual playback failed', err);
-                    });
-                  }}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('GLYPH VOICE: manual playback touch triggered');
-                    playText(msg.text).catch(err => {
-                      console.error('GLYPH VOICE: manual playback failed', err);
-                    });
-                  }}
-                  disabled={isSpeaking}
-                  className="mt-3 text-xs bg-blue-600/30 hover:bg-blue-600/50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-blue-400/30 disabled:opacity-50"
-                  style={{ 
-                    boxShadow: '0 0 10px rgba(37, 99, 235, 0.2)',
-                    touchAction: 'manipulation',
-                    pointerEvents: 'auto',
-                    minWidth: '80px',
-                    minHeight: '36px'
-                  }}
-                >
-                  <Volume2 className={`w-3 h-3 ${isSpeaking ? 'animate-pulse' : ''} pointer-events-none`} />
-                  {isSpeaking ? 'Playing...' : 'Listen'}
-                </button>
-              )}
+
             </div>
           </div>
         ))}
