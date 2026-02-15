@@ -340,7 +340,7 @@ export default function POSCashRegister({ user }) {
                 </Button>
 
                 {lastTransaction && (
-                  <div className="mt-2 flex justify-center">
+                  <div className="mt-4">
                     <ReceiptPrinter transaction={lastTransaction} />
                   </div>
                 )}
