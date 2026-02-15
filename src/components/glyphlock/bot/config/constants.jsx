@@ -1,3 +1,4 @@
+
 export const STORAGE_KEYS = {
   MESSAGES: 'glyphbot_messages',
   SETTINGS: 'glyphbot_settings',
@@ -15,15 +16,7 @@ export const PROVIDER_PRIORITY = ['PUTER', 'GEMINI', 'OPENAI', 'CLAUDE', 'OPENRO
 export const WELCOME_MESSAGE = {
   id: 'welcome-1',
   role: 'assistant',
-  content: `Welcome to GlyphBot — your elite AI security assistant.
-
-I can help you with:
-• **Security audits** — analyze code, URLs, and systems for vulnerabilities
-• **Blockchain analysis** — smart contract review and DeFi security
-• **Threat detection** — identify and mitigate potential risks
-• **Code debugging** — find and fix issues with precision
-
-What would you like to explore today?`,
+  content: `Hey — I'm GlyphBot. Ask me anything about security, code, or threats.`,
   audit: null
 };
 
