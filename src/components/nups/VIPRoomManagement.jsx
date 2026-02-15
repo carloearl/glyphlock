@@ -57,6 +57,7 @@ export default function VIPRoomManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vip-rooms'] });
       setShowStartDialog(false);
+      setContractStep("form");
       setSessionForm({ entertainer_id: "", guest_name: "", duration_minutes: 60 });
     }
   });
