@@ -26,15 +26,22 @@ const VOICE_MAPPING = {
 Deno.serve(async (req) => {
   console.log('GLYPH VOICE BACKEND: function invoked');
 
+  // Auth check — isolated so failures return 401, not 500
+  let user;
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    user = await base44.auth.me();
+  } catch (authErr) {
+    console.error('GLYPH VOICE BACKEND: auth failed', authErr.message);
+    return Response.json({ success: false, error: 'Authentication required' }, { status: 401 });
+  }
 
-    if (!user) {
-      console.error('GLYPH VOICE BACKEND: unauthorized - no user');
-      return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
+  if (!user) {
+    console.error('GLYPH VOICE BACKEND: unauthorized - no user');
+    return Response.json({ success: false, error: 'Authentication required' }, { status: 401 });
+  }
 
+  try {
     if (!OPENAI_API_KEY) {
       console.error('GLYPH VOICE BACKEND: OpenAI API key not configured');
       return Response.json({ 
