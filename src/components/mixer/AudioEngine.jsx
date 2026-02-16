@@ -22,6 +22,7 @@ export default function AudioEngine({
   title = "Unknown Track",
   artist = "",
   autoPlay = false,
+  externalVolume,
   onEnded,
   onNext,
   onPrev,
