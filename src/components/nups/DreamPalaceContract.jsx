@@ -420,47 +420,107 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
     );
   }
 
-  // ═══════════════ STEP 1: REVIEW, ACKNOWLEDGE, SIGN ═══════════════
+  // ═══════════════ STEP 1: FULL CONTRACT SCROLL ═══════════════
   if (step === 1) {
     return (
       <div className="space-y-4">
         <div className="text-center">
-          <h2 className="text-lg font-bold text-white">Terms, Acknowledgements & Signature</h2>
+          <FileText className="w-10 h-10 text-amber-400 mx-auto mb-2" />
+          <h2 className="text-lg font-bold text-white">Terms & Conditions — READ ENTIRE CONTRACT</h2>
           <p className="text-xs text-gray-400">Order: {orderNumber} | Total: ${grandTotal.toFixed(2)}</p>
         </div>
 
-        {/* Contract text */}
-        <Card className="bg-gray-900/60 border-gray-700">
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-amber-400">Terms and Conditions — READ CAREFULLY</CardTitle></CardHeader>
-          <CardContent>
-            <div className="bg-black/60 border border-gray-700 rounded-lg p-4 max-h-60 overflow-y-auto text-[10px] text-gray-300 leading-relaxed whitespace-pre-wrap font-mono">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-300">
+          <p className="font-bold">⚠️ LEGAL DOCUMENT — Scroll to the bottom to continue.</p>
+          <p>You must read ALL sections before you can proceed to sign.</p>
+        </div>
+
+        {/* Full contract — tall scroll area with bottom detection */}
+        <Card className="bg-gray-900/60 border-amber-500/30">
+          <CardContent className="p-0">
+            <div
+              className="bg-black/60 border border-gray-700 rounded-lg p-4 sm:p-6 overflow-y-auto text-xs sm:text-sm text-gray-300 leading-relaxed whitespace-pre-wrap font-mono"
+              style={{ maxHeight: '60vh', minHeight: '300px' }}
+              onScroll={(e) => {
+                const el = e.target;
+                if (el.scrollHeight - el.scrollTop - el.clientHeight < 40) {
+                  setContractScrolled(true);
+                }
+              }}
+            >
               {FULL_CONTRACT_TEXT}
             </div>
           </CardContent>
         </Card>
 
+        {!contractScrolled && (
+          <div className="text-center text-xs text-amber-400 animate-pulse">
+            ↓ Scroll down to read the entire contract ↓
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setStep(0)} className="flex-1 border-gray-700">← Back to Order</Button>
+          <Button onClick={() => setStep(2)} disabled={!contractScrolled}
+            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-black font-bold h-12">
+            I Have Read the Contract — Continue →
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════ STEP 2: CLICKWRAP ACKNOWLEDGMENTS ═══════════════
+  if (step === 2) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center">
+          <Shield className="w-10 h-10 text-green-400 mx-auto mb-2" />
+          <h2 className="text-lg font-bold text-white">Acknowledgements & Clickwrap Agreement</h2>
+          <p className="text-xs text-gray-400">Order: {orderNumber} | {customerName} | ${grandTotal.toFixed(2)}</p>
+        </div>
+
         {/* Acknowledgments */}
         <Card className="bg-gray-900/60 border-amber-500/30">
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-amber-400">Acknowledgements — Check All *</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-amber-400">Check ALL to Acknowledge *</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {ACKNOWLEDGMENTS.map((ack, i) => (
               <div key={i} className="flex items-start gap-3 cursor-pointer" onClick={() => setAcks(p => { const n = [...p]; n[i] = !n[i]; return n; })}>
                 <div className={`w-5 h-5 mt-0.5 rounded border-2 flex items-center justify-center flex-shrink-0 ${acks[i] ? 'bg-green-500 border-green-500' : 'border-gray-600'}`}>
                   {acks[i] && <CheckCircle2 className="w-3 h-3 text-white" />}
                 </div>
-                <p className="text-[10px] text-gray-300 leading-relaxed">• {ack}</p>
+                <p className="text-xs text-gray-300 leading-relaxed">• {ack}</p>
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* Biometrics + Signature */}
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setStep(1)} className="flex-1 border-gray-700">← Back</Button>
+          <Button onClick={() => setStep(3)} disabled={!allAcked}
+            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-black font-bold h-12">
+            I Agree — Proceed to Biometrics & Sign →
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════ STEP 3: BIOMETRICS + GUEST SIGNATURE ═══════════════
+  if (step === 3) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center">
+          <Fingerprint className="w-10 h-10 text-purple-400 mx-auto mb-2" />
+          <h2 className="text-lg font-bold text-white">Biometric Capture & Customer Signature</h2>
+          <p className="text-xs text-gray-400">Order: {orderNumber} | {customerName}</p>
+        </div>
+
         <Card className="bg-gray-900/60 border-green-500/30">
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-green-400">Customer Signature & Biometrics</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-4 space-y-4">
             {/* Signature */}
             <div>
-              <Label>Customer Signature — Type full name *</Label>
+              <Label className="text-sm font-bold text-white">Customer Signature — Type full name *</Label>
               <Input value={signature} onChange={e => setSignature(e.target.value)} placeholder={customerName} className="text-lg text-center font-bold bg-gray-800 border-gray-700" style={{ fontFamily: 'cursive, serif' }} />
             </div>
 
@@ -471,9 +531,10 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
               {thumbprintUrl ? (
                 <div className="relative"><img src={thumbprintUrl} alt="Thumb" className="w-32 h-20 object-cover rounded border-2 border-purple-500/50" />
                   <Badge className="absolute top-1 right-1 bg-green-500/20 text-green-400 text-[8px]">✓</Badge>
+                  <Button size="sm" variant="outline" className="mt-2 w-full border-gray-700 text-gray-400" onClick={() => thumbRef.current?.click()}>Rescan</Button>
                 </div>
               ) : (
-                <Button onClick={() => thumbRef.current?.click()} disabled={uploading.thumb} variant="outline" className="w-full h-16 border-dashed border-purple-500/40 text-purple-400">
+                <Button onClick={() => thumbRef.current?.click()} disabled={uploading.thumb} variant="outline" className="w-full h-20 border-dashed border-purple-500/40 text-purple-400">
                   {uploading.thumb ? <Loader2 className="w-5 h-5 animate-spin" /> : <Fingerprint className="w-6 h-6" />}
                   <span className="ml-2">{uploading.thumb ? "Uploading..." : "Scan Thumbprint"}</span>
                 </Button>
@@ -482,14 +543,15 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
 
             {/* Guest Photo */}
             <div>
-              <Label className="flex items-center gap-2"><Camera className="w-4 h-4 text-green-400" /> Guest Photo *</Label>
+              <Label className="flex items-center gap-2"><Camera className="w-4 h-4 text-green-400" /> Guest Photo (front-facing) *</Label>
               <input ref={photoRef} type="file" accept="image/*" capture="user" className="hidden" onChange={e => handleFileUpload(e.target.files[0], "photo")} />
               {guestPhotoUrl ? (
                 <div className="relative"><img src={guestPhotoUrl} alt="Guest" className="w-32 h-32 object-cover rounded border-2 border-green-500/50" />
                   <Badge className="absolute top-1 right-1 bg-green-500/20 text-green-400 text-[8px]">✓</Badge>
+                  <Button size="sm" variant="outline" className="mt-2 w-full border-gray-700 text-gray-400" onClick={() => photoRef.current?.click()}>Retake</Button>
                 </div>
               ) : (
-                <Button onClick={() => photoRef.current?.click()} disabled={uploading.photo} variant="outline" className="w-full h-16 border-dashed border-green-500/40 text-green-400">
+                <Button onClick={() => photoRef.current?.click()} disabled={uploading.photo} variant="outline" className="w-full h-20 border-dashed border-green-500/40 text-green-400">
                   {uploading.photo ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-6 h-6" />}
                   <span className="ml-2">{uploading.photo ? "Uploading..." : "Take Guest Photo"}</span>
                 </Button>
@@ -527,7 +589,7 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
         </Card>
 
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setStep(0)} className="flex-1 border-gray-700">← Back to Order</Button>
+          <Button variant="outline" onClick={() => setStep(2)} className="flex-1 border-gray-700">← Back</Button>
           <Button onClick={handleGuestSign} disabled={!canSign || loading} className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-black font-bold h-12">
             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
             Guest Signed — Next: Staff
