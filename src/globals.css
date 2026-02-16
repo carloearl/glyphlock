@@ -157,20 +157,7 @@ body, #root, #__next, main, section {
   }
 }
 
-/* ENHANCED: Minimum Touch Target Sizes (48x48px for mobile - better UX) */
-button,
-a[role="button"],
-input[type="checkbox"],
-input[type="radio"],
-input[type="submit"],
-input[type="button"],
-select {
-  min-width: 48px;
-  min-height: 48px;
-  touch-action: manipulation;
-  cursor: pointer;
-}
-
+/* Touch Target Sizes - desktop only, mobile handled separately */
 @media (min-width: 769px) {
   button,
   a[role="button"],
@@ -181,6 +168,8 @@ select {
   select {
     min-width: 44px;
     min-height: 44px;
+    touch-action: manipulation;
+    cursor: pointer;
   }
 }
 
@@ -678,32 +667,6 @@ body {
     pointer-events: none !important;
   }
 
-  /* Force all interactive containers clickable */
-  [onclick],
-  [class*="clickable"],
-  [class*="interactive"] {
-    pointer-events: auto !important;
-    touch-action: manipulation !important;
-    cursor: pointer !important;
-  }
-  
-  /* Enable smooth scrolling on mobile */
-  html, body, main, section {
-    scroll-snap-type: none !important;
-    scroll-snap-align: none !important;
-  }
-
-  /* Prevent double-tap zoom */
-  a, button, [role="button"] {
-    touch-action: manipulation !important;
-  }
-
-  /* Fix card flip containers */
-  [style*="perspective"] {
-    -webkit-tap-highlight-color: transparent !important;
-    touch-action: pan-y !important;
-  }
-  
   /* Ensure main content is scrollable */
   main {
     overflow-y: visible !important;
