@@ -69,12 +69,14 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
             title={song.title}
             artist={song.artist}
             autoPlay={true}
+            externalVolume={volume}
             onEnded={onEnded}
           />
         </div>
       ) : (
-        <div className="w-full aspect-video bg-black/40 flex items-center justify-center">
+        <div className="w-full aspect-video bg-black/40 flex flex-col items-center justify-center gap-1 p-2">
           <span className="text-xs text-slate-600">No playable source</span>
+          <span className="text-[9px] text-slate-700">Add a YouTube URL or upload audio</span>
         </div>
       )}
 

@@ -56,13 +56,21 @@ export default function AudioEngine({
     }
   }, [src]);
 
-  // Sync volume
+  // Sync external volume override
   useEffect(() => {
+    if (externalVolume !== undefined && externalVolume !== null && audioRef.current) {
+      audioRef.current.volume = Math.max(0, Math.min(1, externalVolume));
+    }
+  }, [externalVolume]);
+
+  // Sync volume (only when no external override)
+  useEffect(() => {
+    if (externalVolume !== undefined && externalVolume !== null) return;
     if (audioRef.current) {
       audioRef.current.volume = muted ? 0 : volume;
       audioRef.current.muted = muted;
     }
-  }, [volume, muted]);
+  }, [volume, muted, externalVolume]);
 
   // Sync loop
   useEffect(() => {
