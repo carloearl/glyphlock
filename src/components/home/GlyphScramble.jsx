@@ -37,8 +37,8 @@ export default function GlyphScramble() {
       role="button"
       tabIndex={0}
       aria-label="Hover to reveal the GlyphLock founding quote"
-      onFocus={() => setRevealed(true)}
-      onBlur={() => setRevealed(false)}
+      onFocus={() => { setRevealed(true); hasRevealed.current = true; }}
+      onBlur={() => {}}
       style={{ minHeight: '100px' }}
     >
       {/* Subtle background glow */}
