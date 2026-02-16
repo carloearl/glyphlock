@@ -331,21 +331,25 @@ export default function MixerModuleView() {
               <MusicSearchPanel
                 onAddTrack={(trackData) => handleUploadedSong(trackData)}
                 onPreviewTrack={(track) => {
-                  // Create a temp song and play it on Deck A
+                  // Find existing or create new, then load on Deck A
+                  const existing = songs.find(s => s.uploadUrl === track.audio_url);
+                  if (existing) {
+                    setPlayingSongId(existing.id);
+                    setPlayerCollapsed(false);
+                    return;
+                  }
                   const tempSong = createSongEntry({
                     title: track.title,
                     artist: track.artist,
                     uploadUrl: track.audio_url,
+                    imageUrl: track.image_url,
                   });
-                  setSongs(prev => {
-                    const exists = prev.find(s => s.title === track.title && s.artist === track.artist);
-                    if (exists) {
-                      setPlayingSongId(exists.id);
-                      return prev;
-                    }
-                    setPlayingSongId(tempSong.id);
-                    return [...prev, tempSong];
-                  });
+                  setSongs(prev => [...prev, tempSong]);
+                  if (activeProfile) {
+                    setProfiles(prev => prev.map(p => p.id === activeProfile.id ? { ...p, songIds: [...p.songIds, tempSong.id] } : p));
+                  }
+                  setPlayingSongId(tempSong.id);
+                  setPlayerCollapsed(false);
                 }}
               />
             ) : (
