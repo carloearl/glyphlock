@@ -46,6 +46,8 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
     if (tempId && onSkip) onSkip(playingSongId); // advances deck A
   }, [deckBSongId, playingSongId, onSkip]);
 
+  const hasAnySong = deckASong || deckBSong;
+
   if (collapsed) {
     return (
       <div
@@ -53,13 +55,15 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
         onClick={onToggleCollapse}
       >
         <div className="flex items-center gap-2">
-          <div className="flex gap-0.5">
-            <span className="w-1.5 h-3 bg-purple-400 rounded-full animate-pulse" />
-            <span className="w-1.5 h-4 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-            <span className="w-1.5 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
-          </div>
+          {deckASong && (
+            <div className="flex gap-0.5">
+              <span className="w-1.5 h-3 bg-purple-400 rounded-full animate-pulse" />
+              <span className="w-1.5 h-4 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+            </div>
+          )}
           <span className="text-xs text-white font-medium truncate max-w-[200px]">
-            {deckASong ? `${deckASong.title} — ${deckASong.artist}` : 'No track'}
+            {deckASong ? `${deckASong.title} — ${deckASong.artist}` : 'No track loaded'}
           </span>
         </div>
         <ChevronUp className="w-4 h-4 text-slate-500" />
