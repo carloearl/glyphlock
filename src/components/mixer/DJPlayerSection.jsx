@@ -63,6 +63,12 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
       <div
         className="h-10 flex-shrink-0 border-t border-slate-700/50 bg-slate-900/60 flex items-center justify-between px-4 cursor-pointer"
         onClick={onToggleCollapse}
+        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
+        onDrop={(e) => {
+          e.preventDefault();
+          const songId = e.dataTransfer.getData("application/mixer-song-id");
+          if (songId) { onPlay?.(songId); onToggleCollapse?.(); }
+        }}
       >
         <div className="flex items-center gap-2">
           {deckASong && (
