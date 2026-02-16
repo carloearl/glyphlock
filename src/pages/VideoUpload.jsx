@@ -28,8 +28,9 @@ export default function VideoUpload() {
     return null;
   };
 
-  const MAX_VIDEO_SIZE_MB = 200;
+  const MAX_VIDEO_SIZE_MB = 500;
   const MAX_OTHER_SIZE_MB = 50;
+  const DRIVE_THRESHOLD_MB = 50;
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -53,37 +54,60 @@ export default function VideoUpload() {
     setQrCodeUrl('');
   };
 
+  const [uploadProgress, setUploadProgress] = useState('');
+  const [previewUrl, setPreviewUrl] = useState('');
+
   const handleUpload = async () => {
     if (!file) {
       toast.error('Please select a file first');
       return;
     }
 
+    const useDrive = file.size > DRIVE_THRESHOLD_MB * 1024 * 1024;
     setUploading(true);
+    setUploadProgress(useDrive ? 'Uploading to Google Drive (large file)...' : 'Uploading...');
+
     try {
-      console.log('[VideoUpload] Starting upload for:', file.name);
-      const result = await base44.integrations.Core.UploadFile({ file });
-      console.log('[VideoUpload] Upload result:', result);
-      
-      const url = result?.file_url || result?.data?.file_url;
-      
-      if (url) {
-        console.log('[VideoUpload] Setting file URL:', url);
-        setFileUrl(url);
-        // Persist to localStorage
-        localStorage.setItem('gl_last_uploaded_url', url);
-        localStorage.setItem('gl_last_uploaded_type', fileType);
-        toast.success('File uploaded successfully!');
+      if (useDrive) {
+        // Large file → Google Drive via backend function
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const result = await base44.functions.invoke('uploadToGoogleDrive', formData);
+        const data = result?.data;
+        
+        if (data?.file_url) {
+          setFileUrl(data.file_url);
+          setPreviewUrl(data.preview_url || '');
+          localStorage.setItem('gl_last_uploaded_url', data.file_url);
+          localStorage.setItem('gl_last_uploaded_type', fileType);
+          toast.success(`Uploaded to Google Drive! (${(file.size / 1024 / 1024).toFixed(0)}MB)`);
+        } else {
+          throw new Error(data?.error || 'No URL returned from Google Drive');
+        }
       } else {
-        console.error('[VideoUpload] No URL in response:', result);
-        throw new Error('No URL returned from upload');
+        // Small file → standard Base44 upload
+        const result = await base44.integrations.Core.UploadFile({ file });
+        const url = result?.file_url || result?.data?.file_url;
+        
+        if (url) {
+          setFileUrl(url);
+          setPreviewUrl('');
+          localStorage.setItem('gl_last_uploaded_url', url);
+          localStorage.setItem('gl_last_uploaded_type', fileType);
+          toast.success('File uploaded successfully!');
+        } else {
+          throw new Error('No URL returned from upload');
+        }
       }
     } catch (error) {
       console.error('[VideoUpload] Upload error:', error);
       toast.error('Upload failed: ' + (error.message || 'Unknown error'));
       setFileUrl('');
+      setPreviewUrl('');
     } finally {
       setUploading(false);
+      setUploadProgress('');
     }
   };
 
@@ -155,7 +179,7 @@ export default function VideoUpload() {
           title: 'Troubleshooting',
           content: [
             { heading: 'No URL After Upload', text: 'If upload succeeds but no URL appears, check browser console for errors. Ensure file size is under 50MB. Try refreshing and re-uploading.' },
-            { heading: 'File Size Limits', text: 'Maximum file size: 200MB for video, 50MB for audio/images. For larger files, compress before uploading or use external hosting.' },
+            { heading: 'File Size Limits', text: 'Videos up to 500MB are uploaded via Google Drive automatically. Audio/images up to 50MB use standard hosting. Files over 50MB route through Google Drive for reliability.' },
             { heading: 'Supported Formats', text: 'Videos: MP4, MOV. Audio: MP3, WAV, OGG. Images: PNG, JPG, GIF, WEBP. Other formats may fail silently.' }
           ]
         }
@@ -212,7 +236,12 @@ export default function VideoUpload() {
                 {getFileIcon()}
                 <div className="flex-1">
                   <div className="font-semibold text-emerald-400">{file.name}</div>
-                  <div className="text-slate-400 text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB • {fileType.toUpperCase()}</div>
+                  <div className="text-slate-400 text-xs">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB • {fileType.toUpperCase()}
+                    {file.size > DRIVE_THRESHOLD_MB * 1024 * 1024 && (
+                      <span className="ml-2 text-blue-400 font-semibold">→ Google Drive</span>
+                    )}
+                  </div>
                 </div>
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
               </div>
@@ -232,7 +261,7 @@ export default function VideoUpload() {
             {uploading ? (
               <>
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <span className="text-lg">Uploading...</span>
+                <span className="text-lg">{uploadProgress || 'Uploading...'}</span>
               </>
             ) : (
               <>
@@ -321,11 +350,20 @@ export default function VideoUpload() {
                   <label className="block text-sm font-bold text-slate-300 uppercase tracking-wider">
                     Video Preview
                   </label>
-                  <video
-                    src={fileUrl}
-                    controls
-                    className="w-full rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
-                  />
+                  {previewUrl ? (
+                    <iframe
+                      src={previewUrl}
+                      className="w-full aspect-video rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      src={fileUrl}
+                      controls
+                      className="w-full rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+                    />
+                  )}
                 </div>
               )}
 
