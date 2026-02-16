@@ -51,7 +51,14 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-900/40 rounded-lg border border-slate-700/30 overflow-hidden">
+    <div
+      className={`flex-1 flex flex-col bg-slate-900/40 rounded-lg border overflow-hidden transition-colors ${
+        dragOver ? "border-purple-400 bg-purple-500/10" : "border-slate-700/30"
+      }`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* Deck label + volume */}
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-700/30">
         <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">{label}</span>
