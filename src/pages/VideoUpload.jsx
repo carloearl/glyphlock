@@ -28,19 +28,29 @@ export default function VideoUpload() {
     return null;
   };
 
+  const MAX_VIDEO_SIZE_MB = 200;
+  const MAX_OTHER_SIZE_MB = 50;
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
 
     const category = getFileCategory(selectedFile.type);
-    if (category) {
-      setFile(selectedFile);
-      setFileType(category);
-      setFileUrl('');
-      setQrCodeUrl('');
-    } else {
+    if (!category) {
       toast.error('Please select an MP4, MP3, or image file');
+      return;
     }
+
+    const maxMB = category === 'video' ? MAX_VIDEO_SIZE_MB : MAX_OTHER_SIZE_MB;
+    if (selectedFile.size > maxMB * 1024 * 1024) {
+      toast.error(`${category.charAt(0).toUpperCase() + category.slice(1)} files must be under ${maxMB}MB`);
+      return;
+    }
+
+    setFile(selectedFile);
+    setFileType(category);
+    setFileUrl('');
+    setQrCodeUrl('');
   };
 
   const handleUpload = async () => {
@@ -145,7 +155,7 @@ export default function VideoUpload() {
           title: 'Troubleshooting',
           content: [
             { heading: 'No URL After Upload', text: 'If upload succeeds but no URL appears, check browser console for errors. Ensure file size is under 50MB. Try refreshing and re-uploading.' },
-            { heading: 'File Size Limits', text: 'Maximum file size: 50MB. For larger files, compress before uploading or use external hosting.' },
+            { heading: 'File Size Limits', text: 'Maximum file size: 200MB for video, 50MB for audio/images. For larger files, compress before uploading or use external hosting.' },
             { heading: 'Supported Formats', text: 'Videos: MP4, MOV. Audio: MP3, WAV, OGG. Images: PNG, JPG, GIF, WEBP. Other formats may fail silently.' }
           ]
         }
