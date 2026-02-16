@@ -20,6 +20,16 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
   const deckASong = useMemo(() => songs.find(s => s.id === playingSongId), [songs, playingSongId]);
   const deckBSong = useMemo(() => songs.find(s => s.id === deckBSongId), [songs, deckBSongId]);
 
+  // Auto-cue next when deck A loads a new song
+  useEffect(() => {
+    if (!playingSongId || !profileSongs.length) return;
+    const idx = profileSongs.findIndex(s => s.id === playingSongId);
+    const next = profileSongs[idx + 1] || profileSongs[0];
+    if (next && next.id !== playingSongId && next.id !== deckBSongId) {
+      setDeckBSongId(next.id);
+    }
+  }, [playingSongId]);
+
   // Derive actual volumes from crossfader
   const deckAVolume = useMemo(() => {
     const cf = Math.min(1, (100 - crossfade) / 50);
