@@ -8,7 +8,7 @@ import CTASection from '@/components/home/CTASection';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
 import CountdownPill from '@/components/marketing/CountdownPill';
 import SEOHead from '@/components/SEOHead';
-import GlyphScramble from '@/components/home/GlyphScramble';
+
 
 const useScrollEffect = (sectionRef) => {
   const [style, setStyle] = useState({ transform: 'perspective(1000px)', opacity: 1 });
@@ -163,7 +163,14 @@ export default function Home() {
         {/* Bootstrap Quote + Hero Section */}
         <section className="w-full">
           <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
-            <GlyphScramble />
+            <p className="text-lg sm:text-xl md:text-2xl font-bold leading-relaxed max-w-3xl mx-auto">
+              <span className="text-white" style={{ textShadow: '0 0 20px rgba(255,255,255,0.4)' }}>"The people who are crazy enough to think they can </span>
+              <span className="text-cyan-400" style={{ textShadow: '0 0 25px rgba(6,182,212,0.7)' }}>change the world</span>
+              <span className="text-white" style={{ textShadow: '0 0 20px rgba(255,255,255,0.4)' }}> are the ones who </span>
+              <span className="text-cyan-400" style={{ textShadow: '0 0 25px rgba(6,182,212,0.7)' }}>do.</span>
+              <span className="text-white" style={{ textShadow: '0 0 20px rgba(255,255,255,0.4)' }}>"</span>
+            </p>
+            <p className="text-xs text-white/50 mt-2 tracking-widest uppercase">— Steve Jobs</p>
           </div>
 
           <ScrollSection>
