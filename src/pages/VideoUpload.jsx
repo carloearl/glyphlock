@@ -345,11 +345,20 @@ export default function VideoUpload() {
                   <label className="block text-sm font-bold text-slate-300 uppercase tracking-wider">
                     Video Preview
                   </label>
-                  <video
-                    src={fileUrl}
-                    controls
-                    className="w-full rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
-                  />
+                  {fileUrl.includes('drive.google.com') ? (
+                    <iframe
+                      src={fileUrl}
+                      className="w-full aspect-video rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      src={fileUrl}
+                      controls
+                      className="w-full rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+                    />
+                  )}
                 </div>
               )}
 
