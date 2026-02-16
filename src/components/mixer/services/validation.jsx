@@ -23,9 +23,12 @@ export function validateSong(song, allSongs = []) {
   if (!song.artist?.trim()) errors.artist = "Artist is required";
   else if (song.artist.trim().length > 100) errors.artist = "Artist must be 100 characters or less";
 
-  // YouTube URL optional if song has an upload URL
-  if (!song.uploadUrl && !song.youtubeUrl?.trim()) errors.youtubeUrl = "YouTube URL is required (or upload a file)";
-  else if (song.youtubeUrl?.trim() && !parseYoutubeUrl(song.youtubeUrl) && !song.youtubeUrl.includes("youtube.com/results")) errors.youtubeUrl = "Invalid YouTube URL";
+  // At least one source needed
+  if (!song.uploadUrl?.trim() && !song.youtubeUrl?.trim()) {
+    errors.youtubeUrl = "YouTube URL or direct audio URL is required";
+  } else if (song.youtubeUrl?.trim() && !parseYoutubeUrl(song.youtubeUrl) && !song.youtubeUrl.includes("youtube.com/results") && !song.uploadUrl?.trim()) {
+    errors.youtubeUrl = "Invalid YouTube URL";
+  }
 
   if (song.energyLevel == null || song.energyLevel < 1 || song.energyLevel > 10 || !Number.isInteger(song.energyLevel)) {
     errors.energyLevel = "Energy level must be an integer from 1-10";
