@@ -28,10 +28,14 @@ export default function SongCard({
 }) {
   const eColor = energyColor(song.energyLevel);
 
-  const openYoutube = () => window.open(song.youtubeUrl, "_blank", "noopener");
+  const hasPlayableSource = song.youtubeUrl || song.uploadUrl;
+  const openLink = () => {
+    const url = song.youtubeUrl || song.uploadUrl;
+    if (url) window.open(url, "_blank", "noopener");
+  };
   const copyLink = () => {
-    navigator.clipboard.writeText(song.youtubeUrl);
-    toast.success("Link copied");
+    const url = song.youtubeUrl || song.uploadUrl || "";
+    if (url) { navigator.clipboard.writeText(url); toast.success("Link copied"); }
   };
 
   const isList = viewMode === "list";
@@ -98,9 +102,11 @@ export default function SongCard({
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onEdit} title="Edit">
           <Pencil className="w-3.5 h-3.5 text-slate-500" />
         </Button>
-        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={openYoutube} title="Open YouTube">
-          <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-        </Button>
+        {hasPlayableSource && (
+          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={openLink} title="Open link">
+            <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+          </Button>
+        )}
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={copyLink} title="Copy link">
           <Copy className="w-3.5 h-3.5 text-slate-500" />
         </Button>
