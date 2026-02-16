@@ -8,6 +8,7 @@ import CTASection from '@/components/home/CTASection';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
 import CountdownPill from '@/components/marketing/CountdownPill';
 import SEOHead from '@/components/SEOHead';
+import GlyphScramble from '@/components/home/GlyphScramble';
 
 const useScrollEffect = (sectionRef) => {
   const [style, setStyle] = useState({ transform: 'perspective(1000px)', opacity: 1 });

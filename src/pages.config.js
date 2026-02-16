@@ -74,6 +74,7 @@ import FullExport from './pages/FullExport';
 import GlyphBot from './pages/GlyphBot';
 import GlyphBotJunior from './pages/GlyphBotJunior';
 import GlyphBotMixer from './pages/GlyphBotMixer';
+import GlyphLockFinancial from './pages/GlyphLockFinancial';
 import GlyphLockPlayground from './pages/GlyphLockPlayground';
 import GovernanceHub from './pages/GovernanceHub';
 import Home from './pages/Home';
@@ -87,6 +88,7 @@ import Mobile from './pages/Mobile';
 import NISTChallenge from './pages/NISTChallenge';
 import NUPSLogin from './pages/NUPSLogin';
 import NUPSOwner from './pages/NUPSOwner';
+import NUPSReport from './pages/NUPSReport';
 import NUPSStaff from './pages/NUPSStaff';
 import NotFound from './pages/NotFound';
 import PartnerPortal from './pages/PartnerPortal';
@@ -124,8 +126,6 @@ import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
-import NUPSReport from './pages/NUPSReport';
-import GlyphLockFinancial from './pages/GlyphLockFinancial';
 import __Layout from './Layout.jsx';
 
 
@@ -157,6 +157,7 @@ export const PAGES = {
     "GlyphBot": GlyphBot,
     "GlyphBotJunior": GlyphBotJunior,
     "GlyphBotMixer": GlyphBotMixer,
+    "GlyphLockFinancial": GlyphLockFinancial,
     "GlyphLockPlayground": GlyphLockPlayground,
     "GovernanceHub": GovernanceHub,
     "Home": Home,
@@ -170,6 +171,7 @@ export const PAGES = {
     "NISTChallenge": NISTChallenge,
     "NUPSLogin": NUPSLogin,
     "NUPSOwner": NUPSOwner,
+    "NUPSReport": NUPSReport,
     "NUPSStaff": NUPSStaff,
     "NotFound": NotFound,
     "PartnerPortal": PartnerPortal,
@@ -207,8 +209,6 @@ export const PAGES = {
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
-    "NUPSReport": NUPSReport,
-    "GlyphLockFinancial": GlyphLockFinancial,
 }
 
 export const pagesConfig = {
