@@ -84,19 +84,19 @@ export default function GlyphScramble() {
                 animate={revealed ? 'english' : 'glyph'}
                 variants={{
                   glyph: {
-                    color: 'rgba(139,92,246,0.45)',
+                    color: i % 3 === 0 ? 'rgba(255,255,255,0.5)' : 'rgba(167,139,250,0.5)',
                     fontFamily: 'monospace',
                     fontStyle: 'normal',
                     fontWeight: 400,
-                    textShadow: '0 0 6px rgba(139,92,246,0.15)',
+                    textShadow: i % 3 === 0 ? '0 0 4px rgba(255,255,255,0.1)' : '0 0 4px rgba(167,139,250,0.12)',
                     scale: 1,
                   },
                   english: {
-                    color: isHighlight ? '#a78bfa' : 'rgba(255,255,255,0.85)',
+                    color: isHighlight ? '#ffffff' : 'rgba(255,255,255,0.9)',
                     fontFamily: 'inherit',
                     fontStyle: 'italic',
                     fontWeight: isHighlight ? 700 : 400,
-                    textShadow: isHighlight ? '0 0 12px rgba(167,139,250,0.4)' : 'none',
+                    textShadow: isHighlight ? '0 0 16px rgba(167,139,250,0.6), 0 0 4px rgba(255,255,255,0.3)' : 'none',
                     scale: 1,
                   }
                 }}
