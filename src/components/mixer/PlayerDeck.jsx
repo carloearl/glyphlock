@@ -18,16 +18,33 @@ function extractVideoId(url) {
   return m ? m[1] : null;
 }
 
-export default function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded }) {
+export default function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded, onDropSong }) {
+  const [dragOver, setDragOver] = useState(false);
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null;
   const isUpload = song?.uploadUrl && !videoId;
 
+  const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; setDragOver(true); };
+  const handleDragLeave = () => setDragOver(false);
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const songId = e.dataTransfer.getData("application/mixer-song-id");
+    if (songId && onDropSong) onDropSong(songId);
+  };
+
   if (!song) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-slate-900/40 rounded-lg border border-slate-700/30 p-3">
+      <div
+        className={`flex-1 flex flex-col items-center justify-center bg-slate-900/40 rounded-lg border p-3 transition-colors ${
+          dragOver ? "border-purple-400 bg-purple-500/10" : "border-slate-700/30"
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <span className="text-[10px] uppercase tracking-wider text-slate-600 mb-1">{label}</span>
         <div className="w-full aspect-video bg-black/40 rounded flex items-center justify-center">
-          <span className="text-xs text-slate-600">No track loaded</span>
+          <span className="text-xs text-slate-600">{dragOver ? "Drop to load" : "Drag a song here"}</span>
         </div>
       </div>
     );
