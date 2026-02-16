@@ -31,9 +31,9 @@ export default function GlyphScramble() {
   return (
     <div
       className="relative w-full max-w-3xl mx-auto cursor-pointer select-none"
-      onMouseEnter={() => setRevealed(true)}
-      onMouseLeave={() => setRevealed(false)}
-      onTouchStart={() => setRevealed(r => !r)}
+      onMouseEnter={() => { setRevealed(true); hasRevealed.current = true; }}
+      onMouseLeave={() => {}}
+      onTouchStart={() => { if (!hasRevealed.current) { setRevealed(true); hasRevealed.current = true; } }}
       role="button"
       tabIndex={0}
       aria-label="Hover to reveal the GlyphLock founding quote"
