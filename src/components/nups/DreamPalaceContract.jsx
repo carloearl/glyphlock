@@ -607,7 +607,7 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
         <div className="text-center">
           <Shield className="w-10 h-10 text-purple-400 mx-auto mb-2" />
           <h2 className="text-lg font-bold text-white">Manager & Hostess Signatures</h2>
-          <p className="text-xs text-gray-400">Guest signed. Hand device to staff.</p>
+          <p className="text-xs text-gray-400">Guest signed ✓ — Hand device to staff for their signatures.</p>
         </div>
 
         <Card className="bg-green-500/10 border-green-500/30">
