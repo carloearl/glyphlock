@@ -30,17 +30,8 @@ const GlyphChar = React.memo(({ realChar, index, revealed, glyphChar, glyphColor
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
 
-  // Scramble animation on idle
-  useEffect(() => {
-    if (!revealed && !isResolved) {
-      intervalRef.current = setInterval(() => {
-        const rng = mulberry32(Date.now() + index * 7);
-        setDisplayChar(GLYPHS[Math.floor(rng() * GLYPHS.length)]);
-        setDisplayColor(GLYPH_COLORS[Math.floor(rng() * GLYPH_COLORS.length)]);
-      }, 150 + Math.random() * 200);
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [revealed, isResolved, index]);
+  // Idle: stay as initial glyph — no scrambling
+  // (glyphs are static until hovered)
 
   // On hover: staggered resolve to real character
   useEffect(() => {
