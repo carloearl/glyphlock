@@ -1,7 +1,7 @@
 /**
  * ClubCurrencyPressView — Main layout orchestrator
- * Tabs: Voucher Press | Contract Terminal | Archive
- * AI tab disabled per directive.
+ * Tabs: Order Form | Press | Legacy Contract | AI | Archive
+ * Supports draggable elements, 4up/5up layout toggle, AI design gen, print from site
  */
 import React, { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,19 +34,18 @@ export default function ClubCurrencyPressView() {
   const [activeTab, setActiveTab] = useState("press");
   const [currencyAmount, setCurrencyAmount] = useState(0);
   const [currencyOrderNumber, setCurrencyOrderNumber] = useState("");
+  const [elements, setElements] = useState(config.elements || []);
 
-  // Auto-save
-  useEffect(() => { savePressConfig(config); }, [config]);
+  // Auto-save config
+  useEffect(() => { savePressConfig({ ...config, elements }); }, [config, elements]);
   useEffect(() => {
     try { saveFrontImages(frontImages); } catch (err) {
-      toast.error('Image too large for storage. Try a smaller file.');
-      emitPressTelemetry('STORAGE_QUOTA_ERROR', { operation: 'saveFrontImages', message: err.message });
+      toast.error("Image too large for storage.");
     }
   }, [frontImages]);
   useEffect(() => {
     try { saveBackImage(backImage); } catch (err) {
-      toast.error('Image too large for storage. Try a smaller file.');
-      emitPressTelemetry('STORAGE_QUOTA_ERROR', { operation: 'saveBackImage', message: err.message });
+      toast.error("Image too large for storage.");
     }
   }, [backImage]);
 
@@ -58,39 +57,37 @@ export default function ClubCurrencyPressView() {
     });
   }, []);
 
-  const handleBackImageChange = useCallback((data) => {
-    setBackImage(data);
-  }, []);
+  const handleBackImageChange = useCallback((data) => setBackImage(data), []);
 
   const handlePreview = useCallback(() => {
     setShowPreview(true);
-    emitPressTelemetry('VOUCHER_PREVIEW_GENERATED', {
-      batchCount: config.batchCount,
-      paperSize: config.paperSize,
-      printMode: config.printMode,
-    });
+    emitPressTelemetry("VOUCHER_PREVIEW_GENERATED", { batchCount: config.batchCount, layout: config.layoutMode });
   }, [config]);
 
   const handlePrint = useCallback(() => {
-    emitPressTelemetry('VOUCHER_PRINT_STARTED', {
-      sheetCount: config.batchCount,
-      printMode: config.printMode,
-    });
-    // Check zoom
-    if (typeof window !== 'undefined' && window.devicePixelRatio !== 1) {
-      toast.warning('Browser zoom is not 100%. Print scaling may be affected.');
+    emitPressTelemetry("VOUCHER_PRINT_STARTED", { sheetCount: config.batchCount, layout: config.layoutMode });
+    if (typeof window !== "undefined" && window.devicePixelRatio !== 1) {
+      toast.warning("Browser zoom is not 100%. Print scaling may be affected.");
     }
     setShowPreview(true);
     setTimeout(() => window.print(), 300);
   }, [config]);
 
-  const handleContractArchive = useCallback((record) => {
-    // Just a callback; record already saved by ContractTerminal
+  const handleAddElement = useCallback((el) => {
+    setElements((prev) => [...prev, el]);
+  }, []);
+
+  const handleUpdateElement = useCallback((updated) => {
+    setElements((prev) => prev.map((el) => (el.id === updated.id ? updated : el)));
+  }, []);
+
+  const handleRemoveElement = useCallback((id) => {
+    setElements((prev) => prev.filter((el) => el.id !== id));
   }, []);
 
   return (
     <div className="min-h-[600px] flex flex-col">
-      {/* Module header */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-4 no-print">
         <div className="flex items-center gap-3">
           <Banknote className="w-6 h-6 text-green-400" />
@@ -99,16 +96,12 @@ export default function ClubCurrencyPressView() {
             <p className="text-xs text-gray-500">Voucher Sheet Press · Contract Terminal · Archive</p>
           </div>
         </div>
-        <Button
-          size="sm" variant="outline"
-          className="gap-1.5 border-gray-700"
-          onClick={() => setArchiveOpen(true)}
-        >
+        <Button size="sm" variant="outline" className="gap-1.5 border-gray-700" onClick={() => setArchiveOpen(true)}>
           <Search className="w-4 h-4" /> Archive
         </Button>
       </div>
 
-      {/* Tab navigation */}
+      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col no-print">
         <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-4 gap-1 p-1 w-full max-w-lg">
           <TabsTrigger value="order" className="min-h-[44px] flex items-center gap-1.5">
@@ -130,18 +123,16 @@ export default function ClubCurrencyPressView() {
           </TabsTrigger>
         </TabsList>
 
-        {/* ORDER FORM TAB — Dream Palace Sales/Order Receipt */}
+        {/* ORDER FORM TAB */}
         <TabsContent value="order" className="flex-1 mt-4">
           <div className="max-w-3xl mx-auto">
             <DreamPalaceContract
-              onComplete={(orderId) => {
-                toast.success('Contract archived successfully');
-              }}
+              onComplete={() => toast.success("Contract archived")}
               onPrintCurrency={(amount, orderNum) => {
                 setCurrencyAmount(amount);
                 setCurrencyOrderNumber(orderNum);
                 setActiveTab("press");
-                toast.success(`Club Currency $${amount} queued for printing`);
+                toast.success(`Club Currency $${amount} queued`);
               }}
             />
           </div>
@@ -150,7 +141,6 @@ export default function ClubCurrencyPressView() {
         {/* PRESS TAB */}
         <TabsContent value="press" className="flex-1 mt-4">
           <div className="flex flex-col lg:flex-row gap-4">
-            {/* Controls sidebar */}
             <div className="w-full lg:w-[320px] flex-shrink-0">
               <ControlPanel
                 config={config}
@@ -161,16 +151,19 @@ export default function ClubCurrencyPressView() {
                 onBackImageChange={handleBackImageChange}
                 onPrint={handlePrint}
                 onPreview={handlePreview}
+                elements={elements}
+                onAddElement={handleAddElement}
               />
             </div>
-
-            {/* Preview canvas */}
             <div className="flex-1 bg-gray-800/30 rounded-xl border border-gray-700/50 overflow-auto min-h-[400px]">
               {showPreview ? (
                 <VoucherCanvas
                   config={config}
                   frontImages={frontImages}
                   backImage={backImage}
+                  elements={elements}
+                  onElementUpdate={handleUpdateElement}
+                  onElementRemove={handleRemoveElement}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500 text-sm">
@@ -187,7 +180,7 @@ export default function ClubCurrencyPressView() {
         {/* CONTRACT TAB */}
         <TabsContent value="contract" className="flex-1 mt-4">
           <div className="max-w-xl mx-auto">
-            <ContractTerminal onArchive={handleContractArchive} />
+            <ContractTerminal onArchive={() => {}} />
           </div>
         </TabsContent>
 
@@ -208,7 +201,7 @@ export default function ClubCurrencyPressView() {
         </TabsContent>
       </Tabs>
 
-      {/* Archive search dialog */}
+      {/* Archive dialog */}
       <ArchiveSearch isOpen={archiveOpen} onClose={() => setArchiveOpen(false)} />
     </div>
   );
