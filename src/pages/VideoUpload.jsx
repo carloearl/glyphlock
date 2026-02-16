@@ -53,7 +53,7 @@ export default function VideoUpload() {
     setQrCodeUrl('');
   };
 
-  const DRIVE_THRESHOLD_MB = 10; // Files over 10MB go to Google Drive
+  const DRIVE_THRESHOLD_MB = 45; // Use Google Drive for files over 45MB
 
   const handleUpload = async () => {
     if (!file) {
@@ -61,35 +61,44 @@ export default function VideoUpload() {
       return;
     }
 
-    setUploading(true);
-    const sizeMB = file.size / 1024 / 1024;
-    const useDrive = sizeMB > DRIVE_THRESHOLD_MB;
+    const fileSizeMB = file.size / 1024 / 1024;
+    const useDrive = fileSizeMB > DRIVE_THRESHOLD_MB;
 
+    setUploading(true);
     try {
+      console.log(`[VideoUpload] Starting ${useDrive ? 'Google Drive' : 'standard'} upload for:`, file.name, `(${fileSizeMB.toFixed(1)}MB)`);
+
       let url;
 
       if (useDrive) {
-        // Large file → Google Drive via backend function
-        console.log('[VideoUpload] Large file detected, uploading to Google Drive:', file.name);
-        toast.info('Large file — uploading to Google Drive...');
-        const form = new FormData();
-        form.append('file', file);
-        form.append('fileName', file.name);
-        const res = await base44.functions.invoke('uploadToDrive', form);
-        const data = res?.data || res;
-        url = data?.file_url;
+        // Large file → upload via Google Drive backend function
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await base44.functions.invoke('uploadToDrive', formData);
+        const result = response.data;
+        
+        if (result?.success && result?.embed_url) {
+          url = result.embed_url;
+          // Store all URLs for flexibility
+          localStorage.setItem('gl_last_drive_file_id', result.file_id || '');
+          localStorage.setItem('gl_last_direct_url', result.direct_url || '');
+        } else {
+          throw new Error(result?.error || 'Drive upload failed');
+        }
       } else {
         // Small file → standard Base44 upload
-        console.log('[VideoUpload] Standard upload for:', file.name);
         const result = await base44.integrations.Core.UploadFile({ file });
         url = result?.file_url || result?.data?.file_url;
       }
-
+      
       if (url) {
+        console.log('[VideoUpload] Setting file URL:', url);
         setFileUrl(url);
         localStorage.setItem('gl_last_uploaded_url', url);
         localStorage.setItem('gl_last_uploaded_type', fileType);
-        toast.success(`File uploaded successfully${useDrive ? ' via Google Drive' : ''}!`);
+        localStorage.setItem('gl_last_upload_method', useDrive ? 'drive' : 'standard');
+        toast.success(useDrive ? 'Uploaded to Google Drive!' : 'File uploaded successfully!');
       } else {
         throw new Error('No URL returned from upload');
       }
@@ -247,12 +256,12 @@ export default function VideoUpload() {
             {uploading ? (
               <>
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <span className="text-lg">Uploading...</span>
+                <span className="text-lg">Uploading{file && file.size > DRIVE_THRESHOLD_MB * 1024 * 1024 ? ' to Google Drive' : ''}...</span>
               </>
             ) : (
               <>
                 <Upload className="w-6 h-6" />
-                <span className="text-lg">Upload {fileType ? fileType.charAt(0).toUpperCase() + fileType.slice(1) : 'File'}</span>
+                <span className="text-lg">Upload {fileType ? fileType.charAt(0).toUpperCase() + fileType.slice(1) : 'File'}{file && file.size > DRIVE_THRESHOLD_MB * 1024 * 1024 ? ' via Google Drive' : ''}</span>
               </>
             )}
           </button>
@@ -336,11 +345,20 @@ export default function VideoUpload() {
                   <label className="block text-sm font-bold text-slate-300 uppercase tracking-wider">
                     Video Preview
                   </label>
-                  <video
-                    src={fileUrl}
-                    controls
-                    className="w-full rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
-                  />
+                  {fileUrl.includes('drive.google.com') ? (
+                    <iframe
+                      src={fileUrl}
+                      className="w-full aspect-video rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      src={fileUrl}
+                      controls
+                      className="w-full rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+                    />
+                  )}
                 </div>
               )}
 
