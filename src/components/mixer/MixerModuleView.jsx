@@ -373,6 +373,7 @@ export default function MixerModuleView() {
         onSkip={handleSkip}
         collapsed={playerCollapsed}
         onToggleCollapse={() => setPlayerCollapsed((c) => !c)}
+        onPlay={handlePlay}
       />
 
       {/* Mobile profiles */}
