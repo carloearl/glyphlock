@@ -56,7 +56,8 @@ const ACKNOWLEDGMENTS = [
 ];
 
 export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
-  const [step, setStep] = useState(0); // 0=form, 1=review+sign, 2=staff sign, 3=print+rescan
+  const [step, setStep] = useState(0); // 0=form, 1=contract scroll, 2=clickwrap, 3=biometrics+sign, 4=staff sign, 5=print+rescan
+  const [contractScrolled, setContractScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState({});
   const [savedOrderId, setSavedOrderId] = useState(null);
@@ -180,7 +181,7 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
     });
     setSavedOrderId(order.id);
     setLoading(false);
-    setStep(2);
+    setStep(4);
   };
 
   const handleStaffSign = async () => {
@@ -190,7 +191,7 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
       hostess_signature: hostessSignature,
     });
     setLoading(false);
-    setStep(3);
+    setStep(5);
   };
 
   const handlePrint = () => {
@@ -599,8 +600,8 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
     );
   }
 
-  // ═══════════════ STEP 2: STAFF SIGN ═══════════════
-  if (step === 2) {
+  // ═══════════════ STEP 4: STAFF SIGN ═══════════════
+  if (step === 4) {
     return (
       <div className="space-y-4">
         <div className="text-center">
@@ -640,7 +641,7 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
     );
   }
 
-  // ═══════════════ STEP 3: PRINT + RESCAN ═══════════════
+  // ═══════════════ STEP 5: PRINT + RESCAN ═══════════════
   return (
     <div className="space-y-4">
       <div className="text-center">
