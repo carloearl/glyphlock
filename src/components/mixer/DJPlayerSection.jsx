@@ -108,6 +108,7 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
           muted={deckAMuted}
           onVolumeChange={(v, m) => { setDeckABaseVol(v); setDeckAMuted(m); }}
           onEnded={() => onSkip?.(playingSongId)}
+          onDropSong={(songId) => onPlay?.(songId)}
         />
         <PlayerDeck
           song={deckBSong}
@@ -116,6 +117,7 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
           muted={deckBMuted}
           onVolumeChange={(v, m) => { setDeckBBaseVol(v); setDeckBMuted(m); }}
           onEnded={() => setDeckBSongId(null)}
+          onDropSong={(songId) => setDeckBSongId(songId)}
         />
       </div>
 
