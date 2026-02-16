@@ -74,6 +74,8 @@ export default function MixerModuleView() {
     setPlayingSongId((prev) => (prev === songId ? null : songId));
     const song = songs.find((s) => s.id === songId);
     if (song) {
+      // Auto-expand the player when a song starts
+      setPlayerCollapsed(false);
       setSongs((prev) => prev.map((s) => (s.id === songId ? { ...s, lastPlayed: Date.now() } : s)));
       emitTelemetry("SONG_PLAY", { songId, profileId: uiState.activeProfileId, timestamp: Date.now() });
     }
