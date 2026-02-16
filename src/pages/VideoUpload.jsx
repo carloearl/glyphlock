@@ -28,9 +28,8 @@ export default function VideoUpload() {
     return null;
   };
 
-  const MAX_VIDEO_SIZE_MB = 500;
+  const MAX_VIDEO_SIZE_MB = 200;
   const MAX_OTHER_SIZE_MB = 50;
-  const DRIVE_THRESHOLD_MB = 50;
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -54,8 +53,7 @@ export default function VideoUpload() {
     setQrCodeUrl('');
   };
 
-  const [uploadProgress, setUploadProgress] = useState('');
-  const [previewUrl, setPreviewUrl] = useState('');
+  const DRIVE_THRESHOLD_MB = 20; // Files over 20MB go to Google Drive
 
   const handleUpload = async () => {
     if (!file) {
@@ -63,52 +61,45 @@ export default function VideoUpload() {
       return;
     }
 
-    const useDrive = file.size > DRIVE_THRESHOLD_MB * 1024 * 1024;
     setUploading(true);
-    setUploadProgress(useDrive ? 'Uploading to Google Drive (large file)...' : 'Uploading...');
+    const fileSizeMB = file.size / (1024 * 1024);
+    const useDrive = fileSizeMB > DRIVE_THRESHOLD_MB;
 
     try {
+      console.log(`[VideoUpload] Starting ${useDrive ? 'Google Drive' : 'standard'} upload for:`, file.name, `(${fileSizeMB.toFixed(1)}MB)`);
+      
+      let url;
+
       if (useDrive) {
         // Large file → Google Drive via backend function
+        toast.info('Large file detected — uploading to Google Drive...');
         const formData = new FormData();
         formData.append('file', file);
-        
-        const result = await base44.functions.invoke('uploadToDrive', formData);
-        const data = result?.data;
-        
-        const driveUrl = data?.file_url || data?.download_url;
-        if (driveUrl) {
-          setFileUrl(driveUrl);
-          setPreviewUrl(data.embed_url || data.preview_url || '');
-          localStorage.setItem('gl_last_uploaded_url', driveUrl);
-          localStorage.setItem('gl_last_uploaded_type', fileType);
-          toast.success(`Uploaded to Google Drive! (${(file.size / 1024 / 1024).toFixed(0)}MB)`);
-        } else {
-          throw new Error(data?.error || 'No URL returned from Google Drive');
-        }
+        const response = await base44.functions.invoke('uploadToDrive', formData);
+        const result = response.data;
+        if (!result?.success) throw new Error(result?.error || 'Drive upload failed');
+        url = result.embed_url || result.view_url || result.file_url;
+        setFileUrl(url);
+        localStorage.setItem('gl_last_uploaded_url', url);
+        localStorage.setItem('gl_last_uploaded_type', fileType);
+        localStorage.setItem('gl_last_drive_id', result.drive_file_id || '');
+        toast.success('Uploaded to Google Drive!');
       } else {
         // Small file → standard Base44 upload
         const result = await base44.integrations.Core.UploadFile({ file });
-        const url = result?.file_url || result?.data?.file_url;
-        
-        if (url) {
-          setFileUrl(url);
-          setPreviewUrl('');
-          localStorage.setItem('gl_last_uploaded_url', url);
-          localStorage.setItem('gl_last_uploaded_type', fileType);
-          toast.success('File uploaded successfully!');
-        } else {
-          throw new Error('No URL returned from upload');
-        }
+        url = result?.file_url || result?.data?.file_url;
+        if (!url) throw new Error('No URL returned from upload');
+        setFileUrl(url);
+        localStorage.setItem('gl_last_uploaded_url', url);
+        localStorage.setItem('gl_last_uploaded_type', fileType);
+        toast.success('File uploaded successfully!');
       }
     } catch (error) {
       console.error('[VideoUpload] Upload error:', error);
       toast.error('Upload failed: ' + (error.message || 'Unknown error'));
       setFileUrl('');
-      setPreviewUrl('');
     } finally {
       setUploading(false);
-      setUploadProgress('');
     }
   };
 
@@ -180,7 +171,7 @@ export default function VideoUpload() {
           title: 'Troubleshooting',
           content: [
             { heading: 'No URL After Upload', text: 'If upload succeeds but no URL appears, check browser console for errors. Ensure file size is under 50MB. Try refreshing and re-uploading.' },
-            { heading: 'File Size Limits', text: 'Videos up to 500MB are uploaded via Google Drive automatically. Audio/images up to 50MB use standard hosting. Files over 50MB route through Google Drive for reliability.' },
+            { heading: 'File Size Limits', text: 'Maximum file size: 200MB for video, 50MB for audio/images. For larger files, compress before uploading or use external hosting.' },
             { heading: 'Supported Formats', text: 'Videos: MP4, MOV. Audio: MP3, WAV, OGG. Images: PNG, JPG, GIF, WEBP. Other formats may fail silently.' }
           ]
         }
@@ -237,12 +228,7 @@ export default function VideoUpload() {
                 {getFileIcon()}
                 <div className="flex-1">
                   <div className="font-semibold text-emerald-400">{file.name}</div>
-                  <div className="text-slate-400 text-xs">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB • {fileType.toUpperCase()}
-                    {file.size > DRIVE_THRESHOLD_MB * 1024 * 1024 && (
-                      <span className="ml-2 text-blue-400 font-semibold">→ Google Drive</span>
-                    )}
-                  </div>
+                  <div className="text-slate-400 text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB • {fileType.toUpperCase()}</div>
                 </div>
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
               </div>
@@ -262,12 +248,15 @@ export default function VideoUpload() {
             {uploading ? (
               <>
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <span className="text-lg">{uploadProgress || 'Uploading...'}</span>
+                <span className="text-lg">Uploading...</span>
               </>
             ) : (
               <>
                 <Upload className="w-6 h-6" />
-                <span className="text-lg">Upload {fileType ? fileType.charAt(0).toUpperCase() + fileType.slice(1) : 'File'}</span>
+                <span className="text-lg">
+                  Upload {fileType ? fileType.charAt(0).toUpperCase() + fileType.slice(1) : 'File'}
+                  {file && file.size > DRIVE_THRESHOLD_MB * 1024 * 1024 ? ' (via Google Drive)' : ''}
+                </span>
               </>
             )}
           </button>
@@ -351,9 +340,9 @@ export default function VideoUpload() {
                   <label className="block text-sm font-bold text-slate-300 uppercase tracking-wider">
                     Video Preview
                   </label>
-                  {previewUrl ? (
+                  {fileUrl.includes('drive.google.com') ? (
                     <iframe
-                      src={previewUrl}
+                      src={fileUrl}
                       className="w-full aspect-video rounded-xl border-2 border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
                       allow="autoplay; encrypted-media"
                       allowFullScreen
