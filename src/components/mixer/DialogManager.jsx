@@ -30,9 +30,14 @@ function SongForm({ song, onChange, errors, onClassify, classifying }) {
         {errors.artist && <p className="text-xs text-red-400 mt-1">{errors.artist}</p>}
       </div>
       <div>
-        <Label className="text-xs text-slate-300">YouTube URL *</Label>
+        <Label className="text-xs text-slate-300">YouTube URL</Label>
         <Input value={song.youtubeUrl} onChange={(e) => onChange({ ...song, youtubeUrl: e.target.value })} placeholder="https://youtube.com/watch?v=..." className="mt-1" />
         {errors.youtubeUrl && <p className="text-xs text-red-400 mt-1">{errors.youtubeUrl}</p>}
+      </div>
+      <div>
+        <Label className="text-xs text-slate-300">Direct Audio URL</Label>
+        <Input value={song.uploadUrl || ""} onChange={(e) => onChange({ ...song, uploadUrl: e.target.value })} placeholder="https://example.com/song.mp3" className="mt-1" />
+        <p className="text-[10px] text-slate-600 mt-0.5">MP3/WAV URL — or use Upload button for local files</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
