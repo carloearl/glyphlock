@@ -29,6 +29,18 @@ export const PAPER_DIMENSIONS = {
   legal: { width: 8.5, height: 14, label: 'Legal (8.5 × 14)' },
 };
 
+// Layout modes
+export const LayoutMode = {
+  FIVE_PER_SHEET: '5up',
+  FOUR_PER_SHEET: '4up',
+};
+
+// US Dollar bill dimensions (6.14 × 2.61 inches)
+export const US_DOLLAR_DIMS = {
+  width: 6.14,
+  height: 2.61,
+};
+
 // Currency denominations
 export const CURRENCY_AMOUNTS = [100, 500, 1000, 2000];
 
