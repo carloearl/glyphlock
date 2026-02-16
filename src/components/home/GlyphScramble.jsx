@@ -1,23 +1,18 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion } from 'framer-motion';
 
 const GLYPHS = '⌬⏣◈◇⬡⎔⏢⬢△▽◻◆⬠⏥⎊⏧⌖⌗⏛⏜⌭⌮⍟⍙⍡⎈⎋⎍⎑⎗⎙⏀⏁⏂⏃⏄⏅⏆⏇⏈⏉⏊⏋⏌⌘⌥⌦⌧⌫⍢⍣⍤⍥⍦⍧⍨⍩⎀⎁⎂⎃⎄⎅⎆⎇';
-const COLORS = [
-  '#39ff14', // neon green
-  '#00ff87', // mint green
-  '#4f46e5', // indigo
-  '#6366f1', // lighter indigo
-  '#818cf8', // lavender indigo
-  '#7c3aed', // ultraviolet
-  '#a855f7', // purple UV
-  '#c084fc', // light UV
-  '#8b5cf6', // violet
-  '#06ffa5', // electric green
+
+const GLYPH_COLORS = [
+  '#39ff14', '#00ff87', '#4f46e5', '#6366f1',
+  '#818cf8', '#7c3aed', '#a855f7', '#c084fc',
+  '#8b5cf6', '#06ffa5',
 ];
 
-const QUOTE_TEXT = `"We didn't wait for permission. We didn't ask for funding. We built it from nothing — and we own every line."`;
+const QUOTE = `"We didn't wait for permission. We didn't ask for funding. We built it from nothing — and we own every line."`;
 const ATTRIBUTION = '— GlyphLock Founding Protocol · Bootstrapped Since Day One';
 
+// Seeded RNG
 function mulberry32(a) {
   return function () {
     let t = (a += 0x6d2b79f5);
@@ -27,211 +22,225 @@ function mulberry32(a) {
   };
 }
 
-const getRandomGlyph = (rng) => GLYPHS[Math.floor(rng() * GLYPHS.length)];
-const getRandomColor = (rng) => COLORS[Math.floor(rng() * COLORS.length)];
+// Per-character cell component
+const GlyphChar = React.memo(({ realChar, index, revealed, glyphChar, glyphColor, totalChars }) => {
+  const [displayChar, setDisplayChar] = useState(glyphChar);
+  const [displayColor, setDisplayColor] = useState(glyphColor);
+  const [isResolved, setIsResolved] = useState(false);
+  const intervalRef = useRef(null);
+  const timeoutRef = useRef(null);
+
+  // Scramble animation on idle
+  useEffect(() => {
+    if (!revealed && !isResolved) {
+      intervalRef.current = setInterval(() => {
+        const rng = mulberry32(Date.now() + index * 7);
+        setDisplayChar(GLYPHS[Math.floor(rng() * GLYPHS.length)]);
+        setDisplayColor(GLYPH_COLORS[Math.floor(rng() * GLYPH_COLORS.length)]);
+      }, 150 + Math.random() * 200);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [revealed, isResolved, index]);
+
+  // On hover: staggered resolve to real character
+  useEffect(() => {
+    if (revealed) {
+      clearInterval(intervalRef.current);
+      // Stagger delay based on character index — cascade left to right
+      const staggerDelay = index * 18 + Math.random() * 40;
+      // Quick scramble burst before settling
+      let burstCount = 0;
+      const maxBursts = 3 + Math.floor(Math.random() * 4);
+
+      timeoutRef.current = setTimeout(() => {
+        const burstInterval = setInterval(() => {
+          burstCount++;
+          if (burstCount >= maxBursts) {
+            clearInterval(burstInterval);
+            setDisplayChar(realChar);
+            setDisplayColor('#ffffff');
+            setIsResolved(true);
+          } else {
+            const rng = mulberry32(Date.now() + index + burstCount);
+            setDisplayChar(GLYPHS[Math.floor(rng() * GLYPHS.length)]);
+            setDisplayColor(GLYPH_COLORS[Math.floor(rng() * GLYPH_COLORS.length)]);
+          }
+        }, 40);
+      }, staggerDelay);
+    } else {
+      // Reset on un-hover
+      clearTimeout(timeoutRef.current);
+      setIsResolved(false);
+      const rng = mulberry32(Date.now() + index * 3);
+      setDisplayChar(GLYPHS[Math.floor(rng() * GLYPHS.length)]);
+      setDisplayColor(GLYPH_COLORS[Math.floor(rng() * GLYPH_COLORS.length)]);
+    }
+    return () => clearTimeout(timeoutRef.current);
+  }, [revealed, realChar, index]);
+
+  // Spaces stay as spaces
+  if (realChar === ' ') {
+    return <span className="inline" style={{ width: '0.3em' }}>&nbsp;</span>;
+  }
+
+  // Highlight key phrase "and we own every line."
+  const isHighlightZone = index >= QUOTE.indexOf('and we own every line.');
+  const resolvedColor = isResolved && isHighlightZone
+    ? undefined
+    : isResolved
+    ? '#ffffff'
+    : displayColor;
+
+  const resolvedStyle = isResolved && isHighlightZone
+    ? {
+        background: 'linear-gradient(135deg, #39ff14 0%, #6366f1 50%, #a855f7 100%)',
+        WebkitBackgroundClip: 'text',
+        backgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        fontWeight: 700,
+        fontStyle: 'normal',
+      }
+    : {};
+
+  return (
+    <span
+      className="inline-block transition-all duration-150"
+      style={{
+        color: resolvedColor,
+        fontFamily: isResolved ? 'inherit' : 'monospace',
+        fontStyle: isResolved ? 'italic' : 'normal',
+        fontWeight: isResolved ? (isHighlightZone ? 700 : 400) : 800,
+        textShadow: isResolved
+          ? 'none'
+          : `0 0 8px ${displayColor}88, 0 0 16px ${displayColor}44`,
+        filter: isResolved ? 'none' : `drop-shadow(0 0 4px ${displayColor}66)`,
+        fontSize: isResolved ? undefined : '1.05em',
+        ...resolvedStyle,
+      }}
+    >
+      {displayChar}
+    </span>
+  );
+});
+
+GlyphChar.displayName = 'GlyphChar';
 
 export default function GlyphScramble() {
   const [revealed, setRevealed] = useState(false);
-  const [glyphGrid, setGlyphGrid] = useState([]);
-  const [scrambleKey, setScrambleKey] = useState(0);
-  const intervalRef = useRef(null);
-  const rngRef = useRef(mulberry32(Date.now()));
+  const [attrRevealed, setAttrRevealed] = useState(false);
 
-  // Generate a grid of scrambled glyphs
-  const generateGrid = useCallback(() => {
-    const rng = mulberry32(Date.now() + Math.random() * 99999);
-    rngRef.current = rng;
-    const count = 42; // number of glyph cells
-    const grid = [];
-    for (let i = 0; i < count; i++) {
-      grid.push({
-        char: getRandomGlyph(rng),
-        color: getRandomColor(rng),
-        x: (rng() * 100).toFixed(1),
-        y: (rng() * 100).toFixed(1),
-        size: (0.8 + rng() * 1.4).toFixed(2),
-        delay: (rng() * 0.8).toFixed(2),
-        rotation: Math.floor(rng() * 360),
-      });
-    }
-    return grid;
-  }, []);
-
-  // Continuously scramble glyphs
+  // Show attribution after quote is revealed
   useEffect(() => {
-    setGlyphGrid(generateGrid());
-
-    intervalRef.current = setInterval(() => {
-      if (!revealed) {
-        setGlyphGrid(generateGrid());
-        setScrambleKey((k) => k + 1);
-      }
-    }, 1800);
-
-    return () => clearInterval(intervalRef.current);
-  }, [revealed, generateGrid]);
-
-  // Stop scrambling on reveal
-  useEffect(() => {
-    if (revealed && intervalRef.current) {
-      clearInterval(intervalRef.current);
+    if (revealed) {
+      const t = setTimeout(() => setAttrRevealed(true), QUOTE.length * 18 + 400);
+      return () => clearTimeout(t);
+    } else {
+      setAttrRevealed(false);
     }
   }, [revealed]);
 
+  // Pre-generate initial glyph assignments
+  const initialGlyphs = useMemo(() => {
+    const rng = mulberry32(42);
+    return QUOTE.split('').map(() => ({
+      char: GLYPHS[Math.floor(rng() * GLYPHS.length)],
+      color: GLYPH_COLORS[Math.floor(rng() * GLYPH_COLORS.length)],
+    }));
+  }, []);
+
   return (
     <div
-      className="relative w-full max-w-3xl mx-auto cursor-pointer select-none group"
+      className="relative w-full max-w-3xl mx-auto cursor-pointer select-none"
       onMouseEnter={() => setRevealed(true)}
       onMouseLeave={() => setRevealed(false)}
-      onTouchStart={() => setRevealed((r) => !r)}
-      style={{ minHeight: '120px' }}
+      onTouchStart={() => setRevealed(r => !r)}
       role="button"
       tabIndex={0}
       aria-label="Hover to reveal the GlyphLock founding quote"
       onFocus={() => setRevealed(true)}
       onBlur={() => setRevealed(false)}
+      style={{ minHeight: '110px' }}
     >
       {/* Background glow */}
       <div
-        className="absolute inset-0 pointer-events-none rounded-2xl"
+        className="absolute inset-0 pointer-events-none rounded-2xl transition-all duration-700"
         style={{
           background: revealed
-            ? 'radial-gradient(ellipse at center, rgba(87,61,255,0.2) 0%, transparent 70%)'
-            : 'radial-gradient(ellipse at center, rgba(57,255,20,0.08) 0%, rgba(79,70,229,0.06) 40%, rgba(124,58,237,0.04) 70%, transparent 100%)',
+            ? 'radial-gradient(ellipse at center, rgba(87,61,255,0.15) 0%, transparent 70%)'
+            : 'radial-gradient(ellipse at center, rgba(57,255,20,0.06) 0%, rgba(79,70,229,0.05) 40%, rgba(124,58,237,0.03) 70%, transparent 100%)',
           filter: 'blur(30px)',
-          transition: 'all 0.8s ease',
         }}
       />
 
-      {/* Scrambled Glyphs Layer */}
-      <AnimatePresence>
-        {!revealed && (
-          <motion.div
-            key={`scramble-${scrambleKey}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.9, filter: 'blur(8px)' }}
-            transition={{ duration: 0.5 }}
-            className="relative w-full flex flex-wrap items-center justify-center gap-1 py-4 px-2"
-            style={{ minHeight: '100px' }}
-          >
-            {glyphGrid.map((g, i) => (
-              <motion.span
-                key={`${scrambleKey}-${i}`}
-                initial={{ opacity: 0, scale: 0.3, rotate: g.rotation }}
-                animate={{
-                  opacity: [0.3, 0.9, 0.5],
-                  scale: [0.6, 1, 0.8],
-                  rotate: [g.rotation, g.rotation + 30, g.rotation - 15],
-                }}
-                transition={{
-                  duration: 1.5,
-                  delay: parseFloat(g.delay),
-                  repeat: Infinity,
-                  repeatType: 'reverse',
-                  ease: 'easeInOut',
-                }}
-                className="inline-block font-mono font-black"
-                style={{
-                  color: g.color,
-                  fontSize: `${g.size}rem`,
-                  textShadow: `0 0 12px ${g.color}88, 0 0 24px ${g.color}44, 0 0 4px ${g.color}cc`,
-                  filter: `drop-shadow(0 0 6px ${g.color}66)`,
-                  lineHeight: 1,
-                }}
-              >
-                {g.char}
-              </motion.span>
-            ))}
+      {/* Horizontal beam */}
+      <div
+        className="absolute top-1/2 left-0 right-0 h-[1px] pointer-events-none transition-opacity duration-500"
+        style={{
+          background: revealed
+            ? 'linear-gradient(90deg, transparent 5%, rgba(57,255,20,0.3) 25%, rgba(87,61,255,0.5) 50%, rgba(124,58,237,0.3) 75%, transparent 95%)'
+            : 'linear-gradient(90deg, transparent 5%, rgba(57,255,20,0.15) 25%, rgba(87,61,255,0.25) 50%, rgba(124,58,237,0.15) 75%, transparent 95%)',
+          boxShadow: revealed
+            ? '0 0 20px rgba(57,255,20,0.3), 0 0 40px rgba(87,61,255,0.2)'
+            : '0 0 10px rgba(57,255,20,0.1)',
+          opacity: revealed ? 1 : 0.5,
+        }}
+      />
 
-            {/* "Hover to unlock" hint */}
-            <motion.div
-              animate={{ opacity: [0.4, 0.8, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs uppercase tracking-[4px] font-bold pointer-events-none"
-              style={{
-                background: 'linear-gradient(90deg, #39ff14, #6366f1, #a855f7)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 8px rgba(57,255,20,0.4))',
-              }}
-            >
-              ▸ HOVER TO UNLOCK ◂
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Character grid */}
+      <div className="relative z-10 py-4 px-2 text-center text-sm sm:text-base md:text-lg leading-relaxed italic">
+        {QUOTE.split('').map((char, i) => (
+          <GlyphChar
+            key={i}
+            realChar={char}
+            index={i}
+            revealed={revealed}
+            glyphChar={initialGlyphs[i].char}
+            glyphColor={initialGlyphs[i].color}
+            totalChars={QUOTE.length}
+          />
+        ))}
+      </div>
 
-      {/* Revealed Quote Layer */}
-      <AnimatePresence>
-        {revealed && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, filter: 'blur(12px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -10, filter: 'blur(8px)' }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 py-4 px-2 text-center"
-          >
-            {/* Horizontal beam */}
-            <div
-              className="absolute top-1/2 left-0 right-0 h-[1px] pointer-events-none"
-              style={{
-                background:
-                  'linear-gradient(90deg, transparent 5%, rgba(57,255,20,0.3) 25%, rgba(87,61,255,0.5) 50%, rgba(124,58,237,0.3) 75%, transparent 95%)',
-                boxShadow: '0 0 20px rgba(57,255,20,0.3), 0 0 40px rgba(87,61,255,0.2)',
-              }}
-            />
+      {/* Attribution - fades in after decode */}
+      <div
+        className="relative z-10 text-center transition-all duration-500"
+        style={{
+          opacity: attrRevealed ? 1 : 0,
+          transform: attrRevealed ? 'translateY(0)' : 'translateY(6px)',
+        }}
+      >
+        <span
+          className="text-[10px] sm:text-xs uppercase tracking-[3px] font-semibold"
+          style={{
+            background: 'linear-gradient(90deg, rgba(57,255,20,0.6), rgba(99,102,241,0.5), rgba(168,85,247,0.5))',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            filter: 'drop-shadow(0 0 8px rgba(57,255,20,0.3))',
+          }}
+        >
+          {ATTRIBUTION}
+        </span>
+      </div>
 
-            <blockquote>
-              <p
-                className="text-sm sm:text-base md:text-lg italic leading-relaxed"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(147,197,253,0.9) 50%, rgba(255,255,255,0.75) 100%)',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 0 12px rgba(87,61,255,0.3))',
-                }}
-              >
-                "We didn't wait for permission. We didn't ask for funding. We built it from nothing —
-                <span
-                  style={{
-                    background: 'linear-gradient(135deg, #39ff14 0%, #6366f1 50%, #a855f7 100%)',
-                    WebkitBackgroundClip: 'text',
-                    backgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    fontWeight: 700,
-                    fontStyle: 'normal',
-                    filter: 'drop-shadow(0 0 16px rgba(57,255,20,0.5))',
-                  }}
-                >
-                  {' '}
-                  and we own every line.
-                </span>
-                "
-              </p>
-              <motion.footer
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="mt-3 text-[10px] sm:text-xs uppercase tracking-[3px] font-semibold"
-                style={{
-                  background:
-                    'linear-gradient(90deg, rgba(57,255,20,0.6), rgba(99,102,241,0.5), rgba(168,85,247,0.5))',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 0 8px rgba(57,255,20,0.3))',
-                }}
-              >
-                {ATTRIBUTION}
-              </motion.footer>
-            </blockquote>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Hover hint */}
+      <motion.div
+        animate={{ opacity: revealed ? 0 : [0.3, 0.7, 0.3] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        className="relative z-10 text-center mt-1 pointer-events-none"
+      >
+        <span
+          className="text-[9px] sm:text-[10px] uppercase tracking-[4px] font-bold"
+          style={{
+            background: 'linear-gradient(90deg, #39ff14, #6366f1, #a855f7)',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          ▸ hover to decode ◂
+        </span>
+      </motion.div>
     </div>
   );
 }
