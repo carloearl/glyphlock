@@ -9,7 +9,7 @@ import Crossfader from "@/components/mixer/Crossfader";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftRight, ChevronUp, ChevronDown } from "lucide-react";
 
-export default function DJPlayerSection({ playingSongId, songs, profileSongs, onSkip, collapsed, onToggleCollapse }) {
+export default function DJPlayerSection({ playingSongId, songs, profileSongs, onSkip, collapsed, onToggleCollapse, onPlay }) {
   const [crossfade, setCrossfade] = useState(50);
   const [deckBSongId, setDeckBSongId] = useState(null);
   const [deckAMuted, setDeckAMuted] = useState(false);
