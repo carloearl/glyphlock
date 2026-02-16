@@ -59,6 +59,9 @@ export const DEFAULT_PRESS_CONFIG = {
   serialPrefix: 'CC',
   serialSeed: 1,
   interactiveMode: true,
+  layoutMode: LayoutMode.FIVE_PER_SHEET,
+  denomination: '100',
+  elements: [], // draggable overlay elements [{id, type, x, y, width, height, content, src}]
 };
 
 // Default element transform
