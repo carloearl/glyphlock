@@ -3,7 +3,7 @@
  * Manages Deck A / Deck B state, volume derived from crossfader position,
  * and next-track auto-load.
  */
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import PlayerDeck from "@/components/mixer/PlayerDeck";
 import Crossfader from "@/components/mixer/Crossfader";
 import { Button } from "@/components/ui/button";
