@@ -17,6 +17,7 @@ function seededRng(seed) {
 
 export default function GlyphScramble() {
   const [revealed, setRevealed] = useState(false);
+  const hasRevealed = useRef(false);
 
   // Static glyph per character — computed once
   const glyphMap = useMemo(() => {
