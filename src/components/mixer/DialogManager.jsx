@@ -135,8 +135,8 @@ export default function DialogManager({
 
   const handleSongSubmit = () => {
     // Normalize YouTube URL
-    const parsed = parseYoutubeUrl(songDraft.youtubeUrl);
-    const normalized = { ...songDraft, youtubeUrl: parsed ? parsed.canonical : songDraft.youtubeUrl, energyLevel: parseInt(songDraft.energyLevel) || 5 };
+    const parsed = songDraft.youtubeUrl ? parseYoutubeUrl(songDraft.youtubeUrl) : null;
+    const normalized = { ...songDraft, youtubeUrl: parsed ? parsed.canonical : (songDraft.youtubeUrl || ""), energyLevel: parseInt(songDraft.energyLevel) || 5 };
     const { valid, errors: errs } = validateSong(normalized, allSongs);
     if (!valid) { setErrors(errs); return; }
     onSaveSong(normalized, mode === "editSong");
