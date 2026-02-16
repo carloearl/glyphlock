@@ -42,6 +42,11 @@ export default function SongCard({
 
   return (
     <div
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("application/mixer-song-id", song.id);
+        e.dataTransfer.effectAllowed = "copy";
+      }}
       className={`group relative rounded-lg border transition-all duration-75 ${
         isPlaying
           ? "border-purple-500/60 bg-purple-500/10 shadow-lg shadow-purple-500/10"
