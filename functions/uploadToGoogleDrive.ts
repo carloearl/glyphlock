@@ -8,72 +8,72 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const contentType = req.headers.get('content-type') || '';
-    if (!contentType.includes('multipart/form-data')) {
-      return Response.json({ error: 'Expected multipart/form-data' }, { status: 400 });
-    }
-
     const formData = await req.formData();
     const file = formData.get('file');
-    if (!file || !(file instanceof File)) {
+    
+    if (!file) {
       return Response.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const fileName = file.name || `upload_${Date.now()}`;
-    const mimeType = file.type || 'application/octet-stream';
-
-    // Get Google Drive access token via app connector
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googledrive');
 
-    // Step 1: Create file metadata on Google Drive
-    const metadataRes = await fetch(
-      'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable',
+    // Step 1: Create file metadata
+    const metadata = {
+      name: file.name || `video_${Date.now()}.mp4`,
+      mimeType: file.type || 'video/mp4'
+    };
+
+    // Step 2: Upload using multipart upload for large files
+    const boundary = '----GlyphLockUploadBoundary';
+    const metadataPart = JSON.stringify(metadata);
+    const fileBytes = new Uint8Array(await file.arrayBuffer());
+
+    const bodyParts = [
+      `--${boundary}\r\n`,
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n',
+      metadataPart,
+      `\r\n--${boundary}\r\n`,
+      `Content-Type: ${file.type || 'video/mp4'}\r\n\r\n`,
+    ];
+
+    // Build the multipart body
+    const encoder = new TextEncoder();
+    const closingBoundary = encoder.encode(`\r\n--${boundary}--`);
+    
+    const textParts = bodyParts.map(p => encoder.encode(p));
+    const totalLength = textParts.reduce((sum, p) => sum + p.length, 0) + fileBytes.length + closingBoundary.length;
+    
+    const body = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const part of textParts) {
+      body.set(part, offset);
+      offset += part.length;
+    }
+    body.set(fileBytes, offset);
+    offset += fileBytes.length;
+    body.set(closingBoundary, offset);
+
+    const uploadResponse = await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink',
       {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json; charset=UTF-8',
-          'X-Upload-Content-Type': mimeType,
-          'X-Upload-Content-Length': String(file.size),
+          'Content-Type': `multipart/related; boundary=${boundary}`,
         },
-        body: JSON.stringify({
-          name: fileName,
-          mimeType: mimeType,
-        }),
+        body: body
       }
     );
 
-    if (!metadataRes.ok) {
-      const err = await metadataRes.text();
-      console.error('Drive metadata error:', err);
-      return Response.json({ error: 'Failed to init Drive upload', details: err }, { status: 500 });
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error('Google Drive upload error:', errorText);
+      return Response.json({ error: 'Google Drive upload failed', details: errorText }, { status: 500 });
     }
 
-    const resumableUri = metadataRes.headers.get('location');
-    if (!resumableUri) {
-      return Response.json({ error: 'No resumable URI returned' }, { status: 500 });
-    }
+    const driveFile = await uploadResponse.json();
 
-    // Step 2: Upload file bytes
-    const fileBytes = await file.arrayBuffer();
-    const uploadRes = await fetch(resumableUri, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': mimeType,
-        'Content-Length': String(file.size),
-      },
-      body: fileBytes,
-    });
-
-    if (!uploadRes.ok) {
-      const err = await uploadRes.text();
-      console.error('Drive upload error:', err);
-      return Response.json({ error: 'Drive upload failed', details: err }, { status: 500 });
-    }
-
-    const driveFile = await uploadRes.json();
-
-    // Step 3: Make file publicly readable
+    // Step 3: Make the file publicly viewable
     await fetch(
       `https://www.googleapis.com/drive/v3/files/${driveFile.id}/permissions`,
       {
@@ -84,21 +84,22 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           role: 'reader',
-          type: 'anyone',
-        }),
+          type: 'anyone'
+        })
       }
     );
 
-    // Return the direct download and preview links
-    const fileUrl = `https://drive.google.com/uc?export=download&id=${driveFile.id}`;
-    const previewUrl = `https://drive.google.com/file/d/${driveFile.id}/preview`;
+    // Build direct link
+    const directUrl = `https://drive.google.com/file/d/${driveFile.id}/preview`;
+    const downloadUrl = `https://drive.google.com/uc?export=download&id=${driveFile.id}`;
 
     return Response.json({
-      file_url: fileUrl,
-      preview_url: previewUrl,
-      drive_id: driveFile.id,
-      file_name: fileName,
-      size: file.size,
+      success: true,
+      file_id: driveFile.id,
+      file_name: driveFile.name,
+      preview_url: directUrl,
+      download_url: downloadUrl,
+      web_view_url: driveFile.webViewLink
     });
 
   } catch (error) {
