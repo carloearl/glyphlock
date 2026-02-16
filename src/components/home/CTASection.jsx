@@ -201,7 +201,7 @@ export default function CTASection() {
                 transition={{ duration: 1.1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]"
               >
-                READY TO BUILD YOUR{' '}
+                READY TO{' '}
                 <motion.span 
                   className="bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6] bg-clip-text text-transparent"
                   animate={{
@@ -212,7 +212,7 @@ export default function CTASection() {
                   }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  ECOSYSTEM?
+                  START BUILDING?
                 </motion.span>
               </motion.h2>
 
@@ -223,7 +223,7 @@ export default function CTASection() {
                 transition={{ duration: 1.1, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
                 className="text-base md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto font-medium"
               >
-                Open framework. Covenant verified. Built for creators who own their work.
+                Open source. Covenant verified. Built for creators who own their work.
               </motion.p>
 
               {/* Email form - Scale up with bounce */}

@@ -58,10 +58,10 @@ export default function Pricing() {
       features: [
         'Everything in Creator',
         'Unlimited verified assets',
-        'Priority AI site building',
+        'Priority AI processing',
         'Master Covenant authorship',
-        'Advanced ecosystem tools',
-        '24/7 builder support'
+        'Advanced open source tools',
+        '24/7 priority support'
       ]
     },
     {
@@ -72,10 +72,10 @@ export default function Pricing() {
       color: 'blue',
       features: [
         'Everything in Professional',
-        'Custom ecosystem architecture',
+        'Custom deployment architecture',
         'Dedicated infrastructure engineer',
         'SLA guarantees',
-        'White-label framework',
+        'White-label deployment',
         'Custom protocol integrations'
       ]
     }
@@ -84,8 +84,8 @@ export default function Pricing() {
   return (
     <div className="min-h-screen text-white py-12 md:py-20" style={{ background: 'transparent' }}>
       <SEOHead
-        title="Pricing Plans | GlyphLock Creative Ecosystem"
-        description="Choose the right GlyphLock plan for your creative infrastructure needs. From Creator to Enterprise, open framework tools for verified digital ecosystems at every scale."
+        title="Support & Services | GlyphLock Open Source"
+        description="GlyphLock is open source. Support plans fund continued development and unlock priority services, dedicated infrastructure, and enterprise SLAs."
         url="/pricing"
       />
 
@@ -93,14 +93,14 @@ export default function Pricing() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12 md:mb-16">
-            <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 mb-3 md:mb-4 inline-block">
-              Creative Infrastructure
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 mb-3 md:mb-4 inline-block">
+              Open Source · Free Core
             </Badge>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent leading-tight">
-              Ecosystem Plans
+              Support & Services
             </h1>
             <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto px-2">
-              Open framework access for creators, builders, and enterprises
+              The framework is open source. These plans support development and unlock priority services.
             </p>
           </div>
 
@@ -206,15 +206,15 @@ export default function Pricing() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="text-white font-semibold mb-2">Can I cancel anytime?</h3>
-                <p className="text-slate-400 text-sm">Yes, cancel from account settings. Your ecosystems remain accessible in read-only mode.</p>
+                <p className="text-slate-400 text-sm">Yes, cancel from account settings. The core framework is always free and open source.</p>
               </div>
               <div>
                 <h3 className="text-white font-semibold mb-2">What payment methods work?</h3>
                 <p className="text-slate-400 text-sm">All major credit cards via Stripe. Invoicing available for Enterprise.</p>
               </div>
               <div>
-                <h3 className="text-white font-semibold mb-2">Is there a free tier?</h3>
-                <p className="text-slate-400 text-sm">Yes, core framework access is free. Upgrade for unlimited assets and advanced tools.</p>
+                <h3 className="text-white font-semibold mb-2">Is GlyphLock really open source?</h3>
+                <p className="text-slate-400 text-sm">Yes, 100%. The entire framework is open source. Support plans fund development and provide priority services.</p>
               </div>
             </CardContent>
           </Card>
