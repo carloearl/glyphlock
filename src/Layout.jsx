@@ -16,10 +16,13 @@ import StructuredDataOrg from "@/components/StructuredDataOrg";
 import SecurityHeaders from "@/components/security/SecurityHeaders";
 import CrawlerFallback from "@/components/seo/CrawlerFallback";
 import PrerenderHints from "@/components/seo/PrerenderHints";
+import AccessibilityToolbar from "@/components/accessibility/AccessibilityToolbar";
+import ScreenReaderAnnouncer from "@/components/accessibility/ScreenReaderAnnouncer";
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [a11yOpen, setA11yOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -64,6 +67,15 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   useEffect(() => {
+    // Alt+A keyboard shortcut for accessibility toolbar
+    const handleA11yKey = (e) => {
+      if (e.altKey && e.key === 'a') {
+        e.preventDefault();
+        setA11yOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleA11yKey);
+
     // Disable scroll snap on mobile
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
@@ -72,6 +84,8 @@ export default function Layout({ children, currentPageName }) {
     }
     
     window.scrollTo({ top: 0, behavior: "instant" });
+
+    return () => window.removeEventListener('keydown', handleA11yKey);
   }, [location.pathname]);
 
   if (loading) return <GlyphLoader text="Initializing Secure Environment..." />;
@@ -375,6 +389,10 @@ export default function Layout({ children, currentPageName }) {
         <footer className="relative overflow-hidden" style={{ zIndex: 100, pointerEvents: 'auto', isolation: 'isolate' }}>
           <Footer />
         </footer>
+
+        {/* Accessibility Toolbar (sitewide, Alt+A) */}
+        <AccessibilityToolbar open={a11yOpen} onClose={() => setA11yOpen(false)} />
+        <ScreenReaderAnnouncer />
 
         {/* GlyphLock Brand Mark - Fixed bottom-left */}
         <div 
