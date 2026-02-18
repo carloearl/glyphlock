@@ -8,7 +8,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
  * Returns: { tracks: [{ id, title, artist, duration, audio_url, image_url, album, genre }] }
  */
 
-const JAMENDO_CLIENT_ID = "b1a113fc";
+// Jamendo public API client ID — free tier, no secret needed
+const JAMENDO_CLIENT_ID = "2c9a11b4";
 
 Deno.serve(async (req) => {
   try {
