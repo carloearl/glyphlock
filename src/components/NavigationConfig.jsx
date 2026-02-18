@@ -37,6 +37,7 @@ export const NAV_SECTIONS = [
       { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
       { label: "SDK Documentation", page: "SDKDocs", visibility: "public" },
       { label: "Site Intelligence", page: "Sie", visibility: "admin" },
+      { label: "System Audit", page: "GlyphLockAudit", visibility: "admin" },
       { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" }
     ]
   },
