@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { DoorOpen, Video, Clock, DollarSign, User, UserCheck } from "lucide-react";
 import VIPSessionTimer from "./VIPSessionTimer";
 import VIPContractFlow from "./VIPContractFlow";
+import VIPReceiptPrinter from "./VIPReceiptPrinter";
 
 export default function VIPRoomManagement() {
   const queryClient = useQueryClient();
@@ -160,14 +161,21 @@ export default function VIPRoomManagement() {
                       Start Session
                     </Button>
                   ) : room.status === 'occupied' ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full border-red-500/50 text-red-400"
-                      onClick={() => endSession.mutate(room.id)}
-                    >
-                      End Session
-                    </Button>
+                    <div className="space-y-2">
+                      <VIPReceiptPrinter
+                        room={room}
+                        guestName={room.guest_name}
+                        grandTotal={room.total_charge || 0}
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full border-red-500/50 text-red-400"
+                        onClick={() => endSession.mutate(room.id)}
+                      >
+                        End Session
+                      </Button>
+                    </div>
                   ) : null}
                 </CardContent>
               </Card>

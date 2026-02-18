@@ -200,9 +200,11 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
     w.document.close();
     setTimeout(() => w.print(), 400);
     setPrinted(true);
-    // Trigger club currency print
+    // Auto-trigger club currency printing after contract print
     if (onPrintCurrency && dreamDollarValue > 0) {
-      onPrintCurrency(dreamDollarValue, orderNumber);
+      setTimeout(() => {
+        onPrintCurrency(dreamDollarValue, orderNumber);
+      }, 1500);
     }
   };
 
