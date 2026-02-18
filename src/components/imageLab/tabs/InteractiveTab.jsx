@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Upload, Save, Lock, Trash2, Sparkles, MousePointer, Link2, ExternalLink, Share2, Download } from 'lucide-react';
+import { Loader2, Upload, Save, Lock, Trash2, Sparkles, MousePointer, Link2, ExternalLink, Share2, Download, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   GlyphImageCard,
@@ -18,6 +18,7 @@ import {
   GlyphImageBadge,
   GlyphImagePanel,
 } from '../design/GlyphImageDesignSystem';
+import ShareUrlPanel from './ShareUrlPanel';
 
 export default function InteractiveTab({ user, selectedImage, onImageSelect }) {
   const [imageAsset, setImageAsset] = useState(selectedImage);
@@ -27,6 +28,7 @@ export default function InteractiveTab({ user, selectedImage, onImageSelect }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [pendingClick, setPendingClick] = useState(null);
   const [shareUrl, setShareUrl] = useState(null);
+  const [showBorders, setShowBorders] = useState(true);
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
 
@@ -482,66 +484,7 @@ Be precise with the bounding box - make it fit the detected object tightly but i
               </div>
             )}
             
-            {shareUrl && (
-              <div className="mt-3 p-4 rounded-lg bg-green-500/10 border border-green-500/30 space-y-3">
-                <p className="text-xs text-green-400 font-bold">📤 Share Your Interactive Image</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={shareUrl}
-                    readOnly
-                    className="flex-1 px-2 py-1 bg-black/50 border border-green-500/30 rounded text-xs text-white font-mono"
-                  />
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(shareUrl);
-                      toast.success('Link copied to clipboard!');
-                    }}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    Copy
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      const subject = `Check out this interactive image: ${imageAsset.name}`;
-                      const body = `I created an interactive image with AI-powered hotspots. Click to explore:\n\n${shareUrl}`;
-                      window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
-                      toast.success('Email composer opened');
-                    }}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs"
-                  >
-                    📧 Email
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      const text = `Check out my interactive image: ${shareUrl}`;
-                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'width=600,height=400');
-                      toast.success('Twitter opened');
-                    }}
-                    className="flex-1 bg-sky-600 hover:bg-sky-700 text-white text-xs"
-                  >
-                    𝕏 Tweet
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      const text = `Check out my interactive image: ${shareUrl}`;
-                      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=400');
-                      toast.success('LinkedIn opened');
-                    }}
-                    className="flex-1 bg-blue-700 hover:bg-blue-800 text-white text-xs"
-                  >
-                    💼 LinkedIn
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-400">Share this link via text, email, or social media. Hotspots work on all devices.</p>
-              </div>
-            )}
+            {shareUrl && <ShareUrlPanel shareUrl={shareUrl} imageAsset={imageAsset} />}
           </CardContent>
         </Card>
 
@@ -619,7 +562,7 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                 />
               )}
 
-              {/* Render hotspots - fully transparent zones, only visible on hover */}
+              {/* Render hotspots */}
               {hotspots.map((hotspot) => (
                 <div
                   key={hotspot.id}
@@ -631,10 +574,12 @@ Be precise with the bounding box - make it fit the detected object tightly but i
                       setSelectedHotspot(hotspot);
                     }
                   }}
-                  className={`absolute border-2 transition-all group rounded-lg ${
+                  className={`absolute transition-all group rounded-lg ${
                     selectedHotspot?.id === hotspot.id
-                      ? 'border-cyan-400 bg-cyan-400/20 shadow-[0_0_25px_rgba(6,182,212,0.8)]'
-                      : 'border-transparent bg-transparent hover:border-green-400/60 hover:bg-green-400/10 cursor-pointer'
+                      ? 'border-2 border-cyan-400 bg-cyan-400/20 shadow-[0_0_25px_rgba(6,182,212,0.8)]'
+                      : showBorders
+                        ? 'border-2 border-white/30 bg-white/5 hover:border-green-400/60 hover:bg-green-400/10 cursor-pointer'
+                        : 'border-2 border-transparent bg-transparent hover:border-green-400/60 hover:bg-green-400/10 cursor-pointer'
                   }`}
                   style={{
                     left: `${hotspot.x}%`,
@@ -668,19 +613,22 @@ Be precise with the bounding box - make it fit the detected object tightly but i
               ))}
             </div>
 
-            <div className="mt-4 flex items-center justify-between text-sm">
+            <div className="mt-4 flex items-center justify-between text-sm flex-wrap gap-3">
               <span className="text-gray-400">
                 {analyzing ? 'AI is detecting the object you clicked...' : 'Click anywhere to create an AI-detected hotspot'}
               </span>
               <div className="flex items-center gap-4 text-xs">
-                <span className="flex items-center gap-1">
-                  <div className="w-3 h-3 border-2 border-green-400 rounded-sm" />
-                  <span className="text-gray-500">Has URL</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <div className="w-3 h-3 border-2 border-purple-400 rounded-sm" />
-                  <span className="text-gray-500">No URL</span>
-                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowBorders(!showBorders); }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all ${
+                    showBorders
+                      ? 'border-cyan-400/50 bg-cyan-500/15 text-cyan-400'
+                      : 'border-white/10 bg-white/5 text-white/40'
+                  }`}
+                >
+                  {showBorders ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                  {showBorders ? 'Borders ON' : 'Borders OFF'}
+                </button>
               </div>
             </div>
           </CardContent>
