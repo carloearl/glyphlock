@@ -69,7 +69,7 @@ export default function MusicSearchPanel({ onAddTrack, onPreviewTrack }) {
           </Button>
         </div>
         <p className="text-[9px] text-slate-600">
-          Free CC-licensed tracks via Jamendo • Click + to add to your deck
+          Free CC-licensed tracks via Jamendo API • Click + to add to your deck
         </p>
       </div>
 
@@ -121,6 +121,12 @@ export default function MusicSearchPanel({ onAddTrack, onPreviewTrack }) {
                 {track.album && (
                   <span className="text-[10px] text-slate-600 truncate hidden sm:inline">• {track.album}</span>
                 )}
+                {track.genre && (
+                  <span className="text-[10px] text-purple-400/60 truncate hidden sm:inline">• {track.genre}</span>
+                )}
+                {track.source === 'jamendo' && (
+                  <span className="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-bold">JAMENDO</span>
+                )}
               </div>
             </div>
 
@@ -147,15 +153,18 @@ export default function MusicSearchPanel({ onAddTrack, onPreviewTrack }) {
                 className="h-7 w-7"
                 onClick={() => {
                   onAddTrack?.({
-                    title: track.title,
-                    artist: track.artist,
+                    title: track.title || 'Unknown Track',
+                    artist: track.artist || 'Unknown Artist',
                     uploadUrl: track.audio_url,
                     youtubeUrl: "",
-                    imageUrl: track.image_url,
+                    imageUrl: track.image_url || "",
                     duration: track.duration,
-                    license: track.license,
+                    license: track.license || "",
+                    album: track.album || "",
+                    genre: track.genre || "",
+                    source: track.source || "search",
                   });
-                  toast.success(`Added "${track.title}"`);
+                  toast.success(`Added "${track.title}" by ${track.artist}`);
                 }}
                 title="Add to deck"
               >
