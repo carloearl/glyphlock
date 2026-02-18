@@ -104,11 +104,10 @@ export default function ImageLab() {
           {
             title: 'Tabs Overview',
             content: [
-              { heading: 'Generate (01)', text: 'AI image generation with prompts, styles, and reference images.' },
+              { heading: 'Generate + Forge (01)', text: 'Full AI image generation with prompt engineering, style presets, reference images, batch rendering, and advanced controls.' },
               { heading: 'Interactive (02)', text: 'Add clickable hotspots to images for interactive experiences.' },
               { heading: 'Gallery (03)', text: 'View and manage all your generated and uploaded images.' },
-              { heading: 'Forge (04)', text: 'Advanced batch generation with style presets, controls, and seed locking.' },
-              { heading: 'Multimodal (05)', text: 'Preview upcoming features: Image→Video, Video Style Transfer, Image→3D, Audio→Visual.' }
+              { heading: 'Multimodal (04)', text: 'Active tools: Image→Video keyframes, Style Transfer, Image→3D multi-view, Audio→Visual synesthesia.' }
             ]
           }
         ]}
