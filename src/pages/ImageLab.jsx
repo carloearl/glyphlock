@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Loader2, Sparkles, Layers, Image as ImageIcon, Database, Zap } from 'lucide-react';
+import { Loader2, Sparkles, Layers, Image as ImageIcon, Database, Zap, Wand2, Box } from 'lucide-react';
 
 import SEOHead from '@/components/SEOHead';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
@@ -13,6 +13,8 @@ import HelpPanel from '@/components/global/HelpPanel';
 import GenerateTab from '@/components/imageLab/tabs/GenerateTab.jsx';
 import InteractiveTab from '@/components/imageLab/tabs/InteractiveTab.jsx';
 import GalleryTab from '@/components/imageLab/tabs/GalleryTab.jsx';
+import ForgeTab from '@/components/imageLab/tabs/ForgeTab.jsx';
+import MultimodalTab from '@/components/imageLab/tabs/MultimodalTab.jsx';
 
 export default function ImageLab() {
   const [activeTab, setActiveTab] = useState(() => {
@@ -358,12 +360,32 @@ export default function ImageLab() {
               
               <TabsTrigger 
                 value="gallery" 
-                className="flex-1 min-h-[56px] relative group data-[state=active]:bg-gradient-to-b data-[state=active]:from-blue-500/20 data-[state=active]:to-transparent data-[state=active]:border-t-2 data-[state=active]:border-t-blue-400 data-[state=active]:text-blue-300 text-gray-500 hover:text-gray-300 transition-all font-mono text-xs uppercase tracking-widest rounded-none"
+                className="flex-1 min-h-[56px] relative group border-r border-cyan-500/10 data-[state=active]:bg-gradient-to-b data-[state=active]:from-blue-500/20 data-[state=active]:to-transparent data-[state=active]:border-t-2 data-[state=active]:border-t-blue-400 data-[state=active]:text-blue-300 text-gray-500 hover:text-gray-300 transition-all font-mono text-xs uppercase tracking-widest rounded-none"
               >
                 <span className="mr-2 text-[10px] opacity-60">03</span>
                 <Database className="w-4 h-4 mr-2" />
                 <span>Gallery</span>
                 <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-0 group-data-[state=active]:opacity-100 glyph-glow"></div>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="forge" 
+                className="flex-1 min-h-[56px] relative group border-r border-cyan-500/10 data-[state=active]:bg-gradient-to-b data-[state=active]:from-amber-500/20 data-[state=active]:to-transparent data-[state=active]:border-t-2 data-[state=active]:border-t-amber-400 data-[state=active]:text-amber-300 text-gray-500 hover:text-gray-300 transition-all font-mono text-xs uppercase tracking-widest rounded-none"
+              >
+                <span className="mr-2 text-[10px] opacity-60">04</span>
+                <Wand2 className="w-4 h-4 mr-2" />
+                <span>Forge</span>
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-0 group-data-[state=active]:opacity-100 glyph-glow"></div>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="multimodal" 
+                className="flex-1 min-h-[56px] relative group data-[state=active]:bg-gradient-to-b data-[state=active]:from-pink-500/20 data-[state=active]:to-transparent data-[state=active]:border-t-2 data-[state=active]:border-t-pink-400 data-[state=active]:text-pink-300 text-gray-500 hover:text-gray-300 transition-all font-mono text-xs uppercase tracking-widest rounded-none"
+              >
+                <span className="mr-2 text-[10px] opacity-60">05</span>
+                <Box className="w-4 h-4 mr-2" />
+                <span>Multimodal</span>
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-pink-400 to-transparent opacity-0 group-data-[state=active]:opacity-100 glyph-glow"></div>
               </TabsTrigger>
             </TabsList>
 
@@ -374,6 +396,8 @@ export default function ImageLab() {
                   { value: 'generate', icon: ImageIcon, label: 'Generate', num: '01' },
                   { value: 'interactive', icon: Layers, label: 'Interactive', num: '02' },
                   { value: 'gallery', icon: Database, label: 'Gallery', num: '03' },
+                  { value: 'forge', icon: Wand2, label: 'Forge', num: '04' },
+                  { value: 'multimodal', icon: Box, label: 'Multimodal', num: '05' },
                 ].map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -432,6 +456,16 @@ export default function ImageLab() {
                 user={user}
                 onImageSelect={handleImageSelected}
               />
+            </TabsContent>
+
+            {/* Forge Tab (merged from Image Generator) */}
+            <TabsContent value="forge">
+              <ForgeTab />
+            </TabsContent>
+
+            {/* Multimodal Expansion Tab */}
+            <TabsContent value="multimodal">
+              <MultimodalTab />
             </TabsContent>
           </Tabs>
         </div>
