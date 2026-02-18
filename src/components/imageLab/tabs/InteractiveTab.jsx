@@ -18,7 +18,7 @@ import {
   GlyphImageBadge,
   GlyphImagePanel,
 } from '../design/GlyphImageDesignSystem';
-import ShareUrlPanel from './ShareUrlPanel';
+import ShareUrlPanel from '@/components/imageLab/tabs/ShareUrlPanel';
 
 export default function InteractiveTab({ user, selectedImage, onImageSelect }) {
   const [imageAsset, setImageAsset] = useState(selectedImage);
