@@ -15,24 +15,40 @@ export default function Share() {
   const loadShare = async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token') || window.location.pathname.split('/share/')[1];
+      const imageId = urlParams.get('id');
+      const token = urlParams.get('token');
 
-      if (!token) {
-        setError('No share token provided');
+      if (!imageId && !token) {
+        setError('No share link provided');
         setLoading(false);
         return;
       }
 
-      // Use backend function to load share data (public access)
-      const res = await base44.functions.invoke('interactiveImageOps', {
-        action: 'loadShare',
-        token
-      });
-
-      if (res.data?.error) {
-        setError(res.data.error);
-      } else {
-        setImageData(res.data);
+      if (imageId) {
+        // Direct image ID mode (simplest - works for authenticated users)
+        const image = await base44.entities.InteractiveImage.filter({ id: imageId });
+        if (image.length > 0) {
+          setImageData(image[0]);
+        } else {
+          setError('Image not found or access denied');
+        }
+      } else if (token) {
+        // Token-based share mode
+        const shares = await base44.entities.InteractiveImageShare.filter({
+          share_url: `/share/${token}`,
+          is_active: true
+        });
+        if (shares.length > 0) {
+          const share = shares[0];
+          const images = await base44.entities.InteractiveImage.filter({ id: share.interactive_image_id });
+          if (images.length > 0) {
+            setImageData(images[0]);
+          } else {
+            setError('Shared image no longer available');
+          }
+        } else {
+          setError('Share link expired or invalid');
+        }
       }
     } catch (err) {
       console.error('Share load error:', err);

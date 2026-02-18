@@ -62,10 +62,16 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
+    const origin = req.headers.get('origin') || 'https://glyphlock.io';
+    // Generate both token-based URL and direct ID URL
+    const fullUrl = `${origin}/Share?token=${shareToken}`;
+    const directUrl = `${origin}/Share?id=${interactive_image_id}`;
+
     return Response.json({
       share_id: share.id,
       share_url: shareUrl,
-      full_url: `${req.headers.get('origin') || 'https://glyphlock.io'}${shareUrl}`,
+      full_url: fullUrl,
+      direct_url: directUrl,
       manifest_url: manifestUrl,
       mode
     });
