@@ -239,7 +239,8 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
       * { margin:0; padding:0; box-sizing:border-box; }
       body { font-family: Arial, sans-serif; font-size: 11px; color: #000; padding: 20px; max-width: 8.5in; margin: 0 auto; }
       h1 { text-align:center; font-size:18px; margin-bottom:2px; }
-      h2 { text-align:center; font-size:14px; margin-bottom:12px; }
+      h2 { text-align:center; font-size:14px; margin-bottom:4px; }
+      .biz-info { text-align:center; font-size:10px; margin-bottom:12px; }
       .warning { text-align:center; color:red; font-weight:bold; font-size:12px; margin:8px 0; }
       table { border-collapse:collapse; width:100%; margin:8px 0; }
       .info-row { display:flex; gap:12px; margin:4px 0; }
@@ -252,7 +253,10 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
       @media print { @page { margin: 15mm; } }
     </style></head><body>
       <h1>Dream Palace</h1>
-      <h2>Sales / Order receipt Form</h2>
+      <div class="biz-info">Liberty Holding Group, L.L.C. dba The Dream Palace</div>
+      <div class="biz-info" style="font-weight:bold;">815 N. Scottsdale Road, Tempe, AZ 85281</div>
+      <div class="biz-info">Tel: (602) 536-0372 | Tax ID: 88-1234567</div>
+      <h2>Sales / Order Receipt Form</h2>
       
       <div style="display:flex;gap:20px;margin-bottom:8px;">
         <div style="flex:1;border:1px solid #000;padding:8px;">
@@ -314,7 +318,9 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
 
       <div class="barcode" style="margin-top:16px;">||||| ${orderNumber} |||||</div>
       <div style="text-align:center;font-size:9px;color:#666;margin-top:8px;">
-        DD form Digital Version v3 -02-06-2026 | Order: ${orderNumber} | Printed: ${new Date().toISOString()}
+        DD form Digital Version v3 -02-06-2026 | Order: ${orderNumber} | Printed: ${new Date().toISOString()}<br/>
+        Liberty Holding Group, L.L.C. dba The Dream Palace<br/>
+        815 N. Scottsdale Road, Tempe, AZ 85281 | (602) 536-0372
       </div>
     </body></html>`;
   };
