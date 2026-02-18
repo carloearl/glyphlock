@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Shield, DollarSign, ShoppingCart, TrendingUp, 
   Users, LogOut, UserCheck, DoorOpen, FileText,
-  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText
+  Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText,
+  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -27,6 +28,16 @@ import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView
 import ProductManagement from "../components/nups/ProductManagement.jsx";
 import InventoryManagement from "../components/nups/InventoryManagement.jsx";
 import DreamPalaceContract from "../components/nups/DreamPalaceContract.jsx";
+import TipBreakdown from "../components/nups/TipBreakdown.jsx";
+import DailySummary from "../components/nups/DailySummary.jsx";
+import CashDrawerLog from "../components/nups/CashDrawerLog.jsx";
+import RefundManager from "../components/nups/RefundManager.jsx";
+import CustomerManagement from "../components/nups/CustomerManagement.jsx";
+import MarketingCampaigns from "../components/nups/MarketingCampaigns.jsx";
+import LoyaltyProgram from "../components/nups/LoyaltyProgram.jsx";
+import StaffManagement from "../components/nups/StaffManagement.jsx";
+import AIInsights from "../components/nups/AIInsights.jsx";
+import SalesReport from "../components/nups/SalesReport.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -249,6 +260,42 @@ export default function NUPSOwner() {
               <Banknote className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Press</span>
             </TabsTrigger>
+            <TabsTrigger value="tips" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <HandCoins className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Tips</span>
+            </TabsTrigger>
+            <TabsTrigger value="daily" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <PieChart className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Daily</span>
+            </TabsTrigger>
+            <TabsTrigger value="drawer" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Wallet className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Drawer</span>
+            </TabsTrigger>
+            <TabsTrigger value="refunds" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <RotateCcw className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Refunds</span>
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Heart className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">CRM</span>
+            </TabsTrigger>
+            <TabsTrigger value="loyalty" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Heart className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Loyalty</span>
+            </TabsTrigger>
+            <TabsTrigger value="marketing" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Megaphone className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Marketing</span>
+            </TabsTrigger>
+            <TabsTrigger value="staff" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <UserCog className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Staff</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+              <Brain className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">AI</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics">
@@ -298,6 +345,33 @@ export default function NUPSOwner() {
           </TabsContent>
           <TabsContent value="press">
             <ClubCurrencyPressView />
+          </TabsContent>
+          <TabsContent value="tips">
+            <TipBreakdown transactions={transactions} />
+          </TabsContent>
+          <TabsContent value="daily">
+            <DailySummary transactions={transactions} />
+          </TabsContent>
+          <TabsContent value="drawer">
+            <CashDrawerLog />
+          </TabsContent>
+          <TabsContent value="refunds">
+            <RefundManager user={user} />
+          </TabsContent>
+          <TabsContent value="customers">
+            <CustomerManagement />
+          </TabsContent>
+          <TabsContent value="loyalty">
+            <LoyaltyProgram />
+          </TabsContent>
+          <TabsContent value="marketing">
+            <MarketingCampaigns />
+          </TabsContent>
+          <TabsContent value="staff">
+            <StaffManagement />
+          </TabsContent>
+          <TabsContent value="ai">
+            <AIInsights />
           </TabsContent>
         </Tabs>
       </div>
