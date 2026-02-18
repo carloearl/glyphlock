@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Loader2, Sparkles, Layers, Image as ImageIcon, Database, Zap, Wand2, Box } from 'lucide-react';
+import { Loader2, Sparkles, Layers, Image as ImageIcon, Database, Zap, Box } from 'lucide-react';
 
 import SEOHead from '@/components/SEOHead';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
@@ -13,7 +13,6 @@ import HelpPanel from '@/components/global/HelpPanel';
 import GenerateTab from '@/components/imageLab/tabs/GenerateTab.jsx';
 import InteractiveTab from '@/components/imageLab/tabs/InteractiveTab.jsx';
 import GalleryTab from '@/components/imageLab/tabs/GalleryTab.jsx';
-import ForgeTab from '@/components/imageLab/tabs/ForgeTab.jsx';
 import MultimodalTab from '@/components/imageLab/tabs/MultimodalTab.jsx';
 
 export default function ImageLab() {
@@ -140,7 +139,7 @@ export default function ImageLab() {
                   <span className="text-[11px] text-indigo-300 font-semibold">AI-Powered</span>
                 </div>
                 <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10">
-                  <span className="text-[11px] text-cyan-300 font-semibold">5 Modules</span>
+                  <span className="text-[11px] text-cyan-300 font-semibold">4 Modules</span>
                 </div>
               </div>
             </div>
@@ -152,11 +151,10 @@ export default function ImageLab() {
             {/* Desktop Tabs - Pill Design */}
             <TabsList className="hidden lg:flex w-full mb-8 bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-1.5 h-auto rounded-2xl gap-1">
               {[
-                { value: 'generate', icon: ImageIcon, label: 'Generate', num: '01', color: 'indigo' },
+                { value: 'generate', icon: ImageIcon, label: 'Generate + Forge', num: '01', color: 'indigo' },
                 { value: 'interactive', icon: Layers, label: 'Interactive', num: '02', color: 'cyan' },
                 { value: 'gallery', icon: Database, label: 'Gallery', num: '03', color: 'blue' },
-                { value: 'forge', icon: Wand2, label: 'Forge', num: '04', color: 'amber' },
-                { value: 'multimodal', icon: Box, label: 'Multimodal', num: '05', color: 'pink' },
+                { value: 'multimodal', icon: Box, label: 'Multimodal', num: '04', color: 'pink' },
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.value;
@@ -185,10 +183,9 @@ export default function ImageLab() {
             <div className="lg:hidden mb-6">
               <div className="flex gap-1.5 bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-1.5 rounded-2xl">
                 {[
-                  { value: 'generate', icon: ImageIcon, label: 'Gen' },
+                  { value: 'generate', icon: ImageIcon, label: 'Generate' },
                   { value: 'interactive', icon: Layers, label: 'Edit' },
                   { value: 'gallery', icon: Database, label: 'Gallery' },
-                  { value: 'forge', icon: Wand2, label: 'Forge' },
                   { value: 'multimodal', icon: Box, label: 'Multi' },
                 ].map((tab) => {
                   const Icon = tab.icon;
@@ -236,12 +233,7 @@ export default function ImageLab() {
               />
             </TabsContent>
 
-            {/* Forge Tab (merged from Image Generator) */}
-            <TabsContent value="forge">
-              <ForgeTab />
-            </TabsContent>
-
-            {/* Multimodal Expansion Tab */}
+            {/* Multimodal Studio Tab */}
             <TabsContent value="multimodal">
               <MultimodalTab />
             </TabsContent>
