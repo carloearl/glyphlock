@@ -339,10 +339,12 @@ export default function MixerModuleView() {
                     return;
                   }
                   const tempSong = createSongEntry({
-                    title: track.title,
-                    artist: track.artist,
+                    title: track.title || 'Unknown Track',
+                    artist: track.artist || 'Unknown Artist',
                     uploadUrl: track.audio_url,
-                    imageUrl: track.image_url,
+                    imageUrl: track.image_url || '',
+                    album: track.album || '',
+                    genre: track.genre || '',
                   });
                   setSongs(prev => [...prev, tempSong]);
                   if (activeProfile) {
