@@ -1043,6 +1043,63 @@ input::placeholder, textarea::placeholder {
   }
 }
 
+/* === ACCESSIBILITY OVERRIDES === */
+.a11y-high-contrast * {
+  border-color: #fff !important;
+}
+.a11y-high-contrast p,
+.a11y-high-contrast span,
+.a11y-high-contrast a,
+.a11y-high-contrast li,
+.a11y-high-contrast td,
+.a11y-high-contrast th,
+.a11y-high-contrast label,
+.a11y-high-contrast input,
+.a11y-high-contrast textarea,
+.a11y-high-contrast select {
+  color: #ffffff !important;
+  text-shadow: 0 0 1px rgba(255,255,255,0.3) !important;
+}
+.a11y-high-contrast button,
+.a11y-high-contrast [role="button"] {
+  border: 2px solid #fff !important;
+}
+
+.a11y-invert {
+  filter: invert(1) hue-rotate(180deg);
+}
+.a11y-invert img,
+.a11y-invert video,
+.a11y-invert canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.a11y-large-cursor,
+.a11y-large-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M8 8L8 38L18 28L28 28Z' fill='%2300E4FF' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") 8 8, auto !important;
+}
+
+.a11y-reduce-motion *,
+.a11y-reduce-motion *::before,
+.a11y-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+.a11y-dyslexia-font * {
+  font-family: 'Comic Sans MS', 'OpenDyslexic', 'Trebuchet MS', sans-serif !important;
+  letter-spacing: 0.05em !important;
+  word-spacing: 0.15em !important;
+  line-height: 1.8 !important;
+}
+
+.a11y-underline-links a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+
 /* ===== MODERN SCROLL ANIMATIONS ===== */
 
 /* Smooth scroll behavior site-wide */
