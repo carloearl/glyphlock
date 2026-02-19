@@ -14,6 +14,21 @@ const CLICKWRAP_TERMS = [
   "I understand misuse of this system may result in termination and legal action."
 ];
 
+// §9.2 RBAC role → dashboard route mapping
+const OWNER_TIER_ROLES = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"];
+const PERFORMER_ROLES = ["PERFORMER"];
+
+function resolveNUPSDashboard(permissionsData, base44Role) {
+  if (!permissionsData || !permissionsData.venue_access) {
+    // Fallback to base44 built-in role
+    return base44Role === "admin" ? "NUPSOwner" : "NUPSStaff";
+  }
+  const roleKeys = permissionsData.venue_access.map(va => va.role_key);
+  if (roleKeys.some(rk => OWNER_TIER_ROLES.includes(rk))) return "NUPSOwner";
+  if (roleKeys.some(rk => PERFORMER_ROLES.includes(rk))) return "EntertainerCheckIn";
+  return "NUPSStaff";
+}
+
 export default function NUPSLogin() {
   const [checking, setChecking] = useState(true);
   const [showClickwrap, setShowClickwrap] = useState(false);
@@ -25,12 +40,17 @@ export default function NUPSLogin() {
       try {
         const isAuth = await base44.auth.isAuthenticated();
         if (isAuth) {
-          const user = await base44.auth.me();
-          if (user.role === "admin") {
-            window.location.href = createPageUrl("NUPSOwner");
-          } else {
-            window.location.href = createPageUrl("NUPSStaff");
+          // §9.2 — Route via RBAC permissions, not legacy role string
+          let permissionsData = null;
+          try {
+            const res = await base44.functions.invoke('getUserPermissions', {});
+            permissionsData = res.data;
+          } catch (e) {
+            console.warn("RBAC payload unavailable, falling back to base44 role:", e);
           }
+          const user = await base44.auth.me();
+          const target = resolveNUPSDashboard(permissionsData, user.role);
+          window.location.href = createPageUrl(target);
           return;
         }
       } catch (err) {}

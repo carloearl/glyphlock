@@ -25,6 +25,16 @@ export default function NUPSStaff() {
           return;
         }
         const currentUser = await base44.auth.me();
+
+        // §9.2 RBAC — Enrich user with permissions payload
+        try {
+          const res = await base44.functions.invoke('getUserPermissions', {});
+          currentUser._rbac = res.data;
+          currentUser._highestRole = res.data?.highest_role || null;
+        } catch (e) {
+          console.warn("RBAC payload unavailable:", e);
+        }
+
         setUser(currentUser);
       } catch (error) {
         window.location.href = createPageUrl("NUPSLogin");
@@ -80,7 +90,7 @@ export default function NUPSStaff() {
             <div className="hidden md:flex items-center gap-2">
               <Users className="w-4 h-4 text-gray-400" />
               <span className="text-sm text-white truncate max-w-[120px]">{user?.email}</span>
-              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-xs">Staff</Badge>
+              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-xs">{user?._highestRole || "Staff"}</Badge>
             </div>
             <Button
               variant="outline"
@@ -122,7 +132,7 @@ export default function NUPSStaff() {
             <BatchManagement user={user} />
           </TabsContent>
           <TabsContent value="timeclock">
-            <TimeClock user={user} role="staff" />
+            <TimeClock user={user} role={user?._highestRole || "BARTENDER"} />
           </TabsContent>
           <TabsContent value="history">
             <TransactionHistory transactions={todayTransactions} showReceipt={true} />

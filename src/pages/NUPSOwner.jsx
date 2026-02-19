@@ -53,10 +53,30 @@ export default function NUPSOwner() {
           return;
         }
         const currentUser = await base44.auth.me();
-        if (currentUser.role !== "admin") {
+
+        // §9.2 RBAC — Check via getUserPermissions, not legacy role string
+        let permissionsData = null;
+        try {
+          const res = await base44.functions.invoke('getUserPermissions', {});
+          permissionsData = res.data;
+        } catch (e) {
+          console.warn("RBAC payload unavailable, falling back to base44 role:", e);
+        }
+
+        // Determine if user has owner/manager tier access
+        const OWNER_TIER = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"];
+        const hasOwnerAccess = permissionsData?.venue_access?.some(
+          va => OWNER_TIER.includes(va.role_key)
+        ) || currentUser.role === "admin";
+
+        if (!hasOwnerAccess) {
           window.location.href = createPageUrl("NUPSStaff");
           return;
         }
+
+        // Enrich user object with RBAC data
+        currentUser._rbac = permissionsData;
+        currentUser._highestRole = permissionsData?.highest_role || (currentUser.role === "admin" ? "VENUE_OWNER" : null);
         setUser(currentUser);
       } catch (error) {
         window.location.href = createPageUrl("NUPSLogin");
@@ -143,7 +163,7 @@ export default function NUPSOwner() {
               <div className="hidden md:flex items-center gap-2">
                 <Users className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-white truncate max-w-[150px]">{user?.email}</span>
-                <Badge variant="outline" className="border-purple-500/50 text-purple-400 text-xs">Owner</Badge>
+                <Badge variant="outline" className="border-purple-500/50 text-purple-400 text-xs">{user?._highestRole || "Owner"}</Badge>
               </div>
               <Button
                 variant="outline"
@@ -320,7 +340,7 @@ export default function NUPSOwner() {
             <GuestTracking />
           </TabsContent>
           <TabsContent value="timeclock">
-            <TimeClock user={user} role="admin" />
+            <TimeClock user={user} role={user?._highestRole || "VENUE_OWNER"} />
           </TabsContent>
           <TabsContent value="history">
             <TransactionHistory transactions={transactions} showReceipt={true} />
