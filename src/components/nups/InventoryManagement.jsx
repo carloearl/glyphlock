@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Package, AlertTriangle, TrendingDown, Plus, Search } from "lucide-react";
 
-export default function InventoryManagement({ products }) {
+export default function InventoryManagement({ products = [] }) {
   const queryClient = useQueryClient();
   const [showBatchDialog, setShowBatchDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);

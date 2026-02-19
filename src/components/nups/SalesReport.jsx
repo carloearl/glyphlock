@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Package, DollarSign } from "lucide-react";
 
-export default function SalesReport({ transactions, products }) {
+export default function SalesReport({ transactions = [], products = [] }) {
   const totalRevenue = transactions.reduce((sum, t) => sum + (t.total || 0), 0);
   const totalTransactions = transactions.length;
   const averageTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
