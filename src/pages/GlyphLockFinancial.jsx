@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import SEOHead from "@/components/SEOHead";
 import FinancialHero from "@/components/financial/FinancialHero";
 import FinancialModules from "@/components/financial/FinancialModules";
