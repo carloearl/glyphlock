@@ -204,11 +204,11 @@ export default function FinancialCoinHero() {
           <div className="glf-coin">
             <div className="glf-edge" />
             <div className="glf-face glf-face-front">
-              <img src={LOGO_URL} alt="GlyphLock Financial Front" />
+              <img src={GL_COIN_URL} alt="GlyphLock Financial GL Coin" />
               <div className="glf-shine" />
             </div>
             <div className="glf-face glf-face-back">
-              <img src={LOGO_URL} alt="GlyphLock Financial Back" />
+              <img src={SHIELD_LOGO_URL} alt="GlyphLock Financial Shield" />
               <div className="glf-shine" />
             </div>
           </div>

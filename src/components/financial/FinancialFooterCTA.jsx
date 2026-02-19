@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Shield, DollarSign, Zap } from "lucide-react";
 
+const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/5e2e34bf7_b70d54f1-3b3b-418e-ac6f-c4ecad013f91.png";
+const GL_COIN_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/b001ff48e_ChatGPTImageFeb6202606_25_17PM.png";
+
 export default function FinancialFooterCTA() {
   return (
     <section className="py-16 md:py-24" style={{ background: 'transparent' }}>
@@ -27,6 +30,13 @@ export default function FinancialFooterCTA() {
           />
 
           <div className="relative z-10">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <img src={SHIELD_LOGO_URL} alt="GlyphLock Financial" className="w-20 h-20 object-contain drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]" />
+                <img src={GL_COIN_URL} alt="GL Coin" className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full object-cover border-2 border-emerald-500/40 shadow-[0_0_12px_rgba(255,215,0,0.4)]" />
+              </div>
+            </div>
+
             <div className="inline-flex items-center gap-2 mb-4">
               <Shield className="w-4 h-4 text-emerald-400" />
               <span className="text-xs text-emerald-400 uppercase tracking-widest font-bold">Separate Legal Entity</span>

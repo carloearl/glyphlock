@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { DollarSign, Shield, Zap } from "lucide-react";
 import FinancialCoinHero from "./FinancialCoinHero";
 
+const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/5e2e34bf7_b70d54f1-3b3b-418e-ac6f-c4ecad013f91.png";
+
 export default function FinancialHero() {
   return (
     <section className="relative w-full flex flex-col items-center overflow-hidden">
@@ -44,7 +46,7 @@ export default function FinancialHero() {
               transition={{ duration: 0.6 }}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs font-bold uppercase tracking-widest mb-6"
             >
-              <DollarSign className="w-3.5 h-3.5" />
+              <img src={SHIELD_LOGO_URL} alt="GL" className="w-5 h-5 rounded-sm object-contain" />
               GlyphLock Financial LLC
             </motion.div>
 

@@ -4,8 +4,10 @@ import { createPageUrl } from "@/utils";
 import { motion, useInView } from "framer-motion";
 import { 
   CreditCard, Link2, Banknote, Music, ShieldCheck, FileText,
-  ChevronRight, Coins, BarChart3
+  ChevronRight, Coins
 } from "lucide-react";
+
+const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/5e2e34bf7_b70d54f1-3b3b-418e-ac6f-c4ecad013f91.png";
 
 const MODULES = [
   {
@@ -139,6 +141,14 @@ export default function FinancialModules() {
           >
             <Coins className="w-3.5 h-3.5" />
             Financial Technology Suite
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={inView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ delay: 0.05 }}
+            className="flex justify-center mb-4"
+          >
+            <img src={SHIELD_LOGO_URL} alt="GlyphLock Financial" className="w-16 h-16 object-contain drop-shadow-[0_0_16px_rgba(16,185,129,0.3)]" />
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
