@@ -25,7 +25,8 @@ export default function FinancialCoinHero() {
     }
   }, []);
 
-  const LOGO_URL = "https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/ef67c8dbe_GLLogo.png";
+  const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/5e2e34bf7_b70d54f1-3b3b-418e-ac6f-c4ecad013f91.png";
+  const GL_COIN_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/b001ff48e_ChatGPTImageFeb6202606_25_17PM.png";
 
   return (
     <div className="glf-coin-hero">
