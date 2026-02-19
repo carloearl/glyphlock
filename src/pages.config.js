@@ -74,6 +74,7 @@ import FullExport from './pages/FullExport';
 import GlyphBot from './pages/GlyphBot';
 import GlyphBotJunior from './pages/GlyphBotJunior';
 import GlyphBotMixer from './pages/GlyphBotMixer';
+import GlyphLockAudit from './pages/GlyphLockAudit';
 import GlyphLockFinancial from './pages/GlyphLockFinancial';
 import GlyphLockPlayground from './pages/GlyphLockPlayground';
 import GovernanceHub from './pages/GovernanceHub';
@@ -126,7 +127,6 @@ import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
-import GlyphLockAudit from './pages/GlyphLockAudit';
 import __Layout from './Layout.jsx';
 
 
@@ -158,6 +158,7 @@ export const PAGES = {
     "GlyphBot": GlyphBot,
     "GlyphBotJunior": GlyphBotJunior,
     "GlyphBotMixer": GlyphBotMixer,
+    "GlyphLockAudit": GlyphLockAudit,
     "GlyphLockFinancial": GlyphLockFinancial,
     "GlyphLockPlayground": GlyphLockPlayground,
     "GovernanceHub": GovernanceHub,
@@ -210,7 +211,6 @@ export const PAGES = {
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
-    "GlyphLockAudit": GlyphLockAudit,
 }
 
 export const pagesConfig = {

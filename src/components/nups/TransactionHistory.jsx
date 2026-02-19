@@ -5,7 +5,7 @@ import { ShoppingCart, CreditCard, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import ReceiptPrinter from "./ReceiptPrinter";
 
-export default function TransactionHistory({ transactions = [], showReceipt = false }) {
+export default function TransactionHistory({ transactions, showReceipt = false }) {
   return (
     <Card className="bg-gray-900 border-gray-800">
       <CardHeader>

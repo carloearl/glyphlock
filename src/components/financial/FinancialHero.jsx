@@ -1,42 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { Play, DollarSign, Shield, Zap } from "lucide-react";
+import { DollarSign, Shield, Zap } from "lucide-react";
+import FinancialCoinHero from "./FinancialCoinHero";
 
-export default function FinancialHero({ videoUrl }) {
-  const [videoPlaying, setVideoPlaying] = useState(false);
-
+export default function FinancialHero() {
   return (
-    <section className="relative w-full min-h-[80vh] flex items-center overflow-hidden">
-      {/* Background video / fallback gradient */}
-      {videoUrl ? (
-        <div className="absolute inset-0 z-0">
-          <video
-            src={videoUrl}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover"
-            style={{ filter: 'brightness(0.3) saturate(1.2)' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/50 via-transparent to-emerald-950/50" />
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-950 via-black to-green-950" />
-          <div className="absolute inset-0" style={{
-            backgroundImage: `
-              linear-gradient(rgba(16,185,129,0.08) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(16,185,129,0.08) 1px, transparent 1px)
-            `,
-            backgroundSize: '60px 60px'
-          }} />
-        </div>
-      )}
+    <section className="relative w-full flex flex-col items-center overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950 via-black to-green-950" />
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(rgba(16,185,129,0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(16,185,129,0.08) 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px'
+        }} />
+      </div>
 
       {/* Ambient glow orbs */}
       <motion.div className="absolute top-20 left-[20%] w-[400px] h-[400px] rounded-full pointer-events-none z-[1]"
@@ -51,8 +34,8 @@ export default function FinancialHero({ videoUrl }) {
       />
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 max-w-6xl py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="relative z-10 container mx-auto px-4 max-w-6xl py-12 md:py-20">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Text side */}
           <div>
             <motion.div
@@ -131,48 +114,13 @@ export default function FinancialHero({ videoUrl }) {
             </motion.div>
           </div>
 
-          {/* Video / visual side */}
+          {/* 3D Coin Hero — replaces video placeholder */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.3 }}
-            className="relative"
           >
-            {videoUrl ? (
-              <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_60px_rgba(16,185,129,0.2)]">
-                <video
-                  src={videoUrl}
-                  controls={videoPlaying}
-                  autoPlay={false}
-                  muted={!videoPlaying}
-                  playsInline
-                  className="w-full aspect-video object-cover"
-                  onClick={() => setVideoPlaying(true)}
-                />
-                {!videoPlaying && (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/40 hover:bg-black/30 transition-colors"
-                    onClick={() => setVideoPlaying(true)}
-                  >
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="w-20 h-20 rounded-full bg-emerald-500/80 flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.6)]"
-                    >
-                      <Play className="w-8 h-8 text-white ml-1" />
-                    </motion.div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-950/50 to-green-950/50 aspect-video flex items-center justify-center">
-                <div className="text-center p-8">
-                  <DollarSign className="w-16 h-16 text-emerald-500/40 mx-auto mb-4" />
-                  <p className="text-sm text-emerald-400/60">Hero video placeholder</p>
-                  <p className="text-xs text-slate-600 mt-1">Upload your GlyphLock Financial intro video</p>
-                </div>
-              </div>
-            )}
+            <FinancialCoinHero />
           </motion.div>
         </div>
       </div>

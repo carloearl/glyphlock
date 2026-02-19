@@ -1,13 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import SEOHead from "@/components/SEOHead";
 import FinancialHero from "@/components/financial/FinancialHero";
 import FinancialModules from "@/components/financial/FinancialModules";
 import FinancialFooterCTA from "@/components/financial/FinancialFooterCTA";
 
 export default function GlyphLockFinancial() {
-  // Video URL — user can upload their hero video and set it here
-  const [heroVideo] = useState(null);
-
   return (
     <>
       <SEOHead
@@ -18,7 +15,7 @@ export default function GlyphLockFinancial() {
       />
 
       <div className="text-white min-h-screen" style={{ background: 'transparent' }}>
-        <FinancialHero videoUrl={heroVideo} />
+        <FinancialHero />
         <FinancialModules />
         <FinancialFooterCTA />
       </div>
