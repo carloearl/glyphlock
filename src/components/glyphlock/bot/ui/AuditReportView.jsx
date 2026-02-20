@@ -1,7 +1,8 @@
 import React from 'react';
-import { X, Shield, AlertTriangle, CheckCircle, Volume2, Download, Archive, Globe, User, Building2 } from 'lucide-react';
+import { X, Shield, AlertTriangle, CheckCircle, Volume2, Download, Archive, Globe, User, Building2, FileText, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { exportAuditPDF, exportAuditCSV } from './AuditExportUtils';
 
 export default function AuditReportView({ audit, onClose, onPlaySummary, onArchive, onDownload }) {
   if (!audit) return null;
@@ -88,13 +89,31 @@ export default function AuditReportView({ audit, onClose, onPlaySummary, onArchi
           </div>
           <div className="flex items-center gap-2">
             <Button
-              onClick={handleDownload}
+              onClick={() => exportAuditPDF(audit)}
+              size="sm"
+              variant="outline"
+              className="border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20"
+            >
+              <FileText className="w-4 h-4 mr-1" />
+              PDF
+            </Button>
+            <Button
+              onClick={() => exportAuditCSV(audit)}
               size="sm"
               variant="outline"
               className="border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/20"
             >
+              <FileDown className="w-4 h-4 mr-1" />
+              CSV
+            </Button>
+            <Button
+              onClick={handleDownload}
+              size="sm"
+              variant="outline"
+              className="border-slate-500/50 text-slate-300 hover:bg-slate-500/20"
+            >
               <Download className="w-4 h-4 mr-1" />
-              Export
+              JSON
             </Button>
             <Button
               onClick={handleArchive}
