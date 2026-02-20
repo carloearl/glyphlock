@@ -81,12 +81,24 @@ export default function ProductManagement() {
     setShowDialog(true);
   };
 
+  const stripHtml = (str) => (str || '').replace(/<[^>]*>/g, '').replace(/[<>"']/g, '').trim();
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const cleaned = {
+      ...formData,
+      name: stripHtml(formData.name),
+      sku: stripHtml(formData.sku),
+      barcode: stripHtml(formData.barcode),
+      price: Math.max(0, parseFloat(formData.price) || 0),
+      cost: Math.max(0, parseFloat(formData.cost) || 0),
+      stock_quantity: Math.max(0, parseInt(formData.stock_quantity) || 0)
+    };
+    if (cleaned.name.length < 1) return;
     if (editingProduct) {
-      updateProduct.mutate({ id: editingProduct.id, data: formData });
+      updateProduct.mutate({ id: editingProduct.id, data: cleaned });
     } else {
-      createProduct.mutate(formData);
+      createProduct.mutate(cleaned);
     }
   };
 

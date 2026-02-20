@@ -170,7 +170,17 @@ export default function GuestTracking() {
           <form 
             onSubmit={(e) => {
               e.preventDefault();
-              checkInGuest.mutate(guestForm);
+              const stripHtml = (s) => (s || '').replace(/<[^>]*>/g, '').replace(/[<>"']/g, '').trim();
+              const cleaned = {
+                guest_name: stripHtml(guestForm.guest_name),
+                membership_number: stripHtml(guestForm.membership_number),
+                phone: stripHtml(guestForm.phone),
+                email: (guestForm.email || '').trim(),
+                date_of_birth: "2000-01-01"
+              };
+              if (cleaned.guest_name.length < 2) return;
+              if (cleaned.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.email)) return;
+              checkInGuest.mutate(cleaned);
             }} 
             className="space-y-4"
           >

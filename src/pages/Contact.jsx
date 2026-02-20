@@ -63,6 +63,7 @@ export default function Contact() {
   });
 
   const [cooldown, setCooldown] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const sanitize = (str) => str.replace(/<[^>]*>/g, '').replace(/[<>"'&]/g, '').trim();
 
@@ -75,10 +76,17 @@ export default function Contact() {
     const subject = sanitize(formData.subject);
     const message = sanitize(formData.message);
 
-    if (name.length < 2 || name.length > 100) return;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
-    if (subject.length < 2 || subject.length > 200) return;
-    if (message.length < 10 || message.length > 2000) return;
+    const newErrors = {};
+    if (name.length < 2) newErrors.name = "Name must be at least 2 characters.";
+    else if (name.length > 100) newErrors.name = "Name must be under 100 characters.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Enter a valid email address.";
+    if (subject.length < 2) newErrors.subject = "Subject is required.";
+    else if (subject.length > 200) newErrors.subject = "Subject must be under 200 characters.";
+    if (message.length < 10) newErrors.message = "Message must be at least 10 characters.";
+    else if (message.length > 2000) newErrors.message = "Message must be under 2,000 characters.";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
     sendEmail.mutate({ name, email, subject, message });
     setCooldown(true);
@@ -180,8 +188,10 @@ export default function Contact() {
                         placeholder="Your Name"
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        maxLength={100}
                         className="w-full"
                       />
+                      {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-white/80 text-xs uppercase tracking-wider font-bold">Contact Point</Label>
@@ -192,6 +202,7 @@ export default function Contact() {
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         className="w-full"
                       />
+                      {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
                     </div>
                   </div>
 
@@ -202,17 +213,24 @@ export default function Contact() {
                       placeholder="Consultation / Partnership / Support"
                       value={formData.subject}
                       onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                      maxLength={200}
                       className="w-full"
                     />
+                    {errors.subject && <p className="text-red-400 text-xs mt-1">{errors.subject}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="message" className="text-white/80 text-xs uppercase tracking-wider font-bold">Transmission</Label>
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor="message" className="text-white/80 text-xs uppercase tracking-wider font-bold">Transmission</Label>
+                      <span className="text-xs text-slate-500">{formData.message.length}/2000</span>
+                    </div>
                     <Textarea
                       id="message"
                       required
                       value={formData.message}
-                      onChange={(e) => setFormData({...formData, message: e.target.value})}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 2000) setFormData({...formData, message: e.target.value});
+                      }}
                       rows={5}
                       className="w-full bg-slate-900 border-2 border-slate-800 text-white focus:border-[#3B82F6]/60 resize-none rounded-lg px-4 py-3 placeholder:text-slate-500"
                       style={{
@@ -220,6 +238,7 @@ export default function Contact() {
                       }}
                       placeholder="Describe your creative infrastructure needs or partnership vision..."
                     />
+                    {errors.message && <p className="text-red-400 text-xs mt-1">{errors.message}</p>}
                   </div>
 
                   <GlyphButton type="submit" variant="mixed" className="w-full" disabled={sendEmail.isPending || cooldown}>

@@ -65,6 +65,8 @@ export default function EntertainerContract({ onContractSigned }) {
     "I understand the termination policies"
   ];
 
+  const stripHtml = (str) => (str || '').replace(/<[^>]*>/g, '').replace(/[<>"']/g, '').trim();
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!agreed) {
@@ -75,7 +77,23 @@ export default function EntertainerContract({ onContractSigned }) {
       alert('Please provide your digital signature');
       return;
     }
-    createEntertainer.mutate(entertainerData);
+    const cleaned = {
+      stage_name: stripHtml(entertainerData.stage_name),
+      legal_name: stripHtml(entertainerData.legal_name),
+      phone: stripHtml(entertainerData.phone),
+      email: (entertainerData.email || '').trim(),
+      emergency_contact: {
+        name: stripHtml(entertainerData.emergency_contact.name),
+        phone: stripHtml(entertainerData.emergency_contact.phone),
+        relationship: stripHtml(entertainerData.emergency_contact.relationship)
+      },
+      commission_rate: entertainerData.commission_rate
+    };
+    if (cleaned.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    createEntertainer.mutate(cleaned);
   };
 
   return (

@@ -65,12 +65,23 @@ export default function CustomerManagement() {
     }
   });
 
+  const stripHtml = (str) => (str || '').replace(/<[^>]*>/g, '').replace(/[<>"']/g, '').trim();
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const cleaned = {
+      full_name: stripHtml(formData.full_name),
+      email: (formData.email || '').trim(),
+      phone: stripHtml(formData.phone),
+      birthday: formData.birthday,
+      notes: stripHtml(formData.notes).slice(0, 1000)
+    };
+    if (cleaned.full_name.length < 2) return;
+    if (cleaned.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.email)) return;
     if (selectedCustomer) {
-      updateCustomer.mutate({ id: selectedCustomer.id, data: formData });
+      updateCustomer.mutate({ id: selectedCustomer.id, data: cleaned });
     } else {
-      createCustomer.mutate(formData);
+      createCustomer.mutate(cleaned);
     }
   };
 
