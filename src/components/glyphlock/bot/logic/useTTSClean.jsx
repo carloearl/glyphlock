@@ -49,14 +49,28 @@ export default function useTTSClean(defaultSettings = {}) {
 
   const stop = useCallback(() => {
     console.log('GLYPH VOICE: stop requested');
+    playingRef.current = false;
     if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      try {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.onended = null;
+        audioRef.current.onerror = null;
+        // Revoke blob URL if it exists
+        if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {
+          URL.revokeObjectURL(audioRef.current.src);
+        }
+      } catch (e) {
+        console.warn('GLYPH VOICE: stop cleanup error', e);
+      }
       audioRef.current = null;
+    }
+    // Also kill any browser speechSynthesis (from GlyphBotJr or other components)
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
     }
     setIsSpeaking(false);
     setIsLoading(false);
-    playingRef.current = false;
   }, []);
 
   const playingRef = useRef(false);
