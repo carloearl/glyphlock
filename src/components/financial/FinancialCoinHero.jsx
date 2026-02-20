@@ -7,7 +7,7 @@ export default function FinancialCoinHero() {
     if (!starsRef.current) return;
     const container = starsRef.current;
     container.innerHTML = "";
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 60; i++) {
       const star = document.createElement("div");
       const size = Math.random() * 2 + 0.5;
       Object.assign(star.style, {
@@ -204,11 +204,11 @@ export default function FinancialCoinHero() {
           <div className="glf-coin">
             <div className="glf-edge" />
             <div className="glf-face glf-face-front">
-              <img src={GL_COIN_URL} alt="GlyphLock Financial GL Coin" />
+              <img src={GL_COIN_URL} alt="GlyphLock Financial GL Coin" loading="eager" fetchpriority="high" decoding="async" width={340} height={340} />
               <div className="glf-shine" />
             </div>
             <div className="glf-face glf-face-back">
-              <img src={SHIELD_LOGO_URL} alt="GlyphLock Financial Shield" />
+              <img src={SHIELD_LOGO_URL} alt="GlyphLock Financial Shield" loading="lazy" decoding="async" width={340} height={340} />
               <div className="glf-shine" />
             </div>
           </div>

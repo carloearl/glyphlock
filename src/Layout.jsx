@@ -404,7 +404,10 @@ export default function Layout({ children, currentPageName }) {
             src="https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/ef67c8dbe_GLLogo.png"
             alt="GlyphLock"
             className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
-            loading="eager"
+            loading="lazy"
+            decoding="async"
+            width={64}
+            height={64}
             draggable={false}
           />
         </div>

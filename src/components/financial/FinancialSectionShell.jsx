@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 
 export default function FinancialSectionShell({ children, orbSeed = 0 }) {
   const orbs = [
@@ -22,23 +21,28 @@ export default function FinancialSectionShell({ children, orbSeed = 0 }) {
         backgroundSize: '60px 60px'
       }} />
 
-      {/* Gold grid pulse */}
-      <motion.div
+      {/* Gold grid pulse — CSS-only */}
+      <div
         className="absolute inset-0 pointer-events-none"
-        animate={{ opacity: [0.02, 0.07, 0.02] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: orbSeed * 0.4 }}
         style={{
           backgroundImage: `
             linear-gradient(rgba(234,179,8,0.04) 1px, transparent 1px),
             linear-gradient(90deg, rgba(234,179,8,0.04) 1px, transparent 1px)
           `,
-          backgroundSize: '60px 60px'
+          backgroundSize: '60px 60px',
+          animation: `fin-grid-pulse ${5 + orbSeed * 0.4}s ease-in-out infinite`,
         }}
       />
+      <style>{`
+        @keyframes fin-grid-pulse {
+          0%, 100% { opacity: 0.02; }
+          50% { opacity: 0.07; }
+        }
+      `}</style>
 
-      {/* Glow orbs */}
+      {/* Glow orbs — CSS-only, no JS animation on load */}
       {orbs.map((o, i) => (
-        <motion.div
+        <div
           key={i}
           className="absolute rounded-full pointer-events-none"
           style={{
@@ -48,11 +52,18 @@ export default function FinancialSectionShell({ children, orbSeed = 0 }) {
             background: `radial-gradient(circle, ${o.color}, transparent 70%)`,
             filter: 'blur(70px)',
             transform: 'translate(-50%, -50%)',
+            opacity: 0.12,
+            willChange: 'opacity',
+            animation: `fin-orb-pulse ${o.dur}s ease-in-out infinite ${o.delay + orbSeed * 0.3}s`,
           }}
-          animate={{ scale: [1, 1.25, 1], opacity: [0.06, 0.2, 0.06] }}
-          transition={{ duration: o.dur, repeat: Infinity, ease: "easeInOut", delay: o.delay + orbSeed * 0.3 }}
         />
       ))}
+      <style>{`
+        @keyframes fin-orb-pulse {
+          0%, 100% { opacity: 0.06; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.25); }
+        }
+      `}</style>
 
       {/* Content — tighter padding */}
       <div className="relative z-10 py-10 md:py-14">

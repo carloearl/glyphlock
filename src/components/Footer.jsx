@@ -33,6 +33,10 @@ export default function Footer() {
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
                 alt="GlyphLock"
                 className="h-10 w-auto"
+                loading="lazy"
+                decoding="async"
+                width={40}
+                height={40}
               />
               <span className="text-2xl font-black tracking-tighter font-space text-white">
                 GLYPH<span className="text-[#00E4FF]">LOCK</span>
@@ -277,7 +281,7 @@ export default function Footer() {
                 className="group flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all duration-300"
               >
                 <div className="w-14 h-14 md:w-20 md:h-20 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity group-hover:scale-105 duration-300">
-                  <img src={cert.image} alt={cert.name} className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]" />
+                  <img src={cert.image} alt={cert.name} className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]" loading="lazy" decoding="async" width={80} height={80} />
                 </div>
                 <div className="text-center">
                   <p className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors">{cert.name}</p>
