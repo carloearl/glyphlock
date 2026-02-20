@@ -5,8 +5,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Volume2, Sparkles, Zap, Play } from "lucide-react";
-import { TTS_PROVIDERS, getVoicesForProvider, generateAudio } from "@/components/utils/ttsEngine";
+import { Volume2, Sparkles, Zap, Play, Square } from "lucide-react";
+import { TTS_PROVIDERS, getVoicesForProvider } from "@/components/utils/ttsEngine";
 import { toast } from "sonner";
 
 export default function VoiceSettingsPanel({ settings, onChange }) {
@@ -44,39 +44,46 @@ export default function VoiceSettingsPanel({ settings, onChange }) {
     updateSetting("voice", newVoice);
   }
 
-  async function handlePreview() {
-    // Stop any currently playing audio before starting new one
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
+  function stopPreview() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setPreviewPlaying(false);
+  }
+
+  function handlePreview() {
+    if (!('speechSynthesis' in window)) {
+      toast.error("Speech synthesis not supported in this browser");
+      return;
     }
 
+    // Stop any currently playing audio
+    window.speechSynthesis.cancel();
+
     setPreviewPlaying(true);
-    try {
-      const audioUrl = await generateAudio(
-        provider,
-        voice,
-        "Hello! This is a preview of my voice. How do I sound?",
-        settings
-      );
-      
-      if (audioUrl) {
-        const audio = new Audio(audioUrl);
-        audioRef.current = audio;
-        audio.playbackRate = settings.speed || 1.0;
-        audio.onended = () => {
-          setPreviewPlaying(false);
-          audioRef.current = null;
-        };
-        await audio.play();
-      }
-    } catch (error) {
-      console.error("Preview error:", error);
-      toast.error("Failed to preview voice");
-      setPreviewPlaying(false);
-      audioRef.current = null;
+
+    const utterance = new SpeechSynthesisUtterance(
+      "Hello! This is a preview of my voice. How do I sound?"
+    );
+
+    // Match the selected voice by name
+    const availableVoices = window.speechSynthesis.getVoices();
+    const matchedVoice = availableVoices.find(v => v.name === voice);
+    if (matchedVoice) {
+      utterance.voice = matchedVoice;
     }
+
+    utterance.rate = settings.speed || 1.0;
+    utterance.pitch = settings.pitch || 1.0;
+    utterance.volume = settings.volume || 1.0;
+
+    utterance.onend = () => setPreviewPlaying(false);
+    utterance.onerror = () => {
+      setPreviewPlaying(false);
+      toast.error("Voice preview failed");
+    };
+
+    window.speechSynthesis.speak(utterance);
   }
 
   const providerConfig = TTS_PROVIDERS[provider] || {};
@@ -91,15 +98,27 @@ export default function VoiceSettingsPanel({ settings, onChange }) {
             Voice Settings
           </h2>
         </div>
-        <Button
-          onClick={handlePreview}
-          disabled={previewPlaying}
-          className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white"
-          size="sm"
-        >
-          <Play className="w-4 h-4 mr-1" />
-          Preview
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handlePreview}
+            disabled={previewPlaying}
+            className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white"
+            size="sm"
+          >
+            <Play className="w-4 h-4 mr-1" />
+            {previewPlaying ? "Playing..." : "Preview"}
+          </Button>
+          {previewPlaying && (
+            <Button
+              onClick={stopPreview}
+              variant="outline"
+              size="sm"
+              className="border-rose-500/50 text-rose-300 hover:bg-rose-500/20"
+            >
+              <Square className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Provider Selection */}
