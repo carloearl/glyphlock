@@ -149,14 +149,14 @@ export default function Home() {
   return (
     <>
       <SEOHead 
-        title="Quantum-Resistant Encryption Platform | GlyphLock Security LLC"
-        description="GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework."
-        keywords="quantum-resistant encryption, post-quantum cryptography, AI cybersecurity, enterprise security platform, visual cryptography, secure QR codes, blockchain security, AI governance framework, Master Covenant, GlyphLock Security, threat detection AI, zero-trust architecture"
+        title="Secure Digital Ecosystems Platform | GlyphLock Security LLC"
+        description="GlyphLock Security LLC — empowering the future of secure digital ecosystems with cutting-edge AI, quantum-resistant architecture, and intelligent operational frameworks. Enterprise security, AI governance, visual cryptography, secure QR infrastructure, and venue management."
+        keywords="GlyphLock Security, enterprise security platform, AI governance, quantum-resistant encryption, post-quantum cryptography, secure QR codes, visual cryptography, blockchain security, venue management POS, AI-powered threat detection, zero-trust architecture, Master Covenant, digital ecosystem security"
         url="/"
       />
       
       {/* SEO H1 - Hidden but crawlable */}
-      <h1 className="sr-only">GlyphLock Security — Enterprise Quantum-Resistant Cybersecurity Architecture</h1>
+      <h1 className="sr-only">GlyphLock Security — Empowering Secure Digital Ecosystems with AI, Quantum-Resistant Architecture, and Intelligent Operational Frameworks</h1>
 
       <main className="w-full relative" style={{ background: 'transparent' }}>
         
