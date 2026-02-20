@@ -1,13 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import FinancialCoinHero from "./FinancialCoinHero";
+import FinancialCTA from "./FinancialCTA";
 
 const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/5e2e34bf7_b70d54f1-3b3b-418e-ac6f-c4ecad013f91.png";
-
-const NEU_BTN_PRIMARY = "inline-flex items-center justify-center px-10 py-4 text-sm font-bold tracking-[3px] uppercase text-white bg-[#0c2216] border border-yellow-600/40 rounded-lg shadow-[4px_4px_12px_rgba(0,0,0,0.6),_-3px_-3px_10px_rgba(16,185,129,0.08)] hover:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.5),_inset_-2px_-2px_6px_rgba(16,185,129,0.06)] hover:bg-[#0e2a1a] transition-all duration-200 cursor-pointer";
-const NEU_BTN_OUTLINE = "inline-flex items-center justify-center px-10 py-4 text-sm font-bold tracking-[2px] uppercase text-yellow-500/90 bg-transparent border border-yellow-600/30 rounded-lg shadow-[4px_4px_12px_rgba(0,0,0,0.5),_-3px_-3px_10px_rgba(16,185,129,0.04)] hover:border-yellow-500/50 transition-all duration-200 cursor-pointer";
 
 export default function FinancialHero() {
   return (
@@ -22,22 +18,41 @@ export default function FinancialHero() {
           `,
           backgroundSize: '60px 60px'
         }} />
+        {/* Animated grid pulse overlay */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ opacity: [0.03, 0.08, 0.03] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(234,179,8,0.06) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(234,179,8,0.06) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px'
+          }}
+        />
       </div>
 
-      {/* Ambient glow orbs */}
-      <motion.div className="absolute top-20 left-[20%] w-[400px] h-[400px] rounded-full pointer-events-none z-[1]"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.3), transparent 70%)', filter: 'blur(80px)' }}
+      {/* Ambient glow orbs — more alive */}
+      <motion.div className="absolute top-20 left-[20%] w-[500px] h-[500px] rounded-full pointer-events-none z-[1]"
+        animate={{ scale: [1, 1.3, 1], opacity: [0.12, 0.3, 0.12] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.35), transparent 70%)', filter: 'blur(80px)' }}
       />
-      <motion.div className="absolute bottom-20 right-[15%] w-[350px] h-[350px] rounded-full pointer-events-none z-[1]"
-        animate={{ scale: [1.1, 1, 1.1], opacity: [0.12, 0.22, 0.12] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        style={{ background: 'radial-gradient(circle, rgba(234,179,8,0.25), transparent 70%)', filter: 'blur(80px)' }}
+      <motion.div className="absolute bottom-20 right-[15%] w-[450px] h-[450px] rounded-full pointer-events-none z-[1]"
+        animate={{ scale: [1.1, 1, 1.1], opacity: [0.1, 0.28, 0.1] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+        style={{ background: 'radial-gradient(circle, rgba(234,179,8,0.3), transparent 70%)', filter: 'blur(80px)' }}
+      />
+      {/* Gold accent orb */}
+      <motion.div className="absolute top-[40%] right-[30%] w-[300px] h-[300px] rounded-full pointer-events-none z-[1]"
+        animate={{ scale: [0.9, 1.15, 0.9], opacity: [0.05, 0.18, 0.05] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        style={{ background: 'radial-gradient(circle, rgba(234,179,8,0.2), transparent 70%)', filter: 'blur(60px)' }}
       />
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 max-w-6xl py-12 md:py-20">
+      <div className="relative z-10 container mx-auto px-4 max-w-6xl py-12 md:py-24">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Text side */}
           <div>
@@ -57,7 +72,7 @@ export default function FinancialHero() {
               </span>
             </motion.div>
 
-            {/* MAIN TITLE — Brand dominant, anchored by FINANCIAL */}
+            {/* MAIN TITLE */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -78,7 +93,7 @@ export default function FinancialHero() {
               </span>
             </motion.h1>
 
-            {/* SUBTITLE — Institutional authority, two lines max */}
+            {/* SUBTITLE */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -99,12 +114,12 @@ export default function FinancialHero() {
               </p>
             </motion.div>
 
-            {/* COMPLIANCE TAG STACK — Standards, not features */}
+            {/* COMPLIANCE TAG STACK */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex items-center gap-4 mb-12"
+              className="flex items-center gap-4 mb-14"
             >
               <span
                 className="text-[10px] uppercase font-bold text-slate-400"
@@ -121,23 +136,23 @@ export default function FinancialHero() {
               </span>
             </motion.div>
 
-            {/* CTA BUTTONS — Neumorphic, disciplined */}
+            {/* CTA BUTTONS — Gold glow, green shimmer, pop-out */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex flex-wrap gap-4"
+              className="flex flex-wrap gap-5"
             >
-              <Link to={createPageUrl("Consultation")} className={NEU_BTN_PRIMARY} style={{ fontFamily: "'Cinzel', serif" }}>
+              <FinancialCTA to="Consultation" variant="primary">
                 Initiate Qualification
-              </Link>
-              <Link to={createPageUrl("SecurityDocs")} className={NEU_BTN_OUTLINE} style={{ fontFamily: "'Cinzel', serif" }}>
+              </FinancialCTA>
+              <FinancialCTA to="SecurityDocs" variant="outline">
                 View Framework Documentation
-              </Link>
+              </FinancialCTA>
             </motion.div>
           </div>
 
-          {/* 3D Coin Hero — untouched */}
+          {/* 3D Coin Hero */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
