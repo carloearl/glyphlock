@@ -8,6 +8,12 @@ const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/obj
 export default function FinancialHero() {
   return (
     <section className="relative w-full flex flex-col items-center overflow-hidden">
+      <style>{`
+        @keyframes fin-title-gradient {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+      `}</style>
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-950 via-black to-green-950" />
