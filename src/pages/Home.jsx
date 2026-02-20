@@ -108,29 +108,29 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-gradient-to-br from-blue-950 via-indigo-950 to-blue-900">
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, #172554, #1e1b4b, #1e3a5f)' }}>
         <div className="text-center space-y-6">
           <div className="relative w-20 h-20 mx-auto">
             {/* Outer ring */}
             <motion.div 
-              className="absolute inset-0 border-[3px] border-blue-500/20 border-t-blue-400 rounded-full"
+              className="absolute inset-0 rounded-full"
               animate={{ rotate: 360 }}
               transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-              style={{ boxShadow: '0 0 20px rgba(59,130,246,0.5)' }}
+              style={{ boxShadow: '0 0 20px rgba(59,130,246,0.5)', border: '3px solid rgba(59,130,246,0.2)', borderTopColor: 'rgba(96,165,250,1)' }}
             />
             {/* Middle ring */}
             <motion.div 
-              className="absolute inset-2 border-[3px] border-indigo-500/20 border-t-indigo-400 rounded-full"
+              className="absolute inset-2 rounded-full"
               animate={{ rotate: -360 }}
               transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
-              style={{ boxShadow: '0 0 15px rgba(99,102,241,0.5)' }}
+              style={{ boxShadow: '0 0 15px rgba(99,102,241,0.5)', border: '3px solid rgba(99,102,241,0.2)', borderTopColor: 'rgba(129,140,248,1)' }}
             />
             {/* Inner pulse */}
             <motion.div 
-              className="absolute inset-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full"
+              className="absolute inset-6 rounded-full"
               animate={{ scale: [0.8, 1, 0.8], opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              style={{ boxShadow: '0 0 25px rgba(59,130,246,0.8)' }}
+              style={{ boxShadow: '0 0 25px rgba(59,130,246,0.8)', background: 'linear-gradient(to bottom right, #3b82f6, #4f46e5)' }}
             />
           </div>
           <motion.h2 
@@ -158,7 +158,7 @@ export default function Home() {
       {/* SEO H1 - Hidden but crawlable */}
       <h1 className="sr-only">GlyphLock Security — Empowering Secure Digital Ecosystems with AI, Quantum-Resistant Architecture, and Intelligent Operational Frameworks</h1>
 
-      <main className="w-full relative" style={{ background: 'transparent' }}>
+      <main className="w-full relative" style={{ background: 'transparent', position: 'relative' }}>
         
         {/* Bootstrap Quote + Hero Section */}
         <section className="w-full">
