@@ -43,6 +43,7 @@ export default function GlyphBotPage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isProcessingAudit, setIsProcessingAudit] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState('none');
+  const [showLiveFeed, setShowLiveFeed] = useState(false);
 
   const [modes, setModes] = useState({
     voice: false,
@@ -604,6 +605,9 @@ export default function GlyphBotPage() {
         console.warn('[TTS Stop]', e);
       }
     }
+    if (key === 'live') {
+      setShowLiveFeed(prev => !prev);
+    }
     setModes(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -894,6 +898,17 @@ export default function GlyphBotPage() {
                 </div>
               )}
             </div>
+
+            {/* Live Feed Panel */}
+            {showLiveFeed && (
+              <UI.LiveFeedPanel
+                isOpen={showLiveFeed}
+                onClose={() => {
+                  setShowLiveFeed(false);
+                  setModes(prev => ({ ...prev, live: false }));
+                }}
+              />
+            )}
 
             {/* Chat History Panel */}
             {showHistoryPanel && currentUser && (
