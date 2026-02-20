@@ -462,8 +462,8 @@ export default function GlyphBotPage() {
       // Update audit status
       await updateAudit(auditId, { status: 'IN_PROGRESS' });
 
-      // Build channel-specific audit prompt
-      const auditPrompt = await runAudit(auditId, auditData, glyphbotClient, messages);
+      // Build channel-specific audit prompt using web search
+      const auditPrompt = await runAudit(auditId, auditData);
       
       if (!auditPrompt) {
         throw new Error('Failed to build audit prompt');
