@@ -297,7 +297,7 @@ export default function Footer() {
 
         {/* Enterprise Security Capabilities — SEO Long-tail Section */}
         <div className="border-t border-white/10 pt-8 mb-10">
-          <h3 className="text-xs font-bold text-white/70 uppercase tracking-[3px] text-center mb-4">Enterprise Security Capabilities</h3>
+          <h3 className="text-xs font-bold text-white/90 uppercase tracking-[3px] text-center mb-4">Enterprise Security Capabilities</h3>
           <div className="max-w-3xl mx-auto space-y-3 text-xs text-slate-300 leading-relaxed text-center">
             <p>
               GlyphLock Security delivers quantum-resistant security architecture designed for enterprises operating in high-scrutiny environments. The platform combines an AI-powered threat detection engine with post-quantum cryptographic primitives aligned with NIST post-quantum standards, providing structured cybersecurity defense across distributed infrastructure.
