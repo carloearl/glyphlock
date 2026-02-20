@@ -1,10 +1,11 @@
+
 export { default as ChatMessage } from './ChatMessage';
 export { default as ChatInput } from './ChatInput';
 export { default as ControlBar } from './ControlBar';
 export { default as ChatHistoryPanel } from './ChatHistoryPanel';
 export { default as AuditPanel } from './AuditPanel';
 export { default as AuditHistoryPanel } from './AuditHistoryPanel';
-export { default as AuditReportView } from './AuditReportView';
+export { default as AuditMetricsDashboard } from './AuditMetricsDashboard';
 export { default as ProviderStatusPanel } from './ProviderStatusPanel';
 export { default as ProviderDebugPanel } from './ProviderDebugPanel';
 export { default as GlyphBotJr } from './GlyphBotJr';
