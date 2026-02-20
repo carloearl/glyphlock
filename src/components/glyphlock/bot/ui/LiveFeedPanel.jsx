@@ -252,14 +252,31 @@ export default function LiveFeedPanel({ isOpen, onClose }) {
               {intelligence?.content ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border border-blue-500/40 bg-blue-500/15 text-blue-400">
-                      AI Analysis
+                    <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
+                      Live Intelligence
                     </span>
                     <span className="text-[9px] text-slate-500">{intelligence.source}</span>
                   </div>
                   <div className="text-[10px] text-slate-300 leading-relaxed whitespace-pre-wrap">
                     {intelligence.content}
                   </div>
+                  {intelligence.citations?.length > 0 && (
+                    <div className="pt-1.5 border-t border-white/5 space-y-1">
+                      <span className="text-[8px] text-slate-500 uppercase tracking-wider font-bold">Sources</span>
+                      {intelligence.citations.map((url, i) => (
+                        <a
+                          key={i}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-[9px] text-cyan-400 hover:text-cyan-300 truncate"
+                        >
+                          <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                          <span className="truncate">{url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -303,7 +320,7 @@ export default function LiveFeedPanel({ isOpen, onClose }) {
       {/* Footer */}
       <div className="px-3 py-1.5 border-t border-white/5 bg-white/[0.01]">
         <div className="flex items-center justify-between text-[8px] text-slate-600">
-          <span>Sources: NIST NVD · RSS · OpenAI</span>
+          <span>Sources: NIST NVD · RSS · Perplexity</span>
           <span>Cache: 5m news / 15m intel</span>
         </div>
       </div>
