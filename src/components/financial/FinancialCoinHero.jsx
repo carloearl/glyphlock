@@ -54,42 +54,41 @@ export default function FinancialCoinHero() {
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           padding: 60px 16px 32px;
           overflow: hidden; font-family: 'Cinzel', serif;
-          background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,40,20,0.6) 0%, transparent 70%);
+          background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,30,15,0.4) 0%, transparent 70%);
         }
 
         .glf-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 
-        /* ====== MASSIVE NEON GREEN AURA ====== */
+        /* ====== SUBTLE GREEN AMBIENT AURA ====== */
         .glf-neon-aura {
-          position: absolute; width: 700px; height: 700px; border-radius: 50%;
+          position: absolute; width: 600px; height: 600px; border-radius: 50%;
           background: radial-gradient(circle,
-            rgba(0,255,128,0.25) 0%,
-            rgba(0,255,100,0.12) 25%,
-            rgba(0,200,80,0.06) 45%,
-            transparent 65%
+            rgba(16,185,129,0.12) 0%,
+            rgba(16,185,129,0.05) 30%,
+            transparent 60%
           );
-          filter: blur(30px);
-          animation: glf-auraPulse 3s ease-in-out infinite;
+          filter: blur(60px);
+          animation: glf-auraPulse 5s ease-in-out infinite;
           pointer-events: none; z-index: 1;
         }
         .glf-neon-aura-2 {
-          position: absolute; width: 500px; height: 500px; border-radius: 50%;
+          position: absolute; width: 400px; height: 400px; border-radius: 50%;
           background: radial-gradient(circle,
-            rgba(0,255,100,0.35) 0%,
-            rgba(16,255,80,0.15) 35%,
+            rgba(16,185,129,0.15) 0%,
+            rgba(16,185,129,0.06) 35%,
             transparent 60%
           );
-          filter: blur(15px);
-          animation: glf-auraPulse2 2.5s ease-in-out infinite;
+          filter: blur(40px);
+          animation: glf-auraPulse2 4s ease-in-out infinite;
           pointer-events: none; z-index: 1;
         }
         @keyframes glf-auraPulse {
-          0%, 100% { transform: scale(0.9); opacity: 0.6; }
-          50% { transform: scale(1.15); opacity: 1; }
+          0%, 100% { transform: scale(0.95); opacity: 0.5; }
+          50% { transform: scale(1.05); opacity: 0.8; }
         }
         @keyframes glf-auraPulse2 {
-          0%, 100% { transform: scale(1); opacity: 0.7; }
-          50% { transform: scale(1.1); opacity: 1; }
+          0%, 100% { transform: scale(1); opacity: 0.5; }
+          50% { transform: scale(1.06); opacity: 0.8; }
         }
 
         /* ====== STAGE ====== */
@@ -99,23 +98,22 @@ export default function FinancialCoinHero() {
           z-index: 2; perspective: 1400px; transform-style: preserve-3d;
         }
 
-        /* ====== ORBIT TRACKS — glowing rings ====== */
+        /* ====== ORBIT TRACKS — subtle rings ====== */
         .glf-ring { position: absolute; border-radius: 50%; pointer-events: none; }
         .glf-ring-1 {
-          inset: 10px; border: 1.5px solid rgba(0,255,128,0.25);
-          box-shadow: 0 0 12px rgba(0,255,128,0.15), inset 0 0 12px rgba(0,255,128,0.08);
+          inset: 10px; border: 1px solid rgba(16,185,129,0.12);
+          box-shadow: 0 0 8px rgba(16,185,129,0.06);
           animation: glf-rCW 28s linear infinite;
           transform: rotateX(75deg);
         }
         .glf-ring-2 {
-          inset: 40px; border: 1px solid rgba(255,215,0,0.2);
-          box-shadow: 0 0 8px rgba(255,215,0,0.12), inset 0 0 8px rgba(255,215,0,0.06);
+          inset: 40px; border: 1px solid rgba(218,165,32,0.1);
+          box-shadow: 0 0 6px rgba(218,165,32,0.05);
           animation: glf-rCCW 22s linear infinite;
           transform: rotateX(75deg) rotateZ(60deg);
         }
         .glf-ring-3 {
-          inset: 70px; border: 1px solid rgba(0,255,128,0.15);
-          box-shadow: 0 0 6px rgba(0,255,128,0.1);
+          inset: 70px; border: 1px solid rgba(16,185,129,0.08);
           animation: glf-rCW 32s linear infinite;
           transform: rotateX(75deg) rotateZ(120deg);
         }
@@ -141,22 +139,21 @@ export default function FinancialCoinHero() {
         @keyframes glf-btcOrbit { to { transform: rotate(360deg); } }
         .glf-btc {
           position: absolute; top: 18px; left: 50%;
-          width: 52px; height: 52px; border-radius: 50%;
+          width: 44px; height: 44px; border-radius: 50%;
           transform: translateX(-50%);
           background: radial-gradient(circle at 30% 25%, #fff8dc 0%, #FFD700 30%, #DAA520 60%, #8B6914 100%);
           display: flex; align-items: center; justify-content: center;
-          font-size: 26px; font-weight: 900; color: #3a2000;
+          font-size: 22px; font-weight: 900; color: #3a2000;
           box-shadow:
-            inset -4px -4px 8px rgba(0,0,0,0.3),
-            inset 4px 4px 8px rgba(255,255,255,0.3),
-            0 0 25px rgba(255,215,0,1),
-            0 0 60px rgba(255,215,0,0.7),
-            0 0 100px rgba(255,215,0,0.3);
-          animation: glf-btcPulse 2s ease-in-out infinite alternate;
+            inset -3px -3px 6px rgba(0,0,0,0.3),
+            inset 3px 3px 6px rgba(255,255,255,0.2),
+            0 0 15px rgba(255,215,0,0.6),
+            0 0 40px rgba(255,215,0,0.3);
+          animation: glf-btcPulse 3s ease-in-out infinite alternate;
         }
         @keyframes glf-btcPulse {
-          from { box-shadow: inset -4px -4px 8px rgba(0,0,0,0.3), inset 4px 4px 8px rgba(255,255,255,0.3), 0 0 25px rgba(255,215,0,1), 0 0 60px rgba(255,215,0,0.7); }
-          to   { box-shadow: inset -4px -4px 8px rgba(0,0,0,0.3), inset 4px 4px 8px rgba(255,255,255,0.3), 0 0 35px rgba(255,215,0,1), 0 0 90px rgba(255,215,0,1), 0 0 150px rgba(255,215,0,0.4); }
+          from { box-shadow: inset -3px -3px 6px rgba(0,0,0,0.3), inset 3px 3px 6px rgba(255,255,255,0.2), 0 0 15px rgba(255,215,0,0.6), 0 0 40px rgba(255,215,0,0.3); }
+          to   { box-shadow: inset -3px -3px 6px rgba(0,0,0,0.3), inset 3px 3px 6px rgba(255,255,255,0.2), 0 0 20px rgba(255,215,0,0.8), 0 0 50px rgba(255,215,0,0.4); }
         }
 
 
@@ -168,22 +165,21 @@ export default function FinancialCoinHero() {
         }
         .glf-scene:active { cursor: grabbing; }
 
-        /* HEAVY green glow BEHIND the coin */
+        /* Soft green glow behind coin */
         .glf-coin-neon {
-          position: absolute; inset: -50px; border-radius: 50%;
+          position: absolute; inset: -40px; border-radius: 50%;
           background: radial-gradient(circle,
-            rgba(0,255,120,0.4) 0%,
-            rgba(0,255,100,0.2) 30%,
-            rgba(0,200,80,0.08) 55%,
-            transparent 70%
+            rgba(16,185,129,0.18) 0%,
+            rgba(16,185,129,0.08) 35%,
+            transparent 65%
           );
-          filter: blur(12px);
+          filter: blur(20px);
           z-index: 1; pointer-events: none;
-          animation: glf-coinNeon 2.5s ease-in-out infinite;
+          animation: glf-coinNeon 4s ease-in-out infinite;
         }
         @keyframes glf-coinNeon {
-          0%, 100% { transform: scale(0.9); opacity: 0.7; }
-          50% { transform: scale(1.12); opacity: 1; }
+          0%, 100% { transform: scale(0.95); opacity: 0.6; }
+          50% { transform: scale(1.05); opacity: 0.9; }
         }
 
         .glf-coin {
@@ -225,22 +221,21 @@ export default function FinancialCoinHero() {
         .glf-face-back  { transform: rotateY(180deg) translateZ(10px); position: relative; }
         .glf-face img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; position: relative; z-index: 2; }
 
-        /* ====== HEAVY NEON GREEN BEHIND SHIELD ====== */
+        /* Refined green glow behind shield */
         .glf-shield-neon {
-          position: absolute; inset: -40px; border-radius: 50%; z-index: 1;
+          position: absolute; inset: -30px; border-radius: 50%; z-index: 1;
           pointer-events: none;
           background: radial-gradient(circle,
-            rgba(0,255,100,0.6) 0%,
-            rgba(0,255,80,0.35) 30%,
-            rgba(0,200,60,0.15) 55%,
-            transparent 70%
+            rgba(16,185,129,0.3) 0%,
+            rgba(16,185,129,0.12) 35%,
+            transparent 65%
           );
-          filter: blur(10px);
-          animation: glf-shieldNeon 2s ease-in-out infinite;
+          filter: blur(14px);
+          animation: glf-shieldNeon 3.5s ease-in-out infinite;
         }
         @keyframes glf-shieldNeon {
-          0%, 100% { opacity: 0.7; transform: scale(0.92); }
-          50% { opacity: 1; transform: scale(1.08); }
+          0%, 100% { opacity: 0.5; transform: scale(0.96); }
+          50% { opacity: 0.85; transform: scale(1.04); }
         }
 
         .glf-shine {
@@ -251,45 +246,40 @@ export default function FinancialCoinHero() {
         /* ====== BRAND TEXT ====== */
         .glf-brand { margin-top: 28px; text-align: center; position: relative; z-index: 10; }
         .glf-brand-glyph {
-          font-family: 'Cinzel Decorative', serif;
-          font-size: clamp(28px, 7vw, 48px);
-          font-weight: 900; letter-spacing: 8px;
-          background: linear-gradient(180deg, #FFF8DC 0%, #FFD700 25%, #DAA520 55%, #8B6914 100%);
+          font-family: 'Cinzel', serif;
+          font-size: clamp(22px, 5vw, 38px);
+          font-weight: 700; letter-spacing: 10px;
+          background: linear-gradient(180deg, #FFF8DC 0%, #DAA520 50%, #8B6914 100%);
           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
           background-clip: text; color: transparent;
-          filter: drop-shadow(0 0 20px rgba(218,165,32,0.7)) drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+          filter: drop-shadow(0 0 10px rgba(218,165,32,0.4));
         }
         .glf-brand-sub {
-          font-family: 'Cinzel', serif; font-size: clamp(10px, 2.5vw, 15px);
-          letter-spacing: 16px; text-transform: uppercase; margin-top: 6px;
-          color: #00ff88 !important; -webkit-text-fill-color: #00ff88;
-          text-shadow: 0 0 20px rgba(0,255,100,0.8), 0 0 40px rgba(0,255,100,0.4);
-          animation: glf-subPulse 3s ease-in-out infinite;
-        }
-        @keyframes glf-subPulse {
-          0%, 100% { text-shadow: 0 0 15px rgba(0,255,100,0.6), 0 0 30px rgba(0,255,100,0.3); }
-          50% { text-shadow: 0 0 30px rgba(0,255,100,1), 0 0 60px rgba(0,255,100,0.6), 0 0 100px rgba(0,255,100,0.2); }
+          font-family: 'Cinzel', serif; font-size: clamp(9px, 2vw, 12px);
+          letter-spacing: 14px; text-transform: uppercase; margin-top: 4px;
+          color: rgba(16,185,129,0.7) !important; -webkit-text-fill-color: rgba(16,185,129,0.7);
+          font-weight: 400;
         }
 
         /* ====== TICKER ====== */
         .glf-ticker-wrap {
           position: relative; z-index: 10; width: 100%; max-width: 680px;
           overflow: hidden; margin-top: 24px;
-          border-top: 1px solid rgba(218,165,32,0.25);
-          border-bottom: 1px solid rgba(218,165,32,0.25);
-          padding: 8px 0;
-          background: linear-gradient(90deg, transparent, rgba(0,255,100,0.03), transparent);
+          border-top: 1px solid rgba(218,165,32,0.1);
+          border-bottom: 1px solid rgba(218,165,32,0.1);
+          padding: 7px 0;
         }
         .glf-ticker-track {
           display: flex; white-space: nowrap;
           animation: glf-ticker 30s linear infinite;
-          font-family: 'Cinzel', serif; font-size: 9px;
-          color: #DAA520 !important; letter-spacing: 2.5px;
-          -webkit-text-fill-color: #DAA520;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 9px;
+          color: rgba(218,165,32,0.6) !important; letter-spacing: 2px;
+          -webkit-text-fill-color: rgba(218,165,32,0.6);
+          font-weight: 500;
         }
         @keyframes glf-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .glf-ti { padding: 0 20px; }
-        .glf-td { color: #00ff88 !important; -webkit-text-fill-color: #00ff88; padding: 0 8px; font-size: 7px; }
+        .glf-ti { padding: 0 18px; }
+        .glf-td { color: rgba(16,185,129,0.4) !important; -webkit-text-fill-color: rgba(16,185,129,0.4); padding: 0 8px; font-size: 6px; }
 
         /* ====== MOBILE ====== */
         @media (max-width: 640px) {
