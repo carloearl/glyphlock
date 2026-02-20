@@ -19,7 +19,7 @@ export default function HomeDreamTeamCTA() {
           transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-white text-4xl md:text-5xl font-black mb-6 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
         >
-          <span className="text-blue-400">DREAM TEAM AI</span>, NOT STREETBALL TRICKS
+          <span className="text-blue-400">DREAM TEAM AI</span> — ORCHESTRATED INTELLIGENCE
         </motion.h2>
         
         {/* Subtitle - Slide from right */}
@@ -29,7 +29,7 @@ export default function HomeDreamTeamCTA() {
           transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="text-xl md:text-2xl leading-relaxed font-black drop-shadow-[0_4px_12px_rgba(0,0,0,1)] space-y-4"
         >
-          <p className="text-white">Other stacks do mixtape moves.<br />GlyphLock runs the Olympic playbook—<span className="text-blue-400">'92 talent, real sets, no solo highlights.</span></p>
+          <p className="text-white">Other platforms run single models with guardrails.<br />GlyphLock orchestrates a full roster — <span className="text-blue-400">six specialized AI agents executing coordinated plays.</span></p>
         </motion.div>
       </div>
 

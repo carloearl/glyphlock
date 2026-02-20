@@ -31,10 +31,10 @@ export default function CTASection() {
   };
 
   const benefits = [
-    { text: "QR identity for every asset", icon: Shield },
-    { text: "AI site building infrastructure", icon: Zap },
-    { text: "Master Covenant authorship proof", icon: CheckCircle2 },
-    { text: "Open source creative framework", icon: Sparkles }
+    { text: "QR identity anchored to every asset", icon: Shield },
+    { text: "AI-orchestrated multi-model defense", icon: Zap },
+    { text: "Master Covenant authorship protocol", icon: CheckCircle2 },
+    { text: "Post-quantum sovereign architecture", icon: Sparkles }
   ];
 
   // Stagger animation variants
@@ -191,7 +191,7 @@ export default function CTASection() {
                 >
                   <Sparkles size={14} className="text-blue-400" />
                 </motion.div>
-                <span className="text-blue-300 text-sm font-medium tracking-wide">Quantum-Grade Security</span>
+                <span className="text-blue-300 text-sm font-medium tracking-wide">Sovereign Builder Infrastructure</span>
               </motion.div>
 
               {/* Title - Slide from LEFT */}
@@ -212,7 +212,7 @@ export default function CTASection() {
                   }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  START BUILDING?
+                  OWN YOUR STACK?
                 </motion.span>
               </motion.h2>
 
@@ -223,7 +223,7 @@ export default function CTASection() {
                 transition={{ duration: 1.1, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
                 className="text-base md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto font-medium"
               >
-                Open source. Covenant verified. Built for creators who own their work.
+                Covenant-verified infrastructure for builders who refuse to rent what they create.
               </motion.p>
 
               {/* Email form - Scale up with bounce */}
@@ -264,7 +264,7 @@ export default function CTASection() {
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                     />
                     <span className="relative flex items-center gap-2 text-sm md:text-base">
-                      START BUILDING
+                      CLAIM YOUR STACK
                       <motion.span
                         animate={{ x: [0, 4, 0] }}
                         transition={{ duration: 1.5, repeat: Infinity }}

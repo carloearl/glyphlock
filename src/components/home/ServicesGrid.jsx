@@ -79,7 +79,7 @@ export default function ServicesGrid() {
           transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]"
         >
-          Creative Infrastructure <span className="bg-gradient-to-r from-[#1E40AF] via-[#3B82F6] to-[#60A5FA] bg-clip-text text-transparent">Modules</span>
+          Sovereign Security <span className="bg-gradient-to-r from-[#1E40AF] via-[#3B82F6] to-[#60A5FA] bg-clip-text text-transparent">Modules</span>
         </motion.h2>
         
         {/* Subtitle - Slide from right */}
@@ -89,7 +89,7 @@ export default function ServicesGrid() {
           transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="text-lg text-white/90"
         >
-          Build, verify, and protect digital ecosystems with open covenant architecture
+          Build, anchor, and defend your digital ecosystem — powered by covenant-verified infrastructure
         </motion.p>
       </div>
 
