@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Award, TrendingUp, Users, Star } from "lucide-react";
 
-export default function LoyaltyProgram({ customers }) {
+export default function LoyaltyProgram({ customers = [] }) {
   const loyaltyTiers = {
     Bronze: customers.filter(c => (c.loyalty_tier || 'Bronze') === 'Bronze').length,
     Silver: customers.filter(c => c.loyalty_tier === 'Silver').length,
