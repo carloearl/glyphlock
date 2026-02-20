@@ -185,25 +185,91 @@ export default function Footer() {
           </details>
         </div>
 
-        {/* ─── ENTERPRISE CAPABILITIES (SEO) ─── */}
-        <div className="border-t border-white/[0.06] mt-6 pt-6">
-          <details className="group">
-            <summary className="cursor-pointer text-center text-[10px] text-slate-600 tracking-wide hover:text-slate-400 transition-colors list-none select-none">
-              <span className="inline-flex items-center gap-1.5">
-                Enterprise Security Capabilities
-                <svg className="w-3 h-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-              </span>
-            </summary>
-            <div className="mt-3 max-w-3xl mx-auto text-[11px] text-slate-500 leading-relaxed space-y-2 text-center">
-              <p>GlyphLock Security delivers quantum-resistant security architecture designed for enterprises operating in high-scrutiny environments. The platform combines an AI-powered threat detection engine with post-quantum cryptographic primitives aligned with NIST standards.</p>
-              <p>Visual authentication mechanisms built on enterprise-grade steganography tools ensure that identity artifacts cannot be forged. Secure QR generation with blockchain verification anchors every asset to an immutable provenance chain.</p>
-              <p>The Master Covenant framework establishes structured AI governance architecture — defining accountability, enforcement protocols, and compliance alignment across multi-provider LLM deployments.</p>
+        {/* ─── PLATFORM CAPABILITIES ─── */}
+        <div className="border-t border-white/[0.06] mt-6 pt-10 pb-6">
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Authority Header */}
+            <div className="text-center space-y-2">
+              <h3 className="text-xs font-bold text-white/50 uppercase tracking-[0.3em]">Platform Capabilities</h3>
+              <div className="w-16 h-px mx-auto" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.5), transparent)' }} />
             </div>
-          </details>
+
+            {/* Capability Paragraphs */}
+            <div className="space-y-4 text-[12px] text-slate-500 leading-[1.8] text-center">
+              <p>
+                GlyphLock Security LLC delivers a unified cybersecurity platform spanning <strong className="text-slate-400">quantum-resistant encryption</strong>, <strong className="text-slate-400">AI-powered threat detection</strong>, and <strong className="text-slate-400">visual cryptography</strong> — architected for enterprises operating in zero-trust, high-scrutiny environments. Post-quantum cryptographic primitives align with NIST PQC standards to future-proof every layer of the stack.
+              </p>
+              <p>
+                The <strong className="text-slate-400">QR Verification Studio</strong> generates tamper-proof QR codes with blockchain-anchored provenance chains, AI risk scoring, and steganographic payloads. The <strong className="text-slate-400">Image Lab</strong> provides AI image generation, interactive hotspot editing, and multimodal analysis — all secured with SHA-256 hash verification and immutable audit trails.
+              </p>
+              <p>
+                <strong className="text-slate-400">GlyphBot Intelligence</strong> is a multi-provider AI assistant offering real-time site auditing, security scanning, code analysis, and natural-language threat assessment — powered by a provider chain architecture that routes across LLM backends for optimal accuracy and uptime.
+              </p>
+              <p>
+                The <strong className="text-slate-400">N.U.P.S. Point-of-Sale</strong> system provides venue-grade transaction processing with RBAC staff management, entertainer scheduling, VIP guest tracking, Z-report generation, and the <strong className="text-slate-400">Club Currency Press</strong> for custom voucher and Dream Dollar issuance with digital contract signing and biometric verification.
+              </p>
+              <p>
+                <strong className="text-slate-400">GlyphLock Financial</strong> delivers underwriting dossier generation, deterministic risk profiling, and qualification assessment frameworks designed for institutional-grade compliance review. The <strong className="text-slate-400">Blockchain Verification</strong> module creates timestamped cryptographic proofs exportable as legal evidence.
+              </p>
+              <p>
+                The <strong className="text-slate-400">Master Covenant</strong> framework establishes the first structured AI governance architecture — defining binding accountability, enforcement protocols, and compliance alignment across multi-provider LLM deployments. The <strong className="text-slate-400">Security Operations Center</strong> provides continuous monitoring, alert thresholds, and live threat intelligence across all operational surfaces.
+              </p>
+              <p>
+                Additional modules include the <strong className="text-slate-400">DJ Pro Mixer</strong> for AI-powered music mixing, the <strong className="text-slate-400">Media Processing Hub</strong> for video and asset management, <strong className="text-slate-400">SDK Documentation</strong> for developer integration, the <strong className="text-slate-400">Dream Team AI</strong> multi-model orchestration system, and the <strong className="text-slate-400">Site Intelligence Engine</strong> for automated codebase auditing and remediation.
+              </p>
+            </div>
+
+            {/* Compliance Disclosure */}
+            <p className="text-[10px] text-slate-600 text-center max-w-2xl mx-auto leading-relaxed">
+              GlyphLock Security is structured to support alignment with SOC 2, ISO 27001, PCI DSS, GDPR, and HIPAA frameworks. These designations reflect architectural alignment and do not constitute formal certification unless explicitly stated in a written agreement.
+            </p>
+          </div>
         </div>
 
+        {/* ─── AUTHORITY BRAND BLOCK ─── */}
+        <div className="border-t border-white/[0.06] pt-8 pb-6">
+          <div className="flex flex-col items-center gap-4">
+            {/* Spinning GL Logo */}
+            <div className="relative w-16 h-16">
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
+                alt="GlyphLock"
+                className="w-full h-full object-contain"
+                loading="lazy"
+                decoding="async"
+                width={64}
+                height={64}
+                style={{ 
+                  animation: 'footerLogoSpin 20s linear infinite',
+                  filter: 'drop-shadow(0 0 12px rgba(59,130,246,0.4))'
+                }}
+              />
+            </div>
+            <div className="text-center space-y-1.5">
+              <p className="text-sm font-black text-white uppercase tracking-[0.25em]">GlyphLock Security LLC</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Post-Quantum Cybersecurity Architecture</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">AI Governance · Zero-Trust · Enterprise Defense</p>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] text-blue-400/60 font-bold uppercase tracking-[0.15em]">AI Governance</span>
+              <span className="text-white/10">·</span>
+              <span className="text-[10px] text-indigo-400/60 font-bold uppercase tracking-[0.15em]">Zero-Trust</span>
+              <span className="text-white/10">·</span>
+              <span className="text-[10px] text-purple-400/60 font-bold uppercase tracking-[0.15em]">Post-Quantum</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Spin keyframes */}
+        <style>{`
+          @keyframes footerLogoSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+
         {/* ─── BOTTOM BAR ─── */}
-        <div className="border-t border-white/[0.06] mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/[0.06] pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[11px] text-slate-600 text-center md:text-left">
             © {new Date().getFullYear()} GlyphLock Security LLC. All rights reserved.
           </p>
