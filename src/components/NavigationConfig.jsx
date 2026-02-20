@@ -49,7 +49,7 @@ export const NAV_SECTIONS = [
       { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public" },
       { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
       { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
-      { label: "Crypto & Security Tools", page: "SecurityTools", visibility: "public" },
+      { label: "Security Tools", page: "SecurityTools", visibility: "public" },
     ]
   },
   {
@@ -99,7 +99,7 @@ export const FOOTER_LINKS = {
     { label: "GlyphBot Intelligence", page: "GlyphBot", visibility: "public" },
     { label: "Security Operations", page: "SecurityOperationsCenter", visibility: "public" },
     { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
-    { label: "All Security Tools", page: "SecurityTools", visibility: "public" },
+    { label: "Security Tools", page: "SecurityTools", visibility: "public" },
     { label: "SDK Documentation", page: "SDKDocs", visibility: "public" },
     { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" }
   ],
@@ -108,7 +108,7 @@ export const FOOTER_LINKS = {
     { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public" },
     { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
-    { label: "Crypto & Security Tools", page: "SecurityTools", visibility: "public" },
+    { label: "Security Tools", page: "SecurityTools", visibility: "public" },
   ],
   protocols: [
     { label: "Master Covenant", page: "GovernanceHub", visibility: "public" },
@@ -131,7 +131,8 @@ export const FOOTER_LINKS = {
   ],
   account: [
     { label: "Security Settings", page: "AccountSecurity", visibility: "public" },
-    { label: "Command Center", page: "CommandCenter", visibility: "public" }
+    { label: "Command Center", page: "CommandCenter", visibility: "public" },
+    { label: "Project Updates", page: "ProjectUpdates", visibility: "public" }
   ]
 };
 
