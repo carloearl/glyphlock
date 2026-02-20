@@ -75,23 +75,32 @@ export default function FinancialCoinHero() {
           align-items: center;
           justify-content: center;
           z-index: 2;
+          transform-style: preserve-3d;
+          perspective: 1200px;
         }
 
         .glf-orbit-svg {
           position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+          transform-style: preserve-3d;
         }
 
-        /* ===== NEXUS TEXT ORBITS — opposite directions ===== */
+        /* ===== NEXUS TEXT ORBITS — tilted axis, opposite flow ===== */
         .glf-orbit-outer { 
-          animation: glf-orbitCW 28s linear infinite; 
+          animation: glf-orbitOuterTilt 26s linear infinite; 
           transform-origin: 280px 280px; 
         }
         .glf-orbit-inner { 
-          animation: glf-orbitCCW 20s linear infinite; 
+          animation: glf-orbitInnerTilt 19s linear infinite; 
           transform-origin: 280px 280px; 
         }
-        @keyframes glf-orbitCW  { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes glf-orbitCCW { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+        @keyframes glf-orbitOuterTilt {
+          from { transform: rotate(0deg) rotateX(8deg); }
+          to   { transform: rotate(360deg) rotateX(8deg); }
+        }
+        @keyframes glf-orbitInnerTilt {
+          from { transform: rotate(0deg) rotateX(-6deg) rotateY(4deg); }
+          to   { transform: rotate(-360deg) rotateX(-6deg) rotateY(4deg); }
+        }
 
         /* Orbit track rings — subtle nexus spin */
         .glf-orbit-track-1 {
@@ -135,15 +144,12 @@ export default function FinancialCoinHero() {
           display: flex; align-items: center; justify-content: center;
           font-size: 24px; font-weight: 900; color: #3a2000;
           box-shadow: 0 0 20px rgba(255,215,0,1), 0 0 50px rgba(255,215,0,0.6), 0 0 90px rgba(255,215,0,0.2);
-          animation: glf-btcGlow 2s ease-in-out infinite alternate, glf-btcSelfSpin 4s linear infinite;
+          animation: glf-btcGlow 2s ease-in-out infinite alternate;
+          transform-style: preserve-3d;
         }
         @keyframes glf-btcGlow {
           from { box-shadow: 0 0 20px rgba(255,215,0,1), 0 0 50px rgba(255,215,0,0.6); }
           to   { box-shadow: 0 0 28px rgba(255,215,0,1), 0 0 80px rgba(255,215,0,1), 0 0 130px rgba(255,215,0,0.4); }
-        }
-        @keyframes glf-btcSelfSpin {
-          from { transform: translateX(-50%) rotateY(0deg); }
-          to   { transform: translateX(-50%) rotateY(360deg); }
         }
 
         /* ===== 3D COIN ===== */
@@ -202,12 +208,15 @@ export default function FinancialCoinHero() {
         .glf-face-front { transform: translateZ(9px); }
         .glf-face-back  { 
           transform: rotateY(180deg) translateZ(9px); 
-          background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%);
-          animation: glf-shieldBgPulse 3s ease-in-out infinite;
         }
-        @keyframes glf-shieldBgPulse {
-          0%, 100% { background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%); }
-          50% { background: radial-gradient(circle, rgba(16,185,129,0.25) 0%, rgba(16,185,129,0.05) 50%, transparent 70%); }
+        .glf-shield-glow {
+          position: absolute; inset: 0; border-radius: 50%; z-index: 1; pointer-events: none;
+          box-shadow: inset 0 0 40px rgba(16,185,129,0.4), inset 0 0 80px rgba(16,185,129,0.2);
+          animation: glf-shieldGlowPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes glf-shieldGlowPulse {
+          0%, 100% { opacity: 0.5; box-shadow: inset 0 0 30px rgba(16,185,129,0.3), inset 0 0 60px rgba(16,185,129,0.15); }
+          50% { opacity: 1; box-shadow: inset 0 0 50px rgba(16,185,129,0.5), inset 0 0 90px rgba(16,185,129,0.3); }
         }
         .glf-face img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
         .glf-shine {
@@ -310,6 +319,7 @@ export default function FinancialCoinHero() {
             </div>
             <div className="glf-face glf-face-back">
               <img src={SHIELD_LOGO_URL} alt="GlyphLock Financial Shield" />
+              <div className="glf-shield-glow" />
               <div className="glf-shine" />
             </div>
           </div>
