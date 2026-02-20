@@ -77,6 +77,7 @@ export default function NUPSStaff() {
       <SEOHead
         title="N.U.P.S. Staff Terminal | GlyphLock"
         description="Staff point-of-sale terminal. Transaction processing, timeclock, shift management, and batch operations."
+        keywords="POS terminal, staff timeclock, transaction processing, batch management, nightclub POS, GlyphLock NUPS"
         url="/nups-staff"
       />
       <header className="border-b border-cyan-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">

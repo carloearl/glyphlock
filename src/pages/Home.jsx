@@ -164,10 +164,7 @@ export default function Home() {
         <section className="w-full">
           <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
             <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-3xl mx-auto text-white/90 uppercase tracking-[3px]">
-              Enterprise-Grade Quantum-Resistant Security Architecture
-            </p>
-            <p className="text-xs text-white/60 mt-2 tracking-widest uppercase">
-              Post-Quantum Encryption · AI Governance · Zero-Trust Infrastructure
+              Empowering the future of secure digital ecosystems with cutting-edge AI, quantum-resistant architecture, and intelligent operational frameworks.
             </p>
           </div>
 
