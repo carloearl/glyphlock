@@ -159,29 +159,7 @@ export default function FinancialCoinHero() {
           to   { box-shadow: inset -4px -4px 8px rgba(0,0,0,0.3), inset 4px 4px 8px rgba(255,255,255,0.3), 0 0 35px rgba(255,215,0,1), 0 0 90px rgba(255,215,0,1), 0 0 150px rgba(255,215,0,0.4); }
         }
 
-        /* Small emerald orbiter (opposite direction) */
-        .glf-em-arm {
-          position: absolute; inset: 0;
-          animation: glf-emOrbit 11s linear infinite reverse;
-          pointer-events: none; z-index: 6;
-        }
-        @keyframes glf-emOrbit { to { transform: rotate(360deg); } }
-        .glf-em {
-          position: absolute; bottom: 35px; left: 50%;
-          width: 28px; height: 28px; border-radius: 50%;
-          transform: translateX(-50%);
-          background: radial-gradient(circle at 35% 30%, #80ffdb 0%, #10b981 50%, #065f46 100%);
-          box-shadow:
-            inset -2px -2px 6px rgba(0,0,0,0.3),
-            inset 2px 2px 6px rgba(255,255,255,0.2),
-            0 0 20px rgba(16,185,129,0.9),
-            0 0 50px rgba(16,185,129,0.5);
-          animation: glf-emGlow 2.5s ease-in-out infinite alternate;
-        }
-        @keyframes glf-emGlow {
-          from { box-shadow: inset -2px -2px 6px rgba(0,0,0,0.3), 0 0 20px rgba(16,185,129,0.9), 0 0 50px rgba(16,185,129,0.5); }
-          to   { box-shadow: inset -2px -2px 6px rgba(0,0,0,0.3), 0 0 30px rgba(16,185,129,1), 0 0 80px rgba(16,185,129,0.7), 0 0 120px rgba(16,185,129,0.3); }
-        }
+
 
         /* ====== 3D COIN ====== */
         .glf-scene {
@@ -366,10 +344,7 @@ export default function FinancialCoinHero() {
           <div className="glf-btc">₿</div>
         </div>
 
-        {/* Orbiting emerald sphere (opposite) */}
-        <div className="glf-em-arm">
-          <div className="glf-em" />
-        </div>
+
 
         {/* 3D Coin */}
         <div className="glf-scene">
