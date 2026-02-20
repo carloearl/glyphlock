@@ -1,5 +1,5 @@
 import React from "react";
-import { NEU_DIVIDER, NEU_CARD, CINZEL, GEORGIA } from "./FinancialDesignTokens";
+import { FIN_DIVIDER, FIN_CARD, CINZEL, GEORGIA } from "./FinancialDesignTokens";
 import FinancialSectionShell from "./FinancialSectionShell";
 import FinancialCTA from "./FinancialCTA";
 
@@ -11,30 +11,30 @@ const TIERS = [
 
 export default function QualificationAssessment() {
   return (
-    <FinancialSectionShell orbSeed={4}>
+    <FinancialSectionShell>
       <div className="max-w-4xl mx-auto px-6">
-        <div className={NEU_DIVIDER + " mb-16"} />
+        <div className={FIN_DIVIDER + " mb-14"} />
 
         <div className="text-center mb-10">
-          <p className="text-[11px] uppercase tracking-[6px] text-emerald-500/60 mb-6 font-medium">Section IV</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight" style={{ ...CINZEL, letterSpacing: '1px' }}>
+          <p className="text-[11px] uppercase tracking-[5px] text-indigo-400/60 mb-5 font-medium">Section IV</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight" style={{ ...CINZEL, letterSpacing: '0.5px' }}>
             Structured Qualification Assessment
           </h2>
         </div>
 
-        <p className="text-[15px] text-slate-300 leading-[1.85] max-w-3xl mx-auto text-center mb-14" style={GEORGIA}>
+        <p className="text-[15px] text-slate-300 leading-[1.85] max-w-3xl mx-auto text-center mb-12" style={GEORGIA}>
           Venues may initiate formal review through a standardized operational questionnaire aligned to Deterministic Risk Profile criteria.
         </p>
 
-        <div className={`${NEU_CARD} overflow-hidden max-w-2xl mx-auto mb-14`}>
-          <div className="bg-[#0c1e12] px-6 py-3 border-b border-emerald-900/25">
-            <p className="text-[10px] uppercase tracking-[4px] text-emerald-400 font-bold" style={CINZEL}>
+        <div className={`${FIN_CARD} overflow-hidden max-w-2xl mx-auto mb-12`}>
+          <div className="bg-white/[0.02] px-6 py-3 border-b border-white/[0.06]">
+            <p className="text-[10px] uppercase tracking-[4px] text-indigo-300 font-bold" style={CINZEL}>
               Assessment Output
             </p>
           </div>
           {TIERS.map((t, i) => (
-            <div key={i} className={`px-6 py-4 flex items-baseline gap-4 ${i < TIERS.length - 1 ? 'border-b border-emerald-900/15' : ''}`}>
-              <span className="text-xs font-bold text-emerald-400 tracking-wider whitespace-nowrap" style={CINZEL}>
+            <div key={i} className={`px-6 py-4 flex items-baseline gap-4 ${i < TIERS.length - 1 ? 'border-b border-white/[0.04]' : ''}`}>
+              <span className="text-xs font-bold text-indigo-400 tracking-wider whitespace-nowrap" style={CINZEL}>
                 {t.tier}
               </span>
               <span className="text-[13px] text-slate-400" style={GEORGIA}>
@@ -44,7 +44,7 @@ export default function QualificationAssessment() {
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-5 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <FinancialCTA to="Consultation" variant="primary">
             Initiate Qualification Review
           </FinancialCTA>
@@ -53,7 +53,7 @@ export default function QualificationAssessment() {
           </FinancialCTA>
         </div>
 
-        <div className={NEU_DIVIDER + " mt-16"} />
+        <div className={FIN_DIVIDER + " mt-14"} />
       </div>
     </FinancialSectionShell>
   );

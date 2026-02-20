@@ -14,17 +14,14 @@ export default function GlyphLockFinancial() {
   return (
     <>
       <SEOHead
-        title="GlyphLock Financial LLC | Operational Qualification Architecture"
-        description="GlyphLock Financial establishes a structured operational qualification architecture for nightlife and entertainment venues operating within high-scrutiny underwriting environments."
-        keywords="GlyphLock Financial, operational qualification, underwriting, deterministic risk profile, verified operations standard, compliance framework"
+        title="GlyphLock Financial | Operational Qualification Architecture | GlyphLock Security LLC"
+        description="Structured operational qualification architecture for entertainment and hospitality venues operating within high-scrutiny underwriting environments. Deterministic risk profiling and verified operations standards."
+        keywords="GlyphLock Financial, operational qualification, underwriting architecture, deterministic risk profile, verified operations standard"
         url="/glyphlock-financial"
       />
 
       <div className="text-white min-h-screen" style={{ background: 'transparent' }}>
-        {/* HERO — FROZEN / IMMUTABLE */}
         <FinancialHero />
-
-        {/* SOVEREIGN FRAMEWORK SECTIONS */}
         <FrameworkAuthority />
         <DeterministicRiskProfile />
         <VerifiedOperationsStandard />
