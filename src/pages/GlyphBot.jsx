@@ -744,15 +744,20 @@ export default function GlyphBotPage() {
               onClear={handleClear}
               onVoiceSettingsChange={{
                 playText: (text, settings) => {
-                  console.log('[GlyphBot] Testing voice with settings:', settings);
-                  // CRITICAL: Pass the actual settings, not voiceSettings state
-                  const testSettings = settings || voiceSettings;
-                  console.log('[GlyphBot] Actual test settings being used:', testSettings);
+                  // CRITICAL: Always read FRESHEST voiceSettings from localStorage
+                  // to avoid stale React closure capturing old state
+                  let freshSettings = settings || voiceSettings;
                   try {
-                    playText(text, testSettings);
-                  } catch (e) {
-                    console.warn('[TTS Test]', e);
-                  }
+                    const saved = localStorage.getItem('glyphbot_voice_settings');
+                    if (saved) {
+                      const parsed = JSON.parse(saved);
+                      freshSettings = { ...parsed, ...(settings || {}) };
+                    }
+                  } catch (e) { /* use passed settings */ }
+                  
+                  console.log('[GlyphBot] Test voice — voiceProfile:', freshSettings.voiceProfile, 'emotion:', freshSettings.emotion);
+                  stopTTS(); // Kill any currently playing audio first
+                  playText(text, freshSettings);
                 },
                 setVoiceSettings: (updater) => {
                   setVoiceSettings(prev => {
