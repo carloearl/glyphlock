@@ -86,7 +86,7 @@ export default function FinancialHero() {
               className="mb-10"
             >
               <span
-                className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[0.9]"
+                className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.9] break-words"
                 style={{
                   letterSpacing: '-1px',
                   background: 'linear-gradient(135deg, #ffffff 0%, #fbbf24 40%, #f97316 70%, #ffffff 100%)',
@@ -95,6 +95,8 @@ export default function FinancialHero() {
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
                   animation: 'fin-title-gradient 6s ease infinite',
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word',
                 }}
               >
                 GLYPHLOCK
