@@ -583,7 +583,7 @@ export default function GlyphBotPage() {
     }
   }, [archiveAudit]);
 
-  // Phase 6: Download audit report
+  // Phase 6: Download audit report (JSON fallback)
   const handleDownloadAudit = useCallback((audit) => {
     const dataStr = JSON.stringify(audit, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -593,7 +593,7 @@ export default function GlyphBotPage() {
     a.download = `glyphbot_audit_${audit.targetIdentifier?.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('Audit report downloaded');
+    toast.success('JSON audit report downloaded');
   }, []);
 
   const handleToggleMode = (key) => {
