@@ -75,7 +75,7 @@ export default function HeroContent() {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.15 });
   const [typedText, setTypedText] = useState("");
-  const fullText = "GlyphLock = THE_CREATION_LAYER";
+  const fullText = "GlyphLock = SOVEREIGN_INFRASTRUCTURE";
 
   useEffect(() => {
     if (!isInView) return;
@@ -89,17 +89,17 @@ export default function HeroContent() {
   }, [isInView]);
 
   const features = [
-    { highlight: "FULL ACCESS", text: "— modify anything" },
-    { highlight: "CUSTOM FEATURES", text: "— no permission" },
-    { highlight: "ANY DEVELOPER", text: "— open source" },
-    { highlight: "YOUR PLATFORM", text: "— your rules" },
-    { highlight: "NO LOCK-IN", text: "— you own it" }
+    { highlight: "BUILD SOVEREIGN", text: "— your architecture, your keys" },
+    { highlight: "PROVE ORIGIN", text: "— blockchain-anchored authorship" },
+    { highlight: "AI ORCHESTRATION", text: "— multi-model intelligence" },
+    { highlight: "ZERO TRUST", text: "— post-quantum by default" },
+    { highlight: "OWN EVERYTHING", text: "— covenant-verified, forever" }
   ];
 
   const cards = [
     {
-      title: "FRAMEWORK ACCESS",
-      desc: "No paywalls. No locked features. The entire creation layer is yours.",
+      title: "SOVEREIGN STACK",
+      desc: "Your infrastructure. Your keys. No middlemen, no gatekeepers — full operational control.",
       color: "#06b6d4",
       borderClass: "border-cyan-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(6,182,212,0.5)]",
@@ -107,8 +107,8 @@ export default function HeroContent() {
       icon: <Code2 className="w-10 h-10" style={{ color: '#06b6d4', filter: 'drop-shadow(0 0 15px #06b6d4)' }} />
     },
     {
-      title: "SOURCE PROOF",
-      desc: "Transparent. Auditable. Forkable. No black boxes. No hidden agendas.",
+      title: "VERIFIABLE ORIGIN",
+      desc: "Blockchain-anchored proof of authorship. Transparent, auditable, immutable — no hidden layers.",
       color: "#4f46e5",
       borderClass: "border-indigo-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(79,70,229,0.5)]",
@@ -116,8 +116,8 @@ export default function HeroContent() {
       icon: <Eye className="w-10 h-10" style={{ color: '#4f46e5', filter: 'drop-shadow(0 0 15px #4f46e5)' }} />
     },
     {
-      title: "COVENANT SHIELD",
-      desc: "Legally binds your rights. Your work stays yours. Forever. Period.",
+      title: "COVENANT PROTOCOL",
+      desc: "Cryptographic governance that binds your rights to the chain. What you build stays yours. Permanently.",
       color: "#7c3aed",
       borderClass: "border-purple-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(124,58,237,0.5)]",
@@ -298,7 +298,7 @@ export default function HeroContent() {
               }}
             >
               <span className="text-purple-400" style={{ animation: 'heroBlink 1s infinite' }}>&gt; </span>
-              LIBERATION PROTOCOL v3.0 ACTIVE
+              SOVEREIGN PROTOCOL v3.0 ACTIVE
             </motion.div>
 
             {/* Headline */}
@@ -308,22 +308,22 @@ export default function HeroContent() {
               transition={{ duration: 1, delay: 0.2 }}
             >
               <h1 className="font-black text-4xl sm:text-5xl leading-[0.85] uppercase tracking-tight mb-4" style={{ transform: 'skewY(-2deg)' }}>
-                <span className="text-white block">STOP</span>
-                <span className="text-white block">GETTING</span>
-                <span className="hero-word-robbed block">ROBBED.</span>
-                <span className="text-white block text-[0.7em]">START</span>
-                <span className="hero-word-creating block">CREATING.</span>
+                <span className="text-white block">BUILD</span>
+                <span className="text-white block">WHAT'S</span>
+                <span className="hero-word-robbed block">YOURS.</span>
+                <span className="text-white block text-[0.7em]">PROVE IT</span>
+                <span className="hero-word-creating block">FOREVER.</span>
               </h1>
               <div className="bg-black/80 border-2 border-cyan-500 p-3 font-mono text-xs text-cyan-400 relative" style={{ boxShadow: '0 0 20px rgba(6,182,212,0.2)', textShadow: '0 0 10px #06b6d4' }}>
-                <div className="opacity-50 text-[10px] mb-1">$ sudo access --level=CREATOR</div>
+                <div className="opacity-50 text-[10px] mb-1">$ glyphlock --mode=sovereign --verify</div>
                 <div>{typedText}<span className="inline-block w-[6px] h-3 bg-cyan-400 ml-[3px]" style={{ animation: 'heroBlink 1s infinite', boxShadow: '0 0 8px #06b6d4' }} /></div>
               </div>
             </motion.div>
 
             {/* Side panels */}
             <div className="flex flex-col gap-3">
-              <GlassShard title="⚡ ENTERPRISE POWER" text="This is what billion-dollar companies have. Now you have it too." color="cyan" delay={0.4} isInView={isInView} />
-              <GlassShard title="🔓 OPEN SOURCE" text="Every line visible. Audit it. Fork it. Own it." color="violet" delay={0.5} isInView={isInView} />
+              <GlassShard title="⚡ QUANTUM-GRADE DEFENSE" text="Post-quantum encryption and AI threat detection — institutional security for sovereign builders." color="cyan" delay={0.4} isInView={isInView} />
+              <GlassShard title="🔓 COVENANT GOVERNANCE" text="Every asset anchored. Every origin provable. Cryptographic rights management at protocol level." color="violet" delay={0.5} isInView={isInView} />
             </div>
 
             {/* Features */}
@@ -367,7 +367,7 @@ export default function HeroContent() {
                 }}
               >
                 <span className="text-purple-400" style={{ animation: 'heroBlink 1s infinite' }}>&gt; </span>
-                LIBERATION PROTOCOL v3.0 ACTIVE
+                SOVEREIGN PROTOCOL v3.0 ACTIVE
               </motion.div>
             </div>
 
@@ -378,21 +378,21 @@ export default function HeroContent() {
               transition={{ duration: 1, delay: 0.2 }}
             >
               <h1 className="font-black text-5xl lg:text-6xl xl:text-7xl leading-[0.85] uppercase tracking-tight mb-4" style={{ transform: 'skewY(-2deg)' }}>
-                <span className="text-white block">STOP</span>
-                <span className="text-white block">GETTING</span>
-                <span className="hero-word-robbed block">ROBBED.</span>
-                <span className="text-white block text-[0.7em]">START</span>
-                <span className="hero-word-creating block">CREATING.</span>
+                <span className="text-white block">BUILD</span>
+                <span className="text-white block">WHAT'S</span>
+                <span className="hero-word-robbed block">YOURS.</span>
+                <span className="text-white block text-[0.7em]">PROVE IT</span>
+                <span className="hero-word-creating block">FOREVER.</span>
               </h1>
               <div className="bg-black/80 border-2 border-cyan-500 p-3 font-mono text-xs text-cyan-400 relative mt-3" style={{ boxShadow: '0 0 20px rgba(6,182,212,0.2)', textShadow: '0 0 10px #06b6d4' }}>
-                <div className="opacity-50 text-[10px] mb-1">$ sudo access --level=CREATOR</div>
+                <div className="opacity-50 text-[10px] mb-1">$ glyphlock --mode=sovereign --verify</div>
                 <div>{typedText}<span className="inline-block w-[6px] h-3 bg-cyan-400 ml-[3px]" style={{ animation: 'heroBlink 1s infinite', boxShadow: '0 0 8px #06b6d4' }} /></div>
               </div>
             </motion.div>
 
             <div className="flex flex-col gap-3">
-              <GlassShard title="⚡ ENTERPRISE POWER" text="This is what billion-dollar companies have. Now you have it too." color="cyan" delay={0.4} isInView={isInView} />
-              <GlassShard title="🔓 OPEN SOURCE" text="Every line visible. Audit it. Fork it. Own it." color="violet" delay={0.5} isInView={isInView} />
+              <GlassShard title="⚡ QUANTUM-GRADE DEFENSE" text="Post-quantum encryption and AI threat detection — institutional security for sovereign builders." color="cyan" delay={0.4} isInView={isInView} />
+              <GlassShard title="🔓 COVENANT GOVERNANCE" text="Every asset anchored. Every origin provable. Cryptographic rights management at protocol level." color="violet" delay={0.5} isInView={isInView} />
             </div>
 
             {/* Row 3: Features + CTAs */}
@@ -489,7 +489,7 @@ function CTAButtons({ isInView }) {
             }}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              ⚡ TAKE CONTROL NOW
+              ⚡ BEGIN SOVEREIGN BUILD
             </span>
           </div>
         </Link>
@@ -510,7 +510,7 @@ function CTAButtons({ isInView }) {
               clipPath: 'polygon(0% 8%, 92% 0%, 100% 92%, 8% 100%)'
             }}
           >
-            👁 EXPLORE FRAMEWORK
+            👁 EXPLORE SECURITY MODULES
           </div>
         </Link>
       </motion.div>
