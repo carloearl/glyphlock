@@ -170,10 +170,9 @@ export default function Footer() {
               <div>
                 <h5 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-3">Secondary Keywords</h5>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  steganography tools, QR code generator secure, image encryption, NIST post-quantum standards, 
-                  AI binding protocol, exposure-based binding, PROBE violation classification, TruthStrike protocol, 
-                  GlyphBot AI assistant, N.U.P.S. POS system, hotzone mapper, security operations center, 
-                  SOC 2 compliant, ISO 27001, GDPR compliant, HIPAA compliant, PCI DSS
+                  steganography tools, secure QR code generator, image encryption, NIST post-quantum standards, 
+                  AI binding protocol, security operations center, 
+                  SOC 2 aligned, ISO 27001 aligned, GDPR aligned, HIPAA aligned, PCI DSS aligned
                 </p>
               </div>
 
