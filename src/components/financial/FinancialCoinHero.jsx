@@ -84,22 +84,22 @@ export default function FinancialCoinHero() {
           transform-style: preserve-3d;
         }
 
-        /* ===== NEXUS TEXT ORBITS — tilted axis, opposite flow ===== */
+        /* ===== NEXUS TEXT ORBITS — different axis tilt, opposite flow ===== */
         .glf-orbit-outer { 
-          animation: glf-orbitOuterTilt 26s linear infinite; 
+          animation: glf-orbitOuter 26s linear infinite; 
           transform-origin: 280px 280px; 
         }
         .glf-orbit-inner { 
-          animation: glf-orbitInnerTilt 19s linear infinite; 
+          animation: glf-orbitInner 19s linear infinite; 
           transform-origin: 280px 280px; 
         }
-        @keyframes glf-orbitOuterTilt {
-          from { transform: rotate(0deg) rotateX(8deg); }
-          to   { transform: rotate(360deg) rotateX(8deg); }
+        @keyframes glf-orbitOuter {
+          from { transform: rotateX(12deg) rotateZ(0deg); }
+          to   { transform: rotateX(12deg) rotateZ(360deg); }
         }
-        @keyframes glf-orbitInnerTilt {
-          from { transform: rotate(0deg) rotateX(-6deg) rotateY(4deg); }
-          to   { transform: rotate(-360deg) rotateX(-6deg) rotateY(4deg); }
+        @keyframes glf-orbitInner {
+          from { transform: rotateX(-10deg) rotateY(8deg) rotateZ(0deg); }
+          to   { transform: rotateX(-10deg) rotateY(8deg) rotateZ(-360deg); }
         }
 
         /* Orbit track rings — subtle nexus spin */
@@ -137,15 +137,17 @@ export default function FinancialCoinHero() {
           pointer-events: none;
         }
         @keyframes glf-btcOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .glf-btc {
+        .glf-btc-wrapper {
           position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
-          width: 50px; height: 50px; border-radius: 50%;
+          width: 50px; height: 50px; perspective: 300px;
+        }
+        .glf-btc {
+          width: 100%; height: 100%; border-radius: 50%;
           background: radial-gradient(circle at 35% 30%, #ffe066 0%, #DAA520 55%, #8B6914 100%);
           display: flex; align-items: center; justify-content: center;
           font-size: 24px; font-weight: 900; color: #3a2000;
           box-shadow: 0 0 20px rgba(255,215,0,1), 0 0 50px rgba(255,215,0,0.6), 0 0 90px rgba(255,215,0,0.2);
           animation: glf-btcGlow 2s ease-in-out infinite alternate;
-          transform-style: preserve-3d;
         }
         @keyframes glf-btcGlow {
           from { box-shadow: 0 0 20px rgba(255,215,0,1), 0 0 50px rgba(255,215,0,0.6); }
@@ -210,13 +212,14 @@ export default function FinancialCoinHero() {
           transform: rotateY(180deg) translateZ(9px); 
         }
         .glf-shield-glow {
-          position: absolute; inset: 0; border-radius: 50%; z-index: 1; pointer-events: none;
-          box-shadow: inset 0 0 40px rgba(16,185,129,0.4), inset 0 0 80px rgba(16,185,129,0.2);
+          position: absolute; inset: -30px; border-radius: 50%; z-index: 0; pointer-events: none;
+          background: radial-gradient(circle, rgba(0,255,100,0.35) 0%, rgba(0,255,80,0.15) 40%, transparent 70%);
           animation: glf-shieldGlowPulse 2.5s ease-in-out infinite;
+          filter: blur(8px);
         }
         @keyframes glf-shieldGlowPulse {
-          0%, 100% { opacity: 0.5; box-shadow: inset 0 0 30px rgba(16,185,129,0.3), inset 0 0 60px rgba(16,185,129,0.15); }
-          50% { opacity: 1; box-shadow: inset 0 0 50px rgba(16,185,129,0.5), inset 0 0 90px rgba(16,185,129,0.3); }
+          0%, 100% { opacity: 0.6; transform: scale(0.95); }
+          50% { opacity: 1; transform: scale(1.1); }
         }
         .glf-face img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
         .glf-shine {
@@ -305,7 +308,9 @@ export default function FinancialCoinHero() {
 
         {/* Orbiting gold element */}
         <div className="glf-btc-arm">
-          <div className="glf-btc">₿</div>
+          <div className="glf-btc-wrapper">
+            <div className="glf-btc">₿</div>
+          </div>
         </div>
 
         {/* 3D Coin with green glow */}
