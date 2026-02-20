@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Sparkles, Send, Loader2, X, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { PERSONAS } from "@/components/glyphbot/personas";
-import { generateAudio } from "@/components/utils/ttsEngine";
+import { PERSONAS } from "@/components/glyphlock/bot/config/personas";
 
 export default function GlyphBotJr() {
   const jrPersona = PERSONAS.find(p => p.id === "glyphbot_jr") || PERSONAS[4];
@@ -15,38 +14,30 @@ export default function GlyphBotJr() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    // Load voices for speech synthesis
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-    }
-  }, []);
-
   const playVoice = async (text) => {
     try {
+      // Stop any currently playing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+
       const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
       if (!cleanText) return;
 
-      const audioUrl = await generateAudio(
-        'google',
-        'en-US-Neural2-F',
-        cleanText,
-        {
-          speed: 1.1,
-          pitch: 1.0,
-          volume: 1.0
-        }
-      );
-
-      if (audioUrl) {
-        const audio = new Audio(audioUrl);
-        audio.playbackRate = 1.1;
-        await audio.play();
+      // Use browser speech synthesis as fallback (no external TTS endpoint needed)
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = 1.1;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
       }
     } catch (err) {
       console.error("Voice playback failed:", err);
@@ -62,8 +53,8 @@ export default function GlyphBotJr() {
     setLoading(true);
 
     try {
-      const { QR_KNOWLEDGE_BASE } = await import('./qr/QrKnowledgeBase');
-      const { IMAGE_LAB_KNOWLEDGE } = await import('./imageLab/ImageLabKnowledge');
+      const { QR_KNOWLEDGE_BASE } = await import('@/components/qr/QrKnowledgeBase');
+      const { IMAGE_LAB_KNOWLEDGE } = await import('@/components/imageLab/ImageLabKnowledge');
       const { default: faqData } = await import('@/components/content/faqMasterData');
       const { default: sitemapKnowledge } = await import('@/components/content/sitemapKnowledge');
       

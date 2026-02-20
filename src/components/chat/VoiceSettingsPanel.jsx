@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -14,6 +14,7 @@ export default function VoiceSettingsPanel({ settings, onChange }) {
   const [voice, setVoice] = useState(settings.voice || "alloy");
   const [voices, setVoices] = useState([]);
   const [previewPlaying, setPreviewPlaying] = useState(false);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     async function loadVoices() {
@@ -44,6 +45,13 @@ export default function VoiceSettingsPanel({ settings, onChange }) {
   }
 
   async function handlePreview() {
+    // Stop any currently playing audio before starting new one
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+
     setPreviewPlaying(true);
     try {
       const audioUrl = await generateAudio(
@@ -55,14 +63,19 @@ export default function VoiceSettingsPanel({ settings, onChange }) {
       
       if (audioUrl) {
         const audio = new Audio(audioUrl);
+        audioRef.current = audio;
         audio.playbackRate = settings.speed || 1.0;
+        audio.onended = () => {
+          setPreviewPlaying(false);
+          audioRef.current = null;
+        };
         await audio.play();
-        audio.onended = () => setPreviewPlaying(false);
       }
     } catch (error) {
       console.error("Preview error:", error);
       toast.error("Failed to preview voice");
       setPreviewPlaying(false);
+      audioRef.current = null;
     }
   }
 
