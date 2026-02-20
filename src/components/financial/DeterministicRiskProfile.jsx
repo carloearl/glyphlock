@@ -1,5 +1,5 @@
 import React from "react";
-import { FIN_DIVIDER, FIN_CELL, CINZEL, GEORGIA } from "./FinancialDesignTokens";
+import { NEU_DIVIDER, NEU_CELL, CINZEL, GEORGIA } from "./FinancialDesignTokens";
 import FinancialSectionShell from "./FinancialSectionShell";
 
 const PROTOCOLS = [
@@ -12,25 +12,25 @@ const PROTOCOLS = [
 
 export default function DeterministicRiskProfile() {
   return (
-    <FinancialSectionShell>
+    <FinancialSectionShell orbSeed={2}>
       <div className="max-w-4xl mx-auto px-6">
-        <div className={FIN_DIVIDER + " mb-14"} />
+        <div className={NEU_DIVIDER + " mb-16"} />
 
         <div className="text-center mb-10">
-          <p className="text-[11px] uppercase tracking-[5px] text-indigo-400/60 mb-5 font-medium">Section II</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight" style={{ ...CINZEL, letterSpacing: '0.5px' }}>
+          <p className="text-[11px] uppercase tracking-[6px] text-emerald-500/60 mb-6 font-medium">Section II</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight" style={{ ...CINZEL, letterSpacing: '1px' }}>
             Deterministic Risk Profile
           </h2>
         </div>
 
-        <p className="text-[15px] text-slate-300 leading-[1.85] max-w-3xl mx-auto text-center mb-12" style={GEORGIA}>
+        <p className="text-[15px] text-slate-300 leading-[1.85] max-w-3xl mx-auto text-center mb-14" style={GEORGIA}>
           The Deterministic Risk Profile is a documentation control model that converts venue operations into structured, review-ready underwriting format.
         </p>
 
         <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
           {PROTOCOLS.map((p, i) => (
-            <div key={i} className={`${FIN_CELL} p-5`}>
-              <h3 className="text-sm font-bold text-indigo-300 mb-2 tracking-wide" style={CINZEL}>
+            <div key={i} className={`${NEU_CELL} p-6`}>
+              <h3 className="text-sm font-bold text-emerald-300 mb-2 tracking-wide" style={CINZEL}>
                 {p.title}
               </h3>
               <p className="text-[13px] text-slate-400 leading-relaxed" style={GEORGIA}>
@@ -41,7 +41,7 @@ export default function DeterministicRiskProfile() {
           {PROTOCOLS.length % 2 !== 0 && <div />}
         </div>
 
-        <div className={FIN_DIVIDER + " mt-14"} />
+        <div className={NEU_DIVIDER + " mt-16"} />
       </div>
     </FinancialSectionShell>
   );
