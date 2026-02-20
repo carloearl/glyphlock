@@ -3,6 +3,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 const CACHE = new Map();
 const CACHE_TTL_NEWS = 5 * 60 * 1000;      // 5 min
 const CACHE_TTL_INTEL = 15 * 60 * 1000;    // 15 min
+const MAX_INTEL_CALLS_PER_DAY = 20;
+const userCallCounts = new Map();
 
 function getCached(key, ttl) {
   const entry = CACHE.get(key);
@@ -11,6 +13,14 @@ function getCached(key, ttl) {
 }
 function setCache(key, data) {
   CACHE.set(key, { data, ts: Date.now() });
+}
+
+function checkRateLimit(userEmail) {
+  const key = `${userEmail}_${new Date().toDateString()}`;
+  const count = userCallCounts.get(key) || 0;
+  if (count >= MAX_INTEL_CALLS_PER_DAY) return false;
+  userCallCounts.set(key, count + 1);
+  return true;
 }
 
 // 1. NIST NVD — Latest CVEs
@@ -134,54 +144,75 @@ async function fetchMarketIntel() {
   return { items: [], updatedAt: Date.now(), source: 'Market Intel', error: 'All feeds unavailable' };
 }
 
-// 4. AI INTELLIGENCE — OpenAI fallback (only on explicit request)
-async function fetchAIIntelligence(query) {
+// 4. LIVE INTELLIGENCE — Perplexity API (real-time web search with citations)
+async function fetchLiveIntelligence(query) {
   const cacheKey = `intel_${(query || 'briefing').slice(0, 50)}`;
   const cached = getCached(cacheKey, CACHE_TTL_INTEL);
   if (cached) return cached;
 
-  const apiKey = Deno.env.get('OPENAI_API_KEY');
+  const apiKey = Deno.env.get('PERPLEXITY_API_KEY');
   if (!apiKey) {
-    return { content: 'AI intelligence unavailable — API key not configured.', updatedAt: Date.now(), source: 'AI Analysis', isAI: true };
+    return { 
+      content: 'Live intelligence unavailable — Perplexity API key not configured.', 
+      citations: [],
+      updatedAt: Date.now(), 
+      source: 'Live Intelligence', 
+      isAI: true 
+    };
   }
 
   try {
-    const prompt = query || 'Provide a brief daily intelligence briefing covering: top 3 cybersecurity developments today, any significant regulatory or compliance changes, and 2 key fintech/market moves. Be concise and factual.';
+    const prompt = query || 'Provide a brief daily intelligence briefing covering: top 3 cybersecurity developments today, any significant regulatory or compliance changes, and 2 key fintech/market moves. Be concise and factual. Cite your sources.';
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'llama-3.1-sonar-small-128k-online',
         messages: [
           {
             role: 'system',
-            content: 'You are a security and fintech intelligence analyst. Provide concise, factual, current analysis. No marketing language. Cite sources when possible. Use bullet points for clarity. Keep under 400 words.'
+            content: 'You are a security and fintech intelligence analyst. Provide concise, factual, CURRENT analysis grounded in live web sources. Always cite specific sources with URLs. Use bullet points for clarity. Keep under 400 words.'
           },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 500,
-        temperature: 0.3
+        max_tokens: 600,
+        temperature: 0.2,
+        return_citations: true
       })
     });
 
     if (!res.ok) {
       const errBody = await res.text();
-      throw new Error(`OpenAI ${res.status}: ${errBody.slice(0, 200)}`);
+      throw new Error(`Perplexity ${res.status}: ${errBody.slice(0, 200)}`);
     }
 
     const json = await res.json();
     const content = json.choices?.[0]?.message?.content || 'No analysis generated.';
+    const citations = json.citations || [];
 
-    const result = { content, updatedAt: Date.now(), source: 'AI Analysis', isAI: true };
+    const result = { 
+      content, 
+      citations,
+      updatedAt: Date.now(), 
+      source: 'Perplexity Live Search', 
+      isAI: true 
+    };
     setCache(cacheKey, result);
     return result;
   } catch (e) {
-    console.error('[LiveFeed] AI intelligence error:', e.message);
-    return { content: `Intelligence unavailable: ${e.message}`, updatedAt: Date.now(), source: 'AI Analysis', isAI: true, error: e.message };
+    console.error('[LiveFeed] Perplexity intelligence error:', e.message);
+    return { 
+      content: `Live intelligence unavailable: ${e.message}`, 
+      citations: [],
+      updatedAt: Date.now(), 
+      source: 'Live Intelligence', 
+      isAI: true, 
+      error: e.message 
+    };
   }
 }
 
@@ -197,7 +228,6 @@ Deno.serve(async (req) => {
     const { action = 'feeds', query } = body;
 
     if (action === 'feeds') {
-      // Fetch all 3 main feeds in parallel
       const [threatIntel, securityNews, marketIntel] = await Promise.all([
         fetchThreatIntel(),
         fetchSecurityNews(),
@@ -213,7 +243,20 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'intelligence') {
-      const intel = await fetchAIIntelligence(query);
+      if (!checkRateLimit(user.email)) {
+        return Response.json({ 
+          intelligence: { 
+            content: 'Daily intelligence limit reached (20/day). Try again tomorrow.', 
+            citations: [],
+            updatedAt: Date.now(), 
+            source: 'Rate Limited', 
+            isAI: true 
+          },
+          fetchedAt: Date.now() 
+        }, { status: 429 });
+      }
+
+      const intel = await fetchLiveIntelligence(query);
       return Response.json({ intelligence: intel, fetchedAt: Date.now() });
     }
 
