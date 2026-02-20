@@ -16,7 +16,7 @@ export default function FinancialHero() {
       `}</style>
       {/* Background */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950 via-black to-green-950" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1f12] via-black to-[#0d1a0f]" />
         <div className="absolute inset-0" style={{
           backgroundImage: `
             linear-gradient(rgba(16,185,129,0.08) 1px, transparent 1px),
@@ -71,7 +71,7 @@ export default function FinancialHero() {
             >
               <img src={SHIELD_LOGO_URL} alt="GL" className="w-5 h-5 rounded-sm object-contain opacity-70" />
               <span
-                className="text-[11px] font-semibold uppercase text-emerald-400/60"
+                className="text-[11px] font-semibold uppercase text-amber-400/60"
                 style={{ letterSpacing: '4px', fontFamily: "'Cinzel', serif" }}
               >
                 GlyphLock Financial LLC
