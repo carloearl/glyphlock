@@ -155,7 +155,7 @@ export default function Footer() {
               <a href="tel:+14242466499" className="flex items-center gap-2 text-slate-300 font-medium hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
                 <Phone size={16} /> (424) 246-6499
               </a>
-              <p className="text-sm text-slate-400 pt-2">
+              <p className="text-sm text-slate-300 pt-2">
                 El Mirage, Arizona<br/>United States
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function Footer() {
         {/* SEO Keywords & Meta Tags Section - Crawler Optimized */}
         <div className="border-t border-white/10 pt-8 mb-12">
           <details className="group">
-            <summary className="cursor-pointer text-center text-xs text-slate-500 tracking-wide mb-3 hover:text-cyan-400 transition-colors list-none">
+            <summary className="cursor-pointer text-center text-xs text-slate-400 tracking-wide mb-3 hover:text-cyan-400 transition-colors list-none">
               <span className="inline-flex items-center gap-2">
                 🏷️ Keywords & SEO Metadata
                 <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -218,21 +218,21 @@ export default function Footer() {
               <div>
                 <h5 className="text-xs font-bold text-green-400 uppercase tracking-wider mb-3">Schema.org Structured Data</h5>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                  <span className="text-slate-400">Organization</span>
-                  <span className="text-slate-400">SoftwareApplication</span>
-                  <span className="text-slate-400">WebApplication</span>
-                  <span className="text-slate-400">SecurityService</span>
-                  <span className="text-slate-400">CreativeWork</span>
-                  <span className="text-slate-400">Article</span>
-                  <span className="text-slate-400">FAQPage</span>
-                  <span className="text-slate-400">HowTo</span>
+                  <span className="text-slate-300">Organization</span>
+                  <span className="text-slate-300">SoftwareApplication</span>
+                  <span className="text-slate-300">WebApplication</span>
+                  <span className="text-slate-300">SecurityService</span>
+                  <span className="text-slate-300">CreativeWork</span>
+                  <span className="text-slate-300">Article</span>
+                  <span className="text-slate-300">FAQPage</span>
+                  <span className="text-slate-300">HowTo</span>
                 </div>
               </div>
 
               {/* Open Graph Tags */}
               <div>
                 <h5 className="text-xs font-bold text-pink-400 uppercase tracking-wider mb-3">Open Graph & Social</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-slate-400">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-slate-300">
                   <span>og:type: website</span>
                   <span>og:site_name: GlyphLock Security</span>
                   <span>twitter:card: summary_large_image</span>
@@ -246,14 +246,14 @@ export default function Footer() {
         {/* Crawler Discovery Section - Static HTML for SEO */}
         <div className="border-t border-white/10 pt-8 mb-12">
           <details className="group">
-            <summary className="cursor-pointer text-center text-xs text-slate-500 tracking-wide mb-3 hover:text-cyan-400 transition-colors list-none">
+            <summary className="cursor-pointer text-center text-xs text-slate-400 tracking-wide mb-3 hover:text-cyan-400 transition-colors list-none">
               <span className="inline-flex items-center gap-2">
                 🔍 Sitemap & Crawler Discovery
                 <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
               </span>
             </summary>
             <nav aria-label="Sitemap Discovery" className="mt-4 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
-              <p className="text-xs text-slate-400 mb-4 text-center">Machine-readable discovery endpoints for search engines and AI crawlers</p>
+              <p className="text-xs text-slate-300 mb-4 text-center">Machine-readable discovery endpoints for search engines and AI crawlers</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                 <a href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/sitemap" target="_blank" rel="noopener" className="text-cyan-400 hover:text-cyan-300 underline">sitemap.xml</a>
                 <a href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/robotsTxt" target="_blank" rel="noopener" className="text-cyan-400 hover:text-cyan-300 underline">robots.txt</a>
@@ -270,7 +270,7 @@ export default function Footer() {
 
         {/* Compliance Badges - Clickable */}
         <div className="border-t border-white/10 pt-8 mb-12">
-          <p className="text-center text-xs text-slate-400 tracking-wide mb-6">
+          <p className="text-center text-xs text-slate-300 tracking-wide mb-6">
             Compliance Alignment & Standards
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6 mb-6">
@@ -285,7 +285,7 @@ export default function Footer() {
                 </div>
                 <div className="text-center">
                   <p className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors">{cert.name}</p>
-                  <p className="text-[10px] text-slate-500">{cert.subtitle}</p>
+                  <p className="text-[10px] text-slate-400">{cert.subtitle}</p>
                 </div>
               </Link>
             ))}
@@ -313,11 +313,11 @@ export default function Footer() {
 
         {/* Authority Line */}
         <div className="border-t border-white/10 pt-6 mb-8 text-center space-y-1">
-          <p className="text-xs font-bold text-white/80 uppercase tracking-[3px]">GlyphLock Security LLC</p>
-          <p className="text-[10px] text-slate-400 uppercase tracking-[2px]">Post-Quantum Cybersecurity Architecture</p>
-          <p className="text-[10px] text-slate-400 uppercase tracking-[2px]">AI Governance Framework</p>
-          <p className="text-[10px] text-slate-400 uppercase tracking-[2px]">Enterprise Security Platform</p>
-          <p className="text-[10px] text-slate-400 mt-2 max-w-xl mx-auto">
+          <p className="text-xs font-bold text-white uppercase tracking-[3px]">GlyphLock Security LLC</p>
+          <p className="text-[10px] text-slate-300 uppercase tracking-[2px]">Post-Quantum Cybersecurity Architecture</p>
+          <p className="text-[10px] text-slate-300 uppercase tracking-[2px]">AI Governance Framework</p>
+          <p className="text-[10px] text-slate-300 uppercase tracking-[2px]">Enterprise Security Platform</p>
+          <p className="text-[10px] text-slate-300 mt-2 max-w-xl mx-auto">
             Designed for structured compliance alignment, zero-trust environments, and post-quantum resilience.
           </p>
         </div>

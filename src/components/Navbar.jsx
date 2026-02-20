@@ -448,7 +448,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
               <span className="text-white">GLYPH</span>
               <span className="text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-500 bg-clip-text">LOCK</span>
             </span>
-            <span className="text-[9px] uppercase tracking-[0.3em] text-cyan-400/70 font-medium">Ecosystem</span>
+            <span className="text-[9px] uppercase tracking-[0.3em] text-cyan-400 font-medium">Ecosystem</span>
           </div>
         </Link>
 
@@ -514,12 +514,12 @@ export default function Navbar({ user, onLogin, onLogout }) {
                     {user.full_name?.charAt(0) || "U"}
                   </div>
                   <span className="text-sm font-medium text-gray-300 max-w-[80px] truncate">{user.full_name?.split(" ")[0]}</span>
-                  <ChevronDown size={14} className="text-gray-400" />
+                  <ChevronDown size={14} className="text-gray-300" />
                 </motion.button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-slate-950/95 backdrop-blur-2xl border border-cyan-500/20 shadow-[0_0_50px_rgba(0,228,255,0.2)] rounded-xl p-2 mt-2 w-60">
                 <div className="px-3 py-2.5 mb-2 border-b border-white/10">
-                  <p className="text-xs text-gray-500">Signed in as</p>
+                  <p className="text-xs text-gray-400">Signed in as</p>
                   <p className="text-sm font-semibold text-white truncate">{user.email}</p>
                 </div>
                 {user.role === 'admin' && (

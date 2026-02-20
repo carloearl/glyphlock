@@ -1028,7 +1028,7 @@ a:hover {
 }
 
 input::placeholder, textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* Page Container Glow */

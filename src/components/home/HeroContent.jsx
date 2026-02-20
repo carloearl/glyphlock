@@ -447,7 +447,7 @@ function GlassShard({ title, text, color, delay, isInView }) {
       <div className={`text-sm font-bold uppercase tracking-wide mb-1 ${isCyan ? 'text-cyan-400' : 'text-purple-400'}`} style={{ textShadow: `0 0 10px ${isCyan ? '#06b6d4' : '#7c3aed'}` }}>
         {title}
       </div>
-      <div className="text-xs text-white/70 leading-relaxed">{text}</div>
+      <div className="text-xs text-white/90 leading-relaxed">{text}</div>
     </motion.div>
   );
 }
@@ -463,7 +463,7 @@ function FeatureLine({ highlight, text, delay, isInView }) {
       <span className="text-cyan-400 mr-2 group-hover:hidden" style={{ textShadow: '0 0 8px #06b6d4' }}>▸</span>
       <span className="text-cyan-400 mr-2 hidden group-hover:inline" style={{ textShadow: '0 0 8px #06b6d4' }}>►</span>
       <span className="text-white" style={{ textShadow: '0 0 10px #06b6d4' }}>{highlight}</span>
-      <span className="text-white/80"> {text}</span>
+      <span className="text-white/90"> {text}</span>
       <div className="absolute left-0 top-0 w-0 h-full group-hover:w-full transition-all duration-400" style={{ background: 'linear-gradient(90deg, rgba(6,182,212,0.2), transparent)' }} />
     </motion.div>
   );
@@ -537,7 +537,7 @@ function FragmentCard({ card, delay, isInView }) {
       <h3 className="text-sm font-black uppercase tracking-wide mb-2" style={{ color: card.color, textShadow: `0 0 15px ${card.color}` }}>
         {card.title}
       </h3>
-      <p className="text-xs text-white/60 leading-relaxed">{card.desc}</p>
+      <p className="text-xs text-white/90 leading-relaxed">{card.desc}</p>
     </motion.div>
   );
 }

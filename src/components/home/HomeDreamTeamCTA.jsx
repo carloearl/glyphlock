@@ -123,7 +123,7 @@ export default function HomeDreamTeamCTA() {
               <motion.p 
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="relative mt-6 text-white/80 text-sm md:text-base font-black uppercase tracking-[0.3em] drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]" 
+                className="relative mt-6 text-white text-sm md:text-base font-black uppercase tracking-[0.3em] drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]" 
                 style={{ zIndex: 100 }}
               >
                 ↑ CLICK THE BALL ↑
@@ -168,8 +168,8 @@ export default function HomeDreamTeamCTA() {
               className="p-6 rounded-xl bg-black/60 border-2 border-blue-500/40 backdrop-blur-md hover:border-blue-400 transition-colors duration-300"
             >
               <h3 className="text-xl font-black text-blue-400 mb-2">{player.name}</h3>
-              <p className="text-sm text-white/80 font-bold mb-3">{player.role}</p>
-              <p className="text-sm text-white/70 leading-relaxed">{player.desc}</p>
+              <p className="text-sm text-white/90 font-bold mb-3">{player.role}</p>
+              <p className="text-sm text-white/80 leading-relaxed">{player.desc}</p>
             </motion.div>
           );
         })}

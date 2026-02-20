@@ -163,10 +163,10 @@ export default function Home() {
         {/* Bootstrap Quote + Hero Section */}
         <section className="w-full">
           <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
-            <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-3xl mx-auto text-white/70 uppercase tracking-[3px]">
+            <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-3xl mx-auto text-white/90 uppercase tracking-[3px]">
               Enterprise-Grade Quantum-Resistant Security Architecture
             </p>
-            <p className="text-xs text-white/40 mt-2 tracking-widest uppercase">
+            <p className="text-xs text-white/60 mt-2 tracking-widest uppercase">
               Post-Quantum Encryption · AI Governance · Zero-Trust Infrastructure
             </p>
           </div>
