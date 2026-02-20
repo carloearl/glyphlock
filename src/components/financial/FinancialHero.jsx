@@ -114,50 +114,56 @@ export default function FinancialHero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="mb-8"
+              className="mb-10"
             >
               <p
-                className="text-[15px] text-slate-300 leading-relaxed max-w-lg"
+                className="text-lg md:text-xl font-semibold text-white/90 mb-2"
+                style={{ letterSpacing: '1px', fontFamily: "'Cinzel', serif" }}
+              >
+                Operational Qualification Architecture
+              </p>
+              <p
+                className="text-[14px] text-slate-400 leading-relaxed max-w-lg"
                 style={{ fontFamily: "'Georgia', serif" }}
               >
-                The financial technology arm of the GlyphLock ecosystem. Point-of-sale systems, blockchain verification, club currency, and entertainment venue technology — built from scratch, owned outright.
+                Structured documentation framework aligned to formal underwriting review protocols.
               </p>
             </motion.div>
 
-            {/* PRODUCT TAGS */}
+            {/* COMPLIANCE TAG STACK */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex items-center gap-6 mb-10"
+              className="flex items-center gap-4 mb-14"
             >
-              {[
-                { icon: "⚡", label: "NUPS", sub: "POS SYSTEM" },
-                { icon: "$", label: "Dream$", sub: "CURRENCY PRESS" },
-                { icon: "◇", label: "Verified", sub: "BLOCKCHAIN" },
-              ].map((tag, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-md border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xs">{tag.icon}</span>
-                  <div>
-                    <span className="block text-xs font-bold text-white leading-none" style={{ fontFamily: "'Cinzel', serif" }}>{tag.label}</span>
-                    <span className="block text-[9px] text-slate-500 uppercase tracking-wider">{tag.sub}</span>
-                  </div>
-                </div>
-              ))}
+              <span
+                className="text-[10px] uppercase font-bold text-slate-400"
+                style={{ letterSpacing: '3px', fontFamily: "'Cinzel', serif" }}
+              >
+                Deterministic Risk Profile
+              </span>
+              <span className="w-px h-4 bg-yellow-600/40" />
+              <span
+                className="text-[10px] uppercase font-bold text-slate-400"
+                style={{ letterSpacing: '3px', fontFamily: "'Cinzel', serif" }}
+              >
+                Verified Operations Standard
+              </span>
             </motion.div>
 
-            {/* CTA BUTTONS — Green solid + outlined */}
+            {/* CTA BUTTONS — Gold glow, green shimmer, pop-out */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex flex-wrap gap-4"
+              className="flex flex-wrap gap-5"
             >
-              <FinancialCTA to="NUPSLogin" variant="primary">
-                Access NUPS POS
+              <FinancialCTA to="Consultation" variant="primary">
+                Initiate Qualification
               </FinancialCTA>
-              <FinancialCTA to="Blockchain" variant="outline">
-                Blockchain Tools
+              <FinancialCTA to="SecurityDocs" variant="outline">
+                View Framework Documentation
               </FinancialCTA>
             </motion.div>
           </div>
