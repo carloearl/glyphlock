@@ -24,11 +24,11 @@ export default function SEOHead({
       autoData = getSeoData(key);
   }
 
-  const resolvedTitle = title || autoData.title || "GlyphLock Security - Quantum-Resistant Cybersecurity Platform | AI-Powered Enterprise Security Solutions";
-  const resolvedDescription = description || autoData.description || "GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity with AI threat detection, visual cryptography, blockchain security, and secure POS systems. Based in El Mirage, Arizona. Protect your digital assets with military-grade encryption, GlyphBot AI assistant, QR code security, steganography tools, and comprehensive security operations center. Founded January 2025 by Carlo Rene Earl, Collin Vanderginst (CTO), and Jacub Lough (CSO/CFO).";
+  const resolvedTitle = title || autoData.title || "Quantum-Resistant Enterprise Security Platform | GlyphLock Security LLC";
+  const resolvedDescription = description || autoData.description || "GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework. Built for high-security environments and structured compliance readiness.";
   
   // Combine and deduplicate keywords
-  const defaultKeywords = "GlyphLock Security LLC, quantum-resistant encryption, cybersecurity platform Arizona, AI security threat detection, blockchain security solutions, visual cryptography, QR code security generator, steganography tools, security operations center SOC, enterprise security El Mirage, POS system NUPS, GlyphBot AI assistant, secure payment processing, fraud prevention system, identity protection, data encryption, Carlo Rene Earl, Collin Vanderginst CTO, Jacub Lough CSO CFO, military-grade encryption, cybersecurity consulting, security audit services, hotzone mapper, Master Covenant security framework";
+  const defaultKeywords = "GlyphLock Security LLC, quantum-resistant encryption, post-quantum cryptography, AI cybersecurity, enterprise security platform, visual cryptography, secure QR codes, blockchain security, AI governance framework, Master Covenant, GlyphLock Security, threat detection AI, zero-trust architecture, identity verification, fraud prevention, steganography tools, secure QR code generator, image encryption, NIST post-quantum standards, AI binding protocol, security operations center";
   const autoKeywords = autoData.keywords ? autoData.keywords.join(", ") : "";
   const propKeywords = Array.isArray(keywords) ? keywords.join(", ") : (keywords || "");
   
@@ -143,9 +143,9 @@ export default function SEOHead({
     updateMetaTag('og:image:height', '630', true);
     updateMetaTag('og:image:alt', resolvedTitle, true);
     updateMetaTag('og:image:type', 'image/png', true);
-    updateMetaTag('og:site_name', 'GlyphLock', true);
+    updateMetaTag('og:site_name', 'GlyphLock Security', true);
     updateMetaTag('og:locale', 'en_US', true);
-    updateMetaTag('fb:app_id', 'YOUR_FB_APP_ID', true); // Replace with actual FB app ID
+    // fb:app_id omitted — no verified FB app ID
 
     // GLYPHLOCK: Enhanced Twitter Cards
     updateMetaTag('twitter:card', 'summary_large_image');
@@ -202,7 +202,7 @@ export default function SEOHead({
       "url": siteUrl,
       "logo": image,
       "image": image,
-      "description": "Enterprise-grade quantum-resistant cybersecurity platform offering AI-powered threat detection, visual cryptography, blockchain security, secure POS systems, and comprehensive security solutions for businesses worldwide.",
+      "description": "Enterprise-grade quantum-resistant cybersecurity architecture combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant AI governance framework.",
       "foundingDate": "2025-01",
       "founder": [
         {
@@ -245,20 +245,23 @@ export default function SEOHead({
         "https://instagram.com/glyphlock",
         "https://tiktok.com/@glyphlock"
       ],
-      "slogan": "Quantum-Grade Security for the AI Era",
+      "slogan": "Post-Quantum Cybersecurity Architecture for Enterprise Defense",
       "areaServed": "Worldwide",
       "keywords": resolvedKeywords,
       "knowsAbout": [
         "Quantum-resistant encryption",
-        "Cybersecurity",
-        "Artificial Intelligence",
-        "Blockchain Security",
-        "Visual Cryptography",
-        "Threat Detection",
-        "Data Protection",
-        "Identity Verification",
-        "Fraud Prevention",
-        "Security Auditing"
+        "Post-quantum cryptography",
+        "AI cybersecurity",
+        "Blockchain security",
+        "Visual cryptography",
+        "AI governance framework",
+        "Zero-trust architecture",
+        "Identity verification",
+        "Fraud prevention",
+        "Threat detection AI",
+        "NIST post-quantum standards",
+        "Steganography",
+        "Secure QR infrastructure"
       ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
