@@ -164,7 +164,7 @@ export default function Home() {
         <section className="w-full">
           <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
             <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-3xl mx-auto text-white/90 uppercase tracking-[3px]">
-              Where sovereign creators build, verify, and defend what they own — powered by post-quantum security and AI orchestration.
+              The next-generation system where autonomous agents, post-quantum security, and creator ownership converge.
             </p>
           </div>
 
