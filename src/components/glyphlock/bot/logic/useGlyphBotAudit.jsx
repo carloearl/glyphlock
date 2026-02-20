@@ -144,7 +144,7 @@ export function useGlyphBotAudit(currentUser) {
     }
   }, [loadAudits]);
 
-  const runAudit = useCallback(async (auditId, auditConfig) => {
+  const runAudit = useCallback(async (auditId, auditConfig, _client, _msgs) => {
     if (!auditId) return null;
 
     try {
@@ -153,7 +153,7 @@ export function useGlyphBotAudit(currentUser) {
       const audit = await getAudit(auditId);
       if (!audit) return null;
 
-      const auditPrompt = auditService.buildAuditPrompt(auditConfig, audit.targetType);
+      const auditPrompt = auditService.buildAuditPrompt(auditConfig, auditConfig.targetType || audit.targetType);
       
       return auditPrompt;
     } catch (e) {
