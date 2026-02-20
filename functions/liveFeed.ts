@@ -167,6 +167,7 @@ async function fetchLiveIntelligence(query) {
   try {
     const prompt = query || 'Provide a brief daily intelligence briefing covering: top 3 cybersecurity developments today, any significant regulatory or compliance changes, and 2 key fintech/market moves. Be concise and factual. Cite your sources.';
 
+    console.log('[LiveFeed] Calling Perplexity with key len=' + apiKey.length + ' prefix=' + apiKey.slice(0, 6));
     const res = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
