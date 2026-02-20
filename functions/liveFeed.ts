@@ -161,19 +161,19 @@ async function fetchLiveIntelligence(query) {
     };
   }
 
-  // Trim whitespace/newlines that can corrupt headers
-  const apiKey = rawKey.trim();
+  // Strip ALL non-ASCII and whitespace that can corrupt HTTP headers
+  const apiKey = rawKey.replace(/[^\x20-\x7E]/g, '').trim();
+  console.log('[LiveFeed] Perplexity key length:', apiKey.length, 'starts with:', apiKey.slice(0, 8));
 
   try {
     const prompt = query || 'Provide a brief daily intelligence briefing covering: top 3 cybersecurity developments today, any significant regulatory or compliance changes, and 2 key fintech/market moves. Be concise and factual. Cite your sources.';
 
-    const headers = new Headers();
-    headers.set('Content-Type', 'application/json');
-    headers.set('Authorization', 'Bearer ' + apiKey);
-
     const res = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
       body: JSON.stringify({
         model: 'llama-3.1-sonar-small-128k-online',
         messages: [
