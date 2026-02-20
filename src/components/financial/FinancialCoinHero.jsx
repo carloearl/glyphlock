@@ -48,28 +48,23 @@ export default function FinancialCoinHero() {
         .glf-stars { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
         @keyframes glf-twinkle { from { opacity: 0.05; } to { opacity: 0.7; } }
 
-        /* ===== GREEN PULSE GLOW ===== */
+        /* ===== GREEN PULSE GLOW — no box, pure radial ===== */
         .glf-green-pulse {
           position: absolute;
           width: min(480px, 85vw);
           height: min(480px, 85vw);
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(16,185,129,0.25) 0%, rgba(16,185,129,0.08) 40%, transparent 70%);
+          background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, rgba(16,185,129,0.06) 35%, transparent 65%);
           animation: glf-greenPulse 3s ease-in-out infinite;
           pointer-events: none;
           z-index: 1;
+          border: none;
+          outline: none;
+          box-sizing: border-box;
         }
         @keyframes glf-greenPulse {
-          0%, 100% { 
-            transform: scale(0.92); 
-            opacity: 0.4;
-            box-shadow: 0 0 60px rgba(16,185,129,0.3), 0 0 120px rgba(16,185,129,0.15);
-          }
-          50% { 
-            transform: scale(1.08); 
-            opacity: 1;
-            box-shadow: 0 0 100px rgba(16,185,129,0.5), 0 0 200px rgba(16,185,129,0.25), 0 0 300px rgba(16,185,129,0.1);
-          }
+          0%, 100% { transform: scale(0.95); opacity: 0.5; }
+          50% { transform: scale(1.05); opacity: 1; }
         }
 
         .glf-stage {
@@ -86,48 +81,44 @@ export default function FinancialCoinHero() {
           position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
         }
 
-        /* ===== MULTI-AXIS ORBIT RINGS ===== */
+        /* ===== NEXUS TEXT ORBITS — opposite directions ===== */
         .glf-orbit-outer { 
-          animation: glf-orbitCW 22s linear infinite; 
+          animation: glf-orbitCW 28s linear infinite; 
           transform-origin: 280px 280px; 
         }
         .glf-orbit-inner { 
-          animation: glf-orbitCCW 16s linear infinite; 
+          animation: glf-orbitCCW 20s linear infinite; 
           transform-origin: 280px 280px; 
         }
         @keyframes glf-orbitCW  { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes glf-orbitCCW { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
-        /* Orbit track rings — spinning on different axes */
+        /* Orbit track rings — subtle nexus spin */
         .glf-orbit-track-1 {
           position: absolute; inset: 25px; border-radius: 50%;
-          border: 1px solid rgba(16,185,129,0.2);
+          border: 1px solid rgba(16,185,129,0.15);
           pointer-events: none;
-          animation: glf-ringSpinX 18s linear infinite;
+          animation: glf-ringCW 24s linear infinite;
         }
         .glf-orbit-track-2 {
           position: absolute; inset: 55px; border-radius: 50%;
-          border: 1px solid rgba(234,179,8,0.15);
+          border: 1px solid rgba(234,179,8,0.12);
           pointer-events: none;
-          animation: glf-ringSpinY 14s linear infinite reverse;
+          animation: glf-ringCCW 18s linear infinite;
         }
         .glf-orbit-track-3 {
           position: absolute; inset: 85px; border-radius: 50%;
-          border: 1px solid rgba(16,185,129,0.12);
+          border: 1px solid rgba(16,185,129,0.1);
           pointer-events: none;
-          animation: glf-ringSpinZ 20s linear infinite;
+          animation: glf-ringCW 30s linear infinite;
         }
-        @keyframes glf-ringSpinX {
-          from { transform: rotateX(0deg) rotateZ(0deg); }
-          to   { transform: rotateX(360deg) rotateZ(60deg); }
+        @keyframes glf-ringCW {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
-        @keyframes glf-ringSpinY {
-          from { transform: rotateY(0deg) rotateZ(0deg); }
-          to   { transform: rotateY(360deg) rotateZ(-45deg); }
-        }
-        @keyframes glf-ringSpinZ {
-          from { transform: rotateZ(0deg) rotateX(0deg); }
-          to   { transform: rotateZ(360deg) rotateX(30deg); }
+        @keyframes glf-ringCCW {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(-360deg); }
         }
 
         /* ===== ORBITING ELEMENT ===== */
@@ -209,7 +200,15 @@ export default function FinancialCoinHero() {
             0 0 60px rgba(255,200,0,0.45), 0 0 120px rgba(255,200,0,0.15);
         }
         .glf-face-front { transform: translateZ(9px); }
-        .glf-face-back  { transform: rotateY(180deg) translateZ(9px); }
+        .glf-face-back  { 
+          transform: rotateY(180deg) translateZ(9px); 
+          background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%);
+          animation: glf-shieldBgPulse 3s ease-in-out infinite;
+        }
+        @keyframes glf-shieldBgPulse {
+          0%, 100% { background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%); }
+          50% { background: radial-gradient(circle, rgba(16,185,129,0.25) 0%, rgba(16,185,129,0.05) 50%, transparent 70%); }
+        }
         .glf-face img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
         .glf-shine {
           position: absolute; inset: 0; border-radius: 50%; z-index: 3; pointer-events: none;
