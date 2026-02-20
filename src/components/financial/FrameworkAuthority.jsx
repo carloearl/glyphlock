@@ -1,11 +1,11 @@
 import React from "react";
-import { GRID_BG, NEU_DIVIDER, NEU_CARD, CINZEL, GEORGIA } from "./FinancialDesignTokens";
+import { NEU_DIVIDER, NEU_CARD, CINZEL, GEORGIA } from "./FinancialDesignTokens";
+import FinancialSectionShell from "./FinancialSectionShell";
 
 export default function FrameworkAuthority() {
   return (
-    <section className="py-20 md:py-28 relative" style={{ background: 'transparent' }}>
-      <div className="absolute inset-0 pointer-events-none" style={GRID_BG} />
-      <div className="max-w-4xl mx-auto px-6 relative z-10">
+    <FinancialSectionShell orbSeed={1}>
+      <div className="max-w-4xl mx-auto px-6">
         <div className={NEU_DIVIDER + " mb-16"} />
 
         <div className="text-center mb-12">
@@ -26,6 +26,6 @@ export default function FrameworkAuthority() {
 
         <div className={NEU_DIVIDER + " mt-16"} />
       </div>
-    </section>
+    </FinancialSectionShell>
   );
 }

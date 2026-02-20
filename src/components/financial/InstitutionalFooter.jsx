@@ -1,11 +1,11 @@
 import React from "react";
-import { GRID_BG, NEU_CARD, CINZEL, GEORGIA } from "./FinancialDesignTokens";
+import { NEU_CARD, CINZEL, GEORGIA } from "./FinancialDesignTokens";
+import FinancialSectionShell from "./FinancialSectionShell";
 
 export default function InstitutionalFooter() {
   return (
-    <section className="py-16 md:py-20 relative" style={{ background: 'transparent' }}>
-      <div className="absolute inset-0 pointer-events-none" style={GRID_BG} />
-      <div className="max-w-4xl mx-auto px-6 relative z-10">
+    <FinancialSectionShell orbSeed={8}>
+      <div className="max-w-4xl mx-auto px-6">
         <div className="w-full h-px bg-gradient-to-r from-transparent via-emerald-600/30 to-transparent mb-12" />
 
         <div className={`${NEU_CARD} p-8 md:p-10 text-center space-y-4`}>
@@ -35,6 +35,6 @@ export default function InstitutionalFooter() {
           </p>
         </div>
       </div>
-    </section>
+    </FinancialSectionShell>
   );
 }

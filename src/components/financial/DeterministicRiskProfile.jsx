@@ -1,5 +1,6 @@
 import React from "react";
-import { GRID_BG, NEU_DIVIDER, NEU_CELL, CINZEL, GEORGIA } from "./FinancialDesignTokens";
+import { NEU_DIVIDER, NEU_CELL, CINZEL, GEORGIA } from "./FinancialDesignTokens";
+import FinancialSectionShell from "./FinancialSectionShell";
 
 const PROTOCOLS = [
   { title: "Transaction Documentation Protocol", definition: "Defined logging and retention framework." },
@@ -11,9 +12,8 @@ const PROTOCOLS = [
 
 export default function DeterministicRiskProfile() {
   return (
-    <section className="py-20 md:py-28 relative" style={{ background: 'transparent' }}>
-      <div className="absolute inset-0 pointer-events-none" style={GRID_BG} />
-      <div className="max-w-4xl mx-auto px-6 relative z-10">
+    <FinancialSectionShell orbSeed={2}>
+      <div className="max-w-4xl mx-auto px-6">
         <div className={NEU_DIVIDER + " mb-16"} />
 
         <div className="text-center mb-10">
@@ -43,6 +43,6 @@ export default function DeterministicRiskProfile() {
 
         <div className={NEU_DIVIDER + " mt-16"} />
       </div>
-    </section>
+    </FinancialSectionShell>
   );
 }
