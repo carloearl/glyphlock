@@ -128,7 +128,7 @@ export default function ImageLab() {
                     Image Lab
                   </h1>
                   <p className="text-[11px] md:text-xs text-white/60 font-medium mt-0.5">
-                    AI-Powered Visual Asset Infrastructure
+                    Structured Visual Asset Processing
                   </p>
                 </div>
               </div>
