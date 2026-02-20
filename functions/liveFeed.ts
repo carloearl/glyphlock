@@ -147,8 +147,9 @@ async function fetchMarketIntel() {
 // 4. LIVE INTELLIGENCE — Perplexity API (real-time web search with citations)
 async function fetchLiveIntelligence(query) {
   const cacheKey = `intel_${(query || 'briefing').slice(0, 50)}`;
+  // Skip cache for error responses
   const cached = getCached(cacheKey, CACHE_TTL_INTEL);
-  if (cached) return cached;
+  if (cached && !cached.error) return cached;
 
   const rawKey = Deno.env.get('PERPLEXITY_API_KEY');
   if (!rawKey) {
