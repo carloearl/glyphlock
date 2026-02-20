@@ -1,5 +1,6 @@
-// GlyphLock Financial — Shared Design Tokens
-// Money theme, nightlife appeal, bank-grade authority
+
+// GlyphLock Financial — Design Tokens v2
+// Dark emerald base, gold/orange accents, no flat green
 
 export const GRID_BG = {
   backgroundImage: `
@@ -9,11 +10,11 @@ export const GRID_BG = {
   backgroundSize: '48px 48px'
 };
 
-export const NEU_DIVIDER = "w-full h-px bg-gradient-to-r from-transparent via-yellow-600/40 to-transparent";
+export const NEU_DIVIDER = "w-full h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent";
 
-export const NEU_CARD = "bg-[#0a1a0f] border border-emerald-800/30 rounded-lg shadow-[6px_6px_16px_rgba(0,0,0,0.7),_-4px_-4px_12px_rgba(16,185,129,0.06)]";
+export const NEU_CARD = "bg-black/40 backdrop-blur-md border border-amber-500/15 rounded-xl shadow-[0_0_30px_rgba(234,179,8,0.08),_0_4px_20px_rgba(0,0,0,0.5)]";
 
-export const NEU_CELL = "bg-[#0a1a0f] shadow-[inset_2px_2px_6px_rgba(0,0,0,0.6),_inset_-2px_-2px_6px_rgba(16,185,129,0.04)] border border-emerald-900/30 rounded-lg";
+export const NEU_CELL = "bg-black/30 backdrop-blur-sm border border-amber-500/10 rounded-lg shadow-[0_0_15px_rgba(234,179,8,0.05)]";
 
 export const CINZEL = { fontFamily: "'Cinzel', serif" };
 export const GEORGIA = { fontFamily: "'Georgia', serif" };
