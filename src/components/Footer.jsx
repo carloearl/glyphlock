@@ -229,7 +229,6 @@ export default function Footer() {
         {/* ─── AUTHORITY BRAND BLOCK ─── */}
         <div className="border-t border-white/[0.06] pt-8 pb-6">
           <div className="flex flex-col items-center gap-4">
-            {/* Spinning GL Logo */}
             <div className="relative w-16 h-16">
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
@@ -239,10 +238,7 @@ export default function Footer() {
                 decoding="async"
                 width={64}
                 height={64}
-                style={{ 
-                  animation: 'footerLogoSpin 20s linear infinite',
-                  filter: 'drop-shadow(0 0 12px rgba(59,130,246,0.4))'
-                }}
+                style={{ filter: 'drop-shadow(0 0 12px rgba(59,130,246,0.4))' }}
               />
             </div>
             <div className="text-center space-y-1.5">
@@ -259,14 +255,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-
-        {/* Spin keyframes */}
-        <style>{`
-          @keyframes footerLogoSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
 
         {/* ─── BOTTOM BAR ─── */}
         <div className="border-t border-white/[0.06] pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
