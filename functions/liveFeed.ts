@@ -165,7 +165,6 @@ async function fetchLiveIntelligence(query) {
   const apiKey = rawKey.replace(/[^\x20-\x7E]/g, '').trim();
 
   try {
-    console.log('[LiveFeed] Key debug — length:', apiKey.length, '| first8:', apiKey.slice(0, 8), '| last4:', apiKey.slice(-4));
     const prompt = query || 'Provide a brief daily intelligence briefing covering: top 3 cybersecurity developments today, any significant regulatory or compliance changes, and 2 key fintech/market moves. Be concise and factual. Cite your sources.';
 
     const res = await fetch('https://api.perplexity.ai/chat/completions', {
