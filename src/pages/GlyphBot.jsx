@@ -331,7 +331,9 @@ export default function GlyphBotPage() {
       });
 
       if (modes.voice && botText) {
-        // CRITICAL: Read latest voiceSettings from localStorage to avoid stale closure
+        // CRITICAL: Stop any previous audio before auto-speaking new response
+        stopTTS();
+        // Read latest voiceSettings from localStorage to avoid stale closure
         let latestVoiceSettings = voiceSettings;
         try {
           const saved = localStorage.getItem('glyphbot_voice_settings');
