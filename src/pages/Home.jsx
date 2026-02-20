@@ -149,14 +149,14 @@ export default function Home() {
   return (
     <>
       <SEOHead 
-        title="Secure Digital Ecosystems Platform | GlyphLock Security LLC"
-        description="GlyphLock Security LLC — empowering the future of secure digital ecosystems with cutting-edge AI, quantum-resistant architecture, and intelligent operational frameworks. Enterprise security, AI governance, visual cryptography, secure QR infrastructure, and venue management."
-        keywords="GlyphLock Security, enterprise security platform, AI governance, quantum-resistant encryption, post-quantum cryptography, secure QR codes, visual cryptography, blockchain security, venue management POS, AI-powered threat detection, zero-trust architecture, Master Covenant, digital ecosystem security"
+        title="Intelligent Security & Creator Infrastructure | GlyphLock Security LLC"
+        description="GlyphLock Security LLC — where intelligent security meets creator sovereignty. Post-quantum encryption, AI-orchestrated defense, blockchain-anchored authorship, and the Master Covenant governance framework. Build what's yours. Prove it forever."
+        keywords="GlyphLock Security, creator infrastructure, AI security orchestration, quantum-resistant encryption, post-quantum cryptography, secure QR identity, blockchain authorship proof, venue management POS, AI threat detection, zero-trust architecture, Master Covenant, digital sovereignty"
         url="/"
       />
       
       {/* SEO H1 - Hidden but crawlable */}
-      <h1 className="sr-only">GlyphLock Security — Empowering Secure Digital Ecosystems with AI, Quantum-Resistant Architecture, and Intelligent Operational Frameworks</h1>
+      <h1 className="sr-only">GlyphLock Security — Intelligent Security Infrastructure for Creators, Builders, and Sovereign Digital Ecosystems</h1>
 
       <main className="w-full relative" style={{ background: 'transparent', position: 'relative' }}>
         
@@ -164,7 +164,7 @@ export default function Home() {
         <section className="w-full">
           <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
             <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-3xl mx-auto text-white/90 uppercase tracking-[3px]">
-              Empowering the future of secure digital ecosystems with cutting-edge AI, quantum-resistant architecture, and intelligent operational frameworks.
+              Where sovereign creators build, verify, and defend what they own — powered by post-quantum security and AI orchestration.
             </p>
           </div>
 
