@@ -25,9 +25,9 @@ export default function Footer() {
     <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/15 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-12 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-14 gap-6 md:gap-8 lg:gap-10 mb-12 md:mb-20">
-          {/* Brand Column */}
-          <div className="md:col-span-2 lg:col-span-3 space-y-6">
+        {/* Brand + Social Row */}
+        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 mb-12 md:mb-16">
+          <div className="flex flex-col items-center md:items-start gap-4 max-w-lg">
             <div className="flex items-center gap-3">
               <img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
@@ -42,22 +42,21 @@ export default function Footer() {
                 GLYPH<span className="text-[#00E4FF]">LOCK</span>
               </span>
             </div>
-            <div className="space-y-4 max-w-md">
-              <p className="text-white text-lg font-black leading-tight">
-                POST-QUANTUM CYBERSECURITY ARCHITECTURE
-              </p>
-              <p className="text-slate-300 leading-relaxed text-sm">
-                Enterprise-grade quantum-resistant encryption, AI-powered threat detection, visual cryptography, and the Master Covenant AI governance framework.
-              </p>
-              <div className="flex flex-wrap gap-2 pt-2">
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">AI GOVERNANCE</span>
-                <span className="text-violet-400">•</span>
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">ZERO-TRUST</span>
-                <span className="text-violet-400">•</span>
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">POST-QUANTUM</span>
-              </div>
+            <p className="text-slate-300 leading-relaxed text-sm text-center md:text-left">
+              Enterprise-grade quantum-resistant encryption, AI-powered threat detection, visual cryptography, and the Master Covenant AI governance framework.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">AI GOVERNANCE</span>
+              <span className="text-violet-400">•</span>
+              <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">ZERO-TRUST</span>
+              <span className="text-violet-400">•</span>
+              <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">POST-QUANTUM</span>
             </div>
-            <div className="flex items-center gap-4 pt-4">
+          </div>
+
+          {/* Social + Contact */}
+          <div className="flex flex-col items-center md:items-end gap-4">
+            <div className="flex items-center gap-3">
               <a href="https://twitter.com/glyphlock" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/8 flex items-center justify-center text-indigo-300 hover:bg-violet-500 hover:text-white hover:shadow-[0_0_15px_rgba(168,60,255,0.6)] transition-all duration-300">
                 <Twitter size={18} />
               </a>
@@ -71,93 +70,85 @@ export default function Footer() {
                 <Github size={18} />
               </a>
             </div>
-          </div>
-
-          {/* Company Column */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Company</h4>
-            <div className="flex flex-col gap-4">
-              {FOOTER_LINKS.company && FOOTER_LINKS.company.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Modules Column */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Modules</h4>
-            <div className="flex flex-col gap-4">
-              {FOOTER_LINKS.modules && FOOTER_LINKS.modules.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Financial Column */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Financial</h4>
-            <div className="flex flex-col gap-4">
-              {FOOTER_LINKS.financial && FOOTER_LINKS.financial.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-amber-400 hover:drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-all duration-300">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Protocols Column */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Protocols</h4>
-            <div className="flex flex-col gap-4">
-              {FOOTER_LINKS.protocols && FOOTER_LINKS.protocols.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-indigo-400 hover:drop-shadow-[0_0_8px_rgba(129,140,248,0.8)] transition-all duration-300">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-          
-          {/* Resources Column */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Resources</h4>
-            <div className="flex flex-col gap-4">
-              {FOOTER_LINKS.resources && FOOTER_LINKS.resources.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-purple-400 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] transition-all duration-300">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-          
-          {/* Account Column */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Account</h4>
-            <div className="flex flex-col gap-4">
-              {FOOTER_LINKS.account && FOOTER_LINKS.account.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-          
-          {/* Contact Column */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Contact</h4>
-            <div className="flex flex-col gap-4">
-              <a href="mailto:support@glyphlock.io" className="flex items-center gap-2 text-slate-300 font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
-                <Mail size={16} /> support@glyphlock.io
+            <div className="flex flex-col items-center md:items-end gap-2 text-sm">
+              <a href="mailto:support@glyphlock.io" className="flex items-center gap-2 text-slate-300 font-medium hover:text-cyan-400 transition-all duration-300">
+                <Mail size={14} /> support@glyphlock.io
               </a>
-              <a href="tel:+14242466499" className="flex items-center gap-2 text-slate-300 font-medium hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
-                <Phone size={16} /> (424) 246-6499
+              <a href="tel:+14242466499" className="flex items-center gap-2 text-slate-300 font-medium hover:text-blue-400 transition-all duration-300">
+                <Phone size={14} /> (424) 246-6499
               </a>
-              <p className="text-sm text-slate-300 pt-2">
-                El Mirage, Arizona<br/>United States
-              </p>
+              <p className="text-xs text-slate-400">El Mirage, Arizona · United States</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Horizontal Link Groups */}
+        <div className="space-y-6 mb-12 md:mb-16">
+          {/* Row: Company + Modules + Financial */}
+          <div className="flex flex-wrap justify-center md:justify-start gap-x-10 gap-y-6">
+            <div>
+              <h4 className="text-white font-bold mb-3 uppercase tracking-widest text-[11px]">Company</h4>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {FOOTER_LINKS.company && FOOTER_LINKS.company.map((link) => (
+                  <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 text-sm hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-3 uppercase tracking-widest text-[11px]">Modules</h4>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {FOOTER_LINKS.modules && FOOTER_LINKS.modules.map((link) => (
+                  <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 text-sm hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-3 uppercase tracking-widest text-[11px]">Financial</h4>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {FOOTER_LINKS.financial && FOOTER_LINKS.financial.map((link) => (
+                  <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 text-sm hover:text-amber-400 hover:drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-all duration-300">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Row: Protocols + Resources + Account */}
+          <div className="flex flex-wrap justify-center md:justify-start gap-x-10 gap-y-6">
+            <div>
+              <h4 className="text-white font-bold mb-3 uppercase tracking-widest text-[11px]">Protocols</h4>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {FOOTER_LINKS.protocols && FOOTER_LINKS.protocols.map((link) => (
+                  <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 text-sm hover:text-indigo-400 hover:drop-shadow-[0_0_8px_rgba(129,140,248,0.8)] transition-all duration-300">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-3 uppercase tracking-widest text-[11px]">Resources</h4>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {FOOTER_LINKS.resources && FOOTER_LINKS.resources.map((link) => (
+                  <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 text-sm hover:text-purple-400 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] transition-all duration-300">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-3 uppercase tracking-widest text-[11px]">Account</h4>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {FOOTER_LINKS.account && FOOTER_LINKS.account.map((link) => (
+                  <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 text-sm hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
