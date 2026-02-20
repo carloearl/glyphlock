@@ -839,6 +839,10 @@ export default function GlyphBotPage() {
 
                 {showAuditHistory ? (
                   <div className="flex-1 overflow-hidden flex flex-col">
+                    {/* Metrics Dashboard */}
+                    <div className="p-3 border-b border-slate-800/50 max-h-[40%] overflow-y-auto">
+                      <UI.AuditMetricsDashboard audits={audits} />
+                    </div>
                     <UI.AuditHistoryPanel
                       audits={audits}
                       isLoading={auditsLoading}
