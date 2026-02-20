@@ -9,7 +9,7 @@ export default function SecurityDocs() {
     {
       icon: Shield,
       title: "Encryption Standards",
-      description: "We use AES-256 encryption for data at rest and TLS 1.3 for data in transit. All cryptographic operations follow NIST standards and quantum-resistant algorithms.",
+      description: "AES-256 encryption for data at rest and TLS 1.3 for data in transit. Cryptographic operations are structured to align with NIST standards and quantum-resistant algorithms.",
       badge: "AES-256"
     },
     {
@@ -21,14 +21,14 @@ export default function SecurityDocs() {
     {
       icon: Lock,
       title: "Data Protection",
-      description: "All user data is encrypted, backed up daily, and stored in SOC 2 compliant data centers with 99.99% uptime SLA. Zero-knowledge architecture available.",
-      badge: "SOC 2"
+      description: "All user data is encrypted, backed up daily, and stored in SOC 2 aligned infrastructure with 99.99% uptime SLA. Zero-knowledge architecture available.",
+      badge: "SOC 2 Aligned"
     },
     {
       icon: FileText,
       title: "Compliance",
-      description: "GDPR compliant, CCPA ready, and working towards ISO 27001 certification. Regular third-party security audits and penetration testing.",
-      badge: "GDPR"
+      description: "GDPR aligned, CCPA ready, and structured to support ISO 27001 alignment. Regular third-party security audits and penetration testing.",
+      badge: "GDPR Aligned"
     }
   ];
 

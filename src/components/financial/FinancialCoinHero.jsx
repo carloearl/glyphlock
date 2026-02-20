@@ -184,7 +184,7 @@ export default function FinancialCoinHero() {
           </defs>
           <g className="glf-orbit-outer">
             <text fontFamily="Cinzel,serif" fontSize="11" fill="rgba(218,165,32,0.8)" letterSpacing="3">
-              <textPath href="#glfOuterPath">GLYPHLOCK FINANCIAL LLC &nbsp;◆&nbsp; LEGAL ENTITY: AZ #23831258 &nbsp;◆&nbsp; PATENT PENDING #18/584,961 &nbsp;◆&nbsp; ENTERTAINMENT VENUE SOLUTIONS &nbsp;◆&nbsp; PCI DSS LEVEL 1 &nbsp;◆&nbsp; SOC 2 TYPE II &nbsp;◆&nbsp; INDEPENDENTLY AUDITED &nbsp;◆&nbsp;</textPath>
+              <textPath href="#glfOuterPath">GLYPHLOCK FINANCIAL LLC &nbsp;◆&nbsp; LEGAL ENTITY: AZ #23831258 &nbsp;◆&nbsp; PATENT PENDING #18/584,961 &nbsp;◆&nbsp; ENTERTAINMENT VENUE SOLUTIONS &nbsp;◆&nbsp; PCI DSS LEVEL 1 ALIGNED &nbsp;◆&nbsp; SOC 2 TYPE II ALIGNED &nbsp;◆&nbsp; INDEPENDENTLY AUDITED &nbsp;◆&nbsp;</textPath>
             </text>
           </g>
           <g className="glf-orbit-inner">
@@ -236,9 +236,9 @@ export default function FinancialCoinHero() {
               <span className="glf-td">▲</span>
               <span className="glf-ti">BLOCKCHAIN VERIFIED</span>
               <span className="glf-td">▲</span>
-              <span className="glf-ti">PCI DSS LEVEL 1</span>
+              <span className="glf-ti">PCI DSS ALIGNED</span>
               <span className="glf-td">▲</span>
-              <span className="glf-ti">SOC 2 TYPE II</span>
+              <span className="glf-ti">SOC 2 ALIGNED</span>
               <span className="glf-td">▲</span>
               <span className="glf-ti">AES-256 ENCRYPTED</span>
               <span className="glf-td">▲</span>

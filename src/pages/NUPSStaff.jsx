@@ -11,6 +11,7 @@ import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import { useQuery } from "@tanstack/react-query";
+import SEOHead from "@/components/SEOHead";
 
 export default function NUPSStaff() {
   const [user, setUser] = useState(null);
@@ -73,6 +74,11 @@ export default function NUPSStaff() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <SEOHead
+        title="N.U.P.S. Staff Terminal | GlyphLock"
+        description="Staff point-of-sale terminal. Transaction processing, timeclock, shift management, and batch operations."
+        url="/nups-staff"
+      />
       <header className="border-b border-cyan-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
         <div className="container mx-auto flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">

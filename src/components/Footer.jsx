@@ -25,9 +25,9 @@ export default function Footer() {
     <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/15 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-12 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-12 mb-12 md:mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-14 gap-6 md:gap-8 lg:gap-10 mb-12 md:mb-20">
           {/* Brand Column */}
-          <div className="md:col-span-2 lg:col-span-4 space-y-6">
+          <div className="md:col-span-2 lg:col-span-3 space-y-6">
             <div className="flex items-center gap-3">
               <img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
@@ -42,7 +42,7 @@ export default function Footer() {
               <p className="text-white text-lg font-black leading-tight">
                 POST-QUANTUM CYBERSECURITY ARCHITECTURE
               </p>
-              <p className="text-gray-400 leading-relaxed text-sm">
+              <p className="text-slate-300 leading-relaxed text-sm">
                 Enterprise-grade quantum-resistant encryption, AI-powered threat detection, visual cryptography, and the Master Covenant AI governance framework.
               </p>
               <div className="flex flex-wrap gap-2 pt-2">
@@ -74,7 +74,7 @@ export default function Footer() {
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Company</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.company && FOOTER_LINKS.company.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-white font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
+                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
                   {link.label}
                 </Link>
               ))}
@@ -86,7 +86,19 @@ export default function Footer() {
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Modules</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.modules && FOOTER_LINKS.modules.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-white font-medium hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
+                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Financial Column */}
+          <div className="md:col-span-1 lg:col-span-2">
+            <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Financial</h4>
+            <div className="flex flex-col gap-4">
+              {FOOTER_LINKS.financial && FOOTER_LINKS.financial.map((link) => (
+                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-amber-400 hover:drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-all duration-300">
                   {link.label}
                 </Link>
               ))}
@@ -98,19 +110,19 @@ export default function Footer() {
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Protocols</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.protocols && FOOTER_LINKS.protocols.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-white font-medium hover:text-amber-400 hover:drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-all duration-300">
+                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-indigo-400 hover:drop-shadow-[0_0_8px_rgba(129,140,248,0.8)] transition-all duration-300">
                   {link.label}
                 </Link>
               ))}
             </div>
           </div>
-
+          
           {/* Resources Column */}
           <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Resources</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.resources && FOOTER_LINKS.resources.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-white font-medium hover:text-indigo-400 hover:drop-shadow-[0_0_8px_rgba(129,140,248,0.8)] transition-all duration-300">
+                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-purple-400 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] transition-all duration-300">
                   {link.label}
                 </Link>
               ))}
@@ -122,7 +134,7 @@ export default function Footer() {
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Account</h4>
             <div className="flex flex-col gap-4">
               {FOOTER_LINKS.account && FOOTER_LINKS.account.map((link) => (
-                <Link key={link.page} to={createPageUrl(link.page)} className="text-white font-medium hover:text-purple-400 hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] transition-all duration-300">
+                <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
                   {link.label}
                 </Link>
               ))}
@@ -133,13 +145,13 @@ export default function Footer() {
           <div className="md:col-span-1 lg:col-span-2">
             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Contact</h4>
             <div className="flex flex-col gap-4">
-              <a href="mailto:support@glyphlock.io" className="flex items-center gap-2 text-white font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
+              <a href="mailto:support@glyphlock.io" className="flex items-center gap-2 text-slate-300 font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
                 <Mail size={16} /> support@glyphlock.io
               </a>
-              <a href="tel:+14242466499" className="flex items-center gap-2 text-white font-medium hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
+              <a href="tel:+14242466499" className="flex items-center gap-2 text-slate-300 font-medium hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300">
                 <Phone size={16} /> (424) 246-6499
               </a>
-              <p className="text-sm opacity-60 pt-2">
+              <p className="text-sm text-slate-400 pt-2">
                 El Mirage, Arizona<br/>United States
               </p>
             </div>
@@ -254,8 +266,8 @@ export default function Footer() {
 
         {/* Compliance Badges - Clickable */}
         <div className="border-t border-white/10 pt-8 mb-12">
-          <p className="text-center text-xs text-slate-500 tracking-wide mb-6">
-            Compliance & Standards
+          <p className="text-center text-xs text-slate-400 tracking-wide mb-6">
+            Compliance Alignment & Standards
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6 mb-6">
             {certifications.map((cert) => (
@@ -274,23 +286,23 @@ export default function Footer() {
               </Link>
             ))}
           </div>
-          <p className="text-center text-xs text-slate-400 max-w-3xl mx-auto leading-relaxed">
-            GlyphLock Security is designed to support alignment with widely recognized industry frameworks, including SOC 2, ISO 27001, PCI DSS, GDPR, and HIPAA. These designations reflect architectural alignment and do not constitute formal certification unless explicitly stated in a written agreement.
+          <p className="text-center text-xs text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            GlyphLock Security is structured to support alignment with widely recognized industry frameworks, including SOC 2, ISO 27001, PCI DSS, GDPR, and HIPAA. These designations reflect architectural alignment and do not constitute formal certification unless explicitly stated in a written agreement.
           </p>
         </div>
 
         {/* Enterprise Security Capabilities — SEO Long-tail Section */}
         <div className="border-t border-white/10 pt-8 mb-10">
           <h3 className="text-xs font-bold text-white/70 uppercase tracking-[3px] text-center mb-4">Enterprise Security Capabilities</h3>
-          <div className="max-w-3xl mx-auto space-y-3 text-xs text-slate-400 leading-relaxed text-center">
+          <div className="max-w-3xl mx-auto space-y-3 text-xs text-slate-300 leading-relaxed text-center">
             <p>
-              GlyphLock Security delivers quantum-immune security architecture for enterprises operating in high-scrutiny environments. The platform combines an AI-powered threat detection engine with post-quantum cryptographic primitives aligned with NIST post-quantum standards, providing autonomous cybersecurity defense across distributed infrastructure.
+              GlyphLock Security delivers quantum-resistant security architecture designed for enterprises operating in high-scrutiny environments. The platform combines an AI-powered threat detection engine with post-quantum cryptographic primitives aligned with NIST post-quantum standards, providing structured cybersecurity defense across distributed infrastructure.
             </p>
             <p>
               Visual authentication mechanisms built on enterprise-grade steganography tools ensure that identity artifacts cannot be forged or replicated. Secure QR generation with blockchain verification anchors every asset to an immutable provenance chain. A real-time security monitoring dashboard provides continuous visibility across all operational surfaces.
             </p>
             <p>
-              The Master Covenant framework establishes a legally binding AI governance architecture — structuring accountability, enforcement protocols, and compliance alignment across multi-provider LLM security assistant deployments. Designed for structured compliance, zero-trust environments, and post-quantum resilience.
+              The Master Covenant framework establishes a structured AI governance architecture — defining accountability, enforcement protocols, and compliance alignment across multi-provider LLM security assistant deployments. Designed for structured compliance alignment, zero-trust environments, and post-quantum resilience.
             </p>
           </div>
         </div>
@@ -298,20 +310,20 @@ export default function Footer() {
         {/* Authority Line */}
         <div className="border-t border-white/10 pt-6 mb-8 text-center space-y-1">
           <p className="text-xs font-bold text-white/80 uppercase tracking-[3px]">GlyphLock Security LLC</p>
-          <p className="text-[10px] text-slate-500 uppercase tracking-[2px]">Post-Quantum Cybersecurity Architecture</p>
-          <p className="text-[10px] text-slate-500 uppercase tracking-[2px]">AI Governance Framework</p>
-          <p className="text-[10px] text-slate-500 uppercase tracking-[2px]">Enterprise Security Platform</p>
-          <p className="text-[10px] text-slate-600 mt-2 max-w-xl mx-auto">
-            Designed for structured compliance, zero-trust environments, and post-quantum resilience.
+          <p className="text-[10px] text-slate-400 uppercase tracking-[2px]">Post-Quantum Cybersecurity Architecture</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-[2px]">AI Governance Framework</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-[2px]">Enterprise Security Platform</p>
+          <p className="text-[10px] text-slate-400 mt-2 max-w-xl mx-auto">
+            Designed for structured compliance alignment, zero-trust environments, and post-quantum resilience.
           </p>
         </div>
 
         {/* Bottom Bar - Legal Links */}
         <div className="border-t border-white/10 pt-6 md:pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs md:text-sm">
-          <p className="text-white font-medium text-center md:text-left">© {new Date().getFullYear()} GlyphLock Security LLC. All rights reserved.</p>
+          <p className="text-slate-300 font-medium text-center md:text-left">© {new Date().getFullYear()} GlyphLock Security LLC. All rights reserved.</p>
           <div className="flex items-center gap-4 md:gap-8 flex-wrap justify-center">
             {FOOTER_LINKS.legal && FOOTER_LINKS.legal.map((link) => (
-            <Link key={link.page} to={createPageUrl(link.page)} className="text-white font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
+            <Link key={link.page} to={createPageUrl(link.page)} className="text-slate-300 font-medium hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300">
               {link.label}
             </Link>
             ))}

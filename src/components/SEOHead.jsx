@@ -25,7 +25,7 @@ export default function SEOHead({
   }
 
   const resolvedTitle = title || autoData.title || "Quantum-Resistant Enterprise Security Platform | GlyphLock Security LLC";
-  const resolvedDescription = description || autoData.description || "GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework. Built for high-security environments and structured compliance readiness.";
+  const resolvedDescription = description || autoData.description || "GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework. Designed for high-security environments and structured compliance alignment.";
   
   // Combine and deduplicate keywords
   const defaultKeywords = "GlyphLock Security LLC, quantum-resistant encryption, post-quantum cryptography, AI cybersecurity, enterprise security platform, visual cryptography, secure QR codes, blockchain security, AI governance framework, Master Covenant, GlyphLock Security, threat detection AI, zero-trust architecture, identity verification, fraud prevention, steganography tools, secure QR code generator, image encryption, NIST post-quantum standards, AI binding protocol, security operations center";
@@ -202,7 +202,7 @@ export default function SEOHead({
       "url": siteUrl,
       "logo": image,
       "image": image,
-      "description": "Enterprise-grade quantum-resistant cybersecurity architecture combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant AI governance framework.",
+      "description": "Enterprise-grade quantum-resistant cybersecurity architecture combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant AI governance framework. Designed for structured compliance alignment.",
       "foundingDate": "2025-01",
       "founder": [
         {

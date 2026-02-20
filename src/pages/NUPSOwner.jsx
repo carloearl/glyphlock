@@ -38,6 +38,7 @@ import LoyaltyProgram from "../components/nups/LoyaltyProgram.jsx";
 import StaffManagement from "../components/nups/StaffManagement.jsx";
 import AIInsights from "../components/nups/AIInsights.jsx";
 import SalesReport from "../components/nups/SalesReport.jsx";
+import SEOHead from "@/components/SEOHead";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -147,6 +148,11 @@ export default function NUPSOwner() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <SEOHead
+        title="N.U.P.S. Owner Dashboard | GlyphLock"
+        description="Venue owner operations dashboard. Staff management, financial reporting, shift oversight, VIP room management, and real-time analytics."
+        url="/nups-owner"
+      />
       {/* Header */}
       <header className="border-b border-purple-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
         <div className="container mx-auto">

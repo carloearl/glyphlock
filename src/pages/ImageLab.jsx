@@ -127,8 +127,8 @@ export default function ImageLab() {
                   <h1 className="text-xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent leading-tight">
                     Image Lab
                   </h1>
-                  <p className="text-[11px] md:text-xs text-white/40 font-medium mt-0.5">
-                    Generate • Interact • Secure • Share
+                  <p className="text-[11px] md:text-xs text-white/60 font-medium mt-0.5">
+                    AI-Powered Visual Asset Infrastructure
                   </p>
                 </div>
               </div>

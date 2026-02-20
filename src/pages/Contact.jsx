@@ -62,9 +62,27 @@ export default function Contact() {
     }
   });
 
+  const [cooldown, setCooldown] = useState(false);
+
+  const sanitize = (str) => str.replace(/<[^>]*>/g, '').replace(/[<>"'&]/g, '').trim();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    sendEmail.mutate(formData);
+    if (cooldown) return;
+
+    const name = sanitize(formData.name);
+    const email = formData.email.trim();
+    const subject = sanitize(formData.subject);
+    const message = sanitize(formData.message);
+
+    if (name.length < 2 || name.length > 100) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    if (subject.length < 2 || subject.length > 200) return;
+    if (message.length < 10 || message.length > 2000) return;
+
+    sendEmail.mutate({ name, email, subject, message });
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 30000);
   };
 
   return (
@@ -204,7 +222,7 @@ export default function Contact() {
                     />
                   </div>
 
-                  <GlyphButton type="submit" variant="mixed" className="w-full" disabled={sendEmail.isPending}>
+                  <GlyphButton type="submit" variant="mixed" className="w-full" disabled={sendEmail.isPending || cooldown}>
                     {sendEmail.isPending ? (
                       <div className="flex items-center justify-center gap-2">
                         <motion.div 
@@ -214,6 +232,8 @@ export default function Contact() {
                         />
                         Encrypting Transmission...
                       </div>
+                    ) : cooldown ? (
+                      "Message Sent — Please Wait"
                     ) : (
                       "Send Verified Message"
                     )}
