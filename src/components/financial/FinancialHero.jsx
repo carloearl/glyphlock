@@ -2,11 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Button } from "@/components/ui/button";
-import { DollarSign, Shield, Zap } from "lucide-react";
 import FinancialCoinHero from "./FinancialCoinHero";
 
 const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/5e2e34bf7_b70d54f1-3b3b-418e-ac6f-c4ecad013f91.png";
+
+const NEU_BTN_PRIMARY = "inline-flex items-center justify-center px-10 py-4 text-sm font-bold tracking-[3px] uppercase text-white bg-[#0c2216] border border-yellow-600/40 rounded-lg shadow-[4px_4px_12px_rgba(0,0,0,0.6),_-3px_-3px_10px_rgba(16,185,129,0.08)] hover:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.5),_inset_-2px_-2px_6px_rgba(16,185,129,0.06)] hover:bg-[#0e2a1a] transition-all duration-200 cursor-pointer";
+const NEU_BTN_OUTLINE = "inline-flex items-center justify-center px-10 py-4 text-sm font-bold tracking-[2px] uppercase text-yellow-500/90 bg-transparent border border-yellow-600/30 rounded-lg shadow-[4px_4px_12px_rgba(0,0,0,0.5),_-3px_-3px_10px_rgba(16,185,129,0.04)] hover:border-yellow-500/50 transition-all duration-200 cursor-pointer";
 
 export default function FinancialHero() {
   return (
@@ -40,83 +41,103 @@ export default function FinancialHero() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Text side */}
           <div>
+            {/* TOP LINE — Registered entity feel */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs font-bold uppercase tracking-widest mb-6"
+              className="inline-flex items-center gap-3 mb-10"
             >
-              <img src={SHIELD_LOGO_URL} alt="GL" className="w-5 h-5 rounded-sm object-contain" />
-              GlyphLock Financial LLC
+              <img src={SHIELD_LOGO_URL} alt="GL" className="w-5 h-5 rounded-sm object-contain opacity-70" />
+              <span
+                className="text-[11px] font-semibold uppercase text-emerald-400/60"
+                style={{ letterSpacing: '4px', fontFamily: "'Cinzel', serif" }}
+              >
+                GlyphLock Financial LLC
+              </span>
             </motion.div>
 
+            {/* MAIN TITLE — Brand dominant, anchored by FINANCIAL */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] mb-6"
+              className="mb-10"
             >
-              <span className="text-white">GLYPH</span>
-              <span className="bg-gradient-to-r from-emerald-400 via-green-400 to-yellow-400 bg-clip-text text-transparent">LOCK</span>
-              <br />
-              <span className="text-white text-3xl sm:text-4xl md:text-5xl">FINANCIAL</span>
+              <span
+                className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9]"
+                style={{ letterSpacing: '-1px' }}
+              >
+                GLYPHLOCK
+              </span>
+              <span
+                className="block text-2xl sm:text-3xl md:text-4xl font-semibold text-white/80 mt-2"
+                style={{ letterSpacing: '8px', fontFamily: "'Cinzel', serif" }}
+              >
+                FINANCIAL
+              </span>
             </motion.h1>
 
-            <motion.p
+            {/* SUBTITLE — Institutional authority, two lines max */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg text-slate-300 max-w-lg leading-relaxed mb-8"
+              className="mb-10"
             >
-              The financial technology arm of the GlyphLock ecosystem. 
-              Point-of-sale systems, blockchain verification, club currency, 
-              and entertainment venue technology — built from scratch, owned outright.
-            </motion.p>
+              <p
+                className="text-lg md:text-xl font-semibold text-white/90 mb-2"
+                style={{ letterSpacing: '1px', fontFamily: "'Cinzel', serif" }}
+              >
+                Operational Qualification Architecture
+              </p>
+              <p
+                className="text-[14px] text-slate-400 leading-relaxed max-w-lg"
+                style={{ fontFamily: "'Georgia', serif" }}
+              >
+                Structured documentation framework aligned to formal underwriting review protocols.
+              </p>
+            </motion.div>
 
-            {/* Stats row */}
+            {/* COMPLIANCE TAG STACK — Standards, not features */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-wrap gap-6 mb-8"
+              className="flex items-center gap-4 mb-12"
             >
-              {[
-                { label: "POS System", value: "NUPS", icon: Zap },
-                { label: "Currency Press", value: "Dream$", icon: DollarSign },
-                { label: "Blockchain", value: "Verified", icon: Shield },
-              ].map((stat, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-                    <stat.icon className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-white">{stat.value}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-slate-500">{stat.label}</div>
-                  </div>
-                </div>
-              ))}
+              <span
+                className="text-[10px] uppercase font-bold text-slate-400"
+                style={{ letterSpacing: '3px', fontFamily: "'Cinzel', serif" }}
+              >
+                Deterministic Risk Profile
+              </span>
+              <span className="w-px h-4 bg-yellow-600/40" />
+              <span
+                className="text-[10px] uppercase font-bold text-slate-400"
+                style={{ letterSpacing: '3px', fontFamily: "'Cinzel', serif" }}
+              >
+                Verified Operations Standard
+              </span>
             </motion.div>
 
+            {/* CTA BUTTONS — Neumorphic, disciplined */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex flex-wrap gap-3"
+              className="flex flex-wrap gap-4"
             >
-              <Link to={createPageUrl("NUPSLogin")}>
-                <Button className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white px-8 py-6 text-base font-bold shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-                  Access NUPS POS
-                </Button>
+              <Link to={createPageUrl("Consultation")} className={NEU_BTN_PRIMARY} style={{ fontFamily: "'Cinzel', serif" }}>
+                Initiate Qualification
               </Link>
-              <Link to={createPageUrl("Blockchain")}>
-                <Button variant="outline" className="border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10 px-8 py-6 text-base font-bold">
-                  Blockchain Tools
-                </Button>
+              <Link to={createPageUrl("SecurityDocs")} className={NEU_BTN_OUTLINE} style={{ fontFamily: "'Cinzel', serif" }}>
+                View Framework Documentation
               </Link>
             </motion.div>
           </div>
 
-          {/* 3D Coin Hero — replaces video placeholder */}
+          {/* 3D Coin Hero — untouched */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
