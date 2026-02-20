@@ -62,10 +62,11 @@ export default function useTTSClean(defaultSettings = {}) {
   const playingRef = useRef(false);
 
   const playText = useCallback(async (text, customSettings = {}) => {
-    if (playingRef.current) {
-      console.log('GLYPH VOICE: already playing, stopping previous');
-      stop();
-    }
+    // ALWAYS stop previous audio — no race conditions
+    stop();
+    
+    // Small delay to ensure previous audio element is fully cleaned up
+    await new Promise(r => setTimeout(r, 50));
 
     if (!text || typeof text !== 'string') {
       console.error('GLYPH VOICE: invalid input - text is', typeof text);
@@ -154,7 +155,6 @@ export default function useTTSClean(defaultSettings = {}) {
 
     console.log('GLYPH VOICE: cache MISS, calling backend');
 
-    stop(); // Stop any current playback
     playingRef.current = true;
     setIsLoading(true);
     setLastError(null);
@@ -256,8 +256,15 @@ export default function useTTSClean(defaultSettings = {}) {
   }, [settings, stop]);
 
   const testTTS = useCallback(async () => {
-    console.log('GLYPH VOICE: test voice requested');
-    return playText('Hello! This is GlyphBot, your elite security assistant.');
+    // Read latest settings from localStorage to avoid stale closure
+    let latestSettings = {};
+    try {
+      const saved = localStorage.getItem('glyphbot_voice_settings');
+      if (saved) latestSettings = JSON.parse(saved);
+    } catch (e) { /* use defaults */ }
+    
+    console.log('GLYPH VOICE: test voice requested with settings:', latestSettings);
+    return playText('Hello! This is GlyphBot, your elite security assistant.', latestSettings);
   }, [playText]);
 
   return {
