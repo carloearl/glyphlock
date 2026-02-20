@@ -7,7 +7,7 @@ export default function HeroSection() {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   return (
-    <div ref={containerRef} className="w-full flex justify-center px-4 sm:px-6 py-8" style={{ background: 'transparent', pointerEvents: 'auto' }}>
+    <div ref={containerRef} className="w-full flex justify-center px-4 sm:px-6 py-8" style={{ background: 'transparent', pointerEvents: 'auto', position: 'relative' }}>
       <motion.div 
         initial={{ opacity: 0, y: 60, scale: 0.9 }}
         animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}

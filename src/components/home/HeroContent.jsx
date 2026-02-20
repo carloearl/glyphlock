@@ -127,7 +127,7 @@ export default function HeroContent() {
   ];
 
   return (
-    <section ref={containerRef} className="w-full max-w-7xl mx-auto px-4 py-12 md:py-20 relative" style={{ background: 'transparent', pointerEvents: 'auto' }}>
+    <section ref={containerRef} className="w-full max-w-7xl mx-auto px-4 py-12 md:py-20 relative" style={{ background: 'transparent', pointerEvents: 'auto', position: 'relative' }}>
       {/* Keyframe styles */}
       <style>{`
         @keyframes heroDebrisFloat {
