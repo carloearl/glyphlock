@@ -10,11 +10,11 @@ import { FOOTER_LINKS } from "@/components/NavigationConfig";
  */
 
 const certifications = [
-  { name: "ISO 27001", subtitle: "STANDARDS MET", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg", page: "TrustSecurity" },
-  { name: "SOC 2", subtitle: "PROGRAM IN PLACE", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg", page: "TrustSecurity" },
-  { name: "GDPR", subtitle: "COMPLIANT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg", page: "Privacy" },
-  { name: "HIPAA", subtitle: "COMPLIANT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg", page: "TrustSecurity" },
-  { name: "Post-Quantum", subtitle: "SECURED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg", page: "TrustSecurity" }
+  { name: "ISO 27001", subtitle: "ALIGNED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg", page: "TrustSecurity" },
+  { name: "SOC 2", subtitle: "ALIGNED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg", page: "TrustSecurity" },
+  { name: "GDPR", subtitle: "ALIGNED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg", page: "Privacy" },
+  { name: "HIPAA", subtitle: "ALIGNED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg", page: "TrustSecurity" },
+  { name: "Post-Quantum", subtitle: "DESIGNED FOR", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg", page: "TrustSecurity" }
 ];
 
 export default function Footer() {
@@ -40,17 +40,17 @@ export default function Footer() {
             </div>
             <div className="space-y-4 max-w-md">
               <p className="text-white text-lg font-black leading-tight">
-                BUILD VERIFIED WORLDS, NOT JUST WEBSITES.
+                POST-QUANTUM CYBERSECURITY ARCHITECTURE
               </p>
               <p className="text-gray-400 leading-relaxed text-sm">
-                QR identity for every asset, AI site building infrastructure, and Master Covenant authorship proof in one open framework for creative sovereignty.
+                Enterprise-grade quantum-resistant encryption, AI-powered threat detection, visual cryptography, and the Master Covenant AI governance framework.
               </p>
               <div className="flex flex-wrap gap-2 pt-2">
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">QR IDENTITY LAYER</span>
+                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">AI GOVERNANCE</span>
                 <span className="text-violet-400">•</span>
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">SITE BUILDING AI</span>
+                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">ZERO-TRUST</span>
                 <span className="text-violet-400">•</span>
-                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">COVENANT AUTHORSHIP</span>
+                <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">POST-QUANTUM</span>
               </div>
             </div>
             <div className="flex items-center gap-4 pt-4">
@@ -193,9 +193,9 @@ export default function Footer() {
               <div>
                 <h5 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3">Meta Description</h5>
                 <p className="text-xs text-slate-300 leading-relaxed italic">
-                  "GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity with AI-powered threat detection, 
-                  visual cryptography, blockchain security, and the revolutionary Master Covenant AI governance framework. 
-                  Protect your organization with post-quantum encryption, secure QR codes, and autonomous defense systems."
+                  "GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, 
+                  combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, 
+                  and the Master Covenant governance framework. Built for high-security environments and structured compliance readiness."
                 </p>
               </div>
 
@@ -276,7 +276,34 @@ export default function Footer() {
             ))}
           </div>
           <p className="text-center text-xs text-slate-400 max-w-3xl mx-auto leading-relaxed">
-            GlyphLock aligns its internal security controls with widely recognized industry frameworks, including SOC 2, ISO 27001, PCI DSS, GDPR, and HIPAA, where applicable. Compliance status is subject to ongoing assessment and does not constitute certification unless explicitly stated in a written agreement.
+            GlyphLock Security is designed to support alignment with widely recognized industry frameworks, including SOC 2, ISO 27001, PCI DSS, GDPR, and HIPAA. These designations reflect architectural alignment and do not constitute formal certification unless explicitly stated in a written agreement.
+          </p>
+        </div>
+
+        {/* Enterprise Security Capabilities — SEO Long-tail Section */}
+        <div className="border-t border-white/10 pt-8 mb-10">
+          <h3 className="text-xs font-bold text-white/70 uppercase tracking-[3px] text-center mb-4">Enterprise Security Capabilities</h3>
+          <div className="max-w-3xl mx-auto space-y-3 text-xs text-slate-400 leading-relaxed text-center">
+            <p>
+              GlyphLock Security delivers quantum-immune security architecture for enterprises operating in high-scrutiny environments. The platform combines an AI-powered threat detection engine with post-quantum cryptographic primitives aligned with NIST post-quantum standards, providing autonomous cybersecurity defense across distributed infrastructure.
+            </p>
+            <p>
+              Visual authentication mechanisms built on enterprise-grade steganography tools ensure that identity artifacts cannot be forged or replicated. Secure QR generation with blockchain verification anchors every asset to an immutable provenance chain. A real-time security monitoring dashboard provides continuous visibility across all operational surfaces.
+            </p>
+            <p>
+              The Master Covenant framework establishes a legally binding AI governance architecture — structuring accountability, enforcement protocols, and compliance alignment across multi-provider LLM security assistant deployments. Designed for structured compliance, zero-trust environments, and post-quantum resilience.
+            </p>
+          </div>
+        </div>
+
+        {/* Authority Line */}
+        <div className="border-t border-white/10 pt-6 mb-8 text-center space-y-1">
+          <p className="text-xs font-bold text-white/80 uppercase tracking-[3px]">GlyphLock Security LLC</p>
+          <p className="text-[10px] text-slate-500 uppercase tracking-[2px]">Post-Quantum Cybersecurity Architecture</p>
+          <p className="text-[10px] text-slate-500 uppercase tracking-[2px]">AI Governance Framework</p>
+          <p className="text-[10px] text-slate-500 uppercase tracking-[2px]">Enterprise Security Platform</p>
+          <p className="text-[10px] text-slate-600 mt-2 max-w-xl mx-auto">
+            Designed for structured compliance, zero-trust environments, and post-quantum resilience.
           </p>
         </div>
 

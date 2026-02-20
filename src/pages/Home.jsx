@@ -149,14 +149,14 @@ export default function Home() {
   return (
     <>
       <SEOHead 
-        title="GlyphLock - Open Source Security Framework | QR Identity, Site Building & Covenant Architecture"
-        description="GlyphLock is a fully open source framework for verified digital environments. QR-based identity, AI site building, Master Covenant authorship proof, and blockchain-anchored creative infrastructure."
-        keywords="GlyphLock, open source security, QR identity, site building framework, Master Covenant, verified ownership, digital authorship, blockchain verification, open source web infrastructure, creative sovereignty"
+        title="Quantum-Resistant Encryption Platform | GlyphLock Security LLC"
+        description="GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework."
+        keywords="quantum-resistant encryption, post-quantum cryptography, AI cybersecurity, enterprise security platform, visual cryptography, secure QR codes, blockchain security, AI governance framework, Master Covenant, GlyphLock Security, threat detection AI, zero-trust architecture"
         url="/"
       />
       
       {/* SEO H1 - Hidden but crawlable */}
-      <h1 className="sr-only">GlyphLock - Open Source Security Framework for Verified Digital Worlds</h1>
+      <h1 className="sr-only">GlyphLock Security — Enterprise Quantum-Resistant Cybersecurity Architecture</h1>
 
       <main className="w-full relative" style={{ background: 'transparent' }}>
         
