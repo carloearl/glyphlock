@@ -16,6 +16,20 @@ export default function VoiceSettingsPanel({ settings, onChange }) {
   const [previewPlaying, setPreviewPlaying] = useState(false);
   const audioRef = useRef(null);
 
+  // Load browser speechSynthesis voices for preview
+  const [browserVoices, setBrowserVoices] = useState([]);
+  
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    const loadBrowserVoices = () => {
+      const available = window.speechSynthesis.getVoices();
+      setBrowserVoices(available.filter(v => v.lang.startsWith('en')));
+    };
+    loadBrowserVoices();
+    window.speechSynthesis.onvoiceschanged = loadBrowserVoices;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
+
   useEffect(() => {
     async function loadVoices() {
       const v = await getVoicesForProvider(provider);
