@@ -31,7 +31,7 @@ export const injectMobileStyles = () => {
   html { height: -webkit-fill-available; }
   * { -webkit-overflow-scrolling: touch; }
 
-  :root { --mobile-scale-hero: 0.75; --mobile-scale-ui: 1.15; --mobile-scale-bg: 0.8; --mobile-scale-cursor: 1.2; }
+  :root { --mobile-scale-hero: 0.75; --mobile-scale-ui: 1.0; --mobile-scale-bg: 0.8; --mobile-scale-cursor: 1.2; }
 
   .hero-section, [class*="hero"] { transform: scale(var(--mobile-scale-hero)); transform-origin: center top; }
   .hero-section h1, .hero-section .hero-title { font-size: calc(3rem * var(--mobile-scale-hero)); line-height: 1.1; }
@@ -42,14 +42,14 @@ export const injectMobileStyles = () => {
 
   [class*="cursor"], [data-cursor] { transform: scale(var(--mobile-scale-cursor)); pointer-events: none; }
 
-  nav, header nav { padding: calc(1rem * var(--mobile-scale-ui)); }
-  nav a, nav button { min-height: 48px; min-width: 48px; padding: calc(0.75rem * var(--mobile-scale-ui)) calc(1.25rem * var(--mobile-scale-ui)); }
-  .btn, button { min-height: 56px; padding: calc(1rem * var(--mobile-scale-ui)) calc(2rem * var(--mobile-scale-ui)); }
-  [class*="floating"] { width: calc(64px * var(--mobile-scale-ui)); height: calc(64px * var(--mobile-scale-ui)); bottom: calc(24px + var(--mobile-safe-bottom)); right: calc(24px + var(--mobile-safe-right)); }
+  nav, header nav { padding: 1rem; }
+  nav a, nav button { min-height: 44px; min-width: 44px; padding: 0.75rem 1.25rem; }
+  .btn, button { min-height: 44px; padding: 0.75rem 1.5rem; }
+  [class*="floating"] { width: 56px; height: 56px; bottom: calc(24px + var(--mobile-safe-bottom)); right: calc(24px + var(--mobile-safe-right)); }
 
-  .container { padding-left: max(1.5rem, var(--mobile-safe-left)); padding-right: max(1.5rem, var(--mobile-safe-right)); }
-  .grid { grid-template-columns: 1fr !important; gap: calc(2rem * var(--mobile-scale-ui)); }
-  section { padding-top: calc(4rem * var(--mobile-scale-ui)); padding-bottom: calc(4rem * var(--mobile-scale-ui)); }
+  .container { padding-left: max(1rem, var(--mobile-safe-left)); padding-right: max(1rem, var(--mobile-safe-right)); }
+  .grid { grid-template-columns: 1fr !important; gap: 1.5rem; }
+  section { padding-top: 3rem; padding-bottom: 3rem; }
 
   h1 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; }
   h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
@@ -61,18 +61,18 @@ export const injectMobileStyles = () => {
 }
 
 @media (max-width: 600px) {
-  :root { --mobile-scale-hero: 0.65; --mobile-scale-ui: 1.25; }
+  :root { --mobile-scale-hero: 0.65; --mobile-scale-ui: 1.05; }
   .hero-section h1 { font-size: calc(2.5rem * var(--mobile-scale-hero)); }
-  nav a, nav button { min-height: 52px; }
-  .btn, button { min-height: 60px; }
+  nav a, nav button { min-height: 44px; }
+  .btn, button { min-height: 44px; }
 }
 
 @media (max-width: 480px) {
-  :root { --mobile-scale-hero: 0.55; --mobile-scale-ui: 1.35; --mobile-scale-bg: 0.7; }
+  :root { --mobile-scale-hero: 0.55; --mobile-scale-ui: 1.1; --mobile-scale-bg: 0.7; }
   .hero-section h1 { font-size: calc(2rem * var(--mobile-scale-hero)); }
-  nav a, nav button { min-height: 56px; }
-  .btn, button { min-height: 64px; }
-  section { padding-top: calc(3rem * var(--mobile-scale-ui)); padding-bottom: calc(3rem * var(--mobile-scale-ui)); }
+  nav a, nav button { min-height: 44px; }
+  .btn, button { min-height: 44px; }
+  section { padding-top: 2.5rem; padding-bottom: 2.5rem; }
   [data-particle-system] { --particle-density: 0.4; }
 }
 

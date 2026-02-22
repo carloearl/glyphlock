@@ -120,13 +120,13 @@ class MobileScalingSystem {
     switch (breakpoint) {
       case 'xs':
       case 'sm':
-        scaleUI = 1.35;
+        scaleUI = 1.1;
         break;
       case 'md':
-        scaleUI = 1.25;
+        scaleUI = 1.05;
         break;
       case 'lg':
-        scaleUI = 1.15;
+        scaleUI = 1.0;
         break;
       default:
         scaleUI = 1;

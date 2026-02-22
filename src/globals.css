@@ -149,12 +149,6 @@ body, #root, #__next, main, section {
     overflow-x: hidden !important;
     max-width: 100vw !important;
   }
-
-  /* Prevent any horizontal scroll */
-  *, *::before, *::after {
-    max-width: 100vw;
-    box-sizing: border-box;
-  }
 }
 
 /* Touch Target Sizes - desktop only, mobile handled separately */
@@ -343,7 +337,7 @@ p {
 
 /* Mobile input optimization */
 @media (max-width: 768px) {
-  /* Larger touch targets for all inputs */
+  /* Touch-friendly inputs */
   input[type="text"],
   input[type="email"],
   input[type="tel"],
@@ -352,54 +346,40 @@ p {
   input[type="password"],
   textarea,
   select {
-    min-height: 48px;
+    min-height: 44px;
     font-size: 16px;
-    padding: 12px 16px;
-    touch-action: auto;
-    user-select: text;
-    -webkit-user-select: text;
+    padding: 10px 14px;
   }
 
-  /* Larger buttons with proper spacing */
+  /* Touch-friendly buttons */
   button:not([class*="icon"]),
   [role="button"]:not([class*="icon"]),
   .btn,
   a.btn {
-    min-height: 48px;
-    padding: 12px 20px;
-    font-size: 16px;
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 15px;
   }
-  
-  /* Icon buttons remain smaller but still touchable */
+
+  /* Icon buttons */
   button[class*="icon"],
   [role="button"][class*="icon"] {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 40px;
+    min-height: 40px;
   }
 
-  /* Ensure tabs are finger-friendly */
+  /* Tabs */
   [role="tab"],
   [data-state] {
-    min-height: 48px;
-    padding: 12px 16px;
+    min-height: 44px;
+    padding: 10px 14px;
   }
 
-  /* Native scroll on containers */
-  .chat-scroll-container,
-  [class*="scroll"],
-  [style*="overflow-y"] {
-    touch-action: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
   /* Cards should stack on mobile */
   .grid {
     grid-template-columns: 1fr !important;
   }
-  
+
   /* Responsive grid override */
   .grid-cols-2,
   .grid-cols-3,
@@ -412,7 +392,7 @@ p {
   .lg\:grid-cols-4 {
     grid-template-columns: 1fr !important;
   }
-  
+
   /* Preserve 2-col for stats only */
   .stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -622,50 +602,49 @@ body {
   html, body {
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: auto !important;
-    scroll-behavior: smooth !important;
-    position: relative !important;
-    height: auto !important;
-    min-height: 100vh !important;
-    max-width: 100vw !important;
-    touch-action: manipulation !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+    scroll-behavior: smooth;
+    position: relative;
+    height: auto;
+    min-height: 100vh;
+    max-width: 100vw;
+    touch-action: auto;
   }
 
   /* FORCE ALL BUTTONS CLICKABLE */
-  button, 
-  a, 
-  [role="button"], 
-  [onclick], 
-  .cursor-pointer, 
-  input[type="button"], 
-  input[type="submit"],
-  [class*="button"],
-  [class*="btn"],
-  label {
-    touch-action: manipulation !important;
-    -webkit-tap-highlight-color: rgba(6, 182, 212, 0.4) !important;
-    cursor: pointer !important;
-    pointer-events: auto !important;
-  }
+    button, 
+    a, 
+    [role="button"], 
+    [onclick], 
+    .cursor-pointer, 
+    input[type="button"], 
+    input[type="submit"],
+    [class*="button"],
+    [class*="btn"],
+    label {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(6, 182, 212, 0.3);
+      cursor: pointer;
+      pointer-events: auto;
+    }
 
-  /* Active state feedback */
-  button:active, 
-  a:active, 
-  [role="button"]:active, 
-  input[type="submit"]:active,
-  [class*="button"]:active,
-  [class*="btn"]:active {
-    opacity: 0.9 !important;
-    background-color: transparent !important;
-  }
+    /* Active state feedback */
+    button:active, 
+    a:active, 
+    [role="button"]:active, 
+    input[type="submit"]:active,
+    [class*="button"]:active,
+    [class*="btn"]:active {
+      opacity: 0.85;
+    }
 
-  /* Force SVG/icons inside buttons to never block clicks */
-  button svg, 
-  a svg, 
-  [role="button"] svg {
-    pointer-events: none !important;
-  }
+    /* Force SVG/icons inside buttons to never block clicks */
+    button svg, 
+    a svg, 
+    [role="button"] svg {
+      pointer-events: none;
+    }
 
   /* Ensure main content is scrollable */
   main {
@@ -701,11 +680,10 @@ footer, [role="contentinfo"] {
   }
 }
 
-/* FORCE MOBILE INTERACTIVITY - ALL DEVICES */
-button, a, input, textarea, select, [role="button"], [type="button"], [type="submit"], label,
-[class*="btn"], [class*="button"], [onclick] {
+/* MOBILE INTERACTIVITY */
+button, a, [role="button"], [type="button"], [type="submit"],
+[class*="btn"], [class*="button"] {
   touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(6, 182, 212, 0.4);
   pointer-events: auto;
   cursor: pointer;
 }
@@ -713,8 +691,8 @@ button, a, input, textarea, select, [role="button"], [type="button"], [type="sub
 @media (max-width: 768px) {
   button, a, input, textarea, select, [role="button"], [type="button"], [type="submit"], label,
   [class*="btn"], [class*="button"], [onclick] {
-    min-width: 48px !important;
-    min-height: 48px !important;
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 
