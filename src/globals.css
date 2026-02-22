@@ -104,12 +104,12 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background: transparent;
+  background: #000000;
   color: #ffffff !important;
 }
 
 html.dark {
-  background: transparent;
+  background: #000000;
 }
 
 body {
@@ -121,7 +121,7 @@ body {
   height: 100%;
   width: 100%;
   position: relative;
-  background: transparent;
+  background: #000000;
   color: #ffffff !important;
 }
 
@@ -138,7 +138,11 @@ img.logo,
   loading: eager;
 }
 
-body, #root, #__next, main, section {
+body, #root, #__next {
+  background: #000000 !important;
+}
+
+main, section {
   background: transparent !important;
 }
 
