@@ -3,7 +3,7 @@ css
 @tailwind components;
 @tailwind utilities;
 
-@import './components/mobile/MobileLayoutFix.css';
+/* Mobile styles injected via JS - see mobile-styles.js */
 
 /* Image Lab Authority Styling - NEON RESTORATION */
 .image-lab-section {
