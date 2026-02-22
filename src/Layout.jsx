@@ -116,45 +116,19 @@ export default function Layout({ children, currentPageName }) {
       <CrawlerFallback />
       <PrerenderHints />
 
-      {/* SITE-WIDE NEBULA - Desktop only - Behind everything */}
+      {/* SITE-WIDE NEBULA + CURSOR ORB - Desktop only */}
       <div 
-        className="hidden md:block"
+        className="hidden md:block fixed inset-0"
         style={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
           zIndex: 0, 
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
-          transform: 'translateZ(0)',
-          willChange: 'transform',
-          backfaceVisibility: 'hidden'
+          isolation: 'isolate'
         }}
+        aria-hidden="true"
       >
         <NebulaLayer intensity={1.0} />
-      </div>
-
-      {/* CURSOR ORB - Desktop only - Behind everything */}
-      <div 
-        className="hidden md:block" 
-        style={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
-          zIndex: 1, 
-          pointerEvents: 'none',
-          touchAction: 'none',
-          userSelect: 'none',
-          transform: 'translateZ(0)',
-          willChange: 'transform',
-          backfaceVisibility: 'hidden'
-        }}
-      >
         <CursorOrb />
       </div>
 

@@ -594,9 +594,9 @@ body {
 
 /* MOBILE FORCE-CLICKABLE - AGGRESSIVE OVERRIDES */
 @media (max-width: 768px) {
-  /* Enable tap highlights */
-  * {
-    -webkit-tap-highlight-color: rgba(6, 182, 212, 0.4) !important;
+  /* Enable tap highlights on interactive elements only */
+  button, a, [role="button"], input, select, textarea, label {
+    -webkit-tap-highlight-color: rgba(6, 182, 212, 0.3);
   }
 
   html, body {
@@ -711,11 +711,11 @@ select {
   touch-action: auto !important;
 }
 
-/* Canvas overlays don't block interaction - except interactive canvases */
-canvas:not([data-interactive]) {
-  pointer-events: none;
-  touch-action: none;
-  user-select: none;
+/* Canvas overlays NEVER block interaction */
+canvas {
+  pointer-events: none !important;
+  touch-action: none !important;
+  user-select: none !important;
 }
 
 /* Prevent Text Overflow */
