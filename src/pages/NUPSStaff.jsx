@@ -113,7 +113,7 @@ export default function NUPSStaff() {
 
       <div className="container mx-auto p-4 md:p-6">
         <Tabs defaultValue="register" className="space-y-6">
-          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-4 gap-1 p-1.5 w-full">
+          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-4 gap-1 p-1.5 w-full min-h-0">
             <TabsTrigger value="register" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
               <ShoppingCart className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Register</span>
