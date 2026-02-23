@@ -299,7 +299,7 @@ export default function POSCashRegister({ user }) {
 
   // ─── RENDER: MAIN REGISTER VIEW ───────────────────
   return (
-    <div className="grid lg:grid-cols-5 gap-4" style={{ minHeight: 'calc(100vh - 220px)' }}>
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4" style={{ minHeight: 'calc(100vh - 220px)' }}>
       {/* LEFT: Products + Quick Charges */}
       <div className="lg:col-span-3 space-y-4">
         {/* Search + Barcode */}
@@ -343,7 +343,7 @@ export default function POSCashRegister({ user }) {
         <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
           <CardContent className="p-3">
             <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Products</div>
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-2 max-h-[350px] overflow-y-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-[350px] overflow-y-auto">
               {filteredProducts.map((product) => (
                 <Button
                   key={product.id}

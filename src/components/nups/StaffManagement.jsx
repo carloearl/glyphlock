@@ -16,7 +16,7 @@ export default function StaffManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Card className="bg-gradient-to-br from-purple-500/10 to-purple-700/10 border-purple-500/30">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
