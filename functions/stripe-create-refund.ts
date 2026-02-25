@@ -1,84 +1,93 @@
 /**
- * Create Stripe Refund
- * 
+ * Create Stripe Refund - SECURED
+ * DACO FIX: CRIT-002 - Migrated to Deno.serve with explicit auth + admin gating
  * Issues a full or partial refund for a consultation payment
- * 
- * @param {string} consultationId - Consultation record ID
- * @param {number} amount - Optional: Amount to refund in cents (defaults to full refund)
- * @param {string} reason - Refund reason (duplicate, fraudulent, requested_by_customer)
- * @returns {object} Refund result
  */
 
-export default async function handler({ consultationId, amount, reason = 'requested_by_customer' }, { secrets, entities }) {
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import Stripe from 'npm:stripe@^14.14.0';
+
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+
+Deno.serve(async (req) => {
   try {
-    const STRIPE_SECRET_KEY = secrets.STRIPE_SECRET_KEY;
-    
-    if (!STRIPE_SECRET_KEY) {
-      throw new Error('Stripe secret key not configured');
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // ADMIN-ONLY: Only admin users can issue refunds
+    if (user.role !== 'admin') {
+      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    }
+
+    const { consultationId, amount, reason = 'requested_by_customer' } = await req.json();
+
+    if (!consultationId) {
+      return Response.json({ error: 'consultationId is required' }, { status: 400 });
     }
 
     // Get consultation
-    const consultations = await entities.Consultation.filter({ id: consultationId });
+    const consultations = await base44.asServiceRole.entities.Consultation.filter({ id: consultationId });
     
     if (consultations.length === 0) {
-      throw new Error('Consultation not found');
+      return Response.json({ error: 'Consultation not found' }, { status: 404 });
     }
 
     const consultation = consultations[0];
 
     if (consultation.payment_status !== 'paid') {
-      throw new Error('Consultation payment is not in paid status');
+      return Response.json({ error: 'Consultation payment is not in paid status' }, { status: 400 });
     }
 
     if (!consultation.stripe_payment_intent_id) {
-      throw new Error('No Stripe payment intent ID found');
+      return Response.json({ error: 'No Stripe payment intent ID found' }, { status: 400 });
     }
 
     // Create refund
-    const refundData = {
+    const refundParams = {
       payment_intent: consultation.stripe_payment_intent_id,
       reason: reason
     };
 
     if (amount) {
-      refundData.amount = amount.toString();
+      refundParams.amount = parseInt(amount);
     }
 
-    const response = await fetch('https://api.stripe.com/v1/refunds', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams(refundData)
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'Failed to create refund');
-    }
-
-    const refund = await response.json();
+    const refund = await stripe.refunds.create(refundParams);
 
     // Update consultation
-    await entities.Consultation.update(consultationId, {
+    await base44.asServiceRole.entities.Consultation.update(consultationId, {
       payment_status: 'refunded',
       refund_amount: refund.amount,
       refund_date: new Date().toISOString()
     });
 
-    return {
+    // Log refund to audit
+    await base44.asServiceRole.entities.SystemAuditLog.create({
+      event_type: 'REFUND_ISSUED',
+      description: `Admin ${user.email} issued refund for consultation ${consultationId}`,
+      actor_email: user.email,
+      resource_id: consultationId,
+      metadata: {
+        refund_id: refund.id,
+        amount: refund.amount,
+        reason: reason
+      },
+      status: 'success'
+    });
+
+    return Response.json({
       success: true,
       refundId: refund.id,
       amount: refund.amount,
       status: refund.status
-    };
+    });
 
   } catch (error) {
-    console.error('Refund creation failed:', error);
-    return {
-      success: false,
-      error: error.message
-    };
+    console.error('[Refund] Error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
   }
-}
+});

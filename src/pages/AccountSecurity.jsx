@@ -61,9 +61,9 @@ export default function AccountSecurity() {
     }
   };
 
-  const handleRevokeDevice = async (deviceIdPrefix) => {
+  const handleRevokeDevice = async (deviceId) => {
     try {
-      await base44.functions.invoke('mfaRevokeTrustedDevice', { deviceIdPrefix });
+      await base44.functions.invoke('mfaRevokeTrustedDevice', { deviceId });
       toast.success('Device trust revoked');
       loadUserAndStatus();
     } catch (error) {
@@ -266,7 +266,7 @@ export default function AccountSecurity() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleRevokeDevice(device.deviceId.split('...')[0])}
+                      onClick={() => handleRevokeDevice(device.deviceId.replace('...', ''))}
                       className="border-red-500/50 text-red-400 hover:bg-red-500/10"
                     >
                       Revoke

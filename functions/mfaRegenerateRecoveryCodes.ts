@@ -64,6 +64,32 @@ function generateRecoveryCodes() {
   return { rawCodes, hashedCodes };
 }
 
+// Rate limiting (in-memory)
+const rateLimitStore = new Map();
+const checkRateLimit = (identifier) => {
+  const now = Date.now();
+  const record = rateLimitStore.get(identifier) || { attempts: [], lockedUntil: null };
+  if (record.lockedUntil && now < record.lockedUntil) {
+    return { allowed: false, remainingMs: record.lockedUntil - now };
+  }
+  const validAttempts = record.attempts.filter(t => now - t < 900000);
+  if (validAttempts.length >= 5) {
+    record.lockedUntil = now + 3600000;
+    rateLimitStore.set(identifier, record);
+    return { allowed: false, remainingMs: 3600000 };
+  }
+  return { allowed: true };
+};
+const recordAttempt = (identifier, success) => {
+  if (!success) {
+    const record = rateLimitStore.get(identifier) || { attempts: [], lockedUntil: null };
+    record.attempts.push(Date.now());
+    rateLimitStore.set(identifier, record);
+  } else {
+    rateLimitStore.delete(identifier);
+  }
+};
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -71,6 +97,15 @@ Deno.serve(async (req) => {
     
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // DACO FIX: MED-001 - Rate limiting
+    const rateLimit = checkRateLimit(user.email);
+    if (!rateLimit.allowed) {
+      const remainingMin = Math.ceil(rateLimit.remainingMs / 60000);
+      return Response.json({ 
+        error: `Too many failed attempts. Try again in ${remainingMin} minutes.` 
+      }, { status: 429 });
     }
     
     const body = await req.json();
@@ -91,8 +126,11 @@ Deno.serve(async (req) => {
     const isValid = verifyTotpCode(decryptedSecret, totpCode);
     
     if (!isValid) {
+      recordAttempt(user.email, false);
       return Response.json({ error: 'Invalid TOTP code' }, { status: 400 });
     }
+
+    recordAttempt(user.email, true);
     
     const { rawCodes, hashedCodes } = generateRecoveryCodes();
     
