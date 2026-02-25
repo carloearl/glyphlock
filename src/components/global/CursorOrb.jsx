@@ -109,11 +109,14 @@ export default function CursorOrb() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
+      className="fixed inset-0"
       style={{ 
         zIndex: 1,
         mixBlendMode: 'screen',
-        cursor: 'none'
+        pointerEvents: 'none',
+        touchAction: 'none',
+        userSelect: 'none',
+        contain: 'strict'
       }}
     />
   );
