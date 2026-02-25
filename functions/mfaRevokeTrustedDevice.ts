@@ -16,9 +16,9 @@ Deno.serve(async (req) => {
     }
     
     const body = await req.json();
-    const { deviceIdPrefix } = body;
+    const { deviceId } = body;
     
-    if (!deviceIdPrefix) {
+    if (!deviceId) {
       return Response.json({ error: 'Device ID required' }, { status: 400 });
     }
     
@@ -29,8 +29,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'No trusted devices found' }, { status: 404 });
     }
     
+    // DACO FIX: HIGH-001 - Exact deviceId match instead of prefix
     const updatedDevices = userData.trustedDevices.filter(
-      d => !d.deviceId.startsWith(deviceIdPrefix)
+      d => d.deviceId !== deviceId
     );
     
     await base44.asServiceRole.entities.User.update(userData.id, {
