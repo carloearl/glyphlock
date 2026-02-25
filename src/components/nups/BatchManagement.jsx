@@ -124,7 +124,7 @@ export default function BatchManagement({ user }) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="glass-card p-4">
                   <div className="text-sm text-gray-400 mb-1">Opening Cash</div>
                   <div className="text-2xl font-bold text-cyan-400">${activeBatch.opening_cash?.toFixed(2)}</div>
