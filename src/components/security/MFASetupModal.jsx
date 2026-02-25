@@ -65,7 +65,6 @@ export default function MFASetupModal({ isOpen, onClose, onSuccess }) {
       });
 
       setRecoveryCodes(response.data.recoveryCodes);
-      setTempSecret(''); // DACO FIX: MED-002 - Clear sensitive temp secret after verification
       setStep('codes');
     } catch (err) {
       setError(err?.response?.data?.error || 'Invalid verification code. Make sure you entered the 6-digit code from your authenticator app.');
@@ -99,10 +98,6 @@ export default function MFASetupModal({ isOpen, onClose, onSuccess }) {
     setVerificationCode('');
     setRecoveryCodes([]);
     setShowManualKey(false);
-    setTempSecret(''); // DACO FIX: MED-002 - Ensure temp secret cleared on completion
-    setManualKey('');
-    setQrCodeDataUrl('');
-    setOtpauthUrl('');
   };
 
   return (

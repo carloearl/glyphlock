@@ -336,7 +336,7 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
         </div>
 
         {/* Customer / Purchaser + Card Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card className="bg-gray-900/60 border-gray-700">
             <CardHeader className="pb-2"><CardTitle className="text-sm text-cyan-400">Customer / Purchaser</CardTitle></CardHeader>
             <CardContent className="space-y-2">
@@ -375,8 +375,8 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
         {/* Line Items Table */}
         <Card className="bg-gray-900/60 border-gray-700">
           <CardContent className="pt-4">
-            <div className="overflow-x-auto -mx-4 px-4">
-              <table className="w-full text-xs min-w-[500px]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-700 text-gray-400">
                     <th className="p-2 w-8">#</th>

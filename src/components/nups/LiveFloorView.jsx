@@ -60,7 +60,7 @@ export default function LiveFloorView() {
   return (
     <div className="space-y-4">
       {/* Overview Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-center">
           <Users className="w-5 h-5 text-green-400 mx-auto mb-1" />
           <div className="text-2xl font-bold text-green-400">{activeShifts.length}</div>
@@ -95,7 +95,7 @@ export default function LiveFloorView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {occupiedRooms.map(room => (
                 <div key={room.id} className="bg-gray-800/50 border border-gray-700 rounded-lg p-3">
                   <div className="flex justify-between items-start mb-2">
@@ -122,7 +122,7 @@ export default function LiveFloorView() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
             {Object.entries(locationGroups).map(([location, people]) => (
               <div key={location} className={`rounded-lg p-3 border ${locationColors[location] || 'border-gray-700 bg-gray-800/30'}`}>
                 <div className="flex items-center justify-between mb-2">

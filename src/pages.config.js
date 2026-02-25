@@ -87,7 +87,6 @@ import ManageSubscription from './pages/ManageSubscription';
 import MasterCovenant from './pages/MasterCovenant';
 import Mobile from './pages/Mobile';
 import NISTChallenge from './pages/NISTChallenge';
-import NUPSAudit from './pages/NUPSAudit';
 import NUPSLogin from './pages/NUPSLogin';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSReport from './pages/NUPSReport';
@@ -172,7 +171,6 @@ export const PAGES = {
     "MasterCovenant": MasterCovenant,
     "Mobile": Mobile,
     "NISTChallenge": NISTChallenge,
-    "NUPSAudit": NUPSAudit,
     "NUPSLogin": NUPSLogin,
     "NUPSOwner": NUPSOwner,
     "NUPSReport": NUPSReport,

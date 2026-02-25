@@ -88,7 +88,7 @@ export default function EntertainerCheckIn() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <Select value={selectedEntertainer || ""} onValueChange={setSelectedEntertainer}>
               <SelectTrigger className="glass-input">
                 <SelectValue placeholder="Select entertainer..." />
@@ -137,7 +137,7 @@ export default function EntertainerCheckIn() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeShifts.map((shift) => {
               const duration = Math.floor((new Date() - new Date(shift.check_in_time)) / 60000);
               return (

@@ -187,7 +187,7 @@ export default function NUPSOwner() {
 
       <div className="container mx-auto p-4 md:p-6">
         {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
+        <div className="stats-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
           <Card className="bg-gray-900/50 border-cyan-500/30">
             <CardContent className="p-4">
               <DollarSign className="w-6 h-6 text-cyan-400 mb-1" />
@@ -234,7 +234,7 @@ export default function NUPSOwner() {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:flex gap-1 p-1.5 w-full overflow-x-auto">
+          <TabsList className="bg-gray-900/80 border border-gray-800 flex flex-wrap gap-1 p-1.5 w-full">
             <TabsTrigger value="analytics" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
               <BarChart3 className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Analytics</span>

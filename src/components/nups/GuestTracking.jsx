@@ -92,7 +92,7 @@ export default function GuestTracking() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeGuests.map((guest) => {
               const duration = Math.floor((new Date() - new Date(guest.check_in_time)) / 60000);
               return (

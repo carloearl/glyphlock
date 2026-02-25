@@ -104,12 +104,12 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background: #000000;
+  background: transparent;
   color: #ffffff !important;
 }
 
 html.dark {
-  background: #000000;
+  background: transparent;
 }
 
 body {
@@ -121,7 +121,7 @@ body {
   height: 100%;
   width: 100%;
   position: relative;
-  background: #000000;
+  background: transparent;
   color: #ffffff !important;
 }
 
@@ -138,11 +138,7 @@ img.logo,
   loading: eager;
 }
 
-body, #root, #__next {
-  background: #000000 !important;
-}
-
-main, section {
+body, #root, #__next, main, section {
   background: transparent !important;
 }
 
@@ -379,7 +375,25 @@ p {
     padding: 10px 14px;
   }
 
-  /* Preserve 2-col for stats grids */
+  /* Cards should stack on mobile */
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Responsive grid override */
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4,
+  .md\:grid-cols-2,
+  .md\:grid-cols-3,
+  .md\:grid-cols-4,
+  .lg\:grid-cols-2,
+  .lg\:grid-cols-3,
+  .lg\:grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Preserve 2-col for stats only */
   .stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
   }
@@ -580,9 +594,9 @@ body {
 
 /* MOBILE FORCE-CLICKABLE - AGGRESSIVE OVERRIDES */
 @media (max-width: 768px) {
-  /* Enable tap highlights on interactive elements only */
-  button, a, [role="button"], input, select, textarea, label {
-    -webkit-tap-highlight-color: rgba(6, 182, 212, 0.3);
+  /* Enable tap highlights */
+  * {
+    -webkit-tap-highlight-color: rgba(6, 182, 212, 0.4) !important;
   }
 
   html, body {
@@ -697,11 +711,11 @@ select {
   touch-action: auto !important;
 }
 
-/* Canvas overlays NEVER block interaction */
-canvas {
-  pointer-events: none !important;
-  touch-action: none !important;
-  user-select: none !important;
+/* Canvas overlays don't block interaction - except interactive canvases */
+canvas:not([data-interactive]) {
+  pointer-events: none;
+  touch-action: none;
+  user-select: none;
 }
 
 /* Prevent Text Overflow */

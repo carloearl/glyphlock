@@ -283,34 +283,36 @@ export default function NebulaLayer({ intensity = 0.5 }) {
       <canvas
         ref={starsCanvasRef}
         id="nebula-layer-stars"
-        className="fixed inset-0 nebula-layer-container"
+        className="fixed inset-0 pointer-events-none nebula-layer-container"
         style={{ 
           zIndex: 0,
-          mixBlendMode: 'screen',
+          mixBlendMode: window.innerWidth < 768 ? 'normal' : 'screen',
           opacity: 0.6,
-          pointerEvents: 'none',
-          touchAction: 'none',
-          userSelect: 'none',
+          backgroundColor: '#000000',
           transform: 'translateZ(0)',
-          willChange: 'transform',
-          contain: 'strict'
+          willChange: 'transform, opacity',
+          backfaceVisibility: 'hidden',
+          WebkitTransform: 'translateZ(0)',
+          WebkitBackfaceVisibility: 'hidden',
+          contain: 'layout style paint'
         }}
       />
       
       <canvas
         ref={canvasRef}
         id="nebula-layer"
-        className="fixed inset-0 nebula-layer-container"
+        className="fixed inset-0 pointer-events-none nebula-layer-container"
         style={{ 
           zIndex: 1,
-          mixBlendMode: 'screen',
+          mixBlendMode: window.innerWidth < 768 ? 'normal' : 'screen',
           opacity: 0.8,
-          pointerEvents: 'none',
-          touchAction: 'none',
-          userSelect: 'none',
+          backgroundColor: '#000000',
           transform: 'translateZ(0)',
-          willChange: 'transform',
-          contain: 'strict'
+          willChange: 'transform, opacity',
+          backfaceVisibility: 'hidden',
+          WebkitTransform: 'translateZ(0)',
+          WebkitBackfaceVisibility: 'hidden',
+          contain: 'layout style paint'
         }}
       />
     </>
