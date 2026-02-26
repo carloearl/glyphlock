@@ -411,7 +411,8 @@ Provide your response as a JSON object with:
           <Button
             onClick={handleExpandPrompt}
             disabled={!prompt.trim() || expandMutation.isPending}
-            className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_40px_rgba(99,102,241,0.6)] transition-all font-black text-base md:text-lg border-2 border-indigo-400/30 touch-manipulation"
+            className="w-full h-16 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_40px_rgba(99,102,241,0.6)] transition-all font-black text-base md:text-lg border-2 border-indigo-400/30"
+            style={{ touchAction: 'manipulation', pointerEvents: 'auto', minHeight: '64px', cursor: 'pointer' }}
           >
             {expandMutation.isPending ? (
               <>
@@ -722,7 +723,8 @@ Provide your response as a JSON object with:
         <Button
           onClick={() => handleGenerate('generate')}
           disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
-          className="w-full h-20 text-lg md:text-xl font-black bg-white hover:bg-white/90 text-black shadow-[0_0_40px_rgba(255,255,255,0.5)] hover:shadow-[0_0_60px_rgba(255,255,255,0.8)] transition-all border-2 border-white/40 touch-manipulation active:scale-95 flex items-center justify-center gap-3"
+          className="w-full h-20 text-lg md:text-xl font-black bg-white hover:bg-white/90 text-black shadow-[0_0_40px_rgba(255,255,255,0.5)] hover:shadow-[0_0_60px_rgba(255,255,255,0.8)] transition-all border-2 border-white/40 active:scale-95 flex items-center justify-center gap-3"
+          style={{ touchAction: 'manipulation', pointerEvents: 'auto', minHeight: '80px', cursor: 'pointer' }}
         >
           {generateMutation.isPending ? (
             <><Loader2 className="w-6 h-6 md:w-7 md:h-7 animate-spin" />GENERATING...</>

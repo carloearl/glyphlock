@@ -8,10 +8,10 @@ export default function HomeDreamTeamCTA() {
   const isInView = useInView(containerRef, { once: true, amount: 0.4 });
 
   return (
-    <div ref={containerRef} className="w-full flex flex-col items-center mt-20">
+    <div ref={containerRef} className="w-full flex flex-col items-center mt-20 px-4 overflow-hidden" style={{ maxWidth: '100vw' }}>
       
       {/* HERO TEXT - ABOVE COURT */}
-      <div className="text-center px-8 mb-8 max-w-5xl">
+      <div className="text-center px-4 md:px-8 mb-8 max-w-5xl w-full">
         {/* Title - Slide from left */}
         <motion.h2 
           initial={{ opacity: 0, x: -100 }}
@@ -49,6 +49,7 @@ export default function HomeDreamTeamCTA() {
         animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
         transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="relative w-full mx-auto max-w-5xl rounded-3xl shadow-[0_0_80px_rgba(79,70,229,0.6)] overflow-hidden"
+        style={{ maxWidth: 'min(1280px, calc(100vw - 32px))' }}
       >
         
         {/* COURT BACKGROUND - TIGHTER CROP */}
@@ -134,7 +135,7 @@ export default function HomeDreamTeamCTA() {
       </motion.section>
 
       {/* ROSTER ROLES - BELOW COURT */}
-      <div className="relative w-full max-w-5xl mt-12 mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+      <div className="relative w-full max-w-5xl mt-12 mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 px-4" style={{ maxWidth: 'min(1280px, 100%)' }}>
         {[
           { name: 'Alfred', role: 'Point Guard (Floor General)', desc: 'Orchestrates the chain, calls the plays, enforces execution order so every touch has purpose.' },
           { name: 'Claude', role: 'Shooting Guard (Closer)', desc: 'Pure shot-maker on hard problems: deep reasoning, constraints, proofs. When it has to be right, the ball goes here.' },

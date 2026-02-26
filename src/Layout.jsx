@@ -116,15 +116,18 @@ export default function Layout({ children, currentPageName }) {
       <CrawlerFallback />
       <PrerenderHints />
 
-      {/* SITE-WIDE NEBULA + CURSOR ORB - Always Visible */}
+      {/* SITE-WIDE NEBULA + CURSOR ORB - Always Visible on ALL Devices */}
       <div 
-        className="fixed inset-0"
+        className="fixed inset-0 block"
         style={{ 
           zIndex: 0, 
-          pointerEvents: 'none',
-          touchAction: 'none',
+          pointerEvents: 'none !important',
+          touchAction: 'none !important',
           userSelect: 'none',
-          isolation: 'isolate'
+          isolation: 'isolate',
+          display: 'block !important',
+          visibility: 'visible !important',
+          opacity: 1
         }}
         aria-hidden="true"
       >
