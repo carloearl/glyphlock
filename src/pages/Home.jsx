@@ -7,6 +7,7 @@ import ServicesGrid from '@/components/home/ServicesGrid';
 import CTASection from '@/components/home/CTASection';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
 import CountdownPill from '@/components/marketing/CountdownPill';
+import TestimonialsSection from '@/components/home/TestimonialsSection';
 import SEOHead from '@/components/SEOHead';
 
 
@@ -195,6 +196,11 @@ export default function Home() {
         {/* Technology Partners */}
         <ScrollSection>
           <TechnologyMarquee />
+        </ScrollSection>
+
+        {/* Testimonials */}
+        <ScrollSection className="container-responsive">
+          <TestimonialsSection />
         </ScrollSection>
 
         {/* Final Call to Action */}
