@@ -9,19 +9,20 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
 
   return (
     <>
-      {/* Sidebar Tab - Always Visible on Mobile, Auto-Hide on Desktop */}
+      {/* Sidebar Tab - Hidden by default, shows on hover (desktop) or tap (mobile) */}
       <button
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsOpen(!isOpen);
+        onMouseEnter={() => {
+          // Only trigger on desktop hover
+          if (window.innerWidth >= 768) {
+            setIsOpen(true);
+          }
         }}
-        className="fixed right-0 md:right-[-64px] md:hover:right-0 z-[999999] w-20 h-48 md:w-16 md:h-40 rounded-l-3xl bg-gradient-to-br from-purple-600 to-indigo-600 backdrop-blur-xl border-2 border-r-0 border-purple-400 shadow-[0_0_60px_rgba(168,85,247,0.9)] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all duration-300"
+        className="fixed right-[-64px] hover:right-0 z-[999999] w-16 h-40 rounded-l-3xl bg-gradient-to-br from-purple-600 to-indigo-600 backdrop-blur-xl border-2 border-r-0 border-purple-400 shadow-[0_0_60px_rgba(168,85,247,0.9)] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all duration-300"
         style={{ 
           top: '50%',
           transform: 'translateY(-50%)',
@@ -29,13 +30,13 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
           touchAction: 'manipulation',
           WebkitTapHighlightColor: 'rgba(168, 85, 247, 0.5)',
           cursor: 'pointer',
-          minWidth: '80px',
-          minHeight: '192px',
+          minWidth: '64px',
+          minHeight: '160px',
           zIndex: 999999
         }}
       >
-        <MessageSquare className="w-10 h-10 md:w-8 md:h-8 text-purple-100 drop-shadow-[0_0_15px_rgba(168,85,247,1)] pointer-events-none" />
-        <span className="text-base md:text-sm text-white font-black -rotate-90 whitespace-nowrap tracking-wider pointer-events-none">ASSIST</span>
+        <MessageSquare className="w-8 h-8 text-purple-100 drop-shadow-[0_0_15px_rgba(168,85,247,1)] pointer-events-none" />
+        <span className="text-sm text-white font-black -rotate-90 whitespace-nowrap tracking-wider pointer-events-none">ASSIST</span>
       </button>
 
         {/* Slide-Out Menu */}
@@ -46,6 +47,12 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 400, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
+              onMouseLeave={() => {
+                // Only auto-close on desktop hover-out
+                if (window.innerWidth >= 768) {
+                  setIsOpen(false);
+                }
+              }}
               className="fixed right-0 top-0 bottom-0 w-full md:w-96 bg-slate-900/98 backdrop-blur-2xl border-l-2 border-purple-500/50 shadow-[-20px_0_60px_rgba(168,85,247,0.6)] overflow-y-auto z-[999998]"
               style={{
                 pointerEvents: 'auto',

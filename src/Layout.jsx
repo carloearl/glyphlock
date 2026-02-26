@@ -116,9 +116,9 @@ export default function Layout({ children, currentPageName }) {
       <CrawlerFallback />
       <PrerenderHints />
 
-      {/* SITE-WIDE NEBULA + CURSOR ORB - Desktop only */}
+      {/* SITE-WIDE NEBULA + CURSOR ORB - Always Visible */}
       <div 
-        className="hidden md:block fixed inset-0"
+        className="fixed inset-0"
         style={{ 
           zIndex: 0, 
           pointerEvents: 'none',

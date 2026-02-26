@@ -52,7 +52,8 @@ export default function HeroSection() {
             loop
             muted
             playsInline
-            preload="auto"
+            preload="none"
+            loading="lazy"
             className="absolute inset-0 w-full h-full object-cover z-0"
             style={{ filter: 'brightness(1.1) contrast(1.1)', transform: 'translateZ(0)' }}
             onLoadedData={() => setVideoLoaded(true)}

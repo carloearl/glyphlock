@@ -79,16 +79,16 @@ export default function CTASection() {
   return (
     <motion.div 
       ref={containerRef}
-      className="w-full max-w-6xl mx-auto px-4 py-20 relative"
-      style={{ background: 'transparent', pointerEvents: 'auto', scale }}
+      className="w-full max-w-6xl mx-auto px-4 py-20 relative overflow-hidden"
+      style={{ background: 'transparent', pointerEvents: 'auto', scale, maxWidth: '100vw' }}
     >
-      {/* Animated background orbs - Royal Blue/Indigo */}
+      {/* Animated background orbs - Royal Blue/Indigo - Mobile Safe */}
       <motion.div
         className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ y: backgroundY }}
+        style={{ y: backgroundY, willChange: 'transform' }}
       >
         <motion.div
-          className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/25 rounded-full blur-[120px]"
+          className="absolute top-0 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-blue-500/25 rounded-full blur-[80px] md:blur-[120px]"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3]
@@ -96,7 +96,7 @@ export default function CTASection() {
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/25 rounded-full blur-[120px]"
+          className="absolute bottom-0 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-indigo-500/25 rounded-full blur-[80px] md:blur-[120px]"
           animate={{
             scale: [1.2, 1, 1.2],
             opacity: [0.4, 0.3, 0.4]
@@ -115,11 +115,12 @@ export default function CTASection() {
       >
         {/* Main card with animated border */}
         <div className="relative rounded-3xl overflow-hidden">
-          {/* VIVID Royal Blue Glow - Behind everything */}
+          {/* VIVID Royal Blue Glow - Behind everything - Mobile Safe */}
           <motion.div
-            className="absolute -inset-4 rounded-3xl blur-3xl"
+            className="absolute -inset-2 md:-inset-4 rounded-3xl blur-2xl md:blur-3xl"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(59,130,246,0.7) 0%, rgba(37,99,235,0.5) 40%, rgba(29,78,216,0.3) 70%, transparent 100%)'
+              background: 'radial-gradient(ellipse at center, rgba(59,130,246,0.7) 0%, rgba(37,99,235,0.5) 40%, rgba(29,78,216,0.3) 70%, transparent 100%)',
+              willChange: 'transform, opacity'
             }}
             animate={{
               scale: [1, 1.05, 1],
@@ -128,11 +129,12 @@ export default function CTASection() {
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           />
           
-          {/* Secondary glow pulse */}
+          {/* Secondary glow pulse - Mobile Safe */}
           <motion.div
-            className="absolute -inset-6 rounded-3xl blur-[60px]"
+            className="absolute -inset-3 md:-inset-6 rounded-3xl blur-[40px] md:blur-[60px]"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(59,130,246,0.5) 0%, rgba(6,182,212,0.2) 50%, transparent 80%)'
+              background: 'radial-gradient(ellipse at center, rgba(59,130,246,0.5) 0%, rgba(6,182,212,0.2) 50%, transparent 80%)',
+              willChange: 'opacity'
             }}
             animate={{
               opacity: isHovered ? 0.8 : 0.5
@@ -276,35 +278,36 @@ export default function CTASection() {
                 </motion.div>
               </motion.form>
 
-              {/* Benefits grid - Alternating slide from LEFT and RIGHT */}
+              {/* Benefits grid - Alternating slide from LEFT and RIGHT - Mobile Safe */}
               <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                {benefits.map((benefit, idx) => {
-                  const Icon = benefit.icon;
-                  const isLeft = idx % 2 === 0;
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, x: isLeft ? -80 : 80, scale: 0.9 }}
-                      animate={isInView ? { opacity: 1, x: 0, scale: 1 } : { opacity: 0, x: isLeft ? -80 : 80, scale: 0.9 }}
-                      transition={{ 
-                        duration: 1, 
-                        delay: 0.9 + (idx * 0.15), 
-                        ease: [0.16, 1, 0.3, 1] 
-                      }}
-                      whileHover={{ scale: 1.03, x: isLeft ? 8 : -8 }}
-                      className="flex items-center gap-3 text-white font-medium p-3 rounded-xl bg-white/5 border border-white/10 hover:border-blue-400/50 hover:bg-blue-500/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all cursor-default"
-                    >
-                      <motion.div
-                        whileHover={{ rotate: 360, scale: 1.1 }}
-                        transition={{ duration: 0.5 }}
-                        className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/25 to-blue-600/25 flex items-center justify-center"
-                      >
-                        <Icon className="w-4 h-4 text-[#3B82F6]" style={{ filter: 'drop-shadow(0 0 8px rgba(59,130,246,0.9))' }} />
-                      </motion.div>
-                      <span className="text-sm tracking-wide">{benefit.text}</span>
-                    </motion.div>
-                  );
-                })}
+               {benefits.map((benefit, idx) => {
+                 const Icon = benefit.icon;
+                 const isLeft = idx % 2 === 0;
+                 return (
+                   <motion.div
+                     key={idx}
+                     initial={{ opacity: 0, x: isLeft ? -80 : 80, scale: 0.9 }}
+                     animate={isInView ? { opacity: 1, x: 0, scale: 1 } : { opacity: 0, x: isLeft ? -80 : 80, scale: 0.9 }}
+                     transition={{ 
+                       duration: 1, 
+                       delay: 0.9 + (idx * 0.15), 
+                       ease: [0.16, 1, 0.3, 1] 
+                     }}
+                     whileHover={{ scale: 1.03, x: isLeft ? 8 : -8 }}
+                     className="flex items-center gap-3 text-white font-medium p-3 md:p-4 rounded-xl bg-white/5 border border-white/10 hover:border-blue-400/50 hover:bg-blue-500/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all cursor-default"
+                     style={{ maxWidth: '100%', overflow: 'hidden', willChange: 'transform' }}
+                   >
+                     <motion.div
+                       whileHover={{ rotate: 360, scale: 1.1 }}
+                       transition={{ duration: 0.5 }}
+                       className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-gradient-to-br from-blue-500/25 to-blue-600/25 flex items-center justify-center"
+                     >
+                       <Icon className="w-4 h-4 md:w-5 md:h-5 text-[#3B82F6]" style={{ filter: 'drop-shadow(0 0 8px rgba(59,130,246,0.9))' }} />
+                     </motion.div>
+                     <span className="text-xs md:text-sm tracking-wide">{benefit.text}</span>
+                   </motion.div>
+                 );
+               })}
               </div>
             </div>
           </div>

@@ -291,9 +291,18 @@ Provide your response as a JSON object with:
     }
   };
 
-  const handleGenerate = (action = 'generate') => {
+  const handleGenerate = async (action = 'generate') => {
+    console.log('[GenerateTab] handleGenerate called with action:', action);
+    console.log('[GenerateTab] promptSpecId:', promptSpecId);
+    console.log('[GenerateTab] weightsValid:', weightsValid);
+    
+    if (!prompt.trim()) {
+      toast.error('⚠️ Enter a prompt first');
+      return;
+    }
+    
     if (!promptSpecId) {
-      toast.error('⚠️ Expand prompt first before generating');
+      toast.error('⚠️ Click "Expand Prompt" button first before generating');
       return;
     }
 
@@ -303,6 +312,7 @@ Provide your response as a JSON object with:
       return;
     }
 
+    console.log('[GenerateTab] Starting generation mutation...');
     generateMutation.mutate({
       prompt_spec_id: promptSpecId,
       reference_image_ids: references.map(r => r.reference_image_id),
