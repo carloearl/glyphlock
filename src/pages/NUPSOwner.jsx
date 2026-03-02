@@ -270,6 +270,7 @@ export default function NUPSOwner() {
               { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'staff', icon: UserCog, label: 'Staff' },
               { value: 'ai', icon: Brain, label: 'AI' },
+              { value: 'contracts', icon: ScrollText, label: 'Contracts' },
               ...((user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') ? [{ value: 'rbac', icon: KeyRound, label: 'Access' }] : []),
             ].map(({ value, icon: Icon, label }) => (
               <TabsTrigger
