@@ -80,7 +80,7 @@ export default function NUPSStaff() {
         keywords="POS terminal, staff timeclock, transaction processing, batch management, nightclub POS, GlyphLock NUPS"
         url="/nups-staff"
       />
-      <header className="border-b border-cyan-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
+      <header className="border-b border-cyan-500/20 p-4 sticky top-0 bg-black/95 backdrop-blur-lg" style={{ zIndex: 9990, position: 'sticky', pointerEvents: 'auto' }}>
         <div className="container mx-auto flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <Store className="w-6 h-6 text-cyan-400" />
