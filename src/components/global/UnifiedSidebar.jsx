@@ -205,57 +205,162 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
             className="fixed inset-0 z-[999999] flex items-center justify-center p-4" 
             style={{ pointerEvents: 'auto', touchAction: 'manipulation' }}
           >
-            <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setActiveModal(null)} />
+            <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={() => setActiveModal(null)} />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 50 }}
+              initial={{ opacity: 0, scale: 0.93, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 50 }}
-              className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900 border-2 border-cyan-500/40 rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(6,182,212,0.5)]"
+              exit={{ opacity: 0, scale: 0.93, y: 30 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="relative w-full max-w-5xl bg-slate-900/95 border border-purple-500/30 rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(168,85,247,0.35),0_0_140px_rgba(168,85,247,0.15)] backdrop-blur-2xl flex flex-col"
+              style={{ height: '85vh' }}
               onClick={(e) => e.stopPropagation()}
             >
-            <div className="flex items-center justify-between p-6 border-b border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border-2 border-cyan-400/60 flex items-center justify-center">
-                  <HelpCircle className="w-6 h-6 text-cyan-300" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">{helpTitle}</h2>
-                  <p className="text-xs text-cyan-400">Knowledge Base</p>
-                </div>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setActiveModal(null);
-                }}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setActiveModal(null);
-                }}
-                className="p-2 rounded-xl hover:bg-white/10 transition-all"
-                style={{ touchAction: 'manipulation', minWidth: '48px', minHeight: '48px', pointerEvents: 'auto' }}
-              >
-                <X className="w-5 h-5 text-slate-400 hover:text-red-400 pointer-events-none" />
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {helpSections.map((section, idx) => (
-                <div key={idx} className="mb-6">
-                  <h3 className="text-lg font-bold text-cyan-300 mb-3">{section.title}</h3>
-                  <div className="space-y-3">
-                    {section.content?.map((item, cIdx) => (
-                      <div key={cIdx} className="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
-                        <h4 className="text-sm font-semibold text-white mb-2">{item.heading}</h4>
-                        <p className="text-xs text-slate-300 leading-relaxed">{item.text}</p>
-                      </div>
-                    ))}
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-purple-500/20 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 backdrop-blur-xl shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border border-purple-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                    <HelpCircle className="w-5 h-5 text-purple-200" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-white">{helpTitle}</h2>
+                    <p className="text-xs text-purple-400/70">Knowledge Base</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </motion.div>
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="p-2 rounded-xl hover:bg-white/10 transition-all"
+                  style={{ touchAction: 'manipulation', minWidth: '44px', minHeight: '44px', pointerEvents: 'auto' }}
+                >
+                  <X className="w-5 h-5 text-slate-400 hover:text-red-400 pointer-events-none" />
+                </button>
+              </div>
+
+              {/* Fixed Tab Bar + Glass Dropdown */}
+              <div className="flex items-center gap-2 px-6 py-3 border-b border-purple-500/15 bg-slate-900/60 shrink-0 flex-wrap">
+                {/* Section Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-purple-600/20 to-indigo-600/20 border border-purple-400/40 hover:border-purple-400/70 text-white text-sm font-semibold transition-all shadow-[0_0_15px_rgba(168,85,247,0.2)] hover:shadow-[0_0_25px_rgba(168,85,247,0.35)] min-w-[180px]"
+                  >
+                    <span className="flex-1 text-left truncate">{helpSections[activeSection]?.title || 'Select Section'}</span>
+                    <ChevronDown className={`w-4 h-4 text-purple-300 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {dropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        className="absolute top-full left-0 mt-2 w-64 z-50 rounded-2xl overflow-hidden"
+                        style={{
+                          background: 'rgba(15, 10, 30, 0.97)',
+                          border: '1px solid rgba(168, 85, 247, 0.35)',
+                          boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(168,85,247,0.25), inset 0 1px 0 rgba(255,255,255,0.05)',
+                          backdropFilter: 'blur(24px)',
+                        }}
+                      >
+                        <div className="p-2">
+                          {helpSections.map((section, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => { setActiveSection(idx); setActiveItem(0); setDropdownOpen(false); }}
+                              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left ${
+                                activeSection === idx
+                                  ? 'bg-gradient-to-r from-purple-600/40 to-indigo-600/40 text-white border border-purple-400/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                                  : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                              }`}
+                            >
+                              {activeSection === idx && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                              {activeSection !== idx && <span className="w-3.5 h-3.5 shrink-0" />}
+                              {section.title}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Topic Pills - fixed, no scroll */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {helpSections[activeSection]?.content?.map((item, cIdx) => (
+                    <button
+                      key={cIdx}
+                      onClick={() => setActiveItem(cIdx)}
+                      className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                        activeItem === cIdx
+                          ? 'bg-gradient-to-r from-purple-600/50 to-indigo-600/50 text-white border border-purple-400/50 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
+                          : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200 border border-white/10'
+                      }`}
+                    >
+                      {item.heading?.split(' ').slice(0, 3).join(' ')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Content Area - no scroll, full height */}
+              <div className="flex-1 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  {helpSections[activeSection]?.content?.[activeItem] && (
+                    <motion.div
+                      key={`${activeSection}-${activeItem}`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                      className="h-full p-8 overflow-y-auto"
+                    >
+                      {(() => {
+                        const item = helpSections[activeSection].content[activeItem];
+                        return (
+                          <div className="max-w-3xl mx-auto space-y-6">
+                            <div>
+                              <h3 className="text-2xl font-bold text-white mb-1">{item.heading}</h3>
+                              <div className="h-px bg-gradient-to-r from-purple-500/50 to-transparent mt-3" />
+                            </div>
+                            <p className="text-base text-slate-300 leading-relaxed whitespace-pre-line">{item.text}</p>
+                            {item.tip && (
+                              <div className="flex gap-3 p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-400/25">
+                                <span className="text-lg shrink-0">💡</span>
+                                <p className="text-sm text-purple-200 leading-relaxed">{item.tip}</p>
+                              </div>
+                            )}
+                            {item.action && (
+                              <div className="flex gap-3 p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-400/25">
+                                <span className="text-lg shrink-0">▶</span>
+                                <p className="text-sm text-cyan-200 leading-relaxed">{item.action}</p>
+                              </div>
+                            )}
+                            {/* Nav arrows */}
+                            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                              <button
+                                onClick={() => setActiveItem(Math.max(0, activeItem - 1))}
+                                disabled={activeItem === 0}
+                                className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-300 hover:bg-white/10 disabled:opacity-30 transition-all"
+                              >
+                                ← Prev
+                              </button>
+                              <span className="text-xs text-slate-500">{activeItem + 1} / {helpSections[activeSection].content.length}</span>
+                              <button
+                                onClick={() => setActiveItem(Math.min(helpSections[activeSection].content.length - 1, activeItem + 1))}
+                                disabled={activeItem === helpSections[activeSection].content.length - 1}
+                                className="px-5 py-2.5 rounded-xl bg-purple-600/20 border border-purple-400/30 text-sm text-purple-200 hover:bg-purple-600/35 disabled:opacity-30 transition-all"
+                              >
+                                Next →
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
