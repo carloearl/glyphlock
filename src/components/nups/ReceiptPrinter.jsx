@@ -205,9 +205,9 @@ export default function ReceiptPrinter({
   const txDate = new Date(transaction.created_date);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
       {/* On-screen receipt preview */}
-      <div className="bg-black/60 border border-cyan-500/20 rounded-xl p-4 font-mono text-xs max-w-sm mx-auto">
+      <div className="bg-black/90 border border-cyan-500/40 rounded-xl p-4 font-mono text-xs max-w-sm mx-auto shadow-[0_0_30px_rgba(6,182,212,0.2)]">
         <div className="text-center mb-3">
           <div className="text-base font-black text-white tracking-widest">{BIZ_NAME}</div>
           <div className="text-[9px] text-gray-500">N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE</div>
@@ -286,7 +286,8 @@ export default function ReceiptPrinter({
       
       <div className="flex justify-center">
         <Button onClick={printReceipt} variant="outline" size="sm"
-          className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
+          className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+          style={{ position: 'relative', zIndex: 31, pointerEvents: 'auto', cursor: 'pointer' }}>
           <Printer className="w-4 h-4 mr-1" /> Print Receipt
         </Button>
       </div>
