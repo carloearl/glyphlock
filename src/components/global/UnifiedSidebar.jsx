@@ -47,12 +47,12 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
         <style>{`
           @keyframes edgeGlowPulse {
             0%, 100% {
-              opacity: 0.55;
-              box-shadow: 0 0 6px rgba(168,85,247,0.5), -5px 0 16px rgba(168,85,247,0.2), -10px 0 30px rgba(99,102,241,0.08);
+              opacity: 0.75;
+              box-shadow: 0 0 10px rgba(168,85,247,0.8), -8px 0 24px rgba(168,85,247,0.45), -18px 0 50px rgba(99,102,241,0.2);
             }
             50% {
               opacity: 1;
-              box-shadow: 0 0 12px rgba(168,85,247,0.95), -8px 0 28px rgba(168,85,247,0.45), -18px 0 55px rgba(99,102,241,0.25);
+              box-shadow: 0 0 18px rgba(168,85,247,1), -12px 0 40px rgba(168,85,247,0.7), -28px 0 80px rgba(99,102,241,0.4);
             }
           }
         `}</style>
