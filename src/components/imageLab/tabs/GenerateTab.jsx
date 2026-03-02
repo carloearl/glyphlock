@@ -354,7 +354,7 @@ Provide your response as a JSON object with:
         onClose={() => setShowEditor(false)}
       />
     )}
-    <div className="space-y-5 p-4 md:p-6 relative">
+    <div className="space-y-5 p-4 md:p-6 relative" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
       {/* SCAN LINE */}
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70 animate-pulse pointer-events-none z-50" />
       
