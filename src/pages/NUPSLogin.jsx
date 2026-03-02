@@ -124,50 +124,54 @@ export default function NUPSLogin() {
             </div>
           ) : (
             <>
-              <div className="space-y-3 mb-6">
-                <Button
-                  onClick={() => setShowClickwrap(true)}
-                  className="w-full h-14 text-lg bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] hover:from-[#6D28D9] hover:to-[#2563EB] rounded-xl"
-                >
-                  <Shield className="w-5 h-5 mr-2" />
-                  Admin / Owner Login
-                </Button>
-
-                <Button
-                  onClick={() => setShowClickwrap(true)}
-                  variant="outline"
-                  className="w-full h-14 text-lg border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 rounded-xl"
-                >
-                  <LogIn className="w-5 h-5 mr-2" />
-                  Staff Login
-                </Button>
-
-                <Button
-                  onClick={() => setShowClickwrap(true)}
-                  variant="outline"
-                  className="w-full h-14 text-lg border-pink-500/50 text-pink-400 hover:bg-pink-500/10 rounded-xl"
-                >
-                  <FileSignature className="w-5 h-5 mr-2" />
-                  Entertainer Login
-                </Button>
+              {/* Role Selector Cards */}
+              <div className="grid grid-cols-3 gap-3 mb-5">
+                {[
+                  {
+                    icon: <Shield className="w-7 h-7" />,
+                    label: "Admin",
+                    sub: "Owner / Manager",
+                    color: "from-violet-600/20 to-indigo-600/20",
+                    border: "border-violet-500/40 hover:border-violet-400/70",
+                    iconColor: "text-violet-400",
+                    glow: "hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]",
+                  },
+                  {
+                    icon: <LogIn className="w-7 h-7" />,
+                    label: "Staff",
+                    sub: "POS · Time Clock",
+                    color: "from-cyan-600/20 to-blue-600/20",
+                    border: "border-cyan-500/40 hover:border-cyan-400/70",
+                    iconColor: "text-cyan-400",
+                    glow: "hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]",
+                  },
+                  {
+                    icon: <Music className="w-7 h-7" />,
+                    label: "Entertainer",
+                    sub: "Check-In · Floor",
+                    color: "from-pink-600/20 to-rose-600/20",
+                    border: "border-pink-500/40 hover:border-pink-400/70",
+                    iconColor: "text-pink-400",
+                    glow: "hover:shadow-[0_0_20px_rgba(236,72,153,0.3)]",
+                  },
+                ].map((role) => (
+                  <button
+                    key={role.label}
+                    onClick={() => setShowClickwrap(true)}
+                    className={`group flex flex-col items-center gap-2 p-4 rounded-2xl bg-gradient-to-br ${role.color} border ${role.border} ${role.glow} transition-all duration-200 active:scale-95 text-center`}
+                  >
+                    <span className={`${role.iconColor} transition-transform group-hover:scale-110 duration-200`}>
+                      {role.icon}
+                    </span>
+                    <div>
+                      <div className="text-sm font-bold text-white">{role.label}</div>
+                      <div className="text-[10px] text-white/50 leading-tight mt-0.5">{role.sub}</div>
+                    </div>
+                  </button>
+                ))}
               </div>
 
-              <div className="pt-4 border-t border-[#3B82F6]/30">
-                <div className="text-xs text-white/60 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span>Staff Access:</span>
-                    <span className="text-[#3B82F6]">POS, Time Clock, Sales</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Owner Access:</span>
-                    <span className="text-[#8B5CF6]">Full Admin + Live View + Reports</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Entertainer:</span>
-                    <span className="text-pink-400">Check-In, Floor Status</span>
-                  </div>
-                </div>
-              </div>
+              <p className="text-center text-[11px] text-white/30">Select your role to continue</p>
             </>
           )}
         </div>
