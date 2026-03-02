@@ -23,33 +23,23 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
 
   return (
     <>
-      {/* Floating Glow Orb Trigger */}
-      <button
+      {/* Invisible Edge Trigger - no visual, hover opens panel */}
+      <div
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(!isOpen); }}
-        onMouseEnter={() => {}}
-        className="fixed right-3 z-[999999] w-4 h-4 rounded-full cursor-pointer transition-all duration-500 hover:scale-150"
+        onMouseEnter={() => { if (window.innerWidth >= 768) setIsOpen(true); }}
         style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
+          position: 'fixed',
+          right: 0,
+          top: '30%',
+          width: '12px',
+          height: '40%',
+          zIndex: 999999,
           pointerEvents: 'auto',
           touchAction: 'manipulation',
-          background: 'rgba(168, 85, 247, 0)',
-          boxShadow: 'none',
-          opacity: 0,
+          background: 'transparent',
+          cursor: 'pointer',
         }}
-        onMouseEnter={e => {
-          e.currentTarget.style.opacity = '1';
-          e.currentTarget.style.background = 'rgba(168, 85, 247, 0.6)';
-          e.currentTarget.style.boxShadow = '0 0 14px rgba(168,85,247,0.9), 0 0 35px rgba(168,85,247,0.5)';
-          if (window.innerWidth >= 768) setIsOpen(true);
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.opacity = '0';
-          e.currentTarget.style.background = 'rgba(168, 85, 247, 0)';
-          e.currentTarget.style.boxShadow = 'none';
-        }}
-      >
-      </button>
+      />
 
         {/* Slide-Out Menu */}
         <AnimatePresence>
