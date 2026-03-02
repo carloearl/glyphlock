@@ -27,23 +27,28 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
       <button
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(!isOpen); }}
         onMouseEnter={() => { if (window.innerWidth >= 768) setIsOpen(true); }}
-        className="fixed right-3 z-[999999] w-4 h-4 rounded-full cursor-pointer transition-all duration-300 hover:scale-150"
+        className="fixed right-3 z-[999999] w-4 h-4 rounded-full cursor-pointer transition-all duration-500 hover:scale-150"
         style={{
           top: '50%',
           transform: 'translateY(-50%)',
           pointerEvents: 'auto',
           touchAction: 'manipulation',
-          background: 'rgba(168, 85, 247, 0.6)',
-          boxShadow: '0 0 12px rgba(168,85,247,0.8), 0 0 30px rgba(168,85,247,0.4)',
-          animation: 'orbPulse 3s ease-in-out infinite',
+          background: 'rgba(168, 85, 247, 0)',
+          boxShadow: 'none',
+          opacity: 0,
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.opacity = '1';
+          e.currentTarget.style.background = 'rgba(168, 85, 247, 0.6)';
+          e.currentTarget.style.boxShadow = '0 0 14px rgba(168,85,247,0.9), 0 0 35px rgba(168,85,247,0.5)';
+          if (window.innerWidth >= 768) setIsOpen(true);
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.opacity = '0';
+          e.currentTarget.style.background = 'rgba(168, 85, 247, 0)';
+          e.currentTarget.style.boxShadow = 'none';
         }}
       >
-        <style>{`
-          @keyframes orbPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(168,85,247,0.7), 0 0 25px rgba(168,85,247,0.35); }
-            50% { box-shadow: 0 0 18px rgba(168,85,247,1), 0 0 45px rgba(168,85,247,0.55); }
-          }
-        `}</style>
       </button>
 
         {/* Slide-Out Menu */}
