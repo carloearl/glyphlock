@@ -176,7 +176,7 @@ export default function NUPSLogin() {
                 ].map((role) => (
                   <button
                     key={role.label}
-                    onClick={() => setShowClickwrap(true)}
+                    onClick={() => { setSelectedRole(role.label); setShowClickwrap(true); }}
                     className={`group flex flex-col items-center gap-2 p-4 rounded-2xl bg-gradient-to-br ${role.color} border ${role.border} ${role.glow} transition-all duration-200 active:scale-95 text-center`}
                   >
                     <span className={`${role.iconColor} transition-transform group-hover:scale-110 duration-200`}>
