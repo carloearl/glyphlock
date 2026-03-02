@@ -62,7 +62,7 @@ export default function NUPSLogin() {
             console.warn("RBAC payload unavailable, falling back to base44 role:", e);
           }
           const user = await base44.auth.me();
-          const target = resolveNUPSDashboard(permissionsData, user.role);
+          const target = resolveNUPSDashboard(permissionsData, user.role, null);
           window.location.href = createPageUrl(target);
           return;
         }
