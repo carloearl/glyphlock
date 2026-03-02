@@ -299,86 +299,98 @@ export default function POSCashRegister({ user }) {
 
   // ─── RENDER: MAIN REGISTER VIEW ───────────────────
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4" style={{ minHeight: 'calc(100vh - 220px)', position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-      {/* LEFT: Products + Quick Charges */}
-      <div className="lg:col-span-3 space-y-4">
-        {/* Search + Barcode */}
-        <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
-          <CardContent className="p-3">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <Input
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-black/40 border-white/15 text-white"
-                />
-              </div>
-              <div className="relative">
-                <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <Input
-                  placeholder="Scan barcode"
-                  value={barcodeInput}
-                  onChange={(e) => setBarcodeInput(e.target.value)}
-                  className="pl-10 w-48 bg-black/40 border-white/15 text-white"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div
+      className="flex gap-0 rounded-2xl overflow-hidden"
+      style={{
+        height: 'calc(100vh - 200px)',
+        minHeight: '600px',
+        background: 'rgba(0,0,0,0.6)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        backdropFilter: 'blur(20px)',
+        position: 'relative',
+        zIndex: 20,
+        pointerEvents: 'auto',
+      }}
+    >
+      {/* ── LEFT PANEL: Items/Charges ───────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden border-r border-white/[0.06]">
 
-        {/* Quick Charge Presets */}
-        <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
-          <CardContent className="p-3">
+        {/* Search bar */}
+        <div className="p-3 border-b border-white/[0.06] flex gap-2 shrink-0">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 text-sm"
+            />
+          </div>
+          <div className="relative">
+            <Barcode className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            <Input
+              placeholder="Scan..."
+              value={barcodeInput}
+              onChange={(e) => setBarcodeInput(e.target.value)}
+              className="pl-8 w-32 h-9 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent' }}>
+
+          {/* Quick Charges */}
+          <div>
+            <div className="text-[10px] text-gray-600 uppercase tracking-widest mb-2 font-bold flex items-center gap-1">
+              <DollarSign className="w-3 h-3" /> Quick Charges
+            </div>
             <QuickChargePanel
               onAddItem={addToCart}
               onSetDiscount={setDiscount}
               currentDiscount={discount}
             />
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Product Grid */}
-        <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
-          <CardContent className="p-3">
-            <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Products</div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-[350px] overflow-y-auto">
-              {filteredProducts.map((product) => (
-                <Button
-                  key={product.id}
-                  onClick={() => addProductToCart(product)}
-                  className="h-auto p-3 flex flex-col items-center gap-1 bg-black/30 border border-white/[0.08] hover:border-white/25 text-left active:scale-95 transition-all"
-                  variant="outline"
-                >
-                  <div className="text-[11px] font-semibold text-white truncate w-full text-center">{product.name}</div>
-                  <div className="text-base font-black text-green-400">${product.price?.toFixed(2)}</div>
-                  {product.stock_quantity != null && (
-                    <div className="text-[9px] text-gray-600">Stock: {product.stock_quantity}</div>
-                  )}
-                </Button>
-              ))}
-              {filteredProducts.length === 0 && (
-                <div className="col-span-full text-center py-8 text-gray-600 text-sm">
-                  No products found
-                </div>
-              )}
+          {/* Product Grid */}
+          {filteredProducts.length > 0 && (
+            <div>
+              <div className="text-[10px] text-gray-600 uppercase tracking-widest mb-2 font-bold">Products</div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                {filteredProducts.map((product) => (
+                  <button
+                    key={product.id}
+                    onClick={() => addProductToCart(product)}
+                    className="group relative rounded-xl p-2.5 flex flex-col items-center gap-1 text-center active:scale-95 transition-all"
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.07)',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(34,197,94,0.35)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
+                  >
+                    <div className="text-[11px] font-semibold text-gray-300 truncate w-full">{product.name}</div>
+                    <div className="text-sm font-black text-green-400">${product.price?.toFixed(2)}</div>
+                    {product.stock_quantity != null && (
+                      <div className="text-[9px] text-gray-600">Stock: {product.stock_quantity}</div>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          )}
 
-        {/* Customer Selection */}
-        <Card className="bg-black/40 border-white/10 backdrop-blur-sm">
-          <CardContent className="p-3">
-            <Label className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block font-bold">Customer</Label>
+          {/* Customer */}
+          <div>
+            <div className="text-[10px] text-gray-600 uppercase tracking-widest mb-2 font-bold">Customer</div>
             <Select
               value={selectedCustomer?.id || "walk-in"}
               onValueChange={(id) => setSelectedCustomer(id === "walk-in" ? null : customers.find(c => c.id === id) || null)}
             >
-              <SelectTrigger className="bg-black/40 border-white/15 text-white">
+              <SelectTrigger className="h-9 bg-white/[0.04] border-white/[0.08] text-white text-sm">
                 <SelectValue placeholder="Walk-in Customer" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
+              <SelectContent className="bg-gray-950 border-gray-800">
                 <SelectItem value="walk-in">Walk-in Customer</SelectItem>
                 {customers.map((customer) => (
                   <SelectItem key={customer.id} value={customer.id}>
@@ -387,41 +399,49 @@ export default function POSCashRegister({ user }) {
                 ))}
               </SelectContent>
             </Select>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      {/* RIGHT: Order Display + Checkout */}
-      <div className="lg:col-span-2 flex flex-col">
-        <Card className="bg-black/40 border-white/10 backdrop-blur-sm flex-1 flex flex-col overflow-hidden">
-          <OrderDisplay
-            cart={cart}
-            subtotal={subtotal}
-            tax={tax}
-            discount={discount}
-            discountAmount={discountAmount}
-            total={total}
-            onUpdateQuantity={updateQuantity}
-            onRemoveItem={removeFromCart}
-            onClearCart={() => setCart([])}
-          />
-          {cart.length > 0 && (
-            <div className="p-3 border-t border-white/10">
-              <Button
-                onClick={handleCheckout}
-                className="w-full h-16 text-xl font-black bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 active:scale-[0.98] transition-all"
-                style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto', cursor: 'pointer' }}
-              >
-                <Wallet className="w-6 h-6 mr-2" />
-                PAY ${total.toFixed(2)}
-              </Button>
-            </div>
+      {/* ── RIGHT PANEL: Order + Checkout ──────────── */}
+      <div className="w-72 lg:w-80 flex flex-col shrink-0" style={{ background: 'rgba(0,0,0,0.3)' }}>
+        <OrderDisplay
+          cart={cart}
+          subtotal={subtotal}
+          tax={tax}
+          discount={discount}
+          discountAmount={discountAmount}
+          total={total}
+          onUpdateQuantity={updateQuantity}
+          onRemoveItem={removeFromCart}
+          onClearCart={() => setCart([])}
+        />
+
+        {/* Checkout Button */}
+        <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          {cart.length > 0 ? (
+            <button
+              onClick={handleCheckout}
+              className="w-full rounded-xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-2"
+              style={{
+                height: '64px',
+                background: 'linear-gradient(135deg, #16a34a, #059669)',
+                boxShadow: '0 0 30px rgba(34,197,94,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+                pointerEvents: 'auto',
+                cursor: 'pointer',
+              }}
+            >
+              <Wallet className="w-6 h-6" />
+              PAY ${total.toFixed(2)}
+            </button>
+          ) : (
+            <div className="text-center text-gray-700 text-xs py-4">Add items to order</div>
           )}
-        </Card>
+        </div>
 
         {/* Last Receipt */}
         {lastTransaction && (
-          <div className="mt-3">
+          <div className="px-3 pb-3 shrink-0">
             <ReceiptPrinter transaction={lastTransaction} />
           </div>
         )}
