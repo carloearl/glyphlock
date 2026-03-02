@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
-import { Shield, LogIn, Loader2, CheckCircle2, FileSignature } from "lucide-react";
+import { Shield, LogIn, Loader2, CheckCircle2, FileSignature, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const CLICKWRAP_TERMS = [
   "I understand this system contains confidential business information.",
