@@ -60,11 +60,11 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                 touchAction: 'pan-y'
               }}
             >
-              <div className="sticky top-0 z-10 p-6 border-b border-purple-500/30 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 backdrop-blur-xl flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-1">Quick Assist</h3>
-                  <p className="text-sm text-purple-300">AI help & system guides</p>
-                </div>
+              <div className="sticky top-0 z-10 p-5 border-b border-purple-500/20 bg-gradient-to-r from-purple-600/15 to-indigo-600/15 backdrop-blur-xl flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-0.5">Quick Assist</h3>
+                <p className="text-xs text-purple-300/80">AI help & system guides</p>
+              </div>
                 <button
                   onClick={(e) => {
                     e.preventDefault();
@@ -101,7 +101,7 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                     setActiveModal('bot');
                     setIsOpen(false);
                   }}
-                  className="p-6 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-400/40 active:border-purple-400/80 active:scale-98 transition-all cursor-pointer"
+                  className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/15 to-indigo-500/15 border border-purple-400/35 hover:border-purple-400/60 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-[0.98] transition-all cursor-pointer"
                   style={{
                     minHeight: '120px',
                     pointerEvents: 'auto',
@@ -111,12 +111,12 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   }}
                 >
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/40 to-indigo-500/40 border-2 border-purple-400/60 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.6)]">
-                      <MessageSquare className="w-8 h-8 text-purple-200" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border border-purple-400/50 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                      <MessageSquare className="w-6 h-6 text-purple-200" />
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold text-white">GlyphBot Jr</h4>
-                      <p className="text-sm text-purple-300">AI Assistant</p>
+                      <h4 className="text-base font-bold text-white">GlyphBot Jr</h4>
+                      <p className="text-xs text-purple-300/80">AI Assistant</p>
                     </div>
                   </div>
                   <p className="text-sm text-slate-300 leading-relaxed">
@@ -141,7 +141,7 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                     setActiveModal('help');
                     setIsOpen(false);
                   }}
-                  className="p-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-400/40 active:border-cyan-400/80 active:scale-98 transition-all cursor-pointer"
+                  className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/15 to-indigo-500/15 border border-purple-400/35 hover:border-purple-400/60 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-[0.98] transition-all cursor-pointer"
                   style={{
                     minHeight: '120px',
                     pointerEvents: 'auto',
@@ -151,12 +151,12 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   }}
                 >
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/40 to-blue-500/40 border-2 border-cyan-400/60 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.6)]">
-                      <HelpCircle className="w-8 h-8 text-cyan-200" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border border-purple-400/50 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                      <HelpCircle className="w-6 h-6 text-purple-200" />
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold text-white">Help Guide</h4>
-                      <p className="text-sm text-cyan-300">Documentation</p>
+                      <h4 className="text-base font-bold text-white">Help Guide</h4>
+                      <p className="text-xs text-purple-300/80">Documentation</p>
                     </div>
                   </div>
                   <p className="text-sm text-slate-300 leading-relaxed">
@@ -165,8 +165,8 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                 </motion.div>
               </div>
 
-              <div className="sticky bottom-0 p-6 border-t border-purple-500/20 bg-slate-950/95 backdrop-blur-xl">
-                <p className="text-sm text-center text-purple-400 font-semibold">Tap an option to get started</p>
+              <div className="sticky bottom-0 p-4 border-t border-purple-500/15 bg-slate-950/90 backdrop-blur-xl">
+                <p className="text-xs text-center text-purple-400/70">Tap an option to get started</p>
               </div>
             </motion.div>
           )}
