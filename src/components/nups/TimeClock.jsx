@@ -295,13 +295,18 @@ export default function TimeClock({ user, role = "staff" }) {
   if (pinStep === "clocking_in" || pinStep === "clocking_out") {
     return (
       <div className="max-w-sm mx-auto space-y-4">
-        <Button variant="ghost" onClick={() => setPinStep("idle")} className="text-gray-400">
+        <Button variant="ghost" onClick={() => { setPinStep("idle"); setPinError(""); }} className="text-gray-400">
           <ChevronLeft className="w-4 h-4 mr-1" /> Back
         </Button>
-        <PinPad 
-          onSubmit={handlePin} 
-          label={pinStep === "clocking_in" ? "🟢 CLOCK IN — Enter PIN" : "🔴 CLOCK OUT — Enter PIN"} 
+        <PinPad
+          onSubmit={handlePin}
+          label={pinStep === "clocking_in" ? "🟢 CLOCK IN — Enter PIN" : "🔴 CLOCK OUT — Enter PIN"}
         />
+        {pinError && (
+          <div className="text-center text-sm font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+            {pinError}
+          </div>
+        )}
       </div>
     );
   }
