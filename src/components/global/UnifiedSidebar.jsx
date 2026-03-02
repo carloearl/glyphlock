@@ -26,7 +26,7 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
       {/* Floating Glow Orb Trigger */}
       <button
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(!isOpen); }}
-        onMouseEnter={() => { if (window.innerWidth >= 768) setIsOpen(true); }}
+        onMouseEnter={() => {}}
         className="fixed right-3 z-[999999] w-4 h-4 rounded-full cursor-pointer transition-all duration-500 hover:scale-150"
         style={{
           top: '50%',
