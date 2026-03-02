@@ -23,35 +23,25 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
 
   return (
     <>
-      {/* Sidebar Tab */}
+      {/* Floating Glow Orb Trigger */}
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-        onMouseEnter={() => {
-          if (window.innerWidth >= 768) setIsOpen(true);
-        }}
-        className="fixed right-[-52px] hover:right-0 z-[999999] w-14 h-32 rounded-l-2xl bg-gradient-to-br from-purple-600/90 to-indigo-600/90 backdrop-blur-xl border border-r-0 border-purple-400/60 shadow-[0_0_30px_rgba(168,85,247,0.6),0_0_60px_rgba(168,85,247,0.3)] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all duration-300"
-        style={{ 
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(!isOpen); }}
+        onMouseEnter={() => { if (window.innerWidth >= 768) setIsOpen(true); }}
+        className="fixed right-3 z-[999999] w-4 h-4 rounded-full cursor-pointer transition-all duration-300 hover:scale-150"
+        style={{
           top: '50%',
           transform: 'translateY(-50%)',
           pointerEvents: 'auto',
           touchAction: 'manipulation',
-          WebkitTapHighlightColor: 'rgba(168, 85, 247, 0.4)',
-          cursor: 'pointer',
-          minWidth: '56px',
-          minHeight: '128px',
-          zIndex: 999999,
-          animation: 'sidebarGlow 3s ease-in-out infinite',
+          background: 'rgba(168, 85, 247, 0.6)',
+          boxShadow: '0 0 12px rgba(168,85,247,0.8), 0 0 30px rgba(168,85,247,0.4)',
+          animation: 'orbPulse 3s ease-in-out infinite',
         }}
       >
-        <MessageSquare className="w-6 h-6 text-purple-100 drop-shadow-[0_0_8px_rgba(168,85,247,0.9)] pointer-events-none" />
         <style>{`
-          @keyframes sidebarGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(168,85,247,0.5), 0 0 40px rgba(168,85,247,0.2); }
-            50% { box-shadow: 0 0 35px rgba(168,85,247,0.75), 0 0 65px rgba(168,85,247,0.35); }
+          @keyframes orbPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(168,85,247,0.7), 0 0 25px rgba(168,85,247,0.35); }
+            50% { box-shadow: 0 0 18px rgba(168,85,247,1), 0 0 45px rgba(168,85,247,0.55); }
           }
         `}</style>
       </button>
