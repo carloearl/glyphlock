@@ -9,7 +9,7 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
 
   return (
     <>
-      {/* Sidebar Tab - Hidden by default, shows on hover (desktop) or tap (mobile) */}
+      {/* Sidebar Tab */}
       <button
         onClick={(e) => {
           e.preventDefault();
@@ -17,43 +17,44 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
           setIsOpen(!isOpen);
         }}
         onMouseEnter={() => {
-          // Only trigger on desktop hover
-          if (window.innerWidth >= 768) {
-            setIsOpen(true);
-          }
+          if (window.innerWidth >= 768) setIsOpen(true);
         }}
-        className="fixed right-[-64px] hover:right-0 z-[999999] w-16 h-40 rounded-l-3xl bg-gradient-to-br from-purple-600 to-indigo-600 backdrop-blur-xl border-2 border-r-0 border-purple-400 shadow-[0_0_60px_rgba(168,85,247,0.9)] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all duration-300"
+        className="fixed right-[-52px] hover:right-0 z-[999999] w-14 h-32 rounded-l-2xl bg-gradient-to-br from-purple-600/90 to-indigo-600/90 backdrop-blur-xl border border-r-0 border-purple-400/60 shadow-[0_0_30px_rgba(168,85,247,0.6),0_0_60px_rgba(168,85,247,0.3)] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all duration-300"
         style={{ 
           top: '50%',
           transform: 'translateY(-50%)',
           pointerEvents: 'auto',
           touchAction: 'manipulation',
-          WebkitTapHighlightColor: 'rgba(168, 85, 247, 0.5)',
+          WebkitTapHighlightColor: 'rgba(168, 85, 247, 0.4)',
           cursor: 'pointer',
-          minWidth: '64px',
-          minHeight: '160px',
-          zIndex: 999999
+          minWidth: '56px',
+          minHeight: '128px',
+          zIndex: 999999,
+          animation: 'sidebarGlow 3s ease-in-out infinite',
         }}
       >
-        <MessageSquare className="w-8 h-8 text-purple-100 drop-shadow-[0_0_15px_rgba(168,85,247,1)] pointer-events-none" />
-        <span className="text-sm text-white font-black -rotate-90 whitespace-nowrap tracking-wider pointer-events-none">ASSIST</span>
+        <MessageSquare className="w-6 h-6 text-purple-100 drop-shadow-[0_0_8px_rgba(168,85,247,0.9)] pointer-events-none" />
+        <span className="text-[11px] text-white/90 font-bold -rotate-90 whitespace-nowrap tracking-wider pointer-events-none">ASSIST</span>
+        <style>{`
+          @keyframes sidebarGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(168,85,247,0.5), 0 0 40px rgba(168,85,247,0.2); }
+            50% { box-shadow: 0 0 35px rgba(168,85,247,0.75), 0 0 65px rgba(168,85,247,0.35); }
+          }
+        `}</style>
       </button>
 
         {/* Slide-Out Menu */}
         <AnimatePresence>
           {isOpen && !activeModal && (
             <motion.div
-              initial={{ x: 400, opacity: 0 }}
+              initial={{ x: 320, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 400, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              exit={{ x: 320, opacity: 0 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
               onMouseLeave={() => {
-                // Only auto-close on desktop hover-out
-                if (window.innerWidth >= 768) {
-                  setIsOpen(false);
-                }
+                if (window.innerWidth >= 768) setIsOpen(false);
               }}
-              className="fixed right-0 top-0 bottom-0 w-full md:w-96 bg-slate-900/98 backdrop-blur-2xl border-l-2 border-purple-500/50 shadow-[-20px_0_60px_rgba(168,85,247,0.6)] overflow-y-auto z-[999998]"
+              className="fixed right-0 top-0 bottom-0 w-full md:w-80 bg-slate-900/95 backdrop-blur-2xl border-l border-purple-500/30 shadow-[-12px_0_40px_rgba(168,85,247,0.35)] overflow-y-auto z-[999998]"
               style={{
                 pointerEvents: 'auto',
                 touchAction: 'pan-y'
