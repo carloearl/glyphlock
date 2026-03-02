@@ -359,7 +359,7 @@ Provide your response as a JSON object with:
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70 animate-pulse pointer-events-none z-50" />
       
       {/* PROMPT ENGINEERING CARD - NEUROMORPHISM STYLE */}
-      <Card id="prompt-section" className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-2 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.25)] backdrop-blur-xl">
+      <Card id="prompt-section" className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-2 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.25)] backdrop-blur-xl" style={{ position: 'relative', zIndex: 21 }}>
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-indigo-600/5 blur-xl pointer-events-none" />
         
         <CardHeader className="pb-4 relative z-10 border-b border-indigo-500/30">
@@ -719,12 +719,12 @@ Provide your response as a JSON object with:
       </Card>
 
       {/* GENERATE BUTTON - PROFESSIONAL */}
-      <div id="generate-section" className="space-y-3">
+      <div id="generate-section" className="space-y-3" style={{ position: 'relative', zIndex: 25 }}>
         <Button
           onClick={() => handleGenerate('generate')}
           disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
           className="w-full h-20 text-lg md:text-xl font-black bg-white hover:bg-white/90 text-black shadow-[0_0_40px_rgba(255,255,255,0.5)] hover:shadow-[0_0_60px_rgba(255,255,255,0.8)] transition-all border-2 border-white/40 active:scale-95 flex items-center justify-center gap-3"
-          style={{ touchAction: 'manipulation', pointerEvents: 'auto', minHeight: '80px', cursor: 'pointer' }}
+          style={{ touchAction: 'manipulation', pointerEvents: 'auto', minHeight: '80px', cursor: 'pointer', position: 'relative', zIndex: 26 }}
         >
           {generateMutation.isPending ? (
             <><Loader2 className="w-6 h-6 md:w-7 md:h-7 animate-spin" />GENERATING...</>
