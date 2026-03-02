@@ -376,6 +376,9 @@ export default function NUPSOwner() {
           <TabsContent value="ai">
             <AIInsights />
           </TabsContent>
+          <TabsContent value="contracts">
+            <ContractViewer />
+          </TabsContent>
           <TabsContent value="rbac">
             <RBACAdminPanel />
           </TabsContent>
