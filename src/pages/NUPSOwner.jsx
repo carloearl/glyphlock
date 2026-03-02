@@ -9,7 +9,7 @@ import {
   Shield, DollarSign, ShoppingCart, TrendingUp, 
   Users, LogOut, UserCheck, DoorOpen, FileText,
   Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText,
-  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins
+  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -38,6 +38,7 @@ import LoyaltyProgram from "../components/nups/LoyaltyProgram.jsx";
 import StaffManagement from "../components/nups/StaffManagement.jsx";
 import AIInsights from "../components/nups/AIInsights.jsx";
 import SalesReport from "../components/nups/SalesReport.jsx";
+import RBACAdminPanel from "../components/nups/RBACAdminPanel.jsx";
 import SEOHead from "@/components/SEOHead";
 
 export default function NUPSOwner() {
@@ -323,6 +324,13 @@ export default function NUPSOwner() {
               <Brain className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">AI</span>
             </TabsTrigger>
+            {/* RBAC tab: Owners only */}
+            {(user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') && (
+              <TabsTrigger value="rbac" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
+                <KeyRound className="w-4 h-4" />
+                <span className="text-[10px] md:text-xs">Access</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="analytics">
@@ -399,6 +407,9 @@ export default function NUPSOwner() {
           </TabsContent>
           <TabsContent value="ai">
             <AIInsights />
+          </TabsContent>
+          <TabsContent value="rbac">
+            <RBACAdminPanel />
           </TabsContent>
         </Tabs>
       </div>
