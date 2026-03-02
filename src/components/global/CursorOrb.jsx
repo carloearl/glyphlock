@@ -115,8 +115,7 @@ export default function CursorOrb() {
         mixBlendMode: 'screen',
         pointerEvents: 'none',
         touchAction: 'none',
-        userSelect: 'none',
-        contain: 'strict'
+        userSelect: 'none'
       }}
     />
   );

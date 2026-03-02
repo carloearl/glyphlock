@@ -292,8 +292,7 @@ export default function NebulaLayer({ intensity = 0.5 }) {
           touchAction: 'none',
           userSelect: 'none',
           transform: 'translateZ(0)',
-          willChange: 'transform',
-          contain: 'strict'
+          willChange: 'transform'
         }}
       />
       
@@ -309,8 +308,7 @@ export default function NebulaLayer({ intensity = 0.5 }) {
           touchAction: 'none',
           userSelect: 'none',
           transform: 'translateZ(0)',
-          willChange: 'transform',
-          contain: 'strict'
+          willChange: 'transform'
         }}
       />
     </>

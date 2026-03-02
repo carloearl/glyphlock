@@ -118,15 +118,12 @@ export default function Layout({ children, currentPageName }) {
 
       {/* SITE-WIDE NEBULA + CURSOR ORB - Always Visible on ALL Devices */}
       <div 
-        className="fixed inset-0 block"
+        className="fixed inset-0"
         style={{ 
           zIndex: 0, 
-          pointerEvents: 'none !important',
-          touchAction: 'none !important',
+          pointerEvents: 'none',
+          touchAction: 'none',
           userSelect: 'none',
-          isolation: 'isolate',
-          display: 'block !important',
-          visibility: 'visible !important',
           opacity: 1
         }}
         aria-hidden="true"
@@ -145,7 +142,6 @@ export default function Layout({ children, currentPageName }) {
           minHeight: '100vh',
           height: 'auto',
           boxSizing: 'border-box',
-          isolation: 'isolate',
           zIndex: 10,
           position: 'relative',
           touchAction: 'manipulation'
