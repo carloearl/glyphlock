@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
-import { HelpCircle, MessageSquare, X } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { HelpCircle, MessageSquare, X, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlyphBotJr from '@/components/glyphlock/bot/ui/GlyphBotJr';
 
 export default function UnifiedSidebar({ helpSections = [], helpTitle = "System Guide" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'bot' or 'help'
+  const [activeSection, setActiveSection] = useState(0);
+  const [activeItem, setActiveItem] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   return (
     <>
