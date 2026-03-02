@@ -16,16 +16,29 @@ const CLICKWRAP_TERMS = [
 // §9.2 RBAC role → dashboard route mapping
 const OWNER_TIER_ROLES = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"];
 const PERFORMER_ROLES = ["PERFORMER"];
+const STAFF_ROLES = ["BARTENDER", "FLOOR_HOST", "SECURITY", "DJ", "KIOSK"];
 
-function resolveNUPSDashboard(permissionsData, base44Role) {
+// Role card → forced route override (if set, skips RBAC routing)
+const ROLE_CARD_ROUTES = {
+  Admin: null,        // resolved via RBAC
+  Staff: "NUPSStaff",
+  Entertainer: "EntertainerCheckIn",
+};
+
+function resolveNUPSDashboard(permissionsData, base44Role, selectedRoleCard) {
+  // If user picked Staff or Entertainer card explicitly, honour that choice
+  if (selectedRoleCard && ROLE_CARD_ROUTES[selectedRoleCard]) {
+    return ROLE_CARD_ROUTES[selectedRoleCard];
+  }
+
   if (!permissionsData || !permissionsData.venue_access) {
-    // Fallback to base44 built-in role
     return base44Role === "admin" ? "NUPSOwner" : "NUPSStaff";
   }
   const roleKeys = permissionsData.venue_access.map(va => va.role_key);
   if (roleKeys.some(rk => OWNER_TIER_ROLES.includes(rk))) return "NUPSOwner";
   if (roleKeys.some(rk => PERFORMER_ROLES.includes(rk))) return "EntertainerCheckIn";
-  return "NUPSStaff";
+  if (roleKeys.some(rk => STAFF_ROLES.includes(rk))) return "NUPSStaff";
+  return base44Role === "admin" ? "NUPSOwner" : "NUPSStaff";
 }
 
 export default function NUPSLogin() {
