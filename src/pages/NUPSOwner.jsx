@@ -39,6 +39,7 @@ import StaffManagement from "../components/nups/StaffManagement.jsx";
 import AIInsights from "../components/nups/AIInsights.jsx";
 import SalesReport from "../components/nups/SalesReport.jsx";
 import RBACAdminPanel from "../components/nups/RBACAdminPanel.jsx";
+import ContractViewer from "../components/nups/ContractViewer.jsx";
 import SEOHead from "@/components/SEOHead";
 
 export default function NUPSOwner() {
