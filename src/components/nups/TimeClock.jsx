@@ -202,6 +202,13 @@ export default function TimeClock({ user, role = "staff" }) {
     enabled: !!user
   });
 
+  // Load NUPSUser records so we can validate PINs against real stored values
+  const { data: nupsUsers = [] } = useQuery({
+    queryKey: ['nups-users-for-pin'],
+    queryFn: () => base44.entities.NUPSUser.list(),
+    enabled: !!user
+  });
+
   const activeShifts = shifts.filter(s => !s.check_out_time);
   const todayShifts = shifts.filter(s => new Date(s.check_in_time).toDateString() === now.toDateString());
 
