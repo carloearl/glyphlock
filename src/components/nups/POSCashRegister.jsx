@@ -299,7 +299,7 @@ export default function POSCashRegister({ user }) {
 
   // ─── RENDER: MAIN REGISTER VIEW ───────────────────
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4" style={{ minHeight: 'calc(100vh - 220px)' }}>
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4" style={{ minHeight: 'calc(100vh - 220px)', position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
       {/* LEFT: Products + Quick Charges */}
       <div className="lg:col-span-3 space-y-4">
         {/* Search + Barcode */}
@@ -410,6 +410,7 @@ export default function POSCashRegister({ user }) {
               <Button
                 onClick={handleCheckout}
                 className="w-full h-16 text-xl font-black bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 active:scale-[0.98] transition-all"
+                style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto', cursor: 'pointer' }}
               >
                 <Wallet className="w-6 h-6 mr-2" />
                 PAY ${total.toFixed(2)}
