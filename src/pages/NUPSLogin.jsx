@@ -73,6 +73,8 @@ export default function NUPSLogin() {
   }, []);
 
   const handleLogin = () => {
+    // Store selected role so post-login redirect can use it
+    if (selectedRole) sessionStorage.setItem("nups_role_hint", selectedRole);
     base44.auth.redirectToLogin(createPageUrl("NUPSLogin"));
   };
 
