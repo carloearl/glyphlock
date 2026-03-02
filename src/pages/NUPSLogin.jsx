@@ -44,6 +44,7 @@ function resolveNUPSDashboard(permissionsData, base44Role, selectedRoleCard) {
 export default function NUPSLogin() {
   const [checking, setChecking] = useState(true);
   const [showClickwrap, setShowClickwrap] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null); // 'Admin' | 'Staff' | 'Entertainer'
   const [acks, setAcks] = useState(CLICKWRAP_TERMS.map(() => false));
   const allAcked = acks.every(Boolean);
 
