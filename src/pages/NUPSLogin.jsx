@@ -53,7 +53,10 @@ export default function NUPSLogin() {
       try {
         const isAuth = await base44.auth.isAuthenticated();
         if (isAuth) {
-          // §9.2 — Route via RBAC permissions, not legacy role string
+          // Consume role hint stored before redirect
+          const roleHint = sessionStorage.getItem("nups_role_hint");
+          sessionStorage.removeItem("nups_role_hint");
+
           let permissionsData = null;
           try {
             const res = await base44.functions.invoke('getUserPermissions', {});
@@ -62,7 +65,7 @@ export default function NUPSLogin() {
             console.warn("RBAC payload unavailable, falling back to base44 role:", e);
           }
           const user = await base44.auth.me();
-          const target = resolveNUPSDashboard(permissionsData, user.role, null);
+          const target = resolveNUPSDashboard(permissionsData, user.role, roleHint);
           window.location.href = createPageUrl(target);
           return;
         }
