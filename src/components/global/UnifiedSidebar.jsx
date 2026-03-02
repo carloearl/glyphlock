@@ -284,20 +284,19 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   </AnimatePresence>
                 </div>
 
-                {/* Topic Pills - fixed, no scroll */}
+                {/* Topic Glow Dots - no labels */}
                 <div className="flex items-center gap-2 flex-wrap">
                   {helpSections[activeSection]?.content?.map((item, cIdx) => (
                     <button
                       key={cIdx}
                       onClick={() => setActiveItem(cIdx)}
-                      className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                      title={item.heading}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
                         activeItem === cIdx
-                          ? 'bg-gradient-to-r from-purple-600/50 to-indigo-600/50 text-white border border-purple-400/50 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
-                          : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200 border border-white/10'
+                          ? 'bg-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.9),0_0_20px_rgba(168,85,247,0.5)] scale-125'
+                          : 'bg-white/20 hover:bg-purple-400/50 hover:shadow-[0_0_8px_rgba(168,85,247,0.5)]'
                       }`}
-                    >
-                      {item.heading?.split(' ').slice(0, 3).join(' ')}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
