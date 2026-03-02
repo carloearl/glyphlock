@@ -239,35 +239,48 @@ export default function TimeClock({ user, role = "staff" }) {
     }
   });
 
-  const handlePin = useCallback((pin) => {
-    // Look up entertainer by matching last 4+ of their phone or ID
-    const ent = entertainers.find(e => 
-      e.phone?.replace(/\D/g,'').endsWith(pin) || 
-      e.legal_name?.toLowerCase().includes(pin.toLowerCase()) ||
-      String(e.id).endsWith(pin)
-    );
+  const [pinError, setPinError] = useState("");
 
-    if (!ent && role !== "admin") {
-      // Fallback: allow current user
-      if (pinStep === "clocking_in") clockIn.mutate(null);
-      else {
-        const myShift = activeShifts.find(s => s.created_by === user?.email);
-        if (myShift) clockOut.mutate(myShift.id);
-      }
+  const handlePin = useCallback((pin) => {
+    setPinError("");
+
+    // 1. Find a NUPSUser whose stored PIN matches exactly
+    const nupsUser = nupsUsers.find(u => u.pin === pin && u.status === "active");
+
+    if (!nupsUser) {
+      setPinError("❌ Invalid PIN. Please try again.");
       return;
     }
 
-    if (ent) setIdentifiedUser(ent);
+    // 2. Match NUPSUser to Entertainer record by stage_name / legal_name
+    const ent = entertainers.find(e =>
+      e.stage_name === nupsUser.full_name ||
+      e.legal_name === nupsUser.full_name ||
+      (nupsUser.username && e.stage_name?.toLowerCase() === nupsUser.username.toLowerCase())
+    );
+
+    // 3. Build identity from nupsUser (fall back if no Entertainer record)
+    const identity = ent || {
+      id: nupsUser.id,
+      stage_name: nupsUser.full_name,
+      legal_name: nupsUser.full_name,
+    };
+
+    setIdentifiedUser(identity);
 
     if (pinStep === "clocking_in") {
-      clockIn.mutate(ent);
+      clockIn.mutate(identity);
     } else if (pinStep === "clocking_out") {
-      const shift = activeShifts.find(s => 
-        s.entertainer_id === ent?.id || s.stage_name === ent?.stage_name
+      const shift = activeShifts.find(s =>
+        s.entertainer_id === identity.id || s.stage_name === identity.stage_name
       );
-      if (shift) clockOut.mutate(shift.id);
+      if (shift) {
+        clockOut.mutate(shift.id);
+      } else {
+        setPinError("No active shift found for this employee.");
+      }
     }
-  }, [pinStep, entertainers, activeShifts, user, clockIn, clockOut, role]);
+  }, [pinStep, entertainers, nupsUsers, activeShifts, clockIn, clockOut]);
 
   const formatDuration = (startStr) => {
     const ms = now - new Date(startStr);
