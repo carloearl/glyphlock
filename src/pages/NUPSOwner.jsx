@@ -235,102 +235,68 @@ export default function NUPSOwner() {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:flex gap-1 p-1.5 w-full overflow-x-auto">
-            <TabsTrigger value="analytics" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <BarChart3 className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="live" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Eye className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Live View</span>
-            </TabsTrigger>
-            <TabsTrigger value="pos" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <CreditCard className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">POS</span>
-            </TabsTrigger>
-            <TabsTrigger value="floor" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <UserCheck className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Floor</span>
-            </TabsTrigger>
-            <TabsTrigger value="vip" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <DoorOpen className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">VIP</span>
-            </TabsTrigger>
-            <TabsTrigger value="guests" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Users className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Guests</span>
-            </TabsTrigger>
-            <TabsTrigger value="timeclock" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Clock className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Time Clock</span>
-            </TabsTrigger>
-            <TabsTrigger value="history" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Receipt className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">History</span>
-            </TabsTrigger>
-            <TabsTrigger value="zreport" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <FileText className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Z-Report</span>
-            </TabsTrigger>
-            <TabsTrigger value="products" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Tag className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Products</span>
-            </TabsTrigger>
-            <TabsTrigger value="inventory" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Package className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Inventory</span>
-            </TabsTrigger>
-            <TabsTrigger value="contract" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <ScrollText className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Contract</span>
-            </TabsTrigger>
-            <TabsTrigger value="press" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Banknote className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Press</span>
-            </TabsTrigger>
-            <TabsTrigger value="tips" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <HandCoins className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Tips</span>
-            </TabsTrigger>
-            <TabsTrigger value="daily" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <PieChart className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Daily</span>
-            </TabsTrigger>
-            <TabsTrigger value="drawer" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Wallet className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Drawer</span>
-            </TabsTrigger>
-            <TabsTrigger value="refunds" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <RotateCcw className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Refunds</span>
-            </TabsTrigger>
-            <TabsTrigger value="customers" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Heart className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">CRM</span>
-            </TabsTrigger>
-            <TabsTrigger value="loyalty" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Heart className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Loyalty</span>
-            </TabsTrigger>
-            <TabsTrigger value="marketing" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Megaphone className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Marketing</span>
-            </TabsTrigger>
-            <TabsTrigger value="staff" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <UserCog className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Staff</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-              <Brain className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">AI</span>
-            </TabsTrigger>
-            {/* RBAC tab: Owners only */}
-            {(user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') && (
-              <TabsTrigger value="rbac" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5">
-                <KeyRound className="w-4 h-4" />
-                <span className="text-[10px] md:text-xs">Access</span>
+          <TabsList
+            className="h-auto flex flex-wrap gap-1.5 p-2 w-full"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(168,85,247,0.2)',
+              borderRadius: '16px',
+              boxShadow: '0 0 30px rgba(168,85,247,0.12), inset 0 1px 0 rgba(255,255,255,0.06)',
+            }}
+          >
+            {[
+              { value: 'analytics', icon: BarChart3, label: 'Analytics' },
+              { value: 'live', icon: Eye, label: 'Live' },
+              { value: 'pos', icon: CreditCard, label: 'POS' },
+              { value: 'floor', icon: UserCheck, label: 'Floor' },
+              { value: 'vip', icon: DoorOpen, label: 'VIP' },
+              { value: 'guests', icon: Users, label: 'Guests' },
+              { value: 'timeclock', icon: Clock, label: 'Time Clock' },
+              { value: 'history', icon: Receipt, label: 'History' },
+              { value: 'zreport', icon: FileText, label: 'Z-Report' },
+              { value: 'products', icon: Tag, label: 'Products' },
+              { value: 'inventory', icon: Package, label: 'Inventory' },
+              { value: 'contract', icon: ScrollText, label: 'Contract' },
+              { value: 'press', icon: Banknote, label: 'Press' },
+              { value: 'tips', icon: HandCoins, label: 'Tips' },
+              { value: 'daily', icon: PieChart, label: 'Daily' },
+              { value: 'drawer', icon: Wallet, label: 'Drawer' },
+              { value: 'refunds', icon: RotateCcw, label: 'Refunds' },
+              { value: 'customers', icon: Heart, label: 'CRM' },
+              { value: 'loyalty', icon: Heart, label: 'Loyalty' },
+              { value: 'marketing', icon: Megaphone, label: 'Marketing' },
+              { value: 'staff', icon: UserCog, label: 'Staff' },
+              { value: 'ai', icon: Brain, label: 'AI' },
+              ...((user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') ? [{ value: 'rbac', icon: KeyRound, label: 'Access' }] : []),
+            ].map(({ value, icon: Icon, label }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-400 transition-all duration-200 border border-transparent"
+                style={{
+                  background: 'transparent',
+                  minHeight: '36px',
+                }}
+                data-glass-tab
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span>{label}</span>
               </TabsTrigger>
-            )}
+            ))}
+            <style>{`
+              [data-glass-tab][data-state="active"] {
+                background: rgba(168,85,247,0.18) !important;
+                border-color: rgba(168,85,247,0.45) !important;
+                color: #e9d5ff !important;
+                box-shadow: 0 0 14px rgba(168,85,247,0.35), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+              }
+              [data-glass-tab]:hover:not([data-state="active"]) {
+                background: rgba(255,255,255,0.06) !important;
+                color: #d1d5db !important;
+              }
+            `}</style>
           </TabsList>
 
           <TabsContent value="analytics">
