@@ -23,23 +23,40 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
 
   return (
     <>
-      {/* Invisible Edge Trigger - no visual, hover opens panel */}
+      {/* Signature Edge Glow Tab */}
       <div
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(!isOpen); }}
         onMouseEnter={() => { if (window.innerWidth >= 768) setIsOpen(true); }}
         style={{
           position: 'fixed',
           right: 0,
-          top: '30%',
-          width: '12px',
-          height: '40%',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: '3px',
+          height: '120px',
           zIndex: 999999,
           pointerEvents: 'auto',
           touchAction: 'manipulation',
-          background: 'transparent',
           cursor: 'pointer',
+          borderRadius: '4px 0 0 4px',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(168,85,247,0.9) 40%, rgba(99,102,241,1) 60%, transparent 100%)',
+          boxShadow: '0 0 8px rgba(168,85,247,0.6), -6px 0 20px rgba(168,85,247,0.25), -12px 0 40px rgba(99,102,241,0.12)',
+          animation: 'edgeGlowPulse 4s ease-in-out infinite',
         }}
-      />
+      >
+        <style>{`
+          @keyframes edgeGlowPulse {
+            0%, 100% {
+              opacity: 0.55;
+              box-shadow: 0 0 6px rgba(168,85,247,0.5), -5px 0 16px rgba(168,85,247,0.2), -10px 0 30px rgba(99,102,241,0.08);
+            }
+            50% {
+              opacity: 1;
+              box-shadow: 0 0 12px rgba(168,85,247,0.95), -8px 0 28px rgba(168,85,247,0.45), -18px 0 55px rgba(99,102,241,0.25);
+            }
+          }
+        `}</style>
+      </div>
 
         {/* Slide-Out Menu */}
         <AnimatePresence>
