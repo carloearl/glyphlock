@@ -48,7 +48,6 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
         }}
       >
         <MessageSquare className="w-6 h-6 text-purple-100 drop-shadow-[0_0_8px_rgba(168,85,247,0.9)] pointer-events-none" />
-        <span className="text-[11px] text-white/90 font-bold -rotate-90 whitespace-nowrap tracking-wider pointer-events-none">ASSIST</span>
         <style>{`
           @keyframes sidebarGlow {
             0%, 100% { box-shadow: 0 0 20px rgba(168,85,247,0.5), 0 0 40px rgba(168,85,247,0.2); }
