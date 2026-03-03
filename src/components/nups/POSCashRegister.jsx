@@ -134,7 +134,7 @@ export default function POSCashRegister({ user }) {
 
   const handleCheckout = () => {
     if (!activeBatch) {
-      alert("Please open a batch before processing transactions");
+      toast.error("Please open a batch before processing transactions.");
       return;
     }
     if (cart.length === 0) return;
