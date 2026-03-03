@@ -17,7 +17,55 @@ const PRESETS = [
 
 const DISCOUNT_PRESETS = [10, 15, 20, 25, 30, 50];
 
+// ─── Quick Add Product (inline form) ─────────────────────────────────────────
+function QuickAddProduct({ onClose }) {
+  const queryClient = useQueryClient();
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [category, setCategory] = useState("Other");
+  const [saving, setSaving] = useState(false);
+
+  const CATS = ["Food & Beverage", "Spirits", "Beer & Wine", "Mixers", "VIP Service", "Merchandise", "Services", "Other"];
+
+  const save = async () => {
+    if (!name || !price) return;
+    setSaving(true);
+    await base44.entities.POSProduct.create({ name, price: parseFloat(price), category, is_active: true, stock_quantity: 99, taxable: true, tax_rate: 0.08 });
+    queryClient.invalidateQueries({ queryKey: ['pos-products'] });
+    setSaving(false);
+    onClose();
+  };
+
+  return (
+    <div className="rounded-xl p-3 space-y-2" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.25)' }}>
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Quick Add Product</span>
+        <button onClick={onClose} className="text-gray-600 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+      </div>
+      <div className="flex gap-2">
+        <Input value={name} onChange={e => setName(e.target.value)} placeholder="Product name"
+          className="h-8 flex-1 bg-black/40 border-white/10 text-white text-sm placeholder:text-gray-600" />
+        <Input value={price} onChange={e => setPrice(e.target.value)} placeholder="$0.00" type="number" step="0.01"
+          className="h-8 w-20 bg-black/40 border-white/10 text-white text-sm font-mono" />
+      </div>
+      <div className="flex gap-2">
+        <select value={category} onChange={e => setCategory(e.target.value)}
+          className="flex-1 h-8 rounded-lg text-xs text-white font-medium px-2"
+          style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {CATS.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <button onClick={save} disabled={!name || !price || saving}
+          className="h-8 px-4 rounded-lg text-xs font-black text-white disabled:opacity-40 transition-all active:scale-95"
+          style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)' }}>
+          {saving ? "Saving..." : "Add"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount }) {
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
   return (
     <div className="space-y-5">
       {/* Quick Charges — big touch targets */}
