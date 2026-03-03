@@ -131,8 +131,10 @@ export default function ClubCurrencyPressView() {
               onPrintCurrency={(amount, orderNum) => {
                 setCurrencyAmount(amount);
                 setCurrencyOrderNumber(orderNum);
+                // Auto-set denomination to match Dream Dollar amount ordered
+                setConfig(prev => ({ ...prev, denomination: String(amount) }));
                 setActiveTab("press");
-                toast.success(`Club Currency $${amount} queued`);
+                toast.success(`Club Currency $${amount} queued — denomination auto-set`);
               }}
             />
           </div>
