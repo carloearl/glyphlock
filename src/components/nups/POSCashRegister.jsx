@@ -303,76 +303,78 @@ export default function POSCashRegister({ user }) {
       className="flex gap-0 rounded-2xl overflow-hidden"
       style={{
         height: 'calc(100vh - 200px)',
-        minHeight: '600px',
-        background: 'rgba(0,0,0,0.6)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        backdropFilter: 'blur(20px)',
+        minHeight: '640px',
+        background: 'rgba(10,10,14,0.95)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(24px)',
         position: 'relative',
         zIndex: 20,
         pointerEvents: 'auto',
       }}
     >
-      {/* ── LEFT PANEL: Items/Charges ───────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden border-r border-white/[0.06]">
+      {/* ── LEFT PANEL ───────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
 
-        {/* Search bar */}
-        <div className="p-3 border-b border-white/[0.06] flex gap-2 shrink-0">
+        {/* Top bar: search + scan */}
+        <div className="flex gap-2 p-3 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
             <Input
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-9 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 text-sm"
+              className="pl-9 h-10 text-white text-sm placeholder:text-gray-600"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}
             />
           </div>
           <div className="relative">
-            <Barcode className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            <Barcode className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
             <Input
               placeholder="Scan..."
               value={barcodeInput}
               onChange={(e) => setBarcodeInput(e.target.value)}
-              className="pl-8 w-32 h-9 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 text-sm"
+              className="pl-8 w-28 h-10 text-white text-sm placeholder:text-gray-600"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}
             />
           </div>
         </div>
 
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent' }}>
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-5" style={{ scrollbarWidth: 'none' }}>
 
-          {/* Quick Charges */}
-          <div>
-            <div className="text-[10px] text-gray-600 uppercase tracking-widest mb-2 font-bold flex items-center gap-1">
-              <DollarSign className="w-3 h-3" /> Quick Charges
-            </div>
-            <QuickChargePanel
-              onAddItem={addToCart}
-              onSetDiscount={setDiscount}
-              currentDiscount={discount}
-            />
+          {/* Section label */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Quick Charges</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
           </div>
 
-          {/* Product Grid */}
+          <QuickChargePanel
+            onAddItem={addToCart}
+            onSetDiscount={setDiscount}
+            currentDiscount={discount}
+          />
+
+          {/* Products (if any) */}
           {filteredProducts.length > 0 && (
             <div>
-              <div className="text-[10px] text-gray-600 uppercase tracking-widest mb-2 font-bold">Products</div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Products</span>
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
+              </div>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 {filteredProducts.map((product) => (
                   <button
                     key={product.id}
                     onClick={() => addProductToCart(product)}
-                    className="group relative rounded-xl p-2.5 flex flex-col items-center gap-1 text-center active:scale-95 transition-all"
-                    style={{
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(34,197,94,0.35)'}
+                    className="rounded-xl p-3 flex flex-col items-center gap-1 text-center active:scale-95 transition-all"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
                   >
                     <div className="text-[11px] font-semibold text-gray-300 truncate w-full">{product.name}</div>
                     <div className="text-sm font-black text-green-400">${product.price?.toFixed(2)}</div>
                     {product.stock_quantity != null && (
-                      <div className="text-[9px] text-gray-600">Stock: {product.stock_quantity}</div>
+                      <div className="text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>Stock: {product.stock_quantity}</div>
                     )}
                   </button>
                 ))}
@@ -382,12 +384,15 @@ export default function POSCashRegister({ user }) {
 
           {/* Customer */}
           <div>
-            <div className="text-[10px] text-gray-600 uppercase tracking-widest mb-2 font-bold">Customer</div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Customer</span>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
+            </div>
             <Select
               value={selectedCustomer?.id || "walk-in"}
               onValueChange={(id) => setSelectedCustomer(id === "walk-in" ? null : customers.find(c => c.id === id) || null)}
             >
-              <SelectTrigger className="h-9 bg-white/[0.04] border-white/[0.08] text-white text-sm">
+              <SelectTrigger className="h-10 text-white text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}>
                 <SelectValue placeholder="Walk-in Customer" />
               </SelectTrigger>
               <SelectContent className="bg-gray-950 border-gray-800">
@@ -404,7 +409,7 @@ export default function POSCashRegister({ user }) {
       </div>
 
       {/* ── RIGHT PANEL: Order + Checkout ──────────── */}
-      <div className="w-72 lg:w-80 flex flex-col shrink-0" style={{ background: 'rgba(0,0,0,0.3)' }}>
+      <div className="w-72 lg:w-80 flex flex-col shrink-0" style={{ background: 'rgba(0,0,0,0.4)' }}>
         <OrderDisplay
           cart={cart}
           subtotal={subtotal}
@@ -417,25 +422,26 @@ export default function POSCashRegister({ user }) {
           onClearCart={() => setCart([])}
         />
 
-        {/* Checkout Button */}
+        {/* Checkout CTA */}
         <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
           {cart.length > 0 ? (
             <button
               onClick={handleCheckout}
-              className="w-full rounded-xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-2"
+              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3"
               style={{
-                height: '64px',
-                background: 'linear-gradient(135deg, #16a34a, #059669)',
-                boxShadow: '0 0 30px rgba(34,197,94,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-                pointerEvents: 'auto',
-                cursor: 'pointer',
+                height: '68px',
+                background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
+                boxShadow: '0 0 40px rgba(34,197,94,0.35), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
+                letterSpacing: '-0.5px',
               }}
             >
               <Wallet className="w-6 h-6" />
-              PAY ${total.toFixed(2)}
+              CHARGE ${total.toFixed(2)}
             </button>
           ) : (
-            <div className="text-center text-gray-700 text-xs py-4">Add items to order</div>
+            <div className="text-center text-sm py-5 font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>
+              Tap a charge to begin
+            </div>
           )}
         </div>
 
