@@ -62,7 +62,7 @@ export default function NUPSAudit() {
           <Row name="Audit logging" status="PASS" notes="auditLog function exists. AuditEvent entity append-only. rbacCheck logs denials." />
           <Row name="Dead routes" status="PASS" notes="No dead routes found. All NUPS pages accessible and functional." />
           <Row name="Broken imports" status="PASS" notes="All lucide-react icons verified. Tag import fixed previously (was Tags)." />
-          <Row name="Debug code in production" status="WARN" notes="alert() calls in EntertainerCheckIn (check-in/out confirmation). Should use toast instead." severity="LOW" />
+          <Row name="Debug code in production" status="FIX" notes="alert() calls in EntertainerCheckIn replaced with sonner toast notifications. No debug code in production." />
         </Section>
 
         {/* PHASE 2: Frontend Hardening */}
