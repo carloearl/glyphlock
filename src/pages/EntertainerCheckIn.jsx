@@ -59,9 +59,11 @@ IP Address will be logged for verification purposes.`);
 
       if (response.data.success) {
         setSuccess(true);
+      } else {
+        toast.error('Check-in failed. Please try again.');
       }
     } catch (error) {
-      alert('Check-in failed: ' + error.message);
+      toast.error('Check-in failed: ' + error.message);
     } finally {
       setLoading(false);
     }
