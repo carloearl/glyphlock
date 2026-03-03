@@ -372,7 +372,7 @@ export default function NUPSOwner() {
             <MarketingCampaigns />
           </TabsContent>
           <TabsContent value="staff">
-            <StaffManagement />
+            <NUPSUserManager currentUser={user} />
           </TabsContent>
           <TabsContent value="ai">
             <AIInsights />
