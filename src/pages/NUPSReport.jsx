@@ -112,7 +112,7 @@ export default function NUPSReport() {
             <StatusRow name="Contract terminal" status="DONE" notes="DRAFT → SIGN → ISSUED → ARCHIVED flow with financial calc (30% fee, 50% dancer payout)." />
             <StatusRow name="AI assistant tab" status="DONE" notes="Press configuration suggestions via AI." />
             <StatusRow name="Archive search" status="DONE" notes="Search past contracts in archive." />
-            <StatusRow name="Auto-print from contract" status="NEEDS_WORK" notes="Contract tab triggers press switch, but doesn't auto-set denomination to match Dream Dollar amount. Needs denomination pass-through." />
+            <StatusRow name="Auto-print from contract" status="DONE" notes="DreamPalaceContract → Press now auto-sets denomination to match ordered Dream Dollar amount. Pass-through fully wired." />
           </CardContent>
         </Card>
 
