@@ -271,6 +271,7 @@ export default function NUPSOwner() {
               { value: 'loyalty', icon: Heart, label: 'Loyalty' },
               { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'staff', icon: UserCog, label: 'Staff' },
+              { value: 'sales', icon: BarChart3, label: 'Sales' },
               { value: 'ai', icon: Brain, label: 'AI' },
               { value: 'contracts', icon: ScrollText, label: 'Contracts' },
               ...((user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') ? [{ value: 'rbac', icon: KeyRound, label: 'Access' }] : []),
