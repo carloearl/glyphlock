@@ -636,7 +636,12 @@ export default function Navbar({ user, onLogin, onLogout }) {
                      >
                        <Link
                          to={createPageUrl(item.page)}
-                         onClick={() => setMobileMenuOpen(false)}
+                         onClick={() => {
+                           setMobileMenuOpen(false);
+                           if (item.requiresAccessToken) {
+                             sessionStorage.setItem("nups_access_token", crypto.randomUUID());
+                           }
+                         }}
                          style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
                          className="text-gray-300 hover:text-white text-base py-4 px-4 block rounded-xl hover:bg-cyan-500/10 hover:border-cyan-400/30 border-2 border-transparent transition-all min-h-[56px] flex items-center font-semibold active:scale-95 active:bg-cyan-500/20"
                        >
