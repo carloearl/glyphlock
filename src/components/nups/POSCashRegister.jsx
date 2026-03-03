@@ -9,6 +9,7 @@ import {
   ShoppingCart, DollarSign, CreditCard, Receipt, Search, Barcode,
   Smartphone, Gift, Hotel, ArrowLeft, Wallet
 } from "lucide-react";
+import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import ReceiptPrinter from "./ReceiptPrinter";
