@@ -244,14 +244,22 @@ export default function ControlPanel({
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-[10px] text-gray-500">Add text or images to the bill, then drag/resize on the preview.</p>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="flex-1 h-8 text-xs border-gray-700 gap-1" onClick={handleAddTextElement}>
-              <Type className="w-3 h-3" /> Add Text
-            </Button>
-            <Button size="sm" variant="outline" className="flex-1 h-8 text-xs border-gray-700 gap-1" onClick={handleAddImageElement}>
-              <Upload className="w-3 h-3" /> Add Image
-            </Button>
-          </div>
+          {textInputVisible ? (
+            <div className="flex gap-2">
+              <Input value={pendingText} onChange={e => setPendingText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleConfirmText()} className="h-8 bg-gray-800 border-gray-700 text-xs flex-1" autoFocus />
+              <Button size="sm" onClick={handleConfirmText} className="h-8 bg-green-600 text-xs px-2">Add</Button>
+              <Button size="sm" variant="ghost" onClick={() => setTextInputVisible(false)} className="h-8 text-xs px-2">✕</Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs border-gray-700 gap-1" onClick={handleAddTextElement}>
+                <Type className="w-3 h-3" /> Add Text
+              </Button>
+              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs border-gray-700 gap-1" onClick={handleAddImageElement}>
+                <Upload className="w-3 h-3" /> Add Image
+              </Button>
+            </div>
+          )}
           <input ref={overlayImgRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files[0]) handleOverlayImageFile(e.target.files[0]); }} />
         </CardContent>
       </Card>
