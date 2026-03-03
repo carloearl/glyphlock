@@ -237,7 +237,7 @@ export default function NUPSOwner() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="analytics" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList
             className="h-auto flex flex-wrap gap-1.5 p-2 w-full"
             style={{
