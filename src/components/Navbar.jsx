@@ -126,12 +126,8 @@ const NavItem = ({ section, isOpen, onToggle, index, user }) => {
         {/* Outer glow on hover */}
         <motion.div
           className="absolute -inset-1 rounded-xl blur-md -z-10"
-          animate={{
-            opacity: isHovered ? 0.6 : 0,
-            background: isHovered 
-              ? 'linear-gradient(135deg, rgba(59,130,246,0.5), rgba(139,92,246,0.5))' 
-              : 'transparent'
-          }}
+          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.5), rgba(139,92,246,0.5))' }}
+          animate={{ opacity: isHovered ? 0.6 : 0 }}
           transition={{ duration: 0.3 }}
         />
         
