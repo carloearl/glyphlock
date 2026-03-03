@@ -272,6 +272,14 @@ export default function TipBreakdown({ transactions = [] }) {
           >
             Split %
           </button>
+          {signedCount > 0 && (
+            <button onClick={handleSave}
+              disabled={saveMutation.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+              style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}>
+              {saveMutation.isPending ? 'Saving...' : '💾 Save Record'}
+            </button>
+          )}
           <button onClick={handlePrint}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
             style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)', color: '#fbbf24' }}>
