@@ -4,6 +4,17 @@ import { createPageUrl } from "@/utils";
 import { Shield, LogIn, Loader2, CheckCircle2, FileSignature, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Layer 1: Inject noindex to prevent search engine indexing of this login page
+(function injectNoIndex() {
+  if (typeof document === "undefined") return;
+  if (document.querySelector('meta[name="robots"][data-nups]')) return;
+  const meta = document.createElement("meta");
+  meta.setAttribute("name", "robots");
+  meta.setAttribute("content", "noindex, nofollow");
+  meta.setAttribute("data-nups", "1");
+  document.head.appendChild(meta);
+})();
+
 const CLICKWRAP_TERMS = [
   "I understand this system contains confidential business information.",
   "I agree to the company's data privacy and security policies.",
