@@ -41,7 +41,7 @@ export default function EntertainerCheckIn() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
       setSelectedEntertainer(null);
-      alert('✅ Checked in successfully!');
+      toast.success('Checked in successfully!');
     }
   });
 
