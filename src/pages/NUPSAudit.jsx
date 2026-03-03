@@ -170,7 +170,7 @@ export default function NUPSAudit() {
           <Row name="Tip pool — custom per-person override" status="PLAN" notes="Allow manager to enter partial-shift adjustments per employee before printing tip sheet." severity="LOW" />
           <Row name="Entertainer login portal" status="PLAN" notes="Separate self-service portal for entertainers to view earnings and schedule." severity="LOW" />
           <Row name="Physical barcode printing" status="PLAN" notes="Requires thermal printer hardware integration (Zebra/DYMO). Currently screen-only." severity="LOW" />
-          <Row name="Currency denomination auto-set" status="PLAN" notes="Contract archive should auto-configure press denomination to match Dream Dollar amount." severity="LOW" />
+          <Row name="Currency denomination auto-set" status="FIX" notes="ClubCurrencyPressView now auto-sets denomination to match Dream Dollar amount when contract triggers press tab." />
         </Section>
 
         {/* Cross-Device Matrix */}
