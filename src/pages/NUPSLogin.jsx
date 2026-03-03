@@ -83,28 +83,6 @@ export default function NUPSLogin() {
         }
       } catch (err) {}
 
-      // Layer 2: Backend origin check
-      try {
-        const originRes = await base44.functions.invoke('nupsOriginCheck', {});
-        if (!originRes.data?.authorized) {
-          setAccessDenied(true);
-          setChecking(false);
-          return;
-        }
-      } catch (e) {
-        // If origin check function is unreachable, fall through to token gate
-      }
-
-      // Layer 3: Session token gate — must have navigated via authorized link
-      const accessToken = sessionStorage.getItem("nups_access_token");
-      if (!accessToken) {
-        setAccessDenied(true);
-        setChecking(false);
-        return;
-      }
-      // One-time use — consume immediately
-      sessionStorage.removeItem("nups_access_token");
-
       setChecking(false);
     };
     checkAuth();
