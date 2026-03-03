@@ -64,11 +64,85 @@ function QuickAddProduct({ onClose }) {
   );
 }
 
+// ─── Manual Item Entry (mirrors Tkinter POSApp.add_item) ─────────────────────
+function ManualItemEntry({ onAddItem }) {
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [qty, setQty] = useState("1");
+  const [error, setError] = useState("");
+
+  const handleAdd = () => {
+    const p = parseFloat(price);
+    const q = parseInt(qty);
+    if (!name.trim() || isNaN(p) || p < 0 || isNaN(q) || q <= 0) {
+      setError("Enter a valid name, positive price, and quantity ≥ 1.");
+      return;
+    }
+    setError("");
+    onAddItem({
+      product_id: `manual-${Date.now()}`,
+      product_name: name.trim(),
+      quantity: q,
+      price: p,
+      total: p * q,
+    });
+    setName(""); setPrice(""); setQty("1");
+  };
+
+  return (
+    <div className="rounded-xl p-3 space-y-2" style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.25)' }}>
+      <div className="flex items-center gap-1.5">
+        <Keyboard className="w-3.5 h-3.5 text-purple-400" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Manual Entry</span>
+      </div>
+      <div className="flex gap-2">
+        <Input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          placeholder="Item name"
+          className="h-9 flex-1 bg-black/40 border-white/10 text-white text-sm placeholder:text-gray-600"
+        />
+        <Input
+          value={price}
+          onChange={e => setPrice(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          placeholder="$0.00"
+          type="number"
+          step="0.01"
+          min="0"
+          className="h-9 w-20 bg-black/40 border-white/10 text-white text-sm font-mono"
+        />
+        <Input
+          value={qty}
+          onChange={e => setQty(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          placeholder="Qty"
+          type="number"
+          min="1"
+          className="h-9 w-14 bg-black/40 border-white/10 text-white text-sm font-mono"
+        />
+        <button
+          onClick={handleAdd}
+          className="h-9 px-4 rounded-lg text-xs font-black text-white transition-all active:scale-95"
+          style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)' }}
+        >
+          Add
+        </button>
+      </div>
+      {error && <p className="text-[11px] text-red-400">{error}</p>}
+    </div>
+  );
+}
+
 export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount }) {
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   return (
     <div className="space-y-5">
-      {/* Quick Add Product */}
+      {/* Manual Item Entry */}
+      <ManualItemEntry onAddItem={onAddItem} />
+
+      {/* Quick Add Product to Catalog */}
       {showQuickAdd ? (
         <QuickAddProduct onClose={() => setShowQuickAdd(false)} />
       ) : (
