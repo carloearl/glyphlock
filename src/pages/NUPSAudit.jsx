@@ -88,7 +88,7 @@ export default function NUPSAudit() {
           <Row name="RBAC enforcement" status="PASS" notes="rbacCheck verifies UserRoleAssignment + PlatformRole per action. Deny-by-default." />
           <Row name="Venue-scoped authorization" status="PASS" notes="rbacCheck scopes queries to venue_id. PLATFORM_ADMIN with is_cross_venue bypasses." />
           <Row name="Audit logging on mutations" status="PASS" notes="auditLog function accepts action/entity_type/entity_id. CREATE/UPDATE/DELETE/ACCESS/TRANSFER/ESCALATE supported." />
-          <Row name="Rate limiting" status="WARN" notes="No explicit rate limiting on NUPS endpoints. Base44 platform provides some throttling." severity="MEDIUM" />
+          <Row name="Rate limiting" status="FIX" notes="nupsRateLimiter backend function deployed — sliding window per user+action. Limits: 20/min for POS transactions, 10/min for VIP/DreamPalace contracts, 30/min default." />
           <Row name="Error response hardening" status="PASS" notes="All backend functions return generic error messages. Stack traces caught in try/catch." />
           <Row name="Env vars not exposed" status="PASS" notes="No secrets referenced in frontend code. All API keys in Deno.env.get() server-side only." />
           <Row name="Audit denial logging" status="PASS" notes="rbacCheck logs AUTHORIZATION_DENIED events with IP + user-agent to AuditEvent." />
