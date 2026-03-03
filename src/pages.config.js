@@ -128,6 +128,7 @@ import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
+import NUPSPostLogin from './pages/NUPSPostLogin';
 import __Layout from './Layout.jsx';
 
 
@@ -213,6 +214,7 @@ export const PAGES = {
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
+    "NUPSPostLogin": NUPSPostLogin,
 }
 
 export const pagesConfig = {
