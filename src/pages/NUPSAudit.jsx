@@ -145,7 +145,7 @@ export default function NUPSAudit() {
           <Row name="Digital tip line signature" status="PASS" notes="Each employee row has Sign button. Signs timestamped in local state. Signed count displayed." />
           <Row name="Printable tip sheet" status="PASS" notes="Full-page print with employee name, role/pool, payout amount, and physical signature line per person. Manager signature block at bottom." />
           <Row name="Cashier reference panel" status="PASS" notes="Shows which cashiers collected tips today for cross-reference with pool payouts." />
-          <Row name="Tip signature persistence" status="WARN" notes="Signatures are stored in component state only — lost on page refresh. Consider persisting to AuditEvent or a TipPayout entity." severity="MEDIUM" />
+          <Row name="Tip signature persistence" status="FIX" notes="TipPayout entity created. Save Record button now persists signed payout with employee breakdown, split config, and cashier summary to database." />
           <Row name="Tip line — custom amount entry" status="PLAN" notes="Allow manager to override per-person amount (e.g., for partial shift workers) instead of pure equal split." severity="LOW" />
         </Section>
 
