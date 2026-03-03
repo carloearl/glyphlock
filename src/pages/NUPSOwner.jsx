@@ -46,6 +46,7 @@ import SEOHead from "@/components/SEOHead";
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [activeTab, setActiveTab] = useState("analytics");
   const queryClient = useQueryClient();
 
   useEffect(() => {
