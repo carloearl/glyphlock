@@ -341,15 +341,17 @@ export default function NUPSOwner() {
           </TabsContent>
           <TabsContent value="contract">
             <DreamPalaceContract
-              onCurrencyPrint={(amount) => {
-                // Auto-switch to press tab to print currency
-                document.querySelector('[value="press"]')?.click();
+              onCurrencyPrint={(amount, orderNum) => {
+                setActiveTab("press");
               }}
               onComplete={() => queryClient.invalidateQueries({ queryKey: ['dream-palace-orders'] })}
             />
           </TabsContent>
           <TabsContent value="press">
             <ClubCurrencyPressView />
+          </TabsContent>
+          <TabsContent value="sales">
+            <SalesReport transactions={transactions} products={products} />
           </TabsContent>
           <TabsContent value="tips">
             <TipBreakdown transactions={transactions} />
