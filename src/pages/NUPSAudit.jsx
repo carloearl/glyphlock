@@ -136,12 +136,38 @@ export default function NUPSAudit() {
           <Row name="Bundle optimization" status="WARN" notes="DreamPalaceContract is 700 lines. Could be split into sub-components per step." severity="LOW" />
         </Section>
 
+        {/* PHASE 9: Tip System */}
+        <Section title="Phase 9 — Tip Payout System" color="green">
+          <Row name="Tip pool breakdown" status="PASS" notes="4 pools: Staff (70%), Hostess/Host (15%), Manager/Promo (10%), Entertainer (5%). Configurable via split editor." />
+          <Row name="Employee auto-grouping by role" status="PASS" notes="ROLE_POOLS map assigns each NUPSUser role key to correct pool. Fetches active NUPSUsers live." />
+          <Row name="Customizable split %s" status="PASS" notes="Split editor validates total = 100%. Live dollar preview per pool while editing." />
+          <Row name="Per-person calculation" status="PASS" notes="Equal split per pool. Per-person = poolTotal / employees in pool. Displayed per row." />
+          <Row name="Digital tip line signature" status="PASS" notes="Each employee row has Sign button. Signs timestamped in local state. Signed count displayed." />
+          <Row name="Printable tip sheet" status="PASS" notes="Full-page print with employee name, role/pool, payout amount, and physical signature line per person. Manager signature block at bottom." />
+          <Row name="Cashier reference panel" status="PASS" notes="Shows which cashiers collected tips today for cross-reference with pool payouts." />
+          <Row name="Tip signature persistence" status="WARN" notes="Signatures are stored in component state only — lost on page refresh. Consider persisting to AuditEvent or a TipPayout entity." severity="MEDIUM" />
+          <Row name="Tip line — custom amount entry" status="PLAN" notes="Allow manager to override per-person amount (e.g., for partial shift workers) instead of pure equal split." severity="LOW" />
+        </Section>
+
+        {/* PHASE 10: Staff & RBAC */}
+        <Section title="Phase 10 — Staff / NUPS User Manager" color="purple">
+          <Row name="NUPSUserManager — tiered display" status="PASS" notes="4 tiers: Platform Admin, Executive/Manager, Staff, Entertainer. Color-coded per tier." />
+          <Row name="PIN eye-reveal admin gate" status="PASS" notes="PIN display and reveal button only shown when isAdmin = true (role=admin or _highestRole=PLATFORM_ADMIN)." />
+          <Row name="Inline employee editing" status="PASS" notes="Admin can edit full_name, PIN, and role inline per row. Saves via updateMutation." />
+          <Row name="Quick Add Product from POS" status="PASS" notes="QuickChargePanel has inline Quick Add Product form — saves directly to POSProduct catalog without leaving the register." />
+          <Row name="RBAC — getUserPermissions backend" status="PASS" notes="getUserPermissions function returns venue_access array, highest_role, and is_platform_admin flag." />
+          <Row name="RBAC — deny by default" status="PASS" notes="rbacCheck returns 403 if no matching UserRoleAssignment found. No silent pass-through." />
+          <Row name="Role assignment audit trail" status="PASS" notes="manageRoleAssignment function logs AUDIT_EVENT on assign/revoke. deactivated_by + deactivated_at recorded." />
+        </Section>
+
         {/* Known Issues */}
         <Section title="Known Issues — Severity Classified" color="red">
+          <Row name="Tip signatures not persisted" status="WARN" notes="Digital tip acknowledgment signatures stored in React state. Add TipPayout entity or AuditEvent logging to persist." severity="MEDIUM" />
           <Row name="alert() calls in EntertainerCheckIn" status="WARN" notes="Lines 44, 68 use browser alert(). Replace with toast/sonner for UX consistency." severity="LOW" />
           <Row name="No rate limiting on backend" status="WARN" notes="NUPS backend functions lack explicit rate limiting. Platform throttling provides baseline." severity="MEDIUM" />
           <Row name="card_last_six plaintext" status="WARN" notes="DreamPalaceOrder stores last 6 digits of card as plaintext. Consider field-level encryption." severity="MEDIUM" />
-          <Row name="Lazy loading for owner tabs" status="PLAN" notes="22 components loaded eagerly. React.lazy() would reduce initial bundle for NUPSOwner." severity="LOW" />
+          <Row name="Lazy loading for owner tabs" status="PLAN" notes="24 components now loaded eagerly. React.lazy() would reduce initial bundle for NUPSOwner." severity="LOW" />
+          <Row name="Tip pool — custom per-person override" status="PLAN" notes="Allow manager to enter partial-shift adjustments per employee before printing tip sheet." severity="LOW" />
           <Row name="Entertainer login portal" status="PLAN" notes="Separate self-service portal for entertainers to view earnings and schedule." severity="LOW" />
           <Row name="Physical barcode printing" status="PLAN" notes="Requires thermal printer hardware integration (Zebra/DYMO). Currently screen-only." severity="LOW" />
           <Row name="Currency denomination auto-set" status="PLAN" notes="Contract archive should auto-configure press denomination to match Dream Dollar amount." severity="LOW" />
