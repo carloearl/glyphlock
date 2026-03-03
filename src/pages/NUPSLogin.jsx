@@ -46,6 +46,7 @@ export default function NUPSLogin() {
   const [showClickwrap, setShowClickwrap] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null); // 'Admin' | 'Staff' | 'Entertainer'
   const [acks, setAcks] = useState(CLICKWRAP_TERMS.map(() => false));
+  const [accessDenied, setAccessDenied] = useState(false);
   const allAcked = acks.every(Boolean);
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function NUPSLogin() {
             const res = await base44.functions.invoke('getUserPermissions', {});
             permissionsData = res.data;
           } catch (e) {
-            console.warn("RBAC payload unavailable, falling back to base44 role:", e);
+            console.warn("RBAC payload unavailable — using base44 fallback");
           }
           const user = await base44.auth.me();
           const target = resolveNUPSDashboard(permissionsData, user.role, roleHint);
@@ -70,6 +71,17 @@ export default function NUPSLogin() {
           return;
         }
       } catch (err) {}
+
+      // Layer 1: Verify access token set by authorized entry points
+      const accessToken = sessionStorage.getItem("nups_access_token");
+      if (!accessToken) {
+        setAccessDenied(true);
+        setChecking(false);
+        return;
+      }
+      // One-time use — consume immediately
+      sessionStorage.removeItem("nups_access_token");
+
       setChecking(false);
     };
     checkAuth();
