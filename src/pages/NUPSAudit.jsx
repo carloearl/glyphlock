@@ -161,12 +161,12 @@ export default function NUPSAudit() {
         </Section>
 
         {/* Known Issues */}
-        <Section title="Known Issues — Severity Classified" color="red">
-          <Row name="Tip signatures not persisted" status="WARN" notes="Digital tip acknowledgment signatures stored in React state. Add TipPayout entity or AuditEvent logging to persist." severity="MEDIUM" />
-          <Row name="alert() calls in EntertainerCheckIn" status="FIX" notes="Replaced browser alert() with toast/sonner notifications in EntertainerCheckIn." />
-          <Row name="No rate limiting on backend" status="WARN" notes="NUPS backend functions lack explicit rate limiting. Platform throttling provides baseline." severity="MEDIUM" />
-          <Row name="card_last_six plaintext" status="WARN" notes="DreamPalaceOrder stores last 6 digits of card as plaintext. Consider field-level encryption." severity="MEDIUM" />
-          <Row name="Lazy loading for owner tabs" status="PLAN" notes="24 components now loaded eagerly. React.lazy() would reduce initial bundle for NUPSOwner." severity="LOW" />
+        <Section title="Known Issues — Open Tracker" color="red">
+          <Row name="Tip signatures not persisted" status="FIX" notes="TipPayout entity created. Save Record button persists signed payout with employee breakdown, split config, and cashier summary." />
+          <Row name="alert() calls in EntertainerCheckIn" status="FIX" notes="Replaced with sonner toast notifications." />
+          <Row name="No rate limiting on backend" status="FIX" notes="nupsRateLimiter deployed — sliding window per user+action. 20/min POS, 10/min contracts, 30/min default." />
+          <Row name="card_last_six plaintext" status="WARN" notes="DreamPalaceOrder stores last 6 digits of card as plaintext. Consider field-level encryption or masking before DB write." severity="MEDIUM" />
+          <Row name="Lazy loading for owner tabs" status="PLAN" notes="24 components loaded eagerly. React.lazy() would reduce initial bundle for NUPSOwner." severity="LOW" />
           <Row name="Tip pool — custom per-person override" status="PLAN" notes="Allow manager to enter partial-shift adjustments per employee before printing tip sheet." severity="LOW" />
           <Row name="Entertainer login portal" status="PLAN" notes="Separate self-service portal for entertainers to view earnings and schedule." severity="LOW" />
           <Row name="Physical barcode printing" status="PLAN" notes="Requires thermal printer hardware integration (Zebra/DYMO). Currently screen-only." severity="LOW" />
