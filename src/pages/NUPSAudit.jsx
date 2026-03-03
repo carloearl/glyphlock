@@ -184,6 +184,14 @@ export default function NUPSAudit() {
           <Row name="Ultrawide 1920×1080" status="PASS" notes="Container max-width prevents over-stretch. Grids scale to 6-col max." />
         </Section>
 
+        {/* PHASE 11: NUPSLogin Security Hardening */}
+        <Section title="Phase 11 — NUPSLogin Access Control (FINDING-012)" color="red">
+          <Row name="noindex meta injection" status="FIX" notes="NUPSLogin injects a noindex,nofollow meta tag on mount to prevent search engine indexing of the login page." />
+          <Row name="Backend origin check (nupsOriginCheck)" status="FIX" notes="New backend function verifies request origin is glyphlock.io before serving the login UI. Returns 403 for unauthorized origins." />
+          <Row name="Session token gate (nups_access_token)" status="FIX" notes="Login page requires a one-time sessionStorage token set only by Navbar/Footer links. Direct cold URL access shows Access Restricted screen. Token consumed immediately on use." />
+          <Row name="Navigation link wiring" status="FIX" notes="NavigationConfig updated to flag NUPS link as requiresAccessToken. Navbar and Footer both set the token on click before navigation." />
+        </Section>
+
         <div className="text-center py-8 text-gray-600 text-xs">
           <p>NUPS Autonomous Hardening Directive — Execution Complete</p>
           <p>Generated: {new Date().toISOString()}</p>
