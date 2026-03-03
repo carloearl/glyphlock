@@ -1,25 +1,25 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-const OWNER_TIER_ROLES = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"];
-const PERFORMER_ROLES = ["PERFORMER"];
+// Maps the role card the user selected to the correct dashboard page
+const ROLE_CARD_DESTINATIONS = {
+  Admin:       "NUPSOwner",
+  Manager:     "NUPSOwner",
+  Staff:       "NUPSStaff",
+  Entertainer: "EntertainerCheckIn",
+};
 
-function resolveDestination(permissionsData, base44Role, roleHint) {
-  if (roleHint === "Staff") return "NUPSStaff";
-  if (roleHint === "Entertainer") return "EntertainerCheckIn";
-
-  if (permissionsData?.venue_access) {
-    const keys = permissionsData.venue_access.map(va => va.role_key);
-    if (keys.some(k => OWNER_TIER_ROLES.includes(k))) return "NUPSOwner";
-    if (keys.some(k => PERFORMER_ROLES.includes(k))) return "EntertainerCheckIn";
-  }
-
+// Maps base44 platform role (admin/user) to a fallback destination
+function getFallbackDestination(base44Role) {
   return base44Role === "admin" ? "NUPSOwner" : "NUPSStaff";
 }
 
 export default function NUPSPostLogin() {
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     (async () => {
       try {
@@ -29,29 +29,48 @@ export default function NUPSPostLogin() {
           return;
         }
 
-        const roleHint = sessionStorage.getItem("nups_role_hint") || null;
+        // Pull the saved destination (set before redirect to sign-in)
+        const savedDest = sessionStorage.getItem("nups_destination");
+        const roleHint  = sessionStorage.getItem("nups_role_hint");
+        sessionStorage.removeItem("nups_destination");
         sessionStorage.removeItem("nups_role_hint");
 
-        let permissionsData = null;
-        try {
-          const res = await base44.functions.invoke('getUserPermissions', {});
-          permissionsData = res.data;
-        } catch (e) {}
+        // Prefer the explicit destination the user chose from the login card
+        if (savedDest && ROLE_CARD_DESTINATIONS[roleHint]) {
+          window.location.href = createPageUrl(ROLE_CARD_DESTINATIONS[roleHint]);
+          return;
+        }
 
+        // Fallback: derive from base44 platform role
         const user = await base44.auth.me();
-        const target = resolveDestination(permissionsData, user.role, roleHint);
-        window.location.href = createPageUrl(target);
+        window.location.href = createPageUrl(getFallbackDestination(user.role));
       } catch (err) {
-        window.location.href = createPageUrl("NUPSLogin");
+        setError("Authentication failed. Please try signing in again.");
       }
     })();
   }, []);
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="text-center space-y-4 max-w-xs">
+          <AlertCircle className="w-12 h-12 text-red-400 mx-auto" />
+          <p className="text-white font-bold">Something went wrong</p>
+          <p className="text-gray-400 text-sm">{error}</p>
+          <Button onClick={() => { window.location.href = createPageUrl("NUPSLogin"); }}
+            className="w-full bg-violet-600 hover:bg-violet-500">
+            Back to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="w-10 h-10 text-purple-400 mx-auto mb-3 animate-spin" />
-        <p className="text-white/50 text-sm">Routing you to your dashboard…</p>
+      <div className="text-center space-y-3">
+        <Loader2 className="w-10 h-10 text-purple-400 mx-auto animate-spin" />
+        <p className="text-white/50 text-sm">Routing to your dashboard…</p>
       </div>
     </div>
   );
