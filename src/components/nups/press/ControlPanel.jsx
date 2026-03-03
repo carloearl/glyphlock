@@ -69,10 +69,15 @@ export default function ControlPanel({
     }
   };
 
-  const handleAddTextElement = () => {
-    const text = prompt("Enter text for the bill element:", "CLUB CURRENCY");
-    if (!text) return;
-    onAddElement({ id: crypto.randomUUID().slice(0, 8), type: "text", x: 40, y: 30, width: 150, height: 40, content: text });
+  const [textInputVisible, setTextInputVisible] = useState(false);
+  const [pendingText, setPendingText] = useState("CLUB CURRENCY");
+
+  const handleAddTextElement = () => setTextInputVisible(true);
+  const handleConfirmText = () => {
+    if (!pendingText.trim()) return;
+    onAddElement({ id: crypto.randomUUID().slice(0, 8), type: "text", x: 40, y: 30, width: 150, height: 40, content: pendingText });
+    setTextInputVisible(false);
+    setPendingText("CLUB CURRENCY");
   };
 
   const handleAddImageElement = () => overlayImgRef.current?.click();
