@@ -134,13 +134,12 @@ const NavItem = ({ section, isOpen, onToggle, index, user }) => {
         {/* Glowing dot indicator */}
         <motion.span
           className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ 
-            scale: isOpen ? 1 : 0, 
-            opacity: isOpen ? 1 : 0,
-            background: isOpen ? 'linear-gradient(135deg, #00E4FF, #8B5CF6)' : '#00E4FF'
+          style={{ 
+            background: 'linear-gradient(135deg, #00E4FF, #8B5CF6)',
+            boxShadow: '0 0 12px #00E4FF, 0 0 24px #8B5CF6' 
           }}
-          style={{ boxShadow: '0 0 12px #00E4FF, 0 0 24px #8B5CF6' }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: isOpen ? 1 : 0, opacity: isOpen ? 1 : 0 }}
         />
         
         <span className="relative z-10 flex items-center gap-1.5">
