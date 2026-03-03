@@ -104,6 +104,25 @@ export default function NUPSLogin() {
     );
   }
 
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+        <div className="text-center">
+          <Shield className="w-12 h-12 text-red-500/60 mx-auto mb-4" />
+          <p className="text-red-400 font-bold text-lg">Access Restricted</p>
+          <p className="text-gray-600 text-sm mt-2">This system is not publicly accessible.</p>
+          <button
+            onClick={() => window.location.href = createPageUrl("Home")}
+            className="mt-6 px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+          >
+            Return Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 relative">
       <div className="absolute inset-0 bg-gradient-to-br from-[#1E40AF]/20 via-[#7C3AED]/10 to-[#3B82F6]/20" />
