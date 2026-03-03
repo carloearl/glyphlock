@@ -163,7 +163,7 @@ export default function NUPSAudit() {
         {/* Known Issues */}
         <Section title="Known Issues — Severity Classified" color="red">
           <Row name="Tip signatures not persisted" status="WARN" notes="Digital tip acknowledgment signatures stored in React state. Add TipPayout entity or AuditEvent logging to persist." severity="MEDIUM" />
-          <Row name="alert() calls in EntertainerCheckIn" status="WARN" notes="Lines 44, 68 use browser alert(). Replace with toast/sonner for UX consistency." severity="LOW" />
+          <Row name="alert() calls in EntertainerCheckIn" status="FIX" notes="Replaced browser alert() with toast/sonner notifications in EntertainerCheckIn." />
           <Row name="No rate limiting on backend" status="WARN" notes="NUPS backend functions lack explicit rate limiting. Platform throttling provides baseline." severity="MEDIUM" />
           <Row name="card_last_six plaintext" status="WARN" notes="DreamPalaceOrder stores last 6 digits of card as plaintext. Consider field-level encryption." severity="MEDIUM" />
           <Row name="Lazy loading for owner tabs" status="PLAN" notes="24 components now loaded eagerly. React.lazy() would reduce initial bundle for NUPSOwner." severity="LOW" />
