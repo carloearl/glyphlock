@@ -161,8 +161,43 @@ export default function TipBreakdown({ transactions = [] }) {
     entertainer: totalTips * splitPcts.entertainer,
   };
 
+  const queryClient = useQueryClient();
+
+  const saveMutation = useMutation({
+    mutationFn: (data) => base44.entities.TipPayout.create(data),
+    onSuccess: () => toast.success('Tip payout saved to record.'),
+    onError: () => toast.error('Failed to save payout record.'),
+  });
+
   const handleSign = (empId, name) => {
     setTipSignatures(prev => ({ ...prev, [empId]: { signed_at: new Date().toISOString(), name } }));
+  };
+
+  const handleSave = () => {
+    const signatures = Object.entries(tipSignatures).map(([empId, sig]) => {
+      const emp = nupsUsers.find(u => u.id === empId);
+      const poolKey = emp ? (ROLE_POOLS[emp.role] || 'staff') : 'staff';
+      const pool = POOLS.find(p => p.key === poolKey);
+      const empsInPool = byPool[poolKey] || [];
+      const perPerson = empsInPool.length > 0 ? poolTotals[poolKey] / empsInPool.length : 0;
+      return {
+        employee_id: empId,
+        employee_name: sig.name,
+        pool: poolKey,
+        amount: parseFloat(perPerson.toFixed(2)),
+        signed_at: sig.signed_at,
+      };
+    });
+
+    saveMutation.mutate({
+      payout_date: new Date().toISOString().split('T')[0],
+      total_tips: totalTips,
+      split_config: customSplit,
+      signatures,
+      cashier_summary: tipsByCashier,
+      manager_email: '',
+      status: 'completed',
+    });
   };
 
   const signedCount = Object.keys(tipSignatures).length;
