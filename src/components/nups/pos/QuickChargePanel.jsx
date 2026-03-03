@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Percent, Plus, X } from "lucide-react";
+import { Percent, Plus, X, Keyboard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
