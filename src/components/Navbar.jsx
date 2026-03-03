@@ -281,6 +281,11 @@ const NavItem = ({ section, isOpen, onToggle, index, user }) => {
                    >
                      <Link
                        to={createPageUrl(item.page)}
+                       onClick={() => {
+                         if (item.requiresAccessToken) {
+                           sessionStorage.setItem("nups_access_token", crypto.randomUUID());
+                         }
+                       }}
                        className="group/item relative flex items-center justify-between px-4 py-3.5 rounded-lg text-blue-100 hover:text-white transition-all duration-300 overflow-hidden"
                      >
                         {/* Animated hover background sweep */}
