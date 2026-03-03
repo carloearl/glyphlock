@@ -64,7 +64,7 @@ export default function EntertainerCheckIn() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
-      alert('✅ Checked out successfully!');
+      toast.success('Checked out successfully!');
     }
   });
 
