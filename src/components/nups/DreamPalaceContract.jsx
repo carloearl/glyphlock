@@ -649,6 +649,14 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
     );
   }
 
+  // ─── Compute entertainer payout from this contract ───
+  // Entertainers receive 50% of Dream Dollar face value when they redeem the bills
+  const entertainerDDPayout = dreamDollarValue * 0.5;
+  // Line items: room fee portion goes to entertainer (room_fee per line, split if needed)
+  const totalRoomFees = lineItems.reduce((s, li) => s + (li.room_fee || 0), 0);
+  const entertainersOnContract = lineItems.filter(li => li.room_ent_dur_id.trim()).map(li => li.room_ent_dur_id.trim());
+  const uniqueEntertainers = [...new Set(entertainersOnContract)];
+
   // ═══════════════ STEP 5: PRINT + RESCAN ═══════════════
   return (
     <div className="space-y-4">
@@ -656,6 +664,44 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
         <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-2" />
         <h2 className="text-lg font-bold text-green-400">Contract Fully Executed</h2>
         <Badge className="bg-green-500/20 text-green-400 border-green-500/40 font-mono">{orderNumber}</Badge>
+      </div>
+
+      {/* ── Entertainer Receipt Summary ── */}
+      <div className="rounded-xl p-4 space-y-3" style={{ background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.35)' }}>
+        <div className="flex items-center gap-2 text-pink-400 font-black text-sm uppercase tracking-widest">
+          <Music className="w-4 h-4" /> Entertainer Show Receipt
+        </div>
+        <div className="text-[10px] text-gray-500">This is the entertainer's separate earnings from this VIP contract — paid via Dream Dollar redemption, independent of floor tips.</div>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="rounded-lg p-3" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(236,72,153,0.2)' }}>
+            <div className="text-[10px] text-gray-500 uppercase tracking-widest">Dream Dollar Face Value</div>
+            <div className="text-xl font-black font-mono text-white">${dreamDollarValue.toFixed(2)}</div>
+          </div>
+          <div className="rounded-lg p-3" style={{ background: 'rgba(236,72,153,0.1)', border: '1px solid rgba(236,72,153,0.3)' }}>
+            <div className="text-[10px] text-gray-500 uppercase tracking-widest">Entertainer Receives (50%)</div>
+            <div className="text-xl font-black font-mono text-pink-400">${entertainerDDPayout.toFixed(2)}</div>
+          </div>
+        </div>
+        {totalRoomFees > 0 && (
+          <div className="rounded-lg p-3" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="text-[10px] text-gray-500 uppercase tracking-widest">Room Fee(s) on Contract</div>
+            <div className="text-base font-black font-mono text-amber-400">${totalRoomFees.toFixed(2)}</div>
+            <div className="text-[10px] text-gray-600">Room fee distribution handled by management separately</div>
+          </div>
+        )}
+        {uniqueEntertainers.length > 0 && (
+          <div>
+            <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Entertainers on This Contract</div>
+            <div className="flex flex-wrap gap-1">
+              {uniqueEntertainers.map(e => (
+                <Badge key={e} className="bg-pink-500/20 text-pink-300 border-pink-500/30 text-xs">{e}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="text-[10px] text-amber-400 font-semibold pt-1">
+          ⚠️ This payout is NOT included in nightly floor tip calculations.
+        </div>
       </div>
 
       {!printed ? (
