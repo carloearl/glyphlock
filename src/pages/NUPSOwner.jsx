@@ -41,6 +41,8 @@ import SalesReport from "../components/nups/SalesReport.jsx";
 import RBACAdminPanel from "../components/nups/RBACAdminPanel.jsx";
 import ContractViewer from "../components/nups/ContractViewer.jsx";
 import NUPSUserManager from "../components/nups/NUPSUserManager.jsx";
+import EmployeeManagement from "../components/nups/EmployeeManagement.jsx";
+import PayrollReport from "../components/nups/PayrollReport.jsx";
 import SEOHead from "@/components/SEOHead";
 
 export default function NUPSOwner() {
@@ -271,6 +273,8 @@ export default function NUPSOwner() {
               { value: 'loyalty', icon: Heart, label: 'Loyalty' },
               { value: 'marketing', icon: Megaphone, label: 'Marketing' },
               { value: 'staff', icon: UserCog, label: 'Staff' },
+              { value: 'employees', icon: Users, label: 'Employees' },
+              { value: 'payroll', icon: Receipt, label: 'Payroll' },
               { value: 'sales', icon: BarChart3, label: 'Sales' },
               { value: 'ai', icon: Brain, label: 'AI' },
               { value: 'contracts', icon: ScrollText, label: 'Contracts' },
@@ -377,6 +381,12 @@ export default function NUPSOwner() {
           </TabsContent>
           <TabsContent value="staff">
             <NUPSUserManager currentUser={user} />
+          </TabsContent>
+          <TabsContent value="employees">
+            <EmployeeManagement />
+          </TabsContent>
+          <TabsContent value="payroll">
+            <PayrollReport />
           </TabsContent>
           <TabsContent value="ai">
             <AIInsights />

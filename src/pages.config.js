@@ -90,6 +90,7 @@ import NISTChallenge from './pages/NISTChallenge';
 import NUPSAudit from './pages/NUPSAudit';
 import NUPSLogin from './pages/NUPSLogin';
 import NUPSOwner from './pages/NUPSOwner';
+import NUPSPostLogin from './pages/NUPSPostLogin';
 import NUPSReport from './pages/NUPSReport';
 import NUPSStaff from './pages/NUPSStaff';
 import NotFound from './pages/NotFound';
@@ -128,7 +129,6 @@ import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
-import NUPSPostLogin from './pages/NUPSPostLogin';
 import __Layout from './Layout.jsx';
 
 
@@ -176,6 +176,7 @@ export const PAGES = {
     "NUPSAudit": NUPSAudit,
     "NUPSLogin": NUPSLogin,
     "NUPSOwner": NUPSOwner,
+    "NUPSPostLogin": NUPSPostLogin,
     "NUPSReport": NUPSReport,
     "NUPSStaff": NUPSStaff,
     "NotFound": NotFound,
@@ -214,7 +215,6 @@ export const PAGES = {
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
-    "NUPSPostLogin": NUPSPostLogin,
 }
 
 export const pagesConfig = {
