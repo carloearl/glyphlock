@@ -22,6 +22,40 @@ const ROLE_POOLS = {
 
 const fmt = (n) => `$${(n || 0).toFixed(2)}`;
 
+// ─── Payout Calculator (custom params) ───────────────────────────────
+function computePayoutsCustom(totalTips, byPool, formula) {
+  const { entertainerPct, hostessPct, managerBonus, djPct } = formula;
+  const entertainers = byPool.entertainer || [];
+  const hostesses    = byPool.hostess     || [];
+  const managers     = byPool.manager     || [];
+  const djs          = byPool.dj          || [];
+  const security     = byPool.security    || [];
+
+  const entertainerPerPerson = totalTips * (entertainerPct / 100);
+  const entertainerTotal     = entertainerPerPerson * entertainers.length;
+
+  const hostessTotal     = totalTips * (hostessPct / 100);
+  const hostessPerPerson = hostesses.length > 0 ? hostessTotal / hostesses.length : 0;
+
+  const managerPerPerson = hostessPerPerson + managerBonus;
+  const managerTotal     = managerPerPerson * managers.length;
+
+  const djTotal     = hostessTotal * (djPct / 100);
+  const djPerPerson = djs.length > 0 ? djTotal / djs.length : 0;
+
+  const allocated      = entertainerTotal + hostessTotal + managerTotal + djTotal;
+  const securityTotal  = Math.max(0, totalTips - allocated);
+  const securityPerPerson = security.length > 0 ? securityTotal / security.length : 0;
+
+  return {
+    entertainer: { total: entertainerTotal, perPerson: entertainerPerPerson, employees: entertainers },
+    hostess:     { total: hostessTotal,     perPerson: hostessPerPerson,     employees: hostesses   },
+    manager:     { total: managerTotal,     perPerson: managerPerPerson,     employees: managers    },
+    dj:          { total: djTotal,          perPerson: djPerPerson,          employees: djs         },
+    security:    { total: securityTotal,    perPerson: securityPerPerson,    employees: security    },
+  };
+}
+
 // ─── Payout Calculator ────────────────────────────────────────────────
 // Rules:
 //  1. Each entertainer gets 37% of totalTips (individually, nightly)
