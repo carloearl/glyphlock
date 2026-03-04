@@ -344,7 +344,7 @@ export default function TipBreakdown({ transactions = [] }) {
       {/* Total */}
       <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
         <div className="text-4xl font-black font-mono text-amber-400">{fmt(totalTips)}</div>
-        <div className="text-xs text-gray-500 mt-1">Total Nightly Tips (Cash + Card)</div>
+        <div className="text-xs text-gray-500 mt-1">Total Floor Tips (Cash + Card — VIP contract earnings separate)</div>
         {signedCount > 0 && (
           <div className="text-xs text-green-400 mt-2 font-semibold">
             {signedCount} / {totalEmployees} signed
