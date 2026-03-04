@@ -352,12 +352,16 @@ export default function TipBreakdown({ transactions = [] }) {
 
       {/* Formula legend */}
       <div className="rounded-xl p-3 text-[10px] text-gray-500 space-y-1" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="font-bold text-gray-400 uppercase tracking-widest mb-2">Payout Formula</div>
-        <div>🎤 <strong className="text-pink-400">Entertainer</strong> — 37% of total tips each (per performer, nightly)</div>
-        <div>⭐ <strong className="text-amber-400">Hostess / Host</strong> — 15% of total, split equally</div>
+        <div className="font-bold text-gray-400 uppercase tracking-widest mb-2">Payout Formula — Floor Tips Only</div>
+        <div>🎤 <strong className="text-pink-400">Entertainer</strong> — 37% of floor tip pool each (floor/bar tips only — VIP show earnings are paid separately via contract receipts)</div>
+        <div>⭐ <strong className="text-amber-400">Hostess / Host</strong> — 15% of total, split equally among all hosts</div>
         <div>🛡 <strong className="text-purple-400">Manager / Promo</strong> — Hostess share + $100 each</div>
         <div>🎧 <strong className="text-cyan-400">DJ / Asst Manager</strong> — 50% of hostess pool total, split equally</div>
         <div>👥 <strong className="text-gray-400">Security / Staff</strong> — Remaining balance, split equally</div>
+        <div className="mt-2 flex items-start gap-1.5 p-2 rounded-lg" style={{ background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.2)' }}>
+          <Info className="w-3 h-3 text-pink-400 mt-0.5 shrink-0" />
+          <span className="text-pink-300">VIP show revenue (Dream Palace contracts) is tracked separately. Entertainers receive their VIP show earnings via the scanned contract receipt — that payout is <em>not</em> included here.</span>
+        </div>
       </div>
 
       {/* Split Editor */}
