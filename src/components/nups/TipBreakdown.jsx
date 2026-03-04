@@ -315,7 +315,7 @@ export default function TipBreakdown({ transactions = [] }) {
           <h2 className="text-lg font-black text-white flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-amber-400" /> Nightly Tip Payout
           </h2>
-          <p className="text-xs text-gray-500">{todayTx.filter(t => t.tip > 0).length} tipped transactions today</p>
+          <p className="text-xs text-gray-500">{floorTx.filter(t => t.tip > 0).length} floor tip transactions today</p>
         </div>
         <div className="flex items-center gap-2">
           <button
