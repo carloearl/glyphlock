@@ -360,6 +360,38 @@ export default function TipBreakdown({ transactions = [] }) {
         <div>👥 <strong className="text-gray-400">Security / Staff</strong> — Remaining balance, split equally</div>
       </div>
 
+      {/* Split Editor */}
+      {showSplitEditor && (
+        <div className="rounded-xl p-4 space-y-3" style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.25)' }}>
+          <div className="text-xs font-bold text-purple-300 uppercase tracking-widest">Adjust Payout Formula</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { key: 'entertainerPct', label: 'Entertainer %', suffix: '%', color: '#ec4899', note: 'each, of total' },
+              { key: 'hostessPct',     label: 'Hostess Pool %', suffix: '%', color: '#f59e0b', note: '% of total, split' },
+              { key: 'managerBonus',   label: 'Mgr Bonus $',    suffix: '$', color: '#a855f7', note: 'added to hostess/ea' },
+              { key: 'djPct',          label: 'DJ % of Hostess',suffix: '%', color: '#22d3ee', note: '% of hostess pool' },
+            ].map(({ key, label, suffix, color, note }) => (
+              <div key={key}>
+                <label className="text-[10px] font-bold uppercase tracking-widest mb-1 block" style={{ color }}>{label}</label>
+                <div className="flex items-center gap-1">
+                  {suffix === '$' && <span className="text-gray-400 text-sm">$</span>}
+                  <input
+                    type="number" min={0} max={key === 'entertainerPct' ? 100 : key === 'managerBonus' ? 1000 : 100}
+                    value={formula[key]}
+                    onChange={e => setFormula(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
+                    className="h-8 w-20 rounded-lg px-2 font-mono text-sm text-white"
+                    style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)' }}
+                  />
+                  {suffix === '%' && <span className="text-gray-400 text-sm">%</span>}
+                </div>
+                <div className="text-[9px] text-gray-600 mt-0.5">{note}</div>
+              </div>
+            ))}
+          </div>
+          <div className="text-[10px] text-gray-600">Security always receives the remaining balance automatically.</div>
+        </div>
+      )}
+
       {/* Cashier reference */}
       {Object.keys(tipsByCashier).length > 0 && (
         <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
