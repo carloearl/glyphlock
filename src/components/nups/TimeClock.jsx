@@ -239,15 +239,20 @@ export default function TimeClock({ user, role = "staff" }) {
     if (action === "in") {
       clockIn.mutate(confirmedEmployee);
     } else {
-      const shift = activeShifts.find(s =>
-        s.entertainer_id === confirmedEmployee.id ||
-        s.stage_name === confirmedEmployee.stage_name
-      );
+      // Match by nupsUser.id, entertainer id, stage_name, or full_name — broad match
+      const name = (confirmedEmployee.stage_name || confirmedEmployee.full_name || "").toLowerCase().trim();
+      const shift = activeShifts.find(s => {
+        if (confirmedEmployee.id && (s.entertainer_id === confirmedEmployee.id)) return true;
+        if (s.stage_name && s.stage_name.toLowerCase().trim() === name) return true;
+        return false;
+      });
       if (shift) {
         clockOut.mutate(shift.id);
       } else {
+        // Show helpful debug: list who IS on the clock
+        const onClock = activeShifts.map(s => s.stage_name).join(", ") || "nobody";
         setStep("error");
-        setPinError(`No active shift found for ${confirmedEmployee.stage_name}.`);
+        setPinError(`No active clock-in found for "${confirmedEmployee.stage_name}". Currently on clock: ${onClock}.`);
       }
     }
   };
