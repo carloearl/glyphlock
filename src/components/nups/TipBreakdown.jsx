@@ -199,7 +199,7 @@ export default function TipBreakdown({ transactions = [] }) {
   const totalTips = floorTx.reduce((s, t) => s + (t.tip || 0), 0);
 
   const tipsByCashier = {};
-  todayTx.forEach(t => {
+  floorTx.forEach(t => {
     if (t.tip > 0) {
       const c = t.cashier || 'Unknown';
       tipsByCashier[c] = (tipsByCashier[c] || 0) + t.tip;
