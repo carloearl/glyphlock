@@ -219,6 +219,14 @@ export default function Footer() {
               </p>
             </div>
 
+            {/* Glyph Buck IP Notice */}
+            <div className="rounded-xl p-4 space-y-2 text-center" style={{ background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.12)' }}>
+              <p className="text-[11px] font-bold text-blue-400/70 uppercase tracking-[0.2em]">Intellectual Property — Glyph Buck™</p>
+              <p className="text-[10px] text-slate-500 leading-relaxed max-w-3xl mx-auto">
+                <strong className="text-slate-400">Glyph Buck™</strong> is a proprietary legal instrument and registered trademark of <strong className="text-slate-400">GlyphLock Security LLC</strong>. The Glyph Buck system — including its physical bill design, digital contract architecture, redemption protocol, biometric verification workflow, and Club Currency Press technology — constitutes original copyrighted works owned exclusively by GlyphLock Security LLC. All rights reserved. No venue, licensee, or third party may reproduce, modify, reissue, or create derivative instruments based on Glyph Bucks without prior written authorization from GlyphLock Security LLC. Venue operators are licensed users only and retain no ownership interest in the Glyph Buck instrument or the underlying intellectual property. Unauthorized reproduction or fraudulent issuance of Glyph Buck instruments may constitute counterfeiting and will be prosecuted to the fullest extent of applicable law.
+              </p>
+            </div>
+
             {/* Compliance Disclosure */}
             <p className="text-[10px] text-slate-600 text-center max-w-2xl mx-auto leading-relaxed">
               GlyphLock Security is structured to support alignment with SOC 2, ISO 27001, PCI DSS, GDPR, and HIPAA frameworks. These designations reflect architectural alignment and do not constitute formal certification unless explicitly stated in a written agreement.
