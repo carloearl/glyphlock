@@ -23,10 +23,10 @@ const ROLE_POOLS = {
 };
 
 const POOLS = [
-  { key: "staff",      label: "Staff",         color: "#06b6d4", icon: <Users  className="w-4 h-4" />, pct: 0.70 },
+  { key: "entertainer",label: "Entertainer",    color: "#ec4899", icon: <Music  className="w-4 h-4" />, pct: 0.70 },
   { key: "hostess",    label: "Hostess / Host", color: "#f59e0b", icon: <Star   className="w-4 h-4" />, pct: 0.15 },
   { key: "manager",    label: "Manager / Promo",color: "#a855f7", icon: <Shield className="w-4 h-4" />, pct: 0.10 },
-  { key: "entertainer",label: "Entertainer",    color: "#ec4899", icon: <Music  className="w-4 h-4" />, pct: 0.05 },
+  { key: "staff",      label: "Staff",          color: "#06b6d4", icon: <Users  className="w-4 h-4" />, pct: 0.05 },
 ];
 
 const fmt = (n) => `$${(n || 0).toFixed(2)}`;
