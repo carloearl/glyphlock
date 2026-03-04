@@ -316,6 +316,13 @@ export default function TipBreakdown({ transactions = [] }) {
           <p className="text-xs text-gray-500">{todayTx.filter(t => t.tip > 0).length} tipped transactions today</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowSplitEditor(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+            style={{ background: showSplitEditor ? 'rgba(168,85,247,0.2)' : 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.4)', color: '#c084fc' }}
+          >
+            ⚙️ Adjust Split
+          </button>
           {signedCount > 0 && (
             <button onClick={handleSave}
               disabled={saveMutation.isPending}
