@@ -1,45 +1,88 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
-  DollarSign, Printer, Users, Star, Music, Shield,
-  ChevronDown, ChevronUp, PenLine
+  DollarSign, Printer, Users, Star, Music, Shield, Disc3, ChevronDown, ChevronUp, PenLine
 } from "lucide-react";
 
-// ─── Role → payout pool ─────────────────────────────────────────────
+// ─── Role → pool ─────────────────────────────────────────────────────
 const ROLE_POOLS = {
   PLATFORM_ADMIN:  "manager",
   VENUE_OWNER:     "manager",
   VENUE_MANAGER:   "manager",
   FLOOR_HOST:      "hostess",
-  BARTENDER:       "staff",
-  SECURITY:        "staff",
-  DJ:              "staff",
-  KIOSK:           "staff",
+  BARTENDER:       "security",  // security / leftover pool
+  SECURITY:        "security",
+  KIOSK:           "security",
+  DJ:              "dj",
   PERFORMER:       "entertainer",
 };
 
-const POOLS = [
-  { key: "entertainer",label: "Entertainer",    color: "#ec4899", icon: <Music  className="w-4 h-4" />, pct: 0.70 },
-  { key: "hostess",    label: "Hostess / Host", color: "#f59e0b", icon: <Star   className="w-4 h-4" />, pct: 0.15 },
-  { key: "manager",    label: "Manager / Promo",color: "#a855f7", icon: <Shield className="w-4 h-4" />, pct: 0.10 },
-  { key: "staff",      label: "Staff",          color: "#06b6d4", icon: <Users  className="w-4 h-4" />, pct: 0.05 },
-];
-
 const fmt = (n) => `$${(n || 0).toFixed(2)}`;
 
-// ─── TipLine Row (printable signature line) ──────────────────────────
-function TipLine({ name, pool, amount, signature, onSign }) {
+// ─── Payout Calculator ────────────────────────────────────────────────
+// Rules:
+//  1. Each entertainer gets 37% of totalTips (individually, nightly)
+//  2. Hostess pool = defined pct of remaining after entertainers; split equally (2 hostesses)
+//  3. Manager = hostess per-person + $100
+//  4. DJ + Asst Manager = 50% of total hostess pool, split equally between them
+//  5. Security = whatever is left, split equally
+function computePayouts(totalTips, byPool) {
+  const entertainers = byPool.entertainer || [];
+  const hostesses    = byPool.hostess     || [];
+  const managers     = byPool.manager     || [];
+  const djs          = byPool.dj          || [];
+  const security     = byPool.security    || [];
+
+  // 1. Entertainers — each individual gets 37% of totalTips
+  const entertainerPerPerson = totalTips * 0.37;
+  const entertainerTotal     = entertainerPerPerson * entertainers.length; // sum paid out
+
+  // 2. Hostess pool — 15% of totalTips, split equally
+  const hostessTotal     = totalTips * 0.15;
+  const hostessPerPerson = hostesses.length > 0 ? hostessTotal / hostesses.length : 0;
+
+  // 3. Manager — hostess per-person + $100 each
+  const managerPerPerson = hostessPerPerson + 100;
+  const managerTotal     = managerPerPerson * managers.length;
+
+  // 4. DJ (and any "Asst Manager" stored as DJ role) — 50% of hostess total pool, split equally
+  const djTotal     = hostessTotal * 0.5;
+  const djPerPerson = djs.length > 0 ? djTotal / djs.length : 0;
+
+  // 5. Security — everything left over
+  const allocated      = entertainerTotal + hostessTotal + managerTotal + djTotal;
+  const securityTotal  = Math.max(0, totalTips - allocated);
+  const securityPerPerson = security.length > 0 ? securityTotal / security.length : 0;
+
+  return {
+    entertainer: { total: entertainerTotal, perPerson: entertainerPerPerson, employees: entertainers },
+    hostess:     { total: hostessTotal,     perPerson: hostessPerPerson,     employees: hostesses   },
+    manager:     { total: managerTotal,     perPerson: managerPerPerson,     employees: managers    },
+    dj:          { total: djTotal,          perPerson: djPerPerson,          employees: djs         },
+    security:    { total: securityTotal,    perPerson: securityPerPerson,    employees: security    },
+  };
+}
+
+// ─── Pool display config ──────────────────────────────────────────────
+const POOL_CONFIG = [
+  { key: "entertainer", label: "Entertainer (37% each)", color: "#ec4899", icon: <Music  className="w-4 h-4" />, note: "37% of total — per performer" },
+  { key: "hostess",     label: "Hostess / Host",         color: "#f59e0b", icon: <Star   className="w-4 h-4" />, note: "15% of total — split equally" },
+  { key: "manager",     label: "Manager / Promo",        color: "#a855f7", icon: <Shield className="w-4 h-4" />, note: "Hostess share + $100 each"   },
+  { key: "dj",          label: "DJ / Asst Manager",      color: "#22d3ee", icon: <Disc3  className="w-4 h-4" />, note: "50% of hostess pool, split"  },
+  { key: "security",    label: "Security / Staff",       color: "#6b7280", icon: <Users  className="w-4 h-4" />, note: "Remainder — split equally"   },
+];
+
+// ─── TipLine Row ──────────────────────────────────────────────────────
+function TipLine({ name, color, amount, signature, onSign }) {
   return (
     <div className="flex items-center gap-3 py-2 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-bold text-white truncate">{name}</div>
-        <div className="text-[10px]" style={{ color: pool.color }}>{pool.label}</div>
       </div>
-      <div className="text-base font-black font-mono" style={{ color: pool.color }}>{fmt(amount)}</div>
+      <div className="text-base font-black font-mono" style={{ color }}>{fmt(amount)}</div>
       <div className="flex items-center gap-1.5 shrink-0">
         {signature ? (
           <span className="text-[10px] px-2 py-0.5 rounded bg-green-500/15 text-green-400 font-semibold">✓ Signed</span>
@@ -58,50 +101,44 @@ function TipLine({ name, pool, amount, signature, onSign }) {
 }
 
 // ─── Pool Section ─────────────────────────────────────────────────────
-function PoolSection({ pool, employees, poolTotal, tipSignatures, onSign }) {
+function PoolSection({ config, payout, tipSignatures, onSign }) {
   const [open, setOpen] = useState(true);
+  const { employees, perPerson, total } = payout;
   if (employees.length === 0) return null;
-  const perPerson = employees.length > 0 ? poolTotal / employees.length : 0;
 
   return (
-    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${pool.color}25`, background: `${pool.color}08` }}>
-      {/* Header */}
+    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${config.color}25`, background: `${config.color}08` }}>
       <button
         className="w-full flex items-center justify-between px-4 py-3 transition-all"
         onClick={() => setOpen(v => !v)}
-        style={{ background: `${pool.color}10` }}
+        style={{ background: `${config.color}10` }}
       >
         <div className="flex items-center gap-2">
-          <span style={{ color: pool.color }}>{pool.icon}</span>
-          <span className="font-black text-sm text-white">{pool.label}</span>
+          <span style={{ color: config.color }}>{config.icon}</span>
+          <span className="font-black text-sm text-white">{config.label}</span>
           <span className="text-[10px] px-2 py-0.5 rounded-full font-bold"
-            style={{ background: `${pool.color}20`, color: pool.color }}>
-            {employees.length} staff
+            style={{ background: `${config.color}20`, color: config.color }}>
+            {employees.length}
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="font-black font-mono text-base" style={{ color: pool.color }}>{fmt(poolTotal)}</span>
-          <span className="text-[10px] text-gray-500">{(pool.pct * 100).toFixed(0)}% pool</span>
+          <span className="font-black font-mono text-base" style={{ color: config.color }}>{fmt(total)}</span>
+          <span className="text-[10px] text-gray-500">{fmt(perPerson)}/ea</span>
           {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
         </div>
       </button>
 
-      {/* Rows */}
       {open && (
         <div className="px-4 pb-3">
-          {/* Per-person callout */}
-          <div className="text-[10px] text-gray-500 py-2 flex items-center justify-between">
-            <span>Equal split — {fmt(perPerson)} per person</span>
-            <span className="text-gray-600">({pool.pct * 100}% of total tips)</span>
-          </div>
+          <div className="text-[10px] text-gray-500 py-2">{config.note}</div>
           {employees.map(emp => (
             <TipLine
               key={emp.id}
               name={emp.full_name || emp.username || emp.id}
-              pool={pool}
+              color={config.color}
               amount={perPerson}
               signature={tipSignatures[emp.id]}
-              onSign={() => onSign(emp.id, emp.full_name)}
+              onSign={() => onSign(emp.id, emp.full_name || emp.username)}
             />
           ))}
         </div>
@@ -114,20 +151,15 @@ function PoolSection({ pool, employees, poolTotal, tipSignatures, onSign }) {
 export default function TipBreakdown({ transactions = [] }) {
   const today = new Date().toDateString();
   const [tipSignatures, setTipSignatures] = useState({});
-  const [customSplit, setCustomSplit] = useState({ entertainer: 70, hostess: 15, manager: 10, staff: 5 });
-  const [showSplitEditor, setShowSplitEditor] = useState(false);
 
-  // Load NUPS employees
   const { data: nupsUsers = [] } = useQuery({
     queryKey: ['nups-users-for-tip'],
     queryFn: () => base44.entities.NUPSUser.filter({ status: "active" }),
   });
 
-  // Today's tip total
   const todayTx = transactions.filter(t => new Date(t.created_date).toDateString() === today);
   const totalTips = todayTx.reduce((s, t) => s + (t.tip || 0), 0);
 
-  // By cashier for reference
   const tipsByCashier = {};
   todayTx.forEach(t => {
     if (t.tip > 0) {
@@ -136,32 +168,16 @@ export default function TipBreakdown({ transactions = [] }) {
     }
   });
 
-  // Compute splits from customSplit
-  const splitPcts = {
-    staff:       customSplit.staff / 100,
-    hostess:     customSplit.hostess / 100,
-    manager:     customSplit.manager / 100,
-    entertainer: customSplit.entertainer / 100,
-  };
-
-  // Group employees by pool
   const byPool = useMemo(() => {
-    const pools = { staff: [], hostess: [], manager: [], entertainer: [] };
+    const pools = { staff: [], hostess: [], manager: [], entertainer: [], dj: [], security: [] };
     nupsUsers.forEach(u => {
-      const p = ROLE_POOLS[u.role] || "staff";
+      const p = ROLE_POOLS[u.role] || "security";
       if (pools[p]) pools[p].push(u);
     });
     return pools;
   }, [nupsUsers]);
 
-  const poolTotals = {
-    staff:       totalTips * splitPcts.staff,
-    hostess:     totalTips * splitPcts.hostess,
-    manager:     totalTips * splitPcts.manager,
-    entertainer: totalTips * splitPcts.entertainer,
-  };
-
-  const queryClient = useQueryClient();
+  const payouts = useMemo(() => computePayouts(totalTips, byPool), [totalTips, byPool]);
 
   const saveMutation = useMutation({
     mutationFn: (data) => base44.entities.TipPayout.create(data),
@@ -173,18 +189,19 @@ export default function TipBreakdown({ transactions = [] }) {
     setTipSignatures(prev => ({ ...prev, [empId]: { signed_at: new Date().toISOString(), name } }));
   };
 
+  const signedCount = Object.keys(tipSignatures).length;
+  const totalEmployees = nupsUsers.length;
+
   const handleSave = () => {
     const signatures = Object.entries(tipSignatures).map(([empId, sig]) => {
       const emp = nupsUsers.find(u => u.id === empId);
-      const poolKey = emp ? (ROLE_POOLS[emp.role] || 'staff') : 'staff';
-      const pool = POOLS.find(p => p.key === poolKey);
-      const empsInPool = byPool[poolKey] || [];
-      const perPerson = empsInPool.length > 0 ? poolTotals[poolKey] / empsInPool.length : 0;
+      const poolKey = emp ? (ROLE_POOLS[emp.role] || 'security') : 'security';
+      const payout = payouts[poolKey];
       return {
         employee_id: empId,
         employee_name: sig.name,
         pool: poolKey,
-        amount: parseFloat(perPerson.toFixed(2)),
+        amount: parseFloat((payout?.perPerson || 0).toFixed(2)),
         signed_at: sig.signed_at,
       };
     });
@@ -192,7 +209,7 @@ export default function TipBreakdown({ transactions = [] }) {
     saveMutation.mutate({
       payout_date: new Date().toISOString().split('T')[0],
       total_tips: totalTips,
-      split_config: customSplit,
+      split_config: { formula: "37pct-entertainer / 15pct-hostess / hostess+100-manager / 50pct-dj / leftover-security" },
       signatures,
       cashier_summary: tipsByCashier,
       manager_email: '',
@@ -200,44 +217,44 @@ export default function TipBreakdown({ transactions = [] }) {
     });
   };
 
-  const signedCount = Object.keys(tipSignatures).length;
-  const totalEmployees = nupsUsers.length;
-
-  // Print tip sheet
   const handlePrint = () => {
-    const rows = POOLS.flatMap(pool => {
-      const emps = byPool[pool.key] || [];
-      const perPerson = emps.length > 0 ? (totalTips * (customSplit[pool.key] / 100)) / emps.length : 0;
-      return emps.map(emp => `
+    const rows = POOL_CONFIG.flatMap(cfg => {
+      const payout = payouts[cfg.key];
+      if (!payout || payout.employees.length === 0) return [];
+      return payout.employees.map(emp => `
         <tr>
           <td style="padding:6px 4px;border-bottom:1px solid #eee;">${emp.full_name || emp.username || '—'}</td>
-          <td style="padding:6px 4px;border-bottom:1px solid #eee;color:#666;">${pool.label}</td>
-          <td style="padding:6px 4px;border-bottom:1px solid #eee;font-weight:bold;text-align:right;">$${perPerson.toFixed(2)}</td>
+          <td style="padding:6px 4px;border-bottom:1px solid #eee;color:#666;">${cfg.label}</td>
+          <td style="padding:6px 4px;border-bottom:1px solid #eee;font-size:10px;color:#888;">${cfg.note}</td>
+          <td style="padding:6px 4px;border-bottom:1px solid #eee;font-weight:bold;text-align:right;">$${payout.perPerson.toFixed(2)}</td>
           <td style="padding:6px 4px;border-bottom:1px solid #eee;width:140px;">
             <div style="border-bottom:1px solid #000;height:24px;margin-top:8px;"></div>
           </td>
         </tr>`);
     }).join('');
 
-    const splitSummary = POOLS.map(p =>
-      `${p.label}: ${customSplit[p.key]}% = $${(totalTips * customSplit[p.key] / 100).toFixed(2)}`
-    ).join(' &nbsp;|&nbsp; ');
+    const poolSummary = POOL_CONFIG.map(cfg => {
+      const p = payouts[cfg.key];
+      return p && p.employees.length > 0
+        ? `${cfg.label}: ${fmt(p.total)} (${fmt(p.perPerson)}/ea)` : null;
+    }).filter(Boolean).join(' | ');
 
     const html = `<html><head><title>Tip Payout Sheet</title>
     <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Courier New',monospace;padding:20px;font-size:12px;}
     table{width:100%;border-collapse:collapse;}th{text-align:left;padding:6px 4px;border-bottom:2px solid #000;font-size:11px;text-transform:uppercase;}
     @media print{@page{margin:12mm;size:letter;}}</style></head><body>
-    <div style="text-align:center;font-size:18px;font-weight:bold;letter-spacing:2px;">TIP PAYOUT SHEET</div>
+    <div style="text-align:center;font-size:18px;font-weight:bold;letter-spacing:2px;">NIGHTLY TIP PAYOUT SHEET</div>
     <div style="text-align:center;font-size:11px;margin-top:2px;">Dream Palace — 815 N. Scottsdale Rd, Tempe AZ 85281</div>
     <div style="text-align:center;font-size:11px;">${new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</div>
     <hr style="margin:10px 0;border-top:2px solid #000;"/>
-    <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px;">
-      <span><strong>TOTAL TIPS COLLECTED:</strong></span>
+    <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
+      <span><strong>TOTAL NIGHTLY TIPS:</strong></span>
       <span style="font-size:20px;font-weight:900;">$${totalTips.toFixed(2)}</span>
     </div>
-    <div style="font-size:10px;color:#555;margin-bottom:10px;">${splitSummary}</div>
+    <div style="font-size:9px;color:#555;margin-bottom:10px;">Formula: Entertainers 37% each · Hostess 15% split · Manager = Hostess+$100 · DJ/AsstMgr = 50% of Hostess pool · Security = remainder</div>
+    <div style="font-size:10px;color:#333;margin-bottom:10px;">${poolSummary}</div>
     <table>
-      <thead><tr><th>Employee</th><th>Role/Pool</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Signature</th></tr></thead>
+      <thead><tr><th>Employee</th><th>Role</th><th>Formula</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Signature</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <hr style="margin:16px 0;border-top:2px solid #000;"/>
@@ -252,26 +269,17 @@ export default function TipBreakdown({ transactions = [] }) {
     setTimeout(() => w.print(), 300);
   };
 
-  const splitTotal = Object.values(customSplit).reduce((s, v) => s + v, 0);
-
   return (
     <div className="space-y-4">
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-lg font-black text-white flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-amber-400" /> Tip Payout Breakdown
+            <DollarSign className="w-5 h-5 text-amber-400" /> Nightly Tip Payout
           </h2>
           <p className="text-xs text-gray-500">{todayTx.filter(t => t.tip > 0).length} tipped transactions today</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowSplitEditor(v => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-            style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)', color: '#c084fc' }}
-          >
-            Split %
-          </button>
           {signedCount > 0 && (
             <button onClick={handleSave}
               disabled={saveMutation.isPending}
@@ -288,49 +296,28 @@ export default function TipBreakdown({ transactions = [] }) {
         </div>
       </div>
 
-      {/* ── Total Tip Display ── */}
+      {/* Total */}
       <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
         <div className="text-4xl font-black font-mono text-amber-400">{fmt(totalTips)}</div>
-        <div className="text-xs text-gray-500 mt-1">Total Tips to Distribute</div>
+        <div className="text-xs text-gray-500 mt-1">Total Nightly Tips (Cash + Card)</div>
         {signedCount > 0 && (
           <div className="text-xs text-green-400 mt-2 font-semibold">
-            {signedCount} / {totalEmployees} employees signed
+            {signedCount} / {totalEmployees} signed
           </div>
         )}
       </div>
 
-      {/* ── Split Editor ── */}
-      {showSplitEditor && (
-        <div className="rounded-xl p-4 space-y-3" style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.2)' }}>
-          <div className="text-xs font-bold text-purple-300 flex items-center justify-between">
-            <span>Customize Tip Split %</span>
-            <span className={`text-xs font-black ${splitTotal !== 100 ? 'text-red-400' : 'text-green-400'}`}>
-              Total: {splitTotal}% {splitTotal !== 100 ? '⚠ must equal 100' : '✓'}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {POOLS.map(pool => (
-              <div key={pool.key}>
-                <label className="text-[10px] font-bold uppercase tracking-widest mb-1 block" style={{ color: pool.color }}>
-                  {pool.label}
-                </label>
-                <div className="flex items-center gap-1">
-                  <Input
-                    type="number" min={0} max={100}
-                    value={customSplit[pool.key]}
-                    onChange={e => setCustomSplit(prev => ({ ...prev, [pool.key]: parseInt(e.target.value) || 0 }))}
-                    className="h-8 w-16 bg-black/40 border-white/15 text-white font-mono text-sm"
-                  />
-                  <span className="text-gray-500 text-sm">%</span>
-                </div>
-                <div className="text-[10px] text-gray-600 mt-0.5">{fmt(totalTips * customSplit[pool.key] / 100)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Formula legend */}
+      <div className="rounded-xl p-3 text-[10px] text-gray-500 space-y-1" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="font-bold text-gray-400 uppercase tracking-widest mb-2">Payout Formula</div>
+        <div>🎤 <strong className="text-pink-400">Entertainer</strong> — 37% of total tips each (per performer, nightly)</div>
+        <div>⭐ <strong className="text-amber-400">Hostess / Host</strong> — 15% of total, split equally</div>
+        <div>🛡 <strong className="text-purple-400">Manager / Promo</strong> — Hostess share + $100 each</div>
+        <div>🎧 <strong className="text-cyan-400">DJ / Asst Manager</strong> — 50% of hostess pool total, split equally</div>
+        <div>👥 <strong className="text-gray-400">Security / Staff</strong> — Remaining balance, split equally</div>
+      </div>
 
-      {/* ── Cashier Reference (who ran tips) ── */}
+      {/* Cashier reference */}
       {Object.keys(tipsByCashier).length > 0 && (
         <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-2">Tips Collected By Cashier</div>
@@ -345,13 +332,12 @@ export default function TipBreakdown({ transactions = [] }) {
         </div>
       )}
 
-      {/* ── Pool Sections ── */}
-      {POOLS.map(pool => (
+      {/* Pool Sections */}
+      {POOL_CONFIG.map(cfg => (
         <PoolSection
-          key={pool.key}
-          pool={pool}
-          employees={byPool[pool.key] || []}
-          poolTotal={poolTotals[pool.key]}
+          key={cfg.key}
+          config={cfg}
+          payout={payouts[cfg.key]}
           tipSignatures={tipSignatures}
           onSign={handleSign}
         />
@@ -363,23 +349,30 @@ export default function TipBreakdown({ transactions = [] }) {
         </div>
       )}
 
-      {/* ── Summary Row ── */}
+      {/* Summary */}
       {totalTips > 0 && (
         <div className="rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.07)' }}>
           <div className="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">Pool Summary</div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {POOLS.map(pool => {
-              const emps = byPool[pool.key] || [];
-              const poolTotal = totalTips * (customSplit[pool.key] / 100);
-              const perPerson = emps.length > 0 ? poolTotal / emps.length : 0;
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {POOL_CONFIG.map(cfg => {
+              const p = payouts[cfg.key];
               return (
-                <div key={pool.key} className="text-center">
-                  <div className="text-[10px] text-gray-500">{pool.label}</div>
-                  <div className="text-base font-black font-mono" style={{ color: pool.color }}>{fmt(poolTotal)}</div>
-                  {emps.length > 0 && <div className="text-[10px] text-gray-600">{fmt(perPerson)}/person</div>}
+                <div key={cfg.key} className="text-center">
+                  <div className="text-[10px] text-gray-500">{cfg.label}</div>
+                  <div className="text-base font-black font-mono" style={{ color: cfg.color }}>{fmt(p?.total || 0)}</div>
+                  {p?.employees.length > 0 && <div className="text-[10px] text-gray-600">{fmt(p.perPerson)}/ea</div>}
                 </div>
               );
             })}
+          </div>
+          <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-gray-600 text-right">
+            Total allocated: {fmt(
+              (payouts.entertainer?.total || 0) +
+              (payouts.hostess?.total    || 0) +
+              (payouts.manager?.total    || 0) +
+              (payouts.dj?.total         || 0) +
+              (payouts.security?.total   || 0)
+            )}
           </div>
         </div>
       )}
