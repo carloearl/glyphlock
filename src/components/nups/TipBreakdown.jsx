@@ -193,8 +193,10 @@ export default function TipBreakdown({ transactions = [] }) {
     queryFn: () => base44.entities.NUPSUser.filter({ status: "active" }),
   });
 
+  // Floor tips only — exclude VIP/contract revenue (those go through contract receipts)
   const todayTx = transactions.filter(t => new Date(t.created_date).toDateString() === today);
-  const totalTips = todayTx.reduce((s, t) => s + (t.tip || 0), 0);
+  const floorTx = todayTx.filter(t => !t.notes?.toLowerCase().includes('vip') && !t.notes?.toLowerCase().includes('contract'));
+  const totalTips = floorTx.reduce((s, t) => s + (t.tip || 0), 0);
 
   const tipsByCashier = {};
   todayTx.forEach(t => {
