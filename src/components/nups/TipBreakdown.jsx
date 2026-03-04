@@ -114,7 +114,7 @@ function PoolSection({ pool, employees, poolTotal, tipSignatures, onSign }) {
 export default function TipBreakdown({ transactions = [] }) {
   const today = new Date().toDateString();
   const [tipSignatures, setTipSignatures] = useState({});
-  const [customSplit, setCustomSplit] = useState({ staff: 70, hostess: 15, manager: 10, entertainer: 5 });
+  const [customSplit, setCustomSplit] = useState({ entertainer: 70, hostess: 15, manager: 10, staff: 5 });
   const [showSplitEditor, setShowSplitEditor] = useState(false);
 
   // Load NUPS employees
