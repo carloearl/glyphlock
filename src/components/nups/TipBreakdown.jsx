@@ -179,7 +179,7 @@ export default function TipBreakdown({ transactions = [] }) {
     return pools;
   }, [nupsUsers]);
 
-  const payouts = useMemo(() => computePayouts(totalTips, byPool), [totalTips, byPool]);
+  const payouts = useMemo(() => computePayoutsCustom(totalTips, byPool, formula), [totalTips, byPool, formula]);
 
   const saveMutation = useMutation({
     mutationFn: (data) => base44.entities.TipPayout.create(data),
