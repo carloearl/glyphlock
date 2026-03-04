@@ -151,6 +151,8 @@ function PoolSection({ config, payout, tipSignatures, onSign }) {
 export default function TipBreakdown({ transactions = [] }) {
   const today = new Date().toDateString();
   const [tipSignatures, setTipSignatures] = useState({});
+  const [showSplitEditor, setShowSplitEditor] = useState(false);
+  const [formula, setFormula] = useState({ entertainerPct: 37, hostessPct: 15, managerBonus: 100, djPct: 50 });
 
   const { data: nupsUsers = [] } = useQuery({
     queryKey: ['nups-users-for-tip'],
