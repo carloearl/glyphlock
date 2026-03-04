@@ -27,13 +27,21 @@ export default function NUPSStaff() {
         }
         const currentUser = await base44.auth.me();
 
-        // §9.2 RBAC — Enrich user with permissions payload
+        // Enrich with RBAC payload
         try {
           const res = await base44.functions.invoke('getUserPermissions', {});
           currentUser._rbac = res.data;
           currentUser._highestRole = res.data?.highest_role || null;
-        } catch (e) {
-          console.warn("RBAC payload unavailable:", e);
+        } catch (e) {}
+
+        // If user has owner/manager tier, redirect to admin dashboard
+        const OWNER_TIER = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"];
+        const hasOwnerAccess = currentUser._rbac?.venue_access?.some(
+          va => OWNER_TIER.includes(va.role_key)
+        ) || currentUser.role === "admin";
+        if (hasOwnerAccess) {
+          window.location.href = createPageUrl("NUPSOwner");
+          return;
         }
 
         setUser(currentUser);
