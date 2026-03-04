@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
-  DollarSign, Printer, Users, Star, Music, Shield, Disc3, ChevronDown, ChevronUp, PenLine
+  DollarSign, Printer, Users, Star, Music, Shield, Disc3, ChevronDown, ChevronUp, PenLine, Info
 } from "lucide-react";
 
 // ─── Role → pool ─────────────────────────────────────────────────────
