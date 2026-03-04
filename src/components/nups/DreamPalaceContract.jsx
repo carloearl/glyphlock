@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2, Loader2, Camera, Fingerprint, ScanLine,
-  FileText, Shield, Printer, Archive, Upload, ArrowRight
+  FileText, Shield, Printer, Archive, Upload, ArrowRight, Music
 } from "lucide-react";
 
 // ─── Contract Terms (exact from physical form) ───
