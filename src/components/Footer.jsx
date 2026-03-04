@@ -206,7 +206,7 @@ export default function Footer() {
                 <strong className="text-slate-400">GlyphBot Intelligence</strong> is a multi-provider AI assistant offering real-time site auditing, security scanning, code analysis, and natural-language threat assessment — powered by a provider chain architecture that routes across LLM backends for optimal accuracy and uptime.
               </p>
               <p>
-                The <strong className="text-slate-400">N.U.P.S. Point-of-Sale</strong> system provides venue-grade transaction processing with RBAC staff management, entertainer scheduling, VIP guest tracking, Z-report generation, and the <strong className="text-slate-400">Club Currency Press</strong> for custom voucher and Dream Dollar issuance with digital contract signing and biometric verification.
+                The <strong className="text-slate-400">N.U.P.S. Point-of-Sale</strong> system provides venue-grade transaction processing with RBAC staff management, entertainer scheduling, VIP guest tracking, Z-report generation, and the <strong className="text-slate-400">Club Currency Press</strong> for custom voucher and <strong className="text-slate-400">Glyph Buck™</strong> issuance with digital contract signing and biometric verification.
               </p>
               <p>
                 <strong className="text-slate-400">GlyphLock Financial</strong> delivers underwriting dossier generation, deterministic risk profiling, and qualification assessment frameworks designed for institutional-grade compliance review. The <strong className="text-slate-400">Blockchain Verification</strong> module creates timestamped cryptographic proofs exportable as legal evidence.
