@@ -169,12 +169,11 @@ export default function TimeClock({ user, role = "staff" }) {
     return () => clearInterval(t);
   }, []);
 
+  // Always fetch all shifts — filtering by created_by breaks clock-out since
+  // shifts may be created by admin. We scope the "today's log" display per user below.
   const { data: shifts = [] } = useQuery({
-    queryKey: ['time-clock-shifts', role, user?.email],
-    queryFn: async () => {
-      const all = await base44.entities.EntertainerShift.list('-created_date', 500);
-      return role === 'admin' ? all : all.filter(s => s.created_by === user?.email);
-    },
+    queryKey: ['time-clock-shifts'],
+    queryFn: () => base44.entities.EntertainerShift.list('-created_date', 500),
     enabled: !!user
   });
 
