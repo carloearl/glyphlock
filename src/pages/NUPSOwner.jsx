@@ -342,6 +342,12 @@ export default function NUPSOwner() {
           <TabsContent value="zreport">
             <ZReportGenerator user={user} />
           </TabsContent>
+          <TabsContent value="glyphbucks">
+            <GlyphBuckInventory />
+          </TabsContent>
+          <TabsContent value="entertainer">
+            <EntertainerDashboard user={user} />
+          </TabsContent>
           <TabsContent value="products">
             <ProductManagement />
           </TabsContent>
