@@ -178,11 +178,32 @@ export default function ZReportGenerator({ user }) {
               </div>
             `).join('')}
           </div>
+
+          ${(() => {
+            let extra = {};
+            try { extra = JSON.parse(report.notes || "{}"); } catch(e) {}
+            if (!extra.glyph_buck_contracts) return "";
+            return `
+          <div class="section">
+            <h3>GLYPH BUCK™ ACTIVITY</h3>
+            <div class="row"><span>Contracts Issued Today:</span><span>${extra.glyph_buck_contracts}</span></div>
+            <div class="row"><span>Face Value Issued:</span><span>$${(extra.glyph_buck_issued_value||0).toFixed(2)}</span></div>
+            <div class="row"><span>Revenue Charged (w/ surcharge):</span><span>$${(extra.glyph_buck_revenue_charged||0).toFixed(2)}</span></div>
+            <div class="row"><span>Redeemed Value:</span><span>$${(extra.glyph_buck_redeemed_value||0).toFixed(2)}</span></div>
+            <div class="row"><span>Entertainer Tip Payouts:</span><span>$${(extra.entertainer_tip_payouts||0).toFixed(2)}</span></div>
+          </div>
+          <div style="font-size:9px;color:#666;margin-bottom:8px;">Glyph Buck™ is a proprietary instrument of GlyphLock Financial LLC. All redemptions are audit-logged.</div>`;
+          })()}
           
           <div class="section total">
             <div class="row"><span>Total Transactions:</span><span>${report.transaction_count}</span></div>
-            <div class="row"><span>TOTAL SALES:</span><span>$${report.total_sales.toFixed(2)}</span></div>
+            <div class="row"><span>TOTAL SALES (incl. Glyph Buck revenue):</span><span>$${report.total_sales.toFixed(2)}</span></div>
           </div>
+          <div style="margin-top:20px;border-top:1px solid #000;padding-top:12px;display:flex;gap:40px;">
+            <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">MANAGER SIGNATURE</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
+            <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">DATE</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
+          </div>
+          <div style="text-align:center;font-size:9px;color:#999;margin-top:10px;">N.U.P.S. POS — GlyphLock Financial LLC — ${new Date().toLocaleString()}</div>
         </body>
       </html>
     `);
