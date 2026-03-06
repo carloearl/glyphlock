@@ -88,6 +88,11 @@ export default function ZReportGenerator({ user }) {
         total: data.total
       }));
 
+      const glyphBuckIssued = todayOrders.reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
+      const glyphBuckRevenue = todayOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
+      const glyphBuckRedeemed = todayOrders.filter(o => o.status === "archived").reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
+      const entertainerPayouts = todayTipPayouts.reduce((s, p) => s + (p.total_tips || 0), 0);
+
       return base44.entities.POSZReport.create({
         report_id: `Z-${Date.now()}`,
         report_date: new Date().toISOString().split('T')[0],
@@ -98,13 +103,20 @@ export default function ZReportGenerator({ user }) {
         closing_cash: Number(closingCash),
         cash_sales: cashSales,
         card_sales: cardSales,
-        total_sales: totalSales,
+        total_sales: totalSales + glyphBuckRevenue,
         transaction_count: todayTransactions.length,
         vip_room_revenue: vipRevenue,
         bar_revenue: barRevenue,
         merchandise_revenue: merchandiseRevenue,
         discrepancy: Number(closingCash) - Number(openingCash) - cashSales,
-        products_sold
+        products_sold,
+        notes: JSON.stringify({
+          glyph_buck_issued_value: glyphBuckIssued,
+          glyph_buck_revenue_charged: glyphBuckRevenue,
+          glyph_buck_redeemed_value: glyphBuckRedeemed,
+          glyph_buck_contracts: todayOrders.length,
+          entertainer_tip_payouts: entertainerPayouts,
+        })
       });
     },
     onSuccess: (report) => {
