@@ -201,7 +201,12 @@ export default function ZReportGenerator({ user }) {
   const vipRevenue = todayVIPSessions
     .reduce((sum, s) => sum + (s.total_charge || 0), 0);
 
-  const totalSales = cashSales + cardSales + vipRevenue;
+  const glyphBuckRevenue = todayOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
+  const glyphBuckIssued = todayOrders.reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
+  const glyphBuckRedeemed = todayOrders.filter(o => o.status === "archived").reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
+  const entertainerPayouts = todayTipPayouts.reduce((s, p) => s + (p.total_tips || 0), 0);
+
+  const totalSales = cashSales + cardSales + vipRevenue + glyphBuckRevenue;
 
   return (
     <div className="space-y-6">
