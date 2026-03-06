@@ -44,6 +44,8 @@ import NUPSUserManager from "../components/nups/NUPSUserManager.jsx";
 import EmployeeManagement from "../components/nups/EmployeeManagement.jsx";
 import PayrollReport from "../components/nups/PayrollReport.jsx";
 import SEOHead from "@/components/SEOHead";
+import GlyphBuckInventory from "../components/nups/GlyphBuckInventory.jsx";
+import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
