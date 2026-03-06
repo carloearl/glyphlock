@@ -251,6 +251,37 @@ export default function ZReportGenerator({ user }) {
             <div className="text-2xl font-bold text-green-400">{todayTransactions.length}</div>
           </CardContent>
         </Card>
+
+        <Card className="glass-card-dark border-amber-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Banknote className="w-5 h-5 text-amber-400" />
+              <span className="text-sm text-gray-400">Glyph Bucks Issued</span>
+            </div>
+            <div className="text-2xl font-bold text-amber-400">${glyphBuckIssued.toFixed(2)}</div>
+            <div className="text-xs text-gray-600 mt-1">{todayOrders.length} contracts / ${glyphBuckRevenue.toFixed(2)} charged</div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card-dark border-orange-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Banknote className="w-5 h-5 text-orange-400" />
+              <span className="text-sm text-gray-400">Glyph Bucks Redeemed</span>
+            </div>
+            <div className="text-2xl font-bold text-orange-400">${glyphBuckRedeemed.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card-dark border-pink-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-5 h-5 text-pink-400" />
+              <span className="text-sm text-gray-400">Entertainer Payouts</span>
+            </div>
+            <div className="text-2xl font-bold text-pink-400">${entertainerPayouts.toFixed(2)}</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Generate Report */}
