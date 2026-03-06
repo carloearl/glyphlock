@@ -263,6 +263,8 @@ export default function NUPSOwner() {
               { value: 'timeclock', icon: Clock, label: 'Time Clock' },
               { value: 'history', icon: Receipt, label: 'History' },
               { value: 'zreport', icon: FileText, label: 'Z-Report' },
+              { value: 'glyphbucks', icon: Banknote, label: 'Glyph Bucks' },
+              { value: 'entertainer', icon: Users, label: 'My Stats' },
               { value: 'products', icon: Tag, label: 'Products' },
               { value: 'inventory', icon: Package, label: 'Inventory' },
               { value: 'contract', icon: ScrollText, label: 'Contract' },
