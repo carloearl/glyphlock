@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileText, DollarSign, ShoppingCart, Printer, Calendar } from "lucide-react";
+import { FileText, DollarSign, ShoppingCart, Printer, Calendar, Banknote, Users } from "lucide-react";
 
 export default function ZReportGenerator({ user }) {
   const queryClient = useQueryClient();
@@ -27,6 +27,24 @@ export default function ZReportGenerator({ user }) {
       const all = await base44.entities.VIPRoom.list('-created_date', 500);
       const today = new Date().toDateString();
       return all.filter(r => r.start_time && new Date(r.start_time).toDateString() === today);
+    }
+  });
+
+  const { data: todayOrders = [] } = useQuery({
+    queryKey: ['today-glyph-orders'],
+    queryFn: async () => {
+      const all = await base44.entities.DreamPalaceOrder.list('-created_date', 500);
+      const today = new Date().toDateString();
+      return all.filter(o => new Date(o.created_date).toDateString() === today);
+    }
+  });
+
+  const { data: todayTipPayouts = [] } = useQuery({
+    queryKey: ['today-tip-payouts'],
+    queryFn: async () => {
+      const all = await base44.entities.TipPayout.list('-created_date', 50);
+      const today = new Date().toDateString();
+      return all.filter(p => new Date(p.created_date).toDateString() === today);
     }
   });
 
