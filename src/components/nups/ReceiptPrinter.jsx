@@ -202,7 +202,8 @@ export default function ReceiptPrinter({
   const items = transaction.items || [];
   const totalItems = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
   const tipAmount = transaction.tip || 0;
-  const grandTotal = (transaction.total || 0) + tipAmount;
+  // transaction.total already includes subtotal + tax + tip
+  const grandTotal = transaction.total || 0;
   const txDate = new Date(transaction.created_date);
 
   return (
