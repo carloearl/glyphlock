@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { logAuditEvent } from "./AuditLogDashboard";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -115,12 +116,23 @@ export default function GlyphBuckInventory() {
   const alerts = useMemo(() => detectSuspiciousPatterns(instruments), [instruments]);
 
   const updateStatus = useMutation({
-    mutationFn: ({ orderId, newStatus, notes }) =>
-      base44.entities.DreamPalaceOrder.update(orderId, {
+    mutationFn: async ({ orderId, newStatus, notes, instrument }) => {
+      const result = await base44.entities.DreamPalaceOrder.update(orderId, {
         status: newStatus === "redeemed" ? "archived" : newStatus === "voided" ? "archived" : "signed",
         archived_at: newStatus === "redeemed" ? new Date().toISOString() : undefined,
         archived_by: newStatus === "redeemed" ? "Manual" : undefined,
-      }),
+      });
+      await logAuditEvent({
+        action: "UPDATE",
+        entityType: "GlyphBuck",
+        entityId: instrument?.serial_number || orderId,
+        description: `Glyph Buck™ serial ${instrument?.serial_number} status changed to ${newStatus.toUpperCase()}`,
+        severity: newStatus === "voided" || newStatus === "flagged" ? "WARNING" : "INFO",
+        beforeState: { status: instrument?.status },
+        afterState: { status: newStatus },
+      });
+      return result;
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["dream-palace-orders-inv"] });
       toast.success("Instrument status updated.");
@@ -129,15 +141,25 @@ export default function GlyphBuckInventory() {
   });
 
   const flagInstrument = useMutation({
-    mutationFn: ({ serial_number, notes }) =>
-      base44.entities.VIPContractRecord.create({
+    mutationFn: async ({ serial_number, notes }) => {
+      const result = await base44.entities.VIPContractRecord.create({
         token: `FLAG-${serial_number}-${Date.now()}`,
         record_type: "contract_token",
         serial_number,
         guest_name: "FLAGGED",
         status: "revoked",
         metadata: { notes, flagged_at: new Date().toISOString() },
-      }),
+      });
+      await logAuditEvent({
+        action: "UPDATE",
+        entityType: "GlyphBuck",
+        entityId: serial_number,
+        description: `Glyph Buck™ serial ${serial_number} FLAGGED for review. Reason: ${notes}`,
+        severity: "CRITICAL",
+        afterState: { status: "flagged", reason: notes },
+      });
+      return result;
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["contract-records-inv"] });
       toast.success("Instrument flagged for review.");
