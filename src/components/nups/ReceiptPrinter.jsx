@@ -56,8 +56,9 @@ export default function ReceiptPrinter({
       <head><title>Receipt - ${transaction.transaction_id}</title>
       <style>
         @media print {
-          @page { margin: 0; size: 80mm auto; }
-          body { width: 80mm; }
+          @page { margin: 4mm; size: 80mm auto; }
+          body { width: 72mm; margin: 0 auto; }
+          html, body { height: auto !important; }
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier New', monospace; width: 302px; padding: 16px 12px; font-size: 11px; color: #000; line-height: 1.4; }
