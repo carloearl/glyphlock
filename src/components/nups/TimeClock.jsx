@@ -132,12 +132,12 @@ function PayrollReport({ shifts, weekStart }) {
                     {emp.shifts.map(s => {
                       const dur = s.check_out_time
                         ? differenceInMinutes(new Date(s.check_out_time), new Date(s.check_in_time))
-                        : differenceInMinutes(new Date(), new Date(s.check_in_time));
+                        : null;
                       return (
-                        <div key={s.id} className="flex justify-between text-[11px] text-gray-400">
+                        <div key={s.id} className={`flex justify-between text-[11px] ${!s.check_out_time ? 'text-red-400' : 'text-gray-400'}`}>
                           <span>{format(new Date(s.check_in_time), 'EEE MM/dd h:mm a')}</span>
-                          <span>{s.check_out_time ? format(new Date(s.check_out_time), 'h:mm a') : <Badge className="bg-green-500/20 text-green-400 text-[9px]">Active</Badge>}</span>
-                          <span className="font-mono text-white">{Math.floor(dur/60)}h {dur%60}m</span>
+                          <span>{s.check_out_time ? format(new Date(s.check_out_time), 'h:mm a') : <Badge className="bg-red-500/20 text-red-400 text-[9px]">⚠ No clock-out</Badge>}</span>
+                          <span className="font-mono text-white">{dur !== null ? `${Math.floor(dur/60)}h ${dur%60}m` : "—"}</span>
                         </div>
                       );
                     })}
