@@ -177,10 +177,10 @@ export default function FinancialCoinHero() {
         <div className="glf-orbit-track" />
 
         {/* Orbit text rings */}
-        <svg className="glf-orbit-svg" viewBox="0 0 560 560" xmlns="http://www.w3.org/2000/svg">
+        <svg className="glf-orbit-svg" viewBox="0 0 460 460" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <path id="glfOuterPath" d="M280,280 m-248,0 a248,248 0 1,1 496,0 a248,248 0 1,1 -496,0"/>
-            <path id="glfInnerPath" d="M280,280 m-214,0 a214,214 0 1,0 428,0 a214,214 0 1,0 -428,0"/>
+            <path id="glfOuterPath" d="M230,230 m-204,0 a204,204 0 1,1 408,0 a204,204 0 1,1 -408,0"/>
+            <path id="glfInnerPath" d="M230,230 m-176,0 a176,176 0 1,0 352,0 a176,176 0 1,0 -352,0"/>
           </defs>
           <g className="glf-orbit-outer">
             <text fontFamily="Cinzel,serif" fontSize="11" fill="rgba(218,165,32,0.8)" letterSpacing="3">
