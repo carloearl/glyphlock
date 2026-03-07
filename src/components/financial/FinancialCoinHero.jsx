@@ -164,10 +164,10 @@ export default function FinancialCoinHero() {
         .glf-td { color: rgba(0,200,60,0.7) !important; -webkit-text-fill-color: rgba(0,200,60,0.7); padding: 0 8px; }
 
         @media (max-width: 640px) {
-          .glf-stage { width: 320px; height: 320px; }
-          .glf-scene { width: 200px; height: 200px; }
-          .glf-btc { width: 32px; height: 32px; font-size: 16px; top: 16px; }
-          .glf-orbit-track { inset: 14px; }
+          .glf-stage { width: 280px; height: 280px; }
+          .glf-scene { width: 170px; height: 170px; }
+          .glf-btc { width: 30px; height: 30px; font-size: 14px; top: 14px; }
+          .glf-orbit-track { inset: 12px; }
         }
       `}</style>
 
