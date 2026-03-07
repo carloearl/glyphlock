@@ -82,8 +82,9 @@ function PayrollReport({ shifts, weekStart }) {
         const co = s.check_out_time ? format(new Date(s.check_out_time), 'h:mm a') : 'ACTIVE';
         const dur = s.check_out_time
           ? differenceInMinutes(new Date(s.check_out_time), new Date(s.check_in_time))
-          : differenceInMinutes(new Date(), new Date(s.check_in_time));
-        return `<tr><td style="padding:2px 8px;font-size:10px;">${ci}</td><td style="padding:2px 8px;font-size:10px;">${co}</td><td style="padding:2px 8px;font-size:10px;text-align:right;">${Math.floor(dur/60)}h ${dur%60}m</td></tr>`;
+          : null;
+        const durStr = dur !== null ? `${Math.floor(dur/60)}h ${dur%60}m` : "⚠ NOT CLOCKED OUT";
+        return `<tr><td style="padding:2px 8px;font-size:10px;">${ci}</td><td style="padding:2px 8px;font-size:10px;">${co}</td><td style="padding:2px 8px;font-size:10px;text-align:right;${dur === null ? 'color:red;font-weight:bold;' : ''}">${durStr}</td></tr>`;
       }).join('');
       return `<tr style="background:#eee;"><td colspan="3" style="padding:6px 8px;font-weight:bold;font-size:13px;">${emp.name} — ${hrs}h ${mins}m total</td></tr>${shiftRows}`;
     }).join('');
