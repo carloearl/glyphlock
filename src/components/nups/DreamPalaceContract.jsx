@@ -423,6 +423,27 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
           </CardContent>
         </Card>
 
+        {/* Collapsible Contract Preview */}
+        <Card className="bg-gray-900/60 border-amber-500/30">
+          <button
+            onClick={() => setContractPreviewOpen(p => !p)}
+            className="w-full flex items-center justify-between p-4 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-amber-400" />
+              <span className="text-sm font-bold text-amber-400">View Full Contract (Terms & Conditions)</span>
+            </div>
+            {contractPreviewOpen ? <ChevronUp className="w-4 h-4 text-amber-400" /> : <ChevronDown className="w-4 h-4 text-amber-400" />}
+          </button>
+          {contractPreviewOpen && (
+            <CardContent className="pt-0 pb-4">
+              <div className="bg-black/60 border border-gray-700 rounded-lg p-4 overflow-y-auto text-xs text-gray-300 leading-relaxed whitespace-pre-wrap font-mono" style={{ maxHeight: '50vh' }}>
+                {FULL_CONTRACT_TEXT}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+
         <Button onClick={() => setStep(1)} disabled={!canProceedToSign} className="w-full h-12 bg-gradient-to-r from-cyan-500 to-blue-600 font-bold">
           Proceed to Acknowledgements & Signature <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
