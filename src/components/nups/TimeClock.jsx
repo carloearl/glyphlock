@@ -58,13 +58,16 @@ function PayrollReport({ shifts, weekStart }) {
     return d >= weekStart && d <= weekEnd;
   });
 
+  const MAX_SHIFT_MINUTES = 16 * 60; // cap unclosed shifts at 16h for payroll sanity
+
   const byEmployee = {};
   weekShifts.forEach(s => {
     const key = s.stage_name || s.entertainer_id || "Unknown";
     if (!byEmployee[key]) byEmployee[key] = { name: key, shifts: [], totalMinutes: 0 };
     byEmployee[key].shifts.push(s);
-    const end = s.check_out_time ? new Date(s.check_out_time) : new Date();
-    byEmployee[key].totalMinutes += differenceInMinutes(end, new Date(s.check_in_time));
+    if (!s.check_out_time) return; // skip unclosed shifts in payroll totals
+    const dur = differenceInMinutes(new Date(s.check_out_time), new Date(s.check_in_time));
+    byEmployee[key].totalMinutes += Math.min(dur, MAX_SHIFT_MINUTES);
   });
 
   const employees = Object.values(byEmployee).sort((a, b) => b.totalMinutes - a.totalMinutes);
