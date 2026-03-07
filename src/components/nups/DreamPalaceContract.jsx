@@ -57,6 +57,7 @@ const ACKNOWLEDGMENTS = [
 
 export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
   const [step, setStep] = useState(0); // 0=form, 1=contract scroll, 2=clickwrap, 3=biometrics+sign, 4=staff sign, 5=print+rescan
+  const [contractPreviewOpen, setContractPreviewOpen] = useState(false);
   const [contractScrolled, setContractScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState({});
