@@ -88,7 +88,7 @@ export default function FinancialCoinHero() {
         }
 
         .glf-scene {
-          width: min(340px, 60vw); height: min(340px, 60vw);
+          width: min(280px, 52vw); height: min(280px, 52vw);
           perspective: 900px; position: relative; z-index: 5; cursor: grab;
         }
         .glf-scene:active { cursor: grabbing; }
