@@ -49,8 +49,8 @@ export default function FinancialCoinHero() {
 
         .glf-stage {
           position: relative;
-          width: min(560px, 90vw);
-          height: min(560px, 90vw);
+          width: min(460px, 80vw);
+          height: min(460px, 80vw);
           display: flex;
           align-items: center;
           justify-content: center;
