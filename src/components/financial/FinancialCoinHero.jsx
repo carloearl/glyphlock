@@ -129,7 +129,7 @@ export default function FinancialCoinHero() {
           background: linear-gradient(130deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 30%, transparent 60%);
         }
 
-        .glf-brand { margin-top: 24px; text-align: center; position: relative; z-index: 10; }
+        .glf-brand { margin-top: 32px; text-align: center; position: relative; z-index: 20; }
         .glf-brand-glyph {
           font-family: 'Cinzel Decorative', serif; font-size: clamp(24px, 6vw, 40px);
           font-weight: 900; letter-spacing: 6px;
