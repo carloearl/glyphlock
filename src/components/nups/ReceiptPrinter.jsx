@@ -186,10 +186,12 @@ export default function ReceiptPrinter({
       </html>
     `;
 
-    const printWindow = window.open('', '_blank', 'width=350,height=900');
+    const printWindow = window.open('', '_blank', 'width=380,height=700,scrollbars=yes');
     printWindow.document.write(receiptHtml);
     printWindow.document.close();
-    setTimeout(() => { printWindow.print(); }, 300);
+    // Wait for content to fully render before printing
+    printWindow.onload = () => { setTimeout(() => { printWindow.print(); }, 400); };
+    setTimeout(() => { printWindow.print(); }, 800);
   };
 
   if (!transaction) {
