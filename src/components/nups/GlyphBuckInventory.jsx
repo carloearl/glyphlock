@@ -327,7 +327,7 @@ export default function GlyphBuckInventory() {
                         {inst.status === "active" && (
                           <>
                             <button
-                              onClick={() => updateStatus.mutate({ orderId: inst.id, newStatus: "redeemed" })}
+                              onClick={() => updateStatus.mutate({ orderId: inst.id, newStatus: "redeemed", instrument: inst })}
                               className="text-[9px] px-2 py-1 rounded font-bold transition-all"
                               style={{ background: "rgba(6,182,212,0.12)", border: "1px solid rgba(6,182,212,0.3)", color: "#22d3ee" }}
                             >Redeem</button>
@@ -340,7 +340,7 @@ export default function GlyphBuckInventory() {
                               style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171" }}
                             >Flag</button>
                             <button
-                              onClick={() => updateStatus.mutate({ orderId: inst.id, newStatus: "expired" })}
+                              onClick={() => updateStatus.mutate({ orderId: inst.id, newStatus: "expired", instrument: inst })}
                               className="text-[9px] px-2 py-1 rounded font-bold transition-all"
                               style={{ background: "rgba(107,114,128,0.12)", border: "1px solid rgba(107,114,128,0.3)", color: "#9ca3af" }}
                             >Expire</button>
