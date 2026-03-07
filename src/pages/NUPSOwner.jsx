@@ -46,6 +46,8 @@ import PayrollReport from "../components/nups/PayrollReport.jsx";
 import SEOHead from "@/components/SEOHead";
 import GlyphBuckInventory from "../components/nups/GlyphBuckInventory.jsx";
 import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
+import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
+import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -265,6 +267,8 @@ export default function NUPSOwner() {
               { value: 'zreport', icon: FileText, label: 'Z-Report' },
               { value: 'glyphbucks', icon: Banknote, label: 'Glyph Bucks' },
               { value: 'entertainer', icon: Users, label: 'My Stats' },
+              { value: 'payroll-engine', icon: DollarSign, label: 'Payroll Engine' },
+              { value: 'audit-log', icon: Shield, label: 'Audit Log' },
               { value: 'products', icon: Tag, label: 'Products' },
               { value: 'inventory', icon: Package, label: 'Inventory' },
               { value: 'contract', icon: ScrollText, label: 'Contract' },
@@ -347,6 +351,12 @@ export default function NUPSOwner() {
           </TabsContent>
           <TabsContent value="entertainer">
             <EntertainerDashboard user={user} />
+          </TabsContent>
+          <TabsContent value="payroll-engine">
+            <EntertainerPayrollEngine user={user} />
+          </TabsContent>
+          <TabsContent value="audit-log">
+            <AuditLogDashboard user={user} />
           </TabsContent>
           <TabsContent value="products">
             <ProductManagement />
