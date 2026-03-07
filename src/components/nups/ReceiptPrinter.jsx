@@ -34,7 +34,8 @@ export default function ReceiptPrinter({
 
     const totalItems = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
     const tipAmount = transaction.tip || 0;
-    const grandTotal = (transaction.total || 0) + tipAmount;
+    // transaction.total already includes subtotal + tax + tip from POSCashRegister
+    const grandTotal = transaction.total || 0;
 
     const vipSection = isVIP && vipDetails ? `
       <div style="border:2px solid #000;padding:8px;margin:8px 0;background:#f9f9f9;">
