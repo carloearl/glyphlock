@@ -59,8 +59,8 @@ export default function FinancialCoinHero() {
         .glf-orbit-svg {
           position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
         }
-        .glf-orbit-outer { animation: glf-orbitCW 22s linear infinite; transform-origin: 280px 280px; }
-        .glf-orbit-inner { animation: glf-orbitCCW 16s linear infinite; transform-origin: 280px 280px; }
+        .glf-orbit-outer { animation: glf-orbitCW 22s linear infinite; transform-origin: 230px 230px; }
+        .glf-orbit-inner { animation: glf-orbitCCW 16s linear infinite; transform-origin: 230px 230px; }
         @keyframes glf-orbitCW  { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes glf-orbitCCW { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
