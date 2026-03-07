@@ -488,13 +488,16 @@ export default function TimeClock({ user, role = "staff" }) {
                   const dur = s.check_out_time
                     ? differenceInMinutes(new Date(s.check_out_time), new Date(s.check_in_time))
                     : differenceInMinutes(now, new Date(s.check_in_time));
+                  const isStale = !s.check_out_time && dur > 16 * 60;
                   return (
-                    <div key={s.id} className="flex items-center justify-between p-2 bg-black/20 rounded-lg text-xs">
+                    <div key={s.id} className={`flex items-center justify-between p-2 rounded-lg text-xs ${isStale ? 'bg-red-500/10 border border-red-500/20' : 'bg-black/20'}`}>
                       <span className="font-bold text-white w-1/3 truncate">{s.stage_name}</span>
                       <span className="text-gray-500">
-                        {format(new Date(s.check_in_time), 'h:mm a')} — {s.check_out_time ? format(new Date(s.check_out_time), 'h:mm a') : <span className="text-green-400">Active</span>}
+                        {format(new Date(s.check_in_time), 'h:mm a')} — {s.check_out_time
+                          ? format(new Date(s.check_out_time), 'h:mm a')
+                          : <span className={isStale ? "text-red-400 font-bold" : "text-green-400"}>{isStale ? "⚠ Not clocked out" : "Active"}</span>}
                       </span>
-                      <span className="font-mono text-cyan-400 text-right">{Math.floor(dur/60)}h {dur%60}m</span>
+                      <span className={`font-mono text-right ${isStale ? 'text-red-400' : 'text-cyan-400'}`}>{Math.floor(dur/60)}h {dur%60}m</span>
                     </div>
                   );
                 })
