@@ -47,6 +47,7 @@ export const NAV_SECTIONS = [
     items: [
       { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
       { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public", requiresAccessToken: true },
+      { label: "Dream Dollar Hub", page: "DreamDollarHub", visibility: "public", requiresAccessToken: true },
       { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
       { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
       { label: "Security Tools", page: "SecurityTools", visibility: "public" },
@@ -106,6 +107,7 @@ export const FOOTER_LINKS = {
   financial: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
     { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public", requiresAccessToken: true },
+    { label: "Dream Dollar Hub", page: "DreamDollarHub", visibility: "public", requiresAccessToken: true },
     { label: "Club Currency Press", page: "ClubCurrencyPress", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
