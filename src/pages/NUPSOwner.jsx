@@ -17,7 +17,7 @@ import {
   Shield, DollarSign, ShoppingCart, TrendingUp, 
   Users, LogOut, UserCheck, DoorOpen, FileText,
   Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText,
-  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star
+  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star, Coins
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -56,6 +56,7 @@ import GlyphBuckInventory from "../components/nups/GlyphBuckInventory.jsx";
 import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
+import DreamDollarHub from "../pages/DreamDollarHub.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -387,10 +388,6 @@ export default function NUPSOwner() {
                 {[
                   { value: 'products', icon: Tag, label: 'Products', desc: 'Menu items' },
                   { value: 'inventory', icon: Package, label: 'Stock', desc: 'Inventory levels' },
-                  { value: 'glyphbucks', icon: Banknote, label: 'Gift Cards', desc: 'Glyph Bucks' },
-                  { value: 'press', icon: Banknote, label: 'Currency', desc: 'Print currency' },
-                  { value: 'contract', icon: ScrollText, label: 'New Contract', desc: 'Create order' },
-                  { value: 'contracts', icon: ScrollText, label: 'All Orders', desc: 'View contracts' },
                 ].map(({ value, icon: Icon, label, desc }) => (
                   <DropdownMenuItem
                     key={value}
@@ -436,6 +433,44 @@ export default function NUPSOwner() {
                     onClick={() => setActiveTab(value)}
                     className={`cursor-pointer min-h-[44px] ${
                       activeTab === value ? 'bg-purple-500/20 text-purple-400' : 'text-gray-300 hover:bg-white/10'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 mr-3" />
+                    <div>
+                      <div className="font-medium">{label}</div>
+                      <div className="text-xs text-gray-500">{desc}</div>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Dream Dollar Operations Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="min-h-[44px] bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30 hover:border-yellow-500/50 text-white"
+                >
+                  <Coins className="w-4 h-4 mr-2 text-yellow-400" />
+                  Dream Dollar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-gray-900/95 border-yellow-500/30 backdrop-blur-xl">
+                <DropdownMenuLabel className="text-yellow-400">Dream Dollar Operations</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-yellow-500/20" />
+                {[
+                  { value: 'dd-hub', icon: Coins, label: 'Hub', desc: 'Central operations' },
+                  { value: 'contract', icon: ScrollText, label: 'New Contract', desc: 'Create order' },
+                  { value: 'press', icon: Banknote, label: 'Currency Press', desc: 'Print currency' },
+                  { value: 'glyphbucks', icon: Banknote, label: 'Gift Cards', desc: 'Glyph Bucks' },
+                  { value: 'contracts', icon: ScrollText, label: 'All Orders', desc: 'View contracts' },
+                ].map(({ value, icon: Icon, label, desc }) => (
+                  <DropdownMenuItem
+                    key={value}
+                    onClick={() => setActiveTab(value)}
+                    className={`cursor-pointer min-h-[44px] ${
+                      activeTab === value ? 'bg-yellow-500/20 text-yellow-400' : 'text-gray-300 hover:bg-white/10'
                     }`}
                   >
                     <Icon className="w-4 h-4 mr-3" />
@@ -585,6 +620,9 @@ export default function NUPSOwner() {
           </TabsContent>
           <TabsContent value="rbac">
             <RBACAdminPanel />
+          </TabsContent>
+          <TabsContent value="dd-hub">
+            <DreamDollarHub />
           </TabsContent>
         </Tabs>
       </div>
