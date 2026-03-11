@@ -29,7 +29,6 @@ const ROLE_DESTINATIONS = {
 };
 
 const ROLES = [
-  { key: "Admin",       label: "Admin / Manager", sub: "Owner · Venue Manager",   icon: Shield,   color: "from-violet-600/20 to-indigo-600/20", border: "border-violet-500/40 hover:border-violet-400", iconColor: "text-violet-400" },
   { key: "Staff",       label: "Staff",            sub: "Bartender · Host · DJ",   icon: LogIn,    color: "from-cyan-600/20 to-blue-600/20",     border: "border-cyan-500/40 hover:border-cyan-400",    iconColor: "text-cyan-400"   },
   { key: "Entertainer", label: "Entertainer",      sub: "Performer · Floor",       icon: Music,    color: "from-pink-600/20 to-rose-600/20",     border: "border-pink-500/40 hover:border-pink-400",    iconColor: "text-pink-400"   },
 ];

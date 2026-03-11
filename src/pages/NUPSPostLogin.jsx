@@ -4,17 +4,20 @@ import { createPageUrl } from "@/utils";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Maps the role card the user selected to the correct dashboard page
-const ROLE_CARD_DESTINATIONS = {
-  Admin:       "NUPSOwner",
-  Manager:     "NUPSOwner",
-  Staff:       "NUPSStaff",
-  Entertainer: "EntertainerCheckIn",
-};
-
-// Maps base44 platform role (admin/user) to a fallback destination
-function getFallbackDestination(base44Role) {
-  return base44Role === "admin" ? "NUPSOwner" : "NUPSStaff";
+// Maps actual Base44 role to authorized destination
+function getAuthorizedDestination(user, requestedRoleKey) {
+  // SECURITY: Only users with Base44 role "admin" can access Owner dashboard
+  const isActualAdmin = user.role === "admin";
+  
+  // If user requested Admin/Manager but isn't actually admin, downgrade to Staff
+  if ((requestedRoleKey === "Admin" || requestedRoleKey === "Manager") && !isActualAdmin) {
+    return "NUPSStaff";
+  }
+  
+  // Map based on actual role, not requested role
+  if (isActualAdmin) return "NUPSOwner";
+  if (requestedRoleKey === "Entertainer") return "EntertainerCheckIn";
+  return "NUPSStaff";
 }
 
 export default function NUPSPostLogin() {
@@ -29,21 +32,17 @@ export default function NUPSPostLogin() {
           return;
         }
 
-        // Pull the saved destination (set before redirect to sign-in)
-        const savedDest = sessionStorage.getItem("nups_destination");
-        const roleHint  = sessionStorage.getItem("nups_role_hint");
+        // Get authenticated user and verify actual role
+        const user = await base44.auth.me();
+        
+        // Pull the role card the user selected (just a hint, not authorization)
+        const roleHint = sessionStorage.getItem("nups_role_hint");
         sessionStorage.removeItem("nups_destination");
         sessionStorage.removeItem("nups_role_hint");
 
-        // Prefer the explicit destination the user chose from the login card
-        if (savedDest && ROLE_CARD_DESTINATIONS[roleHint]) {
-          window.location.href = createPageUrl(ROLE_CARD_DESTINATIONS[roleHint]);
-          return;
-        }
-
-        // Fallback: derive from base44 platform role
-        const user = await base44.auth.me();
-        window.location.href = createPageUrl(getFallbackDestination(user.role));
+        // Route based on ACTUAL Base44 role, not what they selected on login card
+        const destination = getAuthorizedDestination(user, roleHint);
+        window.location.href = createPageUrl(destination);
       } catch (err) {
         setError("Authentication failed. Please try signing in again.");
       }
