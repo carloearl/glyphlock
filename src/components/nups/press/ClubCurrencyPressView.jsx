@@ -93,7 +93,7 @@ export default function ClubCurrencyPressView() {
           <Banknote className="w-6 h-6 text-green-400" />
           <div>
             <h2 className="text-lg font-bold text-white">Club Currency Press</h2>
-            <p className="text-xs text-gray-500">Voucher Sheet Press · Contract Terminal · Archive</p>
+            <p className="text-xs text-gray-500">Design & Print Dream Dollar Bills</p>
           </div>
         </div>
         <Button size="sm" variant="outline" className="gap-1.5 border-gray-700" onClick={() => setArchiveOpen(true)}>
