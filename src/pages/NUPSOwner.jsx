@@ -5,6 +5,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   Shield, DollarSign, ShoppingCart, TrendingUp, 
   Users, LogOut, UserCheck, DoorOpen, FileText,
@@ -242,17 +250,23 @@ export default function NUPSOwner() {
           </Card>
         </div>
 
-        {/* Dashboard Sections */}
+        {/* Dashboard Navigation - Dropdown Menus */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* Section Headers */}
-          <div className="space-y-8">
-            {/* Operations */}
-            <div>
-              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-cyan-400" />
-                Operations
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          <div className="flex flex-wrap gap-3 mb-6">
+            {/* Operations Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="min-h-[44px] bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30 hover:border-cyan-500/50 text-white"
+                >
+                  <TrendingUp className="w-4 h-4 mr-2 text-cyan-400" />
+                  Operations
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-gray-900/95 border-cyan-500/30 backdrop-blur-xl">
+                <DropdownMenuLabel className="text-cyan-400">Operations</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-cyan-500/20" />
                 {[
                   { value: 'analytics', icon: BarChart3, label: 'Dashboard', desc: 'Revenue & metrics' },
                   { value: 'live', icon: Eye, label: 'Live View', desc: 'Real-time floor' },
@@ -261,38 +275,37 @@ export default function NUPSOwner() {
                   { value: 'zreport', icon: FileText, label: 'Daily Close', desc: 'End-of-day report' },
                   { value: 'drawer', icon: Wallet, label: 'Cash Log', desc: 'Drawer activity' },
                 ].map(({ value, icon: Icon, label, desc }) => (
-                  <button
+                  <DropdownMenuItem
                     key={value}
                     onClick={() => setActiveTab(value)}
-                    className={`
-                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
-                      flex flex-col items-start justify-between text-left
-                      border backdrop-blur-xl
-                      ${activeTab === value 
-                        ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-cyan-500/50 shadow-lg shadow-cyan-500/20' 
-                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-cyan-500/30'
-                      }
-                    `}
+                    className={`cursor-pointer min-h-[44px] ${
+                      activeTab === value ? 'bg-cyan-500/20 text-cyan-400' : 'text-gray-300 hover:bg-white/10'
+                    }`}
                   >
-                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-cyan-400' : 'text-gray-400'}`} />
+                    <Icon className="w-4 h-4 mr-3" />
                     <div>
-                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
-                        {label}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                      <div className="font-medium">{label}</div>
+                      <div className="text-xs text-gray-500">{desc}</div>
                     </div>
-                  </button>
+                  </DropdownMenuItem>
                 ))}
-              </div>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            {/* Staff & Floor */}
-            <div>
-              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-pink-400" />
-                Staff & Floor
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {/* Staff & Floor Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="min-h-[44px] bg-gradient-to-br from-pink-500/10 to-rose-500/10 border-pink-500/30 hover:border-pink-500/50 text-white"
+                >
+                  <Users className="w-4 h-4 mr-2 text-pink-400" />
+                  Staff & Floor
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-gray-900/95 border-pink-500/30 backdrop-blur-xl">
+                <DropdownMenuLabel className="text-pink-400">Staff & Floor</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-pink-500/20" />
                 {[
                   { value: 'floor', icon: UserCheck, label: 'Check-In', desc: 'Staff attendance' },
                   { value: 'timeclock', icon: Clock, label: 'Time Clock', desc: 'Hours tracking' },
@@ -301,38 +314,37 @@ export default function NUPSOwner() {
                   { value: 'entertainer', icon: Star, label: 'Performer Stats', desc: 'My earnings' },
                   { value: 'staff', icon: UserCog, label: 'Manage Staff', desc: 'User accounts' },
                 ].map(({ value, icon: Icon, label, desc }) => (
-                  <button
+                  <DropdownMenuItem
                     key={value}
                     onClick={() => setActiveTab(value)}
-                    className={`
-                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
-                      flex flex-col items-start justify-between text-left
-                      border backdrop-blur-xl
-                      ${activeTab === value 
-                        ? 'bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-pink-500/50 shadow-lg shadow-pink-500/20' 
-                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-pink-500/30'
-                      }
-                    `}
+                    className={`cursor-pointer min-h-[44px] ${
+                      activeTab === value ? 'bg-pink-500/20 text-pink-400' : 'text-gray-300 hover:bg-white/10'
+                    }`}
                   >
-                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-pink-400' : 'text-gray-400'}`} />
+                    <Icon className="w-4 h-4 mr-3" />
                     <div>
-                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
-                        {label}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                      <div className="font-medium">{label}</div>
+                      <div className="text-xs text-gray-500">{desc}</div>
                     </div>
-                  </button>
+                  </DropdownMenuItem>
                 ))}
-              </div>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            {/* Finance & Payroll */}
-            <div>
-              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-green-400" />
-                Finance & Payroll
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {/* Finance & Payroll Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="min-h-[44px] bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30 hover:border-green-500/50 text-white"
+                >
+                  <DollarSign className="w-4 h-4 mr-2 text-green-400" />
+                  Finance & Payroll
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-gray-900/95 border-green-500/30 backdrop-blur-xl">
+                <DropdownMenuLabel className="text-green-400">Finance & Payroll</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-green-500/20" />
                 {[
                   { value: 'tips', icon: HandCoins, label: 'Tip Pool', desc: 'Distribute tips' },
                   { value: 'payroll-engine', icon: DollarSign, label: 'Payroll', desc: 'Calculate pay' },
@@ -341,38 +353,37 @@ export default function NUPSOwner() {
                   { value: 'daily', icon: PieChart, label: 'Daily Report', desc: 'Day summary' },
                   { value: 'refunds', icon: RotateCcw, label: 'Refunds', desc: 'Process returns' },
                 ].map(({ value, icon: Icon, label, desc }) => (
-                  <button
+                  <DropdownMenuItem
                     key={value}
                     onClick={() => setActiveTab(value)}
-                    className={`
-                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
-                      flex flex-col items-start justify-between text-left
-                      border backdrop-blur-xl
-                      ${activeTab === value 
-                        ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/50 shadow-lg shadow-green-500/20' 
-                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-green-500/30'
-                      }
-                    `}
+                    className={`cursor-pointer min-h-[44px] ${
+                      activeTab === value ? 'bg-green-500/20 text-green-400' : 'text-gray-300 hover:bg-white/10'
+                    }`}
                   >
-                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-green-400' : 'text-gray-400'}`} />
+                    <Icon className="w-4 h-4 mr-3" />
                     <div>
-                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
-                        {label}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                      <div className="font-medium">{label}</div>
+                      <div className="text-xs text-gray-500">{desc}</div>
                     </div>
-                  </button>
+                  </DropdownMenuItem>
                 ))}
-              </div>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            {/* Inventory & Products */}
-            <div>
-              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-amber-400" />
-                Inventory & Products
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {/* Inventory & Products Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="min-h-[44px] bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30 hover:border-amber-500/50 text-white"
+                >
+                  <Package className="w-4 h-4 mr-2 text-amber-400" />
+                  Inventory & Products
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-gray-900/95 border-amber-500/30 backdrop-blur-xl">
+                <DropdownMenuLabel className="text-amber-400">Inventory & Products</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-amber-500/20" />
                 {[
                   { value: 'products', icon: Tag, label: 'Products', desc: 'Menu items' },
                   { value: 'inventory', icon: Package, label: 'Stock', desc: 'Inventory levels' },
@@ -381,38 +392,37 @@ export default function NUPSOwner() {
                   { value: 'contract', icon: ScrollText, label: 'New Contract', desc: 'Create order' },
                   { value: 'contracts', icon: ScrollText, label: 'All Orders', desc: 'View contracts' },
                 ].map(({ value, icon: Icon, label, desc }) => (
-                  <button
+                  <DropdownMenuItem
                     key={value}
                     onClick={() => setActiveTab(value)}
-                    className={`
-                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
-                      flex flex-col items-start justify-between text-left
-                      border backdrop-blur-xl
-                      ${activeTab === value 
-                        ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/50 shadow-lg shadow-amber-500/20' 
-                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-amber-500/30'
-                      }
-                    `}
+                    className={`cursor-pointer min-h-[44px] ${
+                      activeTab === value ? 'bg-amber-500/20 text-amber-400' : 'text-gray-300 hover:bg-white/10'
+                    }`}
                   >
-                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-amber-400' : 'text-gray-400'}`} />
+                    <Icon className="w-4 h-4 mr-3" />
                     <div>
-                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
-                        {label}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                      <div className="font-medium">{label}</div>
+                      <div className="text-xs text-gray-500">{desc}</div>
                     </div>
-                  </button>
+                  </DropdownMenuItem>
                 ))}
-              </div>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            {/* Marketing & Analytics */}
-            <div>
-              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <Megaphone className="w-5 h-5 text-purple-400" />
-                Marketing & Insights
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {/* Marketing & Insights Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="min-h-[44px] bg-gradient-to-br from-purple-500/10 to-violet-500/10 border-purple-500/30 hover:border-purple-500/50 text-white"
+                >
+                  <Megaphone className="w-4 h-4 mr-2 text-purple-400" />
+                  Marketing & Insights
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-gray-900/95 border-purple-500/30 backdrop-blur-xl">
+                <DropdownMenuLabel className="text-purple-400">Marketing & Insights</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-purple-500/20" />
                 {[
                   { value: 'customers', icon: Heart, label: 'Customers', desc: 'CRM database' },
                   { value: 'loyalty', icon: Heart, label: 'Loyalty', desc: 'Rewards program' },
@@ -421,66 +431,57 @@ export default function NUPSOwner() {
                   { value: 'ai', icon: Brain, label: 'AI Insights', desc: 'Predictions' },
                   { value: 'audit-log', icon: Shield, label: 'Audit Trail', desc: 'Security log' },
                 ].map(({ value, icon: Icon, label, desc }) => (
-                  <button
+                  <DropdownMenuItem
                     key={value}
                     onClick={() => setActiveTab(value)}
-                    className={`
-                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
-                      flex flex-col items-start justify-between text-left
-                      border backdrop-blur-xl
-                      ${activeTab === value 
-                        ? 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-500/50 shadow-lg shadow-purple-500/20' 
-                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-purple-500/30'
-                      }
-                    `}
+                    className={`cursor-pointer min-h-[44px] ${
+                      activeTab === value ? 'bg-purple-500/20 text-purple-400' : 'text-gray-300 hover:bg-white/10'
+                    }`}
                   >
-                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-purple-400' : 'text-gray-400'}`} />
+                    <Icon className="w-4 h-4 mr-3" />
                     <div>
-                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
-                        {label}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                      <div className="font-medium">{label}</div>
+                      <div className="text-xs text-gray-500">{desc}</div>
                     </div>
-                  </button>
+                  </DropdownMenuItem>
                 ))}
-              </div>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            {/* Admin Tools */}
+            {/* Admin Tools Dropdown */}
             {(user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') && (
-              <div>
-                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <KeyRound className="w-5 h-5 text-red-400" />
-                  Admin Tools
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="min-h-[44px] bg-gradient-to-br from-red-500/10 to-rose-500/10 border-red-500/30 hover:border-red-500/50 text-white"
+                  >
+                    <KeyRound className="w-4 h-4 mr-2 text-red-400" />
+                    Admin Tools
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-gray-900/95 border-red-500/30 backdrop-blur-xl">
+                  <DropdownMenuLabel className="text-red-400">Admin Tools</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-red-500/20" />
                   {[
                     { value: 'rbac', icon: KeyRound, label: 'Access Control', desc: 'Manage permissions' },
                   ].map(({ value, icon: Icon, label, desc }) => (
-                    <button
+                    <DropdownMenuItem
                       key={value}
                       onClick={() => setActiveTab(value)}
-                      className={`
-                        relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
-                        flex flex-col items-start justify-between text-left
-                        border backdrop-blur-xl
-                        ${activeTab === value 
-                          ? 'bg-gradient-to-br from-red-500/20 to-rose-500/20 border-red-500/50 shadow-lg shadow-red-500/20' 
-                          : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-red-500/30'
-                        }
-                      `}
+                      className={`cursor-pointer min-h-[44px] ${
+                        activeTab === value ? 'bg-red-500/20 text-red-400' : 'text-gray-300 hover:bg-white/10'
+                      }`}
                     >
-                      <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-red-400' : 'text-gray-400'}`} />
+                      <Icon className="w-4 h-4 mr-3" />
                       <div>
-                        <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
-                          {label}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                        <div className="font-medium">{label}</div>
+                        <div className="text-xs text-gray-500">{desc}</div>
                       </div>
-                    </button>
+                    </DropdownMenuItem>
                   ))}
-                </div>
-              </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
