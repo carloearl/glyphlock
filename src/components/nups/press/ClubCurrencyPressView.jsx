@@ -12,7 +12,6 @@ import { toast } from "sonner";
 
 import ControlPanel from "@/components/nups/press/ControlPanel";
 import VoucherCanvas from "@/components/nups/press/VoucherCanvas";
-import ContractTerminal from "@/components/nups/press/ContractTerminal";
 import ArchiveSearch from "@/components/nups/press/ArchiveSearch";
 import AIAssistant from "@/components/nups/press/AIAssistant";
 import DreamPalaceContract from "@/components/nups/DreamPalaceContract";
@@ -103,45 +102,55 @@ export default function ClubCurrencyPressView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col no-print">
-        <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-4 gap-1 p-1 w-full max-w-lg">
+        <TabsList className="bg-gray-900/80 border border-gray-800 grid grid-cols-3 gap-1 p-1 w-full max-w-lg">
           <TabsTrigger value="order" className="min-h-[44px] flex items-center gap-1.5">
             <FileText className="w-4 h-4" />
-            <span className="text-xs">Order Form</span>
+            <span className="text-xs">New Sale</span>
           </TabsTrigger>
           <TabsTrigger value="press" className="min-h-[44px] flex items-center gap-1.5">
             <Banknote className="w-4 h-4" />
-            <span className="text-xs">Press</span>
-          </TabsTrigger>
-          <TabsTrigger value="contract" className="min-h-[44px] flex items-center gap-1.5">
-            <FileText className="w-4 h-4" />
-            <span className="text-xs">Legacy</span>
+            <span className="text-xs">Print Bills</span>
           </TabsTrigger>
           <TabsTrigger value="ai" className="min-h-[44px] flex items-center gap-1.5">
             <Sparkles className="w-4 h-4" />
-            <span className="text-xs">AI</span>
+            <span className="text-xs">AI Design</span>
             <Badge className="text-[8px] bg-purple-500/30 text-purple-300 ml-1">LIVE</Badge>
           </TabsTrigger>
         </TabsList>
 
-        {/* ORDER FORM TAB */}
+        {/* NEW SALE TAB */}
         <TabsContent value="order" className="flex-1 mt-4">
-          <div className="max-w-3xl mx-auto">
+          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-white mb-1">New Dream Dollar Sale</h3>
+              <p className="text-xs text-gray-400">Complete customer contract and issue Dream Dollar bills</p>
+            </div>
             <DreamPalaceContract
-              onComplete={() => toast.success("Contract archived")}
-              onPrintCurrency={(amount, orderNum) => {
+              onComplete={() => toast.success("Contract archived and ready for printing")}
+              onCurrencyPrint={(amount, orderNum) => {
                 setCurrencyAmount(amount);
                 setCurrencyOrderNumber(orderNum);
-                // Auto-set denomination to match Dream Dollar amount ordered
                 setConfig(prev => ({ ...prev, denomination: String(amount) }));
                 setActiveTab("press");
-                toast.success(`Club Currency $${amount} queued — denomination auto-set`);
+                toast.success(`$${amount} Dream Dollars queued → Switch to Print Bills tab`);
               }}
             />
           </div>
         </TabsContent>
 
-        {/* PRESS TAB */}
+        {/* PRINT BILLS TAB */}
         <TabsContent value="press" className="flex-1 mt-4">
+          {currencyAmount > 0 && (
+            <div className="mb-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Banknote className="w-5 h-5 text-green-400" />
+                <div>
+                  <div className="text-sm font-bold text-green-400">Active Order: ${currencyAmount}</div>
+                  <div className="text-xs text-gray-400">Order #{currencyOrderNumber} ready for printing</div>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="w-full lg:w-[320px] flex-shrink-0">
               <ControlPanel
@@ -171,7 +180,10 @@ export default function ClubCurrencyPressView() {
                 <div className="flex items-center justify-center h-full text-gray-500 text-sm">
                   <div className="text-center space-y-2">
                     <Banknote className="w-10 h-10 mx-auto text-gray-600" />
-                    <p>Click "Preview" to render voucher sheets</p>
+                    <p>Configure bill design and click "Preview" to render sheets</p>
+                    {currencyAmount === 0 && (
+                      <p className="text-xs text-gray-600 mt-2">💡 Complete a sale in "New Sale" tab first</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -179,16 +191,16 @@ export default function ClubCurrencyPressView() {
           </div>
         </TabsContent>
 
-        {/* CONTRACT TAB */}
-        <TabsContent value="contract" className="flex-1 mt-4">
-          <div className="max-w-xl mx-auto">
-            <ContractTerminal onArchive={() => {}} />
-          </div>
-        </TabsContent>
-
-        {/* AI TAB */}
+        {/* AI DESIGN TAB */}
         <TabsContent value="ai" className="flex-1 mt-4">
-          <div className="max-w-2xl mx-auto">
+          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+                AI Design Assistant
+              </h3>
+              <p className="text-xs text-gray-400">Generate bill designs and optimize print layouts</p>
+            </div>
             <AIAssistant
               config={config}
               onConfigSuggestion={(suggestions) => {
@@ -197,6 +209,7 @@ export default function ClubCurrencyPressView() {
                 if (suggestions.billWidthInches) updated.billWidthInches = suggestions.billWidthInches;
                 if (suggestions.billHeightInches) updated.billHeightInches = suggestions.billHeightInches;
                 setConfig(updated);
+                toast.success("AI suggestions applied to bill configuration");
               }}
             />
           </div>

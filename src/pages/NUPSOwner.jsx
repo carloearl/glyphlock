@@ -461,8 +461,7 @@ export default function NUPSOwner() {
                 <DropdownMenuSeparator className="bg-yellow-500/20" />
                 {[
                   { value: 'dd-hub', icon: Coins, label: 'Hub', desc: 'Central operations' },
-                  { value: 'contract', icon: ScrollText, label: 'New Contract', desc: 'Create order' },
-                  { value: 'press', icon: Banknote, label: 'Currency Press', desc: 'Print currency' },
+                  { value: 'press', icon: Banknote, label: 'Currency Press', desc: 'Sales & printing' },
                   { value: 'glyphbucks', icon: Banknote, label: 'Gift Cards', desc: 'Glyph Bucks' },
                   { value: 'contracts', icon: ScrollText, label: 'All Orders', desc: 'View contracts' },
                 ].map(({ value, icon: Icon, label, desc }) => (
@@ -568,14 +567,7 @@ export default function NUPSOwner() {
           <TabsContent value="inventory">
             <InventoryManagement products={products} />
           </TabsContent>
-          <TabsContent value="contract">
-            <DreamPalaceContract
-              onCurrencyPrint={(amount, orderNum) => {
-                setActiveTab("press");
-              }}
-              onComplete={() => queryClient.invalidateQueries({ queryKey: ['dream-palace-orders'] })}
-            />
-          </TabsContent>
+
           <TabsContent value="press">
             <ClubCurrencyPressView />
           </TabsContent>
