@@ -242,75 +242,246 @@ export default function NUPSOwner() {
           </Card>
         </div>
 
-        {/* Dashboard Module Cards */}
+        {/* Dashboard Sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-            {[
-              { value: 'analytics', icon: BarChart3, label: 'Analytics', color: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-500/40', glow: 'shadow-cyan-500/20' },
-              { value: 'live', icon: Eye, label: 'Live Floor', color: 'from-green-500/20 to-emerald-500/20', border: 'border-green-500/40', glow: 'shadow-green-500/20' },
-              { value: 'pos', icon: CreditCard, label: 'POS', color: 'from-purple-500/20 to-violet-500/20', border: 'border-purple-500/40', glow: 'shadow-purple-500/20' },
-              { value: 'floor', icon: UserCheck, label: 'Floor Staff', color: 'from-pink-500/20 to-rose-500/20', border: 'border-pink-500/40', glow: 'shadow-pink-500/20' },
-              { value: 'vip', icon: DoorOpen, label: 'VIP Rooms', color: 'from-amber-500/20 to-orange-500/20', border: 'border-amber-500/40', glow: 'shadow-amber-500/20' },
-              { value: 'guests', icon: Users, label: 'Guests', color: 'from-indigo-500/20 to-blue-500/20', border: 'border-indigo-500/40', glow: 'shadow-indigo-500/20' },
-              { value: 'timeclock', icon: Clock, label: 'Time Clock', color: 'from-teal-500/20 to-cyan-500/20', border: 'border-teal-500/40', glow: 'shadow-teal-500/20' },
-              { value: 'history', icon: Receipt, label: 'Transaction History', color: 'from-slate-500/20 to-gray-500/20', border: 'border-slate-500/40', glow: 'shadow-slate-500/20' },
-              { value: 'zreport', icon: FileText, label: 'Z-Report', color: 'from-blue-500/20 to-indigo-500/20', border: 'border-blue-500/40', glow: 'shadow-blue-500/20' },
-              { value: 'glyphbucks', icon: Banknote, label: 'Glyph Bucks', color: 'from-yellow-500/20 to-amber-500/20', border: 'border-yellow-500/40', glow: 'shadow-yellow-500/20' },
-              { value: 'entertainer', icon: Star, label: 'My Stats', color: 'from-fuchsia-500/20 to-pink-500/20', border: 'border-fuchsia-500/40', glow: 'shadow-fuchsia-500/20' },
-              { value: 'payroll-engine', icon: DollarSign, label: 'Payroll Engine', color: 'from-green-500/20 to-teal-500/20', border: 'border-green-500/40', glow: 'shadow-green-500/20' },
-              { value: 'audit-log', icon: Shield, label: 'Audit Log', color: 'from-red-500/20 to-orange-500/20', border: 'border-red-500/40', glow: 'shadow-red-500/20' },
-              { value: 'products', icon: Tag, label: 'Products', color: 'from-lime-500/20 to-green-500/20', border: 'border-lime-500/40', glow: 'shadow-lime-500/20' },
-              { value: 'inventory', icon: Package, label: 'Inventory', color: 'from-orange-500/20 to-red-500/20', border: 'border-orange-500/40', glow: 'shadow-orange-500/20' },
-              { value: 'contract', icon: ScrollText, label: 'Contract', color: 'from-violet-500/20 to-purple-500/20', border: 'border-violet-500/40', glow: 'shadow-violet-500/20' },
-              { value: 'press', icon: Banknote, label: 'Currency Press', color: 'from-emerald-500/20 to-green-500/20', border: 'border-emerald-500/40', glow: 'shadow-emerald-500/20' },
-              { value: 'tips', icon: HandCoins, label: 'Tips', color: 'from-amber-500/20 to-yellow-500/20', border: 'border-amber-500/40', glow: 'shadow-amber-500/20' },
-              { value: 'daily', icon: PieChart, label: 'Daily Summary', color: 'from-cyan-500/20 to-teal-500/20', border: 'border-cyan-500/40', glow: 'shadow-cyan-500/20' },
-              { value: 'drawer', icon: Wallet, label: 'Cash Drawer', color: 'from-pink-500/20 to-fuchsia-500/20', border: 'border-pink-500/40', glow: 'shadow-pink-500/20' },
-              { value: 'refunds', icon: RotateCcw, label: 'Refunds', color: 'from-red-500/20 to-pink-500/20', border: 'border-red-500/40', glow: 'shadow-red-500/20' },
-              { value: 'customers', icon: Heart, label: 'CRM', color: 'from-rose-500/20 to-pink-500/20', border: 'border-rose-500/40', glow: 'shadow-rose-500/20' },
-              { value: 'loyalty', icon: Heart, label: 'Loyalty', color: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-500/40', glow: 'shadow-purple-500/20' },
-              { value: 'marketing', icon: Megaphone, label: 'Marketing', color: 'from-orange-500/20 to-amber-500/20', border: 'border-orange-500/40', glow: 'shadow-orange-500/20' },
-              { value: 'staff', icon: UserCog, label: 'Staff Mgmt', color: 'from-blue-500/20 to-cyan-500/20', border: 'border-blue-500/40', glow: 'shadow-blue-500/20' },
-              { value: 'employees', icon: Users, label: 'Employees', color: 'from-indigo-500/20 to-violet-500/20', border: 'border-indigo-500/40', glow: 'shadow-indigo-500/20' },
-              { value: 'payroll', icon: Receipt, label: 'Payroll', color: 'from-teal-500/20 to-green-500/20', border: 'border-teal-500/40', glow: 'shadow-teal-500/20' },
-              { value: 'sales', icon: BarChart3, label: 'Sales Report', color: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-500/40', glow: 'shadow-cyan-500/20' },
-              { value: 'ai', icon: Brain, label: 'AI Insights', color: 'from-violet-500/20 to-fuchsia-500/20', border: 'border-violet-500/40', glow: 'shadow-violet-500/20' },
-              { value: 'contracts', icon: ScrollText, label: 'All Contracts', color: 'from-slate-500/20 to-zinc-500/20', border: 'border-slate-500/40', glow: 'shadow-slate-500/20' },
-              ...((user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') ? [
-                { value: 'rbac', icon: KeyRound, label: 'Access Control', color: 'from-red-500/20 to-rose-500/20', border: 'border-red-500/40', glow: 'shadow-red-500/20' }
-              ] : []),
-            ].map(({ value, icon: Icon, label, color, border, glow }) => (
-              <button
-                key={value}
-                onClick={() => setActiveTab(value)}
-                className={`
-                  relative group p-5 rounded-2xl transition-all duration-300 min-h-[140px]
-                  flex flex-col items-center justify-center gap-3 text-center
-                  border-2 backdrop-blur-xl
-                  ${activeTab === value 
-                    ? `bg-gradient-to-br ${color} ${border} shadow-lg ${glow}` 
-                    : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
-                  }
-                `}
-                style={{
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                }}
-              >
-                <div className={`
-                  w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300
-                  ${activeTab === value ? 'bg-white/20 shadow-lg' : 'bg-white/5'}
-                `}>
-                  <Icon className={`w-7 h-7 ${activeTab === value ? 'text-white' : 'text-gray-400'}`} />
+          {/* Section Headers */}
+          <div className="space-y-8">
+            {/* Operations */}
+            <div>
+              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-cyan-400" />
+                Operations
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                {[
+                  { value: 'analytics', icon: BarChart3, label: 'Dashboard', desc: 'Revenue & metrics' },
+                  { value: 'live', icon: Eye, label: 'Live View', desc: 'Real-time floor' },
+                  { value: 'pos', icon: CreditCard, label: 'Register', desc: 'Process sales' },
+                  { value: 'history', icon: Receipt, label: 'Transactions', desc: 'Sales history' },
+                  { value: 'zreport', icon: FileText, label: 'Daily Close', desc: 'End-of-day report' },
+                  { value: 'drawer', icon: Wallet, label: 'Cash Log', desc: 'Drawer activity' },
+                ].map(({ value, icon: Icon, label, desc }) => (
+                  <button
+                    key={value}
+                    onClick={() => setActiveTab(value)}
+                    className={`
+                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
+                      flex flex-col items-start justify-between text-left
+                      border backdrop-blur-xl
+                      ${activeTab === value 
+                        ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-cyan-500/50 shadow-lg shadow-cyan-500/20' 
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-cyan-500/30'
+                      }
+                    `}
+                  >
+                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-cyan-400' : 'text-gray-400'}`} />
+                    <div>
+                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
+                        {label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Staff & Floor */}
+            <div>
+              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Users className="w-5 h-5 text-pink-400" />
+                Staff & Floor
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                {[
+                  { value: 'floor', icon: UserCheck, label: 'Check-In', desc: 'Staff attendance' },
+                  { value: 'timeclock', icon: Clock, label: 'Time Clock', desc: 'Hours tracking' },
+                  { value: 'vip', icon: DoorOpen, label: 'VIP Rooms', desc: 'Room status' },
+                  { value: 'guests', icon: Users, label: 'Guest List', desc: 'Visitor tracking' },
+                  { value: 'entertainer', icon: Star, label: 'Performer Stats', desc: 'My earnings' },
+                  { value: 'staff', icon: UserCog, label: 'Manage Staff', desc: 'User accounts' },
+                ].map(({ value, icon: Icon, label, desc }) => (
+                  <button
+                    key={value}
+                    onClick={() => setActiveTab(value)}
+                    className={`
+                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
+                      flex flex-col items-start justify-between text-left
+                      border backdrop-blur-xl
+                      ${activeTab === value 
+                        ? 'bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-pink-500/50 shadow-lg shadow-pink-500/20' 
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-pink-500/30'
+                      }
+                    `}
+                  >
+                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-pink-400' : 'text-gray-400'}`} />
+                    <div>
+                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
+                        {label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Finance & Payroll */}
+            <div>
+              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-400" />
+                Finance & Payroll
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                {[
+                  { value: 'tips', icon: HandCoins, label: 'Tip Pool', desc: 'Distribute tips' },
+                  { value: 'payroll-engine', icon: DollarSign, label: 'Payroll', desc: 'Calculate pay' },
+                  { value: 'payroll', icon: Receipt, label: 'Pay Records', desc: 'Payment history' },
+                  { value: 'employees', icon: Users, label: 'Employees', desc: 'Staff records' },
+                  { value: 'daily', icon: PieChart, label: 'Daily Report', desc: 'Day summary' },
+                  { value: 'refunds', icon: RotateCcw, label: 'Refunds', desc: 'Process returns' },
+                ].map(({ value, icon: Icon, label, desc }) => (
+                  <button
+                    key={value}
+                    onClick={() => setActiveTab(value)}
+                    className={`
+                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
+                      flex flex-col items-start justify-between text-left
+                      border backdrop-blur-xl
+                      ${activeTab === value 
+                        ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/50 shadow-lg shadow-green-500/20' 
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-green-500/30'
+                      }
+                    `}
+                  >
+                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-green-400' : 'text-gray-400'}`} />
+                    <div>
+                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
+                        {label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Inventory & Products */}
+            <div>
+              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Package className="w-5 h-5 text-amber-400" />
+                Inventory & Products
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                {[
+                  { value: 'products', icon: Tag, label: 'Products', desc: 'Menu items' },
+                  { value: 'inventory', icon: Package, label: 'Stock', desc: 'Inventory levels' },
+                  { value: 'glyphbucks', icon: Banknote, label: 'Gift Cards', desc: 'Glyph Bucks' },
+                  { value: 'press', icon: Banknote, label: 'Currency', desc: 'Print currency' },
+                  { value: 'contract', icon: ScrollText, label: 'New Contract', desc: 'Create order' },
+                  { value: 'contracts', icon: ScrollText, label: 'All Orders', desc: 'View contracts' },
+                ].map(({ value, icon: Icon, label, desc }) => (
+                  <button
+                    key={value}
+                    onClick={() => setActiveTab(value)}
+                    className={`
+                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
+                      flex flex-col items-start justify-between text-left
+                      border backdrop-blur-xl
+                      ${activeTab === value 
+                        ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/50 shadow-lg shadow-amber-500/20' 
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-amber-500/30'
+                      }
+                    `}
+                  >
+                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-amber-400' : 'text-gray-400'}`} />
+                    <div>
+                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
+                        {label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Marketing & Analytics */}
+            <div>
+              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Megaphone className="w-5 h-5 text-purple-400" />
+                Marketing & Insights
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                {[
+                  { value: 'customers', icon: Heart, label: 'Customers', desc: 'CRM database' },
+                  { value: 'loyalty', icon: Heart, label: 'Loyalty', desc: 'Rewards program' },
+                  { value: 'marketing', icon: Megaphone, label: 'Campaigns', desc: 'Promotions' },
+                  { value: 'sales', icon: BarChart3, label: 'Sales Report', desc: 'Performance' },
+                  { value: 'ai', icon: Brain, label: 'AI Insights', desc: 'Predictions' },
+                  { value: 'audit-log', icon: Shield, label: 'Audit Trail', desc: 'Security log' },
+                ].map(({ value, icon: Icon, label, desc }) => (
+                  <button
+                    key={value}
+                    onClick={() => setActiveTab(value)}
+                    className={`
+                      relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
+                      flex flex-col items-start justify-between text-left
+                      border backdrop-blur-xl
+                      ${activeTab === value 
+                        ? 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-500/50 shadow-lg shadow-purple-500/20' 
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-purple-500/30'
+                      }
+                    `}
+                  >
+                    <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-purple-400' : 'text-gray-400'}`} />
+                    <div>
+                      <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
+                        {label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Admin Tools */}
+            {(user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') && (
+              <div>
+                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <KeyRound className="w-5 h-5 text-red-400" />
+                  Admin Tools
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                  {[
+                    { value: 'rbac', icon: KeyRound, label: 'Access Control', desc: 'Manage permissions' },
+                  ].map(({ value, icon: Icon, label, desc }) => (
+                    <button
+                      key={value}
+                      onClick={() => setActiveTab(value)}
+                      className={`
+                        relative group p-4 rounded-xl transition-all duration-200 min-h-[110px]
+                        flex flex-col items-start justify-between text-left
+                        border backdrop-blur-xl
+                        ${activeTab === value 
+                          ? 'bg-gradient-to-br from-red-500/20 to-rose-500/20 border-red-500/50 shadow-lg shadow-red-500/20' 
+                          : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-red-500/30'
+                        }
+                      `}
+                    >
+                      <Icon className={`w-6 h-6 mb-2 ${activeTab === value ? 'text-red-400' : 'text-gray-400'}`} />
+                      <div>
+                        <div className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-300'}`}>
+                          {label}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <span className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-400'}`}>
-                  {label}
-                </span>
-                {activeTab === value && (
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-                )}
-              </button>
-            ))}
+              </div>
+            )}
           </div>
 
           <TabsContent value="analytics">
