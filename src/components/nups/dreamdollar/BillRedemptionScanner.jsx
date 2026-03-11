@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Scan, Trash2, CheckCircle, AlertCircle, DollarSign } from 'lucide-react';
+import { Scan, Trash2, CheckCircle, AlertCircle, DollarSign, Zap } from 'lucide-react';
 
 export default function BillRedemptionScanner({ venue_id, contractor }) {
   const [scannedBills, setScannedBills] = useState([]);
@@ -11,6 +11,8 @@ export default function BillRedemptionScanner({ venue_id, contractor }) {
   const [scanning, setScanning] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
   const [redemptionRate] = useState(0.85);
+  const [scanBuffer, setScanBuffer] = useState('');
+  const scanTimeoutRef = React.useRef(null);
 
   const handleScanSerial = () => {
     const serial = serialInput.trim().toUpperCase();
@@ -36,6 +38,80 @@ export default function BillRedemptionScanner({ venue_id, contractor }) {
   const removeBill = (serial) => {
     setScannedBills(prev => prev.filter(b => b.serial_number !== serial));
   };
+
+  // Hardware barcode scanner support (HID keyboard emulation)
+  useEffect(() => {
+    let buffer = '';
+    let timeout = null;
+
+    const handleKeyPress = async (e) => {
+      // Ignore if user is typing in input fields
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      // Clear timeout on each keystroke
+      clearTimeout(timeout);
+
+      // Barcode scanners type fast (<100ms between chars) and end with Enter
+      if (e.key === 'Enter') {
+        const scannedCode = buffer.trim().toUpperCase();
+        
+        if (scannedCode.length >= 8) {
+          // Validate against BarcodeRegistry
+          try {
+            const barcode = await base44.entities.BarcodeRegistry.filter({
+              barcode_id: scannedCode,
+              record_type: 'bill',
+              status: 'active'
+            });
+
+            if (barcode.length > 0) {
+              const serial = barcode[0].linked_record_id;
+              
+              // Check if already scanned
+              if (scannedBills.some(b => b.serial_number === serial)) {
+                console.warn('Duplicate scan detected:', serial);
+                buffer = '';
+                return;
+              }
+
+              // Add to scanned bills
+              setScannedBills(prev => [...prev, {
+                serial_number: serial,
+                status: 'validated',
+                denomination: null // Will be populated from DB
+              }]);
+
+              // Visual feedback
+              console.log('✅ Hardware scan captured:', serial);
+            } else {
+              console.warn('⚠️ Invalid barcode scanned:', scannedCode);
+            }
+          } catch (err) {
+            console.error('Barcode validation error:', err);
+          }
+        }
+
+        buffer = '';
+      } else if (e.key.length === 1) {
+        // Accumulate characters
+        buffer += e.key;
+
+        // Reset buffer after 200ms of inactivity (human typing speed)
+        timeout = setTimeout(() => {
+          buffer = '';
+        }, 200);
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keypress', handleKeyPress);
+      clearTimeout(timeout);
+    };
+  }, [scannedBills]);
 
   const handleRedeemBills = async () => {
     if (scannedBills.length === 0) {
@@ -107,6 +183,10 @@ export default function BillRedemptionScanner({ venue_id, contractor }) {
               <div className="text-sm text-gray-300">Redeeming for:</div>
               <div className="font-semibold text-cyan-400">
                 {contractor.stage_name || contractor.legal_name}
+              </div>
+              <div className="flex items-center gap-2 mt-2 text-xs text-green-400">
+                <Zap className="w-3 h-3" />
+                Hardware scanner enabled
               </div>
             </div>
           )}
