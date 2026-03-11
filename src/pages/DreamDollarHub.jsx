@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DollarSign, Scan, Search, Shield, FileText, Settings } from 'lucide-react';
+import { DollarSign, Scan, Search, Shield, FileText, Settings, Camera } from 'lucide-react';
 
 import DreamDollarPOS from '@/components/nups/dreamdollar/DreamDollarPOS';
 import BillRedemptionScanner from '@/components/nups/dreamdollar/BillRedemptionScanner';
