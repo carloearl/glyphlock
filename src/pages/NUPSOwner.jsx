@@ -242,79 +242,76 @@ export default function NUPSOwner() {
           </Card>
         </div>
 
-        {/* Tabs */}
+        {/* Dashboard Module Cards */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList
-            className="h-auto flex flex-wrap gap-1.5 p-2 w-full"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(168,85,247,0.2)',
-              borderRadius: '16px',
-              boxShadow: '0 0 30px rgba(168,85,247,0.12), inset 0 1px 0 rgba(255,255,255,0.06)',
-            }}
-          >
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
             {[
-              { value: 'analytics', icon: BarChart3, label: 'Analytics' },
-              { value: 'live', icon: Eye, label: 'Live' },
-              { value: 'pos', icon: CreditCard, label: 'POS' },
-              { value: 'floor', icon: UserCheck, label: 'Floor' },
-              { value: 'vip', icon: DoorOpen, label: 'VIP' },
-              { value: 'guests', icon: Users, label: 'Guests' },
-              { value: 'timeclock', icon: Clock, label: 'Time Clock' },
-              { value: 'history', icon: Receipt, label: 'History' },
-              { value: 'zreport', icon: FileText, label: 'Z-Report' },
-              { value: 'glyphbucks', icon: Banknote, label: 'Glyph Bucks' },
-              { value: 'entertainer', icon: Users, label: 'My Stats' },
-              { value: 'payroll-engine', icon: DollarSign, label: 'Payroll Engine' },
-              { value: 'audit-log', icon: Shield, label: 'Audit Log' },
-              { value: 'products', icon: Tag, label: 'Products' },
-              { value: 'inventory', icon: Package, label: 'Inventory' },
-              { value: 'contract', icon: ScrollText, label: 'Contract' },
-              { value: 'press', icon: Banknote, label: 'Press' },
-              { value: 'tips', icon: HandCoins, label: 'Tips' },
-              { value: 'daily', icon: PieChart, label: 'Daily' },
-              { value: 'drawer', icon: Wallet, label: 'Drawer' },
-              { value: 'refunds', icon: RotateCcw, label: 'Refunds' },
-              { value: 'customers', icon: Heart, label: 'CRM' },
-              { value: 'loyalty', icon: Heart, label: 'Loyalty' },
-              { value: 'marketing', icon: Megaphone, label: 'Marketing' },
-              { value: 'staff', icon: UserCog, label: 'Staff' },
-              { value: 'employees', icon: Users, label: 'Employees' },
-              { value: 'payroll', icon: Receipt, label: 'Payroll' },
-              { value: 'sales', icon: BarChart3, label: 'Sales' },
-              { value: 'ai', icon: Brain, label: 'AI' },
-              { value: 'contracts', icon: ScrollText, label: 'Contracts' },
-              ...((user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') ? [{ value: 'rbac', icon: KeyRound, label: 'Access' }] : []),
-            ].map(({ value, icon: Icon, label }) => (
-              <TabsTrigger
+              { value: 'analytics', icon: BarChart3, label: 'Analytics', color: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-500/40', glow: 'shadow-cyan-500/20' },
+              { value: 'live', icon: Eye, label: 'Live Floor', color: 'from-green-500/20 to-emerald-500/20', border: 'border-green-500/40', glow: 'shadow-green-500/20' },
+              { value: 'pos', icon: CreditCard, label: 'POS', color: 'from-purple-500/20 to-violet-500/20', border: 'border-purple-500/40', glow: 'shadow-purple-500/20' },
+              { value: 'floor', icon: UserCheck, label: 'Floor Staff', color: 'from-pink-500/20 to-rose-500/20', border: 'border-pink-500/40', glow: 'shadow-pink-500/20' },
+              { value: 'vip', icon: DoorOpen, label: 'VIP Rooms', color: 'from-amber-500/20 to-orange-500/20', border: 'border-amber-500/40', glow: 'shadow-amber-500/20' },
+              { value: 'guests', icon: Users, label: 'Guests', color: 'from-indigo-500/20 to-blue-500/20', border: 'border-indigo-500/40', glow: 'shadow-indigo-500/20' },
+              { value: 'timeclock', icon: Clock, label: 'Time Clock', color: 'from-teal-500/20 to-cyan-500/20', border: 'border-teal-500/40', glow: 'shadow-teal-500/20' },
+              { value: 'history', icon: Receipt, label: 'Transaction History', color: 'from-slate-500/20 to-gray-500/20', border: 'border-slate-500/40', glow: 'shadow-slate-500/20' },
+              { value: 'zreport', icon: FileText, label: 'Z-Report', color: 'from-blue-500/20 to-indigo-500/20', border: 'border-blue-500/40', glow: 'shadow-blue-500/20' },
+              { value: 'glyphbucks', icon: Banknote, label: 'Glyph Bucks', color: 'from-yellow-500/20 to-amber-500/20', border: 'border-yellow-500/40', glow: 'shadow-yellow-500/20' },
+              { value: 'entertainer', icon: Star, label: 'My Stats', color: 'from-fuchsia-500/20 to-pink-500/20', border: 'border-fuchsia-500/40', glow: 'shadow-fuchsia-500/20' },
+              { value: 'payroll-engine', icon: DollarSign, label: 'Payroll Engine', color: 'from-green-500/20 to-teal-500/20', border: 'border-green-500/40', glow: 'shadow-green-500/20' },
+              { value: 'audit-log', icon: Shield, label: 'Audit Log', color: 'from-red-500/20 to-orange-500/20', border: 'border-red-500/40', glow: 'shadow-red-500/20' },
+              { value: 'products', icon: Tag, label: 'Products', color: 'from-lime-500/20 to-green-500/20', border: 'border-lime-500/40', glow: 'shadow-lime-500/20' },
+              { value: 'inventory', icon: Package, label: 'Inventory', color: 'from-orange-500/20 to-red-500/20', border: 'border-orange-500/40', glow: 'shadow-orange-500/20' },
+              { value: 'contract', icon: ScrollText, label: 'Contract', color: 'from-violet-500/20 to-purple-500/20', border: 'border-violet-500/40', glow: 'shadow-violet-500/20' },
+              { value: 'press', icon: Banknote, label: 'Currency Press', color: 'from-emerald-500/20 to-green-500/20', border: 'border-emerald-500/40', glow: 'shadow-emerald-500/20' },
+              { value: 'tips', icon: HandCoins, label: 'Tips', color: 'from-amber-500/20 to-yellow-500/20', border: 'border-amber-500/40', glow: 'shadow-amber-500/20' },
+              { value: 'daily', icon: PieChart, label: 'Daily Summary', color: 'from-cyan-500/20 to-teal-500/20', border: 'border-cyan-500/40', glow: 'shadow-cyan-500/20' },
+              { value: 'drawer', icon: Wallet, label: 'Cash Drawer', color: 'from-pink-500/20 to-fuchsia-500/20', border: 'border-pink-500/40', glow: 'shadow-pink-500/20' },
+              { value: 'refunds', icon: RotateCcw, label: 'Refunds', color: 'from-red-500/20 to-pink-500/20', border: 'border-red-500/40', glow: 'shadow-red-500/20' },
+              { value: 'customers', icon: Heart, label: 'CRM', color: 'from-rose-500/20 to-pink-500/20', border: 'border-rose-500/40', glow: 'shadow-rose-500/20' },
+              { value: 'loyalty', icon: Heart, label: 'Loyalty', color: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-500/40', glow: 'shadow-purple-500/20' },
+              { value: 'marketing', icon: Megaphone, label: 'Marketing', color: 'from-orange-500/20 to-amber-500/20', border: 'border-orange-500/40', glow: 'shadow-orange-500/20' },
+              { value: 'staff', icon: UserCog, label: 'Staff Mgmt', color: 'from-blue-500/20 to-cyan-500/20', border: 'border-blue-500/40', glow: 'shadow-blue-500/20' },
+              { value: 'employees', icon: Users, label: 'Employees', color: 'from-indigo-500/20 to-violet-500/20', border: 'border-indigo-500/40', glow: 'shadow-indigo-500/20' },
+              { value: 'payroll', icon: Receipt, label: 'Payroll', color: 'from-teal-500/20 to-green-500/20', border: 'border-teal-500/40', glow: 'shadow-teal-500/20' },
+              { value: 'sales', icon: BarChart3, label: 'Sales Report', color: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-500/40', glow: 'shadow-cyan-500/20' },
+              { value: 'ai', icon: Brain, label: 'AI Insights', color: 'from-violet-500/20 to-fuchsia-500/20', border: 'border-violet-500/40', glow: 'shadow-violet-500/20' },
+              { value: 'contracts', icon: ScrollText, label: 'All Contracts', color: 'from-slate-500/20 to-zinc-500/20', border: 'border-slate-500/40', glow: 'shadow-slate-500/20' },
+              ...((user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') ? [
+                { value: 'rbac', icon: KeyRound, label: 'Access Control', color: 'from-red-500/20 to-rose-500/20', border: 'border-red-500/40', glow: 'shadow-red-500/20' }
+              ] : []),
+            ].map(({ value, icon: Icon, label, color, border, glow }) => (
+              <button
                 key={value}
-                value={value}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-400 transition-all duration-200 border border-transparent"
+                onClick={() => setActiveTab(value)}
+                className={`
+                  relative group p-5 rounded-2xl transition-all duration-300 min-h-[140px]
+                  flex flex-col items-center justify-center gap-3 text-center
+                  border-2 backdrop-blur-xl
+                  ${activeTab === value 
+                    ? `bg-gradient-to-br ${color} ${border} shadow-lg ${glow}` 
+                    : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                  }
+                `}
                 style={{
-                  background: 'transparent',
-                  minHeight: '36px',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
                 }}
-                data-glass-tab
               >
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span>{label}</span>
-              </TabsTrigger>
+                <div className={`
+                  w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300
+                  ${activeTab === value ? 'bg-white/20 shadow-lg' : 'bg-white/5'}
+                `}>
+                  <Icon className={`w-7 h-7 ${activeTab === value ? 'text-white' : 'text-gray-400'}`} />
+                </div>
+                <span className={`text-sm font-semibold ${activeTab === value ? 'text-white' : 'text-gray-400'}`}>
+                  {label}
+                </span>
+                {activeTab === value && (
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                )}
+              </button>
             ))}
-            <style>{`
-              [data-glass-tab][data-state="active"] {
-                background: rgba(168,85,247,0.18) !important;
-                border-color: rgba(168,85,247,0.45) !important;
-                color: #e9d5ff !important;
-                box-shadow: 0 0 14px rgba(168,85,247,0.35), inset 0 1px 0 rgba(255,255,255,0.1) !important;
-              }
-              [data-glass-tab]:hover:not([data-state="active"]) {
-                background: rgba(255,255,255,0.06) !important;
-                color: #d1d5db !important;
-              }
-            `}</style>
-          </TabsList>
+          </div>
 
           <TabsContent value="analytics">
             <OwnerAnalytics transactions={transactions} />
