@@ -267,7 +267,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       // STEP 4: Call backend to create Dream Dollar batch + bills
       if (dreamDollarValue > 0) {
         const saleResponse = await base44.functions.invoke('createDreamDollarSale', {
-          venue_id: "dream-palace-tempe",
           customer_name: customerName,
           customer_identity_id: customerId || null,
           denominations: buildDenominationsArray(dreamDollarValue),
@@ -293,11 +292,29 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       setLoading(false);
       setStep(4);
     } catch (error) {
-      setBackendError(error.message || "Failed to process sale. Please contact support.");
+      const errorMsg = error.message || "Failed to process sale. Please contact support.";
+      setBackendError(errorMsg);
       setLoading(false);
       setPaymentProcessing(false);
       setPaymentConfirmed(false);
-      toast.error("Transaction failed: " + error.message);
+      
+      // CRITICAL: Log transaction failure for reconciliation
+      try {
+        await base44.entities.AuditEvent.create({
+          event_id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          actor_id: user.email,
+          actor_role: user.role,
+          venue_id: null,
+          entity_type: 'DreamPalaceOrder',
+          entity_id: orderNumber,
+          action: 'CREATE',
+          severity: 'CRITICAL',
+          description: `TRANSACTION FAILED: Order ${orderNumber}, error: ${errorMsg}`
+        });
+      } catch {}
+      
+      toast.error("Transaction failed: " + errorMsg);
     }
   };
 

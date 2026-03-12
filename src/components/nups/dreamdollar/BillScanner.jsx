@@ -58,7 +58,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
     try {
       // Validate bill via backend (single-bill validation)
       const response = await base44.functions.invoke('redeemDreamDollarBills', {
-        venue_id: "dream-palace-tempe",
         contractor_id: contractorId,
         contractor_name: contractorName,
         serial_numbers: [serialNumber],
