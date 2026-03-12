@@ -1,108 +1,105 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+
+/**
+ * SECURE SINGLE-USE QR CODE GENERATOR
+ * 
+ * Generates tamper-proof QR codes for customer orders
+ * Expires after 24 hours or first scan
+ */
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
+    const venue_id = sessionVenue.data?.venue_id;
+
+    const { order_id } = await req.json();
+
+    if (!order_id) {
+      return Response.json({ error: 'order_id required' }, { status: 400 });
+    }
+
+    // Generate cryptographically secure QR data
+    const qr_id = crypto.randomUUID();
+    const timestamp = Date.now();
+    const secret_key = Deno.env.get('MFA_SECRET_KEY'); // Reuse existing secret for signing
     
-    // Auth is optional - allow anonymous QR generation
-    const isAuth = await base44.auth.isAuthenticated();
-    const user = isAuth ? await base44.auth.me() : null;
+    const payload = JSON.stringify({
+      qr_id,
+      order_id,
+      venue_id,
+      timestamp,
+      nonce: crypto.randomUUID()
+    });
 
-    const { payload, stegoMessage, security_level, customization } = await req.json();
+    // Create HMAC signature
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret_key),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+    const signature_hex = Array.from(new Uint8Array(signature))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
 
-    if (!payload) {
-      return Response.json({ error: 'Payload is required' }, { status: 400 });
-    }
+    const signed_payload = `${payload}:${signature_hex}`;
+    const qr_data = btoa(signed_payload); // Base64 encode
 
-    // AI Security Scan if security level requires it
-    let securityResult = null;
-    if (security_level === 'high' || security_level === 'critical') {
-      const scanResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analyze this QR code payload for security threats: "${payload}"
-        
-Perform comprehensive security analysis:
-1. DOMAIN TRUST (0-100): Check reputation, detect typosquatting
-2. NLP PHISHING (0-100): Detect urgency phrases, impersonation
-3. ENTITY LEGITIMACY (0-100): Verify brand identity
-4. URL FEATURES (0-100): Check for javascript:, data URIs, obfuscation
-
-Calculate final_score and determine risk_level.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            final_score: { type: "number" },
-            risk_level: { type: "string" },
-            threat_types: { type: "array", items: { type: "string" } },
-            analysis_details: { type: "string" }
-          }
-        }
-      });
-
-      securityResult = scanResult;
-
-      if (scanResult.final_score < 65) {
-        return Response.json({
-          error: 'Payload blocked by security policy',
-          security_score: scanResult.final_score,
-          risk_level: scanResult.risk_level,
-          details: scanResult.analysis_details
-        }, { status: 403 });
-      }
-    }
-
-    // Generate QR code URL
-    const size = customization?.size || 512;
-    const fgColor = customization?.foreground || '000000';
-    const bgColor = customization?.background || 'FFFFFF';
-    const errorCorrection = customization?.errorCorrection || 'M';
-
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(payload)}&ecc=${errorCorrection}&color=${fgColor}&bgcolor=${bgColor}`;
-
-    // If steganography message provided, encode it
-    let stegoData = null;
-    if (stegoMessage) {
-      stegoData = {
-        message: stegoMessage,
-        encoded: true,
-        method: 'LSB'
-      };
-    }
-
-    // Save to database
-    const codeId = `qr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generate QR code image using AI
+    const qr_prompt = `Generate a QR code image with data: ${qr_data}. High contrast black and white, 512x512px.`;
     
-    await base44.entities.QRGenHistory.create({
-      code_id: codeId,
-      payload: payload,
-      payload_sha256: await generateSHA256(payload),
-      size: size,
-      creator_id: user?.email || 'anonymous',
-      status: securityResult ? (securityResult.final_score >= 80 ? 'safe' : 'suspicious') : 'safe',
-      type: 'url',
-      image_format: 'png',
-      error_correction: errorCorrection,
-      foreground_color: `#${fgColor}`,
-      background_color: `#${bgColor}`,
-      has_logo: !!customization?.logo
+    const qr_image = await base44.asServiceRole.integrations.Core.GenerateImage({
+      prompt: qr_prompt
+    });
+
+    // Store QR record
+    const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+
+    const qr_record = await base44.asServiceRole.entities.SecureQRCode.create({
+      qr_id,
+      order_id,
+      venue_id,
+      qr_data,
+      qr_image_url: qr_image.url,
+      is_single_use: true,
+      is_used: false,
+      expires_at,
+      scan_attempts: 0,
+      status: 'active'
+    });
+
+    // Log creation
+    await base44.asServiceRole.entities.AuditEvent.create({
+      event_id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      actor_id: user.email,
+      actor_role: user.role,
+      venue_id,
+      entity_type: 'SecureQRCode',
+      entity_id: qr_id,
+      action: 'CREATED',
+      severity: 'INFO',
+      description: `Secure QR code generated for order ${order_id}`
     });
 
     return Response.json({
-      success: true,
-      code_id: codeId,
-      qr_url: qrUrl,
-      security_result: securityResult,
-      stego_data: stegoData
+      qr_id,
+      qr_image_url: qr_image.url,
+      qr_data,
+      expires_at
     });
 
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
-
-async function generateSHA256(text) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
