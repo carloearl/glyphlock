@@ -16,9 +16,17 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
+    // SECURITY: Get venue_id from session, not request body
+    const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
+    if (!sessionVenue.data.success) {
+      return Response.json({ 
+        error: sessionVenue.data.error || 'Venue access denied' 
+      }, { status: 403 });
+    }
+    const venue_id = sessionVenue.data.venue_id;
+
     const payload = await req.json();
     const {
-      venue_id,
       customer_name,
       customer_identity_id,
       denominations, // [{ denomination: 20, quantity: 5 }, ...]
@@ -30,7 +38,7 @@ Deno.serve(async (req) => {
     } = payload;
 
     // FRAUD PREVENTION: Validate inputs server-side
-    if (!venue_id || !customer_name || !denominations || !Array.isArray(denominations)) {
+    if (!customer_name || !denominations || !Array.isArray(denominations)) {
       return Response.json({ error: 'Invalid request: missing required fields' }, { status: 400 });
     }
 

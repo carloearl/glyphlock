@@ -21,9 +21,17 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
+    // SECURITY: Get venue_id from session, not request body
+    const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
+    if (!sessionVenue.data.success) {
+      return Response.json({ 
+        error: sessionVenue.data.error || 'Venue access denied' 
+      }, { status: 403 });
+    }
+    const venue_id = sessionVenue.data.venue_id;
+
     const payload = await req.json();
     const {
-      venue_id,
       contractor_id,
       contractor_name,
       serial_numbers, // Array of bill serial numbers to redeem
@@ -32,7 +40,7 @@ Deno.serve(async (req) => {
     } = payload;
 
     // FRAUD PREVENTION: Input validation
-    if (!venue_id || !contractor_id || !serial_numbers || !Array.isArray(serial_numbers)) {
+    if (!contractor_id || !serial_numbers || !Array.isArray(serial_numbers)) {
       return Response.json({ error: 'Invalid request: missing required fields' }, { status: 400 });
     }
 

@@ -48,6 +48,15 @@ Deno.serve(async (req) => {
       paymentAttempts.set(attemptKey, { count: 1, resetAt: now + LOCKOUT_DURATION_MS });
     }
 
+    // SECURITY: Get venue_id from session, not request body
+    const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
+    if (!sessionVenue.data.success) {
+      return Response.json({ 
+        error: sessionVenue.data.error || 'Venue access denied' 
+      }, { status: 403 });
+    }
+    const venue_id = sessionVenue.data.venue_id;
+
     const payload = await req.json();
     const {
       amount,
@@ -92,7 +101,7 @@ Deno.serve(async (req) => {
         order_number,
         customer_name,
         processed_by: user.email,
-        venue_id: 'dream-palace-tempe',
+        venue_id,
         order_type: 'dream_dollar_sale'
       },
       receipt_email: customer_email || user.email,
@@ -107,7 +116,7 @@ Deno.serve(async (req) => {
       timestamp: new Date().toISOString(),
       actor_id: user.email,
       actor_role: user.role,
-      venue_id: 'dream-palace-tempe',
+      venue_id,
       entity_type: 'PaymentIntent',
       entity_id: paymentIntent.id,
       action: 'CREATE',

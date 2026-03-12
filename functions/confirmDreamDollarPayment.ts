@@ -21,6 +21,15 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
+    // SECURITY: Get venue_id from session
+    const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
+    if (!sessionVenue.data.success) {
+      return Response.json({ 
+        error: sessionVenue.data.error || 'Venue access denied' 
+      }, { status: 403 });
+    }
+    const venue_id = sessionVenue.data.venue_id;
+
     const payload = await req.json();
     const { payment_intent_id, order_number } = payload;
 
@@ -68,7 +77,7 @@ Deno.serve(async (req) => {
         timestamp: new Date().toISOString(),
         actor_id: user.email,
         actor_role: user.role,
-        venue_id: 'dream-palace-tempe',
+        venue_id,
         entity_type: 'PaymentIntent',
         entity_id: payment_intent_id,
         action: 'ACCESS',
@@ -100,7 +109,7 @@ Deno.serve(async (req) => {
       timestamp: new Date().toISOString(),
       actor_id: user.email,
       actor_role: user.role,
-      venue_id: 'dream-palace-tempe',
+      venue_id,
       entity_type: 'PaymentIntent',
       entity_id: payment_intent_id,
       action: 'CONFIRM',
