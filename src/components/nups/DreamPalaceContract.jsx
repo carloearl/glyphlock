@@ -8,8 +8,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2, Loader2, Camera, Fingerprint, ScanLine,
-  FileText, Shield, Printer, Archive, Upload, ArrowRight, Music, ChevronDown, ChevronUp
+  FileText, Shield, Printer, Archive, Upload, ArrowRight, Music, 
+  ChevronDown, ChevronUp, CreditCard, AlertCircle
 } from "lucide-react";
+import { toast } from "sonner";
 
 // ─── Contract Terms (exact from physical form) ───
 const FULL_CONTRACT_TEXT = `1. Orders
@@ -64,6 +66,8 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   const [savedOrderId, setSavedOrderId] = useState(null);
   const [batchCreated, setBatchCreated] = useState(null);
   const [backendError, setBackendError] = useState(null);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
   // Customer / Purchaser
   const [customerName, setCustomerName] = useState("");
@@ -157,9 +161,48 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   const handleGuestSign = async () => {
     setLoading(true);
     setBackendError(null);
+    setPaymentProcessing(true);
     
     try {
-      // STEP 1: Create DreamPalaceOrder record
+      // STEP 1: Process Stripe payment
+      const paymentResponse = await base44.functions.invoke('processDreamDollarPayment', {
+        amount: grandTotal,
+        order_number: orderNumber,
+        customer_name: customerName,
+        customer_email: null,
+        description: `Dream Palace Order ${orderNumber} - Dream Dollars $${dreamDollarValue}`
+      });
+
+      if (!paymentResponse.data.success) {
+        throw new Error(paymentResponse.data.error || "Payment processing failed");
+      }
+
+      const { client_secret, payment_intent_id } = paymentResponse.data;
+
+      // STEP 2: Simulate payment confirmation (in production, use Stripe Elements)
+      // For now, auto-confirm the payment intent
+      const confirmResponse = await base44.functions.invoke('confirmDreamDollarPayment', {
+        payment_intent_id,
+        order_number: orderNumber
+      });
+
+      if (!confirmResponse.data.success) {
+        throw new Error(confirmResponse.data.error || "Payment confirmation failed");
+      }
+
+      const { approval_code, processor_reference, card_last_four } = confirmResponse.data;
+      setPaymentConfirmed(true);
+      setPaymentProcessing(false);
+
+      // Update approval code in state
+      setApprovalCode(approval_code);
+      if (card_last_four && !cardLastSix) {
+        setCardLastSix(card_last_four);
+      }
+
+      toast.success(`Payment approved: ${approval_code}`);
+
+      // STEP 3: Create DreamPalaceOrder record
       const order = await base44.entities.DreamPalaceOrder.create({
         order_number: orderNumber,
         status: "signed",
@@ -188,7 +231,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       });
       setSavedOrderId(order.id);
 
-      // STEP 2: Call backend to create Dream Dollar batch + bills
+      // STEP 4: Call backend to create Dream Dollar batch + bills
       if (dreamDollarValue > 0) {
         const saleResponse = await base44.functions.invoke('createDreamDollarSale', {
           venue_id: "dream-palace-tempe",
@@ -196,8 +239,8 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           customer_identity_id: customerId || null,
           denominations: buildDenominationsArray(dreamDollarValue),
           surcharge_rate: 0.30,
-          approval_code: approvalCode,
-          processor_reference: `ORDER-${orderNumber}`,
+          approval_code: approval_code,
+          processor_reference: processor_reference,
           payment_method: "card",
           card_last_four: cardLastSix.slice(-4)
         });
@@ -220,6 +263,9 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       console.error("Guest sign error:", error);
       setBackendError(error.message || "Failed to process sale. Please contact support.");
       setLoading(false);
+      setPaymentProcessing(false);
+      setPaymentConfirmed(false);
+      toast.error("Transaction failed: " + error.message);
     }
   };
 
@@ -700,11 +746,42 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           </CardContent>
         </Card>
 
+        {/* Payment Status */}
+        {paymentProcessing && (
+          <Card className="bg-blue-900/20 border-blue-500/40">
+            <CardContent className="p-4 flex items-center gap-3">
+              <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+              <div>
+                <div className="text-sm font-bold text-blue-400">Processing Payment...</div>
+                <div className="text-xs text-gray-400">Contacting payment processor — do not refresh</div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {paymentConfirmed && (
+          <Card className="bg-green-900/20 border-green-500/40">
+            <CardContent className="p-4 flex items-center gap-3">
+              <CreditCard className="w-5 h-5 text-green-400" />
+              <div>
+                <div className="text-sm font-bold text-green-400">Payment Approved</div>
+                <div className="text-xs text-gray-400">Approval Code: {approvalCode}</div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setStep(2)} className="flex-1 border-gray-700">← Back</Button>
+          <Button variant="outline" onClick={() => setStep(2)} className="flex-1 border-gray-700" disabled={loading}>← Back</Button>
           <Button onClick={handleGuestSign} disabled={!canSign || loading} className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-black font-bold h-12">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-            Guest Signed — Next: Staff
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : paymentConfirmed ? (
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+            ) : (
+              <CreditCard className="w-4 h-4 mr-2" />
+            )}
+            {paymentProcessing ? "Processing..." : paymentConfirmed ? "Complete — Next: Staff" : "Process Payment & Sign"}
           </Button>
         </div>
       </div>
