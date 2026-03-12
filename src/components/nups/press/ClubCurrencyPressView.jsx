@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Banknote, FileText, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { base44 } from "@/api/base44Client";
 
 import ControlPanel from "@/components/nups/press/ControlPanel";
 import VoucherCanvas from "@/components/nups/press/VoucherCanvas";
@@ -34,6 +35,28 @@ export default function ClubCurrencyPressView() {
   const [currencyAmount, setCurrencyAmount] = useState(0);
   const [currencyOrderNumber, setCurrencyOrderNumber] = useState("");
   const [elements, setElements] = useState(config.elements || []);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // RBAC: Check user permissions on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        if (!currentUser || !['admin', 'manager', 'staff'].includes(currentUser.role)) {
+          toast.error("Unauthorized: Staff access required");
+          window.location.href = '/nups-login';
+          return;
+        }
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        window.location.href = '/nups-login';
+      } finally {
+        setAuthLoading(false);
+      }
+    })();
+  }, []);
 
   // Auto-save config
   useEffect(() => { savePressConfig({ ...config, elements }); }, [config, elements]);
@@ -83,6 +106,18 @@ export default function ClubCurrencyPressView() {
   const handleRemoveElement = useCallback((id) => {
     setElements((prev) => prev.filter((el) => el.id !== id));
   }, []);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Redirecting
+  }
 
   return (
     <div className="min-h-[600px] flex flex-col">
