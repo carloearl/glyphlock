@@ -154,6 +154,45 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
   const orderNumber = useRef(`DP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2,4).toUpperCase()}`).current;
 
+  // SESSION PRESERVATION: Save draft state to localStorage
+  useEffect(() => {
+    if (step > 0 && !savedOrderId) {
+      const draftState = {
+        step,
+        orderNumber,
+        customerName,
+        customerId,
+        dreamDollarValue,
+        lineItems,
+        timestamp: Date.now()
+      };
+      sessionStorage.setItem('nups_draft_order', JSON.stringify(draftState));
+    } else if (savedOrderId) {
+      // Transaction completed — clear draft
+      sessionStorage.removeItem('nups_draft_order');
+    }
+  }, [step, customerName, dreamDollarValue, savedOrderId]);
+
+  // SESSION RECOVERY: Restore draft on mount if session expired mid-transaction
+  useEffect(() => {
+    const draft = sessionStorage.getItem('nups_draft_order');
+    if (draft && !savedOrderId) {
+      try {
+        const state = JSON.parse(draft);
+        const age = Date.now() - state.timestamp;
+        
+        // Restore if draft is less than 1 hour old
+        if (age < 3600000) {
+          setCustomerName(state.customerName || "");
+          setCustomerId(state.customerId || "");
+          setDreamDollarValue(state.dreamDollarValue || 0);
+          if (state.lineItems) setLineItems(state.lineItems);
+          toast.info("Draft order restored from session");
+        }
+      } catch {}
+    }
+  }, []);
+
   const handleFileUpload = async (file, field) => {
     if (!file) return;
     setUploading(p => ({ ...p, [field]: true }));
