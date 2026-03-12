@@ -10,6 +10,8 @@ import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import SettlementReports from './pages/SettlementReports';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -52,6 +54,16 @@ const AuthenticatedApp = () => {
         {Object.entries(Pages).map(([path, Page]) => (
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}
+        <Route path="/AnalyticsDashboard" element={
+          <LayoutWrapper currentPageName="AnalyticsDashboard">
+            <AnalyticsDashboard />
+          </LayoutWrapper>
+        } />
+        <Route path="/SettlementReports" element={
+          <LayoutWrapper currentPageName="SettlementReports">
+            <SettlementReports />
+          </LayoutWrapper>
+        } />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
