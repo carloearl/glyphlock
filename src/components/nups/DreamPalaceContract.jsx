@@ -74,7 +74,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
         }
         setUser(currentUser);
       } catch (error) {
-        console.error("Auth check failed:", error);
         window.location.href = '/nups-login';
       } finally {
         setAuthLoading(false);
@@ -294,7 +293,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       setLoading(false);
       setStep(4);
     } catch (error) {
-      console.error("Guest sign error:", error);
       setBackendError(error.message || "Failed to process sale. Please contact support.");
       setLoading(false);
       setPaymentProcessing(false);

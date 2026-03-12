@@ -26,7 +26,6 @@ export default function BillRedemptionScanner() {
         }
         setUser(currentUser);
       } catch (error) {
-        console.error("Auth check failed:", error);
         window.location.href = '/nups-login';
       } finally {
         setAuthLoading(false);

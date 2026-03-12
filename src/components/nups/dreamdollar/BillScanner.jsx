@@ -99,7 +99,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
         toast.error(data.error || "Invalid bill");
       }
     } catch (error) {
-      console.error("Scan error:", error);
       setScannedBills(prev => [...prev, {
         serial_number: serialNumber,
         status: "error",
