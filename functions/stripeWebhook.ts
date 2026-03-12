@@ -13,17 +13,14 @@ const PRICE_TO_PLAN = {
   [Deno.env.get('STRIPE_PRICE_PROFESSIONAL_MONTHLY')]: 'professional'
 };
 
-// IDEMPOTENCY: Track processed webhook IDs
-const processedWebhooks = new Map(); // key: event.id, value: timestamp
-const WEBHOOK_TTL_MS = 86400000; // 24 hours
-
 Deno.serve(async (req) => {
   try {
     const body = await req.text();
     const signature = req.headers.get('stripe-signature');
 
-    // SECURITY: Signature verification (critical — prevents spoofed webhooks)
+    // ✅ SIGNATURE VERIFICATION: Reject invalid/missing signatures immediately
     if (!signature || !webhookSecret) {
+      console.error('WEBHOOK_SIGNATURE_FAILURE: Missing signature or webhook secret');
       return Response.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
     }
 
@@ -35,29 +32,59 @@ Deno.serve(async (req) => {
         webhookSecret
       );
     } catch (sigError) {
-      // SECURITY: Log invalid signature attempt
-      console.error('WEBHOOK SIGNATURE VALIDATION FAILED:', sigError.message);
+      console.error('WEBHOOK_SIGNATURE_FAILURE:', sigError.message);
+      
+      // Log signature validation failure to audit trail
+      try {
+        const base44 = createClientFromRequest(req);
+        await base44.asServiceRole.entities.AuditEvent.create({
+          event_id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          actor_id: 'STRIPE_WEBHOOK',
+          actor_role: 'system',
+          venue_id: null,
+          entity_type: 'StripeWebhook',
+          entity_id: 'SIGNATURE_FAILURE',
+          action: 'ACCESS',
+          is_system_action: true,
+          severity: 'CRITICAL',
+          description: `Webhook signature validation failed: ${sigError.message}`
+        });
+      } catch {}
+      
       return Response.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    // IDEMPOTENCY: Check if webhook already processed
-    const now = Date.now();
-    if (processedWebhooks.has(event.id)) {
-      return Response.json({ received: true, idempotent: true });
-    }
-
-    // Clean up expired webhook IDs from memory
-    for (const [id, timestamp] of processedWebhooks.entries()) {
-      if (now - timestamp > WEBHOOK_TTL_MS) {
-        processedWebhooks.delete(id);
-      }
-    }
-
-    // Mark webhook as processed
-    processedWebhooks.set(event.id, now);
-
     const base44 = createClientFromRequest(req);
 
+    // ✅ IDEMPOTENCY: Check DB for already-processed webhook (survives cold starts)
+    const existingEvent = await base44.asServiceRole.entities.AuditEvent.filter({
+      entity_type: 'StripeWebhook',
+      entity_id: event.id
+    }, null, 1);
+
+    if (existingEvent.length > 0) {
+      // Already processed — acknowledge Stripe but skip DB writes
+      return Response.json({ received: true, idempotent: true, event_id: event.id });
+    }
+
+    // Log webhook receipt (idempotency anchor)
+    await base44.asServiceRole.entities.AuditEvent.create({
+      event_id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      actor_id: 'STRIPE_WEBHOOK',
+      actor_role: 'system',
+      venue_id: null,
+      entity_type: 'StripeWebhook',
+      entity_id: event.id,
+      action: 'ACCESS',
+      after_state: JSON.stringify({ type: event.type }),
+      is_system_action: true,
+      severity: 'INFO',
+      description: `Webhook received: ${event.type}`
+    });
+
+    // Process event based on type
     switch (event.type) {
       // ═══ SUBSCRIPTION EVENTS (GlyphLock SaaS) ═══
       case 'checkout.session.completed': {
@@ -81,8 +108,6 @@ Deno.serve(async (req) => {
               subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
               cancel_at_period_end: false
             });
-
-            // Email notification removed (sendgridClient not accessible)
           }
         }
         break;
@@ -111,17 +136,12 @@ Deno.serve(async (req) => {
         });
         
         if (users.length > 0) {
-          const userEmail = users[0].email;
-          const planName = users[0].subscription_plan || 'your plan';
-
           await base44.asServiceRole.entities.User.update(users[0].id, {
             subscription_status: 'canceled',
             subscription_id: null,
             subscription_plan: null,
             cancel_at_period_end: false
           });
-
-          // Email notification removed (sendgridClient not accessible)
         }
         break;
       }
@@ -162,11 +182,20 @@ Deno.serve(async (req) => {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object;
         
-        // Check if this is a Dream Dollar transaction
         if (paymentIntent.metadata?.order_type === 'dream_dollar_sale') {
           const order_number = paymentIntent.metadata?.order_number;
           
-          // Log successful payment (immutable audit trail)
+          // Find associated DreamPalaceOrder record if exists
+          const orders = await base44.asServiceRole.entities.DreamPalaceOrder.filter({
+            order_number
+          }, null, 1);
+
+          if (orders.length > 0) {
+            await base44.asServiceRole.entities.DreamPalaceOrder.update(orders[0].id, {
+              status: 'signed' // Payment confirmed — ready for fulfillment
+            });
+          }
+
           await base44.asServiceRole.entities.AuditEvent.create({
             event_id: crypto.randomUUID(),
             timestamp: new Date().toISOString(),
@@ -194,8 +223,20 @@ Deno.serve(async (req) => {
         
         if (paymentIntent.metadata?.order_type === 'dream_dollar_sale') {
           const order_number = paymentIntent.metadata?.order_number;
+          const failure_reason = paymentIntent.last_payment_error?.message || 'Unknown error';
           
-          // CRITICAL: Log payment failure for reconciliation
+          // Update order status to FAILED
+          const orders = await base44.asServiceRole.entities.DreamPalaceOrder.filter({
+            order_number
+          }, null, 1);
+
+          if (orders.length > 0) {
+            await base44.asServiceRole.entities.DreamPalaceOrder.update(orders[0].id, {
+              status: 'draft' // Reset to draft — payment failed, retry needed
+            });
+          }
+
+          // CRITICAL: Log payment failure for staff alert
           await base44.asServiceRole.entities.AuditEvent.create({
             event_id: crypto.randomUUID(),
             timestamp: new Date().toISOString(),
@@ -209,13 +250,96 @@ Deno.serve(async (req) => {
               status: 'failed',
               amount: paymentIntent.amount / 100,
               order_number,
-              failure_reason: paymentIntent.last_payment_error?.message || 'Unknown'
+              failure_reason
             }),
             is_system_action: true,
             severity: 'CRITICAL',
-            description: `PAYMENT FAILED: Dream Dollar order ${order_number}, reason: ${paymentIntent.last_payment_error?.message || 'Unknown'}`
+            description: `PAYMENT FAILED: Dream Dollar order ${order_number}, reason: ${failure_reason}`
           });
         }
+        break;
+      }
+
+      case 'payment_intent.canceled': {
+        const paymentIntent = event.data.object;
+        
+        if (paymentIntent.metadata?.order_type === 'dream_dollar_sale') {
+          const order_number = paymentIntent.metadata?.order_number;
+          
+          // Mark order as CANCELED
+          const orders = await base44.asServiceRole.entities.DreamPalaceOrder.filter({
+            order_number
+          }, null, 1);
+
+          if (orders.length > 0) {
+            await base44.asServiceRole.entities.DreamPalaceOrder.update(orders[0].id, {
+              status: 'archived' // Payment canceled — order voided
+            });
+          }
+
+          // VOID any Dream Dollar batch created for this order
+          const batches = await base44.asServiceRole.entities.DreamDollarBatch.filter({
+            order_number
+          });
+
+          for (const batch of batches) {
+            await base44.asServiceRole.entities.DreamDollarBatch.update(batch.id, {
+              status: 'voided'
+            });
+
+            // VOID all bills in the batch
+            const bills = await base44.asServiceRole.entities.DreamDollarBill.filter({
+              batch_id: batch.batch_id
+            });
+
+            for (const bill of bills) {
+              await base44.asServiceRole.entities.DreamDollarBill.update(bill.id, {
+                status: 'voided',
+                voided_at: new Date().toISOString(),
+                voided_by: 'STRIPE_WEBHOOK',
+                void_reason: 'Payment canceled by Stripe'
+              });
+            }
+          }
+
+          await base44.asServiceRole.entities.AuditEvent.create({
+            event_id: crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
+            actor_id: 'STRIPE_WEBHOOK',
+            actor_role: 'system',
+            venue_id: paymentIntent.metadata?.venue_id || 'dream-palace-tempe',
+            entity_type: 'PaymentIntent',
+            entity_id: paymentIntent.id,
+            action: 'UPDATE',
+            after_state: JSON.stringify({
+              status: 'canceled',
+              amount: paymentIntent.amount / 100,
+              order_number,
+              batches_voided: batches.length
+            }),
+            is_system_action: true,
+            severity: 'WARNING',
+            description: `PAYMENT CANCELED: Dream Dollar order ${order_number}, voided ${batches.length} batch(es)`
+          });
+        }
+        break;
+      }
+
+      // ✅ UNHANDLED EVENTS: Log but do not error
+      default: {
+        await base44.asServiceRole.entities.AuditEvent.create({
+          event_id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          actor_id: 'STRIPE_WEBHOOK',
+          actor_role: 'system',
+          venue_id: null,
+          entity_type: 'StripeWebhook',
+          entity_id: event.id,
+          action: 'ACCESS',
+          is_system_action: true,
+          severity: 'INFO',
+          description: `Unhandled webhook event: ${event.type}`
+        });
         break;
       }
     }
