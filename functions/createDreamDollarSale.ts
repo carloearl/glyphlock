@@ -88,8 +88,11 @@ Deno.serve(async (req) => {
     // Create batch ID (collision-resistant)
     const batch_id = `DD-${Date.now()}-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
 
-    // Create DreamDollarBatch record
-    const batch = await base44.asServiceRole.entities.DreamDollarBatch.create({
+    // CRITICAL: Create DreamDollarBatch record
+    // If this fails after payment succeeded, system flags RECONCILIATION_NEEDED
+    let batch;
+    try {
+      batch = await base44.asServiceRole.entities.DreamDollarBatch.create({
       batch_id,
       venue_id,
       denominations: processed_denominations,
@@ -102,7 +105,25 @@ Deno.serve(async (req) => {
       status: 'issued',
       issued_at: new Date().toISOString(),
       issued_by: user.email
-    });
+      });
+    } catch (dbError) {
+      // CRITICAL: Payment succeeded but DB write failed
+      // Flag for immediate reconciliation
+      await base44.asServiceRole.entities.AuditEvent.create({
+        event_id: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        actor_id: user.email,
+        actor_role: user.role,
+        venue_id,
+        entity_type: 'DreamDollarBatch',
+        entity_id: processor_reference,
+        action: 'CREATE',
+        severity: 'CRITICAL',
+        description: `RECONCILIATION_NEEDED: Payment succeeded (${processor_reference}) but batch creation failed. Charged: $${total_charged}, Error: ${dbError.message}`
+      });
+
+      throw new Error('CRITICAL: Payment processed but record creation failed. Contact support immediately with code: ' + processor_reference);
+    }
 
     // Generate serial numbers for each bill
     const bills = [];
@@ -124,8 +145,29 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Bulk create bills
-    const created_bills = await base44.asServiceRole.entities.DreamDollarBill.bulkCreate(bills);
+    // Bulk create bills (atomic — all or nothing)
+    let created_bills;
+    try {
+      created_bills = await base44.asServiceRole.entities.DreamDollarBill.bulkCreate(bills);
+    } catch (billError) {
+      // ROLLBACK: Delete batch if bill creation fails
+      await base44.asServiceRole.entities.DreamDollarBatch.delete(batch.id);
+      
+      await base44.asServiceRole.entities.AuditEvent.create({
+        event_id: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        actor_id: user.email,
+        actor_role: user.role,
+        venue_id,
+        entity_type: 'DreamDollarBill',
+        entity_id: batch_id,
+        action: 'CREATE',
+        severity: 'CRITICAL',
+        description: `BATCH ROLLBACK: Bill creation failed, batch ${batch_id} deleted. Payment: ${processor_reference}, Error: ${billError.message}`
+      });
+
+      throw new Error('Bill generation failed — batch rolled back. Payment may need refund. Code: ' + processor_reference);
+    }
 
     // Create barcode registry entries
     const barcode_entries = [
