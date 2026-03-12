@@ -57,6 +57,7 @@ import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import DreamDollarHub from "../pages/DreamDollarHub.jsx";
+import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -205,6 +206,11 @@ export default function NUPSOwner() {
       </header>
 
       <div className="container mx-auto p-4 md:p-6">
+        {/* Fraud Alert Monitor */}
+        <div className="mb-4">
+          <FraudAlertMonitor />
+        </div>
+
         {/* Stats Row */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
           <Card className="bg-gray-900/50 border-cyan-500/30">
