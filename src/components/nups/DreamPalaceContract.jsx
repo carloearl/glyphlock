@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,28 @@ const ACKNOWLEDGMENTS = [
 
 export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   const [step, setStep] = useState(0); // 0=form, 1=contract scroll, 2=clickwrap, 3=biometrics+sign, 4=staff sign, 5=print+rescan
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // RBAC: Check user permissions on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        if (!currentUser || !['admin', 'manager', 'staff'].includes(currentUser.role)) {
+          toast.error("Unauthorized: Staff access required");
+          window.location.href = '/nups-login';
+          return;
+        }
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        window.location.href = '/nups-login';
+      } finally {
+        setAuthLoading(false);
+      }
+    })();
+  }, []);
   const [contractPreviewOpen, setContractPreviewOpen] = useState(false);
   const [contractScrolled, setContractScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -157,6 +179,18 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   const canProceedToSign = customerName.trim() && cardLastSix.length >= 4 && dreamDollarValue > 0;
   const canSign = allAcked && signature.trim() && thumbprintUrl && guestPhotoUrl && idPhotoUrl;
   const canStaffSign = managerSignature.trim() && hostessSignature.trim();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Redirecting
+  }
 
   const handleGuestSign = async () => {
     setLoading(true);
