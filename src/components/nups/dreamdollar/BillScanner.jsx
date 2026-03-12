@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ScanLine, CheckCircle2, XCircle, AlertTriangle, Loader2,
-  DollarSign, Trash2, Archive
+  DollarSign, Trash2, Archive, WifiOff
 } from "lucide-react";
 import { toast } from "sonner";
+import OfflineIndicator from "../OfflineIndicator";
 
 export default function BillScanner({ contractorId, contractorName, onPayoutComplete }) {
   const [scannedBills, setScannedBills] = useState([]);
@@ -50,6 +51,17 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
   const handleScan = async (serialNumber) => {
     if (!serialNumber || scannedBills.some(b => b.serial_number === serialNumber)) {
       toast.error("Duplicate scan detected");
+      return;
+    }
+
+    // Check network connectivity
+    if (!navigator.onLine) {
+      toast.error("No internet connection — cannot validate bill");
+      setScannedBills(prev => [...prev, {
+        serial_number: serialNumber,
+        status: "error",
+        error: "Offline — scan not validated"
+      }]);
       return;
     }
 
@@ -153,6 +165,8 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
 
   return (
     <div className="space-y-4">
+      <OfflineIndicator />
+      
       {/* Scanner Input */}
       <Card className="bg-gray-900/60 border-cyan-500/30">
         <CardHeader className="pb-3">

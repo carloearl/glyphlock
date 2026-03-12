@@ -12,6 +12,8 @@ import {
   ChevronDown, ChevronUp, CreditCard, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import ErrorRecoveryPanel from "./ErrorRecoveryPanel";
+import OfflineIndicator from "./OfflineIndicator";
 
 // ─── Contract Terms (exact from physical form) ───
 const FULL_CONTRACT_TEXT = `1. Orders
@@ -692,6 +694,8 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   if (step === 3) {
     return (
       <div className="space-y-4">
+        <OfflineIndicator />
+        
         <div className="text-center">
           <Fingerprint className="w-10 h-10 text-purple-400 mx-auto mb-2" />
           <h2 className="text-lg font-bold text-white">Biometric Capture & Customer Signature</h2>
@@ -700,27 +704,17 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
         {/* Backend Error Display */}
         {backendError && (
-          <Card className="bg-red-900/20 border-red-500/40">
-            <CardContent className="pt-4">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-bold">!</span>
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-red-400">Transaction Failed</div>
-                  <div className="text-xs text-red-300 mt-1">{backendError}</div>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="mt-2 border-red-500/40 text-red-400" 
-                    onClick={() => setBackendError(null)}
-                  >
-                    Dismiss
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ErrorRecoveryPanel
+            title="Payment Processing Failed"
+            message={backendError}
+            errorId={crypto.randomUUID()}
+            retryable={true}
+            onRetry={() => {
+              setBackendError(null);
+              handleGuestSign();
+            }}
+            severity="critical"
+          />
         )}
 
         <Card className="bg-gray-900/60 border-green-500/30">
