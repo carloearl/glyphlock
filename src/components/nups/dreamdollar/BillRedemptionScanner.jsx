@@ -12,6 +12,27 @@ import BillScanner from "./BillScanner";
 export default function BillRedemptionScanner() {
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [completedPayouts, setCompletedPayouts] = useState([]);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // RBAC: Check user permissions on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        if (!currentUser || !['admin', 'manager', 'staff'].includes(currentUser.role)) {
+          window.location.href = '/nups-login';
+          return;
+        }
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        window.location.href = '/nups-login';
+      } finally {
+        setAuthLoading(false);
+      }
+    })();
+  }, []);
 
   // Fetch active entertainers
   const { data: entertainers = [], isLoading } = useQuery({
@@ -32,12 +53,16 @@ export default function BillRedemptionScanner() {
     setSelectedContractor(null);
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
       </div>
     );
+  }
+
+  if (!user) {
+    return null; // Redirecting
   }
 
   return (

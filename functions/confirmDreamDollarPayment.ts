@@ -33,6 +33,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // RBAC: Only staff/admin can confirm payments
+    if (!['admin', 'manager', 'staff'].includes(user.role)) {
+      return Response.json({ 
+        error: 'Forbidden: Staff access required to confirm payments' 
+      }, { status: 403 });
+    }
+
     const payload = await req.json();
     const { payment_intent_id, order_number } = payload;
 

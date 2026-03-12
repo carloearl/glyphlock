@@ -36,6 +36,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // RBAC: Only staff/admin can process Dream Dollar payments
+    if (!['admin', 'manager', 'staff'].includes(user.role)) {
+      return Response.json({ 
+        error: 'Forbidden: Staff access required to process payments' 
+      }, { status: 403 });
+    }
+
     const payload = await req.json();
     const {
       amount,
