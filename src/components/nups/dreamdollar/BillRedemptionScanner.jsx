@@ -1,282 +1,153 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Scan, Trash2, CheckCircle, AlertCircle, DollarSign, Zap } from 'lucide-react';
+import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  ScanLine, Loader2, Users, Archive, UserCheck
+} from "lucide-react";
+import BillScanner from "./BillScanner";
 
-export default function BillRedemptionScanner({ venue_id, contractor }) {
-  const [scannedBills, setScannedBills] = useState([]);
-  const [serialInput, setSerialInput] = useState('');
-  const [scanning, setScanning] = useState(false);
-  const [redeeming, setRedeeming] = useState(false);
-  const [redemptionRate] = useState(0.85);
-  const [scanBuffer, setScanBuffer] = useState('');
-  const scanTimeoutRef = React.useRef(null);
+export default function BillRedemptionScanner() {
+  const [selectedContractor, setSelectedContractor] = useState(null);
+  const [completedPayouts, setCompletedPayouts] = useState([]);
 
-  const handleScanSerial = () => {
-    const serial = serialInput.trim().toUpperCase();
-    if (!serial) return;
-
-    // Check if already scanned
-    if (scannedBills.some(b => b.serial_number === serial)) {
-      alert('Bill already scanned in this session');
-      setSerialInput('');
-      return;
+  // Fetch active entertainers
+  const { data: entertainers = [], isLoading } = useQuery({
+    queryKey: ['active-entertainers'],
+    queryFn: async () => {
+      const shifts = await base44.entities.EntertainerShift.filter({
+        status: { $in: ["checked_in", "on_floor", "in_vip"] }
+      }, '-check_in_time', 50);
+      return shifts;
     }
+  });
 
-    // Add to scanned list (pending validation)
-    setScannedBills(prev => [...prev, {
-      serial_number: serial,
-      status: 'pending',
-      denomination: null
+  const handlePayoutComplete = (payoutData) => {
+    setCompletedPayouts(prev => [...prev, {
+      ...payoutData,
+      timestamp: new Date().toISOString()
     }]);
-
-    setSerialInput('');
+    setSelectedContractor(null);
   };
 
-  const removeBill = (serial) => {
-    setScannedBills(prev => prev.filter(b => b.serial_number !== serial));
-  };
-
-  // Hardware barcode scanner support (HID keyboard emulation)
-  useEffect(() => {
-    let buffer = '';
-    let timeout = null;
-
-    const handleKeyPress = async (e) => {
-      // Ignore if user is typing in input fields
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        return;
-      }
-
-      // Clear timeout on each keystroke
-      clearTimeout(timeout);
-
-      // Barcode scanners type fast (<100ms between chars) and end with Enter
-      if (e.key === 'Enter') {
-        const scannedCode = buffer.trim().toUpperCase();
-        
-        if (scannedCode.length >= 8) {
-          // Validate against BarcodeRegistry
-          try {
-            const barcode = await base44.entities.BarcodeRegistry.filter({
-              barcode_id: scannedCode,
-              record_type: 'bill',
-              status: 'active'
-            });
-
-            if (barcode.length > 0) {
-              const serial = barcode[0].linked_record_id;
-              
-              // Check if already scanned
-              if (scannedBills.some(b => b.serial_number === serial)) {
-                console.warn('Duplicate scan detected:', serial);
-                buffer = '';
-                return;
-              }
-
-              // Add to scanned bills
-              setScannedBills(prev => [...prev, {
-                serial_number: serial,
-                status: 'validated',
-                denomination: null // Will be populated from DB
-              }]);
-
-              // Visual feedback
-              console.log('✅ Hardware scan captured:', serial);
-            } else {
-              console.warn('⚠️ Invalid barcode scanned:', scannedCode);
-            }
-          } catch (err) {
-            console.error('Barcode validation error:', err);
-          }
-        }
-
-        buffer = '';
-      } else if (e.key.length === 1) {
-        // Accumulate characters
-        buffer += e.key;
-
-        // Reset buffer after 200ms of inactivity (human typing speed)
-        timeout = setTimeout(() => {
-          buffer = '';
-        }, 200);
-      }
-    };
-
-    window.addEventListener('keypress', handleKeyPress);
-
-    return () => {
-      window.removeEventListener('keypress', handleKeyPress);
-      clearTimeout(timeout);
-    };
-  }, [scannedBills]);
-
-  const handleRedeemBills = async () => {
-    if (scannedBills.length === 0) {
-      alert('No bills scanned');
-      return;
-    }
-
-    if (!contractor?.id) {
-      alert('No contractor selected');
-      return;
-    }
-
-    setRedeeming(true);
-    try {
-      const serial_numbers = scannedBills.map(b => b.serial_number);
-
-      const result = await base44.functions.invoke('redeemDreamDollarBills', {
-        venue_id,
-        contractor_id: contractor.id,
-        contractor_name: contractor.stage_name || contractor.legal_name,
-        serial_numbers,
-        redemption_rate: redemptionRate,
-        payment_method: 'cash'
-      });
-
-      if (result.data.success) {
-        const { bills_redeemed, duplicates_detected, total_payout, errors } = result.data;
-
-        let message = `✅ Successfully redeemed ${bills_redeemed} bills\n`;
-        message += `💰 Payout: $${total_payout.toFixed(2)}\n`;
-
-        if (duplicates_detected > 0) {
-          message += `⚠️ ${duplicates_detected} duplicate bills detected\n`;
-        }
-
-        if (errors.length > 0) {
-          message += `\nErrors:\n${errors.join('\n')}`;
-        }
-
-        alert(message);
-        setScannedBills([]);
-      }
-    } catch (err) {
-      console.error('Redemption error:', err);
-      alert('Failed to redeem bills: ' + err.message);
-    } finally {
-      setRedeeming(false);
-    }
-  };
-
-  const totalScanned = scannedBills.length;
-  const estimatedPayout = scannedBills.reduce((sum, bill) => 
-    sum + (bill.denomination || 0), 0
-  ) * redemptionRate;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <Card className="glyph-glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Scan className="w-5 h-5 text-cyan-400" />
-            Dream Dollar Redemption
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Contractor Info */}
-          {contractor && (
-            <div className="p-3 rounded-lg bg-indigo-900/20 border border-indigo-500/30">
-              <div className="text-sm text-gray-300">Redeeming for:</div>
-              <div className="font-semibold text-cyan-400">
-                {contractor.stage_name || contractor.legal_name}
-              </div>
-              <div className="flex items-center gap-2 mt-2 text-xs text-green-400">
-                <Zap className="w-3 h-3" />
-                Hardware scanner enabled
-              </div>
-            </div>
-          )}
-
-          {/* Serial Scanner */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Scan Bill Serial Number</label>
-            <div className="flex gap-2">
-              <Input
-                value={serialInput}
-                onChange={(e) => setSerialInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleScanSerial()}
-                placeholder="Enter or scan serial number"
-                className="input-glow-blue flex-1"
-                disabled={!contractor}
-              />
-              <Button
-                onClick={handleScanSerial}
-                disabled={!serialInput.trim() || !contractor}
-              >
-                <Scan className="w-5 h-5" />
-              </Button>
-            </div>
+    <div className="min-h-screen bg-black text-white p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <ScanLine className="w-8 h-8 text-cyan-400" />
+            <h1 className="text-2xl font-bold text-white">Dream Dollar Redemption</h1>
           </div>
+          <p className="text-sm text-gray-400">Scan bills to calculate contractor payout (50% redemption)</p>
+        </div>
 
-          {/* Scanned Bills List */}
-          {scannedBills.length > 0 && (
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Scanned Bills ({totalScanned})</div>
-              <div className="max-h-64 overflow-y-auto space-y-2">
-                {scannedBills.map(bill => (
-                  <div
-                    key={bill.serial_number}
-                    className="flex items-center justify-between p-3 rounded-lg glyph-glass border border-white/10"
+        {/* Contractor Selection */}
+        {!selectedContractor ? (
+          <Card className="bg-gray-900/60 border-pink-500/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Users className="w-5 h-5 text-pink-400" />
+                <span className="text-pink-400">Select Entertainer</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 max-h-96 overflow-y-auto">
+              {entertainers.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Users className="w-10 h-10 mx-auto mb-2 text-gray-600" />
+                  <p className="text-sm">No entertainers checked in</p>
+                  <p className="text-xs text-gray-600 mt-1">Entertainers must check in before redemption</p>
+                </div>
+              ) : (
+                entertainers.map((shift) => (
+                  <button
+                    key={shift.id}
+                    onClick={() => setSelectedContractor({
+                      id: shift.entertainer_id,
+                      name: shift.stage_name
+                    })}
+                    className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-pink-500/50 transition-all"
                   >
                     <div className="flex items-center gap-3">
-                      {bill.status === 'pending' ? (
-                        <AlertCircle className="w-4 h-4 text-yellow-400" />
-                      ) : (
-                        <CheckCircle className="w-4 h-4 text-green-400" />
-                      )}
-                      <span className="font-mono text-sm">{bill.serial_number}</span>
-                      {bill.denomination && (
-                        <span className="text-cyan-400 font-semibold">
-                          ${bill.denomination}
-                        </span>
-                      )}
+                      <UserCheck className="w-5 h-5 text-pink-400" />
+                      <div className="text-left">
+                        <div className="font-bold text-white">{shift.stage_name}</div>
+                        <div className="text-xs text-gray-400">
+                          Checked in: {new Date(shift.check_in_time).toLocaleTimeString()}
+                        </div>
+                      </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeBill(bill.serial_number)}
-                    >
-                      <Trash2 className="w-4 h-4 text-red-400" />
-                    </Button>
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/40">Active</Badge>
+                  </button>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Selected Contractor Header */}
+            <Card className="bg-pink-900/20 border-pink-500/30">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <UserCheck className="w-6 h-6 text-pink-400" />
+                  <div>
+                    <div className="text-sm font-bold text-white">{selectedContractor.name}</div>
+                    <div className="text-xs text-gray-400">Ready for redemption</div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setSelectedContractor(null)}
+                  className="border-gray-700 text-gray-400"
+                >
+                  Change
+                </Button>
+              </CardContent>
+            </Card>
 
-          {/* Payout Summary */}
-          {scannedBills.length > 0 && (
-            <div className="p-4 rounded-lg bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30">
-              <div className="flex justify-between text-sm mb-1">
-                <span>Bills Scanned:</span>
-                <span className="font-semibold">{totalScanned}</span>
-              </div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Redemption Rate:</span>
-                <span className="font-semibold">{(redemptionRate * 100).toFixed(0)}%</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold border-t border-white/10 pt-2 mt-2">
-                <span>Estimated Payout:</span>
-                <span className="text-cyan-400">${estimatedPayout.toFixed(2)}</span>
-              </div>
-            </div>
-          )}
+            {/* Bill Scanner */}
+            <BillScanner
+              contractorId={selectedContractor.id}
+              contractorName={selectedContractor.name}
+              onPayoutComplete={handlePayoutComplete}
+            />
+          </>
+        )}
 
-          {/* Redeem Button */}
-          <Button
-            onClick={handleRedeemBills}
-            disabled={redeeming || scannedBills.length === 0 || !contractor}
-            className="w-full btn-glow-blue"
-          >
-            <DollarSign className="w-5 h-5 mr-2" />
-            {redeeming ? 'Processing...' : 'Complete Redemption'}
-          </Button>
-        </CardContent>
-      </Card>
+        {/* Completed Payouts Today */}
+        {completedPayouts.length > 0 && (
+          <Card className="bg-gray-900/60 border-green-500/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Archive className="w-5 h-5 text-green-400" />
+                <span className="text-green-400">Completed Payouts Today ({completedPayouts.length})</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 max-h-48 overflow-y-auto">
+              {completedPayouts.map((payout, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 bg-gray-800/50 rounded border border-gray-700">
+                  <div className="text-sm">
+                    <span className="text-gray-300">{payout.contractor_name || `Contractor ${payout.contractor_id}`}</span>
+                    <span className="text-xs text-gray-500 ml-2">({payout.bills_redeemed} bills)</span>
+                  </div>
+                  <div className="font-mono font-bold text-green-400">${payout.total_payout.toFixed(2)}</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
