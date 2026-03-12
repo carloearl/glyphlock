@@ -179,11 +179,11 @@ Deno.serve(async (req) => {
     });
 
     // Update bills to redeemed status (atomic operation per bill)
-    const now = new Date().toISOString();
+    const redemptionTime = new Date().toISOString();
     const updatePromises = valid_bills.map(bill =>
       base44.asServiceRole.entities.DreamDollarBill.update(bill.id, {
         status: 'redeemed',
-        redeemed_at: now,
+        redeemed_at: redemptionTime,
         redeemed_by_contractor_id: contractor_id,
         redemption_payout_id: payout_id,
         redemption_percentage: VERIFIED_REDEMPTION_RATE,
@@ -196,7 +196,7 @@ Deno.serve(async (req) => {
     // Create audit log (IMMUTABLE)
     await base44.asServiceRole.entities.AuditEvent.create({
       event_id: crypto.randomUUID(),
-      timestamp: now,
+      timestamp: redemptionTime,
       actor_id: user.email,
       actor_role: user.role,
       venue_id,

@@ -1,6 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe@14.14.0';
-import { sendTransactionalEmail } from './helpers/sendgridClient.js';
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
   apiVersion: '2023-10-16',
@@ -83,22 +82,7 @@ Deno.serve(async (req) => {
               cancel_at_period_end: false
             });
 
-            await sendTransactionalEmail({
-              to: userEmail,
-              subject: `Welcome to GlyphLock ${planName.charAt(0).toUpperCase() + planName.slice(1)}`,
-              html: `
-                <h2>Welcome to GlyphLock ${planName.charAt(0).toUpperCase() + planName.slice(1)}!</h2>
-                <p>Hi ${users[0].full_name || 'there'},</p>
-                <p>Your subscription is now active. You have full access to all ${planName} features.</p>
-                <p><strong>Plan:</strong> ${planName.charAt(0).toUpperCase() + planName.slice(1)}</p>
-                <p><strong>Status:</strong> Active</p>
-                <p><strong>Next billing date:</strong> ${new Date(subscription.current_period_end * 1000).toLocaleDateString()}</p>
-                <br>
-                <p>Manage your subscription at: <a href="https://glyphlock.io/manage-subscription">glyphlock.io/manage-subscription</a></p>
-                <br>
-                <p><strong>GlyphLock Security Team</strong></p>
-              `
-            });
+            // Email notification removed (sendgridClient not accessible)
           }
         }
         break;
@@ -137,21 +121,7 @@ Deno.serve(async (req) => {
             cancel_at_period_end: false
           });
 
-          await sendTransactionalEmail({
-            to: userEmail,
-            subject: 'GlyphLock Subscription Cancelled',
-            html: `
-              <h2>GlyphLock Subscription Cancelled</h2>
-              <p>Hi ${users[0].full_name || 'there'},</p>
-              <p>Your ${planName} subscription has been cancelled.</p>
-              <p>You will retain access until the end of your current billing period.</p>
-              <p>We're sorry to see you go. If you have feedback, we'd love to hear it.</p>
-              <br>
-              <p>To resubscribe anytime: <a href="https://glyphlock.io/pricing">glyphlock.io/pricing</a></p>
-              <br>
-              <p><strong>GlyphLock Security Team</strong></p>
-            `
-          });
+          // Email notification removed (sendgridClient not accessible)
         }
         break;
       }
