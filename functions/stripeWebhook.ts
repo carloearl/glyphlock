@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe@14.14.0';
 import { sendTransactionalEmail } from './helpers/sendgridClient.js';
 
@@ -8,30 +8,59 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
 
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
-// GLYPHLOCK: Env-based price mapping (reverse lookup)
+// Env-based price mapping
 const PRICE_TO_PLAN = {
   [Deno.env.get('STRIPE_PRICE_CREATOR_MONTHLY')]: 'creator',
   [Deno.env.get('STRIPE_PRICE_PROFESSIONAL_MONTHLY')]: 'professional'
 };
+
+// IDEMPOTENCY: Track processed webhook IDs
+const processedWebhooks = new Map(); // key: event.id, value: timestamp
+const WEBHOOK_TTL_MS = 86400000; // 24 hours
 
 Deno.serve(async (req) => {
   try {
     const body = await req.text();
     const signature = req.headers.get('stripe-signature');
 
+    // SECURITY: Signature verification (critical — prevents spoofed webhooks)
     if (!signature || !webhookSecret) {
       return Response.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
     }
 
-    const event = await stripe.webhooks.constructEventAsync(
-      body,
-      signature,
-      webhookSecret
-    );
+    let event;
+    try {
+      event = await stripe.webhooks.constructEventAsync(
+        body,
+        signature,
+        webhookSecret
+      );
+    } catch (sigError) {
+      // SECURITY: Log invalid signature attempt
+      console.error('WEBHOOK SIGNATURE VALIDATION FAILED:', sigError.message);
+      return Response.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    // IDEMPOTENCY: Check if webhook already processed
+    const now = Date.now();
+    if (processedWebhooks.has(event.id)) {
+      return Response.json({ received: true, idempotent: true });
+    }
+
+    // Clean up expired webhook IDs from memory
+    for (const [id, timestamp] of processedWebhooks.entries()) {
+      if (now - timestamp > WEBHOOK_TTL_MS) {
+        processedWebhooks.delete(id);
+      }
+    }
+
+    // Mark webhook as processed
+    processedWebhooks.set(event.id, now);
 
     const base44 = createClientFromRequest(req);
 
     switch (event.type) {
+      // ═══ SUBSCRIPTION EVENTS (GlyphLock SaaS) ═══
       case 'checkout.session.completed': {
         const session = event.data.object;
         const userEmail = session.customer_email || session.metadata?.userEmail;
@@ -42,7 +71,6 @@ Deno.serve(async (req) => {
             const subscription = await stripe.subscriptions.retrieve(session.subscription);
             const priceId = subscription.items.data[0]?.price?.id;
             
-            // GLYPHLOCK: Map Stripe price ID to plan key using env-based mapping
             let planName = PRICE_TO_PLAN[priceId] || session.metadata?.plan || 'unknown';
 
             await base44.asServiceRole.entities.User.update(users[0].id, {
@@ -55,24 +83,21 @@ Deno.serve(async (req) => {
               cancel_at_period_end: false
             });
 
-            // GLYPHLOCK: Send subscription confirmation email
-            const emailHtml = `
-              <h2>Welcome to GlyphLock ${planName.charAt(0).toUpperCase() + planName.slice(1)}!</h2>
-              <p>Hi ${users[0].full_name || 'there'},</p>
-              <p>Your subscription is now active. You have full access to all ${planName} features.</p>
-              <p><strong>Plan:</strong> ${planName.charAt(0).toUpperCase() + planName.slice(1)}</p>
-              <p><strong>Status:</strong> Active</p>
-              <p><strong>Next billing date:</strong> ${new Date(subscription.current_period_end * 1000).toLocaleDateString()}</p>
-              <br>
-              <p>Manage your subscription at: <a href="https://glyphlock.io/manage-subscription">glyphlock.io/manage-subscription</a></p>
-              <br>
-              <p><strong>GlyphLock Security Team</strong></p>
-            `;
-
             await sendTransactionalEmail({
               to: userEmail,
               subject: `Welcome to GlyphLock ${planName.charAt(0).toUpperCase() + planName.slice(1)}`,
-              html: emailHtml
+              html: `
+                <h2>Welcome to GlyphLock ${planName.charAt(0).toUpperCase() + planName.slice(1)}!</h2>
+                <p>Hi ${users[0].full_name || 'there'},</p>
+                <p>Your subscription is now active. You have full access to all ${planName} features.</p>
+                <p><strong>Plan:</strong> ${planName.charAt(0).toUpperCase() + planName.slice(1)}</p>
+                <p><strong>Status:</strong> Active</p>
+                <p><strong>Next billing date:</strong> ${new Date(subscription.current_period_end * 1000).toLocaleDateString()}</p>
+                <br>
+                <p>Manage your subscription at: <a href="https://glyphlock.io/manage-subscription">glyphlock.io/manage-subscription</a></p>
+                <br>
+                <p><strong>GlyphLock Security Team</strong></p>
+              `
             });
           }
         }
@@ -112,23 +137,20 @@ Deno.serve(async (req) => {
             cancel_at_period_end: false
           });
 
-          // GLYPHLOCK: Send cancellation confirmation email
-          const emailHtml = `
-            <h2>GlyphLock Subscription Cancelled</h2>
-            <p>Hi ${users[0].full_name || 'there'},</p>
-            <p>Your ${planName} subscription has been cancelled.</p>
-            <p>You will retain access until the end of your current billing period.</p>
-            <p>We're sorry to see you go. If you have feedback, we'd love to hear it.</p>
-            <br>
-            <p>To resubscribe anytime: <a href="https://glyphlock.io/pricing">glyphlock.io/pricing</a></p>
-            <br>
-            <p><strong>GlyphLock Security Team</strong></p>
-          `;
-
           await sendTransactionalEmail({
             to: userEmail,
             subject: 'GlyphLock Subscription Cancelled',
-            html: emailHtml
+            html: `
+              <h2>GlyphLock Subscription Cancelled</h2>
+              <p>Hi ${users[0].full_name || 'there'},</p>
+              <p>Your ${planName} subscription has been cancelled.</p>
+              <p>You will retain access until the end of your current billing period.</p>
+              <p>We're sorry to see you go. If you have feedback, we'd love to hear it.</p>
+              <br>
+              <p>To resubscribe anytime: <a href="https://glyphlock.io/pricing">glyphlock.io/pricing</a></p>
+              <br>
+              <p><strong>GlyphLock Security Team</strong></p>
+            `
           });
         }
         break;
@@ -165,11 +187,73 @@ Deno.serve(async (req) => {
         }
         break;
       }
+
+      // ═══ DREAM DOLLAR PAYMENT EVENTS ═══
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object;
+        
+        // Check if this is a Dream Dollar transaction
+        if (paymentIntent.metadata?.order_type === 'dream_dollar_sale') {
+          const order_number = paymentIntent.metadata?.order_number;
+          
+          // Log successful payment (immutable audit trail)
+          await base44.asServiceRole.entities.AuditEvent.create({
+            event_id: crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
+            actor_id: 'STRIPE_WEBHOOK',
+            actor_role: 'system',
+            venue_id: paymentIntent.metadata?.venue_id || 'dream-palace-tempe',
+            entity_type: 'PaymentIntent',
+            entity_id: paymentIntent.id,
+            action: 'UPDATE',
+            after_state: JSON.stringify({
+              status: 'succeeded',
+              amount: paymentIntent.amount / 100,
+              order_number
+            }),
+            is_system_action: true,
+            severity: 'INFO',
+            description: `Dream Dollar payment succeeded: ${order_number}, $${(paymentIntent.amount / 100).toFixed(2)}`
+          });
+        }
+        break;
+      }
+
+      case 'payment_intent.payment_failed': {
+        const paymentIntent = event.data.object;
+        
+        if (paymentIntent.metadata?.order_type === 'dream_dollar_sale') {
+          const order_number = paymentIntent.metadata?.order_number;
+          
+          // CRITICAL: Log payment failure for reconciliation
+          await base44.asServiceRole.entities.AuditEvent.create({
+            event_id: crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
+            actor_id: 'STRIPE_WEBHOOK',
+            actor_role: 'system',
+            venue_id: paymentIntent.metadata?.venue_id || 'dream-palace-tempe',
+            entity_type: 'PaymentIntent',
+            entity_id: paymentIntent.id,
+            action: 'UPDATE',
+            after_state: JSON.stringify({
+              status: 'failed',
+              amount: paymentIntent.amount / 100,
+              order_number,
+              failure_reason: paymentIntent.last_payment_error?.message || 'Unknown'
+            }),
+            is_system_action: true,
+            severity: 'CRITICAL',
+            description: `PAYMENT FAILED: Dream Dollar order ${order_number}, reason: ${paymentIntent.last_payment_error?.message || 'Unknown'}`
+          });
+        }
+        break;
+      }
     }
 
-    return Response.json({ received: true });
+    return Response.json({ received: true, event_id: event.id });
   } catch (error) {
-    console.error('Webhook error:', error);
-    return Response.json({ error: error.message }, { status: 400 });
+    const errorId = crypto.randomUUID();
+    console.error(`[${errorId}] Webhook error:`, error);
+    return Response.json({ error: 'Webhook processing failed', error_id: errorId }, { status: 400 });
   }
 });

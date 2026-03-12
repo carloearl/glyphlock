@@ -5,25 +5,6 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
   apiVersion: '2023-10-16',
 });
 
-/**
- * Confirm Dream Dollar Payment
- * Verifies payment intent succeeded before allowing order completion
- * 
- * Expected payload:
- * {
- *   payment_intent_id: string,
- *   order_number: string
- * }
- * 
- * Returns:
- * {
- *   success: boolean,
- *   payment_status: string,
- *   approval_code: string (last 4 of payment ID),
- *   processor_reference: string
- * }
- */
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -43,14 +24,58 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const { payment_intent_id, order_number } = payload;
 
-    if (!payment_intent_id) {
-      return Response.json({ error: 'Missing payment_intent_id' }, { status: 400 });
+    if (!payment_intent_id || typeof payment_intent_id !== 'string') {
+      return Response.json({ error: 'Missing or invalid payment_intent_id' }, { status: 400 });
+    }
+
+    // FRAUD PREVENTION: Idempotency check
+    const existingConfirm = await base44.asServiceRole.entities.AuditEvent.filter({
+      entity_type: 'PaymentIntent',
+      entity_id: payment_intent_id,
+      action: 'CONFIRM'
+    }, null, 1);
+
+    if (existingConfirm.length > 0) {
+      // Already confirmed — return cached result (idempotent)
+      const cached = JSON.parse(existingConfirm[0].after_state);
+      return Response.json({
+        success: true,
+        payment_status: 'succeeded',
+        approval_code: cached.approval_code,
+        processor_reference: payment_intent_id,
+        card_last_four: cached.card_last_four || null,
+        amount_charged: cached.amount,
+        idempotent: true
+      });
     }
 
     // Retrieve payment intent to verify status
-    const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
+    let paymentIntent;
+    try {
+      paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
+    } catch (stripeError) {
+      return Response.json({
+        success: false,
+        error: 'PAYMENT_NOT_FOUND',
+        message: 'Invalid payment intent ID'
+      }, { status: 404 });
+    }
 
     if (paymentIntent.status !== 'succeeded') {
+      // Log failed confirmation attempt
+      await base44.asServiceRole.entities.AuditEvent.create({
+        event_id: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        actor_id: user.email,
+        actor_role: user.role,
+        venue_id: 'dream-palace-tempe',
+        entity_type: 'PaymentIntent',
+        entity_id: payment_intent_id,
+        action: 'ACCESS',
+        severity: 'WARNING',
+        description: `Payment confirmation failed: status=${paymentIntent.status}, order=${order_number}`
+      });
+
       return Response.json({
         success: false,
         payment_status: paymentIntent.status,
@@ -69,7 +94,7 @@ Deno.serve(async (req) => {
 
     const card_last_four = charge?.payment_method_details?.card?.last4 || null;
 
-    // Log successful payment verification
+    // Log successful payment verification (IMMUTABLE)
     await base44.asServiceRole.entities.AuditEvent.create({
       event_id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
@@ -82,9 +107,11 @@ Deno.serve(async (req) => {
       after_state: JSON.stringify({
         status: paymentIntent.status,
         amount: paymentIntent.amount / 100,
-        approval_code
+        approval_code,
+        card_last_four
       }),
-      description: `Payment confirmed for order ${order_number}`
+      severity: 'INFO',
+      description: `Payment confirmed for order ${order_number}: $${(paymentIntent.amount / 100).toFixed(2)}`
     });
 
     return Response.json({
@@ -97,10 +124,14 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Payment confirmation error:', error);
+    // SECURITY: Log error without exposing internals
+    const errorId = crypto.randomUUID();
+    console.error(`[${errorId}] Payment confirmation error:`, error);
+    
     return Response.json({ 
       success: false,
-      error: error.message 
+      error: 'Payment confirmation failed',
+      error_id: errorId
     }, { status: 500 });
   }
 });

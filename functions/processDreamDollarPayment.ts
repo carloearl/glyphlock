@@ -5,27 +5,10 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
   apiVersion: '2023-10-16',
 });
 
-/**
- * Process Dream Dollar Payment
- * Creates Stripe Payment Intent for Dream Dollar purchase
- * 
- * Expected payload:
- * {
- *   amount: number (total charge in dollars),
- *   order_number: string,
- *   customer_name: string,
- *   customer_email?: string,
- *   description: string
- * }
- * 
- * Returns:
- * {
- *   success: boolean,
- *   client_secret: string,
- *   payment_intent_id: string,
- *   amount: number
- * }
- */
+// FRAUD PREVENTION: Rate limiting map
+const paymentAttempts = new Map();
+const MAX_PAYMENT_ATTEMPTS_PER_HOUR = 10;
+const LOCKOUT_DURATION_MS = 3600000; // 1 hour
 
 Deno.serve(async (req) => {
   try {
@@ -43,6 +26,28 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
+    // FRAUD PREVENTION: Rate limit per user
+    const now = Date.now();
+    const attemptKey = user.email;
+    const attempts = paymentAttempts.get(attemptKey);
+
+    if (attempts) {
+      if (now < attempts.resetAt) {
+        if (attempts.count >= MAX_PAYMENT_ATTEMPTS_PER_HOUR) {
+          return Response.json({
+            error: 'RATE_LIMIT_EXCEEDED',
+            message: 'Too many payment attempts. Please wait.',
+            retry_after_seconds: Math.ceil((attempts.resetAt - now) / 1000)
+          }, { status: 429 });
+        }
+        attempts.count++;
+      } else {
+        paymentAttempts.set(attemptKey, { count: 1, resetAt: now + LOCKOUT_DURATION_MS });
+      }
+    } else {
+      paymentAttempts.set(attemptKey, { count: 1, resetAt: now + LOCKOUT_DURATION_MS });
+    }
+
     const payload = await req.json();
     const {
       amount,
@@ -52,12 +57,30 @@ Deno.serve(async (req) => {
       description
     } = payload;
 
-    if (!amount || amount <= 0) {
-      return Response.json({ error: 'Invalid amount' }, { status: 400 });
+    // FRAUD PREVENTION: Validate amount server-side
+    if (!amount || amount <= 0 || amount > 50000) {
+      return Response.json({ 
+        error: 'Invalid amount',
+        message: 'Amount must be between $0.01 and $50,000'
+      }, { status: 400 });
     }
 
-    if (!order_number) {
-      return Response.json({ error: 'Missing order_number' }, { status: 400 });
+    if (!order_number || typeof order_number !== 'string') {
+      return Response.json({ error: 'Missing or invalid order_number' }, { status: 400 });
+    }
+
+    // FRAUD PREVENTION: Check for duplicate order_number (idempotency)
+    const existingPayment = await base44.asServiceRole.entities.AuditEvent.filter({
+      entity_type: 'PaymentIntent',
+      description: { $regex: order_number }
+    }, null, 1);
+
+    if (existingPayment.length > 0) {
+      return Response.json({
+        error: 'DUPLICATE_ORDER',
+        message: 'This order number has already been processed',
+        existing_event_id: existingPayment[0].event_id
+      }, { status: 409 });
     }
 
     // Create Payment Intent
@@ -78,7 +101,7 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Log payment intent creation
+    // Log payment intent creation (IMMUTABLE)
     await base44.asServiceRole.entities.AuditEvent.create({
       event_id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
@@ -91,8 +114,10 @@ Deno.serve(async (req) => {
       after_state: JSON.stringify({
         amount,
         order_number,
-        status: paymentIntent.status
+        status: paymentIntent.status,
+        payment_intent_id: paymentIntent.id
       }),
+      severity: 'INFO',
       description: `Payment intent created for order ${order_number}: $${amount}`
     });
 
@@ -105,10 +130,14 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Payment processing error:', error);
+    // SECURITY: Log error without exposing internals
+    const errorId = crypto.randomUUID();
+    console.error(`[${errorId}] Payment processing error:`, error);
+    
     return Response.json({ 
       success: false,
-      error: error.message 
+      error: 'Payment processing failed',
+      error_id: errorId
     }, { status: 500 });
   }
 });

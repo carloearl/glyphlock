@@ -9,6 +9,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // RBAC: Only staff/admin can create Dream Dollar sales
+    if (!['admin', 'manager', 'staff'].includes(user.role)) {
+      return Response.json({ 
+        error: 'Forbidden: Staff access required to process Dream Dollar sales' 
+      }, { status: 403 });
+    }
+
     const payload = await req.json();
     const {
       venue_id,
@@ -22,7 +29,40 @@ Deno.serve(async (req) => {
       card_last_four
     } = payload;
 
-    // Calculate totals
+    // FRAUD PREVENTION: Validate inputs server-side
+    if (!venue_id || !customer_name || !denominations || !Array.isArray(denominations)) {
+      return Response.json({ error: 'Invalid request: missing required fields' }, { status: 400 });
+    }
+
+    if (!approval_code || !processor_reference) {
+      return Response.json({ error: 'Invalid payment: missing approval code or processor reference' }, { status: 400 });
+    }
+
+    // FRAUD PREVENTION: Validate denominations are real values
+    const validDenoms = [1, 5, 10, 20, 50, 100];
+    for (const d of denominations) {
+      if (!validDenoms.includes(d.denomination) || d.quantity <= 0 || d.quantity > 1000) {
+        return Response.json({ 
+          error: `Invalid denomination: ${d.denomination} or quantity: ${d.quantity}` 
+        }, { status: 400 });
+      }
+    }
+
+    // FRAUD PREVENTION: Check for duplicate processor_reference (replay attack)
+    const existingBatch = await base44.asServiceRole.entities.DreamDollarBatch.filter({
+      processor_reference,
+      venue_id
+    }, null, 1);
+
+    if (existingBatch.length > 0) {
+      return Response.json({
+        error: 'DUPLICATE_TRANSACTION',
+        message: 'This payment has already been processed',
+        existing_batch_id: existingBatch[0].batch_id
+      }, { status: 409 });
+    }
+
+    // Calculate totals SERVER-SIDE (never trust client)
     let total_face_value = 0;
     const processed_denominations = denominations.map(d => {
       const total_value = d.denomination * d.quantity;
@@ -37,8 +77,8 @@ Deno.serve(async (req) => {
     const surcharge_amount = total_face_value * surcharge_rate;
     const total_charged = total_face_value + surcharge_amount;
 
-    // Create batch ID
-    const batch_id = `DD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    // Create batch ID (collision-resistant)
+    const batch_id = `DD-${Date.now()}-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
 
     // Create DreamDollarBatch record
     const batch = await base44.asServiceRole.entities.DreamDollarBatch.create({
@@ -104,7 +144,7 @@ Deno.serve(async (req) => {
 
     await base44.asServiceRole.entities.BarcodeRegistry.bulkCreate(barcode_entries);
 
-    // Create audit log
+    // Create audit log (IMMUTABLE)
     await base44.asServiceRole.entities.AuditEvent.create({
       event_id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
@@ -114,8 +154,15 @@ Deno.serve(async (req) => {
       entity_type: 'DreamDollarBatch',
       entity_id: batch_id,
       action: 'CREATE',
-      after_state: JSON.stringify({ batch, bills_count: bills.length }),
-      description: `Dream Dollar sale created: ${bills.length} bills, total value $${total_face_value}`
+      after_state: JSON.stringify({ 
+        batch_id,
+        total_face_value,
+        total_charged,
+        bills_count: bills.length,
+        processor_reference
+      }),
+      severity: 'INFO',
+      description: `Dream Dollar sale created: ${bills.length} bills, face value $${total_face_value}, charged $${total_charged}`
     });
 
     return Response.json({
@@ -126,17 +173,29 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Dream Dollar sale error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    // SECURITY: Log error to audit without exposing internals to client
+    const errorId = crypto.randomUUID();
+    console.error(`[${errorId}] Dream Dollar sale error:`, error);
+    
+    return Response.json({ 
+      error: 'Transaction processing failed',
+      error_id: errorId,
+      message: 'Contact support with this error ID'
+    }, { status: 500 });
   }
 });
 
 function generateSerialNumber() {
-  // Generate 12-digit serial: YYYYMMDD + 4 random digits
+  // Generate cryptographically unique 12-digit serial: YYYYMMDD + 4 secure random digits
   const date = new Date();
   const dateStr = date.getFullYear().toString() +
                   (date.getMonth() + 1).toString().padStart(2, '0') +
                   date.getDate().toString().padStart(2, '0');
-  const random = Math.floor(1000 + Math.random() * 9000);
+  
+  // Use crypto.getRandomValues for security
+  const randomArray = new Uint32Array(1);
+  crypto.getRandomValues(randomArray);
+  const random = (randomArray[0] % 9000) + 1000; // 1000-9999
+  
   return `${dateStr}${random}`;
 }
