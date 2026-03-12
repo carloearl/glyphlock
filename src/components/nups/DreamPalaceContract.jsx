@@ -55,13 +55,15 @@ const ACKNOWLEDGMENTS = [
   "You have read and understood the Terms and Conditions on the front and back side of this contract. And Agree."
 ];
 
-export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
+export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   const [step, setStep] = useState(0); // 0=form, 1=contract scroll, 2=clickwrap, 3=biometrics+sign, 4=staff sign, 5=print+rescan
   const [contractPreviewOpen, setContractPreviewOpen] = useState(false);
   const [contractScrolled, setContractScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState({});
   const [savedOrderId, setSavedOrderId] = useState(null);
+  const [batchCreated, setBatchCreated] = useState(null);
+  const [backendError, setBackendError] = useState(null);
 
   // Customer / Purchaser
   const [customerName, setCustomerName] = useState("");
@@ -154,35 +156,71 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
 
   const handleGuestSign = async () => {
     setLoading(true);
-    const order = await base44.entities.DreamPalaceOrder.create({
-      order_number: orderNumber,
-      status: "signed",
-      customer_name: customerName,
-      customer_id_number: customerId,
-      customer_address: customerAddress,
-      customer_state: customerState,
-      customer_zip: customerZip,
-      purchaser_card_name: purchaserCardName,
-      card_last_six: cardLastSix,
-      card_exp: cardExp,
-      approval_code: approvalCode,
-      manager_name: managerName,
-      hostess_name: hostessName,
-      line_items: lineItems.filter(li => li.room_ent_dur_id || li.amount > 0),
-      dream_dollar_value: dreamDollarValue,
-      processing_surcharge: processingSurcharge,
-      grand_total: grandTotal,
-      acknowledgments_checked: true,
-      customer_signature: signature,
-      thumbprint_url: thumbprintUrl,
-      guest_photo_url: guestPhotoUrl,
-      id_photo_url: idPhotoUrl,
-      id_photo_back_url: idPhotoBackUrl,
-      signed_at: new Date().toISOString(),
-    });
-    setSavedOrderId(order.id);
-    setLoading(false);
-    setStep(4);
+    setBackendError(null);
+    
+    try {
+      // STEP 1: Create DreamPalaceOrder record
+      const order = await base44.entities.DreamPalaceOrder.create({
+        order_number: orderNumber,
+        status: "signed",
+        customer_name: customerName,
+        customer_id_number: customerId,
+        customer_address: customerAddress,
+        customer_state: customerState,
+        customer_zip: customerZip,
+        purchaser_card_name: purchaserCardName,
+        card_last_six: cardLastSix,
+        card_exp: cardExp,
+        approval_code: approvalCode,
+        manager_name: managerName,
+        hostess_name: hostessName,
+        line_items: lineItems.filter(li => li.room_ent_dur_id || li.amount > 0),
+        dream_dollar_value: dreamDollarValue,
+        processing_surcharge: processingSurcharge,
+        grand_total: grandTotal,
+        acknowledgments_checked: true,
+        customer_signature: signature,
+        thumbprint_url: thumbprintUrl,
+        guest_photo_url: guestPhotoUrl,
+        id_photo_url: idPhotoUrl,
+        id_photo_back_url: idPhotoBackUrl,
+        signed_at: new Date().toISOString(),
+      });
+      setSavedOrderId(order.id);
+
+      // STEP 2: Call backend to create Dream Dollar batch + bills
+      if (dreamDollarValue > 0) {
+        const saleResponse = await base44.functions.invoke('createDreamDollarSale', {
+          venue_id: "dream-palace-tempe",
+          customer_name: customerName,
+          customer_identity_id: customerId || null,
+          denominations: buildDenominationsArray(dreamDollarValue),
+          surcharge_rate: 0.30,
+          approval_code: approvalCode,
+          processor_reference: `ORDER-${orderNumber}`,
+          payment_method: "card",
+          card_last_four: cardLastSix.slice(-4)
+        });
+
+        if (!saleResponse.data.success) {
+          throw new Error(saleResponse.data.error || "Failed to create Dream Dollar sale");
+        }
+
+        setBatchCreated(saleResponse.data.batch);
+        
+        // Link batch to order
+        await base44.entities.DreamPalaceOrder.update(order.id, {
+          status: "printed"
+        });
+      }
+
+      setLoading(false);
+      setStep(4);
+    } catch (error) {
+      console.error("Guest sign error:", error);
+      setBackendError(error.message || "Failed to process sale. Please contact support.");
+      setLoading(false);
+    }
   };
 
   const handleStaffSign = async () => {
@@ -202,9 +240,9 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
     setTimeout(() => w.print(), 400);
     setPrinted(true);
     // Auto-trigger club currency printing after contract print
-    if (onPrintCurrency && dreamDollarValue > 0) {
+    if (onCurrencyPrint && dreamDollarValue > 0 && batchCreated) {
       setTimeout(() => {
-        onPrintCurrency(dreamDollarValue, orderNumber);
+        onCurrencyPrint(dreamDollarValue, orderNumber);
       }, 1500);
     }
   };
@@ -221,6 +259,24 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
     });
     setLoading(false);
     if (onComplete) onComplete(savedOrderId);
+  };
+
+  // Convert Dream Dollar total into denominations (smart split)
+  const buildDenominationsArray = (total) => {
+    const denoms = [];
+    let remaining = total;
+    
+    // Priority: use largest bills possible
+    const bills = [100, 50, 20, 10, 5, 1];
+    for (const denom of bills) {
+      if (remaining >= denom) {
+        const qty = Math.floor(remaining / denom);
+        denoms.push({ denomination: denom, quantity: qty });
+        remaining -= qty * denom;
+      }
+    }
+    
+    return denoms;
   };
 
   const buildPrintHtml = () => {
@@ -547,6 +603,31 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
           <p className="text-xs text-gray-400">Order: {orderNumber} | {customerName}</p>
         </div>
 
+        {/* Backend Error Display */}
+        {backendError && (
+          <Card className="bg-red-900/20 border-red-500/40">
+            <CardContent className="pt-4">
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs font-bold">!</span>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-red-400">Transaction Failed</div>
+                  <div className="text-xs text-red-300 mt-1">{backendError}</div>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="mt-2 border-red-500/40 text-red-400" 
+                    onClick={() => setBackendError(null)}
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="bg-gray-900/60 border-green-500/30">
           <CardContent className="pt-4 space-y-4">
             {/* Signature */}
@@ -644,8 +725,13 @@ export default function DreamPalaceContract({ onComplete, onPrintCurrency }) {
           <CardContent className="p-4 flex items-center gap-3">
             <CheckCircle2 className="w-5 h-5 text-green-400" />
             <div>
-              <div className="text-sm font-bold text-green-400">Guest Signature Verified</div>
+              <div className="text-sm font-bold text-green-400">Transaction Confirmed</div>
               <div className="text-xs text-gray-400">{customerName} — ${grandTotal.toFixed(2)} — Biometrics captured</div>
+              {batchCreated && (
+                <div className="text-xs text-green-300 mt-1">
+                  ✓ Dream Dollar Batch: {batchCreated.batch_id} — {batchCreated.total_face_value ? `${Math.round(batchCreated.total_face_value / batchCreated.denominations.reduce((s, d) => s + d.quantity, 0))} bills` : 'Created'}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
