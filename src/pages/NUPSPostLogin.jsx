@@ -32,12 +32,23 @@ export default function NUPSPostLogin() {
 
       setUser(currentUser);
 
-      // Auto-redirect based on role after 2 seconds
+      // Check for stored destination from NUPSLogin flow
+      const savedDest = sessionStorage.getItem('nups_destination');
+      if (savedDest) {
+        sessionStorage.removeItem('nups_destination');
+        sessionStorage.removeItem('nups_role_hint');
+        setTimeout(() => navigate(`/${savedDest}`), 2000);
+        return;
+      }
+
+      // Fallback: Auto-redirect based on actual user role
       setTimeout(() => {
         if (currentUser.role === 'owner' || currentUser.role === 'admin') {
           navigate('/NUPSOwner');
         } else if (currentUser.role === 'staff') {
           navigate('/NUPSStaff');
+        } else if (currentUser.role === 'entertainer') {
+          navigate('/EntertainerCheckIn');
         } else {
           navigate('/DreamDollarHub');
         }
