@@ -32,11 +32,11 @@ export async function synthesizeTTS(text, settings = {}) {
 
     if (!response.data) throw new Error('No audio data returned');
     
-    // Response is base64 encoded audio
-    const audioData = Uint8Array.from(atob(response.data.audio), c => c.charCodeAt(0));
-    console.log('[TTS Client] Audio fetched:', audioData.byteLength, 'bytes');
+    // Backend returns ArrayBuffer directly via Base44
+    const audioData = response.data;
+    console.log('[TTS Client] Audio fetched:', audioData.byteLength || audioData.length, 'bytes');
     
-    return audioData.buffer;
+    return audioData;
 
   } catch (error) {
     console.error('[TTS Client] Failed:', error);
