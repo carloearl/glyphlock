@@ -12,6 +12,7 @@ import DemoModeController from '@/components/nups/pos/DemoModeController';
 import FraudAnalyticsDashboard from '@/components/nups/FraudAnalyticsDashboard';
 import IDScannerCamera from '@/components/nups/IDScannerCamera';
 import VerificationCameraCapture from '@/components/nups/VerificationCameraCapture';
+import ClubCurrencyPressView from '@/components/nups/press/ClubCurrencyPressView';
 
 /**
  * Dream Dollar Hub - Unified transaction, verification, and compliance module.
@@ -113,7 +114,7 @@ export default function DreamDollarHub() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 gap-2">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-2">
             <TabsTrigger value="sales" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
               <span className="hidden sm:inline">Sales</span>
@@ -121,6 +122,10 @@ export default function DreamDollarHub() {
             <TabsTrigger value="receipt" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">Receipt</span>
+            </TabsTrigger>
+            <TabsTrigger value="press" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Press</span>
             </TabsTrigger>
             <TabsTrigger value="id-scan" className="flex items-center gap-2">
               <Scan className="w-4 h-4" />
@@ -167,6 +172,11 @@ export default function DreamDollarHub() {
                 <p className="text-sm mt-2">Complete a sale to generate receipt</p>
               </div>
             )}
+          </TabsContent>
+
+          {/* Club Currency Press Tab */}
+          <TabsContent value="press">
+            <ClubCurrencyPressView />
           </TabsContent>
 
           {/* ID Scanner Tab */}

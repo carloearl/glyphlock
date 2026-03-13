@@ -4,12 +4,13 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Store, ShoppingCart, LogOut, Users, FileText, Clock, CreditCard, Loader2 } from "lucide-react";
+import { Store, ShoppingCart, LogOut, Users, FileText, Clock, CreditCard, Loader2, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import POSCashRegister from "../components/nups/POSCashRegister.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
+import DreamDollarHub from "./DreamDollarHub";
 import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/SEOHead";
 
@@ -121,10 +122,14 @@ export default function NUPSStaff() {
 
       <div className="container mx-auto p-4 md:p-6" style={{ position: 'relative', zIndex: 20 }}>
         <Tabs defaultValue="register" className="space-y-6">
-          <TabsList className="bg-gray-900/95 border border-cyan-500/30 grid grid-cols-4 gap-1 p-1.5 w-full min-h-0" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
+          <TabsList className="bg-gray-900/95 border border-cyan-500/30 grid grid-cols-5 gap-1 p-1.5 w-full min-h-0" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
             <TabsTrigger value="register" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border-cyan-500/50" style={{ pointerEvents: 'auto', cursor: 'pointer', position: 'relative', zIndex: 31 }}>
               <ShoppingCart className="w-4 h-4" />
               <span className="text-[10px] md:text-xs">Register</span>
+            </TabsTrigger>
+            <TabsTrigger value="contracts" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" style={{ pointerEvents: 'auto', cursor: 'pointer', position: 'relative', zIndex: 31 }}>
+              <DollarSign className="w-4 h-4" />
+              <span className="text-[10px] md:text-xs">Contracts</span>
             </TabsTrigger>
             <TabsTrigger value="batch" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" style={{ pointerEvents: 'auto', cursor: 'pointer', position: 'relative', zIndex: 31 }}>
               <CreditCard className="w-4 h-4" />
@@ -142,6 +147,9 @@ export default function NUPSStaff() {
 
           <TabsContent value="register" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
             <POSCashRegister user={user} />
+          </TabsContent>
+          <TabsContent value="contracts" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
+            <DreamDollarHub />
           </TabsContent>
           <TabsContent value="batch" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
             <BatchManagement user={user} />
