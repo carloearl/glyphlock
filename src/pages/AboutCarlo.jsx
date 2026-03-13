@@ -146,17 +146,21 @@ export default function AboutCarloPage() {
         <section className="w-full max-w-5xl mb-20 px-4">
           <div className="space-y-8">
             <p className="text-2xl sm:text-3xl md:text-4xl text-white font-bold leading-tight text-center">
-              I do not invent from comfort.
+              Before GlyphLock existed, there was a problem most people refused to see.
             </p>
-            <p className="text-2xl sm:text-3xl md:text-4xl text-white font-bold leading-tight text-center">
-              I forge under pressure.
-            </p>
-            <p className="text-xl sm:text-2xl text-blue-200 leading-relaxed text-center max-w-4xl mx-auto">
-              I take what life throws at me and turn it into structure. I take pain and turn it into design. 
-              GlyphLock was not born from ambition or trend chasing. <span className="text-white font-semibold">It was born from necessity.</span>
-            </p>
-            <p className="text-lg sm:text-xl text-blue-200/90 leading-relaxed text-center max-w-4xl mx-auto">
-              From watching truth get bent, identity get stolen, and creators get erased while the world pretended that was normal.
+            <div className="space-y-4 text-xl sm:text-2xl text-blue-200 leading-relaxed text-center max-w-4xl mx-auto">
+              <p>Truth was becoming optional.</p>
+              <p>Identity was becoming disposable.</p>
+              <p className="text-white font-semibold">And the people who actually built things were quietly losing ownership of their own work.</p>
+            </div>
+            <div className="space-y-3 text-lg sm:text-xl text-blue-200/90 leading-relaxed text-center max-w-4xl mx-auto">
+              <p>Ideas were copied.</p>
+              <p>Credit was reassigned.</p>
+              <p>Evidence disappeared.</p>
+              <p className="text-white font-semibold mt-4">The world kept moving as if none of it mattered.</p>
+            </div>
+            <p className="text-xl sm:text-2xl text-cyan-300 font-bold text-center mt-8">
+              For Carlo Rene Earl, that reality was never abstract. It was personal.
             </p>
           </div>
         </section>
@@ -177,12 +181,21 @@ export default function AboutCarloPage() {
 
           <div className="space-y-8 text-lg sm:text-xl leading-relaxed">
             <p className="text-blue-100">
-              <span className="text-white font-semibold">I didn't wake up one morning and decide to become a founder.</span> The world pushed me there.
+              Years spent designing, building, writing, producing music, and creating systems revealed a pattern that repeated itself everywhere.
+            </p>
+
+            <div className="space-y-3 text-center">
+              <p className="text-white font-semibold">The loudest voice often won.</p>
+              <p className="text-white font-semibold">The fastest copier often took the credit.</p>
+              <p className="text-red-300 font-bold">The original creator was left behind.</p>
+            </div>
+
+            <p className="text-blue-100">
+              <span className="text-white font-semibold">GlyphLock was not born from a single moment.</span> It was born from pressure.
             </p>
 
             <p className="text-blue-100">
-              I watched identity turn into a costume anyone could wear. I watched truth become a product—rewritten, replaced, sold to whoever lied louder. 
-              I experienced what it feels like to be <span className="text-cyan-300 font-semibold">copied, ignored, underestimated,</span> and stripped of credit for work I broke myself to create.
+              Years of watching identity blur, authorship dissolve, and proof lose its authority in a digital world capable of rewriting anything.
             </p>
 
             <div 
@@ -201,20 +214,45 @@ export default function AboutCarloPage() {
               {/* Subtle pulsing glow hint */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-400/0 via-indigo-400/10 to-violet-400/0 opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-700" />
               <p className="text-blue-100">
-                In Arizona, a simple conversation cracked everything open. Collin talked about camouflage—how patterns hide people. 
-                I wasn't interested in hiding. I looked past the surface and asked the question that wouldn't let me go:
+                Then a conversation in Arizona shifted the trajectory. <span className="text-white font-semibold">Collin Vanderginst was talking about camouflage.</span> Military patterns designed to hide soldiers in plain sight.
               </p>
+              <p className="text-blue-100 mt-4">Most people would have stopped there.</p>
+              <p className="text-blue-100 mt-4">But Carlo saw something else. <span className="text-cyan-300 font-semibold">A question.</span></p>
               <p className="text-2xl sm:text-3xl text-white font-bold mt-6 text-center">
-                What if the pattern isn't hiding you?<br/>
+                What if the pattern is not hiding you?<br/>
                 <span className="bg-gradient-to-r from-blue-300 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">
-                  What if the pattern <em>is</em> the intelligence?
+                  What if the pattern itself is intelligence?
                 </span>
               </p>
             </div>
 
+            <p className="text-xl text-white font-bold text-center">
+              That question changed everything.
+            </p>
+
             <p className="text-blue-100">
-              That question changed everything. It became the realization that <span className="text-white font-semibold">images are not decoration and symbols are not art alone.</span> 
-              They are vessels. For proof. For intent. For action. For contracts that cannot be faked.
+              Because once you see patterns differently, you understand something deeper.
+            </p>
+
+            <div className="space-y-3 text-center">
+              <p className="text-white">Images are not decoration.</p>
+              <p className="text-white">Symbols are not merely art.</p>
+              <p className="text-cyan-300 font-bold text-xl">They are vessels.</p>
+            </div>
+
+            <div className="space-y-2 text-center text-blue-200">
+              <p>Vessels for identity.</p>
+              <p>For instruction.</p>
+              <p>For verification.</p>
+              <p className="text-white font-semibold">For truth.</p>
+            </div>
+
+            <p className="text-blue-100 mt-8">
+              <span className="text-cyan-300 font-semibold">That realization became the seed of GlyphLock.</span>
+            </p>
+
+            <p className="text-blue-100">
+              But ideas alone do not build systems.
             </p>
           </div>
         </section>
@@ -235,15 +273,34 @@ export default function AboutCarloPage() {
             </h3>
             
             <p className="relative z-10 text-lg sm:text-xl text-violet-100 leading-relaxed text-center max-w-4xl mx-auto">
-              The road from that moment to GlyphLock was carved through <span className="text-red-300">broken trust, unpaid bills, slow partners, empty promises,</span> and a family that needed stability when life offered none.
+              Between that insight and the first architecture of GlyphLock was a long road through the realities of creation.
+            </p>
+
+            <div className="relative z-10 space-y-3 text-center mt-6">
+              <p className="text-red-300 font-semibold">Broken trust.</p>
+              <p className="text-orange-300 font-semibold">Partners who slowed progress.</p>
+              <p className="text-yellow-300 font-semibold">Bills that did not wait.</p>
+              <p className="text-violet-100">A family that needed stability while the future remained uncertain.</p>
+            </div>
+            
+            <p className="relative z-10 text-xl sm:text-2xl text-white font-bold mt-8 text-center">
+              The idea could have died many times.
             </p>
             
-            <p className="relative z-10 text-xl sm:text-2xl text-white font-semibold mt-8 text-center">
-              The idea should have died more times than I can count.
+            <p className="relative z-10 text-lg text-white/60 text-center mt-2">
+              Most ideas do.
             </p>
             
-            <p className="relative z-10 text-lg sm:text-xl text-violet-100 leading-relaxed mt-4 text-center">
-              But I carried it when no one else would. Not because it was easy—but because <span className="text-cyan-300 font-semibold">letting it die would have meant accepting a world where truth has no spine.</span>
+            <p className="relative z-10 text-xl sm:text-2xl text-white font-bold mt-6 text-center">
+              But it did not die.
+            </p>
+            
+            <p className="relative z-10 text-lg sm:text-xl text-violet-100 leading-relaxed mt-6 text-center">
+              Because abandoning it would have meant accepting a world where truth could always be overwritten.
+            </p>
+
+            <p className="relative z-10 text-xl text-cyan-300 font-bold text-center mt-6">
+              That was never an option.
             </p>
           </div>
         </section>
