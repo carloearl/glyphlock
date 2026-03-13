@@ -212,9 +212,8 @@ export default function NUPSPostLogin() {
         <div className="mt-12 text-center">
           <Button
             variant="outline"
-            onClick={() => {
-              base44.auth.logout();
-              navigate('/NUPSLogin');
+            onClick={async () => {
+              await base44.auth.logout('/NUPSLogin');
             }}
             className="border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500"
           >
