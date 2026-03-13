@@ -1,75 +1,226 @@
-import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
-import { createPageUrl } from "@/utils";
-import { Loader2, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-// Maps actual Base44 role to authorized destination
-function getAuthorizedDestination(user, requestedRoleKey) {
-  // SECURITY: Only users with Base44 role "admin" can access Owner dashboard
-  const isActualAdmin = user.role === "admin";
-  
-  // If user requested Admin/Manager but isn't actually admin, downgrade to Staff
-  if ((requestedRoleKey === "Admin" || requestedRoleKey === "Manager") && !isActualAdmin) {
-    return "NUPSStaff";
-  }
-  
-  // Map based on actual role, not requested role
-  if (isActualAdmin) return "NUPSOwner";
-  if (requestedRoleKey === "Entertainer") return "EntertainerCheckIn";
-  return "NUPSStaff";
-}
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  ShoppingCart, 
+  DollarSign, 
+  Users, 
+  BarChart3,
+  Lock,
+  Loader2
+} from 'lucide-react';
 
 export default function NUPSPostLogin() {
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) {
-          window.location.href = createPageUrl("NUPSLogin");
-          return;
-        }
-
-        // Get authenticated user and verify actual role
-        const user = await base44.auth.me();
-        
-        // Pull the role card the user selected (just a hint, not authorization)
-        const roleHint = sessionStorage.getItem("nups_role_hint");
-        sessionStorage.removeItem("nups_destination");
-        sessionStorage.removeItem("nups_role_hint");
-
-        // Route based on ACTUAL Base44 role, not what they selected on login card
-        const destination = getAuthorizedDestination(user, roleHint);
-        window.location.href = createPageUrl(destination);
-      } catch (err) {
-        setError("Authentication failed. Please try signing in again.");
-      }
-    })();
+    checkAuthAndRedirect();
   }, []);
 
-  if (error) {
+  const checkAuthAndRedirect = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      
+      if (!currentUser) {
+        navigate('/NUPSLogin');
+        return;
+      }
+
+      setUser(currentUser);
+
+      // Auto-redirect based on role after 2 seconds
+      setTimeout(() => {
+        if (currentUser.role === 'owner' || currentUser.role === 'admin') {
+          navigate('/NUPSOwner');
+        } else if (currentUser.role === 'staff') {
+          navigate('/NUPSStaff');
+        } else {
+          navigate('/DreamDollarHub');
+        }
+      }, 2000);
+
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      navigate('/NUPSLogin');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualNavigation = (path) => {
+    navigate(path);
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="text-center space-y-4 max-w-xs">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto" />
-          <p className="text-white font-bold">Something went wrong</p>
-          <p className="text-gray-400 text-sm">{error}</p>
-          <Button onClick={() => { window.location.href = createPageUrl("NUPSLogin"); }}
-            className="w-full bg-violet-600 hover:bg-violet-500">
-            Back to Login
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-cyan-400 animate-spin mx-auto mb-4" />
+          <p className="text-slate-400 text-lg">Authenticating...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="text-center space-y-3">
-        <Loader2 className="w-10 h-10 text-purple-400 mx-auto animate-spin" />
-        <p className="text-white/50 text-sm">Routing to your dashboard…</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-6">
+      <div className="w-full max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 bg-slate-800/50 px-6 py-3 rounded-full border border-cyan-500/30 mb-6">
+            <Lock className="w-5 h-5 text-cyan-400" />
+            <span className="text-cyan-400 font-mono text-sm">AUTHENTICATED</span>
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Welcome to N.U.P.S.
+          </h1>
+          
+          <p className="text-slate-400 text-lg mb-2">
+            Nightclub Utility Payment System
+          </p>
+          
+          {user && (
+            <p className="text-slate-500 text-sm">
+              Signed in as: <span className="text-cyan-400 font-mono">{user.email}</span>
+            </p>
+          )}
+        </div>
+
+        {/* Role-Based Cards */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Staff Portal */}
+          {user?.role === 'staff' && (
+            <Card 
+              className="bg-slate-900/50 border-cyan-500/30 hover:border-cyan-400/60 transition-all cursor-pointer group"
+              onClick={() => handleManualNavigation('/NUPSStaff')}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-cyan-400">
+                  <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  Staff Terminal
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 mb-4">
+                  Access POS, contracts, batch management, and time clock
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                  <span className="bg-slate-800 px-2 py-1 rounded">Register</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Contracts</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Batches</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Clock In/Out</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Owner/Admin Portal */}
+          {(user?.role === 'owner' || user?.role === 'admin') && (
+            <Card 
+              className="bg-slate-900/50 border-purple-500/30 hover:border-purple-400/60 transition-all cursor-pointer group"
+              onClick={() => handleManualNavigation('/NUPSOwner')}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-purple-400">
+                  <BarChart3 className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  Owner Dashboard
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 mb-4">
+                  Analytics, reports, staff management, and system controls
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                  <span className="bg-slate-800 px-2 py-1 rounded">Analytics</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Reports</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Staff</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Settings</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Dream Dollar Hub */}
+          <Card 
+            className="bg-slate-900/50 border-blue-500/30 hover:border-blue-400/60 transition-all cursor-pointer group"
+            onClick={() => handleManualNavigation('/DreamDollarHub')}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-blue-400">
+                <DollarSign className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                Dream Dollar Hub
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-400 mb-4">
+                Currency operations, sales, press, redemption, and fraud monitoring
+              </p>
+              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                <span className="bg-slate-800 px-2 py-1 rounded">New Sale</span>
+                <span className="bg-slate-800 px-2 py-1 rounded">Press Bills</span>
+                <span className="bg-slate-800 px-2 py-1 rounded">Redeem</span>
+                <span className="bg-slate-800 px-2 py-1 rounded">Analytics</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Entertainer Portal */}
+          {user?.role === 'entertainer' && (
+            <Card 
+              className="bg-slate-900/50 border-pink-500/30 hover:border-pink-400/60 transition-all cursor-pointer group"
+              onClick={() => handleManualNavigation('/EntertainerCheckIn')}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-pink-400">
+                  <Users className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  Entertainer Portal
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-400 mb-4">
+                  Check in, view schedule, track earnings, and manage profile
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                  <span className="bg-slate-800 px-2 py-1 rounded">Check In</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Schedule</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Earnings</span>
+                  <span className="bg-slate-800 px-2 py-1 rounded">Profile</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Auto-redirect notice */}
+        <div className="text-center">
+          <p className="text-slate-500 text-sm">
+            Redirecting to your dashboard automatically...
+          </p>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse delay-75"></div>
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse delay-150"></div>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <div className="mt-12 text-center">
+          <Button
+            variant="outline"
+            onClick={() => {
+              base44.auth.logout();
+              navigate('/NUPSLogin');
+            }}
+            className="border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500"
+          >
+            Sign Out
+          </Button>
+        </div>
       </div>
     </div>
   );

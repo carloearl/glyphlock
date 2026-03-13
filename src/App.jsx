@@ -13,6 +13,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import SettlementReports from './pages/SettlementReports';
 import GovernanceHub from './pages/GovernanceHub';
+import NUPSPostLogin from './pages/NUPSPostLogin';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
             <GovernanceHub />
           </LayoutWrapper>
         } />
+        <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
