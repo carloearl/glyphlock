@@ -1,5 +1,5 @@
 // GLYPHLOCK: Advanced TTS - Granular Voice Control
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
@@ -37,7 +37,8 @@ Deno.serve(async (req) => {
     }
 
     const { 
-      text, 
+      text,
+      provider = 'openai',
       voice = 'nova',
       speed = 1.0,
       emotion = null,
@@ -49,6 +50,23 @@ Deno.serve(async (req) => {
 
     if (!text || typeof text !== 'string') {
       return Response.json({ error: 'Text is required' }, { status: 400 });
+    }
+
+    // Route to Qwen TTS if provider is qwen
+    if (provider === 'qwen') {
+      const qwenResponse = await base44.asServiceRole.functions.invoke('qwenTTS', {
+        text,
+        voice,
+        speed: customSpeed || speed,
+        emotion: emotion || 'neutral',
+        pitch: 1.0
+      });
+      
+      if (qwenResponse.status === 200) {
+        return qwenResponse;
+      }
+      // Fallback to OpenAI if Qwen fails
+      console.warn('Qwen TTS failed, falling back to OpenAI');
     }
 
     // Apply emotion preset if specified
