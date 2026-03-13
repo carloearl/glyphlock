@@ -133,19 +133,16 @@ export default function NUPSLogin() {
       try {
         const isAuth = await base44.auth.isAuthenticated();
         if (isAuth) {
-          // Check if there's a saved destination from a previous sign-in attempt
-          const savedDest = sessionStorage.getItem("nups_destination");
-          sessionStorage.removeItem("nups_destination");
-          sessionStorage.removeItem("nups_role_hint");
-
-          if (savedDest && savedDest !== "NUPSLogin") {
-            window.location.href = createPageUrl(savedDest);
-            return;
-          }
-
-          // No hint — use base44 role to decide
           const user = await base44.auth.me();
-          const dest = user.role === "admin" ? "NUPSOwner" : "NUPSStaff";
+          
+          // Direct role-based routing for authenticated users
+          let dest = "NUPSStaff";
+          if (user.role === "admin" || user.role === "owner") {
+            dest = "NUPSOwner";
+          } else if (user.role === "entertainer") {
+            dest = "EntertainerCheckIn";
+          }
+          
           window.location.href = createPageUrl(dest);
           return;
         }
