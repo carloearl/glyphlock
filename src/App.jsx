@@ -14,6 +14,7 @@ import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import SettlementReports from './pages/SettlementReports';
 import GovernanceHub from './pages/GovernanceHub';
 import NUPSPostLogin from './pages/NUPSPostLogin';
+import SystemAudit from './pages/SystemAudit';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -72,6 +73,11 @@ const AuthenticatedApp = () => {
           </LayoutWrapper>
         } />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
+        <Route path="/SystemAudit" element={
+          <LayoutWrapper currentPageName="SystemAudit">
+            <SystemAudit />
+          </LayoutWrapper>
+        } />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
