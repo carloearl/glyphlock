@@ -7,6 +7,7 @@ import { Mic, Volume2, Sparkles, Brain, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function VoiceCustomizer({ onSettingsChange }) {
+  const [provider, setProvider] = useState('openai');
   const [voice, setVoice] = useState('nova');
   const [speed, setSpeed] = useState(1.0);
   const [breathiness, setBreathiness] = useState(0.5);
@@ -15,14 +16,28 @@ export default function VoiceCustomizer({ onSettingsChange }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [playing, setPlaying] = useState(false);
 
-  const voices = [
-    { id: 'nova', name: 'Nova', desc: 'Warm Female', gender: 'female' },
-    { id: 'shimmer', name: 'Shimmer', desc: 'Energetic Female', gender: 'female' },
-    { id: 'alloy', name: 'Alloy', desc: 'Professional Female', gender: 'female' },
-    { id: 'echo', name: 'Echo', desc: 'Warm Male', gender: 'male' },
-    { id: 'fable', name: 'Fable', desc: 'Narrative Male', gender: 'male' },
-    { id: 'onyx', name: 'Onyx', desc: 'Deep Male', gender: 'male' }
-  ];
+  const providerVoices = {
+    openai: [
+      { id: 'nova', name: 'Nova', desc: 'Warm Female', gender: 'female' },
+      { id: 'shimmer', name: 'Shimmer', desc: 'Energetic Female', gender: 'female' },
+      { id: 'alloy', name: 'Alloy', desc: 'Professional Female', gender: 'female' },
+      { id: 'echo', name: 'Echo', desc: 'Warm Male', gender: 'male' },
+      { id: 'fable', name: 'Fable', desc: 'Narrative Male', gender: 'male' },
+      { id: 'onyx', name: 'Onyx', desc: 'Deep Male', gender: 'male' }
+    ],
+    qwen: [
+      { id: 'qwen-neutral-female', name: 'Neutral Female', desc: 'Balanced Female', gender: 'female' },
+      { id: 'qwen-neutral-male', name: 'Neutral Male', desc: 'Balanced Male', gender: 'male' },
+      { id: 'qwen-warm-female', name: 'Warm Female', desc: 'Friendly Female', gender: 'female' },
+      { id: 'qwen-energetic-female', name: 'Energetic Female', desc: 'Dynamic Female', gender: 'female' },
+      { id: 'qwen-professional-male', name: 'Professional Male', desc: 'Business Male', gender: 'male' },
+      { id: 'qwen-friendly-male', name: 'Friendly Male', desc: 'Approachable Male', gender: 'male' },
+      { id: 'qwen-narrative-female', name: 'Narrative Female', desc: 'Storytelling Female', gender: 'female' },
+      { id: 'qwen-calm-male', name: 'Calm Male', desc: 'Soothing Male', gender: 'male' }
+    ]
+  };
+
+  const voices = providerVoices[provider] || providerVoices.openai;
 
   const emotions = [
     { id: 'neutral', name: 'Neutral', icon: '😐' },
@@ -36,9 +51,9 @@ export default function VoiceCustomizer({ onSettingsChange }) {
 
   useEffect(() => {
     if (onSettingsChange) {
-      onSettingsChange({ voice, speed, breathiness, vocalFry, emotion });
+      onSettingsChange({ provider, voice, speed, breathiness, vocalFry, emotion });
     }
-  }, [voice, speed, breathiness, vocalFry, emotion]);
+  }, [provider, voice, speed, breathiness, vocalFry, emotion]);
 
   const handleAIAnalysis = async () => {
     setAnalyzing(true);
@@ -70,6 +85,7 @@ export default function VoiceCustomizer({ onSettingsChange }) {
       const testText = "This is how I sound with your current settings.";
       const response = await base44.functions.invoke('textToSpeechAdvancedCustom', {
         text: testText,
+        provider,
         voice,
         speed,
         breathiness,
@@ -127,6 +143,26 @@ export default function VoiceCustomizer({ onSettingsChange }) {
             </>
           )}
         </Button>
+      </div>
+
+      {/* Provider Selection */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-cyan-300">TTS Provider</label>
+        <Select value={provider} onValueChange={(p) => {
+          setProvider(p);
+          setVoice(providerVoices[p][0].id);
+        }}>
+          <SelectTrigger className="bg-slate-800 border-cyan-500/30">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="openai">OpenAI (GPT Voice)</SelectItem>
+            <SelectItem value="qwen">Qwen TTS 3.5 (Alibaba)</SelectItem>
+            <SelectItem value="google">Google Cloud TTS</SelectItem>
+            <SelectItem value="microsoft">Microsoft Azure Neural</SelectItem>
+            <SelectItem value="elevenlabs">ElevenLabs</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Voice Selection */}

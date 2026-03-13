@@ -59,6 +59,23 @@ export const TTS_PROVIDERS = {
     supportsSpeed: true,
     supportsPitch: true,
     supportsEmotion: false
+  },
+  qwen: {
+    label: 'Qwen TTS 3.5 (Alibaba)',
+    voices: [
+      'qwen-neutral-female',
+      'qwen-neutral-male',
+      'qwen-warm-female',
+      'qwen-energetic-female',
+      'qwen-professional-male',
+      'qwen-friendly-male',
+      'qwen-narrative-female',
+      'qwen-calm-male'
+    ],
+    supportsSpeed: true,
+    supportsPitch: true,
+    supportsEmotion: true,
+    supportsMultilingual: true
   }
 };
 
