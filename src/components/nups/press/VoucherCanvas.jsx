@@ -39,7 +39,7 @@ function BarcodeDisplay({ data, width: bw = 2, height: bh = 40, fontSize = 12 })
 }
 
 // ─── Single Voucher Bill ───
-function VoucherBill({ serial, frontImage, backImage, billWidth, billHeight, printMode, denomination, isInteractive, elements, onElementUpdate, onElementRemove }) {
+function VoucherBill({ serial, frontImage, backImage, billWidth, billHeight, printMode, denomination, isInteractive, elements = [], onElementUpdate, onElementRemove }) {
   const showFront = printMode === PrintMode.FRONT || printMode === PrintMode.DUPLEX;
   const showBack = printMode === PrintMode.BACK;
 
@@ -187,15 +187,33 @@ export default function VoucherCanvas({ config, frontImages, backImage, elements
 
       <style>{`
         @media print {
-          body * { visibility: hidden !important; }
+          body, body * { visibility: hidden !important; }
           .voucher-canvas-container,
           .voucher-canvas-container * { visibility: visible !important; }
-          .voucher-canvas-container { position: absolute; left: 0; top: 0; }
-          .voucher-sheet { page-break-after: always; margin: 0 !important; box-shadow: none !important; }
+          .voucher-canvas-container { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%;
+            height: 100%;
+            overflow: visible !important;
+          }
+          .voucher-sheet { 
+            page-break-after: always; 
+            margin: 0 !important; 
+            box-shadow: none !important;
+            break-inside: avoid;
+          }
           .print-only { display: block !important; visibility: visible !important; }
-          .no-print { display: none !important; }
-          /* Hide drag handles in print */
-          .group\\/el > button, .group\\/el > div:last-child { display: none !important; }
+          .no-print, .print-hide { display: none !important; visibility: hidden !important; }
+          /* Hide all interactive controls */
+          .group\\/el > button { display: none !important; }
+          .group\\/el > .print-hide { display: none !important; }
+          /* Ensure images print */
+          img { 
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
         }
         @media screen {
           .print-only { display: none; }

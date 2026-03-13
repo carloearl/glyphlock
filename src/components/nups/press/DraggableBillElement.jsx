@@ -1,15 +1,16 @@
 /**
- * DraggableBillElement — Click-and-drag to move + resize elements on the bill canvas.
+ * DraggableBillElement — Click-and-drag to move + resize + rotate elements on the bill canvas.
  * Supports text, images, and shapes.
  */
 import React, { useState, useRef, useCallback } from "react";
-import { Trash2, Move, Maximize2 } from "lucide-react";
+import { Trash2, Move, Maximize2, RotateCw } from "lucide-react";
 
 export default function DraggableBillElement({ element, billWidth, billHeight, onUpdate, onRemove, isInteractive }) {
   const elRef = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
   const startRef = useRef({ x: 0, y: 0, elX: 0, elY: 0, elW: 0, elH: 0 });
+  const rotation = element.rotation || 0;
 
   const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
 
@@ -88,6 +89,8 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
         top: element.y,
         width: element.width,
         height: element.height,
+        transform: `rotate(${rotation}deg)`,
+        transformOrigin: 'center',
         zIndex: dragging || resizing ? 50 : 20,
         outline: isInteractive ? "1px dashed rgba(6,182,212,0.4)" : "none",
       }}
@@ -107,21 +110,27 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
         </div>
       )}
 
-      {/* Resize handle */}
+      {/* Controls */}
       {isInteractive && (
         <>
           <div
-            className="absolute bottom-0 right-0 w-4 h-4 bg-cyan-500 rounded-tl cursor-se-resize opacity-0 group-hover/el:opacity-100 transition-opacity flex items-center justify-center"
+            className="absolute bottom-0 right-0 w-4 h-4 bg-cyan-500 rounded-tl cursor-se-resize opacity-0 group-hover/el:opacity-100 transition-opacity flex items-center justify-center print-hide"
             onMouseDown={handleResizeStart}
             onTouchStart={handleResizeStart}
           >
             <Maximize2 className="w-2.5 h-2.5 text-white" />
           </div>
           <button
-            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/el:opacity-100 transition-opacity"
+            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/el:opacity-100 transition-opacity print-hide"
             onClick={(e) => { e.stopPropagation(); onRemove(element.id); }}
           >
             <Trash2 className="w-3 h-3 text-white" />
+          </button>
+          <button
+            className="absolute -top-2 -left-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center opacity-0 group-hover/el:opacity-100 transition-opacity print-hide"
+            onClick={(e) => { e.stopPropagation(); handleRotate(); }}
+          >
+            <RotateCw className="w-3 h-3 text-white" />
           </button>
         </>
       )}

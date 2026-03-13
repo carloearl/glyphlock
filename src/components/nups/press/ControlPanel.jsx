@@ -208,8 +208,9 @@ export default function ControlPanel({
           </div>
 
           <div>
-            <Label className="text-xs text-gray-400">Batch Count</Label>
+            <Label className="text-xs text-gray-400">Batch Count (Sheets to Print)</Label>
             <Input type="number" min="1" max="20" value={config.batchCount} onChange={(e) => update("batchCount", parseInt(e.target.value) || 1)} className="mt-1 bg-gray-800 border-gray-700" />
+            <p className="text-[10px] text-gray-500 mt-1">{is4Up ? '4' : '5'} bills per sheet × {config.batchCount} = {(is4Up ? 4 : 5) * config.batchCount} total bills</p>
           </div>
         </CardContent>
       </Card>
