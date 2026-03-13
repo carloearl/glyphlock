@@ -24,19 +24,19 @@ export async function synthesizeTTS(text, settings = {}) {
   console.log('[TTS Client] Synthesizing:', { voice, speed, emotion, textLength: text.length });
 
   try {
-    const response = await fetch('/.netlify/functions/textToSpeechOpenAI', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ text, voiceProfile: voice || 'nova', speed: speed || 1.0 })
+    const response = await base44.functions.invoke('textToSpeechOpenAI', {
+      text,
+      voiceProfile: voice || 'nova',
+      speed: speed || 1.0
     });
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.data) throw new Error('No audio data returned');
     
-    const audioData = await response.arrayBuffer();
+    // Response is base64 encoded audio
+    const audioData = Uint8Array.from(atob(response.data.audio), c => c.charCodeAt(0));
     console.log('[TTS Client] Audio fetched:', audioData.byteLength, 'bytes');
     
-    return audioData;
+    return audioData.buffer;
 
   } catch (error) {
     console.error('[TTS Client] Failed:', error);
@@ -50,8 +50,12 @@ export async function synthesizeTTS(text, settings = {}) {
  */
 export async function testTTSAvailability() {
   try {
-    await synthesizeTTS('Test', { voice: 'nova', speed: 1.0 });
-    return true;
+    const result = await base44.functions.invoke('textToSpeechOpenAI', {
+      text: 'Test',
+      voiceProfile: 'nova',
+      speed: 1.0
+    });
+    return !!result.data;
   } catch (error) {
     console.warn('[TTS Client] TTS backend not available:', error.message);
     return false;
