@@ -225,7 +225,7 @@ export default function FinancialCoinHero() {
       <div className="glf-ticker-wrap">
         <div className="glf-ticker-track">
           {[1, 2].map(k => (
-            <React.Fragment key={k}>
+            <span key={k} style={{display: 'contents'}}>
               <span className="glf-ti">AZ LLC #23831258</span>
               <span className="glf-td">▲</span>
               <span className="glf-ti">PATENT #18/584,961</span>
@@ -246,7 +246,7 @@ export default function FinancialCoinHero() {
               <span className="glf-td">▲</span>
               <span className="glf-ti">ZERO BREACH RECORD</span>
               <span className="glf-td">▲</span>
-            </React.Fragment>
+            </span>
           ))}
         </div>
       </div>
