@@ -981,36 +981,16 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
             <CheckCircle2 className="w-4 h-4" /> Printed. Now rescan signed hardcopy.
           </div>
 
-          {/* Rescan */}
-          <Card className="bg-gray-900/60 border-amber-500/30">
-            <CardContent className="pt-4 space-y-4">
-              <div>
-                <Label className="flex items-center gap-2"><Camera className="w-4 h-4 text-amber-400" /> Photo of Signed Printed Contract *</Label>
-                <input ref={hardcopyRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFileUpload(e.target.files[0], "hardcopy")} />
-                {hardcopyUrl ? (
-                  <img src={hardcopyUrl} alt="Hardcopy" className="w-full rounded border-2 border-amber-500/50 mt-2" />
-                ) : (
-                  <Button onClick={() => hardcopyRef.current?.click()} disabled={uploading.hardcopy} variant="outline" className="w-full h-20 border-dashed border-amber-500/40 text-amber-400 mt-2">
-                    {uploading.hardcopy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-6 h-6" />}
-                    <span className="ml-2">{uploading.hardcopy ? "Uploading..." : "Photograph Signed Contract"}</span>
-                  </Button>
-                )}
-              </div>
-              <div>
-                <Label>Barcode / Serial Scan</Label>
-                <Input value={barcodeValue} onChange={e => setBarcodeValue(e.target.value)} placeholder={orderNumber} className="bg-gray-800 border-gray-700 font-mono" />
-              </div>
-              <div>
-                <Label>Archived By (Staff Name) *</Label>
-                <Input value={archivedBy} onChange={e => setArchivedBy(e.target.value)} className="bg-gray-800 border-gray-700" />
-              </div>
-
-              <Button onClick={handleArchive} disabled={!hardcopyUrl || !archivedBy.trim() || loading} className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 text-black font-bold">
-                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Archive className="w-5 h-5 mr-2" />}
-                Archive Contract to Storage
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Rescan - Using HardcopyRescan Component */}
+          <HardcopyRescan
+            serialNumber={orderNumber}
+            contractId={savedContractId}
+            guestName={customerName}
+            onComplete={() => {
+              toast.success("Contract archived to storage — searchable in archive");
+              if (onComplete) onComplete();
+            }}
+          />
         </>
       )}
     </div>
