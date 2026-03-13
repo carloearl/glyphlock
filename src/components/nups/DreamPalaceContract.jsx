@@ -14,6 +14,8 @@ import {
 import { toast } from "sonner";
 import ErrorRecoveryPanel from "./ErrorRecoveryPanel";
 import OfflineIndicator from "./OfflineIndicator";
+import HardcopyRescan from "./HardcopyRescan";
+import RateLimitGuard from "./validation/RateLimitGuard";
 
 // ─── Contract Terms (exact from physical form) ───
 const FULL_CONTRACT_TEXT = `1. Orders
@@ -87,6 +89,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState({});
   const [savedOrderId, setSavedOrderId] = useState(null);
+  const [savedContractId, setSavedContractId] = useState(null);
   const [batchCreated, setBatchCreated] = useState(null);
   const [backendError, setBackendError] = useState(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
@@ -147,10 +150,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
   // Post-print
   const [printed, setPrinted] = useState(false);
-  const [hardcopyUrl, setHardcopyUrl] = useState("");
-  const [barcodeValue, setBarcodeValue] = useState("");
-  const [archivedBy, setArchivedBy] = useState("");
-  const hardcopyRef = useRef(null);
 
   const orderNumber = useRef(`DP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2,4).toUpperCase()}`).current;
 
@@ -276,7 +275,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
       toast.success(`Payment approved: ${approval_code}`);
 
-      // STEP 3: Create DreamPalaceOrder record
+      // STEP 3: Create DreamPalaceOrder + VIPContractRecord
       const order = await base44.entities.DreamPalaceOrder.create({
         order_number: orderNumber,
         status: "signed",
@@ -304,6 +303,25 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
         signed_at: new Date().toISOString(),
       });
       setSavedOrderId(order.id);
+
+      // STEP 3b: Create VIPContractRecord for hardcopy rescanning
+      const contract = await base44.entities.VIPContractRecord.create({
+        order_number: orderNumber,
+        guest_name: customerName,
+        venue_id: "dream_palace",
+        contract_type: "dream_dollar_sale",
+        total_amount: grandTotal,
+        customer_signature: signature,
+        manager_signature: null,
+        hostess_signature: null,
+        status: "executed",
+        biometric_thumbprint_url: thumbprintUrl,
+        guest_photo_url: guestPhotoUrl,
+        id_scan_front_url: idPhotoUrl,
+        id_scan_back_url: idPhotoBackUrl,
+        payment_approval_code: approval_code,
+      });
+      setSavedContractId(contract.id);
 
       // STEP 4: Call backend to create Dream Dollar batch + bills
       if (dreamDollarValue > 0) {
@@ -365,6 +383,13 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       manager_signature: managerSignature,
       hostess_signature: hostessSignature,
     });
+    // Also update VIPContractRecord with staff signatures
+    if (savedContractId) {
+      await base44.entities.VIPContractRecord.update(savedContractId, {
+        manager_signature: managerSignature,
+        hostess_signature: hostessSignature,
+      });
+    }
     setLoading(false);
     setStep(5);
   };
@@ -383,19 +408,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     }
   };
 
-  const handleArchive = async () => {
-    setLoading(true);
-    await base44.entities.DreamPalaceOrder.update(savedOrderId, {
-      status: "archived",
-      signed_hardcopy_url: hardcopyUrl,
-      barcode_scan: barcodeValue || orderNumber,
-      archived_at: new Date().toISOString(),
-      archived_by: archivedBy,
-      printed_at: new Date().toISOString(),
-    });
-    setLoading(false);
-    if (onComplete) onComplete(savedOrderId);
-  };
+
 
   // Convert Dream Dollar total into denominations (smart split)
   const buildDenominationsArray = (total) => {
@@ -527,6 +540,16 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           <p className="text-sm text-gray-400">Sales / Order Receipt Form</p>
           <Badge className="mt-1 bg-purple-500/20 text-purple-400 border-purple-500/40 font-mono text-xs">{orderNumber}</Badge>
         </div>
+
+        {/* Rate Limit Guard */}
+        <RateLimitGuard 
+          staffEmail={user?.email} 
+          onStatusChange={(rateLimitStatus) => {
+            if (!rateLimitStatus.allowed) {
+              toast.error("Rate limit exceeded. Please wait before creating another contract.");
+            }
+          }}
+        />
 
         {/* Customer / Purchaser + Card Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
