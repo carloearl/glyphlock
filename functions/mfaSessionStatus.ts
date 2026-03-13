@@ -4,16 +4,20 @@
  * SELF-CONTAINED: No local imports (Deno deploy limitation)
  */
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { createHash } from 'node:crypto';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-// --- Inline device fingerprint ---
-function generateDeviceFingerprint(req) {
+// --- Inline device fingerprint using Web Crypto API ---
+async function generateDeviceFingerprint(req) {
   const userAgent = req.headers.get('user-agent') || '';
   const acceptLanguage = req.headers.get('accept-language') || '';
   const acceptEncoding = req.headers.get('accept-encoding') || '';
   const fingerprint = `${userAgent}|${acceptLanguage}|${acceptEncoding}`;
-  return createHash('sha256').update(fingerprint).digest('hex');
+  
+  const encoder = new TextEncoder();
+  const data = encoder.encode(fingerprint);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function findTrustedDevice(trustedDevices, deviceId) {
@@ -66,7 +70,7 @@ Deno.serve(async (req) => {
     const mfaVerifiedCookie = req.headers.get('cookie')?.includes('mfa_verified=true');
     
     // Check trusted device
-    const deviceId = generateDeviceFingerprint(req);
+    const deviceId = await generateDeviceFingerprint(req);
     const trustedDevice = findTrustedDevice(userData.trustedDevices, deviceId);
     
     // Update lastUsedAt for trusted device (fire and forget)
