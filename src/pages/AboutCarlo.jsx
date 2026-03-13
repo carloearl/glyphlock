@@ -343,44 +343,84 @@ export default function AboutCarloPage() {
 
             <div className="space-y-10 max-w-5xl mx-auto">
               <p className="text-xl sm:text-2xl text-violet-100 leading-relaxed text-center font-light">
-                It was built because <span className="text-white font-bold">something sacred was being left undefended.</span>
+                It was built as <span className="text-white font-bold">a response.</span>
               </p>
 
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="p-6 rounded-2xl bg-red-500/10 border border-red-400/30 backdrop-blur-sm">
-                  <p className="text-lg text-red-200 font-semibold">I watched lies outrun facts.</p>
+              <p className="text-lg sm:text-xl text-blue-200 text-center">
+                A response to a world where creators are erased, identity is impersonated, and truth can be rewritten faster than it can be defended.
+              </p>
+
+              <div className="mt-8 space-y-3 text-center">
+                <p className="text-2xl text-white font-bold">So the concept evolved.</p>
+                <p className="text-lg text-blue-200">Patterns became glyphs.</p>
+                <p className="text-lg text-blue-200">Glyphs became proof.</p>
+                <p className="text-lg text-cyan-300 font-semibold">Proof became action.</p>
+              </div>
+
+              <div className="mt-10 p-8 rounded-2xl bg-gradient-to-br from-blue-500/15 to-indigo-500/10 border-2 border-blue-400/40">
+                <p className="text-xl text-white font-bold text-center mb-4">From that evolution came the Master Covenant.</p>
+                <p className="text-lg text-blue-200 text-center">
+                  A framework where identity, intent, and verification are bound together in ways that are visible, traceable, and enforceable.
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-6 mt-8">
+                <div className="p-6 rounded-2xl bg-blue-500/10 border border-blue-400/30 backdrop-blur-sm">
+                  <p className="text-lg text-blue-200 font-semibold text-center">Where symbols carry intelligence</p>
                 </div>
-                <div className="p-6 rounded-2xl bg-orange-500/10 border border-orange-400/30 backdrop-blur-sm">
-                  <p className="text-lg text-orange-200 font-semibold">I watched identity become disposable.</p>
+                <div className="p-6 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 backdrop-blur-sm">
+                  <p className="text-lg text-indigo-200 font-semibold text-center">Where images trigger verification</p>
                 </div>
-                <div className="p-6 rounded-2xl bg-yellow-500/10 border border-yellow-400/30 backdrop-blur-sm">
-                  <p className="text-lg text-yellow-200 font-semibold">I watched creations ripped from their makers without consequence.</p>
+                <div className="p-6 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 backdrop-blur-sm">
+                  <p className="text-lg text-cyan-200 font-semibold text-center">Where truth anchors itself to something stronger than memory</p>
                 </div>
-                <div className="p-6 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-400/30 backdrop-blur-sm">
-                  <p className="text-lg text-fuchsia-200 font-semibold">I watched evidence vanish as if it never existed.</p>
-                </div>
+              </div>
+
+              <div className="mt-12 text-center space-y-6">
+                <p className="text-2xl text-white font-bold">
+                  Inside the company, Carlo is not simply the founder.
+                </p>
+                <p className="text-xl text-cyan-300 font-semibold">
+                  He is the architect of the philosophy behind the system.
+                </p>
+                <p className="text-lg text-blue-200">
+                  A builder who moves between art and engineering, music and structure, design and security.
+                </p>
               </div>
 
               <div className="mt-12 p-10 rounded-3xl bg-gradient-to-br from-blue-500/20 to-indigo-500/15 border-2 border-blue-300/50 shadow-[inset_0_0_60px_rgba(59,130,246,0.2)]">
-                <p className="text-xl sm:text-2xl text-white leading-relaxed text-center">
-                  Every betrayal, every collapse, every loss became <span className="text-cyan-300 font-bold">material for the foundation.</span>
+                <p className="text-2xl text-white font-bold text-center leading-tight mb-6">
+                  Every decision inside GlyphLock must answer one question:
                 </p>
-                <p className="text-lg sm:text-xl text-blue-200 leading-relaxed text-center mt-6">
-                  I poured all of it into the Master Covenant—the way proof binds to action, the way identity is held accountable, the way glyphs carry intent.
+                <p className="text-xl sm:text-2xl text-cyan-100 font-semibold text-center italic leading-relaxed">
+                  "Does this protect the people who cannot afford another betrayal?"
                 </p>
-                <p className="text-xl text-white font-bold text-center mt-6">
-                  None of this is theory. It is lived experience translated into architecture.
+                <p className="text-lg text-white text-center mt-6">
+                  If the answer is no, it does not belong.
                 </p>
               </div>
 
-              <div className="mt-16 text-center">
-                <p className="text-2xl sm:text-3xl text-white font-bold leading-tight mb-4">
-                  GlyphLock is my answer to a world that treats truth as optional.
+              <div className="mt-16 text-center space-y-6">
+                <p className="text-xl text-blue-200">
+                  GlyphLock exists because that question matters.
                 </p>
-                <p className="text-lg sm:text-xl text-blue-200 leading-relaxed max-w-3xl mx-auto">
-                  It is my promise to my children, my wife, my family—and to every creator, builder, and thinker who has ever been 
-                  <span className="text-red-300 font-semibold"> copied, stolen from, erased, or silenced.</span>
-                </p>
+                <div className="space-y-2 text-lg text-blue-200">
+                  <p>For creators.</p>
+                  <p>For builders.</p>
+                  <p>For thinkers.</p>
+                  <p className="text-white font-semibold">For anyone who has watched their work taken, their voice replaced, or their truth rewritten.</p>
+                </div>
+              </div>
+
+              <div className="mt-12 space-y-4 text-center">
+                <p className="text-xl text-white font-bold">GlyphLock was not built for comfort.</p>
+                <p className="text-xl text-cyan-300 font-bold">It was forged in pressure.</p>
+              </div>
+
+              <div className="mt-8 space-y-3 text-center text-lg text-blue-200">
+                <p>It exists so proof cannot be erased.</p>
+                <p>So identity cannot be worn like a costume.</p>
+                <p>So creation cannot be stolen and rewritten by whoever shouts the loudest.</p>
               </div>
             </div>
           </div>
