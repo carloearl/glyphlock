@@ -47,6 +47,12 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
     window.addEventListener("touchend", onUp);
   }, [element, billWidth, billHeight, onUpdate, isInteractive]);
 
+  const handleRotate = useCallback(() => {
+    if (!isInteractive) return;
+    const newRotation = (rotation + 45) % 360;
+    onUpdate({ ...element, rotation: newRotation });
+  }, [element, rotation, onUpdate, isInteractive]);
+
   const handleResizeStart = useCallback((e) => {
     if (!isInteractive) return;
     e.preventDefault();
