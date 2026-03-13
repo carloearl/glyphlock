@@ -1,81 +1,110 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 /**
- * GLYPHLOCK VERIFICATION TOKEN GENERATOR
- * 
- * Generates one-time submission tokens for Verification Gate
- * Server-side validation only - no client exposure
- * 
- * Security measures:
- * - Origin validation
- * - Timestamp validation (5 minute window)
- * - Token expiry (10 minutes)
- * - Replay prevention via database tracking
+ * VERIFICATION TOKEN GENERATOR
+ * Creates secure tokens for protocol verification engagements
  */
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    
+    const {
+      organization_name,
+      organization_email,
+      organization_domain,
+      engagement_type
+    } = await req.json();
 
-    // Validate authenticated user
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    if (!organization_name || !organization_email || !engagement_type) {
+      return Response.json({
+        error: 'Missing required fields'
+      }, { status: 400 });
     }
 
-    const { origin, timestamp } = await req.json();
+    // Check cohort availability for founding_cohort
+    if (engagement_type === 'founding_cohort') {
+      const existing_cohort = await base44.asServiceRole.entities.VerificationToken.filter({
+        engagement_type: 'founding_cohort',
+        payment_status: { $in: ['pending', 'paid'] }
+      });
 
-    // Validate origin
-    const allowedOrigins = [
-      "https://glyphlock.io",
-      "http://localhost:3000",
-      Deno.env.get("APP_URL")
-    ].filter(Boolean);
-
-    if (!allowedOrigins.includes(origin)) {
-      return Response.json({ error: "Invalid origin" }, { status: 403 });
+      if (existing_cohort.length >= 5) {
+        return Response.json({
+          success: false,
+          error: 'Founding Cohort is full (5/5 slots filled)',
+          alternative: 'standard_verification'
+        }, { status: 400 });
+      }
     }
 
-    // Validate timestamp (5 minute window)
-    const now = Date.now();
-    const timeDiff = Math.abs(now - timestamp);
-    if (timeDiff > 300000) { // 5 minutes
-      return Response.json({ error: "Invalid timestamp" }, { status: 403 });
-    }
+    // Determine engagement fee
+    const engagement_fee = engagement_type === 'founding_cohort' ? 6500 : null;
 
-    // Generate cryptographically secure token
-    const tokenData = {
-      userId: user.id,
-      email: user.email,
-      origin,
-      timestamp: now,
-      expiresAt: now + 600000, // 10 minutes
-      nonce: crypto.randomUUID()
-    };
+    // Generate secure token
+    const token_id = `VER-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
 
-    // Create token signature
-    const encoder = new TextEncoder();
-    const data = encoder.encode(JSON.stringify(tokenData));
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const token = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    // Store token for validation (with expiry)
-    await base44.asServiceRole.entities.VerificationToken.create({
-      token,
-      user_id: user.id,
-      email: user.email,
-      origin,
-      expires_at: new Date(tokenData.expiresAt).toISOString(),
-      used: false
+    // Create token record
+    const token = await base44.asServiceRole.entities.VerificationToken.create({
+      token_id,
+      organization_name,
+      organization_email,
+      organization_domain,
+      engagement_type,
+      engagement_fee,
+      payment_status: 'pending',
+      verification_status: 'requested',
+      alignment_tier: 'pending',
+      credential_eligibility: 'pending',
+      cohort_position: engagement_type === 'founding_cohort' ? existing_cohort.length + 1 : null
     });
 
-    return Response.json({ 
-      token,
-      expiresAt: tokenData.expiresAt
+    // Send confirmation email
+    await base44.asServiceRole.integrations.Core.SendEmail({
+      from_name: 'GlyphLock Protocol Verification',
+      to: organization_email,
+      subject: `Verification Engagement Request Received — ${token_id}`,
+      body: `
+        <h2>Protocol Verification Engagement</h2>
+        <p><strong>Organization:</strong> ${organization_name}</p>
+        <p><strong>Engagement Type:</strong> ${engagement_type === 'founding_cohort' ? 'Founding Cohort Verification ($6,500)' : 'Standard Verification'}</p>
+        <p><strong>Token ID:</strong> ${token_id}</p>
+        <hr>
+        <h3>Next Steps:</h3>
+        <ol>
+          <li>Complete payment authorization (invoice will be sent separately)</li>
+          <li>Submit required documentation package</li>
+          <li>Schedule 90-minute verification session</li>
+        </ol>
+        <p>You will receive your verification report and alignment tier determination within 48 hours of session completion.</p>
+        <hr>
+        <small>GlyphLock Master Covenant Framework | ${new Date().getFullYear()}</small>
+      `
     });
+
+    // Log engagement request
+    await base44.asServiceRole.entities.AuditEvent.create({
+      event_id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      actor_id: organization_email,
+      actor_role: 'external_org',
+      entity_type: 'VerificationToken',
+      entity_id: token_id,
+      action: 'CREATED',
+      severity: 'INFO',
+      description: `Verification engagement requested: ${organization_name} (${engagement_type})`
+    });
+
+    return Response.json({
+      success: true,
+      token_id,
+      engagement_type,
+      engagement_fee,
+      cohort_position: token.cohort_position,
+      message: 'Verification request submitted successfully'
+    });
+
   } catch (error) {
-    console.error("Verification token generation failed:", error);
-    return Response.json({ error: "Verification failed" }, { status: 500 });
+    return Response.json({ error: error.message }, { status: 500 });
   }
 });

@@ -1,81 +1,93 @@
-import React from "react";
-
-const FOUNDING_INCLUDES = [
-  "Pre-session documentation intake review",
-  "Structured 90-minute moderated verification session",
-  "Comprehensive Verification Report",
-  "Executive Brief for leadership",
-  "Qualification Tier Determination",
-  "Remediation Roadmap"
-];
-
-const STANDARD_INCLUDES = [
-  "Pre-session structured documentation review",
-  "Formal 90-minute verification engagement",
-  "Comprehensive written determination report",
-  "Executive Brief",
-  "Credential eligibility statement",
-  "Structured enforcement roadmap"
-];
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle } from 'lucide-react';
 
 export default function EngagementOptions() {
+  const founding_features = [
+    'Pre-session documentation intake review',
+    'Structured 90-minute moderated verification session',
+    'Comprehensive Verification Report',
+    'Executive Brief for leadership',
+    'Qualification Tier Determination',
+    'Remediation Roadmap'
+  ];
+
+  const standard_features = [
+    'Pre-session structured documentation review',
+    'Formal 90-minute verification engagement',
+    'Comprehensive written determination report',
+    'Executive Brief',
+    'Credential eligibility statement',
+    'Structured enforcement roadmap'
+  ];
+
   return (
-    <section className="max-w-4xl mx-auto mb-20 md:mb-28 px-4">
-      <p className="text-[10px] uppercase tracking-[5px] text-amber-500/70 mb-4 font-medium text-center">Section II</p>
-      <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-12 tracking-tight">
-        Engagement Options
-      </h2>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-white">Section II — Engagement Options</h2>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Founding Cohort */}
-        <div className="border border-slate-600 p-6 md:p-8 bg-slate-900/40">
-          <p className="text-[10px] uppercase tracking-[4px] text-amber-400/80 mb-2 font-semibold">Subsection A</p>
-          <h3 className="text-lg font-bold text-white mb-1">Founding Cohort Verification</h3>
-          <p className="text-xs text-slate-400 mb-6">Limited Enrollment Program</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Subsection A: Founding Cohort */}
+        <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/40">
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="text-xl text-purple-300">Founding Cohort Verification</CardTitle>
+                <p className="text-sm text-slate-400 mt-1">Limited Enrollment Program</p>
+              </div>
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40">
+                Limited
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-purple-300">$6,500</div>
+              <p className="text-xs text-slate-400 mt-1">Limited to five organizations</p>
+            </div>
 
-          <div className="mb-6">
-            <span className="text-3xl font-bold text-white">$6,500</span>
-            <p className="text-xs text-slate-400 mt-1">Limited to five organizations</p>
-          </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-white">Includes:</p>
+              {founding_features.map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-slate-300">{feature}</span>
+                </div>
+              ))}
+            </div>
 
-          <p className="text-xs uppercase tracking-wider text-slate-400 mb-3 font-semibold">Includes:</p>
-          <ul className="space-y-2.5 mb-8">
-            {FOUNDING_INCLUDES.map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-slate-300">
-                <span className="text-slate-500 mt-0.5 text-xs">—</span>
-                {item}
-              </li>
-            ))}
-          </ul>
+            <div className="pt-4 border-t border-purple-500/20">
+              <p className="text-xs text-slate-400 italic">
+                Upon completion of Founding Cohort enrollment, standard engagement pricing applies.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-          <div className="border-t border-slate-700/50 pt-4">
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Upon completion of Founding Cohort enrollment, standard engagement pricing applies.
-            </p>
-          </div>
-        </div>
+        {/* Subsection B: Standard Verification */}
+        <Card className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 border-cyan-500/40">
+          <CardHeader>
+            <CardTitle className="text-xl text-cyan-300">Standard Verification Engagement</CardTitle>
+            <p className="text-sm text-slate-400">For qualified organizations</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-cyan-300">Custom Pricing</div>
+              <p className="text-xs text-slate-400 mt-1">Engagement Fee Provided Upon Qualification</p>
+            </div>
 
-        {/* Standard */}
-        <div className="border border-slate-700/50 p-6 md:p-8 bg-slate-900/30">
-          <p className="text-[10px] uppercase tracking-[4px] text-slate-500 mb-2 font-semibold">Subsection B</p>
-          <h3 className="text-lg font-bold text-white mb-1">Standard Verification Engagement</h3>
-          <p className="text-xs text-slate-400 mb-6">For qualified organizations</p>
-
-          <div className="mb-6">
-            <span className="text-lg font-semibold text-slate-300">Engagement Fee Provided Upon Qualification</span>
-          </div>
-
-          <p className="text-xs uppercase tracking-wider text-slate-400 mb-3 font-semibold">Includes:</p>
-          <ul className="space-y-2.5">
-            {STANDARD_INCLUDES.map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-slate-300">
-                <span className="text-slate-500 mt-0.5 text-xs">—</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-white">Includes:</p>
+              {standard_features.map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-cyan-400 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-slate-300">{feature}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </section>
+    </div>
   );
 }

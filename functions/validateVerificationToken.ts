@@ -1,69 +1,44 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 /**
- * GLYPHLOCK VERIFICATION TOKEN VALIDATOR
- * 
- * Validates submission tokens from Verification Gate
- * Enforces:
- * - Token exists and not expired
- * - Token not previously used (replay prevention)
- * - User matches token
- * 
- * Returns validation status only - no details on failure
+ * VERIFICATION TOKEN VALIDATOR
+ * Validates engagement tokens and retrieves status
  */
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    
+    const { token_id } = await req.json();
 
-    // Validate authenticated user
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ valid: false }, { status: 401 });
+    if (!token_id) {
+      return Response.json({ error: 'token_id required' }, { status: 400 });
     }
 
-    const { token } = await req.json();
-
-    if (!token) {
-      return Response.json({ valid: false }, { status: 400 });
-    }
-
-    // Query token from database
     const tokens = await base44.asServiceRole.entities.VerificationToken.filter({
-      token,
-      user_id: user.id
+      token_id
     });
 
     if (tokens.length === 0) {
-      return Response.json({ valid: false }, { status: 403 });
+      return Response.json({
+        valid: false,
+        error: 'Verification token not found'
+      }, { status: 404 });
     }
 
-    const verificationToken = tokens[0];
+    const token = tokens[0];
 
-    // Check if token already used
-    if (verificationToken.used) {
-      return Response.json({ valid: false }, { status: 403 });
-    }
-
-    // Check if token expired
-    const expiresAt = new Date(verificationToken.expires_at).getTime();
-    const now = Date.now();
-    if (now > expiresAt) {
-      return Response.json({ valid: false }, { status: 403 });
-    }
-
-    // Mark token as used (replay prevention)
-    await base44.asServiceRole.entities.VerificationToken.update(verificationToken.id, {
-      used: true,
-      used_at: new Date().toISOString()
-    });
-
-    return Response.json({ 
+    return Response.json({
       valid: true,
-      userId: user.id
+      token,
+      status: token.verification_status,
+      alignment_tier: token.alignment_tier,
+      credential_eligibility: token.credential_eligibility,
+      session_scheduled: !!token.session_scheduled_at,
+      reports_available: !!(token.verification_report_url || token.executive_brief_url)
     });
+
   } catch (error) {
-    console.error("Token validation failed:", error);
-    return Response.json({ valid: false }, { status: 500 });
+    return Response.json({ error: error.message }, { status: 500 });
   }
 });
