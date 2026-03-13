@@ -10,11 +10,7 @@ import POSCashRegister from "../components/nups/POSCashRegister.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
-import DreamPalaceContract from "../components/nups/DreamPalaceContract";
-import ClubCurrencyPressView from "../components/nups/press/ClubCurrencyPressView";
-import BillRedemptionScanner from "../components/nups/dreamdollar/BillRedemptionScanner";
-import TransactionSearch from "../components/nups/dreamdollar/TransactionSearch";
-import FraudAnalyticsDashboard from "../components/nups/FraudAnalyticsDashboard";
+import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub";
 import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/SEOHead";
 
@@ -153,35 +149,7 @@ export default function NUPSStaff() {
             <POSCashRegister user={user} />
           </TabsContent>
           <TabsContent value="contracts" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-            <Tabs defaultValue="new-contract" className="space-y-4">
-              <TabsList className="grid grid-cols-5 gap-2">
-                <TabsTrigger value="new-contract">New Contract</TabsTrigger>
-                <TabsTrigger value="press">Currency Press</TabsTrigger>
-                <TabsTrigger value="redeem">Redeem Bills</TabsTrigger>
-                <TabsTrigger value="search">Search</TabsTrigger>
-                <TabsTrigger value="fraud">Fraud</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="new-contract">
-                <DreamPalaceContract onComplete={() => alert('Contract archived')} />
-              </TabsContent>
-              
-              <TabsContent value="press">
-                <ClubCurrencyPressView />
-              </TabsContent>
-              
-              <TabsContent value="redeem">
-                <BillRedemptionScanner venue_id="dream_palace" />
-              </TabsContent>
-              
-              <TabsContent value="search">
-                <TransactionSearch venue_id="dream_palace" />
-              </TabsContent>
-              
-              <TabsContent value="fraud">
-                <FraudAnalyticsDashboard venue_id="dream_palace" />
-              </TabsContent>
-            </Tabs>
+            <UnifiedDreamDollarHub venue_id="dream_palace" />
           </TabsContent>
           <TabsContent value="batch" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
             <BatchManagement user={user} />

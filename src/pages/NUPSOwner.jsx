@@ -47,7 +47,6 @@ import StaffManagement from "../components/nups/StaffManagement.jsx";
 import AIInsights from "../components/nups/AIInsights.jsx";
 import SalesReport from "../components/nups/SalesReport.jsx";
 import RBACAdminPanel from "../components/nups/RBACAdminPanel.jsx";
-import ContractViewer from "../components/nups/ContractViewer.jsx";
 import NUPSUserManager from "../components/nups/NUPSUserManager.jsx";
 import EmployeeManagement from "../components/nups/EmployeeManagement.jsx";
 import PayrollReport from "../components/nups/PayrollReport.jsx";
@@ -56,8 +55,8 @@ import GlyphBuckInventory from "../components/nups/GlyphBuckInventory.jsx";
 import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
-import DreamDollarHub from "../pages/DreamDollarHub.jsx";
 import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
+import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
@@ -466,10 +465,8 @@ export default function NUPSOwner() {
                 <DropdownMenuLabel className="text-yellow-400">Dream Dollar Operations</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-yellow-500/20" />
                 {[
-                  { value: 'dd-hub', icon: Coins, label: 'Hub', desc: 'Central operations' },
-                  { value: 'press', icon: Banknote, label: 'Currency Press', desc: 'Sales & printing' },
+                  { value: 'contracts', icon: ScrollText, label: 'Contracts & Press', desc: 'Sales, printing, archive' },
                   { value: 'glyphbucks', icon: Banknote, label: 'Gift Cards', desc: 'Glyph Bucks' },
-                  { value: 'contracts', icon: ScrollText, label: 'All Orders', desc: 'View contracts' },
                 ].map(({ value, icon: Icon, label, desc }) => (
                   <DropdownMenuItem
                     key={value}
@@ -574,9 +571,7 @@ export default function NUPSOwner() {
             <InventoryManagement products={products} />
           </TabsContent>
 
-          <TabsContent value="press">
-            <ClubCurrencyPressView />
-          </TabsContent>
+
           <TabsContent value="sales">
             <SalesReport transactions={transactions} products={products} />
           </TabsContent>
@@ -614,14 +609,12 @@ export default function NUPSOwner() {
             <AIInsights />
           </TabsContent>
           <TabsContent value="contracts">
-            <ContractViewer />
+            <UnifiedDreamDollarHub venue_id="dream_palace" />
           </TabsContent>
           <TabsContent value="rbac">
             <RBACAdminPanel />
           </TabsContent>
-          <TabsContent value="dd-hub">
-            <DreamDollarHub />
-          </TabsContent>
+
         </Tabs>
       </div>
     </div>
