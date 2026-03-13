@@ -1,13 +1,17 @@
 import React, { useEffect, useRef } from "react";
+import { OptimizedImage, useMobileOptimization } from "@/components/mobile/MobileOptimizer";
 
 export default function FinancialCoinHero() {
   const starsRef = useRef(null);
+  const { deviceTier } = useMobileOptimization();
 
   useEffect(() => {
+    // Reduce star count on low-tier devices
+    const starCount = deviceTier === 'low' ? 20 : deviceTier === 'medium' ? 40 : 60;
     if (!starsRef.current) return;
     const container = starsRef.current;
     container.innerHTML = "";
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < starCount; i++) {
       const star = document.createElement("div");
       const size = Math.random() * 2 + 0.5;
       Object.assign(star.style, {
@@ -23,7 +27,7 @@ export default function FinancialCoinHero() {
       });
       container.appendChild(star);
     }
-  }, []);
+  }, [deviceTier]);
 
   const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/5e2e34bf7_b70d54f1-3b3b-418e-ac6f-c4ecad013f91.png";
   const GL_COIN_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/697a087fb354faebb72df54b/b001ff48e_ChatGPTImageFeb6202606_25_17PM.png";
@@ -204,11 +208,11 @@ export default function FinancialCoinHero() {
           <div className="glf-coin">
             <div className="glf-edge" />
             <div className="glf-face glf-face-front">
-              <img src={GL_COIN_URL} alt="GlyphLock Financial GL Coin" loading="eager" fetchpriority="high" decoding="async" width={340} height={340} />
+              <OptimizedImage src={GL_COIN_URL} alt="GlyphLock Financial GL Coin" className="w-full h-full object-cover rounded-full" priority />
               <div className="glf-shine" />
             </div>
             <div className="glf-face glf-face-back">
-              <img src={SHIELD_LOGO_URL} alt="GlyphLock Financial Shield" loading="lazy" decoding="async" width={340} height={340} />
+              <OptimizedImage src={SHIELD_LOGO_URL} alt="GlyphLock Financial Shield" className="w-full h-full object-cover rounded-full" />
               <div className="glf-shine" />
             </div>
           </div>
