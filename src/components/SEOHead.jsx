@@ -158,6 +158,32 @@ export default function SEOHead({
     updateMetaTag('twitter:image:alt', resolvedTitle);
     updateMetaTag('twitter:domain', 'glyphlock.io');
 
+    // Preconnect to Google Fonts for performance
+    let preconnectGoogleFonts = document.querySelector('link[rel="preconnect"][href="https://fonts.googleapis.com"]');
+    if (!preconnectGoogleFonts) {
+      preconnectGoogleFonts = document.createElement('link');
+      preconnectGoogleFonts.setAttribute('rel', 'preconnect');
+      preconnectGoogleFonts.setAttribute('href', 'https://fonts.googleapis.com');
+      document.head.appendChild(preconnectGoogleFonts);
+    }
+
+    let preconnectGstatic = document.querySelector('link[rel="preconnect"][href="https://fonts.gstatic.com"]');
+    if (!preconnectGstatic) {
+      preconnectGstatic = document.createElement('link');
+      preconnectGstatic.setAttribute('rel', 'preconnect');
+      preconnectGstatic.setAttribute('href', 'https://fonts.gstatic.com');
+      preconnectGstatic.setAttribute('crossorigin', '');
+      document.head.appendChild(preconnectGstatic);
+    }
+
+    let dnsPrefetch = document.querySelector('link[rel="dns-prefetch"][href="https://fonts.googleapis.com"]');
+    if (!dnsPrefetch) {
+      dnsPrefetch = document.createElement('link');
+      dnsPrefetch.setAttribute('rel', 'dns-prefetch');
+      dnsPrefetch.setAttribute('href', 'https://fonts.googleapis.com');
+      document.head.appendChild(dnsPrefetch);
+    }
+
     // Canonical link
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
