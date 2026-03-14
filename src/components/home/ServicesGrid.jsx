@@ -122,21 +122,15 @@ export default function ServicesGrid() {
                   style={{ background: 'rgba(87,61,255,0.08)' }}
                 >
                   <div className="relative h-48 overflow-hidden">
-                    <picture>
-                      <source 
-                        srcSet={service.image.replace(/\.(jpg|jpeg|png)$/i, '.webp')} 
-                        type="image/webp" 
-                      />
-                      <img 
-                        src={service.image} 
-                        alt={`${service.title} - ${service.description}`}
-                        width="800"
-                        height="600"
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    </picture>
+                    <img 
+                      src={service.image} 
+                      alt={`${service.title} - ${service.description}`}
+                      width="800"
+                      height="600"
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
                     {/* Gradient overlay on hover */}
                     <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>

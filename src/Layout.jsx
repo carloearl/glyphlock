@@ -373,26 +373,20 @@ export default function Layout({ children, currentPageName }) {
           style={{ width: 64, height: 64 }}
           aria-hidden="true"
         >
-          <picture>
-            <source
-              srcSet="https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/ef67c8dbe_GLLogo.webp"
-              type="image/webp"
-            />
-            <img 
-              src="https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/ef67c8dbe_GLLogo.png"
-              alt=""
-              className="w-full h-full object-contain"
-              loading="lazy"
-              decoding="async"
-              width={64}
-              height={64}
-              draggable={false}
-              style={{ 
-                animation: 'glLogoSpin 20s linear infinite',
-                filter: 'drop-shadow(0 0 10px rgba(59,130,246,0.5))'
-              }}
-            />
-          </picture>
+          <img 
+            src="https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/ef67c8dbe_GLLogo.png"
+            alt=""
+            className="w-full h-full object-contain"
+            loading="lazy"
+            decoding="async"
+            width={64}
+            height={64}
+            draggable={false}
+            style={{ 
+              animation: 'glLogoSpin 20s linear infinite',
+              filter: 'drop-shadow(0 0 10px rgba(59,130,246,0.5))'
+            }}
+          />
           <style>{`@keyframes glLogoSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>

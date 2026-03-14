@@ -51,21 +51,15 @@ export default function Footer() {
           {/* Brand — spans 2 cols on md, 3 on lg */}
           <div className="col-span-2 md:col-span-6 lg:col-span-3 space-y-5">
             <div className="flex items-center gap-2.5">
-              <picture>
-                <source
-                  srcSet="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.webp"
-                  type="image/webp"
-                />
-                <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
-                  alt="GlyphLock Security Platform Logo"
-                  className="h-9 w-auto"
-                  loading="lazy"
-                  decoding="async"
-                  width={36}
-                  height={36}
-                />
-              </picture>
+              <img
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
+                alt="GlyphLock Security Platform Logo"
+                className="h-9 w-auto"
+                loading="lazy"
+                decoding="async"
+                width={36}
+                height={36}
+              />
               <span className="text-xl font-black tracking-tight text-white">
                 GLYPH<span style={{ color: '#3B82F6' }}>LOCK</span>
               </span>
@@ -125,21 +119,15 @@ export default function Footer() {
                 className="group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
               >
-                <picture>
-                  <source
-                    srcSet={cert.image.replace(/\.(jpg|jpeg|png)$/i, '.webp')}
-                    type="image/webp"
-                  />
-                  <img 
-                    src={cert.image} 
-                    alt={`${cert.name} ${cert.subtitle} certification badge`}
-                    className="w-8 h-8 md:w-10 md:h-10 object-contain opacity-80 group-hover:opacity-100 transition-opacity" 
-                    loading="lazy" 
-                    decoding="async" 
-                    width={40} 
-                    height={40} 
-                  />
-                </picture>
+                <img 
+                  src={cert.image} 
+                  alt={`${cert.name} ${cert.subtitle} certification badge`}
+                  className="w-8 h-8 md:w-10 md:h-10 object-contain opacity-80 group-hover:opacity-100 transition-opacity" 
+                  loading="lazy" 
+                  decoding="async" 
+                  width={40} 
+                  height={40} 
+                />
                 <div>
                   <p className="text-[11px] font-semibold text-white/80 group-hover:text-white transition-colors leading-tight">{cert.name}</p>
                   <p className="text-[9px] text-slate-500 uppercase tracking-wider">{cert.subtitle}</p>
@@ -250,22 +238,16 @@ export default function Footer() {
         <div className="border-t border-white/[0.06] pt-8 pb-6">
           <div className="flex flex-col items-center gap-4">
             <div className="relative w-16 h-16">
-              <picture>
-                <source
-                  srcSet="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.webp"
-                  type="image/webp"
-                />
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
-                  alt="GlyphLock Security Platform Logo"
-                  className="w-full h-full object-contain"
-                  loading="lazy"
-                  decoding="async"
-                  width={64}
-                  height={64}
-                  style={{ filter: 'drop-shadow(0 0 12px rgba(59,130,246,0.4))' }}
-                />
-              </picture>
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
+                alt="GlyphLock Security Platform Logo"
+                className="w-full h-full object-contain"
+                loading="lazy"
+                decoding="async"
+                width={64}
+                height={64}
+                style={{ filter: 'drop-shadow(0 0 12px rgba(59,130,246,0.4))' }}
+              />
             </div>
             <div className="text-center space-y-1.5">
               <p className="text-sm font-black text-white uppercase tracking-[0.25em]">GlyphLock Security LLC</p>
