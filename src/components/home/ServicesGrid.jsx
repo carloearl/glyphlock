@@ -120,7 +120,8 @@ export default function ServicesGrid() {
                   <div className="relative h-48 overflow-hidden">
                     <img 
                       src={service.image} 
-                      alt={service.title}
+                      alt={`${service.title} - ${service.description}`}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     {/* Gradient overlay on hover */}
