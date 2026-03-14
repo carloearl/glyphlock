@@ -225,6 +225,8 @@ export default function TechnologyMarquee() {
                 <img 
                   src={company.logo} 
                   alt={`${company.name} - Technology Partner Logo`}
+                  width="120"
+                  height="60"
                   className="logo-img"
                   loading="lazy"
                   onError={(e) => { e.target.style.display = 'none'; }}
@@ -242,6 +244,8 @@ export default function TechnologyMarquee() {
                 <img 
                   src={company.logo} 
                   alt={`${company.name} - Technology Partner Logo`}
+                  width="120"
+                  height="60"
                   className="logo-img"
                   loading="lazy"
                   onError={(e) => { e.target.style.display = 'none'; }}
@@ -259,6 +263,8 @@ export default function TechnologyMarquee() {
                 <img 
                   src={company.logo} 
                   alt={`${company.name} - Technology Partner Logo`}
+                  width="120"
+                  height="60"
                   className="logo-img"
                   loading="lazy"
                   onError={(e) => { e.target.style.display = 'none'; }}

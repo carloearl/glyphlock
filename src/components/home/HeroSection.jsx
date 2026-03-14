@@ -80,6 +80,8 @@ export default function HeroSection() {
             <img
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
               alt="GlyphLock Security Logo - Quantum-Resistant Cybersecurity Platform"
+              width="120"
+              height="120"
               loading="lazy"
               decoding="async"
               className="h-6 sm:h-8 md:h-10 lg:h-12 w-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
