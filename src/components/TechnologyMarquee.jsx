@@ -222,15 +222,21 @@ export default function TechnologyMarquee() {
           <div className="marquee-content marquee-row-1">
             {repeatedRow1.map((company, idx) => (
               <div key={`r1-${company.name}-${idx}`} className="logo-item">
-                <img 
-                  src={company.logo} 
-                  alt={`${company.name} - Technology Partner Logo`}
-                  width="120"
-                  height="60"
-                  className="logo-img"
-                  loading="lazy"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
+                <picture>
+                  <source 
+                    srcSet={company.logo.replace(/\.(jpg|jpeg|png|svg)$/i, '.webp')} 
+                    type="image/webp" 
+                  />
+                  <img 
+                    src={company.logo} 
+                    alt={`${company.name} - Technology Partner Logo`}
+                    width="120"
+                    height="60"
+                    className="logo-img"
+                    loading="lazy"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </picture>
               </div>
             ))}
           </div>
@@ -241,15 +247,21 @@ export default function TechnologyMarquee() {
           <div className="marquee-content marquee-row-2">
             {repeatedRow2.map((company, idx) => (
               <div key={`r2-${company.name}-${idx}`} className="logo-item">
-                <img 
-                  src={company.logo} 
-                  alt={`${company.name} - Technology Partner Logo`}
-                  width="120"
-                  height="60"
-                  className="logo-img"
-                  loading="lazy"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
+                <picture>
+                  <source 
+                    srcSet={company.logo.replace(/\.(jpg|jpeg|png|svg)$/i, '.webp')} 
+                    type="image/webp" 
+                  />
+                  <img 
+                    src={company.logo} 
+                    alt={`${company.name} - Technology Partner Logo`}
+                    width="120"
+                    height="60"
+                    className="logo-img"
+                    loading="lazy"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </picture>
               </div>
             ))}
           </div>
@@ -260,15 +272,21 @@ export default function TechnologyMarquee() {
           <div className="marquee-content marquee-row-3">
             {repeatedRow3.map((company, idx) => (
               <div key={`r3-${company.name}-${idx}`} className="logo-item">
-                <img 
-                  src={company.logo} 
-                  alt={`${company.name} - Technology Partner Logo`}
-                  width="120"
-                  height="60"
-                  className="logo-img"
-                  loading="lazy"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
+                <picture>
+                  <source 
+                    srcSet={company.logo.replace(/\.(jpg|jpeg|png|svg)$/i, '.webp')} 
+                    type="image/webp" 
+                  />
+                  <img 
+                    src={company.logo} 
+                    alt={`${company.name} - Technology Partner Logo`}
+                    width="120"
+                    height="60"
+                    className="logo-img"
+                    loading="lazy"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </picture>
               </div>
             ))}
           </div>
