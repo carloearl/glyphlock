@@ -224,7 +224,7 @@ export default function TechnologyMarquee() {
               <div key={`r1-${company.name}-${idx}`} className="logo-item">
                 <img 
                   src={company.logo} 
-                  alt={company.name}
+                  alt={`${company.name} - Technology Partner Logo`}
                   className="logo-img"
                   loading="lazy"
                   onError={(e) => { e.target.style.display = 'none'; }}
@@ -241,7 +241,7 @@ export default function TechnologyMarquee() {
               <div key={`r2-${company.name}-${idx}`} className="logo-item">
                 <img 
                   src={company.logo} 
-                  alt={company.name}
+                  alt={`${company.name} - Technology Partner Logo`}
                   className="logo-img"
                   loading="lazy"
                   onError={(e) => { e.target.style.display = 'none'; }}
@@ -258,7 +258,7 @@ export default function TechnologyMarquee() {
               <div key={`r3-${company.name}-${idx}`} className="logo-item">
                 <img 
                   src={company.logo} 
-                  alt={company.name}
+                  alt={`${company.name} - Technology Partner Logo`}
                   className="logo-img"
                   loading="lazy"
                   onError={(e) => { e.target.style.display = 'none'; }}
