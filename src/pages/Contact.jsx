@@ -184,23 +184,27 @@ export default function Contact() {
                     <div className="space-y-2">
                       <Label htmlFor="name" className="text-white/80 text-xs uppercase tracking-wider font-bold">Identity</Label>
                       <GlyphInput
+                        id="name"
                         type="text"
                         placeholder="Your Name"
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                         maxLength={100}
                         className="w-full"
+                        aria-required="true"
                       />
                       {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-white/80 text-xs uppercase tracking-wider font-bold">Contact Point</Label>
                       <GlyphInput
+                        id="email"
                         type="email"
                         placeholder="name@company.com"
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         className="w-full"
+                        aria-required="true"
                       />
                       {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
                     </div>
@@ -209,12 +213,14 @@ export default function Contact() {
                   <div className="space-y-2">
                     <Label htmlFor="subject" className="text-white/80 text-xs uppercase tracking-wider font-bold">Subject Protocol</Label>
                     <GlyphInput
+                      id="subject"
                       type="text"
                       placeholder="Consultation / Partnership / Support"
                       value={formData.subject}
                       onChange={(e) => setFormData({...formData, subject: e.target.value})}
                       maxLength={200}
                       className="w-full"
+                      aria-required="true"
                     />
                     {errors.subject && <p className="text-red-400 text-xs mt-1">{errors.subject}</p>}
                   </div>
@@ -237,6 +243,7 @@ export default function Contact() {
                         boxShadow: '6px 6px 10px rgba(0,0,0,0.8), 1px 1px 10px rgba(59, 130, 246, 0.2)'
                       }}
                       placeholder="Describe your creative infrastructure needs or partnership vision..."
+                      aria-label="Message content"
                     />
                     {errors.message && <p className="text-red-400 text-xs mt-1">{errors.message}</p>}
                   </div>

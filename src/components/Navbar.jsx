@@ -429,16 +429,21 @@ export default function Navbar({ user, onLogin, onLogout }) {
                 transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               />
               <div className="relative">
-                <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png"
-                  alt="GlyphLock"
-                  className="h-10 w-auto relative z-10 group-hover:scale-110 transition-transform duration-300"
-                  loading="eager"
-                  fetchpriority="high"
-                  decoding="async"
-                  width={40}
-                  height={40}
-                />
+                <picture>
+                  <source
+                    srcSet="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.webp"
+                    type="image/webp"
+                  />
+                  <img
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png"
+                    alt="GlyphLock Security Platform Logo"
+                    className="h-10 w-auto relative z-10 group-hover:scale-110 transition-transform duration-300"
+                    fetchpriority="high"
+                    decoding="async"
+                    width={40}
+                    height={40}
+                  />
+                </picture>
               </div>
             </div>
           </MagneticButton>
@@ -505,11 +510,12 @@ export default function Navbar({ user, onLogin, onLogout }) {
           {user ? (
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/30 transition-all backdrop-blur-sm"
-                >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/30 transition-all backdrop-blur-sm"
+                aria-label={`User menu for ${user.full_name || user.email}`}
+              >
                   <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-500 flex items-center justify-center text-xs font-bold text-white">
                     {user.full_name?.charAt(0) || "U"}
                   </div>
@@ -552,6 +558,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="text-gray-300 hover:text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-white/5 transition-all"
+              aria-label="Sign in to GlyphLock account"
             >
               Sign In
             </motion.button>
@@ -564,7 +571,8 @@ export default function Navbar({ user, onLogin, onLogout }) {
           style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minWidth: '52px', minHeight: '52px' }}
           className="lg:hidden relative w-14 h-14 flex items-center justify-center rounded-xl bg-white/5 border-2 border-white/10 hover:border-cyan-400/50 transition-all active:bg-cyan-500/20"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
+          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={mobileMenuOpen}
         >
           <AnimatePresence mode="wait">
             {mobileMenuOpen ? (

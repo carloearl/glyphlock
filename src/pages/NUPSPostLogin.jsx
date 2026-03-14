@@ -11,6 +11,7 @@ import {
   Lock,
   Loader2
 } from 'lucide-react';
+import SEOHead from '@/components/SEOHead';
 
 export default function NUPSPostLogin() {
   const navigate = useNavigate();
@@ -79,6 +80,11 @@ export default function NUPSPostLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-6">
+      <SEOHead
+        title="N.U.P.S. Authenticated | Redirecting to Dashboard"
+        description="NUPS authentication successful. Redirecting to your role-based dashboard."
+        noIndex={true}
+      />
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-12">
@@ -109,6 +115,10 @@ export default function NUPSPostLogin() {
             <Card 
               className="bg-slate-900/50 border-cyan-500/30 hover:border-cyan-400/60 transition-all cursor-pointer group"
               onClick={() => handleManualNavigation('/NUPSStaff')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/NUPSStaff'); }}}
+              aria-label="Navigate to Staff Terminal - Access POS, contracts, batch management, and time clock"
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-cyan-400">
@@ -135,6 +145,10 @@ export default function NUPSPostLogin() {
             <Card 
               className="bg-slate-900/50 border-purple-500/30 hover:border-purple-400/60 transition-all cursor-pointer group"
               onClick={() => handleManualNavigation('/NUPSOwner')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/NUPSOwner'); }}}
+              aria-label="Navigate to Owner Dashboard - Analytics, reports, staff management, and system controls"
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-purple-400">
@@ -160,6 +174,10 @@ export default function NUPSPostLogin() {
           <Card 
             className="bg-slate-900/50 border-blue-500/30 hover:border-blue-400/60 transition-all cursor-pointer group"
             onClick={() => handleManualNavigation('/DreamDollarHub')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/DreamDollarHub'); }}}
+            aria-label="Navigate to Dream Dollar Hub - Currency operations, sales, press, redemption, and fraud monitoring"
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-blue-400">
@@ -185,6 +203,10 @@ export default function NUPSPostLogin() {
             <Card 
               className="bg-slate-900/50 border-pink-500/30 hover:border-pink-400/60 transition-all cursor-pointer group"
               onClick={() => handleManualNavigation('/EntertainerCheckIn')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/EntertainerCheckIn'); }}}
+              aria-label="Navigate to Entertainer Portal - Check in, view schedule, track earnings, and manage profile"
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-pink-400">
@@ -227,6 +249,7 @@ export default function NUPSPostLogin() {
               await base44.auth.logout('/NUPSLogin');
             }}
             className="border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500"
+            aria-label="Sign out and return to NUPS login"
           >
             Sign Out
           </Button>

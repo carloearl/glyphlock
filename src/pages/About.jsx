@@ -405,7 +405,10 @@ export default function About() {
                 transition={{ duration: 1, delay: 0.5, type: "spring", stiffness: 100 }}
               >
                 <Link to={createPageUrl("Consultation")}>
-                  <Button className="bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] hover:scale-105 transition-transform text-white text-lg font-bold uppercase tracking-wide px-10 py-6 shadow-[0_0_30px_rgba(0,228,255,0.3)] border-none">
+                  <Button 
+                    className="bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] hover:scale-105 transition-transform text-white text-lg font-bold uppercase tracking-wide px-10 py-6 shadow-[0_0_30px_rgba(0,228,255,0.3)] border-none"
+                    aria-label="Start building with GlyphLock - Request consultation"
+                  >
                     Start Building
                   </Button>
                 </Link>

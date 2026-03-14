@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DollarSign, Scan, Search, Shield, FileText, Settings, Camera } from 'lucide-react';
+import SEOHead from '@/components/SEOHead';
 
 import DreamDollarPOS from '@/components/nups/dreamdollar/DreamDollarPOS';
 import BillRedemptionScanner from '@/components/nups/dreamdollar/BillRedemptionScanner';
@@ -93,6 +94,12 @@ export default function DreamDollarHub() {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8" style={{ background: 'transparent' }}>
+      <SEOHead
+        title="Dream Dollar Hub | Transaction Management & Compliance"
+        description="Unified Dream Dollar transaction management, verification, and compliance module. Sales, press, redemption, ID scanning, and fraud monitoring."
+        keywords="Dream Dollar, currency operations, transaction management, compliance module, ID verification, fraud monitoring, club currency"
+        noIndex={true}
+      />
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

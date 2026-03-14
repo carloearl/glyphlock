@@ -479,7 +479,7 @@ function CTAButtons({ isInView }) {
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
       >
-        <Link to={createPageUrl("Consultation")} className="block">
+        <Link to={createPageUrl("Consultation")} className="block" aria-label="Begin sovereign build - Request consultation">
           <div
             className="relative text-center py-4 px-6 font-black text-sm sm:text-base uppercase tracking-wide cursor-pointer text-black transition-all duration-300"
             style={{
@@ -502,7 +502,7 @@ function CTAButtons({ isInView }) {
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
       >
-        <Link to={createPageUrl("SecurityTools")} className="block">
+        <Link to={createPageUrl("SecurityTools")} className="block" aria-label="Explore security modules - View available tools">
           <div
             className="relative text-center py-4 px-6 font-bold text-sm sm:text-base uppercase tracking-wide cursor-pointer text-purple-400 border-[3px] border-purple-500 transition-all duration-300 hover:bg-purple-500/10"
             style={{

@@ -8,6 +8,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { Loader2 } from "lucide-react";
 import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView";
+import SEOHead from "@/components/SEOHead";
 
 export default function ClubCurrencyPress() {
   const [user, setUser] = useState(null);
@@ -41,6 +42,12 @@ export default function ClubCurrencyPress() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <SEOHead
+        title="Club Currency Press | Dream Dollar Production System"
+        description="Professional club currency design and production system. Create custom Dream Dollar vouchers with drag-and-drop canvas, AI assistance, and batch printing."
+        keywords="club currency, Dream Dollar press, voucher design, custom currency, nightclub currency, currency production"
+        noIndex={true}
+      />
       <div className="container mx-auto p-4 md:p-6">
         <ClubCurrencyPressView />
       </div>

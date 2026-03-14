@@ -244,6 +244,7 @@ export default function CTASection() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="bg-white/8 backdrop-blur-md border-2 border-white/20 text-white placeholder:text-white/60 focus:border-indigo-400 focus:shadow-[0_0_30px_rgba(87,61,255,0.5)] transition-all h-14 md:h-16 rounded-xl text-base px-5"
+                    aria-label="Email address for getting started"
                   />
                   {/* Focus glow */}
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-indigo-500/20 opacity-0 group-focus-within:opacity-100 blur-xl transition-opacity pointer-events-none" />
