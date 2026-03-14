@@ -196,6 +196,7 @@ export default function NUPSOwner() {
                 size="sm"
                 onClick={() => base44.auth.logout()}
                 className="border-red-500/50 text-red-400 hover:bg-red-500/10 min-h-[44px]"
+                aria-label="Sign out of owner dashboard"
               >
                 <LogOut className="w-4 h-4" />
               </Button>

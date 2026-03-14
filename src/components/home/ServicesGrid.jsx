@@ -110,7 +110,11 @@ export default function ServicesGrid() {
               }}
               whileHover={{ y: -10, scale: 1.03 }}
             >
-              <Link to={createPageUrl(service.link)} className="block h-full touch-manipulation">
+              <Link 
+                to={createPageUrl(service.link)} 
+                className="block h-full touch-manipulation"
+                aria-label={`Navigate to ${service.title} - ${service.description}`}
+              >
                 <motion.div 
                   whileHover={{ boxShadow: '0 0 80px rgba(87,61,255,0.9)' }}
                   whileTap={{ scale: 0.97 }}
@@ -129,6 +133,7 @@ export default function ServicesGrid() {
                         width="800"
                         height="600"
                         loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </picture>

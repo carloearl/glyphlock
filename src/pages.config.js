@@ -51,6 +51,7 @@ import About from './pages/About';
 import AboutCarlo from './pages/AboutCarlo';
 import Accessibility from './pages/Accessibility';
 import AccountSecurity from './pages/AccountSecurity';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import BillingAndPayments from './pages/BillingAndPayments';
 import Blockchain from './pages/Blockchain';
 import CaseStudies from './pages/CaseStudies';
@@ -66,6 +67,7 @@ import ContentGenerator from './pages/ContentGenerator';
 import ContractArchive from './pages/ContractArchive';
 import ContractSearch from './pages/ContractSearch';
 import Cookies from './pages/Cookies';
+import DreamDollarHub from './pages/DreamDollarHub';
 import DreamTeam from './pages/DreamTeam';
 import EmergencyBackup from './pages/EmergencyBackup';
 import EntertainerCheckIn from './pages/EntertainerCheckIn';
@@ -110,6 +112,7 @@ import SecurityDocs from './pages/SecurityDocs';
 import SecurityOperationsCenter from './pages/SecurityOperationsCenter';
 import SecurityTools from './pages/SecurityTools';
 import Services from './pages/Services';
+import SettlementReports from './pages/SettlementReports';
 import Share from './pages/Share';
 import Sie from './pages/Sie';
 import SiteAudit from './pages/SiteAudit';
@@ -124,12 +127,12 @@ import SitemapQr from './pages/SitemapQr';
 import SitemapXml from './pages/SitemapXml';
 import Solutions from './pages/Solutions';
 import StrategicScale from './pages/StrategicScale';
+import SystemAudit from './pages/SystemAudit';
 import Terms from './pages/Terms';
 import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
 import sitemapQr from './pages/sitemap-qr';
-import DreamDollarHub from './pages/DreamDollarHub';
 import __Layout from './Layout.jsx';
 
 
@@ -138,6 +141,7 @@ export const PAGES = {
     "AboutCarlo": AboutCarlo,
     "Accessibility": Accessibility,
     "AccountSecurity": AccountSecurity,
+    "AnalyticsDashboard": AnalyticsDashboard,
     "BillingAndPayments": BillingAndPayments,
     "Blockchain": Blockchain,
     "CaseStudies": CaseStudies,
@@ -153,6 +157,7 @@ export const PAGES = {
     "ContractArchive": ContractArchive,
     "ContractSearch": ContractSearch,
     "Cookies": Cookies,
+    "DreamDollarHub": DreamDollarHub,
     "DreamTeam": DreamTeam,
     "EmergencyBackup": EmergencyBackup,
     "EntertainerCheckIn": EntertainerCheckIn,
@@ -197,6 +202,7 @@ export const PAGES = {
     "SecurityOperationsCenter": SecurityOperationsCenter,
     "SecurityTools": SecurityTools,
     "Services": Services,
+    "SettlementReports": SettlementReports,
     "Share": Share,
     "Sie": Sie,
     "SiteAudit": SiteAudit,
@@ -211,12 +217,12 @@ export const PAGES = {
     "SitemapXml": SitemapXml,
     "Solutions": Solutions,
     "StrategicScale": StrategicScale,
+    "SystemAudit": SystemAudit,
     "Terms": Terms,
     "TrustSecurity": TrustSecurity,
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
     "sitemap-qr": sitemapQr,
-    "DreamDollarHub": DreamDollarHub,
 }
 
 export const pagesConfig = {

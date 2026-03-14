@@ -52,12 +52,13 @@ export default function HeroSection() {
             loop
             muted
             playsInline
-            preload="none"
-            loading="lazy"
+            preload="auto"
+            poster="https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/hero-poster.jpg"
             className="absolute inset-0 w-full h-full object-cover z-0"
             style={{ filter: 'brightness(1.1) contrast(1.1)', transform: 'translateZ(0)' }}
             onLoadedData={() => setVideoLoaded(true)}
             onCanPlay={() => setVideoLoaded(true)}
+            aria-label="GlyphLock security system visualization"
           >
             <source src="https://base44.app/api/apps/6902128ac3c5c94a82446585/files/public/6902128ac3c5c94a82446585/643dc9ba3_Dec_05__2220_13s_202512052257_lc8rw.mp4" type="video/mp4" />
           </video>
@@ -77,16 +78,22 @@ export default function HeroSection() {
             >
               SYSTEM ACTIVE
             </motion.span>
-            <img
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
-              alt="GlyphLock Security Logo - Quantum-Resistant Cybersecurity Platform"
-              width="120"
-              height="120"
-              loading="lazy"
-              decoding="async"
-              className="h-6 sm:h-8 md:h-10 lg:h-12 w-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
-              style={{ transform: 'translateZ(0)' }}
-            />
+            <picture>
+              <source
+                srcSet="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.webp"
+                type="image/webp"
+              />
+              <img
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
+                alt="GlyphLock Security Logo - Quantum-Resistant Cybersecurity Platform"
+                width="120"
+                height="120"
+                fetchpriority="high"
+                decoding="async"
+                className="h-6 sm:h-8 md:h-10 lg:h-12 w-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
+                style={{ transform: 'translateZ(0)' }}
+              />
+            </picture>
           </motion.div>
         </div>
       </motion.div>

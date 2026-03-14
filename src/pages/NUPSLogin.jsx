@@ -3,13 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { Shield, LogIn, CheckCircle2, FileSignature, Music, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SEOHead from "@/components/SEOHead";
 
-// Noindex
-if (typeof document !== "undefined" && !document.querySelector('meta[data-nups]')) {
-  const m = document.createElement("meta");
-  m.name = "robots"; m.content = "noindex, nofollow"; m.setAttribute("data-nups", "1");
-  document.head.appendChild(m);
-}
+// SEOHead component handles meta tags - removed redundant manual injection
 
 const CLICKWRAP_TERMS = [
   "I understand this system contains confidential business information.",
@@ -45,6 +41,7 @@ function RoleStep({ onSelect }) {
           <button
             key={role.key}
             onClick={() => onSelect(role.key)}
+            aria-label={`Sign in as ${role.label} - ${role.sub}`}
             className={`w-full flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r ${role.color} border ${role.border} transition-all duration-150 active:scale-[0.98] text-left group`}
           >
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-black/30 flex-shrink-0 ${role.iconColor}`}>
@@ -75,7 +72,15 @@ function AgreementStep({ roleKey, onBack, onAgree }) {
       </div>
       <div className="bg-black/50 border border-gray-700 rounded-lg p-3 max-h-52 overflow-y-auto space-y-3">
         {CLICKWRAP_TERMS.map((term, i) => (
-          <div key={i} className="flex items-start gap-3 cursor-pointer" onClick={() => toggle(i)}>
+          <div 
+            key={i} 
+            className="flex items-start gap-3 cursor-pointer" 
+            onClick={() => toggle(i)}
+            role="checkbox"
+            aria-checked={acks[i]}
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(i); }}}
+          >
             <div className={`w-4 h-4 mt-0.5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${acks[i] ? 'bg-green-500 border-green-500' : 'border-gray-600'}`}>
               {acks[i] && <CheckCircle2 className="w-3 h-3 text-white" />}
             </div>
@@ -161,6 +166,11 @@ export default function NUPSLogin() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 relative">
+      <SEOHead
+        title="N.U.P.S. Login | Secure Staff Authentication"
+        description="Secure login portal for NUPS point-of-sale staff and entertainers. Multi-step authentication with clickwrap agreements."
+        noIndex={true}
+      />
       <div className="absolute inset-0 bg-gradient-to-br from-[#1E40AF]/20 via-[#7C3AED]/10 to-[#3B82F6]/20 pointer-events-none" />
       <div className="relative z-10 w-full max-w-sm">
         {/* Header */}
