@@ -50,14 +50,14 @@ export default function ManagerPINVerifier({ onVerified, onCancel, purpose = "au
     setFailed(false);
 
     try {
-      // Look up staff with matching manager_pin
+      // Look up staff with matching PIN (uses existing `pin` field on NUPSUser)
       const staffList = await base44.entities.NUPSUser.filter({
-        manager_pin: fullPin,
-        is_active: true
-      }, null, 5);
+        pin: fullPin,
+        status: "active"
+      }, null, 10);
 
-      // Also allow admin/manager roles
-      const validRoles = ["admin", "manager"];
+      // Only manager-level or above can authorize payouts
+      const validRoles = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "admin", "manager"];
       const match = staffList.find(s => validRoles.includes(s.role));
 
       if (match) {
