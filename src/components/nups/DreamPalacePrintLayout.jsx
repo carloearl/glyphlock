@@ -68,23 +68,36 @@ export default function DreamPalacePrintLayout({
     </tbody>
   </table>
 
-  <div class="box">
-    <div class="grid2">
-      <div>
-        <div><strong>Dream Dollar value (Amount Ordered)</strong></div>
-        <div><strong>Processing Surcharge 30% for issuing Dream Dollars</strong></div>
-        <div style="font-size:8px;margin-top:4px;">** Dream Dollar are sold as a Convenience medium of currency for payment and is not valid anywhere else. The Entertainer can redeem the Dream Dollars for Cash.</div>
-      </div>
-      <div style="text-align:right;">
-        <div>Dream Dollars: <strong>$${dreamDollarValue.toFixed(2)}</strong> +</div>
-        <div>Surcharge: <strong>$${surcharge.toFixed(2)}</strong> +</div>
-        <div style="font-size:10px;margin-top:4px;">Not Legal Tender</div>
-        <div style="border:2px solid #000;padding:6px;margin-top:6px;font-weight:bold;font-size:14px;">
-          GRAND TOTAL CHARGE = <strong>$${grandTotal.toFixed(2)}</strong>
-        </div>
-      </div>
-    </div>
-  </div>
+  <table>
+    <tbody>
+      <tr>
+        <td><strong>Show Price / Dream Dollar Value (Amount Ordered)</strong></td>
+        <td style="text-align:center;">Dream Dollars</td>
+        <td style="text-align:right;font-weight:bold;">$${dreamDollarValue.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td><strong>Processing Fee (30%) for Issuing Dream Dollars</strong></td>
+        <td style="text-align:center;">+</td>
+        <td style="text-align:right;font-weight:bold;">$${surcharge.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td><strong>Waitress Tip (Customer Discretionary)</strong></td>
+        <td style="text-align:center;">+</td>
+        <td style="text-align:right;font-weight:bold;">$${waitressTip.toFixed(2)}</td>
+      </tr>
+      ${lineTotal > 0 ? `<tr>
+        <td><strong>Other Line Items Total</strong></td>
+        <td style="text-align:center;">+</td>
+        <td style="text-align:right;font-weight:bold;">$${lineTotal.toFixed(2)}</td>
+      </tr>` : ''}
+      <tr>
+        <td colspan="2" style="font-size:8px;">** Dream Dollars are sold as a convenience medium of currency for payment and are not valid anywhere else. The Entertainer can redeem the Dream Dollars for Cash. Not Legal Tender.</td>
+        <td style="border:2px solid #000;padding:6px;text-align:center;font-weight:bold;background:#f5f5f5;">
+          GRAND TOTAL<br/><span style="font-size:14px;">$${grandTotal.toFixed(2)}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
   <div style="text-align:center;font-weight:bold;text-decoration:underline;margin:8px 0;">Acknowledgements</div>
   <ul style="font-size:9px;padding-left:16px;">
