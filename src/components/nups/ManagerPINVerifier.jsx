@@ -61,11 +61,11 @@ export default function ManagerPINVerifier({ onVerified, onCancel, purpose = "au
       const match = staffList.find(s => validRoles.includes(s.role));
 
       if (match) {
-        toast.success(`Authorized: ${match.display_name || match.full_name}`);
+        toast.success(`Authorized: ${match.full_name}`);
         onVerified({
           managerId: match.id,
-          managerName: match.display_name || match.full_name || match.email,
-          managerEmail: match.email,
+          managerName: match.full_name || match.username,
+          managerEmail: match.username,
           managerPin: fullPin
         });
       } else {
