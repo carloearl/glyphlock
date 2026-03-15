@@ -139,7 +139,22 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
   const totalPayout = validBills.reduce((sum, b) => sum + (b.redemption_amount || 0), 0);
   const totalFaceValue = validBills.reduce((sum, b) => sum + (b.denomination || 0), 0);
 
-  const handleFinalizePayout = async () => {
+  const handleRequestPayout = () => {
+    if (validBills.length === 0) {
+      toast.error("No valid bills to process");
+      return;
+    }
+    // Require manager PIN before finalizing
+    setShowPINVerifier(true);
+  };
+
+  const handleManagerAuthorized = (managerInfo) => {
+    setAuthorizedManager(managerInfo);
+    setShowPINVerifier(false);
+    handleFinalizePayout(managerInfo);
+  };
+
+  const handleFinalizePayout = async (managerInfo) => {
     if (validBills.length === 0) {
       toast.error("No valid bills to process");
       return;
@@ -147,18 +162,22 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
 
     setProcessing(true);
     try {
-      // All bills already redeemed individually during scan
-      // Just confirm and trigger callback
-      toast.success(`Payout complete: $${totalPayout.toFixed(2)} to ${contractorName}`);
+      toast.success(`Payout approved by ${managerInfo.managerName} — $${totalPayout.toFixed(2)} to ${contractorName}`);
       if (onPayoutComplete) {
         onPayoutComplete({
           contractor_id: contractorId,
+          contractor_name: contractorName,
           bills_redeemed: validBills.length,
           total_payout: totalPayout,
-          payout_ids: [...new Set(validBills.map(b => b.payout_id))]
+          payout_ids: [...new Set(validBills.map(b => b.payout_id))],
+          authorized_by_manager_id: managerInfo.managerId,
+          authorized_by_manager_name: managerInfo.managerName,
+          authorized_by_manager_email: managerInfo.managerEmail,
+          authorized_at: new Date().toISOString()
         });
       }
       setScannedBills([]);
+      setAuthorizedManager(null);
     } catch (error) {
       toast.error("Payout failed: " + error.message);
     } finally {
