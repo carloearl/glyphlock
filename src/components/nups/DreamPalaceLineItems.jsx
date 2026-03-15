@@ -7,6 +7,7 @@ import { DollarSign, ArrowRight } from "lucide-react";
 
 export default function DreamPalaceLineItems({
   lineItems, setLineItems, dreamDollarValue, setDreamDollarValue,
+  waitressTip, setWaitressTip,
   surcharge, grandTotal, onBack, onNext
 }) {
   const updateLine = (idx, field, value) => {
