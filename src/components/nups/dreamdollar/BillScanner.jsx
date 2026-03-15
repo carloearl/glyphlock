@@ -279,8 +279,17 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
         </Card>
       )}
 
+      {/* Manager PIN Verifier — shown when Finalize is requested */}
+      {showPINVerifier && (
+        <ManagerPINVerifier
+          purpose={`authorize $${totalPayout.toFixed(2)} payout to ${contractorName}`}
+          onVerified={handleManagerAuthorized}
+          onCancel={() => setShowPINVerifier(false)}
+        />
+      )}
+
       {/* Payout Summary */}
-      {validBills.length > 0 && (
+      {validBills.length > 0 && !showPINVerifier && (
         <Card className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border-green-500/40">
           <CardContent className="pt-4 space-y-3">
             <div className="flex items-center justify-between">
@@ -295,17 +304,31 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
               <span className="text-sm font-bold text-green-400">Contractor Payout (50%):</span>
               <span className="font-mono text-2xl font-black text-green-400">${totalPayout.toFixed(2)}</span>
             </div>
+
+            {/* Manager approval status */}
+            {authorizedManager ? (
+              <div className="flex items-center gap-2 text-xs text-green-400 bg-green-900/20 border border-green-500/30 rounded-lg p-2">
+                <CheckCircle2 className="w-4 h-4" />
+                Authorized by: <strong>{authorizedManager.managerName}</strong>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-900/10 border border-amber-500/30 rounded-lg p-2">
+                <Shield className="w-4 h-4" />
+                Manager PIN required to finalize
+              </div>
+            )}
+
             <Button
-              onClick={handleFinalizePayout}
+              onClick={handleRequestPayout}
               disabled={processing}
-              className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-black font-bold"
+              className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold"
             >
               {processing ? (
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
               ) : (
-                <DollarSign className="w-5 h-5 mr-2" />
+                <Shield className="w-5 h-5 mr-2" />
               )}
-              Confirm Payout to {contractorName}
+              {processing ? "Processing..." : "Authorize & Finalize Payout"}
             </Button>
           </CardContent>
         </Card>
