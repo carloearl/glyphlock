@@ -1,7 +1,7 @@
 export default function DreamPalacePrintLayout({
   orderNumber, customerName, customerId, customerAddress, customerState, customerZip,
   purchaserCardName, cardLastSix, cardExp, approvalCode, managerName, hostessName,
-  lineItems, dreamDollarValue, surcharge, grandTotal, signature, managerSig, hostessSig,
+  lineItems, dreamDollarValue, surcharge, waitressTip = 0, grandTotal, signature, managerSig, hostessSig,
 }) {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US');
