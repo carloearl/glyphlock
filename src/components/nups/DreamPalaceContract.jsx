@@ -624,14 +624,27 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
             {/* Totals */}
             <div className="mt-4 space-y-2 max-w-sm ml-auto">
+              {/* Show Price (Dream Dollars) */}
               <div className="flex justify-between items-center">
-                <Label className="text-xs">Dream Dollar value (Amount Ordered) *</Label>
+                <Label className="text-xs text-green-400 font-bold">Show Price / Dream Dollar Value *</Label>
                 <Input type="number" step="100" value={dreamDollarValue || ''} onChange={e => setDreamDollarValue(parseFloat(e.target.value) || 0)} className="w-28 h-8 bg-gray-800 border-gray-700 text-right text-xs" />
               </div>
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>Processing Surcharge 30%:</span>
+              {/* 30% Processing Fee — auto-calculated, read-only */}
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-400">30% Processing Fee:</span>
                 <span className="text-yellow-400 font-mono">${processingSurcharge.toFixed(2)}</span>
               </div>
+              {/* Waitress Tip — customer enters */}
+              <div className="flex justify-between items-center">
+                <Label className="text-xs text-pink-400">Waitress Tip (Customer Decides)</Label>
+                <Input type="number" step="1" value={waitressTip || ''} onChange={e => setWaitressTip(parseFloat(e.target.value) || 0)} className="w-28 h-8 bg-gray-800 border-pink-500/40 text-right text-xs" placeholder="0.00" />
+              </div>
+              {lineItemsTotal > 0 && (
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>Other Line Items:</span>
+                  <span className="font-mono">${lineItemsTotal.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm font-bold border-t border-gray-700 pt-2">
                 <span className="text-white">GRAND TOTAL CHARGE:</span>
                 <span className="text-cyan-400 font-mono text-lg">${grandTotal.toFixed(2)}</span>
