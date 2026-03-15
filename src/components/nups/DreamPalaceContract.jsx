@@ -125,9 +125,10 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
   // Dream Dollars
   const [dreamDollarValue, setDreamDollarValue] = useState(0);
+  const [waitressTip, setWaitressTip] = useState(0);
   const processingSurcharge = dreamDollarValue * 0.3;
   const lineItemsTotal = lineItems.reduce((s, li) => s + (li.amount || 0), 0);
-  const grandTotal = dreamDollarValue + processingSurcharge + lineItemsTotal;
+  const grandTotal = dreamDollarValue + processingSurcharge + waitressTip + lineItemsTotal;
 
   // Acknowledgments
   const [acks, setAcks] = useState(ACKNOWLEDGMENTS.map(() => false));
