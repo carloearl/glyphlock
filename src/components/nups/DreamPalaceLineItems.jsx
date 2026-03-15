@@ -74,24 +74,34 @@ export default function DreamPalaceLineItems({
           </table>
         </div>
 
-        {/* Dream Dollar section */}
+        {/* Pricing section */}
         <div className="bg-gray-800/50 rounded-lg p-3 space-y-3">
+          {/* Show Price / Dream Dollars */}
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-bold text-green-400">Dream Dollar Value (Amount Ordered)</Label>
+            <Label className="text-sm font-bold text-green-400">Show Price / Dream Dollar Value *</Label>
             <Input type="number" step="1" value={dreamDollarValue || ''} onChange={e => setDreamDollarValue(parseFloat(e.target.value) || 0)}
-              className="w-32 text-right bg-gray-700 border-gray-600 font-bold text-green-400" placeholder="0" />
+              className="w-32 text-right bg-gray-700 border-gray-600 font-bold text-green-400" placeholder="0.00" />
           </div>
+          {/* 30% Processing Fee — read-only, auto-calc */}
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-400">Processing Surcharge 30% for issuing Dream Dollars</span>
-            <span className="font-bold text-yellow-400">${surcharge.toFixed(2)}</span>
+            <span className="text-gray-400">30% Processing Fee (auto)</span>
+            <span className="font-bold text-yellow-400">+ ${surcharge.toFixed(2)}</span>
+          </div>
+          {/* Waitress Tip */}
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-bold text-pink-400">Waitress Tip (Customer Decides)</Label>
+            <Input type="number" step="1" value={waitressTip || ''} onChange={e => setWaitressTip(parseFloat(e.target.value) || 0)}
+              className="w-32 text-right bg-gray-700 border-pink-500/40 font-bold text-pink-400" placeholder="0.00" />
           </div>
           <div className="text-[10px] text-gray-500 italic">
-            ** Dream Dollars are sold as a Convenience medium of currency for payment and is not valid anywhere else. The Entertainer can redeem the Dream Dollars for Cash.
+            ** Dream Dollars are sold as a convenience medium of currency for payment and are not valid anywhere else. The Entertainer can redeem the Dream Dollars for Cash.
           </div>
-          <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-700">
-            <span className="text-gray-400">Line Items Total</span>
-            <span className="text-white">${lineTotal.toFixed(2)}</span>
-          </div>
+          {lineTotal > 0 && (
+            <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-700">
+              <span className="text-gray-400">Other Line Items Total</span>
+              <span className="text-white">+ ${lineTotal.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between border-t-2 border-gray-600 pt-2">
             <span className="text-lg font-bold text-white">GRAND TOTAL CHARGE</span>
             <span className="text-2xl font-bold text-cyan-400">${grandTotal.toFixed(2)}</span>
