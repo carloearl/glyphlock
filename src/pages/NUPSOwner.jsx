@@ -608,6 +608,9 @@ export default function NUPSOwner() {
           <TabsContent value="payroll">
             <PayrollReport />
           </TabsContent>
+          <TabsContent value="official-checks">
+            <OfficialChecks />
+          </TabsContent>
           <TabsContent value="ai">
             <AIInsights />
           </TabsContent>
