@@ -6,16 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ScanLine, CheckCircle2, XCircle, AlertTriangle, Loader2,
-  DollarSign, Trash2, Archive, WifiOff
+  DollarSign, Trash2, Archive, WifiOff, Shield
 } from "lucide-react";
 import { toast } from "sonner";
 import OfflineIndicator from "../OfflineIndicator";
+import ManagerPINVerifier from "../ManagerPINVerifier";
 
 export default function BillScanner({ contractorId, contractorName, onPayoutComplete }) {
   const [scannedBills, setScannedBills] = useState([]);
   const [scanBuffer, setScanBuffer] = useState("");
   const [validating, setValidating] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [showPINVerifier, setShowPINVerifier] = useState(false);
+  const [authorizedManager, setAuthorizedManager] = useState(null);
   const inputRef = useRef(null);
 
   // Auto-focus input for continuous scanning
