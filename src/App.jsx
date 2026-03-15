@@ -79,6 +79,7 @@ const AuthenticatedApp = () => {
             <SystemAudit />
           </LayoutWrapper>
         } />
+        <Route path="/OfficialChecks" element={<OfficialChecks />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
