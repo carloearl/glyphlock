@@ -357,6 +357,7 @@ export default function NUPSOwner() {
                   { value: 'tips', icon: HandCoins, label: 'Tip Pool', desc: 'Distribute tips' },
                   { value: 'payroll-engine', icon: DollarSign, label: 'Payroll', desc: 'Calculate pay' },
                   { value: 'payroll', icon: Receipt, label: 'Pay Records', desc: 'Payment history' },
+                  { value: 'official-checks', icon: Banknote, label: 'Official Checks', desc: 'Print payroll checks' },
                   { value: 'employees', icon: Users, label: 'Employees', desc: 'Staff records' },
                   { value: 'daily', icon: PieChart, label: 'Daily Report', desc: 'Day summary' },
                   { value: 'refunds', icon: RotateCcw, label: 'Refunds', desc: 'Process returns' },
