@@ -182,7 +182,7 @@ export default function NUPSPostImplementationReport() {
           ].map(({ label, value, Icon, color }) => (
             <Card key={label} className="bg-gray-900/50 border-white/[0.06]">
               <CardContent className="p-3 text-center">
-                <Icon className={`w-5 h-5 ${color} mx-auto mb-1`} />
+                <Icon className={`w-5 h-5 ${color} mx-auto mb-1`} aria-hidden="true" />
                 <div className={`text-2xl font-black ${color}`}>{value}</div>
                 <div className="text-[10px] text-gray-500">{label}</div>
               </CardContent>
