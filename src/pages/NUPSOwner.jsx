@@ -170,6 +170,7 @@ export default function NUPSOwner() {
   const occupiedRooms = vipRooms.filter((r) => r.status === "occupied").length;
 
   return (
+    <NUPSRouteGuard requiredRoles={["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"]}>
     <div className="min-h-screen bg-black text-white">
       <SEOHead
         title="N.U.P.S. Owner Dashboard | GlyphLock"
@@ -631,5 +632,6 @@ export default function NUPSOwner() {
         </Tabs>
       </div>
     </div>
+    </NUPSRouteGuard>
   );
 }

@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Store, ShoppingCart, LogOut, Users, FileText, Clock, CreditCard, Loader2, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import POSCashRegister from "../components/nups/POSCashRegister.jsx";
+import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
