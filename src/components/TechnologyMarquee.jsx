@@ -65,14 +65,12 @@ const ROWS = [
       { name: "MariaDB",       src: logo("mariadb.org") },
       { name: "Cassandra",     src: logo("cassandra.apache.org") },
       { name: "CockroachDB",   src: logo("cockroachlabs.com") },
-      { name: "DynamoDB",      src: logo("aws.amazon.com") },
       { name: "Supabase",      src: logo("supabase.com") },
       { name: "PlanetScale",   src: logo("planetscale.com") },
       { name: "Neon",          src: logo("neon.tech") },
       { name: "Prisma",        src: logo("prisma.io") },
       { name: "GraphQL",       src: logo("graphql.org") },
       { name: "Apollo",        src: logo("apollographql.com") },
-      { name: "tRPC",          src: logo("trpc.io") },
       { name: "Next.js",       src: logo("nextjs.org") },
       { name: "Nuxt",          src: logo("nuxt.com") },
       { name: "SvelteKit",     src: logo("svelte.dev") },
@@ -81,9 +79,11 @@ const ROWS = [
       { name: "Webpack",       src: logo("webpack.js.org") },
       { name: "Babel",         src: logo("babeljs.io") },
       { name: "ESLint",        src: logo("eslint.org") },
-      { name: "Prettier",      src: logo("prettier.io") },
       { name: "Jest",          src: logo("jestjs.io") },
       { name: "Playwright",    src: logo("playwright.dev") },
+      { name: "Prettier",      src: logo("prettier.io") },
+      { name: "tRPC",          src: logo("trpc.io") },
+      { name: "Storybook",     src: logo("storybook.js.org") },
     ],
   },
   {
@@ -121,12 +121,29 @@ const ROWS = [
       { name: "Salesforce",    src: logo("salesforce.com") },
       { name: "Zendesk",       src: logo("zendesk.com") },
       { name: "Intercom",      src: logo("intercom.com") },
-      { name: "Brex",          src: logo("brex.com") },
       { name: "Plaid",         src: logo("plaid.com") },
       { name: "Square",        src: logo("squareup.com") },
+      { name: "Brex",          src: logo("brex.com") },
     ],
   },
 ];
+
+function LogoCard({ logo }) {
+  return (
+    <div className="marquee-logo-card">
+      <img
+        src={logo.src}
+        alt={logo.name}
+        loading="lazy"
+        style={{ width: 36, height: 36, objectFit: "contain" }}
+        onError={(e) => { e.target.style.opacity = 0.15; }}
+      />
+      <span style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", letterSpacing: 0.5, textAlign: "center", lineHeight: 1.2, marginTop: 4 }}>
+        {logo.name.toUpperCase()}
+      </span>
+    </div>
+  );
+}
 
 function MarqueeRow({ logos, duration, dir }) {
   const items = [...logos, ...logos, ...logos];
@@ -134,67 +151,68 @@ function MarqueeRow({ logos, duration, dir }) {
     <div
       className="w-full overflow-hidden"
       style={{
-        maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
-        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+        maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
       }}
     >
       <div
         style={{
           display: "flex",
-          gap: "14px",
+          gap: "16px",
           width: "max-content",
           animation: `marquee-scroll ${duration} linear infinite ${dir}`,
         }}
       >
         {items.map((logo, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "5px",
-              flexShrink: 0,
-              width: 80,
-              height: 70,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 12,
-              padding: "8px 10px",
-            }}
-          >
-            <img
-              src={logo.src}
-              alt={logo.name}
-              loading="lazy"
-              style={{ width: 34, height: 34, objectFit: "contain" }}
-              onError={(e) => { e.target.style.opacity = 0.2; }}
-            />
-            <span style={{ fontSize: 7, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, textAlign: "center", lineHeight: 1.2 }}>
-              {logo.name.toUpperCase()}
-            </span>
-          </div>
+          <LogoCard key={i} logo={logo} />
         ))}
       </div>
-
-      <style>{`
-        @keyframes marquee-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-33.333%); }
-        }
-      `}</style>
     </div>
   );
 }
+
+// Row configs: [back, mid, front]
+const ROW_CONFIGS = [
+  { rotateX: -38, scaleX: 0.46, scaleY: 0.72, opacity: 0.35, mb: -30 },
+  { rotateX: -20, scaleX: 0.70, scaleY: 0.88, opacity: 0.60, mb: -16 },
+  { rotateX:   0, scaleX: 1.00, scaleY: 1.00, opacity: 1.00, mb:   0 },
+];
 
 export default function TechnologyMarquee() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
 
   return (
-    <div ref={ref} className="w-full max-w-6xl mx-auto px-4 py-16">
-      <div className="text-center mb-10">
+    <div ref={ref} className="w-full max-w-6xl mx-auto px-4 py-20">
+      <style>{`
+        @keyframes marquee-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-33.333%); }
+        }
+        .marquee-logo-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          width: 86px;
+          height: 76px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 14px;
+          padding: 10px 12px;
+          filter: grayscale(1) brightness(0.55);
+          transition: filter 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+          cursor: default;
+        }
+        .marquee-logo-card:hover {
+          filter: grayscale(0) brightness(1);
+          border-color: rgba(255,255,255,0.2);
+          box-shadow: 0 0 18px rgba(56,189,248,0.18);
+        }
+      `}</style>
+
+      <div className="text-center mb-14">
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -209,7 +227,7 @@ export default function TechnologyMarquee() {
           initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-2xl md:text-4xl font-bold text-white mb-2"
+          className="text-2xl md:text-4xl font-bold text-white mb-3"
         >
           Built on World-Class Infrastructure
         </motion.h2>
@@ -227,22 +245,18 @@ export default function TechnologyMarquee() {
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 1, delay: 0.3 }}
-        className="flex flex-col"
-        style={{ gap: 0, perspective: "600px" }}
+        style={{ perspective: "500px", perspectiveOrigin: "50% 80%" }}
       >
         {ROWS.map((row, i) => {
-          const rotateX = [-28, -14, 0][i];
-          const scaleX = [0.55, 0.78, 1][i];
-          const opacity = [0.45, 0.72, 1][i];
-          const mb = [-18, -10, 0][i];
+          const cfg = ROW_CONFIGS[i];
           return (
             <div
               key={i}
               style={{
-                transform: `rotateX(${rotateX}deg) scaleX(${scaleX})`,
-                transformOrigin: "center center",
-                marginBottom: mb,
-                opacity,
+                transform: `rotateX(${cfg.rotateX}deg) scaleX(${cfg.scaleX}) scaleY(${cfg.scaleY})`,
+                transformOrigin: "center bottom",
+                marginBottom: cfg.mb,
+                opacity: cfg.opacity,
               }}
             >
               <MarqueeRow logos={row.logos} duration={row.duration} dir={row.dir} />
@@ -255,7 +269,7 @@ export default function TechnologyMarquee() {
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 1, delay: 0.6 }}
-        className="mt-8 flex items-center justify-center gap-3"
+        className="mt-12 flex items-center justify-center gap-3"
       >
         <div className="h-px flex-1 max-w-[120px]" style={{ background: "linear-gradient(to right, transparent, rgba(56,189,248,0.3))" }} />
         <span className="text-xs text-white/30 tracking-widest uppercase">100+ Integrated Technologies</span>
