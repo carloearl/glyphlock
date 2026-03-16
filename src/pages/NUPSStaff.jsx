@@ -83,7 +83,6 @@ export default function NUPSStaff() {
   const todayRevenue = todayTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
 
   return (
-    <NUPSRouteGuard requiredRoles={["PLATFORM_ADMIN","VENUE_OWNER","VENUE_MANAGER","BARTENDER","DJ","SECURITY","KIOSK","PERFORMER"]}>
     <div className="min-h-screen bg-black text-white">
       <SEOHead
         title="N.U.P.S. Staff Terminal | GlyphLock"
@@ -166,6 +165,5 @@ export default function NUPSStaff() {
         </Tabs>
       </div>
     </div>
-    </NUPSRouteGuard>
   );
 }
