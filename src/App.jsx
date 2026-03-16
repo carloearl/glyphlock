@@ -83,6 +83,9 @@ const AuthenticatedApp = () => {
           </LayoutWrapper>
         } />
         <Route path="/OfficialChecks" element={<OfficialChecks />} />
+        <Route path="/NUPSLanding" element={<NUPSLanding />} />
+        <Route path="/NUPSGateway" element={<NUPSGateway />} />
+        <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
