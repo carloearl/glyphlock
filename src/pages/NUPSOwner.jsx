@@ -62,7 +62,7 @@ import VIPContractLifecycle from "../components/nups/VIPContractLifecycle.jsx";
 import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
 import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
 
-function NUPSOwnerInner() {
+export default function NUPSOwner() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [activeTab, setActiveTab] = useState("analytics");

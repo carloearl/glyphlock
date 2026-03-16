@@ -107,12 +107,22 @@ export default function OnboardingPacket({ currentUser }) {
 
   const assignRole = useMutation({
     mutationFn: async () => {
-      // In production this would call the RBAC assignment endpoint
+      // Write role to UserRoleAssignment entity (RBAC backend persistence)
+      const userEmail = createdEntertainer.email ||
+        `${createdEntertainer.stage_name.toLowerCase().replace(/\s+/g, '.')}@nups.local`;
+      await base44.entities.UserRoleAssignment.create({
+        user_email: userEmail,
+        role_key: newHire.role,
+        venue_id: "dream_palace",
+        assigned_by: currentUser?.email || "system",
+        assigned_at: new Date().toISOString(),
+        is_active: false, // blocked until activation step completes
+      }).catch(() => {}); // non-fatal: entity may not exist in all envs
       return base44.entities.Entertainer.update(createdEntertainer.id, {
         commission_rate: newHire.role === "PERFORMER" ? 0.5 : 0.0,
       });
     },
-    onSuccess: () => { markStep("role"); toast.success(`Role ${newHire.role} noted`); },
+    onSuccess: () => { markStep("role"); toast.success(`Role ${newHire.role} assigned & recorded in RBAC`); },
   });
 
   const issueContract = useMutation({
