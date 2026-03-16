@@ -21,6 +21,7 @@ import NUPSGateway from './pages/NUPSGateway';
 import NUPSSandbox from './pages/NUPSSandbox';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
 import NUPSMISReport from './pages/NUPSMISReport';
+import ImageShare from './pages/ImageShare';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSGateway" element={<NUPSGateway />} />
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
+        <Route path="/view/:assetId" element={<ImageShare />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
