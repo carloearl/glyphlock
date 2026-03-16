@@ -228,7 +228,7 @@ export default function TechnologyMarquee() {
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 1, delay: 0.3 }}
         className="flex flex-col"
-        style={{ gap: 0, perspective: "1200px" }}
+        style={{ gap: 0, perspective: "600px" }}
       >
         {ROWS.map((row, i) => {
           const rotateX = [-28, -14, 0][i];
