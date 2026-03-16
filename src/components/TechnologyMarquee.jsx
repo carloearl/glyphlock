@@ -279,7 +279,7 @@ export default function TechnologyMarquee() {
         initial={{ opacity: 0, scale: 0.92 }}
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 space-y-2"
+        className="relative z-10 space-y-6"
         style={{
           perspective: 1200,
         }}
