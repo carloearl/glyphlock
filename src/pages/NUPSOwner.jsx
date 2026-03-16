@@ -58,6 +58,8 @@ import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
 import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub.jsx";
 import OfficialChecks from "./OfficialChecks";
+import VIPContractLifecycle from "../components/nups/VIPContractLifecycle.jsx";
+import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
 
 export default function NUPSOwner() {
   const [user, setUser] = useState(null);
