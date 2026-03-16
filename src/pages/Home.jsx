@@ -193,9 +193,9 @@ export default function Home() {
         </ScrollSection>
 
         {/* Technology Partners */}
-        <ScrollSection>
+        <section className="w-full py-8">
           <TechnologyMarquee />
-        </ScrollSection>
+        </section>
 
         {/* Final Call to Action */}
         <ScrollSection className="container-responsive">
