@@ -138,11 +138,7 @@ const STATUS_BADGE = {
 };
 
 const REMAINING = [
-  "NUPSRouteGuard should be applied to remaining operational routes (DreamDollarHub, OfficialChecks, etc.) if deployed publicly",
-  "EntertainerCheckIn page (/EntertainerCheckIn) could be upgraded to use TimeClock PIN flow instead of the older contract form",
-  "Onboarding Packet's role assignment is UI-side only — a backend RBAC write via NUPSUser/UserRoleAssignment entities should be wired in production",
-  "VIPContractLifecycle uses ContractorPayout entity as contract store — a dedicated VIPContract entity would be more semantically clean",
-  "Sandbox demo data is static — a 'Reset Demo' button that seeds the test DB is a future enhancement",
+  "VIPContractLifecycle uses ContractorPayout entity as contract store — a dedicated VIPContract entity would be more semantically clean (low priority)",
 ];
 
 export default function NUPSPostImplementationReport() {
