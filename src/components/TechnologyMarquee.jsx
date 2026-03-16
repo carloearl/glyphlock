@@ -158,9 +158,10 @@ function MarqueeRow({ logos, duration, dir }) {
       <div
         style={{
           display: "flex",
-          gap: "16px",
+          gap: "20px",
           width: "max-content",
           animation: `marquee-scroll ${duration} linear infinite ${dir}`,
+          padding: "10px 0",
         }}
       >
         {items.map((logo, i) => (
