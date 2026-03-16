@@ -1,140 +1,117 @@
-import React, { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import React, { useRef, useState, useEffect } from "react";
+import { motion, useInView, useAnimationFrame } from "framer-motion";
 
 const ALL_LOGOS = [
-  { name: "AWS", logo: "https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-ar21.svg" },
-  { name: "Google Cloud", logo: "https://upload.wikimedia.org/wikipedia/commons/5/51/Google_Cloud_logo.svg" },
-  { name: "Microsoft Azure", logo: "https://www.vectorlogo.zone/logos/microsoft_azure/microsoft_azure-ar21.svg" },
-  { name: "Docker", logo: "https://www.vectorlogo.zone/logos/docker/docker-ar21.svg" },
-  { name: "PostgreSQL", logo: "https://www.vectorlogo.zone/logos/postgresql/postgresql-ar21.svg" },
-  { name: "MongoDB", logo: "https://www.vectorlogo.zone/logos/mongodb/mongodb-ar21.svg" },
-  { name: "Redis", logo: "https://www.vectorlogo.zone/logos/redis/redis-ar21.svg" },
-  { name: "OpenAI", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4d/OpenAI_Logo.svg" },
-  { name: "NVIDIA", logo: "https://www.vectorlogo.zone/logos/nvidia/nvidia-ar21.svg" },
-  { name: "GitHub", logo: "https://www.vectorlogo.zone/logos/github/github-ar21.svg" },
-  { name: "Cloudflare", logo: "https://www.vectorlogo.zone/logos/cloudflare/cloudflare-ar21.svg" },
-  { name: "Stripe", logo: "https://logo.clearbit.com/stripe.com" },
-  { name: "Kubernetes", logo: "https://www.vectorlogo.zone/logos/kubernetes/kubernetes-ar21.svg" },
-  { name: "React", logo: "https://www.vectorlogo.zone/logos/reactjs/reactjs-ar21.svg" },
-  { name: "Node.js", logo: "https://www.vectorlogo.zone/logos/nodejs/nodejs-ar21.svg" },
-  { name: "Python", logo: "https://www.vectorlogo.zone/logos/python/python-ar21.svg" },
-  { name: "TypeScript", logo: "https://www.vectorlogo.zone/logos/typescriptlang/typescriptlang-ar21.svg" },
-  { name: "TailwindCSS", logo: "https://www.vectorlogo.zone/logos/tailwindcss/tailwindcss-ar21.svg" },
-  { name: "GraphQL", logo: "https://www.vectorlogo.zone/logos/graphql/graphql-ar21.svg" },
-  { name: "CrowdStrike", logo: "https://upload.wikimedia.org/wikipedia/commons/3/3e/CrowdStrike_logo.svg" },
-  { name: "Claude", logo: "https://upload.wikimedia.org/wikipedia/commons/7/78/Anthropic_logo.svg" },
-  { name: "Gemini", logo: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg" },
-  { name: "Okta", logo: "https://www.vectorlogo.zone/logos/okta/okta-ar21.svg" },
-  { name: "Datadog", logo: "https://www.vectorlogo.zone/logos/datadoghq/datadoghq-ar21.svg" },
-  { name: "Grafana", logo: "https://www.vectorlogo.zone/logos/grafana/grafana-ar21.svg" },
-  { name: "Slack", logo: "https://www.vectorlogo.zone/logos/slack/slack-ar21.svg" },
-  { name: "Twilio", logo: "https://www.vectorlogo.zone/logos/twilio/twilio-ar21.svg" },
-  { name: "VS Code", logo: "https://www.vectorlogo.zone/logos/visualstudio_code/visualstudio_code-ar21.svg" },
-  { name: "Figma", logo: "https://www.vectorlogo.zone/logos/figma/figma-ar21.svg" },
-  { name: "Shopify", logo: "https://www.vectorlogo.zone/logos/shopify/shopify-ar21.svg" },
-  { name: "Apple", logo: "https://www.vectorlogo.zone/logos/apple/apple-ar21.svg" },
-  { name: "Microsoft", logo: "https://www.vectorlogo.zone/logos/microsoft/microsoft-ar21.svg" },
-  { name: "Google", logo: "https://www.vectorlogo.zone/logos/google/google-ar21.svg" },
-  { name: "Amazon", logo: "https://www.vectorlogo.zone/logos/amazon/amazon-ar21.svg" },
-  { name: "PayPal", logo: "https://www.vectorlogo.zone/logos/paypal/paypal-ar21.svg" },
-  { name: "Visa", logo: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" },
-  { name: "Salesforce", logo: "https://www.vectorlogo.zone/logos/salesforce/salesforce-ar21.svg" },
-  { name: "Oracle", logo: "https://www.vectorlogo.zone/logos/oracle/oracle-ar21.svg" },
-  { name: "IBM", logo: "https://www.vectorlogo.zone/logos/ibm/ibm-ar21.svg" },
-  { name: "Snowflake", logo: "https://www.vectorlogo.zone/logos/snowflake/snowflake-ar21.svg" },
-  { name: "Perplexity", logo: "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/perplexity-ai-icon.png" },
-  { name: "Anthropic", logo: "https://upload.wikimedia.org/wikipedia/commons/7/78/Anthropic_logo.svg" },
-  { name: "Intel", logo: "https://www.vectorlogo.zone/logos/intel/intel-ar21.svg" },
-  { name: "Notion", logo: "https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" },
-  { name: "Discord", logo: "https://www.vectorlogo.zone/logos/discordapp/discordapp-ar21.svg" },
-  { name: "Base44", logo: "https://avatars.githubusercontent.com/u/145019558?s=200&v=4" },
-  { name: "Mastercard", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" },
-  { name: "Firebase", logo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/Firebase_Logo.png" },
-  { name: "Elastic", logo: "https://www.vectorlogo.zone/logos/elastic/elastic-ar21.svg" },
-  { name: "Terraform", logo: "https://www.vectorlogo.zone/logos/terraformio/terraformio-ar21.svg" },
-  { name: "CircleCI", logo: "https://www.vectorlogo.zone/logos/circleci/circleci-ar21.svg" },
-  { name: "GitLab", logo: "https://www.vectorlogo.zone/logos/gitlab/gitlab-ar21.svg" },
-  { name: "Jira", logo: "https://www.vectorlogo.zone/logos/atlassian_jira/atlassian_jira-ar21.svg" },
-  { name: "Dropbox", logo: "https://www.vectorlogo.zone/logos/dropbox/dropbox-ar21.svg" },
-  { name: "Atlassian", logo: "https://www.vectorlogo.zone/logos/atlassian/atlassian-ar21.svg" },
-  { name: "Asana", logo: "https://www.vectorlogo.zone/logos/asana/asana-ar21.svg" },
-  { name: "Ethereum", logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg" },
-  { name: "Bitcoin", logo: "https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" },
-  { name: "Coinbase", logo: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Coinbase.svg" },
-  { name: "Plaid", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Plaid_logo.svg" },
-  { name: "Nginx", logo: "https://www.vectorlogo.zone/logos/nginx/nginx-ar21.svg" },
-  { name: "Linux", logo: "https://www.vectorlogo.zone/logos/linux/linux-ar21.svg" },
-  { name: "Ubuntu", logo: "https://www.vectorlogo.zone/logos/ubuntu/ubuntu-ar21.svg" },
-  { name: "Netlify", logo: "https://www.vectorlogo.zone/logos/netlify/netlify-ar21.svg" },
-  { name: "Vercel", logo: "https://www.vectorlogo.zone/logos/vercel/vercel-ar21.svg" },
-  { name: "Supabase", logo: "https://upload.wikimedia.org/wikipedia/commons/b/b8/Supabase_Logo.svg" },
-  { name: "Hugging Face", logo: "https://huggingface.co/front/assets/huggingface_logo.svg" },
-  { name: "PagerDuty", logo: "https://www.vectorlogo.zone/logos/pagerduty/pagerduty-ar21.svg" },
-  { name: "Splunk", logo: "https://www.vectorlogo.zone/logos/splunk/splunk-ar21.svg" },
-  { name: "New Relic", logo: "https://www.vectorlogo.zone/logos/newrelic/newrelic-ar21.svg" },
-  { name: "SendGrid", logo: "https://www.vectorlogo.zone/logos/sendgrid/sendgrid-ar21.svg" },
-  { name: "Cisco", logo: "https://www.vectorlogo.zone/logos/cisco/cisco-ar21.svg" },
-  { name: "VMware", logo: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Vmware.svg" },
+  "AWS", "Google Cloud", "Azure", "Docker", "PostgreSQL", "MongoDB",
+  "Redis", "OpenAI", "NVIDIA", "GitHub", "Cloudflare", "Stripe",
+  "Kubernetes", "React", "Node.js", "Python", "TypeScript", "TailwindCSS",
+  "GraphQL", "CrowdStrike", "Claude", "Gemini", "Okta", "Datadog",
+  "Grafana", "Slack", "Twilio", "Figma", "Shopify", "Salesforce",
+  "Oracle", "IBM", "Snowflake", "Anthropic", "Intel", "Notion",
+  "Discord", "Mastercard", "Firebase", "Elastic", "Terraform", "GitLab",
+  "Jira", "Ethereum", "Bitcoin", "Coinbase", "Linux", "Vercel",
+  "Supabase", "HuggingFace", "Splunk", "SendGrid", "Cisco", "VMware",
+  "CircleCI", "PagerDuty", "New Relic", "Netlify", "PayPal", "Visa",
 ];
 
-// Infinite scroll marquee row
-function MarqueeRow({ logos, speed = 40, direction = 1, itemH = 56, imgH = 32, opacity = 1 }) {
-  // Double the logos so the loop is seamless
-  const doubled = [...logos, ...logos];
-  const duration = (logos.length * 160) / speed;
+// Ring colors for each tier
+const RING_COLORS = [
+  { text: "#c4b5fd", glow: "rgba(167,139,250,0.7)", orbit: "rgba(139,92,246,0.35)" },  // top — purple
+  { text: "#67e8f9", glow: "rgba(103,232,249,0.7)", orbit: "rgba(6,182,212,0.35)" },   // mid — cyan
+  { text: "#a5f3fc", glow: "rgba(99,202,255,0.8)", orbit: "rgba(59,130,246,0.4)" },    // base — blue
+];
+
+function OrbitRing3D({ labels, radius, speed, direction, tiltX, color, itemSize }) {
+  const angleRef = useRef(0);
+  const [tick, setTick] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [hoveredIdx, setHoveredIdx] = useState(null);
+  const count = labels.length;
+
+  useAnimationFrame((_, delta) => {
+    if (paused) return;
+    angleRef.current += (delta / 1000) * speed * direction;
+    setTick(t => t + 1);
+  });
+
+  const angle = angleRef.current;
 
   return (
     <div
-      className="overflow-hidden w-full"
-      style={{ height: itemH + 16, opacity, maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)" }}
+      className="relative w-full flex items-center justify-center"
+      style={{ height: itemSize * 2.2, perspective: 900, perspectiveOrigin: "50% 50%" }}
     >
+      {/* Orbit ellipse ring */}
       <div
-        className="flex items-center gap-3"
+        className="absolute pointer-events-none"
         style={{
-          width: "max-content",
-          animation: `marquee-scroll ${duration}s linear infinite`,
-          animationDirection: direction === -1 ? "reverse" : "normal",
+          width: radius * 2,
+          height: radius * 0.28,
+          border: `1px dashed ${color.orbit}`,
+          borderRadius: "50%",
+          transform: `rotateX(${tiltX}deg)`,
+          left: "50%",
+          top: "50%",
+          marginLeft: -radius,
+          marginTop: -(radius * 0.14),
+        }}
+      />
+
+      {/* Labels */}
+      <div
+        style={{
+          position: "relative",
+          width: radius * 2,
+          height: itemSize,
+          transformStyle: "preserve-3d",
+          transform: `rotateX(${tiltX}deg)`,
         }}
       >
-        {doubled.map((logo, i) => (
-          <div
-            key={`${logo.name}-${i}`}
-            className="flex items-center justify-center flex-shrink-0 group"
-            style={{
-              width: 120,
-              height: itemH,
-              borderRadius: 12,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              padding: "6px 12px",
-              transition: "all 0.3s ease",
-            }}
-          >
-            <img
-              src={logo.logo}
-              alt={logo.name}
-              loading="lazy"
-              style={{
-                maxWidth: "100%",
-                height: imgH,
-                objectFit: "contain",
-                filter: "brightness(0) invert(1) opacity(0.55)",
-                transition: "filter 0.3s ease",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.filter = "none"; e.currentTarget.parentElement.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.parentElement.style.borderColor = "rgba(255,255,255,0.2)"; }}
-              onMouseLeave={e => { e.currentTarget.style.filter = "brightness(0) invert(1) opacity(0.55)"; e.currentTarget.parentElement.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.parentElement.style.borderColor = "rgba(255,255,255,0.08)"; }}
-              onError={e => { e.target.style.display = "none"; }}
-            />
-          </div>
-        ))}
-      </div>
+        {labels.map((label, i) => {
+          const theta = (i / count) * 2 * Math.PI + (angle * Math.PI) / 180;
+          const x = Math.cos(theta) * radius;
+          const z = Math.sin(theta) * radius;
+          const normZ = (z / radius + 1) / 2; // 0=back 1=front
+          const isHovered = hoveredIdx === i;
+          const opacity = isHovered ? 1 : 0.15 + normZ * 0.75;
+          const scale = isHovered ? 1.2 : 0.65 + normZ * 0.35;
 
-      <style>{`
-        @keyframes marquee-scroll {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-      `}</style>
+          return (
+            <div
+              key={label + i}
+              onMouseEnter={() => { setPaused(true); setHoveredIdx(i); }}
+              onMouseLeave={() => { setPaused(false); setHoveredIdx(null); }}
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: `translate(-50%, -50%) translateX(${x}px) translateZ(${z}px) scale(${scale})`,
+                opacity,
+                transition: "opacity 0.2s, transform 0.2s",
+                zIndex: isHovered ? 20 : Math.round(normZ * 10),
+                cursor: "default",
+                whiteSpace: "nowrap",
+                padding: isHovered ? "4px 12px" : "3px 8px",
+                borderRadius: 20,
+                background: isHovered
+                  ? "rgba(255,255,255,0.1)"
+                  : normZ > 0.7 ? "rgba(255,255,255,0.04)" : "transparent",
+                border: isHovered
+                  ? `1px solid ${color.text}`
+                  : normZ > 0.7 ? "1px solid rgba(255,255,255,0.1)" : "1px solid transparent",
+                boxShadow: isHovered ? `0 0 20px ${color.glow}` : "none",
+                fontSize: itemSize * 0.28,
+                fontWeight: isHovered ? 700 : 500,
+                letterSpacing: "0.04em",
+                color: isHovered ? color.text : `rgba(255,255,255,${0.4 + normZ * 0.5})`,
+                textShadow: isHovered ? `0 0 16px ${color.glow}` : "none",
+              }}
+            >
+              {label}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -143,31 +120,31 @@ export default function TechnologyMarquee() {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.15 });
 
-  // Pyramid: top row fewest logos (narrowest visually), bottom row most
-  const ring1 = ALL_LOGOS.slice(0, 10);   // top — smallest/fewest
-  const ring2 = ALL_LOGOS.slice(10, 35);  // middle
-  const ring3 = ALL_LOGOS.slice(35);      // base — widest/most
+  // Pyramid: top = fewest/narrowest, bottom = most/widest
+  const ring1 = ALL_LOGOS.slice(0, 10);
+  const ring2 = ALL_LOGOS.slice(10, 32);
+  const ring3 = ALL_LOGOS.slice(32);
 
   return (
     <div
       ref={containerRef}
-      className="w-full mx-auto px-0 py-16 relative overflow-hidden"
+      className="w-full max-w-7xl mx-auto px-4 py-16 relative overflow-hidden"
       style={{ background: "transparent" }}
     >
       {/* Ambient glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 60%, rgba(87,61,255,0.07) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 70% 80% at 50% 60%, rgba(87,61,255,0.08) 0%, transparent 70%)",
         }}
       />
 
       {/* Header */}
-      <div className="text-center mb-12 relative z-10 px-4">
+      <div className="text-center mb-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.8 }}
           className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
           style={{ background: "rgba(87,61,255,0.12)", border: "1px solid rgba(87,61,255,0.3)", color: "#a78bfa" }}
         >
@@ -178,7 +155,7 @@ export default function TechnologyMarquee() {
         <motion.h2
           initial={{ opacity: 0, x: -60 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1 }}
           className="text-2xl md:text-4xl font-bold text-white mb-3"
         >
           Enterprise Engineering Excellence
@@ -187,34 +164,53 @@ export default function TechnologyMarquee() {
         <motion.p
           initial={{ opacity: 0, x: 60 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, delay: 0.15 }}
           className="text-base md:text-lg text-white/70 max-w-3xl mx-auto"
         >
           Engineered under the Triple-E Standard — aligned with the same high-integrity benchmarks that leading global platforms refuse to compromise on.
         </motion.p>
       </div>
 
-      {/* Pyramid rows — top is narrowest (centered, clipped), base is full width */}
+      {/* Cylindrical Pyramid — narrow apex → wide base */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 1, delay: 0.3 }}
-        className="relative z-10 flex flex-col items-center gap-3"
+        transition={{ duration: 1.2, delay: 0.3 }}
+        className="relative z-10 flex flex-col items-center"
+        style={{ gap: 0 }}
       >
-        {/* Row 1 — TOP: narrowest, fewest, most faded */}
-        <div style={{ width: "42%", minWidth: 320 }}>
-          <MarqueeRow logos={ring1} speed={28} direction={1} itemH={48} imgH={26} opacity={0.6} />
-        </div>
+        {/* TOP — smallest ring, fewest labels */}
+        <OrbitRing3D
+          labels={ring1}
+          radius={260}
+          speed={22}
+          direction={1}
+          tiltX={72}
+          color={RING_COLORS[0]}
+          itemSize={28}
+        />
 
-        {/* Row 2 — MIDDLE */}
-        <div style={{ width: "72%", minWidth: 480 }}>
-          <MarqueeRow logos={ring2} speed={38} direction={-1} itemH={56} imgH={32} opacity={0.8} />
-        </div>
+        {/* MIDDLE */}
+        <OrbitRing3D
+          labels={ring2}
+          radius={400}
+          speed={16}
+          direction={-1}
+          tiltX={72}
+          color={RING_COLORS[1]}
+          itemSize={34}
+        />
 
-        {/* Row 3 — BASE: full width, most opaque, largest */}
-        <div style={{ width: "100%" }}>
-          <MarqueeRow logos={ring3} speed={48} direction={1} itemH={64} imgH={38} opacity={1} />
-        </div>
+        {/* BASE — widest ring, most labels */}
+        <OrbitRing3D
+          labels={ring3}
+          radius={540}
+          speed={12}
+          direction={1}
+          tiltX={72}
+          color={RING_COLORS[2]}
+          itemSize={40}
+        />
       </motion.div>
 
       {/* Bottom label */}
@@ -222,7 +218,7 @@ export default function TechnologyMarquee() {
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 1, delay: 0.8 }}
-        className="mt-10 flex items-center justify-center gap-3 relative z-10 px-4"
+        className="mt-8 flex items-center justify-center gap-3 relative z-10"
       >
         <div className="h-px flex-1 max-w-[120px]" style={{ background: "linear-gradient(to right, transparent, rgba(87,61,255,0.5))" }} />
         <span className="text-xs text-white/40 tracking-widest uppercase font-medium">
