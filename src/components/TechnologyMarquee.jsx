@@ -78,14 +78,15 @@ const ALL_LOGOS = [
 ];
 
 // --- 3D Carousel Row ---
-function Carousel3DRow({ logos, radius, speed, direction = 1, yOffset = 0, tiltX = 0 }) {
+function Carousel3DRow({ logos, radius, speed, direction = 1, tiltX = 0 }) {
   const angleRef = useRef(0);
   const [angle, setAngle] = useState(0);
-  const hoveredRef = useRef(false);
+  const [hoveredIdx, setHoveredIdx] = useState(null);
+  const ringPausedRef = useRef(false);
   const count = logos.length;
 
   useAnimationFrame((_, delta) => {
-    if (hoveredRef.current) return;
+    if (ringPausedRef.current) return;
     angleRef.current += (delta / 1000) * speed * direction;
     setAngle(angleRef.current);
   });
@@ -93,57 +94,61 @@ function Carousel3DRow({ logos, radius, speed, direction = 1, yOffset = 0, tiltX
   return (
     <div
       className="relative w-full flex items-center justify-center"
-      style={{ height: 90, perspective: 1200, perspectiveOrigin: "50% 50%" }}
+      style={{ height: 100, perspective: 1200, perspectiveOrigin: "50% 50%" }}
     >
       <div
         style={{
           position: "relative",
           width: radius * 2,
-          height: 70,
+          height: 75,
           transformStyle: "preserve-3d",
           transform: `rotateX(${tiltX}deg)`,
         }}
-        onMouseEnter={() => { hoveredRef.current = true; }}
-        onMouseLeave={() => { hoveredRef.current = false; }}
       >
         {logos.map((logo, i) => {
           const theta = (i / count) * 2 * Math.PI + (angle * Math.PI) / 180;
           const x = Math.cos(theta) * radius;
           const z = Math.sin(theta) * radius;
-          // Items on the back half are faded + behind
-          const normalizedZ = (z / radius + 1) / 2; // 0 = back, 1 = front
-          const opacity = 0.25 + normalizedZ * 0.75;
-          const brightness = 0.4 + normalizedZ * 0.6;
-          const scale = 0.7 + normalizedZ * 0.3;
+          const normalizedZ = (z / radius + 1) / 2; // 0=back, 1=front
+          const isHovered = hoveredIdx === i;
+          const opacity = isHovered ? 1 : 0.2 + normalizedZ * 0.7;
+          const scale = isHovered ? 1.15 : 0.72 + normalizedZ * 0.28;
 
           return (
             <div
               key={`${logo.name}-${i}`}
+              onMouseEnter={() => { ringPausedRef.current = true; setHoveredIdx(i); }}
+              onMouseLeave={() => { ringPausedRef.current = false; setHoveredIdx(null); }}
               style={{
                 position: "absolute",
                 left: "50%",
                 top: "50%",
-                width: 110,
-                height: 55,
+                width: 115,
+                height: 58,
                 transform: `translate(-50%, -50%) translateX(${x}px) translateZ(${z}px) scale(${scale})`,
                 opacity,
-                transition: "opacity 0.1s",
+                transition: "opacity 0.25s, transform 0.25s",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "6px 10px",
-                borderRadius: 10,
-                background: normalizedZ > 0.7
-                  ? "rgba(255,255,255,0.07)"
+                borderRadius: 12,
+                background: isHovered
+                  ? "rgba(255,255,255,0.1)"
+                  : normalizedZ > 0.75
+                  ? "rgba(255,255,255,0.05)"
                   : "transparent",
-                border: normalizedZ > 0.7
-                  ? "1px solid rgba(255,255,255,0.12)"
+                border: isHovered
+                  ? "1px solid rgba(255,255,255,0.25)"
+                  : normalizedZ > 0.75
+                  ? "1px solid rgba(255,255,255,0.1)"
                   : "1px solid transparent",
-                backdropFilter: normalizedZ > 0.7 ? "blur(6px)" : "none",
-                boxShadow: normalizedZ > 0.8
-                  ? "0 0 18px rgba(87,61,255,0.25)"
+                backdropFilter: normalizedZ > 0.7 || isHovered ? "blur(8px)" : "none",
+                boxShadow: isHovered
+                  ? "0 0 28px rgba(87,61,255,0.5)"
                   : "none",
-                pointerEvents: "none",
+                cursor: "default",
+                zIndex: isHovered ? 10 : Math.round(normalizedZ * 5),
               }}
             >
               <img
@@ -156,8 +161,11 @@ function Carousel3DRow({ logos, radius, speed, direction = 1, yOffset = 0, tiltX
                   maxWidth: "100%",
                   maxHeight: "100%",
                   objectFit: "contain",
-                  filter: `brightness(0) invert(1) opacity(${brightness.toFixed(2)})`,
-                  transition: "filter 0.3s",
+                  // On hover: show real brand color. Otherwise white/faded.
+                  filter: isHovered
+                    ? "none"
+                    : `brightness(0) invert(1) opacity(${(0.35 + normalizedZ * 0.55).toFixed(2)})`,
+                  transition: "filter 0.35s ease",
                 }}
                 onError={(e) => { e.target.style.display = "none"; }}
               />
