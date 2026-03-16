@@ -171,11 +171,11 @@ function MarqueeRow({ logos, duration, dir }) {
   );
 }
 
-// Row configs: [back, mid, front]
+// Row configs: all rows curve identically, just stacked with spacing
 const ROW_CONFIGS = [
-  { rotateX: -38, scaleX: 0.46, scaleY: 0.72, opacity: 0.35, mb: -30 },
-  { rotateX: -20, scaleX: 0.70, scaleY: 0.88, opacity: 0.60, mb: -16 },
-  { rotateX:   0, scaleX: 1.00, scaleY: 1.00, opacity: 1.00, mb:   0 },
+  { rotateX: -18, scaleX: 0.82, opacity: 0.45, mb: 28 },
+  { rotateX: -18, scaleX: 0.91, opacity: 0.70, mb: 28 },
+  { rotateX: -18, scaleX: 1.00, opacity: 1.00, mb:  0 },
 ];
 
 export default function TechnologyMarquee() {
