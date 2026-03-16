@@ -166,5 +166,6 @@ export default function NUPSStaff() {
         </Tabs>
       </div>
     </div>
+    </NUPSRouteGuard>
   );
 }
