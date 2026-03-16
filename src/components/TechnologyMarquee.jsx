@@ -91,7 +91,7 @@ const ROWS = [
     dir: "normal",
     logos: [
       { name: "Anthropic",     src: logo("anthropic.com") },
-      { name: "Gemini",        src: logo("gemini.google.com") },
+      { name: "Gemini",        src: logo("deepmind.google") },
       { name: "Visa",          src: logo("visa.com") },
       { name: "Mastercard",    src: logo("mastercard.com") },
       { name: "Slack",         src: logo("slack.com") },
