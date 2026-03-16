@@ -16,6 +16,9 @@ import GovernanceHub from './pages/GovernanceHub';
 import NUPSPostLogin from './pages/NUPSPostLogin';
 import SystemAudit from './pages/SystemAudit';
 import OfficialChecks from './pages/OfficialChecks';
+import NUPSLanding from './pages/NUPSLanding';
+import NUPSGateway from './pages/NUPSGateway';
+import NUPSSandbox from './pages/NUPSSandbox';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
