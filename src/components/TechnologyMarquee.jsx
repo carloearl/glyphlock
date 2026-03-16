@@ -84,6 +84,9 @@ function Carousel3DRow({ logos, radius, speed, direction = 1, tiltX = 0 }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const ringPausedRef = useRef(false);
   const count = logos.length;
+  const itemW = radius > 400 ? 115 : 85;
+  const itemH = radius > 400 ? 58 : 44;
+  const imgW = radius > 400 ? 80 : 58;
 
   useAnimationFrame((_, delta) => {
     if (ringPausedRef.current) return;
@@ -94,13 +97,13 @@ function Carousel3DRow({ logos, radius, speed, direction = 1, tiltX = 0 }) {
   return (
     <div
       className="relative w-full flex items-center justify-center"
-      style={{ height: 100, perspective: 1200, perspectiveOrigin: "50% 50%" }}
+      style={{ height: "100%", perspective: 1200, perspectiveOrigin: "50% 50%" }}
     >
       <div
         style={{
           position: "relative",
           width: radius * 2,
-          height: 75,
+          height: itemH,
           transformStyle: "preserve-3d",
           transform: `rotateX(${tiltX}deg)`,
         }}
