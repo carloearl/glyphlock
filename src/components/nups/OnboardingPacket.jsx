@@ -143,10 +143,19 @@ export default function OnboardingPacket({ currentUser }) {
   });
 
   const activateAccount = useMutation({
-    mutationFn: () => base44.entities.Entertainer.update(createdEntertainer.id, {
-      status: "active",
-      contract_signature: `Activated by ${currentUser?.email} on ${new Date().toLocaleDateString()}`,
-    }),
+    mutationFn: async () => {
+      // Flip UserRoleAssignment to active (RBAC live access)
+      const userEmail = createdEntertainer.email ||
+        `${createdEntertainer.stage_name.toLowerCase().replace(/\s+/g, '.')}@nups.local`;
+      const existing = await base44.entities.UserRoleAssignment.filter({ user_email: userEmail }).catch(() => []);
+      if (existing?.length > 0) {
+        await base44.entities.UserRoleAssignment.update(existing[0].id, { is_active: true }).catch(() => {});
+      }
+      return base44.entities.Entertainer.update(createdEntertainer.id, {
+        status: "active",
+        contract_signature: `Activated by ${currentUser?.email} on ${new Date().toLocaleDateString()}`,
+      });
+    },
     onSuccess: () => {
       markStep("activated");
       qc.invalidateQueries({ queryKey: ["onboarding-entertainers"] });
