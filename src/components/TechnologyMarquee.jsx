@@ -80,7 +80,7 @@ const ROWS = [
       { name: "Babel",         src: logo("babeljs.io") },
       { name: "ESLint",        src: logo("eslint.org") },
       { name: "Jest",          src: logo("jestjs.io") },
-      { name: "Playwright",    src: logo("microsoft.com") },
+      { name: "Playwright",    src: logo("playwright.dev") },
       { name: "Prettier",      src: logo("prettier.io") },
       { name: "tRPC",          src: logo("trpc.io") },
       { name: "Storybook",     src: logo("chromatic.com") },
