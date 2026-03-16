@@ -71,7 +71,7 @@ const ROWS = [
       { name: "Prisma",        src: logo("prisma.io") },
       { name: "GraphQL",       src: logo("graphql.org") },
       { name: "Apollo",        src: logo("apollographql.com") },
-      { name: "Next.js",       src: logo("nextjs.org") },
+      { name: "Next.js",       src: logo("vercel.com") },
       { name: "Nuxt",          src: logo("nuxt.com") },
       { name: "SvelteKit",     src: logo("svelte.dev") },
       { name: "Remix",         src: logo("remix.run") },
