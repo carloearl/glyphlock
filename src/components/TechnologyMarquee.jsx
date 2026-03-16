@@ -87,21 +87,34 @@ function MarqueeRow({ logos, duration, dir }) {
               justifyContent: "center",
               gap: "6px",
               flexShrink: 0,
-              width: 80,
-              height: 72,
+              width: 84,
+              height: 74,
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: 12,
               padding: "10px 12px",
             }}
           >
-            <img
-              src={logo.src}
-              alt={logo.name}
-              loading="lazy"
-              style={{ width: 32, height: 32, objectFit: "contain", filter: "brightness(0.9) saturate(0.75)" }}
-            />
-            <span style={{ fontSize: 8, color: "rgba(255,255,255,0.4)", letterSpacing: 1, textAlign: "center" }}>
+            {logo.src ? (
+              <img
+                src={logo.src}
+                alt={logo.name}
+                loading="lazy"
+                style={{ width: 32, height: 32, objectFit: "contain", filter: "brightness(0.85) saturate(0.8)" }}
+              />
+            ) : (
+              <div style={{
+                width: 32, height: 32,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 22,
+                background: `${logo.color}22`,
+                borderRadius: 8,
+                border: `1px solid ${logo.color}44`,
+              }}>
+                {logo.emoji}
+              </div>
+            )}
+            <span style={{ fontSize: 7, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, textAlign: "center", lineHeight: 1.2 }}>
               {logo.name.toUpperCase()}
             </span>
           </div>
