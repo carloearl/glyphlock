@@ -171,11 +171,11 @@ function MarqueeRow({ logos, duration, dir }) {
   );
 }
 
-// Row configs: all rows identical to bottom row, just with varying opacity
+// Cylinder: top row tilted away most, bottom row faces viewer directly
 const ROW_CONFIGS = [
-  { rotateX: 0, scaleX: 1.00, opacity: 0.45, mb: 28 },
-  { rotateX: 0, scaleX: 1.00, opacity: 0.70, mb: 28 },
-  { rotateX: 0, scaleX: 1.00, opacity: 1.00, mb:  0 },
+  { rotateX: 55, scaleX: 0.55, opacity: 0.30, mb: -10 },
+  { rotateX: 28, scaleX: 0.78, opacity: 0.60, mb: -6  },
+  { rotateX:  0, scaleX: 1.00, opacity: 1.00, mb:  0  },
 ];
 
 export default function TechnologyMarquee() {
