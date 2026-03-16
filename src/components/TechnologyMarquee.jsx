@@ -102,6 +102,7 @@ const ROWS = [
       { name: "Tailwind",      src: logo("tailwindcss.com") },
       { name: "Okta",          src: logo("okta.com") },
       { name: "HuggingFace",   src: logo("huggingface.co") },
+
       { name: "Cohere",        src: logo("cohere.com") },
       { name: "Mistral",       src: logo("mistral.ai") },
       { name: "Replicate",     src: logo("replicate.com") },
