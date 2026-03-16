@@ -254,9 +254,10 @@ export default function TechnologyMarquee() {
               key={i}
               style={{
                 transform: `rotateX(${cfg.rotateX}deg) scaleX(${cfg.scaleX})`,
-                transformOrigin: "center center",
+                transformOrigin: "center top",
                 marginBottom: cfg.mb,
                 opacity: cfg.opacity,
+                transformStyle: "preserve-3d",
               }}
             >
               <MarqueeRow logos={row.logos} duration={row.duration} dir={row.dir} />
