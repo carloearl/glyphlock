@@ -253,8 +253,8 @@ export default function TechnologyMarquee() {
             <div
               key={i}
               style={{
-                transform: `rotateX(${cfg.rotateX}deg) scaleX(${cfg.scaleX}) scaleY(${cfg.scaleY})`,
-                transformOrigin: "center bottom",
+                transform: `rotateX(${cfg.rotateX}deg) scaleX(${cfg.scaleX})`,
+                transformOrigin: "center center",
                 marginBottom: cfg.mb,
                 opacity: cfg.opacity,
               }}
