@@ -227,8 +227,7 @@ export default function TechnologyMarquee() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Pyramid heights: top ring gets smallest container, base gets tallest
-  const ringHeights = [160, 220, 290];
+  const ringHeights = [140, 200, 260];
 
   return (
     <div
