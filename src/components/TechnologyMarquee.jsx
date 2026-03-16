@@ -158,8 +158,8 @@ function Carousel3DRow({ logos, radius, speed, direction = 1, tiltX = 0 }) {
                 src={logo.logo}
                 alt={logo.name}
                 loading="lazy"
-                width={80}
-                height={40}
+                width={imgW}
+                height={imgW / 2}
                 style={{
                   maxWidth: "100%",
                   maxHeight: "100%",
