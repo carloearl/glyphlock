@@ -20,6 +20,7 @@ import NUPSLanding from './pages/NUPSLanding';
 import NUPSGateway from './pages/NUPSGateway';
 import NUPSSandbox from './pages/NUPSSandbox';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
+import NUPSMISReport from './pages/NUPSMISReport';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];

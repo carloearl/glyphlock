@@ -507,6 +507,7 @@ export default function NUPSOwner() {
                   <DropdownMenuSeparator className="bg-red-500/20" />
                   {[
                     { value: 'rbac', icon: KeyRound, label: 'Access Control', desc: 'Manage permissions' },
+                    { value: 'mis-report', icon: BarChart3, label: 'Q MIS Report', desc: 'Quarterly summary' },
                   ].map(({ value, icon: Icon, label, desc }) => (
                     <DropdownMenuItem
                       key={value}
