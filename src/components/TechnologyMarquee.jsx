@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
-import { motion, useInView, useAnimationFrame } from "framer-motion";
+import React, { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 
 const ALL_LOGOS = [
   { name: "AWS", logo: "https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-ar21.svg" },
@@ -77,140 +77,64 @@ const ALL_LOGOS = [
   { name: "VMware", logo: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Vmware.svg" },
 ];
 
-// --- 3D Carousel Row ---
-function Carousel3DRow({ logos, radius, speed, direction = 1, tiltX = 0, itemScale = 1 }) {
-  const angleRef = useRef(0);
-  const [angle, setAngle] = useState(0);
-  const [hoveredIdx, setHoveredIdx] = useState(null);
-  const ringPausedRef = useRef(false);
-  const count = logos.length;
-  const base = 115 * itemScale;
-  const itemW = Math.round(base);
-  const itemH = Math.round(base * 0.5);
-  const imgW = Math.round(base * 0.7);
-
-  useAnimationFrame((_, delta) => {
-    if (ringPausedRef.current) return;
-    angleRef.current += (delta / 1000) * speed * direction;
-    setAngle(angleRef.current);
-  });
+// Infinite scroll marquee row
+function MarqueeRow({ logos, speed = 40, direction = 1, itemH = 56, imgH = 32, opacity = 1 }) {
+  // Double the logos so the loop is seamless
+  const doubled = [...logos, ...logos];
+  const duration = (logos.length * 160) / speed;
 
   return (
     <div
-      className="relative w-full flex items-center justify-center"
-      style={{ height: "100%", perspective: 1200, perspectiveOrigin: "50% 50%" }}
+      className="overflow-hidden w-full"
+      style={{ height: itemH + 16, opacity, maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)" }}
     >
       <div
+        className="flex items-center gap-3"
         style={{
-          position: "relative",
-          width: radius * 2,
-          height: itemH,
-          transformStyle: "preserve-3d",
-          transform: `rotateX(${tiltX}deg)`,
+          width: "max-content",
+          animation: `marquee-scroll ${duration}s linear infinite`,
+          animationDirection: direction === -1 ? "reverse" : "normal",
         }}
       >
-        {logos.map((logo, i) => {
-          const theta = (i / count) * 2 * Math.PI + (angle * Math.PI) / 180;
-          const x = Math.cos(theta) * radius;
-          const z = Math.sin(theta) * radius;
-          const normalizedZ = (z / radius + 1) / 2; // 0=back, 1=front
-          const isHovered = hoveredIdx === i;
-          const opacity = isHovered ? 1 : 0.2 + normalizedZ * 0.7;
-          const scale = isHovered ? 1.15 : 0.72 + normalizedZ * 0.28;
-
-          return (
-            <div
-              key={`${logo.name}-${i}`}
-              onMouseEnter={() => { ringPausedRef.current = true; setHoveredIdx(i); }}
-              onMouseLeave={() => { ringPausedRef.current = false; setHoveredIdx(null); }}
+        {doubled.map((logo, i) => (
+          <div
+            key={`${logo.name}-${i}`}
+            className="flex items-center justify-center flex-shrink-0 group"
+            style={{
+              width: 120,
+              height: itemH,
+              borderRadius: 12,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              padding: "6px 12px",
+              transition: "all 0.3s ease",
+            }}
+          >
+            <img
+              src={logo.logo}
+              alt={logo.name}
+              loading="lazy"
               style={{
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                width: itemW,
-                height: itemH,
-                transform: `translate(-50%, -50%) translateX(${x}px) translateZ(${z}px) scale(${scale})`,
-                opacity,
-                transition: "opacity 0.25s, transform 0.25s",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "6px 10px",
-                borderRadius: 12,
-                background: isHovered
-                  ? "rgba(255,255,255,0.1)"
-                  : normalizedZ > 0.75
-                  ? "rgba(255,255,255,0.05)"
-                  : "transparent",
-                border: isHovered
-                  ? "1px solid rgba(255,255,255,0.25)"
-                  : normalizedZ > 0.75
-                  ? "1px solid rgba(255,255,255,0.1)"
-                  : "1px solid transparent",
-                backdropFilter: normalizedZ > 0.7 || isHovered ? "blur(8px)" : "none",
-                boxShadow: isHovered
-                  ? "0 0 28px rgba(87,61,255,0.5)"
-                  : "none",
-                cursor: "default",
-                zIndex: isHovered ? 10 : Math.round(normalizedZ * 5),
+                maxWidth: "100%",
+                height: imgH,
+                objectFit: "contain",
+                filter: "brightness(0) invert(1) opacity(0.55)",
+                transition: "filter 0.3s ease",
               }}
-            >
-              <img
-                src={logo.logo}
-                alt={logo.name}
-                loading="lazy"
-                width={imgW}
-                height={imgW / 2}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain",
-                  // On hover: show real brand color. Otherwise white/faded.
-                  filter: isHovered
-                    ? "none"
-                    : `brightness(0) invert(1) opacity(${(0.35 + normalizedZ * 0.55).toFixed(2)})`,
-                  transition: "filter 0.35s ease",
-                }}
-                onError={(e) => { e.target.style.display = "none"; }}
-              />
-            </div>
-          );
-        })}
+              onMouseEnter={e => { e.currentTarget.style.filter = "none"; e.currentTarget.parentElement.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.parentElement.style.borderColor = "rgba(255,255,255,0.2)"; }}
+              onMouseLeave={e => { e.currentTarget.style.filter = "brightness(0) invert(1) opacity(0.55)"; e.currentTarget.parentElement.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.parentElement.style.borderColor = "rgba(255,255,255,0.08)"; }}
+              onError={e => { e.target.style.display = "none"; }}
+            />
+          </div>
+        ))}
       </div>
-    </div>
-  );
-}
 
-// --- Orbit Ring SVG ---
-function OrbitRing({ opacity = 0.25, scale = 1 }) {
-  return (
-    <div
-      className="absolute inset-0 pointer-events-none flex items-center justify-center"
-      style={{ zIndex: 0 }}
-    >
-      <svg
-        width="100%"
-        height="100%"
-        viewBox="0 0 1200 220"
-        preserveAspectRatio="xMidYMid meet"
-        style={{ opacity, transform: `scaleX(${scale})` }}
-      >
-        <ellipse
-          cx="600" cy="110" rx="520" ry="40"
-          fill="none"
-          stroke="url(#orbitGrad)"
-          strokeWidth="1"
-          strokeDasharray="8 6"
-        />
-        <defs>
-          <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="transparent" />
-            <stop offset="30%" stopColor="#5b3dff" />
-            <stop offset="70%" stopColor="#06b6d4" />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
-      </svg>
+      <style>{`
+        @keyframes marquee-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   );
 }
@@ -219,43 +143,35 @@ export default function TechnologyMarquee() {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.15 });
 
-  // Split logos across 3 rings
-  const ring1 = ALL_LOGOS.slice(0, 24);
-  const ring2 = ALL_LOGOS.slice(24, 48);
-  const ring3 = ALL_LOGOS.slice(48);
+  // Pyramid: top row fewest logos (narrowest visually), bottom row most
+  const ring1 = ALL_LOGOS.slice(0, 10);   // top — smallest/fewest
+  const ring2 = ALL_LOGOS.slice(10, 35);  // middle
+  const ring3 = ALL_LOGOS.slice(35);      // base — widest/most
 
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-7xl mx-auto px-4 py-16 relative overflow-hidden"
+      className="w-full mx-auto px-0 py-16 relative overflow-hidden"
       style={{ background: "transparent" }}
     >
-      {/* Ambient glow behind section */}
+      {/* Ambient glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "radial-gradient(ellipse 80% 50% at 50% 50%, rgba(87,61,255,0.07) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 60%, rgba(87,61,255,0.07) 0%, transparent 70%)",
         }}
       />
 
       {/* Header */}
-      <div className="text-center mb-10 relative z-10">
+      <div className="text-center mb-12 relative z-10 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
-          style={{
-            background: "rgba(87,61,255,0.12)",
-            border: "1px solid rgba(87,61,255,0.3)",
-            color: "#a78bfa",
-          }}
+          style={{ background: "rgba(87,61,255,0.12)", border: "1px solid rgba(87,61,255,0.3)", color: "#a78bfa" }}
         >
-          <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ background: "#a78bfa" }}
-          />
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#a78bfa" }} />
           Enterprise Integration Network
         </motion.div>
 
@@ -278,38 +194,35 @@ export default function TechnologyMarquee() {
         </motion.p>
       </div>
 
-      {/* Cylindrical Pyramid — wide base → narrow top */}
+      {/* Pyramid rows — top is narrowest (centered, clipped), base is full width */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={isInView ? { opacity: 1, scale: 1 } : {}}
-        transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex flex-col items-center gap-2"
+        initial={{ opacity: 0, y: 30 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 1, delay: 0.3 }}
+        className="relative z-10 flex flex-col items-center gap-3"
       >
-        {/* Ring 3 (TOP — narrowest, smallest) */}
-        <div className="relative overflow-hidden" style={{ width: "52%", height: 72 }}>
-          <OrbitRing opacity={0.18} scale={1} />
-          <Carousel3DRow logos={ring3} radius={260} speed={8} direction={-1} tiltX={-4} itemScale={0.7} />
+        {/* Row 1 — TOP: narrowest, fewest, most faded */}
+        <div style={{ width: "42%", minWidth: 320 }}>
+          <MarqueeRow logos={ring1} speed={28} direction={1} itemH={48} imgH={26} opacity={0.6} />
         </div>
 
-        {/* Ring 2 (MIDDLE) */}
-        <div className="relative overflow-hidden" style={{ width: "76%", height: 92 }}>
-          <OrbitRing opacity={0.26} scale={1} />
-          <Carousel3DRow logos={ring2} radius={400} speed={13} direction={1} tiltX={0} itemScale={0.85} />
+        {/* Row 2 — MIDDLE */}
+        <div style={{ width: "72%", minWidth: 480 }}>
+          <MarqueeRow logos={ring2} speed={38} direction={-1} itemH={56} imgH={32} opacity={0.8} />
         </div>
 
-        {/* Ring 1 (BASE — widest, largest) */}
-        <div className="relative w-full overflow-hidden" style={{ height: 115 }}>
-          <OrbitRing opacity={0.38} scale={1} />
-          <Carousel3DRow logos={ring1} radius={560} speed={18} direction={-1} tiltX={4} itemScale={1} />
+        {/* Row 3 — BASE: full width, most opaque, largest */}
+        <div style={{ width: "100%" }}>
+          <MarqueeRow logos={ring3} speed={48} direction={1} itemH={64} imgH={38} opacity={1} />
         </div>
       </motion.div>
 
-      {/* Bottom label strip */}
+      {/* Bottom label */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 1, delay: 0.8 }}
-        className="mt-10 flex items-center justify-center gap-3 relative z-10"
+        className="mt-10 flex items-center justify-center gap-3 relative z-10 px-4"
       >
         <div className="h-px flex-1 max-w-[120px]" style={{ background: "linear-gradient(to right, transparent, rgba(87,61,255,0.5))" }} />
         <span className="text-xs text-white/40 tracking-widest uppercase font-medium">
