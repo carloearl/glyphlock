@@ -151,11 +151,30 @@ export default function TechnologyMarquee() {
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 1, delay: 0.3 }}
-        className="flex flex-col gap-4"
+        className="flex flex-col"
+        style={{ gap: 0, perspective: "1200px" }}
       >
-        {ROWS.map((row, i) => (
-          <MarqueeRow key={i} logos={row.logos} duration={row.duration} dir={row.dir} />
-        ))}
+        {ROWS.map((row, i) => {
+          // Each row tilts slightly differently to simulate a stacked cylinder cone
+          const rotateX = [-12, -6, 0][i];
+          const scaleX = [0.72, 0.86, 1][i];
+          const opacity = [0.6, 0.8, 1][i];
+          const mb = [-8, -4, 0][i];
+          return (
+            <div
+              key={i}
+              style={{
+                transform: `rotateX(${rotateX}deg) scaleX(${scaleX})`,
+                transformOrigin: "center center",
+                marginBottom: mb,
+                opacity,
+                transition: "transform 0.3s",
+              }}
+            >
+              <MarqueeRow logos={row.logos} duration={row.duration} dir={row.dir} />
+            </div>
+          );
+        })}
       </motion.div>
 
       <motion.div
