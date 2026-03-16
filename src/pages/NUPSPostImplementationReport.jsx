@@ -166,7 +166,7 @@ export default function NUPSPostImplementationReport() {
             <div>
               <div className="text-xs font-bold tracking-widest text-violet-400 uppercase mb-1">N.U.P.S. · GlyphLock Financial</div>
               <h1 className="text-2xl md:text-3xl font-black text-white">Post-Implementation Report</h1>
-              <p className="text-gray-500 text-sm mt-1">March 16, 2026 · Implementation Phase 1 Complete</p>
+              <p className="text-gray-500 text-sm mt-1">March 16, 2026 · Phase 1 + Phase 2 Complete</p>
             </div>
             <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs px-3 py-1">
                 <CheckCircle2 className="w-3 h-3 mr-1 inline" /> All Phases Complete
