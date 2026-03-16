@@ -96,7 +96,7 @@ const ROWS = [
       { name: "Mastercard",    src: logo("mastercard.com") },
       { name: "Slack",         src: logo("slack.com") },
       { name: "PayPal",        src: logo("paypal.com") },
-      { name: "GitLab",        src: logo("gitlab.com") },
+      { name: "GitLab",        src: logo("about.gitlab.com") },
       { name: "Atlassian",     src: logo("atlassian.com") },
       { name: "Figma",         src: logo("figma.com") },
       { name: "Tailwind",      src: logo("tailwindcss.com") },
