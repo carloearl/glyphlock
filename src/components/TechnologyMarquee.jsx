@@ -63,7 +63,7 @@ const ROWS = [
       { name: "Jenkins",       src: logo("jenkins.io") },
       { name: "MySQL",         src: logo("mysql.com") },
       { name: "MariaDB",       src: logo("mariadb.org") },
-      { name: "Cassandra",     src: logo("cassandra.apache.org") },
+      { name: "Cassandra",     src: logo("apache.org") },
       { name: "CockroachDB",   src: logo("cockroachlabs.com") },
       { name: "Supabase",      src: logo("supabase.com") },
       { name: "PlanetScale",   src: logo("planetscale.com") },
