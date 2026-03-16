@@ -244,7 +244,7 @@ export default function TechnologyMarquee() {
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 1, delay: 0.3 }}
-        style={{ perspective: "400px", perspectiveOrigin: "50% 0%", display: "flex", flexDirection: "column", gap: "0px" }}
+        style={{ display: "flex", flexDirection: "column" }}
       >
         {ROWS.map((row, i) => {
           const cfg = ROW_CONFIGS[i];
