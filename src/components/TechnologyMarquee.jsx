@@ -194,22 +194,26 @@ export default function TechnologyMarquee() {
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          width: 86px;
-          height: 76px;
+          width: 90px;
+          height: 80px;
           background: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.07);
           border-radius: 14px;
-          padding: 10px 12px;
+          padding: 12px 14px;
           filter: grayscale(1) brightness(0.45);
-          transition: filter 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease;
+          transition: filter 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease, z-index 0s;
           cursor: default;
+          position: relative;
+          z-index: 0;
+          overflow: visible;
         }
         .marquee-logo-card:hover {
           filter: grayscale(0) brightness(1.15) saturate(1.3);
           border-color: rgba(56,189,248,0.5);
           box-shadow: 0 0 20px rgba(56,189,248,0.35), 0 0 40px rgba(56,189,248,0.15), 0 8px 24px rgba(0,0,0,0.4);
           background: rgba(56,189,248,0.08);
-          transform: translateY(-4px) scale(1.08);
+          transform: translateY(-6px) scale(1.12);
+          z-index: 10;
         }
       `}</style>
 
