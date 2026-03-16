@@ -192,6 +192,26 @@ export default function NUPSPostImplementationReport() {
           ))}
         </div>
 
+        {/* Phase 2 completions */}
+        <Card className="bg-green-500/5 border-green-500/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-green-400 text-sm flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" /> Phase 2 Completions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {PHASE2_STEPS.map((s, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-green-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-white font-medium">{s.title}</span>
+                  <p className="text-xs text-gray-500 mt-0.5">{s.detail}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
         {/* Step-by-step breakdown */}
         <div className="space-y-2">
           {STEPS.map(step => {
