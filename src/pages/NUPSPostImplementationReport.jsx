@@ -9,6 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const PHASE2_STEPS = [
+  { title: "NUPSRouteGuard applied to NUPSOwner + NUPSStaff", status: "complete", detail: "Both pages now wrapped with NUPSRouteGuard — requiredRoles enforced at render time, not just on auth check" },
+  { title: "Onboarding Packet → UserRoleAssignment entity write", status: "complete", detail: "Role step now writes to UserRoleAssignment entity (is_active=false), flipped to true on final activation step" },
+  { title: "Sandbox 'Reset Demo' button seeds test DB", status: "complete", detail: "Seeds Entertainer + POSTransaction records into dev/test database — isolated from production" },
+];
+
 const STEPS = [
   {
     step: 1,
