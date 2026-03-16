@@ -60,8 +60,9 @@ import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub.jsx"
 import OfficialChecks from "./OfficialChecks";
 import VIPContractLifecycle from "../components/nups/VIPContractLifecycle.jsx";
 import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
+import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
 
-export default function NUPSOwner() {
+function NUPSOwnerInner() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [activeTab, setActiveTab] = useState("analytics");
