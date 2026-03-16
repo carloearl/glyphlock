@@ -301,9 +301,9 @@ export default function TechnologyMarquee() {
             <div
               className="absolute left-1/2 top-1/2 pointer-events-none"
               style={{
-                width: Math.min(ring.radiusX, (containerWidth || 800) * 0.44) * 2,
-                height: Math.min(ring.radiusX, (containerWidth || 800) * 0.44) * 0.56 * 0.28 * 2,
-                border: `1px dashed ${ring.color}33`,
+                width: Math.min(ring.radiusX, (containerWidth || 800) * 0.40) * 2,
+                height: Math.min(ring.radiusX, (containerWidth || 800) * 0.40) * 0.30 * 2,
+                border: `1px dashed ${ring.color}28`,
                 borderRadius: "50%",
                 transform: "translate(-50%, -50%)",
               }}
