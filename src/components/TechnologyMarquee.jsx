@@ -325,7 +325,7 @@ export default function TechnologyMarquee() {
           style={{ background: "linear-gradient(to right, transparent, rgba(87,61,255,0.5))" }}
         />
         <span className="text-xs text-white/40 tracking-widest uppercase font-medium">
-          {TECH_LABELS.length}+ Integrated Technologies
+          {TECH_ITEMS.length}+ Integrated Technologies
         </span>
         <div
           className="h-px flex-1 max-w-[120px]"
