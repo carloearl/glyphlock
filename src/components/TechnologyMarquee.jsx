@@ -53,7 +53,7 @@ const ROWS = [
       { name: "MongoDB",       src: logo("mongodb.com") },
       { name: "Redis",         src: logo("redis.io") },
       { name: "PostgreSQL",    src: logo("postgresql.org") },
-      { name: "Firebase",      src: logo("firebaseopensource.com") },
+      { name: "Firebase",      src: logo("firebase.google.com") },
       { name: "Cloudflare",    src: logo("cloudflare.com") },
       { name: "React",         src: logo("react.dev") },
       { name: "TypeScript",    src: logo("typescriptlang.org") },
