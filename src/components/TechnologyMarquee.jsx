@@ -11,7 +11,7 @@ const ROWS = [
     dir: "normal",
     logos: [
       { name: "Stripe",        src: logo("stripe.com") },
-      { name: "AWS",           src: logo("aws.amazon.com") },
+      { name: "AWS",           src: logo("amazon.com") },
       { name: "OpenAI",        src: logo("openai.com") },
       { name: "Azure",         src: logo("azure.microsoft.com") },
       { name: "Docker",        src: logo("docker.com") },
