@@ -175,11 +175,11 @@ export default function NUPSPostImplementationReport() {
         {/* Summary cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: "New Pages",       value: "4",  icon: FileText,    color: "text-violet-400" },
-            { label: "New Components",  value: "3",  icon: Shield,      color: "text-cyan-400" },
-            { label: "Workflows Built", value: "7",  icon: CheckCircle2,color: "text-green-400" },
-            { label: "Security Gates",  value: "2",  icon: Lock,        color: "text-red-400" },
-          ].map(({ label, value, icon: Icon, color }) => (
+            { label: "New Pages",       value: "4",  Icon: FileText,    color: "text-violet-400" },
+            { label: "New Components",  value: "3",  Icon: Shield,      color: "text-cyan-400" },
+            { label: "Workflows Built", value: "7",  Icon: CheckCircle2,color: "text-green-400" },
+            { label: "Security Gates",  value: "2",  Icon: Lock,        color: "text-red-400" },
+          ].map(({ label, value, Icon, color }) => (
             <Card key={label} className="bg-gray-900/50 border-white/[0.06]">
               <CardContent className="p-3 text-center">
                 <Icon className={`w-5 h-5 ${color} mx-auto mb-1`} />
