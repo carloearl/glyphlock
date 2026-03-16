@@ -298,7 +298,7 @@ export default function NUPSPostImplementationReport() {
         </Card>
 
         <div className="text-center text-[10px] text-gray-700 pb-8">
-          N.U.P.S. Implementation Report · GlyphLock Financial LLC · March 16, 2026 · Changes not yet published
+          N.U.P.S. Implementation Report · GlyphLock Financial LLC · March 16, 2026 · Phase 1 + 2 Complete
         </div>
       </div>
     </div>
