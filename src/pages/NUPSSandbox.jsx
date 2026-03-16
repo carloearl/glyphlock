@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import {
   FlaskConical, Shield, DollarSign, Users, Clock, FileText,
   CreditCard, BarChart3, CheckCircle2, ArrowLeft, Play, Banknote,
-  UserCheck, Music, Crown, AlertTriangle
+  UserCheck, Music, Crown, AlertTriangle, RefreshCw, Loader2
 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
