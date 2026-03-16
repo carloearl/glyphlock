@@ -169,8 +169,8 @@ export default function NUPSPostImplementationReport() {
               <p className="text-gray-500 text-sm mt-1">March 16, 2026 · Implementation Phase 1 Complete</p>
             </div>
             <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs px-3 py-1">
-              <CheckCircle2 className="w-3 h-3 mr-1 inline" /> 9/9 Steps Complete
-            </Badge>
+                <CheckCircle2 className="w-3 h-3 mr-1 inline" /> All Phases Complete
+              </Badge>
           </div>
         </div>
 
