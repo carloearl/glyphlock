@@ -98,104 +98,112 @@ const RINGS = [
 function OrbitRing({ ring, containerWidth }) {
   const angleRef = useRef(0);
   const rafRef = useRef(null);
-  const [items, setItems] = useState(() =>
-    ring.labels.map((label, i) => {
-      const theta = (i / ring.labels.length) * 2 * Math.PI;
-      return { label, theta, x: 0, z: 0, normZ: 0 };
-    })
+  const count = ring.items.length;
+  const [positions, setPositions] = useState(() =>
+    ring.items.map((_, i) => ({ x: 0, z: 0, normZ: 0.5 }))
   );
   const [hovered, setHovered] = useState(null);
   const pausedRef = useRef(false);
 
-  // Responsive radius
-  const rx = Math.min(ring.radiusX, (containerWidth || 800) * 0.44);
-  const rz = rx * 0.28; // flatten the z-depth for elliptical look
+  const rx = Math.min(ring.radiusX, (containerWidth || 800) * 0.40);
+  const rz = rx * 0.30; // elliptical depth flatten
 
   const tick = useCallback(() => {
     if (!pausedRef.current) {
       angleRef.current += ring.speed * ring.dir;
     }
     const base = angleRef.current;
-    setItems(prev =>
-      prev.map((item, i) => {
-        const theta = (i / ring.labels.length) * 2 * Math.PI + base;
+    setPositions(
+      ring.items.map((_, i) => {
+        const theta = (i / count) * 2 * Math.PI + base;
         const x = Math.cos(theta) * rx;
         const z = Math.sin(theta) * rz;
-        const normZ = (z / rz + 1) / 2; // 0=back, 1=front
-        return { ...item, theta, x, z, normZ };
+        const normZ = (z / rz + 1) / 2;
+        return { x, z, normZ };
       })
     );
     rafRef.current = requestAnimationFrame(tick);
-  }, [ring, rx, rz]);
+  }, [ring, rx, rz, count]);
 
   useEffect(() => {
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
   }, [tick]);
 
-  const tiltRad = (ring.tilt * Math.PI) / 180;
-
   return (
     <div
       className="absolute inset-0 flex items-center justify-center"
       style={{ pointerEvents: "none" }}
     >
-      {items.map((item, i) => {
+      {ring.items.map((item, i) => {
+        const pos = positions[i] || { x: 0, z: 0, normZ: 0.5 };
         const isHov = hovered === i;
-        // Apply tilt: transform z into a vertical offset
-        const yShift = item.z * Math.sin(tiltRad) * 2.2;
-        // Depth scale: front items = 1.0, back = 0.55
-        const scale = isHov ? 1.3 : 0.55 + item.normZ * 0.45;
-        // Depth opacity: front = 1, back = 0.15
-        const opacity = isHov ? 1 : 0.12 + item.normZ * 0.78;
-        // Depth blur: back items blurred
-        const blur = isHov ? 0 : (1 - item.normZ) * 1.8;
-        // z-index
-        const zIdx = Math.round(item.normZ * 100);
+        // Perspective Y shift — tilt the ring so it looks like a 3D orbit
+        const yShift = pos.z * 1.6;
+        // Depth cues
+        const scale = isHov ? 1.35 : 0.52 + pos.normZ * 0.48;
+        const opacity = isHov ? 1 : 0.1 + pos.normZ * 0.82;
+        const blur = isHov ? 0 : (1 - pos.normZ) * 2.0;
+        const zIdx = Math.round(pos.normZ * 100);
+        const size = ring.imgSize;
+        const chipW = size + 16;
 
         return (
           <div
-            key={item.label}
+            key={item.name + i}
             onMouseEnter={() => { setHovered(i); pausedRef.current = true; }}
             onMouseLeave={() => { setHovered(null); pausedRef.current = false; }}
+            title={item.name}
             style={{
               position: "absolute",
-              transform: `translateX(${item.x}px) translateY(${yShift}px) scale(${scale})`,
+              transform: `translateX(${pos.x}px) translateY(${yShift}px) scale(${scale})`,
               opacity,
               filter: blur > 0 ? `blur(${blur}px)` : "none",
               zIndex: zIdx,
               pointerEvents: "auto",
-              cursor: "default",
-              transition: isHov ? "transform 0.15s ease, opacity 0.15s" : "none",
-              whiteSpace: "nowrap",
-              padding: isHov ? "5px 14px" : "3px 10px",
-              borderRadius: 24,
+              cursor: "pointer",
+              width: chipW,
+              height: chipW,
+              borderRadius: 14,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               background: isHov
-                ? "rgba(255,255,255,0.1)"
-                : item.normZ > 0.72
-                  ? "rgba(255,255,255,0.04)"
-                  : "transparent",
+                ? "rgba(255,255,255,0.12)"
+                : pos.normZ > 0.65
+                  ? "rgba(255,255,255,0.06)"
+                  : "rgba(255,255,255,0.02)",
               border: isHov
-                ? `1px solid ${ring.color}`
-                : item.normZ > 0.72
-                  ? "1px solid rgba(255,255,255,0.1)"
-                  : "1px solid transparent",
-              boxShadow: isHov ? `0 0 24px ${ring.glowColor}, 0 0 6px ${ring.color}` : "none",
-              fontSize: ring.fontSize,
-              fontWeight: isHov ? 700 : item.normZ > 0.6 ? 600 : 400,
-              letterSpacing: "0.05em",
-              color: isHov
-                ? ring.color
-                : `rgba(255,255,255,${0.25 + item.normZ * 0.65})`,
-              textShadow: isHov
-                ? `0 0 20px ${ring.glowColor}`
-                : item.normZ > 0.7
-                  ? `0 0 8px ${ring.color}66`
+                ? `1.5px solid ${ring.color}`
+                : pos.normZ > 0.65
+                  ? "1px solid rgba(255,255,255,0.12)"
+                  : "1px solid rgba(255,255,255,0.03)",
+              boxShadow: isHov
+                ? `0 0 28px ${ring.glowColor}, 0 0 8px ${ring.color}`
+                : pos.normZ > 0.7
+                  ? `0 0 10px ${ring.color}33`
                   : "none",
-              userSelect: "none",
+              transition: isHov ? "box-shadow 0.2s, border 0.2s" : "none",
             }}
           >
-            {item.label}
+            <img
+              src={item.logo}
+              alt={item.name}
+              loading="lazy"
+              onError={e => { e.target.style.display = "none"; }}
+              style={{
+                width: size,
+                height: size,
+                objectFit: "contain",
+                filter: isHov
+                  ? "brightness(1.2)"
+                  : pos.normZ > 0.6
+                    ? "brightness(0.9) saturate(0.8)"
+                    : "brightness(0.4) saturate(0.3)",
+                transition: "filter 0.2s",
+                pointerEvents: "none",
+              }}
+            />
           </div>
         );
       })}
