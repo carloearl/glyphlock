@@ -72,6 +72,32 @@ export default function NUPSSandbox() {
   const [activeSection, setActiveSection] = useState("overview");
   const [cart, setCart] = useState([]);
   const [lastTx, setLastTx] = useState(null);
+  const [resetting, setResetting] = useState(false);
+  const [resetDone, setResetDone] = useState(false);
+
+  const handleResetDemo = async () => {
+    setResetting(true);
+    setResetDone(false);
+    try {
+      // Seed test DB with demo entertainers
+      await Promise.all([
+        base44.entities.Entertainer.bulkCreate([
+          { stage_name: "Destiny", legal_name: "Tanya Moore", status: "active", contract_signed: true, commission_rate: 0.5, total_earnings: 840 },
+          { stage_name: "Luna",    legal_name: "Brianna Reyes", status: "active", contract_signed: true, commission_rate: 0.5, total_earnings: 620 },
+          { stage_name: "Scarlett",legal_name: "Mia Torres",   status: "active", contract_signed: true, commission_rate: 0.5, total_earnings: 1120 },
+        ], { data_env: "dev" }).catch(() => {}),
+        base44.entities.POSTransaction.bulkCreate([
+          { transaction_id: `DEMO-${Date.now()}-1`, total: 450, payment_method: "Credit Card", cashier: "demo@nups.local", status: "completed" },
+          { transaction_id: `DEMO-${Date.now()}-2`, total: 320, payment_method: "Cash",        cashier: "demo@nups.local", status: "completed" },
+          { transaction_id: `DEMO-${Date.now()}-3`, total: 650, payment_method: "Credit Card", cashier: "demo@nups.local", status: "completed" },
+        ], { data_env: "dev" }).catch(() => {}),
+      ]);
+      setResetDone(true);
+    } catch (e) {
+      setResetDone(false);
+    }
+    setResetting(false);
+  };
 
   const fmt = (n) => `$${Number(n).toFixed(2)}`;
   const total = cart.reduce((s, i) => s + i.price, 0);
