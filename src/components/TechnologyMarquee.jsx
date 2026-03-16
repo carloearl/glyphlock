@@ -277,29 +277,29 @@ export default function TechnologyMarquee() {
         </motion.p>
       </div>
 
-      {/* 3D Carousel Rings — each in its own isolated row */}
+      {/* Cylindrical Pyramid — wide base → narrow top */}
       <motion.div
         initial={{ opacity: 0, scale: 0.92 }}
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex flex-col gap-4"
+        className="relative z-10 flex flex-col items-center gap-2"
       >
-        {/* Ring 1 — large, forward tilt */}
-        <div className="relative w-full overflow-hidden" style={{ height: 110 }}>
-          <OrbitRing opacity={0.35} scale={1} />
-          <Carousel3DRow logos={ring1} radius={560} speed={18} direction={1} tiltX={-6} />
+        {/* Ring 3 (TOP — narrowest, smallest) */}
+        <div className="relative overflow-hidden" style={{ width: "52%", height: 72 }}>
+          <OrbitRing opacity={0.18} scale={1} />
+          <Carousel3DRow logos={ring3} radius={260} speed={8} direction={-1} tiltX={-4} itemScale={0.7} />
         </div>
 
-        {/* Ring 2 — medium, flat, reverse */}
-        <div className="relative w-full overflow-hidden" style={{ height: 110 }}>
-          <OrbitRing opacity={0.22} scale={0.88} />
-          <Carousel3DRow logos={ring2} radius={480} speed={14} direction={-1} tiltX={0} />
+        {/* Ring 2 (MIDDLE) */}
+        <div className="relative overflow-hidden" style={{ width: "76%", height: 92 }}>
+          <OrbitRing opacity={0.26} scale={1} />
+          <Carousel3DRow logos={ring2} radius={400} speed={13} direction={1} tiltX={0} itemScale={0.85} />
         </div>
 
-        {/* Ring 3 — small, back tilt, slower */}
-        <div className="relative w-full overflow-hidden" style={{ height: 80 }}>
-          <OrbitRing opacity={0.15} scale={0.7} />
-          <Carousel3DRow logos={ring3} radius={340} speed={9} direction={1} tiltX={6} />
+        {/* Ring 1 (BASE — widest, largest) */}
+        <div className="relative w-full overflow-hidden" style={{ height: 115 }}>
+          <OrbitRing opacity={0.38} scale={1} />
+          <Carousel3DRow logos={ring1} radius={560} speed={18} direction={-1} tiltX={4} itemScale={1} />
         </div>
       </motion.div>
 
