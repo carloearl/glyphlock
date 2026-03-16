@@ -623,6 +623,9 @@ export default function NUPSOwner() {
           <TabsContent value="rbac">
             <RBACAdminPanel />
           </TabsContent>
+          <TabsContent value="mis-report">
+            <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
+          </TabsContent>
 
         </Tabs>
       </div>
