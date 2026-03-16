@@ -293,7 +293,7 @@ export default function NUPSPostImplementationReport() {
             <p><CheckCircle2 className="w-3.5 h-3.5 text-green-400 inline mr-1.5" />Security boundaries enforced — no automatic access escalation</p>
             <p><CheckCircle2 className="w-3.5 h-3.5 text-green-400 inline mr-1.5" />Sandbox isolated from production data</p>
             <p><CheckCircle2 className="w-3.5 h-3.5 text-green-400 inline mr-1.5" />Mobile-responsive layouts on all new pages</p>
-            <p><AlertTriangle className="w-3.5 h-3.5 text-amber-400 inline mr-1.5" />Changes not published — awaiting confirmation</p>
+            <p><CheckCircle2 className="w-3.5 h-3.5 text-green-400 inline mr-1.5" />Phase 2 completions deployed — NUPSRouteGuard, RBAC write, Sandbox reset</p>
           </CardContent>
         </Card>
 
