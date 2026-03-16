@@ -78,15 +78,16 @@ const ALL_LOGOS = [
 ];
 
 // --- 3D Carousel Row ---
-function Carousel3DRow({ logos, radius, speed, direction = 1, tiltX = 0 }) {
+function Carousel3DRow({ logos, radius, speed, direction = 1, tiltX = 0, itemScale = 1 }) {
   const angleRef = useRef(0);
   const [angle, setAngle] = useState(0);
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const ringPausedRef = useRef(false);
   const count = logos.length;
-  const itemW = radius > 400 ? 115 : 85;
-  const itemH = radius > 400 ? 58 : 44;
-  const imgW = radius > 400 ? 80 : 58;
+  const base = 115 * itemScale;
+  const itemW = Math.round(base);
+  const itemH = Math.round(base * 0.5);
+  const imgW = Math.round(base * 0.7);
 
   useAnimationFrame((_, delta) => {
     if (ringPausedRef.current) return;
