@@ -2,62 +2,174 @@ import React from "react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
+// All logos: real CDN URLs or inline SVG strings
+const LOGOS = {
+  // Row 1
+  AWS: {
+    svg: `<svg viewBox="0 0 80 48" xmlns="http://www.w3.org/2000/svg">
+      <text x="4" y="20" font-family="Arial" font-weight="bold" font-size="11" fill="#FF9900">AWS</text>
+      <path d="M8 28 Q20 22 32 28 Q44 34 56 28 Q68 22 72 26" stroke="#FF9900" stroke-width="2" fill="none"/>
+      <path d="M60 24 L72 26 L64 32" fill="#FF9900"/>
+    </svg>`
+  },
+  OpenAI: {
+    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="17" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+      <path d="M20 8 L26 14 L32 12 L30 18 L36 20 L30 22 L32 28 L26 26 L20 32 L14 26 L8 28 L10 22 L4 20 L10 18 L8 12 L14 14 Z" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+      <circle cx="20" cy="20" r="4" fill="#ffffff"/>
+    </svg>`
+  },
+  Anthropic: {
+    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="8" fill="#C17E3E" opacity="0.15"/>
+      <text x="50%" y="56%" dominant-baseline="middle" text-anchor="middle" font-family="Georgia,serif" font-weight="bold" font-size="13" fill="#C17E3E">A</text>
+      <line x1="10" y1="30" x2="20" y2="12" stroke="#C17E3E" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="30" y1="30" x2="20" y2="12" stroke="#C17E3E" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="14" y1="24" x2="26" y2="24" stroke="#C17E3E" stroke-width="2" stroke-linecap="round"/>
+    </svg>`
+  },
+  Visa: {
+    svg: `<svg viewBox="0 0 60 24" xmlns="http://www.w3.org/2000/svg">
+      <text x="2" y="18" font-family="Arial" font-weight="900" font-size="20" fill="#1A1F71" letter-spacing="-1">VISA</text>
+      <text x="2" y="18" font-family="Arial" font-weight="900" font-size="20" fill="#ffffff" letter-spacing="-1">VISA</text>
+    </svg>`
+  },
+  Mastercard: {
+    svg: `<svg viewBox="0 0 50 32" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="16" r="13" fill="#EB001B"/>
+      <circle cx="32" cy="16" r="13" fill="#F79E1B"/>
+      <path d="M25 7 Q28 12 28 16 Q28 20 25 25 Q22 20 22 16 Q22 12 25 7Z" fill="#FF5F00"/>
+    </svg>`
+  },
+  Firebase: {
+    svg: `<svg viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 34 L16 4 L22 16 L16 10Z" fill="#FFA000"/>
+      <path d="M4 34 L22 16 L28 34Z" fill="#F57C00"/>
+      <path d="M4 34 L28 34 L16 20Z" fill="#FFCA28"/>
+      <path d="M16 4 L22 16 L16 10Z" fill="#FF6D00"/>
+    </svg>`
+  },
+  Cloudflare: {
+    svg: `<svg viewBox="0 0 50 32" xmlns="http://www.w3.org/2000/svg">
+      <path d="M35 22 Q40 10 30 8 Q28 2 20 4 Q14 2 12 8 Q6 8 6 14 Q6 22 14 22Z" fill="#F38020"/>
+      <path d="M36 22 Q42 22 42 16 Q42 10 36 10 Q34 4 28 6" fill="#FBAD41" stroke="none"/>
+    </svg>`
+  },
+  Gemini: {
+    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gem" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#4285F4"/>
+          <stop offset="50%" stop-color="#9C27B0"/>
+          <stop offset="100%" stop-color="#EA4335"/>
+        </linearGradient>
+      </defs>
+      <path d="M20 4 C20 4 20 20 4 20 C4 20 20 20 20 36 C20 36 20 20 36 20 C36 20 20 20 20 4Z" fill="url(#gem)"/>
+    </svg>`
+  },
+  Stripe: {
+    svg: `<svg viewBox="0 0 50 22" xmlns="http://www.w3.org/2000/svg">
+      <text x="2" y="17" font-family="Arial" font-weight="bold" font-size="16" fill="#635BFF">stripe</text>
+    </svg>`
+  },
+  NVIDIA: {
+    svg: `<svg viewBox="0 0 56 20" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="2" width="16" height="16" rx="2" fill="#76B900"/>
+      <text x="2" y="14" font-family="Arial" font-weight="bold" font-size="9" fill="#ffffff">NV</text>
+      <text x="20" y="15" font-family="Arial" font-weight="bold" font-size="11" fill="#76B900">NVIDIA</text>
+    </svg>`
+  },
+  Snowflake: {
+    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="4" x2="20" y2="36" stroke="#29B5E8" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="4" y1="20" x2="36" y2="20" stroke="#29B5E8" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="8" y1="8" x2="32" y2="32" stroke="#29B5E8" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="32" y1="8" x2="8" y2="32" stroke="#29B5E8" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="20" cy="20" r="3" fill="#29B5E8"/>
+      <circle cx="20" cy="4" r="2" fill="#29B5E8"/>
+      <circle cx="20" cy="36" r="2" fill="#29B5E8"/>
+      <circle cx="4" cy="20" r="2" fill="#29B5E8"/>
+      <circle cx="36" cy="20" r="2" fill="#29B5E8"/>
+    </svg>`
+  },
+};
+
 const ROWS = [
   {
-    duration: "35s",
+    duration: "38s",
     dir: "normal",
     logos: [
-      { name: "Stripe",      src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/devicon/devicon-original.svg", emoji: "💳", color: "#635BFF" },
-      { name: "AWS",         src: null, emoji: "☁️", color: "#FF9900" },
-      { name: "Google Cloud",src: null, emoji: "🌐", color: "#4285F4" },
-      { name: "Azure",       src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg", emoji: null, color: "#0078D4" },
-      { name: "Docker",      src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg", emoji: null, color: "#2496ED" },
-      { name: "Kubernetes",  src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg", emoji: null, color: "#326CE5" },
-      { name: "GitHub",      src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg", emoji: null, color: "#ffffff" },
-      { name: "NVIDIA",      src: null, emoji: "⚡", color: "#76B900" },
-      { name: "OpenAI",      src: null, emoji: "🤖", color: "#ffffff" },
-      { name: "Terraform",   src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg", emoji: null, color: "#7B42BC" },
-      { name: "Linux",       src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg", emoji: null, color: "#FCC624" },
-      { name: "Python",      src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg", emoji: null, color: "#3776AB" },
+      { name: "Stripe",      svgKey: "Stripe",      src: null },
+      { name: "AWS",         svgKey: "AWS",         src: null },
+      { name: "OpenAI",      svgKey: "OpenAI",      src: null },
+      { name: "Azure",       svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" },
+      { name: "Docker",      svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" },
+      { name: "Kubernetes",  svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" },
+      { name: "GitHub",      svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" },
+      { name: "NVIDIA",      svgKey: "NVIDIA",      src: null },
+      { name: "Terraform",   svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" },
+      { name: "Python",      svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
+      { name: "Linux",       svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" },
+      { name: "Snowflake",   svgKey: "Snowflake",   src: null },
     ],
   },
   {
-    duration: "45s",
+    duration: "48s",
     dir: "reverse",
     logos: [
-      { name: "MongoDB",     src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg", emoji: null, color: "#47A248" },
-      { name: "Redis",       src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg", emoji: null, color: "#DC382D" },
-      { name: "PostgreSQL",  src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg", emoji: null, color: "#336791" },
-      { name: "Firebase",    src: null, emoji: "🔥", color: "#FFCA28" },
-      { name: "Cloudflare",  src: null, emoji: "🛡️", color: "#F38020" },
-      { name: "Grafana",     src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/grafana/grafana-original.svg", emoji: null, color: "#F46800" },
-      { name: "React",       src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg", emoji: null, color: "#61DAFB" },
-      { name: "TypeScript",  src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg", emoji: null, color: "#3178C6" },
-      { name: "Nginx",       src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg", emoji: null, color: "#009639" },
-      { name: "Ansible",     src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ansible/ansible-original.svg", emoji: null, color: "#EE0000" },
-      { name: "Bitbucket",   src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bitbucket/bitbucket-original.svg", emoji: null, color: "#0052CC" },
-      { name: "Go",          src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg", emoji: null, color: "#00ADD8" },
+      { name: "MongoDB",     svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg" },
+      { name: "Redis",       svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg" },
+      { name: "PostgreSQL",  svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
+      { name: "Firebase",    svgKey: "Firebase",    src: null },
+      { name: "Cloudflare",  svgKey: "Cloudflare",  src: null },
+      { name: "Grafana",     svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/grafana/grafana-original.svg" },
+      { name: "React",       svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+      { name: "TypeScript",  svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
+      { name: "Nginx",       svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg" },
+      { name: "Go",          svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original-wordmark.svg" },
+      { name: "Ansible",     svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ansible/ansible-original.svg" },
+      { name: "Jenkins",     svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jenkins/jenkins-original.svg" },
     ],
   },
   {
-    duration: "28s",
+    duration: "30s",
     dir: "normal",
     logos: [
-      { name: "Anthropic",   src: null, emoji: "🧠", color: "#C17E3E" },
-      { name: "Gemini",      src: null, emoji: "♊", color: "#8E75B2" },
-      { name: "Slack",       src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/slack/slack-original.svg", emoji: null, color: "#4A154B" },
-      { name: "Visa",        src: null, emoji: "💳", color: "#1A1F71" },
-      { name: "Mastercard",  src: null, emoji: "🔴", color: "#EB001B" },
-      { name: "Stripe",      src: null, emoji: "⚡", color: "#635BFF" },
-      { name: "PayPal",      src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/paypal/paypal-original.svg", emoji: null, color: "#00457C" },
-      { name: "GitLab",      src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg", emoji: null, color: "#FC6D26" },
-      { name: "Jenkins",     src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jenkins/jenkins-original.svg", emoji: null, color: "#D33833" },
-      { name: "Jira",        src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jira/jira-original.svg", emoji: null, color: "#0052CC" },
-      { name: "Figma",       src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg", emoji: null, color: "#F24E1E" },
-      { name: "Tailwind",    src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg", emoji: null, color: "#06B6D4" },
+      { name: "Anthropic",   svgKey: "Anthropic",   src: null },
+      { name: "Gemini",      svgKey: "Gemini",      src: null },
+      { name: "Visa",        svgKey: "Visa",        src: null },
+      { name: "Mastercard",  svgKey: "Mastercard",  src: null },
+      { name: "Slack",       svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/slack/slack-original.svg" },
+      { name: "PayPal",      svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/paypal/paypal-original.svg" },
+      { name: "GitLab",      svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg" },
+      { name: "Jira",        svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jira/jira-original.svg" },
+      { name: "Figma",       svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" },
+      { name: "Tailwind",    svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg" },
+      { name: "Bitbucket",   svgKey: null, src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bitbucket/bitbucket-original.svg" },
+      { name: "Okta",        svgKey: null, src: "https://www.vectorlogo.zone/logos/okta/okta-icon.svg" },
     ],
   },
 ];
+
+function LogoIcon({ logo }) {
+  if (logo.svgKey && LOGOS[logo.svgKey]) {
+    return (
+      <div
+        style={{ width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}
+        dangerouslySetInnerHTML={{ __html: LOGOS[logo.svgKey].svg }}
+      />
+    );
+  }
+  return (
+    <img
+      src={logo.src}
+      alt={logo.name}
+      loading="lazy"
+      style={{ width: 34, height: 34, objectFit: "contain", filter: "brightness(0.9) saturate(0.8)" }}
+      onError={(e) => { e.target.style.opacity = 0; }}
+    />
+  );
+}
 
 function MarqueeRow({ logos, duration, dir }) {
   const items = [...logos, ...logos, ...logos];
@@ -72,7 +184,7 @@ function MarqueeRow({ logos, duration, dir }) {
       <div
         style={{
           display: "flex",
-          gap: "16px",
+          gap: "14px",
           width: "max-content",
           animation: `marquee-scroll ${duration} linear infinite ${dir}`,
         }}
@@ -85,35 +197,17 @@ function MarqueeRow({ logos, duration, dir }) {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: "6px",
+              gap: "5px",
               flexShrink: 0,
-              width: 84,
-              height: 74,
+              width: 80,
+              height: 70,
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: 12,
-              padding: "10px 12px",
+              padding: "8px 10px",
             }}
           >
-            {logo.src ? (
-              <img
-                src={logo.src}
-                alt={logo.name}
-                loading="lazy"
-                style={{ width: 32, height: 32, objectFit: "contain", filter: "brightness(0.85) saturate(0.8)" }}
-              />
-            ) : (
-              <div style={{
-                width: 32, height: 32,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 22,
-                background: `${logo.color}22`,
-                borderRadius: 8,
-                border: `1px solid ${logo.color}44`,
-              }}>
-                {logo.emoji}
-              </div>
-            )}
+            <LogoIcon logo={logo} />
             <span style={{ fontSize: 7, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, textAlign: "center", lineHeight: 1.2 }}>
               {logo.name.toUpperCase()}
             </span>
@@ -174,7 +268,6 @@ export default function TechnologyMarquee() {
         style={{ gap: 0, perspective: "1200px" }}
       >
         {ROWS.map((row, i) => {
-          // Each row tilts slightly differently to simulate a stacked cylinder cone
           const rotateX = [-12, -6, 0][i];
           const scaleX = [0.72, 0.86, 1][i];
           const opacity = [0.6, 0.8, 1][i];
@@ -187,7 +280,6 @@ export default function TechnologyMarquee() {
                 transformOrigin: "center center",
                 marginBottom: mb,
                 opacity,
-                transition: "transform 0.3s",
               }}
             >
               <MarqueeRow logos={row.logos} duration={row.duration} dir={row.dir} />
