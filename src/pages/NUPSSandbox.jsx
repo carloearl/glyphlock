@@ -323,7 +323,18 @@ export default function NUPSSandbox() {
               <div className="text-[10px] text-emerald-400">Demo Mode — No real data</div>
             </div>
           </div>
-          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">SANDBOX</Badge>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">SANDBOX</Badge>
+            <button
+              onClick={handleResetDemo}
+              disabled={resetting}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[10px] font-medium hover:bg-violet-500/20 transition-colors disabled:opacity-50"
+              title="Seed test database with demo data"
+            >
+              {resetting ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              {resetting ? "Seeding..." : resetDone ? "✓ Seeded" : "Reset Demo"}
+            </button>
+          </div>
         </div>
       </header>
 
