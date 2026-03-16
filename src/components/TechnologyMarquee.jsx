@@ -231,10 +231,10 @@ export default function TechnologyMarquee() {
         style={{ gap: 0, perspective: "1200px" }}
       >
         {ROWS.map((row, i) => {
-          const rotateX = [-12, -6, 0][i];
-          const scaleX = [0.72, 0.86, 1][i];
-          const opacity = [0.6, 0.8, 1][i];
-          const mb = [-8, -4, 0][i];
+          const rotateX = [-28, -14, 0][i];
+          const scaleX = [0.55, 0.78, 1][i];
+          const opacity = [0.45, 0.72, 1][i];
+          const mb = [-18, -10, 0][i];
           return (
             <div
               key={i}
