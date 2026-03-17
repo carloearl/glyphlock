@@ -234,7 +234,7 @@ export default function NUPSGateway() {
             <div className="inline-flex items-center gap-2 mt-3 bg-white/[0.04] border border-white/[0.08] rounded-full px-4 py-1.5">
               <div className="w-2 h-2 rounded-full bg-green-400" />
               <span className="text-xs text-gray-400">Signed in as <span className="text-white font-medium">{user.email}</span></span>
-              <button onClick={() => base44.auth.logout("/NUPSGateway")} className="text-[10px] text-red-400 hover:text-red-300 ml-1">
+              <button onClick={() => base44.auth.logout("/NUPSLanding")} className="text-[10px] text-red-400 hover:text-red-300 ml-1">
                 Sign out
               </button>
             </div>
