@@ -45,8 +45,12 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
+  // Handle authentication errors — but let NUPS public routes through
+  const currentPath = window.location.pathname;
+  const nupsPublicPaths = ['/NUPSLanding', '/NUPSGateway', '/NUPSSandbox', '/NUPSLogin'];
+  const isNupsPublicRoute = nupsPublicPaths.some(p => currentPath.startsWith(p));
+
+  if (authError && !isNupsPublicRoute) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
