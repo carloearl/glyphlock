@@ -46,7 +46,7 @@ export default function NUPSLanding() {
         <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6">
           <p className="text-gray-300 leading-relaxed text-sm md:text-base">
             N.U.P.S. is the operational backbone for entertainment venue management — 
-            powering point-of-sale, entertainer payroll, Dream Dollar currency, 
+            powering point-of-sale, entertainer payroll, GlyphBucks & GlyphCoin currency, 
             VIP contract workflows, staff scheduling, and financial reporting.
           </p>
           <div className="flex flex-wrap justify-center gap-2 mt-4">
