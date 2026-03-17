@@ -201,7 +201,7 @@ export default function NUPSGateway() {
               <ArrowLeft className="w-4 h-4 mr-2" /> Back
             </Button>
             <Button
-              onClick={() => base44.auth.logout("/NUPSLogin")}
+              onClick={() => base44.auth.logout("/NUPSLanding")}
               className="flex-1 bg-red-600/20 border border-red-500/30 text-red-400 hover:bg-red-600/30"
             >
               <LogOut className="w-4 h-4 mr-2" /> Sign Out
