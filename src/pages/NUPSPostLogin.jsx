@@ -27,7 +27,7 @@ export default function NUPSPostLogin() {
       const currentUser = await base44.auth.me();
       
       if (!currentUser) {
-        navigate('/NUPSLogin');
+        navigate('/NUPSLanding');
         return;
       }
 
