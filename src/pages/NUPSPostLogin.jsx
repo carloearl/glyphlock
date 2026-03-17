@@ -246,7 +246,7 @@ export default function NUPSPostLogin() {
           <Button
             variant="outline"
             onClick={async () => {
-              await base44.auth.logout('/NUPSLogin');
+              await base44.auth.logout('/NUPSLanding');
             }}
             className="border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500"
             aria-label="Sign out and return to NUPS login"
