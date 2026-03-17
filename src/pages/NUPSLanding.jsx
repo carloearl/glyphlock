@@ -50,7 +50,7 @@ export default function NUPSLanding() {
             VIP contract workflows, staff scheduling, and financial reporting.
           </p>
           <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {["POS", "Payroll", "Contracts", "Dream Dollar", "Staff Clock-In", "VIP Management"].map(tag => (
+            {["POS", "Payroll", "Contracts", "GlyphBucks", "GlyphCoin", "Staff Clock-In", "VIP Management"].map(tag => (
               <span key={tag} className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400">
                 {tag}
               </span>
