@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, ChevronRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function NUPSLanding() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "Enter") navigate("/NUPSLogin");
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
