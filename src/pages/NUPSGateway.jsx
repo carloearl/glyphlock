@@ -144,10 +144,8 @@ export default function NUPSGateway() {
       return;
     }
 
-    // Not authenticated — send to login with destination
+    // Not authenticated — send to NUPS credential login
     if (!user) {
-      sessionStorage.setItem("nups_destination", card.destination);
-      sessionStorage.setItem("nups_role_hint", card.key);
       navigate("/NUPSLogin");
       return;
     }
