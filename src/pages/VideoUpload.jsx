@@ -16,16 +16,10 @@ export default function VideoUpload() {
   const [generatingQr, setGeneratingQr] = useState(false);
   const qrCanvasRef = useRef(null);
 
-  const acceptedTypes = {
-    video: ['video/mp4', 'video/quicktime', 'video/x-msvideo'],
-    audio: ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'],
-    image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-  };
-
   const getFileCategory = (type) => {
-    if (acceptedTypes.video.some(t => type.includes(t) || type.includes('video'))) return 'video';
-    if (acceptedTypes.audio.some(t => type.includes(t) || type.includes('audio'))) return 'audio';
-    if (acceptedTypes.image.some(t => type.includes(t) || type.includes('image'))) return 'image';
+    if (type.startsWith('video/')) return 'video';
+    if (type.startsWith('audio/')) return 'audio';
+    if (type.startsWith('image/')) return 'image';
     return null;
   };
 
