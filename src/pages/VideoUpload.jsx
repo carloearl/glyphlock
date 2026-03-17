@@ -222,7 +222,7 @@ export default function VideoUpload() {
             </div>
             <input
               type="file"
-              accept="video/mp4,video/quicktime,audio/mpeg,audio/mp3,audio/wav,image/jpeg,image/png,image/gif,image/webp"
+              accept="video/*,audio/mpeg,audio/mp3,audio/wav,audio/ogg,image/jpeg,image/png,image/gif,image/webp"
               onChange={handleFileChange}
               className="block w-full text-sm text-slate-300
                 file:mr-4 file:py-3 file:px-6
