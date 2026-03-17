@@ -57,7 +57,7 @@ export default function NUPSPostLogin() {
 
     } catch (error) {
       console.error('Auth check failed:', error);
-      navigate('/NUPSLogin');
+      navigate('/NUPSLanding');
     } finally {
       setLoading(false);
     }
