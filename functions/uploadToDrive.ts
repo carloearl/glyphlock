@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     }
 
     // Get Google Drive access token via app connector
-    const accessToken = await base44.asServiceRole.connectors.getAccessToken('googledrive');
+    const { accessToken } = await base44.asServiceRole.connectors.getConnection('googledrive');
 
     // Read file bytes
     const fileBytes = await file.arrayBuffer();
