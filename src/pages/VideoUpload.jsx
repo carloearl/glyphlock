@@ -28,8 +28,8 @@ export default function VideoUpload() {
     return null;
   };
 
-  const MAX_VIDEO_SIZE_MB = 200;
-  const MAX_OTHER_SIZE_MB = 50;
+  const MAX_VIDEO_SIZE_MB = 2048; // 2GB
+  const MAX_OTHER_SIZE_MB = 200;
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
