@@ -105,8 +105,14 @@ export default function NUPSGateway() {
             // RBAC unavailable — fall back to base role
             setUserPermissions({ base44_role: u.role, venue_access: [] });
           }
+        } else {
+          navigate('/NUPSLanding');
+          return;
         }
-      } catch {}
+      } catch {
+        navigate('/NUPSLanding');
+        return;
+      }
       setLoading(false);
     })();
   }, []);
