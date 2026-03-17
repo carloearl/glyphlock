@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { appParams } from '@/lib/app-params';
 import { Upload, Copy, CheckCircle2, AlertCircle, QrCode, Image, Music, Video, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
