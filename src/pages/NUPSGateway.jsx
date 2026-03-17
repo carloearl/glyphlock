@@ -76,6 +76,8 @@ const ROLE_CARDS = [
   },
 ];
 
+const OWNER_EMAIL = 'carloearl@glyphlock.com';
+
 export default function NUPSGateway() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -90,6 +92,11 @@ export default function NUPSGateway() {
         const isAuth = await base44.auth.isAuthenticated();
         if (isAuth) {
           const u = await base44.auth.me();
+          // Lock gateway to owner only
+          if (u?.email?.toLowerCase() !== OWNER_EMAIL) {
+            navigate('/NUPSLanding');
+            return;
+          }
           setUser(u);
           try {
             const res = await base44.functions.invoke("getUserPermissions", {});
