@@ -180,7 +180,7 @@ export default function VideoUpload() {
           title: 'Troubleshooting',
           content: [
             { heading: 'No URL After Upload', text: 'If upload succeeds but no URL appears, check browser console for errors. Ensure file size is under 50MB. Try refreshing and re-uploading.' },
-            { heading: 'File Size Limits', text: 'Maximum file size: 200MB for video, 50MB for audio/images. For larger files, compress before uploading or use external hosting.' },
+            { heading: 'File Size Limits', text: 'Maximum file size: 2GB for video (via Google Drive), 200MB for audio/images. Files over 20MB are automatically routed to Google Drive.' },
             { heading: 'Supported Formats', text: 'Videos: MP4, MOV. Audio: MP3, WAV, OGG. Images: PNG, JPG, GIF, WEBP. Other formats may fail silently.' }
           ]
         }
