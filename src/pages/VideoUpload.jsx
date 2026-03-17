@@ -71,19 +71,13 @@ export default function VideoUpload() {
       let url;
 
       if (useDrive) {
-        // Large file → Google Drive via backend function (raw fetch with FormData)
+        // Large file → Google Drive via backend function
         toast.info('Large file detected — uploading to Google Drive...');
         const formData = new FormData();
         formData.append('file', file);
         formData.append('fileName', file.name);
-        const fnUrl = `https://base44.app/api/apps/${import.meta.env.VITE_APP_ID || window.__base44AppId || ''}/functions/uploadToDrive`;
-        // Use the SDK's built-in fetch proxy so auth headers are attached
-        const response = await fetch(`/api/functions/uploadToDrive`, {
-          method: 'POST',
-          body: formData,
-          headers: { 'x-app-id': window.__base44AppId || '' },
-        });
-        const result = await response.json();
+        const response = await base44.functions.invoke('uploadToDrive', formData, { rawBody: true });
+        const result = response.data;
         if (!result?.success) throw new Error(result?.error || 'Drive upload failed');
         url = result.stream_url || result.file_url || result.view_url;
         setFileUrl(url);
