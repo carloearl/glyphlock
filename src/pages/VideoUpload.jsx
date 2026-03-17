@@ -72,13 +72,20 @@ export default function VideoUpload() {
       let url;
 
       if (useDrive) {
-        // Large file → Google Drive via backend function
+        // Large file → Google Drive via backend function (multipart FormData)
         toast.info('Large file detected — uploading to Google Drive...');
         const formData = new FormData();
         formData.append('file', file);
         formData.append('fileName', file.name);
-        const response = await base44.functions.invoke('uploadToDrive', formData, { rawBody: true });
-        const result = response.data;
+        const serverUrl = appParams.serverUrl || 'https://base44.app';
+        const appId = appParams.appId;
+        const token = appParams.token;
+        const driveRes = await fetch(`${serverUrl}/api/apps/${appId}/functions/uploadToDrive`, {
+          method: 'POST',
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+          body: formData,
+        });
+        const result = await driveRes.json();
         if (!result?.success) throw new Error(result?.error || 'Drive upload failed');
         url = result.stream_url || result.file_url || result.view_url;
         setFileUrl(url);
