@@ -67,7 +67,7 @@ export default function NUPSLanding() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button
-            onClick={() => navigate("/NUPSGateway")}
+            onClick={() => navigate("/NUPSLogin")}
             className="h-14 px-8 text-lg font-black bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 rounded-xl shadow-[0_0_30px_rgba(124,58,237,0.4)] active:scale-95 transition-all"
           >
             Enter N.U.P.S.
