@@ -81,33 +81,10 @@ const ScrollSection = ({ children, className = "" }) => {
   );
 };
 
-const OWNER_EMAIL = 'carloearl@glyphlock.com';
-
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect anyone who isn't the owner to NUPS landing
-    (async () => {
-      try {
-        const isAuth = await base44.auth.isAuthenticated();
-        if (isAuth) {
-          const user = await base44.auth.me();
-          if (user?.email?.toLowerCase() !== OWNER_EMAIL) {
-            navigate('/NUPSLanding');
-            return;
-          }
-        } else {
-          navigate('/NUPSLanding');
-          return;
-        }
-      } catch {
-        navigate('/NUPSLanding');
-        return;
-      }
-    })();
-
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     if (!isMobile) {
