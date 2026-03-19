@@ -201,6 +201,16 @@ Provide your response as a JSON object with:
       return Response.json({ error: 'Image generation failed — no URL returned' }, { status: 500 });
     }
 
+    // Log usage for rate limiting (best effort — schema-validated fields only)
+    try {
+      await base44.asServiceRole.entities.ServiceUsage.create({
+        user_email: user.id || user.email,
+        service_name: 'image_generation'
+      });
+    } catch (usageErr) {
+      console.warn('[ServiceUsage] Failed to log usage:', usageErr.message);
+    }
+
     // Persist to InteractiveImage entity
     const originalPrompt = body.original_prompt ? sanitizePrompt(body.original_prompt) : cleanPrompt.substring(0, 100);
     const imageRecord = await base44.asServiceRole.entities.InteractiveImage.create({
