@@ -90,54 +90,25 @@ export default function GenerateTab() {
 
   const expandMutation = useMutation({
     mutationFn: async (p) => {
-      // Use Base44's built-in LLM to expand prompt
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert prompt engineer for AI image generation. Expand this prompt into a highly detailed, professional prompt for image generation:
-
-"${p}"
-
-Provide your response as a JSON object with:
-- expanded_prompt: A detailed, professional prompt (250-400 chars)
-- structured_spec: Object with keys: subject, style, lighting, camera, mood
-- negative_constraints: Array of things to avoid`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            expanded_prompt: { type: "string" },
-            structured_spec: {
-              type: "object",
-              properties: {
-                subject: { type: "string" },
-                style: { type: "string" },
-                lighting: { type: "string" },
-                camera: { type: "string" },
-                mood: { type: "string" }
-              }
-            },
-            negative_constraints: { type: "array", items: { type: "string" } }
-          }
-        }
-      });
-      
-      // Create PromptSpec in DB
-      const spec = await base44.entities.PromptSpec.create({
-        original_prompt: p,
-        expanded_prompt: result.expanded_prompt,
-        structured_spec: result.structured_spec,
-        negative_constraints: result.negative_constraints || []
-      });
-      
-      return { expansion: result, prompt_spec_id: spec.id };
+      return expandPrompt(p);
     },
     onSuccess: (data) => {
-      console.log('Expand success:', data);
       setExpandedPrompt(data.expansion);
       setPromptSpecId(data.prompt_spec_id);
-      toast.success('✨ Prompt enhanced with AI specifications');
+      if (data.flagged) {
+        toast.warning(`✨ Prompt expanded — some flagged terms noted: ${data.flags?.join(', ')}`);
+      } else {
+        toast.success('✨ Prompt enhanced with AI specifications');
+      }
     },
     onError: (error) => {
-      console.error('Expand error:', error);
-      toast.error(`Prompt expansion failed: ${error.message || 'Unknown error'}`);
+      const msg = error?.response?.data?.reason || error.message || 'Unknown error';
+      const code = error?.response?.data?.code;
+      if (code === 'CONTENT_BLOCKED') {
+        toast.error(`🚫 Content blocked: ${msg}`);
+      } else {
+        toast.error(`Prompt expansion failed: ${msg}`);
+      }
     }
   });
 
