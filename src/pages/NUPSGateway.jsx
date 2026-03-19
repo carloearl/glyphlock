@@ -150,6 +150,23 @@ export default function NUPSGateway() {
     return card.requiredRoles.length === 0 || card.requiredRoles.some(r => assignedRoles.includes(r));
   };
 
+  const isOwner = user?.email?.toLowerCase() === OWNER_EMAIL;
+
+  const handleTestRole = async (testRole) => {
+    setTestingRole(true);
+    try {
+      const res = await base44.functions.invoke("nupsAuthenticate", { owner_test_role: testRole.role });
+      const { success, user: testUser } = res.data;
+      if (success) {
+        sessionStorage.setItem("nups_session", JSON.stringify(testUser));
+        navigate(`/${testRole.dest}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setTestingRole(false);
+  };
+
   const handleCardClick = (card) => {
     // Sandbox — always accessible
     if (card.key === "sandbox") {
