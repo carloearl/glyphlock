@@ -208,17 +208,8 @@ export default function GenerateTab() {
   };
 
   const handleGenerate = async (action = 'generate') => {
-    console.log('[GenerateTab] handleGenerate called with action:', action);
-    console.log('[GenerateTab] promptSpecId:', promptSpecId);
-    console.log('[GenerateTab] weightsValid:', weightsValid);
-    
     if (!prompt.trim()) {
       toast.error('⚠️ Enter a prompt first');
-      return;
-    }
-    
-    if (!promptSpecId) {
-      toast.error('⚠️ Click "Expand Prompt" button first before generating');
       return;
     }
 
@@ -228,19 +219,11 @@ export default function GenerateTab() {
       return;
     }
 
-    console.log('[GenerateTab] Starting generation mutation...');
     generateMutation.mutate({
-      prompt_spec_id: promptSpecId,
-      reference_image_ids: references.map(r => r.reference_image_id),
-      reference_weights: weights,
-      delta_strength: { refinement: 0.3, balanced: 0.5, restyle: 0.7, reinterpret: 0.9 }[deltaMode],
-      seed,
-      identity_lock: identityLock,
-      action,
       aspect_ratio: aspectRatio,
       model_strength: modelStrength,
       quality_mode: qualityMode,
-      negative_prompt: negativePrompt
+      seed,
     });
   };
 
