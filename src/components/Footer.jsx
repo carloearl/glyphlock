@@ -185,55 +185,6 @@ export default function Footer() {
           </details>
         </div>
 
-        {/* ─── PLATFORM CAPABILITIES ─── */}
-        <div className="border-t border-white/[0.06] mt-6 pt-10 pb-6">
-          <div className="max-w-4xl mx-auto space-y-6">
-            {/* Authority Header */}
-            <div className="text-center space-y-2">
-              <h3 className="text-xs font-bold text-white/50 uppercase tracking-[0.3em]">Platform Capabilities</h3>
-              <div className="w-16 h-px mx-auto" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.5), transparent)' }} />
-            </div>
-
-            {/* Capability Paragraphs */}
-            <div className="space-y-4 text-[12px] text-slate-500 leading-[1.8] text-center">
-              <p>
-                GlyphLock Security LLC delivers a unified cybersecurity platform spanning <strong className="text-slate-400">quantum-resistant encryption</strong>, <strong className="text-slate-400">AI-powered threat detection</strong>, and <strong className="text-slate-400">visual cryptography</strong> — architected for enterprises operating in zero-trust, high-scrutiny environments. Post-quantum cryptographic primitives align with NIST PQC standards to future-proof every layer of the stack.
-              </p>
-              <p>
-                The <strong className="text-slate-400">QR Verification Studio</strong> generates tamper-proof QR codes with blockchain-anchored provenance chains, AI risk scoring, and steganographic payloads. The <strong className="text-slate-400">Image Lab</strong> provides AI image generation, interactive hotspot editing, and multimodal analysis — all secured with SHA-256 hash verification and immutable audit trails.
-              </p>
-              <p>
-                <strong className="text-slate-400">GlyphBot Intelligence</strong> is a multi-provider AI assistant offering real-time site auditing, security scanning, code analysis, and natural-language threat assessment — powered by a provider chain architecture that routes across LLM backends for optimal accuracy and uptime.
-              </p>
-              <p>
-                The <strong className="text-slate-400">N.U.P.S. Point-of-Sale</strong> system provides venue-grade transaction processing with RBAC staff management, entertainer scheduling, VIP guest tracking, Z-report generation, and the <strong className="text-slate-400">Club Currency Press</strong> for custom voucher and <strong className="text-slate-400">Glyph Buck™</strong> issuance with digital contract signing and biometric verification.
-              </p>
-              <p>
-                <strong className="text-slate-400">GlyphLock Financial</strong> delivers underwriting dossier generation, deterministic risk profiling, and qualification assessment frameworks designed for institutional-grade compliance review. The <strong className="text-slate-400">Blockchain Verification</strong> module creates timestamped cryptographic proofs exportable as legal evidence.
-              </p>
-              <p>
-                The <strong className="text-slate-400">Master Covenant</strong> framework establishes the first structured AI governance architecture — defining binding accountability, enforcement protocols, and compliance alignment across multi-provider LLM deployments. The <strong className="text-slate-400">Security Operations Center</strong> provides continuous monitoring, alert thresholds, and live threat intelligence across all operational surfaces.
-              </p>
-              <p>
-                Additional modules include the <strong className="text-slate-400">DJ Pro Mixer</strong> for AI-powered music mixing, the <strong className="text-slate-400">Media Processing Hub</strong> for video and asset management, <strong className="text-slate-400">SDK Documentation</strong> for developer integration, the <strong className="text-slate-400">Dream Team AI</strong> multi-model orchestration system, and the <strong className="text-slate-400">Site Intelligence Engine</strong> for automated codebase auditing and remediation. The <strong className="text-slate-400">Glyph Buck™</strong> legal instrument — issued through the N.U.P.S. Club Currency Press — is an original copyrighted product of GlyphLock Security LLC, licensed to venue operators on a per-deployment basis.
-              </p>
-            </div>
-
-            {/* Glyph Buck IP Notice */}
-            <div className="rounded-xl p-4 space-y-2 text-center" style={{ background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.12)' }}>
-              <p className="text-[11px] font-bold text-blue-400/70 uppercase tracking-[0.2em]">Intellectual Property — Glyph Buck™</p>
-              <p className="text-[10px] text-slate-500 leading-relaxed max-w-3xl mx-auto">
-                <strong className="text-slate-400">Glyph Buck™</strong> is a proprietary legal instrument and registered trademark of <strong className="text-slate-400">GlyphLock Financial LLC</strong>. The Glyph Buck system — including its physical bill design, digital contract architecture, redemption protocol, biometric verification workflow, and Club Currency Press technology — constitutes original copyrighted works owned exclusively by GlyphLock Financial LLC. All rights reserved. No venue, licensee, or third party may reproduce, modify, reissue, or create derivative instruments based on Glyph Bucks without prior written authorization from GlyphLock Financial LLC. Venue operators are licensed users only and retain no ownership interest in the Glyph Buck instrument or the underlying intellectual property. Unauthorized reproduction or fraudulent issuance of Glyph Buck instruments may constitute counterfeiting and will be prosecuted to the fullest extent of applicable law.
-              </p>
-            </div>
-
-            {/* Compliance Disclosure */}
-            <p className="text-[10px] text-slate-600 text-center max-w-2xl mx-auto leading-relaxed">
-              GlyphLock Security is structured to support alignment with SOC 2, ISO 27001, PCI DSS, GDPR, and HIPAA frameworks. These designations reflect architectural alignment and do not constitute formal certification unless explicitly stated in a written agreement.
-            </p>
-          </div>
-        </div>
-
         {/* ─── AUTHORITY BRAND BLOCK ─── */}
         <div className="border-t border-white/[0.06] pt-8 pb-6">
           <div className="flex flex-col items-center gap-4">
