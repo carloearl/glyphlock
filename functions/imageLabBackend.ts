@@ -12,12 +12,7 @@ const FLAGGED_TERMS = [
   'hate', 'racist', 'propaganda', 'deepfake', 'real person'
 ];
 
-// Rate limit: max generations per user per hour
-const RATE_LIMIT_MAX = 20;
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-
-// In-memory rate limit store (resets on cold start — good enough for serverless)
-const rateLimitStore = new Map();
+// Rate limit: 50 generations per 24 hours — persistent via ServiceUsage entity
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────────
 
