@@ -38,6 +38,7 @@ export default function GlyphBotPage() {
   const [showTrimWarning, setShowTrimWarning] = useState(false);
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const [showAuditPanel, setShowAuditPanel] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAuditHistory, setShowAuditHistory] = useState(false);
   const [selectedAuditView, setSelectedAuditView] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
