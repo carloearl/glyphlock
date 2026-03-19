@@ -34,7 +34,7 @@ export default function NUPSStaff() {
 
         const isAuth = await base44.auth.isAuthenticated();
         if (!isAuth) {
-          window.location.href = createPageUrl("NUPSLogin");
+          navigate('/NUPSLogin');
           return;
         }
         const currentUser = await base44.auth.me();
@@ -52,7 +52,7 @@ export default function NUPSStaff() {
           va => OWNER_TIER.includes(va.role_key)
         ) || currentUser.role === "admin";
         if (hasOwnerAccess) {
-          window.location.href = createPageUrl("NUPSOwner");
+          navigate('/NUPSOwner');
           return;
         }
 
@@ -60,7 +60,7 @@ export default function NUPSStaff() {
         sessionStorage.setItem("nups_session", JSON.stringify(currentUser));
         setUser(currentUser);
       } catch (error) {
-        window.location.href = createPageUrl("NUPSLogin");
+        navigate('/NUPSLogin');
         return;
       }
       setAuthChecked(true);
