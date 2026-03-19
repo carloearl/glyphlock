@@ -305,6 +305,47 @@ export default function NUPSGateway() {
           })}
         </div>
 
+        {/* OWNER-ONLY: Test all tiers + Demo Manager */}
+        {isOwner && (
+          <div className="mt-6 rounded-2xl border border-violet-500/20 bg-violet-500/4 p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-violet-400" />
+                <span className="text-xs font-black text-violet-400 uppercase tracking-widest">Owner Test Panel</span>
+              </div>
+              <button
+                onClick={() => navigate("/NUPSDemoManager")}
+                className="flex items-center gap-1.5 text-[11px] text-emerald-400 border border-emerald-500/25 rounded-lg px-2.5 py-1.5 hover:bg-emerald-500/10 transition-colors font-bold"
+              >
+                <Plus className="w-3 h-3" />
+                Manage Demo Accounts
+              </button>
+            </div>
+            <p className="text-[11px] text-gray-600">
+              Only visible to you. Click any tier to enter N.U.P.S. as that role — no credentials needed.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {TEST_ROLES.map(tr => (
+                <button
+                  key={tr.role}
+                  onClick={() => handleTestRole(tr)}
+                  disabled={testingRole}
+                  className={`p-2.5 rounded-xl border border-white/[0.06] bg-black/40 hover:border-violet-500/30 hover:bg-violet-500/8 transition-all active:scale-95 text-center disabled:opacity-50`}
+                >
+                  <div className={`text-xs font-black ${tr.color}`}>{tr.label}</div>
+                  <div className="text-[9px] text-gray-600 mt-0.5">→ {tr.dest}</div>
+                </button>
+              ))}
+            </div>
+            {testingRole && (
+              <div className="flex items-center gap-2 text-xs text-violet-400">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Switching tier...
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Footer note */}
         <p className="text-center text-[10px] text-gray-700 mt-8">
           All access attempts are logged · Unauthorized access is prohibited · GlyphLock Financial LLC
