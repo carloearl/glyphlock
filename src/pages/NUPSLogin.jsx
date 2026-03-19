@@ -45,6 +45,12 @@ export default function NUPSLogin() {
       // Store NUPS session (not the platform session)
       sessionStorage.setItem("nups_session", JSON.stringify(user));
 
+      // Demo accounts always go to sandbox
+      if (user.is_demo || user.role === "DEMO") {
+        navigate("/NUPSSandbox");
+        return;
+      }
+
       // Route based on role
       const dest = ROLE_DESTINATIONS[user.role] || "NUPSStaff";
       navigate(`/${dest}`);
