@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sparkles, Upload, X, Shuffle, Lock, Loader2, CheckCircle2, AlertTriangle, Image as ImageIcon, Sliders, Repeat, Wand2, Zap, Edit } from 'lucide-react';
+import { Sparkles, Upload, X, Shuffle, Lock, Loader2, CheckCircle2, AlertTriangle, Image as ImageIcon, Sliders, Repeat, Wand2, Zap, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageEditor from '@/components/imageLab/ImageEditor';
 import { GlyphIcon, IconButton } from '@/components/icons/GlyphIcons';
