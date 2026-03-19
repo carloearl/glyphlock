@@ -288,6 +288,18 @@ export default function GenerateTab() {
     <div className="space-y-5 p-4 md:p-6 relative" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
       {/* SCAN LINE */}
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70 animate-pulse pointer-events-none z-50" />
+
+      {/* CLEAR & RESET */}
+      <div className="flex justify-end">
+        <Button
+          onClick={handleClearAll}
+          variant="ghost"
+          className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/40 text-xs font-semibold gap-2 h-9 px-4 transition-all"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          Clear & Reset
+        </Button>
+      </div>
       
       {/* PROMPT ENGINEERING CARD - NEUROMORPHISM STYLE */}
       <Card id="prompt-section" className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-2 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.25)] backdrop-blur-xl" style={{ position: 'relative', zIndex: 21 }}>
