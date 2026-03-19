@@ -5,7 +5,7 @@ import ChatMessageMemo from '@/components/glyphlock/bot/ui/ChatMessageMemo';
 import ChatErrorBoundary from '@/components/glyphlock/bot/ui/ChatErrorBoundary';
 import SEOHead from '@/components/SEOHead';
 import { base44 } from '@/api/base44Client';
-import { Activity, Shield, Bot, AlertTriangle, X, PanelRightOpen, PanelRightClose } from 'lucide-react';
+import { Activity, Shield, Bot, AlertTriangle, X, PanelRightOpen, PanelRightClose, Menu, ChevronDown } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
