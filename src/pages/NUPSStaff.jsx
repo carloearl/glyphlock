@@ -22,6 +22,15 @@ export default function NUPSStaff() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // First check sessionStorage NUPS session (covers refresh from NUPS login)
+        const nupsSession = sessionStorage.getItem("nups_session");
+        if (nupsSession) {
+          const sessionUser = JSON.parse(nupsSession);
+          setUser(sessionUser);
+          setAuthChecked(true);
+          return;
+        }
+
         const isAuth = await base44.auth.isAuthenticated();
         if (!isAuth) {
           window.location.href = createPageUrl("NUPSLogin");
@@ -46,6 +55,8 @@ export default function NUPSStaff() {
           return;
         }
 
+        // Persist session so refresh doesn't bounce
+        sessionStorage.setItem("nups_session", JSON.stringify(currentUser));
         setUser(currentUser);
       } catch (error) {
         window.location.href = createPageUrl("NUPSLogin");
