@@ -621,7 +621,7 @@ export default function GenerateTab() {
       <div id="generate-section" className="space-y-3" style={{ position: 'relative', zIndex: 25 }}>
         <Button
           onClick={() => handleGenerate('generate')}
-          disabled={!promptSpecId || !weightsValid || generateMutation.isPending}
+          disabled={!prompt.trim() || !weightsValid || generateMutation.isPending}
           className="w-full h-20 text-lg md:text-xl font-black bg-white hover:bg-white/90 text-black shadow-[0_0_40px_rgba(255,255,255,0.5)] hover:shadow-[0_0_60px_rgba(255,255,255,0.8)] transition-all border-2 border-white/40 active:scale-95 flex items-center justify-center gap-3"
           style={{ touchAction: 'manipulation', pointerEvents: 'auto', minHeight: '80px', cursor: 'pointer', position: 'relative', zIndex: 26 }}
         >
