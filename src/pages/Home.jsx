@@ -8,6 +8,7 @@ import CTASection from '@/components/home/CTASection';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
 import CountdownPill from '@/components/marketing/CountdownPill';
 import SEOHead from '@/components/SEOHead';
+import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 
 
 const useScrollEffect = (sectionRef) => {
