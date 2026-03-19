@@ -76,18 +76,30 @@ export default function AuditPanel({ onStartAudit, isProcessing }) {
       </div>
 
       <Tabs value={targetType} onValueChange={setTargetType} className="mb-4">
-        <TabsList className="grid grid-cols-3 bg-slate-800/50 border border-slate-700 p-0.5">
-          <TabsTrigger value="business" className="text-xs data-[state=active]:bg-cyan-500/30 data-[state=active]:text-cyan-300">
-            <Globe className="w-3 h-3 mr-1" />
-            Business
+        <TabsList className="grid grid-cols-3 bg-slate-800/50 border border-slate-700 p-0.5 h-auto">
+          <TabsTrigger
+            value="business"
+            style={{ touchAction: 'manipulation', minHeight: '48px', pointerEvents: 'auto' }}
+            className="flex flex-col items-center gap-1 py-2 text-[10px] sm:text-xs data-[state=active]:bg-cyan-500/30 data-[state=active]:text-cyan-300"
+          >
+            <Globe className="w-4 h-4" />
+            <span>Businesses</span>
           </TabsTrigger>
-          <TabsTrigger value="person" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-300">
-            <User className="w-3 h-3 mr-1" />
-            People
+          <TabsTrigger
+            value="person"
+            style={{ touchAction: 'manipulation', minHeight: '48px', pointerEvents: 'auto' }}
+            className="flex flex-col items-center gap-1 py-2 text-[10px] sm:text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-300"
+          >
+            <User className="w-4 h-4" />
+            <span>People</span>
           </TabsTrigger>
-          <TabsTrigger value="agency" className="text-xs data-[state=active]:bg-amber-500/30 data-[state=active]:text-amber-300">
-            <Building2 className="w-3 h-3 mr-1" />
-            Agency
+          <TabsTrigger
+            value="agency"
+            style={{ touchAction: 'manipulation', minHeight: '48px', pointerEvents: 'auto' }}
+            className="flex flex-col items-center gap-1 py-2 text-[10px] sm:text-xs data-[state=active]:bg-amber-500/30 data-[state=active]:text-amber-300"
+          >
+            <Building2 className="w-4 h-4" />
+            <span>Gov Agencies</span>
           </TabsTrigger>
         </TabsList>
 
