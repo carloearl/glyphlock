@@ -174,6 +174,12 @@ export default function NUPSGateway() {
       return;
     }
 
+    // Owner bypasses all credential checks — go directly
+    if (isOwner) {
+      navigate(`/${card.destination}`);
+      return;
+    }
+
     // Not authenticated — send to NUPS credential login
     if (!user) {
       navigate("/NUPSLogin");
