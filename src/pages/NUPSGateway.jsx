@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import {
   Shield, Crown, Users, UserCheck, Music, FlaskConical,
-  ChevronRight, Lock, AlertTriangle, Loader2, LogOut, ArrowLeft
+  ChevronRight, Lock, AlertTriangle, Loader2, LogOut, ArrowLeft,
+  Zap, Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
