@@ -198,6 +198,9 @@ export default function Home() {
           <TechnologyMarquee />
         </section>
 
+        {/* Platform Capabilities */}
+        <PlatformCapabilities />
+
         {/* Final Call to Action */}
         <ScrollSection className="container-responsive">
           <CTASection />
