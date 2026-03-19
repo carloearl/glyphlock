@@ -7,6 +7,13 @@ import { base44 } from '@/api/base44Client';
 
 async function call(action, payload = {}) {
   const response = await base44.functions.invoke('imageLabBackend', { action, ...payload });
+  if (!response.data) throw new Error('No response from server');
+  if (response.data?.error || response.data?.code === 'CONTENT_BLOCKED' || response.data?.code === 'RATE_LIMITED') {
+    const err = new Error(response.data.error || response.data.reason || 'Request failed');
+    err.code = response.data.code;
+    err.data = response.data;
+    throw err;
+  }
   return response.data;
 }
 

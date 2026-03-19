@@ -66,27 +66,38 @@ export default function GenerateTab() {
   const [showAdvanced, setShowAdvanced] = useState(() => localStorage.getItem('gl_imagelab_show_advanced') === 'true');
   const [showEditor, setShowEditor] = useState(false);
 
-  // Auto-save
-  useEffect(() => { localStorage.setItem('gl_imagelab_prompt', prompt); }, [prompt]);
-  useEffect(() => { if (expandedPrompt) localStorage.setItem('gl_imagelab_expanded', JSON.stringify(expandedPrompt)); }, [expandedPrompt]);
-  useEffect(() => { if (promptSpecId) localStorage.setItem('gl_imagelab_spec_id', promptSpecId); }, [promptSpecId]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_refs', JSON.stringify(references)); }, [references]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_weights', JSON.stringify(weights)); }, [weights]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_seed', seed.toString()); }, [seed]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_seed_locked', seedLocked.toString()); }, [seedLocked]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_delta', deltaMode); }, [deltaMode]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_identity_lock', identityLock.toString()); }, [identityLock]);
-  useEffect(() => { if (generatedImage) localStorage.setItem('gl_imagelab_result', JSON.stringify(generatedImage)); }, [generatedImage]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_history', JSON.stringify(history)); }, [history]);
-  useEffect(() => { if (selectedStyle) localStorage.setItem('gl_imagelab_style', selectedStyle); }, [selectedStyle]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_aspect', aspectRatio); }, [aspectRatio]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_model_strength', modelStrength.toString()); }, [modelStrength]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_sharpness', sharpness.toString()); }, [sharpness]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_creativity', creativity.toString()); }, [creativity]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_guidance', guidanceScale.toString()); }, [guidanceScale]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_quality', qualityMode); }, [qualityMode]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_negative', negativePrompt); }, [negativePrompt]);
-  useEffect(() => { localStorage.setItem('gl_imagelab_show_advanced', showAdvanced.toString()); }, [showAdvanced]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const saves = {
+        'gl_imagelab_prompt': prompt,
+        'gl_imagelab_expanded': expandedPrompt ? JSON.stringify(expandedPrompt) : null,
+        'gl_imagelab_spec_id': promptSpecId,
+        'gl_imagelab_refs': JSON.stringify(references),
+        'gl_imagelab_weights': JSON.stringify(weights),
+        'gl_imagelab_seed': seed.toString(),
+        'gl_imagelab_seed_locked': seedLocked.toString(),
+        'gl_imagelab_delta': deltaMode,
+        'gl_imagelab_identity_lock': identityLock.toString(),
+        'gl_imagelab_result': generatedImage ? JSON.stringify(generatedImage) : null,
+        'gl_imagelab_history': JSON.stringify(history),
+        'gl_imagelab_style': selectedStyle,
+        'gl_imagelab_aspect': aspectRatio,
+        'gl_imagelab_model_strength': modelStrength.toString(),
+        'gl_imagelab_sharpness': sharpness.toString(),
+        'gl_imagelab_creativity': creativity.toString(),
+        'gl_imagelab_guidance': guidanceScale.toString(),
+        'gl_imagelab_quality': qualityMode,
+        'gl_imagelab_negative': negativePrompt,
+        'gl_imagelab_show_advanced': showAdvanced.toString(),
+      };
+      Object.entries(saves).forEach(([k, v]) => {
+        if (v !== null && v !== undefined) localStorage.setItem(k, v);
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [prompt, expandedPrompt, promptSpecId, references, weights, seed, seedLocked,
+      deltaMode, identityLock, generatedImage, history, selectedStyle, aspectRatio,
+      modelStrength, sharpness, creativity, guidanceScale, qualityMode, negativePrompt, showAdvanced]);
 
   const expandMutation = useMutation({
     mutationFn: async (p) => {
@@ -102,8 +113,8 @@ export default function GenerateTab() {
       }
     },
     onError: (error) => {
-      const msg = error?.response?.data?.reason || error.message || 'Unknown error';
-      const code = error?.response?.data?.code;
+      const code = error?.code || error?.data?.code;
+      const msg = error?.data?.reason || error?.data?.error || error.message || 'Unknown error';
       if (code === 'CONTENT_BLOCKED') {
         toast.error(`🚫 Content blocked: ${msg}`);
       } else {
@@ -124,7 +135,7 @@ export default function GenerateTab() {
       toast.success('🖼️ Reference image uploaded');
     },
     onError: (error) => {
-      const msg = error?.response?.data?.error || error.message || 'Unknown error';
+      const msg = error?.data?.error || error.message || 'Unknown error';
       toast.error(`Reference upload failed: ${msg}`);
     }
   });
@@ -163,11 +174,10 @@ export default function GenerateTab() {
       }
     },
     onError: (error) => {
-      const data = error?.response?.data;
-      const code = data?.code;
-      const msg = data?.error || data?.reason || error.message || 'Unknown error';
+      const code = error?.code || error?.data?.code;
+      const msg = error?.data?.error || error?.data?.reason || error.message || 'Unknown error';
       if (code === 'RATE_LIMITED') {
-        toast.error(`🚦 Rate limit reached. Try again in ${data.resetInMinutes} min.`);
+        toast.error(`🚦 Rate limit reached. Try again in ${error?.data?.resetInMinutes} min.`);
       } else if (code === 'CONTENT_BLOCKED') {
         toast.error(`🚫 Content blocked: ${msg}`);
       } else {
