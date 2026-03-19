@@ -40,25 +40,31 @@ function moderatePrompt(prompt) {
   return { blocked: false, flagged: flags.length > 0, flags };
 }
 
-function checkRateLimit(userId) {
+async function checkRateLimit(base44, userId) {
   const now = Date.now();
-  const key = `gen_${userId}`;
-  const entry = rateLimitStore.get(key) || { count: 0, windowStart: now };
+  const windowMs = 24 * 60 * 60 * 1000;
+  const maxGenerations = 50;
 
-  if (now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
-    // Reset window
-    rateLimitStore.set(key, { count: 1, windowStart: now });
-    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
+  try {
+    const records = await base44.asServiceRole.entities.ServiceUsage.filter({
+      user_email: userId,
+      service_name: 'image_generation'
+    });
+
+    const windowStart = now - windowMs;
+    const recentRecords = records.filter(r => new Date(r.created_date).getTime() > windowStart);
+
+    if (recentRecords.length >= maxGenerations) {
+      const oldest = Math.min(...recentRecords.map(r => new Date(r.created_date).getTime()));
+      const resetIn = Math.ceil((oldest + windowMs - now) / 60000);
+      return { allowed: false, resetInMinutes: resetIn };
+    }
+
+    return { allowed: true, remaining: maxGenerations - recentRecords.length };
+  } catch (e) {
+    console.warn('[RateLimit] Check failed, allowing request:', e.message);
+    return { allowed: true, remaining: 50 };
   }
-
-  if (entry.count >= RATE_LIMIT_MAX) {
-    const resetIn = Math.ceil((entry.windowStart + RATE_LIMIT_WINDOW_MS - now) / 60000);
-    return { allowed: false, resetInMinutes: resetIn };
-  }
-
-  entry.count += 1;
-  rateLimitStore.set(key, entry);
-  return { allowed: true, remaining: RATE_LIMIT_MAX - entry.count };
 }
 
 // ─── MAIN HANDLER ──────────────────────────────────────────────────────────────
