@@ -481,10 +481,12 @@ export default function GlyphBotPage() {
       };
 
       // Send to LLM with REAL-TIME WEB SEARCH enabled
+      // usePuter: false forces main chain with real web search capability
       const response = await glyphbotClient.sendMessage([...messages, startMsg, auditRequestMsg], {
         persona: 'SECURITY',
         auditMode: true,
-        realTime: true, // CRITICAL: Enable web search
+        realTime: true,
+        usePuter: false,
         jsonModeForced: true,
         structuredMode: true,
         provider: provider === 'AUTO' ? null : provider
