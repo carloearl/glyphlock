@@ -1,160 +1,337 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
+import {
+  Shield, QrCode, Image, Bot, Building2, DollarSign,
+  Link2, FileText, Eye, Cpu, ArrowRight
+} from 'lucide-react';
+import { createPageUrl } from '@/utils';
 
 const modules = [
   {
     title: 'QR Verification Studio',
-    desc: 'Generates tamper resistant QR codes supported by blockchain anchored provenance chains, artificial intelligence risk scoring, and steganographic payload embedding. These codes act as verifiable digital gateways linking physical environments to secure digital interaction.'
+    desc: 'Tamper-resistant QR codes with blockchain-anchored provenance chains, AI risk scoring, and steganographic payload embedding.',
+    icon: QrCode,
+    color: '#06b6d4',
+    border: 'rgba(6,182,212,0.35)',
+    glow: 'rgba(6,182,212,0.5)',
+    link: 'Qr'
   },
   {
     title: 'Image Lab',
-    desc: 'Provides artificial intelligence image generation, interactive hotspot editing, and multimodal visual analysis. Every asset is secured through SHA-256 hash verification and immutable audit trails to ensure authenticity and traceability.'
+    desc: 'AI image generation, interactive hotspot editing, and multimodal visual analysis secured through SHA-256 hash verification.',
+    icon: Image,
+    color: '#a855f7',
+    border: 'rgba(168,85,247,0.35)',
+    glow: 'rgba(168,85,247,0.5)',
+    link: 'ImageLab'
   },
   {
     title: 'GlyphBot Intelligence',
-    desc: 'Multi-provider AI assistant performing site auditing, vulnerability scanning, code analysis, and natural language threat assessment through distributed large language model routing architecture.'
+    desc: 'Multi-provider AI assistant for site auditing, vulnerability scanning, code analysis, and natural language threat assessment.',
+    icon: Bot,
+    color: '#4f46e5',
+    border: 'rgba(79,70,229,0.35)',
+    glow: 'rgba(79,70,229,0.5)',
+    link: 'GlyphBot'
   },
   {
     title: 'N.U.P.S. Infrastructure',
-    desc: 'Venue grade point of sale platform supporting staff RBAC management, entertainer scheduling, VIP guest tracking, automated Z report generation, and the Club Currency Press for custom voucher and GlyphBucks™ issuance with digital contract signing and biometric verification.'
+    desc: 'Venue-grade POS with staff RBAC, entertainer scheduling, VIP tracking, Z-reports, and GlyphBucks™ issuance with biometric verification.',
+    icon: Building2,
+    color: '#06b6d4',
+    border: 'rgba(6,182,212,0.35)',
+    glow: 'rgba(6,182,212,0.5)',
+    link: 'NUPSLogin'
   },
   {
     title: 'GlyphLock Financial',
-    desc: 'Provides underwriting dossier generation, deterministic risk scoring, and qualification assessment frameworks designed for institutional compliance review and financial infrastructure partnerships.'
+    desc: 'Underwriting dossier generation, deterministic risk scoring, and qualification frameworks for institutional compliance review.',
+    icon: DollarSign,
+    color: '#10b981',
+    border: 'rgba(16,185,129,0.35)',
+    glow: 'rgba(16,185,129,0.5)',
+    link: 'GlyphLockFinancial'
   },
   {
     title: 'Blockchain Verification',
-    desc: 'Creates timestamped cryptographic proofs exportable as evidentiary records for transactions, digital media assets, and operational events across the platform.'
+    desc: 'Timestamped cryptographic proofs exportable as evidentiary records for transactions, media assets, and operational events.',
+    icon: Link2,
+    color: '#f59e0b',
+    border: 'rgba(245,158,11,0.35)',
+    glow: 'rgba(245,158,11,0.5)',
+    link: 'Blockchain'
   },
   {
     title: 'Master Covenant Governance',
-    desc: 'Structured governance architecture defining accountability standards, enforcement protocols, and compliance alignment across multi-provider artificial intelligence systems.'
+    desc: 'Structured governance architecture defining accountability standards and compliance alignment across multi-provider AI systems.',
+    icon: FileText,
+    color: '#7c3aed',
+    border: 'rgba(124,58,237,0.35)',
+    glow: 'rgba(124,58,237,0.5)',
+    link: 'MasterCovenant'
   },
   {
     title: 'Security Operations Center',
-    desc: 'Continuous monitoring environment providing alert thresholds, operational visibility, and live threat intelligence across the GlyphLock infrastructure surface.'
+    desc: 'Continuous monitoring with alert thresholds and live threat intelligence across the full GlyphLock infrastructure surface.',
+    icon: Eye,
+    color: '#ef4444',
+    border: 'rgba(239,68,68,0.35)',
+    glow: 'rgba(239,68,68,0.5)',
+    link: 'SecurityOperationsCenter'
   },
 ];
 
-export default function PlatformCapabilities() {
+function ModuleCard({ mod, index, isInView }) {
+  const [hovered, setHovered] = useState(false);
+  const Icon = mod.icon;
+  const fromLeft = index % 2 === 0;
+
   return (
-    <section style={{ background: '#050505', color: '#e6e6e6', padding: '120px 20px', fontFamily: 'Inter, system-ui, monospace' }}>
-      <div style={{ maxWidth: '1200px', margin: 'auto' }}>
+    <motion.div
+      initial={{ opacity: 0, x: fromLeft ? -60 : 60, y: 30 }}
+      animate={isInView ? { opacity: 1, x: 0, y: 0 } : {}}
+      transition={{ duration: 0.7, delay: 0.2 + index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+    >
+      <Link to={createPageUrl(mod.link)} className="block h-full">
+        <div
+          className="relative overflow-hidden rounded-xl p-6 h-full transition-all duration-400 cursor-pointer"
+          style={{
+            background: hovered
+              ? `linear-gradient(135deg, rgba(10,1,24,0.98), rgba(20,10,50,0.95))`
+              : 'linear-gradient(135deg, rgba(10,1,24,0.95), rgba(15,5,35,0.9))',
+            border: `1px solid ${hovered ? mod.color : mod.border}`,
+            boxShadow: hovered
+              ? `0 0 40px ${mod.glow}, 0 0 80px ${mod.glow.replace('0.5', '0.2')}, inset 0 0 30px rgba(0,0,0,0.4)`
+              : `0 0 15px ${mod.glow.replace('0.5', '0.15')}`,
+          }}
+        >
+          {/* HUD corner accents */}
+          <div className="absolute top-0 left-0 w-5 h-5 border-t border-l opacity-40 transition-opacity duration-300"
+            style={{ borderColor: mod.color, opacity: hovered ? 0.8 : 0.3 }} />
+          <div className="absolute bottom-0 right-0 w-5 h-5 border-b border-r opacity-40 transition-opacity duration-300"
+            style={{ borderColor: mod.color, opacity: hovered ? 0.8 : 0.3 }} />
 
-        {/* Header */}
-        <div style={{ marginBottom: '60px' }}>
-          <span style={{ color: '#00ffd0', fontSize: '12px', letterSpacing: '3px' }}>
-            GLYPHLOCK SECURITY PLATFORM
-          </span>
-          <h2 style={{ fontSize: 'clamp(28px, 5vw, 40px)', marginTop: '10px', marginBottom: '20px', color: '#ffffff', fontWeight: 700 }}>
-            Platform Capabilities
-          </h2>
-          <p style={{ color: '#9aa3a9', lineHeight: '1.7', maxWidth: '900px', fontSize: '16px' }}>
-            GlyphLock Security LLC delivers a unified cybersecurity and digital infrastructure platform combining quantum-resistant encryption, artificial intelligence driven threat detection, and visual cryptography. The system is architected for organizations operating in zero-trust environments where verification, accountability, and operational transparency are essential. Post-quantum cryptographic primitives aligned with NIST PQC standards ensure the platform remains resilient against emerging computational threats.
-          </p>
+          {/* Glow sweep on hover */}
+          {hovered && (
+            <div className="absolute inset-0 pointer-events-none"
+              style={{
+                background: `radial-gradient(ellipse at top left, ${mod.glow.replace('0.5', '0.08')}, transparent 70%)`,
+              }}
+            />
+          )}
+
+          <div className="relative z-10 flex items-start gap-4">
+            <div
+              className="flex-shrink-0 w-11 h-11 rounded-lg flex items-center justify-center transition-all duration-300"
+              style={{
+                background: `${mod.color}18`,
+                border: `1px solid ${mod.color}60`,
+                boxShadow: hovered ? `0 0 20px ${mod.glow}` : 'none',
+              }}
+            >
+              <Icon className="w-5 h-5" style={{ color: mod.color, filter: hovered ? `drop-shadow(0 0 6px ${mod.color})` : 'none' }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-sm uppercase tracking-wider mb-2 transition-all duration-300"
+                style={{ color: hovered ? mod.color : '#ffffff', textShadow: hovered ? `0 0 12px ${mod.color}` : 'none' }}>
+                {mod.title}
+              </h3>
+              <p className="text-xs text-white/70 leading-relaxed">{mod.desc}</p>
+            </div>
+          </div>
+
+          {hovered && (
+            <div className="absolute bottom-4 right-4 z-10">
+              <ArrowRight className="w-4 h-4 opacity-60" style={{ color: mod.color }} />
+            </div>
+          )}
         </div>
-
-        {/* Module Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '30px',
-          marginBottom: '80px'
-        }}>
-          {modules.map((mod) => (
-            <ModuleCard key={mod.title} title={mod.title} desc={mod.desc} />
-          ))}
-        </div>
-
-        {/* IP Section */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '40px', marginBottom: '40px' }}>
-          <h3 style={{ fontSize: '20px', marginBottom: '16px', color: '#ffffff' }}>
-            Intellectual Property — GlyphBucks™
-          </h3>
-          <p style={{ color: '#9aa3a9', lineHeight: '1.7', marginBottom: '16px', fontSize: '15px' }}>
-            GlyphBucks™ is a proprietary legal instrument and registered trademark of GlyphLock Financial LLC. The GlyphBucks system including its physical bill design, digital contract architecture, redemption protocol, biometric verification workflow, and Club Currency Press technology constitutes original copyrighted works owned exclusively by GlyphLock Financial LLC.
-          </p>
-          <p style={{ color: '#9aa3a9', lineHeight: '1.7', fontSize: '15px' }}>
-            Venue operators are licensed users only and retain no ownership interest in the GlyphBucks™ instrument or the underlying intellectual property. Unauthorized reproduction or fraudulent issuance of GlyphBucks™ instruments may constitute counterfeiting and will be prosecuted to the fullest extent of applicable law.
-          </p>
-        </div>
-
-        {/* Compliance */}
-        <div style={{ fontSize: '13px', color: '#7f8a90', marginBottom: '60px', lineHeight: '1.6' }}>
-          GlyphLock Security is architected to align with SOC 2, ISO 27001, PCI DSS, GDPR, and HIPAA security frameworks. These designations represent architectural compatibility and do not constitute formal certification unless explicitly stated in a written agreement.
-        </div>
-
-        {/* Doctrine */}
-        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h3 style={{ fontSize: '22px', marginBottom: '16px', color: '#ffffff' }}>
-            Secure Infrastructure For Real World Systems
-          </h3>
-          <p style={{ color: '#9aa3a9', lineHeight: '1.7', maxWidth: '800px', margin: '0 auto 20px', fontSize: '15px' }}>
-            GlyphLock connects cybersecurity, artificial intelligence, digital identity, and venue infrastructure into a unified operational environment. Through blockchain verification, visual cryptography, and automated intelligence systems, organizations can deploy trusted digital interaction in environments where transparency, accountability, and security are required.
-          </p>
-          <p style={{ fontSize: '18px', color: '#ffffff', lineHeight: '1.6' }}>
-            GlyphLock is not simply a security platform.<br />
-            It is infrastructure for the next generation of digital systems.
-          </p>
-        </div>
-
-        {/* CTA */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-          <Link
-            to="/CommandCenter"
-            style={{
-              background: '#00ffd0',
-              color: '#000',
-              padding: '14px 28px',
-              textDecoration: 'none',
-              fontWeight: '600',
-              borderRadius: '4px',
-              fontSize: '14px',
-              letterSpacing: '1px'
-            }}
-          >
-            ENTER THE GLYPHLOCK SYSTEM
-          </Link>
-          <Link
-            to="/Services"
-            style={{
-              border: '1px solid rgba(255,255,255,0.2)',
-              padding: '14px 28px',
-              textDecoration: 'none',
-              color: '#cbd1d6',
-              borderRadius: '4px',
-              fontSize: '14px',
-              letterSpacing: '1px',
-              transition: '0.25s'
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#00ffd0'; e.currentTarget.style.color = '#00ffd0'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = '#cbd1d6'; }}
-          >
-            REVIEW PLATFORM CAPABILITIES
-          </Link>
-        </div>
-
-      </div>
-    </section>
+      </Link>
+    </motion.div>
   );
 }
 
-function ModuleCard({ title, desc }) {
-  const [hovered, setHovered] = React.useState(false);
+export default function PlatformCapabilities() {
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { once: true, amount: 0.1 });
+
   return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        border: `1px solid ${hovered ? '#00ffd0' : 'rgba(255,255,255,0.08)'}`,
-        padding: '24px',
-        borderRadius: '6px',
-        background: '#0a0a0a',
-        transition: '0.25s'
-      }}
+    <section
+      ref={containerRef}
+      className="w-full relative overflow-hidden"
+      style={{ background: 'transparent', padding: '80px 0 100px' }}
     >
-      <h3 style={{ marginBottom: '10px', fontSize: '18px', color: '#ffffff' }}>{title}</h3>
-      <p style={{ color: '#9aa3a9', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>{desc}</p>
-    </div>
+      {/* Background grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(6,182,212,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.03) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }}
+      />
+
+      {/* Ambient glow orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(79,70,229,0.08), transparent)', filter: 'blur(60px)' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.06), transparent)', filter: 'blur(60px)' }} />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="inline-block mb-4 px-4 py-1 text-xs font-mono uppercase tracking-[0.2em] border border-cyan-500/40 text-cyan-400"
+            style={{ background: 'rgba(6,182,212,0.05)', boxShadow: '0 0 15px rgba(6,182,212,0.2)' }}
+          >
+            GLYPHLOCK SECURITY PLATFORM
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, x: -80 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-3xl md:text-5xl font-black text-white mb-5 drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]"
+          >
+            Platform{' '}
+            <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
+              Capabilities
+            </span>
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, x: 80 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="text-white/70 text-base md:text-lg max-w-3xl mx-auto leading-relaxed"
+          >
+            A unified cybersecurity and digital infrastructure platform spanning quantum-resistant encryption,
+            AI-driven threat detection, and visual cryptography — architected for zero-trust environments
+            where verification and accountability are essential.
+          </motion.p>
+        </div>
+
+        {/* Module Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+          {modules.map((mod, idx) => (
+            <ModuleCard key={mod.title} mod={mod} index={idx} isInView={isInView} />
+          ))}
+        </div>
+
+        {/* IP + Compliance Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="relative overflow-hidden rounded-2xl p-8 mb-10"
+          style={{
+            background: 'linear-gradient(135deg, rgba(10,1,24,0.98), rgba(30,10,60,0.95))',
+            border: '1px solid rgba(124,58,237,0.4)',
+            boxShadow: '0 0 50px rgba(124,58,237,0.2), inset 0 0 60px rgba(0,0,0,0.5)'
+          }}
+        >
+          {/* HUD corners */}
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-purple-500 opacity-50" />
+          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-purple-500 opacity-50" />
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-purple-500 opacity-50" />
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-purple-500 opacity-50" />
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Shield className="w-5 h-5 text-purple-400" style={{ filter: 'drop-shadow(0 0 6px rgba(168,85,247,0.8))' }} />
+                <h3 className="text-sm font-black uppercase tracking-widest text-purple-400">
+                  Intellectual Property — GlyphBucks™
+                </h3>
+              </div>
+              <p className="text-white/70 text-sm leading-relaxed mb-3">
+                GlyphBucks™ is a proprietary legal instrument and registered trademark of GlyphLock Financial LLC.
+                The system — including its physical bill design, digital contract architecture, redemption protocol,
+                and biometric verification workflow — constitutes original copyrighted works owned exclusively by GlyphLock Financial LLC.
+              </p>
+              <p className="text-white/60 text-xs leading-relaxed">
+                Venue operators are licensed users only. Unauthorized reproduction or fraudulent issuance may constitute
+                counterfeiting and will be prosecuted to the fullest extent of applicable law.
+              </p>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Cpu className="w-5 h-5 text-cyan-400" style={{ filter: 'drop-shadow(0 0 6px rgba(6,182,212,0.8))' }} />
+                <h3 className="text-sm font-black uppercase tracking-widest text-cyan-400">
+                  Compliance Alignment
+                </h3>
+              </div>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {['SOC 2', 'ISO 27001', 'PCI DSS', 'GDPR', 'HIPAA'].map(f => (
+                  <span key={f} className="px-3 py-1 text-xs font-bold rounded border border-cyan-500/30 text-cyan-300"
+                    style={{ background: 'rgba(6,182,212,0.08)', boxShadow: '0 0 8px rgba(6,182,212,0.15)' }}>
+                    {f}
+                  </span>
+                ))}
+              </div>
+              <p className="text-white/60 text-xs leading-relaxed">
+                GlyphLock is architected for alignment with these frameworks. Designations represent architectural
+                compatibility and do not constitute formal certification unless explicitly stated in a written agreement.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Doctrine + CTA */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={isInView ? { opacity: 1, scale: 1 } : {}}
+          transition={{ duration: 0.8, delay: 1.1 }}
+          className="text-center"
+        >
+          <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-3">
+            From post-quantum cryptography and blockchain verification to real-time media interaction and financial infrastructure —
+            a unified environment where physical systems and digital networks operate under verifiable trust.
+          </p>
+          <p className="text-white font-bold text-lg md:text-xl mb-10">
+            GlyphLock is not simply a security platform.<br />
+            <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+              It is infrastructure for the next generation of digital systems.
+            </span>
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Link
+                to={createPageUrl('CommandCenter')}
+                className="inline-flex items-center gap-2 px-8 py-4 font-black text-sm uppercase tracking-wide text-black transition-all duration-300"
+                style={{
+                  background: 'linear-gradient(135deg, #06b6d4, #4f46e5)',
+                  boxShadow: '0 0 30px rgba(6,182,212,0.4), 5px 5px 0 rgba(0,0,0,0.3)',
+                  clipPath: 'polygon(6% 0%, 100% 0%, 94% 100%, 0% 100%)'
+                }}
+              >
+                ⚡ ENTER THE GLYPHLOCK SYSTEM
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Link
+                to={createPageUrl('Services')}
+                className="inline-flex items-center gap-2 px-8 py-4 font-bold text-sm uppercase tracking-wide text-purple-400 border-2 border-purple-500 transition-all duration-300 hover:bg-purple-500/10"
+                style={{
+                  boxShadow: '0 0 20px rgba(124,58,237,0.3), 4px 4px 0 rgba(124,58,237,0.2)',
+                  clipPath: 'polygon(0% 6%, 94% 0%, 100% 94%, 6% 100%)'
+                }}
+              >
+                👁 REVIEW PLATFORM CAPABILITIES
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
+
+      </div>
+    </section>
   );
 }
