@@ -61,19 +61,6 @@ export default function EntertainerContract({ onContractSigned }) {
     }
   });
 
-  const contractTerms = [
-    "I understand this is an independent contractor agreement",
-    "I will maintain professional conduct at all times",
-    "I agree to the house rules and safety protocols",
-    "I acknowledge the commission structure and payment terms",
-    "I will respect all guests and staff members",
-    "I understand my schedule obligations",
-    "I agree to maintain confidentiality",
-    "I will comply with all legal requirements",
-    "I acknowledge receipt of safety guidelines",
-    "I understand the termination policies"
-  ];
-
   const stripHtml = (str) => (str || '').replace(/<[^>]*>/g, '').replace(/[<>"']/g, '').trim();
 
   const handleSubmit = (e) => {
