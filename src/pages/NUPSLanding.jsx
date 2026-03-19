@@ -94,7 +94,7 @@ export default function NUPSLanding() {
   const [glitching, setGlitching] = useState(false);
 
   useEffect(() => {
-    const handleKey = (e) => { if (e.key === "Enter") navigate("/NUPSLogin"); };
+    const handleKey = (e) => { if (e.key === "Enter") navigate("/NUPSGateway"); };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [navigate]);
