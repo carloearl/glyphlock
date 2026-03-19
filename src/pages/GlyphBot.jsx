@@ -706,7 +706,7 @@ export default function GlyphBotPage() {
               {currentUser && (
                 <>
                   <button
-                    onClick={() => setShowAuditPanel(!showAuditPanel)}
+                    onClick={() => { setShowAuditPanel(!showAuditPanel); setShowHistoryPanel(false); }}
                     style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                       showAuditPanel 
@@ -718,7 +718,7 @@ export default function GlyphBotPage() {
                     <span className="hidden sm:inline">Audit</span>
                   </button>
                   <button
-                    onClick={() => setShowHistoryPanel(!showHistoryPanel)}
+                    onClick={() => { setShowHistoryPanel(!showHistoryPanel); setShowAuditPanel(false); }}
                     style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                       showHistoryPanel
@@ -734,7 +734,7 @@ export default function GlyphBotPage() {
               <Link
                 to={createPageUrl('ProviderConsole')}
                 style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all"
               >
                 <Activity className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Console</span>
