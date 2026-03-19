@@ -20,6 +20,7 @@ import NUPSLanding from './pages/NUPSLanding';
 import NUPSGateway from './pages/NUPSGateway';
 import NUPSSandbox from './pages/NUPSSandbox';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
+import NUPSDemoManager from './pages/NUPSDemoManager';
 import NUPSMISReport from './pages/NUPSMISReport';
 import ImageShare from './pages/ImageShare';
 
