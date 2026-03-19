@@ -159,7 +159,7 @@ Provide your response as a JSON object with:
   // ─── ACTION: generate_image ────────────────────────────────────────────────
   if (action === 'generate_image') {
     // Rate limit check
-    const rl = checkRateLimit(user.id || user.email);
+    const rl = await checkRateLimit(base44, user.id || user.email);
     if (!rl.allowed) {
       return Response.json({
         error: `Rate limit exceeded. Resets in ${rl.resetInMinutes} minute(s).`,
