@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/SEOHead";
 
 export default function NUPSStaff() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
 
