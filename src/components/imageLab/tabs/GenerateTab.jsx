@@ -114,22 +114,7 @@ export default function GenerateTab() {
 
   const uploadReferenceMutation = useMutation({
     mutationFn: async ({ file, enableIdentity }) => {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      
-      // Create ReferenceImage record
-      const ref = await base44.entities.ReferenceImage.create({
-        original_image_url: file_url,
-        extracted_features: {
-          color_palette: [],
-          visual_mood: 'neutral'
-        },
-        identity_lock_config: {
-          enabled: enableIdentity,
-          similarity_threshold: 0.87
-        }
-      });
-      
-      return { reference_image_id: ref.id, original_image_url: file_url, features: ref.extracted_features };
+      return uploadReferenceImage(file, enableIdentity);
     },
     onSuccess: (data) => {
       const newRefs = [...references, data];
@@ -139,8 +124,8 @@ export default function GenerateTab() {
       toast.success('🖼️ Reference image uploaded');
     },
     onError: (error) => {
-      console.error('Upload error:', error);
-      toast.error(`Reference upload failed: ${error.message || 'Unknown error'}`);
+      const msg = error?.response?.data?.error || error.message || 'Unknown error';
+      toast.error(`Reference upload failed: ${msg}`);
     }
   });
 
