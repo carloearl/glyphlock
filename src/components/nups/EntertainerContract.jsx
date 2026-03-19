@@ -13,6 +13,15 @@ export default function EntertainerContract({ onContractSigned }) {
   const queryClient = useQueryClient();
   const [showContract, setShowContract] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [hasScrolledContract, setHasScrolledContract] = useState(false);
+  const contractScrollRef = useRef(null);
+
+  const handleContractScroll = (e) => {
+    const el = e.target;
+    if (el.scrollHeight - el.scrollTop <= el.clientHeight + 40) {
+      setHasScrolledContract(true);
+    }
+  };
   const [signature, setSignature] = useState("");
   const [entertainerData, setEntertainerData] = useState({
     stage_name: "",
