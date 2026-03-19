@@ -227,6 +227,38 @@ export default function GenerateTab() {
     });
   };
 
+  const handleClearAll = () => {
+    const keys = [
+      'gl_imagelab_prompt','gl_imagelab_expanded','gl_imagelab_spec_id',
+      'gl_imagelab_refs','gl_imagelab_weights','gl_imagelab_seed',
+      'gl_imagelab_seed_locked','gl_imagelab_delta','gl_imagelab_identity_lock',
+      'gl_imagelab_result','gl_imagelab_history','gl_imagelab_style',
+      'gl_imagelab_aspect','gl_imagelab_model_strength','gl_imagelab_sharpness',
+      'gl_imagelab_creativity','gl_imagelab_guidance','gl_imagelab_quality',
+      'gl_imagelab_negative','gl_imagelab_show_advanced'
+    ];
+    keys.forEach(k => localStorage.removeItem(k));
+    setPrompt('');
+    setExpandedPrompt(null);
+    setPromptSpecId(null);
+    setReferences([]);
+    setWeights([]);
+    setSeed(Math.floor(Math.random() * 2147483647));
+    setSeedLocked(false);
+    setDeltaMode('balanced');
+    setIdentityLock(false);
+    setGeneratedImage(null);
+    setHistory([]);
+    setSelectedStyle(null);
+    setAspectRatio('1:1');
+    setModelStrength(50);
+    setGuidanceScale(7.5);
+    setQualityMode('Standard');
+    setNegativePrompt('blurry, low quality, watermark, deformed hands, text');
+    setShowAdvanced(false);
+    toast.success('🔄 Image Lab cleared and reset');
+  };
+
   const handleEditorSave = (editedData) => {
     if (editedData.fineTune) {
       // Re-run generation with feedback
