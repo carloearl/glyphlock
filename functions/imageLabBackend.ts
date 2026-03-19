@@ -162,7 +162,7 @@ Provide your response as a JSON object with:
     const rl = await checkRateLimit(base44, user.id || user.email);
     if (!rl.allowed) {
       return Response.json({
-        error: `Rate limit exceeded. Resets in ${rl.resetInMinutes} minute(s).`,
+        error: `You have reached your daily image generation limit (50 per day). Resets in ${rl.resetInMinutes} minute(s). Please try again later.`,
         code: 'RATE_LIMITED',
         resetInMinutes: rl.resetInMinutes
       }, { status: 429 });
