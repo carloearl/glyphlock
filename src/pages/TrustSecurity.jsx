@@ -1,378 +1,349 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Button } from "@/components/ui/button";
-import { Shield, Lock, FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Shield, Lock, CheckCircle, Clock, AlertCircle, Zap, Eye, Bot, Key } from "lucide-react";
+import { motion, useInView } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 40 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }
+});
+
+const slideLeft = (delay = 0) => ({
+  initial: { opacity: 0, x: -60 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }
+});
+
+const slideRight = (delay = 0) => ({
+  initial: { opacity: 0, x: 60 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }
+});
+
+const currentMeasures = [
+  { title: "Battle-Tested Infrastructure", icon: Shield, color: "blue", description: "Enterprise-grade resilience engineered for creators under pressure. Encrypted communications (TLS 1.3), DDoS protection, and regular hardening updates ensure your work cannot be quietly erased." },
+  { title: "Creator IP Protection", icon: Key, color: "indigo", description: "Patent pending (USPTO App. No. 18/584,961). Legal frameworks protecting independent authorship with cryptographic proof, blockchain timestamping, and Master Covenant governance — leveling the field against larger hostile forces." },
+  { title: "Audit-Ready Transparency", icon: Eye, color: "cyan", description: "Every action logged. Every change traceable. Minimal data collection with user consent. AI behavior and system operations recorded on tamper-resistant ledgers for long-term trust and accountability." },
+  { title: "Human-Overseen AI Safety", icon: Bot, color: "purple", description: "AI operates inside accountable guardrails. Secure development lifecycle with mandatory human review. Machine intelligence paired with structural oversight to prevent runaway automation." }
+];
+
+const colorMap = {
+  blue: { border: "border-blue-500/40", glow: "rgba(59,130,246,0.3)", icon: "text-blue-400", bg: "from-blue-500/10 to-blue-600/5" },
+  indigo: { border: "border-indigo-500/40", glow: "rgba(99,102,241,0.3)", icon: "text-indigo-400", bg: "from-indigo-500/10 to-indigo-600/5" },
+  cyan: { border: "border-cyan-500/40", glow: "rgba(6,182,212,0.3)", icon: "text-cyan-400", bg: "from-cyan-500/10 to-cyan-600/5" },
+  purple: { border: "border-purple-500/40", glow: "rgba(168,85,247,0.3)", icon: "text-purple-400", bg: "from-purple-500/10 to-purple-600/5" }
+};
+
+const roadmap = [
+  { phase: "Completed — Security Foundation", period: "Q1–Q2 2025", status: "done", items: ["Firebase authentication", "Encryption for sensitive data at rest", "Logging and monitoring", "Security policy documentation", "Incident response procedures"] },
+  { phase: "Completed — SOC 2 Type II Preparation", period: "Q3–Q4 2025", status: "done", items: ["Control framework implementation", "Risk assessment", "Internal audits", "Staff security training"] },
+  { phase: "Current Phase — SOC 2 Type II Audit Period", period: "Q1 2026", status: "current", items: ["Six month observation period", "CPA firm audit engagement", "Continuous monitoring", "Control effectiveness validation", "ISO 27001 framework alignment"] },
+  { phase: "Planned — Formal Certifications", period: "Q2–Q3 2026", status: "planned", items: ["SOC 2 Type II audit completion", "ISO 27001 certification audit", "GDPR validation", "Industry specific compliance as applicable"] },
+  { phase: "Planned — Advanced Security Posture", period: "Q4 2026", status: "planned", items: ["Post quantum cryptography roadmap", "24/7 security operations", "Advanced threat detection", "Continuous compliance monitoring", "Annual penetration testing"] }
+];
+
+const controls = [
+  { category: "Encryption", items: ["In transit: TLS 1.3", "At rest: AES 256 roadmap", "Key management and HSM integration planned"] },
+  { category: "Access Control", items: ["Firebase Authentication", "Multi factor authentication", "Role based access control", "Session management"] },
+  { category: "Monitoring & Testing", items: ["Security event logging", "Dependency vulnerability scanning", "Scheduled penetration testing", "Third party audits as applicable"] },
+  { category: "Infrastructure", items: ["Cloud native architecture", "CDN and DDoS protection", "Backup and disaster recovery planning"] },
+  { category: "Compliance Programs", items: ["Privacy policy and terms", "Data processing agreements", "User rights management", "GDPR and CCPA programs active", "PCI DSS and HIPAA applied only when feature scope requires"] }
+];
+
+const frameworks = [
+  { title: "ISO 27001", status: "Aligned", statusColor: "blue", desc: "Information security management system (ISMS) implementation covering personnel, physical, and logical security controls.", specs: ["Annex A Controls", "Risk Treatment Plan", "Internal Audit Cycle"] },
+  { title: "SOC 2 Type II", status: "In Progress", statusColor: "amber", desc: "Service Organization Control evaluation for Security, Availability, and Confidentiality trust principles.", specs: ["Control Environment", "Risk Assessment", "Monitoring Activities"] },
+  { title: "GDPR", status: "Compliant", statusColor: "green", desc: "European Union data protection regulation compliance including data subject rights and processing records.", specs: ["DPA in Place", "Data Minimization", "Right to Erasure"] },
+  { title: "PCI DSS", status: "Level 4", statusColor: "purple", desc: "Payment Card Industry Data Security Standard for secure handling of credit card information.", specs: ["SAQ A Completed", "TLS 1.3 Enforcement", "No Card Data Retention"] }
+];
+
+const certs = [
+  { name: "ISO 27001", subtitle: "STANDARDS MET", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg" },
+  { name: "SOC 2", subtitle: "PROGRAM IN PLACE", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg" },
+  { name: "GDPR", subtitle: "COMPLIANT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg" },
+  { name: "HIPAA", subtitle: "COMPLIANT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg" },
+  { name: "Post-Quantum", subtitle: "SECURED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg" }
+];
+
+const statusBadge = {
+  Compliant: "bg-green-500/10 border border-green-500/30 text-green-400",
+  Aligned: "bg-blue-500/10 border border-blue-500/30 text-blue-400",
+  "In Progress": "bg-amber-500/10 border border-amber-500/30 text-amber-400",
+  "Level 4": "bg-purple-500/10 border border-purple-500/30 text-purple-400"
+};
+
 export default function TrustSecurity() {
-  const currentMeasures = [
-    {
-      title: "Battle-Tested Infrastructure",
-      status: "Active",
-      description: "Enterprise-grade resilience engineered for creators under pressure. Encrypted communications (TLS 1.3), DDoS protection, and regular hardening updates ensure your work cannot be quietly erased."
-    },
-    {
-      title: "Creator IP Protection",
-      status: "Active",
-      description: "Patent pending (USPTO App. No. 18/584,961). Legal frameworks protecting independent authorship with cryptographic proof, blockchain timestamping, and Master Covenant governance — leveling the field against larger hostile forces."
-    },
-    {
-      title: "Audit-Ready Transparency",
-      status: "Active",
-      description: "Every action logged. Every change traceable. Minimal data collection with user consent. AI behavior and system operations recorded on tamper-resistant ledgers for long-term trust and accountability."
-    },
-    {
-      title: "Human-Overseen AI Safety",
-      status: "Active",
-      description: "AI operates inside accountable guardrails. Secure development lifecycle with mandatory human review. Machine intelligence paired with structural oversight to prevent runaway automation."
-    }
-  ];
-
-  const roadmap = [
-    {
-      phase: "Completed — Security Foundation",
-      period: "Q1–Q2 2025",
-      items: [
-        "Firebase authentication",
-        "Encryption for sensitive data at rest",
-        "Logging and monitoring",
-        "Security policy documentation",
-        "Incident response procedures"
-      ]
-    },
-    {
-      phase: "Completed — SOC 2 Type II Preparation",
-      period: "Q3–Q4 2025",
-      items: [
-        "Control framework implementation",
-        "Risk assessment",
-        "Internal audits",
-        "Staff security training"
-      ]
-    },
-    {
-      phase: "Current Phase — SOC 2 Type II Audit Period",
-      period: "Q1 2026",
-      items: [
-        "Six month observation period",
-        "CPA firm audit engagement",
-        "Continuous monitoring",
-        "Control effectiveness validation",
-        "ISO 27001 framework alignment"
-      ]
-    },
-    {
-      phase: "Planned — Formal Certifications",
-      period: "Q2–Q3 2026",
-      items: [
-        "SOC 2 Type II audit completion",
-        "ISO 27001 certification audit",
-        "GDPR validation",
-        "Industry specific compliance as applicable"
-      ]
-    },
-    {
-      phase: "Planned — Advanced Security Posture",
-      period: "Q4 2026",
-      items: [
-        "Post quantum cryptography roadmap",
-        "24/7 security operations",
-        "Advanced threat detection",
-        "Continuous compliance monitoring",
-        "Annual penetration testing"
-      ]
-    }
-  ];
-
-  const controls = [
-    {
-      category: "Encryption",
-      items: [
-        "In transit: TLS 1.3",
-        "At rest: AES 256 roadmap",
-        "Key management and HSM integration planned"
-      ]
-    },
-    {
-      category: "Access Control",
-      items: [
-        "Firebase Authentication",
-        "Multi factor authentication",
-        "Role based access control",
-        "Session management"
-      ]
-    },
-    {
-      category: "Monitoring & Testing",
-      items: [
-        "Security event logging",
-        "Dependency vulnerability scanning",
-        "Scheduled penetration testing",
-        "Third party audits as applicable"
-      ]
-    },
-    {
-      category: "Infrastructure",
-      items: [
-        "Cloud native architecture",
-        "CDN and DDoS protection",
-        "Backup and disaster recovery planning"
-      ]
-    },
-    {
-      category: "Compliance Programs",
-      items: [
-        "Privacy policy and terms",
-        "Data processing agreements",
-        "User rights management",
-        "GDPR and CCPA programs active",
-        "PCI DSS and HIPAA applied only when feature scope requires"
-      ]
-    }
-  ];
-
   return (
     <>
-      <SEOHead 
+      <SEOHead
         title="Trust & Infrastructure - GlyphLock Ecosystem Resilience & Compliance"
         description="GlyphLock's infrastructure architecture, audit-ready controls, and compliance framework. Transparent documentation of the protection layer securing independent creators and verified ecosystems."
         keywords="infrastructure resilience, audit trails, creator protection, blockchain ledgers, AI accountability, SOC 2, ISO 27001, GDPR, tamper-resistant systems"
         url="/trust-security"
       />
-      
-      <div className="min-h-screen bg-black text-white py-32 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00E4FF]/5 rounded-full blur-[100px] pointer-events-none"></div>
-        
-        <div className="container mx-auto px-6 max-w-6xl relative z-10">
-          {/* Header */}
-          <div className="mb-12 md:mb-16 text-center">
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <Shield className="w-6 h-6 md:w-8 md:h-8 text-[#00E4FF]" />
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight">
-                Trust & Infrastructure
-              </h1>
-            </div>
-            <p className="text-base md:text-xl text-gray-400 max-w-3xl mx-auto px-4">
+
+      <div className="min-h-screen text-white relative overflow-hidden" style={{ background: 'transparent' }}>
+        {/* Ambient orbs — match site palette */}
+        <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-600/12 rounded-full blur-[130px]" />
+          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[110px]" />
+          <div className="absolute top-2/3 left-1/2 w-[300px] h-[300px] bg-purple-600/8 rounded-full blur-[100px]" />
+        </div>
+
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 max-w-6xl py-24 md:py-32">
+
+          {/* ── HERO ── */}
+          <div className="text-center mb-16 md:mb-20">
+            <motion.div {...fadeUp(0)} className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
+              style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.25)' }}>
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }}>
+                <Shield size={14} className="text-blue-400" />
+              </motion.div>
+              <span className="text-blue-300 text-sm font-semibold tracking-wide">Sovereign Infrastructure</span>
+            </motion.div>
+
+            <motion.h1 {...slideLeft(0.1)}
+              className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-white mb-5 drop-shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+              Trust &amp;{" "}
+              <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-300 bg-clip-text text-transparent">
+                Infrastructure
+              </span>
+            </motion.h1>
+
+            <motion.p {...slideRight(0.2)} className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
               Battle-tested infrastructure protecting independent creators with audit-ready compliance
-            </p>
+            </motion.p>
           </div>
 
-          {/* Foundation Statement */}
-          <div className="glass-card rounded-2xl border border-white/10 p-6 md:p-8 lg:p-12 mb-8 md:mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6">Infrastructure Foundation</h2>
-            <p className="text-gray-300 leading-relaxed text-lg">
-              Protection is engineered into every layer of the GlyphLock ecosystem. Independent creators deserve infrastructure that cannot be quietly erased or overridden — our architecture and operational controls are designed for audit-ready transparency and long-term resilience, with roadmap toward formal certification.
-            </p>
-          </div>
+          {/* ── FOUNDATION STATEMENT ── */}
+          <motion.div {...fadeUp(0.1)} className="mb-12 rounded-2xl overflow-hidden relative"
+            style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.06) 0%, rgba(99,102,241,0.04) 100%)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 0 40px rgba(59,130,246,0.12)' }}>
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.5), transparent)' }} />
+            <div className="p-8 md:p-12">
+              <h2 className="text-2xl font-bold text-white mb-4">Infrastructure Foundation</h2>
+              <p className="text-slate-300 leading-relaxed text-lg">
+                Protection is engineered into every layer of the GlyphLock ecosystem. Independent creators deserve infrastructure that cannot be quietly erased or overridden — our architecture and operational controls are designed for audit-ready transparency and long-term resilience, with roadmap toward formal certification.
+              </p>
+            </div>
+          </motion.div>
 
-          {/* Compliance & Standards - NEW SECTION */}
+          {/* ── COMPLIANCE BADGES ── */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center">Infrastructure Standards & Compliance</h2>
-            <div className="glass-card rounded-2xl border border-white/10 p-8 md:p-12 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none"></div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 items-center justify-center">
-                {[
-                  { name: "ISO 27001", subtitle: "STANDARDS MET", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg" },
-                  { name: "SOC 2", subtitle: "PROGRAM IN PLACE", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg" },
-                  { name: "GDPR", subtitle: "COMPLIANT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg" },
-                  { name: "HIPAA", subtitle: "COMPLIANT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg" },
-                  { name: "Post-Quantum", subtitle: "SECURED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg" }
-                ].map((cert, idx) => (
-                  <div key={idx} className="flex flex-col items-center gap-4 group">
-                    <div className="w-24 h-24 md:w-28 md:h-28 relative flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:drop-shadow-[0_0_25px_rgba(6,182,212,0.5)]">
-                      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      <img 
-                        src={cert.image} 
-                        alt={cert.name} 
-                        className="w-full h-full object-contain filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)] relative z-10" 
-                      />
-                    </div>
-                    <div className="text-center">
-                      <h3 className="text-white font-bold text-sm md:text-base mb-1 group-hover:text-cyan-400 transition-colors">{cert.name}</h3>
-                      <div className="inline-block px-2 py-0.5 rounded-full bg-white/5 border border-white/10 group-hover:border-cyan-500/30 transition-colors">
-                        <span className="text-[10px] md:text-xs text-slate-400 font-semibold tracking-wide uppercase group-hover:text-cyan-300 transition-colors">{cert.subtitle}</span>
+            <motion.h2 {...fadeUp(0)} className="text-3xl font-bold text-white mb-8 text-center">
+              Infrastructure Standards &amp; Compliance
+            </motion.h2>
+            <motion.div {...fadeUp(0.1)} className="rounded-2xl overflow-hidden relative"
+              style={{ background: 'linear-gradient(135deg, rgba(87,61,255,0.06) 0%, rgba(168,60,255,0.04) 100%)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 0 50px rgba(87,61,255,0.15)' }}>
+              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(168,85,247,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.5) 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+              <div className="relative p-8 md:p-12">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-center">
+                  {certs.map((cert, idx) => (
+                    <motion.div key={idx} {...fadeUp(idx * 0.08)} className="flex flex-col items-center gap-3 group cursor-default">
+                      <motion.div whileHover={{ scale: 1.12 }} className="relative w-20 h-20 md:w-24 md:h-24 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <img src={cert.image} alt={cert.name} className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]" loading="lazy" />
+                      </motion.div>
+                      <div className="text-center">
+                        <p className="text-white font-bold text-sm group-hover:text-blue-300 transition-colors">{cert.name}</p>
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">{cert.subtitle}</span>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-10 pt-8 border-t border-white/10 text-center">
-                <p className="text-slate-400 max-w-3xl mx-auto leading-relaxed">
-                  GlyphLock's infrastructure is engineered to protect independent creators against power imbalance. Our controls align with industry frameworks to ensure your work operates inside auditable, resilient systems — not as security theater, but as structural protection. Certifications are subject to audit cycles and formal attestation.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Current Security Measures */}
-          <div className="mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">Active Protection Measures</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {currentMeasures.map((measure, idx) => (
-                <div key={idx} className="glass-card rounded-xl border border-[#00E4FF]/20 p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <h3 className="text-lg font-bold text-white">{measure.title}</h3>
-                    <span className="ml-auto text-xs text-green-400 font-semibold">{measure.status}</span>
-                  </div>
-                  <p className="text-sm text-gray-400 leading-relaxed">{measure.description}</p>
+                    </motion.div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Path to Enterprise Certification */}
-          <div className="mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Path to Enterprise Certification</h2>
-            
-            <div className="glass-card rounded-xl border border-orange-500/30 bg-orange-500/5 p-6 mb-8">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-bold text-orange-400 mb-2 text-sm uppercase tracking-wide">Transparency Notice</h3>
-                  <p className="text-sm text-gray-300 leading-relaxed">
-                    The milestones below reflect our compliance roadmap and ongoing audit activities. Official certification documentation is provided only under NDA once audits are formally completed.
+                <div className="mt-10 pt-8 border-t border-white/[0.07] text-center">
+                  <p className="text-slate-400 max-w-3xl mx-auto leading-relaxed text-sm md:text-base">
+                    GlyphLock's infrastructure is engineered to protect independent creators against power imbalance. Our controls align with industry frameworks to ensure your work operates inside auditable, resilient systems — not as security theater, but as structural protection. Certifications are subject to audit cycles and formal attestation.
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
+          </div>
 
-            <div className="space-y-6">
-              {roadmap.map((phase, idx) => (
-                <div key={idx} className="glass-card rounded-xl border border-white/10 p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="flex-shrink-0 mt-1">
-                      {phase.phase.startsWith("Completed") ? (
-                        <CheckCircle className="w-5 h-5 text-green-400" />
-                      ) : phase.phase.startsWith("Current") ? (
-                        <Clock className="w-5 h-5 text-[#00E4FF]" />
-                      ) : (
-                        <Clock className="w-5 h-5 text-gray-500" />
-                      )}
+          {/* ── ACTIVE PROTECTION MEASURES ── */}
+          <div className="mb-16">
+            <motion.h2 {...slideLeft(0)} className="text-3xl font-bold text-white mb-8">Active Protection Measures</motion.h2>
+            <div className="grid md:grid-cols-2 gap-5">
+              {currentMeasures.map((m, idx) => {
+                const c = colorMap[m.color];
+                const Icon = m.icon;
+                return (
+                  <motion.div key={idx} {...fadeUp(idx * 0.1)}
+                    whileHover={{ y: -4, boxShadow: `0 0 40px ${c.glow}` }}
+                    className={`rounded-xl p-6 relative overflow-hidden transition-all duration-300 ${c.border}`}
+                    style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid`, backdropFilter: 'blur(16px)' }}>
+                    <div className={`absolute inset-0 bg-gradient-to-br ${c.bg} opacity-60`} />
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                          <Icon size={18} className={c.icon} />
+                        </div>
+                        <h3 className="text-base font-bold text-white">{m.title}</h3>
+                        <span className="ml-auto flex items-center gap-1.5 text-xs text-green-400 font-semibold">
+                          <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block animate-pulse" />
+                          Active
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-400 leading-relaxed">{m.description}</p>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-white mb-1">{phase.phase}</h3>
-                      <p className="text-sm text-gray-500 mb-4">{phase.period}</p>
-                      <ul className="space-y-2">
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── ROADMAP ── */}
+          <div className="mb-16">
+            <motion.h2 {...slideRight(0)} className="text-3xl font-bold text-white mb-6">Path to Enterprise Certification</motion.h2>
+
+            <motion.div {...fadeUp(0.05)} className="rounded-xl p-5 mb-8 flex items-start gap-3"
+              style={{ background: 'rgba(251,146,60,0.05)', border: '1px solid rgba(251,146,60,0.25)' }}>
+              <AlertCircle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-orange-400 uppercase tracking-wide mb-1">Transparency Notice</p>
+                <p className="text-sm text-slate-300 leading-relaxed">The milestones below reflect our compliance roadmap and ongoing audit activities. Official certification documentation is provided only under NDA once audits are formally completed.</p>
+              </div>
+            </motion.div>
+
+            {/* Timeline */}
+            <div className="relative pl-8 space-y-4">
+              {/* Vertical line */}
+              <div className="absolute left-3.5 top-2 bottom-2 w-px" style={{ background: 'linear-gradient(to bottom, rgba(59,130,246,0.5), rgba(99,102,241,0.3), rgba(255,255,255,0.05))' }} />
+
+              {roadmap.map((phase, idx) => {
+                const isDone = phase.status === "done";
+                const isCurrent = phase.status === "current";
+                return (
+                  <motion.div key={idx} {...fadeUp(idx * 0.08)} className="relative">
+                    {/* Dot */}
+                    <div className={`absolute -left-8 top-5 w-4 h-4 rounded-full flex items-center justify-center border-2 ${isDone ? 'border-green-400 bg-green-400/20' : isCurrent ? 'border-blue-400 bg-blue-400/20' : 'border-white/20 bg-white/5'}`}>
+                      {isDone && <CheckCircle size={10} className="text-green-400" />}
+                      {isCurrent && <motion.div className="w-2 h-2 bg-blue-400 rounded-full" animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />}
+                    </div>
+
+                    <div className="rounded-xl p-5 transition-all duration-300 hover:border-blue-500/30"
+                      style={{ background: isCurrent ? 'rgba(59,130,246,0.06)' : 'rgba(255,255,255,0.025)', border: `1px solid ${isCurrent ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.08)'}`, boxShadow: isCurrent ? '0 0 30px rgba(59,130,246,0.1)' : 'none' }}>
+                      <div className="flex flex-wrap items-center gap-3 mb-3">
+                        <h3 className="text-base font-bold text-white">{phase.phase}</h3>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isDone ? 'bg-green-500/10 text-green-400' : isCurrent ? 'bg-blue-500/10 text-blue-400' : 'bg-white/5 text-slate-500'}`}>
+                          {phase.period}
+                        </span>
+                      </div>
+                      <ul className="grid sm:grid-cols-2 gap-1.5">
                         {phase.items.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-gray-400">
-                            <span className="text-gray-600 mt-1">•</span>
-                            <span>{item}</span>
+                          <li key={i} className="flex items-start gap-2 text-sm text-slate-400">
+                            <span className={`mt-1.5 w-1 h-1 rounded-full flex-shrink-0 ${isDone ? 'bg-green-400' : isCurrent ? 'bg-blue-400' : 'bg-slate-600'}`} />
+                            {item}
                           </li>
                         ))}
                       </ul>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Security Controls Summary */}
+          {/* ── CONTROLS SUMMARY ── */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-white mb-8">Infrastructure Controls Summary</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {controls.map((control, idx) => (
-                <div key={idx} className="glass-card rounded-xl border border-white/10 p-6">
-                  <h3 className="text-lg font-bold text-white mb-4">{control.category}</h3>
-                  <ul className="space-y-2">
-                    {control.items.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-gray-400">
-                        <span className="text-gray-600 mt-1">•</span>
-                        <span>{item}</span>
+            <motion.h2 {...fadeUp(0)} className="text-3xl font-bold text-white mb-8">Infrastructure Controls Summary</motion.h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {controls.map((ctrl, idx) => (
+                <motion.div key={idx} {...fadeUp(idx * 0.07)}
+                  whileHover={{ y: -4, boxShadow: '0 0 30px rgba(59,130,246,0.15)' }}
+                  className="rounded-xl p-5 transition-all duration-300"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)' }}>
+                  <h3 className="text-sm font-bold text-blue-300 uppercase tracking-widest mb-3">{ctrl.category}</h3>
+                  <ul className="space-y-1.5">
+                    {ctrl.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-400">
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
+                        {item}
                       </li>
                     ))}
                   </ul>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
 
-          {/* Security Standards & Compliance Detail */}
+          {/* ── COMPLIANCE FRAMEWORKS ── */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-white mb-8">Compliance Frameworks</h2>
+            <motion.h2 {...slideLeft(0)} className="text-3xl font-bold text-white mb-8">Compliance Frameworks</motion.h2>
             <div className="space-y-4">
-              {[
-                {
-                  id: "iso27001",
-                  title: "ISO 27001",
-                  status: "Aligned",
-                  desc: "Information security management system (ISMS) implementation covering personnel, physical, and logical security controls.",
-                  specs: ["Annex A Controls", "Risk Treatment Plan", "Internal Audit Cycle"]
-                },
-                {
-                  id: "soc2",
-                  title: "SOC 2 Type II",
-                  status: "In Progress",
-                  desc: "Service Organization Control evaluation for Security, Availability, and Confidentiality trust principles.",
-                  specs: ["Control Environment", "Risk Assessment", "Monitoring Activities"]
-                },
-                {
-                  id: "gdpr",
-                  title: "GDPR",
-                  status: "Compliant",
-                  desc: "European Union data protection regulation compliance including data subject rights and processing records.",
-                  specs: ["DPA in Place", "Data Minimization", "Right to Erasure"]
-                },
-                {
-                  id: "pci",
-                  title: "PCI DSS",
-                  status: "Level 4",
-                  desc: "Payment Card Industry Data Security Standard for secure handling of credit card information.",
-                  specs: ["SAQ A Completed", "TLS 1.3 Enforcement", "No Card Data Retention"]
-                }
-              ].map((std, idx) => (
-                <div key={idx} className="glass-card rounded-xl border border-white/10 p-6 hover:border-cyan-500/30 transition-all">
-                  <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+              {frameworks.map((f, idx) => (
+                <motion.div key={idx} {...fadeUp(idx * 0.08)}
+                  whileHover={{ x: 4, boxShadow: '0 0 30px rgba(59,130,246,0.12)' }}
+                  className="rounded-xl p-6 transition-all duration-300"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)' }}>
+                  <div className="flex flex-col md:flex-row md:items-start gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-xl font-bold text-white">{std.title}</h3>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${
-                          std.status === "Compliant" ? "bg-green-500/10 text-green-400" :
-                          std.status === "Aligned" ? "bg-blue-500/10 text-blue-400" :
-                          "bg-amber-500/10 text-amber-400"
-                        }`}>
-                          {std.status}
-                        </span>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-white">{f.title}</h3>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${statusBadge[f.status]}`}>{f.status}</span>
                       </div>
-                      <p className="text-sm text-slate-400 mt-1">{std.desc}</p>
+                      <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
                     </div>
-                    <div className="flex gap-2">
-                       {std.specs.map((spec, i) => (
-                         <span key={i} className="px-2 py-1 rounded bg-white/5 border border-white/5 text-[10px] text-slate-300">
-                           {spec}
-                         </span>
-                       ))}
+                    <div className="flex flex-wrap gap-2">
+                      {f.specs.map((spec, i) => (
+                        <span key={i} className="px-2.5 py-1 rounded-lg text-[11px] text-slate-300 font-medium"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          {spec}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
 
-          {/* Security Inquiries */}
-          <div className="glass-card rounded-2xl border border-[#00E4FF]/30 p-6 md:p-8 lg:p-12 text-center">
-            <Lock className="w-12 h-12 text-[#00E4FF] mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-4">Infrastructure Inquiries</h2>
-            <p className="text-gray-300 leading-relaxed mb-6 max-w-2xl mx-auto">
-              For infrastructure questions, audit requests, or compliance documentation, contact the GlyphLock team. Certification docs provided under NDA once formal audits complete. We're here to protect your creative sovereignty with transparency.
-            </p>
-            
-            <div className="space-y-2 text-sm text-gray-400 mb-8">
-              <p><strong className="text-white">Contact:</strong> glyphlock@gmail.com</p>
-              <p><strong className="text-white">Entity:</strong> GlyphLock LLC</p>
-              <p><strong className="text-white">Status:</strong> Patent Pending (USPTO App. No. 18/584,961)</p>
+          {/* ── CONTACT CTA ── */}
+          <motion.div {...fadeUp(0.1)} className="rounded-2xl overflow-hidden relative text-center"
+            style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(99,102,241,0.06) 100%)', border: '1px solid rgba(59,130,246,0.3)', boxShadow: '0 0 60px rgba(59,130,246,0.15)' }}>
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.6), rgba(99,102,241,0.4), transparent)' }} />
+            <div className="absolute inset-0 pointer-events-none">
+              <motion.div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full blur-[100px]"
+                style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.15), transparent)' }}
+                animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
             </div>
+            <div className="relative z-10 p-8 md:p-14">
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 12, repeat: Infinity, ease: "linear" }} className="inline-flex mb-6">
+                <Lock className="w-12 h-12 text-blue-400" style={{ filter: 'drop-shadow(0 0 15px rgba(59,130,246,0.7))' }} />
+              </motion.div>
+              <h2 className="text-3xl font-black text-white mb-4">Infrastructure Inquiries</h2>
+              <p className="text-slate-300 leading-relaxed mb-6 max-w-2xl mx-auto">
+                For infrastructure questions, audit requests, or compliance documentation, contact the GlyphLock team. Certification docs provided under NDA once formal audits complete. We're here to protect your creative sovereignty with transparency.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-slate-400 mb-8">
+                <span><strong className="text-white">Contact:</strong> glyphlock@gmail.com</span>
+                <span className="hidden sm:block text-white/20">·</span>
+                <span><strong className="text-white">Entity:</strong> GlyphLock LLC</span>
+                <span className="hidden sm:block text-white/20">·</span>
+                <span><strong className="text-white">Status:</strong> Patent Pending (USPTO App. No. 18/584,961)</span>
+              </div>
+              <Link to={createPageUrl("Contact")}>
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(59,130,246,0.5)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="relative overflow-hidden px-10 py-4 rounded-xl font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg, #1E40AF, #3B82F6)' }}>
+                  <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    initial={{ x: '-100%' }} animate={{ x: '100%' }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }} />
+                  <span className="relative flex items-center gap-2">
+                    <Zap size={16} />
+                    Contact Infrastructure Team
+                  </span>
+                </motion.button>
+              </Link>
+            </div>
+          </motion.div>
 
-            <Link to={createPageUrl("Contact")}>
-              <Button className="bg-[#00E4FF] hover:bg-[#0099FF] text-black font-bold px-8 py-6 text-lg rounded-xl">
-                Contact Infrastructure Team
-              </Button>
-            </Link>
-          </div>
         </div>
       </div>
     </>
