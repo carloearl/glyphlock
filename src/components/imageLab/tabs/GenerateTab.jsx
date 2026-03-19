@@ -131,88 +131,49 @@ export default function GenerateTab() {
 
   const generateMutation = useMutation({
     mutationFn: async (params) => {
-      console.log('Generate params:', params);
-      
       if (!expandedPrompt?.expanded_prompt) {
         throw new Error('Expand prompt first before generating');
       }
-      
-      // Use Base44's built-in GenerateImage
-      const finalPrompt = expandedPrompt.expanded_prompt + 
-        (selectedStyle ? `, ${selectedStyle} style` : '');
-      
-      const result = await base44.integrations.Core.GenerateImage({
-        prompt: finalPrompt,
-        existing_image_urls: references.map(r => r.original_image_url).filter(Boolean)
-      });
-      
-      // Create InteractiveImage record
-      const imageData = {
-        name: `Generated: ${prompt.substring(0, 50)}`,
-        fileUrl: result.url,
-        prompt: prompt,
-        style: selectedStyle || 'default',
-        generationSettings: {
-          aspectRatio: params.aspect_ratio,
-          modelStrength: params.model_strength,
-          qualityMode: params.quality_mode,
-          seed: params.seed,
-          guidanceScale: guidanceScale
-        },
-        reference_image_ids: references.map(r => r.reference_image_id),
+      return generateImage({
         prompt_spec_id: promptSpecId,
-        generation_seed: params.seed,
-        final_image_url: result.url,
-        status: 'draft',
-        source: 'generated',
-        ownerEmail: (await base44.auth.me()).email
-      };
-      
-      const interactiveImage = await base44.entities.InteractiveImage.create(imageData);
-      
-      return {
-        image_id: interactiveImage.id,
-        image_url: result.url,
-        seed: params.seed,
-        best_attempt: {
-          validation_scores: {
-            overall: 0.85,
-            realism: 0.85,
-            composition: 0.85
-          }
-        },
-        attempts: [{
-          attempt: 1,
+        expanded_prompt: expandedPrompt.expanded_prompt,
+        original_prompt: prompt,
+        reference_image_urls: references.map(r => r.original_image_url).filter(Boolean),
+        selected_style: selectedStyle,
+        params: {
+          aspect_ratio: params.aspect_ratio,
+          model_strength: params.model_strength,
+          quality_mode: params.quality_mode,
           seed: params.seed,
-          image_url: result.url,
-          status: 'success',
-          validation_scores: {
-            overall: 0.85,
-            realism: 0.85,
-            composition: 0.85
-          }
-        }]
-      };
+          guidance_scale: guidanceScale
+        }
+      });
     },
     onSuccess: (data) => {
-      console.log('Generate success:', data);
       setGeneratedImage(data);
       setHistory(data.attempts || []);
-      if (!seedLocked) {
-        setSeed(data.seed + 1);
-      }
+      if (!seedLocked) setSeed((data.seed || seed) + 1);
       const bestScore = data.best_attempt?.validation_scores?.overall || 0;
-      if (bestScore >= 0.9) {
-        toast.success(`✅ Exceptional quality! Score: ${(bestScore * 100).toFixed(0)}% • ${data.attempts?.length || 1} attempt(s)`);
-      } else if (bestScore >= 0.7) {
-        toast.success(`✅ Generated successfully! Score: ${(bestScore * 100).toFixed(0)}% • ${data.attempts?.length || 1} attempt(s)`);
+      const rlMsg = data.rate_limit_remaining !== undefined ? ` (${data.rate_limit_remaining} left this hour)` : '';
+      if (data.flagged) {
+        toast.warning(`⚠️ Generated — some prompt terms were flagged for review.${rlMsg}`);
+      } else if (bestScore >= 0.9) {
+        toast.success(`✅ Exceptional quality! Score: ${(bestScore * 100).toFixed(0)}%${rlMsg}`);
       } else {
-        toast.warning(`⚠️ Generated with issues. Score: ${(bestScore * 100).toFixed(0)}% • Best of ${data.attempts?.length || 1} attempt(s)`);
+        toast.success(`✅ Generated successfully!${rlMsg}`);
       }
     },
     onError: (error) => {
-      console.error('Generate error:', error);
-      toast.error(`Generation failed: ${error.message || 'Check console'}`);
+      const data = error?.response?.data;
+      const code = data?.code;
+      const msg = data?.error || data?.reason || error.message || 'Unknown error';
+      if (code === 'RATE_LIMITED') {
+        toast.error(`🚦 Rate limit reached. Try again in ${data.resetInMinutes} min.`);
+      } else if (code === 'CONTENT_BLOCKED') {
+        toast.error(`🚫 Content blocked: ${msg}`);
+      } else {
+        toast.error(`Generation failed: ${msg}`);
+      }
     }
   });
 
