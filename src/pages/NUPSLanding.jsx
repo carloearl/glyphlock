@@ -284,7 +284,7 @@ export default function NUPSLanding() {
             style={{ boxShadow: '0 0 0 1px rgba(139,92,246,0.4), 0 0 60px rgba(124,58,237,0.4)', borderRadius: '14px' }} />
 
           <button
-            onClick={() => navigate("/NUPSLogin")}
+            onClick={() => navigate("/NUPSGateway")}
             className="relative h-14 px-12 text-lg font-black rounded-2xl flex items-center gap-2 transition-all duration-200 active:scale-95 group-hover:scale-[1.02]"
             style={{
               background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
