@@ -131,12 +131,11 @@ export default function GenerateTab() {
 
   const generateMutation = useMutation({
     mutationFn: async (params) => {
-      if (!expandedPrompt?.expanded_prompt) {
-        throw new Error('Expand prompt first before generating');
-      }
+      // Use expanded prompt if available, otherwise fall back to raw prompt
+      const finalExpandedPrompt = expandedPrompt?.expanded_prompt || prompt;
       return generateImage({
-        prompt_spec_id: promptSpecId,
-        expanded_prompt: expandedPrompt.expanded_prompt,
+        prompt_spec_id: promptSpecId || null,
+        expanded_prompt: finalExpandedPrompt,
         original_prompt: prompt,
         reference_image_urls: references.map(r => r.original_image_url).filter(Boolean),
         selected_style: selectedStyle,
