@@ -79,6 +79,17 @@ const ROLE_CARDS = [
 
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
 
+const TEST_ROLES = [
+  { role: "PLATFORM_ADMIN", label: "Platform Admin", color: "text-violet-400", dest: "NUPSOwner" },
+  { role: "VENUE_OWNER", label: "Venue Owner", color: "text-purple-400", dest: "NUPSOwner" },
+  { role: "VENUE_MANAGER", label: "Manager", color: "text-blue-400", dest: "NUPSOwner" },
+  { role: "BARTENDER", label: "Bartender", color: "text-cyan-400", dest: "NUPSStaff" },
+  { role: "DJ", label: "DJ", color: "text-pink-400", dest: "NUPSStaff" },
+  { role: "SECURITY", label: "Security", color: "text-orange-400", dest: "NUPSStaff" },
+  { role: "PERFORMER", label: "Performer", color: "text-rose-400", dest: "EntertainerCheckIn" },
+  { role: "DEMO", label: "Demo / Sandbox", color: "text-emerald-400", dest: "NUPSSandbox" },
+];
+
 export default function NUPSGateway() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -86,6 +97,7 @@ export default function NUPSGateway() {
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
   const [deniedCard, setDeniedCard] = useState(null);
+  const [testingRole, setTestingRole] = useState(false);
 
   useEffect(() => {
     (async () => {
