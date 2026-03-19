@@ -824,68 +824,88 @@ export default function GlyphBotPage() {
           )}
 
           {/* Chat Area */}
-          <div className="flex-1 flex min-h-0 overflow-hidden">
-            {/* Audit Panel */}
-            {showAuditPanel && currentUser && (
-              <aside className="w-80 flex flex-col border-r border-white/5 bg-slate-950/50 overflow-hidden" style={{ zIndex: 50, order: -1 }}>
-                <div className="p-3 border-b border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs">
-                    <Shield className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-sm font-semibold text-white">Audits</span>
-                  </div>
-                  <button
-                    onClick={() => setShowAuditHistory(!showAuditHistory)}
-                    style={{ touchAction: 'manipulation', minHeight: '32px' }}
-                    className={`px-2 py-1 rounded text-[10px] font-medium transition-all ${
-                      showAuditHistory ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-500 hover:text-white'
-                    }`}
-                  >
-                    History
-                  </button>
-                </div>
+          <div className="flex-1 flex min-h-0 overflow-hidden relative">
 
-                {showAuditHistory ? (
-                  <div className="flex-1 overflow-hidden flex flex-col">
-                    {/* Metrics Dashboard */}
-                    <div className="p-3 border-b border-slate-800/50 max-h-[40%] overflow-y-auto">
-                      <UI.AuditMetricsDashboard audits={audits} />
+            {/* AUDIT PANEL — Desktop sidebar + Mobile fullscreen overlay */}
+            {showAuditPanel && currentUser && (
+              <>
+                {/* Mobile overlay backdrop */}
+                <div 
+                  className="fixed inset-0 bg-black/60 z-40 md:hidden" 
+                  onClick={() => setShowAuditPanel(false)} 
+                />
+                {/* Panel */}
+                <aside className="
+                  fixed inset-0 z-50 flex flex-col bg-slate-950 overflow-hidden
+                  md:relative md:inset-auto md:z-auto md:w-80 md:border-r md:border-white/5 md:bg-slate-950/50
+                " style={{ maxWidth: '100vw' }}>
+                  <div className="p-3 border-b border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-sm font-semibold text-white">Security Audit Engine</span>
                     </div>
-                    <UI.AuditHistoryPanel
-                      audits={audits}
-                      isLoading={auditsLoading}
-                      onViewAudit={handleViewAudit}
-                      onDeleteAudit={deleteAudit}
-                      onArchiveAudit={archiveAudit}
-                      onLoadArchivedAudits={loadArchivedAudits}
-                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowAuditHistory(!showAuditHistory)}
+                        style={{ touchAction: 'manipulation', minHeight: '32px' }}
+                        className={`px-2 py-1 rounded text-[10px] font-medium transition-all ${
+                          showAuditHistory ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-500 hover:text-white'
+                        }`}
+                      >
+                        History
+                      </button>
+                      <button
+                        onClick={() => setShowAuditPanel(false)}
+                        style={{ touchAction: 'manipulation', minHeight: '32px', minWidth: '32px' }}
+                        className="md:hidden flex items-center justify-center rounded text-slate-400 hover:text-white"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <div className="flex-1 overflow-y-auto p-4">
-                    <UI.AuditPanel
-                      onStartAudit={handleStartAudit}
-                      isProcessing={isProcessingAudit}
-                    />
-                  </div>
-                )}
-              </aside>
+
+                  {showAuditHistory ? (
+                    <div className="flex-1 overflow-hidden flex flex-col">
+                      <div className="p-3 border-b border-slate-800/50 max-h-[40%] overflow-y-auto">
+                        <UI.AuditMetricsDashboard audits={audits} />
+                      </div>
+                      <UI.AuditHistoryPanel
+                        audits={audits}
+                        isLoading={auditsLoading}
+                        onViewAudit={handleViewAudit}
+                        onDeleteAudit={deleteAudit}
+                        onArchiveAudit={archiveAudit}
+                        onLoadArchivedAudits={loadArchivedAudits}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-y-auto p-4">
+                      <UI.AuditPanel
+                        onStartAudit={(data) => { handleStartAudit(data); setShowAuditPanel(false); }}
+                        isProcessing={isProcessingAudit}
+                      />
+                    </div>
+                  )}
+                </aside>
+              </>
             )}
 
             {/* Messages */}
             <div 
-                    ref={chatContainerRef}
-                    className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-4"
-                  >
-                    {messages.filter(msg => msg && msg.content).map((msg, idx) => {
-                      const msgId = msg.id || `msg-${idx}`;
-                      return (
-                        <ChatMessageMemo 
-                          key={msgId}
-                          msg={msg}
-                          isAssistant={msg.role === 'assistant'}
-                          onReplay={handleReplayWithSettings}
-                        />
-                      );
-                    })}
+              ref={chatContainerRef}
+              className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-4"
+            >
+              {messages.filter(msg => msg && msg.content).map((msg, idx) => {
+                const msgId = msg.id || `msg-${idx}`;
+                return (
+                  <ChatMessageMemo 
+                    key={msgId}
+                    msg={msg}
+                    isAssistant={msg.role === 'assistant'}
+                    onReplay={handleReplayWithSettings}
+                  />
+                );
+              })}
 
               {isSending && (
                 <div className="flex items-center gap-3 px-4 py-3 mx-auto max-w-[80%]">
@@ -913,25 +933,45 @@ export default function GlyphBotPage() {
               />
             )}
 
-            {/* Chat History Panel */}
+            {/* CHAT HISTORY PANEL — Desktop sidebar + Mobile fullscreen overlay */}
             {showHistoryPanel && currentUser && (
-              <aside className="w-64 flex-col border-l border-white/5 bg-slate-950/50 overflow-hidden hidden md:flex relative" style={{ zIndex: 30 }}>
-                <UI.ChatHistoryPanel
-                  currentChatId={currentChatId}
-                  savedChats={savedChats}
-                  isLoading={persistenceLoading}
-                  onSave={handleSaveChat}
-                  onArchive={() => currentChatId ? archiveChat(currentChatId) : toast.error('No active chat to archive')}
-                  onLoadChat={handleLoadChat}
-                  onNewChat={handleNewChat}
-                  onGetArchived={getArchivedChats}
-                  onUnarchive={unarchiveChat}
-                  onDelete={deleteChat}
-                  hasMessages={messages.length > 1}
-                  messages={messages}
-                  onImportChat={handleImportChat}
+              <>
+                {/* Mobile overlay backdrop */}
+                <div 
+                  className="fixed inset-0 bg-black/60 z-40 md:hidden" 
+                  onClick={() => setShowHistoryPanel(false)} 
                 />
-              </aside>
+                <aside className="
+                  fixed inset-0 z-50 flex flex-col bg-slate-950 overflow-hidden
+                  md:relative md:inset-auto md:z-30 md:w-64 md:border-l md:border-white/5 md:bg-slate-950/50
+                ">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 md:hidden">
+                    <span className="text-sm font-semibold text-white">Chat History</span>
+                    <button
+                      onClick={() => setShowHistoryPanel(false)}
+                      style={{ touchAction: 'manipulation', minHeight: '32px', minWidth: '32px' }}
+                      className="flex items-center justify-center rounded text-slate-400 hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <UI.ChatHistoryPanel
+                    currentChatId={currentChatId}
+                    savedChats={savedChats}
+                    isLoading={persistenceLoading}
+                    onSave={handleSaveChat}
+                    onArchive={() => currentChatId ? archiveChat(currentChatId) : toast.error('No active chat to archive')}
+                    onLoadChat={(id) => { handleLoadChat(id); setShowHistoryPanel(false); }}
+                    onNewChat={() => { handleNewChat(); setShowHistoryPanel(false); }}
+                    onGetArchived={getArchivedChats}
+                    onUnarchive={unarchiveChat}
+                    onDelete={deleteChat}
+                    hasMessages={messages.length > 1}
+                    messages={messages}
+                    onImportChat={handleImportChat}
+                  />
+                </aside>
+              </>
             )}
 
             {/* Telemetry Sidebar — only on xl screens, compact */}
