@@ -1,81 +1,38 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import HeroSection from '@/components/home/HeroSection';
 import HeroContent from '@/components/home/HeroContent';
-import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
-import ServicesGrid from '@/components/home/ServicesGrid';
-import CTASection from '@/components/home/CTASection';
-import TechnologyMarquee from '@/components/TechnologyMarquee';
 import CountdownPill from '@/components/marketing/CountdownPill';
 import SEOHead from '@/components/SEOHead';
-import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 
+const HomeDreamTeamCTA = lazy(() => import('@/components/home/HomeDreamTeamCTA'));
+const ServicesGrid = lazy(() => import('@/components/home/ServicesGrid'));
+const TechnologyMarquee = lazy(() => import('@/components/TechnologyMarquee'));
+const PlatformCapabilities = lazy(() => import('@/components/home/PlatformCapabilities'));
+const CTASection = lazy(() => import('@/components/home/CTASection'));
 
-const useScrollEffect = (sectionRef) => {
-  const [style, setStyle] = useState({ transform: 'perspective(1000px)', opacity: 1 });
+const SectionLoader = () => (
+  <div className="w-full py-20 flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-400 rounded-full animate-spin" />
+  </div>
+);
 
-  useEffect(() => {
-    // Disable scroll effects on mobile for performance
-    const isMobile = window.innerWidth < 768;
-    if (isMobile) {
-      return;
-    }
-
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          if (sectionRef.current) {
-            const { top, height } = sectionRef.current.getBoundingClientRect();
-            const screenHeight = window.innerHeight;
-            const elementCenter = top + height / 2;
-            const screenCenter = screenHeight / 2;
-            const distance = screenCenter - elementCenter;
-            const factor = distance / (screenCenter * 1.5);
-
-            let rotation = 0;
-            let scale = 1;
-            let opacity = 1;
-
-            if (factor < 0) {
-              const progress = Math.max(0, Math.min(1, (1 + factor) * 1.5));
-              rotation = (1 - progress) * 10;
-              scale = 0.95 + (progress * 0.05);
-              opacity = Math.max(0.5, progress);
-            } else if (factor > 0) {
-              const progress = Math.min(1, factor * 1.5);
-              rotation = -progress * 10;
-              scale = 1 - (progress * 0.05);
-              opacity = Math.max(0.5, 1 - progress);
-            }
-
-            setStyle({
-              transform: `perspective(1000px) rotateX(${rotation}deg) scale(${scale})`,
-              opacity: opacity,
-            });
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [sectionRef]);
-
-  return style;
-};
 
 const ScrollSection = ({ children, className = "" }) => {
   const sectionRef = useRef(null);
-  const style = useScrollEffect(sectionRef);
   const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    return (
+      <div className={`w-full py-16 md:py-20 lg:py-24 ${className}`}>
+        {children}
+      </div>
+    );
+  }
   
   return (
     <div ref={sectionRef} className={`w-full py-16 md:py-20 lg:py-24 ${className}`}>
-      <div style={isMobile ? {} : style} className={isMobile ? '' : 'transition-all duration-500 ease-out'}>
+      <div className="transition-all duration-500 ease-out" style={{ transform: 'perspective(1000px)', opacity: 1 }}>
         {children}
       </div>
     </div>
@@ -184,27 +141,37 @@ export default function Home() {
         </ScrollSection>
 
         {/* Dream Team CTA */}
-        <ScrollSection className="container-responsive">
-          <HomeDreamTeamCTA />
-        </ScrollSection>
+        <Suspense fallback={<SectionLoader />}>
+          <ScrollSection className="container-responsive">
+            <HomeDreamTeamCTA />
+          </ScrollSection>
+        </Suspense>
 
         {/* Services Overview */}
-        <ScrollSection className="container-responsive">
-          <ServicesGrid />
-        </ScrollSection>
+        <Suspense fallback={<SectionLoader />}>
+          <ScrollSection className="container-responsive">
+            <ServicesGrid />
+          </ScrollSection>
+        </Suspense>
 
         {/* Technology Partners */}
-        <section className="w-full py-8">
-          <TechnologyMarquee />
-        </section>
+        <Suspense fallback={<SectionLoader />}>
+          <section className="w-full py-8">
+            <TechnologyMarquee />
+          </section>
+        </Suspense>
 
         {/* Platform Capabilities */}
-        <PlatformCapabilities />
+        <Suspense fallback={<SectionLoader />}>
+          <PlatformCapabilities />
+        </Suspense>
 
         {/* Final Call to Action */}
-        <ScrollSection className="container-responsive">
-          <CTASection />
-        </ScrollSection>
+        <Suspense fallback={<SectionLoader />}>
+          <ScrollSection className="container-responsive">
+            <CTASection />
+          </ScrollSection>
+        </Suspense>
       </main>
     </>
   );
