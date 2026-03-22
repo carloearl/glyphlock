@@ -185,13 +185,13 @@ Deno.serve(async (req) => {
         if (paymentIntent.metadata?.order_type === 'glyphbucks_sale') {
           const order_number = paymentIntent.metadata?.order_number;
           
-          // Find associated DreamPalaceOrder record if exists
-          const orders = await base44.asServiceRole.entities.DreamPalaceOrder.filter({
+          // Find associated GlyphBucksOrder record if exists
+          const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
             order_number
           }, null, 1);
 
           if (orders.length > 0) {
-            await base44.asServiceRole.entities.DreamPalaceOrder.update(orders[0].id, {
+            await base44.asServiceRole.entities.GlyphBucksOrder.update(orders[0].id, {
               status: 'signed' // Payment confirmed — ready for fulfillment
             });
           }
@@ -226,12 +226,12 @@ Deno.serve(async (req) => {
           const failure_reason = paymentIntent.last_payment_error?.message || 'Unknown error';
           
           // Update order status to FAILED
-          const orders = await base44.asServiceRole.entities.DreamPalaceOrder.filter({
+          const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
             order_number
           }, null, 1);
 
           if (orders.length > 0) {
-            await base44.asServiceRole.entities.DreamPalaceOrder.update(orders[0].id, {
+            await base44.asServiceRole.entities.GlyphBucksOrder.update(orders[0].id, {
               status: 'draft' // Reset to draft — payment failed, retry needed
             });
           }
@@ -267,12 +267,12 @@ Deno.serve(async (req) => {
           const order_number = paymentIntent.metadata?.order_number;
           
           // Mark order as CANCELED
-          const orders = await base44.asServiceRole.entities.DreamPalaceOrder.filter({
+          const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
             order_number
           }, null, 1);
 
           if (orders.length > 0) {
-            await base44.asServiceRole.entities.DreamPalaceOrder.update(orders[0].id, {
+            await base44.asServiceRole.entities.GlyphBucksOrder.update(orders[0].id, {
               status: 'archived' // Payment canceled — order voided
             });
           }
