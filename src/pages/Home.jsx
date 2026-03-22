@@ -1,15 +1,14 @@
-import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import HeroSection from '@/components/home/HeroSection';
 import HeroContent from '@/components/home/HeroContent';
 import CountdownPill from '@/components/marketing/CountdownPill';
 import SEOHead from '@/components/SEOHead';
-
-const HomeDreamTeamCTA = lazy(() => import('@/components/home/HomeDreamTeamCTA'));
-const ServicesGrid = lazy(() => import('@/components/home/ServicesGrid'));
-const TechnologyMarquee = lazy(() => import('@/components/TechnologyMarquee'));
-const PlatformCapabilities = lazy(() => import('@/components/home/PlatformCapabilities'));
-const CTASection = lazy(() => import('@/components/home/CTASection'));
+import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
+import ServicesGrid from '@/components/home/ServicesGrid';
+import TechnologyMarquee from '@/components/TechnologyMarquee';
+import PlatformCapabilities from '@/components/home/PlatformCapabilities';
+import CTASection from '@/components/home/CTASection';
 
 const SectionLoader = () => (
   <div className="w-full py-20 flex items-center justify-center">
@@ -141,37 +140,27 @@ export default function Home() {
         </ScrollSection>
 
         {/* Dream Team CTA */}
-        <Suspense fallback={<SectionLoader />}>
-          <ScrollSection className="container-responsive">
-            <HomeDreamTeamCTA />
-          </ScrollSection>
-        </Suspense>
+        <ScrollSection className="container-responsive">
+          <HomeDreamTeamCTA />
+        </ScrollSection>
 
         {/* Services Overview */}
-        <Suspense fallback={<SectionLoader />}>
-          <ScrollSection className="container-responsive">
-            <ServicesGrid />
-          </ScrollSection>
-        </Suspense>
+        <ScrollSection className="container-responsive">
+          <ServicesGrid />
+        </ScrollSection>
 
         {/* Technology Partners */}
-        <Suspense fallback={<SectionLoader />}>
-          <section className="w-full py-8">
-            <TechnologyMarquee />
-          </section>
-        </Suspense>
+        <section className="w-full py-8">
+          <TechnologyMarquee />
+        </section>
 
         {/* Platform Capabilities */}
-        <Suspense fallback={<SectionLoader />}>
-          <PlatformCapabilities />
-        </Suspense>
+        <PlatformCapabilities />
 
         {/* Final Call to Action */}
-        <Suspense fallback={<SectionLoader />}>
-          <ScrollSection className="container-responsive">
-            <CTASection />
-          </ScrollSection>
-        </Suspense>
+        <ScrollSection className="container-responsive">
+          <CTASection />
+        </ScrollSection>
       </main>
     </>
   );
