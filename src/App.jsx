@@ -23,6 +23,7 @@ import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
 import NUPSDemoManager from './pages/NUPSDemoManager';
 import NUPSMISReport from './pages/NUPSMISReport';
 import ImageShare from './pages/ImageShare';
+import GlyphBucksHub from './pages/GlyphBucksHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -96,6 +97,7 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
+        <Route path="/GlyphBucksHub" element={<GlyphBucksHub />} />
         <Route path="/view/:assetId" element={<ImageShare />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>

@@ -5,21 +5,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DollarSign, Scan, Search, Shield, FileText, Settings, Camera } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
 
-import DreamDollarPOS from '@/components/nups/dreamdollar/DreamDollarPOS';
-import BillRedemptionScanner from '@/components/nups/dreamdollar/BillRedemptionScanner';
-import TransactionSearch from '@/components/nups/dreamdollar/TransactionSearch';
-import DreamDollarReceiptEngine from '@/components/nups/pos/DreamDollarReceiptEngine';
+import GlyphBucksPOS from '@/components/nups/glyphbucks/GlyphBucksPOS';
+import BillRedemptionScanner from '@/components/nups/glyphbucks/BillRedemptionScanner';
+import TransactionSearch from '@/components/nups/glyphbucks/TransactionSearch';
+import GlyphBucksReceiptEngine from '@/components/nups/pos/GlyphBucksReceiptEngine';
 import DemoModeController from '@/components/nups/pos/DemoModeController';
 import FraudAnalyticsDashboard from '@/components/nups/FraudAnalyticsDashboard';
 import IDScannerCamera from '@/components/nups/IDScannerCamera';
 import VerificationCameraCapture from '@/components/nups/VerificationCameraCapture';
 import ClubCurrencyPressView from '@/components/nups/press/ClubCurrencyPressView';
 
-/**
- * Dream Dollar Hub - Unified transaction, verification, and compliance module.
- * Integrates into existing NUPS platform.
- */
-export default function DreamDollarHub() {
+export default function GlyphBucksHub() {
   const [user, setUser] = useState(null);
   const [venueId, setVenueId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,9 +29,6 @@ export default function DreamDollarHub() {
       try {
         const userData = await base44.auth.me();
         setUser(userData);
-        
-        // Get venue from user metadata or assignments
-        // TODO: Implement venue selection logic
         setVenueId('default_venue');
       } catch (err) {
         console.error('Auth error:', err);
@@ -46,7 +39,6 @@ export default function DreamDollarHub() {
     })();
   }, []);
 
-  // Fetch entertainers for redemption
   const { data: entertainers = [] } = useQuery({
     queryKey: ['entertainers', venueId],
     queryFn: async () => {
@@ -73,7 +65,7 @@ export default function DreamDollarHub() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-2">Loading Dream Dollar Hub...</div>
+          <div className="text-2xl font-bold mb-2">Loading GlyphBucks Hub...</div>
           <div className="text-gray-400">Initializing secure environment</div>
         </div>
       </div>
@@ -86,7 +78,7 @@ export default function DreamDollarHub() {
         <div className="text-center">
           <Shield className="w-16 h-16 mx-auto mb-4 text-red-400" />
           <div className="text-2xl font-bold mb-2">Authentication Required</div>
-          <div className="text-gray-400">Please log in to access Dream Dollar operations</div>
+          <div className="text-gray-400">Please log in to access GlyphBucks operations</div>
         </div>
       </div>
     );
@@ -95,18 +87,17 @@ export default function DreamDollarHub() {
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8" style={{ background: 'transparent' }}>
       <SEOHead
-        title="Dream Dollar Hub | Transaction Management & Compliance"
-        description="Unified Dream Dollar transaction management, verification, and compliance module. Sales, press, redemption, ID scanning, and fraud monitoring."
-        keywords="Dream Dollar, currency operations, transaction management, compliance module, ID verification, fraud monitoring, club currency"
+        title="GlyphBucks Hub | Transaction Management & Compliance"
+        description="Unified GlyphBucks transaction management, verification, and compliance module. Sales, press, redemption, ID scanning, and fraud monitoring."
+        keywords="GlyphBucks, club currency, currency operations, transaction management, compliance module, ID verification, fraud monitoring"
         noIndex={true}
       />
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <DollarSign className="w-8 h-8 text-cyan-400" />
-              Dream Dollar Hub
+              GlyphBucks Hub
             </h1>
             <p className="text-gray-400 mt-1">
               Transaction Management & Compliance Module
@@ -119,7 +110,6 @@ export default function DreamDollarHub() {
           )}
         </div>
 
-        {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-2">
             <TabsTrigger value="sales" className="flex items-center gap-2">
@@ -156,18 +146,16 @@ export default function DreamDollarHub() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Sales Tab */}
           <TabsContent value="sales" className="space-y-4">
-            <DreamDollarPOS
+            <GlyphBucksPOS
               venue_id={venueId}
               onSaleComplete={handleSaleComplete}
             />
           </TabsContent>
 
-          {/* Receipt Tab */}
           <TabsContent value="receipt">
             {selectedTransaction && selectedBatch ? (
-              <DreamDollarReceiptEngine
+              <GlyphBucksReceiptEngine
                 transaction={{ order_number: selectedBatch.batch_id, ...selectedBatch }}
                 batch={selectedBatch}
                 onPrint={() => console.log('Receipt printed')}
@@ -181,12 +169,10 @@ export default function DreamDollarHub() {
             )}
           </TabsContent>
 
-          {/* Club Currency Press Tab */}
           <TabsContent value="press">
             <ClubCurrencyPressView />
           </TabsContent>
 
-          {/* ID Scanner Tab */}
           <TabsContent value="id-scan">
             <IDScannerCamera
               venue_id={venueId}
@@ -197,7 +183,6 @@ export default function DreamDollarHub() {
             />
           </TabsContent>
 
-          {/* Verification Capture Tab */}
           <TabsContent value="verification">
             {selectedTransaction ? (
               <VerificationCameraCapture
@@ -216,7 +201,6 @@ export default function DreamDollarHub() {
             )}
           </TabsContent>
 
-          {/* Redemption Tab */}
           <TabsContent value="redemption">
             <div className="space-y-4">
               {entertainers.length > 0 ? (
@@ -239,18 +223,15 @@ export default function DreamDollarHub() {
             </div>
           </TabsContent>
 
-          {/* Search Tab */}
           <TabsContent value="search">
             <TransactionSearch venue_id={venueId} />
           </TabsContent>
 
-          {/* Fraud Analytics Tab */}
           <TabsContent value="fraud">
             <FraudAnalyticsDashboard venue_id={venueId} />
           </TabsContent>
         </Tabs>
 
-        {/* Demo Mode Control (Admin Only) */}
         {user?.role === 'admin' && (
           <div className="mt-8">
             <DemoModeController onModeChange={handleDemoModeChange} />
