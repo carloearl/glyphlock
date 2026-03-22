@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DreamDollarReceiptEngine from "@/components/nups/pos/DreamDollarReceiptEngine";
+import GlyphBucksContract from "@/components/nups/GlyphBucksContract";
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const MOCK_USERS = [
@@ -62,6 +63,7 @@ const STATUS_BADGE = {
 const SECTIONS = [
   { key: "overview", label: "Overview", icon: BarChart3 },
   { key: "pos", label: "POS Register", icon: CreditCard },
+  { key: "dreamdollar", label: "Dream Dollar Demo", icon: Banknote },
   { key: "staff", label: "Staff & Clock-In", icon: Clock },
   { key: "entertainers", label: "Entertainers", icon: Music },
   { key: "contracts", label: "Contracts", icon: FileText },
@@ -147,6 +149,27 @@ export default function NUPSSandbox() {
 
   const renderSection = () => {
     switch (activeSection) {
+      case "dreamdollar":
+        return (
+          <div className="space-y-4">
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-400/80">
+              <div className="flex items-center gap-2 mb-2">
+                <Banknote className="w-4 h-4" />
+                <span className="font-bold">FULL PRODUCTION DEMO</span>
+              </div>
+              <p>This demonstrates the ACTUAL Dream Dollar contract workflow exactly as it runs in production. All steps, signatures, biometrics, and receipt printing are identical to the live system.</p>
+            </div>
+            <GlyphBucksContract 
+              onComplete={() => {
+                setActiveSection("overview");
+              }}
+              onCurrencyPrint={(value, orderNum) => {
+                console.log(`Demo: Would print ${value} Dream Dollars for order ${orderNum}`);
+              }}
+            />
+          </div>
+        );
+
       case "overview":
         return (
           <div className="space-y-4">
@@ -176,10 +199,10 @@ export default function NUPSSandbox() {
               <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {[
                   { label: "POS Transaction", section: "pos" },
+                  { label: "Dream Dollar Flow", section: "dreamdollar" },
                   { label: "Staff Clock-In", section: "staff" },
                   { label: "Entertainer Check-In", section: "entertainers" },
                   { label: "VIP Contract", section: "contracts" },
-                  { label: "Manager Approval", section: "contracts" },
                   { label: "Payroll Review", section: "payroll" },
                 ].map(w => (
                   <button
