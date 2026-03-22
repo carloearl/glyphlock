@@ -1,65 +1,38 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer, Download } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
 
 /**
  * Professional itemized receipt engine for GlyphBucks transactions.
  * Matches printed layout exactly — dynamic height expansion for variable item counts.
  */
-export default function GlyphBucksReceiptEngine({ transaction, batch, onPrint }) {
+export default function GlyphBucksReceiptEngine({ transaction, batch, bills, currentUser, onPrint }) {
   const receiptRef = React.useRef();
+  const barcodeRef = useRef(null);
+
+  useEffect(() => {
+    if (barcodeRef.current && transaction?.order_number) {
+      try {
+        if (typeof window !== 'undefined' && window.JsBarcode) {
+          window.JsBarcode(barcodeRef.current, transaction.order_number, {
+            format: 'CODE128',
+            width: 1.5,
+            height: 40,
+            displayValue: true,
+            fontSize: 10,
+            margin: 4
+          });
+        }
+      } catch (err) {
+        console.error('Barcode generation failed:', err);
+      }
+    }
+  }, [transaction?.order_number]);
 
   const handlePrint = () => {
-    const printWindow = window.open('', '', 'height=800,width=600');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Dream Palace Receipt - ${transaction?.order_number || 'N/A'}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-              font-family: 'Courier New', monospace;
-              font-size: 12px;
-              padding: 20px;
-              background: white;
-              color: black;
-            }
-            .receipt {
-              max-width: 380px;
-              margin: 0 auto;
-              border: 2px solid #000;
-              padding: 20px;
-            }
-            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #000; padding-bottom: 15px; }
-            .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
-            .header p { font-size: 11px; margin: 2px 0; }
-            .section { margin: 15px 0; }
-            .section-title { font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 8px; }
-            .row { display: flex; justify-content: space-between; margin: 5px 0; }
-            .row.bold { font-weight: bold; }
-            .items { margin: 10px 0; }
-            .item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc; }
-            .totals { border-top: 2px solid #000; padding-top: 10px; margin-top: 10px; }
-            .barcode { text-align: center; margin: 20px 0; padding: 15px; border: 2px solid #000; }
-            .barcode-label { font-size: 10px; margin-bottom: 5px; }
-            .barcode-value { font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold; letter-spacing: 2px; }
-            .footer { margin-top: 20px; padding-top: 15px; border-top: 2px dashed #000; text-align: center; font-size: 10px; }
-            @media print {
-              body { padding: 0; }
-              .no-print { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          ${receiptRef.current?.innerHTML || ''}
-          <div class="no-print" style="text-align: center; margin-top: 20px;">
-            <button onclick="window.print()" style="padding: 10px 20px; font-size: 14px; cursor: pointer;">Print Receipt</button>
-          </div>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
+    window.print();
     onPrint?.();
   };
 
@@ -67,119 +40,182 @@ export default function GlyphBucksReceiptEngine({ transaction, batch, onPrint })
     return <div className="text-center py-8 text-gray-400">No transaction data available</div>;
   }
 
+  const cashierName = currentUser?.full_name || transaction.created_by?.split('@')[0] || `Staff ID: ${transaction.created_by || 'UNKNOWN'}`;
+  
+  const qrData = JSON.stringify({
+    type: 'GLYPHLOCK_RECEIPT',
+    uuid: transaction.order_number,
+    batch_id: batch.batch_id,
+    timestamp: transaction.created_date,
+    lookup: `glyphlock.base44.app/ContractLookup?id=${transaction.order_number}`
+  });
+
   return (
     <div className="space-y-4">
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          .receipt-container, .receipt-container * { visibility: visible; }
+          .receipt-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            max-width: none !important;
+            background: white !important;
+            color: black !important;
+            padding: 20px !important;
+            font-family: Arial, sans-serif !important;
+          }
+          .no-print { display: none !important; }
+          .no-screen { display: block !important; }
+        }
+        @media screen {
+          .no-screen { display: none; }
+        }
+      `}</style>
+
       {/* Receipt Preview */}
-      <div className="bg-white text-black p-6 rounded-lg shadow-lg max-w-md mx-auto" ref={receiptRef}>
+      <div className="receipt-container bg-white text-black p-6 rounded-lg shadow-lg max-w-md mx-auto" ref={receiptRef}>
         <div className="receipt">
           {/* Header */}
-          <div className="header">
-            <h1>DREAM PALACE</h1>
-            <p>123 Entertainment Blvd</p>
-            <p>Las Vegas, NV 89101</p>
-            <p>Tel: (702) 555-0100</p>
-            <p style={{ marginTop: '10px', fontWeight: 'bold' }}>GLYPHBUCKS PURCHASE RECEIPT</p>
+          <div className="header text-center mb-5 pb-4 border-b-2 border-dashed border-black">
+            <h1 className="text-xl font-bold mb-1">DREAM PALACE</h1>
+            <p className="text-xs">815 N Scottsdale Rd</p>
+            <p className="text-xs">Tempe, AZ 85281</p>
+            <p className="text-xs">Tel: (602) 536-0372</p>
+            <p className="mt-3 font-bold text-sm">GLYPHBUCKS PURCHASE RECEIPT</p>
           </div>
 
           {/* Transaction Info */}
-          <div className="section">
-            <div className="section-title">TRANSACTION DETAILS</div>
-            <div className="row">
+          <div className="section mb-4">
+            <div className="section-title font-bold border-b border-black pb-1 mb-2">TRANSACTION DETAILS</div>
+            <div className="row flex justify-between my-1 text-xs">
               <span>Receipt #:</span>
-              <span>{transaction.order_number}</span>
+              <span className="font-mono">{transaction.order_number}</span>
             </div>
-            <div className="row">
+            <div className="row flex justify-between my-1 text-xs">
               <span>Date:</span>
               <span>{new Date(transaction.created_date).toLocaleString()}</span>
             </div>
-            <div className="row">
-              <span>Terminal:</span>
-              <span>POS-01</span>
-            </div>
-            <div className="row">
+            <div className="row flex justify-between my-1 text-xs">
               <span>Cashier:</span>
-              <span>{transaction.created_by?.split('@')[0] || 'Staff'}</span>
+              <span className="font-semibold">{cashierName}</span>
             </div>
             {batch.approval_code && (
-              <div className="row">
+              <div className="row flex justify-between my-1 text-xs">
                 <span>Approval Code:</span>
-                <span>{batch.approval_code}</span>
+                <span className="font-mono">{batch.approval_code}</span>
               </div>
             )}
           </div>
 
           {/* Customer Info */}
-          <div className="section">
-            <div className="section-title">CUSTOMER</div>
-            <div className="row">
+          <div className="section mb-4">
+            <div className="section-title font-bold border-b border-black pb-1 mb-2">CUSTOMER</div>
+            <div className="row flex justify-between my-1 text-xs">
               <span>Name:</span>
-              <span>{transaction.customer_name}</span>
+              <span className="font-semibold">{transaction.customer_name}</span>
             </div>
           </div>
 
           {/* Itemized GlyphBucks */}
-          <div className="section">
-            <div className="section-title">GLYPHBUCKS PURCHASED</div>
+          <div className="section mb-4">
+            <div className="section-title font-bold border-b border-black pb-1 mb-2">GLYPHBUCKS PURCHASED</div>
             <div className="items">
               {batch.denominations?.map((item, idx) => (
-                <div key={idx} className="item">
-                  <span>{item.quantity}x ${item.denomination} GlyphBucks{item.quantity > 1 ? '' : ''}</span>
-                  <span>${item.total_value.toFixed(2)}</span>
+                <div key={idx} className="item flex justify-between py-1 border-b border-dotted border-gray-300 text-xs">
+                  <span style={{ wordWrap: 'break-word', maxWidth: '70%' }}>{item.quantity}x ${item.denomination} GlyphBucks</span>
+                  <span className="font-semibold">${item.total_value.toFixed(2)}</span>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* GlyphBucks Issued Section */}
+          {bills && bills.length > 0 && (
+            <div className="section mb-4">
+              <div className="section-title font-bold border-b border-black pb-1 mb-2">GLYPHBUCKS ISSUED</div>
+              <div className="space-y-1">
+                {bills.map((bill, idx) => (
+                  <div key={idx} className="flex justify-between text-xs py-1">
+                    <span className="font-mono">{bill.serial_number}</span>
+                    <span className="font-semibold">${bill.denomination.toFixed(2)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-xs pt-2 mt-2 border-t border-black font-bold">
+                  <span>Total GlyphBucks:</span>
+                  <span>${bills.reduce((sum, b) => sum + b.denomination, 0).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Totals */}
-          <div className="totals">
-            <div className="row">
+          <div className="totals border-t-2 border-black pt-3 mt-3">
+            <div className="row flex justify-between my-1 text-xs">
               <span>GlyphBucks Face Value:</span>
               <span>${batch.total_face_value?.toFixed(2) || '0.00'}</span>
             </div>
-            <div className="row">
+            <div className="row flex justify-between my-1 text-xs">
               <span>Processing Surcharge (30%):</span>
               <span>${batch.surcharge_amount?.toFixed(2) || '0.00'}</span>
             </div>
-            <div className="row bold" style={{ fontSize: '14px', marginTop: '8px', paddingTop: '8px', borderTop: '2px solid #000' }}>
+            <div className="row bold flex justify-between mt-2 pt-2 border-t-2 border-black font-bold text-sm">
               <span>TOTAL CHARGED:</span>
               <span>${batch.total_charged?.toFixed(2) || '0.00'}</span>
             </div>
           </div>
 
           {/* Payment Info */}
-          <div className="section">
-            <div className="section-title">PAYMENT METHOD</div>
-            <div className="row">
-              <span>Card Type:</span>
+          <div className="section mt-4">
+            <div className="section-title font-bold border-b border-black pb-1 mb-2">PAYMENT METHOD</div>
+            <div className="row flex justify-between my-1 text-xs">
+              <span>Card:</span>
               <span>****{transaction.card_last_six?.slice(-4) || 'XXXX'}</span>
             </div>
-            <div className="row">
+            <div className="row flex justify-between my-1 text-xs">
               <span>Status:</span>
-              <span>APPROVED</span>
+              <span className="font-bold text-green-700">APPROVED</span>
             </div>
           </div>
 
-          {/* Barcode */}
-          <div className="barcode">
-            <div className="barcode-label">TRANSACTION BARCODE</div>
-            <div className="barcode-value">{batch.batch_barcode || batch.batch_id}</div>
+          {/* QR Code + Barcode Section */}
+          <div className="no-screen mt-6 pt-4 border-t-2 border-black">
+            <div className="flex items-start justify-between">
+              <div className="text-xs">
+                <p className="font-bold">Transaction UUID:</p>
+                <p className="font-mono text-[10px] mt-1">{transaction.order_number}</p>
+                <p className="font-bold mt-3">Scan to verify:</p>
+              </div>
+              <div className="text-center">
+                <QRCodeSVG value={qrData} size={80} level="M" />
+                <p className="text-[9px] mt-1">GlyphLock Verify</p>
+              </div>
+            </div>
+            <div className="mt-3 text-center">
+              <canvas ref={barcodeRef} className="mx-auto" />
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="footer">
-            <p>Thank you for your business!</p>
-            <p style={{ marginTop: '10px' }}>GlyphBucks are redeemable exclusively at Dream Palace venues.</p>
-            <p>Terms and conditions apply. Non-refundable.</p>
-            <p style={{ marginTop: '10px', fontSize: '9px' }}>
+          <div className="footer mt-5 pt-4 border-t-2 border-dashed border-black text-center text-xs">
+            <p className="font-semibold">Thank you for your business!</p>
+            <p className="mt-2">GlyphBucks are redeemable exclusively at Dream Palace venues.</p>
+            <p className="mt-1">Terms and conditions apply. Non-refundable.</p>
+            <p className="mt-3 text-[9px]">
               This receipt is your proof of purchase. Please retain for your records.
+            </p>
+            <p className="mt-4 pt-3 border-t border-gray-300 text-[9px] text-gray-600">
+              {GLYPHLOCK_DISCLAIMER_SHORT}
             </p>
           </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 justify-center">
-        <Button onClick={handlePrint} className="btn-glow-blue">
+      <div className="flex gap-3 justify-center no-print">
+        <Button onClick={handlePrint} className="btn-glow-blue min-h-[48px]">
           <Printer className="w-4 h-4 mr-2" />
           Print Receipt
         </Button>
