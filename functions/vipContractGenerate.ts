@@ -93,23 +93,24 @@ System Timestamp: ${new Date().toISOString()}
 `;
 
   const contractRecord = await base44.asServiceRole.entities.VIPContractRecord.create({
-    order_number: contractUUID,
+    token: contractUUID,
+    record_type: 'contract_token',
     guest_name: guest_name,
     venue_id: 'dream_palace',
-    contract_type: 'vip_room_service',
-    total_amount: minimumSpend,
-    customer_signature: null,
-    manager_signature: null,
-    hostess_signature: null,
-    status: 'active',
-    contract_metadata: {
-      room_number,
+    room_number: room_number,
+    status: 'pending',
+    expires_at: new Date(Date.now() + 15 * 60000).toISOString(),
+    issued_by: user.email,
+    metadata: {
+      contract_type: 'vip_room_service',
+      total_amount: minimumSpend,
       duration_minutes,
       rate_per_hour,
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
       generated_by: user.email,
-      generated_at: new Date().toISOString()
+      generated_at: new Date().toISOString(),
+      contract_body: contractBody
     }
   });
 
