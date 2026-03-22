@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer, Download } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import QRCode from 'qrcode';
 import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
 
 /**
@@ -11,6 +11,7 @@ import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
 export default function GlyphBucksReceiptEngine({ transaction, batch, bills, currentUser, onPrint }) {
   const receiptRef = React.useRef();
   const barcodeRef = useRef(null);
+  const qrRef = useRef(null);
 
   useEffect(() => {
     if (barcodeRef.current && transaction?.order_number) {
@@ -29,7 +30,23 @@ export default function GlyphBucksReceiptEngine({ transaction, batch, bills, cur
         console.error('Barcode generation failed:', err);
       }
     }
-  }, [transaction?.order_number]);
+
+    if (qrRef.current && transaction?.order_number) {
+      const qrData = JSON.stringify({
+        type: 'GLYPHLOCK_RECEIPT',
+        uuid: transaction.order_number,
+        batch_id: batch.batch_id,
+        timestamp: transaction.created_date,
+        lookup: `glyphlock.base44.app/ContractLookup?id=${transaction.order_number}`
+      });
+      
+      QRCode.toCanvas(qrRef.current, qrData, {
+        width: 80,
+        margin: 1,
+        errorCorrectionLevel: 'M'
+      }).catch(err => console.error('QR generation failed:', err));
+    }
+  }, [transaction?.order_number, batch?.batch_id]);
 
   const handlePrint = () => {
     window.print();
@@ -41,14 +58,6 @@ export default function GlyphBucksReceiptEngine({ transaction, batch, bills, cur
   }
 
   const cashierName = currentUser?.full_name || transaction.created_by?.split('@')[0] || `Staff ID: ${transaction.created_by || 'UNKNOWN'}`;
-  
-  const qrData = JSON.stringify({
-    type: 'GLYPHLOCK_RECEIPT',
-    uuid: transaction.order_number,
-    batch_id: batch.batch_id,
-    timestamp: transaction.created_date,
-    lookup: `glyphlock.base44.app/ContractLookup?id=${transaction.order_number}`
-  });
 
   return (
     <div className="space-y-4">
@@ -189,7 +198,7 @@ export default function GlyphBucksReceiptEngine({ transaction, batch, bills, cur
                 <p className="font-bold mt-3">Scan to verify:</p>
               </div>
               <div className="text-center">
-                <QRCodeSVG value={qrData} size={80} level="M" />
+                <canvas ref={qrRef} />
                 <p className="text-[9px] mt-1">GlyphLock Verify</p>
               </div>
             </div>
