@@ -11,20 +11,21 @@ Deno.serve(async (req) => {
   const payload = await req.json();
   const {
     room_number,
-    customer_name,
-    customer_id,
-    start_time,
-    end_time,
-    minimum_spend,
-    staff_id
+    guest_name,
+    duration_minutes,
+    rate_per_hour
   } = payload;
 
-  if (!room_number || !customer_name || !start_time || !minimum_spend) {
+  if (!room_number || !guest_name || !duration_minutes || !rate_per_hour) {
     return Response.json({
       success: false,
-      error: 'Missing required fields: room_number, customer_name, start_time, minimum_spend'
+      error: 'Missing required fields: room_number, guest_name, duration_minutes, rate_per_hour'
     }, { status: 400 });
   }
+
+  const startTime = new Date();
+  const endTime = new Date(startTime.getTime() + duration_minutes * 60000);
+  const minimumSpend = (duration_minutes / 60) * rate_per_hour;
 
   const contractUUID = crypto.randomUUID();
   const venueConfig = {
@@ -45,15 +46,16 @@ ${venueConfig.address}
 Phone: ${venueConfig.phone}
 
 CUSTOMER INFORMATION
-Name: ${customer_name}
-ID Number: ${customer_id || 'Not provided'}
+Name: ${guest_name}
 
 VIP ROOM DETAILS
 Room Number: ${room_number}
-Start Time: ${new Date(start_time).toLocaleString('en-US', { timeZone: 'America/Phoenix' })}
-End Time: ${end_time ? new Date(end_time).toLocaleString('en-US', { timeZone: 'America/Phoenix' }) : 'Open-ended'}
-Minimum Spend: $${minimum_spend.toFixed(2)}
-Attendant: ${staff_id || 'Assigned by management'}
+Start Time: ${startTime.toLocaleString('en-US', { timeZone: 'America/Phoenix' })}
+End Time: ${endTime.toLocaleString('en-US', { timeZone: 'America/Phoenix' })}
+Duration: ${duration_minutes} minutes
+Minimum Spend: $${minimumSpend.toFixed(2)}
+Rate: $${rate_per_hour.toFixed(2)}/hour
+Attendant: Assigned by management
 
 TERMS AND CONDITIONS
 
@@ -67,12 +69,15 @@ Guest agrees to a minimum spend of $${minimum_spend.toFixed(2)} for use of the V
 All entertainers at ${venueConfig.name} are independent contractors and not employees of the venue. Any arrangements between Guest and entertainers for services are independent agreements. The venue is not responsible for entertainer services or conduct.
 
 4. Payment Terms
-All charges are due immediately upon completion of service. Guest authorizes payment via the credit card on file. Any disputes must follow the dispute resolution process outlined in the venue's standard Terms of Service.
+All charges are due immediately upon completion of service. Minimum spend of $${minimumSpend.toFixed(2)} is required for this ${duration_minutes}-minute VIP room reservation. Guest authorizes payment via the credit card on file. Any disputes must follow the dispute resolution process outlined in the venue's standard Terms of Service.
 
 5. Conduct Policy
 Guest agrees to comply with all club policies, local ordinances, and state regulations. Inappropriate conduct, harassment, or illegal activity will result in immediate ejection without refund.
 
-6. Liability Waiver
+6. Recording Prohibition
+No photography, videography, or audio recording is permitted in VIP areas. Violation will result in immediate termination of service and legal action.
+
+7. Liability Waiver
 Guest assumes all risk associated with VIP room services. The venue is not liable for any injuries, losses, or damages except as required by law.
 
 By signing below, Guest acknowledges reading and accepting all terms.
@@ -89,34 +94,40 @@ System Timestamp: ${new Date().toISOString()}
 
   const contractRecord = await base44.asServiceRole.entities.VIPContractRecord.create({
     order_number: contractUUID,
-    guest_name: customer_name,
+    guest_name: guest_name,
     venue_id: 'dream_palace',
     contract_type: 'vip_room_service',
-    total_amount: minimum_spend,
+    total_amount: minimumSpend,
     customer_signature: null,
     manager_signature: null,
     hostess_signature: null,
     status: 'active',
     contract_metadata: {
       room_number,
-      customer_id,
-      start_time,
-      end_time,
-      staff_id,
+      duration_minutes,
+      rate_per_hour,
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
       generated_by: user.email,
       generated_at: new Date().toISOString()
     }
   });
 
+  const contractUrl = `${Deno.env.get('BASE44_APP_URL') || 'https://glyphlock.com'}/VIPContract?token=${contractUUID}`;
+  const expiresAt = new Date(Date.now() + 15 * 60000).toISOString();
+
   return Response.json({
     success: true,
+    contract_url: contractUrl,
+    expires_at: expiresAt,
     contract: {
       uuid: contractUUID,
       record_id: contractRecord.id,
       body: contractBody,
-      customer_name,
+      guest_name,
       room_number,
-      minimum_spend,
+      minimum_spend: minimumSpend,
+      duration_minutes,
       status: 'active',
       generated_at: new Date().toISOString()
     }
