@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DollarSign, Printer, Scan, Search, ScrollText, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-import DreamPalaceContract from './DreamPalaceContract';
+import GlyphBucksContract from './GlyphBucksContract';
 import ClubCurrencyPressView from './press/ClubCurrencyPressView';
-import BillRedemptionScanner from './dreamdollar/BillRedemptionScanner';
-import TransactionSearch from './dreamdollar/TransactionSearch';
+import BillRedemptionScanner from './glyphbucks/BillRedemptionScanner';
+import TransactionSearch from './glyphbucks/TransactionSearch';
 import ContractViewer from './ContractViewer';
 import FraudAnalyticsDashboard from './FraudAnalyticsDashboard';
 
@@ -56,7 +56,7 @@ export default function UnifiedDreamDollarHub({ venue_id = "dream_palace" }) {
         </TabsList>
 
         <TabsContent value="new-sale" className="mt-4">
-          <DreamPalaceContract 
+          <GlyphBucksContract 
             onComplete={() => {
               setActiveSubTab("archive");
             }}
