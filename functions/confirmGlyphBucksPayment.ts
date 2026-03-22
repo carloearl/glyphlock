@@ -14,14 +14,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // RBAC: Only staff/admin can confirm payments
     if (!['admin', 'manager', 'staff'].includes(user.role)) {
       return Response.json({ 
         error: 'Forbidden: Staff access required to confirm payments' 
       }, { status: 403 });
     }
 
-    // SECURITY: Get venue_id from session
     const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
     if (!sessionVenue.data.success) {
       return Response.json({ 
@@ -37,7 +35,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing or invalid payment_intent_id' }, { status: 400 });
     }
 
-    // FRAUD PREVENTION: Idempotency check
     const existingConfirm = await base44.asServiceRole.entities.AuditEvent.filter({
       entity_type: 'PaymentIntent',
       entity_id: payment_intent_id,
@@ -45,7 +42,6 @@ Deno.serve(async (req) => {
     }, null, 1);
 
     if (existingConfirm.length > 0) {
-      // Already confirmed — return cached result (idempotent)
       const cached = JSON.parse(existingConfirm[0].after_state);
       return Response.json({
         success: true,
@@ -58,7 +54,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Retrieve payment intent to verify status
     let paymentIntent;
     try {
       paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
@@ -71,7 +66,6 @@ Deno.serve(async (req) => {
     }
 
     if (paymentIntent.status !== 'succeeded') {
-      // Log failed confirmation attempt
       await base44.asServiceRole.entities.AuditEvent.create({
         event_id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
@@ -92,18 +86,15 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Extract approval code (last 4 of payment intent ID)
     const approval_code = paymentIntent.id.slice(-4).toUpperCase();
     const processor_reference = paymentIntent.id;
 
-    // Get charge details
     const charge = paymentIntent.latest_charge 
       ? await stripe.charges.retrieve(paymentIntent.latest_charge)
       : null;
 
     const card_last_four = charge?.payment_method_details?.card?.last4 || null;
 
-    // Log successful payment verification (IMMUTABLE)
     await base44.asServiceRole.entities.AuditEvent.create({
       event_id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
@@ -133,7 +124,6 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    // SECURITY: Log error without exposing internals
     const errorId = crypto.randomUUID();
     console.error(`[${errorId}] Payment confirmation error:`, error);
     

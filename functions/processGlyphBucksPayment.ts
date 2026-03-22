@@ -5,10 +5,9 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
   apiVersion: '2023-10-16',
 });
 
-// FRAUD PREVENTION: Rate limiting map
 const paymentAttempts = new Map();
 const MAX_PAYMENT_ATTEMPTS_PER_HOUR = 10;
-const LOCKOUT_DURATION_MS = 3600000; // 1 hour
+const LOCKOUT_DURATION_MS = 3600000;
 
 Deno.serve(async (req) => {
   try {
@@ -19,14 +18,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // RBAC: Only staff/admin can process Dream Dollar payments
     if (!['admin', 'manager', 'staff'].includes(user.role)) {
       return Response.json({ 
         error: 'Forbidden: Staff access required to process payments' 
       }, { status: 403 });
     }
 
-    // FRAUD PREVENTION: Rate limit per user
     const now = Date.now();
     const attemptKey = user.email;
     const attempts = paymentAttempts.get(attemptKey);
@@ -48,7 +45,6 @@ Deno.serve(async (req) => {
       paymentAttempts.set(attemptKey, { count: 1, resetAt: now + LOCKOUT_DURATION_MS });
     }
 
-    // SECURITY: Get venue_id from session, not request body
     const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
     if (!sessionVenue.data.success) {
       return Response.json({ 
@@ -66,7 +62,6 @@ Deno.serve(async (req) => {
       description
     } = payload;
 
-    // FRAUD PREVENTION: Validate amount server-side
     if (!amount || amount <= 0 || amount > 50000) {
       return Response.json({ 
         error: 'Invalid amount',
@@ -78,7 +73,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing or invalid order_number' }, { status: 400 });
     }
 
-    // FRAUD PREVENTION: Check for duplicate order_number (idempotency)
     const existingPayment = await base44.asServiceRole.entities.AuditEvent.filter({
       entity_type: 'PaymentIntent',
       description: { $regex: order_number }
@@ -92,9 +86,8 @@ Deno.serve(async (req) => {
       }, { status: 409 });
     }
 
-    // Create Payment Intent
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
+      amount: Math.round(amount * 100),
       currency: 'usd',
       description: description || `Dream Palace Order ${order_number}`,
       metadata: {
@@ -110,7 +103,6 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Log payment intent creation (IMMUTABLE)
     await base44.asServiceRole.entities.AuditEvent.create({
       event_id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
@@ -139,7 +131,6 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    // SECURITY: Log error without exposing internals
     const errorId = crypto.randomUUID();
     console.error(`[${errorId}] Payment processing error:`, error);
     
