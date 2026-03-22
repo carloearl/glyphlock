@@ -38,15 +38,19 @@ export default function VerificationCameraCapture({ transaction_id, venue_id, on
         audio: false
       });
       setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
       setCameraActive(true);
     } catch (err) {
       console.error('Camera access error:', err);
       alert('Camera access denied. Please enable camera permissions.');
     }
   };
+
+  // Assign stream to video element after it renders
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, cameraActive]);
 
   // STOP WEBCAM STREAM
   const stopCamera = () => {
