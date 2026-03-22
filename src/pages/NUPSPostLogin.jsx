@@ -51,7 +51,7 @@ export default function NUPSPostLogin() {
         } else if (currentUser.role === 'entertainer') {
           navigate('/EntertainerCheckIn');
         } else {
-          navigate('/DreamDollarHub');
+          navigate('/GlyphBucksHub');
         }
       }, 2000);
 
@@ -170,19 +170,19 @@ export default function NUPSPostLogin() {
             </Card>
           )}
 
-          {/* Dream Dollar Hub */}
+          {/* GlyphBucks Hub */}
           <Card 
             className="bg-slate-900/50 border-blue-500/30 hover:border-blue-400/60 transition-all cursor-pointer group"
-            onClick={() => handleManualNavigation('/DreamDollarHub')}
+            onClick={() => handleManualNavigation('/GlyphBucksHub')}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/DreamDollarHub'); }}}
-            aria-label="Navigate to Dream Dollar Hub - Currency operations, sales, press, redemption, and fraud monitoring"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/GlyphBucksHub'); }}}
+            aria-label="Navigate to GlyphBucks Hub - Currency operations, sales, press, redemption, and fraud monitoring"
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-blue-400">
                 <DollarSign className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                Dream Dollar Hub
+                GlyphBucks Hub
               </CardTitle>
             </CardHeader>
             <CardContent>

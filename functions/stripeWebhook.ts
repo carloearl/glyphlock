@@ -178,11 +178,11 @@ Deno.serve(async (req) => {
         break;
       }
 
-      // ═══ DREAM DOLLAR PAYMENT EVENTS ═══
+      // ═══ GLYPHBUCKS PAYMENT EVENTS ═══
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object;
         
-        if (paymentIntent.metadata?.order_type === 'dream_dollar_sale') {
+        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale') {
           const order_number = paymentIntent.metadata?.order_number;
           
           // Find associated DreamPalaceOrder record if exists
@@ -212,7 +212,7 @@ Deno.serve(async (req) => {
             }),
             is_system_action: true,
             severity: 'INFO',
-            description: `Dream Dollar payment succeeded: ${order_number}, $${(paymentIntent.amount / 100).toFixed(2)}`
+            description: `GlyphBucks payment succeeded: ${order_number}, $${(paymentIntent.amount / 100).toFixed(2)}`
           });
         }
         break;
@@ -221,7 +221,7 @@ Deno.serve(async (req) => {
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object;
         
-        if (paymentIntent.metadata?.order_type === 'dream_dollar_sale') {
+        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale') {
           const order_number = paymentIntent.metadata?.order_number;
           const failure_reason = paymentIntent.last_payment_error?.message || 'Unknown error';
           
@@ -254,7 +254,7 @@ Deno.serve(async (req) => {
             }),
             is_system_action: true,
             severity: 'CRITICAL',
-            description: `PAYMENT FAILED: Dream Dollar order ${order_number}, reason: ${failure_reason}`
+            description: `PAYMENT FAILED: GlyphBucks order ${order_number}, reason: ${failure_reason}`
           });
         }
         break;
@@ -263,7 +263,7 @@ Deno.serve(async (req) => {
       case 'payment_intent.canceled': {
         const paymentIntent = event.data.object;
         
-        if (paymentIntent.metadata?.order_type === 'dream_dollar_sale') {
+        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale') {
           const order_number = paymentIntent.metadata?.order_number;
           
           // Mark order as CANCELED
@@ -277,23 +277,23 @@ Deno.serve(async (req) => {
             });
           }
 
-          // VOID any Dream Dollar batch created for this order
-          const batches = await base44.asServiceRole.entities.DreamDollarBatch.filter({
+          // VOID any GlyphBucks batch created for this order
+          const batches = await base44.asServiceRole.entities.GlyphBucksBatch.filter({
             order_number
           });
 
           for (const batch of batches) {
-            await base44.asServiceRole.entities.DreamDollarBatch.update(batch.id, {
+            await base44.asServiceRole.entities.GlyphBucksBatch.update(batch.id, {
               status: 'voided'
             });
 
             // VOID all bills in the batch
-            const bills = await base44.asServiceRole.entities.DreamDollarBill.filter({
+            const bills = await base44.asServiceRole.entities.GlyphBucksBill.filter({
               batch_id: batch.batch_id
             });
 
             for (const bill of bills) {
-              await base44.asServiceRole.entities.DreamDollarBill.update(bill.id, {
+              await base44.asServiceRole.entities.GlyphBucksBill.update(bill.id, {
                 status: 'voided',
                 voided_at: new Date().toISOString(),
                 voided_by: 'STRIPE_WEBHOOK',
@@ -319,7 +319,7 @@ Deno.serve(async (req) => {
             }),
             is_system_action: true,
             severity: 'WARNING',
-            description: `PAYMENT CANCELED: Dream Dollar order ${order_number}, voided ${batches.length} batch(es)`
+            description: `PAYMENT CANCELED: GlyphBucks order ${order_number}, voided ${batches.length} batch(es)`
           });
         }
         break;
