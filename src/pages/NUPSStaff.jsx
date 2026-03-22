@@ -15,6 +15,7 @@ import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub";
 import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/SEOHead";
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
+import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 
 export default function NUPSStaff() {
   const navigate = useNavigate();
@@ -103,6 +104,7 @@ export default function NUPSStaff() {
         keywords="POS terminal, staff timeclock, transaction processing, batch management, nightclub POS, GlyphLock NUPS"
         url="/nups-staff"
       />
+      <OfflineSyncBanner />
       <header className="border-b border-cyan-500/20 p-4 sticky top-0 bg-black/95 backdrop-blur-lg" style={{ zIndex: 9990, position: 'sticky', pointerEvents: 'auto' }}>
         <div className="container mx-auto flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">

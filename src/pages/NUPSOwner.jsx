@@ -62,6 +62,7 @@ import VIPContractLifecycle from "../components/nups/VIPContractLifecycle.jsx";
 import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
 import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
+import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 
 export default function NUPSOwner() {
   const navigate = useNavigate();
@@ -190,6 +191,7 @@ export default function NUPSOwner() {
         keywords="venue management, POS system, staff management, VIP room tracking, entertainment venue analytics, nightclub POS, GlyphLock NUPS"
         url="/nups-owner"
       />
+      <OfflineSyncBanner />
       {/* Header */}
       <header className="border-b border-purple-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
         <div className="container mx-auto">
