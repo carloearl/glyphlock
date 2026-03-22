@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  ScanLine, Loader2, Users, Archive, UserCheck
+  ScanLine, Loader2, Users, Archive, UserCheck, Keyboard
 } from "lucide-react";
 import BillScanner from "./BillScanner";
+import { Input } from "@/components/ui/input";
 
 export default function BillRedemptionScanner() {
   const [selectedContractor, setSelectedContractor] = useState(null);
