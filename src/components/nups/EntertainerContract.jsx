@@ -224,7 +224,7 @@ export default function EntertainerContract({ onContractSigned }) {
 
                   <p><span className="text-white font-semibold">2. SERVICES.</span> Contractor agrees to provide entertainment services at the designated venue on agreed-upon dates and times. Services include but are not limited to: live performance, guest interaction, VIP room services, and promotional activities as directed by venue management.</p>
 
-                  <p><span className="text-white font-semibold">3. COMPENSATION & COMMISSION.</span> Contractor shall be compensated based on the commission structure communicated at time of onboarding. Dream Dollar redemption payouts are processed at 85% of face value. VIP commissions and other earnings are subject to the venue's published rate schedule. All payouts require Contractor's signed acknowledgment.</p>
+                  <p><span className="text-white font-semibold">3. COMPENSATION & COMMISSION.</span> Contractor shall be compensated based on the commission structure communicated at time of onboarding. GlyphBucks redemption payouts are processed at 50% of face value. VIP commissions and other earnings are subject to the venue's published rate schedule. All payouts require Contractor's signed acknowledgment.</p>
 
                   <p><span className="text-white font-semibold">4. HOUSE FEES & DEDUCTIONS.</span> Contractor acknowledges that the venue may charge a house fee per shift. This fee is agreed upon prior to each scheduled shift. Contractor consents to deduction of applicable fees from earned compensation prior to payout.</p>
 

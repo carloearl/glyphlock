@@ -15,7 +15,7 @@ import ControlPanel from "@/components/nups/press/ControlPanel";
 import VoucherCanvas from "@/components/nups/press/VoucherCanvas";
 import ArchiveSearch from "@/components/nups/press/ArchiveSearch";
 import AIAssistant from "@/components/nups/press/AIAssistant";
-import DreamPalaceContract from "@/components/nups/DreamPalaceContract";
+import GlyphBucksContract from "@/components/nups/GlyphBucksContract";
 
 import { DEFAULT_PRESS_CONFIG } from "@/components/nups/press/types";
 import {
@@ -157,17 +157,17 @@ export default function ClubCurrencyPressView() {
         <TabsContent value="order" className="flex-1 mt-4">
           <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-bold text-white mb-1">New Dream Dollar Sale</h3>
-              <p className="text-xs text-gray-400">Complete customer contract and issue Dream Dollar bills</p>
+              <h3 className="text-lg font-bold text-white mb-1">New GlyphBucks Sale</h3>
+              <p className="text-xs text-gray-400">Complete customer contract and issue GlyphBucks bills</p>
             </div>
-            <DreamPalaceContract
+            <GlyphBucksContract
               onComplete={() => toast.success("Contract archived and ready for printing")}
               onCurrencyPrint={(amount, orderNum) => {
                 setCurrencyAmount(amount);
                 setCurrencyOrderNumber(orderNum);
                 setConfig(prev => ({ ...prev, denomination: String(amount) }));
                 setActiveTab("press");
-                toast.success(`$${amount} Dream Dollars queued → Switch to Print Bills tab`);
+                toast.success(`$${amount} GlyphBucks queued → Switch to Print Bills tab`);
               }}
             />
           </div>

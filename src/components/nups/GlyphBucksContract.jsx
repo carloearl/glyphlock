@@ -17,9 +17,8 @@ import OfflineIndicator from "./OfflineIndicator";
 import HardcopyRescan from "./HardcopyRescan";
 import RateLimitGuard from "./validation/RateLimitGuard";
 
-// ─── Contract Terms (exact from physical form) ───
 const FULL_CONTRACT_TEXT = `1. Orders
-Liberty Holding Group, L.L.C., and Liberty Entertainment Group L.L.C doing business as The Dream Palace [club/Bar] ("we," "our," or "us"), agrees to provide you ("you" or "your"), the customer named in the attached Order / purchase Invoice (the "Order"), with the services, and products ("Services and Products") listed in the Order. Dream Dollars (Club currency). The independent entertainer contractors ("Entertainers") at our Dream Palace Gentleman's Club located at 815 N. Scottsdale Road in Tempe, Arizona ("Club/Bar"), are independent entertainer contractors and are not our employees. You may independently arrange with Entertainers for services not provided by us, provided those services are legal. Entertainers do not have authority to contract for or bind us in any manner.
+Liberty Holding Group, L.L.C., and Liberty Entertainment Group L.L.C doing business as The Dream Palace [club/Bar] ("we," "our," or "us"), agrees to provide you ("you" or "your"), the customer named in the attached Order / purchase Invoice (the "Order"), with the services, and products ("Services and Products") listed in the Order. GlyphBucks (Club currency). The independent entertainer contractors ("Entertainers") at our Dream Palace Gentleman's Club located at 815 N. Scottsdale Road in Tempe, Arizona ("Club/Bar"), are independent entertainer contractors and are not our employees. You may independently arrange with Entertainers for services not provided by us, provided those services are legal. Entertainers do not have authority to contract for or bind us in any manner.
 
 2. Payment
 The fees for Services and Products ("Fees") are outlined in the Order and are due in full immediately upon your signature. You authorize us to process payment for the total Fees and any other amounts owed under these Terms and Conditions to the credit card identified in the Order ("Card"). To the fullest extent permitted by law, you irrevocably waive the right to dispute any charge for Services or Products consistent with the Order by requesting a chargeback or otherwise. You may not withhold or reverse payment on the Card for any reason, including setoffs related to disputes or claims against us. If you dispute a charge or attempt to withhold or reverse payment, we are entitled to charge an additional $50 fee for our operational costs, which may be applied to your Card.
@@ -50,23 +49,22 @@ Club Currency is a convenience product for use on premises to pay for club/bar s
 It is not to be used for illegal activities or purposes; if such use is detected, the club currency will be forfeited. To obtain a refund, you must contact management office at 602-536-0372, present identification matching the credit or debit card used for purchase and possessing the unused Club Currency. Each bill is issued with an expiration date, after which it has no value and cannot be refunded, exchanged, or converted. The value of expired Club Currency is transferred to the Club/Bar's Expired Club Currency Revenue Ledger Account.
 By signing below, you acknowledge that you have read and agreed to these Terms and Conditions on both sides of this contract, and that you are entering into this agreement voluntarily, without duress or coercion, and not under the influence of any substance. You agree to be responsible for your purchase made by credit or debit card, and if your provider fails to honor payment, you will personally provide immediate payment of any amount not honored by your card provider.
 
-You are purchasing Dream Dollars along with other products and services. Dream Dollars are for use as an alternative form of payment while at the Dream Palace. When you have spent them or otherwise used them, the dream Dollars have functioned correctly and have used them for your benefit. Any Attempt to avoid your responsibility to pay for your purchase will be in bad faith and considered an attempt to commit fraud against Club/Bar.`;
+You are purchasing GlyphBucks along with other products and services. GlyphBucks are for use as an alternative form of payment while at the Dream Palace. When you have spent them or otherwise used them, the GlyphBucks have functioned correctly and have used them for your benefit. Any Attempt to avoid your responsibility to pay for your purchase will be in bad faith and considered an attempt to commit fraud against Club/Bar.`;
 
 const ACKNOWLEDGMENTS = [
   "You have read and understand this Order (front & back).",
   "You confirm the information in this Order is true and correct.",
   "You are the authorized signer for the credit card identified in this Order.",
   "If you do not pay amounts due under this Order, you consent to use of information gathered about you for collection.",
-  "You have received the non-refundable Club Currency listed in this Order. They may be used only at the Club. Once used, they are of no further value. They expire as specified on their face. Entertainers receive 50% of the face value of Club Currency. Entertainers redeem the dream dollar bills at 50% of face value. You agree it is fair and reasonable considering the amount of risk involved. For every two dollars in Dream Dollars redeemed the Entertainer is paid out 1 U.S. Dollar.",
+  "You have received the non-refundable Club Currency listed in this Order. They may be used only at the Club. Once used, they are of no further value. They expire as specified on their face. Entertainers receive 50% of the face value of Club Currency. Entertainers redeem the GlyphBucks bills at 50% of face value. You agree it is fair and reasonable considering the amount of risk involved. For every two dollars in GlyphBucks redeemed the Entertainer is paid out 1 U.S. Dollar.",
   "You have read and understood the Terms and Conditions on the front and back side of this contract. And Agree."
 ];
 
-export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
-  const [step, setStep] = useState(0); // 0=form, 1=contract scroll, 2=clickwrap, 3=biometrics+sign, 4=staff sign, 5=print+rescan
+export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
+  const [step, setStep] = useState(0);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  // RBAC: Check user permissions on mount
   useEffect(() => {
     (async () => {
       try {
@@ -84,6 +82,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       }
     })();
   }, []);
+
   const [contractPreviewOpen, setContractPreviewOpen] = useState(false);
   const [contractScrolled, setContractScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -95,24 +94,18 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
-  // Customer / Purchaser
   const [customerName, setCustomerName] = useState("");
   const [customerId, setCustomerId] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [customerState, setCustomerState] = useState("");
   const [customerZip, setCustomerZip] = useState("");
-
-  // Purchaser Card Info
   const [purchaserCardName, setPurchaserCardName] = useState("");
   const [cardLastSix, setCardLastSix] = useState("");
   const [cardExp, setCardExp] = useState("");
   const [approvalCode, setApprovalCode] = useState("");
-
-  // Manager / Hostess
   const [managerName, setManagerName] = useState("");
   const [hostessName, setHostessName] = useState("");
 
-  // Line Items (5 rows)
   const [lineItems, setLineItems] = useState(
     Array.from({ length: 5 }, (_, i) => ({
       line_number: i + 1,
@@ -123,18 +116,15 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     }))
   );
 
-  // Dream Dollars
-  const [dreamDollarValue, setDreamDollarValue] = useState(0);
+  const [glyphbucksValue, setGlyphbucksValue] = useState(0);
   const [waitressTip, setWaitressTip] = useState(0);
-  const processingSurcharge = dreamDollarValue * 0.3;
+  const processingSurcharge = glyphbucksValue * 0.3;
   const lineItemsTotal = lineItems.reduce((s, li) => s + (li.amount || 0), 0);
-  const grandTotal = dreamDollarValue + processingSurcharge + waitressTip + lineItemsTotal;
+  const grandTotal = glyphbucksValue + processingSurcharge + waitressTip + lineItemsTotal;
 
-  // Acknowledgments
   const [acks, setAcks] = useState(ACKNOWLEDGMENTS.map(() => false));
   const allAcked = acks.every(Boolean);
 
-  // Biometrics
   const [signature, setSignature] = useState("");
   const [thumbprintUrl, setThumbprintUrl] = useState("");
   const [guestPhotoUrl, setGuestPhotoUrl] = useState("");
@@ -145,16 +135,12 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   const idFrontRef = useRef(null);
   const idBackRef = useRef(null);
 
-  // Staff signatures
   const [managerSignature, setManagerSignature] = useState("");
   const [hostessSignature, setHostessSignature] = useState("");
-
-  // Post-print
   const [printed, setPrinted] = useState(false);
 
-  const orderNumber = useRef(`DP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2,4).toUpperCase()}`).current;
+  const orderNumber = useRef(`GB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2,4).toUpperCase()}`).current;
 
-  // SESSION PRESERVATION: Save draft state to localStorage
   useEffect(() => {
     if (step > 0 && !savedOrderId) {
       const draftState = {
@@ -162,18 +148,16 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
         orderNumber,
         customerName,
         customerId,
-        dreamDollarValue,
+        glyphbucksValue,
         lineItems,
         timestamp: Date.now()
       };
       sessionStorage.setItem('nups_draft_order', JSON.stringify(draftState));
     } else if (savedOrderId) {
-      // Transaction completed — clear draft
       sessionStorage.removeItem('nups_draft_order');
     }
-  }, [step, customerName, dreamDollarValue, savedOrderId]);
+  }, [step, customerName, glyphbucksValue, savedOrderId]);
 
-  // SESSION RECOVERY: Restore draft on mount if session expired mid-transaction
   useEffect(() => {
     const draft = sessionStorage.getItem('nups_draft_order');
     if (draft && !savedOrderId) {
@@ -181,11 +165,10 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
         const state = JSON.parse(draft);
         const age = Date.now() - state.timestamp;
         
-        // Restore if draft is less than 1 hour old
         if (age < 3600000) {
           setCustomerName(state.customerName || "");
           setCustomerId(state.customerId || "");
-          setDreamDollarValue(state.dreamDollarValue || 0);
+          setGlyphbucksValue(state.glyphbucksValue || 0);
           if (state.lineItems) setLineItems(state.lineItems);
           toast.info("Draft order restored from session");
         }
@@ -201,7 +184,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     else if (field === "photo") setGuestPhotoUrl(file_url);
     else if (field === "id_front") setIdPhotoUrl(file_url);
     else if (field === "id_back") setIdPhotoBackUrl(file_url);
-    else if (field === "hardcopy") setHardcopyUrl(file_url);
     setUploading(p => ({ ...p, [field]: false }));
   };
 
@@ -216,7 +198,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     });
   };
 
-  const canProceedToSign = customerName.trim() && cardLastSix.length >= 4 && dreamDollarValue > 0;
+  const canProceedToSign = customerName.trim() && cardLastSix.length >= 4 && glyphbucksValue > 0;
   const canSign = allAcked && signature.trim() && thumbprintUrl && guestPhotoUrl && idPhotoUrl;
   const canStaffSign = managerSignature.trim() && hostessSignature.trim();
 
@@ -229,7 +211,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
   }
 
   if (!user) {
-    return null; // Redirecting
+    return null;
   }
 
   const handleGuestSign = async () => {
@@ -238,13 +220,12 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     setPaymentProcessing(true);
     
     try {
-      // STEP 1: Process Stripe payment
-      const paymentResponse = await base44.functions.invoke('processDreamDollarPayment', {
+      const paymentResponse = await base44.functions.invoke('processGlyphBucksPayment', {
         amount: grandTotal,
         order_number: orderNumber,
         customer_name: customerName,
         customer_email: null,
-        description: `Dream Palace Order ${orderNumber} - Dream Dollars $${dreamDollarValue}`
+        description: `Dream Palace Order ${orderNumber} - GlyphBucks $${glyphbucksValue}`
       });
 
       if (!paymentResponse.data.success) {
@@ -253,9 +234,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
       const { client_secret, payment_intent_id } = paymentResponse.data;
 
-      // STEP 2: Simulate payment confirmation (in production, use Stripe Elements)
-      // For now, auto-confirm the payment intent
-      const confirmResponse = await base44.functions.invoke('confirmDreamDollarPayment', {
+      const confirmResponse = await base44.functions.invoke('confirmGlyphBucksPayment', {
         payment_intent_id,
         order_number: orderNumber
       });
@@ -268,7 +247,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       setPaymentConfirmed(true);
       setPaymentProcessing(false);
 
-      // Update approval code in state
       setApprovalCode(approval_code);
       if (card_last_four && !cardLastSix) {
         setCardLastSix(card_last_four);
@@ -276,8 +254,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
       toast.success(`Payment approved: ${approval_code}`);
 
-      // STEP 3: Create DreamPalaceOrder + VIPContractRecord
-      const order = await base44.entities.DreamPalaceOrder.create({
+      const order = await base44.entities.GlyphBucksOrder.create({
       order_number: orderNumber,
       status: "signed",
       customer_name: customerName,
@@ -292,7 +269,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       manager_name: managerName,
       hostess_name: hostessName,
       line_items: lineItems.filter(li => li.room_ent_dur_id || li.amount > 0),
-      dream_dollar_value: dreamDollarValue,
+      glyphbucks_value: glyphbucksValue,
       processing_surcharge: processingSurcharge,
       waitress_tip: waitressTip,
       grand_total: grandTotal,
@@ -306,12 +283,11 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       });
       setSavedOrderId(order.id);
 
-      // STEP 3b: Create VIPContractRecord for hardcopy rescanning
       const contract = await base44.entities.VIPContractRecord.create({
         order_number: orderNumber,
         guest_name: customerName,
         venue_id: "dream_palace",
-        contract_type: "dream_dollar_sale",
+        contract_type: "glyphbucks_sale",
         total_amount: grandTotal,
         customer_signature: signature,
         manager_signature: null,
@@ -325,12 +301,11 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       });
       setSavedContractId(contract.id);
 
-      // STEP 4: Call backend to create Dream Dollar batch + bills
-      if (dreamDollarValue > 0) {
-        const saleResponse = await base44.functions.invoke('createDreamDollarSale', {
+      if (glyphbucksValue > 0) {
+        const saleResponse = await base44.functions.invoke('createGlyphBucksSale', {
           customer_name: customerName,
           customer_identity_id: customerId || null,
-          denominations: buildDenominationsArray(dreamDollarValue),
+          denominations: buildDenominationsArray(glyphbucksValue),
           surcharge_rate: 0.30,
           approval_code: approval_code,
           processor_reference: processor_reference,
@@ -339,13 +314,12 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
         });
 
         if (!saleResponse.data.success) {
-          throw new Error(saleResponse.data.error || "Failed to create Dream Dollar sale");
+          throw new Error(saleResponse.data.error || "Failed to create GlyphBucks sale");
         }
 
         setBatchCreated(saleResponse.data.batch);
         
-        // Link batch to order
-        await base44.entities.DreamPalaceOrder.update(order.id, {
+        await base44.entities.GlyphBucksOrder.update(order.id, {
           status: "printed"
         });
       }
@@ -359,7 +333,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       setPaymentProcessing(false);
       setPaymentConfirmed(false);
       
-      // CRITICAL: Log transaction failure for reconciliation
       try {
         await base44.entities.AuditEvent.create({
           event_id: crypto.randomUUID(),
@@ -367,7 +340,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           actor_id: user.email,
           actor_role: user.role,
           venue_id: null,
-          entity_type: 'DreamPalaceOrder',
+          entity_type: 'GlyphBucksOrder',
           entity_id: orderNumber,
           action: 'CREATE',
           severity: 'CRITICAL',
@@ -381,11 +354,10 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
   const handleStaffSign = async () => {
     setLoading(true);
-    await base44.entities.DreamPalaceOrder.update(savedOrderId, {
+    await base44.entities.GlyphBucksOrder.update(savedOrderId, {
       manager_signature: managerSignature,
       hostess_signature: hostessSignature,
     });
-    // Also update VIPContractRecord with staff signatures
     if (savedContractId) {
       await base44.entities.VIPContractRecord.update(savedContractId, {
         manager_signature: managerSignature,
@@ -402,22 +374,17 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     w.document.close();
     setTimeout(() => w.print(), 400);
     setPrinted(true);
-    // Auto-trigger club currency printing after contract print
-    if (onCurrencyPrint && dreamDollarValue > 0 && batchCreated) {
+    if (onCurrencyPrint && glyphbucksValue > 0 && batchCreated) {
       setTimeout(() => {
-        onCurrencyPrint(dreamDollarValue, orderNumber);
+        onCurrencyPrint(glyphbucksValue, orderNumber);
       }, 1500);
     }
   };
 
-
-
-  // Convert Dream Dollar total into denominations (smart split)
   const buildDenominationsArray = (total) => {
     const denoms = [];
     let remaining = total;
     
-    // Priority: use largest bills possible
     const bills = [100, 50, 20, 10, 5, 1];
     for (const denom of bills) {
       if (remaining >= denom) {
@@ -456,7 +423,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       .sig-area { border:1px solid #000; min-height:50px; padding:8px; margin:4px 0; font-family:cursive; font-size:16px; }
       .thumb-area { border:1px solid #000; width:150px; height:80px; display:inline-block; }
       .ack-item { margin:4px 0; font-size:10px; }
-      .ack-item strong { }
       .barcode { font-family:monospace; font-size:14px; letter-spacing:4px; text-align:center; margin:8px 0; }
       @media print { @page { margin: 15mm; } }
     </style></head><body>
@@ -484,7 +450,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
         </div>
       </div>
 
-      <div class="warning">Dream Dollars (Club Currency) are not legal tender</div>
+      <div class="warning">GlyphBucks (Club Currency) are not legal tender</div>
 
       <table>
         <tr style="background:#eee;">
@@ -502,12 +468,12 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
       <div style="display:flex;justify-content:flex-end;margin:8px 0;">
         <table style="width:420px;">
           <tr>
-            <td style="border:1px solid #000;padding:4px;">Show Price / Dream Dollar Value (Amount Ordered)</td>
-            <td style="border:1px solid #000;padding:4px;text-align:center;font-size:10px;">Dream Dollars</td>
-            <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${dreamDollarValue.toFixed(2)}</td>
+            <td style="border:1px solid #000;padding:4px;">Show Price / GlyphBucks Value (Amount Ordered)</td>
+            <td style="border:1px solid #000;padding:4px;text-align:center;font-size:10px;">GlyphBucks</td>
+            <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${glyphbucksValue.toFixed(2)}</td>
           </tr>
           <tr>
-            <td style="border:1px solid #000;padding:4px;">Processing Fee (30%) for Issuing Dream Dollars</td>
+            <td style="border:1px solid #000;padding:4px;">Processing Fee (30%) for Issuing GlyphBucks</td>
             <td style="border:1px solid #000;padding:4px;text-align:center;font-size:10px;">+</td>
             <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${processingSurcharge.toFixed(2)}</td>
           </tr>
@@ -522,7 +488,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
             <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${lineItemsTotal.toFixed(2)}</td>
           </tr>` : ''}
           <tr>
-            <td colspan="2" style="border:1px solid #000;padding:4px;font-size:9px;">** Dream Dollars are sold as a convenience medium of currency for payment and are not valid anywhere else. The Entertainer can redeem Dream Dollars for Cash.</td>
+            <td colspan="2" style="border:1px solid #000;padding:4px;font-size:9px;">** GlyphBucks are sold as a convenience medium of currency for payment and are not valid anywhere else. The Entertainer can redeem GlyphBucks for Cash.</td>
             <td style="border:2px solid #000;padding:6px;text-align:center;font-weight:bold;font-size:13px;background:#f5f5f5;">GRAND TOTAL<br/><span style="font-size:16px;">$${grandTotal.toFixed(2)}</span></td>
           </tr>
         </table>
@@ -547,14 +513,13 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
       <div class="barcode" style="margin-top:16px;">||||| ${orderNumber} |||||</div>
       <div style="text-align:center;font-size:9px;color:#666;margin-top:8px;">
-        DD form Digital Version v3 -02-06-2026 | Order: ${orderNumber} | Printed: ${new Date().toISOString()}<br/>
+        GB form Digital Version v3 -02-06-2026 | Order: ${orderNumber} | Printed: ${new Date().toISOString()}<br/>
         Liberty Holding Group, L.L.C. dba The Dream Palace<br/>
         815 N. Scottsdale Road, Tempe, AZ 85281 | (602) 536-0372
       </div>
     </body></html>`;
   };
 
-  // ═══════════════ STEP 0: ORDER FORM ═══════════════
   if (step === 0) {
     return (
       <div className="space-y-4">
@@ -564,7 +529,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           <Badge className="mt-1 bg-purple-500/20 text-purple-400 border-purple-500/40 font-mono text-xs">{orderNumber}</Badge>
         </div>
 
-        {/* Rate Limit Guard */}
         <RateLimitGuard 
           staffEmail={user?.email} 
           onStatusChange={(rateLimitStatus) => {
@@ -574,7 +538,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           }}
         />
 
-        {/* Customer / Purchaser + Card Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="bg-gray-900/60 border-gray-700">
             <CardHeader className="pb-2"><CardTitle className="text-sm text-cyan-400">Customer / Purchaser</CardTitle></CardHeader>
@@ -606,12 +569,10 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           </Card>
         </div>
 
-        {/* Warning */}
         <div className="text-center py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <p className="text-red-400 font-bold text-sm">Dream Dollars (Club Currency) are not legal tender</p>
+          <p className="text-red-400 font-bold text-sm">GlyphBucks (Club Currency) are not legal tender</p>
         </div>
 
-        {/* Line Items Table */}
         <Card className="bg-gray-900/60 border-gray-700">
           <CardContent className="pt-4">
             <div className="overflow-x-auto -mx-4 px-4">
@@ -643,19 +604,15 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
               </table>
             </div>
 
-            {/* Totals */}
             <div className="mt-4 space-y-2 max-w-sm ml-auto">
-              {/* Show Price (Dream Dollars) */}
               <div className="flex justify-between items-center">
-                <Label className="text-xs text-green-400 font-bold">Show Price / Dream Dollar Value *</Label>
-                <Input type="number" step="100" value={dreamDollarValue || ''} onChange={e => setDreamDollarValue(parseFloat(e.target.value) || 0)} className="w-28 h-8 bg-gray-800 border-gray-700 text-right text-xs" />
+                <Label className="text-xs text-green-400 font-bold">Show Price / GlyphBucks Value *</Label>
+                <Input type="number" step="100" value={glyphbucksValue || ''} onChange={e => setGlyphbucksValue(parseFloat(e.target.value) || 0)} className="w-28 h-8 bg-gray-800 border-gray-700 text-right text-xs" />
               </div>
-              {/* 30% Processing Fee — auto-calculated, read-only */}
               <div className="flex justify-between text-xs">
                 <span className="text-gray-400">30% Processing Fee:</span>
                 <span className="text-yellow-400 font-mono">${processingSurcharge.toFixed(2)}</span>
               </div>
-              {/* Waitress Tip — customer enters */}
               <div className="flex justify-between items-center">
                 <Label className="text-xs text-pink-400">Waitress Tip (Customer Decides)</Label>
                 <Input type="number" step="1" value={waitressTip || ''} onChange={e => setWaitressTip(parseFloat(e.target.value) || 0)} className="w-28 h-8 bg-gray-800 border-pink-500/40 text-right text-xs" placeholder="0.00" />
@@ -674,7 +631,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           </CardContent>
         </Card>
 
-        {/* Collapsible Contract Preview */}
         <Card className="bg-gray-900/60 border-amber-500/30">
           <button
             onClick={() => setContractPreviewOpen(p => !p)}
@@ -702,7 +658,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     );
   }
 
-  // ═══════════════ STEP 1: FULL CONTRACT SCROLL ═══════════════
   if (step === 1) {
     return (
       <div className="space-y-4">
@@ -717,7 +672,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           <p>You must read ALL sections before you can proceed to sign.</p>
         </div>
 
-        {/* Full contract — tall scroll area with bottom detection */}
         <Card className="bg-gray-900/60 border-amber-500/30">
           <CardContent className="p-0">
             <div
@@ -752,7 +706,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     );
   }
 
-  // ═══════════════ STEP 2: CLICKWRAP ACKNOWLEDGMENTS ═══════════════
   if (step === 2) {
     return (
       <div className="space-y-4">
@@ -762,7 +715,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           <p className="text-xs text-gray-400">Order: {orderNumber} | {customerName} | ${grandTotal.toFixed(2)}</p>
         </div>
 
-        {/* Acknowledgments */}
         <Card className="bg-gray-900/60 border-amber-500/30">
           <CardHeader className="pb-2"><CardTitle className="text-sm text-amber-400">Check ALL to Acknowledge *</CardTitle></CardHeader>
           <CardContent className="space-y-3">
@@ -788,7 +740,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     );
   }
 
-  // ═══════════════ STEP 3: BIOMETRICS + GUEST SIGNATURE ═══════════════
   if (step === 3) {
     return (
       <div className="space-y-4">
@@ -800,7 +751,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           <p className="text-xs text-gray-400">Order: {orderNumber} | {customerName}</p>
         </div>
 
-        {/* Backend Error Display */}
         {backendError && (
           <ErrorRecoveryPanel
             title="Payment Processing Failed"
@@ -817,13 +767,11 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
         <Card className="bg-gray-900/60 border-green-500/30">
           <CardContent className="pt-4 space-y-4">
-            {/* Signature */}
             <div>
               <Label className="text-sm font-bold text-white">Customer Signature — Type full name *</Label>
               <Input value={signature} onChange={e => setSignature(e.target.value)} placeholder={customerName} className="text-lg text-center font-bold bg-gray-800 border-gray-700" style={{ fontFamily: 'cursive, serif' }} />
             </div>
 
-            {/* Thumbprint */}
             <div>
               <Label className="flex items-center gap-2"><Fingerprint className="w-4 h-4 text-purple-400" /> Thumb Print *</Label>
               <input ref={thumbRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFileUpload(e.target.files[0], "thumb")} />
@@ -840,7 +788,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
               )}
             </div>
 
-            {/* Guest Photo */}
             <div>
               <Label className="flex items-center gap-2"><Camera className="w-4 h-4 text-green-400" /> Guest Photo (front-facing) *</Label>
               <input ref={photoRef} type="file" accept="image/*" capture="user" className="hidden" onChange={e => handleFileUpload(e.target.files[0], "photo")} />
@@ -857,7 +804,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
               )}
             </div>
 
-            {/* ID Photos */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Government ID — Front *</Label>
@@ -887,7 +833,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
           </CardContent>
         </Card>
 
-        {/* Payment Status */}
         {paymentProcessing && (
           <Card className="bg-blue-900/20 border-blue-500/40">
             <CardContent className="p-4 flex items-center gap-3">
@@ -929,7 +874,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     );
   }
 
-  // ═══════════════ STEP 4: STAFF SIGN ═══════════════
   if (step === 4) {
     return (
       <div className="space-y-4">
@@ -947,7 +891,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
               <div className="text-xs text-gray-400">{customerName} — ${grandTotal.toFixed(2)} — Biometrics captured</div>
               {batchCreated && (
                 <div className="text-xs text-green-300 mt-1">
-                  ✓ Dream Dollar Batch: {batchCreated.batch_id} — {batchCreated.total_face_value ? `${Math.round(batchCreated.total_face_value / batchCreated.denominations.reduce((s, d) => s + d.quantity, 0))} bills` : 'Created'}
+                  ✓ GlyphBucks Batch: {batchCreated.batch_id} — {batchCreated.total_face_value ? `${Math.round(batchCreated.total_face_value / batchCreated.denominations.reduce((s, d) => s + d.quantity, 0))} bills` : 'Created'}
                 </div>
               )}
             </div>
@@ -975,15 +919,11 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
     );
   }
 
-  // ─── Compute entertainer payout from this contract ───
-  // Entertainers receive 50% of Dream Dollar face value when they redeem the bills
-  const entertainerDDPayout = dreamDollarValue * 0.5;
-  // Line items: room fee portion goes to entertainer (room_fee per line, split if needed)
+  const entertainerGBPayout = glyphbucksValue * 0.5;
   const totalRoomFees = lineItems.reduce((s, li) => s + (li.room_fee || 0), 0);
   const entertainersOnContract = lineItems.filter(li => li.room_ent_dur_id.trim()).map(li => li.room_ent_dur_id.trim());
   const uniqueEntertainers = [...new Set(entertainersOnContract)];
 
-  // ═══════════════ STEP 5: PRINT + RESCAN ═══════════════
   return (
     <div className="space-y-4">
       <div className="text-center">
@@ -992,20 +932,19 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
         <Badge className="bg-green-500/20 text-green-400 border-green-500/40 font-mono">{orderNumber}</Badge>
       </div>
 
-      {/* ── Entertainer Receipt Summary ── */}
       <div className="rounded-xl p-4 space-y-3" style={{ background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.35)' }}>
         <div className="flex items-center gap-2 text-pink-400 font-black text-sm uppercase tracking-widest">
           <Music className="w-4 h-4" /> Entertainer Show Receipt
         </div>
-        <div className="text-[10px] text-gray-500">This is the entertainer's separate earnings from this VIP contract — paid via Dream Dollar redemption, independent of floor tips.</div>
+        <div className="text-[10px] text-gray-500">This is the entertainer's separate earnings from this VIP contract — paid via GlyphBucks redemption, independent of floor tips.</div>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-lg p-3" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(236,72,153,0.2)' }}>
-            <div className="text-[10px] text-gray-500 uppercase tracking-widest">Dream Dollar Face Value</div>
-            <div className="text-xl font-black font-mono text-white">${dreamDollarValue.toFixed(2)}</div>
+            <div className="text-[10px] text-gray-500 uppercase tracking-widest">GlyphBucks Face Value</div>
+            <div className="text-xl font-black font-mono text-white">${glyphbucksValue.toFixed(2)}</div>
           </div>
           <div className="rounded-lg p-3" style={{ background: 'rgba(236,72,153,0.1)', border: '1px solid rgba(236,72,153,0.3)' }}>
             <div className="text-[10px] text-gray-500 uppercase tracking-widest">Entertainer Receives (50%)</div>
-            <div className="text-xl font-black font-mono text-pink-400">${entertainerDDPayout.toFixed(2)}</div>
+            <div className="text-xl font-black font-mono text-pink-400">${entertainerGBPayout.toFixed(2)}</div>
           </div>
         </div>
         {totalRoomFees > 0 && (
@@ -1032,7 +971,7 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
 
       {!printed ? (
         <Button onClick={handlePrint} className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-600 font-bold text-lg">
-          <Printer className="w-5 h-5 mr-2" /> Print Contract + Club Currency (${dreamDollarValue})
+          <Printer className="w-5 h-5 mr-2" /> Print Contract + Club Currency (${glyphbucksValue})
         </Button>
       ) : (
         <>
@@ -1040,7 +979,6 @@ export default function DreamPalaceContract({ onComplete, onCurrencyPrint }) {
             <CheckCircle2 className="w-4 h-4" /> Printed. Now rescan signed hardcopy.
           </div>
 
-          {/* Rescan - Using HardcopyRescan Component */}
           <HardcopyRescan
             serialNumber={orderNumber}
             contractId={savedContractId}
