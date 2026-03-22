@@ -35,7 +35,7 @@ import OwnerAnalytics from "../components/nups/OwnerAnalytics.jsx";
 import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView";
 import ProductManagement from "../components/nups/ProductManagement.jsx";
 import InventoryManagement from "../components/nups/InventoryManagement.jsx";
-import DreamPalaceContract from "../components/nups/DreamPalaceContract.jsx";
+import GlyphBucksContract from "../components/nups/GlyphBucksContract.jsx";
 import TipBreakdown from "../components/nups/TipBreakdown.jsx";
 import DailySummary from "../components/nups/DailySummary.jsx";
 import CashDrawerLog from "../components/nups/CashDrawerLog.jsx";
