@@ -67,7 +67,7 @@ import ContentGenerator from './pages/ContentGenerator';
 import ContractArchive from './pages/ContractArchive';
 import ContractSearch from './pages/ContractSearch';
 import Cookies from './pages/Cookies';
-import DreamDollarHub from './pages/DreamDollarHub';
+import GlyphBucksHub from './pages/GlyphBucksHub';
 import DreamTeam from './pages/DreamTeam';
 import EmergencyBackup from './pages/EmergencyBackup';
 import EntertainerCheckIn from './pages/EntertainerCheckIn';
@@ -157,7 +157,7 @@ export const PAGES = {
     "ContractArchive": ContractArchive,
     "ContractSearch": ContractSearch,
     "Cookies": Cookies,
-    "DreamDollarHub": DreamDollarHub,
+    "GlyphBucksHub": GlyphBucksHub,
     "DreamTeam": DreamTeam,
     "EmergencyBackup": EmergencyBackup,
     "EntertainerCheckIn": EntertainerCheckIn,
