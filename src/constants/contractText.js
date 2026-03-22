@@ -4,9 +4,7 @@
  * DO NOT duplicate contract text anywhere else.
  */
 
-import { GLYPHLOCK_DISCLAIMER_FULL } from './legalDisclaimer';
-
-const GLYPHLOCK_DISCLAIMER = GLYPHLOCK_DISCLAIMER_FULL;
+import { GLYPHLOCK_DISCLAIMER } from './legalDisclaimer';
 
 export const ENTERTAINER_LICENSE_AGREEMENT = (venue) => `INDEPENDENT ENTERTAINER LICENSE AGREEMENT
 
