@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ import ErrorRecoveryPanel from "./ErrorRecoveryPanel";
 import OfflineIndicator from "./OfflineIndicator";
 import HardcopyRescan from "./HardcopyRescan";
 import RateLimitGuard from "./validation/RateLimitGuard";
+import { GLYPHBUCKS_PURCHASE_AGREEMENT } from '@/constants/contractText';
 
 const FULL_CONTRACT_TEXT = `1. Orders
 Liberty Holding Group, L.L.C., and Liberty Entertainment Group L.L.C doing business as The Dream Palace [club/Bar] ("we," "our," or "us"), agrees to provide you ("you" or "your"), the customer named in the attached Order / purchase Invoice (the "Order"), with the services, and products ("Services and Products") listed in the Order. GlyphBucks (Club currency). The independent entertainer contractors ("Entertainers") at our Dream Palace Gentleman's Club located at 815 N. Scottsdale Road in Tempe, Arizona ("Club/Bar"), are independent entertainer contractors and are not our employees. You may independently arrange with Entertainers for services not provided by us, provided those services are legal. Entertainers do not have authority to contract for or bind us in any manner.
@@ -64,6 +66,13 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const [step, setStep] = useState(0);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+
+  const { data: venues } = useQuery({
+    queryKey: ['venues'],
+    queryFn: () => base44.entities.Venue.list(),
+    initialData: []
+  });
+  const currentVenue = venues?.[0] || { name: 'Venue', address: '', age_requirement: 18 };
 
   useEffect(() => {
     (async () => {
@@ -645,7 +654,15 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           {contractPreviewOpen && (
             <CardContent className="pt-0 pb-4">
               <div className="bg-black/60 border border-gray-700 rounded-lg p-4 overflow-y-auto text-xs text-gray-300 leading-relaxed whitespace-pre-wrap font-mono" style={{ maxHeight: '50vh' }}>
-                {FULL_CONTRACT_TEXT}
+                {GLYPHBUCKS_PURCHASE_AGREEMENT(currentVenue, {
+                  uuid: orderNumber,
+                  timestamp: new Date().toLocaleString(),
+                  customer_name: customerName,
+                  total: grandTotal.toFixed(2),
+                  payment_method: 'Card',
+                  approval_code: approvalCode || 'PENDING',
+                  glyphbucks_serials: 'See batch after signing'
+                })}
               </div>
             </CardContent>
           )}
@@ -684,7 +701,15 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
                 }
               }}
             >
-              {FULL_CONTRACT_TEXT}
+              {GLYPHBUCKS_PURCHASE_AGREEMENT(currentVenue, {
+                uuid: orderNumber,
+                timestamp: new Date().toLocaleString(),
+                customer_name: customerName,
+                total: grandTotal.toFixed(2),
+                payment_method: 'Card',
+                approval_code: approvalCode || 'PENDING',
+                glyphbucks_serials: 'See batch after signing'
+              })}
             </div>
           </CardContent>
         </Card>
