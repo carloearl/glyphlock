@@ -9,14 +9,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // RBAC: Only staff/admin can create Dream Dollar sales
     if (!['admin', 'manager', 'staff'].includes(user.role)) {
       return Response.json({ 
-        error: 'Forbidden: Staff access required to process Dream Dollar sales' 
+        error: 'Forbidden: Staff access required to process GlyphBucks sales' 
       }, { status: 403 });
     }
 
-    // SECURITY: Get venue_id from session, not request body
     const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
     if (!sessionVenue.data.success) {
       return Response.json({ 
@@ -29,7 +27,7 @@ Deno.serve(async (req) => {
     const {
       customer_name,
       customer_identity_id,
-      denominations, // [{ denomination: 20, quantity: 5 }, ...]
+      denominations,
       surcharge_rate = 0.30,
       approval_code,
       processor_reference,
@@ -37,7 +35,6 @@ Deno.serve(async (req) => {
       card_last_four
     } = payload;
 
-    // FRAUD PREVENTION: Validate inputs server-side
     if (!customer_name || !denominations || !Array.isArray(denominations)) {
       return Response.json({ error: 'Invalid request: missing required fields' }, { status: 400 });
     }
@@ -46,7 +43,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid payment: missing approval code or processor reference' }, { status: 400 });
     }
 
-    // FRAUD PREVENTION: Validate denominations are real values
     const validDenoms = [1, 5, 10, 20, 50, 100];
     for (const d of denominations) {
       if (!validDenoms.includes(d.denomination) || d.quantity <= 0 || d.quantity > 1000) {
@@ -56,8 +52,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // FRAUD PREVENTION: Check for duplicate processor_reference (replay attack)
-    const existingBatch = await base44.asServiceRole.entities.DreamDollarBatch.filter({
+    const existingBatch = await base44.asServiceRole.entities.GlyphBucksBatch.filter({
       processor_reference,
       venue_id
     }, null, 1);
@@ -70,7 +65,6 @@ Deno.serve(async (req) => {
       }, { status: 409 });
     }
 
-    // Calculate totals SERVER-SIDE (never trust client)
     let total_face_value = 0;
     const processed_denominations = denominations.map(d => {
       const total_value = d.denomination * d.quantity;
@@ -85,14 +79,11 @@ Deno.serve(async (req) => {
     const surcharge_amount = total_face_value * surcharge_rate;
     const total_charged = total_face_value + surcharge_amount;
 
-    // Create batch ID (collision-resistant)
-    const batch_id = `DD-${Date.now()}-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
+    const batch_id = `GB-${Date.now()}-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
 
-    // CRITICAL: Create DreamDollarBatch record
-    // If this fails after payment succeeded, system flags RECONCILIATION_NEEDED
     let batch;
     try {
-      batch = await base44.asServiceRole.entities.DreamDollarBatch.create({
+      batch = await base44.asServiceRole.entities.GlyphBucksBatch.create({
       batch_id,
       venue_id,
       denominations: processed_denominations,
@@ -107,15 +98,13 @@ Deno.serve(async (req) => {
       issued_by: user.email
       });
     } catch (dbError) {
-      // CRITICAL: Payment succeeded but DB write failed
-      // Flag for immediate reconciliation
       await base44.asServiceRole.entities.AuditEvent.create({
         event_id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
         actor_id: user.email,
         actor_role: user.role,
         venue_id,
-        entity_type: 'DreamDollarBatch',
+        entity_type: 'GlyphBucksBatch',
         entity_id: processor_reference,
         action: 'CREATE',
         severity: 'CRITICAL',
@@ -125,12 +114,11 @@ Deno.serve(async (req) => {
       throw new Error('CRITICAL: Payment processed but record creation failed. Contact support immediately with code: ' + processor_reference);
     }
 
-    // Generate serial numbers for each bill
     const bills = [];
     for (const denom of processed_denominations) {
       for (let i = 0; i < denom.quantity; i++) {
         const serial_number = generateSerialNumber();
-        const barcode_number = `DD${serial_number}`;
+        const barcode_number = `GB${serial_number}`;
         
         bills.push({
           serial_number,
@@ -145,13 +133,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Bulk create bills (atomic — all or nothing)
     let created_bills;
     try {
-      created_bills = await base44.asServiceRole.entities.DreamDollarBill.bulkCreate(bills);
+      created_bills = await base44.asServiceRole.entities.GlyphBucksBill.bulkCreate(bills);
     } catch (billError) {
-      // ROLLBACK: Delete batch if bill creation fails
-      await base44.asServiceRole.entities.DreamDollarBatch.delete(batch.id);
+      await base44.asServiceRole.entities.GlyphBucksBatch.delete(batch.id);
       
       await base44.asServiceRole.entities.AuditEvent.create({
         event_id: crypto.randomUUID(),
@@ -159,7 +145,7 @@ Deno.serve(async (req) => {
         actor_id: user.email,
         actor_role: user.role,
         venue_id,
-        entity_type: 'DreamDollarBill',
+        entity_type: 'GlyphBucksBill',
         entity_id: batch_id,
         action: 'CREATE',
         severity: 'CRITICAL',
@@ -169,7 +155,6 @@ Deno.serve(async (req) => {
       throw new Error('Bill generation failed — batch rolled back. Payment may need refund. Code: ' + processor_reference);
     }
 
-    // Create barcode registry entries
     const barcode_entries = [
       {
         barcode_id: `BATCH-${batch_id}`,
@@ -194,14 +179,13 @@ Deno.serve(async (req) => {
 
     await base44.asServiceRole.entities.BarcodeRegistry.bulkCreate(barcode_entries);
 
-    // Create audit log (IMMUTABLE)
     await base44.asServiceRole.entities.AuditEvent.create({
       event_id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       actor_id: user.email,
       actor_role: user.role,
       venue_id,
-      entity_type: 'DreamDollarBatch',
+      entity_type: 'GlyphBucksBatch',
       entity_id: batch_id,
       action: 'CREATE',
       after_state: JSON.stringify({ 
@@ -212,7 +196,7 @@ Deno.serve(async (req) => {
         processor_reference
       }),
       severity: 'INFO',
-      description: `Dream Dollar sale created: ${bills.length} bills, face value $${total_face_value}, charged $${total_charged}`
+      description: `GlyphBucks sale created: ${bills.length} bills, face value $${total_face_value}, charged $${total_charged}`
     });
 
     return Response.json({
@@ -223,9 +207,8 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    // SECURITY: Log error to audit without exposing internals to client
     const errorId = crypto.randomUUID();
-    console.error(`[${errorId}] Dream Dollar sale error:`, error);
+    console.error(`[${errorId}] GlyphBucks sale error:`, error);
     
     return Response.json({ 
       error: 'Transaction processing failed',
@@ -236,16 +219,14 @@ Deno.serve(async (req) => {
 });
 
 function generateSerialNumber() {
-  // Generate cryptographically unique 12-digit serial: YYYYMMDD + 4 secure random digits
   const date = new Date();
   const dateStr = date.getFullYear().toString() +
                   (date.getMonth() + 1).toString().padStart(2, '0') +
                   date.getDate().toString().padStart(2, '0');
   
-  // Use crypto.getRandomValues for security
   const randomArray = new Uint32Array(1);
   crypto.getRandomValues(randomArray);
-  const random = (randomArray[0] % 9000) + 1000; // 1000-9999
+  const random = (randomArray[0] % 9000) + 1000;
   
   return `${dateStr}${random}`;
 }
