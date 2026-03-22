@@ -63,7 +63,7 @@ TERMS AND CONDITIONS
 The customer ("Guest") is granted access to VIP Room ${room_number} for the duration specified above. Room access is contingent upon meeting the minimum spend requirement and compliance with all club policies.
 
 2. Minimum Spend Requirement
-Guest agrees to a minimum spend of $${minimum_spend.toFixed(2)} for use of the VIP room. This amount must be satisfied through purchase of club services, beverages, or GlyphBucks (club currency). Failure to meet minimum spend will result in a charge for the difference.
+Guest agrees to a minimum spend of $${minimumSpend.toFixed(2)} for use of the VIP room. This amount must be satisfied through purchase of club services, beverages, or GlyphBucks (club currency). Failure to meet minimum spend will result in a charge for the difference.
 
 3. Independent Contractors
 All entertainers at ${venueConfig.name} are independent contractors and not employees of the venue. Any arrangements between Guest and entertainers for services are independent agreements. The venue is not responsible for entertainer services or conduct.
