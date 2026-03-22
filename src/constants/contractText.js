@@ -4,6 +4,8 @@
  * DO NOT duplicate contract text anywhere else.
  */
 
+import { GLYPHLOCK_DISCLAIMER } from './legalDisclaimer';
+
 export const ENTERTAINER_LICENSE_AGREEMENT = (venue) => `INDEPENDENT ENTERTAINER LICENSE AGREEMENT
 
 THIS INDEPENDENT ENTERTAINER LICENSE AGREEMENT ("Agreement") is entered into as of the date of execution set forth below ("Effective Date"), by and between:
@@ -91,6 +93,9 @@ ARTICLE VIII — GENERAL PROVISIONS
 8.3 If any provision is held invalid or unenforceable, the remaining provisions continue in full force.
 
 BY EXECUTING THIS AGREEMENT ELECTRONICALLY THROUGH GLYPHLOCK NUPS, ENTERTAINER ACKNOWLEDGES THAT SHE HAS READ THIS ENTIRE AGREEMENT, UNDERSTANDS ITS TERMS, AND AGREES TO BE LEGALLY BOUND BY ALL PROVISIONS.
+
+────────────────────────────────────────────
+${GLYPHLOCK_DISCLAIMER}
 `;
 
 export const VIP_ROOM_SERVICE_AGREEMENT = (venue, booking) => `VIP ROOM SERVICE AGREEMENT
@@ -138,6 +143,9 @@ Guest assumes all risks associated with attendance at an entertainment venue. Gu
 Any dispute shall be resolved by binding arbitration in Maricopa County, Arizona under Arizona law. Guest waives any right to a jury trial and any right to bring claims as a class action.
 
 BY SIGNING BELOW, GUEST ACKNOWLEDGES HAVING READ THIS ENTIRE AGREEMENT AND VOLUNTARILY AGREES TO BE LEGALLY BOUND BY ALL PROVISIONS.
+
+────────────────────────────────────────────
+${GLYPHLOCK_DISCLAIMER}
 `;
 
 export const GLYPHBUCKS_PURCHASE_AGREEMENT = (venue, transaction) => `GLYPHBUCKS CLUB CURRENCY PURCHASE AGREEMENT
@@ -186,4 +194,7 @@ GlyphLock LLC operates the technology platform facilitating this transaction and
 Any dispute shall be resolved by binding arbitration in Maricopa County, Arizona under Arizona law. Customer waives any right to a jury trial and any right to bring claims as part of a class action.
 
 BY SIGNING BELOW, CUSTOMER ACKNOWLEDGES RECEIPT OF GLYPHBUCKS AND AGREES TO BE LEGALLY BOUND BY ALL TERMS ABOVE.
+
+────────────────────────────────────────────
+${GLYPHLOCK_DISCLAIMER}
 `;

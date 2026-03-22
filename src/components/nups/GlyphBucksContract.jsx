@@ -524,7 +524,8 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       <div style="text-align:center;font-size:9px;color:#666;margin-top:8px;">
         GB form Digital Version v3 -02-06-2026 | Order: ${orderNumber} | Printed: ${new Date().toISOString()}<br/>
         Liberty Holding Group, L.L.C. dba The Dream Palace<br/>
-        815 N. Scottsdale Road, Tempe, AZ 85281 | (602) 536-0372
+        815 N. Scottslade Road, Tempe, AZ 85281 | (602) 536-0372<br/>
+        <div style="margin-top:8px;font-size:8px;color:#999;">GlyphLock LLC is a technology platform licensor only. GlyphLock LLC is not the venue operator, employer, entertainment provider, or merchant of record. All venue operations, patron relationships, entertainer relationships, and financial transactions are the sole responsibility of the licensed venue operator.</div>
       </div>
     </body></html>`;
   };
