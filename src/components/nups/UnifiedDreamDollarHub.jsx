@@ -1,5 +1,5 @@
 /**
- * UnifiedDreamDollarHub — Merged Dream Dollar operations
+ * UnifiedDreamDollarHub — Merged GlyphBucks operations
  * Combines: New Sales, Currency Press, Bill Redemption, Transaction Search, Contract Archive, Fraud Analytics
  */
 import React, { useState } from 'react';
