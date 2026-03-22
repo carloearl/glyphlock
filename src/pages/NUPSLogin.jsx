@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Shield, LogIn, Eye, EyeOff, Loader2, AlertCircle, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
+import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
 
 // Role → destination page mapping
 const ROLE_DESTINATIONS = {
@@ -166,6 +167,10 @@ export default function NUPSLogin() {
         >
           ← Back to NUPS Home
         </button>
+
+        <div className="text-center text-[10px] text-gray-700 mt-6 max-w-md mx-auto">
+          {GLYPHLOCK_DISCLAIMER_SHORT}
+        </div>
       </div>
     </div>
   );
