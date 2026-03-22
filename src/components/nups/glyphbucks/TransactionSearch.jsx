@@ -88,14 +88,12 @@ export default function TransactionSearch({ venue_id }) {
         </CardContent>
       </Card>
 
-      {/* Results Display */}
       {results && (
         <Card className="glyph-glass-card">
           <CardHeader>
             <CardTitle>Transaction Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Summary */}
             <div className="p-4 rounded-lg bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Transaction ID:</span>
@@ -121,7 +119,6 @@ export default function TransactionSearch({ venue_id }) {
               </div>
             </div>
 
-            {/* Order Details */}
             {results.records.order && (
               <div className="space-y-2">
                 <div className="font-semibold flex items-center gap-2">
@@ -139,7 +136,6 @@ export default function TransactionSearch({ venue_id }) {
               </div>
             )}
 
-            {/* Batch Details */}
             {results.records.batch && (
               <div className="space-y-2">
                 <div className="font-semibold">Batch Information</div>
@@ -153,7 +149,6 @@ export default function TransactionSearch({ venue_id }) {
               </div>
             )}
 
-            {/* Verification Media */}
             {results.records.verification_media.length > 0 && (
               <div className="space-y-2">
                 <div className="font-semibold flex items-center gap-2">
@@ -183,7 +178,6 @@ export default function TransactionSearch({ venue_id }) {
               </div>
             )}
 
-            {/* No Results */}
             {results.summary.bills_issued === 0 && (
               <div className="text-center py-8 text-gray-400">
                 <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />

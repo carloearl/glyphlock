@@ -15,7 +15,6 @@ export default function BillRedemptionScanner() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  // RBAC: Check user permissions on mount
   useEffect(() => {
     (async () => {
       try {
@@ -33,7 +32,6 @@ export default function BillRedemptionScanner() {
     })();
   }, []);
 
-  // Fetch active entertainers
   const { data: entertainers = [], isLoading } = useQuery({
     queryKey: ['active-entertainers'],
     queryFn: async () => {
@@ -61,22 +59,20 @@ export default function BillRedemptionScanner() {
   }
 
   if (!user) {
-    return null; // Redirecting
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-black text-white p-4 sm:p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <ScanLine className="w-8 h-8 text-cyan-400" />
-            <h1 className="text-2xl font-bold text-white">Dream Dollar Redemption</h1>
+            <h1 className="text-2xl font-bold text-white">GlyphBucks Redemption</h1>
           </div>
           <p className="text-sm text-gray-400">Scan bills to calculate contractor payout (50% redemption)</p>
         </div>
 
-        {/* Contractor Selection */}
         {!selectedContractor ? (
           <Card className="bg-gray-900/60 border-pink-500/30">
             <CardHeader className="pb-3">
@@ -119,7 +115,6 @@ export default function BillRedemptionScanner() {
           </Card>
         ) : (
           <>
-            {/* Selected Contractor Header */}
             <Card className="bg-pink-900/20 border-pink-500/30">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -140,7 +135,6 @@ export default function BillRedemptionScanner() {
               </CardContent>
             </Card>
 
-            {/* Bill Scanner */}
             <BillScanner
               contractorId={selectedContractor.id}
               contractorName={selectedContractor.name}
@@ -149,7 +143,6 @@ export default function BillRedemptionScanner() {
           </>
         )}
 
-        {/* Completed Payouts Today */}
         {completedPayouts.length > 0 && (
           <Card className="bg-gray-900/60 border-green-500/30">
             <CardHeader className="pb-3">

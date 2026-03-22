@@ -21,18 +21,15 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
   const [authorizedManager, setAuthorizedManager] = useState(null);
   const inputRef = useRef(null);
 
-  // Auto-focus input for continuous scanning
   useEffect(() => {
     inputRef.current?.focus();
   }, [scannedBills]);
 
-  // Handle barcode scanner input (HID keyboard wedge)
   useEffect(() => {
     let buffer = "";
     let timeout;
 
     const handleKeyPress = (e) => {
-      // Barcode scanners send Enter after the code
       if (e.key === "Enter" && buffer.length > 0) {
         e.preventDefault();
         handleScan(buffer.trim());
@@ -57,7 +54,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
       return;
     }
 
-    // Check network connectivity
     if (!navigator.onLine) {
       toast.error("No internet connection — cannot validate bill");
       setScannedBills(prev => [...prev, {
@@ -71,19 +67,17 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
     setValidating(true);
     
     try {
-      // Validate bill via backend (single-bill validation)
-      const response = await base44.functions.invoke('redeemDreamDollarBills', {
+      const response = await base44.functions.invoke('redeemGlyphBucksBills', {
         contractor_id: contractorId,
         contractor_name: contractorName,
         serial_numbers: [serialNumber],
-        redemption_rate: 0.50, // 50% redemption rate
+        redemption_rate: 0.50,
         payment_method: "cash"
       });
 
       const data = response.data;
 
       if (data.success && data.bills_redeemed > 0) {
-        // Valid bill — add to scanned list
         const billData = data.payout.bills_redeemed[0];
         setScannedBills(prev => [...prev, {
           serial_number: serialNumber,
@@ -94,7 +88,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
         }]);
         toast.success(`✓ $${billData.denomination} bill validated — Payout: $${billData.redemption_amount}`);
       } else if (data.duplicates_detected > 0) {
-        // Already redeemed
         const dup = data.duplicate_bills[0];
         setScannedBills(prev => [...prev, {
           serial_number: serialNumber,
@@ -104,7 +97,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
         }]);
         toast.error("Bill already redeemed");
       } else {
-        // Invalid bill
         setScannedBills(prev => [...prev, {
           serial_number: serialNumber,
           status: "invalid",
@@ -144,7 +136,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
       toast.error("No valid bills to process");
       return;
     }
-    // Require manager PIN before finalizing
     setShowPINVerifier(true);
   };
 
@@ -189,12 +180,11 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
     <div className="space-y-4">
       <OfflineIndicator />
       
-      {/* Scanner Input */}
       <Card className="bg-gray-900/60 border-cyan-500/30">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <ScanLine className="w-5 h-5 text-cyan-400" />
-            <span className="text-cyan-400">Scan Dream Dollar Bills</span>
+            <span className="text-cyan-400">Scan GlyphBucks Bills</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -222,7 +212,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
         </CardContent>
       </Card>
 
-      {/* Scanned Bills List */}
       {scannedBills.length > 0 && (
         <Card className="bg-gray-900/60 border-purple-500/30">
           <CardHeader className="pb-3">
@@ -279,7 +268,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
         </Card>
       )}
 
-      {/* Manager PIN Verifier — shown when Finalize is requested */}
       {showPINVerifier && (
         <ManagerPINVerifier
           purpose={`authorize $${totalPayout.toFixed(2)} payout to ${contractorName}`}
@@ -288,7 +276,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
         />
       )}
 
-      {/* Payout Summary */}
       {validBills.length > 0 && !showPINVerifier && (
         <Card className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border-green-500/40">
           <CardContent className="pt-4 space-y-3">
@@ -305,7 +292,6 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
               <span className="font-mono text-2xl font-black text-green-400">${totalPayout.toFixed(2)}</span>
             </div>
 
-            {/* Manager approval status */}
             {authorizedManager ? (
               <div className="flex items-center gap-2 text-xs text-green-400 bg-green-900/20 border border-green-500/30 rounded-lg p-2">
                 <CheckCircle2 className="w-4 h-4" />

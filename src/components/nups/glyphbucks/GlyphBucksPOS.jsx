@@ -7,7 +7,7 @@ import { DollarSign, Plus, Minus, CreditCard } from 'lucide-react';
 
 const DENOMINATIONS = [1, 5, 10, 20, 50, 100];
 
-export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
+export default function GlyphBucksPOS({ venue_id, onSaleComplete }) {
   const [selections, setSelections] = useState(
     DENOMINATIONS.reduce((acc, denom) => ({ ...acc, [denom]: 0 }), {})
   );
@@ -33,7 +33,7 @@ export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
 
   const handleCreateSale = async () => {
     if (totalFaceValue === 0) {
-      alert('Please select Dream Dollar denominations');
+      alert('Please select GlyphBucks denominations');
       return;
     }
     if (!customerName.trim()) {
@@ -50,7 +50,7 @@ export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
           quantity: selections[denom]
         }));
 
-      const result = await base44.functions.invoke('createDreamDollarSale', {
+      const result = await base44.functions.invoke('createGlyphBucksSale', {
         venue_id,
         customer_name: customerName,
         denominations,
@@ -61,10 +61,9 @@ export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
       });
 
       if (result.data.success) {
-        alert(`Sale complete! ${result.data.total_bills} Dream Dollar bills issued.`);
+        alert(`Sale complete! ${result.data.total_bills} GlyphBucks bills issued.`);
         onSaleComplete?.(result.data);
         
-        // Reset form
         setSelections(DENOMINATIONS.reduce((acc, denom) => ({ ...acc, [denom]: 0 }), {}));
         setApprovalCode('');
         setProcessorRef('');
@@ -84,11 +83,10 @@ export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-cyan-400" />
-            Dream Dollar Sales
+            GlyphBucks Sales
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Customer Info */}
           <div>
             <label className="block text-sm font-medium mb-2">Customer Name</label>
             <Input
@@ -99,7 +97,6 @@ export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
             />
           </div>
 
-          {/* Denomination Selection */}
           <div>
             <label className="block text-sm font-medium mb-3">Select Denominations</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -133,10 +130,9 @@ export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
             </div>
           </div>
 
-          {/* Totals */}
           <div className="p-4 rounded-lg bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Dream Dollar Face Value:</span>
+              <span>GlyphBucks Face Value:</span>
               <span className="font-semibold">${totalFaceValue.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm text-cyan-400">
@@ -149,7 +145,6 @@ export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
             </div>
           </div>
 
-          {/* Payment Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium mb-2">Approval Code</label>
@@ -171,7 +166,6 @@ export default function DreamDollarPOS({ venue_id, onSaleComplete }) {
             </div>
           </div>
 
-          {/* Create Sale Button */}
           <Button
             onClick={handleCreateSale}
             disabled={loading || totalFaceValue === 0}
