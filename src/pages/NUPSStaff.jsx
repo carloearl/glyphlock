@@ -14,6 +14,7 @@ import TimeClock from "../components/nups/TimeClock.jsx";
 import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub";
 import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/SEOHead";
+import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 
 export default function NUPSStaff() {
   const navigate = useNavigate();
@@ -175,6 +176,10 @@ export default function NUPSStaff() {
             <TransactionHistory transactions={todayTransactions} showReceipt={true} />
           </TabsContent>
         </Tabs>
+
+        <footer className="text-center text-[10px] text-gray-700 py-6 border-t border-gray-800 mt-12">
+          {GLYPHLOCK_DISCLAIMER}
+        </footer>
       </div>
     </div>
   );
