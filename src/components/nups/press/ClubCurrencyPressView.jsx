@@ -161,15 +161,15 @@ export default function ClubCurrencyPressView() {
               <p className="text-xs text-gray-400">Complete customer contract and issue GlyphBucks bills</p>
             </div>
             <GlyphBucksContract
-              onComplete={() => toast.success("Contract archived and ready for printing")}
-              onCurrencyPrint={(amount, orderNum) => {
-                setCurrencyAmount(amount);
-                setCurrencyOrderNumber(orderNum);
-                setConfig(prev => ({ ...prev, denomination: String(amount) }));
-                setActiveTab("press");
-                toast.success(`$${amount} GlyphBucks queued → Switch to Print Bills tab`);
-              }}
-            />
+                onComplete={() => toast.success("Contract archived and ready for printing")}
+                onCurrencyPrint={(amount, orderNum) => {
+                  setCurrencyAmount(amount);
+                  setCurrencyOrderNumber(orderNum);
+                  setConfig(prev => ({ ...prev, denomination: String(amount) }));
+                  setActiveTab("press");
+                  toast.success(`$${amount} GlyphBucks queued → Switch to Print Bills tab`);
+                }}
+              />
           </div>
         </TabsContent>
 

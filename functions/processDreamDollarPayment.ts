@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
         customer_name,
         processed_by: user.email,
         venue_id,
-        order_type: 'dream_dollar_sale'
+        order_type: 'glyphbucks_sale'
       },
       receipt_email: customer_email || user.email,
       automatic_payment_methods: {

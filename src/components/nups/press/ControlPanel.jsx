@@ -226,7 +226,7 @@ export default function ControlPanel({
         <CardContent className="space-y-3">
           <div>
             <Label className="text-xs text-gray-400">Prefix</Label>
-            <Input value={config.serialPrefix} onChange={(e) => update("serialPrefix", e.target.value.toUpperCase())} placeholder="CC" className="mt-1 bg-gray-800 border-gray-700" maxLength={4} />
+            <Input value={config.serialPrefix} onChange={(e) => update("serialPrefix", e.target.value.toUpperCase())} placeholder="GB" className="mt-1 bg-gray-800 border-gray-700" maxLength={4} />
           </div>
           <div>
             <Label className="text-xs text-gray-400">Seed</Label>

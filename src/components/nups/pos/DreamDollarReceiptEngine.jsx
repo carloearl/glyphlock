@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Printer, Download } from 'lucide-react';
 
 /**
- * Professional itemized receipt engine for Dream Dollar transactions.
+ * Professional itemized receipt engine for GlyphBucks transactions.
  * Matches printed layout exactly — dynamic height expansion for variable item counts.
  */
 export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }) {
@@ -117,13 +117,13 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
             </div>
           </div>
 
-          {/* Itemized Dream Dollars */}
+          {/* Itemized GlyphBuckss */}
           <div className="section">
             <div className="section-title">DREAM DOLLARS PURCHASED</div>
             <div className="items">
               {batch.denominations?.map((item, idx) => (
                 <div key={idx} className="item">
-                  <span>{item.quantity}x ${item.denomination} Dream Dollar{item.quantity > 1 ? 's' : ''}</span>
+                  <span>{item.quantity}x ${item.denomination} GlyphBucks{item.quantity > 1 ? 's' : ''}</span>
                   <span>${item.total_value.toFixed(2)}</span>
                 </div>
               ))}
@@ -133,7 +133,7 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
           {/* Totals */}
           <div className="totals">
             <div className="row">
-              <span>Dream Dollar Face Value:</span>
+              <span>GlyphBucks Face Value:</span>
               <span>${batch.total_face_value?.toFixed(2) || '0.00'}</span>
             </div>
             <div className="row">
@@ -168,7 +168,7 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
           {/* Footer */}
           <div className="footer">
             <p>Thank you for your business!</p>
-            <p style={{ marginTop: '10px' }}>Dream Dollars are redeemable exclusively at Dream Palace venues.</p>
+            <p style={{ marginTop: '10px' }}>GlyphBuckss are redeemable exclusively at Dream Palace venues.</p>
             <p>Terms and conditions apply. Non-refundable.</p>
             <p style={{ marginTop: '10px', fontSize: '9px' }}>
               This receipt is your proof of purchase. Please retain for your records.
