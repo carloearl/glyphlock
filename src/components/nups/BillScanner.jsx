@@ -14,31 +14,47 @@ export default function BillScanner({ onScan }) {
   const [manualEntry, setManualEntry] = useState('');
   const [scanMode, setScanMode] = useState('hardware'); // 'hardware' | 'manual'
   const inputRef = useRef(null);
+  const hiddenInputRef = useRef(null);
 
-  // Hardware scanner detection (listens for rapid keypresses ending with Enter)
+  // Hardware scanner detection - KEYBOARD WEDGE HID INPUT
+  // Auto-focuses hidden input to capture rapid keystrokes ending in Enter
   React.useEffect(() => {
     if (scanMode !== 'hardware') return;
 
+    // Auto-focus hidden input for HID scanner
+    hiddenInputRef.current?.focus();
+
     let buffer = '';
-    let timeout;
+    let lastKeyTime = 0;
 
     const handleKeyPress = (e) => {
-      clearTimeout(timeout);
+      const now = Date.now();
+      
+      // Reset buffer if gap > 100ms (user typing vs scanner)
+      if (now - lastKeyTime > 100) {
+        buffer = '';
+      }
+      lastKeyTime = now;
 
       if (e.key === 'Enter') {
-        if (buffer.length > 8) { // Valid barcode length
-          onScan(buffer);
-          toast.success('Barcode scanned');
+        if (buffer.length >= 8) { // Valid barcode serial (8-12 digits)
+          e.preventDefault();
+          onScan(buffer.trim());
+          toast.success(`✅ Scanned: ${buffer.trim()}`);
+          buffer = '';
+          hiddenInputRef.current.value = '';
         }
-        buffer = '';
-      } else if (e.key.length === 1) {
+      } else if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
         buffer += e.key;
-        timeout = setTimeout(() => { buffer = ''; }, 100);
       }
     };
 
-    window.addEventListener('keypress', handleKeyPress);
-    return () => window.removeEventListener('keypress', handleKeyPress);
+    const hiddenInput = hiddenInputRef.current;
+    hiddenInput?.addEventListener('keypress', handleKeyPress);
+    
+    return () => {
+      hiddenInput?.removeEventListener('keypress', handleKeyPress);
+    };
   }, [scanMode, onScan]);
 
   const handleManualScan = () => {
@@ -79,11 +95,25 @@ export default function BillScanner({ onScan }) {
         </div>
 
         {scanMode === 'hardware' ? (
-          <div className="p-6 border-2 border-dashed rounded-lg text-center">
-            <Scan className="h-12 w-12 mx-auto text-slate-400 mb-2" />
-            <p className="text-sm text-slate-600">
-              Ready to scan. Position barcode under scanner.
-            </p>
+          <div className="relative">
+            {/* HIDDEN INPUT FOR USB HID BARCODE SCANNER (KEYBOARD WEDGE) */}
+            <input
+              ref={hiddenInputRef}
+              type="text"
+              autoFocus
+              className="absolute opacity-0 pointer-events-none"
+              style={{ width: 1, height: 1 }}
+              aria-label="Barcode scanner input"
+            />
+            <div className="p-6 border-2 border-dashed rounded-lg text-center bg-gradient-to-br from-cyan-900/20 to-purple-900/20 border-cyan-500/40">
+              <Scan className="h-12 w-12 mx-auto text-cyan-400 mb-2 animate-pulse" />
+              <p className="text-sm text-white font-medium">
+                ✅ Scanner Ready
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Position barcode under USB scanner
+              </p>
+            </div>
           </div>
         ) : (
           <div className="flex gap-2">

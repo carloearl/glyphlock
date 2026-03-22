@@ -15,8 +15,12 @@ export default function VerificationCameraCapture({ transaction_id, venue_id, on
   const [capturedMedia, setCapturedMedia] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [verificationType, setVerificationType] = useState('customer_signing');
+  const [stream, setStream] = useState(null);
+  const [cameraActive, setCameraActive] = useState(false);
 
   const fileInputRef = useRef();
+  const videoRef = useRef();
+  const canvasRef = useRef();
 
   const handleScanBarcode = () => {
     if (!contractBarcode.trim()) {
@@ -26,33 +30,111 @@ export default function VerificationCameraCapture({ transaction_id, venue_id, on
     setBarcodeScanned(true);
   };
 
-  const handleCaptureMedia = async (event) => {
+  // START LIVE WEBCAM STREAM
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: 1920, height: 1080 },
+        audio: false
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setCameraActive(true);
+    } catch (err) {
+      console.error('Camera access error:', err);
+      alert('Camera access denied. Please enable camera permissions.');
+    }
+  };
+
+  // STOP WEBCAM STREAM
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+      setCameraActive(false);
+    }
+  };
+
+  // SNAPSHOT FROM LIVE VIDEO TO CANVAS → BLOB → UPLOAD
+  const captureSnapshot = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+
+    setUploading(true);
+    try {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+      const formData = new FormData();
+      formData.append('file', blob, `verification_${Date.now()}.jpg`);
+
+      const uploadResult = await base44.integrations.Core.UploadFile({ file: blob });
+      const media_url = uploadResult.file_url;
+
+      const result = await base44.functions.invoke('captureVerificationMedia', {
+        transaction_id,
+        contract_barcode: contractBarcode,
+        venue_id,
+        media_type: 'photo',
+        verification_type: verificationType,
+        media_url,
+        geolocation: await getCurrentLocation()
+      });
+
+      if (result.data.success) {
+        setCapturedMedia(prev => [...prev, result.data.media]);
+        alert('✅ Photo captured and uploaded');
+        stopCamera();
+      }
+    } catch (err) {
+      console.error('Snapshot upload error:', err);
+      alert('Failed to upload photo: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // FILE INPUT FALLBACK (for devices without camera API support)
+  const handleFileUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
     try {
+      const uploadResult = await base44.integrations.Core.UploadFile({ file });
+      const media_url = uploadResult.file_url;
+
       const result = await base44.functions.invoke('captureVerificationMedia', {
         transaction_id,
         contract_barcode: contractBarcode,
         venue_id,
         media_type: file.type.startsWith('video') ? 'video' : 'photo',
         verification_type: verificationType,
-        media_file: file,
+        media_url,
         geolocation: await getCurrentLocation()
       });
 
       if (result.data.success) {
         setCapturedMedia(prev => [...prev, result.data.media]);
-        alert('✅ Media captured and uploaded successfully');
+        alert('✅ Media uploaded successfully');
       }
     } catch (err) {
-      console.error('Media capture error:', err);
-      alert('Failed to capture media: ' + err.message);
+      console.error('File upload error:', err);
+      alert('Failed to upload file: ' + err.message);
     } finally {
       setUploading(false);
     }
   };
+
+  useEffect(() => {
+    return () => stopCamera(); // Cleanup on unmount
+  }, []);
 
   const handleComplete = () => {
     if (capturedMedia.length === 0) {
@@ -137,32 +219,72 @@ export default function VerificationCameraCapture({ transaction_id, venue_id, on
               </select>
             </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*"
-              capture="environment"
-              onChange={handleCaptureMedia}
-              className="hidden"
-            />
-
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full btn-glow-blue h-20"
-            >
-              {uploading ? (
-                <>
-                  <Loader2 className="w-6 h-6 mr-2 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                <>
+            {/* LIVE WEBCAM PREVIEW */}
+            {cameraActive ? (
+              <div className="space-y-3">
+                <div className="relative rounded-lg overflow-hidden bg-black">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-auto"
+                  />
+                  <canvas ref={canvasRef} className="hidden" />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={captureSnapshot}
+                    disabled={uploading}
+                    className="flex-1 btn-glow-blue h-16"
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <Camera className="w-5 h-5 mr-2" />
+                        Capture Photo
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={stopCamera}
+                    variant="outline"
+                    className="px-6"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Button
+                  onClick={startCamera}
+                  className="w-full btn-glow-blue h-20"
+                >
                   <Camera className="w-6 h-6 mr-2" />
-                  Capture Verification Photo/Video
-                </>
-              )}
-            </Button>
+                  Open Live Camera
+                </Button>
+
+                {/* FALLBACK FILE INPUT */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  capture="environment"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Or Upload from Gallery
+                </Button>
+              </>
+            )}
 
             {/* Captured Media List */}
             {capturedMedia.length > 0 && (

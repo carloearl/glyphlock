@@ -14,6 +14,8 @@ export default function IDScannerCamera({ venue_id, onDataExtracted }) {
   const [scanning, setScanning] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [manualEntry, setManualEntry] = useState(false);
+  const [stream, setStream] = useState(null);
+  const [cameraActive, setCameraActive] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
     date_of_birth: '',
@@ -28,7 +30,96 @@ export default function IDScannerCamera({ venue_id, onDataExtracted }) {
   });
 
   const fileInputRef = useRef();
+  const videoRef = useRef();
+  const canvasRef = useRef();
 
+  // START LIVE WEBCAM STREAM
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: 1920, height: 1080 },
+        audio: false
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setCameraActive(true);
+    } catch (err) {
+      console.error('Camera access error:', err);
+      alert('Camera access denied. Please enable camera permissions.');
+    }
+  };
+
+  // STOP WEBCAM STREAM
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+      setCameraActive(false);
+    }
+  };
+
+  // SNAPSHOT FROM LIVE VIDEO → CANVAS → BLOB → OCR EXTRACTION
+  const captureIDSnapshot = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+
+    setUploading(true);
+    try {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+      
+      // In demo mode, generate mock data
+      if (isDemoMode()) {
+        setTimeout(() => {
+          const mockData = {
+            full_name: DemoDataGenerator.customerName(),
+            date_of_birth: '1990-01-01',
+            id_type: 'drivers_license',
+            id_number: DemoDataGenerator.idNumber(),
+            id_state: 'NV',
+            id_expiration: '2028-12-31',
+            address_line1: '123 Demo Street',
+            city: 'Las Vegas',
+            state: 'NV',
+            zip_code: '89101'
+          };
+          setFormData(mockData);
+          onDataExtracted?.(mockData);
+          setUploading(false);
+          stopCamera();
+        }, 1500);
+        return;
+      }
+
+      // Real mode: OCR extraction
+      const uploadResult = await base44.integrations.Core.UploadFile({ file: blob });
+      const result = await base44.functions.invoke('scanCustomerID', {
+        venue_id,
+        id_scan_front_url: uploadResult.file_url
+      });
+
+      if (result.data.success) {
+        const extracted = result.data.autofill_data;
+        setFormData(extracted);
+        onDataExtracted?.(extracted);
+        stopCamera();
+      }
+    } catch (err) {
+      console.error('ID scan error:', err);
+      alert('Failed to scan ID: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // FILE INPUT FALLBACK
   const handleFileUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -58,10 +149,10 @@ export default function IDScannerCamera({ venue_id, onDataExtracted }) {
       }
 
       // Real mode: upload and extract via AI
+      const uploadResult = await base44.integrations.Core.UploadFile({ file });
       const result = await base44.functions.invoke('scanCustomerID', {
         venue_id,
-        scan_data: formData, // Will be populated by OCR
-        id_scan_front_file: file
+        id_scan_front_url: uploadResult.file_url
       });
 
       if (result.data.success) {
@@ -76,6 +167,10 @@ export default function IDScannerCamera({ venue_id, onDataExtracted }) {
       setUploading(false);
     }
   };
+
+  useEffect(() => {
+    return () => stopCamera(); // Cleanup on unmount
+  }, []);
 
   const handleManualSubmit = () => {
     if (!formData.full_name || !formData.id_number) {
@@ -96,47 +191,99 @@ export default function IDScannerCamera({ venue_id, onDataExtracted }) {
       <CardContent className="space-y-4">
         {!manualEntry ? (
           <>
-            {/* Camera Upload */}
+            {/* LIVE WEBCAM ID SCANNING */}
             <div className="text-center space-y-4">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="w-full btn-glow-blue h-24 text-lg"
-              >
-                {uploading ? (
-                  <>
-                    <Loader2 className="w-6 h-6 mr-2 animate-spin" />
-                    Scanning ID...
-                  </>
-                ) : (
-                  <>
-                    <Camera className="w-6 h-6 mr-2" />
-                    Scan Driver License / ID
-                  </>
-                )}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => setManualEntry(true)}
-                className="w-full"
-              >
-                Enter Manually
-              </Button>
-
-              {isDemoMode() && (
-                <div className="text-xs text-yellow-400 p-2 bg-yellow-900/20 rounded border border-yellow-500/30">
-                  ⚠️ DEMO MODE: Will generate mock ID data
+              {cameraActive ? (
+                <div className="space-y-3">
+                  <div className="relative rounded-lg overflow-hidden bg-black border-2 border-cyan-500/50">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-auto"
+                    />
+                    <canvas ref={canvasRef} className="hidden" />
+                    <div className="absolute bottom-2 left-2 right-2 text-center text-xs text-white bg-black/50 p-2 rounded">
+                      Position ID card flat, well-lit, all text visible
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={captureIDSnapshot}
+                      disabled={uploading}
+                      className="flex-1 btn-glow-blue h-16"
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <Camera className="w-5 h-5 mr-2" />
+                          Capture ID
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={stopCamera}
+                      variant="outline"
+                      className="px-6"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  <Button
+                    onClick={startCamera}
+                    className="w-full btn-glow-blue h-24 text-lg"
+                  >
+                    <Camera className="w-6 h-6 mr-2" />
+                    Open Live Camera to Scan ID
+                  </Button>
+
+                  {/* FALLBACK FILE INPUT */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Or Upload from Gallery
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setManualEntry(true)}
+                    className="w-full"
+                  >
+                    Enter Manually
+                  </Button>
+
+                  {isDemoMode() && (
+                    <div className="text-xs text-yellow-400 p-2 bg-yellow-900/20 rounded border border-yellow-500/30">
+                      ⚠️ DEMO MODE: Will generate mock ID data
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </>
