@@ -61,6 +61,7 @@ import OfficialChecks from "./OfficialChecks";
 import VIPContractLifecycle from "../components/nups/VIPContractLifecycle.jsx";
 import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
 import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
+import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 
 export default function NUPSOwner() {
   const navigate = useNavigate();
@@ -641,6 +642,10 @@ export default function NUPSOwner() {
           </TabsContent>
 
         </Tabs>
+
+        <footer className="text-center text-[10px] text-gray-700 py-6 border-t border-gray-800 mt-12">
+          {GLYPHLOCK_DISCLAIMER}
+        </footer>
       </div>
     </div>
   );
