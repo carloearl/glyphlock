@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import {
   FlaskConical, Shield, DollarSign, Users, Clock, FileText,
   CreditCard, BarChart3, CheckCircle2, ArrowLeft, Play, Banknote,
-  UserCheck, Music, Crown, AlertTriangle, RefreshCw, Loader2
+  UserCheck, Music, Crown, AlertTriangle, RefreshCw, Loader2, Printer
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import DreamDollarReceiptEngine from "@/components/nups/pos/DreamDollarReceiptEngine";
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const MOCK_USERS = [
@@ -74,6 +75,8 @@ export default function NUPSSandbox() {
   const [lastTx, setLastTx] = useState(null);
   const [resetting, setResetting] = useState(false);
   const [resetDone, setResetDone] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [currentTransaction, setCurrentTransaction] = useState(null);
 
   const handleResetDemo = async () => {
     setResetting(true);
@@ -105,6 +108,39 @@ export default function NUPSSandbox() {
   const addItem = (item) => setCart(c => [...c, { ...item, id: Date.now() }]);
   const completeSale = () => {
     if (cart.length === 0) return;
+    
+    // Generate demo transaction and batch for receipt
+    const orderNum = `DEMO-${Date.now()}`;
+    const demoTx = {
+      order_number: orderNum,
+      customer_name: `Demo Customer ${Math.floor(Math.random() * 1000)}`,
+      created_date: new Date().toISOString(),
+      created_by: 'sandbox@demo.nups',
+      card_last_six: '****DEMO',
+      status: 'signed',
+      grand_total: total
+    };
+    
+    const demoBatch = {
+      batch_id: `BATCH-${Date.now()}`,
+      transaction_id: orderNum,
+      order_number: orderNum,
+      denominations: cart.map(i => ({
+        denomination: i.price,
+        quantity: 1,
+        total_value: i.price
+      })),
+      total_face_value: total,
+      surcharge_rate: 0.3,
+      surcharge_amount: total * 0.3,
+      total_charged: total * 1.3,
+      approval_code: `DEMO-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      batch_barcode: `DEMO-${orderNum}`,
+      status: 'issued'
+    };
+    
+    setCurrentTransaction({ transaction: demoTx, batch: demoBatch });
+    setShowReceipt(true);
     setLastTx({ items: cart.map(i => i.label).join(", "), total, time: new Date().toLocaleTimeString() });
     setCart([]);
   };
@@ -310,6 +346,23 @@ export default function NUPSSandbox() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Demo Receipt Modal */}
+      {showReceipt && currentTransaction && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-black border-2 border-violet-500/50 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white">Demo Receipt Preview</h2>
+              <Button onClick={() => setShowReceipt(false)} variant="ghost" size="sm">Close</Button>
+            </div>
+            <DreamDollarReceiptEngine 
+              transaction={currentTransaction.transaction}
+              batch={currentTransaction.batch}
+              onPrint={() => setShowReceipt(false)}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-white/[0.06] p-4 bg-black/95 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
