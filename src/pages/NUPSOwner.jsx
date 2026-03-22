@@ -61,9 +61,7 @@ import OfficialChecks from "./OfficialChecks";
 import VIPContractLifecycle from "../components/nups/VIPContractLifecycle.jsx";
 import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
 import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
-import { GLYPHLOCK_DISCLAIMER_FULL } from '@/constants/legalDisclaimer';
-
-const GLYPHLOCK_DISCLAIMER = GLYPHLOCK_DISCLAIMER_FULL;
+import { GLYPHLOCK_DISCLAIMER } from '../constants/legalDisclaimer';
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 
 export default function NUPSOwner() {
