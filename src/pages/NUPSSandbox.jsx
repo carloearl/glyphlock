@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DreamDollarReceiptEngine from "@/components/nups/pos/DreamDollarReceiptEngine";
 import GlyphBucksContract from "@/components/nups/GlyphBucksContract";
+import HardwareStatusPanel from "@/components/nups/hardware/HardwareStatusPanel";
+import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
+import FingerprintPanel from "@/components/nups/hardware/FingerprintPanel";
+import ThermalPrinterPanel from "@/components/nups/hardware/ThermalPrinterPanel";
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const MOCK_USERS = [
@@ -62,6 +66,7 @@ const STATUS_BADGE = {
 
 const SECTIONS = [
   { key: "overview", label: "Overview", icon: BarChart3 },
+  { key: "hardware", label: "Hardware Test", icon: Wifi },
   { key: "pos", label: "POS Register", icon: CreditCard },
   { key: "dreamdollar", label: "Dream Dollar Demo", icon: Banknote },
   { key: "staff", label: "Staff & Clock-In", icon: Clock },
@@ -149,6 +154,63 @@ export default function NUPSSandbox() {
 
   const renderSection = () => {
     switch (activeSection) {
+      case "hardware":
+        return (
+          <div className="space-y-4">
+            <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-3 text-xs text-blue-400/80">
+              <div className="flex items-center gap-2 mb-2">
+                <Wifi className="w-4 h-4" />
+                <span className="font-bold">HARDWARE INTEGRATION TEST</span>
+              </div>
+              <p>Test your Adesso card reader, fingerprint scanner, and thermal printer. All devices connect via USB and work with the production NUPS system.</p>
+            </div>
+
+            <HardwareStatusPanel />
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <CardReaderPanel onCardRead={(card) => {
+                console.log("Card captured:", card);
+                toast.success(`Card captured: ${card.type} ending in ${card.last_six}`);
+              }} />
+              
+              <FingerprintPanel 
+                label="Test Fingerprint Scan"
+                onCapture={(print) => {
+                  console.log("Fingerprint captured:", print);
+                }}
+              />
+            </div>
+
+            <ThermalPrinterPanel 
+              documentHtml={`
+                <html>
+                  <head><title>NUPS Test Print</title></head>
+                  <body style="font-family: monospace; padding: 20px; max-width: 58mm;">
+                    <h3 style="text-align: center; margin: 0;">DREAM PALACE</h3>
+                    <p style="text-align: center; font-size: 10px; margin: 5px 0;">Test Print</p>
+                    <hr/>
+                    <p style="font-size: 11px; margin: 5px 0;">
+                      Date: ${new Date().toLocaleString()}<br/>
+                      Printer: Adesso NuPrint 210<br/>
+                      Status: Connected<br/>
+                      Serial: NP210-${Math.random().toString(36).substr(2, 6).toUpperCase()}
+                    </p>
+                    <hr/>
+                    <p style="text-align: center; font-size: 9px; margin-top: 10px;">
+                      Test successful · NUPS v3.1<br/>
+                      GlyphLock Financial LLC
+                    </p>
+                  </body>
+                </html>
+              `}
+              documentName="Hardware Test Receipt"
+              onPrintComplete={(record) => {
+                console.log("Print completed:", record);
+              }}
+            />
+          </div>
+        );
+
       case "dreamdollar":
         return (
           <div className="space-y-4">
@@ -198,11 +260,11 @@ export default function NUPSSandbox() {
               <CardHeader className="pb-2"><CardTitle className="text-sm text-gray-400">Sandbox Workflows Available</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {[
+                  { label: "Hardware Test", section: "hardware" },
                   { label: "POS Transaction", section: "pos" },
                   { label: "Dream Dollar Flow", section: "dreamdollar" },
                   { label: "Staff Clock-In", section: "staff" },
                   { label: "Entertainer Check-In", section: "entertainers" },
-                  { label: "VIP Contract", section: "contracts" },
                   { label: "Payroll Review", section: "payroll" },
                 ].map(w => (
                   <button
