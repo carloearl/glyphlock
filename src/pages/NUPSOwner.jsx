@@ -6,16 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Shield, DollarSign, ShoppingCart, TrendingUp,
-  Users, LogOut, UserCheck, DoorOpen, FileText,
+  Shield, DollarSign, ShoppingCart, TrendingUp, Users, LogOut, UserCheck, DoorOpen, FileText,
   Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText,
   RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star, Coins
 } from "lucide-react";
@@ -65,12 +60,14 @@ import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
 import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
 import { GLYPHLOCK_DISCLAIMER } from '../constants/legalDisclaimer';
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
+import { mapNUPSRoleToRBAC, hasPermission } from '../src/config/roles.js';
 
 export default function NUPSOwner() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [activeTab, setActiveTab] = useState("analytics");
+  const [rbacRole, setRbacRole] = useState('manager');
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -80,15 +77,14 @@ export default function NUPSOwner() {
         if (nupsSession) {
           const sessionUser = JSON.parse(nupsSession);
           setUser(sessionUser);
+          const mapped = mapNUPSRoleToRBAC(sessionUser._highestRole || sessionUser.role);
+          setRbacRole(mapped);
           setAuthChecked(true);
           return;
         }
 
         const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) {
-          navigate('/NUPSLogin');
-          return;
-        }
+        if (!isAuth) { navigate('/NUPSLogin'); return; }
         const currentUser = await base44.auth.me();
 
         let permissionsData = null;
@@ -104,13 +100,12 @@ export default function NUPSOwner() {
           va => OWNER_TIER.includes(va.role_key)
         ) || currentUser.role === "admin";
 
-        if (!hasOwnerAccess) {
-          navigate('/NUPSStaff');
-          return;
-        }
+        if (!hasOwnerAccess) { navigate('/NUPSStaff'); return; }
 
         currentUser._rbac = permissionsData;
         currentUser._highestRole = permissionsData?.highest_role || (currentUser.role === "admin" ? "VENUE_OWNER" : null);
+        const mapped = mapNUPSRoleToRBAC(currentUser._highestRole || currentUser.role);
+        setRbacRole(mapped);
         sessionStorage.setItem("nups_session", JSON.stringify(currentUser));
         setUser(currentUser);
       } catch (error) {
@@ -127,13 +122,11 @@ export default function NUPSOwner() {
     queryFn: () => base44.entities.POSTransaction.list("-created_date"),
     enabled: !!user,
   });
-
   const { data: entertainers = [] } = useQuery({
     queryKey: ["entertainers"],
     queryFn: () => base44.entities.Entertainer.list(),
     enabled: !!user,
   });
-
   const { data: activeShifts = [] } = useQuery({
     queryKey: ["active-shifts"],
     queryFn: async () => {
@@ -142,19 +135,16 @@ export default function NUPSOwner() {
     },
     enabled: !!user,
   });
-
   const { data: vipRooms = [] } = useQuery({
     queryKey: ["vip-rooms"],
     queryFn: () => base44.entities.VIPRoom.list(),
     enabled: !!user,
   });
-
   const { data: vipGuests = [] } = useQuery({
     queryKey: ["vip-guests"],
     queryFn: () => base44.entities.VIPGuest.list("-created_date", 100),
     enabled: !!user,
   });
-
   const { data: products = [] } = useQuery({
     queryKey: ["pos-products"],
     queryFn: () => base44.entities.POSProduct.list(),
@@ -179,6 +169,20 @@ export default function NUPSOwner() {
   const totalRevenue = transactions.reduce((sum, t) => sum + (t.total || 0), 0);
   const activeGuestsCount = vipGuests.filter((g) => g.status === "in_building").length;
   const occupiedRooms = vipRooms.filter((r) => r.status === "occupied").length;
+
+  // RBAC permission flags
+  const canFinance = hasPermission(rbacRole, 'ACCESS_FINANCIAL_OVERVIEW');
+  const canZReport = hasPermission(rbacRole, 'ACCESS_Z_REPORTS');
+  const canBatch = hasPermission(rbacRole, 'ACCESS_BATCH_MANAGEMENT');
+  const canPayroll = hasPermission(rbacRole, 'ACCESS_PAYROLL');
+  const canManageStaff = hasPermission(rbacRole, 'MANAGE_STAFF');
+  const canAudit = hasPermission(rbacRole, 'ACCESS_AUDIT_LOG');
+  const canInventory = hasPermission(rbacRole, 'ACCESS_INVENTORY');
+  const canMarketing = hasPermission(rbacRole, 'ACCESS_MARKETING');
+  const canRBAC = hasPermission(rbacRole, 'ACCESS_RBAC');
+  const canVoid = hasPermission(rbacRole, 'VOID_TRANSACTIONS');
+
+  const isAdminUser = user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -221,9 +225,7 @@ export default function NUPSOwner() {
       </header>
 
       <div className="container mx-auto p-4 md:p-6">
-        <div className="mb-4">
-          <FraudAlertMonitor />
-        </div>
+        <div className="mb-4"><FraudAlertMonitor /></div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
           <Card className="bg-gray-900/50 border-cyan-500/30">
@@ -272,6 +274,8 @@ export default function NUPSOwner() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex flex-wrap gap-3 mb-6">
+
+            {/* Operations */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30 hover:border-cyan-500/50 text-white">
@@ -282,13 +286,13 @@ export default function NUPSOwner() {
                 <DropdownMenuLabel className="text-cyan-400">Operations</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-cyan-500/20" />
                 {[
-                  { value: 'analytics', icon: BarChart3, label: 'Dashboard', desc: 'Revenue & metrics' },
-                  { value: 'live', icon: Eye, label: 'Live View', desc: 'Real-time floor' },
-                  { value: 'pos', icon: CreditCard, label: 'Register', desc: 'Process sales' },
-                  { value: 'history', icon: Receipt, label: 'Transactions', desc: 'Sales history' },
-                  { value: 'zreport', icon: FileText, label: 'Daily Close', desc: 'End-of-day report' },
-                  { value: 'drawer', icon: Wallet, label: 'Cash Log', desc: 'Drawer activity' },
-                ].map(({ value, icon: Icon, label, desc }) => (
+                  { value: 'analytics', icon: BarChart3, label: 'Dashboard', desc: 'Revenue & metrics', perm: true },
+                  { value: 'live', icon: Eye, label: 'Live View', desc: 'Real-time floor', perm: true },
+                  { value: 'pos', icon: CreditCard, label: 'Register', desc: 'Process sales', perm: true },
+                  { value: 'history', icon: Receipt, label: 'Transactions', desc: 'Sales history', perm: true },
+                  { value: 'zreport', icon: FileText, label: 'Daily Close', desc: 'End-of-day report', perm: canZReport },
+                  { value: 'drawer', icon: Wallet, label: 'Cash Log', desc: 'Drawer activity', perm: canBatch },
+                ].filter(i => i.perm).map(({ value, icon: Icon, label, desc }) => (
                   <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
                     className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-cyan-500/20 text-cyan-400' : 'text-gray-300 hover:bg-white/10'}`}>
                     <Icon className="w-4 h-4 mr-3" />
@@ -298,6 +302,7 @@ export default function NUPSOwner() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Staff & Floor */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-pink-500/10 to-rose-500/10 border-pink-500/30 hover:border-pink-500/50 text-white">
@@ -308,13 +313,13 @@ export default function NUPSOwner() {
                 <DropdownMenuLabel className="text-pink-400">Staff & Floor</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-pink-500/20" />
                 {[
-                  { value: 'floor', icon: UserCheck, label: 'Check-In', desc: 'Staff attendance' },
-                  { value: 'timeclock', icon: Clock, label: 'Time Clock', desc: 'Hours tracking' },
-                  { value: 'vip', icon: DoorOpen, label: 'VIP Rooms', desc: 'Room status' },
-                  { value: 'guests', icon: Users, label: 'Guest Check-In', desc: 'ID verification + door' },
-                  { value: 'entertainer', icon: Star, label: 'Performer Stats', desc: 'My earnings' },
-                  { value: 'staff', icon: UserCog, label: 'Manage Staff', desc: 'User accounts' },
-                ].map(({ value, icon: Icon, label, desc }) => (
+                  { value: 'floor', icon: UserCheck, label: 'Check-In', desc: 'Staff attendance', perm: true },
+                  { value: 'timeclock', icon: Clock, label: 'Time Clock', desc: 'Hours tracking', perm: true },
+                  { value: 'vip', icon: DoorOpen, label: 'VIP Rooms', desc: 'Room status', perm: true },
+                  { value: 'guests', icon: Users, label: 'Guest Check-In', desc: 'ID verification + door', perm: true },
+                  { value: 'entertainer', icon: Star, label: 'Performer Stats', desc: 'My earnings', perm: true },
+                  { value: 'staff', icon: UserCog, label: 'Manage Staff', desc: 'User accounts', perm: canManageStaff },
+                ].filter(i => i.perm).map(({ value, icon: Icon, label, desc }) => (
                   <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
                     className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-pink-500/20 text-pink-400' : 'text-gray-300 hover:bg-white/10'}`}>
                     <Icon className="w-4 h-4 mr-3" />
@@ -324,81 +329,91 @@ export default function NUPSOwner() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30 hover:border-green-500/50 text-white">
-                  <DollarSign className="w-4 h-4 mr-2 text-green-400" />Finance & Payroll
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-gray-900/95 border-green-500/30 backdrop-blur-xl">
-                <DropdownMenuLabel className="text-green-400">Finance & Payroll</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-green-500/20" />
-                {[
-                  { value: 'tips', icon: HandCoins, label: 'Tip Pool', desc: 'Distribute tips' },
-                  { value: 'payroll-engine', icon: DollarSign, label: 'Payroll', desc: 'Calculate pay' },
-                  { value: 'payroll', icon: Receipt, label: 'Pay Records', desc: 'Payment history' },
-                  { value: 'official-checks', icon: Banknote, label: 'Official Checks', desc: 'Print payroll checks' },
-                  { value: 'employees', icon: Users, label: 'Employees', desc: 'Staff records' },
-                  { value: 'daily', icon: PieChart, label: 'Daily Report', desc: 'Day summary' },
-                  { value: 'refunds', icon: RotateCcw, label: 'Refunds', desc: 'Process returns' },
-                ].map(({ value, icon: Icon, label, desc }) => (
-                  <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                    className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-green-500/20 text-green-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                    <Icon className="w-4 h-4 mr-3" />
-                    <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Finance & Payroll — gated */}
+            {canFinance && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30 hover:border-green-500/50 text-white">
+                    <DollarSign className="w-4 h-4 mr-2 text-green-400" />Finance & Payroll
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-gray-900/95 border-green-500/30 backdrop-blur-xl">
+                  <DropdownMenuLabel className="text-green-400">Finance & Payroll</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-green-500/20" />
+                  {[
+                    { value: 'tips', icon: HandCoins, label: 'Tip Pool', desc: 'Distribute tips', perm: canPayroll },
+                    { value: 'payroll-engine', icon: DollarSign, label: 'Payroll', desc: 'Calculate pay', perm: canPayroll },
+                    { value: 'payroll', icon: Receipt, label: 'Pay Records', desc: 'Payment history', perm: canPayroll },
+                    { value: 'official-checks', icon: Banknote, label: 'Official Checks', desc: 'Print payroll checks', perm: canPayroll },
+                    { value: 'employees', icon: Users, label: 'Employees', desc: 'Staff records', perm: canManageStaff },
+                    { value: 'daily', icon: PieChart, label: 'Daily Report', desc: 'Day summary', perm: true },
+                    { value: 'refunds', icon: RotateCcw, label: 'Refunds', desc: 'Process returns', perm: canVoid },
+                  ].filter(i => i.perm).map(({ value, icon: Icon, label, desc }) => (
+                    <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
+                      className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-green-500/20 text-green-400' : 'text-gray-300 hover:bg-white/10'}`}>
+                      <Icon className="w-4 h-4 mr-3" />
+                      <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30 hover:border-amber-500/50 text-white">
-                  <Package className="w-4 h-4 mr-2 text-amber-400" />Inventory & Products
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-gray-900/95 border-amber-500/30 backdrop-blur-xl">
-                <DropdownMenuLabel className="text-amber-400">Inventory & Products</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-amber-500/20" />
-                {[
-                  { value: 'products', icon: Tag, label: 'Products', desc: 'Menu items' },
-                  { value: 'inventory', icon: Package, label: 'Stock', desc: 'Inventory levels' },
-                ].map(({ value, icon: Icon, label, desc }) => (
-                  <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                    className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-amber-500/20 text-amber-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                    <Icon className="w-4 h-4 mr-3" />
-                    <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Inventory & Products */}
+            {canInventory && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30 hover:border-amber-500/50 text-white">
+                    <Package className="w-4 h-4 mr-2 text-amber-400" />Inventory & Products
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-gray-900/95 border-amber-500/30 backdrop-blur-xl">
+                  <DropdownMenuLabel className="text-amber-400">Inventory & Products</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-amber-500/20" />
+                  {[
+                    { value: 'products', icon: Tag, label: 'Products', desc: 'Menu items' },
+                    { value: 'inventory', icon: Package, label: 'Stock', desc: 'Inventory levels' },
+                  ].map(({ value, icon: Icon, label, desc }) => (
+                    <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
+                      className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-amber-500/20 text-amber-400' : 'text-gray-300 hover:bg-white/10'}`}>
+                      <Icon className="w-4 h-4 mr-3" />
+                      <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-purple-500/10 to-violet-500/10 border-purple-500/30 hover:border-purple-500/50 text-white">
-                  <Megaphone className="w-4 h-4 mr-2 text-purple-400" />Marketing & Insights
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-gray-900/95 border-purple-500/30 backdrop-blur-xl">
-                <DropdownMenuLabel className="text-purple-400">Marketing & Insights</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-purple-500/20" />
-                {[
-                  { value: 'customers', icon: Heart, label: 'Customers', desc: 'CRM database' },
-                  { value: 'loyalty', icon: Heart, label: 'Loyalty', desc: 'Rewards program' },
-                  { value: 'marketing', icon: Megaphone, label: 'Campaigns', desc: 'Promotions' },
-                  { value: 'sales', icon: BarChart3, label: 'Sales Report', desc: 'Performance' },
-                  { value: 'ai', icon: Brain, label: 'AI Insights', desc: 'Predictions' },
-                  { value: 'audit-log', icon: Shield, label: 'Audit Trail', desc: 'Security log' },
-                ].map(({ value, icon: Icon, label, desc }) => (
-                  <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                    className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-purple-500/20 text-purple-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                    <Icon className="w-4 h-4 mr-3" />
-                    <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Marketing & Insights */}
+            {canMarketing && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-purple-500/10 to-violet-500/10 border-purple-500/30 hover:border-purple-500/50 text-white">
+                    <Megaphone className="w-4 h-4 mr-2 text-purple-400" />Marketing & Insights
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-gray-900/95 border-purple-500/30 backdrop-blur-xl">
+                  <DropdownMenuLabel className="text-purple-400">Marketing & Insights</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-purple-500/20" />
+                  {[
+                    { value: 'customers', icon: Heart, label: 'Customers', desc: 'CRM database' },
+                    { value: 'loyalty', icon: Heart, label: 'Loyalty', desc: 'Rewards program' },
+                    { value: 'marketing', icon: Megaphone, label: 'Campaigns', desc: 'Promotions' },
+                    { value: 'sales', icon: BarChart3, label: 'Sales Report', desc: 'Performance' },
+                    { value: 'ai', icon: Brain, label: 'AI Insights', desc: 'Predictions' },
+                    { value: 'audit-log', icon: Shield, label: 'Audit Trail', desc: 'Security log', perm: canAudit },
+                  ].filter(i => i.perm !== false).map(({ value, icon: Icon, label, desc }) => (
+                    <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
+                      className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-purple-500/20 text-purple-400' : 'text-gray-300 hover:bg-white/10'}`}>
+                      <Icon className="w-4 h-4 mr-3" />
+                      <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
+            {/* Dream Dollar */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30 hover:border-yellow-500/50 text-white">
@@ -421,7 +436,8 @@ export default function NUPSOwner() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {(user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin') && (
+            {/* Admin Tools — gated to PLATFORM_ADMIN / VENUE_OWNER */}
+            {isAdminUser && canRBAC && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-red-500/10 to-rose-500/10 border-red-500/30 hover:border-red-500/50 text-white">
@@ -450,7 +466,7 @@ export default function NUPSOwner() {
           <TabsContent value="live"><LiveFloorView /></TabsContent>
           <TabsContent value="pos">
             <div className="space-y-4">
-              <BatchManagement user={user} />
+              {canBatch && <BatchManagement user={user} />}
               <POSCashRegister user={user} />
             </div>
           </TabsContent>
@@ -459,31 +475,33 @@ export default function NUPSOwner() {
           <TabsContent value="guests"><GuestCheckIn /></TabsContent>
           <TabsContent value="timeclock"><TimeClock user={user} role={user?._highestRole || "VENUE_OWNER"} /></TabsContent>
           <TabsContent value="history"><TransactionHistory transactions={transactions} showReceipt={true} /></TabsContent>
-          <TabsContent value="zreport"><ZReportGenerator user={user} /></TabsContent>
+          {canZReport && <TabsContent value="zreport"><ZReportGenerator user={user} /></TabsContent>}
           <TabsContent value="glyphbucks"><GlyphBuckInventory /></TabsContent>
           <TabsContent value="entertainer"><EntertainerDashboard user={user} /></TabsContent>
-          <TabsContent value="payroll-engine"><EntertainerPayrollEngine user={user} /></TabsContent>
-          <TabsContent value="audit-log"><AuditLogDashboard user={user} /></TabsContent>
-          <TabsContent value="products"><ProductManagement /></TabsContent>
-          <TabsContent value="inventory"><InventoryManagement products={products} /></TabsContent>
-          <TabsContent value="sales"><SalesReport transactions={transactions} products={products} /></TabsContent>
-          <TabsContent value="tips"><TipBreakdown transactions={transactions} /></TabsContent>
+          {canPayroll && <TabsContent value="payroll-engine"><EntertainerPayrollEngine user={user} /></TabsContent>}
+          {canAudit && <TabsContent value="audit-log"><AuditLogDashboard user={user} /></TabsContent>}
+          {canInventory && <TabsContent value="products"><ProductManagement /></TabsContent>}
+          {canInventory && <TabsContent value="inventory"><InventoryManagement products={products} /></TabsContent>}
+          {canMarketing && <TabsContent value="sales"><SalesReport transactions={transactions} products={products} /></TabsContent>}
+          {canPayroll && <TabsContent value="tips"><TipBreakdown transactions={transactions} /></TabsContent>}
           <TabsContent value="daily"><DailySummary transactions={transactions} /></TabsContent>
-          <TabsContent value="drawer"><CashDrawerLog /></TabsContent>
-          <TabsContent value="refunds"><RefundManager user={user} /></TabsContent>
-          <TabsContent value="customers"><CustomerManagement /></TabsContent>
-          <TabsContent value="loyalty"><LoyaltyProgram /></TabsContent>
-          <TabsContent value="marketing"><MarketingCampaigns /></TabsContent>
-          <TabsContent value="staff"><NUPSUserManager currentUser={user} /></TabsContent>
-          <TabsContent value="employees"><EmployeeManagement /></TabsContent>
-          <TabsContent value="payroll"><PayrollReport /></TabsContent>
-          <TabsContent value="official-checks"><OfficialChecks /></TabsContent>
-          <TabsContent value="ai"><AIInsights /></TabsContent>
+          {canBatch && <TabsContent value="drawer"><CashDrawerLog /></TabsContent>}
+          {canVoid && <TabsContent value="refunds"><RefundManager user={user} /></TabsContent>}
+          {canMarketing && <TabsContent value="customers"><CustomerManagement /></TabsContent>}
+          {canMarketing && <TabsContent value="loyalty"><LoyaltyProgram /></TabsContent>}
+          {canMarketing && <TabsContent value="marketing"><MarketingCampaigns /></TabsContent>}
+          {canManageStaff && <TabsContent value="staff"><NUPSUserManager currentUser={user} /></TabsContent>}
+          {canManageStaff && <TabsContent value="employees"><EmployeeManagement /></TabsContent>}
+          {canPayroll && <TabsContent value="payroll"><PayrollReport /></TabsContent>}
+          {canPayroll && <TabsContent value="official-checks"><OfficialChecks /></TabsContent>}
+          {canMarketing && <TabsContent value="ai"><AIInsights /></TabsContent>}
           <TabsContent value="contracts"><UnifiedDreamDollarHub venue_id="dream_palace" /></TabsContent>
-          <TabsContent value="rbac"><RBACAdminPanel /></TabsContent>
-          <TabsContent value="mis-report">
-            <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
-          </TabsContent>
+          {canRBAC && <TabsContent value="rbac"><RBACAdminPanel /></TabsContent>}
+          {isAdminUser && (
+            <TabsContent value="mis-report">
+              <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
+            </TabsContent>
+          )}
         </Tabs>
 
         <footer className="text-center text-[10px] text-gray-700 py-6 border-t border-gray-800 mt-12">
