@@ -6,12 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  ShoppingCart, DollarSign, CreditCard, Receipt, Search, Barcode,
+  ShoppingCart, DollarSign, CreditCard, Search, Barcode,
   Smartphone, Gift, Hotel, ArrowLeft, Wallet
 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import ReceiptPrinter from "./ReceiptPrinter";
 import QuickChargePanel from "./pos/QuickChargePanel";
 import CashDenominationPad from "./pos/CashDenominationPad";
@@ -27,6 +26,7 @@ export default function POSCashRegister({ user }) {
   const [discount, setDiscount] = useState(0);
   const [lastTransaction, setLastTransaction] = useState(null);
   const [tip, setTip] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false); // B1 — duplicate transaction guard
 
   // Payment flow state
   const [paymentStep, setPaymentStep] = useState("register"); // register | method | pay
@@ -142,7 +142,10 @@ export default function POSCashRegister({ user }) {
     setPaymentStep("method");
   };
 
-  const completePayment = (details = {}) => {
+  // B1 — duplicate guard on payment completion
+  const completePayment = async (details = {}) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const transactionData = {
       transaction_id: `TXN-${Date.now()}`,
       customer_id: selectedCustomer?.id,
@@ -154,11 +157,16 @@ export default function POSCashRegister({ user }) {
       total,
       payment_method: paymentMethod || "Cash",
       cashier: user?.email,
+      cashier_name: user?.full_name || user?.name || user?.email || 'Staff', // E7 — display name
       status: "completed",
       batch_id: activeBatch?.id,
       ...details,
     };
-    createTransaction.mutate(transactionData);
+    try {
+      await createTransaction.mutateAsync(transactionData);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ─── PAYMENT METHOD SELECTION ──────────────────────
@@ -210,7 +218,11 @@ export default function POSCashRegister({ user }) {
               <div className="text-3xl font-black text-amber-400">${total.toFixed(2)}</div>
             </div>
             <Input placeholder="Scan or enter gift card number..." className="text-center font-mono text-lg bg-black/40 border-white/15 text-white h-14" />
-            <Button onClick={() => completePayment({ gift_card: true })} className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-600">
+            <Button
+              onClick={() => completePayment({ gift_card: true })}
+              disabled={isSubmitting}
+              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-600"
+            >
               Redeem Gift Card
             </Button>
           </div>
@@ -223,7 +235,11 @@ export default function POSCashRegister({ user }) {
               <div className="text-3xl font-black text-pink-400">${total.toFixed(2)}</div>
             </div>
             <Input placeholder="Room number or guest name..." className="text-center font-mono text-lg bg-black/40 border-white/15 text-white h-14" />
-            <Button onClick={() => completePayment({ room_tab: true })} className="w-full h-14 text-lg font-bold bg-gradient-to-r from-pink-500 to-rose-600">
+            <Button
+              onClick={() => completePayment({ room_tab: true })}
+              disabled={isSubmitting}
+              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-pink-500 to-rose-600"
+            >
               Charge to Room
             </Button>
           </div>
@@ -285,7 +301,6 @@ export default function POSCashRegister({ user }) {
                   variant="outline"
                   onClick={() => { setPaymentMethod(m.key); setPaymentStep("pay"); }}
                   className="h-24 flex-col gap-2 border-white/10 hover:border-white/30 bg-black/40 active:scale-95 transition-all"
-                  style={{ '--hover-bg': c.bg }}
                 >
                   <span style={{ color: c.text }}>{m.icon}</span>
                   <span className="text-xs font-bold text-gray-300">{m.label}</span>
@@ -343,7 +358,6 @@ export default function POSCashRegister({ user }) {
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-5" style={{ scrollbarWidth: 'none' }}>
 
-          {/* Section label */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Quick Charges</span>
             <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
@@ -355,7 +369,6 @@ export default function POSCashRegister({ user }) {
             currentDiscount={discount}
           />
 
-          {/* Products (if any) */}
           {filteredProducts.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -410,7 +423,8 @@ export default function POSCashRegister({ user }) {
       </div>
 
       {/* ── RIGHT PANEL: Order + Checkout ──────────── */}
-      <div className="w-72 lg:w-80 flex flex-col shrink-0" style={{ background: 'rgba(0,0,0,0.4)' }}>
+      {/* Part 1 receipt fix — overflow-y-auto so bottom content (totals/footer) is never clipped */}
+      <div className="w-72 lg:w-80 flex flex-col shrink-0 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.4)' }}>
         <OrderDisplay
           cart={cart}
           subtotal={subtotal}
@@ -423,12 +437,13 @@ export default function POSCashRegister({ user }) {
           onClearCart={() => setCart([])}
         />
 
-        {/* Checkout CTA */}
+        {/* Checkout CTA — B1: disabled while submitting */}
         <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
           {cart.length > 0 ? (
             <button
               onClick={handleCheckout}
-              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3"
+              disabled={isSubmitting}
+              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 height: '68px',
                 background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
@@ -437,7 +452,7 @@ export default function POSCashRegister({ user }) {
               }}
             >
               <Wallet className="w-6 h-6" />
-              CHARGE ${total.toFixed(2)}
+              {isSubmitting ? 'Processing...' : `CHARGE $${total.toFixed(2)}`}
             </button>
           ) : (
             <div className="text-center text-sm py-5 font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>

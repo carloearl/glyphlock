@@ -9,21 +9,25 @@ const BIZ_PHONE = "(602) 536-0372";
 const BIZ_TAX_ID = "Tax ID: 88-1234567";
 const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
 
-export default function ReceiptPrinter({ 
-  transaction, 
-  isVIP = false, 
-  vipDetails = null 
+// E7 — always prefer cashier_name over raw email
+const getCashierDisplay = (tx) => tx?.cashier_name || tx?.cashier || 'N/A';
+
+export default function ReceiptPrinter({
+  transaction,
+  isVIP = false,
+  vipDetails = null
 }) {
 
   const printReceipt = () => {
     if (!transaction) return;
-    
+
     const items = transaction.items || [];
     const txDate = new Date(transaction.created_date);
     const formattedDate = txDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
     const formattedTime = txDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
-    const itemsHtml = items.map((item, idx) => 
+    const cashierDisplay = getCashierDisplay(transaction);
+
+    const itemsHtml = items.map((item, idx) =>
       `<tr>
         <td style="text-align:left;padding:3px 0;border-bottom:1px dotted #ddd;">${idx + 1}. ${item.product_name}</td>
         <td style="text-align:center;padding:3px 0;border-bottom:1px dotted #ddd;">${item.quantity}</td>
@@ -34,7 +38,6 @@ export default function ReceiptPrinter({
 
     const totalItems = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
     const tipAmount = transaction.tip || 0;
-    // transaction.total already includes subtotal + tax + tip from POSCashRegister
     const grandTotal = transaction.total || 0;
 
     const vipSection = isVIP && vipDetails ? `
@@ -80,7 +83,6 @@ export default function ReceiptPrinter({
       </style>
       </head>
       <body>
-        <!-- HEADER -->
         <div class="center">
           <div class="header-logo">${BIZ_NAME}</div>
           <div style="font-size:9px;">N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE</div>
@@ -89,24 +91,17 @@ export default function ReceiptPrinter({
           <div style="font-size:10px;">Tel: ${BIZ_PHONE}</div>
           <div style="font-size:9px;margin-top:2px;">${BIZ_TAX_ID}</div>
         </div>
-        
         <div class="double-divider"></div>
-        
-        <!-- TRANSACTION INFO -->
         <table>
           <tr class="info-row"><td>Receipt #:</td><td class="right bold">${transaction.transaction_id}</td></tr>
           <tr class="info-row"><td>Date:</td><td class="right">${formattedDate}</td></tr>
           <tr class="info-row"><td>Time:</td><td class="right">${formattedTime}</td></tr>
-          <tr class="info-row"><td>Cashier:</td><td class="right">${transaction.cashier || 'N/A'}</td></tr>
+          <tr class="info-row"><td>Cashier:</td><td class="right">${cashierDisplay}</td></tr>
           ${transaction.customer_id ? `<tr class="info-row"><td>Customer:</td><td class="right">${transaction.customer_id}</td></tr>` : ''}
           <tr class="info-row"><td>Batch:</td><td class="right">${transaction.batch_id || 'N/A'}</td></tr>
         </table>
-        
         ${vipSection}
-        
         <div class="divider"></div>
-        
-        <!-- COLUMN HEADERS -->
         <table>
           <tr class="item-header">
             <td style="text-align:left;">ITEM</td>
@@ -115,61 +110,42 @@ export default function ReceiptPrinter({
             <td style="text-align:right;">TOTAL</td>
           </tr>
         </table>
-        
-        <!-- LINE ITEMS -->
         <table>${itemsHtml}</table>
-        
         <div style="font-size:9px;text-align:right;color:#666;padding-top:2px;">
           ${totalItems} item${totalItems !== 1 ? 's' : ''} sold
         </div>
-        
         <div class="double-divider"></div>
-        
-        <!-- TOTALS -->
         <table>
           <tr><td>Subtotal:</td><td class="right">$${(transaction.subtotal || 0).toFixed(2)}</td></tr>
           <tr><td>Sales Tax (AZ 8.0%):</td><td class="right">$${(transaction.tax || 0).toFixed(2)}</td></tr>
           ${transaction.discount > 0 ? `<tr><td>Discount:</td><td class="right" style="color:red;">-$${transaction.discount.toFixed(2)}</td></tr>` : ''}
           ${tipAmount > 0 ? `<tr><td>Gratuity:</td><td class="right">$${tipAmount.toFixed(2)}</td></tr>` : ''}
         </table>
-        
         <div class="divider"></div>
-        
         <table><tr class="total-row"><td>TOTAL DUE:</td><td class="right">$${grandTotal.toFixed(2)}</td></tr></table>
-        
         <div class="divider"></div>
-        
-        <!-- PAYMENT INFO -->
         <table>
           <tr><td class="bold">Payment:</td><td class="right bold">${transaction.payment_method}</td></tr>
           ${transaction.payment_method === 'Cash' && transaction.cash_tendered ? `
           <tr><td>Tendered:</td><td class="right">$${parseFloat(transaction.cash_tendered).toFixed(2)}</td></tr>
           <tr class="bold"><td>Change:</td><td class="right">$${(transaction.change_due > 0 ? parseFloat(transaction.change_due).toFixed(2) : '0.00')}</td></tr>` : ''}
-          ${transaction.payment_method === 'Credit Card' || transaction.payment_method === 'Debit Card' ? `
+          ${(transaction.payment_method === 'Credit Card' || transaction.payment_method === 'Debit Card') ? `
           <tr class="info-row"><td>Card:</td><td class="right">**** **** **** ${transaction.card_last_four || 'XXXX'}</td></tr>
           <tr class="info-row"><td>Auth Code:</td><td class="right">${transaction.auth_code || Math.random().toString(36).substr(2, 6).toUpperCase()}</td></tr>
           <tr class="info-row"><td>Entry:</td><td class="right">CHIP/TAP</td></tr>` : ''}
         </table>
-        
         <div class="double-divider"></div>
-
-        <!-- AUDIT COMPLIANCE BOX -->
         <div class="audit-box">
           <div style="text-align:center;font-weight:bold;margin-bottom:3px;">AUDIT TRAIL</div>
           <table style="font-size:9px;">
             <tr><td>Terminal:</td><td class="right">NUPS-001</td></tr>
             <tr><td>Sequence:</td><td class="right">${transaction.transaction_id}</td></tr>
             <tr><td>Timestamp:</td><td class="right">${txDate.toISOString()}</td></tr>
-            <tr><td>Operator:</td><td class="right">${transaction.cashier || 'SYSTEM'}</td></tr>
+            <tr><td>Operator:</td><td class="right">${cashierDisplay}</td></tr>
           </table>
         </div>
-        
-        <!-- RECEIPT BARCODE -->
         <div class="center barcode">||| ${transaction.transaction_id} |||</div>
-        
         <div class="divider"></div>
-        
-        <!-- FOOTER -->
         <div class="center footer">
           <div style="font-size:10px;font-weight:bold;margin-bottom:4px;">Thank you for your patronage!</div>
           <div>All sales are final. Refunds require manager</div>
@@ -189,7 +165,6 @@ export default function ReceiptPrinter({
     const printWindow = window.open('', '_blank', 'width=380,height=700,scrollbars=yes');
     printWindow.document.write(receiptHtml);
     printWindow.document.close();
-    // Wait for content to fully render before printing
     printWindow.onload = () => { setTimeout(() => { printWindow.print(); }, 400); };
     setTimeout(() => { printWindow.print(); }, 800);
   };
@@ -205,9 +180,9 @@ export default function ReceiptPrinter({
   const items = transaction.items || [];
   const totalItems = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
   const tipAmount = transaction.tip || 0;
-  // transaction.total already includes subtotal + tax + tip
   const grandTotal = transaction.total || 0;
   const txDate = new Date(transaction.created_date);
+  const cashierDisplay = getCashierDisplay(transaction);
 
   return (
     <div className="space-y-3" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
@@ -219,8 +194,7 @@ export default function ReceiptPrinter({
           <div className="text-[9px] text-gray-400 mt-1">{BIZ_ADDRESS}</div>
           <div className="text-[9px] text-gray-400">Tel: {BIZ_PHONE}</div>
         </div>
-        
-        {/* VIP Badge */}
+
         {isVIP && (
           <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-2 mb-2 text-center">
             <span className="text-purple-400 font-bold text-[10px]">★ VIP SHOW SERVICE ★</span>
@@ -231,9 +205,9 @@ export default function ReceiptPrinter({
           <div className="flex justify-between"><span>Receipt:</span><span className="text-white">{transaction.transaction_id}</span></div>
           <div className="flex justify-between"><span>Date:</span><span>{txDate.toLocaleDateString()}</span></div>
           <div className="flex justify-between"><span>Time:</span><span>{txDate.toLocaleTimeString()}</span></div>
-          <div className="flex justify-between"><span>Cashier:</span><span>{transaction.cashier || 'N/A'}</span></div>
+          <div className="flex justify-between"><span>Cashier:</span><span className="text-white">{cashierDisplay}</span></div>
         </div>
-        
+
         <div className="border-t border-dashed border-gray-700 pt-2 mb-2">
           <div className="flex justify-between text-gray-500 text-[10px] mb-1 font-bold">
             <span className="flex-1">ITEM</span>
@@ -251,7 +225,7 @@ export default function ReceiptPrinter({
           ))}
           <div className="text-right text-[10px] text-gray-600 mt-1">{totalItems} item{totalItems !== 1 ? 's' : ''}</div>
         </div>
-        
+
         <div className="border-t border-double border-gray-600 pt-2 space-y-1">
           <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>${(transaction.subtotal || 0).toFixed(2)}</span></div>
           <div className="flex justify-between text-gray-400"><span>Tax (AZ 8%)</span><span>${(transaction.tax || 0).toFixed(2)}</span></div>
@@ -261,7 +235,7 @@ export default function ReceiptPrinter({
             <span>TOTAL</span><span>${grandTotal.toFixed(2)}</span>
           </div>
         </div>
-        
+
         <div className="border-t border-dashed border-gray-700 pt-2 mt-2 space-y-0.5 text-gray-400">
           <div className="flex justify-between font-bold"><span>Payment</span><span className="text-cyan-400">{transaction.payment_method}</span></div>
           {transaction.payment_method === 'Cash' && transaction.cash_tendered && (
@@ -272,7 +246,6 @@ export default function ReceiptPrinter({
           )}
         </div>
 
-        {/* Audit Trail */}
         <div className="border-t border-gray-700 mt-2 pt-2">
           <div className="text-[9px] text-gray-600 text-center font-bold mb-1">AUDIT TRAIL</div>
           <div className="text-[9px] text-gray-600 space-y-0.5">
@@ -280,7 +253,7 @@ export default function ReceiptPrinter({
             <div className="flex justify-between"><span>ISO:</span><span>{txDate.toISOString().split('.')[0]}</span></div>
           </div>
         </div>
-        
+
         <div className="border-t border-dashed border-gray-700 pt-2 mt-2 text-center text-[10px] text-gray-600">
           <div className="text-gray-400 text-xs mb-1">Thank you for your patronage!</div>
           <div>All sales final • Disputes: {BIZ_PHONE}</div>
@@ -288,7 +261,7 @@ export default function ReceiptPrinter({
           <div className="mt-1 tracking-[4px] text-gray-700">||| {transaction.transaction_id} |||</div>
         </div>
       </div>
-      
+
       <div className="flex justify-center">
         <Button onClick={printReceipt} variant="outline" size="sm"
           className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
