@@ -25,6 +25,7 @@ import NUPSMISReport from './pages/NUPSMISReport';
 import ImageShare from './pages/ImageShare';
 import GlyphBucksHub from './pages/GlyphBucksHub';
 import ContractLookup from './pages/ContractLookup';
+import Unauthorized from './pages/Unauthorized';
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -40,7 +41,6 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -49,22 +49,19 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors — but let NUPS public routes through
   const currentPath = window.location.pathname;
-  const nupsPublicPaths = ['/NUPSLanding', '/NUPSGateway', '/NUPSSandbox', '/NUPSLogin'];
+  const nupsPublicPaths = ['/NUPSLanding', '/NUPSGateway', '/NUPSSandbox', '/NUPSLogin', '/unauthorized'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPath.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <LayoutWrapper currentPageName={mainPageKey}>
       <Routes>
@@ -98,11 +95,11 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSGateway" element={<NUPSGateway />} />
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
-
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
         <Route path="/GlyphBucksHub" element={<GlyphBucksHub />} />
         <Route path="/ContractLookup" element={<ContractLookup />} />
         <Route path="/view/:assetId" element={<ImageShare />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
@@ -111,7 +108,6 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
