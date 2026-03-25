@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/SEOHead";
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
-import { mapNUPSRoleToRBAC, hasPermission, ROLES } from '../src/config/roles.js';
+import { mapNUPSRoleToRBAC, hasPermission, ROLES } from '../config/roles.js';
 
 export default function NUPSStaff() {
   const navigate = useNavigate();

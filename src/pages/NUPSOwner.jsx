@@ -60,7 +60,7 @@ import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
 import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
 import { GLYPHLOCK_DISCLAIMER } from '../constants/legalDisclaimer';
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
-import { mapNUPSRoleToRBAC, hasPermission } from '../src/config/roles.js';
+import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 
 export default function NUPSOwner() {
   const navigate = useNavigate();
