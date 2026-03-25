@@ -11,6 +11,7 @@ export default function ZReportGenerator({ user }) {
   const queryClient = useQueryClient();
   const [openingCash, setOpeningCash] = useState(0);
   const [closingCash, setClosingCash] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false); // B1 — duplicate guard
 
   const { data: todayTransactions = [] } = useQuery({
     queryKey: ['today-transactions'],
@@ -33,7 +34,7 @@ export default function ZReportGenerator({ user }) {
   const { data: todayOrders = [] } = useQuery({
     queryKey: ['today-glyph-orders'],
     queryFn: async () => {
-      const all = await base44.entities.DreamPalaceOrder.list('-created_date', 500);
+      const all = await base44.entities.GlyphBucksOrder.list('-created_date', 500);
       const today = new Date().toDateString();
       return all.filter(o => new Date(o.created_date).toDateString() === today);
     }
@@ -48,62 +49,84 @@ export default function ZReportGenerator({ user }) {
     }
   });
 
-  const generateZReport = useMutation({
-    mutationFn: () => {
-      const cashSales = todayTransactions
-        .filter(t => t.payment_method === 'Cash')
-        .reduce((sum, t) => sum + (t.total || 0), 0);
+  const { data: recentReports = [] } = useQuery({
+    queryKey: ['z-reports'],
+    queryFn: () => base44.entities.POSZReport.list('-created_date', 10)
+  });
 
-      const cardSales = todayTransactions
-        .filter(t => t.payment_method !== 'Cash')
-        .reduce((sum, t) => sum + (t.total || 0), 0);
+  // Live preview calculations
+  const cashSales = todayTransactions
+    .filter(t => t.payment_method === 'Cash')
+    .reduce((sum, t) => sum + (t.total || 0), 0);
 
-      const vipRevenue = todayVIPSessions
-        .reduce((sum, s) => sum + (s.total_charge || 0), 0);
+  const cardSales = todayTransactions
+    .filter(t => t.payment_method !== 'Cash')
+    .reduce((sum, t) => sum + (t.total || 0), 0);
 
-      const totalSales = cashSales + cardSales + vipRevenue;
+  const vipRevenue = todayVIPSessions
+    .reduce((sum, s) => sum + (s.total_charge || 0), 0);
 
-      // Categorize revenue
+  // B2 — total_sales = real tender only. GlyphBucks are reference-only.
+  const totalSales = cashSales + cardSales + vipRevenue;
+
+  const glyphBuckRevenue = todayOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
+  const glyphBuckIssued = todayOrders.reduce((s, o) => s + (o.glyphbucks_value || 0), 0);
+  const glyphBuckRedeemed = todayOrders.filter(o => o.status === 'archived').reduce((s, o) => s + (o.glyphbucks_value || 0), 0);
+  const entertainerPayouts = todayTipPayouts.reduce((s, p) => s + (p.total_tips || 0), 0);
+
+  const handleGenerate = async () => {
+    // B6 — block anonymous / no-transaction generation
+    if (!user?.email) {
+      alert('You must be logged in to generate a Z-Report.');
+      return;
+    }
+    if (todayTransactions.length === 0) {
+      alert('No transactions found for today. Cannot generate an empty Z-Report.');
+      return;
+    }
+
+    // B1 — duplicate guard
+    if (isGenerating) return;
+    setIsGenerating(true);
+
+    try {
       const barRevenue = todayTransactions
         .filter(t => t.items?.some(item => item.product_name?.includes('Drink')))
         .reduce((sum, t) => sum + (t.total || 0), 0);
 
       const merchandiseRevenue = totalSales - barRevenue - vipRevenue;
 
-      // Product breakdown
-      const productSales = {};
+      const productSalesMap = {};
       todayTransactions.forEach(t => {
         t.items?.forEach(item => {
-          if (!productSales[item.product_name]) {
-            productSales[item.product_name] = { quantity: 0, total: 0 };
+          if (!productSalesMap[item.product_name]) {
+            productSalesMap[item.product_name] = { quantity: 0, total: 0 };
           }
-          productSales[item.product_name].quantity += item.quantity;
-          productSales[item.product_name].total += item.total;
+          productSalesMap[item.product_name].quantity += item.quantity;
+          productSalesMap[item.product_name].total += item.total;
         });
       });
 
-      const products_sold = Object.entries(productSales).map(([name, data]) => ({
+      const products_sold = Object.entries(productSalesMap).map(([name, data]) => ({
         product_name: name,
         quantity: data.quantity,
         total: data.total
       }));
 
-      const glyphBuckIssued = todayOrders.reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
-      const glyphBuckRevenue = todayOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
-      const glyphBuckRedeemed = todayOrders.filter(o => o.status === "archived").reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
-      const entertainerPayouts = todayTipPayouts.reduce((s, p) => s + (p.total_tips || 0), 0);
+      // E7 — store display name, not raw email
+      const cashierDisplay = user?.full_name || user?.name || user?.email || 'Unknown';
 
-      return base44.entities.POSZReport.create({
+      const report = await base44.entities.POSZReport.create({
         report_id: `Z-${Date.now()}`,
         report_date: new Date().toISOString().split('T')[0],
         start_time: new Date(new Date().setHours(0,0,0,0)).toISOString(),
         end_time: new Date().toISOString(),
-        cashier_name: user?.email || 'Unknown',
+        cashier_name: cashierDisplay,
         opening_cash: Number(openingCash),
         closing_cash: Number(closingCash),
         cash_sales: cashSales,
         card_sales: cardSales,
-        total_sales: totalSales + glyphBuckRevenue,
+        total_sales: totalSales, // B2 — GlyphBucks NOT in this total
         transaction_count: todayTransactions.length,
         vip_room_revenue: vipRevenue,
         bar_revenue: barRevenue,
@@ -112,27 +135,26 @@ export default function ZReportGenerator({ user }) {
         products_sold,
         notes: JSON.stringify({
           glyph_buck_issued_value: glyphBuckIssued,
-          glyph_buck_revenue_charged: glyphBuckRevenue,
+          glyph_buck_revenue_charged: glyphBuckRevenue, // reference only
           glyph_buck_redeemed_value: glyphBuckRedeemed,
           glyph_buck_contracts: todayOrders.length,
           entertainer_tip_payouts: entertainerPayouts,
         })
       });
-    },
-    onSuccess: (report) => {
-      queryClient.invalidateQueries({ queryKey: ['z-reports'] });
-      alert(`✅ Z-Report generated!\nTotal Sales: $${report.total_sales.toFixed(2)}`);
-      printReport(report);
-    }
-  });
 
-  const { data: recentReports = [] } = useQuery({
-    queryKey: ['z-reports'],
-    queryFn: () => base44.entities.POSZReport.list('-created_date', 10)
-  });
+      queryClient.invalidateQueries({ queryKey: ['z-reports'] });
+      alert(`✅ Z-Report generated!\nTotal Sales (real tender): $${report.total_sales.toFixed(2)}`);
+      printReport(report);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const printReport = (report) => {
     const printWindow = window.open('', '', 'width=800,height=600');
+    let extra = {};
+    try { extra = JSON.parse(report.notes || '{}'); } catch(e) {}
+
     printWindow.document.write(`
       <html>
         <head>
@@ -141,7 +163,7 @@ export default function ZReportGenerator({ user }) {
             body { font-family: monospace; padding: 20px; }
             h1 { text-align: center; border-bottom: 2px solid #000; }
             .section { margin: 20px 0; }
-            .row { display: flex; justify-between; margin: 5px 0; }
+            .row { display: flex; justify-content: space-between; margin: 5px 0; }
             .total { font-weight: bold; font-size: 1.2em; border-top: 2px solid #000; padding-top: 10px; }
           </style>
         </head>
@@ -152,52 +174,43 @@ export default function ZReportGenerator({ user }) {
             <div class="row"><span>Date:</span><span>${report.report_date}</span></div>
             <div class="row"><span>Cashier:</span><span>${report.cashier_name}</span></div>
           </div>
-          
           <div class="section">
             <h3>CASH DRAWER</h3>
             <div class="row"><span>Opening Cash:</span><span>$${report.opening_cash.toFixed(2)}</span></div>
             <div class="row"><span>Closing Cash:</span><span>$${report.closing_cash.toFixed(2)}</span></div>
             <div class="row"><span>Discrepancy:</span><span>$${report.discrepancy.toFixed(2)}</span></div>
           </div>
-          
           <div class="section">
-            <h3>SALES BREAKDOWN</h3>
+            <h3>SALES BREAKDOWN (Real Tender Only)</h3>
             <div class="row"><span>Cash Sales:</span><span>$${report.cash_sales.toFixed(2)}</span></div>
             <div class="row"><span>Card Sales:</span><span>$${report.card_sales.toFixed(2)}</span></div>
             <div class="row"><span>VIP Room Revenue:</span><span>$${report.vip_room_revenue.toFixed(2)}</span></div>
             <div class="row"><span>Bar Revenue:</span><span>$${report.bar_revenue.toFixed(2)}</span></div>
             <div class="row"><span>Merchandise:</span><span>$${report.merchandise_revenue.toFixed(2)}</span></div>
           </div>
-          
           <div class="section">
             <h3>PRODUCTS SOLD</h3>
-            ${report.products_sold.map(p => `
+            ${(report.products_sold || []).map(p => `
               <div class="row">
                 <span>${p.product_name} (x${p.quantity})</span>
                 <span>$${p.total.toFixed(2)}</span>
               </div>
             `).join('')}
           </div>
-
-          ${(() => {
-            let extra = {};
-            try { extra = JSON.parse(report.notes || "{}"); } catch(e) {}
-            if (!extra.glyph_buck_contracts) return "";
-            return `
+          ${extra.glyph_buck_contracts ? `
           <div class="section">
-            <h3>GLYPH BUCK™ ACTIVITY</h3>
+            <h3>GLYPH BUCK™ ACTIVITY (Reference — Not in Total Sales)</h3>
             <div class="row"><span>Contracts Issued Today:</span><span>${extra.glyph_buck_contracts}</span></div>
             <div class="row"><span>Face Value Issued:</span><span>$${(extra.glyph_buck_issued_value||0).toFixed(2)}</span></div>
             <div class="row"><span>Revenue Charged (w/ surcharge):</span><span>$${(extra.glyph_buck_revenue_charged||0).toFixed(2)}</span></div>
             <div class="row"><span>Redeemed Value:</span><span>$${(extra.glyph_buck_redeemed_value||0).toFixed(2)}</span></div>
             <div class="row"><span>Entertainer Tip Payouts:</span><span>$${(extra.entertainer_tip_payouts||0).toFixed(2)}</span></div>
           </div>
-          <div style="font-size:9px;color:#666;margin-bottom:8px;">Glyph Buck™ is a proprietary instrument of GlyphLock Financial LLC. All redemptions are audit-logged.</div>`;
-          })()}
-          
+          <div style="font-size:9px;color:#666;margin-bottom:8px;">Glyph Buck™ is a proprietary instrument of GlyphLock Financial LLC. All redemptions are audit-logged.</div>
+          ` : ''}
           <div class="section total">
             <div class="row"><span>Total Transactions:</span><span>${report.transaction_count}</span></div>
-            <div class="row"><span>TOTAL SALES (incl. Glyph Buck revenue):</span><span>$${report.total_sales.toFixed(2)}</span></div>
+            <div class="row"><span>TOTAL SALES (Cash + Card + VIP):</span><span>$${report.total_sales.toFixed(2)}</span></div>
           </div>
           <div style="margin-top:20px;border-top:1px solid #000;padding-top:12px;display:flex;gap:40px;">
             <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">MANAGER SIGNATURE</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
@@ -211,23 +224,7 @@ export default function ZReportGenerator({ user }) {
     printWindow.print();
   };
 
-  const cashSales = todayTransactions
-    .filter(t => t.payment_method === 'Cash')
-    .reduce((sum, t) => sum + (t.total || 0), 0);
-
-  const cardSales = todayTransactions
-    .filter(t => t.payment_method !== 'Cash')
-    .reduce((sum, t) => sum + (t.total || 0), 0);
-
-  const vipRevenue = todayVIPSessions
-    .reduce((sum, s) => sum + (s.total_charge || 0), 0);
-
-  const glyphBuckRevenue = todayOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
-  const glyphBuckIssued = todayOrders.reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
-  const glyphBuckRedeemed = todayOrders.filter(o => o.status === "archived").reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
-  const entertainerPayouts = todayTipPayouts.reduce((s, p) => s + (p.total_tips || 0), 0);
-
-  const totalSales = cashSales + cardSales + vipRevenue + glyphBuckRevenue;
+  const canGenerate = user?.email && todayTransactions.length > 0 && !isGenerating;
 
   return (
     <div className="space-y-6">
@@ -280,7 +277,7 @@ export default function ZReportGenerator({ user }) {
               <span className="text-sm text-gray-400">Glyph Bucks Issued</span>
             </div>
             <div className="text-2xl font-bold text-amber-400">${glyphBuckIssued.toFixed(2)}</div>
-            <div className="text-xs text-gray-600 mt-1">{todayOrders.length} contracts / ${glyphBuckRevenue.toFixed(2)} charged</div>
+            <div className="text-xs text-gray-600 mt-1">{todayOrders.length} contracts · ${glyphBuckRevenue.toFixed(2)} charged (ref only)</div>
           </CardContent>
         </Card>
 
@@ -314,6 +311,17 @@ export default function ZReportGenerator({ user }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {!user?.email && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400">
+              ⚠️ You must be logged in to generate a Z-Report.
+            </div>
+          )}
+          {todayTransactions.length === 0 && (
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-sm text-yellow-400">
+              ⚠️ No transactions today. A Z-Report cannot be generated for an empty session.
+            </div>
+          )}
+
           <div className="grid md:grid-cols-3 gap-4">
             <div>
               <Label className="text-white">Opening Cash</Label>
@@ -341,20 +349,21 @@ export default function ZReportGenerator({ user }) {
 
             <div className="flex items-end">
               <Button
-                onClick={() => generateZReport.mutate()}
-                disabled={generateZReport.isPending}
+                onClick={handleGenerate}
+                disabled={!canGenerate}
                 className="w-full bg-gradient-to-r from-cyan-500 to-blue-600"
               >
                 <Printer className="w-4 h-4 mr-2" />
-                {generateZReport.isPending ? "Generating..." : "Generate & Print"}
+                {isGenerating ? 'Generating...' : 'Generate & Print'}
               </Button>
             </div>
           </div>
 
           <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
             <div className="text-center">
-              <div className="text-sm text-gray-400 mb-1">Expected Total Sales</div>
+              <div className="text-sm text-gray-400 mb-1">Expected Total Sales (Real Tender Only)</div>
               <div className="text-3xl font-bold text-green-400">${totalSales.toFixed(2)}</div>
+              <div className="text-xs text-gray-500 mt-1">Cash + Card + VIP · GlyphBuck revenue excluded per audit</div>
             </div>
           </div>
         </CardContent>
@@ -370,18 +379,21 @@ export default function ZReportGenerator({ user }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
+            {recentReports.length === 0 && (
+              <p className="text-gray-500 text-sm text-center py-4">No Z-Reports yet.</p>
+            )}
             {recentReports.map((report) => (
-              <div 
+              <div
                 key={report.id}
                 className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
                 onClick={() => printReport(report)}
               >
                 <div>
                   <div className="font-semibold text-white">{report.report_id}</div>
-                  <div className="text-sm text-gray-400">{report.report_date} • {report.cashier_name}</div>
+                  <div className="text-sm text-gray-400">{report.report_date} · {report.cashier_name}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-bold text-cyan-400">${report.total_sales.toFixed(2)}</div>
+                  <div className="font-bold text-cyan-400">${(report.total_sales || 0).toFixed(2)}</div>
                   <div className="text-xs text-gray-400">{report.transaction_count} transactions</div>
                 </div>
               </div>
