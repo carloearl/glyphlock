@@ -27,6 +27,9 @@ export default function EntertainerCheckIn() {
     }
   });
 
+  const [isCheckingIn, setIsCheckingIn] = useState(false); // B1
+  const [isCheckingOut, setIsCheckingOut] = useState(null); // B1 — holds shiftId being checked out
+
   const checkIn = useMutation({
     mutationFn: (entertainerId) => {
       const entertainer = entertainers.find(e => e.id === entertainerId);
@@ -64,6 +67,7 @@ export default function EntertainerCheckIn() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
+      setIsCheckingOut(null);
       toast.success('Checked out successfully!');
     }
   });
@@ -118,12 +122,17 @@ export default function EntertainerCheckIn() {
             </Select>
 
             <Button
-              onClick={() => checkIn.mutate(selectedEntertainer)}
-              disabled={!selectedEntertainer || checkIn.isPending}
+              onClick={async () => {
+                if (isCheckingIn) return;
+                setIsCheckingIn(true);
+                try { await checkIn.mutateAsync(selectedEntertainer); }
+                finally { setIsCheckingIn(false); }
+              }}
+              disabled={!selectedEntertainer || isCheckingIn}
               className="bg-gradient-to-r from-cyan-500 to-blue-600"
             >
               <LogIn className="w-4 h-4 mr-2" />
-              Check In
+              {isCheckingIn ? 'Checking In...' : 'Check In'}
             </Button>
           </div>
         </CardContent>
@@ -154,7 +163,13 @@ export default function EntertainerCheckIn() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => checkOut.mutate(shift.id)}
+                        disabled={isCheckingOut === shift.id}
+                        onClick={async () => {
+                          if (isCheckingOut) return;
+                          setIsCheckingOut(shift.id);
+                          try { await checkOut.mutateAsync(shift.id); }
+                          catch { setIsCheckingOut(null); }
+                        }}
                         className="border-red-500/50 text-red-400"
                       >
                         <LogOut className="w-3 h-3" />
