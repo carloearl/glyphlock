@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Store, ShoppingCart, LogOut, Users, FileText, Clock, CreditCard, Loader2, DollarSign } from "lucide-react";
+import { Store, ShoppingCart, LogOut, Users, FileText, Clock, CreditCard, Loader2, DollarSign, DoorOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import POSCashRegister from "../components/nups/POSCashRegister.jsx";
 import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
@@ -12,53 +12,51 @@ import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub";
+import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
 import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/SEOHead";
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
+import { mapNUPSRoleToRBAC, hasPermission, ROLES } from '../src/config/roles.js';
 
 export default function NUPSStaff() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [rbacRole, setRbacRole] = useState(ROLES.BARTENDER);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // First check sessionStorage NUPS session (covers refresh from NUPS login)
         const nupsSession = sessionStorage.getItem("nups_session");
         if (nupsSession) {
           const sessionUser = JSON.parse(nupsSession);
           setUser(sessionUser);
+          const mapped = mapNUPSRoleToRBAC(sessionUser._highestRole || sessionUser.role);
+          setRbacRole(mapped);
           setAuthChecked(true);
           return;
         }
 
         const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) {
-          navigate('/NUPSLogin');
-          return;
-        }
+        if (!isAuth) { navigate('/NUPSLogin'); return; }
         const currentUser = await base44.auth.me();
 
-        // Enrich with RBAC payload
         try {
           const res = await base44.functions.invoke('getUserPermissions', {});
           currentUser._rbac = res.data;
           currentUser._highestRole = res.data?.highest_role || null;
         } catch (e) {}
 
-        // If user has owner/manager tier, redirect to admin dashboard
         const OWNER_TIER = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"];
         const hasOwnerAccess = currentUser._rbac?.venue_access?.some(
           va => OWNER_TIER.includes(va.role_key)
         ) || currentUser.role === "admin";
-        if (hasOwnerAccess) {
-          navigate('/NUPSOwner');
-          return;
-        }
+        if (hasOwnerAccess) { navigate('/NUPSOwner'); return; }
 
-        // Persist session so refresh doesn't bounce
+        const mapped = mapNUPSRoleToRBAC(currentUser._highestRole || currentUser.role);
+        setRbacRole(mapped);
+
         sessionStorage.setItem("nups_session", JSON.stringify(currentUser));
         setUser(currentUser);
       } catch (error) {
@@ -96,12 +94,31 @@ export default function NUPSStaff() {
 
   const todayRevenue = todayTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
 
+  // RBAC-gated tab visibility
+  const canAccessPOS = hasPermission(rbacRole, 'ACCESS_POS');
+  const canAccessVIP = hasPermission(rbacRole, 'ACCESS_VIP_ROOMS');
+  const canAccessBatch = hasPermission(rbacRole, 'ACCESS_BATCH_MANAGEMENT');
+  const canClockIn = hasPermission(rbacRole, 'CLOCK_IN_OUT');
+
+  // Determine default tab based on role
+  const getDefaultTab = () => {
+    if (canAccessVIP && !canAccessPOS) return 'vip';
+    if (canClockIn && !canAccessPOS && !canAccessVIP) return 'timeclock';
+    return 'register';
+  };
+
+  // Role label for display
+  const roleLabels = {
+    manager: 'Manager', bartender: 'Bartender', door_girl: 'Door',
+    hostess: 'Hostess', security: 'Security', dj: 'DJ'
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <SEOHead
         title="N.U.P.S. Staff Terminal | GlyphLock"
-        description="Staff point-of-sale terminal. Transaction processing, timeclock, shift management, and batch operations."
-        keywords="POS terminal, staff timeclock, transaction processing, batch management, nightclub POS, GlyphLock NUPS"
+        description="Staff point-of-sale terminal."
+        keywords="POS terminal, staff timeclock, GlyphLock NUPS"
         url="/nups-staff"
       />
       <OfflineSyncBanner />
@@ -115,14 +132,18 @@ export default function NUPSStaff() {
             </div>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="bg-gray-900/80 px-3 py-1.5 rounded-lg hidden sm:block">
-              <div className="text-xs text-gray-400">Today</div>
-              <div className="text-base font-bold text-green-400">${todayRevenue.toFixed(2)}</div>
-            </div>
+            {canAccessPOS && (
+              <div className="bg-gray-900/80 px-3 py-1.5 rounded-lg hidden sm:block">
+                <div className="text-xs text-gray-400">Today</div>
+                <div className="text-base font-bold text-green-400">${todayRevenue.toFixed(2)}</div>
+              </div>
+            )}
             <div className="hidden md:flex items-center gap-2">
               <Users className="w-4 h-4 text-gray-400" />
               <span className="text-sm text-white truncate max-w-[120px]">{user?.email}</span>
-              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-xs">{user?._highestRole || "Staff"}</Badge>
+              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-xs">
+                {roleLabels[rbacRole] || user?._highestRole || "Staff"}
+              </Badge>
             </div>
             <Button
               variant="outline"
@@ -138,45 +159,76 @@ export default function NUPSStaff() {
       </header>
 
       <div className="container mx-auto p-4 md:p-6" style={{ position: 'relative', zIndex: 20 }}>
-        <Tabs defaultValue="register" className="space-y-6">
-          <TabsList className="bg-gray-900/95 border border-cyan-500/30 grid grid-cols-5 gap-1 p-1.5 w-full min-h-0" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
-            <TabsTrigger value="register" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border-cyan-500/50" style={{ pointerEvents: 'auto', cursor: 'pointer', position: 'relative', zIndex: 31 }}>
-              <ShoppingCart className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Register</span>
-            </TabsTrigger>
-            <TabsTrigger value="contracts" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" style={{ pointerEvents: 'auto', cursor: 'pointer', position: 'relative', zIndex: 31 }}>
-              <DollarSign className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Contracts</span>
-            </TabsTrigger>
-            <TabsTrigger value="batch" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" style={{ pointerEvents: 'auto', cursor: 'pointer', position: 'relative', zIndex: 31 }}>
-              <CreditCard className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Batch</span>
-            </TabsTrigger>
-            <TabsTrigger value="timeclock" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" style={{ pointerEvents: 'auto', cursor: 'pointer', position: 'relative', zIndex: 31 }}>
-              <Clock className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">Time Clock</span>
-            </TabsTrigger>
-            <TabsTrigger value="history" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" style={{ pointerEvents: 'auto', cursor: 'pointer', position: 'relative', zIndex: 31 }}>
-              <FileText className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs">My Sales</span>
-            </TabsTrigger>
+        <Tabs defaultValue={getDefaultTab()} className="space-y-6">
+          <TabsList className="bg-gray-900/95 border border-cyan-500/30 flex gap-1 p-1.5 w-full min-h-0 flex-wrap" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
+            {canAccessPOS && (
+              <TabsTrigger value="register" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
+                <ShoppingCart className="w-4 h-4" />
+                <span className="text-[10px] md:text-xs">Register</span>
+              </TabsTrigger>
+            )}
+            {canAccessPOS && (
+              <TabsTrigger value="contracts" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
+                <DollarSign className="w-4 h-4" />
+                <span className="text-[10px] md:text-xs">Contracts</span>
+              </TabsTrigger>
+            )}
+            {canAccessBatch && (
+              <TabsTrigger value="batch" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
+                <CreditCard className="w-4 h-4" />
+                <span className="text-[10px] md:text-xs">Batch</span>
+              </TabsTrigger>
+            )}
+            {canAccessVIP && (
+              <TabsTrigger value="vip" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-pink-500/20 data-[state=active]:text-pink-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
+                <DoorOpen className="w-4 h-4" />
+                <span className="text-[10px] md:text-xs">VIP Rooms</span>
+              </TabsTrigger>
+            )}
+            {canClockIn && (
+              <TabsTrigger value="timeclock" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
+                <Clock className="w-4 h-4" />
+                <span className="text-[10px] md:text-xs">Time Clock</span>
+              </TabsTrigger>
+            )}
+            {canAccessPOS && (
+              <TabsTrigger value="history" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
+                <FileText className="w-4 h-4" />
+                <span className="text-[10px] md:text-xs">My Sales</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
-          <TabsContent value="register" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-            <POSCashRegister user={user} />
-          </TabsContent>
-          <TabsContent value="contracts" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-            <UnifiedDreamDollarHub venue_id="dream_palace" />
-          </TabsContent>
-          <TabsContent value="batch" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-            <BatchManagement user={user} />
-          </TabsContent>
-          <TabsContent value="timeclock" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-            <TimeClock user={user} role={user?._highestRole || "BARTENDER"} />
-          </TabsContent>
-          <TabsContent value="history" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-            <TransactionHistory transactions={todayTransactions} showReceipt={true} />
-          </TabsContent>
+          {canAccessPOS && (
+            <TabsContent value="register" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
+              <POSCashRegister user={user} />
+            </TabsContent>
+          )}
+          {canAccessPOS && (
+            <TabsContent value="contracts" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
+              <UnifiedDreamDollarHub venue_id="dream_palace" />
+            </TabsContent>
+          )}
+          {canAccessBatch && (
+            <TabsContent value="batch" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
+              <BatchManagement user={user} />
+            </TabsContent>
+          )}
+          {canAccessVIP && (
+            <TabsContent value="vip" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
+              <VIPRoomBoard />
+            </TabsContent>
+          )}
+          {canClockIn && (
+            <TabsContent value="timeclock" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
+              <TimeClock user={user} role={user?._highestRole || "BARTENDER"} />
+            </TabsContent>
+          )}
+          {canAccessPOS && (
+            <TabsContent value="history" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
+              <TransactionHistory transactions={todayTransactions} showReceipt={true} />
+            </TabsContent>
+          )}
         </Tabs>
 
         <footer className="text-center text-[10px] text-gray-700 py-6 border-t border-gray-800 mt-12">
