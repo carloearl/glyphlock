@@ -5,11 +5,11 @@ import { Twitter, Linkedin, Instagram, Github, Mail, Phone, MapPin, Shield, Exte
 import { FOOTER_LINKS } from "@/components/NavigationConfig";
 
 const certifications = [
-  { name: "ISO 27001", subtitle: "ALIGNED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg", page: "TrustSecurity" },
-  { name: "SOC 2", subtitle: "ALIGNED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg", page: "TrustSecurity" },
-  { name: "GDPR", subtitle: "ALIGNED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg", page: "Privacy" },
-  { name: "HIPAA", subtitle: "ALIGNED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg", page: "TrustSecurity" },
-  { name: "Post-Quantum", subtitle: "DESIGNED FOR", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg", page: "TrustSecurity" }
+  { name: 'ISO 27001', subtitle: 'ARCHITECTURE', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg', page: 'TrustSecurity' },
+  { name: 'SOC 2', subtitle: 'ALIGNED', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg', page: 'TrustSecurity' },
+  { name: 'GDPR', subtitle: 'ALIGNED', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg', page: 'Privacy' },
+  { name: 'HIPAA', subtitle: 'READY', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg', page: 'TrustSecurity' },
+  { name: 'PCI DSS', subtitle: 'COMPATIBLE', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg', page: 'TrustSecurity' }
 ];
 
 const socials = [

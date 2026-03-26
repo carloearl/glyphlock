@@ -89,6 +89,7 @@ export default function ZReportGenerator({ user }) {
     if (isGenerating) return;
     setIsGenerating(true);
 
+    if (!window.confirm('Generate Z-Report for today? This closes the reporting period.')) return;
     try {
       const barRevenue = todayTransactions
         .filter(t => t.items?.some(item => item.product_name?.includes('Drink')))
@@ -113,7 +114,6 @@ export default function ZReportGenerator({ user }) {
         total: data.total
       }));
 
-      // E7 — store display name, not raw email
       const cashierDisplay = user?.full_name || user?.name || user?.email || 'Unknown';
 
       const report = await base44.entities.POSZReport.create({
@@ -126,7 +126,7 @@ export default function ZReportGenerator({ user }) {
         closing_cash: Number(closingCash),
         cash_sales: cashSales,
         card_sales: cardSales,
-        total_sales: totalSales, // B2 — GlyphBucks NOT in this total
+        total_sales: totalSales,
         transaction_count: todayTransactions.length,
         vip_room_revenue: vipRevenue,
         bar_revenue: barRevenue,
@@ -135,7 +135,7 @@ export default function ZReportGenerator({ user }) {
         products_sold,
         notes: JSON.stringify({
           glyph_buck_issued_value: glyphBuckIssued,
-          glyph_buck_revenue_charged: glyphBuckRevenue, // reference only
+          glyph_buck_revenue_charged: glyphBuckRevenue,
           glyph_buck_redeemed_value: glyphBuckRedeemed,
           glyph_buck_contracts: todayOrders.length,
           entertainer_tip_payouts: entertainerPayouts,
@@ -143,7 +143,7 @@ export default function ZReportGenerator({ user }) {
       });
 
       queryClient.invalidateQueries({ queryKey: ['z-reports'] });
-      alert(`✅ Z-Report generated!\nTotal Sales (real tender): $${report.total_sales.toFixed(2)}`);
+      alert(`Z-Report generated!\nTotal Sales (real tender): $${report.total_sales.toFixed(2)}`);
       printReport(report);
     } finally {
       setIsGenerating(false);

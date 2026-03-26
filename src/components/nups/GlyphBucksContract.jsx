@@ -272,7 +272,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       customer_state: customerState,
       customer_zip: customerZip,
       purchaser_card_name: purchaserCardName,
-      card_last_six: cardLastSix,
+      card_last_six: '****' + String(cardLastSix).replace(/\D/g,'').slice(-4),
       card_exp: cardExp,
       approval_code: approvalCode,
       manager_name: managerName,

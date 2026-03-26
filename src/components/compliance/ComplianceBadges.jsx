@@ -1,21 +1,7 @@
 import React from "react";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { SOC2Badge, ISO27001Badge, PCIDSSBadge, GDPRBadge, HIPAABadge } from "./BadgeSVGs";
-
-/**
- * GLYPHLOCK COMPLIANCE BADGES
- * 
- * CRITICAL LEGAL NOTICE:
- * - SOC 2, ISO 27001, PCI DSS badges require active certifications
- * - GDPR and HIPAA have NO official badges (text-based implementation)
- * - CEO must verify all certifications before public display
- * 
- * To use official badges:
- * 1. Place official badge files in /public/badges/
- * 2. Replace ComplianceBadge with <img> tags
- * 3. Update certification_verified to true
- */
 
 const ComplianceBadge = ({ BadgeComponent, title, subtitle, verified = false }) => (
   <Card className="glyph-glass-card p-6 flex flex-col items-center gap-3 hover:scale-105 transition-transform group">
@@ -36,19 +22,17 @@ const ComplianceBadge = ({ BadgeComponent, title, subtitle, verified = false }) 
 );
 
 export default function ComplianceBadges({ showVerificationWarning = true }) {
-  // CRITICAL: Set to true only after CEO confirms active certifications
   const certifications = {
     soc2: { verified: false, inProgress: true },
     iso27001: { verified: false, inProgress: true },
     pciDss: { verified: false, inProgress: true },
-    gdpr: { verified: true, inProgress: false }, // Compliance program (not certification)
-    hipaa: { verified: true, inProgress: false }  // Compliance program (not certification)
+    gdpr: { verified: true, inProgress: false },
+    hipaa: { verified: true, inProgress: false }
   };
 
   return (
     <section className="py-16 relative" style={{ background: 'transparent' }}>
       <div className="container mx-auto px-4">
-        {/* Warning Banner - Remove after verification */}
         {showVerificationWarning && (
           <div className="mb-8 p-4 bg-yellow-500/10 border-2 border-yellow-500/50 rounded-lg">
             <div className="flex items-start gap-3">
@@ -58,7 +42,7 @@ export default function ComplianceBadges({ showVerificationWarning = true }) {
                   ⚠️ COMPLIANCE VERIFICATION REQUIRED
                 </div>
                 <div className="text-xs text-yellow-200">
-                  CEO must verify active certifications before public display. 
+                  CEO must verify active certifications before public display.
                   Currently showing compliance programs in place.
                 </div>
               </div>
@@ -71,103 +55,60 @@ export default function ComplianceBadges({ showVerificationWarning = true }) {
             Enterprise-Grade Security Standards
           </h2>
           <p className="text-lg text-slate-300 max-w-3xl mx-auto">
-            GlyphLock maintains comprehensive security and compliance programs 
+            GlyphLock maintains comprehensive security and compliance programs
             aligned with industry-leading standards for credentialed integrity systems.
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
-          {/* SOC 2 Type II */}
           <ComplianceBadge
             BadgeComponent={SOC2Badge}
-            title="SOC 2"
+            title="SOC 2 Aligned"
             subtitle={certifications.soc2.verified ? "Type II Certified" : "Program In Place"}
             verified={certifications.soc2.verified}
           />
-
-          {/* ISO 27001 */}
           <ComplianceBadge
             BadgeComponent={ISO27001Badge}
-            title="ISO 27001"
+            title="ISO 27001 Architecture"
             subtitle={certifications.iso27001.verified ? "Certified" : "Standards Met"}
             verified={certifications.iso27001.verified}
           />
-
-          {/* PCI DSS */}
           <ComplianceBadge
             BadgeComponent={PCIDSSBadge}
-            title="PCI DSS"
+            title="PCI DSS Compatible"
             subtitle={certifications.pciDss.verified ? "Compliant" : "Standards Met"}
             verified={certifications.pciDss.verified}
           />
-
-          {/* GDPR - No official badge exists */}
           <ComplianceBadge
             BadgeComponent={GDPRBadge}
-            title="GDPR"
+            title="GDPR Aligned"
             subtitle="Compliant"
             verified={certifications.gdpr.verified}
           />
-
-          {/* HIPAA - No official badge exists */}
           <ComplianceBadge
             BadgeComponent={HIPAABadge}
-            title="HIPAA"
+            title="HIPAA Ready"
             subtitle="Compliant"
             verified={certifications.hipaa.verified}
           />
         </div>
 
-        {/* Compliance Documentation Link */}
         <div className="text-center">
-          <a
-            href="/compliance"
-            className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-          >
+          <a href="/compliance" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold transition-colors">
             View Detailed Compliance Documentation
             <CheckCircle2 className="w-4 h-4" />
           </a>
         </div>
 
-        {/* Legal Disclaimer */}
         <div className="mt-12 p-6 bg-slate-900/50 border border-slate-700/50 rounded-lg">
-          <p className="text-xs text-slate-400 text-center leading-relaxed">
-            GlyphLock Security LLC maintains comprehensive security and compliance programs. 
-            Compliance status is subject to ongoing audits and assessments. 
-            For official certification verification, contact{" "}
-            <a href="mailto:glyphlock@gmail.com" className="text-blue-400 hover:underline">
-              glyphlock@gmail.com
-            </a>
+          <p className="text-xs text-slate-500 text-center leading-relaxed mt-2">
+            These labels indicate architectural alignment and program implementation — not formal third-party certification.
+            GlyphLock maintains ongoing security audits and assessments toward formal certification.
+            For verification inquiries, contact{" "}
+            <a href="mailto:hello@glyphlock.io" className="text-blue-400 hover:underline">hello@glyphlock.io</a>.
           </p>
         </div>
       </div>
     </section>
   );
 }
-
-/**
- * OFFICIAL BADGE INTEGRATION INSTRUCTIONS:
- * 
- * Once certifications are verified:
- * 
- * 1. Download official badges:
- *    - SOC 2: https://us.aicpa.org/ (AICPA official seal)
- *    - ISO 27001: From certification body (BSI, DNV, SGS, etc.)
- *    - PCI DSS: https://www.pcisecuritystandards.org/
- * 
- * 2. Save badges to public directory:
- *    /public/badges/soc2-type2-official.svg
- *    /public/badges/iso27001-certified.svg
- *    /public/badges/pci-dss-compliant.svg
- * 
- * 3. Replace ComplianceBadge components with:
- *    <img 
- *      src="/badges/soc2-type2-official.svg" 
- *      alt="SOC 2 Type II Certified"
- *      className="w-24 h-24 grayscale hover:grayscale-0 transition-all"
- *    />
- * 
- * 4. Update certification_verified flags to true
- * 
- * 5. Remove verification warning banner
- */
