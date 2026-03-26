@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Users, LogIn, LogOut, MapPin, Clock, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+
+const ShiftTimer = ({ checkInTime }) => {
+  const [elapsed, setElapsed] = useState('');
+  useEffect(() => {
+    const tick = () => {
+      const diff = Math.floor((Date.now() - new Date(checkInTime)) / 1000);
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      setElapsed(`${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [checkInTime]);
+  return <span className="font-mono">{elapsed}</span>;
+};
 
 export default function EntertainerCheckIn() {
   const queryClient = useQueryClient();
@@ -24,7 +41,8 @@ export default function EntertainerCheckIn() {
     queryFn: async () => {
       const allShifts = await base44.entities.EntertainerShift.list('-created_date', 100);
       return allShifts.filter(shift => !shift.check_out_time);
-    }
+    },
+    refetchInterval: 30000
   });
 
   const [isCheckingIn, setIsCheckingIn] = useState(false); // B1
@@ -60,13 +78,37 @@ export default function EntertainerCheckIn() {
   });
 
   const checkOut = useMutation({
-    mutationFn: (shiftId) =>
-      base44.entities.EntertainerShift.update(shiftId, {
+    mutationFn: async (shiftId) => {
+      const shiftRecord = activeShifts.find(s => s.id === shiftId);
+      const allTxns = await base44.entities.POSTransaction.list('-created_date', 200);
+      const shiftStart = shiftRecord?.check_in_time ? new Date(shiftRecord.check_in_time) : new Date();
+      const shiftTxns = allTxns.filter(t =>
+        t.entertainer_id === shiftRecord?.entertainer_id &&
+        new Date(t.created_date) >= shiftStart
+      );
+      const tips = shiftTxns.reduce((s, t) => s + (parseFloat(t.tip) || 0), 0);
+      const commissions = shiftTxns.reduce((s, t) => s + (parseFloat(t.commission_amount) || 0), 0);
+      const shiftEarnings = tips + commissions;
+      await base44.entities.EntertainerShift.update(shiftId, {
         check_out_time: new Date().toISOString(),
-        status: 'checked_out'
-      }),
+        status: 'checked_out',
+        shift_earnings: shiftEarnings,
+      });
+      if (shiftRecord?.entertainer_id) {
+        try {
+          const ents = await base44.entities.Entertainer.filter({ status: 'active' });
+          const ent = ents.find(e => e.id === shiftRecord.entertainer_id);
+          if (ent) {
+            await base44.entities.Entertainer.update(shiftRecord.entertainer_id, {
+              total_earnings: (parseFloat(ent.total_earnings) || 0) + shiftEarnings,
+            });
+          }
+        } catch(e) {}
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
+      queryClient.invalidateQueries({ queryKey: ['entertainers'] });
       setIsCheckingOut(null);
       toast.success('Checked out successfully!');
     }
@@ -165,6 +207,7 @@ export default function EntertainerCheckIn() {
                         variant="outline"
                         disabled={isCheckingOut === shift.id}
                         onClick={async () => {
+                          if (!window.confirm(`Check out ${shift.stage_name}? This will record final earnings.`)) return;
                           if (isCheckingOut) return;
                           setIsCheckingOut(shift.id);
                           try { await checkOut.mutateAsync(shift.id); }
@@ -179,7 +222,7 @@ export default function EntertainerCheckIn() {
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2 text-gray-400">
                         <Clock className="w-4 h-4" />
-                        <span>{duration} mins on shift</span>
+                        <ShiftTimer checkInTime={shift.check_in_time} />
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
                         <MapPin className="w-4 h-4" />

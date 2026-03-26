@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Clock, XCircle, CheckCircle2, AlertCircle } from "lucide-react";
+import { useActiveVenue } from '../../hooks/useActiveVenue';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import {
 
 export default function BatchManagement({ user }) {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
   const [showOpenDialog, setShowOpenDialog] = useState(false);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [openingCash, setOpeningCash] = useState(0);
@@ -87,7 +89,8 @@ export default function BatchManagement({ user }) {
         start_time: new Date().toISOString(),
         opening_cash: parsed,
         cashier: user?.email,
-        cashier_name: user?.full_name || user?.name || user?.email, // E7
+        cashier_name: user?.full_name || user?.name || user?.email,
+        venue_id: activeVenue?.id || null,
         status: 'open',
         total_sales: 0,
         transaction_count: 0

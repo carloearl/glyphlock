@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReceiptPrinter from "./ReceiptPrinter";
+import { useActiveVenue } from '../../hooks/useActiveVenue';
 import QuickChargePanel from "./pos/QuickChargePanel";
 import CashDenominationPad from "./pos/CashDenominationPad";
 import CardPaymentPanel from "./pos/CardPaymentPanel";
@@ -19,6 +20,7 @@ import OrderDisplay from "./pos/OrderDisplay";
 
 export default function POSCashRegister({ user }) {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [barcodeInput, setBarcodeInput] = useState("");
@@ -27,6 +29,8 @@ export default function POSCashRegister({ user }) {
   const [lastTransaction, setLastTransaction] = useState(null);
   const [tip, setTip] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false); // B1 — duplicate transaction guard
+  const [customerQuery, setCustomerQuery] = useState('');
+  const [showCustDropdown, setShowCustDropdown] = useState(false);
 
   // Payment flow state
   const [paymentStep, setPaymentStep] = useState("register"); // register | method | pay
@@ -146,6 +150,7 @@ export default function POSCashRegister({ user }) {
   const completePayment = async (details = {}) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    const cashierName = user?.full_name || user?.name || user?.email || 'Staff';
     const transactionData = {
       transaction_id: `TXN-${Date.now()}`,
       customer_id: selectedCustomer?.id,
@@ -156,14 +161,22 @@ export default function POSCashRegister({ user }) {
       tip: tipAmount,
       total,
       payment_method: paymentMethod || "Cash",
-      cashier: user?.email,
-      cashier_name: user?.full_name || user?.name || user?.email || 'Staff', // E7 — display name
+      cashier: cashierName,
+      cashier_name: cashierName,
+      venue_id: activeVenue?.id || null,
       status: "completed",
       batch_id: activeBatch?.id,
       ...details,
     };
     try {
       await createTransaction.mutateAsync(transactionData);
+      if (selectedCustomer?.id) {
+        await base44.entities.POSCustomer.update(selectedCustomer.id, {
+          visit_count: (selectedCustomer.visit_count || 0) + 1,
+          total_spent: (selectedCustomer.total_spent || 0) + total,
+        });
+        queryClient.invalidateQueries(['pos-customers']);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -396,35 +409,73 @@ export default function POSCashRegister({ user }) {
             </div>
           )}
 
-          {/* Customer */}
-          <div>
+          {/* Customer — search */}
+          <div className="relative">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Customer</span>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
+              {selectedCustomer && (
+                <button onClick={() => { setSelectedCustomer(null); setCustomerQuery(''); }} className="text-[10px] text-red-400 hover:text-red-300">✕ Clear</button>
+              )}
             </div>
-            <Select
-              value={selectedCustomer?.id || "walk-in"}
-              onValueChange={(id) => setSelectedCustomer(id === "walk-in" ? null : customers.find(c => c.id === id) || null)}
-            >
-              <SelectTrigger className="h-10 text-white text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}>
-                <SelectValue placeholder="Walk-in Customer" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-950 border-gray-800">
-                <SelectItem value="walk-in">Walk-in Customer</SelectItem>
-                {customers.map((customer) => (
-                  <SelectItem key={customer.id} value={customer.id}>
-                    {customer.full_name} {customer.loyalty_tier ? `(${customer.loyalty_tier})` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              placeholder={selectedCustomer ? selectedCustomer.full_name : 'Search by name or phone...'}
+              value={selectedCustomer ? '' : customerQuery}
+              onChange={(e) => { setCustomerQuery(e.target.value); setShowCustDropdown(true); }}
+              onFocus={() => setShowCustDropdown(true)}
+              onBlur={() => setTimeout(() => setShowCustDropdown(false), 150)}
+              className="h-10 text-white text-sm placeholder:text-gray-500"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}
+            />
+            {selectedCustomer && (
+              <div className="mt-1 px-3 py-1.5 rounded-lg text-xs" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)' }}>
+                <span className="text-green-400 font-medium">{selectedCustomer.full_name}</span>
+                {selectedCustomer.phone && <span className="text-gray-500 ml-2">{selectedCustomer.phone}</span>}
+                <span className="text-gray-600 ml-2">Visits: {selectedCustomer.visit_count || 0}</span>
+              </div>
+            )}
+            {showCustDropdown && customerQuery.length >= 2 && !selectedCustomer && (
+              <div className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-2xl" style={{ background: '#0a0a0e', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div
+                  className="px-3 py-2.5 cursor-pointer text-sm text-gray-400 hover:bg-white/5"
+                  onMouseDown={() => { setSelectedCustomer(null); setCustomerQuery(''); setShowCustDropdown(false); }}
+                >
+                  👤 Walk-in Customer
+                </div>
+                {customers
+                  .filter(c =>
+                    c.full_name?.toLowerCase().includes(customerQuery.toLowerCase()) ||
+                    c.phone?.includes(customerQuery)
+                  )
+                  .slice(0, 8)
+                  .map(c => (
+                    <div
+                      key={c.id}
+                      className="px-3 py-2.5 cursor-pointer hover:bg-white/5 border-t border-white/5"
+                      onMouseDown={() => { setSelectedCustomer(c); setCustomerQuery(''); setShowCustDropdown(false); }}
+                    >
+                      <div className="text-sm font-medium text-white">{c.full_name}</div>
+                      <div className="text-xs text-gray-500 flex gap-3">
+                        {c.phone && <span>{c.phone}</span>}
+                        <span>Visits: {c.visit_count || 0}</span>
+                        {c.total_spent > 0 && <span>Spent: ${(c.total_spent || 0).toFixed(0)}</span>}
+                      </div>
+                    </div>
+                  ))}
+                {customers.filter(c =>
+                  c.full_name?.toLowerCase().includes(customerQuery.toLowerCase()) ||
+                  c.phone?.includes(customerQuery)
+                ).length === 0 && (
+                  <div className="px-3 py-2.5 text-xs text-gray-500">No customers found — try a different search</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* ── RIGHT PANEL: Order + Checkout ──────────── */}
-      {/* Part 1 receipt fix — overflow-y-auto so bottom content (totals/footer) is never clipped */}
-      <div className="w-72 lg:w-80 flex flex-col shrink-0 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.4)' }}>
+      <div className="w-72 lg:w-80 flex flex-col shrink-0 overflow-y-auto min-h-0" style={{ background: 'rgba(0,0,0,0.4)' }}>
         <OrderDisplay
           cart={cart}
           subtotal={subtotal}

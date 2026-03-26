@@ -26,6 +26,7 @@ import ImageShare from './pages/ImageShare';
 import GlyphBucksHub from './pages/GlyphBucksHub';
 import ContractLookup from './pages/ContractLookup';
 import Unauthorized from './pages/Unauthorized';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -113,7 +114,9 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <NavigationTracker />
-          <AuthenticatedApp />
+          <ErrorBoundary>
+            <AuthenticatedApp />
+          </ErrorBoundary>
         </Router>
         <Toaster />
         <VisualEditAgent />
