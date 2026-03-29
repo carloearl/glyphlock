@@ -49,13 +49,25 @@ export default function EntertainerCheckIn() {
   const [isCheckingOut, setIsCheckingOut] = useState(null); // B1 — holds shiftId being checked out
 
   const checkIn = useMutation({
-    mutationFn: (entertainerId) => {
+    mutationFn: async (entertainerId) => {
       const entertainer = entertainers.find(e => e.id === entertainerId);
+      // Section 3 — validate entertainer resolves; mark ORPHANED if not found
+      if (!entertainer) {
+        return base44.entities.EntertainerShift.create({
+          entertainer_id: entertainerId,
+          check_in_time: new Date().toISOString(),
+          location: location,
+          status: 'ORPHANED',
+          role: 'Entertainer',
+          orphan_note: `DACO-REPAIR ${new Date().toISOString()}: entertainer_id ${entertainerId} not found in active Entertainer records at check-in time.`
+        });
+      }
       return base44.entities.EntertainerShift.create({
         entertainer_id: entertainerId,
         stage_name: entertainer.stage_name,
         check_in_time: new Date().toISOString(),
         location: location,
+        role: 'Entertainer',
         status: 'on_floor'
       });
     },

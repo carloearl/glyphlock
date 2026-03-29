@@ -89,6 +89,7 @@ export default function BatchManagement({ user }) {
         start_time: new Date().toISOString(),
         opening_cash: parsed,
         cashier: user?.email,
+        cashier_email: user?.email || null,
         cashier_name: user?.full_name || user?.name || user?.email,
         venue_id: activeVenue?.id || null,
         status: 'open',
@@ -114,10 +115,19 @@ export default function BatchManagement({ user }) {
       if (!confirmed) return;
     }
 
-    const cashTx = batchTransactions.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + (t.total || 0), 0);
-    const totalSales = batchTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
+    // Section 3 — filter REAL only for financial totals
+    const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
+    const cashTx = realTxns.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + (t.total || 0), 0);
+    const totalSales = realTxns.reduce((sum, t) => sum + (t.total || 0), 0);
     const expectedCash = (activeBatch?.opening_cash || 0) + cashTx;
     const discrepancy = parsed - expectedCash;
+    const hasDiscrepancy = Math.abs(discrepancy) > 0.01;
+
+    // Section 3 — require discrepancy_note when REQUIRES_REVIEW
+    if (hasDiscrepancy && !notes.trim()) {
+      alert('A discrepancy exists. You must enter a closing note explaining the discrepancy before closing.');
+      return;
+    }
 
     setIsClosingBatch(true);
     try {
@@ -126,10 +136,14 @@ export default function BatchManagement({ user }) {
         data: {
           end_time: new Date().toISOString(),
           closing_cash: parsed,
+          original_closing_cash: parsed,
+          closing_cash_entered_by: user?.email || 'unknown',
+          closing_cash_entered_at: new Date().toISOString(),
           total_sales: totalSales,
           transaction_count: batchTransactions.length,
-          status: 'closed',
+          status: hasDiscrepancy ? 'REQUIRES_REVIEW' : 'closed',
           discrepancy,
+          discrepancy_note: hasDiscrepancy ? notes : null,
           notes
         }
       });
@@ -138,14 +152,20 @@ export default function BatchManagement({ user }) {
     }
   };
 
-  const batchTotal = batchTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
-  const cashTotal = batchTransactions.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + (t.total || 0), 0);
-  const cardTotal = batchTransactions.filter(t => ['Credit Card', 'Debit Card'].includes(t.payment_method)).reduce((sum, t) => sum + (t.total || 0), 0);
+  const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
+  const batchTotal = realTxns.reduce((sum, t) => sum + (t.total || 0), 0);
+  const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + (t.total || 0), 0);
+  const cardTotal = realTxns.filter(t => ['Credit Card', 'Debit Card'].includes(t.payment_method)).reduce((sum, t) => sum + (t.total || 0), 0);
 
   // D10 — stale batch warning
   const batchAgeHours = activeBatch
     ? (Date.now() - new Date(activeBatch.start_time).getTime()) / 1000 / 3600
     : 0;
+
+  const expectedCashPreview = (activeBatch?.opening_cash || 0) + cashTotal;
+  const parsedClosing = parseFloat(closingCash) || 0;
+  const discrepancyPreview = parsedClosing - expectedCashPreview;
+  const hasDiscrepancyPreview = Math.abs(discrepancyPreview) > 0.01;
 
   return (
     <div className="space-y-4">
@@ -207,9 +227,9 @@ export default function BatchManagement({ user }) {
               </div>
             </div>
             <div className="glass-card p-4 mt-4 border-green-500/30">
-              <div className="text-sm text-gray-400 mb-1">Total Batch Sales</div>
+              <div className="text-sm text-gray-400 mb-1">Total Batch Sales (Real Tender)</div>
               <div className="text-3xl font-bold text-green-400">${batchTotal.toFixed(2)}</div>
-              <div className="text-sm text-gray-400 mt-2">Expected Cash: ${(activeBatch.opening_cash + cashTotal).toFixed(2)}</div>
+              <div className="text-sm text-gray-400 mt-2">Expected Cash: ${expectedCashPreview.toFixed(2)}</div>
             </div>
           </CardContent>
         </Card>
@@ -282,7 +302,7 @@ export default function BatchManagement({ user }) {
                 <div className="text-xl font-bold text-blue-400">{batchTransactions.length}</div>
               </div>
               <div className="glass-card p-4">
-                <div className="text-sm text-gray-400 mb-1">Cash Sales</div>
+                <div className="text-sm text-gray-400 mb-1">Cash Sales (Real)</div>
                 <div className="text-xl font-bold text-green-400">${cashTotal.toFixed(2)}</div>
               </div>
             </div>
@@ -290,7 +310,7 @@ export default function BatchManagement({ user }) {
             <div className="glass-card p-4 border-green-500/30">
               <div className="text-sm text-gray-400 mb-1">Expected Cash in Drawer</div>
               <div className="text-2xl font-bold text-green-400">
-                ${((activeBatch?.opening_cash || 0) + cashTotal).toFixed(2)}
+                ${expectedCashPreview.toFixed(2)}
               </div>
             </div>
 
@@ -306,22 +326,29 @@ export default function BatchManagement({ user }) {
               />
             </div>
 
-            {closingCash > 0 && (
-              <div className={`glass-card p-4 ${Math.abs(closingCash - ((activeBatch?.opening_cash || 0) + cashTotal)) > 0.01 ? 'border-red-500/30' : 'border-green-500/30'}`}>
-                <div className="text-sm text-gray-400 mb-1">Discrepancy</div>
-                <div className={`text-2xl font-bold ${closingCash - ((activeBatch?.opening_cash || 0) + cashTotal) < 0 ? 'text-red-400' : 'text-green-400'}`}>
-                  ${(closingCash - ((activeBatch?.opening_cash || 0) + cashTotal)).toFixed(2)}
+            {parsedClosing > 0 && (
+              <div className={`glass-card p-4 ${hasDiscrepancyPreview ? 'border-red-500/30' : 'border-green-500/30'}`}>
+                <div className="text-sm text-gray-400 mb-1">
+                  Discrepancy {hasDiscrepancyPreview && <span className="text-red-400 font-bold ml-1">— NOTE REQUIRED</span>}
                 </div>
+                <div className={`text-2xl font-bold ${discrepancyPreview < 0 ? 'text-red-400' : 'text-green-400'}`}>
+                  ${discrepancyPreview.toFixed(2)}
+                </div>
+                {hasDiscrepancyPreview && (
+                  <div className="text-xs text-orange-400 mt-1">Status will be set to REQUIRES_REVIEW</div>
+                )}
               </div>
             )}
 
             <div>
-              <Label>Closing Notes</Label>
+              <Label>
+                Closing Notes {hasDiscrepancyPreview && <span className="text-red-400">*Required (discrepancy detected)</span>}
+              </Label>
               <Input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="glass-input text-white"
-                placeholder="Any notes about discrepancies or issues..."
+                placeholder="Explain any discrepancies or issues..."
               />
             </div>
 

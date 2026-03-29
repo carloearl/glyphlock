@@ -54,19 +54,23 @@ export default function ZReportGenerator({ user }) {
     queryFn: () => base44.entities.POSZReport.list('-created_date', 10)
   });
 
-  // Live preview calculations
-  const cashSales = todayTransactions
+  // Section 3 — separate REAL vs DEMO transactions
+  const realTransactions = todayTransactions.filter(t => !t.mode || t.mode === 'REAL');
+  const demoTransactions = todayTransactions.filter(t => t.mode === 'DEMO' || t.mode === 'TEST');
+
+  // Live preview calculations — REAL only for financials
+  const cashSales = realTransactions
     .filter(t => t.payment_method === 'Cash')
     .reduce((sum, t) => sum + (t.total || 0), 0);
 
-  const cardSales = todayTransactions
+  const cardSales = realTransactions
     .filter(t => t.payment_method !== 'Cash')
     .reduce((sum, t) => sum + (t.total || 0), 0);
 
   const vipRevenue = todayVIPSessions
     .reduce((sum, s) => sum + (s.total_charge || 0), 0);
 
-  // B2 — total_sales = real tender only. GlyphBucks are reference-only.
+  // B2 — total_sales = real tender only. GlyphBucks and DEMO are reference-only.
   const totalSales = cashSales + cardSales + vipRevenue;
 
   const glyphBuckRevenue = todayOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
@@ -80,8 +84,8 @@ export default function ZReportGenerator({ user }) {
       alert('You must be logged in to generate a Z-Report.');
       return;
     }
-    if (todayTransactions.length === 0) {
-      alert('No transactions found for today. Cannot generate an empty Z-Report.');
+    if (realTransactions.length === 0) {
+      alert('No REAL transactions found for today. Cannot generate an empty Z-Report.');
       return;
     }
 
@@ -89,16 +93,21 @@ export default function ZReportGenerator({ user }) {
     if (isGenerating) return;
     setIsGenerating(true);
 
-    if (!window.confirm('Generate Z-Report for today? This closes the reporting period.')) return;
+    if (!window.confirm('Generate Z-Report for today? This closes the reporting period.')) {
+      setIsGenerating(false);
+      return;
+    }
+
     try {
-      const barRevenue = todayTransactions
+      // Section 3 — REAL transactions only for product breakdown
+      const barRevenue = realTransactions
         .filter(t => t.items?.some(item => item.product_name?.includes('Drink')))
         .reduce((sum, t) => sum + (t.total || 0), 0);
 
       const merchandiseRevenue = totalSales - barRevenue - vipRevenue;
 
       const productSalesMap = {};
-      todayTransactions.forEach(t => {
+      realTransactions.forEach(t => {
         t.items?.forEach(item => {
           if (!productSalesMap[item.product_name]) {
             productSalesMap[item.product_name] = { quantity: 0, total: 0 };
@@ -116,6 +125,14 @@ export default function ZReportGenerator({ user }) {
 
       const cashierDisplay = user?.full_name || user?.name || user?.email || 'Unknown';
 
+      // Section 3 — find today's closed batch to attach batch_id
+      const allBatches = await base44.entities.POSBatch.list('-created_date', 20);
+      const today = new Date().toDateString();
+      const todayBatch = allBatches.find(b =>
+        new Date(b.start_time).toDateString() === today &&
+        (b.status === 'closed' || b.status === 'REQUIRES_REVIEW')
+      );
+
       const report = await base44.entities.POSZReport.create({
         report_id: `Z-${Date.now()}`,
         report_date: new Date().toISOString().split('T')[0],
@@ -126,8 +143,11 @@ export default function ZReportGenerator({ user }) {
         closing_cash: Number(closingCash),
         cash_sales: cashSales,
         card_sales: cardSales,
-        total_sales: totalSales,
-        transaction_count: todayTransactions.length,
+        total_sales: totalSales, // DO NOT MODIFY — real tender only
+        transaction_count: realTransactions.length,
+        real_transaction_count: realTransactions.length,
+        demo_transaction_count: demoTransactions.length,
+        batch_id: todayBatch?.batch_id || null,
         vip_room_revenue: vipRevenue,
         bar_revenue: barRevenue,
         merchandise_revenue: merchandiseRevenue,
@@ -139,18 +159,19 @@ export default function ZReportGenerator({ user }) {
           glyph_buck_redeemed_value: glyphBuckRedeemed,
           glyph_buck_contracts: todayOrders.length,
           entertainer_tip_payouts: entertainerPayouts,
+          demo_transaction_count: demoTransactions.length,
         })
       });
 
       queryClient.invalidateQueries({ queryKey: ['z-reports'] });
-      alert(`Z-Report generated!\nTotal Sales (real tender): $${report.total_sales.toFixed(2)}`);
-      printReport(report);
+      alert(`Z-Report generated!\nReal Transactions: ${realTransactions.length}\nDemo Transactions: ${demoTransactions.length}\nTotal Sales (real tender): $${report.total_sales.toFixed(2)}`);
+      printReport(report, demoTransactions.length);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const printReport = (report) => {
+  const printReport = (report, demoCount = 0) => {
     const printWindow = window.open('', '', 'width=800,height=600');
     let extra = {};
     try { extra = JSON.parse(report.notes || '{}'); } catch(e) {}
@@ -165,6 +186,7 @@ export default function ZReportGenerator({ user }) {
             .section { margin: 20px 0; }
             .row { display: flex; justify-content: space-between; margin: 5px 0; }
             .total { font-weight: bold; font-size: 1.2em; border-top: 2px solid #000; padding-top: 10px; }
+            .demo-note { background: #fff3cd; border: 1px solid #ffc107; padding: 8px; font-size: 11px; }
           </style>
         </head>
         <body>
@@ -173,6 +195,7 @@ export default function ZReportGenerator({ user }) {
             <div class="row"><span>Report ID:</span><span>${report.report_id}</span></div>
             <div class="row"><span>Date:</span><span>${report.report_date}</span></div>
             <div class="row"><span>Cashier:</span><span>${report.cashier_name}</span></div>
+            ${report.batch_id ? `<div class="row"><span>Batch ID:</span><span>${report.batch_id}</span></div>` : ''}
           </div>
           <div class="section">
             <h3>CASH DRAWER</h3>
@@ -187,6 +210,14 @@ export default function ZReportGenerator({ user }) {
             <div class="row"><span>VIP Room Revenue:</span><span>$${report.vip_room_revenue.toFixed(2)}</span></div>
             <div class="row"><span>Bar Revenue:</span><span>$${report.bar_revenue.toFixed(2)}</span></div>
             <div class="row"><span>Merchandise:</span><span>$${report.merchandise_revenue.toFixed(2)}</span></div>
+          </div>
+          <div class="section">
+            <h3>TRANSACTION COUNTS</h3>
+            <div class="row"><span>Real Transactions:</span><span>${report.real_transaction_count || report.transaction_count}</span></div>
+            ${(report.demo_transaction_count || demoCount) > 0 ? `
+            <div class="demo-note">
+              ⚠️ DEMO TRANSACTIONS EXCLUDED: ${report.demo_transaction_count || demoCount} demo/test transactions were recorded but are NOT included in financial totals.
+            </div>` : ''}
           </div>
           <div class="section">
             <h3>PRODUCTS SOLD</h3>
@@ -209,8 +240,8 @@ export default function ZReportGenerator({ user }) {
           <div style="font-size:9px;color:#666;margin-bottom:8px;">Glyph Buck™ is a proprietary instrument of GlyphLock Financial LLC. All redemptions are audit-logged.</div>
           ` : ''}
           <div class="section total">
-            <div class="row"><span>Total Transactions:</span><span>${report.transaction_count}</span></div>
-            <div class="row"><span>TOTAL SALES (Cash + Card + VIP):</span><span>$${report.total_sales.toFixed(2)}</span></div>
+            <div class="row"><span>Real Transactions:</span><span>${report.real_transaction_count || report.transaction_count}</span></div>
+            <div class="row"><span>TOTAL SALES (Cash + Card + VIP — Real Tender Only):</span><span>$${report.total_sales.toFixed(2)}</span></div>
           </div>
           <div style="margin-top:20px;border-top:1px solid #000;padding-top:12px;display:flex;gap:40px;">
             <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">MANAGER SIGNATURE</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
@@ -224,7 +255,7 @@ export default function ZReportGenerator({ user }) {
     printWindow.print();
   };
 
-  const canGenerate = user?.email && todayTransactions.length > 0 && !isGenerating;
+  const canGenerate = user?.email && realTransactions.length > 0 && !isGenerating;
 
   return (
     <div className="space-y-6">
@@ -264,9 +295,12 @@ export default function ZReportGenerator({ user }) {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <ShoppingCart className="w-5 h-5 text-green-400" />
-              <span className="text-sm text-gray-400">Transactions</span>
+              <span className="text-sm text-gray-400">Real Transactions</span>
             </div>
-            <div className="text-2xl font-bold text-green-400">{todayTransactions.length}</div>
+            <div className="text-2xl font-bold text-green-400">{realTransactions.length}</div>
+            {demoTransactions.length > 0 && (
+              <div className="text-xs text-yellow-500 mt-1">{demoTransactions.length} demo excluded</div>
+            )}
           </CardContent>
         </Card>
 
@@ -316,9 +350,14 @@ export default function ZReportGenerator({ user }) {
               ⚠️ You must be logged in to generate a Z-Report.
             </div>
           )}
-          {todayTransactions.length === 0 && (
+          {realTransactions.length === 0 && (
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-sm text-yellow-400">
-              ⚠️ No transactions today. A Z-Report cannot be generated for an empty session.
+              ⚠️ No REAL transactions today. A Z-Report cannot be generated for an empty session.
+            </div>
+          )}
+          {demoTransactions.length > 0 && (
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-400">
+              ℹ️ {demoTransactions.length} DEMO transaction(s) will be excluded from financial totals.
             </div>
           )}
 
@@ -363,7 +402,7 @@ export default function ZReportGenerator({ user }) {
             <div className="text-center">
               <div className="text-sm text-gray-400 mb-1">Expected Total Sales (Real Tender Only)</div>
               <div className="text-3xl font-bold text-green-400">${totalSales.toFixed(2)}</div>
-              <div className="text-xs text-gray-500 mt-1">Cash + Card + VIP · GlyphBuck revenue excluded per audit</div>
+              <div className="text-xs text-gray-500 mt-1">Cash + Card + VIP · GlyphBuck revenue and DEMO transactions excluded per audit</div>
             </div>
           </div>
         </CardContent>
@@ -394,7 +433,10 @@ export default function ZReportGenerator({ user }) {
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-cyan-400">${(report.total_sales || 0).toFixed(2)}</div>
-                  <div className="text-xs text-gray-400">{report.transaction_count} transactions</div>
+                  <div className="text-xs text-gray-400">
+                    {report.real_transaction_count ?? report.transaction_count} real
+                    {report.demo_transaction_count > 0 && ` · ${report.demo_transaction_count} demo`}
+                  </div>
                 </div>
               </div>
             ))}

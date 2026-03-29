@@ -149,6 +149,11 @@ export default function POSCashRegister({ user }) {
   // B1 — duplicate guard on payment completion
   const completePayment = async (details = {}) => {
     if (isSubmitting) return;
+    // Section 3 — block REAL transaction if no batch open
+    if (!activeBatch) {
+      toast.error('Cannot process transaction: no open batch. Please open a batch first.');
+      return;
+    }
     setIsSubmitting(true);
     const cashierName = user?.full_name || user?.name || user?.email || 'Staff';
     const transactionData = {
@@ -163,6 +168,8 @@ export default function POSCashRegister({ user }) {
       payment_method: paymentMethod || "Cash",
       cashier: cashierName,
       cashier_name: cashierName,
+      cashier_email: user?.email || null,
+      mode: 'REAL',
       venue_id: activeVenue?.id || null,
       status: "completed",
       batch_id: activeBatch?.id,
