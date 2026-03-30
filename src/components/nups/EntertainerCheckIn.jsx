@@ -26,7 +26,7 @@ const ShiftTimer = ({ checkInTime }) => {
   return <span className="font-mono">{elapsed}</span>;
 };
 
-export default function EntertainerCheckIn() {
+export default function EntertainerCheckIn({ user }) {
   const queryClient = useQueryClient();
   const [selectedEntertainer, setSelectedEntertainer] = useState(null);
   const [location, setLocation] = useState("Main Floor");
@@ -43,6 +43,14 @@ export default function EntertainerCheckIn() {
       return allShifts.filter(shift => !shift.check_out_time);
     },
     refetchInterval: 30000
+  });
+
+  const { data: activeVenue } = useQuery({
+    queryKey: ['venue-checkin'],
+    queryFn: async () => {
+      const venues = await base44.entities.Venue.list();
+      return venues[0] || null;
+    }
   });
 
   const [isCheckingIn, setIsCheckingIn] = useState(false); // B1
@@ -62,6 +70,78 @@ export default function EntertainerCheckIn() {
           orphan_note: `DACO-REPAIR ${new Date().toISOString()}: entertainer_id ${entertainerId} not found in active Entertainer records at check-in time.`
         });
       }
+
+      // CONTRACT GATE — DIRECTIVE 5B
+      const minimumAge = activeVenue?.minimum_age || 21;
+
+      if (!entertainer.date_of_birth) {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "CONTRACT_GATE_BLOCKED",
+          description: `Check-in blocked: no date_of_birth on file for entertainer_id=${entertainerId}`,
+          actor_email: user?.email,
+          status: "blocked",
+          severity: "HIGH",
+          metadata: { entertainer_id: entertainerId, reason: "missing_dob",
+            minimum_age_required: minimumAge, venue_id: activeVenue?.id, section: "SECTION-5B" }
+        });
+        alert("Check-in blocked: Date of birth not on file. Contact manager.");
+        return;
+      }
+
+      const dob = new Date(entertainer.date_of_birth);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear()
+        - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+
+      if (age < minimumAge) {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "CONTRACT_GATE_BLOCKED",
+          description: `Check-in blocked: entertainer age ${age} is below venue minimum ${minimumAge}`,
+          actor_email: user?.email,
+          status: "blocked",
+          severity: "CRITICAL",
+          metadata: { entertainer_id: entertainerId, reason: "age_below_minimum",
+            entertainer_age: age, minimum_age_required: minimumAge,
+            venue_id: activeVenue?.id, section: "SECTION-5B" }
+        });
+        alert(`Check-in blocked: Entertainer does not meet minimum age requirement of ${minimumAge}.`);
+        return;
+      }
+
+      if (entertainer.contract_status !== 'VALID') {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "CONTRACT_GATE_BLOCKED",
+          description: `Check-in blocked: contract_status=${entertainer.contract_status} for entertainer_id=${entertainerId}`,
+          actor_email: user?.email,
+          status: "blocked",
+          severity: "HIGH",
+          metadata: { entertainer_id: entertainerId, reason: "invalid_contract_status",
+            contract_status: entertainer.contract_status,
+            minimum_age_required: minimumAge, venue_id: activeVenue?.id, section: "SECTION-5B" }
+        });
+        alert(`Check-in blocked: Contract status is ${entertainer.contract_status || 'PENDING'}.`);
+        return;
+      }
+
+      if (!entertainer.contract_signed || !entertainer.contract_signed_date ||
+          !entertainer.contract_signature || !entertainer.contract_ip_address) {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "CONTRACT_GATE_BLOCKED",
+          description: `Check-in blocked: incomplete contract fields for entertainer_id=${entertainerId}`,
+          actor_email: user?.email,
+          status: "blocked",
+          severity: "HIGH",
+          metadata: { entertainer_id: entertainerId, reason: "incomplete_contract_fields",
+            contract_signed: entertainer.contract_signed,
+            has_signature: !!entertainer.contract_signature,
+            has_ip: !!entertainer.contract_ip_address,
+            minimum_age_required: minimumAge, section: "SECTION-5B" }
+        });
+        alert("Check-in blocked: Contract is incomplete.");
+        return;
+      }
+
+      // ALL GATES PASSED — proceed to create EntertainerShift
       return base44.entities.EntertainerShift.create({
         entertainer_id: entertainerId,
         stage_name: entertainer.stage_name,

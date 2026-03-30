@@ -40,7 +40,7 @@ const STATUS_CONFIG = {
   maintenance: { label: 'Maintenance', color: 'bg-gray-500/20 text-gray-400 border-gray-500/40', dot: 'bg-gray-400' },
 };
 
-export default function VIPRoomBoard() {
+export default function VIPRoomBoard({ user }) {
   const queryClient = useQueryClient();
   const [openDialog, setOpenDialog] = useState(null); // null | roomId
   const [guestName, setGuestName] = useState('');
@@ -59,6 +59,14 @@ export default function VIPRoomBoard() {
   const { data: entertainers = [] } = useQuery({
     queryKey: ['entertainers'],
     queryFn: () => base44.entities.Entertainer.filter({ status: 'active' }),
+  });
+
+  const { data: activeVenue } = useQuery({
+    queryKey: ['venue-vip'],
+    queryFn: async () => {
+      const venues = await base44.entities.Venue.list();
+      return venues[0] || null;
+    }
   });
 
   const openRoom = useMutation({
@@ -98,6 +106,58 @@ export default function VIPRoomBoard() {
     }
     setIsOpening(true);
     try {
+      // VIP CONTRACT GATE — DIRECTIVE 5C
+      if (entertainerId) {
+        const selectedEnt = entertainers.find(e => e.id === entertainerId);
+        if (selectedEnt) {
+          const minimumAge = activeVenue?.minimum_age || 21;
+          if (selectedEnt.date_of_birth) {
+            const dob = new Date(selectedEnt.date_of_birth);
+            const today = new Date();
+            const age = today.getFullYear() - dob.getFullYear()
+              - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+            if (age < minimumAge) {
+              await base44.entities.SystemAuditLog.create({
+                event_type: "VIP_CONTRACT_GATE_BLOCKED",
+                description: `VIP blocked: entertainer age ${age} below venue minimum ${minimumAge}`,
+                actor_email: user?.email, status: "blocked", severity: "CRITICAL",
+                metadata: { entertainer_id: entertainerId, reason: "age_below_minimum",
+                  entertainer_age: age, minimum_age_required: minimumAge,
+                  venue_id: activeVenue?.id, section: "SECTION-5C" }
+              });
+              alert(`VIP session blocked: Entertainer does not meet minimum age of ${minimumAge}.`);
+              setIsOpening(false);
+              return;
+            }
+          }
+          if (selectedEnt.contract_status !== 'VALID') {
+            await base44.entities.SystemAuditLog.create({
+              event_type: "VIP_CONTRACT_GATE_BLOCKED",
+              description: `VIP blocked: contract_status=${selectedEnt.contract_status} for entertainer_id=${entertainerId}`,
+              actor_email: user?.email, status: "blocked", severity: "HIGH",
+              metadata: { entertainer_id: entertainerId, reason: "invalid_contract_status",
+                contract_status: selectedEnt.contract_status, section: "SECTION-5C" }
+            });
+            alert(`VIP session blocked: Contract status is ${selectedEnt.contract_status || 'PENDING'}.`);
+            setIsOpening(false);
+            return;
+          }
+          if (!selectedEnt.contract_signed || !selectedEnt.contract_signed_date ||
+              !selectedEnt.contract_signature || !selectedEnt.contract_ip_address) {
+            await base44.entities.SystemAuditLog.create({
+              event_type: "VIP_CONTRACT_GATE_BLOCKED",
+              description: `VIP blocked: incomplete contract fields for entertainer_id=${entertainerId}`,
+              actor_email: user?.email, status: "blocked", severity: "HIGH",
+              metadata: { entertainer_id: entertainerId,
+                reason: "incomplete_contract_fields", section: "SECTION-5C" }
+            });
+            alert("VIP session blocked: Entertainer contract is incomplete.");
+            setIsOpening(false);
+            return;
+          }
+        }
+      }
+      // ALL GATES PASSED — proceed to create VIPRoom record
       const entertainer = entertainers.find(e => e.id === entertainerId);
       await openRoom.mutateAsync({
         id: room.id,
@@ -141,6 +201,19 @@ export default function VIPRoomBoard() {
           duration_minutes: durationMins,
           total_charge: totalCharge,
         }
+      });
+      // AUTO-PRINT TRIGGER — DIRECTIVE 5D
+      await base44.entities.VIPRoom.update(room.id, {
+        contract_print_triggered: true,
+        contract_print_triggered_at: new Date().toISOString(),
+        glyphbucks_voucher_triggered: true
+      });
+      await base44.entities.SystemAuditLog.create({
+        event_type: "VIP_PRINT_TRIGGERED",
+        description: `VIP session completed. Print triggered for room_id=${room.id}`,
+        actor_email: user?.email, status: "success", severity: "MEDIUM",
+        metadata: { vip_room_id: room.id, print_target: "ET-5850",
+          documents: ["vip_contract", "glyphbucks_vouchers"], section: "SECTION-5D" }
       });
     } finally {
       setIsClosing(null);

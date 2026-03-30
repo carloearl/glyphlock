@@ -228,7 +228,21 @@ export default function EntertainerPayrollEngine({ user }) {
   }, [entertainers, shifts, vipSessions, tipPayouts, venueFeeRate, taxRate, otherDeductionAmt, periodStart, periodEnd, existingRecords]);
 
   const savePayroll = useMutation({
-    mutationFn: (data) => {
+    mutationFn: async (data) => {
+      // PAYOUT GATE — DIRECTIVE 5F
+      if (data.entertainer.contract_status !== 'VALID') {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "PAYOUT_GATE_BLOCKED",
+          description: `Payout blocked: contract_status=${data.entertainer.contract_status} for entertainer ${data.entertainer.stage_name}`,
+          actor_email: user?.email,
+          status: "blocked",
+          severity: "CRITICAL",
+          metadata: { entertainer_id: data.entertainer.id, reason: "invalid_contract_status",
+            contract_status: data.entertainer.contract_status, section: "SECTION-5F" }
+        });
+        throw new Error(`Payout blocked: Contract status is ${data.entertainer.contract_status || 'PENDING'}. Contract must be VALID to process payout.`);
+      }
+      // GATE PASSED — proceed to process payout
       const payload = {
         pay_period_start: periodStart,
         pay_period_end: periodEnd,
@@ -259,7 +273,7 @@ export default function EntertainerPayrollEngine({ user }) {
       qc.invalidateQueries({ queryKey: ["payroll-records"] });
       toast.success("Payroll record saved.");
     },
-    onError: () => toast.error("Failed to save payroll record."),
+    onError: (e) => toast.error(e.message || "Failed to save payroll record."),
   });
 
   const updateStatus = useMutation({

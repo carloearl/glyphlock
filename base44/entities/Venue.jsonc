@@ -1,0 +1,109 @@
+{
+  "name": "Venue",
+  "type": "object",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Unique venue identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Venue name"
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "city": {
+      "type": "string",
+      "description": "City name"
+    },
+    "state": {
+      "type": "string",
+      "description": "State code"
+    },
+    "county": {
+      "type": "string",
+      "description": "County name"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "enum": [
+        "city",
+        "unincorporated_county"
+      ],
+      "description": "Regulatory jurisdiction type"
+    },
+    "timezone": {
+      "type": "string",
+      "default": "America/Phoenix",
+      "description": "IANA timezone identifier"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active",
+      "description": "Operational status"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "age_requirement": {
+      "type": "number",
+      "description": "Minimum age for entry (legacy field)"
+    },
+    "minimum_age": {
+      "type": "number",
+      "enum": [
+        18,
+        21
+      ],
+      "description": "SECTION 5A \u2014 Venue minimum age requirement. 18 or 21. Default 21 if not set. Used by all contract gates."
+    },
+    "bar_enabled": {
+      "type": "boolean",
+      "description": "Alcohol service available"
+    },
+    "nudity_level": {
+      "type": "string",
+      "enum": [
+        "topless",
+        "full_nude"
+      ],
+      "description": "Entertainment classification"
+    },
+    "hours_open": {
+      "type": "string",
+      "description": "Opening time"
+    },
+    "hours_close": {
+      "type": "string",
+      "description": "Closing time"
+    },
+    "vip_enabled": {
+      "type": "boolean",
+      "description": "VIP room services available"
+    },
+    "glyphbucks_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "GlyphBucks currency system active"
+    },
+    "compliance_notes": {
+      "type": "string",
+      "description": "Regulatory and operational notes"
+    }
+  },
+  "required": [
+    "venue_id",
+    "name",
+    "address",
+    "city",
+    "state",
+    "county"
+  ]
+}

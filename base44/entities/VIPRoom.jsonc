@@ -1,0 +1,85 @@
+{
+  "name": "VIPRoom",
+  "type": "object",
+  "properties": {
+    "room_number": {
+      "type": "string",
+      "description": "Room identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this room belongs to"
+    },
+    "room_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "occupied",
+        "cleaning",
+        "maintenance"
+      ],
+      "default": "available"
+    },
+    "entertainer_id": {
+      "type": "string",
+      "description": "Current entertainer in room"
+    },
+    "entertainer_name": {
+      "type": "string"
+    },
+    "guest_name": {
+      "type": "string",
+      "description": "VIP guest name"
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_minutes": {
+      "type": "number"
+    },
+    "rate_per_hour": {
+      "type": "number",
+      "default": 300
+    },
+    "total_charge": {
+      "type": "number"
+    },
+    "surveillance_camera": {
+      "type": "string",
+      "description": "Connected camera ID"
+    },
+    "has_audio": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    },
+    "contract_print_triggered": {
+      "type": "boolean",
+      "default": false,
+      "description": "SECTION 5D \u2014 Set true when VIP session closes and print is triggered for ET-5850"
+    },
+    "contract_print_triggered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SECTION 5D \u2014 Timestamp when print trigger was fired"
+    },
+    "glyphbucks_voucher_triggered": {
+      "type": "boolean",
+      "default": false,
+      "description": "SECTION 5D \u2014 Set true when GlyphBucks voucher print is triggered on session close"
+    }
+  },
+  "required": [
+    "room_number"
+  ]
+}

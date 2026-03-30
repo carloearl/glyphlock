@@ -50,7 +50,33 @@ export default function EntertainerContract({ onContractSigned }) {
       const ipResponse = await fetch('https://api.ipify.org?format=json');
       const { ip } = await ipResponse.json();
 
-      return base44.entities.Entertainer.create({
+      // CONTRACT STATUS AUTO-CALCULATION — DIRECTIVE 5E
+      const minimumAge = (venues?.[0]?.minimum_age) || 21;
+      const calculateContractStatus = (ent, minAge) => {
+        if (!ent.date_of_birth) return 'PENDING';
+        const dob = new Date(ent.date_of_birth);
+        const today = new Date();
+        const age = today.getFullYear() - dob.getFullYear()
+          - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+        if (age < minAge) return 'PENDING';
+        if (
+          ent.contract_signed === true &&
+          ent.contract_signed_date &&
+          ent.contract_signature &&
+          ent.contract_ip_address &&
+          ent.legal_name &&
+          ent.stage_name &&
+          ent.id_type &&
+          ent.id_number &&
+          ent.id_expiration &&
+          ent.ssn_or_ein &&
+          ent.emergency_contact &&
+          ent.independent_contractor_acknowledgment === true
+        ) { return 'VALID'; }
+        return 'PENDING';
+      };
+
+      const entertainerPayload = {
         ...data,
         contract_signed: true,
         contract_signature: signature,
@@ -59,6 +85,12 @@ export default function EntertainerContract({ onContractSigned }) {
         status: 'active',
         total_earnings: 0,
         vip_room_count: 0
+      };
+      const contractStatus = calculateContractStatus(entertainerPayload, minimumAge);
+
+      return base44.entities.Entertainer.create({
+        ...entertainerPayload,
+        contract_status: contractStatus
       });
     },
     onSuccess: () => {
