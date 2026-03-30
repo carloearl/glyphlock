@@ -12,6 +12,7 @@ export default function ZReportGenerator({ user }) {
   const [openingCash, setOpeningCash] = useState(0);
   const [closingCash, setClosingCash] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false); // B1 — duplicate guard
+  const [reconciliationNotes, setReconciliationNotes] = useState(''); // Section 4 — required when discrepancy exists
 
   const { data: todayTransactions = [] } = useQuery({
     queryKey: ['today-transactions'],
@@ -70,8 +71,14 @@ export default function ZReportGenerator({ user }) {
   const vipRevenue = todayVIPSessions
     .reduce((sum, s) => sum + (s.total_charge || 0), 0);
 
-  // B2 — total_sales = real tender only. GlyphBucks and DEMO are reference-only.
-  const totalSales = cashSales + cardSales + vipRevenue;
+  // SECTION 4 — total_sales = cash_sales + card_sales ONLY. VIP is operational tracking, NOT revenue ledger.
+  const totalSales = cashSales + cardSales;
+
+  // Section 4 — live preview reconciliation
+  const expectedCash = Number(openingCash) + cashSales;
+  const actualCash = Number(closingCash);
+  const cashOverShort = actualCash - expectedCash;
+  const requiresReview = Math.abs(cashOverShort) > 0.01;
 
   const glyphBuckRevenue = todayOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
   const glyphBuckIssued = todayOrders.reduce((s, o) => s + (o.glyphbucks_value || 0), 0);
@@ -86,6 +93,16 @@ export default function ZReportGenerator({ user }) {
     }
     if (realTransactions.length === 0) {
       alert('No REAL transactions found for today. Cannot generate an empty Z-Report.');
+      return;
+    }
+
+    // SECTION 4 — block generation if discrepancy exists and notes are missing
+    const s4_expectedCash = Number(openingCash) + cashSales;
+    const s4_actualCash = Number(closingCash);
+    const s4_cashOverShort = s4_actualCash - s4_expectedCash;
+    const s4_requiresReview = Math.abs(s4_cashOverShort) > 0.01;
+    if (s4_requiresReview && !reconciliationNotes.trim()) {
+      alert(`Cash discrepancy of $${s4_cashOverShort.toFixed(2)} detected.\n\nReconciliation notes are REQUIRED before generating this report.\nPlease enter notes in the Reconciliation Notes field.`);
       return;
     }
 
@@ -143,7 +160,8 @@ export default function ZReportGenerator({ user }) {
         closing_cash: Number(closingCash),
         cash_sales: cashSales,
         card_sales: cardSales,
-        total_sales: totalSales, // DO NOT MODIFY — real tender only
+        // SECTION 4 — total_sales = cash_sales + card_sales ONLY
+        total_sales: totalSales,
         transaction_count: realTransactions.length,
         real_transaction_count: realTransactions.length,
         demo_transaction_count: demoTransactions.length,
@@ -151,7 +169,18 @@ export default function ZReportGenerator({ user }) {
         vip_room_revenue: vipRevenue,
         bar_revenue: barRevenue,
         merchandise_revenue: merchandiseRevenue,
-        discrepancy: Number(closingCash) - Number(openingCash) - cashSales,
+        // SECTION 4 — reconciliation fields
+        expected_cash: s4_expectedCash,
+        actual_cash: s4_actualCash,
+        cash_over_short: s4_cashOverShort,
+        corrected_total_sales: totalSales,
+        batch_discrepancy_total: s4_cashOverShort,
+        requires_review: s4_requiresReview,
+        reconciliation_notes: reconciliationNotes.trim() || null,
+        reconciled_by: user.email,
+        reconciled_at: new Date().toISOString(),
+        // legacy discrepancy field preserved
+        discrepancy: s4_cashOverShort,
         products_sold,
         notes: JSON.stringify({
           glyph_buck_issued_value: glyphBuckIssued,
@@ -198,10 +227,15 @@ export default function ZReportGenerator({ user }) {
             ${report.batch_id ? `<div class="row"><span>Batch ID:</span><span>${report.batch_id}</span></div>` : ''}
           </div>
           <div class="section">
-            <h3>CASH DRAWER</h3>
-            <div class="row"><span>Opening Cash:</span><span>$${report.opening_cash.toFixed(2)}</span></div>
-            <div class="row"><span>Closing Cash:</span><span>$${report.closing_cash.toFixed(2)}</span></div>
-            <div class="row"><span>Discrepancy:</span><span>$${report.discrepancy.toFixed(2)}</span></div>
+            <h3>CASH DRAWER RECONCILIATION (Section 4)</h3>
+            <div class="row"><span>Opening Cash:</span><span>$${(report.opening_cash||0).toFixed(2)}</span></div>
+            <div class="row"><span>Cash Sales:</span><span>$${(report.cash_sales||0).toFixed(2)}</span></div>
+            <div class="row"><span>Expected Cash (Open + Cash Sales):</span><span>$${(report.expected_cash||0).toFixed(2)}</span></div>
+            <div class="row"><span>Actual Cash (Closing):</span><span>$${(report.actual_cash||report.closing_cash||0).toFixed(2)}</span></div>
+            <div class="row" style="font-weight:bold;color:${(report.cash_over_short||0) !== 0 ? 'red' : 'green'}"><span>Cash Over/Short:</span><span>$${(report.cash_over_short||0).toFixed(2)}</span></div>
+            ${report.requires_review ? `<div style="background:#fff3cd;border:1px solid #ffc107;padding:6px;margin-top:4px;font-size:11px;">⚠️ REQUIRES REVIEW — Discrepancy: $${(report.batch_discrepancy_total||0).toFixed(2)}</div>` : ''}
+            ${report.reconciliation_notes ? `<div class="row"><span>Reconciliation Notes:</span><span style="max-width:60%;text-align:right;">${report.reconciliation_notes}</span></div>` : ''}
+            <div class="row" style="font-size:10px;color:#666;"><span>Reconciled By:</span><span>${report.reconciled_by||''}</span></div>
           </div>
           <div class="section">
             <h3>SALES BREAKDOWN (Real Tender Only)</h3>
@@ -241,7 +275,8 @@ export default function ZReportGenerator({ user }) {
           ` : ''}
           <div class="section total">
             <div class="row"><span>Real Transactions:</span><span>${report.real_transaction_count || report.transaction_count}</span></div>
-            <div class="row"><span>TOTAL SALES (Cash + Card + VIP — Real Tender Only):</span><span>$${report.total_sales.toFixed(2)}</span></div>
+            <div class="row"><span>TOTAL SALES (Cash + Card — Real Tender Only):</span><span>$${(report.total_sales||0).toFixed(2)}</span></div>
+            <div class="row"><span>CORRECTED TOTAL SALES:</span><span>$${(report.corrected_total_sales||report.total_sales||0).toFixed(2)}</span></div>
           </div>
           <div style="margin-top:20px;border-top:1px solid #000;padding-top:12px;display:flex;gap:40px;">
             <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">MANAGER SIGNATURE</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
@@ -358,6 +393,42 @@ export default function ZReportGenerator({ user }) {
           {demoTransactions.length > 0 && (
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-400">
               ℹ️ {demoTransactions.length} DEMO transaction(s) will be excluded from financial totals.
+            </div>
+          )}
+
+          {/* SECTION 4 — Live reconciliation preview */}
+          <div className="bg-gray-800/60 border border-gray-600/40 rounded-lg p-4 space-y-1 text-sm">
+            <div className="text-gray-400 font-semibold mb-2">Section 4 — Live Reconciliation Preview</div>
+            <div className="flex justify-between text-gray-300">
+              <span>Expected Cash (Opening + Cash Sales):</span>
+              <span className="font-mono">${expectedCash.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-gray-300">
+              <span>Actual Cash (Closing):</span>
+              <span className="font-mono">${actualCash.toFixed(2)}</span>
+            </div>
+            <div className={`flex justify-between font-bold ${Math.abs(cashOverShort) > 0.01 ? 'text-red-400' : 'text-green-400'}`}>
+              <span>Cash Over/Short:</span>
+              <span className="font-mono">${cashOverShort.toFixed(2)}</span>
+            </div>
+            {requiresReview && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded p-2 text-red-400 text-xs mt-2">
+                ⚠️ REQUIRES REVIEW — Reconciliation notes are mandatory before generating.
+              </div>
+            )}
+          </div>
+
+          {/* Section 4 — Reconciliation Notes (required if discrepancy) */}
+          {requiresReview && (
+            <div>
+              <Label className="text-white">Reconciliation Notes <span className="text-red-400">*Required</span></Label>
+              <textarea
+                value={reconciliationNotes}
+                onChange={(e) => setReconciliationNotes(e.target.value)}
+                className="w-full mt-1 rounded-lg bg-gray-800 border border-red-500/50 text-white p-3 text-sm resize-none"
+                rows={3}
+                placeholder="Explain the cash discrepancy before generating report..."
+              />
             </div>
           )}
 

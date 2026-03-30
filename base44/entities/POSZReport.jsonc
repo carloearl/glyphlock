@@ -1,0 +1,138 @@
+{
+  "name": "POSZReport",
+  "type": "object",
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "description": "Unique Z-report identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this report belongs to"
+    },
+    "report_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cashier_name": {
+      "type": "string"
+    },
+    "opening_cash": {
+      "type": "number"
+    },
+    "closing_cash": {
+      "type": "number"
+    },
+    "cash_sales": {
+      "type": "number"
+    },
+    "card_sales": {
+      "type": "number"
+    },
+    "total_sales": {
+      "type": "number",
+      "description": "Cash + Card sales from REAL transactions only. VIP excluded."
+    },
+    "transaction_count": {
+      "type": "number"
+    },
+    "real_transaction_count": {
+      "type": "number"
+    },
+    "demo_transaction_count": {
+      "type": "number",
+      "default": 0
+    },
+    "vip_room_revenue": {
+      "type": "number",
+      "description": "Operational tracking only \u2014 not included in total_sales"
+    },
+    "bar_revenue": {
+      "type": "number"
+    },
+    "merchandise_revenue": {
+      "type": "number"
+    },
+    "discrepancy": {
+      "type": "number",
+      "default": 0,
+      "description": "Legacy field \u2014 mirrors cash_over_short"
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "Associated POSBatch batch_id"
+    },
+    "products_sold": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "JSON blob for auxiliary reference data (GlyphBucks, payouts)"
+    },
+    "expected_cash": {
+      "type": "number",
+      "description": "SECTION 4 \u2014 opening_cash + cash_sales"
+    },
+    "actual_cash": {
+      "type": "number",
+      "description": "SECTION 4 \u2014 closing_cash at time of report"
+    },
+    "cash_over_short": {
+      "type": "number",
+      "description": "SECTION 4 \u2014 actual_cash minus expected_cash"
+    },
+    "corrected_total_sales": {
+      "type": "number",
+      "description": "SECTION 4 \u2014 total_sales adjusted for any manual correction"
+    },
+    "batch_discrepancy_total": {
+      "type": "number",
+      "description": "SECTION 4 \u2014 equals cash_over_short for the batch"
+    },
+    "requires_review": {
+      "type": "boolean",
+      "default": false,
+      "description": "SECTION 4 \u2014 true if abs(cash_over_short) > 0.01"
+    },
+    "reconciliation_notes": {
+      "type": "string",
+      "description": "SECTION 4 \u2014 required when requires_review is true"
+    },
+    "reconciled_by": {
+      "type": "string",
+      "description": "SECTION 4 \u2014 email of user who generated the report"
+    },
+    "reconciled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SECTION 4 \u2014 timestamp of reconciliation"
+    }
+  },
+  "required": [
+    "report_id",
+    "cashier_name",
+    "total_sales"
+  ]
+}
