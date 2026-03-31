@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import POSReceiptEngine from "./pos/POSReceiptEngine";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Trash2, Printer, CreditCard, Banknote, DollarSign, Receipt, Package, ShoppingCart, SplitSquareHorizontal, AlertCircle, X } from "lucide-react";
+import { Plus, Minus, Trash2, Printer, CreditCard, Banknote, DollarSign, Package, ShoppingCart, SplitSquareHorizontal, AlertCircle, X } from "lucide-react";
 
 const CATEGORIES = ["All", "Food & Beverage", "Spirits", "Beer & Wine", "Mixers", "VIP Service", "Merchandise", "Services", "Other"];
 const TAX_RATE = 0.08;
@@ -347,63 +348,15 @@ export default function POSBarRegister({ user }) {
       {/* === RECEIPT MODAL === */}
       {lastReceipt && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 rounded-xl border border-gray-700 max-w-sm w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="bg-gray-900 rounded-xl border border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="bg-gradient-to-r from-cyan-600 to-blue-600 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-white font-bold flex items-center gap-2">
-                <Receipt className="w-5 h-5" />
-                Receipt
-              </h3>
+              <h3 className="text-white font-bold">Receipt</h3>
               <button onClick={() => setLastReceipt(null)} className="text-white hover:bg-white/20 p-1 rounded">
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-6 space-y-4 text-sm text-gray-300">
-              <div className="border-b border-gray-700 pb-3">
-                <div className="text-xs text-gray-500 mb-1">TRANSACTION ID</div>
-                <div className="font-mono text-cyan-400 text-xs break-all">{lastReceipt.transactionId}</div>
-                <div className="text-xs text-gray-500 mt-2">{lastReceipt.timestamp.toLocaleString()}</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1">CASHIER</div>
-                <div className="text-sm">{lastReceipt.cashier}</div>
-              </div>
-              <div className="border-t border-b border-gray-700 py-3">
-                <div className="text-xs text-gray-500 mb-2">ITEMS</div>
-                <div className="space-y-2">
-                  {lastReceipt.items.map((item, i) => (
-                    <div key={i} className="flex justify-between text-xs">
-                      <span>{item.name} x{item.qty}</span>
-                      <span>${(item.price * item.qty).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span>${lastReceipt.subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Tax (8%)</span>
-                  <span>${lastReceipt.tax.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between font-bold text-cyan-400 text-sm border-t border-gray-700 pt-2 mt-2">
-                  <span>TOTAL</span>
-                  <span>${lastReceipt.total.toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="bg-gray-800/50 p-3 rounded border border-gray-700">
-                <div className="text-xs text-gray-500 mb-1">PAYMENT METHOD</div>
-                <div className="font-semibold text-green-400">{lastReceipt.paymentMethod === 'Digital Wallet' ? 'GlyphBucks' : lastReceipt.paymentMethod}</div>
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button onClick={() => window.print()} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-colors">
-                  <Printer className="w-3 h-3" /> Print
-                </button>
-                <button onClick={() => setLastReceipt(null)} className="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 rounded text-xs font-bold transition-colors">
-                  Done
-                </button>
-              </div>
+            <div className="p-6">
+              <POSReceiptEngine transaction={lastReceipt} batch={{}} onPrint={() => setLastReceipt(null)} />
             </div>
           </div>
         </div>
