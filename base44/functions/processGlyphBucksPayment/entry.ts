@@ -1,16 +1,22 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe@14.14.0';
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
-  apiVersion: '2023-10-16',
-});
-
 const paymentAttempts = new Map();
 const MAX_PAYMENT_ATTEMPTS_PER_HOUR = 10;
 const LOCKOUT_DURATION_MS = 3600000;
 
 Deno.serve(async (req) => {
   try {
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      return Response.json({
+        success: false,
+        error: 'STRIPE_NOT_CONFIGURED',
+        message: 'Stripe is not configured. Set STRIPE_SECRET_KEY in app secrets to enable card payments.'
+      }, { status: 503 });
+    }
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
