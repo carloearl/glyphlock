@@ -20,6 +20,13 @@ import EntertainerContract from "../components/nups/EntertainerContract.jsx";
 import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
 import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
 import GuestCheckIn from "../components/nups/GuestCheckIn.jsx";
+import GuestTracking from "../components/nups/GuestTracking.jsx";
+import VIPRoomManagement from "../components/nups/VIPRoomManagement.jsx";
+import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
+import POSCashRegister from "../components/nups/POSCashRegister.jsx";
+import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView";
+import GlyphBucksContract from "../components/nups/GlyphBucksContract.jsx";
+import StaffManagement from "../components/nups/StaffManagement.jsx";
 import ZReportGenerator from "../components/nups/ZReportGenerator.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
@@ -61,6 +68,7 @@ export default function NUPSOwner() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [activeTab, setActiveTab] = useState("analytics");
+  const [activeModule, setActiveModule] = useState('dashboard');
   const [rbacRole, setRbacRole] = useState('manager');
   const queryClient = useQueryClient();
 
@@ -178,6 +186,35 @@ export default function NUPSOwner() {
 
   const isAdminUser = user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin';
 
+  // NUPS MODULE ARCHITECTURE v1.0 — 13 MODULES ACROSS 5 DOMAINS
+  const NAV_MODULES = [
+    { key: 'dashboard', label: 'Dashboard',     icon: BarChart3 },
+    { key: 'pos',       label: 'POS Register',  icon: ShoppingCart },
+    { key: 'door',      label: 'Door Check-In', icon: DoorOpen },
+    { key: 'vip',       label: 'VIP Rooms',     icon: Star },
+    { key: 'glyphbucks',label: 'GlyphBucks',    icon: Coins },
+    { key: 'payroll',   label: 'Payroll',       icon: DollarSign },
+    { key: 'reports',   label: 'Reports',       icon: FileText },
+    { key: 'contracts', label: 'Contracts',     icon: ScrollText },
+    { key: 'staff',     label: 'Staff',         icon: Users },
+    { key: 'customers', label: 'Customers',     icon: Heart },
+    { key: 'inventory', label: 'Inventory',     icon: Package },
+    { key: 'audit',     label: 'Audit Log',     icon: Shield },
+    { key: 'admin',     label: 'Admin',         icon: KeyRound },
+  ];
+  const ROLE_MODULE_ACCESS = {
+    manager:   new Set(NAV_MODULES.map(m => m.key)),
+    bartender: new Set(['pos']),
+    door_girl: new Set(['pos','door']),
+    hostess:   new Set(['vip']),
+    security:  new Set(['door']),
+    dj:        new Set(['staff']),
+  };
+  const allowedModuleSet = isAdminUser
+    ? new Set(NAV_MODULES.map(m => m.key))
+    : (ROLE_MODULE_ACCESS[rbacRole] || new Set(['dashboard']));
+  const visibleModules = NAV_MODULES.filter(m => allowedModuleSet.has(m.key));
+
   return (
     <div className="min-h-screen bg-black text-white">
       <SEOHead
@@ -266,241 +303,114 @@ export default function NUPSOwner() {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="flex flex-wrap gap-3 mb-6">
+        {/* ── NUPS MODULE ARCHITECTURE v1.0 — 13 MODULES ── */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {visibleModules.map(({ key, label, icon: Icon }) => (
+            <Button
+              key={key}
+              onClick={() => setActiveModule(key)}
+              variant={activeModule === key ? "default" : "outline"}
+              className={`min-h-[44px] text-sm transition-all ${
+                activeModule === key
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white border-purple-500'
+                  : 'border-gray-700 text-gray-300 hover:border-purple-500/50 hover:text-white bg-transparent'
+              }`}
+            >
+              <Icon className="w-4 h-4 mr-2 shrink-0" />{label}
+            </Button>
+          ))}
+        </div>
 
-            {/* Operations */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30 hover:border-cyan-500/50 text-white">
-                  <TrendingUp className="w-4 h-4 mr-2 text-cyan-400" />Operations
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-gray-900/95 border-cyan-500/30 backdrop-blur-xl">
-                <DropdownMenuLabel className="text-cyan-400">Operations</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-cyan-500/20" />
-                {[
-                  { value: 'analytics', icon: BarChart3, label: 'Dashboard', desc: 'Revenue & metrics', perm: true },
-                  { value: 'live', icon: Eye, label: 'Live View', desc: 'Real-time floor', perm: true },
-                  { value: 'pos', icon: CreditCard, label: 'Register', desc: 'Process sales', perm: true },
-                  { value: 'history', icon: Receipt, label: 'Transactions', desc: 'Sales history', perm: true },
-                  { value: 'zreport', icon: FileText, label: 'Daily Close', desc: 'End-of-day report', perm: canZReport },
-                  { value: 'drawer', icon: Wallet, label: 'Cash Log', desc: 'Drawer activity', perm: canBatch },
-                ].filter(i => i.perm).map(({ value, icon: Icon, label, desc }) => (
-                  <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                    className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-cyan-500/20 text-cyan-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                    <Icon className="w-4 h-4 mr-3" />
-                    <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Staff & Floor */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-pink-500/10 to-rose-500/10 border-pink-500/30 hover:border-pink-500/50 text-white">
-                  <Users className="w-4 h-4 mr-2 text-pink-400" />Staff & Floor
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-gray-900/95 border-pink-500/30 backdrop-blur-xl">
-                <DropdownMenuLabel className="text-pink-400">Staff & Floor</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-pink-500/20" />
-                {[
-                  { value: 'floor', icon: UserCheck, label: 'Check-In', desc: 'Staff attendance', perm: true },
-                  { value: 'timeclock', icon: Clock, label: 'Time Clock', desc: 'Hours tracking', perm: true },
-                  { value: 'vip', icon: DoorOpen, label: 'VIP Rooms', desc: 'Room status', perm: true },
-                  { value: 'guests', icon: Users, label: 'Guest Check-In', desc: 'ID verification + door', perm: true },
-                  { value: 'entertainer', icon: Star, label: 'Performer Stats', desc: 'My earnings', perm: true },
-                  { value: 'staff', icon: UserCog, label: 'Manage Staff', desc: 'User accounts', perm: canManageStaff },
-                ].filter(i => i.perm).map(({ value, icon: Icon, label, desc }) => (
-                  <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                    className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-pink-500/20 text-pink-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                    <Icon className="w-4 h-4 mr-3" />
-                    <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Finance & Payroll — gated */}
-            {canFinance && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30 hover:border-green-500/50 text-white">
-                    <DollarSign className="w-4 h-4 mr-2 text-green-400" />Finance & Payroll
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-gray-900/95 border-green-500/30 backdrop-blur-xl">
-                  <DropdownMenuLabel className="text-green-400">Finance & Payroll</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-green-500/20" />
-                  {[
-                    { value: 'tips', icon: HandCoins, label: 'Tip Pool', desc: 'Distribute tips', perm: canPayroll },
-                    { value: 'payroll-engine', icon: DollarSign, label: 'Payroll', desc: 'Calculate pay', perm: canPayroll },
-                    { value: 'payroll', icon: Receipt, label: 'Pay Records', desc: 'Payment history', perm: canPayroll },
-                    { value: 'official-checks', icon: Banknote, label: 'Official Checks', desc: 'Print payroll checks', perm: canPayroll },
-                    { value: 'employees', icon: Users, label: 'Employees', desc: 'Staff records', perm: canManageStaff },
-                    { value: 'daily', icon: PieChart, label: 'Daily Report', desc: 'Day summary', perm: true },
-                    { value: 'refunds', icon: RotateCcw, label: 'Refunds', desc: 'Process returns', perm: canVoid },
-                  ].filter(i => i.perm).map(({ value, icon: Icon, label, desc }) => (
-                    <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                      className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-green-500/20 text-green-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                      <Icon className="w-4 h-4 mr-3" />
-                      <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* Inventory & Products */}
-            {canInventory && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30 hover:border-amber-500/50 text-white">
-                    <Package className="w-4 h-4 mr-2 text-amber-400" />Inventory & Products
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-gray-900/95 border-amber-500/30 backdrop-blur-xl">
-                  <DropdownMenuLabel className="text-amber-400">Inventory & Products</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-amber-500/20" />
-                  {[
-                    { value: 'products', icon: Tag, label: 'Products', desc: 'Menu items' },
-                    { value: 'inventory', icon: Package, label: 'Stock', desc: 'Inventory levels' },
-                  ].map(({ value, icon: Icon, label, desc }) => (
-                    <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                      className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-amber-500/20 text-amber-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                      <Icon className="w-4 h-4 mr-3" />
-                      <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* Marketing & Insights */}
-            {canMarketing && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-purple-500/10 to-violet-500/10 border-purple-500/30 hover:border-purple-500/50 text-white">
-                    <Megaphone className="w-4 h-4 mr-2 text-purple-400" />Marketing & Insights
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-gray-900/95 border-purple-500/30 backdrop-blur-xl">
-                  <DropdownMenuLabel className="text-purple-400">Marketing & Insights</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-purple-500/20" />
-                  {[
-                    { value: 'customers', icon: Heart, label: 'Customers', desc: 'CRM database' },
-                    { value: 'loyalty', icon: Heart, label: 'Loyalty', desc: 'Rewards program' },
-                    { value: 'marketing', icon: Megaphone, label: 'Campaigns', desc: 'Promotions' },
-                    { value: 'sales', icon: BarChart3, label: 'Sales Report', desc: 'Performance' },
-                    { value: 'ai', icon: Brain, label: 'AI Insights', desc: 'Predictions' },
-                    { value: 'audit-log', icon: Shield, label: 'Audit Trail', desc: 'Security log', perm: canAudit },
-                  ].filter(i => i.perm !== false).map(({ value, icon: Icon, label, desc }) => (
-                    <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                      className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-purple-500/20 text-purple-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                      <Icon className="w-4 h-4 mr-3" />
-                      <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* GlyphBucks */}
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30 hover:border-yellow-500/50 text-white">
-                    <Coins className="w-4 h-4 mr-2 text-yellow-400" />GlyphBucks
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-gray-900/95 border-yellow-500/30 backdrop-blur-xl">
-                <DropdownMenuLabel className="text-yellow-400">GlyphBucks Operations</DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-yellow-500/20" />
-                {[
-                  { value: 'gb-ledger',  icon: Coins,       label: 'GB Ledger',       desc: 'Issue, redeem, adjust' },
-                  { value: 'contract-mgr', icon: ScrollText, label: 'Contracts',        desc: 'Legal agreements' },
-                  { value: 'contracts',  icon: ScrollText,  label: 'Legacy Press',      desc: 'GlyphBucksOrder archive' },
-                  { value: 'glyphbucks', icon: Banknote,    label: 'GB Inventory',      desc: 'Gift card stock' },
-                ].map(({ value, icon: Icon, label, desc }) => (
-                  <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                    className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-yellow-500/20 text-yellow-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                    <Icon className="w-4 h-4 mr-3" />
-                    <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Admin Tools — gated to PLATFORM_ADMIN / VENUE_OWNER */}
-            {isAdminUser && canRBAC && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-red-500/10 to-rose-500/10 border-red-500/30 hover:border-red-500/50 text-white">
-                    <KeyRound className="w-4 h-4 mr-2 text-red-400" />Admin Tools
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-gray-900/95 border-red-500/30 backdrop-blur-xl">
-                  <DropdownMenuLabel className="text-red-400">Admin Tools</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-red-500/20" />
-                  {[
-                    { value: 'rbac', icon: KeyRound, label: 'Access Control', desc: 'Manage permissions' },
-                    { value: 'mis-report', icon: BarChart3, label: 'Q MIS Report', desc: 'Quarterly summary' },
-                  ].map(({ value, icon: Icon, label, desc }) => (
-                    <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
-                      className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-red-500/20 text-red-400' : 'text-gray-300 hover:bg-white/10'}`}>
-                      <Icon className="w-4 h-4 mr-3" />
-                      <div><div className="font-medium">{label}</div><div className="text-xs text-gray-500">{desc}</div></div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-
-          <TabsContent value="analytics"><OwnerAnalytics transactions={transactions} /></TabsContent>
-          <TabsContent value="live"><LiveFloorView /></TabsContent>
-          <TabsContent value="pos">
-            <div className="space-y-4 p-4">
+        <div className="space-y-4 pb-8">
+          {activeModule === 'dashboard' && <NUPSManagerDashboard />}
+          {activeModule === 'pos' && (
+            <div className="space-y-4">
               {canBatch && <BatchManagement user={user} />}
+              <POSCashRegister user={user} />
               <POSBarRegister user={user} />
             </div>
-          </TabsContent>
-          <TabsContent value="floor"><EntertainerCheckIn /></TabsContent>
-          <TabsContent value="vip"><VIPRoomBoard /></TabsContent>
-          <TabsContent value="guests"><GuestCheckIn /></TabsContent>
-          <TabsContent value="timeclock"><TimeClock user={user} role={user?._highestRole || "VENUE_OWNER"} /></TabsContent>
-          <TabsContent value="history"><TransactionHistory transactions={transactions} showReceipt={true} /></TabsContent>
-          {canZReport && <TabsContent value="zreport"><ZReportGenerator user={user} /></TabsContent>}
-          <TabsContent value="glyphbucks"><GlyphBuckInventory /></TabsContent>
-          <TabsContent value="entertainer"><EntertainerDashboard user={user} /></TabsContent>
-          {canPayroll && <TabsContent value="payroll-engine"><EntertainerPayrollEngine user={user} /></TabsContent>}
-          {canAudit && <TabsContent value="audit-log"><AuditLogDashboard user={user} /></TabsContent>}
-          {canInventory && <TabsContent value="products"><ProductManagement /></TabsContent>}
-          {canInventory && <TabsContent value="inventory"><InventoryManagement products={products} /></TabsContent>}
-          {canMarketing && <TabsContent value="sales"><SalesReport transactions={transactions} products={products} /></TabsContent>}
-          {canPayroll && <TabsContent value="tips"><TipBreakdown transactions={transactions} /></TabsContent>}
-          <TabsContent value="daily"><DailySummary transactions={transactions} /></TabsContent>
-          {canBatch && <TabsContent value="drawer"><CashDrawerLog /></TabsContent>}
-          {canVoid && <TabsContent value="refunds"><RefundManager user={user} /></TabsContent>}
-          {canMarketing && <TabsContent value="customers"><CustomerManagement /></TabsContent>}
-          {canMarketing && <TabsContent value="loyalty"><LoyaltyProgram /></TabsContent>}
-          {canMarketing && <TabsContent value="marketing"><MarketingCampaigns /></TabsContent>}
-          {canManageStaff && <TabsContent value="staff"><NUPSUserManager currentUser={user} /></TabsContent>}
-          {canManageStaff && <TabsContent value="employees"><EmployeeManagement /></TabsContent>}
-          {canPayroll && <TabsContent value="payroll"><PayrollReport /></TabsContent>}
-          {canPayroll && <TabsContent value="official-checks"><OfficialChecks /></TabsContent>}
-          {canMarketing && <TabsContent value="ai"><AIInsights /></TabsContent>}
-          <TabsContent value="gb-ledger"><div className="p-4"><GlyphBucksLedger user={user} venue_id="dream_palace" /></div></TabsContent>
-          <TabsContent value="contract-mgr"><div className="p-4"><ContractManager user={user} venue_id="dream_palace" /></div></TabsContent>
-          <TabsContent value="contracts"><UnifiedGlyphBucksHub venue_id="dream_palace" /></TabsContent>
-          {canRBAC && <TabsContent value="rbac"><RBACAdminPanel /></TabsContent>}
-          {isAdminUser && (
-            <TabsContent value="mis-report">
-              <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
-            </TabsContent>
           )}
-        </Tabs>
+          {activeModule === 'door' && <GuestCheckIn />}
+          {activeModule === 'vip' && (
+            <div className="space-y-4">
+              <VIPRoomBoard user={user} />
+              <VIPRoomManagement />
+            </div>
+          )}
+          {activeModule === 'glyphbucks' && (
+            <div className="space-y-4">
+              <GlyphBucksLedger user={user} venue_id="dream_palace" />
+              <ClubCurrencyPressView />
+              <UnifiedGlyphBucksHub venue_id="dream_palace" />
+              <GlyphBuckInventory />
+            </div>
+          )}
+          {activeModule === 'payroll' && (
+            <div className="space-y-4">
+              <EntertainerPayrollEngine user={user} />
+              {canPayroll && <TipBreakdown transactions={transactions} />}
+              {canPayroll && <PayrollReport />}
+              {canPayroll && <OfficialChecks />}
+            </div>
+          )}
+          {activeModule === 'reports' && (
+            <div className="space-y-4">
+              <OwnerAnalytics transactions={transactions} />
+              {canZReport && <ZReportGenerator user={user} />}
+              {canMarketing && <SalesReport transactions={transactions} products={products} />}
+              <DailySummary transactions={transactions} />
+            </div>
+          )}
+          {activeModule === 'contracts' && (
+            <div className="space-y-4">
+              <ContractManager user={user} venue_id="dream_palace" />
+              <GlyphBucksContract />
+            </div>
+          )}
+          {activeModule === 'staff' && (
+            <div className="space-y-4">
+              <StaffManagement />
+              <EntertainerCheckIn user={user} />
+              {canManageStaff && <EmployeeManagement />}
+              {canManageStaff && <NUPSUserManager currentUser={user} />}
+              <TimeClock user={user} role={user?._highestRole || "VENUE_OWNER"} />
+              <EntertainerDashboard user={user} />
+            </div>
+          )}
+          {activeModule === 'customers' && (
+            <div className="space-y-4">
+              <GuestTracking />
+              {canMarketing && <CustomerManagement />}
+              {canMarketing && <LoyaltyProgram />}
+              {canMarketing && <MarketingCampaigns />}
+            </div>
+          )}
+          {activeModule === 'inventory' && (
+            <div className="space-y-4">
+              {canInventory && <ProductManagement />}
+              {canInventory && <InventoryManagement products={products} />}
+              <GlyphBuckInventory />
+              {canBatch && <CashDrawerLog />}
+            </div>
+          )}
+          {activeModule === 'audit' && (
+            <div className="space-y-4">
+              {canAudit && <AuditLogDashboard user={user} />}
+              <TransactionHistory transactions={transactions} showReceipt={true} />
+            </div>
+          )}
+          {activeModule === 'admin' && (
+            <div className="space-y-4">
+              {canRBAC && <RBACAdminPanel />}
+              {canVoid && <RefundManager user={user} />}
+              {canMarketing && <AIInsights />}
+              <LiveFloorView />
+              {isAdminUser && (
+                <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
+              )}
+            </div>
+          )}
+        </div>
 
         <footer className="text-center text-[10px] text-gray-700 py-6 border-t border-gray-800 mt-12">
           {GLYPHLOCK_DISCLAIMER}
