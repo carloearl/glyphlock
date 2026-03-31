@@ -14,7 +14,10 @@ import TransactionSearch from './glyphbucks/TransactionSearch';
 import ContractViewer from './ContractViewer';
 import FraudAnalyticsDashboard from './FraudAnalyticsDashboard';
 
-export default function UnifiedGlyphBucksHub({ venue_id = "dream_palace" }) {
+export default function UnifiedGlyphBucksHub({ venue_id = "dream_palace", user }) {
+  // FIX-B — press tab visible to manager/owner/admin only
+  const canAccessPress = user?.role === 'admin' ||
+    ['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER'].includes(user?._highestRole);
   const [activeSubTab, setActiveSubTab] = useState("new-sale");
 
   return (
@@ -33,10 +36,12 @@ export default function UnifiedGlyphBucksHub({ venue_id = "dream_palace" }) {
             <DollarSign className="w-4 h-4" />
             <span className="text-xs sm:text-sm">New Sale</span>
           </TabsTrigger>
-          <TabsTrigger value="press" className="min-h-[44px] flex items-center gap-1.5">
-            <Printer className="w-4 h-4" />
-            <span className="text-xs sm:text-sm">Press Bills</span>
-          </TabsTrigger>
+          {canAccessPress && (
+            <TabsTrigger value="press" className="min-h-[44px] flex items-center gap-1.5">
+              <Printer className="w-4 h-4" />
+              <span className="text-xs sm:text-sm">Press Bills</span>
+            </TabsTrigger>
+          )}
           <TabsTrigger value="redeem" className="min-h-[44px] flex items-center gap-1.5">
             <Scan className="w-4 h-4" />
             <span className="text-xs sm:text-sm">Redeem</span>
@@ -66,9 +71,11 @@ export default function UnifiedGlyphBucksHub({ venue_id = "dream_palace" }) {
           />
         </TabsContent>
 
-        <TabsContent value="press" className="mt-4">
-          <ClubCurrencyPressView />
-        </TabsContent>
+        {canAccessPress && (
+          <TabsContent value="press" className="mt-4">
+            <ClubCurrencyPressView />
+          </TabsContent>
+        )}
 
         <TabsContent value="redeem" className="mt-4">
           <BillRedemptionScanner venue_id={venue_id} />

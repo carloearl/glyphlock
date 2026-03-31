@@ -191,20 +191,20 @@ export default function NUPSOwner() {
 
   const isAdminUser = user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin';
 
-  // NUPS MODULE ARCHITECTURE v1.0 — 13 MODULES ACROSS 5 DOMAINS
+  // NUPS MODULE ARCHITECTURE v1.0 — FIX-E: Workflow-ordered tabs
   const NAV_MODULES = [
-    { key: 'dashboard', label: 'Dashboard',     icon: BarChart3 },
-    { key: 'pos',       label: 'POS Register',  icon: ShoppingCart },
+    { key: 'staff',     label: 'Staff',         icon: Users },
+    { key: 'contracts', label: 'Contracts',     icon: ScrollText },
     { key: 'door',      label: 'Door Check-In', icon: DoorOpen },
     { key: 'vip',       label: 'VIP Rooms',     icon: Star },
+    { key: 'pos',       label: 'POS Register',  icon: ShoppingCart },
     { key: 'glyphbucks',label: 'GlyphBucks',    icon: Coins },
     { key: 'payroll',   label: 'Payroll',       icon: DollarSign },
     { key: 'reports',   label: 'Reports',       icon: FileText },
-    { key: 'contracts', label: 'Contracts',     icon: ScrollText },
-    { key: 'staff',     label: 'Staff',         icon: Users },
     { key: 'customers', label: 'Customers',     icon: Heart },
     { key: 'inventory', label: 'Inventory',     icon: Package },
     { key: 'audit',     label: 'Audit Log',     icon: Shield },
+    { key: 'dashboard', label: 'Dashboard',     icon: BarChart3 },
     { key: 'admin',     label: 'Admin',         icon: KeyRound },
     { key: 'venue',     label: 'Venue Settings', icon: Building2 },
   ];
@@ -250,7 +250,6 @@ export default function NUPSOwner() {
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-4">
-              <EntertainerContract onContractSigned={() => queryClient.invalidateQueries({ queryKey: ["entertainers"] })} />
               <div className="hidden md:flex items-center gap-2">
                 <Users className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-white truncate max-w-[150px]">{user?.email}</span>
@@ -366,8 +365,7 @@ export default function NUPSOwner() {
           {activeModule === 'glyphbucks' && (
             <div className="space-y-4">
               <GlyphBucksLedger user={user} venue_id="dream_palace" />
-              <ClubCurrencyPressView />
-              <UnifiedGlyphBucksHub venue_id="dream_palace" />
+              <UnifiedGlyphBucksHub venue_id="dream_palace" user={user} />
               <GlyphBuckInventory />
             </div>
           )}
@@ -395,6 +393,7 @@ export default function NUPSOwner() {
           )}
           {activeModule === 'staff' && (
             <div className="space-y-4">
+              <EntertainerContract onContractSigned={() => queryClient.invalidateQueries({ queryKey: ["entertainers"] })} />
               <StaffManagement />
               <EntertainerCheckIn user={user} />
               {canManageStaff && <EmployeeManagement />}

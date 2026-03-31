@@ -49,6 +49,10 @@ export default function POSBarRegister({ user }) {
 
   const createTx = useMutation({
     mutationFn: async (payMethod) => {
+      // FIX-C / GAP-L1 — hard block in mutationFn (not just UI)
+      if (!activeBatch) {
+        throw new Error('No open batch. Please open a batch before processing transactions.');
+      }
       const subtotal = cartTotal;
       const tax = +(subtotal * TAX_RATE).toFixed(2);
       const total = +(subtotal + tax).toFixed(2);
@@ -56,6 +60,7 @@ export default function POSBarRegister({ user }) {
         transaction_id: `TXN-${Date.now()}`,
         venue_id: activeBatch?.venue_id || 'dream_palace',
         cashier: user?.email || 'staff',
+        mode: 'REAL',
         items: cart.map(item => ({
           product_id: item.id,
           product_name: item.name,

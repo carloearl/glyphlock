@@ -131,6 +131,10 @@ export default function POSCashRegister({ user }) {
     setCart(cart.filter(item => item.product_id !== productId));
   };
 
+  // FIX-C — manager/owner gate for advanced POS features (discount, quick charges)
+  const isManagerPOS = user?.role === 'admin' ||
+    ['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER'].includes(user?._highestRole);
+
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
   const tax = subtotal * 0.08;
   const discountAmount = (subtotal * discount) / 100;
@@ -383,11 +387,13 @@ export default function POSCashRegister({ user }) {
             <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
           </div>
 
-          <QuickChargePanel
-            onAddItem={addToCart}
-            onSetDiscount={setDiscount}
-            currentDiscount={discount}
-          />
+          {isManagerPOS && (
+            <QuickChargePanel
+              onAddItem={addToCart}
+              onSetDiscount={setDiscount}
+              currentDiscount={discount}
+            />
+          )}
 
           {filteredProducts.length > 0 && (
             <div>

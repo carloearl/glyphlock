@@ -37,6 +37,8 @@ export default function ClubCurrencyPressView() {
   const [elements, setElements] = useState(config.elements || []);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  // FIX-D — layout lock prevents print before DOM stabilizes after toggle
+  const [layoutReady, setLayoutReady] = useState(true);
 
   // RBAC: Check user permissions on mount
   useEffect(() => {
@@ -57,6 +59,13 @@ export default function ClubCurrencyPressView() {
       }
     })();
   }, []);
+
+  // FIX-D — lock layout for 150ms whenever layoutMode changes
+  useEffect(() => {
+    setLayoutReady(false);
+    const t = setTimeout(() => setLayoutReady(true), 150);
+    return () => clearTimeout(t);
+  }, [config.layoutMode]);
 
   // Auto-save config
   useEffect(() => { savePressConfig({ ...config, elements }); }, [config, elements]);
@@ -87,13 +96,18 @@ export default function ClubCurrencyPressView() {
   }, [config]);
 
   const handlePrint = useCallback(() => {
+    // FIX-D — guard: do not print if layout is still transitioning
+    if (!layoutReady) {
+      toast.warning("Layout is updating. Please wait a moment and try again.");
+      return;
+    }
     emitPressTelemetry("VOUCHER_PRINT_STARTED", { sheetCount: config.batchCount, layout: config.layoutMode });
     if (typeof window !== "undefined" && window.devicePixelRatio !== 1) {
       toast.warning("Browser zoom is not 100%. Print scaling may be affected.");
     }
     setShowPreview(true);
     setTimeout(() => window.print(), 300);
-  }, [config]);
+  }, [config, layoutReady]);
 
   const handleAddElement = useCallback((el) => {
     setElements((prev) => [...prev, el]);
