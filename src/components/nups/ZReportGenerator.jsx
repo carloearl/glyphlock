@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileText, DollarSign, ShoppingCart, Printer, Calendar, Banknote, Users } from "lucide-react";
+import { FileText, DollarSign, ShoppingCart, Printer, Calendar, Banknote, Users, Coins, ScrollText } from "lucide-react";
 
 export default function ZReportGenerator({ user }) {
   const queryClient = useQueryClient();
@@ -38,6 +38,24 @@ export default function ZReportGenerator({ user }) {
       const all = await base44.entities.GlyphBucksOrder.list('-created_date', 500);
       const today = new Date().toDateString();
       return all.filter(o => new Date(o.created_date).toDateString() === today);
+    }
+  });
+
+  const { data: todayGBTransactions = [] } = useQuery({
+    queryKey: ['today-gb-transactions'],
+    queryFn: async () => {
+      const all = await base44.entities.GlyphBucksTransaction.list('-created_date', 500);
+      const today = new Date().toDateString();
+      return all.filter(t => new Date(t.created_date).toDateString() === today && t.status === 'active');
+    }
+  });
+
+  const { data: todayContracts = [] } = useQuery({
+    queryKey: ['today-venue-contracts'],
+    queryFn: async () => {
+      const all = await base44.entities.VenueContract.list('-created_date', 500);
+      const today = new Date().toDateString();
+      return all.filter(c => new Date(c.created_date).toDateString() === today && c.status !== 'voided');
     }
   });
 
@@ -84,6 +102,15 @@ export default function ZReportGenerator({ user }) {
   const glyphBuckIssued = todayOrders.reduce((s, o) => s + (o.glyphbucks_value || 0), 0);
   const glyphBuckRedeemed = todayOrders.filter(o => o.status === 'archived').reduce((s, o) => s + (o.glyphbucks_value || 0), 0);
   const entertainerPayouts = todayTipPayouts.reduce((s, p) => s + (p.total_tips || 0), 0);
+
+  // NEW LEDGER SYSTEM — GlyphBucksTransaction entity
+  const gbLedgerIssued   = todayGBTransactions.filter(t => t.transaction_type === 'Issue').reduce((s, t) => s + (t.amount || 0), 0);
+  const gbLedgerRedeemed = todayGBTransactions.filter(t => t.transaction_type === 'Redeem').reduce((s, t) => s + Math.abs(t.amount || 0), 0);
+  const gbLedgerNet      = gbLedgerIssued - gbLedgerRedeemed;
+  // VenueContract totals
+  const contractCount    = todayContracts.length;
+  const contractValue    = todayContracts.reduce((s, c) => s + (c.contract_amount || 0), 0);
+  const contractGBIssued = todayContracts.reduce((s, c) => s + (c.glyphbucks_issued || 0), 0);
 
   const handleGenerate = async () => {
     // B6 — block anonymous / no-transaction generation
@@ -189,6 +216,13 @@ export default function ZReportGenerator({ user }) {
           glyph_buck_contracts: todayOrders.length,
           entertainer_tip_payouts: entertainerPayouts,
           demo_transaction_count: demoTransactions.length,
+          // NEW LEDGER
+          gb_ledger_issued: gbLedgerIssued,
+          gb_ledger_redeemed: gbLedgerRedeemed,
+          gb_ledger_net: gbLedgerNet,
+          venue_contract_count: contractCount,
+          venue_contract_value: contractValue,
+          venue_contract_gb_issued: contractGBIssued,
         })
       });
 
@@ -289,14 +323,26 @@ export default function ZReportGenerator({ user }) {
           </div>
           ${extra.glyph_buck_contracts ? `
           <div class="section">
-            <h3>GLYPH BUCK™ ACTIVITY (Reference — Not in Total Sales)</h3>
-            <div class="row"><span>Contracts Issued Today:</span><span>${extra.glyph_buck_contracts}</span></div>
+            <h3>GLYPHBUCKS LEDGER (Liability — Not Revenue)</h3>
+            <div class="row"><span>GB Issued (Ledger):</span><span>${(extra.gb_ledger_issued||0).toFixed(2)} GB</span></div>
+            <div class="row"><span>GB Redeemed (Ledger):</span><span>${(extra.gb_ledger_redeemed||0).toFixed(2)} GB</span></div>
+            <div class="row" style="font-weight:bold;"><span>Net GB Liability:</span><span>${(extra.gb_ledger_net||0).toFixed(2)} GB</span></div>
+          </div>
+          <div class="section">
+            <h3>CONTRACT SYSTEM (Reference)</h3>
+            <div class="row"><span>Contracts Today:</span><span>${extra.venue_contract_count||0}</span></div>
+            <div class="row"><span>Contract Value:</span><span>$${(extra.venue_contract_value||0).toFixed(2)}</span></div>
+            <div class="row"><span>GB Issued via Contracts:</span><span>${(extra.venue_contract_gb_issued||0).toFixed(2)} GB</span></div>
+          </div>
+          <div class="section">
+            <h3>LEGACY GLYPH BUCK™ ORDERS (Reference)</h3>
+            <div class="row"><span>Orders Issued Today:</span><span>${extra.glyph_buck_contracts||0}</span></div>
             <div class="row"><span>Face Value Issued:</span><span>$${(extra.glyph_buck_issued_value||0).toFixed(2)}</span></div>
             <div class="row"><span>Revenue Charged (w/ surcharge):</span><span>$${(extra.glyph_buck_revenue_charged||0).toFixed(2)}</span></div>
             <div class="row"><span>Redeemed Value:</span><span>$${(extra.glyph_buck_redeemed_value||0).toFixed(2)}</span></div>
             <div class="row"><span>Entertainer Tip Payouts:</span><span>$${(extra.entertainer_tip_payouts||0).toFixed(2)}</span></div>
           </div>
-          <div style="font-size:9px;color:#666;margin-bottom:8px;">Glyph Buck™ is a proprietary instrument of GlyphLock Financial LLC. All redemptions are audit-logged.</div>
+          <div style="font-size:9px;color:#666;margin-bottom:8px;">GlyphBucks™ is a proprietary stored-value instrument of GlyphLock Financial LLC. All transactions are audit-logged. GlyphBucks are liabilities, not revenue.</div>
           ` : ''}
           <div class="section total">
             <div class="row"><span>Real Transactions:</span><span>${report.real_transaction_count || report.transaction_count}</span></div>
@@ -367,21 +413,33 @@ export default function ZReportGenerator({ user }) {
         <Card className="glass-card-dark border-amber-500/30">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Banknote className="w-5 h-5 text-amber-400" />
-              <span className="text-sm text-gray-400">Glyph Bucks Issued</span>
+              <Coins className="w-5 h-5 text-amber-400" />
+              <span className="text-sm text-gray-400">GB Issued (Ledger)</span>
             </div>
-            <div className="text-2xl font-bold text-amber-400">${glyphBuckIssued.toFixed(2)}</div>
-            <div className="text-xs text-gray-600 mt-1">{todayOrders.length} contracts · ${glyphBuckRevenue.toFixed(2)} charged (ref only)</div>
+            <div className="text-2xl font-bold text-amber-400">{gbLedgerIssued.toFixed(2)} GB</div>
+            <div className="text-xs text-gray-600 mt-1">Legacy orders: ${glyphBuckIssued.toFixed(2)} (ref only)</div>
           </CardContent>
         </Card>
 
         <Card className="glass-card-dark border-orange-500/30">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Banknote className="w-5 h-5 text-orange-400" />
-              <span className="text-sm text-gray-400">Glyph Bucks Redeemed</span>
+              <Coins className="w-5 h-5 text-orange-400" />
+              <span className="text-sm text-gray-400">GB Redeemed (Ledger)</span>
             </div>
-            <div className="text-2xl font-bold text-orange-400">${glyphBuckRedeemed.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-orange-400">{gbLedgerRedeemed.toFixed(2)} GB</div>
+            <div className="text-xs text-gray-600 mt-1">Net liability: {gbLedgerNet.toFixed(2)} GB</div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card-dark border-purple-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ScrollText className="w-5 h-5 text-purple-400" />
+              <span className="text-sm text-gray-400">Contracts Today</span>
+            </div>
+            <div className="text-2xl font-bold text-purple-400">{contractCount}</div>
+            <div className="text-xs text-gray-600 mt-1">${contractValue.toFixed(2)} value · {contractGBIssued.toFixed(0)} GB via contracts</div>
           </CardContent>
         </Card>
 

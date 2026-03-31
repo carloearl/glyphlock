@@ -1,0 +1,117 @@
+{
+  "name": "VenueContract",
+  "type": "object",
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "description": "Unique contract identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue where this contract was created"
+    },
+    "contract_type": {
+      "type": "string",
+      "enum": [
+        "VIP Package",
+        "GlyphBucks Purchase",
+        "Entertainer Agreement",
+        "Service Agreement",
+        "Custom"
+      ],
+      "description": "Classification of contract"
+    },
+    "customer_id": {
+      "type": "string",
+      "description": "Reference to customer"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "entertainer_id": {
+      "type": "string",
+      "description": "Optional \u2014 reference to Entertainer if contract involves a performer"
+    },
+    "entertainer_name": {
+      "type": "string"
+    },
+    "contract_amount": {
+      "type": "number",
+      "description": "Total monetary value of contract"
+    },
+    "glyphbucks_issued": {
+      "type": "number",
+      "default": 0,
+      "description": "GlyphBucks face value issued under this contract (optional)"
+    },
+    "glyphbucks_transaction_id": {
+      "type": "string",
+      "description": "Links to GlyphBucksTransaction if GB were issued"
+    },
+    "vip_session_id": {
+      "type": "string",
+      "description": "Optional \u2014 links to VIPRoom session"
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "POSBatch this contract falls under"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "Cash",
+        "Credit Card",
+        "Debit Card",
+        "GlyphBucks",
+        "Split"
+      ],
+      "default": "Cash"
+    },
+    "is_printed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether hardcopy has been printed"
+    },
+    "is_signed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether customer has signed"
+    },
+    "customer_signature": {
+      "type": "string",
+      "description": "Digital signature data"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "manager_id": {
+      "type": "string",
+      "description": "Manager who authorized contract"
+    },
+    "audit_log_id": {
+      "type": "string",
+      "description": "Reference to SystemAuditLog entry"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "fulfilled",
+        "voided",
+        "disputed"
+      ],
+      "default": "draft"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_id",
+    "contract_type",
+    "customer_name",
+    "contract_amount"
+  ]
+}

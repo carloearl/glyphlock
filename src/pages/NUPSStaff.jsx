@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Store, ShoppingCart, LogOut, Users, FileText, Clock, Loader2, DollarSign, DoorOpen, BarChart3, Receipt, Star } from "lucide-react";
+import { Store, ShoppingCart, LogOut, Users, FileText, Clock, Loader2, DollarSign, DoorOpen, BarChart3, Receipt, Star, Coins, ScrollText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub";
+import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
+import ContractManager from "../components/nups/ContractManager.jsx";
 import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
 import GuestCheckIn from "../components/nups/GuestCheckIn.jsx";
 import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
@@ -107,7 +109,8 @@ export default function NUPSStaff() {
     { id: 'door',      label: 'Door Check-In', Icon: DoorOpen,     color: 'green',  perm: true },
     { id: 'vip',       label: 'VIP Board',     Icon: Star,         color: 'pink',   perm: canAccessVIP },
     { id: 'manager',   label: 'Manager',       Icon: BarChart3,    color: 'purple', perm: isManager },
-    { id: 'contracts', label: 'Contracts',     Icon: FileText,     color: 'yellow', perm: canAccessPOS },
+    { id: 'contracts', label: 'GlyphBucks',    Icon: Coins,        color: 'yellow', perm: canAccessPOS },
+    { id: 'contract-mgr', label: 'Contracts',   Icon: ScrollText,   color: 'purple', perm: canAccessPOS },
     { id: 'reports',   label: 'Z Report',      Icon: Receipt,      color: 'orange', perm: canAccessBatch },
     { id: 'timeclock', label: 'Time Clock',    Icon: Clock,        color: 'blue',   perm: canClockIn },
     { id: 'history',   label: 'My Sales',      Icon: DollarSign,   color: 'gray',   perm: canAccessPOS },
@@ -134,7 +137,8 @@ export default function NUPSStaff() {
       case 'door':      return <GuestCheckIn />;
       case 'vip':       return <VIPRoomBoard />;
       case 'manager':   return <NUPSManagerDashboard user={user} />;
-      case 'contracts': return <UnifiedGlyphBucksHub venue_id="dream_palace" />;
+      case 'contracts':    return <div className="p-4"><GlyphBucksLedger user={user} venue_id="dream_palace" /></div>;
+      case 'contract-mgr': return <div className="p-4"><ContractManager user={user} venue_id="dream_palace" /></div>;
       case 'reports':   return <div className="space-y-4 p-4"><BatchManagement user={user} /><ZReportGenerator user={user} /></div>;
       case 'timeclock': return <TimeClock user={user} role={user?._highestRole || "BARTENDER"} />;
       case 'history':   return <TransactionHistory transactions={todayTransactions} showReceipt={true} />;

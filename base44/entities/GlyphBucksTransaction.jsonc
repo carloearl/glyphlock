@@ -1,0 +1,79 @@
+{
+  "name": "GlyphBucksTransaction",
+  "type": "object",
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "description": "Unique GlyphBucks transaction identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue where this transaction occurred"
+    },
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "Issue",
+        "Redeem",
+        "Transfer",
+        "Void",
+        "Adjustment"
+      ],
+      "description": "Type of GlyphBucks transaction"
+    },
+    "amount": {
+      "type": "number",
+      "description": "GlyphBucks amount (positive = issue/credit, negative = redeem/debit)"
+    },
+    "customer_id": {
+      "type": "string",
+      "description": "Reference to customer"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Customer display name"
+    },
+    "contract_id": {
+      "type": "string",
+      "description": "Optional \u2014 links to VenueContract if issued via contract"
+    },
+    "vip_session_id": {
+      "type": "string",
+      "description": "Optional \u2014 links to VIPRoom session if issued via VIP session"
+    },
+    "pos_transaction_id": {
+      "type": "string",
+      "description": "Optional \u2014 links to POSTransaction if redeemed at POS"
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "POSBatch this transaction belongs to"
+    },
+    "cashier_id": {
+      "type": "string",
+      "description": "Email of cashier who processed this transaction"
+    },
+    "audit_log_id": {
+      "type": "string",
+      "description": "Reference to SystemAuditLog entry"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes or reason for transaction"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "voided"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "transaction_id",
+    "transaction_type",
+    "amount",
+    "cashier_id"
+  ]
+}

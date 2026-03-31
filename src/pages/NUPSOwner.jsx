@@ -55,6 +55,8 @@ import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
 import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub.jsx";
+import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
+import ContractManager from "../components/nups/ContractManager.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 
@@ -420,8 +422,10 @@ export default function NUPSOwner() {
                 <DropdownMenuLabel className="text-yellow-400">GlyphBucks Operations</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-yellow-500/20" />
                 {[
-                  { value: 'contracts', icon: ScrollText, label: 'GlyphBucks & Press', desc: 'Sales, printing, archive' },
-                  { value: 'glyphbucks', icon: Banknote, label: 'Gift Cards', desc: 'Glyph Bucks' },
+                  { value: 'gb-ledger',  icon: Coins,       label: 'GB Ledger',       desc: 'Issue, redeem, adjust' },
+                  { value: 'contract-mgr', icon: ScrollText, label: 'Contracts',        desc: 'Legal agreements' },
+                  { value: 'contracts',  icon: ScrollText,  label: 'Legacy Press',      desc: 'GlyphBucksOrder archive' },
+                  { value: 'glyphbucks', icon: Banknote,    label: 'GB Inventory',      desc: 'Gift card stock' },
                 ].map(({ value, icon: Icon, label, desc }) => (
                   <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
                     className={`cursor-pointer min-h-[44px] ${activeTab === value ? 'bg-yellow-500/20 text-yellow-400' : 'text-gray-300 hover:bg-white/10'}`}>
@@ -491,6 +495,8 @@ export default function NUPSOwner() {
           {canPayroll && <TabsContent value="payroll"><PayrollReport /></TabsContent>}
           {canPayroll && <TabsContent value="official-checks"><OfficialChecks /></TabsContent>}
           {canMarketing && <TabsContent value="ai"><AIInsights /></TabsContent>}
+          <TabsContent value="gb-ledger"><div className="p-4"><GlyphBucksLedger user={user} venue_id="dream_palace" /></div></TabsContent>
+          <TabsContent value="contract-mgr"><div className="p-4"><ContractManager user={user} venue_id="dream_palace" /></div></TabsContent>
           <TabsContent value="contracts"><UnifiedGlyphBucksHub venue_id="dream_palace" /></TabsContent>
           {canRBAC && <TabsContent value="rbac"><RBACAdminPanel /></TabsContent>}
           {isAdminUser && (
