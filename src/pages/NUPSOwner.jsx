@@ -57,6 +57,7 @@ import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
 import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub.jsx";
 import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
 import ContractManager from "../components/nups/ContractManager.jsx";
+import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 
