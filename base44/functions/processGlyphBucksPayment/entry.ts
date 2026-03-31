@@ -45,13 +45,22 @@ Deno.serve(async (req) => {
       paymentAttempts.set(attemptKey, { count: 1, resetAt: now + LOCKOUT_DURATION_MS });
     }
 
-    const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
-    if (!sessionVenue.data.success) {
-      return Response.json({ 
-        error: sessionVenue.data.error || 'Venue access denied' 
-      }, { status: 403 });
+    let venue_id;
+    try {
+      const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
+      if (!sessionVenue.data?.success) {
+        return Response.json({
+          error: sessionVenue.data?.error || 'Venue access denied'
+        }, { status: 403 });
+      }
+      venue_id = sessionVenue.data.venue_id;
+    } catch (venueErr) {
+      const status = venueErr?.response?.status === 403 ? 403 : 503;
+      return Response.json({
+        error: status === 403 ? 'Venue access denied' : 'Venue session service unavailable',
+        detail: venueErr?.message
+      }, { status });
     }
-    const venue_id = sessionVenue.data.venue_id;
 
     const payload = await req.json();
     const {
