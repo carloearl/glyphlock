@@ -8,7 +8,7 @@ import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
-import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub";
+import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub";
 import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
 import GuestCheckIn from "../components/nups/GuestCheckIn.jsx";
 import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
@@ -134,7 +134,7 @@ export default function NUPSStaff() {
       case 'door':      return <GuestCheckIn />;
       case 'vip':       return <VIPRoomBoard />;
       case 'manager':   return <NUPSManagerDashboard user={user} />;
-      case 'contracts': return <UnifiedDreamDollarHub venue_id="dream_palace" />;
+      case 'contracts': return <UnifiedGlyphBucksHub venue_id="dream_palace" />;
       case 'reports':   return <div className="space-y-4 p-4"><BatchManagement user={user} /><ZReportGenerator user={user} /></div>;
       case 'timeclock': return <TimeClock user={user} role={user?._highestRole || "BARTENDER"} />;
       case 'history':   return <TransactionHistory transactions={todayTransactions} showReceipt={true} />;

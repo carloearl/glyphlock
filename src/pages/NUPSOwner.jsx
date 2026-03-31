@@ -54,6 +54,7 @@ import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngin
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
+import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 
@@ -408,18 +409,18 @@ export default function NUPSOwner() {
               </DropdownMenu>
             )}
 
-            {/* Dream Dollar */}
+            {/* GlyphBucks */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30 hover:border-yellow-500/50 text-white">
-                  <Coins className="w-4 h-4 mr-2 text-yellow-400" />Dream Dollar
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="min-h-[44px] bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30 hover:border-yellow-500/50 text-white">
+                    <Coins className="w-4 h-4 mr-2 text-yellow-400" />GlyphBucks
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-gray-900/95 border-yellow-500/30 backdrop-blur-xl">
-                <DropdownMenuLabel className="text-yellow-400">Dream Dollar Operations</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-yellow-400">GlyphBucks Operations</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-yellow-500/20" />
                 {[
-                  { value: 'contracts', icon: ScrollText, label: 'Contracts & Press', desc: 'Sales, printing, archive' },
+                  { value: 'contracts', icon: ScrollText, label: 'GlyphBucks & Press', desc: 'Sales, printing, archive' },
                   { value: 'glyphbucks', icon: Banknote, label: 'Gift Cards', desc: 'Glyph Bucks' },
                 ].map(({ value, icon: Icon, label, desc }) => (
                   <DropdownMenuItem key={value} onClick={() => setActiveTab(value)}
@@ -490,7 +491,7 @@ export default function NUPSOwner() {
           {canPayroll && <TabsContent value="payroll"><PayrollReport /></TabsContent>}
           {canPayroll && <TabsContent value="official-checks"><OfficialChecks /></TabsContent>}
           {canMarketing && <TabsContent value="ai"><AIInsights /></TabsContent>}
-          <TabsContent value="contracts"><UnifiedDreamDollarHub venue_id="dream_palace" /></TabsContent>
+          <TabsContent value="contracts"><UnifiedGlyphBucksHub venue_id="dream_palace" /></TabsContent>
           {canRBAC && <TabsContent value="rbac"><RBACAdminPanel /></TabsContent>}
           {isAdminUser && (
             <TabsContent value="mis-report">

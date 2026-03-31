@@ -1,5 +1,5 @@
 /**
- * UnifiedDreamDollarHub — Merged GlyphBucks operations
+ * UnifiedGlyphBucksHub — GlyphBucks currency system operations
  * Combines: New Sales, Currency Press, Bill Redemption, Transaction Search, Contract Archive, Fraud Analytics
  */
 import React, { useState } from 'react';
@@ -14,14 +14,14 @@ import TransactionSearch from './glyphbucks/TransactionSearch';
 import ContractViewer from './ContractViewer';
 import FraudAnalyticsDashboard from './FraudAnalyticsDashboard';
 
-export default function UnifiedDreamDollarHub({ venue_id = "dream_palace" }) {
+export default function UnifiedGlyphBucksHub({ venue_id = "dream_palace" }) {
   const [activeSubTab, setActiveSubTab] = useState("new-sale");
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <DollarSign className="w-6 h-6 text-yellow-400" />
-        <h2 className="text-xl font-bold text-white">Dream Dollar Operations</h2>
+        <h2 className="text-xl font-bold text-white">GlyphBucks Operations</h2>
         <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs">
           Unified Hub
         </Badge>
