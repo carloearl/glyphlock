@@ -48,6 +48,12 @@ export default function POSBarRegister({ user }) {
     refetchInterval: 30000,
   });
 
+  // Calculate cart totals BEFORE mutation hook (needed by mutationFn)
+  const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const cartTax = cartTotal * TAX_RATE;
+  const cartGrand = +(cartTotal + cartTax).toFixed(2);
+  const itemCount = cart.reduce((s, i) => s + i.qty, 0);
+
   const createTx = useMutation({
     mutationFn: async (payMethod) => {
       // FIX-C / GAP-L1 — hard block in mutationFn (not just UI)
@@ -121,11 +127,6 @@ export default function POSBarRegister({ user }) {
   const adjustQty = (id, delta) => {
     setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(0, i.qty + delta) } : i).filter(i => i.qty > 0));
   };
-
-  const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const cartTax = cartTotal * TAX_RATE;
-  const cartGrand = +(cartTotal + cartTax).toFixed(2);
-  const itemCount = cart.reduce((s, i) => s + i.qty, 0);
 
   // FIX-C — role filtering for bar register (bartenders see only Cash/Card, not Split)
   const isManager = user?.role === 'admin' || ['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER'].includes(user?._highestRole);
