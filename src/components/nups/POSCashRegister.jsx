@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -28,12 +28,11 @@ export default function POSCashRegister({ user }) {
   const [discount, setDiscount] = useState(0);
   const [lastTransaction, setLastTransaction] = useState(null);
   const [tip, setTip] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false); // B1 — duplicate transaction guard
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [customerQuery, setCustomerQuery] = useState('');
   const [showCustDropdown, setShowCustDropdown] = useState(false);
 
-  // Payment flow state
-  const [paymentStep, setPaymentStep] = useState("register"); // register | method | pay
+  const [paymentStep, setPaymentStep] = useState("register");
   const [paymentMethod, setPaymentMethod] = useState(null);
 
   const { data: products = [] } = useQuery({
@@ -75,7 +74,6 @@ export default function POSCashRegister({ user }) {
     p.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Barcode scanning
   useEffect(() => {
     if (barcodeInput.length > 3) {
       const product = products.find(p => p.barcode === barcodeInput);
@@ -131,7 +129,6 @@ export default function POSCashRegister({ user }) {
     setCart(cart.filter(item => item.product_id !== productId));
   };
 
-  // FIX-C — manager/owner gate for advanced POS features (discount, quick charges)
   const isManagerPOS = user?.role === 'admin' ||
     ['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER'].includes(user?._highestRole);
 
@@ -150,10 +147,8 @@ export default function POSCashRegister({ user }) {
     setPaymentStep("method");
   };
 
-  // B1 — duplicate guard on payment completion
   const completePayment = async (details = {}) => {
     if (isSubmitting) return;
-    // Section 3 — block REAL transaction if no batch open
     if (!activeBatch) {
       toast.error('Cannot process transaction: no open batch. Please open a batch first.');
       return;
@@ -193,7 +188,6 @@ export default function POSCashRegister({ user }) {
     }
   };
 
-  // ─── PAYMENT METHOD SELECTION ──────────────────────
   const PAYMENT_METHODS = [
     { key: "Cash", icon: <DollarSign className="w-6 h-6" />, label: "Cash", color: "green" },
     { key: "Credit Card", icon: <CreditCard className="w-6 h-6" />, label: "Credit Card", color: "cyan" },
@@ -212,7 +206,6 @@ export default function POSCashRegister({ user }) {
     pink: { bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.5)', text: '#ec4899' },
   }[color]);
 
-  // ─── RENDER: PAYMENT FLOW ─────────────────────────
   if (paymentStep === "pay") {
     return (
       <div className="max-w-md mx-auto space-y-4 p-4">
@@ -279,7 +272,6 @@ export default function POSCashRegister({ user }) {
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to register
         </Button>
 
-        {/* Total */}
         <div className="bg-black/70 border border-green-500/30 rounded-2xl p-6 text-center">
           <div className="text-[10px] text-gray-500 uppercase tracking-widest">Total Due</div>
           <div className="text-4xl sm:text-6xl font-mono font-black text-green-400 my-2">${total.toFixed(2)}</div>
@@ -290,7 +282,6 @@ export default function POSCashRegister({ user }) {
           </div>
         </div>
 
-        {/* Tip Quick Buttons */}
         <div>
           <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Add Tip</div>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -313,7 +304,6 @@ export default function POSCashRegister({ user }) {
           </div>
         </div>
 
-        {/* Payment Method Grid */}
         <div>
           <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Select Payment</div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -337,7 +327,6 @@ export default function POSCashRegister({ user }) {
     );
   }
 
-  // ─── RENDER: MAIN REGISTER VIEW ───────────────────
   return (
     <div
       className="flex flex-col lg:flex-row gap-0 rounded-2xl overflow-hidden min-h-screen lg:min-h-[640px]"
@@ -350,8 +339,8 @@ export default function POSCashRegister({ user }) {
         pointerEvents: 'auto',
       }}
     >
-      {/* ── PRODUCTS + SEARCH (LEFT on desktop, TOP on mobile) ───────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderRight: 'none', borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.06)' }}>
+      {/* LEFT: PRODUCTS + SEARCH */}
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderRightWidth: '1px', borderRightColor: 'rgba(255,255,255,0.06)', borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.06)' }}>
 
         {/* Top bar: search + scan */}
         <div className="flex gap-2 p-3 shrink-0 flex-col sm:flex-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -485,8 +474,8 @@ export default function POSCashRegister({ user }) {
         </div>
       </div>
 
-      {/* ── RIGHT PANEL: Order + Checkout (RIGHT on desktop, BOTTOM on mobile) ──────────── */}
-      <div className="w-full lg:w-80 flex flex-col shrink-0 overflow-y-auto min-h-auto lg:min-h-0" style={{ background: 'rgba(0,0,0,0.4)', borderTopWidth: '1px', borderTopColor: 'rgba(255,255,255,0.06)', borderLeftWidth: '0px' }}>
+      {/* CENTER: CART + TOTALS (desktop only) */}
+      <div className="hidden lg:flex lg:w-80 flex-col shrink-0 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.4)', borderLeftWidth: '1px', borderLeftColor: 'rgba(255,255,255,0.06)' }}>
         <OrderDisplay
           cart={cart}
           subtotal={subtotal}
@@ -499,7 +488,6 @@ export default function POSCashRegister({ user }) {
           onClearCart={() => setCart([])}
         />
 
-        {/* Checkout CTA — B1: disabled while submitting */}
         <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
           {cart.length > 0 ? (
             <button
@@ -523,7 +511,50 @@ export default function POSCashRegister({ user }) {
           )}
         </div>
 
-        {/* Last Receipt */}
+        {lastTransaction && (
+          <div className="px-3 pb-3 shrink-0">
+            <ReceiptPrinter transaction={lastTransaction} />
+          </div>
+        )}
+      </div>
+
+      {/* RIGHT: CART + TOTALS (mobile) */}
+      <div className="w-full lg:hidden flex flex-col shrink-0 overflow-y-auto min-h-auto" style={{ background: 'rgba(0,0,0,0.4)', borderTopWidth: '1px', borderTopColor: 'rgba(255,255,255,0.06)' }}>
+        <OrderDisplay
+          cart={cart}
+          subtotal={subtotal}
+          tax={tax}
+          discount={discount}
+          discountAmount={discountAmount}
+          total={total}
+          onUpdateQuantity={updateQuantity}
+          onRemoveItem={removeFromCart}
+          onClearCart={() => setCart([])}
+        />
+
+        <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          {cart.length > 0 ? (
+            <button
+              onClick={handleCheckout}
+              disabled={isSubmitting}
+              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                height: '68px',
+                background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
+                boxShadow: '0 0 40px rgba(34,197,94,0.35), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
+                letterSpacing: '-0.5px',
+              }}
+            >
+              <Wallet className="w-6 h-6" />
+              {isSubmitting ? 'Processing...' : `CHARGE $${total.toFixed(2)}`}
+            </button>
+          ) : (
+            <div className="text-center text-sm py-5 font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>
+              Tap a charge to begin
+            </div>
+          )}
+        </div>
+
         {lastTransaction && (
           <div className="px-3 pb-3 shrink-0">
             <ReceiptPrinter transaction={lastTransaction} />
