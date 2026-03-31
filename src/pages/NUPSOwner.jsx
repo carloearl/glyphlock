@@ -61,6 +61,7 @@ import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
 import OfficialChecks from "./OfficialChecks.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
+import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 
 export default function NUPSOwner() {
   const navigate = useNavigate();
