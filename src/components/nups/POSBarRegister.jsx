@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import POSReceiptEngine from "./pos/POSReceiptEngine";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Trash2, Printer, CreditCard, Banknote, DollarSign, Package, ShoppingCart, SplitSquareHorizontal, AlertCircle, X } from "lucide-react";
+import { Plus, Minus, Trash2, Printer, CreditCard, Banknote, DollarSign, Package, ShoppingCart, SplitSquareHorizontal, AlertCircle, X, Receipt } from "lucide-react";
 
 const CATEGORIES = ["All", "Food & Beverage", "Spirits", "Beer & Wine", "Mixers", "VIP Service", "Merchandise", "Services", "Other"];
 const TAX_RATE = 0.08;
