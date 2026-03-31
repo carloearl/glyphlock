@@ -84,12 +84,13 @@ export default function BatchManagement({ user }) {
 
     setIsOpeningBatch(true);
     try {
+      const cashierEmail = user?.email || user?.id || 'unknown';
       await openBatchMutation.mutateAsync({
         batch_id: `BATCH-${Date.now()}`,
         start_time: new Date().toISOString(),
         opening_cash: parsed,
-        cashier: user?.email,
-        cashier_email: user?.email || null,
+        cashier: cashierEmail,
+        cashier_email: cashierEmail,
         cashier_name: user?.full_name || user?.name || user?.email,
         venue_id: activeVenue?.id || null,
         status: 'open',
