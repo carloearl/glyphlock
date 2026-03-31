@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Store, ShoppingCart, LogOut, Users, FileText, Clock, CreditCard, Loader2, DollarSign, DoorOpen } from "lucide-react";
+import { Store, ShoppingCart, LogOut, Users, FileText, Clock, Loader2, DollarSign, DoorOpen, BarChart3, Receipt, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import POSCashRegister from "../components/nups/POSCashRegister.jsx";
-import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
+import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub";
 import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
+import GuestCheckIn from "../components/nups/GuestCheckIn.jsx";
+import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
+import ZReportGenerator from "../components/nups/ZReportGenerator.jsx";
 import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/SEOHead";
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
@@ -24,6 +24,7 @@ export default function NUPSStaff() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [rbacRole, setRbacRole] = useState(ROLES.BARTENDER);
+  const [activeScreen, setActiveScreen] = useState('bar');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -94,27 +95,55 @@ export default function NUPSStaff() {
 
   const todayRevenue = todayTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
 
-  // RBAC-gated tab visibility
+  // RBAC-gated screen visibility
   const canAccessPOS = hasPermission(rbacRole, 'ACCESS_POS');
   const canAccessVIP = hasPermission(rbacRole, 'ACCESS_VIP_ROOMS');
   const canAccessBatch = hasPermission(rbacRole, 'ACCESS_BATCH_MANAGEMENT');
   const canClockIn = hasPermission(rbacRole, 'CLOCK_IN_OUT');
+  const isManager = rbacRole === 'manager';
 
-  // Determine default tab based on role
-  const getDefaultTab = () => {
-    if (canAccessVIP && !canAccessPOS) return 'vip';
-    if (canClockIn && !canAccessPOS && !canAccessVIP) return 'timeclock';
-    return 'register';
+  const screens = [
+    { id: 'bar',       label: 'Bar Register',  Icon: ShoppingCart, color: 'cyan',   perm: canAccessPOS },
+    { id: 'door',      label: 'Door Check-In', Icon: DoorOpen,     color: 'green',  perm: true },
+    { id: 'vip',       label: 'VIP Board',     Icon: Star,         color: 'pink',   perm: canAccessVIP },
+    { id: 'manager',   label: 'Manager',       Icon: BarChart3,    color: 'purple', perm: isManager },
+    { id: 'contracts', label: 'Contracts',     Icon: FileText,     color: 'yellow', perm: canAccessPOS },
+    { id: 'reports',   label: 'Z Report',      Icon: Receipt,      color: 'orange', perm: canAccessBatch },
+    { id: 'timeclock', label: 'Time Clock',    Icon: Clock,        color: 'blue',   perm: canClockIn },
+    { id: 'history',   label: 'My Sales',      Icon: DollarSign,   color: 'gray',   perm: canAccessPOS },
+  ].filter(s => s.perm);
+
+  const SCREEN_COLORS = {
+    cyan:   { active: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',     icon: 'text-cyan-400' },
+    green:  { active: 'bg-green-500/15 text-green-400 border-green-500/40',   icon: 'text-green-400' },
+    pink:   { active: 'bg-pink-500/15 text-pink-400 border-pink-500/40',      icon: 'text-pink-400' },
+    purple: { active: 'bg-purple-500/15 text-purple-400 border-purple-500/40',icon: 'text-purple-400' },
+    yellow: { active: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/40',icon: 'text-yellow-400' },
+    orange: { active: 'bg-orange-500/15 text-orange-400 border-orange-500/40',icon: 'text-orange-400' },
+    blue:   { active: 'bg-blue-500/15 text-blue-400 border-blue-500/40',      icon: 'text-blue-400' },
+    gray:   { active: 'bg-gray-700/50 text-gray-300 border-gray-500/40',      icon: 'text-gray-300' },
   };
 
-  // Role label for display
-  const roleLabels = {
-    manager: 'Manager', bartender: 'Bartender', door_girl: 'Door',
-    hostess: 'Hostess', security: 'Security', dj: 'DJ'
+  // Resolve active screen — fallback to first available if current not in list
+  const activeScreenId = (screens.find(s => s.id === activeScreen) ? activeScreen : screens[0]?.id) || 'bar';
+  const activeScreenMeta = screens.find(s => s.id === activeScreenId);
+
+  const renderScreen = () => {
+    switch (activeScreenId) {
+      case 'bar':       return <POSBarRegister user={user} />;
+      case 'door':      return <GuestCheckIn />;
+      case 'vip':       return <VIPRoomBoard />;
+      case 'manager':   return <NUPSManagerDashboard user={user} />;
+      case 'contracts': return <UnifiedDreamDollarHub venue_id="dream_palace" />;
+      case 'reports':   return <div className="space-y-4 p-4"><BatchManagement user={user} /><ZReportGenerator user={user} /></div>;
+      case 'timeclock': return <TimeClock user={user} role={user?._highestRole || "BARTENDER"} />;
+      case 'history':   return <TransactionHistory transactions={todayTransactions} showReceipt={true} />;
+      default:          return <div className="text-gray-600 p-8 text-center text-sm">Screen not available</div>;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       <SEOHead
         title="N.U.P.S. Staff Terminal | GlyphLock"
         description="Staff point-of-sale terminal."
@@ -122,35 +151,33 @@ export default function NUPSStaff() {
         url="/nups-staff"
       />
       <OfflineSyncBanner />
-      <header className="border-b border-cyan-500/20 p-4 sticky top-0 bg-black/95 backdrop-blur-lg" style={{ zIndex: 9990, position: 'sticky', pointerEvents: 'auto' }}>
-        <div className="container mx-auto flex items-center justify-between flex-wrap gap-3">
+
+      {/* HEADER */}
+      <header className="border-b border-cyan-500/20 px-4 py-2.5 sticky top-0 bg-black/95 backdrop-blur-lg" style={{ zIndex: 9990 }}>
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Store className="w-6 h-6 text-cyan-400" />
+            <Store className="w-5 h-5 text-cyan-400" />
             <div>
-              <h1 className="text-lg md:text-xl font-bold text-white">N.U.P.S. POS</h1>
-              <p className="text-xs text-gray-400 hidden sm:block">Staff Terminal</p>
+              <h1 className="text-base font-bold text-white leading-none">N.U.P.S.</h1>
+              <p className="text-[10px] text-gray-500 mt-0.5">{activeScreenMeta?.label || 'Terminal'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-2.5">
             {canAccessPOS && (
-              <div className="bg-gray-900/80 px-3 py-1.5 rounded-lg hidden sm:block">
-                <div className="text-xs text-gray-400">Today</div>
-                <div className="text-base font-bold text-green-400">${todayRevenue.toFixed(2)}</div>
+              <div className="hidden sm:block text-right">
+                <div className="text-[10px] text-gray-500">Today</div>
+                <div className="text-sm font-bold text-green-400">${todayRevenue.toFixed(2)}</div>
               </div>
             )}
-            <div className="hidden md:flex items-center gap-2">
-              <Users className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-white truncate max-w-[120px]">{user?.email}</span>
-              <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-xs">
-                {roleLabels[rbacRole] || user?._highestRole || "Staff"}
-              </Badge>
-            </div>
+            <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 text-[10px] hidden md:flex">
+              {user?._highestRole || rbacRole || 'Staff'}
+            </Badge>
             <Button
               variant="outline"
               size="sm"
               onClick={() => base44.auth.logout()}
-              className="border-red-500/50 text-red-400 hover:bg-red-500/10 min-h-[44px]"
-              aria-label="Sign out of staff terminal"
+              className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-9 w-9 p-0"
+              aria-label="Sign out"
             >
               <LogOut className="w-4 h-4" />
             </Button>
@@ -158,83 +185,37 @@ export default function NUPSStaff() {
         </div>
       </header>
 
-      <div className="container mx-auto p-4 md:p-6" style={{ position: 'relative', zIndex: 20 }}>
-        <Tabs defaultValue={getDefaultTab()} className="space-y-6">
-          <TabsList className="bg-gray-900/95 border border-cyan-500/30 flex gap-1 p-1.5 w-full min-h-0 flex-wrap" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
-            {canAccessPOS && (
-              <TabsTrigger value="register" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
-                <ShoppingCart className="w-4 h-4" />
-                <span className="text-[10px] md:text-xs">Register</span>
-              </TabsTrigger>
-            )}
-            {canAccessPOS && (
-              <TabsTrigger value="contracts" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
-                <DollarSign className="w-4 h-4" />
-                <span className="text-[10px] md:text-xs">Contracts</span>
-              </TabsTrigger>
-            )}
-            {canAccessBatch && (
-              <TabsTrigger value="batch" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
-                <CreditCard className="w-4 h-4" />
-                <span className="text-[10px] md:text-xs">Batch</span>
-              </TabsTrigger>
-            )}
-            {canAccessVIP && (
-              <TabsTrigger value="vip" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-pink-500/20 data-[state=active]:text-pink-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
-                <DoorOpen className="w-4 h-4" />
-                <span className="text-[10px] md:text-xs">VIP Rooms</span>
-              </TabsTrigger>
-            )}
-            {canClockIn && (
-              <TabsTrigger value="timeclock" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
-                <Clock className="w-4 h-4" />
-                <span className="text-[10px] md:text-xs">Time Clock</span>
-              </TabsTrigger>
-            )}
-            {canAccessPOS && (
-              <TabsTrigger value="history" className="min-h-[48px] flex flex-col items-center justify-center gap-0.5 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 flex-1" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
-                <FileText className="w-4 h-4" />
-                <span className="text-[10px] md:text-xs">My Sales</span>
-              </TabsTrigger>
-            )}
-          </TabsList>
-
-          {canAccessPOS && (
-            <TabsContent value="register" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-              <POSCashRegister user={user} />
-            </TabsContent>
-          )}
-          {canAccessPOS && (
-            <TabsContent value="contracts" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-              <UnifiedDreamDollarHub venue_id="dream_palace" />
-            </TabsContent>
-          )}
-          {canAccessBatch && (
-            <TabsContent value="batch" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-              <BatchManagement user={user} />
-            </TabsContent>
-          )}
-          {canAccessVIP && (
-            <TabsContent value="vip" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-              <VIPRoomBoard />
-            </TabsContent>
-          )}
-          {canClockIn && (
-            <TabsContent value="timeclock" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-              <TimeClock user={user} role={user?._highestRole || "BARTENDER"} />
-            </TabsContent>
-          )}
-          {canAccessPOS && (
-            <TabsContent value="history" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
-              <TransactionHistory transactions={todayTransactions} showReceipt={true} />
-            </TabsContent>
-          )}
-        </Tabs>
-
-        <footer className="text-center text-[10px] text-gray-700 py-6 border-t border-gray-800 mt-12">
-          {GLYPHLOCK_DISCLAIMER}
-        </footer>
+      {/* SCREEN NAVIGATION BAR */}
+      <div className="bg-gray-950 border-b border-gray-800 overflow-x-auto" style={{ zIndex: 30 }}>
+        <div className="flex min-w-max px-1.5 py-1.5 gap-1">
+          {screens.map(({ id, label, Icon, color }) => {
+            const isActive = activeScreenId === id;
+            const colors = SCREEN_COLORS[color];
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveScreen(id)}
+                style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+                className={`flex flex-col items-center gap-0.5 px-4 py-2 rounded-lg min-w-[72px] transition-all border ${
+                  isActive ? colors.active : 'border-transparent text-gray-600 hover:text-gray-300 hover:bg-gray-800/60'
+                }`}
+              >
+                <Icon className={`w-4 h-4 ${isActive ? colors.icon : 'opacity-40'}`} />
+                <span className="text-[10px] font-medium whitespace-nowrap">{label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {/* SCREEN CONTENT */}
+      <div className="flex-1 overflow-auto" style={{ position: 'relative', zIndex: 20, pointerEvents: 'auto' }}>
+        {renderScreen()}
+      </div>
+
+      <footer className="text-center text-[10px] text-gray-700 py-2 border-t border-gray-800">
+        {GLYPHLOCK_DISCLAIMER}
+      </footer>
     </div>
   );
 }

@@ -52,13 +52,8 @@ import GlyphBuckInventory from "../components/nups/GlyphBuckInventory.jsx";
 import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
-import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
-import UnifiedDreamDollarHub from "../components/nups/UnifiedDreamDollarHub.jsx";
-import OfficialChecks from "./OfficialChecks";
-import VIPContractLifecycle from "../components/nups/VIPContractLifecycle.jsx";
-import OnboardingPacket from "../components/nups/OnboardingPacket.jsx";
-import NUPSRouteGuard from "../components/nups/NUPSRouteGuard.jsx";
-import { GLYPHLOCK_DISCLAIMER } from '../constants/legalDisclaimer';
+import POSBarRegister from "../components/nups/POSBarRegister.jsx";
+import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 
@@ -465,9 +460,9 @@ export default function NUPSOwner() {
           <TabsContent value="analytics"><OwnerAnalytics transactions={transactions} /></TabsContent>
           <TabsContent value="live"><LiveFloorView /></TabsContent>
           <TabsContent value="pos">
-            <div className="space-y-4">
+            <div className="space-y-4 p-4">
               {canBatch && <BatchManagement user={user} />}
-              <POSCashRegister user={user} />
+              <POSBarRegister user={user} />
             </div>
           </TabsContent>
           <TabsContent value="floor"><EntertainerCheckIn /></TabsContent>

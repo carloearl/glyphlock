@@ -192,6 +192,31 @@ export default function ZReportGenerator({ user }) {
         })
       });
 
+      // OMEGA SECTION A — Permanent audit log write on batch close
+      await base44.entities.SystemAuditLog.create({
+        event_type: 'Z_REPORT_GENERATED',
+        description: `Z-Report ${report.report_id} closed. Total Sales: $${report.total_sales.toFixed(2)}. Cash Over/Short: $${(report.cash_over_short || 0).toFixed(2)}.`,
+        actor_email: user.email,
+        status: s4_requiresReview ? 'alert' : 'success',
+        severity: s4_requiresReview ? 'high' : 'low',
+        resource_id: report.report_id,
+        metadata: {
+          report_id: report.report_id,
+          batch_id: report.batch_id,
+          total_sales: report.total_sales,
+          cash_sales: report.cash_sales,
+          card_sales: report.card_sales,
+          cash_over_short: report.cash_over_short,
+          requires_review: report.requires_review,
+          real_transactions: report.real_transaction_count,
+          demo_transactions: report.demo_transaction_count,
+          glyphbucks_issued: glyphBuckIssued,
+          glyphbucks_redeemed: glyphBuckRedeemed,
+          opening_cash: report.opening_cash,
+          closing_cash: report.closing_cash,
+          section: 'OMEGA-A-Z-REPORT'
+        }
+      });
       queryClient.invalidateQueries({ queryKey: ['z-reports'] });
       alert(`Z-Report generated!\nReal Transactions: ${realTransactions.length}\nDemo Transactions: ${demoTransactions.length}\nTotal Sales (real tender): $${report.total_sales.toFixed(2)}`);
       printReport(report, demoTransactions.length);
