@@ -309,7 +309,7 @@ export default function POSBarRegister({ user }) {
               </div>
               <button
                 onClick={() => createTx.mutate(paymentStep)}
-                disabled={createTx.isPending || !activeBatch}
+                disabled={createTx.isPending}
                 className="w-full h-12 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-40 text-white font-bold text-sm transition-colors"
               >
                 {createTx.isPending ? 'Processing...' : `✓ Charge ${paymentStep === 'Digital Wallet' ? 'GlyphBucks' : paymentStep}`}
