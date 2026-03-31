@@ -61,6 +61,8 @@ import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
 import VenueSettings from "../components/nups/VenueSettings.jsx";
 import OfficialChecks from "./OfficialChecks.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
+import HardwareStatusPanel from "../components/nups/hardware/HardwareStatusPanel.jsx";
+import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 
@@ -73,6 +75,7 @@ export default function NUPSOwner() {
   const [activeModule, setActiveModule] = useState('dashboard');
   const [rbacRole, setRbacRole] = useState('manager');
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -431,6 +434,7 @@ export default function NUPSOwner() {
               {isAdminUser && (
                 <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
               )}
+              <HardwareStatusPanel user={user} activeVenue={activeVenue} />
             </div>
           )}
           {activeModule === 'venue' && <VenueSettings user={user} />}

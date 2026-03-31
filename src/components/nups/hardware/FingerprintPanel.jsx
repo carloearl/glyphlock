@@ -1,12 +1,24 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Fingerprint, Loader2, CheckCircle2, Camera } from "lucide-react";
 import { toast } from "sonner";
-import { base44 } from "@/api/base44Client";
 
-export default function FingerprintPanel({ onCapture, label = "Thumbprint" }) {
+export default function FingerprintPanel({ onCapture, label = "Thumbprint", activeVenue }) {
+  const venueId = activeVenue?.id || activeVenue?.venue_id;
+
+  const { data: deviceConfig } = useQuery({
+    queryKey: ['hw-fingerprint', venueId],
+    queryFn: async () => {
+      if (!venueId) return null;
+      const records = await base44.entities.VenueHardware.filter({ venue_id: venueId, device_type: 'fingerprint_reader' });
+      return records.find(r => r.is_active !== false) || null;
+    },
+    enabled: !!venueId,
+  });
   const [scanning, setScanning] = useState(false);
   const [captured, setCaptured] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -19,11 +31,10 @@ export default function FingerprintPanel({ onCapture, label = "Thumbprint" }) {
       setScanning(false);
       
       // In production, this would capture from USB device
-      // For now, simulate with a placeholder
       const mockPrint = {
         timestamp: new Date().toISOString(),
         quality: 95,
-        device: "Adesso AFPR-200"
+        device: deviceConfig?.device_label || "Adesso AFPR-200"
       };
       
       toast.success("Fingerprint captured");
@@ -61,10 +72,15 @@ export default function FingerprintPanel({ onCapture, label = "Thumbprint" }) {
   return (
     <Card className="bg-gray-900/60 border-purple-500/30">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm text-purple-400 flex items-center gap-2">
-          <Fingerprint className="w-4 h-4" />
-          {label}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm text-purple-400 flex items-center gap-2">
+            <Fingerprint className="w-4 h-4" />
+            {deviceConfig?.device_label || label}
+          </CardTitle>
+          {deviceConfig?.is_sandbox && (
+            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/40 text-[10px]">Sandbox</Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {captured ? (

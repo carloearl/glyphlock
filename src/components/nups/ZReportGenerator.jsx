@@ -76,6 +76,7 @@ export default function ZReportGenerator({ user }) {
   // Section 3 — separate REAL vs DEMO transactions
   const realTransactions = todayTransactions.filter(t => !t.mode || t.mode === 'REAL');
   const demoTransactions = todayTransactions.filter(t => t.mode === 'DEMO' || t.mode === 'TEST');
+  const demoTotal = demoTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
 
   // Live preview calculations — REAL only for financials
   const cashSales = realTransactions
@@ -216,6 +217,7 @@ export default function ZReportGenerator({ user }) {
           glyph_buck_contracts: todayOrders.length,
           entertainer_tip_payouts: entertainerPayouts,
           demo_transaction_count: demoTransactions.length,
+          demo_total: demoTotal,
           // NEW LEDGER
           gb_ledger_issued: gbLedgerIssued,
           gb_ledger_redeemed: gbLedgerRedeemed,
@@ -309,7 +311,7 @@ export default function ZReportGenerator({ user }) {
             <div class="row"><span>Real Transactions:</span><span>${report.real_transaction_count || report.transaction_count}</span></div>
             ${(report.demo_transaction_count || demoCount) > 0 ? `
             <div class="demo-note">
-              ⚠️ DEMO TRANSACTIONS EXCLUDED: ${report.demo_transaction_count || demoCount} demo/test transactions were recorded but are NOT included in financial totals.
+              ⚠️ Demo Transactions: ${report.demo_transaction_count || demoCount} — $${((extra.demo_total||0)).toFixed(2)} — NOT INCLUDED IN TOTALS
             </div>` : ''}
           </div>
           <div class="section">
@@ -474,8 +476,8 @@ export default function ZReportGenerator({ user }) {
             </div>
           )}
           {demoTransactions.length > 0 && (
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-400">
-              ℹ️ {demoTransactions.length} DEMO transaction(s) will be excluded from financial totals.
+            <div className="bg-amber-500/10 border border-amber-500/40 rounded-lg p-3 text-sm text-amber-400 font-semibold">
+              ⚠️ Demo Transactions: {demoTransactions.length} — ${demoTotal.toFixed(2)} — NOT INCLUDED IN TOTALS
             </div>
           )}
 

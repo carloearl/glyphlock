@@ -1,11 +1,25 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { CreditCard, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-export default function CardReaderPanel({ onCardRead }) {
+export default function CardReaderPanel({ onCardRead, activeVenue }) {
+  const venueId = activeVenue?.id || activeVenue?.venue_id;
+
+  const { data: deviceConfig } = useQuery({
+    queryKey: ['hw-card-terminal', venueId],
+    queryFn: async () => {
+      if (!venueId) return null;
+      const records = await base44.entities.VenueHardware.filter({ venue_id: venueId, device_type: 'card_terminal' });
+      return records.find(r => r.is_active !== false) || null;
+    },
+    enabled: !!venueId,
+  });
   const [reading, setReading] = useState(false);
   const [lastCard, setLastCard] = useState(null);
   const [manualEntry, setManualEntry] = useState(false);
@@ -60,10 +74,18 @@ export default function CardReaderPanel({ onCardRead }) {
   return (
     <Card className="bg-gray-900/60 border-blue-500/30">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm text-blue-400 flex items-center gap-2">
-          <CreditCard className="w-4 h-4" />
-          Adesso Card Reader
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm text-blue-400 flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            {deviceConfig?.device_label || 'Card Reader'}
+          </CardTitle>
+          {deviceConfig?.is_sandbox && (
+            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/40 text-[10px]">Sandbox</Badge>
+          )}
+          {venueId && !deviceConfig && (
+            <Badge className="bg-gray-700 text-gray-400 border-gray-600 text-[10px]">Not Configured</Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {lastCard ? (

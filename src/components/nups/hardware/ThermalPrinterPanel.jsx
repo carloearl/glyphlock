@@ -1,15 +1,29 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Printer, Loader2, CheckCircle2, AlertCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 
-export default function ThermalPrinterPanel({ 
-  documentHtml, 
+export default function ThermalPrinterPanel({
+  documentHtml,
   documentName = "Document",
-  onPrintComplete 
+  onPrintComplete,
+  activeVenue
 }) {
+  const venueId = activeVenue?.id || activeVenue?.venue_id;
+
+  const { data: deviceConfig } = useQuery({
+    queryKey: ['hw-printer', venueId],
+    queryFn: async () => {
+      if (!venueId) return null;
+      const records = await base44.entities.VenueHardware.filter({ venue_id: venueId, device_type: 'receipt_printer' });
+      return records.find(r => r.is_active !== false) || null;
+    },
+    enabled: !!venueId,
+  });
   const [printing, setPrinting] = useState(false);
   const [lastPrint, setLastPrint] = useState(null);
   const [printerReady, setPrinterReady] = useState(true);
@@ -55,7 +69,7 @@ export default function ThermalPrinterPanel({
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm text-green-400 flex items-center gap-2">
             <Printer className="w-4 h-4" />
-            Thermal Printer
+            {deviceConfig?.device_label || 'Thermal Printer'}
           </CardTitle>
           {printerReady ? (
             <Badge className="bg-green-500/20 text-green-400 border-green-500/40 text-[10px]">
@@ -110,7 +124,8 @@ export default function ThermalPrinterPanel({
         </Button>
 
         <div className="text-[10px] text-gray-600 text-center">
-          Paper: 58mm thermal · Speed: 90mm/sec
+          {deviceConfig?.model || 'Adesso NuPrint 210'} · 58mm thermal
+          {deviceConfig?.is_sandbox && <span className="text-yellow-500 ml-2">[SANDBOX]</span>}
         </div>
       </CardContent>
     </Card>
