@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FileSignature, AlertTriangle, ScrollText } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ENTERTAINER_LICENSE_AGREEMENT } from '@/constants/contractText';
 
@@ -36,12 +37,13 @@ export default function EntertainerContract({ onContractSigned }) {
     legal_name: "",
     phone: "",
     email: "",
-    emergency_contact: {
-      name: "",
-      phone: "",
-      relationship: ""
-    },
-    commission_rate: 0.5
+    emergency_contact: { name: "", phone: "", relationship: "" },
+    commission_rate: 0.5,
+    id_type: "",
+    id_number: "",
+    id_expiration: "",
+    ssn_or_ein: "",
+    independent_contractor_acknowledgment: false
   });
 
   const createEntertainer = useMutation({
@@ -113,6 +115,22 @@ export default function EntertainerContract({ onContractSigned }) {
       alert('Please provide your digital signature');
       return;
     }
+    if (!entertainerData.independent_contractor_acknowledgment) {
+      alert('You must acknowledge independent contractor status to continue');
+      return;
+    }
+    if (!entertainerData.id_type || !entertainerData.id_number || !entertainerData.id_expiration) {
+      alert('Government ID information is required');
+      return;
+    }
+    if (new Date(entertainerData.id_expiration) <= new Date()) {
+      alert('ID expiration date must be in the future');
+      return;
+    }
+    if (!entertainerData.ssn_or_ein) {
+      alert('SSN or EIN is required');
+      return;
+    }
     const cleaned = {
       stage_name: stripHtml(entertainerData.stage_name),
       legal_name: stripHtml(entertainerData.legal_name),
@@ -123,7 +141,12 @@ export default function EntertainerContract({ onContractSigned }) {
         phone: stripHtml(entertainerData.emergency_contact.phone),
         relationship: stripHtml(entertainerData.emergency_contact.relationship)
       },
-      commission_rate: entertainerData.commission_rate
+      commission_rate: entertainerData.commission_rate,
+      id_type: entertainerData.id_type,
+      id_number: stripHtml(entertainerData.id_number),
+      id_expiration: entertainerData.id_expiration,
+      ssn_or_ein: stripHtml(entertainerData.ssn_or_ein),
+      independent_contractor_acknowledgment: true
     };
     if (cleaned.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.email)) {
       alert('Please enter a valid email address');
@@ -231,6 +254,73 @@ export default function EntertainerContract({ onContractSigned }) {
                       required
                     />
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Identity & Tax — FIX-1 DIRECTIVE 5E */}
+            <Card className="bg-gray-800/50 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white text-lg">Government ID & Tax Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-white">ID Type *</Label>
+                    <Select value={entertainerData.id_type} onValueChange={(v) => setEntertainerData({...entertainerData, id_type: v})}>
+                      <SelectTrigger className="glass-input">
+                        <SelectValue placeholder="Select ID type..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900 border-gray-700">
+                        <SelectItem value="drivers_license">Driver's License</SelectItem>
+                        <SelectItem value="state_id">State ID</SelectItem>
+                        <SelectItem value="passport">Passport</SelectItem>
+                        <SelectItem value="military_id">Military ID</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white">ID Number *</Label>
+                    <Input
+                      value={entertainerData.id_number}
+                      onChange={(e) => setEntertainerData({...entertainerData, id_number: e.target.value})}
+                      className="glass-input"
+                      placeholder="Government ID number"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white">ID Expiration Date *</Label>
+                    <Input
+                      type="date"
+                      value={entertainerData.id_expiration}
+                      onChange={(e) => setEntertainerData({...entertainerData, id_expiration: e.target.value})}
+                      className="glass-input"
+                      min={new Date().toISOString().split('T')[0]}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white">SSN or EIN *</Label>
+                    <Input
+                      value={entertainerData.ssn_or_ein}
+                      onChange={(e) => setEntertainerData({...entertainerData, ssn_or_ein: e.target.value})}
+                      className="glass-input"
+                      placeholder="SSN (XXX-XX-XXXX) or EIN"
+                      required
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Stored securely for tax reporting purposes</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5">
+                  <Checkbox
+                    checked={entertainerData.independent_contractor_acknowledgment}
+                    onCheckedChange={(v) => setEntertainerData({...entertainerData, independent_contractor_acknowledgment: v})}
+                    className="mt-1"
+                  />
+                  <label className="text-sm text-white cursor-pointer" onClick={() => setEntertainerData({...entertainerData, independent_contractor_acknowledgment: !entertainerData.independent_contractor_acknowledgment})}>
+                    I acknowledge that I am an <strong>independent contractor</strong>, not an employee. I am responsible for my own tax obligations and understand I will receive a 1099 if applicable. *
+                  </label>
                 </div>
               </CardContent>
             </Card>

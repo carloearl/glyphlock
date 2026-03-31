@@ -1,0 +1,96 @@
+{
+  "name": "VenueHardware",
+  "type": "object",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "References Venue.venue_id"
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "receipt_printer",
+        "contract_printer",
+        "card_terminal",
+        "cash_drawer",
+        "barcode_scanner",
+        "id_scanner",
+        "fingerprint_reader"
+      ],
+      "description": "Type of hardware device"
+    },
+    "device_label": {
+      "type": "string",
+      "description": "Human-readable device name (e.g. 'Door Station Printer')"
+    },
+    "model": {
+      "type": "string",
+      "description": "Device model identifier (e.g. Adesso NuPrint 210, ASCR-210)"
+    },
+    "firmware": {
+      "type": "string",
+      "description": "Firmware or driver version string"
+    },
+    "connection_type": {
+      "type": "string",
+      "enum": [
+        "usb",
+        "network",
+        "bluetooth",
+        "serial",
+        "browser_pdf",
+        "test"
+      ],
+      "description": "How device is connected to the station"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "Network IP address (for network-connected devices)"
+    },
+    "port": {
+      "type": "string",
+      "description": "Port number or USB port identifier"
+    },
+    "driver": {
+      "type": "string",
+      "description": "Driver name or class used to communicate with device"
+    },
+    "station": {
+      "type": "string",
+      "enum": [
+        "door",
+        "bar",
+        "vip",
+        "manager",
+        "cashier"
+      ],
+      "description": "Which station this device belongs to"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Device is enabled and in use"
+    },
+    "is_sandbox": {
+      "type": "boolean",
+      "default": false,
+      "description": "Device runs in simulation/test mode (no physical hardware required)"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last successful connection or heartbeat timestamp"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes, location details, or maintenance log"
+    }
+  },
+  "required": [
+    "venue_id",
+    "device_type",
+    "device_label",
+    "connection_type",
+    "station"
+  ]
+}

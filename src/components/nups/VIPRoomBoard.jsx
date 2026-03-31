@@ -106,55 +106,71 @@ export default function VIPRoomBoard({ user }) {
     }
     setIsOpening(true);
     try {
-      // VIP CONTRACT GATE — DIRECTIVE 5C
-      if (entertainerId) {
-        const selectedEnt = entertainers.find(e => e.id === entertainerId);
-        if (selectedEnt) {
-          const minimumAge = activeVenue?.minimum_age || 21;
-          if (selectedEnt.date_of_birth) {
-            const dob = new Date(selectedEnt.date_of_birth);
-            const today = new Date();
-            const age = today.getFullYear() - dob.getFullYear()
-              - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
-            if (age < minimumAge) {
-              await base44.entities.SystemAuditLog.create({
-                event_type: "VIP_CONTRACT_GATE_BLOCKED",
-                description: `VIP blocked: entertainer age ${age} below venue minimum ${minimumAge}`,
-                actor_email: user?.email, status: "blocked", severity: "CRITICAL",
-                metadata: { entertainer_id: entertainerId, reason: "age_below_minimum",
-                  entertainer_age: age, minimum_age_required: minimumAge,
-                  venue_id: activeVenue?.id, section: "SECTION-5C" }
-              });
-              alert(`VIP session blocked: Entertainer does not meet minimum age of ${minimumAge}.`);
-              setIsOpening(false);
-              return;
-            }
-          }
-          if (selectedEnt.contract_status !== 'VALID') {
-            await base44.entities.SystemAuditLog.create({
-              event_type: "VIP_CONTRACT_GATE_BLOCKED",
-              description: `VIP blocked: contract_status=${selectedEnt.contract_status} for entertainer_id=${entertainerId}`,
-              actor_email: user?.email, status: "blocked", severity: "HIGH",
-              metadata: { entertainer_id: entertainerId, reason: "invalid_contract_status",
-                contract_status: selectedEnt.contract_status, section: "SECTION-5C" }
-            });
-            alert(`VIP session blocked: Contract status is ${selectedEnt.contract_status || 'PENDING'}.`);
-            setIsOpening(false);
-            return;
-          }
-          if (!selectedEnt.contract_signed || !selectedEnt.contract_signed_date ||
-              !selectedEnt.contract_signature || !selectedEnt.contract_ip_address) {
-            await base44.entities.SystemAuditLog.create({
-              event_type: "VIP_CONTRACT_GATE_BLOCKED",
-              description: `VIP blocked: incomplete contract fields for entertainer_id=${entertainerId}`,
-              actor_email: user?.email, status: "blocked", severity: "HIGH",
-              metadata: { entertainer_id: entertainerId,
-                reason: "incomplete_contract_fields", section: "SECTION-5C" }
-            });
-            alert("VIP session blocked: Entertainer contract is incomplete.");
-            setIsOpening(false);
-            return;
-          }
+      // VIP CONTRACT GATE — DIRECTIVE 5C (HARDENED FIX-2 + FIX-3)
+      // FIX-2: Hard block if no entertainer assigned
+      if (!entertainerId) {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "VIP_CONTRACT_GATE_BLOCKED",
+          description: "VIP session blocked: No entertainer assigned.",
+          actor_email: user?.email, status: "blocked", severity: "HIGH",
+          metadata: { reason: "no_entertainer_assigned", section: "SECTION-5C-HARDENED" }
+        });
+        alert("VIP session blocked: An entertainer must be assigned to open a session.");
+        setIsOpening(false); return;
+      }
+      const selectedEnt = entertainers.find(e => e.id === entertainerId);
+      if (selectedEnt) {
+        const minimumAge = activeVenue?.minimum_age || 21;
+        // FIX-3: Hard block on missing DOB (matches 5B behavior)
+        if (!selectedEnt.date_of_birth) {
+          await base44.entities.SystemAuditLog.create({
+            event_type: "VIP_CONTRACT_GATE_BLOCKED",
+            description: `VIP blocked: No DOB on file for entertainer_id=${entertainerId}`,
+            actor_email: user?.email, status: "blocked", severity: "CRITICAL",
+            metadata: { entertainer_id: entertainerId, reason: "missing_dob",
+              minimum_age_required: minimumAge, section: "SECTION-5C-HARDENED" }
+          });
+          alert("VIP session blocked: Date of birth not on file for this entertainer.");
+          setIsOpening(false); return;
+        }
+        const dob = new Date(selectedEnt.date_of_birth);
+        const today = new Date();
+        const age = today.getFullYear() - dob.getFullYear()
+          - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+        if (age < minimumAge) {
+          await base44.entities.SystemAuditLog.create({
+            event_type: "VIP_CONTRACT_GATE_BLOCKED",
+            description: `VIP blocked: entertainer age ${age} below venue minimum ${minimumAge}`,
+            actor_email: user?.email, status: "blocked", severity: "CRITICAL",
+            metadata: { entertainer_id: entertainerId, reason: "age_below_minimum",
+              entertainer_age: age, minimum_age_required: minimumAge,
+              venue_id: activeVenue?.id, section: "SECTION-5C-HARDENED" }
+          });
+          alert(`VIP session blocked: Entertainer does not meet minimum age of ${minimumAge}.`);
+          setIsOpening(false); return;
+        }
+        if (selectedEnt.contract_status !== 'VALID') {
+          await base44.entities.SystemAuditLog.create({
+            event_type: "VIP_CONTRACT_GATE_BLOCKED",
+            description: `VIP blocked: contract_status=${selectedEnt.contract_status} for entertainer_id=${entertainerId}`,
+            actor_email: user?.email, status: "blocked", severity: "HIGH",
+            metadata: { entertainer_id: entertainerId, reason: "invalid_contract_status",
+              contract_status: selectedEnt.contract_status, section: "SECTION-5C-HARDENED" }
+          });
+          alert(`VIP session blocked: Contract status is ${selectedEnt.contract_status || 'PENDING'}.`);
+          setIsOpening(false); return;
+        }
+        if (!selectedEnt.contract_signed || !selectedEnt.contract_signed_date ||
+            !selectedEnt.contract_signature || !selectedEnt.contract_ip_address) {
+          await base44.entities.SystemAuditLog.create({
+            event_type: "VIP_CONTRACT_GATE_BLOCKED",
+            description: `VIP blocked: incomplete contract fields for entertainer_id=${entertainerId}`,
+            actor_email: user?.email, status: "blocked", severity: "HIGH",
+            metadata: { entertainer_id: entertainerId,
+              reason: "incomplete_contract_fields", section: "SECTION-5C-HARDENED" }
+          });
+          alert("VIP session blocked: Entertainer contract is incomplete.");
+          setIsOpening(false); return;
         }
       }
       // ALL GATES PASSED — proceed to create VIPRoom record

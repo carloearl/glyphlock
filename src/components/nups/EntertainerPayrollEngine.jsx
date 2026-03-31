@@ -277,11 +277,33 @@ export default function EntertainerPayrollEngine({ user }) {
   });
 
   const updateStatus = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.PayrollRecord.update(id, {
-      status,
-      paid_at: status === "paid" ? new Date().toISOString() : undefined,
-      approved_by: user?.email,
-    }),
+    mutationFn: async ({ id, status, entertainer_id }) => {
+      // PAYOUT GATE — DIRECTIVE 5F HARDENED — re-check on promotion
+      if (entertainer_id) {
+        const allEnts = await base44.entities.Entertainer.list();
+        const entertainer = allEnts.find(e => e.id === entertainer_id);
+        if (entertainer && entertainer.contract_status !== 'VALID') {
+          await base44.entities.SystemAuditLog.create({
+            event_type: "PAYOUT_GATE_BLOCKED",
+            description: `Payroll promotion blocked: contract_status=${entertainer.contract_status} for ${entertainer.stage_name}`,
+            actor_email: user?.email, status: "blocked", severity: "CRITICAL",
+            metadata: { entertainer_id: entertainer.id,
+              reason: "invalid_contract_status_on_promotion",
+              contract_status: entertainer.contract_status,
+              target_status: status, section: "SECTION-5F-HARDENED" }
+          });
+          throw new Error(
+            `Payout blocked: Contract must be VALID to approve or pay. Current: ${entertainer.contract_status || 'PENDING'}.`
+          );
+        }
+      }
+      // GATE PASSED — proceed
+      return base44.entities.PayrollRecord.update(id, {
+        status,
+        paid_at: status === "paid" ? new Date().toISOString() : undefined,
+        approved_by: user?.email,
+      });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["payroll-records"] });
       toast.success("Status updated.");
@@ -458,14 +480,14 @@ export default function EntertainerPayrollEngine({ user }) {
                         ><Printer className="w-3 h-3 inline mr-0.5" />Stub</button>
                         {row.existing && row.existing.status === "draft" && (
                           <button
-                            onClick={() => updateStatus.mutate({ id: row.existing.id, status: "approved" })}
+                            onClick={() => updateStatus.mutate({ id: row.existing.id, status: "approved", entertainer_id: row.entertainer.id })}
                             className="text-[9px] px-2 py-1 rounded font-bold"
                             style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.3)", color: "#60a5fa" }}
                           >Approve</button>
                         )}
                         {row.existing && row.existing.status === "approved" && (
                           <button
-                            onClick={() => updateStatus.mutate({ id: row.existing.id, status: "paid" })}
+                            onClick={() => updateStatus.mutate({ id: row.existing.id, status: "paid", entertainer_id: row.entertainer.id })}
                             className="text-[9px] px-2 py-1 rounded font-bold"
                             style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: "#4ade80" }}
                           ><CheckCircle2 className="w-3 h-3 inline mr-0.5" />Mark Paid</button>
