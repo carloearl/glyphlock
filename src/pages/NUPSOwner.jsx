@@ -12,7 +12,7 @@ import {
 import {
   Shield, DollarSign, ShoppingCart, TrendingUp, Users, LogOut, UserCheck, DoorOpen, FileText,
   Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText,
-  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star, Coins
+  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star, Coins, Building2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -58,6 +58,7 @@ import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub.jsx";
 import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
 import ContractManager from "../components/nups/ContractManager.jsx";
 import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
+import VenueSettings from "../components/nups/VenueSettings.jsx";
 import OfficialChecks from "./OfficialChecks.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
@@ -201,6 +202,7 @@ export default function NUPSOwner() {
     { key: 'inventory', label: 'Inventory',     icon: Package },
     { key: 'audit',     label: 'Audit Log',     icon: Shield },
     { key: 'admin',     label: 'Admin',         icon: KeyRound },
+    { key: 'venue',     label: 'Venue Settings', icon: Building2 },
   ];
   const ROLE_MODULE_ACCESS = {
     manager:   new Set(NAV_MODULES.map(m => m.key)),
@@ -410,6 +412,7 @@ export default function NUPSOwner() {
               )}
             </div>
           )}
+          {activeModule === 'venue' && <VenueSettings user={user} />}
         </div>
 
         <footer className="text-center text-[10px] text-gray-700 py-6 border-t border-gray-800 mt-12">
