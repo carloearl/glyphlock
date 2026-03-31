@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -18,21 +18,16 @@ import { Badge } from "@/components/ui/badge";
 
 import EntertainerContract from "../components/nups/EntertainerContract.jsx";
 import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
-import VIPRoomManagement from "../components/nups/VIPRoomManagement.jsx";
 import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
 import GuestCheckIn from "../components/nups/GuestCheckIn.jsx";
-import GuestTracking from "../components/nups/GuestTracking.jsx";
 import ZReportGenerator from "../components/nups/ZReportGenerator.jsx";
-import POSCashRegister from "../components/nups/POSCashRegister.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import LiveFloorView from "../components/nups/LiveFloorView.jsx";
 import OwnerAnalytics from "../components/nups/OwnerAnalytics.jsx";
-import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView";
 import ProductManagement from "../components/nups/ProductManagement.jsx";
 import InventoryManagement from "../components/nups/InventoryManagement.jsx";
-import GlyphBucksContract from "../components/nups/GlyphBucksContract.jsx";
 import TipBreakdown from "../components/nups/TipBreakdown.jsx";
 import DailySummary from "../components/nups/DailySummary.jsx";
 import CashDrawerLog from "../components/nups/CashDrawerLog.jsx";
@@ -40,7 +35,6 @@ import RefundManager from "../components/nups/RefundManager.jsx";
 import CustomerManagement from "../components/nups/CustomerManagement.jsx";
 import MarketingCampaigns from "../components/nups/MarketingCampaigns.jsx";
 import LoyaltyProgram from "../components/nups/LoyaltyProgram.jsx";
-import StaffManagement from "../components/nups/StaffManagement.jsx";
 import AIInsights from "../components/nups/AIInsights.jsx";
 import SalesReport from "../components/nups/SalesReport.jsx";
 import RBACAdminPanel from "../components/nups/RBACAdminPanel.jsx";
@@ -53,7 +47,6 @@ import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
-import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
 import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub.jsx";
 import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
 import ContractManager from "../components/nups/ContractManager.jsx";
