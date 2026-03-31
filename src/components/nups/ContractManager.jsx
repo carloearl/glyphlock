@@ -108,6 +108,15 @@ export default function ContractManager({ user, venue_id = "dream_palace" }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["venue-contracts"] }),
   });
 
+  const signMutation = useMutation({
+    mutationFn: (id) => base44.entities.VenueContract.update(id, {
+      is_signed: true,
+      signed_at: new Date().toISOString(),
+      customer_signature: `SIGNED-${user?.email || 'staff'}-${Date.now()}`,
+    }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["venue-contracts"] }),
+  });
+
   const filtered = filterStatus === "all" ? contracts : contracts.filter(c => c.status === filterStatus);
 
   const totalContracts  = contracts.length;
@@ -260,6 +269,12 @@ export default function ContractManager({ user, venue_id = "dream_palace" }) {
                   </div>
                 </div>
                 <div className="flex gap-1 flex-col items-end">
+                  {!contract.is_signed && (
+                    <Button variant="outline" size="sm"
+                      onClick={() => signMutation.mutate(contract.id)}
+                      disabled={signMutation.isPending}
+                      className="text-xs border-orange-500/50 text-orange-400 min-h-[32px]">Sign</Button>
+                  )}
                   {contract.status === "active" && (
                     <Button variant="outline" size="sm"
                       onClick={() => updateStatusMutation.mutate({ id: contract.id, status: "fulfilled" })}
