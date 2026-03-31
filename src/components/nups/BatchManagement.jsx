@@ -25,11 +25,13 @@ export default function BatchManagement({ user }) {
   const [isOpeningBatch, setIsOpeningBatch] = useState(false); // B1 — duplicate guard
   const [isClosingBatch, setIsClosingBatch] = useState(false); // B1 — duplicate guard
 
+  const cashierKey = user?.email || user?.id || 'unknown';
+
   const { data: activeBatch } = useQuery({
-    queryKey: ['active-batch'],
+    queryKey: ['active-batch', cashierKey],
     queryFn: async () => {
-      const batches = await base44.entities.POSBatch.filter({ status: 'open', cashier: user?.email });
-      return batches[0];
+      const batches = await base44.entities.POSBatch.filter({ status: 'open', cashier: cashierKey });
+      return batches[0] || null;
     }
   });
 
