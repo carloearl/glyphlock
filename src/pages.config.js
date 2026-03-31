@@ -70,7 +70,7 @@ import Cookies from './pages/Cookies';
 import GlyphBucksHub from './pages/GlyphBucksHub';
 import DreamTeam from './pages/DreamTeam';
 import EmergencyBackup from './pages/EmergencyBackup';
-import EntertainerCheckIn from './pages/EntertainerCheckIn';
+
 import FAQ from './pages/FAQ';
 import FullExport from './pages/FullExport';
 import GlyphBot from './pages/GlyphBot';
@@ -160,7 +160,7 @@ export const PAGES = {
     "GlyphBucksHub": GlyphBucksHub,
     "DreamTeam": DreamTeam,
     "EmergencyBackup": EmergencyBackup,
-    "EntertainerCheckIn": EntertainerCheckIn,
+
     "FAQ": FAQ,
     "FullExport": FullExport,
     "GlyphBot": GlyphBot,
