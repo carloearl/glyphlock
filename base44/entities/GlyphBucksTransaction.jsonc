@@ -68,6 +68,16 @@
         "voided"
       ],
       "default": "active"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Expiration timestamp. Set to issued_at + 48 hours at time of creation. Hard expiry \u2014 no redemption after this time."
+    },
+    "is_redeemable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Set to false when expires_at has passed or when GlyphBucks have been redeemed. Once false \u2014 never flips back to true."
     }
   },
   "required": [

@@ -77,6 +77,101 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
 
       const data = response.data;
 
+      // D-5 EXPIRY GATE — check before redemption
+      const gbtx = await base44.entities.GlyphBucksTransaction.filter(
+        { transaction_id: serialNumber },
+        '-created_date',
+        1
+      );
+
+      if (gbtx.length > 0) {
+        const tx = gbtx[0];
+        const now = new Date();
+        const expiresAt = new Date(tx.expires_at);
+
+        if (!tx.is_redeemable || now > expiresAt) {
+          await base44.entities.SystemAuditLog.create({
+            event_type: "GLYPHBUCKS_REDEMPTION_BLOCKED",
+            description: `GlyphBucks redemption blocked: expired or already redeemed. transaction_id=${tx.id}`,
+            actor_email: contractorName,
+            status: "blocked",
+            severity: "HIGH",
+            metadata: {
+              transaction_id: tx.id,
+              expires_at: tx.expires_at,
+              is_redeemable: tx.is_redeemable,
+              reason: now > expiresAt ? "expired" : "already_redeemed",
+              section: "D-5-EXPIRY-GATE"
+            }
+          });
+          toast.error("These GlyphBucks have expired or have already been redeemed.");
+          setScannedBills(prev => [...prev, {
+            serial_number: serialNumber,
+            status: "expired",
+            error: "Bill expired or already redeemed"
+          }]);
+          setValidating(false);
+          return;
+        }
+      }
+
+      if (data.success && data.bills_redeemed > 0) {
+        const billData = data.payout.bills_redeemed[0];
+        setScannedBills(prev => [...prev, {
+          serial_number: serialNumber,
+          denomination: billData.denomination,
+          redemption_amount: billData.redemption_amount,
+          status: "valid",
+          payout_id: data.payout.payout_id
+        }]);
+        toast.success(`✓ $${billData.denomination} bill validated — Payout: $${billData.redemption_amount}`);
+        
+        // Mark transaction as redeemed
+        if (gbtx.length > 0) {
+          await base44.entities.GlyphBucksTransaction.update(gbtx[0].id, {
+            is_redeemable: false
+          });
+        }
+      } else if (data.duplicates_detected > 0) {
+        const dup = data.duplicate_bills[0];
+        setScannedBills(prev => [...prev, {
+          serial_number: serialNumber,
+          status: "duplicate",
+          redeemed_at: dup.redeemed_at,
+          redeemed_by: dup.redeemed_by
+        }]);
+        toast.error("Bill already redeemed");
+      } else {
+        setScannedBills(prev => [...prev, {
+          serial_number: serialNumber,
+          status: "invalid",
+          error: data.error || "Bill not found"
+        }]);
+        toast.error(data.error || "Invalid bill");
+      }
+    } catch (error) {
+      setScannedBills(prev => [...prev, {
+        serial_number: serialNumber,
+        status: "error",
+        error: error.message
+      }]);
+      toast.error("Validation failed: " + error.message);
+    } finally {
+      setValidating(false);
+      setScanBuffer("");
+    }
+    
+    try {
+      const response = await base44.functions.invoke('redeemGlyphBucksBills', {
+        contractor_id: contractorId,
+        contractor_name: contractorName,
+        serial_numbers: [serialNumber],
+        redemption_rate: 0.50,
+        payment_method: "cash"
+      });
+
+      const data = response.data;
+
       if (data.success && data.bills_redeemed > 0) {
         const billData = data.payout.bills_redeemed[0];
         setScannedBills(prev => [...prev, {

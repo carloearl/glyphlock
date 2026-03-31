@@ -1,0 +1,169 @@
+{
+  "name": "GlyphBucksOrder",
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string",
+      "description": "Unique order number"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue where this order was placed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "signed",
+        "printed",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "customer_id_number": {
+      "type": "string"
+    },
+    "customer_address": {
+      "type": "string"
+    },
+    "customer_state": {
+      "type": "string"
+    },
+    "customer_zip": {
+      "type": "string"
+    },
+    "purchaser_card_name": {
+      "type": "string"
+    },
+    "card_last_four": {
+      "type": "string",
+      "description": "Last 4 digits of card only. CVV never stored."
+    },
+    "card_exp": {
+      "type": "string"
+    },
+    "card_token": {
+      "type": "string",
+      "description": "Processor-issued token only. Raw card data never stored. Tokenization happens at processor level."
+    },
+    "approval_code": {
+      "type": "string"
+    },
+    "manager_name": {
+      "type": "string"
+    },
+    "hostess_name": {
+      "type": "string"
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "line_number": {
+            "type": "integer"
+          },
+          "room_ent_dur_id": {
+            "type": "string"
+          },
+          "room_fee": {
+            "type": "number"
+          },
+          "product": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Up to 5 line items"
+    },
+    "glyphbucks_value": {
+      "type": "number",
+      "description": "Show price / GlyphBucks face value ordered"
+    },
+    "processing_surcharge": {
+      "type": "number",
+      "description": "30% processing fee for issuing GlyphBucks"
+    },
+    "waitress_tip": {
+      "type": "number",
+      "default": 0,
+      "description": "Customer-discretionary waitress tip"
+    },
+    "grand_total": {
+      "type": "number",
+      "description": "glyphbucks_value + processing_surcharge + waitress_tip + line items"
+    },
+    "acknowledgments_checked": {
+      "type": "boolean",
+      "default": false
+    },
+    "customer_signature": {
+      "type": "string"
+    },
+    "customer_signature_hash": {
+      "type": "string"
+    },
+    "thumbprint_url": {
+      "type": "string"
+    },
+    "thumbprint_hash": {
+      "type": "string"
+    },
+    "guest_photo_url": {
+      "type": "string"
+    },
+    "id_photo_url": {
+      "type": "string"
+    },
+    "id_photo_back_url": {
+      "type": "string"
+    },
+    "manager_signature": {
+      "type": "string"
+    },
+    "hostess_signature": {
+      "type": "string"
+    },
+    "signed_hardcopy_url": {
+      "type": "string"
+    },
+    "barcode_scan": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "printed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_by": {
+      "type": "string"
+    },
+    "contract_version": {
+      "type": "string",
+      "default": "v3-digital-02-06-2026"
+    }
+  },
+  "required": [
+    "order_number",
+    "customer_name"
+  ]
+}
