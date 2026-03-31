@@ -250,28 +250,30 @@ export default function POSBarRegister({ user }) {
 
           {/* PAYMENT AREA */}
           {!paymentStep ? (
-            <div className="p-2 grid grid-cols-2 gap-1.5 border-t border-gray-700">
-              {[
-                { method: 'Cash', icon: Banknote, cls: 'bg-green-700 hover:bg-green-600' },
-                { method: 'Credit Card', label: 'Card', icon: CreditCard, cls: 'bg-blue-700 hover:bg-blue-600' },
-                { method: 'Digital Wallet', label: 'GlyphBucks', icon: DollarSign, cls: 'bg-amber-700 hover:bg-amber-600' },
-                { method: 'Split', icon: SplitSquareHorizontal, cls: 'bg-gray-700 hover:bg-gray-600 border border-gray-500', managerOnly: true },
-              ]
-              .filter(m => !m.managerOnly || isManager)
-              .map(({ method, label, icon: Icon, cls }) => (
-                <button
-                  key={method}
-                  onClick={() => setPaymentStep(method)}
-                  disabled={cart.length === 0}
-                  className={`flex items-center justify-center gap-1.5 h-11 rounded-lg text-xs font-bold text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${cls}`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {label || method}
-                </button>
-              ))}
+            <div className="p-2 space-y-1.5 border-t border-gray-700">
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { method: 'Cash', icon: Banknote, cls: 'bg-green-700 hover:bg-green-600' },
+                  { method: 'Credit Card', label: 'Card', icon: CreditCard, cls: 'bg-blue-700 hover:bg-blue-600' },
+                  { method: 'Digital Wallet', label: 'GlyphBucks', icon: DollarSign, cls: 'bg-amber-700 hover:bg-amber-600' },
+                  { method: 'Split', icon: SplitSquareHorizontal, cls: 'bg-gray-700 hover:bg-gray-600 border border-gray-500', managerOnly: true },
+                ]
+                .filter(m => !m.managerOnly || isManager)
+                .map(({ method, label, icon: Icon, cls }) => (
+                  <button
+                    key={method}
+                    onClick={() => setPaymentStep(method)}
+                    disabled={cart.length === 0}
+                    className={`flex items-center justify-center gap-1.5 h-11 rounded-lg text-xs font-bold text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${cls}`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {label || method}
+                  </button>
+                ))}
+              </div>
               <button
                 disabled={cart.length === 0}
-                className="col-span-2 flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-gray-400 border border-gray-700 hover:border-gray-500 hover:text-gray-300 disabled:opacity-30 transition-colors"
+                className="w-full flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs text-gray-400 border border-gray-700 hover:border-gray-500 hover:text-gray-300 disabled:opacity-30 transition-colors"
               >
                 <Printer className="w-3.5 h-3.5" /> Print Receipt
               </button>
