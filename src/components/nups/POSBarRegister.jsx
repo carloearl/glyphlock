@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Minus, Trash2, Printer, CreditCard, Banknote, DollarSign, Receipt, Package, ShoppingCart, SplitSquareHorizontal, AlertCircle } from "lucide-react";
@@ -98,6 +99,10 @@ export default function POSBarRegister({ user }) {
       setPaymentStep(null);
       queryClient.invalidateQueries({ queryKey: ['staff-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['today-transactions'] });
+      toast.success('Transaction created');
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Transaction failed');
     },
   });
 
