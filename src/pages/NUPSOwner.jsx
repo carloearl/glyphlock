@@ -363,9 +363,33 @@ export default function NUPSOwner() {
             </div>
           )}
           {activeModule === 'glyphbucks' && (
-            <div className="space-y-4">
-              <UnifiedGlyphBucksHub venue_id="dream_palace" user={user} />
-              <GlyphBuckInventory />
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-purple-500 pl-2">
+                  Issuance
+                </h3>
+                <UnifiedGlyphBucksHub venue_id={activeVenue?.id || activeVenue?.venue_id || "dream_palace"} user={user} />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-cyan-500 pl-2">
+                  Ledger
+                </h3>
+                <GlyphBucksLedger user={user} venue_id={activeVenue?.id || activeVenue?.venue_id || "dream_palace"} />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-green-500 pl-2">
+                  Inventory
+                </h3>
+                <GlyphBuckInventory />
+              </div>
+              {isAdminUser && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-yellow-500 pl-2">
+                    Press
+                  </h3>
+                  <ClubCurrencyPressView />
+                </div>
+              )}
             </div>
           )}
           {activeModule === 'payroll' && (
@@ -386,7 +410,7 @@ export default function NUPSOwner() {
           )}
           {activeModule === 'contracts' && (
             <div className="space-y-4">
-              <ContractManager user={user} venue_id="dream_palace" />
+              <ContractManager user={user} venue_id={activeVenue?.id || activeVenue?.venue_id || "dream_palace"} />
               <GlyphBucksContract />
             </div>
           )}

@@ -67,11 +67,6 @@
       "logic": "OR",
       "conditions": [
         {
-          "field": "created_by",
-          "operator": "equals",
-          "value": "{{user.email}}"
-        },
-        {
           "field": "{{user._highestRole}}",
           "operator": "in_list",
           "value": [
@@ -79,6 +74,11 @@
             "VENUE_OWNER",
             "VENUE_MANAGER"
           ]
+        },
+        {
+          "field": "created_by",
+          "operator": "equals",
+          "value": "{{user.email}}"
         }
       ]
     }
