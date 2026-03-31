@@ -69,6 +69,7 @@ export default function NUPSOwner() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [activeTab, setActiveTab] = useState("analytics");
+  const [posSubTab, setPosSubTab] = useState("cash");
   const [activeModule, setActiveModule] = useState('dashboard');
   const [rbacRole, setRbacRole] = useState('manager');
   const queryClient = useQueryClient();
@@ -328,8 +329,19 @@ export default function NUPSOwner() {
           {activeModule === 'pos' && (
             <div className="space-y-4">
               {canBatch && <BatchManagement user={user} />}
-              <POSCashRegister user={user} />
-              <POSBarRegister user={user} />
+              <div className="flex gap-2">
+                {[{key:'cash',label:'Cash Register'},{key:'bar',label:'Bar Register'}].map(t => (
+                  <Button key={t.key} onClick={() => setPosSubTab(t.key)}
+                    variant={posSubTab === t.key ? 'default' : 'outline'}
+                    className={`min-h-[44px] text-sm ${
+                      posSubTab === t.key
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white border-purple-500'
+                        : 'border-gray-700 text-gray-300 hover:border-purple-500/50 bg-transparent'
+                    }`}>{t.label}</Button>
+                ))}
+              </div>
+              {posSubTab === 'cash' && <POSCashRegister user={user} />}
+              {posSubTab === 'bar' && <POSBarRegister user={user} />}
             </div>
           )}
           {activeModule === 'door' && <GuestCheckIn />}
