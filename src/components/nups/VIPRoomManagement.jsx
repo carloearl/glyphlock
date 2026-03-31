@@ -13,7 +13,7 @@ import VIPSessionTimer from "./VIPSessionTimer";
 import VIPContractFlow from "./VIPContractFlow";
 import VIPReceiptPrinter from "./VIPReceiptPrinter";
 
-export default function VIPRoomManagement() {
+export default function VIPRoomManagement({ user }) {
   const queryClient = useQueryClient();
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -29,7 +29,7 @@ export default function VIPRoomManagement() {
     queryFn: () => base44.entities.VIPRoom.list()
   });
 
-  const { data: entertainers = [] } = useQuery({
+  const { data: activeShifts = [] } = useQuery({
     queryKey: ['active-shifts'],
     queryFn: async () => {
       const shifts = await base44.entities.EntertainerShift.list('-created_date', 100);
@@ -37,9 +37,37 @@ export default function VIPRoomManagement() {
     }
   });
 
+  // For contract gate lookup — full Entertainer records
+  const { data: entertainerRecords = [] } = useQuery({
+    queryKey: ['entertainers-vip'],
+    queryFn: () => base44.entities.Entertainer.list()
+  });
+
+  const entertainers = activeShifts;
+
   const startSession = useMutation({
-    mutationFn: (data) => {
-      const entertainer = entertainers.find(e => e.entertainer_id === data.entertainer_id);
+    mutationFn: async (data) => {
+      // VIP CONTRACT GATE — DIRECTIVE 5C
+      const entRecord = entertainerRecords.find(e => e.id === data.entertainer_id);
+      if (!entRecord || entRecord.contract_status !== 'VALID') {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "VIP_CONTRACT_GATE_BLOCKED",
+          description: `VIP session blocked: contract_status=${entRecord?.contract_status ?? null} for entertainer_id=${data.entertainer_id}`,
+          actor_email: user?.email,
+          status: "blocked",
+          severity: "CRITICAL",
+          metadata: {
+            entertainer_id: data.entertainer_id,
+            reason: "invalid_contract_status",
+            contract_status: entRecord?.contract_status ?? null,
+            room_id: selectedRoom?.id,
+            section: "SECTION-5C"
+          }
+        });
+        throw new Error(`VIP session blocked: Contract status is ${entRecord?.contract_status || 'PENDING'}.`);
+      }
+      // ALL GATES PASSED — proceed
+      const shiftRecord = entertainers.find(e => e.entertainer_id === data.entertainer_id);
       const startTime = new Date();
       const endTime = new Date(startTime.getTime() + data.duration_minutes * 60000);
       const charge = (data.duration_minutes / 60) * selectedRoom.rate_per_hour;
@@ -47,7 +75,7 @@ export default function VIPRoomManagement() {
       return base44.entities.VIPRoom.update(selectedRoom.id, {
         status: 'occupied',
         entertainer_id: data.entertainer_id,
-        entertainer_name: entertainer?.stage_name || 'Unknown',
+        entertainer_name: shiftRecord?.stage_name || 'Unknown',
         guest_name: data.guest_name,
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
@@ -60,7 +88,8 @@ export default function VIPRoomManagement() {
       setShowStartDialog(false);
       setContractStep("form");
       setSessionForm({ entertainer_id: "", guest_name: "", duration_minutes: 60 });
-    }
+    },
+    onError: (e) => alert(e.message || "VIP session could not be started.")
   });
 
   const endSession = useMutation({
