@@ -1,0 +1,86 @@
+{
+  "name": "SystemAuditLog",
+  "type": "object",
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "description": "Type of event (e.g., KEY_ROTATION, THREAT_DETECTED, API_CALL)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human readable description"
+    },
+    "actor_email": {
+      "type": "string",
+      "description": "Email of the user who performed the action"
+    },
+    "resource_id": {
+      "type": "string",
+      "description": "ID of the affected resource"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional context data"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address of the actor"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failure",
+        "alert",
+        "security_action"
+      ],
+      "default": "success"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Severity level for security events"
+    },
+    "threat_type": {
+      "type": "string",
+      "description": "Type of threat if security-related"
+    },
+    "auto_resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the issue was auto-resolved"
+    }
+  },
+  "required": [
+    "event_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "logic": "OR",
+      "conditions": [
+        {
+          "field": "created_by",
+          "operator": "equals",
+          "value": "{{user.email}}"
+        },
+        {
+          "field": "{{user._highestRole}}",
+          "operator": "in_list",
+          "value": [
+            "PLATFORM_ADMIN",
+            "VENUE_OWNER",
+            "VENUE_MANAGER"
+          ]
+        }
+      ]
+    }
+  }
+}

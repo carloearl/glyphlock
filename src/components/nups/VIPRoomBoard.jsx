@@ -106,7 +106,31 @@ export default function VIPRoomBoard({ user }) {
     }
     setIsOpening(true);
     try {
-      // VIP CONTRACT GATE — DIRECTIVE 5C (HARDENED FIX-2 + FIX-3)
+       // AUDIT-2 GATE — Guest age verification before VIP session
+       const minimumAge = activeVenue?.minimum_age || 21;
+       // For now, prompt manager to confirm guest age manually (DOB would come from VIPGuest record in full implementation)
+       const ageConfirmed = window.confirm(
+         `Confirm: Guest ${guestName.trim()} is ${minimumAge}+ years old?\n\n(Standard venue requirement: ${minimumAge}+)`
+       );
+       if (!ageConfirmed) {
+         await base44.entities.SystemAuditLog.create({
+           event_type: "VIP_GUEST_GATE_BLOCKED",
+           description: `VIP session blocked: Guest age not confirmed. guest_name=${guestName.trim()}`,
+           actor_email: user?.email,
+           status: "blocked",
+           severity: "HIGH",
+           metadata: {
+             guest_name: guestName.trim(),
+             minimum_age: minimumAge,
+             reason: "guest_age_not_confirmed",
+             section: "AUDIT-2-GATE"
+           }
+         });
+         toast.error(`Guest must be ${minimumAge}+ years old to enter VIP room.`);
+         setIsOpening(false);
+         return;
+       }
+       // VIP CONTRACT GATE — DIRECTIVE 5C (HARDENED FIX-2 + FIX-3)
       // FIX-2: Hard block if no entertainer assigned
       if (!entertainerId) {
         await base44.entities.SystemAuditLog.create({

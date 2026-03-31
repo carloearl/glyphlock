@@ -1,0 +1,64 @@
+{
+  "name": "VIPGuest",
+  "type": "object",
+  "properties": {
+    "guest_id": {
+      "type": "string",
+      "description": "Unique guest identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue where guest is registered"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Guest full name"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "in_building",
+        "left_building",
+        "banned"
+      ],
+      "default": "in_building"
+    },
+    "last_visit": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Guest DOB for age verification (AUDIT-2 gate)"
+    },
+    "id_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when ID has been checked by staff"
+    },
+    "id_verified_by": {
+      "type": "string",
+      "description": "Email of staff who verified the ID"
+    },
+    "id_verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of ID verification"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "guest_id",
+    "full_name"
+  ]
+}

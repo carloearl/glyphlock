@@ -364,7 +364,6 @@ export default function NUPSOwner() {
           )}
           {activeModule === 'glyphbucks' && (
             <div className="space-y-4">
-              <GlyphBucksLedger user={user} venue_id="dream_palace" />
               <UnifiedGlyphBucksHub venue_id="dream_palace" user={user} />
               <GlyphBuckInventory />
             </div>

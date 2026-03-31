@@ -105,6 +105,9 @@ export default function POSBarRegister({ user }) {
   const cartGrand = +(cartTotal + cartTax).toFixed(2);
   const itemCount = cart.reduce((s, i) => s + i.qty, 0);
 
+  // FIX-C — role filtering for bar register (bartenders see only Cash/Card, not Split)
+  const isManager = user?.role === 'admin' || ['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER'].includes(user?._highestRole);
+
   const shiftDisplay = () => {
     const diff = Math.floor((Date.now() - shiftStart) / 60000);
     return diff < 60 ? `${diff}m` : `${Math.floor(diff / 60)}h ${diff % 60}m`;
@@ -252,8 +255,10 @@ export default function POSBarRegister({ user }) {
                 { method: 'Cash', icon: Banknote, cls: 'bg-green-700 hover:bg-green-600' },
                 { method: 'Credit Card', label: 'Card', icon: CreditCard, cls: 'bg-blue-700 hover:bg-blue-600' },
                 { method: 'Digital Wallet', label: 'GlyphBucks', icon: DollarSign, cls: 'bg-amber-700 hover:bg-amber-600' },
-                { method: 'Split', icon: SplitSquareHorizontal, cls: 'bg-gray-700 hover:bg-gray-600 border border-gray-500' },
-              ].map(({ method, label, icon: Icon, cls }) => (
+                { method: 'Split', icon: SplitSquareHorizontal, cls: 'bg-gray-700 hover:bg-gray-600 border border-gray-500', managerOnly: true },
+              ]
+              .filter(m => !m.managerOnly || isManager)
+              .map(({ method, label, icon: Icon, cls }) => (
                 <button
                   key={method}
                   onClick={() => setPaymentStep(method)}
