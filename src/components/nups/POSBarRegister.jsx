@@ -51,6 +51,23 @@ export default function POSBarRegister({ user }) {
     mutationFn: async (payMethod) => {
       // FIX-C / GAP-L1 — hard block in mutationFn (not just UI)
       if (!activeBatch) {
+        try {
+          await base44.entities.SystemAuditLog.create({
+            event_type: "BATCH_GATE_BLOCKED",
+            description: "POS Bar Register transaction blocked: no open batch.",
+            actor_email: user?.email || "unknown",
+            status: "blocked",
+            severity: "HIGH",
+            metadata: {
+              attempted_payment_method: payMethod,
+              cashier: user?.email || "unknown",
+              reason: "no_open_batch",
+              section: "7A-GAP-L1"
+            }
+          });
+        } catch (auditErr) {
+          console.error("Audit log failed:", auditErr);
+        }
         throw new Error('No open batch. Please open a batch before processing transactions.');
       }
       const subtotal = cartTotal;
