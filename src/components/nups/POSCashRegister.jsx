@@ -215,7 +215,7 @@ export default function POSCashRegister({ user }) {
   // ─── RENDER: PAYMENT FLOW ─────────────────────────
   if (paymentStep === "pay") {
     return (
-      <div className="max-w-md mx-auto space-y-4">
+      <div className="max-w-md mx-auto space-y-4 p-4">
         <Button variant="ghost" onClick={() => setPaymentStep("method")} className="text-gray-400 hover:text-white mb-2">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to methods
         </Button>
@@ -274,7 +274,7 @@ export default function POSCashRegister({ user }) {
 
   if (paymentStep === "method") {
     return (
-      <div className="max-w-lg mx-auto space-y-4">
+      <div className="max-w-lg mx-auto space-y-4 p-4 overflow-y-auto max-h-screen">
         <Button variant="ghost" onClick={() => setPaymentStep("register")} className="text-gray-400 hover:text-white mb-2">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to register
         </Button>
@@ -282,7 +282,7 @@ export default function POSCashRegister({ user }) {
         {/* Total */}
         <div className="bg-black/70 border border-green-500/30 rounded-2xl p-6 text-center">
           <div className="text-[10px] text-gray-500 uppercase tracking-widest">Total Due</div>
-          <div className="text-6xl font-mono font-black text-green-400 my-2">${total.toFixed(2)}</div>
+          <div className="text-4xl sm:text-6xl font-mono font-black text-green-400 my-2">${total.toFixed(2)}</div>
           <div className="text-xs text-gray-500">
             {cart.reduce((s, i) => s + i.quantity, 0)} items • Tax ${tax.toFixed(2)}
             {discount > 0 && ` • ${discount}% off`}
@@ -293,7 +293,7 @@ export default function POSCashRegister({ user }) {
         {/* Tip Quick Buttons */}
         <div>
           <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Add Tip</div>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
             {[0, 15, 18, 20, 25].map(pct => {
               const tipVal = pct === 0 ? 0 : Math.round(subtotal * pct) / 100;
               return (
@@ -301,11 +301,11 @@ export default function POSCashRegister({ user }) {
                   key={pct}
                   variant="outline"
                   onClick={() => setTip(tipVal)}
-                  className={`h-12 flex-col gap-0 ${
+                  className={`h-12 flex-col gap-0 text-xs sm:text-sm ${
                     tip === tipVal ? 'bg-purple-500/20 border-purple-500/50 text-purple-400' : 'border-white/10 text-gray-400'
                   }`}
                 >
-                  <span className="text-xs font-bold">{pct === 0 ? 'No Tip' : `${pct}%`}</span>
+                  <span className="font-bold">{pct === 0 ? 'No Tip' : `${pct}%`}</span>
                   {pct > 0 && <span className="text-[10px] text-gray-500">${tipVal.toFixed(2)}</span>}
                 </Button>
               );
@@ -316,7 +316,7 @@ export default function POSCashRegister({ user }) {
         {/* Payment Method Grid */}
         <div>
           <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Select Payment</div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {PAYMENT_METHODS.map(m => {
               const c = getMethodColor(m.color);
               return (
@@ -324,10 +324,10 @@ export default function POSCashRegister({ user }) {
                   key={m.key}
                   variant="outline"
                   onClick={() => { setPaymentMethod(m.key); setPaymentStep("pay"); }}
-                  className="h-24 flex-col gap-2 border-white/10 hover:border-white/30 bg-black/40 active:scale-95 transition-all"
+                  className="h-20 sm:h-24 flex-col gap-2 border-white/10 hover:border-white/30 bg-black/40 active:scale-95 transition-all text-xs sm:text-sm"
                 >
                   <span style={{ color: c.text }}>{m.icon}</span>
-                  <span className="text-xs font-bold text-gray-300">{m.label}</span>
+                  <span className="font-bold text-gray-300">{m.label}</span>
                 </Button>
               );
             })}
@@ -340,10 +340,8 @@ export default function POSCashRegister({ user }) {
   // ─── RENDER: MAIN REGISTER VIEW ───────────────────
   return (
     <div
-      className="flex gap-0 rounded-2xl overflow-hidden"
+      className="flex flex-col lg:flex-row gap-0 rounded-2xl overflow-hidden min-h-screen lg:min-h-[640px]"
       style={{
-        height: 'calc(100vh - 200px)',
-        minHeight: '640px',
         background: 'rgba(10,10,14,0.95)',
         border: '1px solid rgba(255,255,255,0.08)',
         backdropFilter: 'blur(24px)',
@@ -352,11 +350,11 @@ export default function POSCashRegister({ user }) {
         pointerEvents: 'auto',
       }}
     >
-      {/* ── LEFT PANEL ───────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* ── PRODUCTS + SEARCH (LEFT on desktop, TOP on mobile) ───────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderRight: 'none', borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.06)' }}>
 
         {/* Top bar: search + scan */}
-        <div className="flex gap-2 p-3 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex gap-2 p-3 shrink-0 flex-col sm:flex-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
             <Input
@@ -373,7 +371,7 @@ export default function POSCashRegister({ user }) {
               placeholder="Scan..."
               value={barcodeInput}
               onChange={(e) => setBarcodeInput(e.target.value)}
-              className="pl-8 w-28 h-10 text-white text-sm placeholder:text-gray-600"
+              className="pl-8 w-full sm:w-28 h-10 text-white text-sm placeholder:text-gray-600"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}
             />
           </div>
@@ -401,7 +399,7 @@ export default function POSCashRegister({ user }) {
                 <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Products</span>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                 {filteredProducts.map((product) => (
                   <button
                     key={product.id}
@@ -468,7 +466,7 @@ export default function POSCashRegister({ user }) {
                       onMouseDown={() => { setSelectedCustomer(c); setCustomerQuery(''); setShowCustDropdown(false); }}
                     >
                       <div className="text-sm font-medium text-white">{c.full_name}</div>
-                      <div className="text-xs text-gray-500 flex gap-3">
+                      <div className="text-xs text-gray-500 flex gap-3 flex-wrap">
                         {c.phone && <span>{c.phone}</span>}
                         <span>Visits: {c.visit_count || 0}</span>
                         {c.total_spent > 0 && <span>Spent: ${(c.total_spent || 0).toFixed(0)}</span>}
@@ -487,8 +485,8 @@ export default function POSCashRegister({ user }) {
         </div>
       </div>
 
-      {/* ── RIGHT PANEL: Order + Checkout ──────────── */}
-      <div className="w-72 lg:w-80 flex flex-col shrink-0 overflow-y-auto min-h-0" style={{ background: 'rgba(0,0,0,0.4)' }}>
+      {/* ── RIGHT PANEL: Order + Checkout (RIGHT on desktop, BOTTOM on mobile) ──────────── */}
+      <div className="w-full lg:w-80 flex flex-col shrink-0 overflow-y-auto min-h-auto lg:min-h-0" style={{ background: 'rgba(0,0,0,0.4)', borderTopWidth: '1px', borderTopColor: 'rgba(255,255,255,0.06)', borderLeftWidth: '0px' }}>
         <OrderDisplay
           cart={cart}
           subtotal={subtotal}
