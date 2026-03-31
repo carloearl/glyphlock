@@ -109,7 +109,7 @@ export default function POSReceiptEngine({ transaction, batch, onPrint }) {
               {transaction.items?.map((item, idx) => (
                 <div key={idx} className="item">
                   <span>{item.product_name} x{item.quantity}</span>
-                  <span>${item.total.toFixed(2)}</span>
+                  <span>${(item.total || 0).toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -119,15 +119,15 @@ export default function POSReceiptEngine({ transaction, batch, onPrint }) {
           <div className="totals">
             <div className="row">
               <span>Subtotal:</span>
-              <span>${transaction.subtotal?.toFixed(2) || '0.00'}</span>
+              <span>${(transaction.subtotal || 0).toFixed(2)}</span>
             </div>
             <div className="row">
               <span>Tax (8%):</span>
-              <span>${transaction.tax?.toFixed(2) || '0.00'}</span>
+              <span>${(transaction.tax || 0).toFixed(2)}</span>
             </div>
             <div className="row bold" style={{ fontSize: '14px', marginTop: '8px', paddingTop: '8px', borderTop: '2px solid #000' }}>
               <span>TOTAL:</span>
-              <span>${transaction.total?.toFixed(2) || '0.00'}</span>
+              <span>${(transaction.total || 0).toFixed(2)}</span>
             </div>
           </div>
 
