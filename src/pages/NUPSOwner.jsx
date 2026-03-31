@@ -231,6 +231,15 @@ export default function NUPSOwner() {
         <div className="container mx-auto">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/NUPSGateway')}
+                className="text-gray-400 hover:text-white p-2 mr-1"
+                aria-label="Back to gateway"
+              >
+                ←
+              </Button>
               <Shield className="w-6 h-6 text-purple-400" />
               <div>
                 <h1 className="text-lg md:text-xl font-bold text-white">N.U.P.S. Admin</h1>

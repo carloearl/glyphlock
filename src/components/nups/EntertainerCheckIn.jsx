@@ -54,10 +54,15 @@ export default function EntertainerCheckIn({ user }) {
   });
 
   const [isCheckingIn, setIsCheckingIn] = useState(false); // B1
+  const lastCheckedInRef = React.useRef(null);
   const [isCheckingOut, setIsCheckingOut] = useState(null); // B1 — holds shiftId being checked out
 
   const checkIn = useMutation({
     mutationFn: async (entertainerId) => {
+      // Prevent double-tap duplicate check-ins
+      const key = `${entertainerId}-${Math.floor(Date.now()/3000)}`;
+      if (lastCheckedInRef.current === key) return;
+      lastCheckedInRef.current = key;
       const entertainer = entertainers.find(e => e.id === entertainerId);
       // Section 3 — validate entertainer resolves; mark ORPHANED if not found
       if (!entertainer) {
