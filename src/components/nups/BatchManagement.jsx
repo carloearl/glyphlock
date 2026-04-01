@@ -83,6 +83,12 @@ export default function BatchManagement({ user, onBatchClosed }) {
       if (!confirmed) return;
     }
 
+    const venueId = activeVenue?.id || activeVenue?.venue_id;
+    if (!venueId) {
+      alert('No active venue selected. Please select a venue before opening a batch.');
+      return;
+    }
+
     setIsOpeningBatch(true);
     try {
       const cashierEmail = user?.email || user?.id || 'unknown';
@@ -93,12 +99,12 @@ export default function BatchManagement({ user, onBatchClosed }) {
         cashier: cashierEmail,
         cashier_email: cashierEmail,
         cashier_name: user?.full_name || user?.name || user?.email,
-        venue_id: activeVenue?.id || null,
+        venue_id: venueId,
         status: 'open',
         total_sales: 0,
         transaction_count: 0
       });
-      const resolvedVenueId = newBatch?.venue_id || activeVenue?.id;
+      const resolvedVenueId = newBatch?.venue_id || venueId;
       if (!resolvedVenueId) {
         throw new Error('BATCH_AUDIT_FAILED: venue_id unavailable');
       }
