@@ -106,7 +106,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
         event_type:  'BATCH_OPENED',
         entity_type: 'POSBatch',
         entity_id:   newBatch?.id || null,
-        actor_email: cashierEmail,
+        actor_id:    cashierEmail,
         venue_id:    resolvedVenueId,
         description: `Batch ${newBatch?.batch_id || newBatch?.id} opened by ${cashierEmail}`,
         metadata:    {
