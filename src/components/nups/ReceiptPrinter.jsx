@@ -1,12 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
-const BIZ_NAME = "Dream Palace";
-const BIZ_LEGAL = "Liberty Holding Group, L.L.C. dba The Dream Palace";
-const BIZ_ADDRESS = "815 N. Scottsdale Road, Tempe, AZ 85281";
-const BIZ_PHONE = "(602) 536-0372";
-const BIZ_TAX_ID = "Tax ID: 88-1234567";
 const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
 
 // E7 — always prefer cashier_name over raw email
@@ -17,6 +13,13 @@ export default function ReceiptPrinter({
   isVIP = false,
   vipDetails = null
 }) {
+  const activeVenue = useActiveVenue();
+
+  const BIZ_NAME = activeVenue?.name || transaction?.venue_name || 'N.U.P.S. POS';
+  const BIZ_LEGAL = activeVenue?.legal_name || activeVenue?.name || BIZ_NAME;
+  const BIZ_ADDRESS = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || 'Address on file';
+  const BIZ_PHONE = activeVenue?.phone || '';
+  const BIZ_TAX_ID = '';
 
   const printReceipt = () => {
     if (!transaction) return;

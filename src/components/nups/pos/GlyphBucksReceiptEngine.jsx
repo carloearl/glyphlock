@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, Download } from 'lucide-react';
+import { Printer } from 'lucide-react';
+import { useActiveVenue } from '@/hooks/useActiveVenue';
 import QRCode from 'qrcode';
 import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
 
@@ -10,6 +11,11 @@ import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
  */
 export default function GlyphBucksReceiptEngine({ transaction, batch, bills, currentUser, onPrint }) {
   const receiptRef = React.useRef();
+  const activeVenue = useActiveVenue();
+  const venueName = activeVenue?.name || 'N.U.P.S. POS';
+  const venueAddress = activeVenue?.address || '';
+  const venueCity = [activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || '';
+  const venuePhone = activeVenue?.phone || '';
   const barcodeRef = useRef(null);
   const qrRef = useRef(null);
 
@@ -89,10 +95,10 @@ export default function GlyphBucksReceiptEngine({ transaction, batch, bills, cur
         <div className="receipt">
           {/* Header */}
           <div className="header text-center mb-5 pb-4 border-b-2 border-dashed border-black">
-            <h1 className="text-xl font-bold mb-1">DREAM PALACE</h1>
-            <p className="text-xs">815 N Scottsdale Rd</p>
-            <p className="text-xs">Tempe, AZ 85281</p>
-            <p className="text-xs">Tel: (602) 536-0372</p>
+            <h1 className="text-xl font-bold mb-1">{venueName.toUpperCase()}</h1>
+            {venueAddress && <p className="text-xs">{venueAddress}</p>}
+            {venueCity && <p className="text-xs">{venueCity}</p>}
+            {venuePhone && <p className="text-xs">Tel: {venuePhone}</p>}
             <p className="mt-3 font-bold text-sm">GLYPHBUCKS PURCHASE RECEIPT</p>
           </div>
 
@@ -210,7 +216,7 @@ export default function GlyphBucksReceiptEngine({ transaction, batch, bills, cur
           {/* Footer */}
           <div className="footer mt-5 pt-4 border-t-2 border-dashed border-black text-center text-xs">
             <p className="font-semibold">Thank you for your business!</p>
-            <p className="mt-2">GlyphBucks are redeemable exclusively at Dream Palace venues.</p>
+            <p className="mt-2">GlyphBucks are redeemable exclusively at this venue.</p>
             <p className="mt-1">Terms and conditions apply. Non-refundable.</p>
             <p className="mt-3 text-[9px]">
               This receipt is your proof of purchase. Please retain for your records.

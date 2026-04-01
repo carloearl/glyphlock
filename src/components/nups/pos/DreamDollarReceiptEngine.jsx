@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, Download } from 'lucide-react';
+import { Printer } from 'lucide-react';
+import { useActiveVenue } from '@/hooks/useActiveVenue';
 
 /**
  * Professional itemized receipt engine for GlyphBucks transactions.
@@ -8,28 +9,23 @@ import { Printer, Download } from 'lucide-react';
  */
 export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }) {
   const receiptRef = React.useRef();
+  const activeVenue = useActiveVenue();
+
+  const venueName = activeVenue?.name || 'N.U.P.S. POS';
+  const venueAddress = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || '';
+  const venuePhone = activeVenue?.phone || '';
 
   const handlePrint = () => {
     const printWindow = window.open('', '', 'height=800,width=600');
+    const content = receiptRef.current?.innerHTML || '';
     printWindow.document.write(`
       <html>
         <head>
-          <title>Dream Palace Receipt - ${transaction?.order_number || 'N/A'}</title>
+          <title>Receipt - ${transaction?.order_number || 'N/A'}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-              font-family: 'Courier New', monospace;
-              font-size: 12px;
-              padding: 20px;
-              background: white;
-              color: black;
-            }
-            .receipt {
-              max-width: 380px;
-              margin: 0 auto;
-              border: 2px solid #000;
-              padding: 20px;
-            }
+            body { font-family: 'Courier New', monospace; font-size: 12px; padding: 20px; background: white; color: black; }
+            .receipt { max-width: 380px; margin: 0 auto; border: 2px solid #000; padding: 20px; }
             .header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #000; padding-bottom: 15px; }
             .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
             .header p { font-size: 11px; margin: 2px 0; }
@@ -37,29 +33,18 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
             .section-title { font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 8px; }
             .row { display: flex; justify-content: space-between; margin: 5px 0; }
             .row.bold { font-weight: bold; }
-            .items { margin: 10px 0; }
             .item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc; }
             .totals { border-top: 2px solid #000; padding-top: 10px; margin-top: 10px; }
-            .barcode { text-align: center; margin: 20px 0; padding: 15px; border: 2px solid #000; }
-            .barcode-label { font-size: 10px; margin-bottom: 5px; }
-            .barcode-value { font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold; letter-spacing: 2px; }
             .footer { margin-top: 20px; padding-top: 15px; border-top: 2px dashed #000; text-align: center; font-size: 10px; }
-            @media print {
-              body { padding: 0; }
-              .no-print { display: none; }
-            }
+            @media print { body { padding: 0; } .no-print { display: none; } }
           </style>
         </head>
-        <body>
-          ${receiptRef.current?.innerHTML || ''}
-          <div class="no-print" style="text-align: center; margin-top: 20px;">
-            <button onclick="window.print()" style="padding: 10px 20px; font-size: 14px; cursor: pointer;">Print Receipt</button>
-          </div>
-        </body>
+        <body>${content}</body>
       </html>
     `);
     printWindow.document.close();
     printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 400);
     onPrint?.();
   };
 
@@ -74,10 +59,9 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
         <div className="receipt">
           {/* Header */}
           <div className="header">
-            <h1>DREAM PALACE</h1>
-            <p>123 Entertainment Blvd</p>
-            <p>Las Vegas, NV 89101</p>
-            <p>Tel: (702) 555-0100</p>
+            <h1>{venueName.toUpperCase()}</h1>
+            {venueAddress && <p>{venueAddress}</p>}
+            {venuePhone && <p>Tel: {venuePhone}</p>}
             <p style={{ marginTop: '10px', fontWeight: 'bold' }}>DREAM DOLLAR PURCHASE RECEIPT</p>
           </div>
 
@@ -94,7 +78,7 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
             </div>
             <div className="row">
               <span>Terminal:</span>
-              <span>POS-01</span>
+              <span>{batch?.station ? batch.station.toUpperCase() + ' REGISTER' : 'POS'}</span>
             </div>
             <div className="row">
               <span>Cashier:</span>
@@ -168,7 +152,7 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
           {/* Footer */}
           <div className="footer">
             <p>Thank you for your business!</p>
-            <p style={{ marginTop: '10px' }}>GlyphBuckss are redeemable exclusively at Dream Palace venues.</p>
+            <p style={{ marginTop: '10px' }}>GlyphBucks are redeemable exclusively at this venue.</p>
             <p>Terms and conditions apply. Non-refundable.</p>
             <p style={{ marginTop: '10px', fontSize: '9px' }}>
               This receipt is your proof of purchase. Please retain for your records.

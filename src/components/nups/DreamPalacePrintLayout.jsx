@@ -2,12 +2,15 @@ export default function DreamPalacePrintLayout({
   orderNumber, customerName, customerId, customerAddress, customerState, customerZip,
   purchaserCardName, cardLastSix, cardExp, approvalCode, managerName, hostessName,
   lineItems, dreamDollarValue, surcharge, waitressTip = 0, grandTotal, signature, managerSig, hostessSig,
+  venue = null,
 }) {
+  const venueName = venue?.name || 'N.U.P.S. POS';
+  const venueAddress = [venue?.address, venue?.city, venue?.state].filter(Boolean).join(', ') || '';
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US');
   const lineTotal = lineItems.reduce((s, li) => s + (li.amount || 0), 0);
 
-  return `<html><head><title>Dream Palace - ${orderNumber}</title>
+  return `<html><head><title>${venueName} - ${orderNumber}</title>
 <style>
   @media print { @page { margin: 15mm; } }
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -27,8 +30,8 @@ export default function DreamPalacePrintLayout({
   .footer { text-align: center; margin-top: 16px; font-size: 8px; color: #666; border-top: 1px solid #000; padding-top: 6px; }
   .thumb-box { border: 1px solid #000; width: 120px; height: 80px; display: inline-block; }
 </style></head><body>
-  <h1>Dream Palace</h1>
-  <h2>Sales / Order receipt Form</h2>
+  <h1>${venueName}</h1>
+  <h2>Sales / Order Receipt Form</h2>
 
   <div class="grid2">
     <div class="box">
@@ -135,8 +138,8 @@ export default function DreamPalacePrintLayout({
   </div>
 
   <div class="footer">
-    Dream Palace — Sales / Order Receipt | Order#: ${orderNumber} | Date: ${dateStr}<br/>
-    DD form Digital Version v3 — 02-06-2026 | N.U.P.S. Point-of-Sale System<br/>
+    ${venueName} — Sales / Order Receipt | Order#: ${orderNumber} | Date: ${dateStr}<br/>
+    ${venueAddress ? venueAddress + ' | ' : ''}DD form Digital Version v3 — 02-06-2026 | N.U.P.S. Point-of-Sale System<br/>
     Retain for records. More Terms and Conditions on the back of this order. You Acknowledge Receiving Dream Dollars.
   </div>
 </body></html>`;
