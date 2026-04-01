@@ -74,7 +74,7 @@ export default function EntertainerDashboard({ user }) {
   // Load ALL orders; we'll filter by hostess_name matching user stage name / email
   const { data: allOrders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["entertainer-orders", user?.email],
-    queryFn: () => base44.entities.DreamPalaceOrder.list("-created_date", 500),
+    queryFn: () => base44.entities.GlyphBucksOrder.list("-created_date", 500),
     enabled: !!user,
   });
 

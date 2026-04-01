@@ -65,7 +65,7 @@ export default function NUPSMISReport() {
 
   const { data: dreamOrders = [] } = useQuery({
     queryKey: ["mis-dream-orders"],
-    queryFn: () => base44.entities.DreamPalaceOrder.list("-created_date", 500),
+    queryFn: () => base44.entities.GlyphBucksOrder.list("-created_date", 500),
   });
 
   const { data: entertainers = [] } = useQuery({

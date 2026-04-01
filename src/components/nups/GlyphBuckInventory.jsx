@@ -75,7 +75,7 @@ export default function GlyphBuckInventory() {
 
   const { data: orders = [] } = useQuery({
     queryKey: ["dream-palace-orders-inv"],
-    queryFn: () => base44.entities.DreamPalaceOrder.list("-created_date", 500),
+    queryFn: () => base44.entities.GlyphBucksOrder.list("-created_date", 500),
   });
 
   // Build inventory from DreamPalaceOrders + any manual overrides stored in VIPContractRecord
@@ -117,7 +117,7 @@ export default function GlyphBuckInventory() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ orderId, newStatus, notes, instrument }) => {
-      const result = await base44.entities.DreamPalaceOrder.update(orderId, {
+      const result = await base44.entities.GlyphBucksOrder.update(orderId, {
         status: newStatus === "redeemed" ? "archived" : newStatus === "voided" ? "archived" : "signed",
         archived_at: newStatus === "redeemed" ? new Date().toISOString() : undefined,
         archived_by: newStatus === "redeemed" ? "Manual" : undefined,
