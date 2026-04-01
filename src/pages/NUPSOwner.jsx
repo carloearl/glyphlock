@@ -339,7 +339,7 @@ export default function NUPSOwner() {
           {activeModule === 'dashboard' && <NUPSManagerDashboard />}
           {activeModule === 'pos' && (
             <div className="space-y-4">
-              {canBatch && <BatchManagement user={user} />}
+              {canBatch && <BatchManagement user={user} onBatchClosed={() => setActiveModule('reports')} />}
               <div className="flex gap-2">
                 {[{key:'cash',label:'Door Register'},{key:'bar',label:'Bar Register'}].map(t => (
                   <Button key={t.key} onClick={() => setPosSubTab(t.key)}

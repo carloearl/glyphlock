@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export default function BatchManagement({ user }) {
+export default function BatchManagement({ user, onBatchClosed }) {
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
   const [showOpenDialog, setShowOpenDialog] = useState(false);
@@ -41,10 +41,8 @@ export default function BatchManagement({ user }) {
       if (!activeBatch) return [];
       const start = new Date(activeBatch.start_time);
       const allTransactions = await base44.entities.POSTransaction.list('-created_date', 1000);
-      return allTransactions.filter(t =>
-        t.cashier === user?.email &&
-        new Date(t.created_date) >= start
-      );
+      // Include ALL stations (door + bar) for this batch period
+      return allTransactions.filter(t => new Date(t.created_date) >= start);
     },
     enabled: !!activeBatch
   });
@@ -67,6 +65,7 @@ export default function BatchManagement({ user }) {
       setShowCloseDialog(false);
       setClosingCash(0);
       setNotes("");
+      onBatchClosed?.();
     }
   });
 
