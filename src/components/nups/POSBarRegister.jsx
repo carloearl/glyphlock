@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import POSReceiptEngine from "./pos/POSReceiptEngine";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Trash2, Printer, CreditCard, Banknote, DollarSign, Package, ShoppingCart, SplitSquareHorizontal, AlertCircle, X, Receipt } from "lucide-react";
+import { Plus, Minus, Trash2, Printer, CreditCard, Banknote, DollarSign, Package, ShoppingCart, SplitSquareHorizontal, AlertCircle, X, Receipt, Pause, RotateCcw, Percent } from "lucide-react";
 
 const CATEGORIES = ["All", "Food & Beverage", "Spirits", "Beer & Wine", "Mixers", "VIP Service", "Merchandise", "Services", "Other"];
 const TAX_RATE = 0.08;
@@ -29,6 +29,9 @@ export default function POSBarRegister({ user }) {
   const [shiftStart] = useState(Date.now());
   const [, setTick] = useState(0);
   const [lastReceipt, setLastReceipt] = useState(null);
+  const [discount, setDiscount] = useState(0);
+  const [heldTransactions, setHeldTransactions] = useState([]);
+  const [showHeld, setShowHeld] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setTick(n => n + 1), 30000);
@@ -53,7 +56,8 @@ export default function POSBarRegister({ user }) {
   // Calculate cart totals BEFORE mutation hook (needed by mutationFn)
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const cartTax = cartTotal * TAX_RATE;
-  const cartGrand = +(cartTotal + cartTax).toFixed(2);
+  const cartDiscountAmt = +(cartTotal * (discount / 100)).toFixed(2);
+  const cartGrand = +(cartTotal + cartTax - cartDiscountAmt).toFixed(2);
   const itemCount = cart.reduce((s, i) => s + i.qty, 0);
 
   const createTx = useMutation({
@@ -144,6 +148,45 @@ export default function POSBarRegister({ user }) {
   // FIX-C — role filtering for bar register (bartenders see only Cash/Card, not Split)
   const isManager = user?.role === 'admin' || ['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER'].includes(user?._highestRole);
 
+  const holdTransaction = () => {
+    if (cart.length === 0) return;
+    const held = {
+      id: Date.now(),
+      cart: [...cart],
+      discount,
+      heldAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setHeldTransactions(prev => [...prev, held]);
+    setCart([]);
+    setDiscount(0);
+    setPaymentStep(null);
+    toast.success(`Ticket held at ${held.heldAt}`);
+  };
+
+  const recallTransaction = (held) => {
+    if (cart.length > 0 && !window.confirm('Replace current ticket with held transaction?')) return;
+    setCart(held.cart);
+    setDiscount(held.discount || 0);
+    setHeldTransactions(prev => prev.filter(h => h.id !== held.id));
+    setShowHeld(false);
+    toast.success('Ticket recalled');
+  };
+
+  const handleNoSale = async () => {
+    if (!window.confirm('Open cash drawer without a sale? This action will be logged.')) return;
+    try {
+      await base44.entities.SystemAuditLog.create({
+        event_type: 'NO_SALE_DRAWER_OPEN',
+        description: `Cash drawer opened without sale by ${user?.email || 'staff'} at bar station`,
+        actor_email: user?.email || 'unknown',
+        status: 'success',
+        severity: 'low',
+        metadata: { station: 'bar', cashier: user?.email }
+      });
+    } catch(e) {}
+    toast.success('💵 Cash drawer opened — logged.');
+  };
+
   const shiftDisplay = () => {
     const diff = Math.floor((Date.now() - shiftStart) / 60000);
     return diff < 60 ? `${diff}m` : `${Math.floor(diff / 60)}h ${diff % 60}m`;
@@ -222,21 +265,64 @@ export default function POSBarRegister({ user }) {
         {/* RIGHT: TICKET PANEL */}
         <div className="w-72 bg-gray-900 border-l border-gray-700 flex flex-col flex-shrink-0">
           {/* Ticket header */}
-          <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
-            <span className="text-sm font-bold text-white flex items-center gap-1.5">
-              <Receipt className="w-4 h-4 text-cyan-400" />
-              Ticket
-              {itemCount > 0 && (
-                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-[10px] ml-1">{itemCount}</Badge>
+          <div className="px-3 py-2 border-b border-gray-700">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-sm font-bold text-white flex items-center gap-1.5">
+                <Receipt className="w-4 h-4 text-cyan-400" />
+                Ticket
+                {itemCount > 0 && (
+                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-[10px] ml-1">{itemCount}</Badge>
+                )}
+              </span>
+              {cart.length > 0 && (
+                <button
+                  onClick={() => { if (window.confirm('Clear ticket?')) { setCart([]); setDiscount(0); } }}
+                  className="text-red-400 hover:text-red-300 text-xs font-medium"
+                >
+                  Clear
+                </button>
               )}
-            </span>
-            {cart.length > 0 && (
+            </div>
+            <div className="flex gap-1">
               <button
-                onClick={() => { if (window.confirm('Clear ticket?')) setCart([]); }}
-                className="text-red-400 hover:text-red-300 text-xs font-medium"
+                onClick={holdTransaction}
+                disabled={cart.length === 0}
+                className="flex-1 h-7 rounded text-[10px] font-semibold flex items-center justify-center gap-1 disabled:opacity-30 transition-all"
+                style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b' }}
               >
-                Clear
+                <Pause className="w-3 h-3" /> Hold
               </button>
+              {heldTransactions.length > 0 && (
+                <button
+                  onClick={() => setShowHeld(p => !p)}
+                  className="flex-1 h-7 rounded text-[10px] font-semibold flex items-center justify-center gap-1 transition-all"
+                  style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}
+                >
+                  <RotateCcw className="w-3 h-3" /> Recall ({heldTransactions.length})
+                </button>
+              )}
+              <button
+                onClick={handleNoSale}
+                title="No Sale — Open Drawer"
+                className="h-7 px-2.5 rounded text-[10px] font-semibold flex items-center justify-center transition-all"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)' }}
+              >
+                💵
+              </button>
+            </div>
+            {showHeld && heldTransactions.length > 0 && (
+              <div className="mt-1.5 rounded overflow-hidden border border-purple-500/20 bg-gray-950">
+                {heldTransactions.map(h => (
+                  <button
+                    key={h.id}
+                    onClick={() => recallTransaction(h)}
+                    className="w-full text-left px-2 py-1.5 text-[10px] hover:bg-gray-800 border-b border-gray-800 last:border-0"
+                  >
+                    <span className="text-purple-400">{h.cart.length} item(s)</span>
+                    <span className="text-gray-500 ml-1.5">Held {h.heldAt}</span>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
 
@@ -277,6 +363,21 @@ export default function POSBarRegister({ user }) {
             </div>
             <div className="flex justify-between text-gray-400">
               <span>Tax (8%)</span><span>${cartTax.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center justify-between text-gray-400">
+              <span className="flex items-center gap-1"><Percent className="w-3 h-3" /> Discount</span>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={discount}
+                  onChange={e => setDiscount(Math.min(100, Math.max(0, +e.target.value || 0)))}
+                  className="w-12 bg-gray-800 border border-gray-600 rounded text-[10px] text-white text-right px-1 py-0.5 focus:outline-none focus:border-cyan-500"
+                />
+                <span>%</span>
+                {cartDiscountAmt > 0 && <span className="text-green-400">-${cartDiscountAmt.toFixed(2)}</span>}
+              </div>
             </div>
             <div className="flex justify-between font-bold text-white text-sm border-t border-gray-700 pt-1.5">
               <span>TOTAL</span>

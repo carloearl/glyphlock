@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ShoppingCart, DollarSign, CreditCard, Search, Barcode,
-  Smartphone, Gift, Hotel, ArrowLeft, Wallet
+  Smartphone, Gift, Hotel, ArrowLeft, Wallet, Pause, RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,6 +31,8 @@ export default function POSCashRegister({ user, station = 'door' }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customerQuery, setCustomerQuery] = useState('');
   const [showCustDropdown, setShowCustDropdown] = useState(false);
+  const [heldTransactions, setHeldTransactions] = useState([]);
+  const [showHeld, setShowHeld] = useState(false);
 
   const [paymentStep, setPaymentStep] = useState("register");
   const [paymentMethod, setPaymentMethod] = useState(null);
@@ -127,6 +129,50 @@ export default function POSCashRegister({ user, station = 'door' }) {
 
   const removeFromCart = (productId) => {
     setCart(cart.filter(item => item.product_id !== productId));
+  };
+
+  const holdTransaction = () => {
+    if (cart.length === 0) return;
+    const held = {
+      id: Date.now(),
+      cart: [...cart],
+      customer: selectedCustomer,
+      discount,
+      tip,
+      heldAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setHeldTransactions(prev => [...prev, held]);
+    setCart([]);
+    setSelectedCustomer(null);
+    setDiscount(0);
+    setTip(0);
+    toast.success(`Transaction held at ${held.heldAt}`);
+  };
+
+  const recallTransaction = (held) => {
+    if (cart.length > 0 && !window.confirm('Replace current cart with held transaction?')) return;
+    setCart(held.cart);
+    setSelectedCustomer(held.customer);
+    setDiscount(held.discount || 0);
+    setTip(held.tip || 0);
+    setHeldTransactions(prev => prev.filter(h => h.id !== held.id));
+    setShowHeld(false);
+    toast.success('Transaction recalled');
+  };
+
+  const handleNoSale = async () => {
+    if (!window.confirm('Open cash drawer without a sale? This action will be logged.')) return;
+    try {
+      await base44.entities.SystemAuditLog.create({
+        event_type: 'NO_SALE_DRAWER_OPEN',
+        description: `Cash drawer opened without sale by ${user?.email || 'staff'} at ${station} station`,
+        actor_email: user?.email || 'unknown',
+        status: 'success',
+        severity: 'low',
+        metadata: { station, cashier: user?.email }
+      });
+    } catch(e) {}
+    toast.success('💵 Cash drawer opened — logged.');
   };
 
   const isManagerPOS = user?.role === 'admin' ||
@@ -490,6 +536,53 @@ export default function POSCashRegister({ user, station = 'door' }) {
         />
 
         <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          {/* Utility: Hold / Recall / No-Sale */}
+          <div className="flex gap-2 mb-2">
+            <button
+              onClick={holdTransaction}
+              disabled={cart.length === 0}
+              title="Hold Transaction"
+              className="flex-1 h-9 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-30 transition-all"
+              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b' }}
+            >
+              <Pause className="w-3.5 h-3.5" /> Hold
+            </button>
+            {heldTransactions.length > 0 && (
+              <button
+                onClick={() => setShowHeld(prev => !prev)}
+                title="Recall Held Transaction"
+                className="flex-1 h-9 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Recall ({heldTransactions.length})
+              </button>
+            )}
+            <button
+              onClick={handleNoSale}
+              title="No Sale — Open Drawer"
+              className="h-9 px-3 rounded-xl text-xs font-semibold flex items-center justify-center transition-all"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.35)' }}
+            >
+              💵
+            </button>
+          </div>
+
+          {showHeld && heldTransactions.length > 0 && (
+            <div className="mb-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(168,85,247,0.3)', background: 'rgba(0,0,0,0.6)' }}>
+              {heldTransactions.map(h => (
+                <button
+                  key={h.id}
+                  onClick={() => recallTransaction(h)}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-white/5 border-b border-white/5 last:border-0"
+                >
+                  <span className="text-purple-400 font-medium">{h.cart.length} item(s)</span>
+                  <span className="text-gray-500 ml-2">Held {h.heldAt}</span>
+                  {h.customer && <span className="text-gray-600 ml-2">— {h.customer.full_name}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+
           {cart.length > 0 ? (
             <button
               onClick={handleCheckout}
@@ -534,6 +627,51 @@ export default function POSCashRegister({ user, station = 'door' }) {
         />
 
         <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="flex gap-2 mb-2">
+            <button
+              onClick={holdTransaction}
+              disabled={cart.length === 0}
+              title="Hold Transaction"
+              className="flex-1 h-9 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-30 transition-all"
+              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b' }}
+            >
+              <Pause className="w-3.5 h-3.5" /> Hold
+            </button>
+            {heldTransactions.length > 0 && (
+              <button
+                onClick={() => setShowHeld(prev => !prev)}
+                className="flex-1 h-9 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Recall ({heldTransactions.length})
+              </button>
+            )}
+            <button
+              onClick={handleNoSale}
+              title="No Sale — Open Drawer"
+              className="h-9 px-3 rounded-xl text-xs font-semibold flex items-center justify-center transition-all"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.35)' }}
+            >
+              💵
+            </button>
+          </div>
+
+          {showHeld && heldTransactions.length > 0 && (
+            <div className="mb-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(168,85,247,0.3)', background: 'rgba(0,0,0,0.6)' }}>
+              {heldTransactions.map(h => (
+                <button
+                  key={h.id}
+                  onClick={() => recallTransaction(h)}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-white/5 border-b border-white/5 last:border-0"
+                >
+                  <span className="text-purple-400 font-medium">{h.cart.length} item(s)</span>
+                  <span className="text-gray-500 ml-2">Held {h.heldAt}</span>
+                  {h.customer && <span className="text-gray-600 ml-2">— {h.customer.full_name}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+
           {cart.length > 0 ? (
             <button
               onClick={handleCheckout}
