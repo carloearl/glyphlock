@@ -244,7 +244,7 @@ export default function ZReportGenerator({ user: userProp }) {
       await base44.entities.SystemAuditLog.create({
         event_type: 'Z_REPORT_GENERATED',
         description: `Z-Report ${report.report_id} closed. Total Sales: $${report.total_sales.toFixed(2)}. Cash Over/Short: $${(report.cash_over_short || 0).toFixed(2)}.`,
-        actor_email: user.email,
+        actor_id: user.email,
         status: s4_requiresReview ? 'alert' : 'success',
         severity: s4_requiresReview ? 'high' : 'low',
         resource_id: report.report_id,

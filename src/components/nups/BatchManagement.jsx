@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Clock, XCircle, CheckCircle2, AlertCircle } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { useActiveVenue } from '../../hooks/useActiveVenue';
 import {
   Dialog,
@@ -16,6 +17,7 @@ import {
 
 export default function BatchManagement({ user, onBatchClosed }) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const activeVenue = useActiveVenue();
   const [showOpenDialog, setShowOpenDialog] = useState(false);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
@@ -115,13 +117,20 @@ export default function BatchManagement({ user, onBatchClosed }) {
         actor_id:    cashierEmail,
         venue_id:    resolvedVenueId,
         description: `Batch ${newBatch?.batch_id || newBatch?.id} opened by ${cashierEmail}`,
-        metadata:    {
+        metadata: {
           batch_id:     newBatch?.batch_id || newBatch?.id,
           opened_at:    new Date().toISOString(),
           opening_cash: parsed
         },
-        severity:    'low',
-        status:      'success'
+        severity: 'low',
+        status:   'success'
+      });
+    } catch (error) {
+      console.error('Batch open failed:', error);
+      toast({
+        title: 'Batch Open Failed',
+        description: error.message || 'Unable to open batch. Please try again.',
+        variant: 'destructive'
       });
     } finally {
       setIsOpeningBatch(false);
@@ -156,6 +165,8 @@ export default function BatchManagement({ user, onBatchClosed }) {
       return;
     }
 
+    const cashierEmail = user?.email || user?.id || 'unknown';
+    const batchBeingClosed = activeBatch;
     setIsClosingBatch(true);
     try {
       await closeBatchMutation.mutateAsync({
@@ -173,6 +184,34 @@ export default function BatchManagement({ user, onBatchClosed }) {
           discrepancy_note: hasDiscrepancy ? notes : null,
           notes
         }
+      });
+      const resolvedVenueId = batchBeingClosed?.venue_id || activeVenue?.id;
+      if (!resolvedVenueId) {
+        throw new Error('BATCH_AUDIT_FAILED: venue_id unavailable on close');
+      }
+      await base44.entities.SystemAuditLog.create({
+        event_type:  'BATCH_CLOSED',
+        entity_type: 'POSBatch',
+        entity_id:   batchBeingClosed?.id || null,
+        actor_id:    cashierEmail,
+        venue_id:    resolvedVenueId,
+        description: `Batch ${batchBeingClosed?.id} closed by ${cashierEmail}`,
+        metadata: {
+          batch_id:                batchBeingClosed?.id,
+          closed_at:               new Date().toISOString(),
+          total_cash:              cashTotal,
+          total_card:              cardTotal,
+          total_glyphbucks_issued: 0
+        },
+        severity: hasDiscrepancy ? 'medium' : 'low',
+        status:   hasDiscrepancy ? 'alert' : 'success'
+      });
+    } catch (error) {
+      console.error('Batch close failed:', error);
+      toast({
+        title: 'Batch Close Failed',
+        description: error.message || 'Unable to close batch. Please try again.',
+        variant: 'destructive'
       });
     } finally {
       setIsClosingBatch(false);

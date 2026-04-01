@@ -83,7 +83,7 @@ export default function EntertainerCheckIn({ user }) {
         await base44.entities.SystemAuditLog.create({
           event_type: "CONTRACT_GATE_BLOCKED",
           description: `Check-in blocked: no date_of_birth on file for entertainer_id=${entertainerId}`,
-          actor_email: user?.email,
+          actor_id: user?.email,
           status: "blocked",
           severity: "HIGH",
           metadata: { entertainer_id: entertainerId, reason: "missing_dob",
@@ -102,7 +102,7 @@ export default function EntertainerCheckIn({ user }) {
         await base44.entities.SystemAuditLog.create({
           event_type: "CONTRACT_GATE_BLOCKED",
           description: `Check-in blocked: entertainer age ${age} is below venue minimum ${minimumAge}`,
-          actor_email: user?.email,
+          actor_id: user?.email,
           status: "blocked",
           severity: "CRITICAL",
           metadata: { entertainer_id: entertainerId, reason: "age_below_minimum",
@@ -117,7 +117,7 @@ export default function EntertainerCheckIn({ user }) {
         await base44.entities.SystemAuditLog.create({
           event_type: "CONTRACT_GATE_BLOCKED",
           description: `Check-in blocked: contract_status=${entertainer.contract_status} for entertainer_id=${entertainerId}`,
-          actor_email: user?.email,
+          actor_id: user?.email,
           status: "blocked",
           severity: "HIGH",
           metadata: { entertainer_id: entertainerId, reason: "invalid_contract_status",
@@ -133,7 +133,7 @@ export default function EntertainerCheckIn({ user }) {
         await base44.entities.SystemAuditLog.create({
           event_type: "CONTRACT_GATE_BLOCKED",
           description: `Check-in blocked: incomplete contract fields for entertainer_id=${entertainerId}`,
-          actor_email: user?.email,
+          actor_id: user?.email,
           status: "blocked",
           severity: "HIGH",
           metadata: { entertainer_id: entertainerId, reason: "incomplete_contract_fields",

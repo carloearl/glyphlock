@@ -53,7 +53,7 @@ export default function VIPRoomManagement({ user }) {
         await base44.entities.SystemAuditLog.create({
           event_type: "VIP_CONTRACT_GATE_BLOCKED",
           description: `VIP session blocked: contract_status=${entRecord?.contract_status ?? null} for entertainer_id=${data.entertainer_id}`,
-          actor_email: user?.email,
+          actor_id: user?.email,
           status: "blocked",
           severity: "CRITICAL",
           metadata: {
