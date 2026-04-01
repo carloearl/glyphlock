@@ -158,6 +158,9 @@ export default function NUPSOwner() {
     enabled: !!user,
   });
 
+  // TASK 7.1 — Filter demo/test transactions from ALL financial views
+  const realTransactions = transactions.filter(t => !t.mode || t.mode === 'REAL');
+
   if (!authChecked || !user) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -166,14 +169,14 @@ export default function NUPSOwner() {
     );
   }
 
-  const todayTransactions = transactions.filter((t) => {
+  const todayTransactions = realTransactions.filter((t) => {
     const txDate = new Date(t.created_date);
     const today = new Date();
     return txDate.toDateString() === today.toDateString();
   });
 
   const todayRevenue = todayTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
-  const totalRevenue = transactions.reduce((sum, t) => sum + (t.total || 0), 0);
+  const totalRevenue = realTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
   const activeGuestsCount = vipGuests.filter((g) => g.status === "in_building").length;
   const occupiedRooms = vipRooms.filter((r) => r.status === "occupied").length;
 
@@ -395,17 +398,17 @@ export default function NUPSOwner() {
           {activeModule === 'payroll' && (
             <div className="space-y-4">
               <EntertainerPayrollEngine user={user} />
-              {canPayroll && <TipBreakdown transactions={transactions} />}
+              {canPayroll && <TipBreakdown transactions={realTransactions} />}
               {canPayroll && <PayrollReport />}
               {canPayroll && <OfficialChecks />}
             </div>
           )}
           {activeModule === 'reports' && (
             <div className="space-y-4">
-              <OwnerAnalytics transactions={transactions} />
+              <OwnerAnalytics transactions={realTransactions} />
               {canZReport && <ZReportGenerator user={user} />}
-              {canMarketing && <SalesReport transactions={transactions} products={products} />}
-              <DailySummary transactions={transactions} />
+              {canMarketing && <SalesReport transactions={realTransactions} products={products} />}
+              <DailySummary transactions={realTransactions} />
             </div>
           )}
           {activeModule === 'contracts' && (
@@ -444,7 +447,7 @@ export default function NUPSOwner() {
           {activeModule === 'audit' && (
             <div className="space-y-4">
               {canAudit && <AuditLogDashboard user={user} />}
-              <TransactionHistory transactions={transactions} showReceipt={true} />
+              <TransactionHistory transactions={realTransactions} showReceipt={true} />
             </div>
           )}
           {activeModule === 'admin' && (
