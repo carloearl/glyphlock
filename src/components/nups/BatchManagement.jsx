@@ -21,8 +21,8 @@ export default function BatchManagement({ user, onBatchClosed }) {
   const activeVenue = useActiveVenue();
   const [showOpenDialog, setShowOpenDialog] = useState(false);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
-  const [openingCash, setOpeningCash] = useState(0);
-  const [closingCash, setClosingCash] = useState(0);
+  const [openingCash, setOpeningCash] = useState('');
+  const [closingCash, setClosingCash] = useState('');
   const [notes, setNotes] = useState("");
   const [isOpeningBatch, setIsOpeningBatch] = useState(false); // B1 — duplicate guard
   const [isClosingBatch, setIsClosingBatch] = useState(false); // B1 — duplicate guard
@@ -75,7 +75,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
     if (isOpeningBatch) return; // B1
 
     // B3 — cash validation
-    const parsed = parseFloat(openingCash);
+    const parsed = parseFloat(openingCash || '0');
     if (isNaN(parsed) || parsed < 0) {
       alert('Please enter a valid opening cash amount.');
       return;
@@ -141,7 +141,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
     if (isClosingBatch) return; // B1
 
     // B3 — cash validation
-    const parsed = parseFloat(closingCash);
+    const parsed = parseFloat(closingCash || '0');
     if (isNaN(parsed) || parsed < 0) {
       alert('Please enter a valid closing cash amount.');
       return;
