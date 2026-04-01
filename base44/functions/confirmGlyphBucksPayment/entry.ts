@@ -114,6 +114,19 @@ Deno.serve(async (req) => {
       description: `Payment confirmed for order ${order_number}: $${(paymentIntent.amount / 100).toFixed(2)}`
     });
 
+    await base44.asServiceRole.entities.GlyphBucksOrder.create({
+      order_number: order_number || processor_reference,
+      venue_id,
+      amount: paymentIntent.amount / 100,
+      payment_type: 'STRIPE',
+      status: 'COMPLETE',
+      approval_code,
+      processor_reference,
+      card_last_four,
+      created_by: user.email,
+      created_at: new Date().toISOString(),
+    });
+
     return Response.json({
       success: true,
       payment_status: paymentIntent.status,

@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100),
       currency: 'usd',
-      description: description || `Dream Palace Order ${order_number}`,
+      description: description || `GlyphBucks Order ${order_number}`,
       metadata: {
         order_number,
         customer_name,
