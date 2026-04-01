@@ -52,7 +52,7 @@ export default function DreamPalacePrintLayout({
     </div>
   </div>
 
-  <div class="warning">Dream Dollars (Club Currency) are not legal tender</div>
+  <div class="warning">Club Currency (GlyphBucks) is not legal tender</div>
 
   <table>
     <thead>
@@ -94,7 +94,7 @@ export default function DreamPalacePrintLayout({
         <td style="text-align:right;font-weight:bold;">$${lineTotal.toFixed(2)}</td>
       </tr>` : ''}
       <tr>
-        <td colspan="2" style="font-size:8px;">** Dream Dollars are sold as a convenience medium of currency for payment and are not valid anywhere else. The Entertainer can redeem the Dream Dollars for Cash. Not Legal Tender.</td>
+        <td colspan="2" style="font-size:8px;">** Club Currency (GlyphBucks) is sold as a convenience medium of currency for payment and is not valid anywhere else. The Entertainer can redeem the Club Currency for Cash. Not Legal Tender.</td>
         <td style="border:2px solid #000;padding:6px;text-align:center;font-weight:bold;background:#f5f5f5;">
           GRAND TOTAL<br/><span style="font-size:14px;">$${grandTotal.toFixed(2)}</span>
         </td>

@@ -72,7 +72,12 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     queryFn: () => base44.entities.Venue.list(),
     initialData: []
   });
-  const currentVenue = venues?.[0] || { name: 'Venue', address: '', age_requirement: 18 };
+  const currentVenue = venues?.[0] || { name: 'Club', address: '', age_requirement: 18 };
+  const venueAddress = [currentVenue?.address, currentVenue?.city, currentVenue?.state].filter(Boolean).join(', ') || '';
+  const venuePhone = currentVenue?.phone || '';
+  const venueLegal = currentVenue?.legal_name || currentVenue?.name || 'Club';
+  const venueName = currentVenue?.name || 'Club';
+  const currentVenueId = currentVenue?.venue_id || currentVenue?.id || null;
 
   useEffect(() => {
     (async () => {
@@ -234,7 +239,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
         order_number: orderNumber,
         customer_name: customerName,
         customer_email: null,
-        description: `Dream Palace Order ${orderNumber} - GlyphBucks $${glyphbucksValue}`
+        description: `${venueName} Order ${orderNumber} - GlyphBucks $${glyphbucksValue}`
       });
 
       if (!paymentResponse.data.success) {
@@ -296,7 +301,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       const contract = await base44.entities.VIPContractRecord.create({
         order_number: orderNumber,
         guest_name: customerName,
-        venue_id: "dream_palace",
+        venue_id: currentVenueId,
         contract_type: "glyphbucks_sale",
         total_amount: grandTotal,
         customer_signature: signature,
@@ -419,7 +424,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
         <td style="border:1px solid #000;padding:4px;text-align:right;">${li.amount ? '$'+li.amount.toFixed(2) : ''}</td>
       </tr>`).join('');
 
-    return `<html><head><title>Dream Palace - Order ${orderNumber}</title>
+    return `<html><head><title>${venueName} - Order ${orderNumber}</title>
     <style>
       * { margin:0; padding:0; box-sizing:border-box; }
       body { font-family: Arial, sans-serif; font-size: 11px; color: #000; padding: 20px; max-width: 8.5in; margin: 0 auto; }
@@ -436,10 +441,10 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       .barcode { font-family:monospace; font-size:14px; letter-spacing:4px; text-align:center; margin:8px 0; }
       @media print { @page { margin: 15mm; } }
     </style></head><body>
-      <h1>Dream Palace</h1>
-      <div class="biz-info">Liberty Holding Group, L.L.C. dba The Dream Palace</div>
-      <div class="biz-info" style="font-weight:bold;">815 N. Scottsdale Road, Tempe, AZ 85281</div>
-      <div class="biz-info">Tel: (602) 536-0372 | Tax ID: 88-1234567</div>
+      <h1>${venueName}</h1>
+      ${venueLegal !== venueName ? `<div class="biz-info">${venueLegal}</div>` : ''}
+      ${venueAddress ? `<div class="biz-info" style="font-weight:bold;">${venueAddress}</div>` : ''}
+      ${venuePhone ? `<div class="biz-info">Tel: ${venuePhone}</div>` : ''}
       <h2>Sales / Order Receipt Form</h2>
       
       <div style="display:flex;gap:20px;margin-bottom:8px;">
@@ -523,9 +528,8 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
 
       <div class="barcode" style="margin-top:16px;">||||| ${orderNumber} |||||</div>
       <div style="text-align:center;font-size:9px;color:#666;margin-top:8px;">
-        GB form Digital Version v3 -02-06-2026 | Order: ${orderNumber} | Printed: ${new Date().toISOString()}<br/>
-        Liberty Holding Group, L.L.C. dba The Dream Palace<br/>
-        815 N. Scottslade Road, Tempe, AZ 85281 | (602) 536-0372<br/>
+        Order: ${orderNumber} | Printed: ${new Date().toISOString()}<br/>
+        ${venueLegal}${venueAddress ? ' | ' + venueAddress : ''}${venuePhone ? ' | ' + venuePhone : ''}<br/>
         <div style="margin-top:8px;font-size:8px;color:#999;">GlyphLock LLC is a technology platform licensor only. GlyphLock LLC is not the venue operator, employer, entertainment provider, or merchant of record. All venue operations, patron relationships, entertainer relationships, and financial transactions are the sole responsibility of the licensed venue operator.</div>
       </div>
     </body></html>`;
@@ -535,7 +539,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     return (
       <div className="space-y-4">
         <div className="text-center mb-4">
-          <h2 className="text-xl font-bold text-white">Dream Palace</h2>
+          <h2 className="text-xl font-bold text-white">{venueName}</h2>
           <p className="text-sm text-gray-400">Sales / Order Receipt Form</p>
           <Badge className="mt-1 bg-purple-500/20 text-purple-400 border-purple-500/40 font-mono text-xs">{orderNumber}</Badge>
         </div>

@@ -32,7 +32,7 @@ export default function DreamPalaceLineItems({
         <CardTitle className="flex items-center gap-2 text-yellow-400">
           <DollarSign className="w-5 h-5" /> Order Details
         </CardTitle>
-        <p className="text-xs text-red-400 font-bold">Dream Dollars (Club Currency) are not legal tender</p>
+        <p className="text-xs text-red-400 font-bold">Club Currency (GlyphBucks) is not legal tender</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Line items table */}
@@ -94,7 +94,7 @@ export default function DreamPalaceLineItems({
               className="w-32 text-right bg-gray-700 border-pink-500/40 font-bold text-pink-400" placeholder="0.00" />
           </div>
           <div className="text-[10px] text-gray-500 italic">
-            ** Dream Dollars are sold as a convenience medium of currency for payment and are not valid anywhere else. The Entertainer can redeem the Dream Dollars for Cash.
+            ** Club Currency (GlyphBucks) is sold as a convenience medium of currency for payment and is not valid anywhere else. The Entertainer can redeem the Club Currency for Cash.
           </div>
           {lineTotal > 0 && (
             <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-700">
