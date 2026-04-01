@@ -86,7 +86,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
     setIsOpeningBatch(true);
     try {
       const cashierEmail = user?.email || user?.id || 'unknown';
-      await openBatchMutation.mutateAsync({
+      const newBatch = await openBatchMutation.mutateAsync({
         batch_id: `BATCH-${Date.now()}`,
         start_time: new Date().toISOString(),
         opening_cash: parsed,
@@ -97,6 +97,20 @@ export default function BatchManagement({ user, onBatchClosed }) {
         status: 'open',
         total_sales: 0,
         transaction_count: 0
+      });
+      await base44.entities.SystemAuditLog.create({
+        event_type: 'BATCH_OPENED',
+        venue_id: newBatch?.venue_id || activeVenue?.id || null,
+        description: `Batch ${newBatch?.batch_id || newBatch?.id} opened by ${cashierEmail}`,
+        actor_email: cashierEmail,
+        resource_id: newBatch?.id || null,
+        metadata: {
+          batch_id: newBatch?.batch_id || newBatch?.id,
+          opened_at: new Date().toISOString(),
+          opening_cash: parsed
+        },
+        severity: 'low',
+        status: 'success'
       });
     } finally {
       setIsOpeningBatch(false);

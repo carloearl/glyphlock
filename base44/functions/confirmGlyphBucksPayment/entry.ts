@@ -138,6 +138,17 @@ Deno.serve(async (req) => {
       timestamp: new Date().toISOString()
     });
 
+    await base44.asServiceRole.entities.GlyphBucksOrder.create({
+      order_number: order_number || processor_reference,
+      venue_id,
+      status: 'signed',
+      card_token: processor_reference,
+      approval_code,
+      card_last_four: card_last_four || null,
+      grand_total: paymentIntent.amount / 100,
+      contract_version: 'v3-digital-02-06-2026'
+    });
+
     return Response.json({
       success: true,
       payment_status: paymentIntent.status,
