@@ -18,7 +18,7 @@ import CashDenominationPad from "./pos/CashDenominationPad";
 import CardPaymentPanel from "./pos/CardPaymentPanel";
 import OrderDisplay from "./pos/OrderDisplay";
 
-export default function POSCashRegister({ user }) {
+export default function POSCashRegister({ user, station = 'door' }) {
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
   const [cart, setCart] = useState([]);
@@ -168,6 +168,7 @@ export default function POSCashRegister({ user }) {
       cashier: cashierName,
       cashier_name: cashierName,
       cashier_email: user?.email || null,
+      station: station,
       mode: 'REAL',
       venue_id: activeVenue?.id || null,
       status: "completed",

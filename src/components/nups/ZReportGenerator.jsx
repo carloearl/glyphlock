@@ -78,6 +78,12 @@ export default function ZReportGenerator({ user }) {
   const demoTransactions = todayTransactions.filter(t => t.mode === 'DEMO' || t.mode === 'TEST');
   const demoTotal = demoTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
 
+  // Station breakdown
+  const doorTransactions = realTransactions.filter(t => !t.station || t.station === 'door');
+  const barTransactions = realTransactions.filter(t => t.station === 'bar');
+  const doorSales = doorTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
+  const barSales = barTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
+
   // Live preview calculations — REAL only for financials
   const cashSales = realTransactions
     .filter(t => t.payment_method === 'Cash')
@@ -218,13 +224,16 @@ export default function ZReportGenerator({ user }) {
           entertainer_tip_payouts: entertainerPayouts,
           demo_transaction_count: demoTransactions.length,
           demo_total: demoTotal,
-          // NEW LEDGER
           gb_ledger_issued: gbLedgerIssued,
           gb_ledger_redeemed: gbLedgerRedeemed,
           gb_ledger_net: gbLedgerNet,
           venue_contract_count: contractCount,
           venue_contract_value: contractValue,
           venue_contract_gb_issued: contractGBIssued,
+          door_register_sales: doorSales,
+          door_register_count: doorTransactions.length,
+          bar_register_sales: barSales,
+          bar_register_count: barTransactions.length,
         })
       });
 
@@ -305,6 +314,11 @@ export default function ZReportGenerator({ user }) {
             <div class="row"><span>VIP Room Revenue:</span><span>$${report.vip_room_revenue.toFixed(2)}</span></div>
             <div class="row"><span>Bar Revenue:</span><span>$${report.bar_revenue.toFixed(2)}</span></div>
             <div class="row"><span>Merchandise:</span><span>$${report.merchandise_revenue.toFixed(2)}</span></div>
+          </div>
+          <div class="section">
+            <h3>STATION BREAKDOWN</h3>
+            <div class="row"><span>🚪 Door Register Sales:</span><span>$${(extra.door_register_sales||0).toFixed(2)} (${extra.door_register_count||0} txns)</span></div>
+            <div class="row"><span>🍸 Bar Register Sales:</span><span>$${(extra.bar_register_sales||0).toFixed(2)} (${extra.bar_register_count||0} txns)</span></div>
           </div>
           <div class="section">
             <h3>TRANSACTION COUNTS</h3>
@@ -409,6 +423,28 @@ export default function ZReportGenerator({ user }) {
             {demoTransactions.length > 0 && (
               <div className="text-xs text-yellow-500 mt-1">{demoTransactions.length} demo excluded</div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card-dark border-blue-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="w-5 h-5 text-blue-400" />
+              <span className="text-sm text-gray-400">Door Register</span>
+            </div>
+            <div className="text-2xl font-bold text-blue-400">${doorSales.toFixed(2)}</div>
+            <div className="text-xs text-gray-500 mt-1">{doorTransactions.length} txns</div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card-dark border-orange-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="w-5 h-5 text-orange-400" />
+              <span className="text-sm text-gray-400">Bar Register</span>
+            </div>
+            <div className="text-2xl font-bold text-orange-400">${barSales.toFixed(2)}</div>
+            <div className="text-xs text-gray-500 mt-1">{barTransactions.length} txns</div>
           </CardContent>
         </Card>
 
