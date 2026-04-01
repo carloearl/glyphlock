@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileText, DollarSign, ShoppingCart, Printer, Calendar, Banknote, Users, Coins, ScrollText } from "lucide-react";
 
-export default function ZReportGenerator({ user }) {
+export default function ZReportGenerator({ user: userProp }) {
   const queryClient = useQueryClient();
-  const [openingCash, setOpeningCash] = useState(0);
-  const [closingCash, setClosingCash] = useState(0);
-  const [isGenerating, setIsGenerating] = useState(false); // B1 — duplicate guard
-  const [reconciliationNotes, setReconciliationNotes] = useState(''); // Section 4 — required when discrepancy exists
+  const [user, setUser] = useState(userProp || null);
+
+  useEffect(() => {
+    if (!userProp) {
+      base44.auth.me().then(setUser).catch(() => {});
+    }
+  }, [userProp]); // Section 4 — required when discrepancy exists
 
   const { data: todayTransactions = [] } = useQuery({
     queryKey: ['today-transactions'],
