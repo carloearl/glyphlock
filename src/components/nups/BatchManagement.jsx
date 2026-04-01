@@ -154,6 +154,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
     // Section 3 — filter REAL only for financial totals
     const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
     const cashTx = realTxns.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + (t.total || 0), 0);
+    const cardTx = realTxns.filter(t => ['Credit Card', 'Debit Card'].includes(t.payment_method)).reduce((s, t) => s + (t.total || 0), 0);
     const totalSales = realTxns.reduce((sum, t) => sum + (t.total || 0), 0);
     const expectedCash = (activeBatch?.opening_cash || 0) + cashTx;
     const discrepancy = parsed - expectedCash;
@@ -199,8 +200,8 @@ export default function BatchManagement({ user, onBatchClosed }) {
         metadata: {
           batch_id:                batchBeingClosed?.id,
           closed_at:               new Date().toISOString(),
-          total_cash:              cashTotal,
-          total_card:              cardTotal,
+          total_cash:              cashTx,
+          total_card:              cardTx,
           total_glyphbucks_issued: 0
         },
         severity: hasDiscrepancy ? 'medium' : 'low',
@@ -222,6 +223,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
   const batchTotal = realTxns.reduce((sum, t) => sum + (t.total || 0), 0);
   const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + (t.total || 0), 0);
   const cardTotal = realTxns.filter(t => ['Credit Card', 'Debit Card'].includes(t.payment_method)).reduce((sum, t) => sum + (t.total || 0), 0);
+  // Note: cashTx and cardTx (local vars in handleCloseBatch) are computed fresh during batch close for audit
 
   // D10 — stale batch warning
   const batchAgeHours = activeBatch
