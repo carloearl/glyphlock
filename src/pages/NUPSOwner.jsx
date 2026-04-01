@@ -54,7 +54,7 @@ import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
-import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub.jsx";
+import UnifiedGlyphBucksHub from "../components/nups/UnifiedGlyphBucksHub.jsx";
 import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
 import ContractManager from "../components/nups/ContractManager.jsx";
 import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";

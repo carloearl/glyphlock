@@ -1,4 +1,4 @@
-export default function DreamPalacePrintLayout({
+export default function VenuePrintLayout({
   orderNumber, customerName, customerId, customerAddress, customerState, customerZip,
   purchaserCardName, cardLastSix, cardExp, approvalCode, managerName, hostessName,
   lineItems, dreamDollarValue, surcharge, waitressTip = 0, grandTotal, signature, managerSig, hostessSig,
@@ -6,6 +6,7 @@ export default function DreamPalacePrintLayout({
 }) {
   const venueName = venue?.name || 'N.U.P.S. POS';
   const venueAddress = [venue?.address, venue?.city, venue?.state].filter(Boolean).join(', ') || '';
+  const currencyName = venue?.currency_name || 'Club Currency';
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US');
   const lineTotal = lineItems.reduce((s, li) => s + (li.amount || 0), 0);
@@ -52,7 +53,7 @@ export default function DreamPalacePrintLayout({
     </div>
   </div>
 
-  <div class="warning">Club Currency (GlyphBucks) is not legal tender</div>
+  <div class="warning">${currencyName} is not legal tender</div>
 
   <table>
     <thead>
@@ -74,12 +75,12 @@ export default function DreamPalacePrintLayout({
   <table>
     <tbody>
       <tr>
-        <td><strong>Show Price / Dream Dollar Value (Amount Ordered)</strong></td>
-        <td style="text-align:center;">Dream Dollars</td>
+        <td><strong>Show Price / ${currencyName} Value (Amount Ordered)</strong></td>
+        <td style="text-align:center;">${currencyName}</td>
         <td style="text-align:right;font-weight:bold;">$${dreamDollarValue.toFixed(2)}</td>
       </tr>
       <tr>
-        <td><strong>Processing Fee (30%) for Issuing Dream Dollars</strong></td>
+        <td><strong>Processing Fee (30%) for Issuing ${currencyName}</strong></td>
         <td style="text-align:center;">+</td>
         <td style="text-align:right;font-weight:bold;">$${surcharge.toFixed(2)}</td>
       </tr>
@@ -94,7 +95,7 @@ export default function DreamPalacePrintLayout({
         <td style="text-align:right;font-weight:bold;">$${lineTotal.toFixed(2)}</td>
       </tr>` : ''}
       <tr>
-        <td colspan="2" style="font-size:8px;">** Club Currency (GlyphBucks) is sold as a convenience medium of currency for payment and is not valid anywhere else. The Entertainer can redeem the Club Currency for Cash. Not Legal Tender.</td>
+        <td colspan="2" style="font-size:8px;">** ${currencyName} is sold as a convenience medium of currency for payment and is not valid anywhere else. The Entertainer can redeem the ${currencyName} for Cash. Not Legal Tender.</td>
         <td style="border:2px solid #000;padding:6px;text-align:center;font-weight:bold;background:#f5f5f5;">
           GRAND TOTAL<br/><span style="font-size:14px;">$${grandTotal.toFixed(2)}</span>
         </td>
@@ -108,7 +109,7 @@ export default function DreamPalacePrintLayout({
     <li>You confirm the information in this Order is true and correct.</li>
     <li>You are the authorized signer for the credit card identified in this Order.</li>
     <li>If you do not pay amounts due under this Order, you consent to use of information gathered about you for collection.</li>
-    <li>You have received the non-refundable Club Currency listed in this Order.</li>
+    <li>You have received the non-refundable ${currencyName} listed in this Order.</li>
     <li><strong>You have read and understood the Terms and Conditions on the front and back side of this contract. And Agree.</strong></li>
   </ul>
 
@@ -139,8 +140,8 @@ export default function DreamPalacePrintLayout({
 
   <div class="footer">
     ${venueName} — Sales / Order Receipt | Order#: ${orderNumber} | Date: ${dateStr}<br/>
-    ${venueAddress ? venueAddress + ' | ' : ''}DD form Digital Version v3 — 02-06-2026 | N.U.P.S. Point-of-Sale System<br/>
-    Retain for records. More Terms and Conditions on the back of this order. You Acknowledge Receiving Dream Dollars.
+    ${venueAddress ? venueAddress + ' | ' : ''}N.U.P.S. Point-of-Sale System<br/>
+    Retain for records. More Terms and Conditions on the back of this order. You Acknowledge Receiving ${currencyName}.
   </div>
 </body></html>`;
 }

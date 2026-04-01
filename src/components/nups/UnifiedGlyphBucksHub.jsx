@@ -14,8 +14,7 @@ import TransactionSearch from './glyphbucks/TransactionSearch';
 import ContractViewer from './ContractViewer';
 import FraudAnalyticsDashboard from './FraudAnalyticsDashboard';
 
-export default function UnifiedGlyphBucksHub({ venue_id = "dream_palace", user }) {
-  // FIX-B — press tab visible to manager/owner/admin only
+export default function UnifiedGlyphBucksHub({ venue_id, user }) {
   const canAccessPress = user?.role === 'admin' ||
     ['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER'].includes(user?._highestRole);
   const [activeSubTab, setActiveSubTab] = useState("new-sale");
@@ -61,13 +60,9 @@ export default function UnifiedGlyphBucksHub({ venue_id = "dream_palace", user }
         </TabsList>
 
         <TabsContent value="new-sale" className="mt-4">
-          <GlyphBucksContract 
-            onComplete={() => {
-              setActiveSubTab("archive");
-            }}
-            onCurrencyPrint={(amount, orderNum) => {
-              setActiveSubTab("press");
-            }}
+          <GlyphBucksContract
+            onComplete={() => setActiveSubTab("archive")}
+            onCurrencyPrint={() => setActiveSubTab("press")}
           />
         </TabsContent>
 

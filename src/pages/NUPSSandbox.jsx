@@ -10,7 +10,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import DreamDollarReceiptEngine from "@/components/nups/pos/DreamDollarReceiptEngine";
+import ClubCurrencyReceiptEngine from "@/components/nups/pos/ClubCurrencyReceiptEngine";
 import GlyphBucksContract from "@/components/nups/GlyphBucksContract";
 import HardwareStatusPanel from "@/components/nups/hardware/HardwareStatusPanel";
 import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
@@ -440,7 +440,7 @@ export default function NUPSSandbox() {
               <h2 className="text-xl font-bold text-white">Demo Receipt Preview</h2>
               <Button onClick={() => setShowReceipt(false)} variant="ghost" size="sm">Close</Button>
             </div>
-            <DreamDollarReceiptEngine 
+            <ClubCurrencyReceiptEngine 
               transaction={currentTransaction.transaction}
               batch={currentTransaction.batch}
               onPrint={() => setShowReceipt(false)}

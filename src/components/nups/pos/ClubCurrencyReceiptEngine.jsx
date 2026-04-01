@@ -1,19 +1,19 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { useActiveVenue } from '@/hooks/useActiveVenue';
 
 /**
- * Professional itemized receipt engine for GlyphBucks transactions.
- * Matches printed layout exactly — dynamic height expansion for variable item counts.
+ * Professional itemized receipt engine for Club Currency (GlyphBucks) transactions.
  */
-export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }) {
+export default function ClubCurrencyReceiptEngine({ transaction, batch, onPrint }) {
   const receiptRef = React.useRef();
   const activeVenue = useActiveVenue();
 
   const venueName = activeVenue?.name || 'N.U.P.S. POS';
   const venueAddress = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || '';
   const venuePhone = activeVenue?.phone || '';
+  const currencyName = activeVenue?.currency_name || 'Club Currency';
 
   const handlePrint = () => {
     const printWindow = window.open('', '', 'height=800,width=600');
@@ -54,18 +54,15 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
 
   return (
     <div className="space-y-4">
-      {/* Receipt Preview */}
       <div className="bg-white text-black p-6 rounded-lg shadow-lg max-w-md mx-auto" ref={receiptRef}>
         <div className="receipt">
-          {/* Header */}
           <div className="header">
             <h1>{venueName.toUpperCase()}</h1>
             {venueAddress && <p>{venueAddress}</p>}
             {venuePhone && <p>Tel: {venuePhone}</p>}
-            <p style={{ marginTop: '10px', fontWeight: 'bold' }}>DREAM DOLLAR PURCHASE RECEIPT</p>
+            <p style={{ marginTop: '10px', fontWeight: 'bold' }}>{currencyName.toUpperCase()} PURCHASE RECEIPT</p>
           </div>
 
-          {/* Transaction Info */}
           <div className="section">
             <div className="section-title">TRANSACTION DETAILS</div>
             <div className="row">
@@ -92,7 +89,6 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
             )}
           </div>
 
-          {/* Customer Info */}
           <div className="section">
             <div className="section-title">CUSTOMER</div>
             <div className="row">
@@ -101,23 +97,21 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
             </div>
           </div>
 
-          {/* Itemized GlyphBuckss */}
           <div className="section">
-            <div className="section-title">DREAM DOLLARS PURCHASED</div>
+            <div className="section-title">{currencyName.toUpperCase()} PURCHASED</div>
             <div className="items">
               {batch.denominations?.map((item, idx) => (
                 <div key={idx} className="item">
-                  <span>{item.quantity}x ${item.denomination} GlyphBucks{item.quantity > 1 ? 's' : ''}</span>
+                  <span>{item.quantity}x ${item.denomination} {currencyName}{item.quantity > 1 ? 's' : ''}</span>
                   <span>${item.total_value.toFixed(2)}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Totals */}
           <div className="totals">
             <div className="row">
-              <span>GlyphBucks Face Value:</span>
+              <span>{currencyName} Face Value:</span>
               <span>${batch.total_face_value?.toFixed(2) || '0.00'}</span>
             </div>
             <div className="row">
@@ -130,7 +124,6 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
             </div>
           </div>
 
-          {/* Payment Info */}
           <div className="section">
             <div className="section-title">PAYMENT METHOD</div>
             <div className="row">
@@ -143,16 +136,14 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
             </div>
           </div>
 
-          {/* Barcode */}
           <div className="barcode">
             <div className="barcode-label">TRANSACTION BARCODE</div>
             <div className="barcode-value">{batch.batch_barcode || batch.batch_id}</div>
           </div>
 
-          {/* Footer */}
           <div className="footer">
             <p>Thank you for your business!</p>
-            <p style={{ marginTop: '10px' }}>GlyphBucks are redeemable exclusively at this venue.</p>
+            <p style={{ marginTop: '10px' }}>{currencyName} are redeemable exclusively at this venue.</p>
             <p>Terms and conditions apply. Non-refundable.</p>
             <p style={{ marginTop: '10px', fontSize: '9px' }}>
               This receipt is your proof of purchase. Please retain for your records.
@@ -161,7 +152,6 @@ export default function DreamDollarReceiptEngine({ transaction, batch, onPrint }
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex gap-3 justify-center">
         <Button onClick={handlePrint} className="btn-glow-blue">
           <Printer className="w-4 h-4 mr-2" />

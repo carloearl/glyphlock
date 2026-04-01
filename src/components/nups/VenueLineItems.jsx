@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ArrowRight } from "lucide-react";
 
-export default function DreamPalaceLineItems({
+export default function VenueLineItems({
   lineItems, setLineItems, dreamDollarValue, setDreamDollarValue,
   waitressTip, setWaitressTip,
   surcharge, grandTotal, onBack, onNext, venue = null
@@ -15,7 +15,6 @@ export default function DreamPalaceLineItems({
     setLineItems(prev => {
       const next = [...prev];
       next[idx] = { ...next[idx], [field]: value };
-      // Auto-calc amount
       if (field === 'room_fee' || field === 'product') {
         const rf = field === 'room_fee' ? (parseFloat(value) || 0) : (parseFloat(next[idx].room_fee) || 0);
         const pr = field === 'product' ? (parseFloat(value) || 0) : (parseFloat(next[idx].product) || 0);
@@ -36,7 +35,6 @@ export default function DreamPalaceLineItems({
         <p className="text-xs text-red-400 font-bold">{currencyName} is not legal tender</p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Line items table */}
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
@@ -75,20 +73,16 @@ export default function DreamPalaceLineItems({
           </table>
         </div>
 
-        {/* Pricing section */}
         <div className="bg-gray-800/50 rounded-lg p-3 space-y-3">
-          {/* Show Price / Dream Dollars */}
           <div className="flex items-center justify-between">
             <Label className="text-sm font-bold text-green-400">Show Price / {currencyName} Value *</Label>
             <Input type="number" step="1" value={dreamDollarValue || ''} onChange={e => setDreamDollarValue(parseFloat(e.target.value) || 0)}
               className="w-32 text-right bg-gray-700 border-gray-600 font-bold text-green-400" placeholder="0.00" />
           </div>
-          {/* 30% Processing Fee — read-only, auto-calc */}
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-400">30% Processing Fee (auto)</span>
             <span className="font-bold text-yellow-400">+ ${surcharge.toFixed(2)}</span>
           </div>
-          {/* Waitress Tip */}
           <div className="flex items-center justify-between">
             <Label className="text-sm font-bold text-pink-400">Waitress Tip (Customer Decides)</Label>
             <Input type="number" step="1" value={waitressTip || ''} onChange={e => setWaitressTip(parseFloat(e.target.value) || 0)}

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, CheckCircle2, Loader2 } from "lucide-react";
 
-export default function DreamPalaceStaffSign({
+export default function VenueStaffSign({
   managerName, hostessName, managerSig, setManagerSig,
   hostessSig, setHostessSig, customerName, signature,
   canFinalize, loading, onBack, onFinalize
@@ -22,7 +22,6 @@ export default function DreamPalaceStaffSign({
           <p className="font-bold">⚠️ STAFF ONLY — Hand device to each staff member to sign.</p>
         </div>
 
-        {/* Customer sig confirmation */}
         <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex items-center justify-between">
           <div>
             <div className="text-[10px] text-gray-400">Customer Signature</div>
@@ -32,7 +31,6 @@ export default function DreamPalaceStaffSign({
           <CheckCircle2 className="w-5 h-5 text-green-400" />
         </div>
 
-        {/* Manager */}
         <div className="border border-amber-500/30 rounded-xl p-4 space-y-3">
           <h4 className="text-sm font-bold text-amber-400">Manager Signature</h4>
           <div>
@@ -52,7 +50,6 @@ export default function DreamPalaceStaffSign({
           )}
         </div>
 
-        {/* Hostess */}
         <div className="border border-pink-500/30 rounded-xl p-4 space-y-3">
           <h4 className="text-sm font-bold text-pink-400">Hostess Signature</h4>
           <div>
