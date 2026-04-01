@@ -7,6 +7,10 @@ import TopLineTipBreakdown from "./TopLineTipBreakdown";
 const COLORS = ["#06b6d4", "#8b5cf6", "#f59e0b", "#10b981", "#ef4444"];
 
 export default function OwnerAnalytics({ transactions = [] }) {
+  const realTransactions = transactions.filter(
+    t => !t.mode || t.mode === 'REAL'
+  );
+
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekStart = new Date(todayStart);
@@ -19,7 +23,7 @@ export default function OwnerAnalytics({ transactions = [] }) {
     const byMethod = {};
     const dailyMap = {};
 
-    transactions.forEach((t) => {
+    realTransactions.forEach((t) => {
       const amt = t.total || 0;
       const date = new Date(t.created_date);
       total += amt;
@@ -42,7 +46,7 @@ export default function OwnerAnalytics({ transactions = [] }) {
     }));
 
     return { today, week, month, total, todayCount, weekCount, monthCount, paymentData, dailyData };
-  }, [transactions]);
+  }, [realTransactions]);
 
   const fmt = (n) => "$" + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
@@ -50,13 +54,13 @@ export default function OwnerAnalytics({ transactions = [] }) {
     { label: "Today", value: fmt(stats.today), count: stats.todayCount, icon: DollarSign, color: "text-cyan-400", border: "border-cyan-500/30" },
     { label: "This Week", value: fmt(stats.week), count: stats.weekCount, icon: Calendar, color: "text-blue-400", border: "border-blue-500/30" },
     { label: "This Month", value: fmt(stats.month), count: stats.monthCount, icon: TrendingUp, color: "text-purple-400", border: "border-purple-500/30" },
-    { label: "All Time", value: fmt(stats.total), count: transactions.length, icon: BarChart3, color: "text-green-400", border: "border-green-500/30" },
+    { label: "All Time", value: fmt(stats.total), count: realTransactions.length, icon: BarChart3, color: "text-green-400", border: "border-green-500/30" },
   ];
 
   return (
     <div className="space-y-6">
       {/* Top Line & Tip Breakdown */}
-      <TopLineTipBreakdown transactions={transactions} />
+      <TopLineTipBreakdown transactions={realTransactions} />
 
       {/* Revenue Cards */}
       <div className="stats-grid grid grid-cols-2 lg:grid-cols-4 gap-3">

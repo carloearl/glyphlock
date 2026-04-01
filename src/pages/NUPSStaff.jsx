@@ -8,7 +8,7 @@ import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import BatchManagement from "../components/nups/BatchManagement.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
-import UnifiedGlyphBucksHub from "../components/nups/UnifiedDreamDollarHub";
+import UnifiedGlyphBucksHub from "../components/nups/UnifiedGlyphBucksHub";
 import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
 import ContractManager from "../components/nups/ContractManager.jsx";
 import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
