@@ -139,14 +139,18 @@ Deno.serve(async (req) => {
     });
 
     await base44.asServiceRole.entities.GlyphBucksOrder.create({
-      order_number: order_number || processor_reference,
-      venue_id,
-      status: 'signed',
-      card_token: processor_reference,
-      approval_code,
+      order_number:   order_number || processor_reference,
+      venue_id:       venue_id,
+      status:         'COMPLETE',
+      card_token:     processor_reference,
+      approval_code:  approval_code,
       card_last_four: card_last_four || null,
-      grand_total: paymentIntent.amount / 100,
-      contract_version: 'v3-digital-02-06-2026'
+      grand_total:    paymentIntent.amount / 100,
+      payment_type:   'STRIPE',
+      created_by:     user.email,
+      created_at:     new Date().toISOString(),
+      denomination:   payload.denomination || null,
+      quantity:       payload.quantity || null
     });
 
     return Response.json({

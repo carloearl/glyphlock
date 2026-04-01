@@ -98,19 +98,24 @@ export default function BatchManagement({ user, onBatchClosed }) {
         total_sales: 0,
         transaction_count: 0
       });
+      const resolvedVenueId = newBatch?.venue_id || activeVenue?.id;
+      if (!resolvedVenueId) {
+        throw new Error('BATCH_AUDIT_FAILED: venue_id unavailable');
+      }
       await base44.entities.SystemAuditLog.create({
-        event_type: 'BATCH_OPENED',
-        venue_id: newBatch?.venue_id || activeVenue?.id || null,
-        description: `Batch ${newBatch?.batch_id || newBatch?.id} opened by ${cashierEmail}`,
+        event_type:  'BATCH_OPENED',
+        entity_type: 'POSBatch',
+        entity_id:   newBatch?.id || null,
         actor_email: cashierEmail,
-        resource_id: newBatch?.id || null,
-        metadata: {
-          batch_id: newBatch?.batch_id || newBatch?.id,
-          opened_at: new Date().toISOString(),
+        venue_id:    resolvedVenueId,
+        description: `Batch ${newBatch?.batch_id || newBatch?.id} opened by ${cashierEmail}`,
+        metadata:    {
+          batch_id:     newBatch?.batch_id || newBatch?.id,
+          opened_at:    new Date().toISOString(),
           opening_cash: parsed
         },
-        severity: 'low',
-        status: 'success'
+        severity:    'low',
+        status:      'success'
       });
     } finally {
       setIsOpeningBatch(false);
