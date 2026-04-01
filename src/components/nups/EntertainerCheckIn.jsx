@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useActiveVenue } from '../../hooks/useActiveVenue';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,13 +46,7 @@ export default function EntertainerCheckIn({ user }) {
     refetchInterval: 30000
   });
 
-  const { data: activeVenue } = useQuery({
-    queryKey: ['venue-checkin'],
-    queryFn: async () => {
-      const venues = await base44.entities.Venue.list();
-      return venues[0] || null;
-    }
-  });
+  const activeVenue = useActiveVenue();
 
   const [isCheckingIn, setIsCheckingIn] = useState(false); // B1
   const lastCheckedInRef = React.useRef(null);
@@ -147,12 +142,17 @@ export default function EntertainerCheckIn({ user }) {
       }
 
       // ALL GATES PASSED — proceed to create EntertainerShift
+      const shiftVenueId = activeVenue?.id;
+      if (!shiftVenueId) {
+        throw new Error('SHIFT_AUDIT_FAILED: venue_id unavailable at check-in');
+      }
       return base44.entities.EntertainerShift.create({
         entertainer_id: entertainerId,
         stage_name: entertainer.stage_name,
         check_in_time: new Date().toISOString(),
         location: location,
         role: 'Entertainer',
+        venue_id: shiftVenueId,
         status: 'on_floor'
       });
     },
@@ -200,7 +200,10 @@ export default function EntertainerCheckIn({ user }) {
               total_earnings: (parseFloat(ent.total_earnings) || 0) + shiftEarnings,
             });
           }
-        } catch(e) {}
+        } catch (error) {
+          console.error('Entertainer earnings update failed:', error);
+          toast.error('Earnings update failed: ' + (error.message || 'Unknown error'));
+        }
       }
     },
     onSuccess: () => {

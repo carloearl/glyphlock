@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useActiveVenue } from '../../hooks/useActiveVenue';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import VIPReceiptPrinter from "./VIPReceiptPrinter";
 
 export default function VIPRoomManagement({ user }) {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [contractStep, setContractStep] = useState("form"); // form | contract
@@ -80,6 +82,7 @@ export default function VIPRoomManagement({ user }) {
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
         duration_minutes: data.duration_minutes,
+        venue_id: activeVenue?.id || null,
         total_charge: charge
       });
     },
@@ -93,18 +96,43 @@ export default function VIPRoomManagement({ user }) {
   });
 
   const endSession = useMutation({
-    mutationFn: (roomId) =>
-      base44.entities.VIPRoom.update(roomId, {
+    mutationFn: async (room) => {
+      const resolvedVenueId = activeVenue?.id;
+      if (!resolvedVenueId) {
+        throw new Error('VIP_AUDIT_FAILED: venue_id unavailable on session end');
+      }
+      const sessionDuration = room.start_time
+        ? Math.round((Date.now() - new Date(room.start_time).getTime()) / 60000)
+        : null;
+      await base44.entities.VIPRoom.update(room.id, {
         status: 'available',
         entertainer_id: null,
         entertainer_name: null,
         guest_name: null,
         start_time: null,
         end_time: null
-      }),
+      });
+      await base44.entities.SystemAuditLog.create({
+        event_type:  'VIP_SESSION_ENDED',
+        entity_type: 'VIPRoom',
+        entity_id:   room?.id || null,
+        actor_id:    user?.email,
+        venue_id:    resolvedVenueId,
+        description: `VIP session ended in room ${room?.room_number} by ${user?.email}`,
+        metadata: {
+          room_id:          room?.id,
+          ended_at:         new Date().toISOString(),
+          session_duration: sessionDuration,
+          total_charge:     room?.total_charge || 0
+        },
+        severity: 'low',
+        status:   'success'
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vip-rooms'] });
-    }
+    },
+    onError: (e) => alert(e.message || 'VIP session could not be ended.')
   });
 
   const getRoomStatusColor = (status) => {
@@ -200,7 +228,7 @@ export default function VIPRoomManagement({ user }) {
                         size="sm"
                         variant="outline"
                         className="w-full border-red-500/50 text-red-400"
-                        onClick={() => endSession.mutate(room.id)}
+                        onClick={() => endSession.mutate(room)}
                       >
                         End Session
                       </Button>
