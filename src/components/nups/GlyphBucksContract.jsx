@@ -349,17 +349,16 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       setPaymentConfirmed(false);
       
       try {
-        await base44.entities.AuditEvent.create({
-          event_id: crypto.randomUUID(),
-          timestamp: new Date().toISOString(),
-          actor_id: user.email,
-          actor_role: user.role,
-          venue_id: null,
+        await base44.entities.SystemAuditLog.create({
+          event_type: 'GLYPHBUCKS_PAYMENT_FAILED',
           entity_type: 'GlyphBucksOrder',
           entity_id: orderNumber,
-          action: 'CREATE',
+          actor_id: user.email,
+          actor_role: user.role,
+          venue_id: currentVenueId || null,
           severity: 'CRITICAL',
-          description: `TRANSACTION FAILED: Order ${orderNumber}, error: ${errorMsg}`
+          description: `TRANSACTION FAILED: Order ${orderNumber}, error: ${errorMsg}`,
+          timestamp: new Date().toISOString()
         });
       } catch {}
       

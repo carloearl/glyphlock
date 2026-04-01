@@ -79,6 +79,18 @@ Deno.serve(async (req) => {
         description: `Payment confirmation failed: status=${paymentIntent.status}, order=${order_number}`
       });
 
+      await base44.asServiceRole.entities.SystemAuditLog.create({
+        event_type: 'GLYPHBUCKS_PAYMENT_FAILED',
+        entity_type: 'PaymentIntent',
+        entity_id: payment_intent_id,
+        actor_id: user.email,
+        actor_role: user.role,
+        venue_id,
+        severity: 'WARNING',
+        description: `Payment confirmation failed: status=${paymentIntent.status}, order=${order_number}`,
+        timestamp: new Date().toISOString()
+      });
+
       return Response.json({
         success: false,
         payment_status: paymentIntent.status,
@@ -114,17 +126,16 @@ Deno.serve(async (req) => {
       description: `Payment confirmed for order ${order_number}: $${(paymentIntent.amount / 100).toFixed(2)}`
     });
 
-    await base44.asServiceRole.entities.GlyphBucksOrder.create({
-      order_number: order_number || processor_reference,
+    await base44.asServiceRole.entities.SystemAuditLog.create({
+      event_type: 'GLYPHBUCKS_PAYMENT_CONFIRMED',
+      entity_type: 'PaymentIntent',
+      entity_id: payment_intent_id,
+      actor_id: user.email,
+      actor_role: user.role,
       venue_id,
-      amount: paymentIntent.amount / 100,
-      payment_type: 'STRIPE',
-      status: 'COMPLETE',
-      approval_code,
-      processor_reference,
-      card_last_four,
-      created_by: user.email,
-      created_at: new Date().toISOString(),
+      severity: 'INFO',
+      description: `Payment confirmed for order ${order_number}: $${(paymentIntent.amount / 100).toFixed(2)}`,
+      timestamp: new Date().toISOString()
     });
 
     return Response.json({
