@@ -204,6 +204,7 @@ export default function NUPSOwner() {
     { key: 'glyphbucks',label: 'GlyphBucks',    icon: Coins },
     { key: 'payroll',   label: 'Payroll',       icon: DollarSign },
     { key: 'reports',   label: 'Reports',       icon: FileText },
+    { key: 'analytics', label: 'Analytics',     icon: TrendingUp },
     { key: 'customers', label: 'Customers',     icon: Heart },
     { key: 'inventory', label: 'Inventory',     icon: Package },
     { key: 'audit',     label: 'Audit Log',     icon: Shield },
@@ -410,6 +411,9 @@ export default function NUPSOwner() {
               {canMarketing && <SalesReport transactions={realTransactions} products={products} />}
               <DailySummary transactions={realTransactions} />
             </div>
+          )}
+          {activeModule === 'analytics' && (
+            <OwnerAnalytics user={user} transactions={realTransactions} />
           )}
           {activeModule === 'contracts' && (
             <div className="space-y-4">
