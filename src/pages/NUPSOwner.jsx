@@ -341,7 +341,7 @@ export default function NUPSOwner() {
             <div className="space-y-4">
               {canBatch && <BatchManagement user={user} />}
               <div className="flex gap-2">
-                {[{key:'cash',label:'Cash Register'},{key:'bar',label:'Bar Register'}].map(t => (
+                {[{key:'cash',label:'Door Register'},{key:'bar',label:'Bar Register'}].map(t => (
                   <Button key={t.key} onClick={() => setPosSubTab(t.key)}
                     variant={posSubTab === t.key ? 'default' : 'outline'}
                     className={`min-h-[44px] text-sm ${
@@ -352,7 +352,7 @@ export default function NUPSOwner() {
                 ))}
               </div>
               {posSubTab === 'cash' && <POSCashRegister user={user} />}
-              {posSubTab === 'bar' && <POSBarRegister user={user} />}
+              {posSubTab === 'bar' && <POSCashRegister user={user} />}
             </div>
           )}
           {activeModule === 'door' && <GuestCheckIn />}
