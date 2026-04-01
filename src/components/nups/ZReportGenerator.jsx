@@ -10,6 +10,10 @@ import { FileText, DollarSign, ShoppingCart, Printer, Calendar, Banknote, Users,
 export default function ZReportGenerator({ user: userProp }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState(userProp || null);
+  const [openingCash, setOpeningCash] = useState('');
+  const [closingCash, setClosingCash] = useState('');
+  const [reconciliationNotes, setReconciliationNotes] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (!userProp) {
