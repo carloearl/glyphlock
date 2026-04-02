@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   FlaskConical, Shield, DollarSign, Users, Clock, FileText,
   CreditCard, BarChart3, CheckCircle2, ArrowLeft, Play, Banknote,
-  UserCheck, Music, Crown, AlertTriangle, RefreshCw, Loader2, Printer, Wifi
+  UserCheck, Music, Crown, AlertTriangle, RefreshCw, Loader2, Printer, Wifi,
+  Database, Sparkles, ScanLine, Eye
 } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
@@ -85,6 +86,36 @@ export default function NUPSSandbox() {
   const [resetDone, setResetDone] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [currentTransaction, setCurrentTransaction] = useState(null);
+  const [demoContracts, setDemoContracts] = useState([]);
+  const [loadingContracts, setLoadingContracts] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [contractsLoaded, setContractsLoaded] = useState(false);
+  const [selectedContract, setSelectedContract] = useState(null);
+
+  const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
+
+  const loadDemoContracts = async () => {
+    setLoadingContracts(true);
+    try {
+      const contracts = await base44.entities.VenueContract.filter({ venue_id: DREAM_PALACE_VENUE_ID, is_demo: true });
+      setDemoContracts(contracts || []);
+      setContractsLoaded(true);
+    } catch {
+      setDemoContracts([]);
+    }
+    setLoadingContracts(false);
+  };
+
+  const seedAndLoad = async () => {
+    setSeeding(true);
+    try {
+      await base44.functions.invoke('seedDemoContracts', { clear_existing: true });
+      await loadDemoContracts();
+    } catch (err) {
+      toast.error('Seed failed: ' + err.message);
+    }
+    setSeeding(false);
+  };
 
   const handleResetDemo = async () => {
     setResetting(true);
@@ -382,23 +413,172 @@ export default function NUPSSandbox() {
 
       case "contracts":
         return (
-          <div className="space-y-3">
-            <p className="text-xs text-gray-500">Demo VIP contract lifecycle. Contracts move: Draft → Issued → Signed → Archived.</p>
-            {MOCK_CONTRACTS.map(c => (
-              <div key={c.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.07]">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-bold text-white">{c.entertainer}</div>
-                  <Badge className={STATUS_BADGE[c.status]}>{c.status}</Badge>
-                </div>
-                <div className="text-xs text-gray-400">{c.event}</div>
-                <div className="text-green-400 font-black mt-1">{fmt(c.value)}</div>
-                <div className="flex gap-2 mt-3">
-                  {c.status === "draft" && <Button size="sm" className="text-xs h-7 bg-blue-600/20 border border-blue-500/30 text-blue-400">Issue Contract</Button>}
-                  {c.status === "issued" && <Button size="sm" className="text-xs h-7 bg-green-600/20 border border-green-500/30 text-green-400">Sign Contract</Button>}
-                  {c.status === "signed" && <Button size="sm" className="text-xs h-7 bg-gray-600/20 border border-gray-500/30 text-gray-400">Archive</Button>}
-                </div>
+          <div className="space-y-4">
+            {/* Header + seed button */}
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-black text-white text-sm">Dream Palace — Contract Workflow</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">Live demo records showing full lifecycle: Draft → Signed → Printed → Scanned → Fulfilled</div>
               </div>
-            ))}
+              <div className="flex gap-2">
+                {contractsLoaded && (
+                  <button onClick={loadDemoContracts} disabled={loadingContracts} className="p-1.5 rounded-lg border border-white/10 text-gray-500 hover:text-white transition-colors">
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingContracts ? 'animate-spin' : ''}`} />
+                  </button>
+                )}
+                <Button
+                  onClick={seedAndLoad}
+                  disabled={seeding || loadingContracts}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-xs h-8 px-4 font-bold gap-1.5"
+                >
+                  {seeding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {seeding ? 'Seeding...' : 'Seed Demo Data'}
+                </Button>
+                {!contractsLoaded && (
+                  <Button
+                    onClick={loadDemoContracts}
+                    disabled={loadingContracts}
+                    variant="outline"
+                    className="border-white/10 text-gray-400 text-xs h-8 px-4 gap-1.5"
+                  >
+                    {loadingContracts ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
+                    Load Contracts
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Workflow legend */}
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: 'Draft', color: 'text-gray-400 border-gray-700 bg-gray-800/30' },
+                { label: 'Signed → Print', color: 'text-yellow-400 border-yellow-700 bg-yellow-900/20' },
+                { label: 'Printed → Scan', color: 'text-blue-400 border-blue-700 bg-blue-900/20' },
+                { label: 'Fulfilled', color: 'text-green-400 border-green-700 bg-green-900/20' },
+              ].map(s => (
+                <div key={s.label} className={`border rounded-lg p-1.5 text-center text-[9px] font-bold uppercase tracking-wide ${s.color}`}>{s.label}</div>
+              ))}
+            </div>
+
+            {/* Empty state */}
+            {contractsLoaded && demoContracts.length === 0 && (
+              <div className="text-center py-10 border border-dashed border-white/[0.06] rounded-xl">
+                <Database className="w-8 h-8 text-gray-700 mx-auto mb-2" />
+                <p className="text-gray-600 text-sm">No demo contracts found.</p>
+                <p className="text-gray-700 text-xs mt-1">Click "Seed Demo Data" to populate Dream Palace contracts.</p>
+              </div>
+            )}
+
+            {!contractsLoaded && !loadingContracts && (
+              <div className="text-center py-10 border border-dashed border-white/[0.06] rounded-xl">
+                <FileText className="w-8 h-8 text-gray-700 mx-auto mb-2" />
+                <p className="text-gray-500 text-sm">Click "Load Contracts" or "Seed Demo Data" to begin.</p>
+              </div>
+            )}
+
+            {loadingContracts && (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 text-gray-600 animate-spin" />
+              </div>
+            )}
+
+            {/* Contract cards */}
+            {demoContracts.map(c => {
+              const scanBadge = c.scan_status === 'SCANNED' ? 'text-green-400 border-green-700 bg-green-900/20'
+                : c.scan_status === 'VERIFIED' ? 'text-emerald-400 border-emerald-600 bg-emerald-900/20'
+                : 'text-yellow-400 border-yellow-700 bg-yellow-900/20';
+              const statusBadge = c.status === 'fulfilled' ? STATUS_BADGE.paid
+                : c.status === 'active' ? STATUS_BADGE.issued
+                : c.status === 'draft' ? STATUS_BADGE.draft
+                : STATUS_BADGE.signed;
+
+              return (
+                <div key={c.id} className={`rounded-xl border p-4 space-y-3 transition-all ${
+                  selectedContract?.id === c.id ? 'border-violet-500/40 bg-violet-500/5' : 'border-white/[0.07] bg-white/[0.02]'
+                }`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="font-black text-white">{c.customer_name}</div>
+                      <div className="text-[10px] text-gray-500 font-mono mt-0.5">{c.contract_id}</div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${statusBadge}`}>{c.status?.toUpperCase()}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${scanBadge}`}>{c.scan_status}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-[10px]">
+                    <div className="bg-black/30 rounded-lg p-2">
+                      <div className="text-gray-500">Amount</div>
+                      <div className="text-green-400 font-black text-sm mt-0.5">{fmt(c.contract_amount || 0)}</div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-2">
+                      <div className="text-gray-500">GB Issued</div>
+                      <div className="text-cyan-400 font-black text-sm mt-0.5">{fmt(c.glyphbucks_issued || 0)}</div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-2">
+                      <div className="text-gray-500">Payment</div>
+                      <div className="text-white font-bold text-[11px] mt-0.5">{c.payment_method}</div>
+                    </div>
+                  </div>
+
+                  {c.notes && (
+                    <div className="text-[10px] text-blue-400/70 italic border-l-2 border-blue-700 pl-2">{c.notes}</div>
+                  )}
+
+                  <div className="flex gap-2 flex-wrap">
+                    {c.is_signed && !c.is_printed && (
+                      <span className="text-[10px] px-2.5 py-1 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 font-bold">
+                        ▶ Next: Print Contract
+                      </span>
+                    )}
+                    {c.is_printed && c.scan_status === 'PENDING' && (
+                      <span className="text-[10px] px-2.5 py-1 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold">
+                        ▶ Next: Scan Hardcopy Back
+                      </span>
+                    )}
+                    {c.scan_status === 'SCANNED' && (
+                      <span className="text-[10px] px-2.5 py-1 rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 font-bold">
+                        ✓ Scan Complete
+                      </span>
+                    )}
+                    {c.status === 'draft' && (
+                      <span className="text-[10px] px-2.5 py-1 rounded-lg border border-gray-600 bg-gray-800/40 text-gray-400 font-bold">
+                        ▶ Next: Customer Signs
+                      </span>
+                    )}
+                    <button
+                      onClick={() => setSelectedContract(selectedContract?.id === c.id ? null : c)}
+                      className="text-[10px] px-2.5 py-1 rounded-lg border border-white/10 text-gray-500 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      <Eye className="w-3 h-3" />
+                      {selectedContract?.id === c.id ? 'Hide' : 'Details'}
+                    </button>
+                  </div>
+
+                  {selectedContract?.id === c.id && (
+                    <div className="bg-black/40 border border-white/[0.05] rounded-lg p-3 text-[10px] space-y-1 font-mono">
+                      <div className="text-gray-500 uppercase tracking-widest mb-2">Record Detail</div>
+                      {[
+                        ['Customer', c.customer_name],
+                        ['ID #', c.customer_id_number || '—'],
+                        ['Card Last 4', c.card_last_four || '—'],
+                        ['Approval', c.approval_code || '—'],
+                        ['Signed At', c.signed_at ? new Date(c.signed_at).toLocaleString() : '—'],
+                        ['Scanned At', c.scanned_at ? new Date(c.scanned_at).toLocaleString() : '—'],
+                        ['Scanned By', c.scanned_by || '—'],
+                        ['IP Address', c.ip_address || '—'],
+                      ].map(([k, v]) => (
+                        <div key={k} className="flex gap-2">
+                          <span className="text-gray-600 w-24 flex-shrink-0">{k}:</span>
+                          <span className="text-gray-300">{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         );
 
