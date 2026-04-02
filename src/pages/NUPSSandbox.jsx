@@ -73,6 +73,7 @@ const SECTIONS = [
   { key: "hardware", label: "Hardware Test", icon: Wifi },
   { key: "pos", label: "POS Register", icon: CreditCard },
   { key: "dreamdollar", label: "Dream Dollar Demo", icon: Banknote },
+  { key: "zreport", label: "Z-Report", icon: FileText },
   { key: "staff", label: "Staff & Clock-In", icon: Clock },
   { key: "entertainers", label: "Entertainers", icon: Music },
   { key: "contracts", label: "Contracts", icon: FileText },
@@ -97,6 +98,8 @@ export default function NUPSSandbox() {
   const [workflowStep, setWorkflowStep] = useState(null);
   const [workflowLoading, setWorkflowLoading] = useState(false);
   const [zReportPrinting, setZReportPrinting] = useState(false);
+  const [zReportData, setZReportData] = useState(null);
+  const [loadingZReport, setLoadingZReport] = useState(false);
 
   const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
 
@@ -182,22 +185,57 @@ export default function NUPSSandbox() {
     toast.success('Scan-back complete!');
   };
 
-  const printDemoZReport = (contracts) => {
+  const loadZReportData = async () => {
+    setLoadingZReport(true);
+    try {
+      const [contracts, posTransactions, vipSessions, gbOrders] = await Promise.all([
+        base44.entities.VenueContract.filter({ venue_id: DREAM_PALACE_VENUE_ID, is_demo: true }).catch(() => []),
+        base44.entities.POSTransaction.list('-created_date', 500).catch(() => []),
+        base44.entities.VIPRoom.list('-created_date', 500).catch(() => []),
+        base44.entities.GlyphBucksOrder.list('-created_date', 500).catch(() => [])
+      ]);
+      setZReportData({ contracts, posTransactions, vipSessions, gbOrders });
+    } catch (err) {
+      toast.error('Failed to load Z-Report data');
+    }
+    setLoadingZReport(false);
+  };
+
+  const printDemoZReport = (data) => {
     setZReportPrinting(true);
     const reportId = `Z-DEMO-${Date.now()}`;
     const now = new Date();
+    const { contracts = [], posTransactions = [], vipSessions = [], gbOrders = [] } = data || {};
+    
+    // Contract aggregates
     const totalContracts = contracts.length;
-    const totalValue = contracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
+    const contractTotal = contracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
     const totalGB = contracts.reduce((s, c) => s + (c.glyphbucks_issued || 0), 0);
     const cashContracts = contracts.filter(c => c.payment_method === 'Cash');
     const cardContracts = contracts.filter(c => c.payment_method !== 'Cash');
-    const cashTotal = cashContracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
-    const cardTotal = cardContracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
+    const contractCashTotal = cashContracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
+    const contractCardTotal = cardContracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
+    const contractSurcharge = contracts.reduce((s, c) => s + (c.processing_surcharge || 0), 0);
+    const contractTips = contracts.reduce((s, c) => s + (c.waitress_tip || 0), 0);
     const scanned = contracts.filter(c => c.scan_status === 'SCANNED' || c.scan_status === 'VERIFIED').length;
     const printed = contracts.filter(c => c.is_printed).length;
     const signed = contracts.filter(c => c.is_signed).length;
-    const surchargeTotal = contracts.reduce((s, c) => s + (c.processing_surcharge || 0), 0);
-    const tipTotal = contracts.reduce((s, c) => s + (c.waitress_tip || 0), 0);
+    
+    // POS aggregates
+    const posCashSales = posTransactions.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + (t.total || 0), 0);
+    const posCardSales = posTransactions.filter(t => t.payment_method !== 'Cash').reduce((s, t) => s + (t.total || 0), 0);
+    const posTotal = posCashSales + posCardSales;
+    
+    // VIP aggregates
+    const vipTotal = vipSessions.reduce((s, v) => s + (v.total_charge || 0), 0);
+    
+    // GlyphBucks aggregates
+    const gbTotal = gbOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
+    
+    // Grand totals
+    const cashTotal = contractCashTotal + posCashSales;
+    const cardTotal = contractCardTotal + posCardSales;
+    const grandTotal = contractTotal + posTotal + vipTotal;
 
     const pw = window.open('', '', 'width=800,height=700');
     pw.document.write(`
@@ -225,35 +263,32 @@ export default function NUPSSandbox() {
       <div class='row'><span>Cashier:</span><span>Alex Rivera (Demo)</span></div>
       <div class='row'><span>Venue:</span><span>Dream Palace — Scottsdale, AZ</span></div>
       <div class='row'><span>Batch ID:</span><span>BATCH-DEMO-${now.toISOString().split('T')[0]}</span></div>
-      <h2>CONTRACT SUMMARY</h2>
-      <div class='row'><span>Total Contracts:</span><span>${totalContracts}</span></div>
-      <div class='row'><span>Signed:</span><span>${signed}</span></div>
-      <div class='row'><span>Printed:</span><span>${printed}</span></div>
-      <div class='row'><span>Scanned Back:</span><span>${scanned}</span></div>
+      <h2>ALL SALES SUMMARY</h2>
+      <div class='row'><span>Dream Dollar Contracts:</span><span>${totalContracts} · $${contractTotal.toFixed(2)}</span></div>
+      <div class='row'><span>POS Transactions:</span><span>${posTransactions.length} · $${posTotal.toFixed(2)}</span></div>
+      <div class='row'><span>VIP Room Sessions:</span><span>${vipSessions.length} · $${vipTotal.toFixed(2)}</span></div>
+      <div class='row'><span>GlyphBucks Orders:</span><span>${gbOrders.length} · $${gbTotal.toFixed(2)}</span></div>
       <h2>CASH DRAWER RECONCILIATION</h2>
       <div class='row'><span>Opening Cash (Demo):</span><span>$500.00</span></div>
-      <div class='row'><span>Cash Contract Sales:</span><span>$${cashTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Cash Sales (All Sources):</span><span>$${cashTotal.toFixed(2)}</span></div>
       <div class='row'><span>Expected Cash:</span><span>$${(500 + cashTotal).toFixed(2)}</span></div>
       <div class='row'><span>Closing Cash (Demo):</span><span>$${(500 + cashTotal).toFixed(2)}</span></div>
       <div class='row' style='color:green;font-weight:bold'><span>Cash Over/Short:</span><span>$0.00</span></div>
       <h2>SALES BREAKDOWN</h2>
-      <div class='row'><span>Cash Sales:</span><span>$${cashTotal.toFixed(2)}</span></div>
-      <div class='row'><span>Card Sales:</span><span>$${cardTotal.toFixed(2)}</span></div>
-      <div class='row'><span>Processing Surcharges:</span><span>$${surchargeTotal.toFixed(2)}</span></div>
-      <div class='row'><span>Waitress Tips Collected:</span><span>$${tipTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Total Cash Sales:</span><span>$${cashTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Total Card Sales:</span><span>$${cardTotal.toFixed(2)}</span></div>
+      <div class='row'><span>VIP Room Revenue (Operational):</span><span>$${vipTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Processing Surcharges:</span><span>$${contractSurcharge.toFixed(2)}</span></div>
+      <div class='row'><span>Waitress Tips Collected:</span><span>$${contractTips.toFixed(2)}</span></div>
       <h2>GLYPHBUCKS LEDGER (Liability)</h2>
       <div class='row'><span>GB Issued Today:</span><span>${totalGB.toFixed(2)} GB</span></div>
-      <div class='row'><span>GB Redeemed Today:</span><span>0.00 GB</span></div>
+      <div class='row'><span>GB Orders Placed:</span><span>${gbOrders.length}</span></div>
       <div class='row' style='font-weight:bold'><span>Net GB Liability:</span><span>${totalGB.toFixed(2)} GB</span></div>
       <div style='font-size:9px;color:#666;margin-top:4px;'>GlyphBucks™ is a stored-value liability instrument. Not counted as revenue.</div>
-      <h2>PER-CONTRACT DETAIL</h2>
-      ${contracts.map((c, i) => `
-        <div class='row'><span>${i+1}. ${c.customer_name}</span><span>$${(c.grand_total||c.contract_amount||0).toFixed(2)} · ${c.payment_method}</span></div>
-        <div class='row' style='font-size:10px;color:#666'><span style='padding-left:12px'>→ GB: ${c.glyphbucks_issued||0} · Scan: ${c.scan_status} · Status: ${c.status}</span></div>
-      `).join('')}
       <div class='total'>
         <div class='row'><span>TOTAL CONTRACTS:</span><span>${totalContracts}</span></div>
-        <div class='row'><span>TOTAL SALES (Real Tender):</span><span>$${(cashTotal + cardTotal).toFixed(2)}</span></div>
+        <div class='row'><span>TOTAL POS TRANSACTIONS:</span><span>${posTransactions.length}</span></div>
+        <div class='row'><span>TOTAL SALES (All Tender):</span><span>$${(cashTotal + cardTotal).toFixed(2)}</span></div>
         <div class='row'><span>TOTAL GB ISSUED:</span><span>${totalGB.toFixed(2)} GB</span></div>
       </div>
       <div class='sig'>
@@ -549,38 +584,7 @@ export default function NUPSSandbox() {
               </div>
             ))}
 
-            {/* Z-Report / Batch Close */}
-            {contractsLoaded && demoContracts.length > 0 && (
-              <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-cyan-400" />
-                  <div className="font-black text-white">Close Batch &amp; Print Z-Report</div>
-                </div>
-                <div className="text-xs text-gray-400">End-of-night batch close. Summarizes all {demoContracts.length} demo contracts — cash/card breakdown, GlyphBucks ledger, scan audit — and prints the Z-Report to your printer.</div>
-                <div className="grid grid-cols-3 gap-2 text-[10px]">
-                  <div className="bg-black/40 rounded-lg p-2 text-center">
-                    <div className="text-green-400 font-black text-base">${demoContracts.reduce((s,c)=>s+(c.grand_total||c.contract_amount||0),0).toFixed(2)}</div>
-                    <div className="text-gray-600">Total Value</div>
-                  </div>
-                  <div className="bg-black/40 rounded-lg p-2 text-center">
-                    <div className="text-cyan-400 font-black text-base">{demoContracts.reduce((s,c)=>s+(c.glyphbucks_issued||0),0)}</div>
-                    <div className="text-gray-600">GB Issued</div>
-                  </div>
-                  <div className="bg-black/40 rounded-lg p-2 text-center">
-                    <div className="text-blue-400 font-black text-base">{demoContracts.filter(c=>c.scan_status==='SCANNED'||c.scan_status==='VERIFIED').length}/{demoContracts.length}</div>
-                    <div className="text-gray-600">Scanned</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => printDemoZReport(demoContracts)}
-                  disabled={zReportPrinting}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black text-sm hover:from-cyan-500 hover:to-blue-500 transition-colors"
-                >
-                  <Printer className="w-4 h-4" />
-                  {zReportPrinting ? 'Generating...' : '🖨️ Print Z-Report / Batch Close'}
-                </button>
-              </div>
-            )}
+
           </div>
         );
 
@@ -964,6 +968,71 @@ export default function NUPSSandbox() {
                 </div>
               );
             })}
+          </div>
+        );
+
+      case "zreport":
+        return (
+          <div className="space-y-4">
+            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-3 text-xs text-cyan-400/80">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="w-4 h-4" />
+                <span className="font-bold">END-OF-NIGHT Z-REPORT</span>
+              </div>
+              <p>Comprehensive daily close summarizing all sales sources: Dream Dollar contracts, POS transactions, VIP room revenue, and GlyphBucks ledger. Ready to print.</p>
+            </div>
+
+            <button
+              onClick={loadZReportData}
+              disabled={loadingZReport || zReportPrinting}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black hover:from-cyan-500 hover:to-blue-500 transition-colors"
+            >
+              {loadingZReport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+              {loadingZReport ? 'Loading...' : 'Load Today\'s Sales Data'}
+            </button>
+
+            {zReportData && (
+              <div className="grid md:grid-cols-4 gap-3">
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.07]">
+                  <div className="text-gray-500 text-xs mb-1">Dream Dollar</div>
+                  <div className="text-green-400 font-black text-lg">${(zReportData.contracts || []).reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0).toFixed(2)}</div>
+                  <div className="text-[10px] text-gray-600 mt-1">{(zReportData.contracts || []).length} contracts</div>
+                </div>
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.07]">
+                  <div className="text-gray-500 text-xs mb-1">POS Sales</div>
+                  <div className="text-blue-400 font-black text-lg">${(zReportData.posTransactions || []).reduce((s, t) => s + (t.total || 0), 0).toFixed(2)}</div>
+                  <div className="text-[10px] text-gray-600 mt-1">{(zReportData.posTransactions || []).length} transactions</div>
+                </div>
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.07]">
+                  <div className="text-gray-500 text-xs mb-1">VIP Revenue</div>
+                  <div className="text-pink-400 font-black text-lg">${(zReportData.vipSessions || []).reduce((s, v) => s + (v.total_charge || 0), 0).toFixed(2)}</div>
+                  <div className="text-[10px] text-gray-600 mt-1">{(zReportData.vipSessions || []).length} sessions</div>
+                </div>
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.07]">
+                  <div className="text-gray-500 text-xs mb-1">GB Orders</div>
+                  <div className="text-amber-400 font-black text-lg">${(zReportData.gbOrders || []).reduce((s, o) => s + (o.grand_total || 0), 0).toFixed(2)}</div>
+                  <div className="text-[10px] text-gray-600 mt-1">{(zReportData.gbOrders || []).length} orders</div>
+                </div>
+              </div>
+            )}
+
+            {zReportData && (
+              <button
+                onClick={() => printDemoZReport(zReportData)}
+                disabled={zReportPrinting}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white font-black text-lg hover:from-green-500 hover:to-emerald-500 transition-colors"
+              >
+                <Printer className="w-5 h-5" />
+                {zReportPrinting ? 'Generating...' : '🖨️ Print Z-Report'}
+              </button>
+            )}
+
+            {!zReportData && !loadingZReport && (
+              <div className="text-center py-12 border border-dashed border-white/[0.06] rounded-xl">
+                <FileText className="w-8 h-8 text-gray-700 mx-auto mb-2" />
+                <p className="text-gray-500 text-sm">Click above to load today's sales data from all sources.</p>
+              </div>
+            )}
           </div>
         );
 
