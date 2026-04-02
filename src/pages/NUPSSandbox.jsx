@@ -435,7 +435,7 @@ export default function NUPSSandbox() {
       case "dreamdollar":
         return (
           <div className="space-y-4">
-            {/* Workflow overlays */}
+            {/* Workflow overlays - for clarity in overlaid modal */}
             {workflowStep === 'print' && workflowContract && (
               <div className="fixed inset-0 z-[9999] bg-black/90 overflow-y-auto">
                 <div className="max-w-3xl mx-auto p-4">
@@ -476,7 +476,7 @@ export default function NUPSSandbox() {
               </div>
             )}
 
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-400/80">
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-300">
               <div className="flex items-center gap-2 mb-2">
                 <Banknote className="w-4 h-4" />
                 <span className="font-bold">DREAM PALACE — GLYPHBUCKS CONTRACT WORKFLOW</span>
@@ -486,7 +486,7 @@ export default function NUPSSandbox() {
 
             {/* Seed / load controls */}
             <div className="flex items-center justify-between">
-              <div className="text-xs text-gray-500">{contractsLoaded ? `${demoContracts.length} demo contracts loaded` : 'Load Dream Palace demo contracts to begin'}</div>
+              <div className="text-xs text-gray-300">{contractsLoaded ? `${demoContracts.length} demo contracts loaded` : 'Load Dream Palace demo contracts to begin'}</div>
               <div className="flex gap-2">
                 {contractsLoaded && <button onClick={loadDemoContracts} disabled={loadingContracts} className="p-1.5 rounded-lg border border-white/10 text-gray-500 hover:text-white"><RefreshCw className={`w-3.5 h-3.5 ${loadingContracts ? 'animate-spin' : ''}`} /></button>}
                 <Button onClick={seedAndLoad} disabled={seeding || loadingContracts} className="bg-gradient-to-r from-blue-600 to-indigo-600 text-xs h-8 px-4 font-bold gap-1.5">
@@ -514,15 +514,15 @@ export default function NUPSSandbox() {
 
             {!contractsLoaded && !loadingContracts && (
               <div className="text-center py-10 border border-dashed border-white/[0.06] rounded-xl">
-                <Banknote className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm">Click "Seed Demo Contracts" to populate 4 Dream Palace records.</p>
+                <Banknote className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-300 text-sm">Click "Seed Demo Contracts" to populate 4 Dream Palace records.</p>
               </div>
             )}
             {loadingContracts && <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-gray-600 animate-spin" /></div>}
             {contractsLoaded && demoContracts.length === 0 && (
               <div className="text-center py-10 border border-dashed border-white/[0.06] rounded-xl">
-                <Database className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-                <p className="text-gray-600 text-sm">No demo contracts found. Click "Seed Demo Contracts".</p>
+                <Database className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-300 text-sm">No demo contracts found. Click "Seed Demo Contracts".</p>
               </div>
             )}
 
@@ -531,12 +531,12 @@ export default function NUPSSandbox() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <div className="font-black text-white">{c.customer_name}</div>
-                    <div className="text-[10px] text-gray-500 font-mono">{c.contract_id}</div>
-                    {c.demo_label && <div className="text-[10px] text-blue-400/70 italic mt-0.5">{c.demo_label}</div>}
+                    <div className="text-[10px] text-gray-400 font-mono">{c.contract_id}</div>
+                    {c.demo_label && <div className="text-[10px] text-blue-300 italic mt-0.5">{c.demo_label}</div>}
                   </div>
                   <div className="text-right">
                     <div className="text-green-400 font-black">${(c.grand_total || c.contract_amount || 0).toFixed(2)}</div>
-                    <div className="text-[10px] text-gray-600">{c.payment_method}</div>
+                    <div className="text-[10px] text-gray-400">{c.payment_method}</div>
                   </div>
                 </div>
 
@@ -690,22 +690,22 @@ export default function NUPSSandbox() {
       case "staff":
         return (
           <div className="space-y-4">
-            <p className="text-xs text-gray-500">Demo staff and clock-in status. In production, staff enter a PIN to clock in/out.</p>
+            <p className="text-xs text-gray-300">Demo staff and clock-in status. In production, staff enter a PIN to clock in/out.</p>
             {MOCK_USERS.map(u => (
               <div key={u.id} className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/[0.07]">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-600 flex items-center justify-center font-black text-white">{u.name[0]}</div>
                 <div className="flex-1">
-                  <div className="font-bold text-white">{u.name}</div>
-                  <div className="text-xs text-gray-500">{u.email}</div>
-                </div>
+                   <div className="font-bold text-white">{u.name}</div>
+                   <div className="text-xs text-gray-400">{u.email}</div>
+                 </div>
                 <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20">{u.role}</Badge>
               </div>
             ))}
             <div className="mt-4">
-              <p className="text-xs text-gray-500 mb-2">Active Shifts</p>
+              <p className="text-xs text-gray-300 mb-2">Active Shifts</p>
               {MOCK_SHIFTS.map(s => (
                 <div key={s.id} className="flex items-center justify-between p-3 mb-2 rounded-lg bg-green-500/5 border border-green-500/20">
-                  <div><div className="font-bold text-white text-sm">{s.name}</div><div className="text-xs text-gray-500">In since {s.in}</div></div>
+                   <div><div className="font-bold text-white text-sm">{s.name}</div><div className="text-xs text-gray-400">In since {s.in}</div></div>
                   <div className="text-green-400 font-mono text-sm font-bold">{s.duration}</div>
                 </div>
               ))}
@@ -716,13 +716,13 @@ export default function NUPSSandbox() {
       case "entertainers":
         return (
           <div className="space-y-3">
-            <p className="text-xs text-gray-500">Demo entertainer dashboard. Shows check-in status, earnings, and VIP sessions.</p>
+            <p className="text-xs text-gray-300">Demo entertainer dashboard. Shows check-in status, earnings, and VIP sessions.</p>
             {MOCK_ENTERTAINERS.map(e => (
               <div key={e.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.07] space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-black text-white text-base">{e.name}</div>
-                    <div className="text-xs text-gray-500">{e.legal}</div>
+                    <div className="text-xs text-gray-400">{e.legal}</div>
                   </div>
                   <Badge className={STATUS_BADGE[e.status]}>{e.status.replace("_", " ")}</Badge>
                 </div>
@@ -742,7 +742,7 @@ export default function NUPSSandbox() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-black text-white text-sm">Dream Palace — Contract Workflow</div>
-                <div className="text-[10px] text-gray-500 mt-0.5">Live demo records showing full lifecycle: Draft → Signed → Printed → Scanned → Fulfilled</div>
+                <div className="text-[10px] text-gray-400 mt-0.5">Live demo records showing full lifecycle: Draft → Signed → Printed → Scanned → Fulfilled</div>
               </div>
               <div className="flex gap-2">
                 {contractsLoaded && (
@@ -787,16 +787,16 @@ export default function NUPSSandbox() {
             {/* Empty state */}
             {contractsLoaded && demoContracts.length === 0 && (
               <div className="text-center py-10 border border-dashed border-white/[0.06] rounded-xl">
-                <Database className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-                <p className="text-gray-600 text-sm">No demo contracts found.</p>
-                <p className="text-gray-700 text-xs mt-1">Click "Seed Demo Data" to populate Dream Palace contracts.</p>
+                <Database className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-300 text-sm">No demo contracts found.</p>
+                <p className="text-gray-400 text-xs mt-1">Click "Seed Demo Data" to populate Dream Palace contracts.</p>
               </div>
             )}
 
             {!contractsLoaded && !loadingContracts && (
               <div className="text-center py-10 border border-dashed border-white/[0.06] rounded-xl">
-                <FileText className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm">Click "Load Contracts" or "Seed Demo Data" to begin.</p>
+                <FileText className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-300 text-sm">Click "Load Contracts" or "Seed Demo Data" to begin.</p>
               </div>
             )}
 
@@ -866,7 +866,7 @@ export default function NUPSSandbox() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <div className="font-black text-white">{c.customer_name}</div>
-                      <div className="text-[10px] text-gray-500 font-mono mt-0.5">{c.contract_id}</div>
+                      <div className="text-[10px] text-gray-400 font-mono mt-0.5">{c.contract_id}</div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${statusBadge}`}>{c.status?.toUpperCase()}</span>
@@ -974,7 +974,7 @@ export default function NUPSSandbox() {
       case "zreport":
         return (
           <div className="space-y-4">
-            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-3 text-xs text-cyan-400/80">
+            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-3 text-xs text-cyan-300">
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="w-4 h-4" />
                 <span className="font-bold">END-OF-NIGHT Z-REPORT</span>
@@ -1029,8 +1029,8 @@ export default function NUPSSandbox() {
 
             {!zReportData && !loadingZReport && (
               <div className="text-center py-12 border border-dashed border-white/[0.06] rounded-xl">
-                <FileText className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm">Click above to load today's sales data from all sources.</p>
+                <FileText className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-300 text-sm">Click above to load today's sales data from all sources.</p>
               </div>
             )}
           </div>
@@ -1039,7 +1039,7 @@ export default function NUPSSandbox() {
       case "payroll":
         return (
           <div className="space-y-3">
-            <p className="text-xs text-gray-500">Demo payroll records. Manager can approve and mark as paid.</p>
+            <p className="text-xs text-gray-300">Demo payroll records. Manager can approve and mark as paid.</p>
             {MOCK_PAYROLL.map(p => (
               <div key={p.name} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.07]">
                 <div className="flex items-center justify-between mb-2">
