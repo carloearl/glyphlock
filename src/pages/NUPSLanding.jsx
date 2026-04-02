@@ -33,7 +33,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#010009;}
   <div class="hero">NUPS</div>
   <div class="sub">Nexus Unified Portal System</div>
   <div class="tag">Venue Technology &nbsp;&middot;&nbsp; GlyphLock LLC</div>
-  <a class="cta" href="#" id="enterBtn">Enter Platform</a>
+  <a class="cta" href="#" id="enterBtn">&#9654;&nbsp; Enter the NUPS</a>
 </div>
 <div id="hint">DRAG &nbsp;&middot;&nbsp; SCROLL</div>
 <button id="snd">&#9835; SOUND</button>
@@ -88,6 +88,7 @@ for(let i=0;i<sparkN;i++){const phi=Math.acos(1-2*(i+.5)/sparkN);const theta=Mat
 const spkGeo=new THREE.BufferGeometry();spkGeo.setAttribute('position',new THREE.BufferAttribute(spkPos,3));
 const spkMesh=new THREE.Points(spkGeo,new THREE.PointsMaterial({color:0x00d4ff,size:.058,transparent:true,opacity:.80,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,sizeAttenuation:true}));spkMesh.renderOrder=8;logoGroup.add(spkMesh);
 const logoImg=new Image();
+logoImg.crossOrigin='anonymous';
 logoImg.onload=()=>{const tex=new THREE.Texture(logoImg);tex.needsUpdate=true;const m1=new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.18,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,depthWrite:false,depthTest:false,alphaTest:.01});const p1=new THREE.Mesh(new THREE.PlaneGeometry(3.1,3.1),m1);p1.position.z=-.35;p1.renderOrder=9;logoGroup.add(p1);const m2=new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,depthWrite:false,depthTest:false,alphaTest:.02});const p2=new THREE.Mesh(new THREE.PlaneGeometry(2.8,2.8),m2);p2.position.z=-.12;p2.renderOrder=10;logoGroup.add(p2);const m3=new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.96,side:THREE.DoubleSide,depthWrite:false,depthTest:false,alphaTest:.04});const p3=new THREE.Mesh(new THREE.PlaneGeometry(2.6,2.6),m3);p3.position.z=0;p3.renderOrder=11;logoGroup.add(p3);const m4=new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.10,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,depthWrite:false,depthTest:false,alphaTest:.01});const p4=new THREE.Mesh(new THREE.PlaneGeometry(2.4,2.4),m4);p4.position.z=.20;p4.renderOrder=12;logoGroup.add(p4);const scM=new THREE.MeshBasicMaterial({color:0x88eeff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,depthWrite:false,depthTest:false});const sc=new THREE.Mesh(new THREE.PlaneGeometry(2.8,.025),scM);sc.position.z=.22;sc.renderOrder=13;logoGroup.add(sc);logoGroup.userData.scan=sc;logoGroup.userData.layers=[m1,m2,m3,m4];};
 logoImg.src='https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/ef67c8dbe_GLLogo.png';
 const RPOOL=Array.from({length:14},()=>{const mat=new THREE.MeshBasicMaterial({color:0x00d4ff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,depthWrite:false});const mesh=new THREE.Mesh(new THREE.RingGeometry(.05,.14,64),mat);mesh.rotation.x=-Math.PI/2;mesh.renderOrder=0;scene.add(mesh);return{mesh,mat,active:false,prog:0};});
