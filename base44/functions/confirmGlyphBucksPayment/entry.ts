@@ -35,14 +35,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing or invalid payment_intent_id' }, { status: 400 });
     }
 
-    const existingConfirm = await base44.asServiceRole.entities.AuditEvent.filter({
+    const existingConfirm = await base44.asServiceRole.entities.SystemAuditLog.filter({
       entity_type: 'PaymentIntent',
       entity_id: payment_intent_id,
-      action: 'CONFIRM'
+      event_type: 'GLYPHBUCKS_PAYMENT_CONFIRMED'
     }, null, 1);
 
     if (existingConfirm.length > 0) {
-      const cached = JSON.parse(existingConfirm[0].after_state);
+      const cached = existingConfirm[0].metadata || {};
       return Response.json({
         success: true,
         payment_status: 'succeeded',
@@ -66,18 +66,6 @@ Deno.serve(async (req) => {
     }
 
     if (paymentIntent.status !== 'succeeded') {
-      await base44.asServiceRole.entities.AuditEvent.create({
-        event_id: crypto.randomUUID(),
-        timestamp: new Date().toISOString(),
-        actor_id: user.email,
-        actor_role: user.role,
-        venue_id,
-        entity_type: 'PaymentIntent',
-        entity_id: payment_intent_id,
-        action: 'ACCESS',
-        severity: 'WARNING',
-        description: `Payment confirmation failed: status=${paymentIntent.status}, order=${order_number}`
-      });
 
       await base44.asServiceRole.entities.SystemAuditLog.create({
         event_type: 'GLYPHBUCKS_PAYMENT_FAILED',
@@ -106,25 +94,6 @@ Deno.serve(async (req) => {
       : null;
 
     const card_last_four = charge?.payment_method_details?.card?.last4 || null;
-
-    await base44.asServiceRole.entities.AuditEvent.create({
-      event_id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-      actor_id: user.email,
-      actor_role: user.role,
-      venue_id,
-      entity_type: 'PaymentIntent',
-      entity_id: payment_intent_id,
-      action: 'CONFIRM',
-      after_state: JSON.stringify({
-        status: paymentIntent.status,
-        amount: paymentIntent.amount / 100,
-        approval_code,
-        card_last_four
-      }),
-      severity: 'INFO',
-      description: `Payment confirmed for order ${order_number}: $${(paymentIntent.amount / 100).toFixed(2)}`
-    });
 
     await base44.asServiceRole.entities.SystemAuditLog.create({
       event_type: 'GLYPHBUCKS_PAYMENT_CONFIRMED',

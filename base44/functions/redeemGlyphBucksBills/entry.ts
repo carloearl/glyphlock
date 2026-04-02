@@ -83,17 +83,16 @@ Deno.serve(async (req) => {
     const foundSerials = new Set(bills.map(b => b.serial_number));
     const notFound = serial_numbers.filter(s => !foundSerials.has(s));
     if (notFound.length > 0) {
-      await base44.asServiceRole.entities.AuditEvent.create({
-        event_id: crypto.randomUUID(),
-        timestamp: new Date().toISOString(),
-        actor_id: user.email,
-        actor_role: user.role,
-        venue_id,
+      await base44.asServiceRole.entities.SystemAuditLog.create({
+        event_type: 'GLYPHBUCKS_FRAUD_ATTEMPT',
         entity_type: 'GlyphBucksBill',
         entity_id: 'FRAUD_ATTEMPT',
-        action: 'ACCESS',
-        severity: 'CRITICAL',
-        description: `FRAUD ALERT: Attempted redemption of non-existent bills: ${notFound.join(', ')}`
+        actor_id: user.email,
+        venue_id,
+        severity: 'critical',
+        description: `FRAUD ALERT: Attempted redemption of non-existent bills: ${notFound.join(', ')}`,
+        status: 'alert',
+        timestamp: new Date().toISOString()
       });
 
       return Response.json({
@@ -115,17 +114,16 @@ Deno.serve(async (req) => {
           redeemed_by: bill.redeemed_by_contractor_id
         });
         
-        await base44.asServiceRole.entities.AuditEvent.create({
-          event_id: crypto.randomUUID(),
-          timestamp: new Date().toISOString(),
-          actor_id: user.email,
-          actor_role: user.role,
-          venue_id,
+        await base44.asServiceRole.entities.SystemAuditLog.create({
+          event_type: 'GLYPHBUCKS_REPLAY_ATTACK',
           entity_type: 'GlyphBucksBill',
           entity_id: bill.serial_number,
-          action: 'ACCESS',
-          severity: 'WARNING',
-          description: `REPLAY ATTACK: Attempted re-redemption of bill ${bill.serial_number} (originally redeemed ${bill.redeemed_at})`
+          actor_id: user.email,
+          venue_id,
+          severity: 'medium',
+          description: `REPLAY ATTACK: Attempted re-redemption of bill ${bill.serial_number} (originally redeemed ${bill.redeemed_at})`,
+          status: 'alert',
+          timestamp: new Date().toISOString()
         });
       } else if (bill.status === 'voided') {
         errors.push(`Bill ${bill.serial_number} is voided`);
@@ -187,25 +185,24 @@ Deno.serve(async (req) => {
 
     await Promise.all(updatePromises);
 
-    await base44.asServiceRole.entities.AuditEvent.create({
-      event_id: crypto.randomUUID(),
-      timestamp: redemptionTime,
-      actor_id: user.email,
-      actor_role: user.role,
-      venue_id,
+    await base44.asServiceRole.entities.SystemAuditLog.create({
+      event_type: 'GLYPHBUCKS_BILLS_REDEEMED',
       entity_type: 'ContractorPayout',
       entity_id: payout_id,
-      action: 'CREATE',
-      after_state: JSON.stringify({
+      actor_id: user.email,
+      venue_id,
+      severity: 'low',
+      description: `GlyphBucks redemption: ${valid_bills.length} bills, contractor ${contractor_name}, payout $${total_payout.toFixed(2)}`,
+      metadata: {
         payout_id,
         contractor_id,
         bills_count: valid_bills.length,
         total_face_value,
         total_payout,
         redemption_rate: VERIFIED_REDEMPTION_RATE
-      }),
-      severity: 'INFO',
-      description: `GlyphBucks redemption: ${valid_bills.length} bills, contractor ${contractor_name}, payout $${total_payout.toFixed(2)}`
+      },
+      status: 'success',
+      timestamp: redemptionTime
     });
 
     return Response.json({

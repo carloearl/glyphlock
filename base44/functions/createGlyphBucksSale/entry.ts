@@ -98,17 +98,16 @@ Deno.serve(async (req) => {
       issued_by: user.email
       });
     } catch (dbError) {
-      await base44.asServiceRole.entities.AuditEvent.create({
-        event_id: crypto.randomUUID(),
-        timestamp: new Date().toISOString(),
-        actor_id: user.email,
-        actor_role: user.role,
-        venue_id,
+      await base44.asServiceRole.entities.SystemAuditLog.create({
+        event_type: 'GLYPHBUCKS_RECONCILIATION_NEEDED',
         entity_type: 'GlyphBucksBatch',
         entity_id: processor_reference,
-        action: 'CREATE',
-        severity: 'CRITICAL',
-        description: `RECONCILIATION_NEEDED: Payment succeeded (${processor_reference}) but batch creation failed. Charged: $${total_charged}, Error: ${dbError.message}`
+        actor_id: user.email,
+        venue_id,
+        severity: 'critical',
+        description: `RECONCILIATION_NEEDED: Payment succeeded (${processor_reference}) but batch creation failed. Charged: $${total_charged}, Error: ${dbError.message}`,
+        status: 'alert',
+        timestamp: new Date().toISOString()
       });
 
       throw new Error('CRITICAL: Payment processed but record creation failed. Contact support immediately with code: ' + processor_reference);
@@ -139,17 +138,16 @@ Deno.serve(async (req) => {
     } catch (billError) {
       await base44.asServiceRole.entities.GlyphBucksBatch.delete(batch.id);
       
-      await base44.asServiceRole.entities.AuditEvent.create({
-        event_id: crypto.randomUUID(),
-        timestamp: new Date().toISOString(),
-        actor_id: user.email,
-        actor_role: user.role,
-        venue_id,
+      await base44.asServiceRole.entities.SystemAuditLog.create({
+        event_type: 'GLYPHBUCKS_BATCH_ROLLBACK',
         entity_type: 'GlyphBucksBill',
         entity_id: batch_id,
-        action: 'CREATE',
-        severity: 'CRITICAL',
-        description: `BATCH ROLLBACK: Bill creation failed, batch ${batch_id} deleted. Payment: ${processor_reference}, Error: ${billError.message}`
+        actor_id: user.email,
+        venue_id,
+        severity: 'critical',
+        description: `BATCH ROLLBACK: Bill creation failed, batch ${batch_id} deleted. Payment: ${processor_reference}, Error: ${billError.message}`,
+        status: 'alert',
+        timestamp: new Date().toISOString()
       });
 
       throw new Error('Bill generation failed — batch rolled back. Payment may need refund. Code: ' + processor_reference);
@@ -179,24 +177,23 @@ Deno.serve(async (req) => {
 
     await base44.asServiceRole.entities.BarcodeRegistry.bulkCreate(barcode_entries);
 
-    await base44.asServiceRole.entities.AuditEvent.create({
-      event_id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-      actor_id: user.email,
-      actor_role: user.role,
-      venue_id,
+    await base44.asServiceRole.entities.SystemAuditLog.create({
+      event_type: 'GLYPHBUCKS_SALE_CREATED',
       entity_type: 'GlyphBucksBatch',
       entity_id: batch_id,
-      action: 'CREATE',
-      after_state: JSON.stringify({ 
+      actor_id: user.email,
+      venue_id,
+      severity: 'low',
+      description: `GlyphBucks sale created: ${bills.length} bills, face value $${total_face_value}, charged $${total_charged}`,
+      metadata: {
         batch_id,
         total_face_value,
         total_charged,
         bills_count: bills.length,
         processor_reference
-      }),
-      severity: 'INFO',
-      description: `GlyphBucks sale created: ${bills.length} bills, face value $${total_face_value}, charged $${total_charged}`
+      },
+      status: 'success',
+      timestamp: new Date().toISOString()
     });
 
     return Response.json({

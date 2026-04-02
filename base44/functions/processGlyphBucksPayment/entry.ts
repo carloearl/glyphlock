@@ -88,16 +88,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing or invalid order_number' }, { status: 400 });
     }
 
-    const existingPayment = await base44.asServiceRole.entities.AuditEvent.filter({
+    const existingPayment = await base44.asServiceRole.entities.SystemAuditLog.filter({
       entity_type: 'PaymentIntent',
-      description: { $regex: order_number }
-    }, null, 1);
+      event_type: 'GLYPHBUCKS_PAYMENT_INTENT_CREATED'
+    }, null, 100);
 
-    if (existingPayment.length > 0) {
+    const isDuplicate = existingPayment.some(e => e.description && e.description.includes(order_number));
+    if (isDuplicate) {
       return Response.json({
         error: 'DUPLICATE_ORDER',
-        message: 'This order number has already been processed',
-        existing_event_id: existingPayment[0].event_id
+        message: 'This order number has already been processed'
       }, { status: 409 });
     }
 
@@ -118,23 +118,22 @@ Deno.serve(async (req) => {
       },
     });
 
-    await base44.asServiceRole.entities.AuditEvent.create({
-      event_id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-      actor_id: user.email,
-      actor_role: user.role,
-      venue_id,
+    await base44.asServiceRole.entities.SystemAuditLog.create({
+      event_type: 'GLYPHBUCKS_PAYMENT_INTENT_CREATED',
       entity_type: 'PaymentIntent',
       entity_id: paymentIntent.id,
-      action: 'CREATE',
-      after_state: JSON.stringify({
+      actor_id: user.email,
+      venue_id,
+      severity: 'low',
+      description: `Payment intent created for order ${order_number}: $${amount}`,
+      metadata: {
         amount,
         order_number,
         status: paymentIntent.status,
         payment_intent_id: paymentIntent.id
-      }),
-      severity: 'INFO',
-      description: `Payment intent created for order ${order_number}: $${amount}`
+      },
+      status: 'success',
+      timestamp: new Date().toISOString()
     });
 
     return Response.json({
