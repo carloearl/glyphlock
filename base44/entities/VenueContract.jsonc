@@ -106,6 +106,29 @@
     },
     "notes": {
       "type": "string"
+    },
+    "scanned_document_url": {
+      "type": "string",
+      "description": "URL of the uploaded signed hardcopy scan"
+    },
+    "scanned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when document was scanned"
+    },
+    "scanned_by": {
+      "type": "string",
+      "description": "Email of staff who scanned the document"
+    },
+    "scan_status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "SCANNED",
+        "VERIFIED"
+      ],
+      "default": "PENDING",
+      "description": "Status of the physical document scan"
     }
   },
   "required": [
