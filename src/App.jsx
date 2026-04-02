@@ -74,7 +74,7 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSGateway" element={<NUPSGateway />} />
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="*" element={<NUPSLanding />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     );
   }
