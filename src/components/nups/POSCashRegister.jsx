@@ -222,7 +222,32 @@ export default function POSCashRegister({ user, station = 'door' }) {
       ...details,
     };
     try {
-      await createTransaction.mutateAsync(transactionData);
+      const newTx = await createTransaction.mutateAsync(transactionData);
+      const resolvedVenueId = activeVenue?.id || null;
+      if (resolvedVenueId) {
+        try {
+          await base44.entities.SystemAuditLog.create({
+            event_type:  'POS_TRANSACTION_CREATED',
+            entity_type: 'POSTransaction',
+            entity_id:   newTx?.id || null,
+            actor_id:    user?.email || null,
+            venue_id:    resolvedVenueId,
+            description: `Transaction created — ${paymentMethod || 'Cash'} $${total.toFixed(2)}`,
+            metadata: {
+              transaction_id: newTx?.id,
+              payment_type:   paymentMethod || 'Cash',
+              amount:         total,
+              batch_id:       activeBatch?.id || null,
+              created_at:     new Date().toISOString()
+            },
+            severity: 'low',
+            status:   'success'
+          });
+        } catch (auditErr) {
+          console.error('TRANSACTION_AUDIT_FAILED:', auditErr);
+          // Soft fail — do not rethrow. Sale is complete.
+        }
+      }
       if (selectedCustomer?.id) {
         await base44.entities.POSCustomer.update(selectedCustomer.id, {
           visit_count: (selectedCustomer.visit_count || 0) + 1,
