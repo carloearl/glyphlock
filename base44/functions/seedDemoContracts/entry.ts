@@ -155,23 +155,24 @@ Deno.serve(async (req) => {
     const { clear_existing = false } = payload;
 
     if (clear_existing) {
-      const existing = await base44.asServiceRole.entities.VenueContract.filter({
+      const existing = await base44.entities.VenueContract.filter({
         venue_id: DREAM_PALACE_VENUE_ID,
         is_demo: true
       });
-      await Promise.all(existing.map(c => base44.asServiceRole.entities.VenueContract.delete(c.id)));
+      await Promise.all(existing.map(c => base44.entities.VenueContract.delete(c.id)));
     }
 
     const created = [];
     for (let i = 0; i < MOCK_CONTRACTS.length; i++) {
-      const contract = await base44.asServiceRole.entities.VenueContract.create(MOCK_CONTRACTS[i]);
+      const contract = await base44.entities.VenueContract.create(MOCK_CONTRACTS[i]);
       created.push({ contract, lineItems: MOCK_LINE_ITEMS_MAP[i] });
     }
 
-    await base44.asServiceRole.entities.SystemAuditLog.create({
+    await base44.entities.SystemAuditLog.create({
       event_type: 'DEMO_DATA_SEEDED',
       entity_type: 'VenueContract',
       actor_id: user.email,
+      actor_email: user.email,
       venue_id: DREAM_PALACE_VENUE_ID,
       description: `Demo contract workflow data seeded by ${user.email} — ${MOCK_CONTRACTS.length} contracts created`,
       severity: 'low',
