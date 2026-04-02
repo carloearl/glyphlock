@@ -28,6 +28,19 @@
     "customer_name": {
       "type": "string"
     },
+    "customer_id_number": {
+      "type": "string",
+      "description": "Government ID number of customer"
+    },
+    "customer_address": {
+      "type": "string"
+    },
+    "customer_state": {
+      "type": "string"
+    },
+    "customer_zip": {
+      "type": "string"
+    },
     "entertainer_id": {
       "type": "string",
       "description": "Optional \u2014 reference to Entertainer if contract involves a performer"
@@ -42,7 +55,19 @@
     "glyphbucks_issued": {
       "type": "number",
       "default": 0,
-      "description": "GlyphBucks face value issued under this contract (optional)"
+      "description": "GlyphBucks face value issued under this contract"
+    },
+    "processing_surcharge": {
+      "type": "number",
+      "default": 0
+    },
+    "waitress_tip": {
+      "type": "number",
+      "default": 0
+    },
+    "grand_total": {
+      "type": "number",
+      "default": 0
     },
     "glyphbucks_transaction_id": {
       "type": "string",
@@ -66,6 +91,21 @@
         "Split"
       ],
       "default": "Cash"
+    },
+    "purchaser_card_name": {
+      "type": "string"
+    },
+    "card_last_four": {
+      "type": "string"
+    },
+    "card_exp": {
+      "type": "string"
+    },
+    "approval_code": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
     },
     "is_printed": {
       "type": "boolean",
@@ -129,6 +169,15 @@
       ],
       "default": "PENDING",
       "description": "Status of the physical document scan"
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for demo/sandbox records \u2014 never shown in production reports"
+    },
+    "demo_label": {
+      "type": "string",
+      "description": "Human-readable label for demo records"
     }
   },
   "required": [
