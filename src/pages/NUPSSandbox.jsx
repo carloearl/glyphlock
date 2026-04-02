@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClubCurrencyReceiptEngine from "@/components/nups/pos/ClubCurrencyReceiptEngine";
+import VenuePrintLayout from "@/components/nups/VenuePrintLayout";
+import ContractScanBack from "@/components/nups/ContractScanBack";
 import GlyphBucksContract from "@/components/nups/GlyphBucksContract";
 import HardwareStatusPanel from "@/components/nups/hardware/HardwareStatusPanel";
 import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
@@ -91,6 +93,26 @@ export default function NUPSSandbox() {
   const [seeding, setSeeding] = useState(false);
   const [contractsLoaded, setContractsLoaded] = useState(false);
   const [selectedContract, setSelectedContract] = useState(null);
+  const [workflowContract, setWorkflowContract] = useState(null);
+  const [workflowStep, setWorkflowStep] = useState(null);
+  const [workflowLoading, setWorkflowLoading] = useState(false);
+
+  const DEMO_VENUE = {
+    id: DREAM_PALACE_VENUE_ID,
+    venue_id: DREAM_PALACE_VENUE_ID,
+    name: 'Dream Palace',
+    address: '815 N Scottsdale Rd',
+    city: 'Scottsdale',
+    state: 'AZ',
+    minimum_age: 21,
+    glyphbucks_enabled: true
+  };
+
+  const DEMO_OPERATOR = {
+    manager_name: 'Alex Rivera',
+    hostess_name: 'Jamie Chen',
+    email: 'manager@dreampalace.demo'
+  };
 
   const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
 
@@ -115,6 +137,48 @@ export default function NUPSSandbox() {
       toast.error('Seed failed: ' + err.message);
     }
     setSeeding(false);
+  };
+
+  const advanceWorkflow = async (contract, action) => {
+    setWorkflowLoading(true);
+    try {
+      if (action === 'sign') {
+        await base44.entities.VenueContract.update(contract.id, {
+          is_signed: true,
+          status: 'active',
+          signed_at: new Date().toISOString(),
+          customer_signature: contract.customer_name,
+          ip_address: '192.168.1.' + Math.floor(Math.random() * 200 + 10)
+        });
+        await loadDemoContracts();
+        toast.success('Contract signed!');
+      } else if (action === 'print') {
+        setWorkflowContract(contract);
+        setWorkflowStep('print');
+      } else if (action === 'scan') {
+        setWorkflowContract(contract);
+        setWorkflowStep('scan');
+      }
+    } catch (err) {
+      toast.error('Action failed: ' + err.message);
+    }
+    setWorkflowLoading(false);
+  };
+
+  const handlePrintComplete = async () => {
+    if (!workflowContract) return;
+    await base44.entities.VenueContract.update(workflowContract.id, { is_printed: true });
+    setWorkflowStep(null);
+    setWorkflowContract(null);
+    await loadDemoContracts();
+    toast.success('Contract marked as printed!');
+  };
+
+  const handleScanComplete = async () => {
+    setWorkflowStep(null);
+    setWorkflowContract(null);
+    await loadDemoContracts();
+    toast.success('Scan-back complete!');
   };
 
   const handleResetDemo = async () => {
@@ -482,6 +546,49 @@ export default function NUPSSandbox() {
               </div>
             )}
 
+            {/* Workflow overlay — Print */}
+            {workflowStep === 'print' && workflowContract && (
+              <div className="fixed inset-0 z-[9999] bg-black/90 overflow-y-auto">
+                <div className="max-w-3xl mx-auto p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="font-black text-white">Step 2: Print Contract</div>
+                      <div className="text-xs text-gray-400">{workflowContract.customer_name}</div>
+                    </div>
+                    <button onClick={() => { setWorkflowStep(null); setWorkflowContract(null); }} className="text-gray-400 hover:text-white text-xs border border-white/10 rounded-lg px-3 py-1.5">✕ Cancel</button>
+                  </div>
+                  <VenuePrintLayout
+                    venue={DEMO_VENUE}
+                    contractInstance={workflowContract}
+                    lineItems={[]}
+                    operator={DEMO_OPERATOR}
+                    onPrintComplete={handlePrintComplete}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Workflow overlay — Scan Back */}
+            {workflowStep === 'scan' && workflowContract && (
+              <div className="fixed inset-0 z-[9999] bg-black/90 overflow-y-auto">
+                <div className="max-w-xl mx-auto p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="font-black text-white">Step 3: Scan Hardcopy Back</div>
+                      <div className="text-xs text-gray-400">{workflowContract.customer_name}</div>
+                    </div>
+                    <button onClick={() => { setWorkflowStep(null); setWorkflowContract(null); }} className="text-gray-400 hover:text-white text-xs border border-white/10 rounded-lg px-3 py-1.5">✕ Cancel</button>
+                  </div>
+                  <ContractScanBack
+                    contractInstance={workflowContract}
+                    operator={DEMO_OPERATOR}
+                    venue={DEMO_VENUE}
+                    onScanComplete={handleScanComplete}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Contract cards */}
             {demoContracts.map(c => {
               const scanBadge = c.scan_status === 'SCANNED' ? 'text-green-400 border-green-700 bg-green-900/20'
@@ -526,26 +633,48 @@ export default function NUPSSandbox() {
                     <div className="text-[10px] text-blue-400/70 italic border-l-2 border-blue-700 pl-2">{c.notes}</div>
                   )}
 
+                  {/* Workflow progress bar */}
+                  <div className="flex items-center gap-1 text-[9px] font-mono overflow-x-auto pb-1">
+                    {['Draft','Signed','Printed','Scanned','Fulfilled'].map((step, i) => {
+                      const reached =
+                        (step === 'Draft') ||
+                        (step === 'Signed' && (c.is_signed || c.status !== 'draft')) ||
+                        (step === 'Printed' && c.is_printed) ||
+                        (step === 'Scanned' && (c.scan_status === 'SCANNED' || c.scan_status === 'VERIFIED')) ||
+                        (step === 'Fulfilled' && c.status === 'fulfilled');
+                      return (
+                        <React.Fragment key={step}>
+                          <span className={`px-1.5 py-0.5 rounded whitespace-nowrap ${reached ? 'text-white bg-white/10' : 'text-gray-700'}`}>{step}</span>
+                          {i < 4 && <span className="text-gray-700">›</span>}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+
                   <div className="flex gap-2 flex-wrap">
+                    {!c.is_signed && c.status === 'draft' && (
+                      <button onClick={() => advanceWorkflow(c, 'sign')} disabled={workflowLoading}
+                        className="text-[11px] px-3 py-1.5 rounded-lg border border-violet-500/40 bg-violet-500/15 text-violet-300 font-bold hover:bg-violet-500/25 transition-colors">
+                        ✍️ Step 1: Sign Contract
+                      </button>
+                    )}
                     {c.is_signed && !c.is_printed && (
-                      <span className="text-[10px] px-2.5 py-1 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 font-bold">
-                        ▶ Next: Print Contract
-                      </span>
+                      <button onClick={() => advanceWorkflow(c, 'print')} disabled={workflowLoading}
+                        className="text-[11px] px-3 py-1.5 rounded-lg border border-yellow-500/40 bg-yellow-500/15 text-yellow-300 font-bold hover:bg-yellow-500/25 transition-colors">
+                        🖨️ Step 2: Print Contract
+                      </button>
                     )}
                     {c.is_printed && c.scan_status === 'PENDING' && (
-                      <span className="text-[10px] px-2.5 py-1 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold">
-                        ▶ Next: Scan Hardcopy Back
-                      </span>
+                      <button onClick={() => advanceWorkflow(c, 'scan')} disabled={workflowLoading}
+                        className="text-[11px] px-3 py-1.5 rounded-lg border border-blue-500/40 bg-blue-500/15 text-blue-300 font-bold hover:bg-blue-500/25 transition-colors">
+                        📷 Step 3: Scan Hardcopy Back
+                      </button>
                     )}
                     {c.scan_status === 'SCANNED' && (
-                      <span className="text-[10px] px-2.5 py-1 rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 font-bold">
-                        ✓ Scan Complete
-                      </span>
+                      <span className="text-[11px] px-3 py-1.5 rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 font-bold">✅ Workflow Complete</span>
                     )}
-                    {c.status === 'draft' && (
-                      <span className="text-[10px] px-2.5 py-1 rounded-lg border border-gray-600 bg-gray-800/40 text-gray-400 font-bold">
-                        ▶ Next: Customer Signs
-                      </span>
+                    {c.status === 'fulfilled' && (
+                      <span className="text-[11px] px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-bold">✅ Fulfilled</span>
                     )}
                     <button
                       onClick={() => setSelectedContract(selectedContract?.id === c.id ? null : c)}
