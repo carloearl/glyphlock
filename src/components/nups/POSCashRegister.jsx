@@ -166,15 +166,12 @@ export default function POSCashRegister({ user, station = 'door' }) {
       await base44.entities.SystemAuditLog.create({
         event_type: 'NO_SALE_DRAWER_OPEN',
         description: `Cash drawer opened without sale by ${user?.email || 'staff'} at ${station} station`,
-        actor_id: user?.email || 'unknown',
+        actor_email: user?.email || 'unknown',
         status: 'success',
         severity: 'low',
         metadata: { station, cashier: user?.email }
       });
-    } catch(error) {
-      console.error('No-sale audit failed:', error);
-      toast.error('Could not record no-sale event');
-    }
+    } catch(e) {}
     toast.success('💵 Cash drawer opened — logged.');
   };
 
@@ -225,32 +222,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
       ...details,
     };
     try {
-      const newTx = await createTransaction.mutateAsync(transactionData);
-      const resolvedVenueId = activeVenue?.id || null;
-      if (resolvedVenueId) {
-        try {
-          await base44.entities.SystemAuditLog.create({
-            event_type:  'POS_TRANSACTION_CREATED',
-            entity_type: 'POSTransaction',
-            entity_id:   newTx?.id || null,
-            actor_id:    user?.email || null,
-            venue_id:    resolvedVenueId,
-            description: `Transaction created — ${paymentMethod || 'Cash'} $${total.toFixed(2)}`,
-            metadata: {
-              transaction_id: newTx?.id,
-              payment_type:   paymentMethod || 'Cash',
-              amount:         total,
-              batch_id:       activeBatch?.id || null,
-              created_at:     new Date().toISOString()
-            },
-            severity: 'low',
-            status:   'success'
-          });
-        } catch (auditErr) {
-          console.error('TRANSACTION_AUDIT_FAILED:', auditErr);
-          // Soft fail — do not rethrow. Sale is complete.
-        }
-      }
+      await createTransaction.mutateAsync(transactionData);
       if (selectedCustomer?.id) {
         await base44.entities.POSCustomer.update(selectedCustomer.id, {
           visit_count: (selectedCustomer.visit_count || 0) + 1,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FlaskConical, Shield, DollarSign, Users, Clock, FileText,
@@ -100,51 +100,16 @@ export default function NUPSSandbox() {
   const [zReportPrinting, setZReportPrinting] = useState(false);
   const [zReportData, setZReportData] = useState(null);
   const [loadingZReport, setLoadingZReport] = useState(false);
-  const [activeVenueId, setActiveVenueId] = useState(null);
-  const [venueError, setVenueError] = useState(false);
-  const [activeVenueRecord, setActiveVenueRecord] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const venues = await base44.entities.Venue.filter({ status: 'active' });
-        const sandboxVenue = venues.find(v => v.mode === 'SANDBOX') || venues[0];
-        if (sandboxVenue?.id) {
-          setActiveVenueId(sandboxVenue.id);
-          setActiveVenueRecord(sandboxVenue);
-        } else {
-          setVenueError(true);
-        }
-      } catch (e) {
-        setVenueError(true);
-      }
-    })();
-  }, []);
+  const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
 
-  if (venueError) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center p-8 border border-red-500/30 rounded-xl bg-red-500/5">
-          <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-          <p className="text-red-400 font-bold">No active venue found.</p>
-          <p className="text-gray-500 text-sm mt-2">Please configure an active venue before using the sandbox.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!activeVenueId) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-gray-600 animate-spin" />
-      </div>
-    );
-  }
-
-  const DEMO_VENUE = activeVenueRecord || {
-    id: activeVenueId,
-    venue_id: activeVenueId,
-    name: 'Active Venue',
+  const DEMO_VENUE = {
+    id: DREAM_PALACE_VENUE_ID,
+    venue_id: DREAM_PALACE_VENUE_ID,
+    name: 'Dream Palace',
+    address: '815 N Scottsdale Rd',
+    city: 'Scottsdale',
+    state: 'AZ',
     minimum_age: 21,
     glyphbucks_enabled: true
   };
@@ -158,7 +123,7 @@ export default function NUPSSandbox() {
   const loadDemoContracts = async () => {
     setLoadingContracts(true);
     try {
-      const contracts = await base44.entities.VenueContract.filter({ venue_id: activeVenueId, is_demo: true });
+      const contracts = await base44.entities.VenueContract.filter({ venue_id: DREAM_PALACE_VENUE_ID, is_demo: true });
       setDemoContracts(contracts || []);
       setContractsLoaded(true);
     } catch {
@@ -224,7 +189,7 @@ export default function NUPSSandbox() {
     setLoadingZReport(true);
     try {
       const [contracts, posTransactions, vipSessions, gbOrders] = await Promise.all([
-        base44.entities.VenueContract.filter({ venue_id: activeVenueId, is_demo: true }).catch(() => []),
+        base44.entities.VenueContract.filter({ venue_id: DREAM_PALACE_VENUE_ID, is_demo: true }).catch(() => []),
         base44.entities.POSTransaction.list('-created_date', 500).catch(() => []),
         base44.entities.VIPRoom.list('-created_date', 500).catch(() => []),
         base44.entities.GlyphBucksOrder.list('-created_date', 500).catch(() => [])

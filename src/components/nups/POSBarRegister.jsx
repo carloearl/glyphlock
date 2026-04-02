@@ -68,7 +68,7 @@ export default function POSBarRegister({ user }) {
           await base44.entities.SystemAuditLog.create({
             event_type: "BATCH_GATE_BLOCKED",
             description: "POS Bar Register transaction blocked: no open batch.",
-            actor_id: user?.email || "unknown",
+            actor_email: user?.email || "unknown",
             status: "blocked",
             severity: "HIGH",
             metadata: {
@@ -86,14 +86,9 @@ export default function POSBarRegister({ user }) {
       const subtotal = cartTotal;
       const tax = +(subtotal * TAX_RATE).toFixed(2);
       const total = +(subtotal + tax).toFixed(2);
-      const resolvedVenueId = activeBatch?.venue_id;
-      if (!resolvedVenueId) {
-        toast.error('No venue ID available. Cannot process transaction.');
-        throw new Error('Venue ID missing');
-      }
-      const newTx = await base44.entities.POSTransaction.create({
+      await base44.entities.POSTransaction.create({
         transaction_id: `TXN-${Date.now()}`,
-        venue_id: resolvedVenueId,
+        venue_id: activeBatch?.venue_id || 'dream_palace',
         cashier: user?.email || 'staff',
         mode: 'REAL',
         items: cart.map(item => ({
@@ -110,30 +105,6 @@ export default function POSBarRegister({ user }) {
         status: 'completed',
         notes: payMethod === 'Split' ? 'Split payment' : undefined,
       });
-      if (resolvedVenueId) {
-        try {
-          await base44.entities.SystemAuditLog.create({
-            event_type:  'POS_TRANSACTION_CREATED',
-            entity_type: 'POSTransaction',
-            entity_id:   newTx?.id || null,
-            actor_id:    user?.email || 'staff',
-            venue_id:    resolvedVenueId,
-            description: `Transaction created — ${payMethod} $${total}`,
-            metadata: {
-              transaction_id: newTx?.id,
-              payment_type:   payMethod,
-              amount:         total,
-              batch_id:       activeBatch?.id || null,
-              created_at:     new Date().toISOString()
-            },
-            severity: 'low',
-            status:   'success'
-          });
-        } catch (auditErr) {
-          console.error('TRANSACTION_AUDIT_FAILED:', auditErr);
-          // Soft fail — do not rethrow. Sale is complete.
-        }
-      }
     },
     onSuccess: () => {
       const receipt = {
@@ -207,15 +178,12 @@ export default function POSBarRegister({ user }) {
       await base44.entities.SystemAuditLog.create({
         event_type: 'NO_SALE_DRAWER_OPEN',
         description: `Cash drawer opened without sale by ${user?.email || 'staff'} at bar station`,
-        actor_id: user?.email || 'unknown',
+        actor_email: user?.email || 'unknown',
         status: 'success',
         severity: 'low',
         metadata: { station: 'bar', cashier: user?.email }
       });
-    } catch(error) {
-      console.error('No-sale audit failed:', error);
-      toast.error('Could not record no-sale event');
-    }
+    } catch(e) {}
     toast.success('💵 Cash drawer opened — logged.');
   };
 

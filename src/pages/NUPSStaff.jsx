@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Clock, DollarSign, AlertCircle, Trash2, Edit2 } from "lucide-react";
-import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -48,7 +47,6 @@ export default function NUPSStaff() {
   };
 
   return (
-    <NUPSRouteGuard requiredRoles={["VENUE_MANAGER", "PLATFORM_ADMIN", "VENUE_OWNER"]}>
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <header className="border-b border-white/[0.06] p-4 bg-black/95 sticky top-0 z-40">
@@ -200,6 +198,5 @@ export default function NUPSStaff() {
         )}
       </div>
     </div>
-    </NUPSRouteGuard>
   );
 }
