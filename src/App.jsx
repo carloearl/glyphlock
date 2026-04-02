@@ -19,6 +19,7 @@ import OfficialChecks from './pages/OfficialChecks';
 import NUPSLanding from './pages/NUPSLanding';
 import NUPSGateway from './pages/NUPSGateway';
 import NUPSSandbox from './pages/NUPSSandbox';
+import EntertainerCheckIn from './pages/EntertainerCheckIn';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
 import NUPSDemoManager from './pages/NUPSDemoManager';
 import NUPSMISReport from './pages/NUPSMISReport';
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/NUPSGateway" element={<NUPSGateway />} />
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
+        <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
