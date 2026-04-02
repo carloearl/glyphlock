@@ -166,12 +166,15 @@ export default function POSCashRegister({ user, station = 'door' }) {
       await base44.entities.SystemAuditLog.create({
         event_type: 'NO_SALE_DRAWER_OPEN',
         description: `Cash drawer opened without sale by ${user?.email || 'staff'} at ${station} station`,
-        actor_email: user?.email || 'unknown',
+        actor_id: user?.email || 'unknown',
         status: 'success',
         severity: 'low',
         metadata: { station, cashier: user?.email }
       });
-    } catch(e) {}
+    } catch(error) {
+      console.error('No-sale audit failed:', error);
+      toast.error('Could not record no-sale event');
+    }
     toast.success('💵 Cash drawer opened — logged.');
   };
 

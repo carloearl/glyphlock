@@ -68,7 +68,7 @@ export default function POSBarRegister({ user }) {
           await base44.entities.SystemAuditLog.create({
             event_type: "BATCH_GATE_BLOCKED",
             description: "POS Bar Register transaction blocked: no open batch.",
-            actor_email: user?.email || "unknown",
+            actor_id: user?.email || "unknown",
             status: "blocked",
             severity: "HIGH",
             metadata: {
@@ -86,9 +86,14 @@ export default function POSBarRegister({ user }) {
       const subtotal = cartTotal;
       const tax = +(subtotal * TAX_RATE).toFixed(2);
       const total = +(subtotal + tax).toFixed(2);
+      const resolvedVenueId = activeBatch?.venue_id;
+      if (!resolvedVenueId) {
+        toast.error('No venue ID available. Cannot process transaction.');
+        throw new Error('Venue ID missing');
+      }
       const newTx = await base44.entities.POSTransaction.create({
         transaction_id: `TXN-${Date.now()}`,
-        venue_id: activeBatch?.venue_id || 'dream_palace',
+        venue_id: resolvedVenueId,
         cashier: user?.email || 'staff',
         mode: 'REAL',
         items: cart.map(item => ({
@@ -105,7 +110,6 @@ export default function POSBarRegister({ user }) {
         status: 'completed',
         notes: payMethod === 'Split' ? 'Split payment' : undefined,
       });
-      const resolvedVenueId = activeBatch?.venue_id;
       if (resolvedVenueId) {
         try {
           await base44.entities.SystemAuditLog.create({
@@ -203,12 +207,15 @@ export default function POSBarRegister({ user }) {
       await base44.entities.SystemAuditLog.create({
         event_type: 'NO_SALE_DRAWER_OPEN',
         description: `Cash drawer opened without sale by ${user?.email || 'staff'} at bar station`,
-        actor_email: user?.email || 'unknown',
+        actor_id: user?.email || 'unknown',
         status: 'success',
         severity: 'low',
         metadata: { station: 'bar', cashier: user?.email }
       });
-    } catch(e) {}
+    } catch(error) {
+      console.error('No-sale audit failed:', error);
+      toast.error('Could not record no-sale event');
+    }
     toast.success('💵 Cash drawer opened — logged.');
   };
 
