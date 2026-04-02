@@ -63,6 +63,22 @@ const AuthenticatedApp = () => {
     }
   }
 
+  // Fullscreen pages that must render WITHOUT the layout wrapper
+  const fullscreenPaths = ['/NUPSLanding', '/NUPSGateway', '/unauthorized', '/NUPSSandbox', '/NUPSLogin'];
+  const isFullscreen = fullscreenPaths.some(p => window.location.pathname.startsWith(p));
+
+  if (isFullscreen) {
+    return (
+      <Routes>
+        <Route path="/NUPSLanding" element={<NUPSLanding />} />
+        <Route path="/NUPSGateway" element={<NUPSGateway />} />
+        <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<NUPSLanding />} />
+      </Routes>
+    );
+  }
+
   return (
     <LayoutWrapper currentPageName={mainPageKey}>
       <Routes>
@@ -70,37 +86,18 @@ const AuthenticatedApp = () => {
         {Object.entries(Pages).map(([path, Page]) => (
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}
-        <Route path="/AnalyticsDashboard" element={
-          <LayoutWrapper currentPageName="AnalyticsDashboard">
-            <AnalyticsDashboard />
-          </LayoutWrapper>
-        } />
-        <Route path="/SettlementReports" element={
-          <LayoutWrapper currentPageName="SettlementReports">
-            <SettlementReports />
-          </LayoutWrapper>
-        } />
-        <Route path="/GovernanceHub" element={
-          <LayoutWrapper currentPageName="GovernanceHub">
-            <GovernanceHub />
-          </LayoutWrapper>
-        } />
+        <Route path="/AnalyticsDashboard" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
+        <Route path="/SettlementReports" element={<LayoutWrapper currentPageName="SettlementReports"><SettlementReports /></LayoutWrapper>} />
+        <Route path="/GovernanceHub" element={<LayoutWrapper currentPageName="GovernanceHub"><GovernanceHub /></LayoutWrapper>} />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
-        <Route path="/SystemAudit" element={
-          <LayoutWrapper currentPageName="SystemAudit">
-            <SystemAudit />
-          </LayoutWrapper>
-        } />
+        <Route path="/SystemAudit" element={<LayoutWrapper currentPageName="SystemAudit"><SystemAudit /></LayoutWrapper>} />
         <Route path="/OfficialChecks" element={<OfficialChecks />} />
-        <Route path="/NUPSLanding" element={<NUPSLanding />} />
-        <Route path="/NUPSGateway" element={<NUPSGateway />} />
-        <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
         <Route path="/GlyphBucksHub" element={<GlyphBucksHub />} />
         <Route path="/ContractLookup" element={<ContractLookup />} />
         <Route path="/view/:assetId" element={<ImageShare />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/NUPSPostImplementationReport" element={<NUPSPostImplementationReport />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
