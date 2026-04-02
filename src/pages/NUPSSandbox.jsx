@@ -96,6 +96,7 @@ export default function NUPSSandbox() {
   const [workflowContract, setWorkflowContract] = useState(null);
   const [workflowStep, setWorkflowStep] = useState(null);
   const [workflowLoading, setWorkflowLoading] = useState(false);
+  const [zReportPrinting, setZReportPrinting] = useState(false);
 
   const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
 
@@ -179,6 +180,95 @@ export default function NUPSSandbox() {
     setWorkflowContract(null);
     await loadDemoContracts();
     toast.success('Scan-back complete!');
+  };
+
+  const printDemoZReport = (contracts) => {
+    setZReportPrinting(true);
+    const reportId = `Z-DEMO-${Date.now()}`;
+    const now = new Date();
+    const totalContracts = contracts.length;
+    const totalValue = contracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
+    const totalGB = contracts.reduce((s, c) => s + (c.glyphbucks_issued || 0), 0);
+    const cashContracts = contracts.filter(c => c.payment_method === 'Cash');
+    const cardContracts = contracts.filter(c => c.payment_method !== 'Cash');
+    const cashTotal = cashContracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
+    const cardTotal = cardContracts.reduce((s, c) => s + (c.grand_total || c.contract_amount || 0), 0);
+    const scanned = contracts.filter(c => c.scan_status === 'SCANNED' || c.scan_status === 'VERIFIED').length;
+    const printed = contracts.filter(c => c.is_printed).length;
+    const signed = contracts.filter(c => c.is_signed).length;
+    const surchargeTotal = contracts.reduce((s, c) => s + (c.processing_surcharge || 0), 0);
+    const tipTotal = contracts.reduce((s, c) => s + (c.waitress_tip || 0), 0);
+
+    const pw = window.open('', '', 'width=800,height=700');
+    pw.document.write(`
+      <html><head><title>Z-Report Demo — ${reportId}</title>
+      <style>
+        body { font-family: monospace; padding: 24px; max-width: 680px; margin: 0 auto; }
+        h1 { text-align: center; border-bottom: 3px double #000; padding-bottom: 8px; font-size: 18px; }
+        h2 { font-size: 13px; border-bottom: 1px solid #000; padding-bottom: 4px; margin-top: 20px; }
+        .row { display: flex; justify-content: space-between; margin: 4px 0; font-size: 12px; }
+        .total { font-weight: bold; font-size: 14px; border-top: 2px solid #000; padding-top: 8px; margin-top: 8px; }
+        .demo { background: #fff3cd; border: 1px solid #ffc107; padding: 6px 10px; font-size: 11px; margin: 8px 0; }
+        .sig { display: flex; gap: 40px; margin-top: 24px; border-top: 1px solid #000; padding-top: 12px; }
+        .sig div { flex: 1; }
+        .sig label { font-size: 10px; font-weight: bold; display: block; margin-bottom: 4px; }
+        .sig .line { border-bottom: 1px solid #000; height: 28px; }
+        .footer { text-align: center; font-size: 9px; color: #666; margin-top: 16px; }
+        @media print { button { display: none; } }
+      </style></head><body>
+      <h1>N.U.P.S. POS — Z-REPORT<br/><span style='font-size:12px;font-weight:normal;'>DREAM PALACE — DEMO BATCH CLOSE</span></h1>
+      <div class='demo'>⚠ SANDBOX DEMO — This report uses seeded demo contract data. No real transactions.</div>
+      <h2>REPORT HEADER</h2>
+      <div class='row'><span>Report ID:</span><span>${reportId}</span></div>
+      <div class='row'><span>Date:</span><span>${now.toLocaleDateString()}</span></div>
+      <div class='row'><span>Time:</span><span>${now.toLocaleTimeString()}</span></div>
+      <div class='row'><span>Cashier:</span><span>Alex Rivera (Demo)</span></div>
+      <div class='row'><span>Venue:</span><span>Dream Palace — Scottsdale, AZ</span></div>
+      <div class='row'><span>Batch ID:</span><span>BATCH-DEMO-${now.toISOString().split('T')[0]}</span></div>
+      <h2>CONTRACT SUMMARY</h2>
+      <div class='row'><span>Total Contracts:</span><span>${totalContracts}</span></div>
+      <div class='row'><span>Signed:</span><span>${signed}</span></div>
+      <div class='row'><span>Printed:</span><span>${printed}</span></div>
+      <div class='row'><span>Scanned Back:</span><span>${scanned}</span></div>
+      <h2>CASH DRAWER RECONCILIATION</h2>
+      <div class='row'><span>Opening Cash (Demo):</span><span>$500.00</span></div>
+      <div class='row'><span>Cash Contract Sales:</span><span>$${cashTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Expected Cash:</span><span>$${(500 + cashTotal).toFixed(2)}</span></div>
+      <div class='row'><span>Closing Cash (Demo):</span><span>$${(500 + cashTotal).toFixed(2)}</span></div>
+      <div class='row' style='color:green;font-weight:bold'><span>Cash Over/Short:</span><span>$0.00</span></div>
+      <h2>SALES BREAKDOWN</h2>
+      <div class='row'><span>Cash Sales:</span><span>$${cashTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Card Sales:</span><span>$${cardTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Processing Surcharges:</span><span>$${surchargeTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Waitress Tips Collected:</span><span>$${tipTotal.toFixed(2)}</span></div>
+      <h2>GLYPHBUCKS LEDGER (Liability)</h2>
+      <div class='row'><span>GB Issued Today:</span><span>${totalGB.toFixed(2)} GB</span></div>
+      <div class='row'><span>GB Redeemed Today:</span><span>0.00 GB</span></div>
+      <div class='row' style='font-weight:bold'><span>Net GB Liability:</span><span>${totalGB.toFixed(2)} GB</span></div>
+      <div style='font-size:9px;color:#666;margin-top:4px;'>GlyphBucks™ is a stored-value liability instrument. Not counted as revenue.</div>
+      <h2>PER-CONTRACT DETAIL</h2>
+      ${contracts.map((c, i) => `
+        <div class='row'><span>${i+1}. ${c.customer_name}</span><span>$${(c.grand_total||c.contract_amount||0).toFixed(2)} · ${c.payment_method}</span></div>
+        <div class='row' style='font-size:10px;color:#666'><span style='padding-left:12px'>→ GB: ${c.glyphbucks_issued||0} · Scan: ${c.scan_status} · Status: ${c.status}</span></div>
+      `).join('')}
+      <div class='total'>
+        <div class='row'><span>TOTAL CONTRACTS:</span><span>${totalContracts}</span></div>
+        <div class='row'><span>TOTAL SALES (Real Tender):</span><span>$${(cashTotal + cardTotal).toFixed(2)}</span></div>
+        <div class='row'><span>TOTAL GB ISSUED:</span><span>${totalGB.toFixed(2)} GB</span></div>
+      </div>
+      <div class='sig'>
+        <div><label>MANAGER SIGNATURE</label><div class='line'></div></div>
+        <div><label>DATE / TIME</label><div class='line'></div></div>
+      </div>
+      <div class='footer'>N.U.P.S. POS — GlyphLock Financial LLC — ${now.toLocaleString()} — DEMO BATCH</div>
+      <br/><button onclick='window.print()' style='padding:8px 20px;font-size:13px;cursor:pointer;'>🖨️ Print</button>
+      </body></html>
+    `);
+    pw.document.close();
+    pw.focus();
+    setTimeout(() => pw.print(), 400);
+    setZReportPrinting(false);
+    toast.success('Z-Report generated!');
   };
 
   const handleResetDemo = async () => {
@@ -458,6 +548,39 @@ export default function NUPSSandbox() {
                 </div>
               </div>
             ))}
+
+            {/* Z-Report / Batch Close */}
+            {contractsLoaded && demoContracts.length > 0 && (
+              <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-cyan-400" />
+                  <div className="font-black text-white">Close Batch &amp; Print Z-Report</div>
+                </div>
+                <div className="text-xs text-gray-400">End-of-night batch close. Summarizes all {demoContracts.length} demo contracts — cash/card breakdown, GlyphBucks ledger, scan audit — and prints the Z-Report to your printer.</div>
+                <div className="grid grid-cols-3 gap-2 text-[10px]">
+                  <div className="bg-black/40 rounded-lg p-2 text-center">
+                    <div className="text-green-400 font-black text-base">${demoContracts.reduce((s,c)=>s+(c.grand_total||c.contract_amount||0),0).toFixed(2)}</div>
+                    <div className="text-gray-600">Total Value</div>
+                  </div>
+                  <div className="bg-black/40 rounded-lg p-2 text-center">
+                    <div className="text-cyan-400 font-black text-base">{demoContracts.reduce((s,c)=>s+(c.glyphbucks_issued||0),0)}</div>
+                    <div className="text-gray-600">GB Issued</div>
+                  </div>
+                  <div className="bg-black/40 rounded-lg p-2 text-center">
+                    <div className="text-blue-400 font-black text-base">{demoContracts.filter(c=>c.scan_status==='SCANNED'||c.scan_status==='VERIFIED').length}/{demoContracts.length}</div>
+                    <div className="text-gray-600">Scanned</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => printDemoZReport(demoContracts)}
+                  disabled={zReportPrinting}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black text-sm hover:from-cyan-500 hover:to-blue-500 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  {zReportPrinting ? 'Generating...' : '🖨️ Print Z-Report / Batch Close'}
+                </button>
+              </div>
+            )}
           </div>
         );
 
