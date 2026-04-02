@@ -310,21 +310,154 @@ export default function NUPSSandbox() {
       case "dreamdollar":
         return (
           <div className="space-y-4">
+            {/* Workflow overlays */}
+            {workflowStep === 'print' && workflowContract && (
+              <div className="fixed inset-0 z-[9999] bg-black/90 overflow-y-auto">
+                <div className="max-w-3xl mx-auto p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="font-black text-white">Step 2: Print Contract</div>
+                      <div className="text-xs text-gray-400">{workflowContract.customer_name}</div>
+                    </div>
+                    <button onClick={() => { setWorkflowStep(null); setWorkflowContract(null); }} className="text-gray-400 hover:text-white text-xs border border-white/10 rounded-lg px-3 py-1.5">✕ Cancel</button>
+                  </div>
+                  <VenuePrintLayout
+                    venue={DEMO_VENUE}
+                    contractInstance={workflowContract}
+                    lineItems={[]}
+                    operator={DEMO_OPERATOR}
+                    onPrintComplete={handlePrintComplete}
+                  />
+                </div>
+              </div>
+            )}
+            {workflowStep === 'scan' && workflowContract && (
+              <div className="fixed inset-0 z-[9999] bg-black/90 overflow-y-auto">
+                <div className="max-w-xl mx-auto p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="font-black text-white">Step 3: Scan Hardcopy Back</div>
+                      <div className="text-xs text-gray-400">{workflowContract.customer_name}</div>
+                    </div>
+                    <button onClick={() => { setWorkflowStep(null); setWorkflowContract(null); }} className="text-gray-400 hover:text-white text-xs border border-white/10 rounded-lg px-3 py-1.5">✕ Cancel</button>
+                  </div>
+                  <ContractScanBack
+                    contractInstance={workflowContract}
+                    operator={DEMO_OPERATOR}
+                    venue={DEMO_VENUE}
+                    onScanComplete={handleScanComplete}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-400/80">
               <div className="flex items-center gap-2 mb-2">
                 <Banknote className="w-4 h-4" />
-                <span className="font-bold">FULL PRODUCTION DEMO</span>
+                <span className="font-bold">DREAM PALACE — GLYPHBUCKS CONTRACT WORKFLOW</span>
               </div>
-              <p>This demonstrates the ACTUAL Dream Dollar contract workflow exactly as it runs in production. All steps, signatures, biometrics, and receipt printing are identical to the live system.</p>
+              <p>Walk through the actual GlyphBucks contract process: customer signs → staff prints hardcopy → signed copy is scanned back into the system. Each step updates the live database record.</p>
             </div>
-            <GlyphBucksContract 
-              onComplete={() => {
-                setActiveSection("overview");
-              }}
-              onCurrencyPrint={(value, orderNum) => {
-                console.log(`Demo: Would print ${value} Dream Dollars for order ${orderNum}`);
-              }}
-            />
+
+            {/* Seed / load controls */}
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-gray-500">{contractsLoaded ? `${demoContracts.length} demo contracts loaded` : 'Load Dream Palace demo contracts to begin'}</div>
+              <div className="flex gap-2">
+                {contractsLoaded && <button onClick={loadDemoContracts} disabled={loadingContracts} className="p-1.5 rounded-lg border border-white/10 text-gray-500 hover:text-white"><RefreshCw className={`w-3.5 h-3.5 ${loadingContracts ? 'animate-spin' : ''}`} /></button>}
+                <Button onClick={seedAndLoad} disabled={seeding || loadingContracts} className="bg-gradient-to-r from-blue-600 to-indigo-600 text-xs h-8 px-4 font-bold gap-1.5">
+                  {seeding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {seeding ? 'Seeding...' : 'Seed Demo Contracts'}
+                </Button>
+                {!contractsLoaded && <Button onClick={loadDemoContracts} disabled={loadingContracts} variant="outline" className="border-white/10 text-gray-400 text-xs h-8 px-4">
+                  {loadingContracts ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Database className="w-3.5 h-3.5 mr-1" />}Load
+                </Button>}
+              </div>
+            </div>
+
+            {/* Workflow legend */}
+            <div className="flex items-center gap-1 text-[10px] text-gray-600 font-mono">
+              <span className="px-2 py-1 rounded bg-white/5 text-gray-300">Draft</span>
+              <span>›</span>
+              <span className="px-2 py-1 rounded bg-violet-900/30 text-violet-300">Signed</span>
+              <span>›</span>
+              <span className="px-2 py-1 rounded bg-yellow-900/30 text-yellow-300">Printed</span>
+              <span>›</span>
+              <span className="px-2 py-1 rounded bg-blue-900/30 text-blue-300">Scanned</span>
+              <span>›</span>
+              <span className="px-2 py-1 rounded bg-green-900/30 text-green-300">Fulfilled</span>
+            </div>
+
+            {!contractsLoaded && !loadingContracts && (
+              <div className="text-center py-10 border border-dashed border-white/[0.06] rounded-xl">
+                <Banknote className="w-8 h-8 text-gray-700 mx-auto mb-2" />
+                <p className="text-gray-500 text-sm">Click "Seed Demo Contracts" to populate 4 Dream Palace records.</p>
+              </div>
+            )}
+            {loadingContracts && <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-gray-600 animate-spin" /></div>}
+            {contractsLoaded && demoContracts.length === 0 && (
+              <div className="text-center py-10 border border-dashed border-white/[0.06] rounded-xl">
+                <Database className="w-8 h-8 text-gray-700 mx-auto mb-2" />
+                <p className="text-gray-600 text-sm">No demo contracts found. Click "Seed Demo Contracts".</p>
+              </div>
+            )}
+
+            {demoContracts.map(c => (
+              <div key={c.id} className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="font-black text-white">{c.customer_name}</div>
+                    <div className="text-[10px] text-gray-500 font-mono">{c.contract_id}</div>
+                    {c.demo_label && <div className="text-[10px] text-blue-400/70 italic mt-0.5">{c.demo_label}</div>}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-green-400 font-black">${(c.grand_total || c.contract_amount || 0).toFixed(2)}</div>
+                    <div className="text-[10px] text-gray-600">{c.payment_method}</div>
+                  </div>
+                </div>
+
+                {/* Progress trail */}
+                <div className="flex items-center gap-1 text-[9px] font-mono">
+                  {['Draft','Signed','Printed','Scanned','Fulfilled'].map((step, i) => {
+                    const reached =
+                      step === 'Draft' ||
+                      (step === 'Signed' && (c.is_signed || c.status !== 'draft')) ||
+                      (step === 'Printed' && c.is_printed) ||
+                      (step === 'Scanned' && (c.scan_status === 'SCANNED' || c.scan_status === 'VERIFIED')) ||
+                      (step === 'Fulfilled' && c.status === 'fulfilled');
+                    return (
+                      <React.Fragment key={step}>
+                        <span className={`px-1.5 py-0.5 rounded whitespace-nowrap ${reached ? 'bg-white/10 text-white' : 'text-gray-700'}`}>{step}</span>
+                        {i < 4 && <span className="text-gray-700">›</span>}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex gap-2 flex-wrap">
+                  {!c.is_signed && c.status === 'draft' && (
+                    <button onClick={() => advanceWorkflow(c, 'sign')} disabled={workflowLoading}
+                      className="text-[11px] px-3 py-1.5 rounded-lg border border-violet-500/40 bg-violet-500/15 text-violet-300 font-bold hover:bg-violet-500/25 transition-colors">
+                      ✍️ Step 1: Customer Signs
+                    </button>
+                  )}
+                  {c.is_signed && !c.is_printed && (
+                    <button onClick={() => advanceWorkflow(c, 'print')} disabled={workflowLoading}
+                      className="text-[11px] px-3 py-1.5 rounded-lg border border-yellow-500/40 bg-yellow-500/15 text-yellow-300 font-bold hover:bg-yellow-500/25 transition-colors">
+                      🖨️ Step 2: Print Contract
+                    </button>
+                  )}
+                  {c.is_printed && c.scan_status === 'PENDING' && (
+                    <button onClick={() => advanceWorkflow(c, 'scan')} disabled={workflowLoading}
+                      className="text-[11px] px-3 py-1.5 rounded-lg border border-blue-500/40 bg-blue-500/15 text-blue-300 font-bold hover:bg-blue-500/25 transition-colors">
+                      📷 Step 3: Scan Hardcopy Back
+                    </button>
+                  )}
+                  {c.scan_status === 'SCANNED' && <span className="text-[11px] px-3 py-1.5 rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 font-bold">✅ Complete</span>}
+                  {c.status === 'fulfilled' && <span className="text-[11px] px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-bold">✅ Fulfilled</span>}
+                </div>
+              </div>
+            ))}
           </div>
         );
 
