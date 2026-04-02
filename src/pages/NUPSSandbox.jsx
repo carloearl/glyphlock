@@ -97,6 +97,8 @@ export default function NUPSSandbox() {
   const [workflowStep, setWorkflowStep] = useState(null);
   const [workflowLoading, setWorkflowLoading] = useState(false);
 
+  const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
+
   const DEMO_VENUE = {
     id: DREAM_PALACE_VENUE_ID,
     venue_id: DREAM_PALACE_VENUE_ID,
@@ -113,8 +115,6 @@ export default function NUPSSandbox() {
     hostess_name: 'Jamie Chen',
     email: 'manager@dreampalace.demo'
   };
-
-  const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
 
   const loadDemoContracts = async () => {
     setLoadingContracts(true);
