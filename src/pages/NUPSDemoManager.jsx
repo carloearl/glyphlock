@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   FlaskConical, Plus, Trash2, Copy, RefreshCw, Shield, ArrowLeft,
-  Loader2, CheckCircle, AlertCircle, Eye, EyeOff, Calendar, User, Tag
+  Loader2, CheckCircle, AlertCircle, Eye, EyeOff, Calendar, User, Tag,
+  Database, FileText, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -26,6 +27,8 @@ export default function NUPSDemoManager() {
   const [copied, setCopied] = useState(null);
   const [showPins, setShowPins] = useState({});
   const [feedback, setFeedback] = useState(null);
+  const [seeding, setSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -123,6 +126,21 @@ export default function NUPSDemoManager() {
     await loadDemoUsers();
   };
 
+  const handleSeedContracts = async (clearExisting = false) => {
+    if (clearExisting && !confirm('This will DELETE all existing demo contracts for Dream Palace and re-seed fresh data. Continue?')) return;
+    setSeeding(true);
+    setSeedResult(null);
+    try {
+      const res = await base44.functions.invoke('seedDemoContracts', { clear_existing: clearExisting });
+      setSeedResult({ success: true, count: res.data.seeded, contracts: res.data.contracts });
+      setFeedback({ type: 'success', msg: `✅ Seeded ${res.data.seeded} Dream Palace demo contracts successfully.` });
+    } catch (err) {
+      setFeedback({ type: 'error', msg: 'Seed failed: ' + (err.message || 'Unknown error') });
+      setSeedResult({ success: false });
+    }
+    setSeeding(false);
+  };
+
   const copyToClipboard = (text, key) => {
     navigator.clipboard.writeText(text);
     setCopied(key);
@@ -186,6 +204,77 @@ export default function NUPSDemoManager() {
             <button onClick={() => setFeedback(null)} className="ml-auto text-current opacity-50 hover:opacity-100">✕</button>
           </div>
         )}
+
+        {/* Demo Data Seeder */}
+        <div className="rounded-2xl border border-blue-500/25 bg-blue-500/5 p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <Database className="w-4 h-4 text-blue-400" />
+            <h2 className="font-black text-blue-400 text-sm uppercase tracking-widest">Dream Palace — Contract Workflow Demo Data</h2>
+          </div>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            Seeds 4 realistic Dream Palace contract records showing the full workflow:
+            <span className="text-gray-300"> Draft → Signed → Printed → Scan-Back → Fulfilled.</span>
+            <br/>Each record is tagged <code className="text-blue-300 bg-blue-500/10 px-1 rounded">is_demo: true</code> and uses the real Dream Palace venue ID.
+          </p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            {[
+              { label: 'Draft', desc: 'Not yet signed', color: 'text-gray-400 border-gray-700' },
+              { label: 'Signed → Print', desc: 'Needs printing', color: 'text-yellow-400 border-yellow-700' },
+              { label: 'Printed → Scan', desc: 'Awaiting scan-back', color: 'text-blue-400 border-blue-700' },
+              { label: 'Fulfilled', desc: 'Complete cycle', color: 'text-green-400 border-green-700' },
+            ].map(s => (
+              <div key={s.label} className={`border rounded-lg p-2 text-center ${s.color}`}>
+                <div className="font-bold text-[10px] uppercase tracking-wide">{s.label}</div>
+                <div className="text-[9px] opacity-70 mt-0.5">{s.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
+            <Button
+              onClick={() => handleSeedContracts(false)}
+              disabled={seeding}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-xs h-9 px-5 font-bold gap-1.5"
+            >
+              {seeding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              Seed Demo Contracts
+            </Button>
+            <Button
+              onClick={() => handleSeedContracts(true)}
+              disabled={seeding}
+              variant="outline"
+              className="border-red-500/25 text-red-400 hover:bg-red-500/10 text-xs h-9 px-5 font-bold gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Clear & Re-seed
+            </Button>
+          </div>
+
+          {seedResult?.success && seedResult.contracts && (
+            <div className="space-y-2">
+              <div className="text-[10px] uppercase tracking-widest text-gray-600">Seeded Records</div>
+              {seedResult.contracts.map((c, i) => (
+                <div key={i} className="flex items-center justify-between bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs">
+                  <div>
+                    <span className="text-white font-semibold">{c.customer_name}</span>
+                    <span className="text-gray-600 ml-2 font-mono text-[10px]">{c.contract_id}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${
+                      c.status === 'fulfilled' ? 'text-green-400 border-green-700' :
+                      c.status === 'active' ? 'text-blue-400 border-blue-700' :
+                      'text-gray-400 border-gray-700'
+                    }`}>{c.status.toUpperCase()}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${
+                      c.scan_status === 'SCANNED' ? 'text-green-400 border-green-700' : 'text-yellow-400 border-yellow-700'
+                    }`}>{c.scan_status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Security notice */}
         <div className="flex items-start gap-2.5 p-4 rounded-xl bg-amber-500/5 border border-amber-500/15 text-xs text-amber-400/80">
