@@ -58,110 +58,79 @@ export default function EntertainerCheckIn({ user }) {
       const key = `${entertainerId}-${Math.floor(Date.now()/3000)}`;
       if (lastCheckedInRef.current === key) return;
       lastCheckedInRef.current = key;
+
+      // GATE: entertainer must exist in active records
       const entertainer = entertainers.find(e => e.id === entertainerId);
-      // Section 3 — validate entertainer resolves; mark ORPHANED if not found
       if (!entertainer) {
-        return base44.entities.EntertainerShift.create({
-          entertainer_id: entertainerId,
-          check_in_time: new Date().toISOString(),
-          location: location,
-          status: 'ORPHANED',
-          role: 'Entertainer',
-          orphan_note: `DACO-REPAIR ${new Date().toISOString()}: entertainer_id ${entertainerId} not found in active Entertainer records at check-in time.`
-        });
-      }
-
-      // CONTRACT GATE — DIRECTIVE 5B
-      const minimumAge = activeVenue?.minimum_age || 21;
-
-      if (!entertainer.date_of_birth) {
-        await base44.entities.SystemAuditLog.create({
-          event_type: "CONTRACT_GATE_BLOCKED",
-          description: `Check-in blocked: no date_of_birth on file for entertainer_id=${entertainerId}`,
-          actor_id: user?.email,
-          status: "blocked",
-          severity: "HIGH",
-          metadata: { entertainer_id: entertainerId, reason: "missing_dob",
-            minimum_age_required: minimumAge, venue_id: activeVenue?.id, section: "SECTION-5B" }
-        });
-        alert("Check-in blocked: Date of birth not on file. Contact manager.");
+        toast.error('Check-in blocked: Entertainer record not found.');
         return;
       }
 
+      const minimumAge = activeVenue?.minimum_age || 21;
+
+      // GATE 1 — date_of_birth required
+      if (!entertainer.date_of_birth) {
+        toast.error('Check-in blocked: Date of birth not on file. Contact manager.');
+        return;
+      }
+
+      // GATE 2 — age >= venue.minimum_age
       const dob = new Date(entertainer.date_of_birth);
       const today = new Date();
       const age = today.getFullYear() - dob.getFullYear()
         - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
-
       if (age < minimumAge) {
-        await base44.entities.SystemAuditLog.create({
-          event_type: "CONTRACT_GATE_BLOCKED",
-          description: `Check-in blocked: entertainer age ${age} is below venue minimum ${minimumAge}`,
-          actor_id: user?.email,
-          status: "blocked",
-          severity: "CRITICAL",
-          metadata: { entertainer_id: entertainerId, reason: "age_below_minimum",
-            entertainer_age: age, minimum_age_required: minimumAge,
-            venue_id: activeVenue?.id, section: "SECTION-5B" }
-        });
-        alert(`Check-in blocked: Entertainer does not meet minimum age requirement of ${minimumAge}.`);
+        toast.error(`Check-in blocked: Does not meet minimum age requirement of ${minimumAge}.`);
         return;
       }
 
+      // GATE 3 — contract_signed
+      if (!entertainer.contract_signed) {
+        toast.error('Check-in blocked: Contract not signed.');
+        return;
+      }
+
+      // GATE 4 — contract_signed_date
+      if (!entertainer.contract_signed_date) {
+        toast.error('Check-in blocked: Contract signed date not on file.');
+        return;
+      }
+
+      // GATE 5 — contract_signature
+      if (!entertainer.contract_signature) {
+        toast.error('Check-in blocked: Contract signature not on file.');
+        return;
+      }
+
+      // GATE 6 — contract_ip_address
+      if (!entertainer.contract_ip_address) {
+        toast.error('Check-in blocked: Contract IP address not on file.');
+        return;
+      }
+
+      // GATE 7 — contract_status === 'VALID' (final gate)
       if (entertainer.contract_status !== 'VALID') {
-        await base44.entities.SystemAuditLog.create({
-          event_type: "CONTRACT_GATE_BLOCKED",
-          description: `Check-in blocked: contract_status=${entertainer.contract_status} for entertainer_id=${entertainerId}`,
-          actor_id: user?.email,
-          status: "blocked",
-          severity: "HIGH",
-          metadata: { entertainer_id: entertainerId, reason: "invalid_contract_status",
-            contract_status: entertainer.contract_status,
-            minimum_age_required: minimumAge, venue_id: activeVenue?.id, section: "SECTION-5B" }
-        });
-        alert(`Check-in blocked: Contract status is ${entertainer.contract_status || 'PENDING'}.`);
+        toast.error(`Check-in blocked: Contract status is ${entertainer.contract_status || 'INVALID'}.`);
         return;
       }
 
-      if (!entertainer.contract_signed || !entertainer.contract_signed_date ||
-          !entertainer.contract_signature || !entertainer.contract_ip_address) {
-        await base44.entities.SystemAuditLog.create({
-          event_type: "CONTRACT_GATE_BLOCKED",
-          description: `Check-in blocked: incomplete contract fields for entertainer_id=${entertainerId}`,
-          actor_id: user?.email,
-          status: "blocked",
-          severity: "HIGH",
-          metadata: { entertainer_id: entertainerId, reason: "incomplete_contract_fields",
-            contract_signed: entertainer.contract_signed,
-            has_signature: !!entertainer.contract_signature,
-            has_ip: !!entertainer.contract_ip_address,
-            minimum_age_required: minimumAge, section: "SECTION-5B" }
-        });
-        alert("Check-in blocked: Contract is incomplete.");
-        return;
-      }
-
-      // ALL GATES PASSED — proceed to create EntertainerShift
+      // ALL GATES PASSED — call secure backend function
       const shiftVenueId = activeVenue?.id;
       if (!shiftVenueId) {
         throw new Error('SHIFT_AUDIT_FAILED: venue_id unavailable at check-in');
       }
-      return base44.entities.EntertainerShift.create({
+
+      const response = await base44.functions.invoke('createEntertainerShift', {
         entertainer_id: entertainerId,
-        stage_name: entertainer.stage_name,
-        check_in_time: new Date().toISOString(),
-        location: location,
-        role: 'Entertainer',
-        venue_id: shiftVenueId,
-        status: 'on_floor'
+        location,
+        venue_id: shiftVenueId
       });
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+      return response.data?.shift;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
-      setSelectedEntertainer(null);
-      toast.success('Checked in successfully!');
-    }
-  });
 
   const updateLocation = useMutation({
     mutationFn: ({ shiftId, newLocation, newStatus }) => 
@@ -176,35 +145,9 @@ export default function EntertainerCheckIn({ user }) {
 
   const checkOut = useMutation({
     mutationFn: async (shiftId) => {
-      const shiftRecord = activeShifts.find(s => s.id === shiftId);
-      const allTxns = await base44.entities.POSTransaction.list('-created_date', 200);
-      const shiftStart = shiftRecord?.check_in_time ? new Date(shiftRecord.check_in_time) : new Date();
-      const shiftTxns = allTxns.filter(t =>
-        t.entertainer_id === shiftRecord?.entertainer_id &&
-        new Date(t.created_date) >= shiftStart
-      );
-      const tips = shiftTxns.reduce((s, t) => s + (parseFloat(t.tip) || 0), 0);
-      const commissions = shiftTxns.reduce((s, t) => s + (parseFloat(t.commission_amount) || 0), 0);
-      const shiftEarnings = tips + commissions;
-      await base44.entities.EntertainerShift.update(shiftId, {
-        check_out_time: new Date().toISOString(),
-        status: 'checked_out',
-        shift_earnings: shiftEarnings,
-      });
-      if (shiftRecord?.entertainer_id) {
-        try {
-          const ents = await base44.entities.Entertainer.filter({ status: 'active' });
-          const ent = ents.find(e => e.id === shiftRecord.entertainer_id);
-          if (ent) {
-            await base44.entities.Entertainer.update(shiftRecord.entertainer_id, {
-              total_earnings: (parseFloat(ent.total_earnings) || 0) + shiftEarnings,
-            });
-          }
-        } catch (error) {
-          console.error('Entertainer earnings update failed:', error);
-          toast.error('Earnings update failed: ' + (error.message || 'Unknown error'));
-        }
-      }
+      const response = await base44.functions.invoke('checkoutEntertainerShift', { shift_id: shiftId });
+      if (response.data?.error) throw new Error(response.data.error);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-shifts'] });

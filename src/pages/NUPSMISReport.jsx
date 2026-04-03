@@ -88,9 +88,9 @@ export default function NUPSMISReport() {
     queryFn: () => base44.entities.VIPRoom.list(),
   });
 
-  const { data: dreamBills = [] } = useQuery({
-    queryKey: ["mis-dream-bills"],
-    queryFn: () => base44.entities.DreamDollarBill.list("-created_date", 500),
+  const { data: gbTransactions = [] } = useQuery({
+    queryKey: ["mis-gb-transactions"],
+    queryFn: () => base44.entities.GlyphBucksTransaction.list("-created_date", 500),
   });
 
   // --- Filter to quarter (REAL only — F-2 BPAAA v3.0) ---
@@ -98,7 +98,9 @@ export default function NUPSMISReport() {
   const qDreamOrders = dreamOrders.filter(o => inRange(o.created_date));
   const qShifts = shifts.filter(s => inRange(s.check_in_time));
   const qPayroll = payroll.filter(p => inRange(p.created_date));
-  const qBills = dreamBills.filter(b => inRange(b.issued_at));
+  const qGBTxns = gbTransactions.filter(t => inRange(t.created_date) && t.status === 'active');
+  const gbIssued = qGBTxns.filter(t => t.transaction_type === 'Issue').length;
+  const gbRedeemed = qGBTxns.filter(t => t.transaction_type === 'Redeem').length;
 
   // --- KPIs — F-1: Tips excluded. F-2: GlyphBucks is liability, not revenue. BPAAA v3.0 ---
   const totalRevenue = qTransactions.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
@@ -113,10 +115,8 @@ export default function NUPSMISReport() {
     }
     return s;
   }, 0);
-  const ddIssued = qBills.filter(b => b.status === "issued").length;
-  const ddRedeemed = qBills.filter(b => b.status === "redeemed").length;
-  const ddValue = qDreamOrders.reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
-  const ddSurcharge = qDreamOrders.reduce((s, o) => s + (o.processing_surcharge || 0), 0);
+  const ddIssued = gbIssued;
+  const ddRedeemed = gbRedeemed;
 
   // --- Revenue by Month — POS only. F-2: GlyphBucks excluded from chart. Tips excluded. ---
   const monthlyData = {};
@@ -196,8 +196,7 @@ export default function NUPSMISReport() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <StatCard icon={DollarSign} label="POS Revenue" value={`$${totalRevenue.toFixed(0)}`} sub="Cash + Card only" color="cyan" />
             <StatCard icon={ShoppingCart} label="POS Transactions" value={qTransactions.length} sub={`Avg $${avgTransaction.toFixed(0)}`} color="purple" />
-            <StatCard icon={Coins} label="Dream Dollar Sales" value={`$${totalDDRevenue.toFixed(0)}`} sub={`${qDreamOrders.length} orders`} color="amber" />
-            <StatCard icon={Users} label="Active Entertainers" value={activeEntertainers} sub={`${entertainers.length} total`} color="pink" />
+            <StatCard icon={Coins} label="GB Issued (Liability)" value={`${gbIssued}`} sub={`${qDreamOrders.length} orders`} color="amber" />
             <StatCard icon={Clock} label="Staff Hours" value={totalShiftHours.toFixed(0)} sub={`${qShifts.length} shifts`} color="blue" />
             <StatCard icon={DoorOpen} label="VIP Rooms" value={vipRooms.length} sub="configured" color="green" />
           </div>

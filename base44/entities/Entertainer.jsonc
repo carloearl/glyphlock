@@ -1,0 +1,117 @@
+{
+  "name": "Entertainer",
+  "type": "object",
+  "properties": {
+    "stage_name": {
+      "type": "string",
+      "description": "Professional stage name"
+    },
+    "legal_name": {
+      "type": "string",
+      "description": "Full legal name"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Primary venue this entertainer belongs to"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "emergency_contact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "relationship": {
+          "type": "string"
+        }
+      }
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date of birth for age verification"
+    },
+    "contract_signed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Clickwrap agreement signed"
+    },
+    "contract_signature": {
+      "type": "string",
+      "description": "Digital signature of contract"
+    },
+    "contract_signed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contract_ip_address": {
+      "type": "string",
+      "description": "IP address where contract was signed"
+    },
+    "contract_status": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "INVALID",
+        "PENDING",
+        "EXPIRED",
+        "REVOKED"
+      ],
+      "default": "INVALID",
+      "description": "Contract validation status. Must be VALID for check-in. Set to VALID only after all contract fields are verified."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "suspended"
+      ],
+      "default": "active"
+    },
+    "schedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "commission_rate": {
+      "type": "number",
+      "default": 0.5,
+      "description": "Commission percentage (0-1)"
+    },
+    "total_earnings": {
+      "type": "number",
+      "default": 0
+    },
+    "vip_room_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "stage_name",
+    "legal_name",
+    "contract_signed"
+  ]
+}

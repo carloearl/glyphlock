@@ -15,12 +15,13 @@ export default function DailySummary({ transactions = [] }) {
   const discounts = todayTx.reduce((s, t) => s + (t.discount || 0), 0);
   const items = todayTx.reduce((s, t) => s + (t.items?.reduce((a, i) => a + (i.quantity || 0), 0) || 0), 0);
 
+  // F-1: Tips excluded from all totals — BPAAA v3.0
   const byMethod = {};
   todayTx.forEach(t => {
     const m = t.payment_method || 'Cash';
     if (!byMethod[m]) byMethod[m] = { count: 0, total: 0 };
     byMethod[m].count++;
-    byMethod[m].total += (t.total || 0);
+    byMethod[m].total += ((t.total || 0) - (t.tip || 0));
   });
 
   const byHour = {};
