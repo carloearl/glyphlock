@@ -20,6 +20,9 @@ import NUPSLanding from './pages/NUPSLanding';
 import NUPSGateway from './pages/NUPSGateway';
 import NUPSSandbox from './pages/NUPSSandbox';
 import EntertainerCheckIn from './pages/EntertainerCheckIn';
+import NUPSLogin from './pages/NUPSLogin';
+import NUPSOwner from './pages/NUPSOwner';
+import NUPSStaff from './pages/NUPSStaff';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
 import NUPSDemoManager from './pages/NUPSDemoManager';
 import NUPSMISReport from './pages/NUPSMISReport';
@@ -65,7 +68,7 @@ const AuthenticatedApp = () => {
   }
 
   // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/NUPSLanding', '/NUPSGateway', '/unauthorized', '/NUPSSandbox', '/NUPSLogin'];
+  const fullscreenPaths = ['/NUPSLanding', '/NUPSGateway', '/unauthorized', '/NUPSSandbox', '/NUPSLogin', '/NUPSOwner', '/NUPSStaff'];
   const isFullscreen = fullscreenPaths.some(p => window.location.pathname.startsWith(p));
 
   if (isFullscreen) {
@@ -74,6 +77,9 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/NUPSGateway" element={<NUPSGateway />} />
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
+        <Route path="/NUPSLogin" element={<NUPSLogin />} />
+        <Route path="/NUPSOwner" element={<NUPSOwner />} />
+        <Route path="/NUPSStaff" element={<NUPSStaff />} />
         <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
