@@ -152,10 +152,12 @@ export default function BatchManagement({ user, onBatchClosed }) {
     }
 
     // Section 3 — filter REAL only for financial totals
+    // F-5: Card whitelist + F-1: Tips excluded — BPAAA v3.0
+    const BATCH_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
     const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
-    const cashTx = realTxns.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + (t.total || 0), 0);
-    const cardTx = realTxns.filter(t => ['Credit Card', 'Debit Card'].includes(t.payment_method)).reduce((s, t) => s + (t.total || 0), 0);
-    const totalSales = realTxns.reduce((sum, t) => sum + (t.total || 0), 0);
+    const cashTx = realTxns.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+    const cardTx = realTxns.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+    const totalSales = cashTx + cardTx;
     const expectedCash = (activeBatch?.opening_cash || 0) + cashTx;
     const discrepancy = parsed - expectedCash;
     const hasDiscrepancy = Math.abs(discrepancy) > 0.01;
@@ -219,10 +221,12 @@ export default function BatchManagement({ user, onBatchClosed }) {
     }
   };
 
+  // F-5: Card whitelist + F-1: Tips excluded — BPAAA v3.0
+  const BATCH_CARD_WHITELIST_DISPLAY = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
   const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
-  const batchTotal = realTxns.reduce((sum, t) => sum + (t.total || 0), 0);
-  const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + (t.total || 0), 0);
-  const cardTotal = realTxns.filter(t => ['Credit Card', 'Debit Card'].includes(t.payment_method)).reduce((sum, t) => sum + (t.total || 0), 0);
+  const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+  const cardTotal = realTxns.filter(t => BATCH_CARD_WHITELIST_DISPLAY.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+  const batchTotal = cashTotal + cardTotal;
   // Note: cashTx and cardTx (local vars in handleCloseBatch) are computed fresh during batch close for audit
 
   // D10 — stale batch warning

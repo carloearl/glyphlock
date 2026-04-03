@@ -175,8 +175,9 @@ export default function NUPSOwner() {
     return txDate.toDateString() === today.toDateString();
   });
 
-  const todayRevenue = todayTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
-  const totalRevenue = realTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
+  // F-1: Tips excluded from all revenue calculations — BPAAA v3.0
+  const todayRevenue = todayTransactions.reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+  const totalRevenue = realTransactions.reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
   const activeGuestsCount = vipGuests.filter((g) => g.status === "in_building").length;
   const occupiedRooms = vipRooms.filter((r) => r.status === "occupied").length;
 

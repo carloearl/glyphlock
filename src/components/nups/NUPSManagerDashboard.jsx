@@ -55,11 +55,14 @@ export default function NUPSManagerDashboard({ user }) {
     refetchInterval: 60000,
   });
 
+  // F-5: Card sales whitelist — BPAAA v3.0
+  const MGR_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
   const todayTx = transactions.filter(t => new Date(t.created_date).toDateString() === today);
   const realTx = todayTx.filter(t => !t.mode || t.mode === 'REAL');
-  const todayRevenue = realTx.reduce((s, t) => s + (t.total || 0), 0);
-  const cashSales = realTx.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + (t.total || 0), 0);
-  const cardSales = realTx.filter(t => t.payment_method !== 'Cash').reduce((s, t) => s + (t.total || 0), 0);
+  // F-1: Tips excluded from all revenue calculations
+  const todayRevenue = realTx.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+  const cashSales = realTx.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+  const cardSales = realTx.filter(t => MGR_CARD_WHITELIST.includes(t.payment_method)).reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
   const occupiedRooms = vipRooms.filter(r => r.status === 'occupied');
   const lastReport = zReports[0];
   const hasDiscrepancy = lastReport?.requires_review;

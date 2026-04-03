@@ -8,8 +8,9 @@ export default function DailySummary({ transactions = [] }) {
   const today = new Date().toDateString();
   const todayTx = transactions.filter(t => new Date(t.created_date).toDateString() === today);
   
-  const revenue = todayTx.reduce((s, t) => s + (t.total || 0), 0);
+  // F-1: Tips excluded from revenue — staff pass-through only — BPAAA v3.0
   const tips = todayTx.reduce((s, t) => s + (t.tip || 0), 0);
+  const revenue = todayTx.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
   const tax = todayTx.reduce((s, t) => s + (t.tax || 0), 0);
   const discounts = todayTx.reduce((s, t) => s + (t.discount || 0), 0);
   const items = todayTx.reduce((s, t) => s + (t.items?.reduce((a, i) => a + (i.quantity || 0), 0) || 0), 0);
@@ -51,7 +52,7 @@ export default function DailySummary({ transactions = [] }) {
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-center">
             <DollarSign className="w-5 h-5 text-amber-400 mx-auto mb-1" />
             <div className="text-xl font-black text-amber-400 font-mono">${tips.toFixed(2)}</div>
-            <div className="text-[10px] text-gray-500">Tips</div>
+            <div className="text-[10px] text-gray-500">Tips — staff pass-through</div>
           </div>
           <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 text-center">
             <CreditCard className="w-5 h-5 text-purple-400 mx-auto mb-1" />

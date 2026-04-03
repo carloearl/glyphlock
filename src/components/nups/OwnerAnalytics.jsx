@@ -24,7 +24,8 @@ export default function OwnerAnalytics({ transactions = [] }) {
     const dailyMap = {};
 
     realTransactions.forEach((t) => {
-      const amt = t.total || 0;
+      // F-1: Tips excluded from revenue — BPAAA v3.0
+      const amt = (t.total || 0) - (t.tip || 0);
       const date = new Date(t.created_date);
       total += amt;
 

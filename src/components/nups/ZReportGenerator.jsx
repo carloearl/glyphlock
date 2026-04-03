@@ -91,19 +91,28 @@ export default function ZReportGenerator({ user: userProp }) {
   const doorSales = doorTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
   const barSales = barTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
 
-  // Live preview calculations — REAL only for financials
+  // F-5: Card sales whitelist — BPAAA v3.0
+  const CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
+
+  // Live preview calculations — REAL only for financials. Tips excluded — staff pass-through only.
   const cashSales = realTransactions
     .filter(t => t.payment_method === 'Cash')
-    .reduce((sum, t) => sum + (t.total || 0), 0);
+    .reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
 
   const cardSales = realTransactions
-    .filter(t => t.payment_method !== 'Cash')
-    .reduce((sum, t) => sum + (t.total || 0), 0);
+    .filter(t => CARD_WHITELIST.includes(t.payment_method))
+    .reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
 
   const vipRevenue = todayVIPSessions
     .reduce((sum, s) => sum + (s.total_charge || 0), 0);
 
-  // SECTION 4 — total_sales = cash_sales + card_sales ONLY. VIP is operational tracking, NOT revenue ledger.
+  // FINANCIAL RULE — LOCKED UNDER BPAAA v3.0
+  // total_sales = cash_sales + card_sales ONLY
+  // Tips excluded — staff pass-through only
+  // GlyphBucks excluded — liability, not revenue
+  // Card sales whitelist: Credit Card, Debit Card, Digital Wallet, Gift Card, Tab
+  // SettlementReports reads from POSZReport.total_sales only
+  // Do not modify without DACO authorization
   const totalSales = cashSales + cardSales;
 
   // Section 4 — live preview reconciliation
@@ -601,7 +610,7 @@ export default function ZReportGenerator({ user: userProp }) {
             <div className="text-center">
               <div className="text-sm text-gray-400 mb-1">Expected Total Sales (Real Tender Only)</div>
               <div className="text-3xl font-bold text-green-400">${totalSales.toFixed(2)}</div>
-              <div className="text-xs text-gray-500 mt-1">Cash + Card + VIP · GlyphBuck revenue and DEMO transactions excluded per audit</div>
+              <div className="text-xs text-gray-500 mt-1">Cash + Card only · Tips, GlyphBucks, VIP, and DEMO transactions excluded per BPAAA v3.0</div>
             </div>
           </div>
         </CardContent>

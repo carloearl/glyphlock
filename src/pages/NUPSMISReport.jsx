@@ -93,17 +93,18 @@ export default function NUPSMISReport() {
     queryFn: () => base44.entities.DreamDollarBill.list("-created_date", 500),
   });
 
-  // --- Filter to quarter ---
-  const qTransactions = transactions.filter(t => inRange(t.created_date));
+  // --- Filter to quarter (REAL only — F-2 BPAAA v3.0) ---
+  const qTransactions = transactions.filter(t => inRange(t.created_date) && (!t.mode || t.mode === 'REAL'));
   const qDreamOrders = dreamOrders.filter(o => inRange(o.created_date));
   const qShifts = shifts.filter(s => inRange(s.check_in_time));
   const qPayroll = payroll.filter(p => inRange(p.created_date));
   const qBills = dreamBills.filter(b => inRange(b.issued_at));
 
-  // --- KPIs ---
-  const totalRevenue = qTransactions.reduce((s, t) => s + (t.total || 0), 0);
-  const totalDDRevenue = qDreamOrders.reduce((s, o) => s + (o.grand_total || 0), 0);
-  const combinedRevenue = totalRevenue + totalDDRevenue;
+  // --- KPIs — F-1: Tips excluded. F-2: GlyphBucks is liability, not revenue. BPAAA v3.0 ---
+  const totalRevenue = qTransactions.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+  const gbLiabilityFaceValue = qDreamOrders.reduce((s, o) => s + (o.glyphbucks_value || 0), 0);
+  const gbSurchargeTotal = qDreamOrders.reduce((s, o) => s + (o.processing_surcharge || 0), 0);
+  // NOTE: totalRevenue and gbLiabilityFaceValue are NEVER combined — F-2 mandate
   const avgTransaction = qTransactions.length ? totalRevenue / qTransactions.length : 0;
   const activeEntertainers = entertainers.filter(e => e.status === "active").length;
   const totalShiftHours = qShifts.reduce((s, sh) => {
@@ -117,16 +118,11 @@ export default function NUPSMISReport() {
   const ddValue = qDreamOrders.reduce((s, o) => s + (o.dream_dollar_value || 0), 0);
   const ddSurcharge = qDreamOrders.reduce((s, o) => s + (o.processing_surcharge || 0), 0);
 
-  // --- Revenue by Month (bar chart) ---
+  // --- Revenue by Month — POS only. F-2: GlyphBucks excluded from chart. Tips excluded. ---
   const monthlyData = {};
   qTransactions.forEach(t => {
     const m = format(new Date(t.created_date), "MMM");
-    monthlyData[m] = (monthlyData[m] || 0) + (t.total || 0);
-  });
-  qDreamOrders.forEach(o => {
-    if (!o.created_date) return;
-    const m = format(new Date(o.created_date), "MMM");
-    monthlyData[m] = (monthlyData[m] || 0) + (o.grand_total || 0);
+    monthlyData[m] = (monthlyData[m] || 0) + ((t.total || 0) - (t.tip || 0));
   });
   const revenueChartData = Object.entries(monthlyData).map(([month, revenue]) => ({ month, revenue }));
 
@@ -198,7 +194,7 @@ export default function NUPSMISReport() {
         <section>
           <SectionHeader title="Executive Summary" color="text-cyan-400" />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <StatCard icon={DollarSign} label="Combined Revenue" value={`$${combinedRevenue.toFixed(0)}`} sub={qLabel} color="cyan" />
+            <StatCard icon={DollarSign} label="POS Revenue" value={`$${totalRevenue.toFixed(0)}`} sub="Cash + Card only" color="cyan" />
             <StatCard icon={ShoppingCart} label="POS Transactions" value={qTransactions.length} sub={`Avg $${avgTransaction.toFixed(0)}`} color="purple" />
             <StatCard icon={Coins} label="Dream Dollar Sales" value={`$${totalDDRevenue.toFixed(0)}`} sub={`${qDreamOrders.length} orders`} color="amber" />
             <StatCard icon={Users} label="Active Entertainers" value={activeEntertainers} sub={`${entertainers.length} total`} color="pink" />
@@ -261,24 +257,29 @@ export default function NUPSMISReport() {
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    { stream: "POS Sales", amount: totalRevenue, count: qTransactions.length },
-                    { stream: "Dream Dollar Orders", amount: totalDDRevenue, count: qDreamOrders.length },
-                    { stream: "DD Processing Surcharges", amount: ddSurcharge, count: qDreamOrders.length },
-                  ].map(row => (
-                    <tr key={row.stream} className="border-b border-gray-800 hover:bg-white/5">
-                      <td className="p-3 text-white">{row.stream}</td>
-                      <td className="p-3 text-right text-green-400 font-mono">${row.amount.toFixed(2)}</td>
-                      <td className="p-3 text-right text-gray-400">{row.count}</td>
-                      <td className="p-3 text-right text-gray-400">
-                        {combinedRevenue > 0 ? ((row.amount / combinedRevenue) * 100).toFixed(1) : "0"}%
-                      </td>
-                    </tr>
-                  ))}
+                  {/* F-2 BPAAA v3.0: POS revenue only in this table. GlyphBucks listed separately below as liability. */}
+                  <tr className="border-b border-gray-800 hover:bg-white/5">
+                    <td className="p-3 text-white">Cash Sales</td>
+                    <td className="p-3 text-right text-green-400 font-mono">${qTransactions.filter(t => t.payment_method === 'Cash').reduce((s,t) => s+((t.total||0)-(t.tip||0)),0).toFixed(2)}</td>
+                    <td className="p-3 text-right text-gray-400">{qTransactions.filter(t => t.payment_method === 'Cash').length}</td>
+                    <td className="p-3 text-right text-gray-400">{totalRevenue > 0 ? ((qTransactions.filter(t => t.payment_method === 'Cash').reduce((s,t) => s+((t.total||0)-(t.tip||0)),0) / totalRevenue) * 100).toFixed(1) : '0'}%</td>
+                  </tr>
+                  <tr className="border-b border-gray-800 hover:bg-white/5">
+                    <td className="p-3 text-white">Card Sales</td>
+                    <td className="p-3 text-right text-green-400 font-mono">${qTransactions.filter(t => ['Credit Card','Debit Card','Digital Wallet','Gift Card','Tab'].includes(t.payment_method)).reduce((s,t) => s+((t.total||0)-(t.tip||0)),0).toFixed(2)}</td>
+                    <td className="p-3 text-right text-gray-400">{qTransactions.filter(t => ['Credit Card','Debit Card','Digital Wallet','Gift Card','Tab'].includes(t.payment_method)).length}</td>
+                    <td className="p-3 text-right text-gray-400">{totalRevenue > 0 ? ((qTransactions.filter(t => ['Credit Card','Debit Card','Digital Wallet','Gift Card','Tab'].includes(t.payment_method)).reduce((s,t) => s+((t.total||0)-(t.tip||0)),0) / totalRevenue) * 100).toFixed(1) : '0'}%</td>
+                  </tr>
+                  <tr className="border-b border-gray-700 bg-amber-900/10">
+                    <td className="p-3 text-amber-400 text-xs">Tips — staff pass-through (excluded from revenue)</td>
+                    <td className="p-3 text-right text-amber-400 font-mono text-xs">${qTransactions.reduce((s,t) => s+(t.tip||0),0).toFixed(2)}</td>
+                    <td className="p-3 text-right text-gray-500 text-xs">—</td>
+                    <td className="p-3 text-right text-gray-500 text-xs">not revenue</td>
+                  </tr>
                   <tr className="bg-gray-800/50 font-bold">
-                    <td className="p-3 text-white">TOTAL</td>
-                    <td className="p-3 text-right text-cyan-400 font-mono">${combinedRevenue.toFixed(2)}</td>
-                    <td className="p-3 text-right text-gray-400">{qTransactions.length + qDreamOrders.length}</td>
+                    <td className="p-3 text-white">POS TOTAL SALES</td>
+                    <td className="p-3 text-right text-cyan-400 font-mono">${totalRevenue.toFixed(2)}</td>
+                    <td className="p-3 text-right text-gray-400">{qTransactions.length}</td>
                     <td className="p-3 text-right text-cyan-400">100%</td>
                   </tr>
                 </tbody>
@@ -287,12 +288,15 @@ export default function NUPSMISReport() {
           </Card>
         </section>
 
-        {/* ── DREAM DOLLAR OPERATIONS ── */}
+        {/* ── GLYPHBUCKS LIABILITY — F-2 BPAAA v3.0: NOT REVENUE ── */}
         <section>
-          <SectionHeader title="Dream Dollar Operations" color="text-amber-400" />
+          <SectionHeader title="GlyphBucks Liability — not venue revenue" color="text-amber-400" />
+          <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-4 text-xs text-amber-400">
+            ⚠️ GlyphBucks are a stored-value liability instrument. These figures are never counted as venue revenue and are never combined with POS sales totals.
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <StatCard icon={Coins} label="DD Face Value Issued" value={`$${ddValue.toFixed(0)}`} color="amber" />
-            <StatCard icon={DollarSign} label="Surcharges Collected" value={`$${ddSurcharge.toFixed(0)}`} color="green" />
+            <StatCard icon={Coins} label="GB Face Value Issued" value={`$${gbLiabilityFaceValue.toFixed(0)}`} color="amber" />
+            <StatCard icon={DollarSign} label="Surcharges Collected" value={`$${gbSurchargeTotal.toFixed(0)}`} color="green" />
             <StatCard icon={CheckCircle2} label="Bills Issued" value={ddIssued} color="cyan" />
             <StatCard icon={Activity} label="Bills Redeemed" value={ddRedeemed} color="purple" />
           </div>

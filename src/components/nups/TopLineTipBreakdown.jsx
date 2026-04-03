@@ -25,8 +25,9 @@ export default function TopLineTipBreakdown({ transactions = [] }) {
 
     transactions.forEach((t) => {
       const date = new Date(t.created_date);
-      const rev = t.total || 0;
       const tip = t.tip || 0;
+      // F-1: Tips excluded from revenue figures — staff pass-through only — BPAAA v3.0
+      const rev = (t.total || 0) - tip;
       const tax = t.tax || 0;
       const disc = t.discount || 0;
       const method = t.payment_method || "Cash";
@@ -100,7 +101,7 @@ export default function TopLineTipBreakdown({ transactions = [] }) {
               <ChangeIndicator value={data.revChange} />
             </div>
             <div className="text-2xl font-bold text-cyan-400">{fmt(data.todayRev)}</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-wide">Today Top Line</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-wide">Today Revenue (excl. tips)</div>
             <div className="text-xs text-gray-500 mt-1">{data.todayCount} transactions</div>
           </CardContent>
         </Card>
