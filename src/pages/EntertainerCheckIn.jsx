@@ -2,8 +2,7 @@ import React from "react";
 import EntertainerCheckInComponent from "@/components/nups/EntertainerCheckIn";
 
 // EntertainerCheckIn is a staff-operated check-in station.
-// It is NOT a self-service portal for performers.
-// NUPSRouteGuard (PERFORMER role) removed — operated by managers/door staff via NUPS session.
+// Operated by managers/door staff via NUPS session — not a self-service performer portal.
 export default function EntertainerCheckInPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white p-4 md:p-8">
