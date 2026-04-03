@@ -131,6 +131,12 @@ export default function EntertainerCheckIn({ user }) {
       }
       return response.data?.shift;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
+      setSelectedEntertainer(null);
+      toast.success('Checked in successfully!');
+    }
+  });
 
   const updateLocation = useMutation({
     mutationFn: ({ shiftId, newLocation, newStatus }) => 
