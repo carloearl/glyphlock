@@ -240,7 +240,6 @@ export default function EntertainerCheckIn({ user }) {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeShifts.map((shift) => {
-              const duration = Math.floor((new Date() - new Date(shift.check_in_time)) / 60000);
               return (
                 <Card key={shift.id} className="bg-gray-800/50 border-gray-700">
                   <CardContent className="p-4">

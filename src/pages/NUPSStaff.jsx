@@ -1,201 +1,233 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Clock, DollarSign, AlertCircle, Trash2, Edit2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import {
+  Shield, LogOut, ShoppingCart, DoorOpen, Users, Clock,
+  Loader2, BarChart3, UserCheck, Star
+} from "lucide-react";
+
+import POSCashRegister from "../components/nups/POSCashRegister.jsx";
+import GuestCheckIn from "../components/nups/GuestCheckIn.jsx";
+import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
+import TimeClock from "../components/nups/TimeClock.jsx";
+import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
+import TransactionHistory from "../components/nups/TransactionHistory.jsx";
+import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
+import SEOHead from "@/components/SEOHead";
+import { mapNUPSRoleToRBAC } from "../config/roles.js";
+import { GLYPHLOCK_DISCLAIMER } from "@/constants/legalDisclaimer";
+
+const STAFF_MODULES = [
+  { key: "pos",       label: "POS Register",  icon: ShoppingCart, roles: new Set(["manager","bartender","door_girl","hostess","security","dj"]) },
+  { key: "door",      label: "Door / Check-In", icon: DoorOpen,   roles: new Set(["manager","door_girl","security"]) },
+  { key: "entertainer",label: "Entertainers", icon: UserCheck,    roles: new Set(["manager","door_girl"]) },
+  { key: "vip",       label: "VIP Rooms",     icon: Star,         roles: new Set(["manager","hostess"]) },
+  { key: "timeclock", label: "Time Clock",    icon: Clock,        roles: new Set(["manager","bartender","door_girl","hostess","security","dj"]) },
+  { key: "history",   label: "My Transactions", icon: BarChart3,  roles: new Set(["manager","bartender"]) },
+];
 
 export default function NUPSStaff() {
   const navigate = useNavigate();
-  const [staff, setStaff] = useState([
-    { id: 1, name: "Alex Rivera", role: "Manager", email: "alex@nups.local", status: "active", hourlyRate: 22.50, shiftsThisMonth: 45 },
-    { id: 2, name: "Jamie Chen", role: "Bartender", email: "jamie@nups.local", status: "active", hourlyRate: 16.00, shiftsThisMonth: 38 },
-    { id: 3, name: "Casey Williams", role: "DJ", email: "casey@nups.local", status: "active", hourlyRate: 20.00, shiftsThisMonth: 28 },
-    { id: 4, name: "Morgan Lee", role: "Door Staff", email: "morgan@nups.local", status: "inactive", hourlyRate: 15.50, shiftsThisMonth: 0 },
-  ]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [formData, setFormData] = useState({ name: "", role: "", email: "", hourlyRate: "" });
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [rbacRole, setRbacRole] = useState("door_girl");
+  const [activeModule, setActiveModule] = useState("pos");
+  const [posStation, setPosStation] = useState("door");
 
-  const filteredStaff = staff.filter(s =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const nupsSession = sessionStorage.getItem("nups_session");
+        if (nupsSession) {
+          const sessionUser = JSON.parse(nupsSession);
+          setUser(sessionUser);
+          const mapped = mapNUPSRoleToRBAC(sessionUser._highestRole || sessionUser.role);
+          setRbacRole(mapped);
+          setAuthChecked(true);
+          return;
+        }
+        const isAuth = await base44.auth.isAuthenticated();
+        if (!isAuth) { navigate("/NUPSLogin"); return; }
+        const me = await base44.auth.me();
 
-  const handleAddStaff = () => {
-    if (formData.name && formData.role && formData.email && formData.hourlyRate) {
-      setStaff([...staff, {
-        id: Date.now(),
-        ...formData,
-        hourlyRate: parseFloat(formData.hourlyRate),
-        status: "active",
-        shiftsThisMonth: 0
-      }]);
-      setFormData({ name: "", role: "", email: "", hourlyRate: "" });
-      setShowAddForm(false);
-    }
-  };
+        let permissionsData = null;
+        try {
+          const res = await base44.functions.invoke("getUserPermissions", {});
+          permissionsData = res.data;
+        } catch (e) { /* fallback */ }
 
-  const handleDeleteStaff = (id) => {
-    setStaff(staff.filter(s => s.id !== id));
-  };
+        me._rbac = permissionsData;
+        me._highestRole = permissionsData?.highest_role || (me.role === "admin" ? "VENUE_OWNER" : null);
+        const mapped = mapNUPSRoleToRBAC(me._highestRole || me.role);
+        setRbacRole(mapped);
+        sessionStorage.setItem("nups_session", JSON.stringify(me));
+        setUser(me);
+      } catch {
+        navigate("/NUPSLogin");
+        return;
+      }
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, []);
 
-  const handleToggleStatus = (id) => {
-    setStaff(staff.map(s =>
-      s.id === id ? { ...s, status: s.status === "active" ? "inactive" : "active" } : s
-    ));
+  const { data: transactions = [] } = useQuery({
+    queryKey: ["pos-transactions"],
+    queryFn: () => base44.entities.POSTransaction.list("-created_date", 50),
+    enabled: !!user,
+  });
+
+  const realTransactions = transactions.filter(t => !t.mode || t.mode === "REAL");
+
+  const todayTransactions = realTransactions.filter(t => {
+    return new Date(t.created_date).toDateString() === new Date().toDateString();
+  });
+  const todayRevenue = todayTransactions.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+
+  if (!authChecked || !user) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
+      </div>
+    );
+  }
+
+  const visibleModules = STAFF_MODULES.filter(m => m.roles.has(rbacRole));
+  // Ensure active module is valid for this role
+  const validKeys = new Set(visibleModules.map(m => m.key));
+  const currentModule = validKeys.has(activeModule) ? activeModule : (visibleModules[0]?.key || "pos");
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("nups_session");
+    base44.auth.logout();
   };
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <SEOHead
+        title="N.U.P.S. Staff Portal | GlyphLock"
+        description="Staff operations dashboard for N.U.P.S."
+        url="/NUPSStaff"
+      />
+      <OfflineSyncBanner />
+
       {/* Header */}
-      <header className="border-b border-white/[0.06] p-4 bg-black/95 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <header className="border-b border-cyan-500/20 p-3 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
+        <div className="container mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/")} className="text-gray-600 hover:text-gray-400">
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <Clock className="w-5 h-5 text-cyan-400" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/NUPSGateway")}
+              className="text-gray-400 hover:text-white p-2"
+              aria-label="Back to gateway"
+            >←</Button>
+            <Shield className="w-5 h-5 text-cyan-400" />
             <div>
-              <div className="font-bold text-white text-sm">N.U.P.S. Staff Management</div>
-              <div className="text-[10px] text-cyan-400">{staff.filter(s => s.status === "active").length} active staff</div>
+              <h1 className="text-base font-bold text-white leading-none">N.U.P.S. Staff</h1>
+              <p className="text-[10px] text-gray-400">{user?.email}</p>
             </div>
           </div>
-          <Button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-gradient-to-r from-cyan-600 to-blue-600 text-xs h-8 px-3 gap-1.5 font-bold"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Add Staff
-          </Button>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-cyan-500/50 text-cyan-400 text-xs hidden sm:flex">
+              {user?._highestRole || rbacRole}
+            </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="border-red-500/50 text-red-400 hover:bg-red-500/10 min-h-[40px]"
+              aria-label="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto p-4">
-        {/* Search */}
-        <div className="mb-4">
-          <Input
-            placeholder="Search by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-white/[0.05] border-white/[0.1] text-white"
-          />
+      <div className="container mx-auto p-4">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          <Card className="bg-gray-900/50 border-cyan-500/30">
+            <CardContent className="p-3 text-center">
+              <div className="text-xl font-bold text-cyan-400">${todayRevenue.toFixed(0)}</div>
+              <div className="text-[10px] text-gray-400">Today Revenue</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gray-900/50 border-purple-500/30">
+            <CardContent className="p-3 text-center">
+              <div className="text-xl font-bold text-purple-400">{todayTransactions.length}</div>
+              <div className="text-[10px] text-gray-400">Transactions</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gray-900/50 border-green-500/30">
+            <CardContent className="p-3 text-center">
+              <div className="text-xl font-bold text-green-400">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+              <div className="text-[10px] text-gray-400">Current Time</div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Add Form */}
-        {showAddForm && (
-          <div className="mb-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.07] space-y-3">
-            <div className="grid md:grid-cols-4 gap-3">
-              <Input
-                placeholder="Full name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-white/[0.05] border-white/[0.1] text-white"
-              />
-              <Input
-                placeholder="Role (Manager, Bartender, etc)"
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="bg-white/[0.05] border-white/[0.1] text-white"
-              />
-              <Input
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="bg-white/[0.05] border-white/[0.1] text-white"
-              />
-              <Input
-                placeholder="Hourly rate"
-                type="number"
-                value={formData.hourlyRate}
-                onChange={(e) => setFormData({ ...formData, hourlyRate: e.target.value })}
-                className="bg-white/[0.05] border-white/[0.1] text-white"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleAddStaff} className="bg-green-600 text-xs h-8">
-                Save Staff Member
-              </Button>
-              <Button
-                onClick={() => setShowAddForm(false)}
-                variant="outline"
-                className="border-white/[0.1] text-xs h-8"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* Module Nav */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {visibleModules.map(({ key, label, icon: Icon }) => (
+            <Button
+              key={key}
+              onClick={() => setActiveModule(key)}
+              variant={currentModule === key ? "default" : "outline"}
+              className={`min-h-[40px] text-sm transition-all ${
+                currentModule === key
+                  ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500"
+                  : "border-gray-700 text-gray-300 hover:border-cyan-500/50 hover:text-white bg-transparent"
+              }`}
+            >
+              <Icon className="w-4 h-4 mr-2 shrink-0" />{label}
+            </Button>
+          ))}
+        </div>
 
-        {/* Staff List */}
-        <div className="space-y-2">
-          {filteredStaff.length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-white/[0.06] rounded-xl">
-              <AlertCircle className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-              <p className="text-gray-300 text-sm">No staff members found.</p>
-            </div>
-          ) : (
-            filteredStaff.map(s => (
-              <div key={s.id} className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.07] flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div>
-                      <div className="font-bold text-white">{s.name}</div>
-                      <div className="text-xs text-gray-400">{s.email}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={s.status === "active" ? "bg-green-500/10 text-green-400 border-green-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}>
-                      {s.status}
-                    </Badge>
-                    <span className="text-xs text-gray-500">{s.role}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 text-right">
-                  <div>
-                    <div className="text-green-400 font-bold text-sm">${s.hourlyRate.toFixed(2)}/hr</div>
-                    <div className="text-xs text-gray-500">{s.shiftsThisMonth} shifts</div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleToggleStatus(s.id)}
-                      className="p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] transition-colors"
-                      title={s.status === "active" ? "Deactivate" : "Activate"}
-                    >
-                      <Edit2 className="w-4 h-4 text-gray-400" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteStaff(s.id)}
-                      className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-400" />
-                    </button>
-                  </div>
-                </div>
+        {/* Module Content */}
+        <div className="space-y-4 pb-8">
+          {currentModule === "pos" && (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                {[{ k: "door", l: "Door Register" }, { k: "bar", l: "Bar Register" }].map(({ k, l }) => (
+                  <Button
+                    key={k}
+                    onClick={() => setPosStation(k)}
+                    variant={posStation === k ? "default" : "outline"}
+                    className={`min-h-[40px] text-sm ${
+                      posStation === k
+                        ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500"
+                        : "border-gray-700 text-gray-300 bg-transparent"
+                    }`}
+                  >{l}</Button>
+                ))}
               </div>
-            ))
+              <POSCashRegister user={user} station={posStation} />
+            </div>
+          )}
+          {currentModule === "door" && <GuestCheckIn />}
+          {currentModule === "entertainer" && <EntertainerCheckIn user={user} />}
+          {currentModule === "vip" && <VIPRoomBoard user={user} />}
+          {currentModule === "timeclock" && (
+            <TimeClock user={user} role={user?._highestRole || rbacRole} />
+          )}
+          {currentModule === "history" && (
+            <TransactionHistory
+              transactions={realTransactions.filter(t => t.cashier === user?.email)}
+              showReceipt={true}
+            />
           )}
         </div>
 
-        {/* Summary */}
-        {filteredStaff.length > 0 && (
-          <div className="mt-6 grid md:grid-cols-3 gap-3">
-            <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.07]">
-              <div className="text-gray-500 text-xs mb-1">Active Staff</div>
-              <div className="text-cyan-400 font-black text-lg">{staff.filter(s => s.status === "active").length}</div>
-            </div>
-            <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.07]">
-              <div className="text-gray-500 text-xs mb-1">Total Staff</div>
-              <div className="text-blue-400 font-black text-lg">{staff.length}</div>
-            </div>
-            <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.07]">
-              <div className="text-gray-500 text-xs mb-1">Avg Hourly Rate</div>
-              <div className="text-green-400 font-black text-lg">
-                ${(staff.reduce((sum, s) => sum + s.hourlyRate, 0) / staff.length).toFixed(2)}
-              </div>
-            </div>
-          </div>
-        )}
+        <footer className="text-center text-[10px] text-gray-700 py-4 border-t border-gray-800 mt-8">
+          {GLYPHLOCK_DISCLAIMER}
+        </footer>
       </div>
     </div>
   );
