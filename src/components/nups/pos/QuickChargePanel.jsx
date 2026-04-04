@@ -5,14 +5,22 @@ import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
 
 const PRESETS = [
-  { label: "Door Fee",       amount: 30,  accent: "#06b6d4" }, // cyan
-  { label: "VIP Entry",      amount: 100, accent: "#a855f7" }, // purple
-  { label: "Bottle Service", amount: 250, accent: "#ec4899" }, // pink
-  { label: "Cover Charge",   amount: 20,  accent: "#3b82f6" }, // blue
-  { label: "Private Dance",  amount: 40,  accent: "#f59e0b" }, // amber
-  { label: "Champagne Room", amount: 500, accent: "#f43f5e" }, // rose
-  { label: "Two-Drink Min",  amount: 25,  accent: "#10b981" }, // emerald
-  { label: "Late Night Fee", amount: 15,  accent: "#6366f1" }, // indigo
+  { label: "Door Fee",       amount: 30,  accent: "#06b6d4" },
+  { label: "VIP Entry",      amount: 100, accent: "#a855f7" },
+  { label: "Bottle Service", amount: 250, accent: "#ec4899" },
+  { label: "Cover Charge",   amount: 20,  accent: "#3b82f6" },
+  { label: "Private Dance",  amount: 40,  accent: "#f59e0b" },
+  { label: "Champagne Room", amount: 500, accent: "#f43f5e" },
+  { label: "Two-Drink Min",  amount: 25,  accent: "#10b981" },
+  { label: "Late Night Fee", amount: 15,  accent: "#6366f1" },
+];
+
+const DOOR_PRESETS = [
+  { label: "Friends & Military", amount: 10, accent: "#10b981" }, // green
+  { label: "Driver Kickback",    amount: 30, accent: "#06b6d4" }, // cyan
+  { label: "Non-Driver K/B",     amount: 20, accent: "#3b82f6" }, // blue
+  { label: "Door $30",           amount: 30, accent: "#a855f7" }, // purple
+  { label: "Door $20",           amount: 20, accent: "#f59e0b" }, // amber
 ];
 
 const DISCOUNT_PRESETS = [10, 15, 20, 25, 30, 50];
@@ -135,7 +143,9 @@ function ManualItemEntry({ onAddItem }) {
   );
 }
 
-export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount }) {
+export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount, station }) {
+  const isDoor = station === 'door';
+  const activePresets = isDoor ? DOOR_PRESETS : PRESETS;
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   return (
     <div className="space-y-5">
@@ -154,8 +164,8 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
       )}
 
       {/* Quick Charges — big touch targets */}
-      <div className="grid grid-cols-4 gap-2.5">
-        {PRESETS.map((p) => (
+      <div className={`grid gap-2.5 ${isDoor ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-4'}`}>
+        {activePresets.map((p) => (
           <button
             key={p.label}
             onClick={() => onAddItem({
@@ -168,7 +178,7 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
             })}
             className="rounded-xl flex flex-col items-center justify-center gap-1 active:scale-95 transition-all select-none"
             style={{
-              height: '76px',
+              height: isDoor ? '90px' : '76px',
               background: `linear-gradient(135deg, ${p.accent}18, ${p.accent}08)`,
               border: `1.5px solid ${p.accent}35`,
             }}
@@ -181,6 +191,9 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
         ))}
       </div>
 
+      {/* Discount strip — hidden on door station */}
+      {!isDoor && (
+      <>
       {/* Discount strip */}
       <div>
         <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold flex items-center gap-1">
@@ -203,6 +216,8 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
           ))}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }

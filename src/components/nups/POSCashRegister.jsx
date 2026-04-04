@@ -421,11 +421,12 @@ export default function POSCashRegister({ user, station = 'door' }) {
             <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
           </div>
 
-          {isManagerPOS && (
+          {(isManagerPOS || station === 'door') && (
             <QuickChargePanel
               onAddItem={addToCart}
               onSetDiscount={setDiscount}
               currentDiscount={discount}
+              station={station}
             />
           )}
 
