@@ -9,7 +9,7 @@ export default function NUPSLanding() {
   };
 
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 bg-black flex items-center justify-center overflow-hidden" style={{ zIndex: 9999 }}>
       {/* Particle animation background */}
       <div className="absolute inset-0 opacity-50">
         <div className="w-full h-full" style={{
