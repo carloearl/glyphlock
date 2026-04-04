@@ -16,11 +16,12 @@ const PRESETS = [
 ];
 
 const DOOR_PRESETS = [
-  { label: "Friends & Military", amount: 10, accent: "#10b981" }, // green
-  { label: "Driver Kickback",    amount: 30, accent: "#06b6d4" }, // cyan
-  { label: "Non-Driver K/B",     amount: 20, accent: "#3b82f6" }, // blue
-  { label: "Door $30",           amount: 30, accent: "#a855f7" }, // purple
-  { label: "Door $20",           amount: 20, accent: "#f59e0b" }, // amber
+  { label: "Friends & Military", amount: 10,  accent: "#10b981" },
+  { label: "Driver Kickback",    amount: 30,  accent: "#06b6d4" },
+  { label: "Non-Driver K/B",     amount: 20,  accent: "#3b82f6" },
+  { label: "Door $30",           amount: 30,  accent: "#a855f7" },
+  { label: "Door $20",           amount: 20,  accent: "#f59e0b" },
+  { label: "MGR VIP Comp",       amount: 0,   accent: "#f43f5e" },
 ];
 
 const DISCOUNT_PRESETS = [10, 15, 20, 25, 30, 50];
