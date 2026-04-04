@@ -389,29 +389,31 @@ export default function POSCashRegister({ user, station = 'door' }) {
       {/* LEFT: PRODUCTS + SEARCH */}
       <div className="flex-1 flex flex-col overflow-hidden" style={{ borderRightWidth: '1px', borderRightColor: 'rgba(255,255,255,0.06)', borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.06)' }}>
 
-        {/* Top bar: search + scan */}
-        <div className="flex gap-2 p-3 shrink-0 flex-col sm:flex-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
-            <Input
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-10 text-white text-sm placeholder:text-gray-600"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}
-            />
+        {/* Top bar: search + scan — hidden on door */}
+        {station !== 'door' && (
+          <div className="flex gap-2 p-3 shrink-0 flex-col sm:flex-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
+              <Input
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 h-10 text-white text-sm placeholder:text-gray-600"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}
+              />
+            </div>
+            <div className="relative">
+              <Barcode className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
+              <Input
+                placeholder="Scan..."
+                value={barcodeInput}
+                onChange={(e) => setBarcodeInput(e.target.value)}
+                className="pl-8 w-full sm:w-28 h-10 text-white text-sm placeholder:text-gray-600"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}
+              />
+            </div>
           </div>
-          <div className="relative">
-            <Barcode className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'rgba(255,255,255,0.25)' }} />
-            <Input
-              placeholder="Scan..."
-              value={barcodeInput}
-              onChange={(e) => setBarcodeInput(e.target.value)}
-              className="pl-8 w-full sm:w-28 h-10 text-white text-sm placeholder:text-gray-600"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px' }}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-5" style={{ scrollbarWidth: 'none' }}>
@@ -430,7 +432,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
             />
           )}
 
-          {filteredProducts.length > 0 && (
+          {station !== 'door' && filteredProducts.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Products</span>

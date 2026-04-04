@@ -149,21 +149,23 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   return (
     <div className="space-y-5">
-      {/* Manual Item Entry */}
+      {/* Manager Comp / Manual Entry — always visible */}
       <ManualItemEntry onAddItem={onAddItem} />
 
-      {/* Quick Add Product to Catalog */}
-      {showQuickAdd ? (
-        <QuickAddProduct onClose={() => setShowQuickAdd(false)} />
-      ) : (
-        <button onClick={() => setShowQuickAdd(true)}
-          className="w-full h-9 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
-          style={{ background: 'rgba(6,182,212,0.06)', border: '1px dashed rgba(6,182,212,0.3)', color: 'rgba(6,182,212,0.7)' }}>
-          <Plus className="w-3.5 h-3.5" /> Quick Add Product to Catalog
-        </button>
+      {/* Quick Add Product — hidden on door */}
+      {!isDoor && (
+        showQuickAdd ? (
+          <QuickAddProduct onClose={() => setShowQuickAdd(false)} />
+        ) : (
+          <button onClick={() => setShowQuickAdd(true)}
+            className="w-full h-9 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
+            style={{ background: 'rgba(6,182,212,0.06)', border: '1px dashed rgba(6,182,212,0.3)', color: 'rgba(6,182,212,0.7)' }}>
+            <Plus className="w-3.5 h-3.5" /> Quick Add Product to Catalog
+          </button>
+        )
       )}
 
-      {/* Quick Charges — big touch targets */}
+      {/* Quick Charges */}
       <div className={`grid gap-2.5 ${isDoor ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-4'}`}>
         {activePresets.map((p) => (
           <button
