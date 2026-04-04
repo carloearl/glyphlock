@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Percent, Plus, X, Keyboard } from "lucide-react";
+import { Percent, Plus, X, Keyboard, AlertTriangle, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,12 +17,80 @@ const PRESETS = [
 
 const DOOR_PRESETS = [
   { label: "Friends & Military", amount: 10,  accent: "#10b981" },
-  { label: "Driver Kickback",    amount: 30,  accent: "#06b6d4" },
-  { label: "Non-Driver K/B",     amount: 20,  accent: "#3b82f6" },
+  { label: "Driver Kickback",    amount: -30, accent: "#06b6d4", isKickback: true },
+  { label: "Non-Driver K/B",     amount: -20, accent: "#3b82f6", isKickback: true },
   { label: "Door $30",           amount: 30,  accent: "#a855f7" },
   { label: "Door $20",           amount: 20,  accent: "#f59e0b" },
   { label: "MGR VIP Comp",       amount: 0,   accent: "#f43f5e" },
 ];
+
+// ─── Kickback Confirm Modal ───────────────────────────────────────────────────
+function KickbackModal({ preset, batchId, cashier, venueId, onClose }) {
+  const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const confirm = async () => {
+    setSaving(true);
+    await base44.entities.POSTransaction.create({
+      transaction_id: `KB-${Date.now()}`,
+      venue_id: venueId || '',
+      items: [{
+        product_id: `kickback-${preset.label.toLowerCase().replace(/\s/g,'-')}`,
+        product_name: preset.label,
+        quantity: 1,
+        price: preset.amount,
+        total: preset.amount,
+      }],
+      subtotal: preset.amount,
+      tax: 0,
+      discount: 0,
+      total: preset.amount,
+      payment_method: 'Cash',
+      cashier: cashier || '',
+      status: 'completed',
+      notes: 'Kickback payout — separate ticket',
+    });
+    setSaving(false);
+    setDone(true);
+    setTimeout(onClose, 1200);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.75)' }}>
+      <div className="rounded-2xl p-6 space-y-4 max-w-xs w-full mx-4" style={{ background: '#111', border: '2px solid rgba(6,182,212,0.4)' }}>
+        {done ? (
+          <div className="flex flex-col items-center gap-3 py-2">
+            <Check className="w-10 h-10 text-green-400" />
+            <p className="text-white font-bold">Kickback Ticket Created</p>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-yellow-400" />
+              <span className="text-white font-bold text-sm">Separate Kickback Ticket</span>
+            </div>
+            <p className="text-gray-400 text-sm">
+              This will create a <strong className="text-white">standalone payout ticket</strong> for:
+            </p>
+            <div className="rounded-xl p-3 text-center" style={{ background: `${preset.accent}15`, border: `1.5px solid ${preset.accent}40` }}>
+              <p className="text-white font-semibold">{preset.label}</p>
+              <p className="text-2xl font-black" style={{ color: preset.accent }}>${Math.abs(preset.amount)}</p>
+            </div>
+            <p className="text-[11px] text-gray-600">This does NOT affect the current order.</p>
+            <div className="flex gap-2">
+              <button onClick={onClose} className="flex-1 h-10 rounded-xl text-sm text-gray-400 border border-white/10">Cancel</button>
+              <button onClick={confirm} disabled={saving}
+                className="flex-1 h-10 rounded-xl text-sm font-black text-white disabled:opacity-50"
+                style={{ background: preset.accent }}>
+                {saving ? 'Processing...' : 'Confirm Payout'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const DISCOUNT_PRESETS = [10, 15, 20, 25, 30, 50];
 
@@ -144,10 +212,11 @@ function ManualItemEntry({ onAddItem }) {
   );
 }
 
-export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount, station }) {
+export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount, station, batchId, cashier, venueId }) {
   const isDoor = station === 'door';
   const activePresets = isDoor ? DOOR_PRESETS : PRESETS;
   const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [kickbackPreset, setKickbackPreset] = useState(null);
   return (
     <div className="space-y-5">
       {/* Manager Comp / Manual Entry — always visible */}
@@ -167,18 +236,30 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
       )}
 
       {/* Quick Charges */}
+      {kickbackPreset && (
+        <KickbackModal
+          preset={kickbackPreset}
+          batchId={batchId}
+          cashier={cashier}
+          venueId={venueId}
+          onClose={() => setKickbackPreset(null)}
+        />
+      )}
       <div className={`grid gap-2.5 ${isDoor ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-4'}`}>
         {activePresets.map((p) => (
           <button
             key={p.label}
-            onClick={() => onAddItem({
-              product_id: `preset-${p.label.toLowerCase().replace(/\s/g, '-')}`,
-              product_name: p.label,
-              quantity: 1,
-              price: p.amount,
-              total: p.amount,
-              is_preset: true,
-            })}
+            onClick={() => {
+              if (p.isKickback) { setKickbackPreset(p); return; }
+              onAddItem({
+                product_id: `preset-${p.label.toLowerCase().replace(/\s/g, '-')}`,
+                product_name: p.label,
+                quantity: 1,
+                price: p.amount,
+                total: p.amount,
+                is_preset: true,
+              });
+            }}
             className="rounded-xl flex flex-col items-center justify-center gap-1 active:scale-95 transition-all select-none"
             style={{
               height: isDoor ? '90px' : '76px',
@@ -188,8 +269,12 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
             onMouseEnter={e => e.currentTarget.style.borderColor = `${p.accent}70`}
             onMouseLeave={e => e.currentTarget.style.borderColor = `${p.accent}35`}
           >
-            <span className="text-[11px] font-semibold leading-tight text-center px-1" style={{ color: 'rgba(255,255,255,0.75)' }}>{p.label}</span>
-            <span className="text-xl font-black" style={{ color: p.accent }}>${p.amount}</span>
+            <span className="text-[11px] font-semibold leading-tight text-center px-1" style={{ color: 'rgba(255,255,255,0.75)' }}>
+              {p.isKickback ? '↩ ' : ''}{p.label}
+            </span>
+            <span className="text-xl font-black" style={{ color: p.accent }}>
+              {p.isKickback ? `-$${Math.abs(p.amount)}` : `$${p.amount}`}
+            </span>
           </button>
         ))}
       </div>
