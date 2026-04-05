@@ -113,7 +113,7 @@ export default function ContractManager({ user, venue_id = activeVenue?.id || ac
       const result = await base44.entities.VenueContract.update(id, {
       is_signed: true,
       signed_at: new Date().toISOString(),
-        signed_ip: window.location.hostname,      const result = await base44.entities.VenueContract.update(id, {
+        signed_ip: window.location.hostname,
       customer_signature: `SIGNED-${user?.email || 'staff'}-${Date.now()}`,
         });
               // AUDIT LOG — Phase 7 BPAAA: Contract signing must be logged
