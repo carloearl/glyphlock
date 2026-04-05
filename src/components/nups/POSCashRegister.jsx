@@ -299,9 +299,17 @@ export default function POSCashRegister({ user, station = 'door' }) {
               <div className="text-4xl mb-2">🎁</div>
               <div className="text-3xl font-black text-amber-400">${total.toFixed(2)}</div>
             </div>
-            <Input placeholder="Scan or enter gift card number..." className="text-center font-mono text-lg bg-black/40 border-white/15 text-white h-14" />
+                        <Input 
+                                      id="gift-card-input"
+                                                    placeholder="Scan or enter gift card number..." 
+                                                                  className="text-center font-mono text-lg bg-black/40 border-white/15 text-white h-14" 
+                                                                              />
             <Button
-              onClick={() => completePayment({ gift_card: true })}
+                            onClick={() => {
+                                              const gcNum = document.getElementById('gift-card-input')?.value || '';
+                                                              completePayment({ gift_card: true, gift_card_number: gcNum });
+                                                                            }}
+                            }}
               disabled={isSubmitting}
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-600"
             >
@@ -316,9 +324,17 @@ export default function POSCashRegister({ user, station = 'door' }) {
               <div className="text-4xl mb-2">🏨</div>
               <div className="text-3xl font-black text-pink-400">${total.toFixed(2)}</div>
             </div>
-            <Input placeholder="Room number or guest name..." className="text-center font-mono text-lg bg-black/40 border-white/15 text-white h-14" />
+                        <Input 
+                                      id="room-tab-input"
+                                                    placeholder="Room number or guest name..." 
+                                                                  className="text-center font-mono text-lg bg-black/40 border-white/15 text-white h-14" 
+                                                                              />
             <Button
-              onClick={() => completePayment({ room_tab: true })}
+                            onClick={() => {
+                                              const roomInfo = document.getElementById('room-tab-input')?.value || '';
+                                                              completePayment({ room_tab: true, room_tab_reference: roomInfo });
+                                                                            }}
+                            }}
               disabled={isSubmitting}
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-pink-500 to-rose-600"
             >
