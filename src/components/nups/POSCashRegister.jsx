@@ -223,6 +223,24 @@ export default function POSCashRegister({ user, station = 'door' }) {
     };
     try {
       await createTransaction.mutateAsync(transactionData);
+            // AUDIT LOG: Transaction created — BPAAA Phase 7
+                  try {
+                          await base44.entities.SystemAuditLog.create({
+                                    event_type: 'TRANSACTION_CREATED',
+                                              description: `Transaction ${transactionData.transaction_id} created — $${total.toFixed(2)} via ${paymentMethod} at ${station} station`,
+                                                        actor_email: user?.email || 'unknown',
+                                                                  status: 'success',
+                                                                            severity: 'low',
+                                                                                      metadata: {
+                                                                                                  transaction_id: transactionData.transaction_id,
+                                                                                                              total: total,
+                                                                                                                          payment_method: paymentMethod,
+                                                                                                                                      station,
+                                                                                                                                                  batch_id: activeBatch?.id,
+                                                                                                                                                              cashier: user?.email
+                                                                                                                                                                        }
+                                                                                                                                                                                });
+                                                                                                                                                                                      } catch(auditErr) { console.warn('Audit log write failed:', auditErr); }
       if (selectedCustomer?.id) {
         await base44.entities.POSCustomer.update(selectedCustomer.id, {
           visit_count: (selectedCustomer.visit_count || 0) + 1,
