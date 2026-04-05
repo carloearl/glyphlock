@@ -36,7 +36,7 @@ export default function NUPSStaff() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [rbacRole, setRbacRole] = useState("door_girl");
-  const [activeModule, setActiveModule] = useState("pos");
+  const [activeModule, setActiveModule] = useState("timeclock");
   const [posStation, setPosStation] = useState("door");
 
   useEffect(() => {
