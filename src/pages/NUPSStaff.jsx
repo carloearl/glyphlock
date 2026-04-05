@@ -17,6 +17,7 @@ import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
+import DriverDropOffTracker from "../components/nups/DriverDropOffTracker.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import SEOHead from "@/components/SEOHead";
 import { mapNUPSRoleToRBAC } from "../config/roles.js";
@@ -24,6 +25,7 @@ import { GLYPHLOCK_DISCLAIMER } from "@/constants/legalDisclaimer";
 
 const STAFF_MODULES = [
   { key: "door_pos",    label: "Door Register",  icon: DoorOpen,    roles: new Set(["manager","door_girl","security"]) },
+  { key: "drivers",     label: "Driver Payouts", icon: Users,        roles: new Set(["manager","door_girl"]) },
   { key: "bar_pos",     label: "Bar Register",   icon: ShoppingCart, roles: new Set(["manager","bartender"]) },
   { key: "door",        label: "Door / Check-In", icon: Users,        roles: new Set(["manager","door_girl","security"]) },
   { key: "entertainer", label: "Entertainers",   icon: UserCheck,    roles: new Set(["manager","door_girl"]) },
@@ -193,6 +195,7 @@ export default function NUPSStaff() {
               showReceipt={true}
             />
           )}
+          {currentModule === "drivers" && <DriverDropOffTracker user={user} />}
         </div>
 
         <footer className="text-center text-[10px] text-gray-700 py-4 border-t border-gray-800 mt-8">

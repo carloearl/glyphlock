@@ -1,0 +1,110 @@
+{
+  "name": "DriverPayout",
+  "type": "object",
+  "properties": {
+    "driver_name": {
+      "type": "string",
+      "description": "Driver's display name"
+    },
+    "driver_number": {
+      "type": "string",
+      "description": "Driver's phone or badge number"
+    },
+    "driver_code": {
+      "type": "string",
+      "description": "Unique driver code / QR payload"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Night/shift date"
+    },
+    "drop_offs": {
+      "type": "array",
+      "description": "Each guest drop-off log entry",
+      "items": {
+        "type": "object",
+        "properties": {
+          "guest_name": {
+            "type": "string"
+          },
+          "drop_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "has_pass": {
+            "type": "boolean",
+            "default": false
+          },
+          "pass_type": {
+            "type": "string"
+          },
+          "went_vip": {
+            "type": "boolean",
+            "default": false
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "total_drops": {
+      "type": "number",
+      "default": 0
+    },
+    "vip_count": {
+      "type": "number",
+      "default": 0
+    },
+    "pass_count": {
+      "type": "number",
+      "default": 0
+    },
+    "base_payout": {
+      "type": "number",
+      "default": 0,
+      "description": "Base per-drop payout"
+    },
+    "incentive_bonus": {
+      "type": "number",
+      "default": 0,
+      "description": "Bonus for 3+ drops"
+    },
+    "vip_kickback": {
+      "type": "number",
+      "default": 0,
+      "description": "Kickback per VIP guest"
+    },
+    "total_payout": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "paid"
+      ],
+      "default": "open"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paid_by": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "driver_name",
+    "driver_number",
+    "session_date"
+  ]
+}
