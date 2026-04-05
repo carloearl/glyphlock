@@ -20,7 +20,7 @@ const STATUS_CONFIG = {
   disputed:  { color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/30" },
 };
 
-export default function ContractManager({ user, venue_id = "dream_palace" }) {
+export default function ContractManager({ user, venue_id = activeVenue?.id || activeVenue?.venue_id || "dream_palace" }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -109,11 +109,33 @@ export default function ContractManager({ user, venue_id = "dream_palace" }) {
   });
 
   const signMutation = useMutation({
-    mutationFn: (id) => base44.entities.VenueContract.update(id, {
+    mutationFn: async (id) => {
+      const result = await base44.entities.VenueContract.update(id, {
       is_signed: true,
       signed_at: new Date().toISOString(),
+        signed_ip: window.location.hostname,      const result = await base44.entities.VenueContract.update(id, {
       customer_signature: `SIGNED-${user?.email || 'staff'}-${Date.now()}`,
-    }),
+        });
+              // AUDIT LOG — Phase 7 BPAAA: Contract signing must be logged
+                    try {
+                            await base44.entities.SystemAuditLog.create({
+                                      event_type: 'CONTRACT_SIGNED',
+                                                description: 'VenueContract ' + id + ' signed by ' + (user?.email || 'staff'),
+                                                          actor_email: user?.email || 'unknown',
+                                                                    entity_type: 'VenueContract',
+                                                                              entity_id: id,
+                                                                                        status: 'success',
+                                                                                                  severity: 'medium',
+                                                                                                            metadata: {
+                                                                                                                        contract_id: id,
+                                                                                                                                    signed_by: user?.email,
+                                                                                                                                                signed_at: new Date().toISOString(),
+                                                                                                                                                            section: 'PHASE7-CONTRACT-SIGNED'
+                                                                                                                                                                      }
+                                                                                                                                                                              });
+                                                                                                                                                                                    } catch(auditErr) { console.warn('Contract sign audit log failed:', auditErr); }
+                                                                                                                                                                                          return result;
+                                                                                                                                                                                              },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["venue-contracts"] }),
   });
 
