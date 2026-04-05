@@ -159,7 +159,11 @@ export default function NUPSOwner() {
   });
 
   // TASK 7.1 — Filter demo/test transactions from ALL financial views
-  const realTransactions = transactions.filter(t => !t.mode || t.mode === 'REAL');
+  const realTransactions = transactions.filter(t =>
+    (!t.mode || t.mode === 'REAL') &&
+    !t.transaction_id?.startsWith('DEMO-') &&
+    !t.cashier?.includes('demo@')
+  );
 
   if (!authChecked || !user) {
     return (
