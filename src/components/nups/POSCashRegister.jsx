@@ -333,7 +333,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
           <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Add Tip</div>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
             {[0, 15, 18, 20, 25].map(pct => {
-              const tipVal = pct === 0 ? 0 : Math.round(subtotal * pct) / 100;
+              const tipVal = pct === 0 ? 0 : Math.round(subtotal * pct / 100 * 100) / 100;
               return (
                 <Button
                   key={pct}
