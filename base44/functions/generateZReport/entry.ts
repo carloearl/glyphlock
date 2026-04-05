@@ -16,8 +16,9 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // Allow automation scheduler (no user) or admin users only
+    if (user && user?.role !== 'admin') {
+      return Response.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     const { opening_cash, closing_cash, reconciliation_notes, venue_id } = await req.json();
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
     // Role check
     const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({ email: user.email });
     const nupsUser = nupsUsers[0];
-    const userRole = nupsUser?.role || (user.role === 'admin' ? 'PLATFORM_ADMIN' : null);
+    const userRole = nupsUser?.role || (user?.role === 'admin' ? 'PLATFORM_ADMIN' : null);
 
     if (!ALLOWED_ROLES.includes(userRole)) {
       return Response.json({ error: 'Forbidden: insufficient role' }, { status: 403 });
