@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -107,6 +108,7 @@ export default function NUPSStaff() {
   };
 
   return (
+    <NUPSRouteGuard requiredRoles={["VENUE_MANAGER","PLATFORM_ADMIN","VENUE_OWNER","BARTENDER","DJ","SECURITY"]}>
     <div className="min-h-screen bg-black text-white">
       <SEOHead
         title="N.U.P.S. Staff Portal | GlyphLock"
@@ -230,5 +232,6 @@ export default function NUPSStaff() {
         </footer>
       </div>
     </div>
+    </NUPSRouteGuard>
   );
 }
