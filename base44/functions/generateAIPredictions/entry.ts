@@ -23,12 +23,12 @@ Deno.serve(async (req) => {
     // Fetch last 90 days of transaction data
     const ninety_days_ago = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
     
-    const orders = await base44.asServiceRole.entities.DreamPalaceOrder.filter({
+    const orders = await base44.asServiceRole.entities.POSTransaction.filter({
       venue_id,
       signed_at: { $gte: ninety_days_ago }
     }, '-signed_at', 1000);
 
-    const batches = await base44.asServiceRole.entities.DreamDollarBatch.filter({
+    const batches = await base44.asServiceRole.entities.GlyphBucksTransactionBatch.filter({
       venue_id,
       issued_at: { $gte: ninety_days_ago }
     }, '-issued_at', 1000);
