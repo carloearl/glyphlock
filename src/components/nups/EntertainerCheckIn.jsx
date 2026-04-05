@@ -114,6 +114,12 @@ export default function EntertainerCheckIn({ user }) {
         return;
       }
 
+            // GATE 8 — linked_venue must exist — H-4 FIX BPAAA Phase 5
+                  if (!entertainer.venue_id && !entertainer.linked_venue) {
+                          toast.error('Check-in blocked: No linked venue on entertainer record. Contact manager.');
+                                  return;
+                                        }
+
       // ALL GATES PASSED — call secure backend function
       const shiftVenueId = activeVenue?.id;
       if (!shiftVenueId) {
