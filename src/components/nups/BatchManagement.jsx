@@ -41,11 +41,15 @@ export default function BatchManagement({ user, onBatchClosed }) {
     queryKey: ['batch-transactions', activeBatch?.id],
     queryFn: async () => {
       if (!activeBatch) return [];
-      const start = new Date(activeBatch.start_time);
       const allTransactions = await base44.entities.POSTransaction.list('-created_date', 1000);
-      // Include ALL stations (door + bar) for this batch period
-      return allTransactions.filter(t => new Date(t.created_date) >= start);
-    },
+            // C-2 FIX: Filter by batch_id (primary) with date-range fallback for legacy transactions
+                  return allTransactions.filter(t => {
+                          if (t.batch_id) return t.batch_id === activeBatch.id;
+                                  // Fallback for transactions created before batch_id was added
+                                          const start = new Date(activeBatch.start_time);
+                                                  const end = activeBatch.end_time ? new Date(activeBatch.end_time) : new Date();
+                                                          return new Date(t.created_date) >= start && new Date(t.created_date) <= end;
+                                                                });    },
     enabled: !!activeBatch
   });
 
