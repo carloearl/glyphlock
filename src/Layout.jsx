@@ -359,7 +359,7 @@ export default function Layout({ children, currentPageName }) {
           />
 
           {/* Footer - always rendered */}
-        <footer className="relative overflow-hidden" style={{ zIndex: 100, pointerEvents: 'auto', isolation: 'isolate' }}>
+        <footer className="relative overflow-hidden" style={{ zIndex: 1, pointerEvents: 'auto' }}>
           <Footer />
         </footer>
 
