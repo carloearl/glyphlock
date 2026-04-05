@@ -23,12 +23,14 @@ import { mapNUPSRoleToRBAC } from "../config/roles.js";
 import { GLYPHLOCK_DISCLAIMER } from "@/constants/legalDisclaimer";
 
 const STAFF_MODULES = [
-  { key: "pos",       label: "POS Register",  icon: ShoppingCart, roles: new Set(["manager","bartender","door_girl","hostess","security","dj"]) },
-  { key: "door",      label: "Door / Check-In", icon: DoorOpen,   roles: new Set(["manager","door_girl","security"]) },
-  { key: "entertainer",label: "Entertainers", icon: UserCheck,    roles: new Set(["manager","door_girl"]) },
-  { key: "vip",       label: "VIP Rooms",     icon: Star,         roles: new Set(["manager","hostess"]) },
-  { key: "timeclock", label: "Time Clock",    icon: Clock,        roles: new Set(["manager","bartender","door_girl","hostess","security","dj"]) },
-  { key: "history",   label: "My Transactions", icon: BarChart3,  roles: new Set(["manager","bartender"]) },
+  { key: "door_pos",    label: "Door Register",  icon: DoorOpen,    roles: new Set(["manager","door_girl","security"]) },
+  { key: "bar_pos",     label: "Bar Register",   icon: ShoppingCart, roles: new Set(["manager","bartender"]) },
+  { key: "door",        label: "Door / Check-In", icon: Users,        roles: new Set(["manager","door_girl","security"]) },
+  { key: "entertainer", label: "Entertainers",   icon: UserCheck,    roles: new Set(["manager","door_girl"]) },
+  { key: "vip",         label: "VIP Rooms",      icon: Star,         roles: new Set(["manager","hostess"]) },
+  { key: "timeclock",   label: "Time Clock",     icon: Clock,        roles: new Set(["manager","bartender","door_girl","hostess","security","dj"]) },
+  { key: "dj",          label: "DJ Console",     icon: BarChart3,    roles: new Set(["manager","dj"]) },
+  { key: "history",     label: "My Transactions", icon: BarChart3,   roles: new Set(["manager","bartender"]) },
 ];
 
 export default function NUPSStaff() {
@@ -37,8 +39,6 @@ export default function NUPSStaff() {
   const [authChecked, setAuthChecked] = useState(false);
   const [rbacRole, setRbacRole] = useState("door_girl");
   const [activeModule, setActiveModule] = useState("timeclock");
-  const [posStation, setPosStation] = useState("door");
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -152,28 +152,6 @@ export default function NUPSStaff() {
       </header>
 
       <div className="container mx-auto p-4">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-5">
-          <Card className="bg-gray-900/50 border-cyan-500/30">
-            <CardContent className="p-3 text-center">
-              <div className="text-xl font-bold text-cyan-400">${todayRevenue.toFixed(0)}</div>
-              <div className="text-[10px] text-gray-400">Today Revenue</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gray-900/50 border-purple-500/30">
-            <CardContent className="p-3 text-center">
-              <div className="text-xl font-bold text-purple-400">{todayTransactions.length}</div>
-              <div className="text-[10px] text-gray-400">Transactions</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gray-900/50 border-green-500/30">
-            <CardContent className="p-3 text-center">
-              <div className="text-xl font-bold text-green-400">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-              <div className="text-[10px] text-gray-400">Current Time</div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Module Nav */}
         <div className="flex flex-wrap gap-2 mb-5">
           {visibleModules.map(({ key, label, icon: Icon }) => (
@@ -194,30 +172,20 @@ export default function NUPSStaff() {
 
         {/* Module Content */}
         <div className="space-y-4 pb-8">
-          {currentModule === "pos" && (
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                {[{ k: "door", l: "Door Register" }, { k: "bar", l: "Bar Register" }].map(({ k, l }) => (
-                  <Button
-                    key={k}
-                    onClick={() => setPosStation(k)}
-                    variant={posStation === k ? "default" : "outline"}
-                    className={`min-h-[40px] text-sm ${
-                      posStation === k
-                        ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500"
-                        : "border-gray-700 text-gray-300 bg-transparent"
-                    }`}
-                  >{l}</Button>
-                ))}
-              </div>
-              <POSCashRegister user={user} station={posStation} />
-            </div>
-          )}
+          {currentModule === "door_pos" && <POSCashRegister user={user} station="door" />}
+          {currentModule === "bar_pos" && <POSCashRegister user={user} station="bar" />}
           {currentModule === "door" && <GuestCheckIn />}
           {currentModule === "entertainer" && <EntertainerCheckIn user={user} />}
           {currentModule === "vip" && <VIPRoomBoard user={user} />}
           {currentModule === "timeclock" && (
             <TimeClock user={user} role={user?._highestRole || rbacRole} />
+          )}
+          {currentModule === "dj" && (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <BarChart3 className="w-16 h-16 text-purple-400 mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">DJ Console</h2>
+              <p className="text-gray-400">DJ tools and music management coming soon.</p>
+            </div>
           )}
           {currentModule === "history" && (
             <TransactionHistory
