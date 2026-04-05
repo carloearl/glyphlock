@@ -272,6 +272,7 @@ export default function EntertainerPayrollEngine({ user }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["payroll-records"] });
       toast.success("Payroll record saved.");
+      base44.entities.SystemAuditLog.create({ event_type: 'PAYROLL_SAVED', description: 'Payroll payout logged', actor_email: user?.email || 'unknown', status: 'success', severity: 'medium' }).catch(function(e){});
     },
     onError: (e) => toast.error(e.message || "Failed to save payroll record."),
   });
