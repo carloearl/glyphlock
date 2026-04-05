@@ -171,7 +171,8 @@ export default function ZReportGenerator({ user: userProp }) {
         .filter(t => t.items?.some(item => item.product_name?.includes('Drink')))
         .reduce((sum, t) => sum + (t.total || 0), 0);
 
-      const merchandiseRevenue = totalSales - barRevenue - vipRevenue;
+      // C-4 FIX: merchandiseRevenue = POS sales minus bar — VIP is tracked separately, not subtracted from totalSales
+              const merchandiseRevenue = Math.max(0, totalSales - barRevenue);
 
       const productSalesMap = {};
       realTransactions.forEach(t => {
