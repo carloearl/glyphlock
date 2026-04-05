@@ -19,6 +19,17 @@ import CardPaymentPanel from "./pos/CardPaymentPanel";
 import OrderDisplay from "./pos/OrderDisplay";
 
 export default function POSCashRegister({ user, station = 'door' }) {
+    // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
+      const [ageBlocked, setAgeBlocked] = useState(false);
+        useEffect(() => {
+            if (station === 'bar' && user?.date_of_birth) {
+                  const dob = new Date(user.date_of_birth);
+                        const today = new Date();
+                              const age = today.getFullYear() - dob.getFullYear()
+                                      - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+                                            if (age < 21) setAgeBlocked(true);
+                                                }
+                                                  }, [station, user]);
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
   const [cart, setCart] = useState([]);
@@ -271,7 +282,19 @@ export default function POSCashRegister({ user, station = 'door' }) {
     pink: { bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.5)', text: '#ec4899' },
   }[color]);
 
-  if (paymentStep === "pay") {
+    if (ageBlocked) {
+          return (
+                <div className="min-h-[200px] flex items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/5 p-8 text-center">
+                        <div>
+                                  <div className="text-4xl mb-3">🔞</div>
+                                            <h3 className="text-xl font-bold text-red-400 mb-2">Access Denied — Bar Register</h3>
+                                                      <p className="text-gray-400 text-sm">Bar register access requires minimum age of 21. Your account does not meet this requirement.</p>
+                                                                <p className="text-xs text-gray-600 mt-3">Contact a manager for assistance. This access attempt has been logged.</p>
+                                                                        </div>
+                                                                              </div>
+                                                                                  );
+                                                                                    }
+                                                                                    if (paymentStep === "pay") {
     return (
       <div className="max-w-md mx-auto space-y-4 p-4">
         <Button variant="ghost" onClick={() => setPaymentStep("method")} className="text-gray-400 hover:text-white mb-2">
