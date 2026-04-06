@@ -102,7 +102,6 @@ export default function NUPSStaff() {
   };
 
   return (
-    <NUPSRouteGuard requiredRoles={["VENUE_MANAGER","PLATFORM_ADMIN","VENUE_OWNER","BARTENDER","DJ","SECURITY"]}>
     <div className="min-h-screen bg-black text-white">
       <SEOHead
         title="N.U.P.S. Staff Portal | GlyphLock"
@@ -195,6 +194,5 @@ export default function NUPSStaff() {
         </footer>
       </div>
     </div>
-    </NUPSRouteGuard>
   );
 }
