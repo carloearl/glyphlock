@@ -17,6 +17,7 @@ import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
 import TimeClock from "../components/nups/TimeClock.jsx";
 import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
 import TransactionHistory from "../components/nups/TransactionHistory.jsx";
+import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import DriverDropOffTracker from "../components/nups/DriverDropOffTracker.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import SEOHead from "@/components/SEOHead";
@@ -179,7 +180,7 @@ export default function NUPSStaff() {
         {/* Module Content */}
         <div className="space-y-4 pb-8">
           {currentModule === "door_pos" && <POSCashRegister user={user} station="door" />}
-          {currentModule === "bar_pos" && <POSCashRegister user={user} station="bar" />}
+          {currentModule === "bar_pos" && <POSBarRegister user={user} />}
           {currentModule === "door" && <GuestCheckIn />}
           {currentModule === "entertainer" && <EntertainerCheckIn user={user} />}
           {currentModule === "vip" && <VIPRoomBoard user={user} />}
