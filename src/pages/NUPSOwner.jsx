@@ -332,14 +332,7 @@ export default function NUPSOwner() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  queryClient.invalidateQueries({ queryKey: ['pos-transactions'] });
-                  queryClient.invalidateQueries({ queryKey: ['entertainers'] });
-                  queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
-                  queryClient.invalidateQueries({ queryKey: ['vip-rooms'] });
-                  queryClient.invalidateQueries({ queryKey: ['vip-guests'] });
-                  queryClient.invalidateQueries({ queryKey: ['pos-products'] });
-                }}
+                onClick={() => queryClient.invalidateQueries()}
                 className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 min-h-[44px]"
                 aria-label="Refresh all data"
               >
