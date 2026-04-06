@@ -141,14 +141,14 @@ export default function BatchManagement({ user, onBatchClosed }) {
       }
     });
 
-    // STEP 2: Void transactions (flag, don't delete — audit trail required)
+    // STEP 2: DELETE all transactions (hard reset for new venue onboarding)
     await Promise.all(
-      batchTransactions.map(t =>
-        base44.entities.POSTransaction.update(t.id, {
-          status: 'refunded',
-          notes: `VOIDED by manager reset — ${manager.full_name || manager.username} — ${new Date().toLocaleString()}`
-        })
-      )
+      batchTransactions.map(t => base44.entities.POSTransaction.delete(t.id))
+    );
+
+    // STEP 2B: DELETE all backups for this batch
+    await Promise.all(
+      relevantBackups.map(b => base44.entities.SystemAuditLog.delete(b.id))
     );
 
     // STEP 3: Zero out the batch record
@@ -170,57 +170,19 @@ export default function BatchManagement({ user, onBatchClosed }) {
       metadata: { batch_id: activeBatch.id, voided_tx_count: batchTransactions.length }
     });
 
-    // STEP 5: Hard-wipe query cache and refresh
-    queryClient.removeQueries({ queryKey: ['active-batch'] });
-    queryClient.removeQueries({ queryKey: ['batch-transactions'] });
-    queryClient.removeQueries({ queryKey: ['batch-backups'] });
-    await queryClient.invalidateQueries({ queryKey: ['active-batch'] });
-    await queryClient.invalidateQueries({ queryKey: ['batch-transactions'] });
-    await queryClient.invalidateQueries({ queryKey: ['batch-backups'] });
+    // STEP 5: Hard-wipe query cache
+    queryClient.clear();
 
-    toast({ title: 'Batch Reset Complete', description: `${batchTransactions.length} transactions voided. Auto-backup saved — use Restore to roll back.` });
+    toast({ title: 'Batch Reset Complete', description: 'All transactions and backups deleted. Batch ready for new onboarding.' });
+    
+    // Force hard refresh of parent
+    window.location.reload();
   };
 
   // ─── BACKUP ───────────────────────────────────────────────────────────────────
   const handleBackupConfirmed = async (manager) => {
-    if (!activeBatch) return;
-
-    // Get current totals
-    const BATCH_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
-    const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
-    const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
-    const cardTotal = realTxns.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
-    const batchTotal = cashTotal + cardTotal;
-
-    setOverrideAction(null);
-    setConfirmBackup(false);
-
-    await base44.entities.SystemAuditLog.create({
-      event_type: 'BATCH_BACKUP',
-      description: `Batch backup by manager ${manager.full_name || manager.username}`,
-      actor_email: manager.username,
-      status: 'success',
-      severity: 'low',
-      metadata: {
-        batch_id: activeBatch.id,
-        backed_up_at: new Date().toISOString(),
-        backed_up_by: manager.full_name || manager.username,
-        snapshot: {
-          opening_cash: activeBatch.opening_cash,
-          total_sales: activeBatch.total_sales,
-          transaction_count: activeBatch.transaction_count,
-          discrepancy: activeBatch.discrepancy,
-          cashTotal,
-          cardTotal,
-          batchTotal,
-          notes: activeBatch.notes,
-          start_time: activeBatch.start_time,
-          status: activeBatch.status,
-        }
-      }
-    });
-    refetchBackups();
-    toast({ title: 'Backup Created', description: `Snapshot saved by ${manager.full_name || manager.username}.` });
+    // Backups disabled during fresh onboarding
+    return;
   };
 
   // ─── RESTORE ─────────────────────────────────────────────────────────────────
@@ -522,11 +484,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
                 className="border-red-500/40 text-red-400 hover:bg-red-500/10">
                 <Trash2 className="w-3 h-3 mr-1" /> Reset to Zero
               </Button>
-              <Button size="sm" variant="outline"
-                onClick={() => setOverrideAction('backup')}
-                className="border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10">
-                <Save className="w-3 h-3 mr-1" /> Backup Snapshot
-              </Button>
+              {/* Backup disabled during onboarding */}
               <Button size="sm" variant="outline"
                 onClick={() => setShowRestoreList(true)}
                 className="border-blue-500/40 text-blue-400 hover:bg-blue-500/10">
