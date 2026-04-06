@@ -200,8 +200,10 @@ export default function EntertainerCheckIn({ user }) {
           </CardContent>
         </Card>
       </div>
-    );
-  }
+      );
+      }
+
+      export default EntertainerCheckIn;
 
   if (showPinPad && verificationComplete) {
     return (
@@ -209,51 +211,28 @@ export default function EntertainerCheckIn({ user }) {
         <Card className="border border-pink-500/30 bg-black">
           <CardHeader className="space-y-3">
             <div className="flex items-center justify-between">
-             <Button
-               variant="ghost"
-               size="sm"
-               onClick={() => {
-                 setShowPinPad(false);
-                 setVerificationComplete(false);
-                 setPin('');
-                 setDailyChecklist({ contractValid: false, licenseValid: false, venueRules: false, safetyAck: false });
-               }}
-               className="text-gray-400 hover:text-white"
-             >
-               <ChevronLeft className="w-4 h-4 mr-1" />
-               Back
-               </Button>
-               </div>
-               </CardContent>
-               </Card>
-               </div>
-               );
-               }
-
-  if (showPinPad) {
-    return (
-      <div className="space-y-6">
-        {/* PIN Pad Modal */}
-        <Card className="border border-pink-500/30 bg-black">
-          <CardHeader className="space-y-3">
-            <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowPinPad(false)}
+                onClick={() => {
+                  setShowPinPad(false);
+                  setVerificationComplete(false);
+                  setPin('');
+                  setDailyChecklist({ contractValid: false, licenseValid: false, venueRules: false, safetyAck: false });
+                }}
                 className="text-gray-400 hover:text-white"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
-                Cancel
+                Back
               </Button>
             </div>
             <div className="flex items-center justify-center gap-2 bg-pink-600/20 border border-pink-500/50 rounded-lg py-3">
               <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-              <span className="font-bold text-pink-400">Check In</span>
+              <span className="font-bold text-pink-400">Enter PIN to Complete Check In</span>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <h2 className="text-center font-bold text-white">Enter your PIN</h2>
+            <h2 className="text-center font-bold text-white">Enter your 4-digit PIN</h2>
 
             {/* PIN Display */}
             <div className="border border-gray-700 rounded-lg p-6 text-center bg-gray-900/50">
@@ -299,62 +278,8 @@ export default function EntertainerCheckIn({ user }) {
             </div>
           </CardContent>
         </Card>
-
-        {/* Daily Checklist */}
-        <Card className="border border-pink-500/30 bg-black">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Users className="w-5 h-5 text-pink-400" />
-              Daily Entertainer Checklist ({activeShifts.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {activeShifts.length === 0 ? (
-              <p className="text-gray-400 text-sm">No entertainers checked in</p>
-            ) : (
-              <div className="space-y-2">
-                {activeShifts.map((shift) => (
-                  <div key={shift.id} className="flex items-center gap-3 p-3 bg-gray-800/50 border border-gray-700 rounded">
-                    <Checkbox checked defaultChecked className="mt-0" />
-                    <div className="flex-1">
-                      <p className="font-semibold text-white">{shift.stage_name}</p>
-                      <div className="flex gap-2 mt-1 text-xs">
-                        <span className="text-gray-400 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          <ShiftTimer checkInTime={shift.check_in_time} />
-                        </span>
-                        <span className="text-gray-400 flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {shift.location}
-                        </span>
-                        <span className="text-gray-400 flex items-center gap-1">
-                          <DollarSign className="w-3 h-3" />
-                          ${(shift.shift_earnings || 0).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={isCheckingOut === shift.id}
-                      onClick={() => {
-                        if (!window.confirm(`Check out ${shift.stage_name}?`)) return;
-                        setIsCheckingOut(shift.id);
-                        checkOut.mutate(shift.id).catch(() => setIsCheckingOut(null));
-                      }}
-                      className="border-pink-500/50 text-pink-400 hover:bg-pink-500/10"
-                    >
-                      <LogOut className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     );
-  }
 
   return (
     <div className="space-y-4">
