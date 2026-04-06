@@ -184,7 +184,7 @@ export default function NUPSManagerDashboard({
               ) : activeShifts.slice(0, 8).map(shift => (
                 <div key={shift.id} className="flex items-center justify-between bg-gray-800/50 rounded-lg px-3 py-2">
                   <div>
-                    <span className="text-xs text-white font-medium">{shift.entertainer_id}</span>
+                    <span className="text-xs text-white font-medium">{shift.stage_name || shift.entertainer_name || shift.entertainer_id}</span>
                     <span className="text-[10px] text-gray-500 ml-2">{shift.location || 'Floor'}</span>
                   </div>
                   <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-[10px]">
