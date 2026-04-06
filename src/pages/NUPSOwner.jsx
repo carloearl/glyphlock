@@ -361,7 +361,7 @@ export default function NUPSOwner() {
                 ))}
               </div>
               {posSubTab === 'cash' && <POSCashRegister user={user} station="door" />}
-              {posSubTab === 'bar' && <POSCashRegister user={user} station="bar" />}
+              {posSubTab === 'bar' && <POSBarRegister user={user} />}
             </div>
           )}
           {activeModule === 'door' && <GuestCheckIn />}
