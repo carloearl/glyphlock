@@ -86,6 +86,10 @@ export default function POSBarRegister({ user }) {
       cashier: user?.email || "bar",
       status: "completed",
       batch_id: activeBatch?.id || "",
+      station: 'bar',
+      mode: 'REAL',
+      cashier_name: user?.full_name || user?.name || user?.email || 'Bar Staff',
+      cashier_email: user?.email || null,
     }),
     onSuccess: () => {
       qc.invalidateQueries(["pos-transactions"]);
