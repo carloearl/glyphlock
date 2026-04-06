@@ -158,7 +158,7 @@ function PayrollReport({ shifts, weekStart }) {
 
 // ─── Main TimeClock ──────────────────────────────────────────────────────────
 // Flow: idle → choose action (clock in / clock out) → enter PIN → confirm → done
-export default function TimeClock({ user, role = "staff" }) {
+export default function TimeClock({ user, role = "staff", onClockStatusChange }) {
   const queryClient = useQueryClient();
   const [now, setNow] = useState(new Date());
   const [mode, setMode] = useState("clock");      // clock | payroll
@@ -206,6 +206,7 @@ export default function TimeClock({ user, role = "staff" }) {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
+      if (onClockStatusChange) onClockStatusChange(true);
       setStep("success");
     }
   });
@@ -217,6 +218,7 @@ export default function TimeClock({ user, role = "staff" }) {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
+      if (onClockStatusChange) onClockStatusChange(false);
       setStep("success");
     }
   });

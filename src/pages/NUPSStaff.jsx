@@ -42,7 +42,14 @@ export default function NUPSStaff() {
   const [authChecked, setAuthChecked] = useState(false);
   const [rbacRole, setRbacRole] = useState("door_girl");
   const [activeModule, setActiveModule] = useState("timeclock");
-  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [isClockedIn, setIsClockedIn] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('nups_clock_status');
+      return stored === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -54,29 +61,29 @@ export default function NUPSStaff() {
     }).catch(() => setAuthChecked(true));
   }, []);
 
-  // Check if current user has an active clock-in (any shift without check_out_time = actively clocked in)
+  // Query active shifts — used for admin view only, NOT for gating
   const { data: activeShifts = [] } = useQuery({
     queryKey: ["staff-active-shifts"],
     queryFn: async () => {
       const allShifts = await base44.entities.EntertainerShift.list("-created_date", 100);
-      return allShifts.filter(s => !s.check_out_time); // No checkout time = still clocked in
+      return allShifts.filter(s => !s.check_out_time);
     },
     enabled: !!user,
-    refetchInterval: 30000,
-    staleTime: 20000,
+    refetchInterval: 15000,
+    staleTime: 10000,
   });
 
-  useEffect(() => {
-    if (!user || !activeShifts.length) return;
-    const email = user.email?.toLowerCase();
-    const name = (user.full_name || user.stage_name || "").toLowerCase();
-    const clocked = activeShifts.some(s =>
-      s.entertainer_id === user.id ||
-      s.entertainer_id?.toLowerCase() === email ||
-      s.stage_name?.toLowerCase() === name
-    );
-    setIsClockedIn(clocked);
-  }, [activeShifts, user]);
+  // Callback for TimeClock to notify when user clocks in/out
+  const handleClockStatusChange = (isClockedInNow) => {
+    setIsClockedIn(isClockedInNow);
+    sessionStorage.setItem('nups_clock_status', String(isClockedInNow));
+    // Unlock timeclock tab always; gate other tabs
+    if (isClockedInNow) {
+      setActiveModule(activeModule === 'timeclock' ? 'timeclock' : activeModule);
+    } else {
+      setActiveModule('timeclock');
+    }
+  };
 
   const { data: transactions = [] } = useQuery({
     queryKey: ["pos-transactions"],
@@ -198,20 +205,24 @@ export default function NUPSStaff() {
         {/* Module Content — only render when clocked in OR on time clock */}
         <div className="space-y-4 pb-8">
           {currentModule === "timeclock" && (
-            <TimeClock user={user} role={user?._highestRole || rbacRole} />
+            <TimeClock user={user} role={user?._highestRole || rbacRole} onClockStatusChange={handleClockStatusChange} />
           )}
-          {isClockedIn && currentModule === "door_pos" && <POSCashRegister user={user} station="door" />}
-          {isClockedIn && currentModule === "bar_pos" && <POSBarRegister user={user} />}
-          {isClockedIn && currentModule === "door" && <GuestCheckIn />}
-          {isClockedIn && currentModule === "entertainer" && <EntertainerCheckIn user={user} />}
-          {isClockedIn && currentModule === "vip" && <VIPRoomBoard user={user} />}
-          {isClockedIn && currentModule === "dj" && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <BarChart3 className="w-16 h-16 text-purple-400 mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">DJ Console</h2>
-              <p className="text-gray-400">DJ tools and music management coming soon.</p>
-            </div>
-          )}
+          {isClockedIn && currentModule !== 'timeclock' ? (
+            <>
+              {currentModule === "door_pos" && <POSCashRegister user={user} station="door" />}
+              {currentModule === "bar_pos" && <POSBarRegister user={user} />}
+              {currentModule === "door" && <GuestCheckIn />}
+              {currentModule === "entertainer" && <EntertainerCheckIn user={user} />}
+              {currentModule === "vip" && <VIPRoomBoard user={user} />}
+              {currentModule === "dj" && (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <BarChart3 className="w-16 h-16 text-purple-400 mb-4" />
+                  <h2 className="text-2xl font-bold text-white mb-2">DJ Console</h2>
+                  <p className="text-gray-400">DJ tools and music management coming soon.</p>
+                </div>
+              )}
+            </>
+          ) : null}
           {isClockedIn && currentModule === "history" && (
             <TransactionHistory
               transactions={realTransactions.filter(t => t.cashier === user?.email)}
