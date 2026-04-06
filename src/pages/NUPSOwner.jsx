@@ -129,11 +129,18 @@ export default function NUPSOwner() {
     queryKey: ["pos-transactions"],
     queryFn: () => base44.entities.POSTransaction.list("-created_date"),
     enabled: !!user,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
   const { data: entertainers = [] } = useQuery({
     queryKey: ["entertainers"],
     queryFn: () => base44.entities.Entertainer.list(),
     enabled: !!user,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
   const { data: activeShifts = [] } = useQuery({
     queryKey: ["active-shifts"],
@@ -142,23 +149,34 @@ export default function NUPSOwner() {
       return allShifts.filter((shift) => !shift.check_out_time);
     },
     enabled: !!user,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
   const { data: vipRooms = [] } = useQuery({
     queryKey: ["vip-rooms"],
     queryFn: () => base44.entities.VIPRoom.list(),
     enabled: !!user,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
   const { data: vipGuests = [] } = useQuery({
     queryKey: ["vip-guests"],
     queryFn: () => base44.entities.VIPGuest.list("-created_date", 100),
     enabled: !!user,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
   const { data: products = [] } = useQuery({
     queryKey: ["pos-products"],
     queryFn: () => base44.entities.POSProduct.list(),
     enabled: !!user,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
-
   // TASK 7.1 — Filter demo/test transactions from ALL financial views
   const realTransactions = transactions.filter(t =>
     (!t.mode || t.mode === 'REAL') &&
@@ -265,6 +283,15 @@ export default function NUPSOwner() {
                 <span className="text-sm text-white truncate max-w-[150px]">{user?.email}</span>
                 <Badge variant="outline" className="border-purple-500/50 text-purple-400 text-xs">{user?._highestRole || "Owner"}</Badge>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => queryClient.invalidateQueries()}
+                className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 min-h-[44px]"
+                aria-label="Refresh all data"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
