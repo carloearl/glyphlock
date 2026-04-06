@@ -63,6 +63,7 @@ import VenueSettings from "../components/nups/VenueSettings.jsx";
 import OfficialChecks from "./OfficialChecks.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import HardwareStatusPanel from "../components/nups/hardware/HardwareStatusPanel.jsx";
+import DemoCredentialsPanel from "../components/nups/DemoCredentialsPanel.jsx";
 import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
@@ -243,6 +244,7 @@ export default function NUPSOwner() {
     { key: 'dashboard', label: 'Dashboard',     icon: BarChart3 },
     { key: 'admin',     label: 'Admin',         icon: KeyRound },
     { key: 'venue',     label: 'Venue Settings', icon: Building2 },
+    { key: 'demo',      label: 'Demo Keys',     icon: KeyRound },
   ];
   const ROLE_MODULE_ACCESS = {
     manager:   new Set(NAV_MODULES.map(m => m.key)),
@@ -575,6 +577,7 @@ export default function NUPSOwner() {
             </div>
           )}
           {activeModule === 'venue' && <VenueSettings user={user} />}
+          {activeModule === 'demo' && isAdminUser && <DemoCredentialsPanel />}
         </div>
         )}
 
