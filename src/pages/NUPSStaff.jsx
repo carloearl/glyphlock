@@ -84,8 +84,12 @@ export default function NUPSStaff() {
     enabled: !!user,
   });
 
-  const realTransactions = transactions.filter(t => !t.mode || t.mode === "REAL");
-
+  // TASK 7.1 – Filter demo/test transactions from ALL financial views
+  const realTransactions = transactions.filter(t =>
+    (!t.mode || t.mode === 'REAL') &&
+    !t.transaction_id?.startsWith('DEMO-') &&
+    !t.cashier?.includes('demo@')
+  );
   const todayTransactions = realTransactions.filter(t => {
     return new Date(t.created_date).toDateString() === new Date().toDateString();
   });
