@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Users, LogIn, LogOut, MapPin, Clock, DollarSign } from "lucide-react";
+import { Users, LogIn, LogOut, MapPin, Clock, DollarSign, Delete } from "lucide-react";
 import { toast } from "sonner";
 
 const ShiftTimer = ({ checkInTime }) => {
@@ -24,17 +24,75 @@ const ShiftTimer = ({ checkInTime }) => {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [checkInTime]);
-  return <span className="font-mono">{elapsed}</span>;
+  return <span className="font-mono text-cyan-400">{elapsed}</span>;
 };
+
+const PinPad = ({ pin, setPin, onSubmit, loading }) => (
+  <div className="space-y-3">
+    <Input
+      type="password"
+      value={pin}
+      readOnly
+      placeholder="Enter PIN"
+      className="bg-gray-900 border-gray-700 text-center text-2xl font-bold tracking-widest"
+    />
+    <div className="grid grid-cols-3 gap-2">
+      {[1,2,3,4,5,6,7,8,9].map(n => (
+        <Button
+          key={n}
+          onClick={() => setPin(prev => (prev + n).slice(-4))}
+          className="bg-gray-800 hover:bg-gray-700 h-12 text-lg font-bold"
+          disabled={pin.length >= 4 || loading}
+        >
+          {n}
+        </Button>
+      ))}
+      <Button
+        onClick={() => setPin(prev => prev.slice(0, -1))}
+        className="bg-gray-800 hover:bg-gray-700 h-12"
+        disabled={pin.length === 0 || loading}
+      >
+        <Delete className="w-4 h-4" />
+      </Button>
+      <Button
+        onClick={() => setPin('')}
+        className="bg-gray-800 hover:bg-gray-700 h-12 text-sm"
+        disabled={pin.length === 0 || loading}
+      >
+        Clear
+      </Button>
+      <Button
+        onClick={() => setPin(prev => (prev + '0').slice(-4))}
+        className="bg-gray-800 hover:bg-gray-700 h-12 text-lg font-bold"
+        disabled={pin.length >= 4 || loading}
+      >
+        0
+      </Button>
+    </div>
+    <Button
+      onClick={() => onSubmit()}
+      disabled={pin.length !== 4 || loading}
+      className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 h-12 font-bold"
+    >
+      <LogIn className="w-4 h-4 mr-2" />
+      {loading ? 'Checking In...' : 'Check In'}
+    </Button>
+  </div>
+);
 
 export default function EntertainerCheckIn({ user }) {
   const queryClient = useQueryClient();
-  const [selectedEntertainer, setSelectedEntertainer] = useState(null);
+  const [pin, setPin] = useState('');
   const [location, setLocation] = useState("Main Floor");
+  const [isCheckingInPin, setIsCheckingInPin] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(null);
 
   const { data: entertainers = [] } = useQuery({
     queryKey: ['entertainers'],
-    queryFn: () => base44.entities.Entertainer.filter({ status: 'active' })
+    queryFn: () => base44.entities.Entertainer.list(),
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always'
   });
 
   const { data: activeShifts = [] } = useQuery({
@@ -43,91 +101,34 @@ export default function EntertainerCheckIn({ user }) {
       const allShifts = await base44.entities.EntertainerShift.list('-created_date', 100);
       return allShifts.filter(shift => !shift.check_out_time);
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
     refetchInterval: 30000
   });
 
   const activeVenue = useActiveVenue();
 
-  const [isCheckingIn, setIsCheckingIn] = useState(false); // B1
-  const lastCheckedInRef = React.useRef(null);
-  const [isCheckingOut, setIsCheckingOut] = useState(null); // B1 — holds shiftId being checked out
-
-  const checkIn = useMutation({
-    mutationFn: async (entertainerId) => {
-      // Prevent double-tap duplicate check-ins
-      const key = `${entertainerId}-${Math.floor(Date.now()/3000)}`;
-      if (lastCheckedInRef.current === key) return;
-      lastCheckedInRef.current = key;
-
-      // GATE: entertainer must exist in active records
-      const entertainer = entertainers.find(e => e.id === entertainerId);
-      if (!entertainer) {
-        toast.error('Check-in blocked: Entertainer record not found.');
-        return;
+  const checkInByPin = useMutation({
+    mutationFn: async () => {
+      // Find entertainer by PIN
+      const ent = entertainers.find(e => e.nups_pin === pin);
+      if (!ent) {
+        throw new Error('PIN not found. Check entertainer records.');
       }
 
-      const minimumAge = activeVenue?.minimum_age || 21;
-
-      // GATE 1 — date_of_birth required
-      if (!entertainer.date_of_birth) {
-        toast.error('Check-in blocked: Date of birth not on file. Contact manager.');
-        return;
+      // Already checked in?
+      if (activeShifts.some(s => s.entertainer_id === ent.id)) {
+        throw new Error(`${ent.stage_name} is already checked in.`);
       }
 
-      // GATE 2 — age >= venue.minimum_age
-      const dob = new Date(entertainer.date_of_birth);
-      const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear()
-        - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
-      if (age < minimumAge) {
-        toast.error(`Check-in blocked: Does not meet minimum age requirement of ${minimumAge}.`);
-        return;
-      }
-
-      // GATE 3 — contract_signed
-      if (!entertainer.contract_signed) {
-        toast.error('Check-in blocked: Contract not signed.');
-        return;
-      }
-
-      // GATE 4 — contract_signed_date
-      if (!entertainer.contract_signed_date) {
-        toast.error('Check-in blocked: Contract signed date not on file.');
-        return;
-      }
-
-      // GATE 5 — contract_signature
-      if (!entertainer.contract_signature) {
-        toast.error('Check-in blocked: Contract signature not on file.');
-        return;
-      }
-
-      // GATE 6 — contract_ip_address
-      if (!entertainer.contract_ip_address) {
-        toast.error('Check-in blocked: Contract IP address not on file.');
-        return;
-      }
-
-      // GATE 7 — contract_status === 'VALID' (final gate)
-      if (entertainer.contract_status !== 'VALID') {
-        toast.error(`Check-in blocked: Contract status is ${entertainer.contract_status || 'INVALID'}.`);
-        return;
-      }
-
-            // GATE 8 — linked_venue must exist — H-4 FIX BPAAA Phase 5
-                  if (!entertainer.venue_id && !entertainer.linked_venue) {
-                          toast.error('Check-in blocked: No linked venue on entertainer record. Contact manager.');
-                                  return;
-                                        }
-
-      // ALL GATES PASSED — call secure backend function
-      const shiftVenueId = activeVenue?.id;
+      const shiftVenueId = activeVenue?.id || activeVenue?.venue_id;
       if (!shiftVenueId) {
-        throw new Error('SHIFT_AUDIT_FAILED: venue_id unavailable at check-in');
+        throw new Error('Venue context unavailable.');
       }
 
       const response = await base44.functions.invoke('createEntertainerShift', {
-        entertainer_id: entertainerId,
+        entertainer_id: ent.id,
         location,
         venue_id: shiftVenueId
       });
@@ -135,17 +136,20 @@ export default function EntertainerCheckIn({ user }) {
       if (response.data?.error) {
         throw new Error(response.data.error);
       }
-      return response.data?.shift;
+      return { shift: response.data?.shift, entertainer: ent };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
-      setSelectedEntertainer(null);
-      toast.success('Checked in successfully!');
+      toast.success(`${data.entertainer.stage_name} checked in!`);
+      setPin('');
+    },
+    onError: (err) => {
+      toast.error(err.message);
     }
   });
 
   const updateLocation = useMutation({
-    mutationFn: ({ shiftId, newLocation, newStatus }) => 
+    mutationFn: ({ shiftId, newLocation, newStatus }) =>
       base44.entities.EntertainerShift.update(shiftId, {
         location: newLocation,
         status: newStatus
@@ -181,72 +185,51 @@ export default function EntertainerCheckIn({ user }) {
 
   return (
     <div className="space-y-6">
-      {/* Check In Form */}
+      {/* PIN Entry */}
       <Card className="glass-card-dark border-cyan-500/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <LogIn className="w-5 h-5 text-cyan-400" />
             Check In Entertainer
           </CardTitle>
+          <p className="text-xs text-gray-400 mt-1">Enter PIN code to check in</p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Select value={selectedEntertainer || ""} onValueChange={setSelectedEntertainer}>
-              <SelectTrigger className="glass-input">
-                <SelectValue placeholder="Select entertainer..." />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                {entertainers
-                  .filter(e => !activeShifts.some(shift => shift.entertainer_id === e.id))
-                  .map(entertainer => (
-                    <SelectItem key={entertainer.id} value={entertainer.id}>
-                      {entertainer.stage_name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={location} onValueChange={setLocation}>
-              <SelectTrigger className="glass-input">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                <SelectItem value="Main Floor">Main Floor</SelectItem>
-                <SelectItem value="VIP Area">VIP Area</SelectItem>
-                <SelectItem value="Bar">Bar</SelectItem>
-                <SelectItem value="Stage">Stage</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              onClick={async () => {
-                if (isCheckingIn) return;
-                setIsCheckingIn(true);
-                try { await checkIn.mutateAsync(selectedEntertainer); }
-                finally { setIsCheckingIn(false); }
-              }}
-              disabled={!selectedEntertainer || isCheckingIn}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600"
-            >
-              <LogIn className="w-4 h-4 mr-2" />
-              {isCheckingIn ? 'Checking In...' : 'Check In'}
-            </Button>
-          </div>
+          <PinPad
+            pin={pin}
+            setPin={setPin}
+            onSubmit={() => checkInByPin.mutate()}
+            loading={isCheckingInPin || checkInByPin.isPending}
+          />
+          <Select value={location} onValueChange={setLocation}>
+            <SelectTrigger className="bg-gray-900 border-gray-700 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-900 border-gray-700">
+              <SelectItem value="Main Floor">Main Floor</SelectItem>
+              <SelectItem value="VIP Area">VIP Area</SelectItem>
+              <SelectItem value="Bar">Bar</SelectItem>
+              <SelectItem value="Stage">Stage</SelectItem>
+              <SelectItem value="Private Room">Private Room</SelectItem>
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
-      {/* Active Entertainers */}
+      {/* Active Shifts */}
       <Card className="glass-card-dark border-cyan-500/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <Users className="w-5 h-5 text-cyan-400" />
-            Active Entertainers ({activeShifts.length})
+            Active Shifts ({activeShifts.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeShifts.map((shift) => {
-              return (
+          {activeShifts.length === 0 ? (
+            <p className="text-gray-400 text-sm">No active shifts</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {activeShifts.map((shift) => (
                 <Card key={shift.id} className="bg-gray-800/50 border-gray-700">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
@@ -261,11 +244,13 @@ export default function EntertainerCheckIn({ user }) {
                         variant="outline"
                         disabled={isCheckingOut === shift.id}
                         onClick={async () => {
-                          if (!window.confirm(`Check out ${shift.stage_name}? This will record final earnings.`)) return;
-                          if (isCheckingOut) return;
+                          if (!window.confirm(`Check out ${shift.stage_name}?`)) return;
                           setIsCheckingOut(shift.id);
-                          try { await checkOut.mutateAsync(shift.id); }
-                          catch { setIsCheckingOut(null); }
+                          try {
+                            await checkOut.mutateAsync(shift.id);
+                          } catch {
+                            setIsCheckingOut(null);
+                          }
                         }}
                         className="border-red-500/50 text-red-400"
                       >
@@ -289,14 +274,14 @@ export default function EntertainerCheckIn({ user }) {
                     </div>
 
                     <div className="mt-3">
-                      <Select 
+                      <Select
                         value={shift.location}
                         onValueChange={(newLocation) => {
                           const newStatus = newLocation === "VIP Area" ? "in_vip" : "on_floor";
-                          updateLocation.mutate({ 
-                            shiftId: shift.id, 
-                            newLocation, 
-                            newStatus 
+                          updateLocation.mutate({
+                            shiftId: shift.id,
+                            newLocation,
+                            newStatus
                           });
                         }}
                       >
@@ -314,9 +299,9 @@ export default function EntertainerCheckIn({ user }) {
                     </div>
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
