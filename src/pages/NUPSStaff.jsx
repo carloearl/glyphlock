@@ -44,28 +44,42 @@ export default function NUPSStaff() {
   const [activeModule, setActiveModule] = useState("timeclock");
   const [isClockedIn, setIsClockedIn] = useState(false);
 
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      if (u) {
+        setUser(u);
+        setRbacRole(mapNUPSRoleToRBAC(u._highestRole || u.role));
+      }
+      setAuthChecked(true);
+    }).catch(() => setAuthChecked(true));
+  }, []);
+
   // Check if current user has an active clock-in
   const { data: activeShifts = [] } = useQuery({
     queryKey: ["staff-active-shifts"],
     queryFn: () => base44.entities.EntertainerShift.filter({ status: "checked_in" }),
     enabled: !!user,
-    refetchInterval: 15000,
-    onSuccess: (shifts) => {
-      const email = user?.email?.toLowerCase();
-      const name = (user?.full_name || user?.stage_name || "").toLowerCase();
-      const clocked = shifts.some(s =>
-        s.entertainer_id === user?.id ||
-        s.entertainer_id?.toLowerCase() === email ||
-        s.stage_name?.toLowerCase() === name
-      );
-      setIsClockedIn(clocked);
-    }
+    refetchInterval: 30000,
+    staleTime: 20000,
   });
+
+  useEffect(() => {
+    if (!user || !activeShifts.length) return;
+    const email = user.email?.toLowerCase();
+    const name = (user.full_name || user.stage_name || "").toLowerCase();
+    const clocked = activeShifts.some(s =>
+      s.entertainer_id === user.id ||
+      s.entertainer_id?.toLowerCase() === email ||
+      s.stage_name?.toLowerCase() === name
+    );
+    setIsClockedIn(clocked);
+  }, [activeShifts, user]);
 
   const { data: transactions = [] } = useQuery({
     queryKey: ["pos-transactions"],
     queryFn: () => base44.entities.POSTransaction.list("-created_date", 50),
-    enabled: !!user,
+    enabled: !!user && activeModule === "history",
+    staleTime: 60000,
   });
 
   // TASK 7.1 – Filter demo/test transactions from ALL financial views
