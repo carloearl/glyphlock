@@ -50,8 +50,6 @@ export default function POSCashRegister({ user, station = 'door' }) {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [showManagerOverride, setShowManagerOverride] = useState(false);
   const [managerPin, setManagerPin] = useState("");
-  const [showManagerOverride, setShowManagerOverride] = useState(false);
-  const [managerPin, setManagerPin] = useState("");
 
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products'],
@@ -208,27 +206,6 @@ export default function POSCashRegister({ user, station = 'door' }) {
       });
     } catch(e) {}
     toast.success('💵 Cash drawer opened — logged.');
-  };
-
-  const handleManagerRefresh = async () => {
-    // Simple manager validation - in production use proper PIN verification
-    const validPins = ['1234', '0000']; // TODO: replace with secure backend PIN check
-    if (!validPins.includes(managerPin)) {
-      toast.error('Invalid manager PIN');
-      setManagerPin('');
-      return;
-    }
-    // Clear all POS data
-    setCart([]);
-    setSelectedCustomer(null);
-    setDiscount(0);
-    setTip(0);
-    setPaymentStep('register');
-    setPaymentMethod(null);
-    setHeldTransactions([]);
-    setShowManagerOverride(false);
-    setManagerPin('');
-    toast.success('POS system cleared by manager');
   };
 
   const isManagerPOS = user?.role === 'admin' ||
@@ -721,45 +698,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
            <ReceiptPrinter transaction={lastTransaction} />
           </div>
           )}
-          </div>
-
-        {lastTransaction && (
-          <div className="px-3 pb-3 shrink-0">
-            <ReceiptPrinter transaction={lastTransaction} />
-          </div>
-        )}
       </div>
-
-      {/* Manager Override Modal */}
-      {showManagerOverride && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.75)' }}>
-          <div className="rounded-2xl p-6 space-y-4 max-w-xs w-full mx-4" style={{ background: '#111', border: '2px solid rgba(59,130,246,0.4)' }}>
-            <div className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-yellow-400" />
-              <span className="text-white font-bold text-sm">Manager PIN Required</span>
-            </div>
-            <p className="text-gray-400 text-sm">Enter manager PIN to clear POS system:</p>
-            <input
-              type="password"
-              value={managerPin}
-              onChange={e => setManagerPin(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleManagerRefresh()}
-              placeholder="••••"
-              maxLength="4"
-              className="w-full h-12 rounded-lg text-center text-2xl font-mono bg-black/40 border border-gray-700 text-white"
-              autoFocus
-            />
-            <div className="flex gap-2">
-              <button onClick={() => { setShowManagerOverride(false); setManagerPin(''); }} className="flex-1 h-10 rounded-xl text-sm text-gray-400 border border-white/10">Cancel</button>
-              <button onClick={handleManagerRefresh}
-                className="flex-1 h-10 rounded-xl text-sm font-black text-white"
-                style={{ background: 'linear-gradient(135deg, #3b82f6, #1e40af)' }}>
-                Clear POS
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Manager Override Modal */}
       {showManagerOverride && (
