@@ -7,16 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Car, Plus, DollarSign, Star, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle } from "lucide-react";
 
-// --- Payout config (manager can adjust later)
-const PER_DROP_RATE = 30;      // $30 per guest drop
-const INCENTIVE_BONUS = 0;     // No bonus
-const VIP_KICKBACK = 0;        // No VIP kickback
+// --- Payout config
+const INTERNAL_DRIVER_RATE = 30;  // Our drivers get $30 per drop
+const EXTERNAL_DRIVER_RATE = 20;  // Outside drivers get $20 per drop
+const PASS_DISCOUNT = 10;          // Guests with pass get $10 off cover fee
+const COVER_FEE_BASE = 30;         // Cover fee is $30 (or $20 with pass)
 
 function calcPayout(record) {
-  const base = (record.total_drops || 0) * PER_DROP_RATE;
-  const incentive = (record.total_drops || 0) >= 3 ? INCENTIVE_BONUS : 0;
-  const vip = (record.vip_count || 0) * VIP_KICKBACK;
-  return { base, incentive, vip, total: base + incentive + vip };
+  const rate = record.driver_type === 'internal' ? INTERNAL_DRIVER_RATE : EXTERNAL_DRIVER_RATE;
+  const total = (record.total_drops || 0) * rate;
+  return { total };
 }
 
 function todayDate() {
@@ -27,7 +27,7 @@ export default function DriverDropOffTracker({ user }) {
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState(null);
   const [showNewDriver, setShowNewDriver] = useState(false);
-  const [newDriver, setNewDriver] = useState({ driver_name: "", driver_number: "" });
+  const [newDriver, setNewDriver] = useState({ driver_name: "", driver_number: "", driver_type: "internal" });
   const [dropForm, setDropForm] = useState({ guest_name: "", has_pass: false, went_vip: false, pass_type: "" });
   const [addingDropTo, setAddingDropTo] = useState(null);
 
@@ -44,13 +44,10 @@ export default function DriverDropOffTracker({ user }) {
       ...data,
       session_date: today,
       driver_code: `DRV-${data.driver_number}-${Date.now()}`,
+      driver_type: data.driver_type || 'internal',
       drop_offs: [],
       total_drops: 0,
-      vip_count: 0,
       pass_count: 0,
-      base_payout: 0,
-      incentive_bonus: 0,
-      vip_kickback: 0,
       total_payout: 0,
       status: "open",
     }),
@@ -135,19 +132,24 @@ export default function DriverDropOffTracker({ user }) {
           <CardContent className="p-4 space-y-3">
             <p className="text-yellow-300 font-semibold text-sm">Register New Driver</p>
             <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="Driver Name"
-                value={newDriver.driver_name}
-                onChange={e => setNewDriver(v => ({ ...v, driver_name: e.target.value }))}
-                className="bg-black/40 border-gray-700 text-white"
-              />
-              <Input
-                placeholder="Phone / Badge #"
-                value={newDriver.driver_number}
-                onChange={e => setNewDriver(v => ({ ...v, driver_number: e.target.value }))}
-                className="bg-black/40 border-gray-700 text-white"
-              />
-            </div>
+                      <Input
+                        placeholder="Driver Name"
+                        value={newDriver.driver_name}
+                        onChange={e => setNewDriver(v => ({ ...v, driver_name: e.target.value }))}
+                        className="bg-black/40 border-gray-700 text-white"
+                      />
+                      <Input
+                        placeholder="Phone / Badge #"
+                        value={newDriver.driver_number}
+                        onChange={e => setNewDriver(v => ({ ...v, driver_number: e.target.value }))}
+                        className="bg-black/40 border-gray-700 text-white"
+                      />
+                      <select value={newDriver.driver_type} onChange={e => setNewDriver(v => ({ ...v, driver_type: e.target.value }))}
+                        className="col-span-2 h-10 rounded-lg text-white font-medium px-2 bg-black/40 border border-gray-700">
+                        <option value="internal">Our Driver ($30/drop)</option>
+                        <option value="external">Outside Driver ($20/drop)</option>
+                      </select>
+                    </div>
             <div className="flex gap-2">
               <Button
                 onClick={() => createDriver.mutate(newDriver)}
@@ -203,8 +205,8 @@ export default function DriverDropOffTracker({ user }) {
       {openRecords.map(record => {
         const isOpen = expanded === record.id;
         const isAddingDrop = addingDropTo === record.id;
-        const { base, incentive, vip, total } = calcPayout(record);
-        const qualifiesIncentive = (record.total_drops || 0) >= 3;
+        const { total } = calcPayout(record);
+        const isInternal = record.driver_type === 'internal';
 
         return (
           <Card key={record.id} className="bg-gray-900/60 border-gray-700/50">
@@ -216,15 +218,12 @@ export default function DriverDropOffTracker({ user }) {
                     <Car className="w-4 h-4 text-yellow-400" />
                     <span className="font-bold text-white">{record.driver_name}</span>
                     <span className="text-gray-500 text-xs">#{record.driver_number}</span>
-                    {qualifiesIncentive && (
-                      <Badge className="bg-green-500/20 text-green-300 border-green-500/40 text-xs">
-                        <Star className="w-3 h-3 mr-1" />Incentive
-                      </Badge>
-                    )}
+                    <Badge className={`text-xs border ${ isInternal ? 'bg-green-500/20 text-green-300 border-green-500/40' : 'bg-orange-500/20 text-orange-300 border-orange-500/40'}`}>
+                      {isInternal ? 'Our Driver' : 'Outside'}
+                    </Badge>
                   </div>
                   <div className="flex gap-3 mt-1 text-xs text-gray-400">
                     <span><Users className="w-3 h-3 inline mr-1" />{record.total_drops || 0} drops</span>
-                    <span className="text-purple-400">{record.vip_count || 0} VIP</span>
                     <span className="text-blue-400">{record.pass_count || 0} passes</span>
                   </div>
                 </div>
@@ -247,19 +246,12 @@ export default function DriverDropOffTracker({ user }) {
               {/* Payout Breakdown */}
               {isOpen && (
                 <div className="border-t border-gray-800 pt-3 space-y-3">
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div className="bg-gray-800/60 rounded p-2 text-center">
-                      <div className="text-white font-bold">${base.toFixed(2)}</div>
-                      <div className="text-gray-500">{record.total_drops} × ${PER_DROP_RATE} base</div>
-                    </div>
-                    <div className={`rounded p-2 text-center ${qualifiesIncentive ? 'bg-green-900/30' : 'bg-gray-800/30'}`}>
-                      <div className={`font-bold ${qualifiesIncentive ? 'text-green-400' : 'text-gray-600'}`}>${incentive.toFixed(2)}</div>
-                      <div className="text-gray-500">incentive bonus</div>
-                    </div>
-                    <div className="bg-purple-900/20 rounded p-2 text-center">
-                      <div className="text-purple-400 font-bold">${vip.toFixed(2)}</div>
-                      <div className="text-gray-500">{record.vip_count} VIP kickback</div>
-                    </div>
+                  <div className="rounded p-3 bg-gray-800/40 text-xs text-center">
+                    <div className="text-white font-bold text-lg">${total.toFixed(2)}</div>
+                    <div className="text-gray-400 mt-1">{record.total_drops} drops × ${ isInternal ? INTERNAL_DRIVER_RATE : EXTERNAL_DRIVER_RATE}/drop</div>
+                    {record.pass_count > 0 && (
+                      <div className="text-blue-400 mt-2 text-xs">ℹ Guests with passes receive ${PASS_DISCOUNT} discount on ${COVER_FEE_BASE} cover fee</div>
+                    )}
                   </div>
 
                   {/* Drop log */}
@@ -270,8 +262,8 @@ export default function DriverDropOffTracker({ user }) {
                         <div key={i} className="flex items-center justify-between bg-gray-800/40 rounded px-3 py-1.5 text-xs">
                           <span className="text-gray-300">{d.guest_name || `Guest ${i + 1}`}</span>
                           <div className="flex gap-2">
-                            {d.has_pass && <Badge className="bg-blue-500/20 text-blue-300 text-[10px] border-blue-500/30">Pass</Badge>}
-                            {d.went_vip && <Badge className="bg-purple-500/20 text-purple-300 text-[10px] border-purple-500/30">VIP</Badge>}
+                            {d.has_pass && <Badge className="bg-blue-500/20 text-blue-300 text-[10px] border-blue-500/30">Pass (${COVER_FEE_BASE - PASS_DISCOUNT})</Badge>}
+                            {!d.has_pass && <Badge className="bg-gray-500/20 text-gray-300 text-[10px] border-gray-500/30">No Pass (${COVER_FEE_BASE})</Badge>}
                             <span className="text-gray-600">{new Date(d.drop_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         </div>
@@ -327,7 +319,7 @@ export default function DriverDropOffTracker({ user }) {
                   {/* Mark Paid — cash comes from door till, logged as till outflow */}
                   <div className="bg-gray-800/40 rounded p-2 flex items-start gap-2 text-xs text-gray-400">
                     <AlertCircle className="w-3 h-3 text-yellow-400 mt-0.5 shrink-0" />
-                    <span>Kickback paid from <strong className="text-yellow-300">door till cash</strong>. This will be logged as a cash outflow on the Z-report.</span>
+                    <span>Driver payout paid from <strong className="text-yellow-300">door till cash</strong>. This will be logged as a cash outflow on the Z-report.</span>
                   </div>
                   <Button
                     onClick={() => markPaid.mutate(record)}
