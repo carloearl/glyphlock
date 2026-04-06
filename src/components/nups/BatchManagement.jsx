@@ -101,21 +101,36 @@ export default function BatchManagement({ user, onBatchClosed }) {
     setOpeningCash('');
     setClosingCash('');
     setNotes('');
-    if (activeBatch) {
-      await base44.entities.POSBatch.update(activeBatch.id, {
-        total_sales: 0,
-        transaction_count: 0,
-        discrepancy: 0,
-        opening_cash: 0,
-        notes: `RESET by manager ${manager.full_name || manager.username} at ${new Date().toLocaleString()}`
-      });
-      // Wipe ALL cached query data and force a hard refetch
-      queryClient.removeQueries(['active-batch']);
-      queryClient.removeQueries(['batch-transactions']);
-      queryClient.removeQueries(['batch-backups']);
-      await queryClient.invalidateQueries();
-    }
-    toast({ title: 'Batch Reset', description: 'All fields and totals have been zeroed out.' });
+    if (!activeBatch) return;
+
+    // Delete every transaction tied to this batch
+    const txnsToDelete = batchTransactions;
+    await Promise.all(txnsToDelete.map(t => base44.entities.POSTransaction.delete(t.id)));
+
+    // Zero out the batch record itself
+    await base44.entities.POSBatch.update(activeBatch.id, {
+      total_sales: 0,
+      transaction_count: 0,
+      discrepancy: 0,
+      opening_cash: 0,
+      notes: `RESET by manager ${manager.full_name || manager.username} at ${new Date().toLocaleString()}`
+    });
+
+    // Log the reset
+    await base44.entities.SystemAuditLog.create({
+      event_type: 'BATCH_RESET',
+      description: `Batch ${activeBatch.batch_id} reset to zero by ${manager.full_name || manager.username}. ${txnsToDelete.length} transactions deleted.`,
+      actor_email: manager.username,
+      status: 'security_action',
+      severity: 'high',
+      metadata: { batch_id: activeBatch.id, deleted_tx_count: txnsToDelete.length }
+    });
+
+    // Hard-wipe cache so nothing comes back on refresh
+    queryClient.removeQueries();
+    await queryClient.invalidateQueries();
+
+    toast({ title: 'Batch Reset Complete', description: `${txnsToDelete.length} transactions deleted. All totals cleared.` });
   };
 
   // ─── BACKUP ───────────────────────────────────────────────────────────────────
@@ -316,6 +331,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
   const batchTotal = cashTotal + cardTotal;
 
   const expectedCashPreview = (activeBatch?.opening_cash || 0) + cashTotal;
+  const batchAgeHours = activeBatch ? (Date.now() - new Date(activeBatch.start_time).getTime()) / 3600000 : 0;
   const parsedClosing = parseFloat(closingCash) || 0;
   const discrepancyPreview = parsedClosing - expectedCashPreview;
   const hasDiscrepancyPreview = Math.abs(discrepancyPreview) > 0.01;
@@ -432,12 +448,22 @@ export default function BatchManagement({ user, onBatchClosed }) {
               <div className="text-sm text-gray-400 mt-2">Expected Cash: ${expectedCashPreview.toFixed(2)}</div>
             </div>
 
-            {/* ── Shift Controls: Reset / Backup / Restore ── */}
+            {/* ── Shift Controls: Refresh / Reset / Backup / Restore ── */}
             <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-800">
+              <Button size="sm" variant="outline"
+                onClick={() => {
+                  queryClient.removeQueries(['active-batch']);
+                  queryClient.removeQueries(['batch-transactions']);
+                  queryClient.invalidateQueries();
+                  toast({ title: 'Refreshed', description: 'Batch data reloaded.' });
+                }}
+                className="border-gray-500/40 text-gray-400 hover:bg-gray-500/10">
+                <RefreshCw className="w-3 h-3 mr-1" /> Refresh
+              </Button>
               <Button size="sm" variant="outline"
                 onClick={() => setOverrideAction('reset')}
                 className="border-red-500/40 text-red-400 hover:bg-red-500/10">
-                <RefreshCw className="w-3 h-3 mr-1" /> Reset to Zero
+                <Trash2 className="w-3 h-3 mr-1" /> Reset to Zero
               </Button>
               <Button size="sm" variant="outline"
                 onClick={() => setOverrideAction('backup')}
