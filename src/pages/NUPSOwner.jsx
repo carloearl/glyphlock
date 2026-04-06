@@ -330,7 +330,7 @@ export default function NUPSOwner() {
                   <DropdownMenuItem
                     className="cursor-pointer hover:bg-gray-800 text-xs text-gray-400"
                     onClick={() => {
-                      setRbacRole('manager');
+                      setRbacRole(mapNUPSRoleToRBAC(user?._highestRole || 'PLATFORM_ADMIN'));
                       setActiveModule('dashboard');
                       const adminSession = { ...user, _highestRole: user?._highestRole || 'PLATFORM_ADMIN' };
                       delete adminSession._viewAsRole;
