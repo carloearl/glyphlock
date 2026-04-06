@@ -78,6 +78,11 @@ export default function NUPSOwner() {
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
 
+  const handleRefreshAll = () => {
+    queryClient.clear();
+    window.location.reload();
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -332,7 +337,7 @@ export default function NUPSOwner() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => queryClient.invalidateQueries()}
+                onClick={handleRefreshAll}
                 className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 min-h-[44px]"
                 aria-label="Refresh all data"
               >
@@ -524,7 +529,7 @@ export default function NUPSOwner() {
           {activeModule === 'staff' && (
             <div className="space-y-4">
               <StaffOnboardingPanel />
-              <EntertainerContract onContractSigned={() => queryClient.invalidateQueries({ queryKey: ["entertainers"] })} />
+              <EntertainerContract onContractSigned={handleRefreshAll} />
               <StaffManagement />
               <EntertainerCheckIn user={user} />
               {canManageStaff && <EmployeeManagement />}
