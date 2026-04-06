@@ -170,9 +170,13 @@ export default function BatchManagement({ user, onBatchClosed }) {
       metadata: { batch_id: activeBatch.id, voided_tx_count: batchTransactions.length }
     });
 
-    // STEP 5: Hard-wipe query cache
-    queryClient.removeQueries();
-    await queryClient.invalidateQueries();
+    // STEP 5: Hard-wipe query cache and refresh
+    queryClient.removeQueries({ queryKey: ['active-batch'] });
+    queryClient.removeQueries({ queryKey: ['batch-transactions'] });
+    queryClient.removeQueries({ queryKey: ['batch-backups'] });
+    await queryClient.invalidateQueries({ queryKey: ['active-batch'] });
+    await queryClient.invalidateQueries({ queryKey: ['batch-transactions'] });
+    await queryClient.invalidateQueries({ queryKey: ['batch-backups'] });
 
     toast({ title: 'Batch Reset Complete', description: `${batchTransactions.length} transactions voided. Auto-backup saved — use Restore to roll back.` });
   };
