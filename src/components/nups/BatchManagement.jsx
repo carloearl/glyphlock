@@ -79,7 +79,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
     onSuccess: () => {
       queryClient.invalidateQueries(['active-batch']);
       setShowOpenDialog(false);
-      setOpeningCash(0);
+      setOpeningCash('');
       setNotes("");
     }
   });
@@ -90,7 +90,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
       queryClient.invalidateQueries(['active-batch']);
       queryClient.invalidateQueries(['batch-transactions']);
       setShowCloseDialog(false);
-      setClosingCash(0);
+      setClosingCash('');
       setNotes("");
       onBatchClosed?.();
     }
@@ -98,12 +98,20 @@ export default function BatchManagement({ user, onBatchClosed }) {
 
   // ─── RESET (manager override required) ───────────────────────────────────────
   const handleResetConfirmed = async (manager) => {
+    if (!activeBatch) return;
+
+    // Get current totals before clearing
+    const BATCH_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
+    const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
+    const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+    const cardTotal = realTxns.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+    const batchTotal = cashTotal + cardTotal;
+
     setOverrideAction(null);
     setConfirmReset(false);
     setOpeningCash('');
     setClosingCash('');
     setNotes('');
-    if (!activeBatch) return;
 
     // STEP 1: Auto-backup BEFORE reset so restore is always possible after
     await base44.entities.SystemAuditLog.create({
@@ -171,9 +179,18 @@ export default function BatchManagement({ user, onBatchClosed }) {
 
   // ─── BACKUP ───────────────────────────────────────────────────────────────────
   const handleBackupConfirmed = async (manager) => {
+    if (!activeBatch) return;
+
+    // Get current totals
+    const BATCH_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
+    const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
+    const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+    const cardTotal = realTxns.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+    const batchTotal = cashTotal + cardTotal;
+
     setOverrideAction(null);
     setConfirmBackup(false);
-    if (!activeBatch) return;
+
     await base44.entities.SystemAuditLog.create({
       event_type: 'BATCH_BACKUP',
       description: `Batch backup by manager ${manager.full_name || manager.username}`,
