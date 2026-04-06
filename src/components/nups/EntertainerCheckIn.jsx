@@ -5,7 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, LogIn, LogOut, MapPin, Clock, DollarSign, ChevronLeft, Check } from "lucide-react";
+import { Users, LogIn, LogOut, MapPin, Clock, DollarSign, ChevronLeft, Check, CheckCircle2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 const ShiftTimer = ({ checkInTime }) => {
@@ -199,7 +200,8 @@ export default function EntertainerCheckIn({ user }) {
             ) : (
               <div className="space-y-2">
                 {activeShifts.map((shift) => (
-                  <div key={shift.id} className="flex items-center justify-between p-3 bg-gray-800/50 border border-gray-700 rounded">
+                  <div key={shift.id} className="flex items-center gap-3 p-3 bg-gray-800/50 border border-gray-700 rounded">
+                    <Checkbox checked defaultChecked className="mt-0" />
                     <div className="flex-1">
                       <p className="font-semibold text-white">{shift.stage_name}</p>
                       <div className="flex gap-2 mt-1 text-xs">
@@ -263,9 +265,10 @@ export default function EntertainerCheckIn({ user }) {
             <p className="text-gray-400 text-sm">No entertainers checked in</p>
           ) : (
             <div className="space-y-2">
-              {activeShifts.map((shift) => (
-                <div key={shift.id} className="flex items-center justify-between p-3 bg-gray-800/50 border border-gray-700 rounded">
-                  <div className="flex-1">
+                {activeShifts.map((shift) => (
+                  <div key={shift.id} className="flex items-center gap-3 p-3 bg-gray-800/50 border border-gray-700 rounded">
+                    <Checkbox checked defaultChecked className="mt-0" />
+                    <div className="flex-1">
                     <p className="font-semibold text-white">{shift.stage_name}</p>
                     <div className="flex gap-2 mt-1 text-xs">
                       <span className="text-gray-400 flex items-center gap-1">
