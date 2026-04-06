@@ -8,35 +8,26 @@ import {
   TrendingUp, FileText, Banknote, CheckCircle, Package
 } from "lucide-react";
 
-export default function NUPSManagerDashboard({ user }) {
+export default function NUPSManagerDashboard({
+  user,
+  // Props passed from NUPSOwner (already-fetched data)
+  transactions: propTransactions,
+  activeShifts: propActiveShifts,
+  vipRooms: propVipRooms,
+  vipGuests: propVipGuests,
+  todayRevenue: propTodayRevenue,
+  totalRevenue: propTotalRevenue,
+  occupiedRooms: propOccupiedRooms,
+  activeGuestsCount: propActiveGuestsCount,
+}) {
   const today = new Date().toDateString();
 
-  const { data: transactions = [] } = useQuery({
-    queryKey: ['mgr-transactions'],
-    queryFn: () => base44.entities.POSTransaction.list('-created_date', 500),
-    refetchInterval: 60000,
-  });
-
+  // Only fetch what the parent doesn't provide
   const { data: activeBatch } = useQuery({
     queryKey: ['mgr-active-batch'],
     queryFn: async () => {
       const batches = await base44.entities.POSBatch.list('-created_date', 10);
       return batches.find(b => b.status === 'open') || null;
-    },
-    refetchInterval: 30000,
-  });
-
-  const { data: vipRooms = [] } = useQuery({
-    queryKey: ['mgr-vip-rooms'],
-    queryFn: () => base44.entities.VIPRoom.list('-created_date', 50),
-    refetchInterval: 30000,
-  });
-
-  const { data: activeShifts = [] } = useQuery({
-    queryKey: ['mgr-active-shifts'],
-    queryFn: async () => {
-      const all = await base44.entities.EntertainerShift.list('-created_date', 100);
-      return all.filter(s => !s.check_out_time);
     },
     refetchInterval: 30000,
   });
@@ -55,25 +46,28 @@ export default function NUPSManagerDashboard({ user }) {
     refetchInterval: 60000,
   });
 
-  // F-5: Card sales whitelist — BPAAA v3.0
+  // Use parent-provided data; fall back to computing locally if not provided
+  const vipRooms = propVipRooms ?? [];
+  const activeShifts = propActiveShifts ?? [];
+
   const MGR_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
-  const todayTx = transactions.filter(t => new Date(t.created_date).toDateString() === today);
-  const realTx = todayTx.filter(t => !t.mode || t.mode === 'REAL');
-  // F-1: Tips excluded from all revenue calculations
-  const todayRevenue = realTx.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
-  const cashSales = realTx.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
-  const cardSales = realTx.filter(t => MGR_CARD_WHITELIST.includes(t.payment_method)).reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
-  const occupiedRooms = vipRooms.filter(r => r.status === 'occupied');
+  const todayTx = (propTransactions ?? []).filter(t => new Date(t.created_date).toDateString() === today);
+  const cashSales = todayTx.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+  const cardSales = todayTx.filter(t => MGR_CARD_WHITELIST.includes(t.payment_method)).reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+  const todayRevenue = propTodayRevenue ?? todayTx.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+  const occupiedRooms = propOccupiedRooms != null ? [] : vipRooms.filter(r => r.status === 'occupied');
+  const occupiedCount = propOccupiedRooms ?? occupiedRooms.length;
+
   const lastReport = zReports[0];
   const hasDiscrepancy = lastReport?.requires_review;
 
   const statCards = [
-    { label: "Today Revenue", value: `$${todayRevenue.toFixed(2)}`, icon: DollarSign, colorText: "text-cyan-400", colorBorder: "border-cyan-500/30" },
-    { label: "Transactions", value: realTx.length, icon: ShoppingCart, colorText: "text-purple-400", colorBorder: "border-purple-500/30" },
-    { label: "Cash Sales", value: `$${cashSales.toFixed(2)}`, icon: Banknote, colorText: "text-green-400", colorBorder: "border-green-500/30" },
-    { label: "Card Sales", value: `$${cardSales.toFixed(2)}`, icon: TrendingUp, colorText: "text-blue-400", colorBorder: "border-blue-500/30" },
-    { label: "VIP Rooms", value: `${occupiedRooms.length}/${vipRooms.length}`, icon: DoorOpen, colorText: "text-pink-400", colorBorder: "border-pink-500/30" },
-    { label: "Staff Active", value: activeShifts.length, icon: Users, colorText: "text-amber-400", colorBorder: "border-amber-500/30" },
+    { label: "Today Revenue",  value: `$${todayRevenue.toFixed(2)}`,        icon: DollarSign, colorText: "text-cyan-400",   colorBorder: "border-cyan-500/30" },
+    { label: "Transactions",   value: todayTx.length,                       icon: ShoppingCart, colorText: "text-purple-400", colorBorder: "border-purple-500/30" },
+    { label: "Cash Sales",     value: `$${cashSales.toFixed(2)}`,           icon: Banknote,   colorText: "text-green-400",  colorBorder: "border-green-500/30" },
+    { label: "Card Sales",     value: `$${cardSales.toFixed(2)}`,           icon: TrendingUp, colorText: "text-blue-400",   colorBorder: "border-blue-500/30" },
+    { label: "VIP Rooms",      value: `${occupiedCount}/${vipRooms.length}`,icon: DoorOpen,   colorText: "text-pink-400",   colorBorder: "border-pink-500/30" },
+    { label: "Staff Active",   value: activeShifts.length,                  icon: Users,      colorText: "text-amber-400",  colorBorder: "border-amber-500/30" },
   ];
 
   return (

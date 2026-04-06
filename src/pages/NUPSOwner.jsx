@@ -419,7 +419,19 @@ export default function NUPSOwner() {
         </div>
 
         <div className="space-y-4 pb-8">
-          {activeModule === 'dashboard' && <NUPSManagerDashboard />}
+          {activeModule === 'dashboard' && (
+            <NUPSManagerDashboard
+              user={user}
+              transactions={realTransactions}
+              activeShifts={activeShifts}
+              vipRooms={vipRooms}
+              vipGuests={vipGuests}
+              todayRevenue={todayRevenue}
+              totalRevenue={totalRevenue}
+              occupiedRooms={occupiedRooms}
+              activeGuestsCount={activeGuestsCount}
+            />
+          )}
           {activeModule === 'pos' && (
             <div className="space-y-4">
               {canBatch && <BatchManagement user={user} onBatchClosed={() => setActiveModule('reports')} />}
