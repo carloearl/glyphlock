@@ -61,15 +61,6 @@ export default function NUPSManagerDashboard({
   const lastReport = zReports[0];
   const hasDiscrepancy = lastReport?.requires_review;
 
-  const statCards = [
-    { label: "Today Revenue",  value: `$${todayRevenue.toFixed(2)}`,        icon: DollarSign, colorText: "text-cyan-400",   colorBorder: "border-cyan-500/30" },
-    { label: "Transactions",   value: todayTx.length,                       icon: ShoppingCart, colorText: "text-purple-400", colorBorder: "border-purple-500/30" },
-    { label: "Cash Sales",     value: `$${cashSales.toFixed(2)}`,           icon: Banknote,   colorText: "text-green-400",  colorBorder: "border-green-500/30" },
-    { label: "Card Sales",     value: `$${cardSales.toFixed(2)}`,           icon: TrendingUp, colorText: "text-blue-400",   colorBorder: "border-blue-500/30" },
-    { label: "VIP Rooms",      value: `${occupiedCount}/${vipRooms.length}`,icon: DoorOpen,   colorText: "text-pink-400",   colorBorder: "border-pink-500/30" },
-    { label: "Staff Active",   value: activeShifts.length,                  icon: Users,      colorText: "text-amber-400",  colorBorder: "border-amber-500/30" },
-  ];
-
   return (
     <div className="p-4 space-y-5 text-white">
 
@@ -112,19 +103,6 @@ export default function NUPSManagerDashboard({
             </div>
           </div>
         )}
-      </div>
-
-      {/* STATS GRID */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {statCards.map(({ label, value, icon: Icon, colorText, colorBorder }) => (
-          <Card key={label} className={`bg-gray-900/60 border ${colorBorder}`}>
-            <CardContent className="p-3">
-              <Icon className={`w-5 h-5 mb-1 ${colorText}`} />
-              <div className={`text-xl font-bold ${colorText}`}>{value}</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">{label}</div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       <div className="grid md:grid-cols-2 gap-5">
