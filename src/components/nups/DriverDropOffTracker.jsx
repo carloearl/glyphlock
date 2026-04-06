@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Car, Plus, DollarSign, Star, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle } from "lucide-react";
 
 // --- Payout config (manager can adjust later)
-const PER_DROP_RATE = 5;       // $5 per guest drop
-const INCENTIVE_BONUS = 15;    // $15 bonus if 3+ drops
-const VIP_KICKBACK = 10;       // $10 per guest who went VIP
+const PER_DROP_RATE = 30;      // $30 per guest drop
+const INCENTIVE_BONUS = 0;     // No bonus
+const VIP_KICKBACK = 0;        // No VIP kickback
 
 function calcPayout(record) {
   const base = (record.total_drops || 0) * PER_DROP_RATE;
