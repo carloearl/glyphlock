@@ -130,7 +130,7 @@ export default function NUPSOwner() {
     checkAuth();
   }, []);
 
-  const { data: transactions = [] } = useQuery({
+  const { data: transactions = [], isLoading: txLoading } = useQuery({
     queryKey: ["pos-transactions"],
     queryFn: () => base44.entities.POSTransaction.list("-created_date"),
     enabled: !!user,
@@ -139,7 +139,7 @@ export default function NUPSOwner() {
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
   });
-  const { data: entertainers = [] } = useQuery({
+  const { data: entertainers = [], isLoading: entLoading } = useQuery({
     queryKey: ["entertainers"],
     queryFn: () => base44.entities.Entertainer.list(),
     enabled: !!user,
@@ -147,7 +147,7 @@ export default function NUPSOwner() {
     gcTime: 0,
     refetchOnMount: 'always',
   });
-  const { data: activeShifts = [] } = useQuery({
+  const { data: activeShifts = [], isLoading: shiftLoading } = useQuery({
     queryKey: ["active-shifts"],
     queryFn: async () => {
       const allShifts = await base44.entities.EntertainerShift.list("-created_date", 100);
@@ -158,7 +158,7 @@ export default function NUPSOwner() {
     gcTime: 0,
     refetchOnMount: 'always',
   });
-  const { data: vipRooms = [] } = useQuery({
+  const { data: vipRooms = [], isLoading: roomLoading } = useQuery({
     queryKey: ["vip-rooms"],
     queryFn: () => base44.entities.VIPRoom.list(),
     enabled: !!user,
@@ -166,7 +166,7 @@ export default function NUPSOwner() {
     gcTime: 0,
     refetchOnMount: 'always',
   });
-  const { data: vipGuests = [] } = useQuery({
+  const { data: vipGuests = [], isLoading: guestLoading } = useQuery({
     queryKey: ["vip-guests"],
     queryFn: () => base44.entities.VIPGuest.list("-created_date", 100),
     enabled: !!user,
@@ -174,7 +174,7 @@ export default function NUPSOwner() {
     gcTime: 0,
     refetchOnMount: 'always',
   });
-  const { data: products = [] } = useQuery({
+  const { data: products = [], isLoading: prodLoading } = useQuery({
     queryKey: ["pos-products"],
     queryFn: () => base44.entities.POSProduct.list(),
     enabled: !!user,
@@ -369,6 +369,19 @@ export default function NUPSOwner() {
       <div className="container mx-auto p-4 md:p-6">
         <div className="mb-4"><FraudAlertMonitor /></div>
 
+        {(txLoading || entLoading || shiftLoading || roomLoading || guestLoading || prodLoading) ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
+            {Array(6).fill(0).map((_, i) => (
+              <Card key={i} className="bg-gray-900/50 border-gray-700/30 animate-pulse">
+                <CardContent className="p-4">
+                  <div className="h-6 w-6 bg-gray-700 rounded mb-2" />
+                  <div className="h-8 w-16 bg-gray-700 rounded mb-1" />
+                  <div className="h-3 w-24 bg-gray-700 rounded" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
           <Card className="bg-gray-900/50 border-cyan-500/30">
             <CardContent className="p-4">
@@ -412,25 +425,8 @@ export default function NUPSOwner() {
               <div className="text-xs text-gray-400">Total Revenue</div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* ── NUPS MODULE ARCHITECTURE v1.0 — 13 MODULES ── */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {visibleModules.map(({ key, label, icon: Icon }) => (
-            <Button
-              key={key}
-              onClick={() => setActiveModule(key)}
-              variant={activeModule === key ? "default" : "outline"}
-              className={`min-h-[44px] text-sm transition-all ${
-                activeModule === key
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white border-purple-500'
-                  : 'border-gray-700 text-gray-300 hover:border-purple-500/50 hover:text-white bg-transparent'
-              }`}
-            >
-              <Icon className="w-4 h-4 mr-2 shrink-0" />{label}
-            </Button>
-          ))}
-        </div>
+          </div>
+          )}
 
         <div className="space-y-4 pb-8">
           {activeModule === 'dashboard' && (
