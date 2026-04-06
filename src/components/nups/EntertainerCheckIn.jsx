@@ -134,11 +134,11 @@ export default function EntertainerCheckIn({ user }) {
             </div>
             <div className="flex items-center justify-center gap-2 bg-pink-600/20 border border-pink-500/50 rounded-lg py-3">
               <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-              <span className="font-bold text-pink-400">Clocking IN</span>
+              <span className="font-bold text-pink-400">Check In</span>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <h2 className="text-center font-bold text-white">Enter your employee PIN</h2>
+            <h2 className="text-center font-bold text-white">Enter your PIN</h2>
 
             {/* PIN Display */}
             <div className="border border-gray-700 rounded-lg p-6 text-center bg-gray-900/50">
