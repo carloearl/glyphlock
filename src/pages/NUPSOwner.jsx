@@ -182,12 +182,15 @@ export default function NUPSOwner() {
     gcTime: 0,
     refetchOnMount: 'always',
   });
+  
   // TASK 7.1 — Filter demo/test transactions from ALL financial views
   const realTransactions = transactions.filter(t =>
     (!t.mode || t.mode === 'REAL') &&
     !t.transaction_id?.startsWith('DEMO-') &&
     !t.cashier?.includes('demo@')
   );
+
+  const isLoading = txLoading || entLoading || shiftLoading || roomLoading || guestLoading || prodLoading;
 
   if (!authChecked || !user) {
     return (
@@ -328,6 +331,8 @@ export default function NUPSOwner() {
                       const adminSession = { ...user, _highestRole: user?._highestRole || 'PLATFORM_ADMIN' };
                       delete adminSession._viewAsRole;
                       sessionStorage.setItem('nups_session', JSON.stringify(adminSession));
+                      queryClient.clear();
+                      window.location.reload();
                     }}
                   >
                     ↩ Reset to Admin
@@ -369,7 +374,7 @@ export default function NUPSOwner() {
       <div className="container mx-auto p-4 md:p-6">
         <div className="mb-4"><FraudAlertMonitor /></div>
 
-        {(txLoading || entLoading || shiftLoading || roomLoading || guestLoading || prodLoading) ? (
+        {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
             {Array(6).fill(0).map((_, i) => (
               <Card key={i} className="bg-gray-900/50 border-gray-700/30 animate-pulse">
@@ -428,6 +433,7 @@ export default function NUPSOwner() {
           </div>
           )}
 
+        {!isLoading && (
         <div className="space-y-4 pb-8">
           {activeModule === 'dashboard' && (
             <NUPSManagerDashboard
@@ -570,6 +576,7 @@ export default function NUPSOwner() {
           )}
           {activeModule === 'venue' && <VenueSettings user={user} />}
         </div>
+        )}
 
         <footer className="text-center text-[10px] text-gray-700 py-6 border-t border-gray-800 mt-12">
           {GLYPHLOCK_DISCLAIMER}
