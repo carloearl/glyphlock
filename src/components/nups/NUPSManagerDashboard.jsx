@@ -7,6 +7,7 @@ import {
   DollarSign, Users, DoorOpen, AlertTriangle, ShoppingCart,
   TrendingUp, FileText, Banknote, CheckCircle, Package
 } from "lucide-react";
+import AuditFixReport from './AuditFixReport';
 
 export default function NUPSManagerDashboard({
   user,
@@ -61,11 +62,42 @@ export default function NUPSManagerDashboard({
   const lastReport = zReports[0];
   const hasDiscrepancy = lastReport?.requires_review;
 
+  // Build audit issues list
+  const auditIssues = [];
+  if (!activeBatch) {
+    auditIssues.push({
+      id: 'no-batch',
+      title: 'No Open Batch',
+      code: 'BATCH-001',
+      severity: 'warning',
+      description: 'No cash batch is currently open. Transactions cannot be processed.',
+      actions: [
+        { id: 'openBatch', label: 'Open Batch Now', type: 'primary' }
+      ]
+    });
+  }
+  if (hasDiscrepancy) {
+    auditIssues.push({
+      id: 'cash-discrepancy',
+      title: 'Cash Discrepancy Flagged',
+      code: `ZRPT-${lastReport?.report_id?.slice(-3)}`,
+      severity: 'critical',
+      description: `Over/Short: $${(lastReport?.cash_over_short || 0).toFixed(2)} — Requires manager review`,
+      details: `Report ID: ${lastReport?.report_id} | Date: ${lastReport?.report_date} | Cashier: ${lastReport?.cashier_name}`,
+      actions: [
+        { id: 'reviewDiscrepancy', label: 'Review Report', type: 'primary' }
+      ]
+    });
+  }
+
   return (
     <div className="p-4 space-y-5 text-white">
 
+      {/* AUDIT FIX REPORT */}
+      <AuditFixReport issues={auditIssues} />
+
       {/* ALERTS */}
-      <div className="space-y-2">
+      <div className="space-y-2" style={{display: 'none'}}>
         {hasDiscrepancy && (
           <div className="bg-red-500/10 border border-red-500/40 rounded-xl p-4 flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
