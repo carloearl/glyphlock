@@ -283,6 +283,52 @@ export default function NUPSOwner() {
                 <span className="text-sm text-white truncate max-w-[150px]">{user?.email}</span>
                 <Badge variant="outline" className="border-purple-500/50 text-purple-400 text-xs">{user?._highestRole || "Owner"}</Badge>
               </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 min-h-[44px] gap-1"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span className="hidden sm:inline text-xs">View As</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700 text-white">
+                  <DropdownMenuLabel className="text-gray-400 text-xs">Switch Role View</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-gray-700" />
+                  {[
+                    { label: 'Manager', role: 'VENUE_MANAGER' },
+                    { label: 'Bartender', role: 'BARTENDER' },
+                    { label: 'Door Staff', role: 'SECURITY' },
+                    { label: 'Hostess', role: 'HOSTESS' },
+                    { label: 'DJ', role: 'DJ' },
+                  ].map(({ label, role }) => (
+                    <DropdownMenuItem
+                      key={role}
+                      className="cursor-pointer hover:bg-gray-800 text-sm"
+                      onClick={() => {
+                        const staffSession = { ...user, _highestRole: role, _viewAsRole: role };
+                        sessionStorage.setItem('nups_session', JSON.stringify(staffSession));
+                        navigate('/NUPSStaff');
+                      }}
+                    >
+                      {label} View
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator className="bg-gray-700" />
+                  <DropdownMenuItem
+                    className="cursor-pointer hover:bg-gray-800 text-xs text-gray-400"
+                    onClick={() => {
+                      const adminSession = { ...user, _highestRole: user?._highestRole || 'PLATFORM_ADMIN' };
+                      delete adminSession._viewAsRole;
+                      sessionStorage.setItem('nups_session', JSON.stringify(adminSession));
+                    }}
+                  >
+                    ↩ Reset to Admin
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 variant="outline"
                 size="sm"
