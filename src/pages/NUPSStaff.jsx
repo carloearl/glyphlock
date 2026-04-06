@@ -54,22 +54,9 @@ export default function NUPSStaff() {
           setAuthChecked(true);
           return;
         }
-        const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) { navigate("/NUPSLogin"); return; }
-        const me = await base44.auth.me();
-
-        let permissionsData = null;
-        try {
-          const res = await base44.functions.invoke("getUserPermissions", {});
-          permissionsData = res.data;
-        } catch (e) { /* fallback */ }
-
-        me._rbac = permissionsData;
-        me._highestRole = permissionsData?.highest_role || (me.role === "admin" ? "VENUE_OWNER" : null);
-        const mapped = mapNUPSRoleToRBAC(me._highestRole || me.role);
-        setRbacRole(mapped);
-        sessionStorage.setItem("nups_session", JSON.stringify(me));
-        setUser(me);
+        // No NUPS session — always redirect to PIN login
+        navigate("/NUPSLogin");
+        return;
       } catch {
         navigate("/NUPSLogin");
         return;

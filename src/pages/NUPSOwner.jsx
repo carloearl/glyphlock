@@ -54,6 +54,7 @@ import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
+import StaffOnboardingPanel from "../components/nups/StaffOnboardingPanel.jsx";
 import UnifiedGlyphBucksHub from "../components/nups/UnifiedGlyphBucksHub.jsx";
 import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
 import ContractManager from "../components/nups/ContractManager.jsx";
@@ -428,6 +429,7 @@ export default function NUPSOwner() {
           )}
           {activeModule === 'staff' && (
             <div className="space-y-4">
+              <StaffOnboardingPanel />
               <EntertainerContract onContractSigned={() => queryClient.invalidateQueries({ queryKey: ["entertainers"] })} />
               <StaffManagement />
               <EntertainerCheckIn user={user} />
