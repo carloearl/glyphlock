@@ -30,9 +30,10 @@ const ShiftTimer = ({ checkInTime }) => {
 export default function EntertainerCheckIn({ user }) {
   const queryClient = useQueryClient();
   const [pin, setPin] = useState('');
-  const [showPinPad, setShowPinPad] = useState(true);
+  const [showPinPad, setShowPinPad] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(null);
-  const [selectedEntertainer, setSelectedEntertainer] = useState(null);
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationComplete, setVerificationComplete] = useState(false);
   const [dailyChecklist, setDailyChecklist] = useState({
     contractValid: false,
     licenseValid: false,
@@ -108,24 +109,23 @@ export default function EntertainerCheckIn({ user }) {
     setPin(prev => prev.slice(0, -1));
   };
 
-  const handleOK = () => {
-    if (pin.length === 4) {
-      const ent = entertainers.find(e => e.nups_pin === pin);
-      if (ent) {
-        setSelectedEntertainer(ent);
-      } else {
-        toast.error('PIN not found');
-      }
+  const handleVerificationComplete = () => {
+    if (Object.values(dailyChecklist).every(v => v)) {
+      setVerificationComplete(true);
+      setShowPinPad(true);
+    } else {
+      toast.error('Please confirm all requirements');
     }
   };
 
-  const handleDailyVerification = () => {
-    if (Object.values(dailyChecklist).every(v => v)) {
+  const handleOK = () => {
+    if (pin.length === 4) {
       checkInByPin.mutate();
-      setSelectedEntertainer(null);
+      setShowPinPad(false);
+      setShowVerification(false);
+      setVerificationComplete(false);
+      setPin('');
       setDailyChecklist({ contractValid: false, licenseValid: false, venueRules: false, safetyAck: false });
-    } else {
-      toast.error('Please confirm all requirements');
     }
   };
 
@@ -139,7 +139,7 @@ export default function EntertainerCheckIn({ user }) {
     return colors[status] || 'bg-gray-500/20 text-gray-400 border-gray-500/50';
   };
 
-  if (showPinPad && selectedEntertainer) {
+  if (showVerification && !verificationComplete) {
     return (
       <div className="space-y-6">
         <Card className="border border-pink-500/30 bg-black">
@@ -149,8 +149,7 @@ export default function EntertainerCheckIn({ user }) {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setSelectedEntertainer(null);
-                  setPin('');
+                  setShowVerification(false);
                   setDailyChecklist({ contractValid: false, licenseValid: false, venueRules: false, safetyAck: false });
                 }}
                 className="text-gray-400 hover:text-white"
@@ -158,18 +157,17 @@ export default function EntertainerCheckIn({ user }) {
                 <ChevronLeft className="w-4 h-4 mr-1" />
                 Back
               </Button>
-              <h2 className="font-bold text-white text-lg">{selectedEntertainer.stage_name}</h2>
               <div className="w-20"></div>
             </div>
             <div className="flex items-center justify-center gap-2 bg-pink-600/20 border border-pink-500/50 rounded-lg py-3">
               <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-              <span className="font-bold text-pink-400">Daily Verification</span>
+              <span className="font-bold text-pink-400">Agreement & Eligibility</span>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 flex gap-3">
               <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-blue-300">Confirm your eligibility and agreement to venue terms before clocking in.</p>
+              <p className="text-sm text-blue-300">Confirm your eligibility and agreement to venue terms before proceeding.</p>
             </div>
 
             <div className="space-y-3">
@@ -193,18 +191,44 @@ export default function EntertainerCheckIn({ user }) {
             </div>
 
             <Button
-              onClick={handleDailyVerification}
-              disabled={!Object.values(dailyChecklist).every(v => v) || checkInByPin.isPending}
+              onClick={handleVerificationComplete}
+              disabled={!Object.values(dailyChecklist).every(v => v)}
               className="w-full bg-gradient-to-r from-pink-600 to-pink-500 h-12 font-bold hover:from-pink-500 hover:to-pink-400 text-white"
             >
-              <LogIn className="w-4 h-4 mr-2" />
-              {checkInByPin.isPending ? 'Checking In...' : 'Complete Check In'}
+              I Agree - Continue to PIN
             </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
+
+  if (showPinPad && verificationComplete) {
+    return (
+      <div className="space-y-6">
+        <Card className="border border-pink-500/30 bg-black">
+          <CardHeader className="space-y-3">
+            <div className="flex items-center justify-between">
+             <Button
+               variant="ghost"
+               size="sm"
+               onClick={() => {
+                 setShowPinPad(false);
+                 setVerificationComplete(false);
+                 setPin('');
+                 setDailyChecklist({ contractValid: false, licenseValid: false, venueRules: false, safetyAck: false });
+               }}
+               className="text-gray-400 hover:text-white"
+             >
+               <ChevronLeft className="w-4 h-4 mr-1" />
+               Back
+               </Button>
+               </div>
+               </CardContent>
+               </Card>
+               </div>
+               );
+               }
 
   if (showPinPad) {
     return (
