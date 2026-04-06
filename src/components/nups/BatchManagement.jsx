@@ -101,16 +101,19 @@ export default function BatchManagement({ user, onBatchClosed }) {
     setOpeningCash('');
     setClosingCash('');
     setNotes('');
-    // Zero out the active batch totals
     if (activeBatch) {
       await base44.entities.POSBatch.update(activeBatch.id, {
         total_sales: 0,
         transaction_count: 0,
         discrepancy: 0,
+        opening_cash: 0,
         notes: `RESET by manager ${manager.full_name || manager.username} at ${new Date().toLocaleString()}`
       });
-      queryClient.invalidateQueries(['active-batch']);
-      queryClient.invalidateQueries(['batch-transactions']);
+      // Wipe ALL cached query data and force a hard refetch
+      queryClient.removeQueries(['active-batch']);
+      queryClient.removeQueries(['batch-transactions']);
+      queryClient.removeQueries(['batch-backups']);
+      await queryClient.invalidateQueries();
     }
     toast({ title: 'Batch Reset', description: 'All fields and totals have been zeroed out.' });
   };
