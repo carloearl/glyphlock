@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ShoppingCart, DollarSign, CreditCard, Search, Barcode,
-  Smartphone, Gift, Hotel, ArrowLeft, Wallet, Pause, RotateCcw
+  Smartphone, Gift, Hotel, ArrowLeft, Wallet, Pause, RotateCcw, RotateCw, Lock
 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
