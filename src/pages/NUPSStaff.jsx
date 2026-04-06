@@ -42,29 +42,25 @@ export default function NUPSStaff() {
   const [authChecked, setAuthChecked] = useState(false);
   const [rbacRole, setRbacRole] = useState("door_girl");
   const [activeModule, setActiveModule] = useState("timeclock");
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const nupsSession = sessionStorage.getItem("nups_session");
-        if (nupsSession) {
-          const sessionUser = JSON.parse(nupsSession);
-          setUser(sessionUser);
-          const mapped = mapNUPSRoleToRBAC(sessionUser._highestRole || sessionUser.role);
-          setRbacRole(mapped);
-          setAuthChecked(true);
-          return;
-        }
-        // No NUPS session — always redirect to PIN login
-        navigate("/NUPSLogin");
-        return;
-      } catch {
-        navigate("/NUPSLogin");
-        return;
-      }
-      setAuthChecked(true);
-    };
-    checkAuth();
-  }, []);
+  const [isClockedIn, setIsClockedIn] = useState(false);
+
+  // Check if current user has an active clock-in
+  const { data: activeShifts = [] } = useQuery({
+    queryKey: ["staff-active-shifts"],
+    queryFn: () => base44.entities.EntertainerShift.filter({ status: "checked_in" }),
+    enabled: !!user,
+    refetchInterval: 15000,
+    onSuccess: (shifts) => {
+      const email = user?.email?.toLowerCase();
+      const name = (user?.full_name || user?.stage_name || "").toLowerCase();
+      const clocked = shifts.some(s =>
+        s.entertainer_id === user?.id ||
+        s.entertainer_id?.toLowerCase() === email ||
+        s.stage_name?.toLowerCase() === name
+      );
+      setIsClockedIn(clocked);
+    }
+  });
 
   const { data: transactions = [] } = useQuery({
     queryKey: ["pos-transactions"],
@@ -163,30 +159,49 @@ export default function NUPSStaff() {
           ))}
         </div>
 
-        {/* Module Content */}
+        {/* Clock-in gate — time clock always accessible; all other tabs locked until clocked in */}
+        {!isClockedIn && currentModule !== "timeclock" && (
+          <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+              <Clock className="w-8 h-8 text-red-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">Clock In Required</h2>
+              <p className="text-gray-400 text-sm mt-1">You must clock in before accessing this module.</p>
+            </div>
+            <button
+              onClick={() => setActiveModule("timeclock")}
+              className="px-6 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition-all"
+            >
+              Go to Time Clock
+            </button>
+          </div>
+        )}
+
+        {/* Module Content — only render when clocked in OR on time clock */}
         <div className="space-y-4 pb-8">
-          {currentModule === "door_pos" && <POSCashRegister user={user} station="door" />}
-          {currentModule === "bar_pos" && <POSBarRegister user={user} />}
-          {currentModule === "door" && <GuestCheckIn />}
-          {currentModule === "entertainer" && <EntertainerCheckIn user={user} />}
-          {currentModule === "vip" && <VIPRoomBoard user={user} />}
           {currentModule === "timeclock" && (
             <TimeClock user={user} role={user?._highestRole || rbacRole} />
           )}
-          {currentModule === "dj" && (
+          {isClockedIn && currentModule === "door_pos" && <POSCashRegister user={user} station="door" />}
+          {isClockedIn && currentModule === "bar_pos" && <POSBarRegister user={user} />}
+          {isClockedIn && currentModule === "door" && <GuestCheckIn />}
+          {isClockedIn && currentModule === "entertainer" && <EntertainerCheckIn user={user} />}
+          {isClockedIn && currentModule === "vip" && <VIPRoomBoard user={user} />}
+          {isClockedIn && currentModule === "dj" && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <BarChart3 className="w-16 h-16 text-purple-400 mb-4" />
               <h2 className="text-2xl font-bold text-white mb-2">DJ Console</h2>
               <p className="text-gray-400">DJ tools and music management coming soon.</p>
             </div>
           )}
-          {currentModule === "history" && (
+          {isClockedIn && currentModule === "history" && (
             <TransactionHistory
               transactions={realTransactions.filter(t => t.cashier === user?.email)}
               showReceipt={true}
             />
           )}
-          {currentModule === "drivers" && <DriverDropOffTracker user={user} />}
+          {isClockedIn && currentModule === "drivers" && <DriverDropOffTracker user={user} />}
         </div>
 
         <footer className="text-center text-[10px] text-gray-700 py-4 border-t border-gray-800 mt-8">
