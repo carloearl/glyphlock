@@ -437,6 +437,28 @@ export default function NUPSOwner() {
           </div>
           )}
 
+        {/* Module Navigation Tabs */}
+        <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-gray-700 overflow-x-auto">
+          {visibleModules.map(mod => {
+            const ModIcon = mod.icon;
+            return (
+              <Button
+                key={mod.key}
+                onClick={() => setActiveModule(mod.key)}
+                variant={activeModule === mod.key ? 'default' : 'outline'}
+                className={`min-h-[44px] text-sm gap-2 flex-shrink-0 ${
+                  activeModule === mod.key
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white border-purple-500'
+                    : 'border-gray-700 text-gray-300 hover:border-purple-500/50 bg-transparent'
+                }`}
+              >
+                <ModIcon className="w-4 h-4" />
+                {mod.label}
+              </Button>
+            );
+          })}
+        </div>
+
         {!isLoading && (
         <div className="space-y-4 pb-8">
           {activeModule === 'dashboard' && (
