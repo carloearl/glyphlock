@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, DollarSign, Star, Users, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { Car, Plus, DollarSign, Star, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle } from "lucide-react";
 
 // --- Payout config (manager can adjust later)
 const PER_DROP_RATE = 5;       // $5 per guest drop
@@ -79,16 +79,38 @@ export default function DriverDropOffTracker({ user }) {
   });
 
   const markPaid = useMutation({
-    mutationFn: (record) => base44.entities.DriverPayout.update(record.id, {
-      status: "paid",
-      paid_at: new Date().toISOString(),
-      paid_by: user?.email || "manager",
-    }),
-    onSuccess: () => qc.invalidateQueries(["driver-payouts"]),
+    mutationFn: async (record) => {
+      const { total } = calcPayout(record);
+      // Record cash outflow from till so Z-report accounts for it
+      await base44.entities.POSTransaction.create({
+        transaction_id: `DRIVER-PAYOUT-${record.id}-${Date.now()}`,
+        items: [{
+          product_id: 'driver_kickback',
+          product_name: `Driver Kickback — ${record.driver_name}`,
+          quantity: 1,
+          price: -total,
+          total: -total,
+        }],
+        subtotal: -total,
+        tax: 0,
+        total: -total,
+        payment_method: 'Cash',
+        cashier: user?.email || 'manager',
+        status: 'completed',
+        notes: `Driver kickback payout: ${record.driver_name} | ${record.total_drops} drops | ${record.vip_count} VIP kickbacks | Paid from door till`,
+      });
+      return base44.entities.DriverPayout.update(record.id, {
+        status: 'paid',
+        paid_at: new Date().toISOString(),
+        paid_by: user?.email || 'manager',
+      });
+    },
+    onSuccess: () => qc.invalidateQueries(['driver-payouts']),
   });
 
   const openRecords = records.filter(r => r.status === "open");
   const paidRecords = records.filter(r => r.status === "paid");
+  const tillOwes = openRecords.reduce((s, r) => s + calcPayout(r).total, 0);
 
   return (
     <div className="space-y-4">
@@ -140,24 +162,22 @@ export default function DriverDropOffTracker({ user }) {
 
       {isLoading && <p className="text-gray-500 text-sm">Loading...</p>}
 
-      {/* Night Summary Bar */}
-      {records.length > 0 && (
-        <div className="grid grid-cols-4 gap-3">
-          {[
-            { label: "Drivers", val: records.length, color: "text-cyan-400" },
-            { label: "Total Drops", val: records.reduce((s, r) => s + (r.total_drops || 0), 0), color: "text-yellow-400" },
-            { label: "VIP Kickbacks", val: records.reduce((s, r) => s + (r.vip_count || 0), 0), color: "text-purple-400" },
-            { label: "Night Payout", val: `$${records.reduce((s, r) => s + (r.total_payout || 0), 0).toFixed(0)}`, color: "text-green-400" },
-          ].map(({ label, val, color }) => (
-            <Card key={label} className="bg-gray-900/60 border-gray-700/50">
-              <CardContent className="p-3 text-center">
-                <div className={`text-xl font-bold ${color}`}>{val}</div>
-                <div className="text-[10px] text-gray-400">{label}</div>
-              </CardContent>
-            </Card>
-          ))}
+      {/* Till Owes Drivers — prominent alert for door staff */}
+      {openRecords.length > 0 && (
+        <div className="flex items-center justify-between bg-yellow-950/40 border border-yellow-500/50 rounded-lg px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Banknote className="w-5 h-5 text-yellow-400" />
+            <div>
+              <p className="text-yellow-300 font-bold text-sm">Till Owes Drivers Tonight</p>
+              <p className="text-yellow-500 text-xs">Reserve this cash in the door till — paid out when drivers collect</p>
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-yellow-400">${tillOwes.toFixed(2)}</div>
         </div>
       )}
+
+      {/* Night Summary Bar */}
+      {records.length > 0 && (
 
       {/* Open Driver Cards */}
       {openRecords.length === 0 && !isLoading && (
@@ -288,14 +308,18 @@ export default function DriverDropOffTracker({ user }) {
                     </Button>
                   )}
 
-                  {/* Mark Paid */}
+                  {/* Mark Paid — cash comes from door till, logged as till outflow */}
+                  <div className="bg-gray-800/40 rounded p-2 flex items-start gap-2 text-xs text-gray-400">
+                    <AlertCircle className="w-3 h-3 text-yellow-400 mt-0.5 shrink-0" />
+                    <span>Kickback paid from <strong className="text-yellow-300">door till cash</strong>. This will be logged as a cash outflow on the Z-report.</span>
+                  </div>
                   <Button
                     onClick={() => markPaid.mutate(record)}
                     className="w-full bg-green-700 hover:bg-green-600 text-white font-bold"
                     disabled={markPaid.isPending}
                   >
                     <DollarSign className="w-4 h-4 mr-2" />
-                    Pay Out ${total.toFixed(2)} to {record.driver_name}
+                    Pay ${total.toFixed(2)} to {record.driver_name} (from till)
                   </Button>
                 </div>
               )}
