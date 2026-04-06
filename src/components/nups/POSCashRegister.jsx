@@ -48,6 +48,10 @@ export default function POSCashRegister({ user, station = 'door' }) {
 
   const [paymentStep, setPaymentStep] = useState("register");
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [showManagerOverride, setShowManagerOverride] = useState(false);
+  const [managerPin, setManagerPin] = useState("");
+  const [showManagerOverride, setShowManagerOverride] = useState(false);
+  const [managerPin, setManagerPin] = useState("");
 
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products'],
@@ -172,6 +176,25 @@ export default function POSCashRegister({ user, station = 'door' }) {
     toast.success('Transaction recalled');
   };
 
+  const handleManagerRefresh = async () => {
+    const validPins = ['1234', '0000'];
+    if (!validPins.includes(managerPin)) {
+      toast.error('Invalid manager PIN');
+      setManagerPin('');
+      return;
+    }
+    setCart([]);
+    setSelectedCustomer(null);
+    setDiscount(0);
+    setTip(0);
+    setPaymentStep('register');
+    setPaymentMethod(null);
+    setHeldTransactions([]);
+    setShowManagerOverride(false);
+    setManagerPin('');
+    toast.success('POS system cleared by manager');
+  };
+
   const handleNoSale = async () => {
     if (!window.confirm('Open cash drawer without a sale? This action will be logged.')) return;
     try {
@@ -185,6 +208,27 @@ export default function POSCashRegister({ user, station = 'door' }) {
       });
     } catch(e) {}
     toast.success('💵 Cash drawer opened — logged.');
+  };
+
+  const handleManagerRefresh = async () => {
+    // Simple manager validation - in production use proper PIN verification
+    const validPins = ['1234', '0000']; // TODO: replace with secure backend PIN check
+    if (!validPins.includes(managerPin)) {
+      toast.error('Invalid manager PIN');
+      setManagerPin('');
+      return;
+    }
+    // Clear all POS data
+    setCart([]);
+    setSelectedCustomer(null);
+    setDiscount(0);
+    setTip(0);
+    setPaymentStep('register');
+    setPaymentMethod(null);
+    setHeldTransactions([]);
+    setShowManagerOverride(false);
+    setManagerPin('');
+    toast.success('POS system cleared by manager');
   };
 
   const isManagerPOS = user?.role === 'admin' ||
@@ -643,26 +687,41 @@ export default function POSCashRegister({ user, station = 'door' }) {
           )}
 
           {cart.length > 0 ? (
-            <button
-              onClick={handleCheckout}
-              disabled={isSubmitting}
-              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
-              style={{
-                height: '68px',
-                background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
-                boxShadow: '0 0 40px rgba(34,197,94,0.35), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
-                letterSpacing: '-0.5px',
-              }}
-            >
-              <Wallet className="w-6 h-6" />
-              {isSubmitting ? 'Processing...' : `CHARGE $${total.toFixed(2)}`}
-            </button>
+           <button
+             onClick={handleCheckout}
+             disabled={isSubmitting}
+             className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+             style={{
+               height: '68px',
+               background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
+               boxShadow: '0 0 40px rgba(34,197,94,0.35), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
+               letterSpacing: '-0.5px',
+             }}
+           >
+             <Wallet className="w-6 h-6" />
+             {isSubmitting ? 'Processing...' : `CHARGE $${total.toFixed(2)}`}
+           </button>
           ) : (
-            <div className="text-center text-sm py-5 font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>
-              Tap a charge to begin
-            </div>
+           <div className="text-center text-sm py-5 font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>
+             Tap a charge to begin
+           </div>
           )}
-        </div>
+          {isManagerPOS && (
+           <button
+             onClick={() => setShowManagerOverride(true)}
+             className="w-full rounded-xl text-xs font-bold text-gray-400 border border-gray-700 hover:border-gray-600 py-2 flex items-center justify-center gap-1 transition-all mt-2"
+           >
+             <RotateCw className="w-3.5 h-3.5" /> Refresh POS (Manager)
+           </button>
+          )}
+          </div>
+
+          {lastTransaction && (
+          <div className="px-3 pb-3 shrink-0">
+           <ReceiptPrinter transaction={lastTransaction} />
+          </div>
+          )}
+          </div>
 
         {lastTransaction && (
           <div className="px-3 pb-3 shrink-0">
@@ -671,94 +730,67 @@ export default function POSCashRegister({ user, station = 'door' }) {
         )}
       </div>
 
-      {/* RIGHT: CART + TOTALS (mobile) */}
-      <div className="w-full lg:hidden flex flex-col shrink-0 overflow-y-auto min-h-auto" style={{ background: 'rgba(0,0,0,0.4)', borderTopWidth: '1px', borderTopColor: 'rgba(255,255,255,0.06)' }}>
-        <OrderDisplay
-          cart={cart}
-          subtotal={subtotal}
-          tax={tax}
-          discount={discount}
-          discountAmount={discountAmount}
-          total={total}
-          onUpdateQuantity={updateQuantity}
-          onRemoveItem={removeFromCart}
-          onClearCart={() => setCart([])}
-        />
-
-        <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="flex gap-2 mb-2">
-            <button
-              onClick={holdTransaction}
-              disabled={cart.length === 0}
-              title="Hold Transaction"
-              className="flex-1 h-9 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 disabled:opacity-30 transition-all"
-              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b' }}
-            >
-              <Pause className="w-3.5 h-3.5" /> Hold
-            </button>
-            {heldTransactions.length > 0 && (
-              <button
-                onClick={() => setShowHeld(prev => !prev)}
-                className="flex-1 h-9 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all"
-                style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Recall ({heldTransactions.length})
+      {/* Manager Override Modal */}
+      {showManagerOverride && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.75)' }}>
+          <div className="rounded-2xl p-6 space-y-4 max-w-xs w-full mx-4" style={{ background: '#111', border: '2px solid rgba(59,130,246,0.4)' }}>
+            <div className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-yellow-400" />
+              <span className="text-white font-bold text-sm">Manager PIN Required</span>
+            </div>
+            <p className="text-gray-400 text-sm">Enter manager PIN to clear POS system:</p>
+            <input
+              type="password"
+              value={managerPin}
+              onChange={e => setManagerPin(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleManagerRefresh()}
+              placeholder="••••"
+              maxLength="4"
+              className="w-full h-12 rounded-lg text-center text-2xl font-mono bg-black/40 border border-gray-700 text-white"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button onClick={() => { setShowManagerOverride(false); setManagerPin(''); }} className="flex-1 h-10 rounded-xl text-sm text-gray-400 border border-white/10">Cancel</button>
+              <button onClick={handleManagerRefresh}
+                className="flex-1 h-10 rounded-xl text-sm font-black text-white"
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #1e40af)' }}>
+                Clear POS
               </button>
-            )}
-            <button
-              onClick={handleNoSale}
-              title="No Sale — Open Drawer"
-              className="h-9 px-3 rounded-xl text-xs font-semibold flex items-center justify-center transition-all"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.35)' }}
-            >
-              💵
-            </button>
+            </div>
           </div>
-
-          {showHeld && heldTransactions.length > 0 && (
-            <div className="mb-2 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(168,85,247,0.3)', background: 'rgba(0,0,0,0.6)' }}>
-              {heldTransactions.map(h => (
-                <button
-                  key={h.id}
-                  onClick={() => recallTransaction(h)}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-white/5 border-b border-white/5 last:border-0"
-                >
-                  <span className="text-purple-400 font-medium">{h.cart.length} item(s)</span>
-                  <span className="text-gray-500 ml-2">Held {h.heldAt}</span>
-                  {h.customer && <span className="text-gray-600 ml-2">— {h.customer.full_name}</span>}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {cart.length > 0 ? (
-            <button
-              onClick={handleCheckout}
-              disabled={isSubmitting}
-              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
-              style={{
-                height: '68px',
-                background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
-                boxShadow: '0 0 40px rgba(34,197,94,0.35), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
-                letterSpacing: '-0.5px',
-              }}
-            >
-              <Wallet className="w-6 h-6" />
-              {isSubmitting ? 'Processing...' : `CHARGE $${total.toFixed(2)}`}
-            </button>
-          ) : (
-            <div className="text-center text-sm py-5 font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>
-              Tap a charge to begin
-            </div>
-          )}
         </div>
+      )}
 
-        {lastTransaction && (
-          <div className="px-3 pb-3 shrink-0">
-            <ReceiptPrinter transaction={lastTransaction} />
+      {/* Manager Override Modal */}
+      {showManagerOverride && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.75)' }}>
+          <div className="rounded-2xl p-6 space-y-4 max-w-xs w-full mx-4" style={{ background: '#111', border: '2px solid rgba(59,130,246,0.4)' }}>
+            <div className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-yellow-400" />
+              <span className="text-white font-bold text-sm">Manager PIN Required</span>
+            </div>
+            <p className="text-gray-400 text-sm">Enter manager PIN to clear POS system:</p>
+            <input
+              type="password"
+              value={managerPin}
+              onChange={e => setManagerPin(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleManagerRefresh()}
+              placeholder="••••"
+              maxLength="4"
+              className="w-full h-12 rounded-lg text-center text-2xl font-mono bg-black/40 border border-gray-700 text-white"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button onClick={() => { setShowManagerOverride(false); setManagerPin(''); }} className="flex-1 h-10 rounded-xl text-sm text-gray-400 border border-white/10">Cancel</button>
+              <button onClick={handleManagerRefresh}
+                className="flex-1 h-10 rounded-xl text-sm font-black text-white"
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #1e40af)' }}>
+                Clear POS
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Driver Payout System — door register only */}
       {station === 'door' && (
