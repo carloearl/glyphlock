@@ -332,7 +332,6 @@ export default function POSCashRegister({ user, station = 'door' }) {
                                               const gcNum = document.getElementById('gift-card-input')?.value || '';
                                                               completePayment({ gift_card: true, gift_card_number: gcNum });
                                                                             }}
-                            }}
               disabled={isSubmitting}
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-600"
             >
