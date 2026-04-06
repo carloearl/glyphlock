@@ -484,12 +484,6 @@ export default function BatchManagement({ user, onBatchClosed }) {
                 className="border-red-500/40 text-red-400 hover:bg-red-500/10">
                 <Trash2 className="w-3 h-3 mr-1" /> Reset to Zero
               </Button>
-              {/* Backup disabled during onboarding */}
-              <Button size="sm" variant="outline"
-                onClick={() => setShowRestoreList(true)}
-                className="border-blue-500/40 text-blue-400 hover:bg-blue-500/10">
-                <RotateCcw className="w-3 h-3 mr-1" /> Restore ({relevantBackups.length})
-              </Button>
             </div>
           </CardContent>
         </Card>
