@@ -24,7 +24,7 @@ const ShiftTimer = ({ checkInTime }) => {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [checkInTime]);
-  return <span className="font-mono text-cyan-400">{elapsed}</span>;
+  return <span className="font-mono text-pink-400">{elapsed}</span>;
 };
 
 const PinPad = ({ pin, setPin, onSubmit, loading }) => (
@@ -34,14 +34,14 @@ const PinPad = ({ pin, setPin, onSubmit, loading }) => (
       value={pin}
       readOnly
       placeholder="Enter PIN"
-      className="bg-gray-900 border-gray-700 text-center text-2xl font-bold tracking-widest"
+      className="bg-gray-900 border border-pink-500/50 text-center text-2xl font-bold tracking-widest text-pink-400"
     />
     <div className="grid grid-cols-3 gap-2">
       {[1,2,3,4,5,6,7,8,9].map(n => (
         <Button
           key={n}
           onClick={() => setPin(prev => (prev + n).slice(-4))}
-          className="bg-gray-800 hover:bg-gray-700 h-12 text-lg font-bold"
+          className="bg-pink-600/20 border border-pink-500/50 hover:bg-pink-500/30 h-12 text-lg font-bold text-pink-300 transition-colors"
           disabled={pin.length >= 4 || loading}
         >
           {n}
@@ -49,21 +49,21 @@ const PinPad = ({ pin, setPin, onSubmit, loading }) => (
       ))}
       <Button
         onClick={() => setPin(prev => prev.slice(0, -1))}
-        className="bg-gray-800 hover:bg-gray-700 h-12"
+        className="bg-pink-600/20 border border-pink-500/50 hover:bg-pink-500/30 h-12 text-pink-300 transition-colors"
         disabled={pin.length === 0 || loading}
       >
         <Delete className="w-4 h-4" />
       </Button>
       <Button
         onClick={() => setPin('')}
-        className="bg-gray-800 hover:bg-gray-700 h-12 text-sm"
+        className="bg-pink-600/20 border border-pink-500/50 hover:bg-pink-500/30 h-12 text-sm text-pink-300 transition-colors"
         disabled={pin.length === 0 || loading}
       >
         Clear
       </Button>
       <Button
         onClick={() => setPin(prev => (prev + '0').slice(-4))}
-        className="bg-gray-800 hover:bg-gray-700 h-12 text-lg font-bold"
+        className="bg-pink-600/20 border border-pink-500/50 hover:bg-pink-500/30 h-12 text-lg font-bold text-pink-300 transition-colors"
         disabled={pin.length >= 4 || loading}
       >
         0
@@ -72,7 +72,7 @@ const PinPad = ({ pin, setPin, onSubmit, loading }) => (
     <Button
       onClick={() => onSubmit()}
       disabled={pin.length !== 4 || loading}
-      className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 h-12 font-bold"
+      className="w-full bg-gradient-to-r from-pink-600 to-pink-500 h-12 font-bold hover:from-pink-500 hover:to-pink-400 text-white"
     >
       <LogIn className="w-4 h-4 mr-2" />
       {loading ? 'Checking In...' : 'Check In'}
@@ -186,10 +186,10 @@ export default function EntertainerCheckIn({ user }) {
   return (
     <div className="space-y-6">
       {/* PIN Entry */}
-      <Card className="glass-card-dark border-cyan-500/30">
+      <Card className="border border-pink-500/30 bg-black">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
-            <LogIn className="w-5 h-5 text-cyan-400" />
+            <LogIn className="w-5 h-5 text-pink-400" />
             Check In Entertainer
           </CardTitle>
           <p className="text-xs text-gray-400 mt-1">Enter PIN code to check in</p>
@@ -202,10 +202,10 @@ export default function EntertainerCheckIn({ user }) {
             loading={isCheckingInPin || checkInByPin.isPending}
           />
           <Select value={location} onValueChange={setLocation}>
-            <SelectTrigger className="bg-gray-900 border-gray-700 text-sm">
+            <SelectTrigger className="bg-gray-900 border border-pink-500/30 text-sm text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-gray-900 border-gray-700">
+            <SelectContent className="bg-gray-900 border border-pink-500/30">
               <SelectItem value="Main Floor">Main Floor</SelectItem>
               <SelectItem value="VIP Area">VIP Area</SelectItem>
               <SelectItem value="Bar">Bar</SelectItem>
@@ -217,10 +217,10 @@ export default function EntertainerCheckIn({ user }) {
       </Card>
 
       {/* Active Shifts */}
-      <Card className="glass-card-dark border-cyan-500/30">
+      <Card className="border border-pink-500/30 bg-black">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
-            <Users className="w-5 h-5 text-cyan-400" />
+            <Users className="w-5 h-5 text-pink-400" />
             Active Shifts ({activeShifts.length})
           </CardTitle>
         </CardHeader>
@@ -285,10 +285,10 @@ export default function EntertainerCheckIn({ user }) {
                           });
                         }}
                       >
-                        <SelectTrigger className="bg-gray-900 border-gray-700 text-xs h-8">
+                        <SelectTrigger className="bg-gray-900 border border-pink-500/30 text-xs h-8 text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-900 border-gray-700">
+                        <SelectContent className="bg-gray-900 border border-pink-500/30">
                           <SelectItem value="Main Floor">Main Floor</SelectItem>
                           <SelectItem value="VIP Area">VIP Area</SelectItem>
                           <SelectItem value="Private Room">Private Room</SelectItem>
