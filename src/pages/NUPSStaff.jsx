@@ -54,10 +54,13 @@ export default function NUPSStaff() {
     }).catch(() => setAuthChecked(true));
   }, []);
 
-  // Check if current user has an active clock-in
+  // Check if current user has an active clock-in (any shift without check_out_time = actively clocked in)
   const { data: activeShifts = [] } = useQuery({
     queryKey: ["staff-active-shifts"],
-    queryFn: () => base44.entities.EntertainerShift.filter({ status: "checked_in" }),
+    queryFn: async () => {
+      const allShifts = await base44.entities.EntertainerShift.list("-created_date", 100);
+      return allShifts.filter(s => !s.check_out_time); // No checkout time = still clocked in
+    },
     enabled: !!user,
     refetchInterval: 30000,
     staleTime: 20000,
