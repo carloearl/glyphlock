@@ -356,7 +356,6 @@ export default function POSCashRegister({ user, station = 'door' }) {
                                               const roomInfo = document.getElementById('room-tab-input')?.value || '';
                                                               completePayment({ room_tab: true, room_tab_reference: roomInfo });
                                                                             }}
-                            }}
               disabled={isSubmitting}
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-pink-500 to-rose-600"
             >
