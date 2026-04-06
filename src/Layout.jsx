@@ -10,6 +10,7 @@ import GlyphLoader from "@/components/GlyphLoader";
 import MobileScalingSystem from "@/components/mobile/mobile-utils";
 import UnifiedSidebar from "@/components/global/UnifiedSidebar";
 
+
 import ThemeProvider from "@/components/ThemeProvider";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import StructuredDataOrg from "@/components/StructuredDataOrg";
@@ -19,11 +20,13 @@ import PrerenderHints from "@/components/seo/PrerenderHints";
 import AccessibilityToolbar from "@/components/accessibility/AccessibilityToolbar";
 import ScreenReaderAnnouncer from "@/components/accessibility/ScreenReaderAnnouncer";
 
+
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [a11yOpen, setA11yOpen] = useState(false);
   const location = useLocation();
+
 
   useEffect(() => {
     (async () => {
@@ -40,6 +43,7 @@ export default function Layout({ children, currentPageName }) {
       }
     })();
   }, []);
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -61,10 +65,12 @@ export default function Layout({ children, currentPageName }) {
         }
       }
 
+
       // Initialize mobile scaling system
       new MobileScalingSystem();
     }
   }, []);
+
 
   useEffect(() => {
     // Alt+A keyboard shortcut for accessibility toolbar
@@ -76,6 +82,7 @@ export default function Layout({ children, currentPageName }) {
     };
     window.addEventListener('keydown', handleA11yKey);
 
+
     // Disable scroll snap on mobile
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
@@ -85,10 +92,13 @@ export default function Layout({ children, currentPageName }) {
     
     window.scrollTo({ top: 0, behavior: "instant" });
 
+
     return () => window.removeEventListener('keydown', handleA11yKey);
   }, [location.pathname]);
 
+
   if (loading) return <GlyphLoader text="Initializing Secure Environment..." />;
+
 
   const handleLogout = async () => {
     try {
@@ -99,6 +109,7 @@ export default function Layout({ children, currentPageName }) {
     }
   };
 
+
   const handleLogin = async () => {
     try {
       await base44.auth.redirectToLogin();
@@ -106,6 +117,7 @@ export default function Layout({ children, currentPageName }) {
       console.error("Login redirect failed:", err);
     }
   };
+
 
   return (
     <ThemeProvider>
@@ -115,6 +127,7 @@ export default function Layout({ children, currentPageName }) {
       <SecurityHeaders />
       <CrawlerFallback />
       <PrerenderHints />
+
 
       {/* SITE-WIDE NEBULA + CURSOR ORB - Always Visible on ALL Devices */}
       <div 
@@ -131,6 +144,7 @@ export default function Layout({ children, currentPageName }) {
         <NebulaLayer intensity={1.0} />
         <CursorOrb />
       </div>
+
 
       <div 
         className="min-h-screen text-white flex flex-col relative overflow-x-hidden selection:bg-[#00E4FF] selection:text-black" 
@@ -151,15 +165,18 @@ export default function Layout({ children, currentPageName }) {
 
 
 
+
         {/* Navbar */}
         <div style={{ position: 'relative', zIndex: 9998, pointerEvents: 'auto', touchAction: 'manipulation' }}>
           <Navbar user={user} onLogin={handleLogin} onLogout={handleLogout} />
         </div>
 
+
         {/* Main content */}
         <main className="flex-1 relative pt-4 w-full" style={{ background: 'transparent', zIndex: 10, width: '100%', maxWidth: '100vw', boxSizing: 'border-box', pointerEvents: 'auto', touchAction: 'manipulation' }}>
           {children}
         </main>
+
 
         {/* Unified Sidebar - GlyphBot Jr + Help Guide */}
         <UnifiedSidebar
@@ -274,13 +291,13 @@ export default function Layout({ children, currentPageName }) {
               content: [
                 { 
                   heading: 'Manage Subscription', 
-                  text: 'How to upgrade: Profile icon → Command Center → Billing tab → click "Upgrade Plan" → choose Professional ($49/mo) or Enterprise ($199/mo) → enter payment details → confirm. Current plan shows at top of billing page. How to cancel: Billing tab → scroll to bottom → click "Cancel Subscription" → confirm → access continues until period ends. How to update payment: Billing tab → Payment Methods → click "Update Card" → enter new details → save. How to view invoices: Billing tab → Invoice History → click any invoice to download PDF. Billing issues? Email glyphlock@gmail.com with your account email.',
+                  text: 'How to upgrade: Profile icon → Command Center → Billing tab → click "Upgrade Plan" → choose Professional ($49/mo) or Enterprise ($199/mo) → enter payment details → confirm. Current plan shows at top of billing page. How to cancel: Billing tab → scroll to bottom → click "Cancel Subscription" → confirm → access continues until period ends. How to update payment: Billing tab → Payment Methods → click "Update Card" → enter new details → save. How to view invoices: Billing tab → Invoice History → click any invoice to download PDF. Billing issues? Email [glyphlock@gmail.com](mailto:glyphlock@gmail.com) with your account email.',
                   tip: 'Subscription renews automatically. Cancel at least 24 hours before renewal date to avoid next charge.',
                   action: 'Check current plan: Profile icon → Command Center → Billing tab → see plan name at top.'
                 },
                 { 
                   heading: 'API Keys & Integration', 
-                  text: 'How to create API key: Command Center → API Keys tab → click "Generate New Key" → name it (e.g., "mobile-app") → set permissions (read-only or read-write) → click Generate → COPY SECRET IMMEDIATELY (shown only once) → save to password manager. How to use key: Add to request headers: Authorization: Bearer YOUR_SECRET_KEY. Test with curl: curl -H "Authorization: Bearer YOUR_KEY" https://api.glyphlock.com/v1/qr/list. How to rotate key: API Keys tab → find key → click rotate icon → old key stops working, new one issued → update apps with new secret within 24 hours. How to revoke: Click trash icon → confirm → key invalidated immediately.',
+                  text: 'How to create API key: Command Center → API Keys tab → click "Generate New Key" → name it (e.g., "mobile-app") → set permissions (read-only or read-write) → click Generate → COPY SECRET IMMEDIATELY (shown only once) → save to password manager. How to use key: Add to request headers: Authorization: Bearer YOUR_SECRET_KEY. Test with curl: curl -H "Authorization: Bearer YOUR_KEY" [https://api.glyphlock.com/v1/qr/list](https://api.glyphlock.com/v1/qr/list). How to rotate key: API Keys tab → find key → click rotate icon → old key stops working, new one issued → update apps with new secret within 24 hours. How to revoke: Click trash icon → confirm → key invalidated immediately.',
                   tip: 'Never commit API keys to Git repos. Use environment variables: process.env.GLYPHLOCK_API_KEY in your code.',
                   action: 'Create test key: Command Center → API Keys → Generate → name it "test-key" → copy secret → test with curl command.'
                 },
@@ -343,29 +360,32 @@ export default function Layout({ children, currentPageName }) {
               content: [
                 { 
                   heading: 'Get Help Fast', 
-                  text: 'GlyphBot Jr (right sidebar): Fastest way to get answers. Click chat icon → type question → instant response. Knows your account context. Email Support: glyphlock@gmail.com for billing, technical issues, or partnership inquiries. Response within 24 hours (usually faster). Phone: +1-424-246-6499 for urgent issues (enterprise customers only). Knowledge Base: Press ? key anytime to open this guide. Search sections on left sidebar. Community: Check FAQ page (footer → FAQ) for common questions and troubleshooting guides.',
+                  text: 'GlyphBot Jr (right sidebar): Fastest way to get answers. Click chat icon → type question → instant response. Knows your account context. Email Support: [glyphlock@gmail.com](mailto:glyphlock@gmail.com) for billing, technical issues, or partnership inquiries. Response within 24 hours (usually faster). Phone: +1-424-246-6499 for urgent issues (enterprise customers only). Knowledge Base: Press ? key anytime to open this guide. Search sections on left sidebar. Community: Check FAQ page (footer → FAQ) for common questions and troubleshooting guides.',
                   tip: 'Before contacting support: Try GlyphBot Jr first—it resolves 80% of issues instantly and has access to your account data.',
                   action: 'Need help right now? Click GlyphBot Jr icon (right side) → describe your issue → get immediate assistance with account context.'
                 },
                 { 
                   heading: 'Report Bugs & Feedback', 
-                  text: 'How to report bug: Describe issue to GlyphBot Jr with screenshot → or email glyphlock@gmail.com with: (1) What you tried to do, (2) What happened instead, (3) Browser/device info, (4) Screenshot if possible. How to request features: GlyphBot Jr → say "I want feature X" → it logs request → or email glyphlock@gmail.com with "Feature Request: [your idea]". How to give feedback: After using any tool → look for feedback button/icon → rate experience → add comment → submit. Your input shapes roadmap!',
+                  text: 'How to report bug: Describe issue to GlyphBot Jr with screenshot → or email [glyphlock@gmail.com](mailto:glyphlock@gmail.com) with: (1) What you tried to do, (2) What happened instead, (3) Browser/device info, (4) Screenshot if possible. How to request features: GlyphBot Jr → say "I want feature X" → it logs request → or email [glyphlock@gmail.com](mailto:glyphlock@gmail.com) with "Feature Request: [your idea]". How to give feedback: After using any tool → look for feedback button/icon → rate experience → add comment → submit. Your input shapes roadmap!',
                   tip: 'Include your browser (Chrome/Safari/Firefox) and device (iPhone/Android/Desktop) when reporting bugs for faster diagnosis.',
-                  action: 'Found a bug? Open GlyphBot Jr → say "I found a bug with [feature]" → describe what happened → it logs issue and may provide immediate fix.'
+                  action: 'Found a bug? Open GlyphBot Jr (right sidebar) → say "I found a bug with [feature]" → describe what happened → it logs issue and may provide immediate fix.'
                 }
               ]
             }
           ]}
           />
 
+
           {/* Footer - always rendered */}
         <footer className="relative overflow-hidden" style={{ zIndex: 1, pointerEvents: 'auto' }}>
           <Footer />
         </footer>
 
+
         {/* Accessibility Toolbar (sitewide, Alt+A) */}
         <AccessibilityToolbar open={a11yOpen} onClose={() => setA11yOpen(false)} />
         <ScreenReaderAnnouncer />
+
 
         {/* GlyphLock Brand Mark - Fixed bottom-left */}
         <div 
