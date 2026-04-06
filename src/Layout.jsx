@@ -412,4 +412,4 @@ export default function Layout({ children, currentPageName }) {
       </div>
     </ThemeProvider>
   );
-  }
+}
