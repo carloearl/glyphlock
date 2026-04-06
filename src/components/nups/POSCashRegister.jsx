@@ -17,6 +17,7 @@ import QuickChargePanel from "./pos/QuickChargePanel";
 import CashDenominationPad from "./pos/CashDenominationPad";
 import CardPaymentPanel from "./pos/CardPaymentPanel";
 import OrderDisplay from "./pos/OrderDisplay";
+import DriverDropOffTracker from "./DriverDropOffTracker";
 
 export default function POSCashRegister({ user, station = 'door' }) {
     // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
@@ -758,6 +759,18 @@ export default function POSCashRegister({ user, station = 'door' }) {
           </div>
         )}
       </div>
+
+      {/* Driver Payout System — door register only */}
+      {station === 'door' && (
+        <div className="flex-1 flex flex-col overflow-hidden" style={{ borderLeftWidth: '1px', borderLeftColor: 'rgba(255,255,255,0.06)' }}>
+          <div className="p-4 border-b border-white/10">
+            <h3 className="text-sm font-bold text-white">Driver Payouts</h3>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <DriverDropOffTracker user={user} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
