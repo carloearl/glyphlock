@@ -63,6 +63,8 @@ export default function BatchManagement({ user, onBatchClosed }) {
       if (!activeBatch) return [];
       const allTransactions = await base44.entities.POSTransaction.list('-created_date', 1000);
       return allTransactions.filter(t => {
+        // Exclude voided/reset transactions from live totals
+        if (t.status === 'refunded' && t.notes?.includes('VOIDED by manager reset')) return false;
         if (t.batch_id) return t.batch_id === activeBatch.id;
         const start = new Date(activeBatch.start_time);
         const end = activeBatch.end_time ? new Date(activeBatch.end_time) : new Date();
@@ -103,11 +105,45 @@ export default function BatchManagement({ user, onBatchClosed }) {
     setNotes('');
     if (!activeBatch) return;
 
-    // Delete every transaction tied to this batch
-    const txnsToDelete = batchTransactions;
-    await Promise.all(txnsToDelete.map(t => base44.entities.POSTransaction.delete(t.id)));
+    // STEP 1: Auto-backup BEFORE reset so restore is always possible after
+    await base44.entities.SystemAuditLog.create({
+      event_type: 'BATCH_BACKUP',
+      description: `AUTO-BACKUP before reset by ${manager.full_name || manager.username}`,
+      actor_email: manager.username,
+      status: 'success',
+      severity: 'medium',
+      metadata: {
+        batch_id: activeBatch.id,
+        backed_up_at: new Date().toISOString(),
+        backed_up_by: manager.full_name || manager.username,
+        auto_backup: true,
+        snapshot: {
+          opening_cash: activeBatch.opening_cash,
+          total_sales: activeBatch.total_sales,
+          transaction_count: activeBatch.transaction_count,
+          discrepancy: activeBatch.discrepancy,
+          cashTotal,
+          cardTotal,
+          batchTotal,
+          notes: activeBatch.notes,
+          start_time: activeBatch.start_time,
+          status: activeBatch.status,
+          transaction_ids: batchTransactions.map(t => t.id)
+        }
+      }
+    });
 
-    // Zero out the batch record itself
+    // STEP 2: Void transactions (flag, don't delete — audit trail required)
+    await Promise.all(
+      batchTransactions.map(t =>
+        base44.entities.POSTransaction.update(t.id, {
+          status: 'refunded',
+          notes: `VOIDED by manager reset — ${manager.full_name || manager.username} — ${new Date().toLocaleString()}`
+        })
+      )
+    );
+
+    // STEP 3: Zero out the batch record
     await base44.entities.POSBatch.update(activeBatch.id, {
       total_sales: 0,
       transaction_count: 0,
@@ -116,21 +152,21 @@ export default function BatchManagement({ user, onBatchClosed }) {
       notes: `RESET by manager ${manager.full_name || manager.username} at ${new Date().toLocaleString()}`
     });
 
-    // Log the reset
+    // STEP 4: Audit log the reset
     await base44.entities.SystemAuditLog.create({
       event_type: 'BATCH_RESET',
-      description: `Batch ${activeBatch.batch_id} reset to zero by ${manager.full_name || manager.username}. ${txnsToDelete.length} transactions deleted.`,
+      description: `Batch ${activeBatch.batch_id} reset to zero. ${batchTransactions.length} transactions voided.`,
       actor_email: manager.username,
       status: 'security_action',
       severity: 'high',
-      metadata: { batch_id: activeBatch.id, deleted_tx_count: txnsToDelete.length }
+      metadata: { batch_id: activeBatch.id, voided_tx_count: batchTransactions.length }
     });
 
-    // Hard-wipe cache so nothing comes back on refresh
+    // STEP 5: Hard-wipe query cache
     queryClient.removeQueries();
     await queryClient.invalidateQueries();
 
-    toast({ title: 'Batch Reset Complete', description: `${txnsToDelete.length} transactions deleted. All totals cleared.` });
+    toast({ title: 'Batch Reset Complete', description: `${batchTransactions.length} transactions voided. Auto-backup saved — use Restore to roll back.` });
   };
 
   // ─── BACKUP ───────────────────────────────────────────────────────────────────
