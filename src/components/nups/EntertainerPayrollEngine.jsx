@@ -349,9 +349,12 @@ export default function EntertainerPayrollEngine({ user }) {
     printStub(record);
   };
 
-  const totalNet = payrollData.reduce((s, r) => s + r.netPayout, 0);
-  const totalGross = payrollData.reduce((s, r) => s + r.grossTotal, 0);
-  const totalDeductions = payrollData.reduce((s, r) => s + r.venueFee + r.taxWithholding + r.otherDeductions, 0);
+  // Only show rows with real earnings or a saved record — no zero/demo rows
+  const activePayrollData = payrollData.filter(r => r.grossTotal > 0 || r.existing);
+
+  const totalNet = activePayrollData.reduce((s, r) => s + r.netPayout, 0);
+  const totalGross = activePayrollData.reduce((s, r) => s + r.grossTotal, 0);
+  const totalDeductions = activePayrollData.reduce((s, r) => s + r.venueFee + r.taxWithholding + r.otherDeductions, 0);
 
   return (
     <div className="space-y-6">
@@ -444,10 +447,10 @@ export default function EntertainerPayrollEngine({ user }) {
               </tr>
             </thead>
             <tbody>
-              {payrollData.length === 0 && (
-                <tr><td colSpan={10} className="text-center py-10 text-gray-600 text-sm">No entertainers found.</td></tr>
+              {activePayrollData.length === 0 && (
+                <tr><td colSpan={10} className="text-center py-10 text-gray-600 text-sm">No payroll data for this period. Check in staff and close VIP sessions to generate earnings.</td></tr>
               )}
-              {payrollData.map(row => {
+              {activePayrollData.map(row => {
                 const statusCfg = STATUS_COLORS[row.existing?.status || "draft"];
                 return (
                   <tr key={row.entertainer.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }} className="hover:bg-white/[0.02]">
