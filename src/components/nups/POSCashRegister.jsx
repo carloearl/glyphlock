@@ -328,7 +328,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
                                                                   className="text-center font-mono text-lg bg-black/40 border-white/15 text-white h-14" 
                                                                               />
             <Button
-                            onClick={() => {
+                                                onClick={() => {
                                               const gcNum = document.getElementById('gift-card-input')?.value || '';
                                                               completePayment({ gift_card: true, gift_card_number: gcNum });
                                                                             }}
