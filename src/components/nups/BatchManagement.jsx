@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Clock, XCircle, CheckCircle2, AlertCircle } from "lucide-react";
+import { DollarSign, Clock, XCircle, CheckCircle2, AlertCircle, RefreshCw, Save, RotateCcw, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useActiveVenue } from '../../hooks/useActiveVenue';
+import ManagerOverrideModal from "./ManagerOverrideModal";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +25,15 @@ export default function BatchManagement({ user, onBatchClosed }) {
   const [openingCash, setOpeningCash] = useState('');
   const [closingCash, setClosingCash] = useState('');
   const [notes, setNotes] = useState("");
-  const [isOpeningBatch, setIsOpeningBatch] = useState(false); // B1 — duplicate guard
-  const [isClosingBatch, setIsClosingBatch] = useState(false); // B1 — duplicate guard
+  const [isOpeningBatch, setIsOpeningBatch] = useState(false);
+  const [isClosingBatch, setIsClosingBatch] = useState(false);
+
+  // Manager Override state
+  const [overrideAction, setOverrideAction] = useState(null); // null | 'reset' | 'backup' | 'restore'
+  const [pendingRestore, setPendingRestore] = useState(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmBackup, setConfirmBackup] = useState(false);
+  const [showRestoreList, setShowRestoreList] = useState(false);
 
   const cashierKey = user?.email || user?.id || 'unknown';
 
@@ -37,19 +45,30 @@ export default function BatchManagement({ user, onBatchClosed }) {
     }
   });
 
+  // Backups stored in SystemAuditLog with event_type BATCH_BACKUP
+  const { data: batchBackups = [], refetch: refetchBackups } = useQuery({
+    queryKey: ['batch-backups', activeBatch?.id],
+    queryFn: () => base44.entities.SystemAuditLog.filter({ event_type: 'BATCH_BACKUP' }),
+    enabled: !!activeBatch,
+    staleTime: 30000,
+  });
+
+  const relevantBackups = batchBackups
+    .filter(b => b.metadata?.batch_id === activeBatch?.id)
+    .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+
   const { data: batchTransactions = [] } = useQuery({
     queryKey: ['batch-transactions', activeBatch?.id],
     queryFn: async () => {
       if (!activeBatch) return [];
       const allTransactions = await base44.entities.POSTransaction.list('-created_date', 1000);
-            // C-2 FIX: Filter by batch_id (primary) with date-range fallback for legacy transactions
-                  return allTransactions.filter(t => {
-                          if (t.batch_id) return t.batch_id === activeBatch.id;
-                                  // Fallback for transactions created before batch_id was added
-                                          const start = new Date(activeBatch.start_time);
-                                                  const end = activeBatch.end_time ? new Date(activeBatch.end_time) : new Date();
-                                                          return new Date(t.created_date) >= start && new Date(t.created_date) <= end;
-                                                                });    },
+      return allTransactions.filter(t => {
+        if (t.batch_id) return t.batch_id === activeBatch.id;
+        const start = new Date(activeBatch.start_time);
+        const end = activeBatch.end_time ? new Date(activeBatch.end_time) : new Date();
+        return new Date(t.created_date) >= start && new Date(t.created_date) <= end;
+      });
+    },
     enabled: !!activeBatch
   });
 
@@ -75,10 +94,82 @@ export default function BatchManagement({ user, onBatchClosed }) {
     }
   });
 
-  const handleOpenBatch = async () => {
-    if (isOpeningBatch) return; // B1
+  // ─── RESET (manager override required) ───────────────────────────────────────
+  const handleResetConfirmed = async (manager) => {
+    setOverrideAction(null);
+    setConfirmReset(false);
+    setOpeningCash('');
+    setClosingCash('');
+    setNotes('');
+    // Zero out the active batch totals
+    if (activeBatch) {
+      await base44.entities.POSBatch.update(activeBatch.id, {
+        total_sales: 0,
+        transaction_count: 0,
+        discrepancy: 0,
+        notes: `RESET by manager ${manager.full_name || manager.username} at ${new Date().toLocaleString()}`
+      });
+      queryClient.invalidateQueries(['active-batch']);
+      queryClient.invalidateQueries(['batch-transactions']);
+    }
+    toast({ title: 'Batch Reset', description: 'All fields and totals have been zeroed out.' });
+  };
 
-    // B3 — cash validation
+  // ─── BACKUP ───────────────────────────────────────────────────────────────────
+  const handleBackupConfirmed = async (manager) => {
+    setOverrideAction(null);
+    setConfirmBackup(false);
+    if (!activeBatch) return;
+    await base44.entities.SystemAuditLog.create({
+      event_type: 'BATCH_BACKUP',
+      description: `Batch backup by manager ${manager.full_name || manager.username}`,
+      actor_email: manager.username,
+      status: 'success',
+      severity: 'low',
+      metadata: {
+        batch_id: activeBatch.id,
+        backed_up_at: new Date().toISOString(),
+        backed_up_by: manager.full_name || manager.username,
+        snapshot: {
+          opening_cash: activeBatch.opening_cash,
+          total_sales: activeBatch.total_sales,
+          transaction_count: activeBatch.transaction_count,
+          discrepancy: activeBatch.discrepancy,
+          cashTotal,
+          cardTotal,
+          batchTotal,
+          notes: activeBatch.notes,
+          start_time: activeBatch.start_time,
+          status: activeBatch.status,
+        }
+      }
+    });
+    refetchBackups();
+    toast({ title: 'Backup Created', description: `Snapshot saved by ${manager.full_name || manager.username}.` });
+  };
+
+  // ─── RESTORE ─────────────────────────────────────────────────────────────────
+  const handleRestoreConfirmed = async (manager) => {
+    setOverrideAction(null);
+    if (!pendingRestore || !activeBatch) return;
+    const snap = pendingRestore.metadata?.snapshot || {};
+    await base44.entities.POSBatch.update(activeBatch.id, {
+      opening_cash: snap.opening_cash ?? activeBatch.opening_cash,
+      total_sales: snap.total_sales ?? 0,
+      transaction_count: snap.transaction_count ?? 0,
+      discrepancy: snap.discrepancy ?? 0,
+      notes: `RESTORED from backup ${new Date(pendingRestore.created_date).toLocaleString()} by ${manager.full_name || manager.username}`
+    });
+    queryClient.invalidateQueries(['active-batch']);
+    queryClient.invalidateQueries(['batch-transactions']);
+    setPendingRestore(null);
+    setShowRestoreList(false);
+    toast({ title: 'Batch Restored', description: `Snapshot from ${new Date(pendingRestore.created_date).toLocaleString()} restored.` });
+  };
+
+  const handleOpenBatch = async () => {
+    if (isOpeningBatch) return;
+
     const parsed = parseFloat(openingCash || '0');
     if (isNaN(parsed) || parsed < 0) {
       alert('Please enter a valid opening cash amount.');
@@ -111,31 +202,21 @@ export default function BatchManagement({ user, onBatchClosed }) {
         transaction_count: 0
       });
       const resolvedVenueId = newBatch?.venue_id || venueId;
-      if (!resolvedVenueId) {
-        throw new Error('BATCH_AUDIT_FAILED: venue_id unavailable');
-      }
+      if (!resolvedVenueId) throw new Error('BATCH_AUDIT_FAILED: venue_id unavailable');
       await base44.entities.SystemAuditLog.create({
-        event_type:  'BATCH_OPENED',
+        event_type: 'BATCH_OPENED',
         entity_type: 'POSBatch',
-        entity_id:   newBatch?.id || null,
-        actor_id:    cashierEmail,
-        venue_id:    resolvedVenueId,
+        entity_id: newBatch?.id || null,
+        actor_id: cashierEmail,
+        venue_id: resolvedVenueId,
         description: `Batch ${newBatch?.batch_id || newBatch?.id} opened by ${cashierEmail}`,
-        metadata: {
-          batch_id:     newBatch?.batch_id || newBatch?.id,
-          opened_at:    new Date().toISOString(),
-          opening_cash: parsed
-        },
+        metadata: { batch_id: newBatch?.batch_id || newBatch?.id, opened_at: new Date().toISOString(), opening_cash: parsed },
         severity: 'low',
-        status:   'success'
+        status: 'success'
       });
     } catch (error) {
       console.error('Batch open failed:', error);
-      toast({
-        title: 'Batch Open Failed',
-        description: error.message || 'Unable to open batch. Please try again.',
-        variant: 'destructive'
-      });
+      toast({ title: 'Batch Open Failed', description: error.message || 'Unable to open batch. Please try again.', variant: 'destructive' });
     } finally {
       setIsOpeningBatch(false);
     }
@@ -225,18 +306,11 @@ export default function BatchManagement({ user, onBatchClosed }) {
     }
   };
 
-  // F-5: Card whitelist + F-1: Tips excluded — BPAAA v3.0
   const BATCH_CARD_WHITELIST_DISPLAY = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
   const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
   const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
   const cardTotal = realTxns.filter(t => BATCH_CARD_WHITELIST_DISPLAY.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
   const batchTotal = cashTotal + cardTotal;
-  // Note: cashTx and cardTx (local vars in handleCloseBatch) are computed fresh during batch close for audit
-
-  // D10 — stale batch warning
-  const batchAgeHours = activeBatch
-    ? (Date.now() - new Date(activeBatch.start_time).getTime()) / 1000 / 3600
-    : 0;
 
   const expectedCashPreview = (activeBatch?.opening_cash || 0) + cashTotal;
   const parsedClosing = parseFloat(closingCash) || 0;
@@ -245,6 +319,57 @@ export default function BatchManagement({ user, onBatchClosed }) {
 
   return (
     <div className="space-y-4">
+
+      {/* ── Manager Override Modal ── */}
+      <ManagerOverrideModal
+        open={!!overrideAction}
+        onClose={() => { setOverrideAction(null); setPendingRestore(null); }}
+        actionLabel={
+          overrideAction === 'reset' ? 'Reset Batch to Zero' :
+          overrideAction === 'backup' ? 'Create Batch Backup Snapshot' :
+          overrideAction === 'restore' ? 'Restore Batch from Snapshot' : ''
+        }
+        description={
+          overrideAction === 'reset' ? 'This will zero out all batch totals and form fields. Transactions remain intact.' :
+          overrideAction === 'backup' ? 'A snapshot of the current batch state will be saved.' :
+          overrideAction === 'restore' ? `Restore snapshot from ${pendingRestore ? new Date(pendingRestore.created_date).toLocaleString() : ''}.` : ''
+        }
+        onApproved={
+          overrideAction === 'reset' ? handleResetConfirmed :
+          overrideAction === 'backup' ? handleBackupConfirmed :
+          overrideAction === 'restore' ? handleRestoreConfirmed : () => {}
+        }
+      />
+
+      {/* ── Restore List Dialog ── */}
+      <Dialog open={showRestoreList} onOpenChange={setShowRestoreList}>
+        <DialogContent className="bg-gray-950 border-blue-500/30 text-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-blue-400">
+              <RotateCcw className="w-4 h-4" /> Restore from Backup
+            </DialogTitle>
+          </DialogHeader>
+          {relevantBackups.length === 0 ? (
+            <p className="text-gray-400 text-sm py-4 text-center">No backups found for this batch.</p>
+          ) : (
+            <div className="space-y-2 max-h-72 overflow-y-auto">
+              {relevantBackups.map(b => (
+                <div key={b.id} className="flex items-center justify-between p-3 bg-black/40 border border-gray-800 rounded-lg">
+                  <div>
+                    <div className="text-sm font-medium text-white">{new Date(b.created_date).toLocaleString()}</div>
+                    <div className="text-xs text-gray-400">By {b.metadata?.backed_up_by} · Sales: ${b.metadata?.snapshot?.batchTotal?.toFixed(2) ?? '—'}</div>
+                  </div>
+                  <Button size="sm" onClick={() => { setPendingRestore(b); setShowRestoreList(false); setOverrideAction('restore'); }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs">
+                    Restore
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* D10 — Stale batch warning */}
       {activeBatch && batchAgeHours > 24 && (
         <div className="bg-orange-500/10 border border-orange-500/40 rounded-xl p-3 flex items-center justify-between">
@@ -253,11 +378,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
             <span className="font-bold">{Math.floor(batchAgeHours)}h</span> since{' '}
             {new Date(activeBatch.start_time).toLocaleDateString()}. Please close it to generate accurate reports.
           </div>
-          <Button
-            size="sm"
-            onClick={() => setShowCloseDialog(true)}
-            className="ml-3 bg-orange-500 hover:bg-orange-600 text-white text-xs"
-          >
+          <Button size="sm" onClick={() => setShowCloseDialog(true)} className="ml-3 bg-orange-500 hover:bg-orange-600 text-white text-xs">
             Close Batch
           </Button>
         </div>
@@ -306,6 +427,25 @@ export default function BatchManagement({ user, onBatchClosed }) {
               <div className="text-sm text-gray-400 mb-1">Total Batch Sales (Real Tender)</div>
               <div className="text-3xl font-bold text-green-400">${batchTotal.toFixed(2)}</div>
               <div className="text-sm text-gray-400 mt-2">Expected Cash: ${expectedCashPreview.toFixed(2)}</div>
+            </div>
+
+            {/* ── Shift Controls: Reset / Backup / Restore ── */}
+            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-800">
+              <Button size="sm" variant="outline"
+                onClick={() => setOverrideAction('reset')}
+                className="border-red-500/40 text-red-400 hover:bg-red-500/10">
+                <RefreshCw className="w-3 h-3 mr-1" /> Reset to Zero
+              </Button>
+              <Button size="sm" variant="outline"
+                onClick={() => setOverrideAction('backup')}
+                className="border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10">
+                <Save className="w-3 h-3 mr-1" /> Backup Snapshot
+              </Button>
+              <Button size="sm" variant="outline"
+                onClick={() => setShowRestoreList(true)}
+                className="border-blue-500/40 text-blue-400 hover:bg-blue-500/10">
+                <RotateCcw className="w-3 h-3 mr-1" /> Restore ({relevantBackups.length})
+              </Button>
             </div>
           </CardContent>
         </Card>
