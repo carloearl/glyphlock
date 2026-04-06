@@ -332,7 +332,14 @@ export default function NUPSOwner() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => queryClient.invalidateQueries()}
+                onClick={() => {
+                  queryClient.invalidateQueries({ queryKey: ['pos-transactions'] });
+                  queryClient.invalidateQueries({ queryKey: ['entertainers'] });
+                  queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
+                  queryClient.invalidateQueries({ queryKey: ['vip-rooms'] });
+                  queryClient.invalidateQueries({ queryKey: ['vip-guests'] });
+                  queryClient.invalidateQueries({ queryKey: ['pos-products'] });
+                }}
                 className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 min-h-[44px]"
                 aria-label="Refresh all data"
               >
@@ -346,6 +353,15 @@ export default function NUPSOwner() {
                 aria-label="Sign out of owner dashboard"
               >
                 <LogOut className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/NUPSGateway')}
+                className="text-gray-400 hover:text-red-400 p-2 min-h-[44px]"
+                aria-label="Close dashboard"
+              >
+                ✕
               </Button>
             </div>
           </div>
@@ -373,14 +389,14 @@ export default function NUPSOwner() {
           <Card className="bg-gray-900/50 border-green-500/30">
             <CardContent className="p-4">
               <UserCheck className="w-6 h-6 text-green-400 mb-1" />
-              <div className="text-2xl font-bold text-green-400">{activeShifts.length}/{entertainers.length}</div>
+              <div className="text-2xl font-bold text-green-400">{activeShifts.length}</div>
               <div className="text-xs text-gray-400">Staff Active</div>
             </CardContent>
           </Card>
           <Card className="bg-gray-900/50 border-pink-500/30">
             <CardContent className="p-4">
               <DoorOpen className="w-6 h-6 text-pink-400 mb-1" />
-              <div className="text-2xl font-bold text-pink-400">{occupiedRooms}/{vipRooms.length}</div>
+              <div className="text-2xl font-bold text-pink-400">{occupiedRooms}</div>
               <div className="text-xs text-gray-400">VIP Rooms</div>
             </CardContent>
           </Card>
