@@ -27,7 +27,21 @@ export default function RefundManager({ user }) {
     mutationFn: async () => {
       await base44.entities.POSTransaction.update(found.id, {
         status: 'refunded',
-        notes: `REFUND by ${user?.email} — Reason: ${reason} — ${new Date().toISOString()}`
+        notes: 'REFUND by ' + (user?.email || 'staff') + ' — Reason: ' + reason + ' — ' + new Date().toISOString()
+      });
+      await base44.entities.SystemAuditLog.create({
+        event_type: 'REFUND_PROCESSED',
+        description: 'Refund processed for transaction ' + found.transaction_id + ' — $' + (found.total || 0).toFixed(2),
+        actor_email: user?.email || 'unknown',
+        status: 'success',
+        severity: 'high',
+        metadata: {
+          transaction_id: found.transaction_id,
+          refund_amount: found.total,
+          payment_method: found.payment_method,
+          reason: reason,
+          section: 'PHASE7-REFUND'
+        }
       });
     },
     onSuccess: () => {
