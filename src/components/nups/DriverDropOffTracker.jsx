@@ -60,15 +60,12 @@ export default function DriverDropOffTracker({ user }) {
       const total_drops = drops.length;
       const vip_count = drops.filter(d => d.went_vip).length;
       const pass_count = drops.filter(d => d.has_pass).length;
-      const { base, incentive, vip, total } = calcPayout({ total_drops, vip_count });
+      const { total } = calcPayout({ ...record, total_drops, vip_count });
       return base44.entities.DriverPayout.update(record.id, {
         drop_offs: drops,
         total_drops,
         vip_count,
         pass_count,
-        base_payout: base,
-        incentive_bonus: incentive,
-        vip_kickback: vip,
         total_payout: total,
       });
     },
