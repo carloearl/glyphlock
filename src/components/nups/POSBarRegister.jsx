@@ -1,319 +1,301 @@
-import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Banknote, CreditCard, DollarSign, Printer, X, Plus, Minus, Trash2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Wine, Star, RefreshCw, Coins, Printer, X, DollarSign, Trash2, CreditCard, Banknote } from "lucide-react";
 
-// ── Bar-only products ──────────────────────────────────────────────
-const BAR_ITEMS = [
-  { id: "drink",   name: "Drink",          price: 10,  color: "bg-cyan-700 hover:bg-cyan-600",   big: true },
-  { id: "bottle",  name: "Bottle Service", price: 500, color: "bg-amber-700 hover:bg-amber-600", big: true },
+const PRODUCTS = [
+  { id: "drink",          name: "Drink",          price: 10,  color: "from-cyan-900 to-cyan-700",    border: "border-cyan-500/60",   text: "text-cyan-300" },
+  { id: "bottle_service", name: "Bottle Service",  price: 500, color: "from-purple-900 to-purple-700", border: "border-purple-500/60", text: "text-purple-300" },
 ];
 
-const EXCHANGE_ITEMS = [
-  { id: "ones",       name: "1s Exchange",       price: 0,  color: "bg-gray-700 hover:bg-gray-600",   note: "Cash exchange — no charge" },
-  { id: "glyphbucks", name: "GlyphBucks Redeem",  price: 0,  color: "bg-purple-700 hover:bg-purple-600", note: "GB exchange — no charge" },
+const EXCHANGES = [
+  { id: "1s_exchange",      name: "1s Exchange",      icon: RefreshCw, color: "border-yellow-500/50 text-yellow-300 hover:bg-yellow-500/10" },
+  { id: "glyphbucks_redeem", name: "GlyphBucks Redeem", icon: Coins,     color: "border-pink-500/50 text-pink-300 hover:bg-pink-500/10" },
 ];
+
+const TIP_PRESETS = [15, 20, 25];
 
 export default function POSBarRegister({ user }) {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
+  const receiptRef = useRef();
+
   const [cart, setCart] = useState([]);
-  const [tip, setTip] = useState("");
-  const [payStep, setPayStep] = useState(null); // null | 'Cash' | 'Credit Card' | 'GlyphBucks'
-  const [cardReceipt, setCardReceipt] = useState(null); // receipt data for CC print
+  const [tipPct, setTipPct] = useState(null);
+  const [customTip, setCustomTip] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [exchangeLogs, setExchangeLogs] = useState([]);
 
   const { data: activeBatch } = useQuery({
-    queryKey: ["active-batch-bar", user?.email],
+    queryKey: ["active-batch"],
     queryFn: async () => {
-      const batches = await base44.entities.POSBatch.list("-created_date", 20);
-      return batches.find(b => b.status === "open") || null;
+      const batches = await base44.entities.POSBatch.filter({ status: "open" });
+      return batches[0] || null;
     },
-    enabled: !!user,
-    refetchInterval: 30000,
   });
 
-  // ── Cart helpers ────────────────────────────────────────────────
-  const addItem = (item) => {
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const tipAmount = (() => {
+    if (customTip !== "") return parseFloat(customTip) || 0;
+    if (tipPct !== null) return parseFloat((subtotal * tipPct / 100).toFixed(2));
+    return 0;
+  })();
+  const total = subtotal + tipAmount;
+
+  function addToCart(product) {
     setCart(prev => {
-      const ex = prev.find(i => i.id === item.id);
-      if (ex) return prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { ...item, qty: 1 }];
+      const existing = prev.find(i => i.id === product.id);
+      if (existing) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      return [...prev, { ...product, qty: 1 }];
     });
-  };
+  }
 
-  const adjustQty = (id, delta) => {
-    setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(0, i.qty + delta) } : i).filter(i => i.qty > 0));
-  };
+  function removeFromCart(id) {
+    setCart(prev => prev.filter(i => i.id !== id));
+  }
 
-  const subtotal = cart.filter(i => i.price > 0).reduce((s, i) => s + i.price * i.qty, 0);
-  const tipAmt   = parseFloat(tip) || 0;
-  const total    = subtotal + tipAmt;
+  function logExchange(ex) {
+    const entry = { ...ex, time: new Date().toISOString(), cashier: user?.email };
+    setExchangeLogs(prev => [...prev, entry]);
+    // Log as $0 transaction for audit trail
+    base44.entities.POSTransaction.create({
+      transaction_id: `EXCH-${ex.id}-${Date.now()}`,
+      items: [{ product_id: ex.id, product_name: ex.name, quantity: 1, price: 0, total: 0 }],
+      subtotal: 0, tax: 0, total: 0,
+      payment_method: "Cash",
+      cashier: user?.email || "bar",
+      status: "completed",
+      notes: `Exchange logged: ${ex.name}`,
+      batch_id: activeBatch?.id || "",
+    });
+  }
 
-  // ── Tip presets ─────────────────────────────────────────────────
-  const TIP_PRESETS = [15, 20, 25].map(pct => ({
-    label: `${pct}%`,
-    val: +(subtotal * pct / 100).toFixed(2),
-  }));
-
-  // ── Save transaction ─────────────────────────────────────────────
-  const createTx = useMutation({
-    mutationFn: async (method) => {
-      if (!activeBatch) throw new Error("No open batch. Open a batch first.");
-      const txnId = `TXN-${Date.now()}`;
-      await base44.entities.POSTransaction.create({
-        transaction_id: txnId,
-        venue_id: activeBatch.venue_id || "dream_palace",
-        cashier: user?.email || "staff",
-        items: cart.filter(i => i.price > 0).map(i => ({
-          product_id: i.id,
-          product_name: i.name,
-          quantity: i.qty,
-          price: i.price,
-          total: +(i.price * i.qty).toFixed(2),
-        })),
-        subtotal,
-        tax: 0,
-        tip: tipAmt,
-        total,
-        payment_method: method,
-        status: "completed",
-        notes: cart.filter(i => i.price === 0).map(i => i.name).join(", ") || undefined,
-      });
-      return txnId;
-    },
-    onSuccess: (txnId, method) => {
-      if (method === "Credit Card") {
-        setCardReceipt({
-          txnId,
-          items: cart.filter(i => i.price > 0),
-          subtotal,
-          tip: tipAmt,
-          total,
-          cashier: user?.full_name || user?.email || "Staff",
-          time: new Date().toLocaleString(),
-        });
-      } else {
-        toast.success("✓ Transaction saved.");
-      }
+  const processTransaction = useMutation({
+    mutationFn: () => base44.entities.POSTransaction.create({
+      transaction_id: `BAR-${Date.now()}`,
+      items: cart.map(i => ({ product_id: i.id, product_name: i.name, quantity: i.qty, price: i.price, total: i.price * i.qty })),
+      subtotal,
+      tax: 0,
+      tip: tipAmount,
+      total,
+      payment_method: paymentMethod,
+      cashier: user?.email || "bar",
+      status: "completed",
+      batch_id: activeBatch?.id || "",
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries(["pos-transactions"]);
       setCart([]);
-      setTip("");
-      setPayStep(null);
-      queryClient.invalidateQueries({ queryKey: ["today-transactions"] });
+      setTipPct(null);
+      setCustomTip("");
+      setShowReceipt(false);
     },
-    onError: (err) => toast.error(err.message || "Transaction failed"),
   });
 
-  const handleCharge = () => createTx.mutate(payStep);
+  function handleCharge() {
+    if (paymentMethod === "Credit Card") {
+      setShowReceipt(true);
+    } else {
+      processTransaction.mutate();
+    }
+  }
 
-  // ── Card Receipt Print ──────────────────────────────────────────
-  const printCardReceipt = () => {
-    const win = window.open("", "_blank", "width=400,height=650");
-    win.document.write(`
-      <html><head><title>Bar Receipt</title>
-      <style>
-        body { font-family: 'Courier New', monospace; font-size: 13px; margin: 20px; color: #000; }
-        h2 { text-align: center; font-size: 15px; margin: 0 0 4px; }
-        .center { text-align: center; }
-        .line { border-top: 1px dashed #000; margin: 8px 0; }
-        .row { display: flex; justify-content: space-between; }
-        .bold { font-weight: bold; }
-        .sig { margin-top: 32px; border-top: 1px solid #000; padding-top: 4px; font-size: 11px; }
-        .footer { margin-top: 12px; font-size: 10px; text-align: center; }
-      </style></head><body>
-      <h2>DREAM PALACE</h2>
-      <p class="center" style="margin:0;font-size:11px;">Bar Station</p>
-      <div class="line"></div>
-      <p class="center" style="font-size:11px;">${cardReceipt.time}</p>
-      <p class="center" style="font-size:11px;">Cashier: ${cardReceipt.cashier}</p>
-      <div class="line"></div>
-      ${cardReceipt.items.map(i => `<div class="row"><span>${i.name} x${i.qty}</span><span>$${(i.price * i.qty).toFixed(2)}</span></div>`).join("")}
-      <div class="line"></div>
-      <div class="row"><span>Subtotal</span><span>$${cardReceipt.subtotal.toFixed(2)}</span></div>
-      ${cardReceipt.tip > 0 ? `<div class="row"><span>Tip</span><span>$${cardReceipt.tip.toFixed(2)}</span></div>` : ""}
-      <div class="row bold" style="font-size:15px;margin-top:6px;"><span>TOTAL</span><span>$${cardReceipt.total.toFixed(2)}</span></div>
-      <div class="line"></div>
-      <p class="center bold">CREDIT CARD</p>
-      <p class="center" style="font-size:11px;">TXN: ${cardReceipt.txnId}</p>
-      <div class="line"></div>
-      <div class="row" style="margin-top:8px;"><span>Tip (write-in): ________</span></div>
-      <div class="row" style="margin-top:6px;"><span>Adjusted Total: ________</span></div>
-      <div class="sig">X ___________________________<br/>Cardholder Signature</div>
-      <p class="footer">By signing you agree to pay the above amount per your card agreement.</p>
-      </body></html>
-    `);
-    win.document.close();
-    setTimeout(() => { win.print(); }, 400);
-    toast.success("Receipt sent to printer.");
-    setCardReceipt(null);
-  };
+  function handlePrintAndCharge() {
+    window.print();
+    processTransaction.mutate();
+  }
 
-  // ── UI ──────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-4 max-w-2xl mx-auto p-4">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <Wine className="w-5 h-5 text-cyan-400" />
+        <h2 className="text-lg font-bold text-white">Bar Register</h2>
+        {activeBatch && <Badge className="bg-green-500/20 text-green-300 border-green-500/40 text-xs">Batch Open</Badge>}
+      </div>
 
-      {/* Batch warning */}
-      {!activeBatch && (
-        <div className="bg-red-900/30 border border-red-500/40 rounded-lg px-4 py-2 text-red-300 text-sm font-semibold text-center">
-          ⚠ No open batch — open a batch before processing transactions
-        </div>
-      )}
-
-      {/* ── BIG PRODUCT BUTTONS ── */}
+      {/* 2 Big Product Buttons */}
       <div className="grid grid-cols-2 gap-4">
-        {BAR_ITEMS.map(item => (
+        {PRODUCTS.map(p => (
           <button
-            key={item.id}
-            onClick={() => addItem(item)}
-            className={`${item.color} text-white rounded-2xl py-8 text-center transition-all active:scale-95 shadow-lg`}
+            key={p.id}
+            onClick={() => addToCart(p)}
+            className={`bg-gradient-to-br ${p.color} ${p.border} border-2 rounded-2xl p-6 text-center transition-all hover:scale-105 active:scale-95`}
           >
-            <div className="text-2xl font-black">${item.price}</div>
-            <div className="text-sm font-semibold mt-1 opacity-80">{item.name}</div>
+            <div className="text-white font-bold text-lg">{p.name}</div>
+            <div className={`text-3xl font-black mt-1 ${p.text}`}>${p.price}</div>
           </button>
         ))}
       </div>
 
-      {/* ── EXCHANGE BUTTONS (no charge) ── */}
+      {/* 2 Exchange Buttons (no charge) */}
       <div className="grid grid-cols-2 gap-3">
-        {EXCHANGE_ITEMS.map(item => (
-          <button
-            key={item.id}
-            onClick={() => addItem(item)}
-            className={`${item.color} text-white rounded-xl py-4 text-center transition-all active:scale-95`}
+        {EXCHANGES.map(ex => (
+          <Button
+            key={ex.id}
+            variant="outline"
+            onClick={() => logExchange(ex)}
+            className={`${ex.color} border min-h-[52px] font-semibold text-sm`}
           >
-            <div className="text-sm font-bold">{item.name}</div>
-            <div className="text-[10px] opacity-60 mt-0.5">{item.note}</div>
-          </button>
+            <ex.icon className="w-4 h-4 mr-2" />{ex.name}
+          </Button>
         ))}
       </div>
-
-      {/* ── CART ── */}
-      {cart.length > 0 && (
-        <div className="bg-gray-900/70 border border-gray-700 rounded-xl p-4 space-y-2">
-          <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Current Ticket</div>
-          {cart.map(item => (
-            <div key={item.id} className="flex items-center gap-2">
-              <span className="flex-1 text-sm text-white">{item.name}</span>
-              <span className="text-xs text-gray-400 w-12 text-right">{item.price > 0 ? `$${(item.price * item.qty).toFixed(2)}` : "—"}</span>
-              <button onClick={() => adjustQty(item.id, -1)} className="w-6 h-6 rounded bg-gray-700 hover:bg-gray-600 flex items-center justify-center">
-                <Minus className="w-3 h-3 text-white" />
-              </button>
-              <span className="w-5 text-center text-sm font-bold text-white">{item.qty}</span>
-              <button onClick={() => adjustQty(item.id, 1)} className="w-6 h-6 rounded bg-gray-700 hover:bg-gray-600 flex items-center justify-center">
-                <Plus className="w-3 h-3 text-white" />
-              </button>
-              <button onClick={() => adjustQty(item.id, -item.qty)} className="w-6 h-6 rounded bg-red-900/60 hover:bg-red-800 flex items-center justify-center">
-                <Trash2 className="w-3 h-3 text-red-400" />
-              </button>
-            </div>
-          ))}
-
-          {/* Tip */}
-          <div className="border-t border-gray-700 pt-3">
-            <div className="text-xs text-gray-400 mb-2">Tip</div>
-            <div className="flex gap-2 flex-wrap">
-              {TIP_PRESETS.map(p => (
-                <button
-                  key={p.label}
-                  onClick={() => setTip(String(p.val))}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${tip === String(p.val) ? 'bg-cyan-600 border-cyan-500 text-white' : 'border-gray-600 text-gray-300 hover:border-cyan-500'}`}
-                >
-                  {p.label} (${p.val})
-                </button>
-              ))}
-              <input
-                type="number"
-                placeholder="Custom $"
-                value={tip}
-                onChange={e => setTip(e.target.value)}
-                className="w-24 bg-gray-800 border border-gray-600 rounded-lg text-xs text-white px-2 py-1 focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-          </div>
-
-          {/* Totals */}
-          <div className="border-t border-gray-700 pt-2 space-y-1 text-sm">
-            <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
-            {tipAmt > 0 && <div className="flex justify-between text-cyan-400"><span>Tip</span><span>+${tipAmt.toFixed(2)}</span></div>}
-            <div className="flex justify-between text-white font-black text-lg">
-              <span>TOTAL</span><span className="text-cyan-400">${total.toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* Payment buttons */}
-          {!payStep ? (
-            <div className="grid grid-cols-3 gap-2 pt-1">
-              {[
-                { method: "Cash",        label: "Cash",       icon: Banknote,    cls: "bg-green-700 hover:bg-green-600" },
-                { method: "Credit Card", label: "Card",       icon: CreditCard,  cls: "bg-blue-700 hover:bg-blue-600"  },
-                { method: "GlyphBucks",  label: "GlyphBucks", icon: DollarSign,  cls: "bg-amber-700 hover:bg-amber-600"},
-              ].map(({ method, label, icon: Icon, cls }) => (
-                <button
-                  key={method}
-                  onClick={() => setPayStep(method)}
-                  disabled={subtotal === 0 && cart.filter(i => i.price > 0).length === 0}
-                  className={`${cls} disabled:opacity-40 text-white rounded-xl py-3 flex flex-col items-center gap-1 transition-all active:scale-95`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-xs font-bold">{label}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-2 pt-1">
-              <div className="text-center text-sm text-gray-400">{payStep} — <span className="text-2xl font-black text-cyan-400">${total.toFixed(2)}</span></div>
-              <button
-                onClick={handleCharge}
-                disabled={createTx.isPending}
-                className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-500 text-white font-black text-base disabled:opacity-40 transition-all"
-              >
-                {createTx.isPending ? "Processing…" : `✓ Charge ${payStep}`}
-              </button>
-              <button onClick={() => setPayStep(null)} className="w-full py-2 rounded-xl border border-gray-700 text-gray-400 hover:text-white text-sm transition-colors">
-                ← Back
-              </button>
-            </div>
-          )}
-
-          {/* Clear */}
-          <button
-            onClick={() => { setCart([]); setTip(""); setPayStep(null); }}
-            className="w-full text-xs text-red-400 hover:text-red-300 py-1 transition-colors"
-          >
-            Clear Ticket
-          </button>
-        </div>
+      {exchangeLogs.length > 0 && (
+        <p className="text-xs text-gray-500 text-center">{exchangeLogs.length} exchange(s) logged this session</p>
       )}
 
-      {/* ── CARD RECEIPT MODAL ── */}
-      {cardReceipt && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-sm shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
-              <h3 className="text-white font-bold">Credit Card Receipt</h3>
-              <button onClick={() => setCardReceipt(null)} className="text-gray-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
+      {/* Cart */}
+      {cart.length > 0 && (
+        <Card className="bg-gray-900/60 border-gray-700/50">
+          <CardContent className="p-4 space-y-2">
+            <p className="text-xs text-gray-400 uppercase tracking-wide">Order</p>
+            {cart.map(item => (
+              <div key={item.id} className="flex items-center justify-between">
+                <span className="text-white text-sm">{item.name} × {item.qty}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-green-400 font-bold">${(item.price * item.qty).toFixed(2)}</span>
+                  <button onClick={() => removeFromCart(item.id)} className="text-gray-600 hover:text-red-400">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {/* Tip Section */}
+            <div className="border-t border-gray-800 pt-3 space-y-2">
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Tip</p>
+              <div className="flex gap-2">
+                {TIP_PRESETS.map(pct => (
+                  <button
+                    key={pct}
+                    onClick={() => { setTipPct(pct); setCustomTip(""); }}
+                    className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${
+                      tipPct === pct && customTip === ""
+                        ? "bg-purple-600 border-purple-500 text-white"
+                        : "border-gray-700 text-gray-400 hover:border-purple-500/50"
+                    }`}
+                  >{pct}%</button>
+                ))}
+                <button
+                  onClick={() => setTipPct(null)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${
+                    tipPct === null && customTip === ""
+                      ? "bg-gray-700 border-gray-500 text-white"
+                      : "border-gray-700 text-gray-400 hover:border-gray-500"
+                  }`}
+                >No Tip</button>
+              </div>
+              <Input
+                placeholder="Custom tip amount"
+                value={customTip}
+                onChange={e => { setCustomTip(e.target.value); setTipPct(null); }}
+                className="bg-black/40 border-gray-700 text-white text-sm"
+                type="number"
+                min="0"
+              />
+              {tipAmount > 0 && <p className="text-xs text-purple-400">Tip: ${tipAmount.toFixed(2)}</p>}
             </div>
-            <div className="px-5 py-4 space-y-2 text-sm text-gray-300 font-mono">
-              {cardReceipt.items.map(i => (
-                <div key={i.id} className="flex justify-between">
-                  <span>{i.name} ×{i.qty}</span>
-                  <span>${(i.price * i.qty).toFixed(2)}</span>
+
+            {/* Totals */}
+            <div className="border-t border-gray-800 pt-2 space-y-1 text-sm">
+              <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+              {tipAmount > 0 && <div className="flex justify-between text-purple-400"><span>Tip</span><span>${tipAmount.toFixed(2)}</span></div>}
+              <div className="flex justify-between text-white font-bold text-base"><span>Total</span><span>${total.toFixed(2)}</span></div>
+            </div>
+
+            {/* Payment Method */}
+            <div className="flex gap-2 pt-1">
+              {["Cash", "Credit Card"].map(m => (
+                <button
+                  key={m}
+                  onClick={() => setPaymentMethod(m)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-all flex items-center justify-center gap-1 ${
+                    paymentMethod === m
+                      ? "bg-cyan-700 border-cyan-500 text-white"
+                      : "border-gray-700 text-gray-400 hover:border-cyan-500/50"
+                  }`}
+                >
+                  {m === "Cash" ? <Banknote className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
+                  {m}
+                </button>
+              ))}
+            </div>
+
+            <Button
+              onClick={handleCharge}
+              disabled={processTransaction.isPending}
+              className="w-full bg-green-700 hover:bg-green-600 text-white font-bold text-base min-h-[48px]"
+            >
+              <DollarSign className="w-5 h-5 mr-2" />
+              {paymentMethod === "Credit Card" ? "Print Receipt & Charge" : `Charge $${total.toFixed(2)}`}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Credit Card Receipt Modal */}
+      {showReceipt && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-white text-black rounded-2xl w-full max-w-sm shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="font-bold text-lg flex items-center gap-2"><Printer className="w-5 h-5" /> Credit Card Receipt</h3>
+              <button onClick={() => setShowReceipt(false)}><X className="w-5 h-5 text-gray-500" /></button>
+            </div>
+
+            {/* Printable Receipt */}
+            <div ref={receiptRef} className="p-6 space-y-3 font-mono text-sm print:block">
+              <div className="text-center font-bold text-base uppercase tracking-widest">BAR RECEIPT</div>
+              <div className="text-center text-xs text-gray-500">{new Date().toLocaleString()}</div>
+              <div className="border-t border-dashed border-gray-400 my-2" />
+              {cart.map(item => (
+                <div key={item.id} className="flex justify-between">
+                  <span>{item.name} × {item.qty}</span>
+                  <span>${(item.price * item.qty).toFixed(2)}</span>
                 </div>
               ))}
-              <div className="border-t border-gray-700 pt-2 flex justify-between"><span>Subtotal</span><span>${cardReceipt.subtotal.toFixed(2)}</span></div>
-              {cardReceipt.tip > 0 && <div className="flex justify-between text-cyan-400"><span>Tip</span><span>${cardReceipt.tip.toFixed(2)}</span></div>}
-              <div className="flex justify-between font-black text-white text-base"><span>TOTAL</span><span>${cardReceipt.total.toFixed(2)}</span></div>
-              <div className="border-t border-dashed border-gray-600 pt-3 text-xs text-gray-500">
-                <div className="mb-1">Tip write-in: _____________</div>
-                <div className="mb-3">Adjusted Total: _____________</div>
-                <div className="border-t border-gray-600 pt-2">X ________________________<br />Cardholder Signature</div>
+              <div className="border-t border-dashed border-gray-400 my-2" />
+              <div className="flex justify-between"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+
+              {/* Tip write-in line */}
+              <div className="flex justify-between items-center gap-2 mt-2">
+                <span className="font-bold">TIP:</span>
+                <div className="flex-1 border-b-2 border-gray-400 h-6" />
+                <span className="text-xs text-gray-400">$_______</span>
               </div>
+              <div className="flex justify-between items-center gap-2">
+                <span className="font-bold">TOTAL:</span>
+                <div className="flex-1 border-b-2 border-gray-400 h-6" />
+                <span className="text-xs text-gray-400">$_______</span>
+              </div>
+
+              <div className="border-t border-dashed border-gray-400 my-3" />
+
+              {/* Signature line */}
+              <div className="space-y-4 mt-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Cardholder Signature</p>
+                  <div className="border-b-2 border-gray-400 w-full h-10" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Print Name</p>
+                  <div className="border-b-2 border-gray-400 w-full h-8" />
+                </div>
+              </div>
+
+              <p className="text-center text-[10px] text-gray-400 mt-4">I agree to pay the above total per my card agreement.</p>
             </div>
-            <div className="px-5 pb-5">
-              <Button onClick={printCardReceipt} className="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold">
-                <Printer className="w-4 h-4 mr-2" /> Print & Sign Receipt
+
+            <div className="p-4 border-t flex gap-2">
+              <Button onClick={handlePrintAndCharge} className="flex-1 bg-green-700 hover:bg-green-600 text-white font-bold">
+                <Printer className="w-4 h-4 mr-2" /> Print & Complete
+              </Button>
+              <Button variant="outline" onClick={() => setShowReceipt(false)} className="border-gray-300 text-gray-600">
+                Cancel
               </Button>
             </div>
           </div>
