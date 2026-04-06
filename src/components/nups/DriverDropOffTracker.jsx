@@ -178,6 +178,22 @@ export default function DriverDropOffTracker({ user }) {
 
       {/* Night Summary Bar */}
       {records.length > 0 && (
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { label: "Drivers", val: records.length, color: "text-cyan-400" },
+            { label: "Total Drops", val: records.reduce((s, r) => s + (r.total_drops || 0), 0), color: "text-yellow-400" },
+            { label: "VIP Kickbacks", val: records.reduce((s, r) => s + (r.vip_count || 0), 0), color: "text-purple-400" },
+            { label: "Night Payout", val: `$${records.reduce((s, r) => s + (r.total_payout || 0), 0).toFixed(0)}`, color: "text-green-400" },
+          ].map(({ label, val, color }) => (
+            <Card key={label} className="bg-gray-900/60 border-gray-700/50">
+              <CardContent className="p-3 text-center">
+                <div className={`text-xl font-bold ${color}`}>{val}</div>
+                <div className="text-[10px] text-gray-400">{label}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Open Driver Cards */}
       {openRecords.length === 0 && !isLoading && (
