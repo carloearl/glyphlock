@@ -246,17 +246,17 @@ class MobileScalingSystem {
         cursor.style.left = `${touch.clientX}px`;
         cursor.style.top = `${touch.clientY}px`;
         cursor.classList.add('active');
-      });
+      }, { passive: true });
 
       document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         cursor.style.left = `${touch.clientX}px`;
         cursor.style.top = `${touch.clientY}px`;
-      });
+      }, { passive: true });
 
       document.addEventListener('touchend', () => {
         cursor.classList.remove('active');
-      });
+      }, { passive: true });
     });
 
     // Convert hover notes to tap reveals
