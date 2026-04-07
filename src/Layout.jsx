@@ -135,7 +135,6 @@ export default function Layout({ children, currentPageName }) {
         style={{ 
           zIndex: 0, 
           pointerEvents: 'none',
-          touchAction: 'none',
           userSelect: 'none',
           opacity: 1
         }}
