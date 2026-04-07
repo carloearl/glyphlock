@@ -29,7 +29,7 @@ export const injectMobileStyles = () => {
   input, textarea, select { font-size: 16px !important; }
   body { min-height: -webkit-fill-available; -webkit-text-size-adjust: 100%; }
   html { height: -webkit-fill-available; }
-  * { -webkit-overflow-scrolling: touch; }
+  [class*="scroll"], [class*="overflow"], .overflow-auto, .overflow-y-auto, .overflow-x-auto { -webkit-overflow-scrolling: touch; }
 
   :root { --mobile-scale-hero: 0.75; --mobile-scale-ui: 1.0; --mobile-scale-bg: 0.8; --mobile-scale-cursor: 1.2; }
 
