@@ -289,6 +289,10 @@ export default function ZReportGenerator({ user: userProp }) {
 
   const printReport = (report, demoCount = 0) => {
     const printWindow = window.open('', '', 'width=800,height=600');
+    if (!printWindow) {
+      alert('Print blocked by browser. Please allow popups for this site and try again.');
+      return;
+    }
     let extra = {};
     try { extra = JSON.parse(report.notes || '{}'); } catch(e) {}
 

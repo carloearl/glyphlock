@@ -41,7 +41,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
     queryKey: ['active-batch', cashierKey],
     queryFn: async () => {
       const batches = await base44.entities.POSBatch.filter({ status: 'open', cashier: cashierKey });
-      return batches[0] || null;
+      return batches[0] ?? null;
     }
   });
 
