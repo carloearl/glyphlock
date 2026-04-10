@@ -207,7 +207,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
   const handleOpenBatch = async () => {
     if (isOpeningBatch) return;
 
-    const parsed = parseFloat(openingCash || '0');
+    const parsed = parseFloat(openingCash || '0') || 0;
     if (isNaN(parsed) || parsed < 0) {
       alert('Please enter a valid opening cash amount.');
       return;
@@ -488,60 +488,38 @@ export default function BatchManagement({ user, onBatchClosed }) {
           </CardContent>
         </Card>
       ) : (
-        <Card className="glass-card-dark border-orange-500/30">
-          <CardContent className="p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">No Active Batch</h3>
-            <p className="text-gray-400 mb-6">You must open a batch before processing transactions</p>
-            <Button
-              onClick={() => setShowOpenDialog(true)}
-              className="bg-gradient-to-r from-green-500 to-emerald-600"
-            >
-              <Clock className="w-4 h-4 mr-2" />
-              Open New Batch
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Open Batch Dialog */}
-      <Dialog open={showOpenDialog} onOpenChange={setShowOpenDialog}>
-        <DialogContent className="glass-card-dark border-cyan-500/30 text-white">
-          <DialogHeader>
-            <DialogTitle>Open New Batch</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+        <Card className="glass-card-dark border-green-500/30">
+          <CardContent className="p-8 text-center space-y-6">
             <div>
-              <Label>Opening Cash Amount</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={openingCash}
-                onChange={(e) => setOpeningCash(e.target.value)}
-                className="glass-input text-white text-2xl text-center"
-                placeholder="0.00"
-              />
+              <div className="text-5xl mb-3">☀️</div>
+              <h3 className="text-2xl font-bold text-white">Start Your Shift</h3>
+              <p className="text-gray-400 mt-1 text-sm">Count your drawer, then tap the button below</p>
             </div>
-            <div>
-              <Label>Notes (Optional)</Label>
-              <Input
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="glass-input text-white"
-                placeholder="Any notes about this batch..."
-              />
+            <div className="max-w-xs mx-auto">
+              <Label className="text-gray-400 text-sm block mb-2">Opening Cash in Drawer</Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-gray-400 font-bold">$</span>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={openingCash}
+                  onChange={(e) => setOpeningCash(e.target.value)}
+                  className="glass-input text-white text-3xl text-center pl-10 h-16"
+                  placeholder="0.00"
+                />
+              </div>
             </div>
             <Button
               onClick={handleOpenBatch}
               disabled={isOpeningBatch}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600"
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-lg font-bold px-10 py-6 h-auto rounded-2xl w-full max-w-xs mx-auto block"
             >
-              <Clock className="w-4 h-4 mr-2" />
-              {isOpeningBatch ? 'Opening...' : 'Open Batch'}
+              {isOpeningBatch ? '⏳ Starting...' : '✅ Start Shift'}
             </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+            <p className="text-xs text-gray-600">Opening cash defaults to $0 if left blank</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Close Batch Dialog */}
       <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
