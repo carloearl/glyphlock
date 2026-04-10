@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +33,8 @@ function getRoleBadge(roleKey) {
 
 const EMPTY_FORM = { username: "", full_name: "", pin: "", role: "BARTENDER", employee_id: "", phone: "", status: "active" };
 
-function EmployeeDialog({ open, onClose, employee, entertainers }) {
+
+function EmployeeDialog({ open, onClose, employee, entertainers, venueId }) {
   const [form, setForm] = useState(employee || EMPTY_FORM);
   const [showPin, setShowPin] = useState(false);
   const queryClient = useQueryClient();
@@ -40,7 +42,7 @@ function EmployeeDialog({ open, onClose, employee, entertainers }) {
   const save = useMutation({
     mutationFn: (data) => employee?.id
       ? base44.entities.NUPSUser.update(employee.id, data)
-      : base44.entities.NUPSUser.create(data),
+      : base44.entities.NUPSUser.create({ ...data, venue_id: venueId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nups-employees'] });
       toast.success(employee?.id ? "Employee updated." : "Employee created.");
@@ -167,6 +169,8 @@ function EmployeeDialog({ open, onClose, employee, entertainers }) {
 
 export default function EmployeeManagement() {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.venue_id || 'dream_palace';
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("active");
@@ -174,8 +178,8 @@ export default function EmployeeManagement() {
   const [editing, setEditing] = useState(null);
 
   const { data: employees = [], isLoading } = useQuery({
-    queryKey: ['nups-employees'],
-    queryFn: () => base44.entities.NUPSUser.list('-created_date', 200)
+    queryKey: ['nups-employees', venueId],
+    queryFn: () => base44.entities.NUPSUser.filter({ venue_id: venueId }, '-created_date', 200)
   });
 
   const { data: entertainers = [] } = useQuery({
@@ -304,6 +308,7 @@ export default function EmployeeManagement() {
         onClose={() => setDialogOpen(false)}
         employee={editing}
         entertainers={entertainers}
+        venueId={venueId}
       />
     </div>
   );
