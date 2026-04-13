@@ -66,6 +66,7 @@ import HardwareStatusPanel from "../components/nups/hardware/HardwareStatusPanel
 import NUPSEnvBanner from "../components/nups/NUPSEnvBanner.jsx";
 import NUPSDataWipePanel from "../components/nups/NUPSDataWipePanel.jsx";
 import DemoCredentialsPanel from "../components/nups/DemoCredentialsPanel.jsx";
+import NUPSDemoManager from "./NUPSDemoManager.jsx";
 import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
@@ -615,7 +616,12 @@ export default function NUPSOwner() {
             </div>
           )}
           {activeModule === 'venue' && <VenueSettings user={user} />}
-          {activeModule === 'demo' && isAdminUser && <DemoCredentialsPanel />}
+          {activeModule === 'demo' && isAdminUser && (
+            <div className="space-y-6">
+              <NUPSDemoManager />
+              <DemoCredentialsPanel />
+            </div>
+          )}
         </div>
         )}
 
