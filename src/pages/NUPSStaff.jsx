@@ -21,6 +21,7 @@ import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import DriverDropOffTracker from "../components/nups/DriverDropOffTracker.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import SEOHead from "@/components/SEOHead";
+import NUPSEnvBanner from "../components/nups/NUPSEnvBanner.jsx";
 import { mapNUPSRoleToRBAC } from "../config/roles.js";
 import { GLYPHLOCK_DISCLAIMER } from "@/constants/legalDisclaimer";
 
@@ -129,6 +130,7 @@ export default function NUPSStaff() {
         url="/NUPSStaff"
       />
       <OfflineSyncBanner />
+      <NUPSEnvBanner user={user} />
 
       {/* Header */}
       <header className="border-b border-cyan-500/20 p-3 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">

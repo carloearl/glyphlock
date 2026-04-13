@@ -63,6 +63,8 @@ import VenueSettings from "../components/nups/VenueSettings.jsx";
 import OfficialChecks from "./OfficialChecks.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import HardwareStatusPanel from "../components/nups/hardware/HardwareStatusPanel.jsx";
+import NUPSEnvBanner from "../components/nups/NUPSEnvBanner.jsx";
+import NUPSDataWipePanel from "../components/nups/NUPSDataWipePanel.jsx";
 import DemoCredentialsPanel from "../components/nups/DemoCredentialsPanel.jsx";
 import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
@@ -268,6 +270,7 @@ export default function NUPSOwner() {
         url="/nups-owner"
       />
       <OfflineSyncBanner />
+      <NUPSEnvBanner user={user} />
       <header className="border-b border-purple-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
         <div className="container mx-auto">
           <div className="flex items-center justify-between flex-wrap gap-3">
@@ -599,6 +602,16 @@ export default function NUPSOwner() {
                 <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
               )}
               <HardwareStatusPanel user={user} activeVenue={activeVenue} />
+              {isAdminUser && (
+                <div className="mt-8">
+                  <div className="text-xs font-bold text-red-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <span className="w-4 h-px bg-red-500/40" />
+                    DATA MANAGEMENT
+                    <span className="flex-1 h-px bg-red-500/40" />
+                  </div>
+                  <NUPSDataWipePanel user={user} />
+                </div>
+              )}
             </div>
           )}
           {activeModule === 'venue' && <VenueSettings user={user} />}
