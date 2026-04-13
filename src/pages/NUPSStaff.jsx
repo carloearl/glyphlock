@@ -166,13 +166,13 @@ export default function NUPSStaff() {
 
       <div className="container mx-auto p-4">
         {/* Module Nav */}
-        <div className="flex flex-wrap gap-2 mb-5">
+        <div className="flex gap-2 mb-5 overflow-x-auto scrollbar-hide pb-1" style={{WebkitOverflowScrolling:'touch'}}>
           {visibleModules.map(({ key, label, icon: Icon }) => (
             <Button
               key={key}
               onClick={() => setActiveModule(key)}
               variant={currentModule === key ? "default" : "outline"}
-              className={`min-h-[40px] text-sm transition-all ${
+              className={`min-h-[44px] text-sm flex-shrink-0 transition-all ${
                 currentModule === key
                   ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500"
                   : "border-gray-700 text-gray-300 hover:border-cyan-500/50 hover:text-white bg-transparent"

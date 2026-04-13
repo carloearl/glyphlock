@@ -17,15 +17,6 @@ export default function PageNotFound({}) {
         }
     }, [pageName, location.search]);
 
-    // Don't show 404 UI while redirecting to auth
-    if (pageName === 'login') {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <p className="text-slate-500">Redirecting to sign in...</p>
-            </div>
-        );
-    }
-
     const { data: authData, isFetched } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
@@ -37,6 +28,17 @@ export default function PageNotFound({}) {
             }
         }
     });
+
+    // Don't show 404 UI while redirecting to auth
+    if (pageName === 'login') {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <p className="text-slate-500">Redirecting to sign in...</p>
+            </div>
+        );
+    }
+
+
     
     return (
         <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">

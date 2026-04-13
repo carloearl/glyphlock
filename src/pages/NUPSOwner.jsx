@@ -366,7 +366,7 @@ export default function NUPSOwner() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/NUPSGateway')}
-                className="text-gray-400 hover:text-red-400 p-2 min-h-[44px]"
+                className="text-gray-400 hover:text-red-400 p-2 min-h-[44px] hidden sm:flex"
                 aria-label="Close dashboard"
               >
                 ✕
@@ -439,7 +439,7 @@ export default function NUPSOwner() {
           )}
 
         {/* Module Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-gray-700 overflow-x-auto">
+        <div className="flex gap-2 mb-6 pb-3 border-b border-gray-700 overflow-x-auto scrollbar-hide" style={{WebkitOverflowScrolling:'touch'}}>
           {visibleModules.map(mod => {
             const ModIcon = mod.icon;
             return (

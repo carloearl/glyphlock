@@ -27,7 +27,12 @@ export default function ControlPanel({
   elements, onAddElement,
 }) {
   const maxSlots = config.layoutMode === LayoutMode.FOUR_PER_SHEET ? 4 : 5;
-  const frontRefs = Array.from({ length: 5 }, () => useRef());
+  const frontRef0 = useRef();
+  const frontRef1 = useRef();
+  const frontRef2 = useRef();
+  const frontRef3 = useRef();
+  const frontRef4 = useRef();
+  const frontRefs = [frontRef0, frontRef1, frontRef2, frontRef3, frontRef4];
   const backRef = useRef();
   const overlayImgRef = useRef();
   const [aiPrompt, setAiPrompt] = useState("");

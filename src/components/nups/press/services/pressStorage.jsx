@@ -3,6 +3,7 @@
  * Keys match directive exactly.
  */
 import { DEFAULT_PRESS_CONFIG } from "@/components/nups/press/types";
+import { base44 } from "@/api/base44Client";
 
 const KEYS = {
   config: 'nups_press_config_v1',
@@ -19,7 +20,6 @@ export function emitPressTelemetry(event, data) {
     }
     // Forward to NUPS pipeline if available
     try {
-      const { base44 } = require("@/api/base44Client");
       base44.analytics.track({ eventName: `press_${event.toLowerCase()}`, properties: data });
     } catch { /* silent */ }
   } catch { /* never crash */ }
