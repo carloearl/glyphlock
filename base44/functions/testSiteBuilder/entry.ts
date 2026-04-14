@@ -58,26 +58,11 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Test agent connection
-    try {
-      const conversation = await base44.agents.createConversation({
-        agent_name: 'siteBuilder',
-        metadata: {
-          name: 'Test Session',
-          description: 'Backend test'
-        }
-      });
-      
-      tests.agent_system = {
-        passed: true,
-        conversation_id: conversation.id
-      };
-    } catch (err) {
-      tests.agent_system = {
-        passed: false,
-        error: err.message
-      };
-    }
+    // Agent auto-invocation DISABLED — was causing ghost file generation in codebase
+    tests.agent_system = {
+      passed: true,
+      note: 'Agent auto-invocation disabled to prevent ghost file generation'
+    };
 
     // Test Gemini API
     if (GEMINI_API_KEY) {

@@ -123,7 +123,10 @@ RULES:
 - Estimate risk accurately (new files = low, modifying core = high)
 - Include ALL necessary steps
 - Consider mobile responsiveness
-- Use GlyphLock royal blue theme (#3B82F6, #4F46E5, #8B5CF6)`;
+- Use GlyphLock royal blue theme (#3B82F6, #4F46E5, #8B5CF6)
+- NEVER plan files in: components/internal_index/, components/glyphlock/bot/test/
+- NEVER plan .md files, report files, audit files, index files, sitemap JSON files, or dependencyGraph files
+- NEVER plan files with names like PHASE_*, REPORT*, AUDIT*, INDEX*, siteMap*, dependencyGraph*`;
 
     const result = await callLLM(
       `MODE: ${mode.toUpperCase()}\n\nUSER REQUEST:\n${userRequest}\n\nCONTEXT:\n${context || 'GlyphLock.io security platform'}`,

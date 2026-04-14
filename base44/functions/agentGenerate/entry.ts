@@ -85,6 +85,8 @@ Generate a reusable component with:
 - Tailwind CSS styling
 - Props interface clearly defined
 - Mobile responsive
+NEVER generate files in: components/internal_index/, components/glyphlock/bot/test/, components/mobile/ (non-functional), components/security/README*
+NEVER create .md files, report files, audit files, index files, or any non-functional file.
 OUTPUT ONLY THE CODE, NO EXPLANATIONS.`,
 
     entity: `You are creating a JSON schema for Base44.

@@ -17,7 +17,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { audit_type = 'full', auto_fix = false } = await req.json();
+    const { audit_type = 'full' } = await req.json();
+    const auto_fix = false; // PERMANENTLY DISABLED — was causing ghost file generation
 
     // Create audit record
     const audit = await base44.entities.SiteAudit.create({
@@ -174,67 +175,8 @@ BEGIN COMPREHENSIVE AUDIT NOW.`;
       execution_time_ms: executionTime
     });
 
-    // Auto-fix if requested
-    if (auto_fix) {
-      const fixLog = [];
-      let fixCount = 0;
-
-      // Get all auto-fixable issues
-      const allFindings = [
-        ...(auditResults.security_findings || []),
-        ...(auditResults.performance_findings || []),
-        ...(auditResults.seo_findings || []),
-        ...(auditResults.ux_findings || [])
-      ].filter(f => f.auto_fixable && f.fix_code);
-
-      // Apply fixes via siteBuilder agent
-      for (const finding of allFindings.slice(0, 10)) { // Limit to 10 auto-fixes per run
-        try {
-          const fixPrompt = `[BUILD MODE - EXECUTE CHANGES] Fix this issue:
-File: ${finding.file_path}
-Issue: ${finding.title}
-Severity: ${finding.severity}
-
-Apply this fix:
-${finding.fix_code}
-
-Recommendation: ${finding.recommendation}`;
-
-          // Create conversation with siteBuilder agent
-          const conversation = await base44.agents.createConversation({
-            agent_name: 'siteBuilder',
-            metadata: { source: 'site_audit_auto_fix' }
-          });
-
-          await base44.agents.addMessage(conversation, {
-            role: 'user',
-            content: fixPrompt
-          });
-
-          fixLog.push({
-            finding_id: finding.title,
-            status: 'applied',
-            applied_at: new Date().toISOString(),
-            result: 'Auto-fixed via siteBuilder agent'
-          });
-          
-          fixCount++;
-        } catch (error) {
-          fixLog.push({
-            finding_id: finding.title,
-            status: 'failed',
-            applied_at: new Date().toISOString(),
-            result: error.message
-          });
-        }
-      }
-
-      // Update audit with fix results
-      await base44.entities.SiteAudit.update(audit.id, {
-        auto_fixes_applied: fixCount,
-        fix_log: fixLog
-      });
-    }
+    // Auto-fix DISABLED — agent-based auto-fix was generating ghost files in the codebase.
+    // All fixes must be applied manually through the Base44 chat interface.
 
     return Response.json({
       success: true,
@@ -247,7 +189,7 @@ Recommendation: ${finding.recommendation}`;
         ux: auditResults.ux_findings?.length || 0
       },
       execution_time_ms: executionTime,
-      auto_fixes_applied: auto_fix ? (await base44.entities.SiteAudit.filter({ id: audit.id }))[0]?.auto_fixes_applied : 0
+      auto_fixes_applied: 0
     });
 
   } catch (error) {
