@@ -1,120 +1,131 @@
 /**
- * NIST GenAI Challenge Page
- * Federal validation of GlyphLock's AI accountability platform
+ * GlyphLock | NIST Cybersecurity Alignment Page
+ * Aligned to NIST CSWP 50 public commentary & CSF 2.0
  */
 
 import React from 'react';
 import SEOHead from '@/components/SEOHead';
-import Hero from '@/components/nist/Hero';
-import DifferenceComparison from '@/components/nist/DifferenceComparison';
-import ModalityTabs from '@/components/nist/ModalityTabs';
-import Timeline from '@/components/nist/Timeline';
-import ComparisonTable from '@/components/nist/ComparisonTable';
-import TechnicalCredentials from '@/components/nist/TechnicalCredentials';
-import TechnicalFooter from '@/components/nist/TechnicalFooter';
 
 export default function NISTChallengePage() {
   return (
-    <div className="nist-challenge-page">
+    <div className="bg-black text-white font-sans min-h-screen">
       <SEOHead
-        title="GlyphLock NIST GenAI Challenge Participation | Federal AI Validation 2026"
-        description="GlyphLock LLC competing in NIST GenAI Challenge across Text, Image, and Code modalities. First legal-technical hybrid AI governance platform validated by federal evaluation."
-        keywords={[
-          'NIST GenAI Challenge',
-          'AI detection',
-          'Master Covenant',
-          'federal validation',
-          'AI governance',
-          'text discriminator',
-          'image forensics',
-          'code generation',
-          'AI accountability',
-          'GlyphLock'
-        ]}
-        image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png"
-        url="/nist-challenge"
+        title="GlyphLock | NIST Cybersecurity Alignment"
+        description="Aligning real-world financial systems with emerging NIST cybersecurity standards. GlyphLock is actively participating in public commentary on NIST CSWP 50."
+        keywords={['NIST CSWP 50', 'NIST CSF 2.0', 'cybersecurity alignment', 'small business', 'GlyphLock', 'audit trail', 'transaction defensibility']}
+        url="/NISTChallenge"
       />
 
-      {/* Hero Section */}
-      <Hero />
+      {/* HERO */}
+      <section className="min-h-screen flex flex-col justify-center items-center text-center px-6">
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+          GlyphLock
+        </h1>
+        <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mb-8">
+          Aligning real-world financial systems with emerging cybersecurity standards.
+        </p>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-w-2xl">
+          <p className="text-gray-400 text-lg">
+            Actively participating in public commentary on NIST CSWP 50 to help shape cybersecurity guidance for small business systems.
+          </p>
+        </div>
+      </section>
 
-      {/* What Makes GlyphLock Different */}
-      <DifferenceComparison />
+      {/* WHAT WE'RE DOING */}
+      <section className="py-20 px-6 max-w-6xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-semibold mb-10 text-center">
+          What We're Doing
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="p-6 border border-white/10 rounded-xl bg-white/5">
+            <h3 className="text-xl font-semibold mb-3">Standards Alignment</h3>
+            <p className="text-gray-400">
+              Mapping GlyphLock architecture to NIST Cybersecurity Framework 2.0 principles, focusing on real-world transaction systems.
+            </p>
+          </div>
+          <div className="p-6 border border-white/10 rounded-xl bg-white/5">
+            <h3 className="text-xl font-semibold mb-3">Public Contribution</h3>
+            <p className="text-gray-400">
+              Submitting formal commentary to help define cybersecurity guidance for non-employer firms and emerging digital systems.
+            </p>
+          </div>
+          <div className="p-6 border border-white/10 rounded-xl bg-white/5">
+            <h3 className="text-xl font-semibold mb-3">Risk Innovation</h3>
+            <p className="text-gray-400">
+              Introducing concepts like transaction defensibility, automated audit trails, and self-service identity verification.
+            </p>
+          </div>
+        </div>
+      </section>
 
-      {/* Overview Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-blue-300 shadow-sm">
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-gray-900">What is NIST GenAI?</h3>
-              <p className="text-gray-800 leading-relaxed text-sm md:text-base">
-                The National Institute of Standards and Technology (NIST) GenAI Challenge 
-                evaluates generative AI systems across five modalities: text, image, code, 
-                audio, and video. As a federal standards agency, NIST provides independent, 
-                rigorous evaluation of AI capabilities and limitations.
-              </p>
+      {/* WHY IT MATTERS */}
+      <section className="py-20 px-6 bg-white/5">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-semibold mb-8">
+            Why This Matters
+          </h2>
+          <p className="text-gray-300 text-lg mb-10">
+            Small businesses represent over 80% of the U.S. market and are increasingly exposed to cybersecurity, financial, and compliance risks.
+            Current standards are evolving — and real-world systems must evolve with them.
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="p-6 border border-white/10 rounded-xl">
+              <p className="text-xl font-semibold mb-2">34.8M</p>
+              <p className="text-gray-400">Small Businesses in the U.S.</p>
             </div>
-            <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border-2 border-green-400 shadow-sm">
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-gray-900">Our Participation</h3>
-              <ul className="space-y-2 text-gray-800 text-sm md:text-base">
-                <li className="flex items-center gap-2">
-                  <span className="text-green-700 font-bold">✓</span> Text Discriminator (Text-D)
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-green-700 font-bold">✓</span> Text Prompter (Text-P)
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-green-700 font-bold">✓</span> Image Discriminator (Image-D)
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-green-700 font-bold">✓</span> Code Generator (Code-G)
-                </li>
-              </ul>
-              <p className="text-sm text-gray-700 mt-4 font-semibold">
-                Timeline: Jan 28 - Jun 17, 2026
-              </p>
+            <div className="p-6 border border-white/10 rounded-xl">
+              <p className="text-xl font-semibold mb-2">81.9%</p>
+              <p className="text-gray-400">Operate Without Employees</p>
             </div>
-            <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border-2 border-purple-400 shadow-sm">
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-gray-900">Why This Matters</h3>
-              <ul className="space-y-2 text-gray-800 text-sm md:text-base font-medium">
-                <li>• Third-party credibility</li>
-                <li>• Benchmark vs. competitors</li>
-                <li>• Technical validation</li>
-                <li>• Patent methodology proof</li>
-                <li>• Regulatory foundation</li>
-              </ul>
+            <div className="p-6 border border-white/10 rounded-xl">
+              <p className="text-xl font-semibold mb-2">0→1</p>
+              <p className="text-gray-400">From Informal to Audit-Ready Systems</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Modality Tabs */}
-      <ModalityTabs />
-
-      {/* Comparison Table */}
-      <ComparisonTable />
-
-      {/* Technical Credentials */}
-      <TechnicalCredentials />
-
-      {/* Timeline */}
-      <Timeline />
-
-      {/* Technical Footer */}
-      <TechnicalFooter />
-
-      {/* Disclaimer Footer */}
-      <section className="py-8 bg-gray-100 border-t-2 border-gray-300">
-        <div className="container mx-auto px-4">
-          <p className="text-sm text-gray-800 text-center max-w-4xl mx-auto leading-relaxed">
-            <strong className="text-gray-900">Disclaimer:</strong> GlyphLock LLC is a participant in the NIST GenAI Challenge. 
-            Participation does not constitute endorsement by NIST or the U.S. Government. 
-            NIST does not approve, recommend, or endorse any commercial products or services. 
-            Performance metrics are preliminary and subject to change pending official evaluation 
-            results (Summer 2026).
+      {/* OUR POSITION */}
+      <section className="py-20 px-6 max-w-6xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-semibold mb-10 text-center">
+          Our Position
+        </h2>
+        <div className="space-y-6 max-w-3xl mx-auto text-gray-300 text-lg">
+          <p>
+            Cybersecurity for small businesses must move beyond theoretical controls and into real, verifiable systems.
+          </p>
+          <p>
+            Every transaction, interaction, and identity event should be recorded, structured, and defensible.
+          </p>
+          <p>
+            Systems must reduce reliance on human memory and manual processes, replacing them with automated, immutable records.
+          </p>
+          <p className="text-white font-semibold">
+            GlyphLock is building infrastructure for that future.
           </p>
         </div>
       </section>
+
+      {/* CTA */}
+      <section className="py-20 px-6 text-center">
+        <h2 className="text-3xl md:text-4xl font-semibold mb-6">
+          Follow the Build
+        </h2>
+        <p className="text-gray-400 mb-8">
+          As standards evolve, so does the system.
+        </p>
+        <button
+          onClick={() => window.location.href = '/Consultation'}
+          className="px-8 py-4 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition"
+        >
+          Request Early Access
+        </button>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-10 text-center text-gray-500 text-sm border-t border-white/5">
+        © 2026 GlyphLock LLC. All rights reserved.
+      </footer>
     </div>
   );
 }
