@@ -103,12 +103,6 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSLogin" element={<NUPSLogin />} />
         <Route path="/NUPSOwner" element={<NUPSOwner />} />
         <Route path="/NUPSStaff" element={<NUPSStaff />} />
-        <Route path="/NUPSLanding" element={<NUPSLanding />} />
-        <Route path="/NUPSGateway" element={<NUPSGateway />} />
-        <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
-        <Route path="/NUPSLogin" element={<NUPSLogin />} />
-        <Route path="/NUPSOwner" element={<NUPSOwner />} />
-        <Route path="/NUPSStaff" element={<NUPSStaff />} />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />

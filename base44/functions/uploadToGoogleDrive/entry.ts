@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const accessToken = await base44.asServiceRole.connectors.getAccessToken('googledrive');
+    const { accessToken } = await base44.asServiceRole.connectors.getConnection('googledrive');
 
     // Step 1: Create file metadata
     const metadata = {

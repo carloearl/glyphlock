@@ -18,12 +18,10 @@ Deno.serve(async (req) => {
 
     // Fetch all related records
     const [order, batch, identity, verification_media] = await Promise.all([
-      base44.asServiceRole.entities.DreamPalaceOrder.filter({ order_number: transaction_id }).then(r => r[0]),
-      base44.asServiceRole.entities.DreamDollarBatch.filter({ transaction_id }).then(r => r[0]),
-      base44.asServiceRole.entities.CustomerIdentity.filter({
-        linked_transactions: { $elemMatch: transaction_id }
-      }).then(r => r[0]),
-      base44.asServiceRole.entities.VerificationMedia.filter({ transaction_id })
+      base44.asServiceRole.entities.GlyphBucksOrder.filter({ order_number: transaction_id }).then(r => r[0]).catch(() => null),
+      base44.asServiceRole.entities.POSBatch.filter({ batch_id: transaction_id }).then(r => r[0]).catch(() => null),
+      base44.asServiceRole.entities.CustomerIdentity.filter({ transaction_id }).then(r => r[0]).catch(() => null),
+      base44.asServiceRole.entities.VerificationMedia.filter({ transaction_id }).catch(() => [])
     ]);
 
     if (!order) {
