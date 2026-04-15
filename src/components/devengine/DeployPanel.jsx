@@ -57,27 +57,8 @@ export default function DeployPanel() {
     toast.info('Auto-apply is disabled by the OMEGA directive.');
   };
 
-  const handleRollback = async (changeSetId) => {
-    if (!confirm('Rollback this change set? This will revert all changes.')) return;
-    
-    setIsRollingBack(true);
-    try {
-      const { data } = await base44.functions.invoke('agentRollback', { changeSetId });
-      
-      if (data.success) {
-        toast.success(`Rolled back ${data.rolledBackModules} modules`);
-        if (data.rollbackText) {
-          setPatchBundle(data.rollbackText);
-        }
-        await loadChangeSets();
-      } else {
-        toast.error(data.error || 'Rollback failed');
-      }
-    } catch (error) {
-      toast.error('Rollback failed: ' + error.message);
-    } finally {
-      setIsRollingBack(false);
-    }
+  const handleRollback = async () => {
+    toast.info('Manual-only mode active: automatic rollback is disabled.');
   };
 
   const handleDelete = async (changeSetId) => {
@@ -217,7 +198,7 @@ export default function DeployPanel() {
                   <div className="text-center py-12 text-slate-400">
                     <Rocket className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p>No change sets yet</p>
-                    <p className="text-xs mt-1">Use Agent Brain to create changes</p>
+                    <p className="text-xs mt-1">Manual-only mode active; no automatic changes are created</p>
                   </div>
                 ) : (
                   changeSets.map((cs) => (

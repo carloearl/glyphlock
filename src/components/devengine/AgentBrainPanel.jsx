@@ -328,10 +328,10 @@ export default function AgentBrainPanel() {
 
   const getModeConfig = () => {
     const configs = {
-      explain: { color: 'bg-cyan-500', label: 'Explain', icon: '💡', desc: 'Analyze & document' },
-      build: { color: 'bg-blue-500', label: 'Build', icon: '🔨', desc: 'Execute & deploy' },
-      refactor: { color: 'bg-indigo-500', label: 'Refactor', icon: '♻️', desc: 'Optimize & improve' },
-      debug: { color: 'bg-red-500', label: 'Debug', icon: '🐛', desc: 'Fix & resolve' }
+      explain: { color: 'bg-cyan-500', label: 'Explain', icon: '💡', desc: 'Report only' },
+      build: { color: 'bg-blue-500', label: 'Build', icon: '🔨', desc: 'Execution locked' },
+      refactor: { color: 'bg-indigo-500', label: 'Refactor', icon: '♻️', desc: 'Execution locked' },
+      debug: { color: 'bg-red-500', label: 'Debug', icon: '🐛', desc: 'Report only' }
     };
     return configs[mode] || configs.build;
   };
@@ -353,10 +353,10 @@ export default function AgentBrainPanel() {
           <CardContent className="grid grid-cols-2 md:grid-cols-1 gap-2 pt-3">
             {['explain', 'build', 'refactor', 'debug'].map(m => {
               const config = {
-                explain: { color: 'bg-cyan-500', icon: '💡', tooltip: 'Analyze & document code without making changes' },
-                build: { color: 'bg-blue-500', icon: '🔨', tooltip: 'Create files, deploy changes, execute code' },
-                refactor: { color: 'bg-indigo-500', icon: '♻️', tooltip: 'Optimize & improve existing code structure' },
-                debug: { color: 'bg-red-500', icon: '🐛', tooltip: 'Auto-fix bugs and resolve errors instantly' }
+                explain: { color: 'bg-cyan-500', icon: '💡', tooltip: 'Review and report without making changes' },
+                build: { color: 'bg-blue-500', icon: '🔨', tooltip: 'Execution blocked in manual-only mode' },
+                refactor: { color: 'bg-indigo-500', icon: '♻️', tooltip: 'Execution blocked in manual-only mode' },
+                debug: { color: 'bg-red-500', icon: '🐛', tooltip: 'Report errors without auto-fixing' }
               }[m];
               return (
                 <HoverTooltip key={m} content={config.tooltip} side="right">
@@ -508,39 +508,39 @@ export default function AgentBrainPanel() {
                 <div className="flex items-center justify-center min-h-[400px]">
                   <div className="text-center px-4 max-w-2xl">
                   <BrainCircuit className="w-12 h-12 md:w-16 md:h-16 text-blue-400 mx-auto mb-4 opacity-50 animate-pulse" />
-                  <h3 className="text-lg md:text-xl font-bold text-white mb-2">🚀 Code Execution Agent Ready</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-2">🚀 Manual-Only Reporting Active</h3>
                   <p className="text-sm md:text-base text-blue-300/80 mb-2">
                     Mode: <span className="font-bold">{modeConfig.label}</span> {modeConfig.icon}
                   </p>
                   <p className="text-xs text-green-400/80 mb-2">
-                    ✅ Can generate real code for pages, components, entities, functions
+                    ✅ Errors can be reviewed and reported safely
                   </p>
                   <p className="text-xs text-amber-400/60 mb-6">
-                    ⚠️ Generated code requires manual deployment (copy to Base44 AI chat)
+                    ⚠️ Manual-only mode: no agents, no auto-fix, no background execution
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
                   <div className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/15 transition-colors">
                   <div className="text-sm text-white font-semibold mb-1">💡 Explain</div>
                   <p className="text-xs text-cyan-300">
-                    Analyzes code • No execution
+                    Reviews issues • No execution
                   </p>
                   </div>
                   <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/15 transition-colors">
                   <div className="text-sm text-white font-semibold mb-1">🔨 Build</div>
                   <p className="text-xs text-blue-300">
-                    Creates & deploys • Full execution
+                    Build requests are blocked • Report only
                   </p>
                   </div>
                   <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/15 transition-colors">
                   <div className="text-sm text-white font-semibold mb-1">♻️ Refactor</div>
                   <p className="text-xs text-indigo-300">
-                    Optimizes & rewrites • Full execution
+                    Refactor requests are blocked • Report only
                   </p>
                   </div>
                   <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/15 transition-colors">
                   <div className="text-sm text-white font-semibold mb-1">🐛 Debug</div>
                   <p className="text-xs text-red-300">
-                    Fixes bugs instantly • Full execution
+                    Debug requests are blocked • Report only
                   </p>
                   </div>
                   </div>
@@ -555,7 +555,7 @@ export default function AgentBrainPanel() {
                 <div className="flex items-center gap-2 text-blue-400 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm font-medium">
-                    {isExecuting ? '⚡ Executing code generation...' : 'Agent processing...'}
+                    {isExecuting ? '⚠️ Reporting only...' : 'Agent processing...'}
                   </span>
                 </div>
               )}
@@ -675,8 +675,8 @@ export default function AgentBrainPanel() {
               </HoverTooltip>
             </div>
             <p className="text-xs text-blue-300/50 mt-2">
-              <span className="hidden md:inline">📎 Attach files • Enter to send • Shift+Enter for new line</span>
-              <span className="md:hidden">📎 Attach • Tap send</span>
+              <span className="hidden md:inline">📎 Attach files • Manual-only mode • no auto-fix execution</span>
+              <span className="md:hidden">📎 Attach • Manual-only</span>
             </p>
           </div>
         </CardContent>

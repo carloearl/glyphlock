@@ -202,14 +202,14 @@ export default function SiteBuilder() {
                 {safeMessages.length === 0 ? (
                   <div className="text-center py-12">
                     <Sparkles className="w-12 h-12 text-blue-400 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-xl font-bold text-white mb-2">Ready to Build</h3>
-                    <p className="text-blue-300 mb-6">Tell me what you want to create or modify</p>
+                    <h3 className="text-xl font-bold text-white mb-2">Manual-Only Mode</h3>
+                    <p className="text-blue-300 mb-6">Describe the issue or request and the system will report it without executing changes</p>
                     <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
                       {[
-                        [Code,'blue','Create Dashboard','New analytics page','Create a new dashboard page with analytics cards'],
-                        [Database,'indigo','Create Entity','New database schema','Add a new entity for tracking user sessions'],
-                        [Zap,'violet','Fix Bugs','Debug and repair','Fix the mobile navigation menu - buttons not working'],
-                        [RefreshCw,'fuchsia','Refactor Code','Improve architecture','Refactor the authentication flow for better security'],
+                        [Code,'blue','Report Issue','Report only','Describe a problem without auto-fixing it'],
+                        [Database,'indigo','Review State','No execution','Inspect current state without changing files'],
+                        [Zap,'violet','Debug Report','Report only','Explain an error without repair execution'],
+                        [RefreshCw,'fuchsia','Manual Mode','Execution locked','Manual-only mode is active'],
                       ].map(([Icon, color, title, sub, prompt]) => (
                         <button key={title} onClick={() => setInput(prompt)}
                           className={`p-4 rounded-xl bg-white/5 border border-${color}-500/20 hover:border-${color}-500/40 transition-all text-left`}>
@@ -246,7 +246,7 @@ export default function SiteBuilder() {
                     {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                   </Button>
                 </div>
-                <p className="text-xs text-blue-300 mt-2">Enter to send • Shift+Enter for new line</p>
+                <p className="text-xs text-blue-300 mt-2">Manual-only mode active • no auto-repair or background execution</p>
               </div>
             </CardContent>
           </Card>
