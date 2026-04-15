@@ -97,13 +97,33 @@ function isBlockedArtifactPath(filePath) {
   if (typeof filePath !== 'string') return false;
   const lowerPath = filePath.toLowerCase();
   const fileName = lowerPath.split('/').pop() || '';
+  const isAllowedExplicitOutput = lowerPath.startsWith('docs/') || lowerPath.startsWith('exports/');
+  if (isAllowedExplicitOutput) return false;
   return lowerPath.includes('internal_index') ||
+    lowerPath.startsWith('components/') && (fileName.includes('audit') || fileName.includes('report') || fileName.includes('index')) ||
     fileName.endsWith('.md') ||
     fileName.includes('audit') ||
     fileName.includes('report') ||
     fileName.includes('site_index') ||
     fileName.includes('dependencygraph') ||
-    fileName.includes('sitemap.json');
+    fileName.includes('sitemap.json') ||
+    fileName.includes('sitemapxml');
+}
+
+function isBlockedContextRequest(input = '') {
+  const text = String(input).toLowerCase();
+  return (
+    text.includes('runsiteaudit') ||
+    text.includes('runfullscan') ||
+    text.includes('generateauditpdf') ||
+    text.includes('generatesecurityreport') ||
+    text.includes('generatedailyreport') ||
+    text.includes('generatesitemapxml') ||
+    text.includes('audit') ||
+    text.includes('report') ||
+    text.includes('sitemap') ||
+    text.includes('index generation')
+  );
 }
 
 Deno.serve(async (req) => {
@@ -129,6 +149,12 @@ Deno.serve(async (req) => {
       case 'analyze_request': {
         // Analyze what the user wants and create a plan
         const { userRequest, context } = payload;
+
+        if (isBlockedContextRequest(userRequest) || isBlockedContextRequest(context)) {
+          return Response.json({
+            error: 'Report, audit, sitemap, and index generation are blocked in builder/dev/UI contexts unless explicitly requested for /docs/, /exports/, or external download.'
+          }, { status: 403 });
+        }
         
         const systemPrompt = `You are a code analysis AI for GlyphLock.io (React/Tailwind/Base44 platform).
 Analyze the user's request and determine what file operations are needed.
@@ -184,6 +210,10 @@ Rules:
       case 'generate_code': {
         // Generate actual code for a file
         const { filePath, description, existingCode, mode } = payload;
+
+        if (isBlockedContextRequest(description)) {
+          return Response.json({ error: 'Blocked: report/audit/index generation is disabled in builder/dev/UI contexts' }, { status: 403 });
+        }
 
         if (isBlockedComponentPath(filePath)) {
           return Response.json({ error: 'Blocked: components/ only allows .jsx files' }, { status: 400 });

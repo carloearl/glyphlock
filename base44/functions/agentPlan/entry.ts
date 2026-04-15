@@ -9,6 +9,23 @@ const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
+function isBlockedBuilderRequest(input = '') {
+  const text = String(input).toLowerCase();
+  return (
+    text.includes('runaudit') ||
+    text.includes('runsiteaudit') ||
+    text.includes('runfullscan') ||
+    text.includes('generateauditpdf') ||
+    text.includes('generatesecurityreport') ||
+    text.includes('generatedailyreport') ||
+    text.includes('generatesitemapxml') ||
+    text.includes('audit') ||
+    text.includes('report') ||
+    text.includes('sitemap') ||
+    text.includes('index generation')
+  );
+}
+
 async function callLLM(prompt, systemPrompt) {
   // Claude first
   if (ANTHROPIC_API_KEY) {
@@ -91,6 +108,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'userRequest is required' }, { status: 400 });
     }
 
+    if (isBlockedBuilderRequest(userRequest)) {
+      return Response.json({
+        error: 'Report, audit, sitemap, and index generation are blocked in SiteBuilder context unless explicitly requested for /docs/, /exports/, or external download.'
+      }, { status: 403 });
+    }
+
     const systemPrompt = `You are an AI planning agent for GlyphLock.io (React/Tailwind/Base44).
 
 PLATFORM CAPABILITIES:
@@ -127,7 +150,9 @@ RULES:
 - NEVER create documentation, reports, audits, indexes, dependency graphs, or internal artifact files
 - NEVER target any path containing internal_index
 - If target starts with components/, it MUST end with .jsx
-- Do not create .md, .json, .css, .txt, or other non-.jsx files under components/`;
+- Do not create .md, .json, .css, .txt, or other non-.jsx files under components/
+- In SiteBuilder context, block audit/report/sitemap/index generation unless explicitly requested for /docs/, /exports/, or external download
+- Never write report, audit, sitemap, or index outputs to components/`;
 
     const result = await callLLM(
       `MODE: ${mode.toUpperCase()}\n\nUSER REQUEST:\n${userRequest}\n\nCONTEXT:\n${context || 'GlyphLock.io security platform'}`,

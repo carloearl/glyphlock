@@ -17,6 +17,11 @@ Deno.serve(async (req) => {
     }
 
     const { filePath, fileContent, changeDescription } = await req.json();
+
+    const blockedText = `${filePath} ${changeDescription}`.toLowerCase();
+    if (blockedText.includes('audit') || blockedText.includes('report') || blockedText.includes('sitemap') || blockedText.includes('index')) {
+      return Response.json({ error: 'Report/audit/index generation is blocked in dev engine context.' }, { status: 403 });
+    }
     
     if (!filePath || !fileContent || !changeDescription) {
       return Response.json({ 

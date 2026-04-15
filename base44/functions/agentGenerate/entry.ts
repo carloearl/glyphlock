@@ -116,13 +116,17 @@ function isBlockedArtifactPath(path) {
   if (typeof path !== 'string') return false;
   const lowerPath = path.toLowerCase();
   const fileName = lowerPath.split('/').pop() || '';
+  const isAllowedExplicitOutput = lowerPath.startsWith('docs/') || lowerPath.startsWith('exports/');
+  if (isAllowedExplicitOutput) return false;
   return lowerPath.includes('internal_index') ||
+    lowerPath.startsWith('components/') && (fileName.includes('audit') || fileName.includes('report') || fileName.includes('index')) ||
     fileName.endsWith('.md') ||
     fileName.includes('audit') ||
     fileName.includes('report') ||
     fileName.includes('site_index') ||
     fileName.includes('dependencygraph') ||
-    fileName.includes('sitemap.json');
+    fileName.includes('sitemap.json') ||
+    fileName.includes('sitemapxml');
 }
 
 function detectFileType(path) {
