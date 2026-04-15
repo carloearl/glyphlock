@@ -26,6 +26,7 @@ export default function PageNotFound({}) {
         );
     }
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { data: authData, isFetched } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {

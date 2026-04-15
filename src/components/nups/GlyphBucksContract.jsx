@@ -123,7 +123,10 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const [lineItems, setLineItems] = useState(
     Array.from({ length: 5 }, (_, i) => ({
       line_number: i + 1,
-      room_ent_dur_id: "",
+      room_number: "",
+      entertainer: "",
+      duration: "",
+      ent_club_id: "",
       room_fee: 0,
       product: 0,
       amount: 0
@@ -134,7 +137,8 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const [waitressTip, setWaitressTip] = useState(0);
   const processingSurcharge = glyphbucksValue * 0.3;
   const lineItemsTotal = lineItems.reduce((s, li) => s + (li.amount || 0), 0);
-  const grandTotal = glyphbucksValue + processingSurcharge + waitressTip + lineItemsTotal;
+  // Grand total = line items + waitress tip only (GlyphBucks handled in parallel flow)
+  const grandTotal = lineItemsTotal + waitressTip;
 
   const [acks, setAcks] = useState(ACKNOWLEDGMENTS.map(() => false));
   const allAcked = acks.every(Boolean);
@@ -204,7 +208,8 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const updateLineItem = (idx, field, val) => {
     setLineItems(prev => {
       const next = [...prev];
-      next[idx] = { ...next[idx], [field]: field === "room_ent_dur_id" ? val : parseFloat(val) || 0 };
+      const textFields = ["room_number", "entertainer", "duration", "ent_club_id"];
+      next[idx] = { ...next[idx], [field]: textFields.includes(field) ? val : parseFloat(val) || 0 };
       if (field === "room_fee" || field === "product") {
         next[idx].amount = (next[idx].room_fee || 0) + (next[idx].product || 0);
       }
@@ -212,7 +217,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     });
   };
 
-  const canProceedToSign = customerName.trim() && cardLastSix.length >= 4 && glyphbucksValue > 0;
+  const canProceedToSign = customerName.trim() && cardLastSix.length >= 4 && lineItemsTotal > 0;
   const canSign = allAcked && signature.trim() && thumbprintUrl && guestPhotoUrl && idPhotoUrl;
   const canStaffSign = managerSignature.trim() && hostessSignature.trim();
 
@@ -283,7 +288,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       approval_code: approvalCode,
       manager_name: managerName,
       hostess_name: hostessName,
-      line_items: lineItems.filter(li => li.room_ent_dur_id || li.amount > 0),
+      line_items: lineItems.filter(li => li.room_number || li.entertainer || li.amount > 0),
       glyphbucks_value: glyphbucksValue,
       processing_surcharge: processingSurcharge,
       waitress_tip: waitressTip,
@@ -412,15 +417,17 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   };
 
   const buildPrintHtml = () => {
-    const liRows = lineItems.map((li, i) => `
+    const liRows = lineItems.filter(li => li.room_number || li.entertainer || li.amount > 0).map((li, i) => `
       <tr>
-        <td style="border:1px solid #000;padding:4px;text-align:center;">${i+1}</td>
-        <td style="border:1px solid #000;padding:4px;">${li.room_ent_dur_id || ''}</td>
-        <td style="border:1px solid #000;padding:4px;text-align:right;">${li.room_fee ? '$'+li.room_fee.toFixed(2) : ''}</td>
+        <td style="border:1px solid #000;padding:4px;text-align:center;">${li.line_number}</td>
+        <td style="border:1px solid #000;padding:4px;text-align:center;">${li.room_number || ''}</td>
+        <td style="border:1px solid #000;padding:4px;">${li.entertainer || ''}</td>
+        <td style="border:1px solid #000;padding:4px;text-align:center;">${li.duration || ''}</td>
+        <td style="border:1px solid #000;padding:4px;text-align:center;">${li.ent_club_id || ''}</td>
+        <td style="border:1px solid #000;padding:4px;text-align:right;">${li.room_fee ? '$'+Number(li.room_fee).toFixed(2) : ''}</td>
         <td style="border:1px solid #000;padding:4px;text-align:center;">+</td>
-        <td style="border:1px solid #000;padding:4px;text-align:right;">${li.product ? '$'+li.product.toFixed(2) : ''}</td>
-        <td style="border:1px solid #000;padding:4px;text-align:center;">+</td>
-        <td style="border:1px solid #000;padding:4px;text-align:right;">${li.amount ? '$'+li.amount.toFixed(2) : ''}</td>
+        <td style="border:1px solid #000;padding:4px;text-align:right;">${li.product ? '$'+Number(li.product).toFixed(2) : ''}</td>
+        <td style="border:1px solid #000;padding:4px;text-align:right;">${li.amount ? '$'+Number(li.amount).toFixed(2) : ''}</td>
       </tr>`).join('');
 
     return `<html><head><title>${venueName} - Order ${orderNumber}</title>
@@ -468,42 +475,32 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
 
       <table>
         <tr style="background:#eee;">
-          <th style="border:1px solid #000;padding:4px;width:30px;">#</th>
-          <th style="border:1px solid #000;padding:4px;">RM# / ENT. / Dur. / ENT Cub ID#</th>
-          <th style="border:1px solid #000;padding:4px;">Room Fee</th>
+          <th style="border:1px solid #000;padding:4px;width:25px;">#</th>
+          <th style="border:1px solid #000;padding:4px;width:40px;">RM #</th>
+          <th style="border:1px solid #000;padding:4px;">Entertainer</th>
+          <th style="border:1px solid #000;padding:4px;width:60px;">Duration</th>
+          <th style="border:1px solid #000;padding:4px;width:70px;">ENT Club ID#</th>
+          <th style="border:1px solid #000;padding:4px;width:70px;">Room Fee</th>
           <th style="border:1px solid #000;padding:4px;width:20px;">+</th>
-          <th style="border:1px solid #000;padding:4px;">Product</th>
-          <th style="border:1px solid #000;padding:4px;width:20px;">+</th>
-          <th style="border:1px solid #000;padding:4px;">Amount</th>
+          <th style="border:1px solid #000;padding:4px;width:70px;">Product</th>
+          <th style="border:1px solid #000;padding:4px;width:70px;">Amount</th>
         </tr>
         ${liRows}
       </table>
 
       <div style="display:flex;justify-content:flex-end;margin:8px 0;">
-        <table style="width:420px;">
+        <table style="width:380px;">
           <tr>
-            <td style="border:1px solid #000;padding:4px;">Show Price / GlyphBucks Value (Amount Ordered)</td>
-            <td style="border:1px solid #000;padding:4px;text-align:center;font-size:10px;">GlyphBucks</td>
-            <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${glyphbucksValue.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td style="border:1px solid #000;padding:4px;">Processing Fee (30%) for Issuing GlyphBucks</td>
-            <td style="border:1px solid #000;padding:4px;text-align:center;font-size:10px;">+</td>
-            <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${processingSurcharge.toFixed(2)}</td>
+            <td style="border:1px solid #000;padding:4px;">Line Items Subtotal</td>
+            <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${lineItemsTotal.toFixed(2)}</td>
           </tr>
           <tr>
             <td style="border:1px solid #000;padding:4px;">Waitress Tip (Customer Discretionary)</td>
-            <td style="border:1px solid #000;padding:4px;text-align:center;font-size:10px;">+</td>
             <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${waitressTip.toFixed(2)}</td>
           </tr>
-          ${lineItemsTotal > 0 ? `<tr>
-            <td style="border:1px solid #000;padding:4px;">Other Line Items Total</td>
-            <td style="border:1px solid #000;padding:4px;text-align:center;font-size:10px;">+</td>
-            <td style="border:1px solid #000;padding:4px;text-align:right;font-weight:bold;">$${lineItemsTotal.toFixed(2)}</td>
-          </tr>` : ''}
           <tr>
-            <td colspan="2" style="border:1px solid #000;padding:4px;font-size:9px;">** GlyphBucks are sold as a convenience medium of currency for payment and are not valid anywhere else. The Entertainer can redeem GlyphBucks for Cash.</td>
-            <td style="border:2px solid #000;padding:6px;text-align:center;font-weight:bold;font-size:13px;background:#f5f5f5;">GRAND TOTAL<br/><span style="font-size:16px;">$${grandTotal.toFixed(2)}</span></td>
+            <td style="border:2px solid #000;padding:6px;font-weight:bold;">GRAND TOTAL CHARGE</td>
+            <td style="border:2px solid #000;padding:6px;text-align:center;font-weight:bold;font-size:16px;background:#f5f5f5;">$${grandTotal.toFixed(2)}</td>
           </tr>
         </table>
       </div>
@@ -590,28 +587,32 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
         <Card className="bg-gray-900/60 border-gray-700">
           <CardContent className="pt-4">
             <div className="overflow-x-auto -mx-4 px-4">
-              <table className="w-full text-xs min-w-[500px]">
+              <table className="w-full text-xs min-w-[700px]">
                 <thead>
                   <tr className="border-b border-gray-700 text-gray-400">
-                    <th className="p-2 w-8">#</th>
-                    <th className="p-2 text-left">RM# / ENT. / Dur. / ENT Cub ID#</th>
-                    <th className="p-2">Room Fee</th>
-                    <th className="p-2 w-6">+</th>
-                    <th className="p-2">Product</th>
-                    <th className="p-2 w-6">+</th>
-                    <th className="p-2">Amount</th>
+                    <th className="p-2 w-8 text-center">#</th>
+                    <th className="p-2 text-center w-14">RM #</th>
+                    <th className="p-2 text-left">Entertainer</th>
+                    <th className="p-2 text-left w-24">Duration</th>
+                    <th className="p-2 text-left w-24">ENT Club ID#</th>
+                    <th className="p-2 text-right w-24">Room Fee ($)</th>
+                    <th className="p-2 text-center w-6 text-gray-600">+</th>
+                    <th className="p-2 text-right w-24">Product ($)</th>
+                    <th className="p-2 text-right w-20">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lineItems.map((li, i) => (
-                    <tr key={i} className="border-b border-gray-800">
+                    <tr key={i} className="border-b border-gray-800/60">
                       <td className="p-1 text-center text-gray-500">{i+1}</td>
-                      <td className="p-1"><Input value={li.room_ent_dur_id} onChange={e => updateLineItem(i, 'room_ent_dur_id', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs" /></td>
-                      <td className="p-1"><Input type="number" step="0.01" value={li.room_fee || ''} onChange={e => updateLineItem(i, 'room_fee', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs w-20" /></td>
-                      <td className="text-center text-gray-500">+</td>
-                      <td className="p-1"><Input type="number" step="0.01" value={li.product || ''} onChange={e => updateLineItem(i, 'product', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs w-20" /></td>
-                      <td className="text-center text-gray-500">+</td>
-                      <td className="p-1 text-right font-mono text-white">${li.amount.toFixed(2)}</td>
+                      <td className="p-1"><Input value={li.room_number || ''} onChange={e => updateLineItem(i, 'room_number', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs text-center" placeholder="e.g. 3" /></td>
+                      <td className="p-1"><Input value={li.entertainer || ''} onChange={e => updateLineItem(i, 'entertainer', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs" placeholder="Stage name" /></td>
+                      <td className="p-1"><Input value={li.duration || ''} onChange={e => updateLineItem(i, 'duration', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs text-center" placeholder="30 min" /></td>
+                      <td className="p-1"><Input value={li.ent_club_id || ''} onChange={e => updateLineItem(i, 'ent_club_id', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs text-center" placeholder="Club ID" /></td>
+                      <td className="p-1"><Input type="number" step="0.01" value={li.room_fee || ''} onChange={e => updateLineItem(i, 'room_fee', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs text-right" placeholder="0.00" /></td>
+                      <td className="text-center text-gray-600">+</td>
+                      <td className="p-1"><Input type="number" step="0.01" value={li.product || ''} onChange={e => updateLineItem(i, 'product', e.target.value)} className="h-8 bg-gray-800 border-gray-700 text-xs text-right" placeholder="0.00" /></td>
+                      <td className="p-1 text-right font-mono font-bold text-white">${li.amount.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -619,24 +620,14 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
             </div>
 
             <div className="mt-4 space-y-2 max-w-sm ml-auto">
-              <div className="flex justify-between items-center">
-                <Label className="text-xs text-green-400 font-bold">Show Price / GlyphBucks Value *</Label>
-                <Input type="number" step="100" value={glyphbucksValue || ''} onChange={e => setGlyphbucksValue(parseFloat(e.target.value) || 0)} className="w-28 h-8 bg-gray-800 border-gray-700 text-right text-xs" />
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-400">30% Processing Fee:</span>
-                <span className="text-yellow-400 font-mono">${processingSurcharge.toFixed(2)}</span>
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>Line Items Subtotal:</span>
+                <span className="font-mono text-white">${lineItemsTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <Label className="text-xs text-pink-400">Waitress Tip (Customer Decides)</Label>
+                <Label className="text-xs text-pink-400">Waitress Tip <span className="text-gray-500 font-normal">(Customer Decides)</span></Label>
                 <Input type="number" step="1" value={waitressTip || ''} onChange={e => setWaitressTip(parseFloat(e.target.value) || 0)} className="w-28 h-8 bg-gray-800 border-pink-500/40 text-right text-xs" placeholder="0.00" />
               </div>
-              {lineItemsTotal > 0 && (
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>Other Line Items:</span>
-                  <span className="font-mono">${lineItemsTotal.toFixed(2)}</span>
-                </div>
-              )}
               <div className="flex justify-between text-sm font-bold border-t border-gray-700 pt-2">
                 <span className="text-white">GRAND TOTAL CHARGE:</span>
                 <span className="text-cyan-400 font-mono text-lg">${grandTotal.toFixed(2)}</span>
@@ -951,7 +942,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
 
   const entertainerGBPayout = glyphbucksValue * 0.5;
   const totalRoomFees = lineItems.reduce((s, li) => s + (li.room_fee || 0), 0);
-  const entertainersOnContract = lineItems.filter(li => li.room_ent_dur_id.trim()).map(li => li.room_ent_dur_id.trim());
+  const entertainersOnContract = lineItems.filter(li => li.entertainer?.trim()).map(li => li.entertainer.trim());
   const uniqueEntertainers = [...new Set(entertainersOnContract)];
 
   return (

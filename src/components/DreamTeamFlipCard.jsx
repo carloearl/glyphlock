@@ -11,11 +11,11 @@ export default function DreamTeamFlipCard({ card }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   
-  if (!card) return null;
-
   const handleClick = useCallback(() => {
     setIsFlipped(prev => !prev);
   }, []);
+
+  if (!card) return null;
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-US', { 

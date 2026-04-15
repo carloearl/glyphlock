@@ -11,8 +11,6 @@ export default function HeroHolographicCard({ card, size = 'normal' }) {
   const [tiltStyle, setTiltStyle] = useState({});
   const cardRef = useRef(null);
 
-  if (!card) return null;
-
   const handleMouseMove = useCallback((e) => {
     if (!cardRef.current || isFlipped) return;
     const rect = cardRef.current.getBoundingClientRect();
@@ -46,6 +44,8 @@ export default function HeroHolographicCard({ card, size = 'normal' }) {
       year: 'numeric', month: 'short', day: 'numeric' 
     });
   };
+
+  if (!card) return null;
 
   const sizeClasses = {
     small: 'w-52 md:w-64',
