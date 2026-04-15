@@ -18,8 +18,8 @@ Deno.serve(async (req) => {
 
     const { filePath, fileContent } = await req.json();
 
-    if (String(filePath).toLowerCase().includes('audit') || String(filePath).toLowerCase().includes('report') || String(filePath).toLowerCase().includes('sitemap') || String(filePath).toLowerCase().includes('index')) {
-      return Response.json({ error: 'Report/audit/index generation and analysis are blocked in dev engine context.' }, { status: 403 });
+    if (String(filePath).toLowerCase().includes('audit') || String(filePath).toLowerCase().includes('scan') || String(filePath).toLowerCase().includes('report') || String(filePath).toLowerCase().includes('sitemap') || String(filePath).toLowerCase().includes('index')) {
+      return Response.json({ error: 'Audit/scan/report/index generation and analysis are blocked in dev engine context.' }, { status: 403 });
     }
     
     if (!filePath || !fileContent) {

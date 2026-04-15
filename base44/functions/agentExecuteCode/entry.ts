@@ -100,9 +100,10 @@ function isBlockedArtifactPath(filePath) {
   const isAllowedExplicitOutput = lowerPath.startsWith('docs/') || lowerPath.startsWith('exports/');
   if (isAllowedExplicitOutput) return false;
   return lowerPath.includes('internal_index') ||
-    lowerPath.startsWith('components/') && (fileName.includes('audit') || fileName.includes('report') || fileName.includes('index')) ||
+    lowerPath.startsWith('components/') && (fileName.includes('audit') || fileName.includes('report') || fileName.includes('index') || fileName.includes('scan')) ||
     fileName.endsWith('.md') ||
     fileName.includes('audit') ||
+    fileName.includes('scan') ||
     fileName.includes('report') ||
     fileName.includes('site_index') ||
     fileName.includes('dependencygraph') ||
@@ -115,11 +116,16 @@ function isBlockedContextRequest(input = '') {
   return (
     text.includes('runsiteaudit') ||
     text.includes('runfullscan') ||
+    text.includes('scansitemaps') ||
+    text.includes('scanroutes') ||
+    text.includes('scannavigation') ||
     text.includes('generateauditpdf') ||
     text.includes('generatesecurityreport') ||
     text.includes('generatedailyreport') ||
     text.includes('generatesitemapxml') ||
+    text.includes('file analysis') ||
     text.includes('audit') ||
+    text.includes('scan') ||
     text.includes('report') ||
     text.includes('sitemap') ||
     text.includes('index generation')

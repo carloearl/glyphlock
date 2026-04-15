@@ -15,11 +15,16 @@ function isBlockedBuilderRequest(input = '') {
     text.includes('runaudit') ||
     text.includes('runsiteaudit') ||
     text.includes('runfullscan') ||
+    text.includes('scansitemaps') ||
+    text.includes('scanroutes') ||
+    text.includes('scannavigation') ||
     text.includes('generateauditpdf') ||
     text.includes('generatesecurityreport') ||
     text.includes('generatedailyreport') ||
     text.includes('generatesitemapxml') ||
+    text.includes('file analysis') ||
     text.includes('audit') ||
+    text.includes('scan') ||
     text.includes('report') ||
     text.includes('sitemap') ||
     text.includes('index generation')
