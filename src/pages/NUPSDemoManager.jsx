@@ -45,6 +45,8 @@ export default function NUPSDemoManager() {
     }
   };
 
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
   const doSeed = async () => {
     setPhase("seeding");
     setSuccessCount(0);
@@ -147,6 +149,7 @@ export default function NUPSDemoManager() {
         if (!records.length) {
           entityCounts[entityName] = 0;
           push(entityName + ": 0 found", "info");
+          await sleep(150);
           continue;
         }
 
@@ -154,11 +157,13 @@ export default function NUPSDemoManager() {
         for (const record of records) {
           await base44.entities[entityName].delete(record.id);
           deletedCount += 1;
+          await sleep(75);
         }
 
         entityCounts[entityName] = deletedCount;
         totalDeleted += deletedCount;
         push(entityName + ": " + deletedCount + " deleted", "success");
+        await sleep(150);
       } catch (e) {
         entityCounts[entityName] = entityCounts[entityName] ?? 0;
         push(entityName + ": " + (e?.message || JSON.stringify(e)), "error");
