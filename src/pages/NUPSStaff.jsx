@@ -108,7 +108,8 @@ export default function NUPSStaff() {
     );
   }
 
-  const visibleModules = STAFF_MODULES.filter(m => m.roles.has(rbacRole));
+  const effectiveRole = user?._viewAsRole ? mapNUPSRoleToRBAC(user._viewAsRole) : rbacRole;
+  const visibleModules = STAFF_MODULES.filter(m => m.roles.has(effectiveRole));
   // Ensure active module is valid for this role
   const validKeys = new Set(visibleModules.map(m => m.key));
   const currentModule = validKeys.has(activeModule) ? activeModule : (visibleModules[0]?.key || "pos");

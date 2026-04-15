@@ -102,6 +102,7 @@ export default function ReceiptPrinter({
           <tr class="info-row"><td>Cashier:</td><td class="right">${cashierDisplay}</td></tr>
           ${transaction.customer_id ? `<tr class="info-row"><td>Customer:</td><td class="right">${transaction.customer_id}</td></tr>` : ''}
           <tr class="info-row"><td>Batch:</td><td class="right">${transaction.batch_id || 'N/A'}</td></tr>
+          <tr class="info-row"><td>Terminal:</td><td class="right">${transaction.station?.toUpperCase() || transaction.terminal_name || 'POS'}</td></tr>
         </table>
         ${vipSection}
         <div class="divider"></div>
@@ -209,6 +210,7 @@ export default function ReceiptPrinter({
           <div className="flex justify-between"><span>Date:</span><span>{txDate.toLocaleDateString()}</span></div>
           <div className="flex justify-between"><span>Time:</span><span>{txDate.toLocaleTimeString()}</span></div>
           <div className="flex justify-between"><span>Cashier:</span><span className="text-white">{cashierDisplay}</span></div>
+          <div className="flex justify-between"><span>Terminal:</span><span>{transaction.station?.toUpperCase() || transaction.terminal_name || 'POS'}</span></div>
         </div>
 
         <div className="border-t border-dashed border-gray-700 pt-2 mb-2">

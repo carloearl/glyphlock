@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { createPageUrl } from "@/utils";
 import {
   Shield, Crown, Users, UserCheck, Music, FlaskConical,
   ChevronRight, Lock, AlertTriangle, Loader2, LogOut, ArrowLeft,
@@ -45,7 +44,7 @@ const ROLE_CARDS = [
     border: "border-cyan-500/30 hover:border-cyan-400/60",
     iconColor: "text-cyan-400",
     iconBg: "bg-cyan-500/10",
-    requiredRoles: ["BARTENDER", "DJ", "SECURITY", "KIOSK"],
+    requiredRoles: ["BARTENDER", "DJ", "SECURITY", "KIOSK", "HOSTESS"],
     destination: "NUPSStaff",
     requiresAuth: true,
   },
@@ -132,21 +131,18 @@ export default function NUPSGateway() {
   const hasOperationalRole = (card) => {
     if (!card.requiresAuth) return true;
     if (!user) return false;
+    if (isOwner || user.role === "admin") return true;
 
-    // Platform admin gets everything
-    if (user.role === "admin") return true;
-
-    // Check RBAC venue_access roles
     const assignedRoles = userPermissions?.venue_access?.map(va => va.role_key) || [];
+    const sessionRole = user?._highestRole ? [user._highestRole] : [];
+    const allRoles = [...new Set([...assignedRoles, ...sessionRole])];
     const OWNER_TIER = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"];
 
-    // Owner/Manager cards — check owner tier roles
     if (card.key === "owner" || card.key === "manager") {
-      return assignedRoles.some(r => OWNER_TIER.includes(r));
+      return allRoles.some(r => OWNER_TIER.includes(r));
     }
 
-    // Other cards — check specific roles
-    return card.requiredRoles.length === 0 || card.requiredRoles.some(r => assignedRoles.includes(r));
+    return card.requiredRoles.length === 0 || card.requiredRoles.some(r => allRoles.includes(r));
   };
 
   const isOwner = user?.email?.toLowerCase() === OWNER_EMAIL;
