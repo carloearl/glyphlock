@@ -4,7 +4,6 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -68,16 +67,19 @@ import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 
+const DEFAULT_VENUE_ID = "dream_palace";
+
 export default function NUPSOwner() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [activeTab, setActiveTab] = useState("analytics");
   const [posSubTab, setPosSubTab] = useState("cash");
   const [activeModule, setActiveModule] = useState('dashboard');
   const [rbacRole, setRbacRole] = useState('manager');
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
+
+  const venueId = activeVenue?.id || activeVenue?.venue_id || DEFAULT_VENUE_ID;
 
   const handleRefreshAll = () => {
     queryClient.clear();
@@ -183,7 +185,7 @@ export default function NUPSOwner() {
     gcTime: 0,
     refetchOnMount: 'always',
   });
-  
+
   // TASK 7.1 — Filter demo/test transactions from ALL financial views
   const realTransactions = transactions.filter(t =>
     (!t.mode || t.mode === 'REAL') &&
@@ -227,24 +229,23 @@ export default function NUPSOwner() {
 
   const isAdminUser = user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin';
 
-  // NUPS MODULE ARCHITECTURE v1.0 — FIX-E: Workflow-ordered tabs
   const NAV_MODULES = [
-    { key: 'staff',     label: 'Staff',         icon: Users },
-    { key: 'contracts', label: 'Contracts',     icon: ScrollText },
-    { key: 'door',      label: 'Door Check-In', icon: DoorOpen },
-    { key: 'vip',       label: 'VIP Rooms',     icon: Star },
-    { key: 'pos',       label: 'POS Register',  icon: ShoppingCart },
-    { key: 'glyphbucks',label: 'GlyphBucks',    icon: Coins },
-    { key: 'payroll',   label: 'Payroll',       icon: DollarSign },
-    { key: 'reports',   label: 'Reports',       icon: FileText },
-    { key: 'analytics', label: 'Analytics',     icon: TrendingUp },
-    { key: 'customers', label: 'Customers',     icon: Heart },
-    { key: 'inventory', label: 'Inventory',     icon: Package },
-    { key: 'audit',     label: 'Audit Log',     icon: Shield },
-    { key: 'dashboard', label: 'Dashboard',     icon: BarChart3 },
-    { key: 'admin',     label: 'Admin',         icon: KeyRound },
-    { key: 'venue',     label: 'Venue Settings', icon: Building2 },
-    { key: 'demo',      label: 'Demo Keys',     icon: KeyRound },
+    { key: 'staff',      label: 'Staff',          icon: Users },
+    { key: 'contracts',  label: 'Contracts',      icon: ScrollText },
+    { key: 'door',       label: 'Door Check-In',  icon: DoorOpen },
+    { key: 'vip',        label: 'VIP Rooms',      icon: Star },
+    { key: 'pos',        label: 'POS Register',   icon: ShoppingCart },
+    { key: 'glyphbucks', label: 'GlyphBucks',     icon: Coins },
+    { key: 'payroll',    label: 'Payroll',         icon: DollarSign },
+    { key: 'reports',    label: 'Reports',         icon: FileText },
+    { key: 'analytics',  label: 'Analytics',      icon: TrendingUp },
+    { key: 'customers',  label: 'Customers',      icon: Heart },
+    { key: 'inventory',  label: 'Inventory',      icon: Package },
+    { key: 'audit',      label: 'Audit Log',      icon: Shield },
+    { key: 'dashboard',  label: 'Dashboard',      icon: BarChart3 },
+    { key: 'admin',      label: 'Admin',           icon: KeyRound },
+    { key: 'venue',      label: 'Venue Settings', icon: Building2 },
+    { key: 'demo',       label: 'Demo Keys',      icon: KeyRound },
   ];
   const ROLE_MODULE_ACCESS = {
     manager:   new Set(NAV_MODULES.map(m => m.key)),
@@ -330,9 +331,7 @@ export default function NUPSOwner() {
                   <DropdownMenuItem
                     className="cursor-pointer hover:bg-gray-800 text-xs text-gray-400"
                     onClick={() => {
-1
-
-                        setActiveModule('dashboard');
+                      setActiveModule('dashboard');
                       const adminSession = { ...user, _highestRole: user?._highestRole || 'PLATFORM_ADMIN' };
                       delete adminSession._viewAsRole;
                       sessionStorage.setItem('nups_session', JSON.stringify(adminSession));
@@ -506,13 +505,13 @@ export default function NUPSOwner() {
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-purple-500 pl-2">
                   Issuance
                 </h3>
-                <UnifiedGlyphBucksHub venue_id={activeVenue?.id || activeVenue?.venue_id || "dream_palace"} user={user} />
+                <UnifiedGlyphBucksHub venue_id={venueId} user={user} />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-cyan-500 pl-2">
                   Ledger
                 </h3>
-                <GlyphBucksLedger user={user} venue_id={activeVenue?.id || activeVenue?.venue_id || "dream_palace"} />
+                <GlyphBucksLedger user={user} venue_id={venueId} />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-green-500 pl-2">
@@ -551,7 +550,7 @@ export default function NUPSOwner() {
           )}
           {activeModule === 'contracts' && (
             <div className="space-y-4">
-              <ContractManager user={user} venue_id={activeVenue?.id || activeVenue?.venue_id || "dream_palace"} />
+              <ContractManager user={user} venue_id={venueId} />
               <GlyphBucksContract />
             </div>
           )}

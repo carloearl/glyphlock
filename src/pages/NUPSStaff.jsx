@@ -229,7 +229,7 @@ export default function NUPSStaff() {
               showReceipt={true}
             />
           )}
-          {isClockedIn && currentModule === "drivers" && <DriverDropOffTracker user={user} />}
+          {isClockedIn && currentModule === "drivers" && isClockedIn && <DriverDropOffTracker user={user} />}
         </div>
 
         <footer className="text-center text-[10px] text-gray-700 py-4 border-t border-gray-800 mt-8">
