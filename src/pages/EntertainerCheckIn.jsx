@@ -12,15 +12,10 @@ export default function EntertainerCheckInPage() {
     const load = async () => {
       try {
         const nupsSession = sessionStorage.getItem("nups_session");
-        if (nupsSession) {
-          setUser(JSON.parse(nupsSession));
-          return;
-        }
+        if (nupsSession) { setUser(JSON.parse(nupsSession)); return; }
         const u = await base44.auth.me();
         setUser(u);
-      } catch {
-        navigate("/NUPSLanding");
-      }
+      } catch { navigate("/NUPSLanding"); }
     };
     load();
   }, []);

@@ -97,7 +97,7 @@ export default function POSBarRegister({ user }) {
         ? `TERM-BAR-${activeBatch.venue_id.slice(-6).toUpperCase()}`
         : 'TERM-BAR-UNKNOWN',
       cashier_id: user?.id || user?.email || null,
-      card_last4: paymentMethod === "Credit Card" ? null : null,
+      card_last4: null,
     }),
     onSuccess: () => {
       qc.invalidateQueries(["pos-transactions"]);

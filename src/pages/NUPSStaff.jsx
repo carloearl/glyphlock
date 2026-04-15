@@ -73,18 +73,6 @@ export default function NUPSStaff() {
     staleTime: 10000,
   });
 
-  // Callback for TimeClock to notify when user clocks in/out
-  const handleClockStatusChange = (isClockedInNow) => {
-    setIsClockedIn(isClockedInNow);
-    sessionStorage.setItem('nups_clock_status', String(isClockedInNow));
-    // Unlock timeclock tab always; gate other tabs
-    if (isClockedInNow) {
-      setActiveModule(activeModule === 'timeclock' ? 'timeclock' : activeModule);
-    } else {
-      setActiveModule('timeclock');
-    }
-  };
-
   const { data: transactions = [] } = useQuery({
     queryKey: ["pos-transactions"],
     queryFn: () => base44.entities.POSTransaction.list("-created_date", 50),
@@ -98,10 +86,18 @@ export default function NUPSStaff() {
     !t.transaction_id?.startsWith('DEMO-') &&
     !t.cashier?.includes('demo@')
   );
-  const todayTransactions = realTransactions.filter(t => {
-    return new Date(t.created_date).toDateString() === new Date().toDateString();
-  });
-  const todayRevenue = todayTransactions.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+
+  // Callback for TimeClock to notify when user clocks in/out
+  const handleClockStatusChange = (isClockedInNow) => {
+    setIsClockedIn(isClockedInNow);
+    sessionStorage.setItem('nups_clock_status', String(isClockedInNow));
+    // Unlock timeclock tab always; gate other tabs
+    if (isClockedInNow) {
+      setActiveModule(activeModule === 'timeclock' ? 'timeclock' : activeModule);
+    } else {
+      setActiveModule('timeclock');
+    }
+  };
 
   if (!authChecked || !user) {
     return (

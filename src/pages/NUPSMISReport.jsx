@@ -106,6 +106,7 @@ export default function NUPSMISReport() {
   const totalRevenue = qTransactions.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
   const gbLiabilityFaceValue = qDreamOrders.reduce((s, o) => s + (o.glyphbucks_value || 0), 0);
   const gbSurchargeTotal = qDreamOrders.reduce((s, o) => s + (o.processing_surcharge || 0), 0);
+  const totalDDRevenue = gbLiabilityFaceValue;
   // NOTE: totalRevenue and gbLiabilityFaceValue are NEVER combined — F-2 mandate
   const avgTransaction = qTransactions.length ? totalRevenue / qTransactions.length : 0;
   const activeEntertainers = entertainers.filter(e => e.status === "active").length;
@@ -191,16 +192,16 @@ export default function NUPSMISReport() {
       <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
 
         {/* ── EXECUTIVE SUMMARY ── */}
-        <section>
-          <SectionHeader title="Executive Summary" color="text-cyan-400" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <StatCard icon={DollarSign} label="POS Revenue" value={`$${totalRevenue.toFixed(0)}`} sub="Cash + Card only" color="cyan" />
-            <StatCard icon={ShoppingCart} label="POS Transactions" value={qTransactions.length} sub={`Avg $${avgTransaction.toFixed(0)}`} color="purple" />
-            <StatCard icon={Coins} label="GB Issued (Liability)" value={`${gbIssued}`} sub={`${qDreamOrders.length} orders`} color="amber" />
-            <StatCard icon={Clock} label="Staff Hours" value={totalShiftHours.toFixed(0)} sub={`${qShifts.length} shifts`} color="blue" />
-            <StatCard icon={DoorOpen} label="VIP Rooms" value={vipRooms.length} sub="configured" color="green" />
-          </div>
-        </section>
+         <section>
+           <SectionHeader title="Executive Summary" color="text-cyan-400" />
+           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+             <StatCard icon={DollarSign} label="POS Revenue" value={`$${totalRevenue.toFixed(0)}`} sub={qLabel} color="green" />
+             <StatCard icon={Coins} label="GlyphBucks Liability" value={`$${totalDDRevenue.toFixed(0)}`} sub="Face value issued — liability, not revenue" color="amber" />
+             <StatCard icon={ShoppingCart} label="POS Transactions" value={qTransactions.length} sub={`Avg $${avgTransaction.toFixed(0)}`} color="purple" />
+             <StatCard icon={Clock} label="Staff Hours" value={totalShiftHours.toFixed(0)} sub={`${qShifts.length} shifts`} color="blue" />
+             <StatCard icon={DoorOpen} label="VIP Rooms" value={vipRooms.length} sub="configured" color="green" />
+           </div>
+         </section>
 
         {/* ── REVENUE BREAKDOWN ── */}
         <section>
@@ -276,10 +277,14 @@ export default function NUPSMISReport() {
                     <td className="p-3 text-right text-gray-500 text-xs">not revenue</td>
                   </tr>
                   <tr className="bg-gray-800/50 font-bold">
-                    <td className="p-3 text-white">POS TOTAL SALES</td>
-                    <td className="p-3 text-right text-cyan-400 font-mono">${totalRevenue.toFixed(2)}</td>
+                    <td className="p-3 text-white">POS Total</td>
+                    <td className="p-3 text-right text-green-400 font-mono">${totalRevenue.toFixed(2)}</td>
                     <td className="p-3 text-right text-gray-400">{qTransactions.length}</td>
-                    <td className="p-3 text-right text-cyan-400">100%</td>
+                    <td className="p-3 text-right text-green-400">100%</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-bold text-white">GlyphBucks Liability</td>
+                    <td className="p-3 text-right text-amber-400 font-mono">${totalDDRevenue.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
