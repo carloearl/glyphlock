@@ -110,6 +110,7 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSStaff" element={<NUPSStaff />} />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
+        <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
         <Route path="*" element={<PageNotFound />} />
