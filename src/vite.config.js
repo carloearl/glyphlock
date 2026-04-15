@@ -7,7 +7,16 @@ import base44 from '@base44/vite-plugin'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
-  plugins: [react(), base44()],
+  plugins: [
+    react(),
+    base44({
+      exclude: [
+        'src/components/internal_index/**',
+        'src/components/mobile/**',
+        'src/components/security/**'
+      ]
+    })
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
