@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from "recharts";
+import {
+  DollarSign, ShoppingCart, Clock, Printer, ArrowLeft, Coins,
+  DoorOpen, CheckCircle2, Activity, Download
+} from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format, startOfQuarter, endOfQuarter, subQuarters, isWithinInterval } from "date-fns";
 
 // Toast notification helper
@@ -39,7 +42,7 @@ function StatCard({ icon: Icon, label, value, sub, color = "cyan" }) {
 
 function SectionHeader({ title, color = "text-cyan-400" }) {
   return (
-    <div className={`flex items-center gap-2 border-b border-white/10 pb-2 mb-4`}>
+    <div className="flex items-center gap-2 border-b border-white/10 pb-2 mb-4">
       <h2 className={`text-lg font-bold ${color}`}>{title}</h2>
     </div>
   );
@@ -109,8 +112,6 @@ export default function NUPSMISReport() {
   const gbLiabilityFaceValue = qDreamOrders.reduce((s, o) => s + (o.glyphbucks_value || 0), 0);
   const gbSurchargeTotal = qDreamOrders.reduce((s, o) => s + (o.processing_surcharge || 0), 0);
   const totalDDRevenue = gbLiabilityFaceValue;
-  // NOTE: totalRevenue and gbLiabilityFaceValue are NEVER combined — F-2 mandate
-  // REMOVED: const combinedRevenue — D-7 violation fix
   const avgTransaction = qTransactions.length ? totalRevenue / qTransactions.length : 0;
   const activeEntertainers = entertainers.filter(e => e.status === "active").length;
   const totalShiftHours = qShifts.reduce((s, sh) => {
@@ -122,7 +123,7 @@ export default function NUPSMISReport() {
   const ddIssued = gbIssued;
   const ddRedeemed = gbRedeemed;
 
-  // --- Revenue by Month — POS only. F-2: GlyphBucks excluded from chart. Tips excluded. ---
+  // --- Revenue by Month ---
   const monthlyData = {};
   qTransactions.forEach(t => {
     const m = format(new Date(t.created_date), "MMM");
@@ -155,27 +156,12 @@ export default function NUPSMISReport() {
   const handleDownloadPDF = async () => {
     try {
       const pdfData = {
-        qLabel,
-        totalRevenue,
-        totalDDRevenue,
-        qTransactions,
-        gbLiabilityFaceValue,
-        gbSurchargeTotal,
-        avgTransaction,
-        activeEntertainers,
-        totalShiftHours,
-        qShifts,
-        entertainers,
-        qPayroll,
-        qDreamOrders,
-        revenueChartData,
-        payMethodChart,
-        topEarners,
-        qStart,
-        qEnd,
-        now,
+        qLabel, totalRevenue, totalDDRevenue, qTransactions,
+        gbLiabilityFaceValue, gbSurchargeTotal, avgTransaction,
+        activeEntertainers, totalShiftHours, qShifts, entertainers,
+        qPayroll, qDreamOrders, revenueChartData, payMethodChart,
+        topEarners, qStart, qEnd, now,
       };
-
       const response = await base44.functions.invoke('generateNUPSPDF', pdfData);
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
@@ -198,12 +184,7 @@ export default function NUPSMISReport() {
       <div className="border-b border-purple-500/20 p-4 bg-black/95 backdrop-blur sticky top-0 z-40 print:static print:border-b-2 print:border-black no-print">
         <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.history.back()}
-              className="text-gray-400 hover:text-white no-print"
-            >
+            <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="text-gray-400 hover:text-white no-print">
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
             <div>
@@ -215,13 +196,8 @@ export default function NUPSMISReport() {
           </div>
           <div className="flex items-center gap-2 no-print">
             {[0, 1, 2].map(q => (
-              <Button
-                key={q}
-                size="sm"
-                variant={quarter === q ? "default" : "outline"}
-                onClick={() => setQuarter(q)}
-                className={quarter === q ? "bg-purple-600 text-white" : "border-gray-700 text-gray-300"}
-              >
+              <Button key={q} size="sm" variant={quarter === q ? "default" : "outline"} onClick={() => setQuarter(q)}
+                className={quarter === q ? "bg-purple-600 text-white" : "border-gray-700 text-gray-300"}>
                 {q === 0 ? "Current Q" : q === 1 ? "Last Q" : "2Q Ago"}
               </Button>
             ))}
@@ -238,16 +214,16 @@ export default function NUPSMISReport() {
       <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
 
         {/* ── EXECUTIVE SUMMARY ── */}
-         <section>
-           <SectionHeader title="Executive Summary" color="text-cyan-400" />
-           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-             <StatCard icon={DollarSign} label="POS Revenue" value={`$${totalRevenue.toFixed(0)}`} sub={qLabel} color="green" />
-             <StatCard icon={Coins} label="GlyphBucks Liability" value={`$${totalDDRevenue.toFixed(0)}`} sub="Face value issued — liability, not revenue" color="amber" />
-             <StatCard icon={ShoppingCart} label="POS Transactions" value={qTransactions.length} sub={`Avg $${avgTransaction.toFixed(0)}`} color="purple" />
-             <StatCard icon={Clock} label="Staff Hours" value={totalShiftHours.toFixed(0)} sub={`${qShifts.length} shifts`} color="blue" />
-             <StatCard icon={DoorOpen} label="VIP Rooms" value={vipRooms.length} sub="configured" color="green" />
-           </div>
-         </section>
+        <section>
+          <SectionHeader title="Executive Summary" color="text-cyan-400" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <StatCard icon={DollarSign} label="POS Revenue" value={`$${totalRevenue.toFixed(0)}`} sub={qLabel} color="green" />
+            <StatCard icon={Coins} label="GlyphBucks Liability" value={`$${totalDDRevenue.toFixed(0)}`} sub="Face value — liability, not revenue" color="amber" />
+            <StatCard icon={ShoppingCart} label="POS Transactions" value={qTransactions.length} sub={`Avg $${avgTransaction.toFixed(0)}`} color="purple" />
+            <StatCard icon={Clock} label="Staff Hours" value={totalShiftHours.toFixed(0)} sub={`${qShifts.length} shifts`} color="blue" />
+            <StatCard icon={DoorOpen} label="VIP Rooms" value={vipRooms.length} sub="configured" color="green" />
+          </div>
+        </section>
 
         {/* ── REVENUE BREAKDOWN ── */}
         <section>
@@ -303,7 +279,6 @@ export default function NUPSMISReport() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* F-2 BPAAA v3.0: POS revenue only in this table. GlyphBucks listed separately below as liability. */}
                   <tr className="border-b border-gray-800 hover:bg-white/5">
                     <td className="p-3 text-white">Cash Sales</td>
                     <td className="p-3 text-right text-green-400 font-mono">${qTransactions.filter(t => t.payment_method === 'Cash').reduce((s,t) => s+((t.total||0)-(t.tip||0)),0).toFixed(2)}</td>
@@ -338,7 +313,7 @@ export default function NUPSMISReport() {
           </Card>
         </section>
 
-        {/* ── GLYPHBUCKS LIABILITY — F-2 BPAAA v3.0: NOT REVENUE ── */}
+        {/* ── GLYPHBUCKS LIABILITY ── */}
         <section>
           <SectionHeader title="GlyphBucks Liability — not venue revenue" color="text-amber-400" />
           <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-4 text-xs text-amber-400">
@@ -359,7 +334,7 @@ export default function NUPSMISReport() {
                     <tr>
                       <th className="text-left p-3 text-gray-400">Order #</th>
                       <th className="text-left p-3 text-gray-400">Customer</th>
-                      <th className="text-right p-3 text-gray-400">DD Value</th>
+                      <th className="text-right p-3 text-gray-400">GB Value</th>
                       <th className="text-right p-3 text-gray-400">Grand Total</th>
                       <th className="text-center p-3 text-gray-400">Status</th>
                     </tr>
@@ -369,7 +344,7 @@ export default function NUPSMISReport() {
                       <tr key={o.id} className="border-b border-gray-800 hover:bg-white/5">
                         <td className="p-3 text-gray-300 font-mono text-xs">{o.order_number}</td>
                         <td className="p-3 text-white">{o.customer_name}</td>
-                        <td className="p-3 text-right text-amber-400 font-mono">${(o.dream_dollar_value || 0).toFixed(2)}</td>
+                        <td className="p-3 text-right text-amber-400 font-mono">${(o.glyphbucks_value || 0).toFixed(2)}</td>
                         <td className="p-3 text-right text-green-400 font-mono">${(o.grand_total || 0).toFixed(2)}</td>
                         <td className="p-3 text-center">
                           <Badge className={
@@ -388,7 +363,7 @@ export default function NUPSMISReport() {
               </CardContent>
             </Card>
           ) : (
-            <div className="text-gray-500 text-sm text-center py-8 border border-gray-800 rounded-lg">No Dream Dollar orders for this quarter.</div>
+            <div className="text-gray-500 text-sm text-center py-8 border border-gray-800 rounded-lg">No GlyphBucks orders for this quarter.</div>
           )}
         </section>
 
@@ -431,7 +406,6 @@ export default function NUPSMISReport() {
             </Card>
           </div>
 
-          {/* Entertainer Roster */}
           {entertainers.length > 0 && (
             <Card className="bg-gray-900/60 border-gray-700/50 mt-4">
               <CardHeader><CardTitle className="text-gray-300 text-sm">Entertainer Roster</CardTitle></CardHeader>
@@ -477,7 +451,7 @@ export default function NUPSMISReport() {
               <CardHeader><CardTitle className="text-red-400 text-sm">Contract Compliance</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { label: "Dream Palace Contracts Signed", value: qDreamOrders.filter(o => o.status === "signed" || o.status === "archived").length, total: qDreamOrders.length, color: "green" },
+                  { label: "GB Contracts Signed", value: qDreamOrders.filter(o => o.status === "signed" || o.status === "archived").length, total: qDreamOrders.length, color: "green" },
                   { label: "Contracts Archived", value: qDreamOrders.filter(o => o.status === "archived").length, total: qDreamOrders.length, color: "cyan" },
                   { label: "Contracts Pending", value: qDreamOrders.filter(o => o.status === "draft").length, total: qDreamOrders.length, color: "amber" },
                   { label: "Entertainers Contract-Signed", value: entertainers.filter(e => e.contract_signed).length, total: entertainers.length, color: "purple" },
