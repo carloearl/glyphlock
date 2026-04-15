@@ -108,6 +108,10 @@ OUTPUT ONLY THE CODE, NO EXPLANATIONS.`
   return prompts[fileType] || prompts.component;
 }
 
+function isBlockedComponentPath(path) {
+  return path.startsWith('components/') && !path.endsWith('.jsx');
+}
+
 function detectFileType(path) {
   if (path.startsWith('pages/')) return 'page';
   if (path.startsWith('components/')) return 'component';
@@ -152,6 +156,15 @@ Deno.serve(async (req) => {
           contentBefore: null,
           contentAfter: null,
           patchInstructions: `Delete file: ${step.target}`
+        });
+        continue;
+      }
+
+      if (isBlockedComponentPath(step.target)) {
+        generatedChanges.push({
+          path: step.target,
+          action: step.action,
+          error: 'Blocked: components/ only allows .jsx files'
         });
         continue;
       }

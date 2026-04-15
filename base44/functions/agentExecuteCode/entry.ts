@@ -89,6 +89,10 @@ async function callLLM(prompt, systemPrompt = '') {
   return { success: false, error: 'All LLM providers failed' };
 }
 
+function isBlockedComponentPath(filePath) {
+  return typeof filePath === 'string' && filePath.startsWith('components/') && !filePath.endsWith('.jsx');
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -167,6 +171,10 @@ Rules:
       case 'generate_code': {
         // Generate actual code for a file
         const { filePath, description, existingCode, mode } = payload;
+
+        if (isBlockedComponentPath(filePath)) {
+          return Response.json({ error: 'Blocked: components/ only allows .jsx files' }, { status: 400 });
+        }
         
         const fileType = filePath.endsWith('.json') ? 'json' : 
                          filePath.startsWith('functions/') ? 'deno' : 'react';
@@ -223,6 +231,10 @@ RESPOND WITH ONLY THE CODE, NO EXPLANATIONS.`
       case 'execute_write': {
         // Actually write the file - this logs to BuilderActionLog
         const { filePath, code, description } = payload;
+
+        if (isBlockedComponentPath(filePath)) {
+          return Response.json({ error: 'Blocked: components/ only allows .jsx files' }, { status: 400 });
+        }
 
         // Log the action
         await base44.entities.BuilderActionLog.create({
