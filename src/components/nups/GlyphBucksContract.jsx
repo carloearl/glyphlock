@@ -417,6 +417,18 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   };
 
   const buildPrintHtml = () => {
+    const contractBody = GLYPHBUCKS_PURCHASE_AGREEMENT(currentVenue, {
+      uuid: orderNumber,
+      timestamp: new Date().toLocaleString(),
+      customer_name: customerName,
+      total: grandTotal.toFixed(2),
+      payment_method: 'Card',
+      approval_code: approvalCode || 'PENDING',
+      glyphbucks_serials: batchCreated
+        ? (batchCreated.bills || []).map(b => b.serial_number).join(', ') || 'See batch record'
+        : 'See batch record'
+    });
+
     const liRows = lineItems.filter(li => li.room_number || li.entertainer || li.amount > 0).map((li, i) => `
       <tr>
         <td style="border:1px solid #000;padding:4px;text-align:center;">${li.line_number}</td>
@@ -504,6 +516,8 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           </tr>
         </table>
       </div>
+
+      <div style="white-space:pre-wrap;font-size:10px;font-family:Arial,sans-serif;margin:12px 0;padding:12px;border:1px solid #ccc;background:#fafafa;">${contractBody}</div>
 
       <div style="text-align:center;font-weight:bold;text-decoration:underline;margin:12px 0;">Acknowledgements</div>
       ${ACKNOWLEDGMENTS.map(a => `<div class="ack-item">• ${a}</div>`).join('')}
