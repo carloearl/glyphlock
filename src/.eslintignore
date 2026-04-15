@@ -1,3 +1,6 @@
-src/components/internal_index/
-src/components/mobile/
-src/components/security/
+src/components/internal_index/**
+src/components/internal_index/**/*.jsx
+src/components/mobile/**
+src/components/mobile/**/*.jsx
+src/components/security/**
+src/components/security/**/*.jsx
