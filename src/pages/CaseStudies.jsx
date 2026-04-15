@@ -9,7 +9,7 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, FileText, Scale, Shield, Trophy, AlertTriangle } from 'lucide-react';
+import { ArrowRight, FileText, Scale, Shield, Trophy, AlertTriangle, Cpu } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
 
 const CASE_STUDIES = [
@@ -72,6 +72,27 @@ const CASE_STUDIES = [
     ],
     outcome: 'Judgment for Defendant',
     url: 'CaseStudyCovenantVictory'
+  },
+  {
+    id: 'nups-compliance-os',
+    title: 'When a Compliance OS Gets Misread as a Legacy POS',
+    date: 'April 2026',
+    category: 'Category Analysis',
+    icon: Cpu,
+    badge: 'NUPS Validation',
+    badgeColor: 'bg-cyan-600',
+    summary: 'How AI-generated search systems misrepresented GlyphLock NUPS by applying legacy POS frameworks to a next-generation compliance operating system — and why the distinction matters for valuation, processors, and underwriters.',
+    keyPoints: [
+      'NUPS processes proof, not just payments',
+      'GlyphBucks reframed as liability tracking layer',
+      'Blockchain-anchored audit trail vs. internal DB records',
+      'Consent-based architecture vs. merchant-initiated trust'
+    ],
+    outcome: 'Category Corrected',
+    outcomeColor: 'bg-cyan-900/30 border-cyan-600',
+    outcomeIcon: Cpu,
+    outcomeIconColor: 'text-cyan-400',
+    url: 'CaseStudyNUPS'
   }
 ];
 
@@ -101,7 +122,7 @@ export default function CaseStudies() {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
-          <StatCard number="3" label="Case Studies" />
+          <StatCard number="4" label="Case Studies" />
           <StatCard number="6" label="AI Systems Bound" />
           <StatCard number="1" label="Legal Victory" />
           <StatCard number="2025" label="Active Year" />

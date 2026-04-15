@@ -24,6 +24,7 @@ import NUPSLogin from './pages/NUPSLogin';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSStaff from './pages/NUPSStaff';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
+import CaseStudyNUPS from './pages/CaseStudyNUPS';
 import NUPSDemoManager from './pages/NUPSDemoManager';
 import NUPSMISReport from './pages/NUPSMISReport';
 import ImageShare from './pages/ImageShare';
@@ -113,6 +114,7 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
