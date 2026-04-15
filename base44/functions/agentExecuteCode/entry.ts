@@ -132,8 +132,9 @@ function isBlockedContextRequest(input = '') {
   );
 }
 
-Deno.serve(async (req) => {
+Deno.serve(async () => {
   try {
+    return Response.json({ error: 'OMEGA directive active: agentExecuteCode is disabled. Report-only mode.' }, { status: 403 });
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 

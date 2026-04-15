@@ -29,119 +29,29 @@ export default function AgentBrainPanel() {
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // OMEGA: Full execution pipeline
   const executeFullPipeline = async (userRequest) => {
     setIsExecuting(true);
     try {
-      // OMEGA PIPELINE: Plan → Generate → Show Patch Bundle
-      
-      // Step 1: Create execution plan
-      toast.info('🧠 Creating execution plan...');
-      const planRes = await base44.functions.invoke('agentPlan', {
-        userRequest,
-        context: 'GlyphLock.io security platform',
-        mode
-      });
-
-      if (!planRes.data?.success) {
-        throw new Error(planRes.data?.error || 'Planning failed');
-      }
-
-      const changeSetId = planRes.data.changeSetId;
-      setActiveChangeSetId(changeSetId);
-      
-      const planMessage = {
+      const reportMessage = {
         role: 'assistant',
-        content: `Okay so here's the plan. ${planRes.data.plan.summary}\n\nRisk level is ${planRes.data.plan.riskLevel}.\n\nHere's what I'll do:\n${planRes.data.plan.executionPlan?.map((p, i) => `${i + 1}. ${p.description} in ${p.target}`).join('\n') || 'No file changes needed'}\n\n${planRes.data.plan.warnings?.length > 0 ? `Heads up: ${planRes.data.plan.warnings.join('. ')}` : ''}`
+        content: `Auto-repair is disabled by the OMEGA directive.\n\nRequest received: ${userRequest}\n\nNo plan was executed, no code was generated, and no files were created or modified.\n\nThis panel is now report-only for build/refactor requests.`
       };
-      setMessages(prev => [...prev, planMessage]);
-
-      // Step 2: Generate code
-      toast.info('⚡ Generating code...');
-      const genRes = await base44.functions.invoke('agentGenerate', { changeSetId });
-
-      if (!genRes.data?.success) {
-        throw new Error(genRes.data?.error || 'Code generation failed');
-      }
-
-      const genMessage = {
-        role: 'assistant',
-        content: `Alright generated ${genRes.data.totalGenerated} files for you. They're ready to deploy.\n\nNext step: I'll create the deployment patch. This will show you exactly what needs to be done.`
-      };
-      setMessages(prev => [...prev, genMessage]);
-
-      // Step 3: Apply (generates patch bundle)
-      toast.info('📦 Creating deployment package...');
-      const applyRes = await base44.functions.invoke('agentApply', {
-        changeSetId,
-        autoApprove: true
-      });
-
-      if (!applyRes.data?.success) {
-        throw new Error(applyRes.data?.error || 'Apply failed');
-      }
-
-      if (applyRes.data.patchBundleRequired) {
-        const patchMessage = {
-          role: 'assistant',
-          content: `Got it. So the platform can't auto deploy frontend files, but I've created everything you need.\n\nHere's your deployment patch bundle. Copy this entire thing and paste it to the main Base44 AI (the one you're talking to now), then just say apply these changes.\n\n\`\`\`\n${applyRes.data.patchBundleText}\n\`\`\``
-        };
-        setMessages(prev => [...prev, patchMessage]);
-        
-        // Also set for easy copy
-        setGeneratedCode({
-          filePath: 'PATCH_BUNDLE',
-          code: applyRes.data.patchBundleText,
-          model: 'deployment-patch'
-        });
-      } else {
-        const successMessage = {
-          role: 'assistant',
-          content: `Done. All changes applied successfully. ${applyRes.data.appliedCount} files deployed.`
-        };
-        setMessages(prev => [...prev, successMessage]);
-      }
-
-      toast.success('✅ Ready to deploy!');
-
-    } catch (error) {
-      console.error('Execution error:', error);
-      toast.error('Failed: ' + error.message);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: `Ran into an error: ${error.message}. Try again or let me know if you need help.`
-      }]);
+      setMessages(prev => [...prev, reportMessage]);
+      toast.info('Auto-repair disabled: report-only mode');
     } finally {
       setIsExecuting(false);
     }
   };
 
-  // Debug analysis
   const executeDebugAnalysis = async (errorInfo) => {
     setIsExecuting(true);
     try {
-      toast.info('🐛 Analyzing error...');
-      
-      const debugRes = await base44.functions.invoke('agentExecuteCode', {
-        action: 'debug_analyze',
-        payload: {
-          errorMessage: errorInfo,
-          stackTrace: '',
-          filePath: ''
-        }
-      });
-
-      if (debugRes.data?.success) {
-        const debugMessage = {
-          role: 'assistant',
-          content: `## 🐛 Debug Analysis\n\n**Root Cause:** ${debugRes.data.rootCause || 'Unknown'}\n\n**Explanation:** ${debugRes.data.explanation}\n\n${debugRes.data.fix ? `**Suggested Fix:**\n\`\`\`\nFile: ${debugRes.data.fix.filePath}\nFind: ${debugRes.data.fix.findCode}\nReplace: ${debugRes.data.fix.replaceCode}\n\`\`\`` : ''}\n\n*Confidence: ${(debugRes.data.confidence * 100).toFixed(0)}% | Model: ${debugRes.data.model}*`
-        };
-        setMessages(prev => [...prev, debugMessage]);
-        toast.success('Debug analysis complete');
-      }
-
-    } catch (error) {
-      toast.error('Debug analysis failed');
+      const debugMessage = {
+        role: 'assistant',
+        content: `## 🐛 Error Report Only\n\nDetected issue: ${errorInfo}\n\nAuto-debug and auto-repair execution are disabled by the OMEGA directive.\n\nNo dev functions were invoked and no fix was attempted.`
+      };
+      setMessages(prev => [...prev, debugMessage]);
+      toast.info('Auto-debug disabled: report-only mode');
     } finally {
       setIsExecuting(false);
     }

@@ -6,8 +6,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
  * ADMIN ONLY
  */
 
-Deno.serve(async (req) => {
+Deno.serve(async () => {
   try {
+    return Response.json({ error: 'OMEGA directive active: devAnalyzeFile is disabled. Report-only mode.' }, { status: 403 });
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 

@@ -49,52 +49,12 @@ export default function DeployPanel() {
     }
   };
 
-  const handleGenerate = async (changeSetId) => {
-    setIsGenerating(true);
-    try {
-      const { data } = await base44.functions.invoke('agentGenerate', { changeSetId });
-      
-      if (data.success) {
-        toast.success(`Generated ${data.totalGenerated} files`);
-        await loadChangeSets();
-        
-        // Load the updated change set to show details
-        const updated = await base44.entities.AgentChangeSet.filter({ id: changeSetId });
-        setSelectedChangeSet(updated[0]);
-      } else {
-        toast.error(data.error || 'Generation failed');
-      }
-    } catch (error) {
-      toast.error('Generation failed: ' + error.message);
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleGenerate = async () => {
+    toast.info('Auto-generation is disabled by the OMEGA directive.');
   };
 
-  const handleApply = async (changeSetId) => {
-    setIsApplying(true);
-    try {
-      const { data } = await base44.functions.invoke('agentApply', { 
-        changeSetId,
-        autoApprove: true // Admin auto-approves
-      });
-      
-      if (data.success) {
-        if (data.patchBundleRequired) {
-          setPatchBundle(data.patchBundleText);
-          toast.info('Patch Bundle generated - copy and paste to Base44 AI');
-        } else {
-          toast.success('Changes applied!');
-        }
-        await loadChangeSets();
-      } else {
-        toast.error(data.error || 'Apply failed');
-      }
-    } catch (error) {
-      toast.error('Apply failed: ' + error.message);
-    } finally {
-      setIsApplying(false);
-    }
+  const handleApply = async () => {
+    toast.info('Auto-apply is disabled by the OMEGA directive.');
   };
 
   const handleRollback = async (changeSetId) => {
