@@ -47,10 +47,11 @@ export const NAV_SECTIONS = [
   items: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
     { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public", requiresAccessToken: true },
+    { label: "Owner Analytics", page: "NUPSOwner", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
   ]
-  },
+  }
   {
     label: "Protocols",
     visibility: "public",
