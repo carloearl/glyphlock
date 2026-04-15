@@ -7,14 +7,10 @@ import CursorOrb from "@/components/global/CursorOrb";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GlyphLoader from "@/components/GlyphLoader";
-import MobileScalingSystem from "@/components/mobile/mobile-utils";
 import UnifiedSidebar from "@/components/global/UnifiedSidebar";
-
-
 import ThemeProvider from "@/components/ThemeProvider";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import StructuredDataOrg from "@/components/StructuredDataOrg";
-import SecurityHeaders from "@/components/security/SecurityHeaders";
 import CrawlerFallback from "@/components/seo/CrawlerFallback";
 import PrerenderHints from "@/components/seo/PrerenderHints";
 import AccessibilityToolbar from "@/components/accessibility/AccessibilityToolbar";
@@ -66,8 +62,6 @@ export default function Layout({ children, currentPageName }) {
       }
 
 
-      // Initialize mobile scaling system
-      new MobileScalingSystem();
     }
   }, []);
 
@@ -124,7 +118,6 @@ export default function Layout({ children, currentPageName }) {
       {/* GLYPHLOCK: Analytics, SEO & Security */}
       <GoogleAnalytics />
       <StructuredDataOrg />
-      <SecurityHeaders />
       <CrawlerFallback />
       <PrerenderHints />
 

@@ -119,6 +119,10 @@ function isBlockedArtifactPath(path) {
   const isAllowedExplicitOutput = lowerPath.startsWith('docs/') || lowerPath.startsWith('exports/');
   if (isAllowedExplicitOutput) return false;
   return lowerPath.includes('internal_index') ||
+    lowerPath.includes('/mobile/') ||
+    lowerPath.includes('/security/') ||
+    lowerPath.startsWith('components/mobile/') ||
+    lowerPath.startsWith('components/security/') ||
     lowerPath.startsWith('components/') && (fileName.includes('audit') || fileName.includes('report') || fileName.includes('index') || fileName.includes('scan')) ||
     fileName.endsWith('.md') ||
     fileName.includes('audit') ||

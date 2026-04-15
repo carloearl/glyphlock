@@ -5,6 +5,20 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
  * Returns organized directory structure with file metadata
  */
 
+function isBlockedTreePath(path) {
+  const value = String(path || '').toLowerCase();
+  return value.includes('internal_index') || value.includes('/mobile/') || value.includes('/security/') || value.startsWith('components/mobile/') || value.startsWith('components/security/');
+}
+
+function pruneBlockedNodes(nodes) {
+  return nodes
+    .filter((node) => !isBlockedTreePath(node.path))
+    .map((node) => ({
+      ...node,
+      children: Array.isArray(node.children) ? pruneBlockedNodes(node.children) : node.children,
+    }));
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -90,10 +104,12 @@ Deno.serve(async (req) => {
       }
     ];
 
+    const prunedTree = pruneBlockedNodes(fileTree);
+
     return Response.json({
       success: true,
-      tree: fileTree,
-      total_files: countFiles(fileTree)
+      tree: prunedTree,
+      total_files: countFiles(prunedTree)
     });
 
   } catch (error) {

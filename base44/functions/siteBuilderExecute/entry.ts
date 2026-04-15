@@ -129,6 +129,11 @@ async function generateWithFallback(prompt, options = {}) {
   return { success: false, error: 'All DREAM TEAM models unavailable' };
 }
 
+function isPermanentlyBlockedPath(path) {
+  const value = String(path || '').toLowerCase();
+  return value.includes('internal_index') || value.includes('/mobile/') || value.includes('/security/') || value.startsWith('components/mobile/') || value.startsWith('components/security/');
+}
+
 Deno.serve(async () => {
   try {
     return Response.json({ error: 'OMEGA directive active: siteBuilderExecute is disabled. Report-only mode.' }, { status: 403 });

@@ -14,6 +14,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
  * - Pages/Components: CANNOT be directly written - requires Patch Bundle for Base44 AI
  */
 
+function isPermanentlyBlockedPath(path) {
+  const value = String(path || '').toLowerCase();
+  return value.includes('internal_index') || value.includes('/mobile/') || value.includes('/security/') || value.startsWith('components/mobile/') || value.startsWith('components/security/');
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -69,6 +74,13 @@ Deno.serve(async (req) => {
       };
 
       try {
+        if (isPermanentlyBlockedPath(change.path)) {
+          logEntry.result = 'blocked';
+          logEntry.error = 'OMEGA directive: blocked artifact path';
+          applyLog.push(logEntry);
+          continue;
+        }
+
         // ENTITY: Can apply directly
         if (change.path.startsWith('entities/')) {
           const entityName = change.path.replace('entities/', '').replace('.json', '');

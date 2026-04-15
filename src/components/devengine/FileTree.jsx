@@ -1,9 +1,18 @@
 import React from 'react';
 
+function isBlockedNodePath(path) {
+  const value = String(path || '').toLowerCase();
+  return value.includes('internal_index') || value.includes('/mobile/') || value.includes('/security/') || value.startsWith('components/mobile/') || value.startsWith('components/security/');
+}
+
 function TreeNode(props) {
   const { node, depth, selectedPath, onSelect } = props;
+  if (isBlockedNodePath(node.path)) return null;
+  const filteredChildren = Array.isArray(node.children)
+    ? node.children.filter((child) => !isBlockedNodePath(child.path))
+    : [];
   const isSelected = node.path === selectedPath;
-  const isFolder = Array.isArray(node.children) && node.children.length > 0;
+  const isFolder = filteredChildren.length > 0;
 
   return (
     <div>
@@ -27,7 +36,7 @@ function TreeNode(props) {
       </button>
 
       {isFolder &&
-        node.children.map(function renderChild(child) {
+        filteredChildren.map(function renderChild(child) {
           return (
             <TreeNode
               key={child.path}
