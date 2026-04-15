@@ -11,6 +11,8 @@ import { Wine, Star, RefreshCw, Coins, Printer, X, DollarSign, Trash2, CreditCar
 const PRODUCTS = [
   { id: "drink",          name: "Drink",          price: 10,  color: "from-cyan-900 to-cyan-700",    border: "border-cyan-500/60",   text: "text-cyan-300" },
   { id: "bottle_service", name: "Bottle Service",  price: 500, color: "from-purple-900 to-purple-700", border: "border-purple-500/60", text: "text-purple-300" },
+  { id: "glyphbucks_100",  name: "$100 GlyphBucks", price: 130, color: "from-amber-900 to-amber-700",   border: "border-amber-500/60",  text: "text-amber-300" },
+  { id: "glyphbucks_250",  name: "$250 GlyphBucks", price: 325, color: "from-amber-900 to-amber-700",   border: "border-amber-500/60",  text: "text-amber-300" },
 ];
 
 const EXCHANGES = [
@@ -77,28 +79,52 @@ export default function POSBarRegister({ user }) {
   }
 
   const processTransaction = useMutation({
-    mutationFn: () => base44.entities.POSTransaction.create({
-      transaction_id: `BAR-${Date.now()}`,
-      items: cart.map(i => ({ product_id: i.id, product_name: i.name, quantity: i.qty, price: i.price, total: i.price * i.qty })),
-      subtotal,
-      tax: 0,
-      tip: tipAmount,
-      total,
-      payment_method: paymentMethod,
-      cashier: user?.email || "bar",
-      status: "completed",
-      batch_id: activeBatch?.id || null,
-      terminal_id: activeBatch?.venue_id
-        ? `TERM-BAR-${activeBatch.venue_id.slice(-6).toUpperCase()}`
-        : 'TERM-BAR-UNKNOWN',
-      cashier_id: user?.id || user?.email || null,
-      card_last4: null,
-      station: 'bar',
-      mode: 'REAL',
-      cashier_name: user?.full_name || user?.name || user?.email || 'Bar Staff',
-      cashier_email: user?.email || null,
-      venue_id: activeBatch?.venue_id || activeVenue?.id || null,
-    }),
+    mutationFn: async () => {
+      const txnId = `BAR-${Date.now()}`;
+      
+      // Create transaction
+      const txn = await base44.entities.POSTransaction.create({
+        transaction_id: txnId,
+        items: cart.map(i => ({ product_id: i.id, product_name: i.name, quantity: i.qty, price: i.price, total: i.price * i.qty })),
+        subtotal,
+        tax: 0,
+        tip: tipAmount,
+        total,
+        payment_method: paymentMethod,
+        cashier: user?.email || "bar",
+        status: "completed",
+        batch_id: activeBatch?.id || null,
+        terminal_id: activeBatch?.venue_id
+          ? `TERM-BAR-${activeBatch.venue_id.slice(-6).toUpperCase()}`
+          : 'TERM-BAR-UNKNOWN',
+        cashier_id: user?.id || user?.email || null,
+        card_last4: null,
+        station: 'bar',
+        mode: 'REAL',
+        cashier_name: user?.full_name || user?.name || user?.email || 'Bar Staff',
+        cashier_email: user?.email || null,
+        venue_id: activeBatch?.venue_id || activeVenue?.id || null,
+      });
+
+      // Issue GlyphBucks if purchased
+      const gbItems = cart.filter(i => i.id.startsWith('glyphbucks_'));
+      for (const item of gbItems) {
+        const gbAmount = item.id === 'glyphbucks_100' ? 100 : 250;
+        await base44.entities.GlyphBucksTransaction.create({
+          transaction_id: `GB-${txnId}-${item.id}`,
+          transaction_type: 'Issue',
+          amount: gbAmount,
+          cashier_id: user?.email || 'bar',
+          status: 'active',
+          expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+          is_redeemable: true,
+          venue_id: activeBatch?.venue_id || activeVenue?.id || null,
+          notes: `Issued via Bar Register — ${gbAmount} GB @ $${item.price.toFixed(2)}`
+        });
+      }
+
+      return txn;
+    },
     onSuccess: () => {
       qc.invalidateQueries(["pos-transactions"]);
       setCart([]);
@@ -117,8 +143,10 @@ export default function POSBarRegister({ user }) {
   }
 
   function handlePrintAndCharge() {
-    window.print();
     processTransaction.mutate();
+    setTimeout(() => {
+      window.print();
+    }, 100);
   }
 
   return (
@@ -271,6 +299,19 @@ export default function POSBarRegister({ user }) {
                 </div>
               ))}
               <div className="border-t border-dashed border-gray-400 my-2" />
+              
+              {/* GlyphBucks Issued Info */}
+              {cart.some(i => i.id.startsWith('glyphbucks_')) && (
+                <div className="my-2 text-xs bg-amber-50 p-2 rounded">
+                  <div className="font-bold text-amber-900 mb-1">⭐ GLYPHBUCKS ISSUED:</div>
+                  {cart.filter(i => i.id.startsWith('glyphbucks_')).map(item => (
+                    <div key={item.id} className="text-amber-800">
+                      • ${item.id === 'glyphbucks_100' ? '100' : '250'} GB (Expires 48 hrs)
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               <div className="flex justify-between"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
 
               {/* Tip write-in line */}
