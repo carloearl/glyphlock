@@ -4,13 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DollarSign, ShoppingCart, Users, TrendingUp, Clock, Star,
-  FileText, BarChart3, Printer, ArrowLeft, Shield, Coins,
-  DoorOpen, CheckCircle2, AlertTriangle, Activity
-} from "lucide-react";
+import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from "recharts";
 import { format, startOfQuarter, endOfQuarter, subQuarters, isWithinInterval } from "date-fns";
+
+// Toast notification helper
+const toast = {
+  error: (msg) => console.error(msg),
+  success: (msg) => console.log(msg),
+};
 
 const COLORS = ["#a855f7", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#3b82f6"];
 
@@ -150,6 +152,46 @@ export default function NUPSMISReport() {
 
   const handlePrint = () => window.print();
 
+  const handleDownloadPDF = async () => {
+    try {
+      const pdfData = {
+        qLabel,
+        totalRevenue,
+        totalDDRevenue,
+        qTransactions,
+        gbLiabilityFaceValue,
+        gbSurchargeTotal,
+        avgTransaction,
+        activeEntertainers,
+        totalShiftHours,
+        qShifts,
+        entertainers,
+        qPayroll,
+        qDreamOrders,
+        revenueChartData,
+        payMethodChart,
+        topEarners,
+        qStart,
+        qEnd,
+        now,
+      };
+
+      const response = await base44.functions.invoke('generateNUPSPDF', pdfData);
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `NUPS-MIS-Report-${qLabel.replace(/ /g, '-')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast.error('Failed to generate PDF');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -183,6 +225,9 @@ export default function NUPSMISReport() {
                 {q === 0 ? "Current Q" : q === 1 ? "Last Q" : "2Q Ago"}
               </Button>
             ))}
+            <Button size="sm" onClick={handleDownloadPDF} className="bg-green-600 hover:bg-green-700 text-white mr-2">
+              <Download className="w-4 h-4 mr-1" /> PDF
+            </Button>
             <Button size="sm" onClick={handlePrint} className="bg-cyan-600 hover:bg-cyan-700 text-white">
               <Printer className="w-4 h-4 mr-1" /> Print
             </Button>
