@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@/utils/index.ts";
 import { Button } from "@/components/ui/button";
 import { 
   Shield, Zap, Brain, Code, Target, Users, 
