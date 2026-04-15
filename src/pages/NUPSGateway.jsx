@@ -5,7 +5,7 @@ import { createPageUrl } from "@/utils";
 import {
   Shield, Crown, Users, UserCheck, Music, FlaskConical,
   ChevronRight, Lock, AlertTriangle, Loader2, LogOut, ArrowLeft,
-  Zap, Plus
+  Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -97,7 +97,6 @@ export default function NUPSGateway() {
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
   const [deniedCard, setDeniedCard] = useState(null);
-  const [testingRole, setTestingRole] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -152,20 +151,7 @@ export default function NUPSGateway() {
 
   const isOwner = user?.email?.toLowerCase() === OWNER_EMAIL;
 
-  const handleTestRole = async (testRole) => {
-    setTestingRole(true);
-    try {
-      const res = await base44.functions.invoke("nupsAuthenticate", { owner_test_role: testRole.role });
-      const { success, user: testUser } = res.data;
-      if (success) {
-        sessionStorage.setItem("nups_session", JSON.stringify(testUser));
-        navigate(`/${testRole.dest}`);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    setTestingRole(false);
-  };
+
 
   const handleCardClick = (card) => {
     // Sandbox — always accessible
@@ -311,44 +297,16 @@ export default function NUPSGateway() {
           })}
         </div>
 
-        {/* OWNER-ONLY: Test all tiers + Demo Manager */}
+        {/* OWNER-ONLY: Demo Account Manager */}
         {isOwner && (
-          <div className="mt-6 rounded-2xl border border-violet-500/20 bg-violet-500/4 p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-violet-400" />
-                <span className="text-xs font-black text-violet-400 uppercase tracking-widest">Owner Test Panel</span>
-              </div>
-              <button
-                onClick={() => navigate("/NUPSDemoManager")}
-                className="flex items-center gap-1.5 text-[11px] text-emerald-400 border border-emerald-500/25 rounded-lg px-2.5 py-1.5 hover:bg-emerald-500/10 transition-colors font-bold"
-              >
-                <Plus className="w-3 h-3" />
-                Manage Demo Accounts
-              </button>
-            </div>
-            <p className="text-[11px] text-gray-600">
-              Only visible to you. Click any tier to enter N.U.P.S. as that role — no credentials needed.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {TEST_ROLES.map(tr => (
-                <button
-                  key={tr.role}
-                  onClick={() => handleTestRole(tr)}
-                  disabled={testingRole}
-                  className={`p-2.5 rounded-xl border border-white/[0.06] bg-black/40 hover:border-violet-500/30 hover:bg-violet-500/8 transition-all active:scale-95 text-center disabled:opacity-50`}
-                >
-                  <div className={`text-xs font-black ${tr.color}`}>{tr.label}</div>
-                  <div className="text-[9px] text-gray-600 mt-0.5">→ {tr.dest}</div>
-                </button>
-              ))}
-            </div>
-            {testingRole && (
-              <div className="flex items-center gap-2 text-xs text-violet-400">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                Switching tier...
-              </div>
-            )}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => navigate("/NUPSDemoManager")}
+              className="inline-flex items-center gap-2 text-xs text-emerald-400 border border-emerald-500/25 rounded-lg px-4 py-2 hover:bg-emerald-500/10 transition-colors font-bold"
+            >
+              <Plus className="w-4 h-4" />
+              Create Demo Accounts (Real RBAC Testing)
+            </button>
           </div>
         )}
 
