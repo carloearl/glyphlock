@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, LogIn, LogOut, MapPin, Clock, DollarSign, ChevronLeft, Check, CheckCircle2 } from "lucide-react";
+import { Users, LogIn, LogOut, MapPin, Clock, DollarSign, Check, CheckCircle2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -145,21 +145,6 @@ export default function EntertainerCheckIn({ user }) {
       <div className="space-y-6">
         <Card className="border border-pink-500/30 bg-black">
           <CardHeader className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowVerification(false);
-                  setDailyChecklist({ contractValid: false, licenseValid: false, venueRules: false, safetyAck: false });
-                }}
-                className="text-gray-400 hover:text-white"
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Back
-              </Button>
-              <div className="w-20"></div>
-            </div>
             <div className="flex items-center justify-center gap-2 bg-pink-600/20 border border-pink-500/50 rounded-lg py-3">
               <div className="w-3 h-3 rounded-full bg-pink-500"></div>
               <span className="font-bold text-pink-400">Agreement & Eligibility</span>
@@ -210,22 +195,6 @@ export default function EntertainerCheckIn({ user }) {
       <div className="space-y-6">
         <Card className="border border-pink-500/30 bg-black">
           <CardHeader className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowPinPad(false);
-                  setVerificationComplete(false);
-                  setPin('');
-                  setDailyChecklist({ contractValid: false, licenseValid: false, venueRules: false, safetyAck: false });
-                }}
-                className="text-gray-400 hover:text-white"
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Back
-              </Button>
-            </div>
             <div className="flex items-center justify-center gap-2 bg-pink-600/20 border border-pink-500/50 rounded-lg py-3">
               <div className="w-3 h-3 rounded-full bg-pink-500"></div>
               <span className="font-bold text-pink-400">Enter PIN to Complete Check In</span>
