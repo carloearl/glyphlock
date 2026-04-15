@@ -63,10 +63,7 @@ import VenueSettings from "../components/nups/VenueSettings.jsx";
 import OfficialChecks from "./OfficialChecks.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import HardwareStatusPanel from "../components/nups/hardware/HardwareStatusPanel.jsx";
-import NUPSEnvBanner from "../components/nups/NUPSEnvBanner.jsx";
-import NUPSDataWipePanel from "../components/nups/NUPSDataWipePanel.jsx";
 import DemoCredentialsPanel from "../components/nups/DemoCredentialsPanel.jsx";
-import NUPSDemoManager from "./NUPSDemoManager.jsx";
 import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
@@ -271,7 +268,6 @@ export default function NUPSOwner() {
         url="/nups-owner"
       />
       <OfflineSyncBanner />
-      <NUPSEnvBanner user={user} />
       <header className="border-b border-purple-500/20 p-4 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
         <div className="container mx-auto">
           <div className="flex items-center justify-between flex-wrap gap-3">
@@ -334,6 +330,8 @@ export default function NUPSOwner() {
                   <DropdownMenuItem
                     className="cursor-pointer hover:bg-gray-800 text-xs text-gray-400"
                     onClick={() => {
+1
+
                         setActiveModule('dashboard');
                       const adminSession = { ...user, _highestRole: user?._highestRole || 'PLATFORM_ADMIN' };
                       delete adminSession._viewAsRole;
@@ -368,7 +366,7 @@ export default function NUPSOwner() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/NUPSGateway')}
-                className="text-gray-400 hover:text-red-400 p-2 min-h-[44px] hidden sm:flex"
+                className="text-gray-400 hover:text-red-400 p-2 min-h-[44px]"
                 aria-label="Close dashboard"
               >
                 ✕
@@ -441,7 +439,7 @@ export default function NUPSOwner() {
           )}
 
         {/* Module Navigation Tabs */}
-        <div className="flex gap-2 mb-6 pb-3 border-b border-gray-700 overflow-x-auto scrollbar-hide" style={{WebkitOverflowScrolling:'touch'}}>
+        <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-gray-700 overflow-x-auto">
           {visibleModules.map(mod => {
             const ModIcon = mod.icon;
             return (
@@ -601,25 +599,10 @@ export default function NUPSOwner() {
                 <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
               )}
               <HardwareStatusPanel user={user} activeVenue={activeVenue} />
-              {isAdminUser && (
-                <div className="mt-8">
-                  <div className="text-xs font-bold text-red-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span className="w-4 h-px bg-red-500/40" />
-                    DATA MANAGEMENT
-                    <span className="flex-1 h-px bg-red-500/40" />
-                  </div>
-                  <NUPSDataWipePanel user={user} />
-                </div>
-              )}
             </div>
           )}
           {activeModule === 'venue' && <VenueSettings user={user} />}
-          {activeModule === 'demo' && isAdminUser && (
-            <div className="space-y-6">
-              <NUPSDemoManager />
-              <DemoCredentialsPanel />
-            </div>
-          )}
+          {activeModule === 'demo' && isAdminUser && <DemoCredentialsPanel />}
         </div>
         )}
 

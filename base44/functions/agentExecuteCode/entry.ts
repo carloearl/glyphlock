@@ -137,10 +137,7 @@ Rules:
 - Entities are JSON schemas in entities/
 - Functions are Deno handlers in functions/
 - Use royal blue theme (#3B82F6, #4F46E5)
-- Mobile-first responsive design
-- NEVER plan files in: components/internal_index/, components/glyphlock/bot/test/
-- NEVER plan .md files, report files, audit files, index files, or non-functional documentation files
-- NEVER plan files named: PHASE_*, *_REPORT*, *_AUDIT*, SITE_INDEX*, siteMap*, dependencyGraph*, README_*, MobileOptimization*`;
+- Mobile-first responsive design`;
 
         const result = await callLLM(
           `User Request: ${userRequest}\n\nContext: ${context || 'GlyphLock.io website'}`,

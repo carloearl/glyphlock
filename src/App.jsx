@@ -55,7 +55,7 @@ const AuthenticatedApp = () => {
   }
 
   const currentPath = window.location.pathname;
-  const nupsPublicPaths = ['/NUPSLanding', '/NUPSGateway', '/NUPSSandbox', '/NUPSLogin', '/unauthorized', '/EntertainerCheckIn', '/NUPSOwner', '/NUPSStaff', '/NUPSDemoManager', '/NUPSPostImplementationReport', '/NUPSMISReport', '/NUPSPostLogin'];
+  const nupsPublicPaths = ['/NUPSLanding', '/NUPSGateway', '/NUPSSandbox', '/NUPSLogin', '/unauthorized', '/EntertainerCheckIn'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPath.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
@@ -68,7 +68,7 @@ const AuthenticatedApp = () => {
   }
 
   // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/NUPSLanding', '/NUPSGateway', '/unauthorized', '/NUPSSandbox', '/NUPSLogin', '/NUPSOwner', '/NUPSStaff', '/EntertainerCheckIn', '/NUPSDemoManager', '/NUPSPostImplementationReport', '/NUPSMISReport', '/NUPSPostLogin'];
+  const fullscreenPaths = ['/NUPSLanding', '/NUPSGateway', '/unauthorized', '/NUPSSandbox', '/NUPSLogin', '/NUPSOwner', '/NUPSStaff', '/EntertainerCheckIn'];
   const isFullscreen = fullscreenPaths.some(p => window.location.pathname.startsWith(p));
 
   if (isFullscreen) {
@@ -82,10 +82,6 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSStaff" element={<NUPSStaff />} />
         <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
-        <Route path="/NUPSPostImplementationReport" element={<NUPSPostImplementationReport />} />
-        <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
-        <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     );
@@ -101,13 +97,22 @@ const AuthenticatedApp = () => {
         <Route path="/AnalyticsDashboard" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
         <Route path="/SettlementReports" element={<LayoutWrapper currentPageName="SettlementReports"><SettlementReports /></LayoutWrapper>} />
         <Route path="/GovernanceHub" element={<LayoutWrapper currentPageName="GovernanceHub"><GovernanceHub /></LayoutWrapper>} />
-        <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
-        <Route path="/NUPSPostImplementationReport" element={<NUPSPostImplementationReport />} />
-        <Route path="/ImageShare" element={<ImageShare />} />
-        <Route path="/GlyphBucksHub" element={<GlyphBucksHub />} />
-        <Route path="/ContractLookup" element={<ContractLookup />} />
-        <Route path="/SystemAudit" element={<LayoutWrapper currentPageName="SystemAudit"><SystemAudit /></LayoutWrapper>} />
-        <Route path="/OfficialChecks" element={<LayoutWrapper currentPageName="OfficialChecks"><OfficialChecks /></LayoutWrapper>} />
+        <Route path="/NUPSLanding" element={<NUPSLanding />} />
+        <Route path="/NUPSGateway" element={<NUPSGateway />} />
+        <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
+        <Route path="/NUPSLogin" element={<NUPSLogin />} />
+        <Route path="/NUPSOwner" element={<NUPSOwner />} />
+        <Route path="/NUPSStaff" element={<NUPSStaff />} />
+        <Route path="/NUPSLanding" element={<NUPSLanding />} />
+        <Route path="/NUPSGateway" element={<NUPSGateway />} />
+        <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
+        <Route path="/NUPSLogin" element={<NUPSLogin />} />
+        <Route path="/NUPSOwner" element={<NUPSOwner />} />
+        <Route path="/NUPSStaff" element={<NUPSStaff />} />
+        <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
+        <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
+        <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>

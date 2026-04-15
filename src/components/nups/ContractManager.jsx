@@ -20,7 +20,7 @@ const STATUS_CONFIG = {
   disputed:  { color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/30" },
 };
 
-export default function ContractManager({ user, venue_id = "dream_palace" }) {
+export default function ContractManager({ user, venue_id = activeVenue?.id || activeVenue?.venue_id || "dream_palace" }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");

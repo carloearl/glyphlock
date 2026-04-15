@@ -376,8 +376,8 @@ export default function DevModeLayout() {
 
               // LOG - Action log
               if (command === 'log') {
-                const { data: result } = await base44.functions.invoke('devGetBackups', { path: selectedFile || 'all' });
-                if (result && result.backups && result.backups.length > 0) {
+                const result = await callDevFunction('devGetBackups', { path: selectedFile || 'all' });
+                if (result.backups && result.backups.length > 0) {
                   return '📝 ACTION LOG:\n' + result.backups.slice(0, 10)
                     .map(b => `  ${b.timestamp} - ${b.path}`)
                     .join('\n');

@@ -11,15 +11,19 @@ export default function HeroHolographicCard({ card, size = 'normal' }) {
   const [tiltStyle, setTiltStyle] = useState({});
   const cardRef = useRef(null);
 
+  if (!card) return null;
+
   const handleMouseMove = useCallback((e) => {
     if (!cardRef.current || isFlipped) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
+    
     const tiltX = (y - 0.5) * 15;
     const tiltY = (x - 0.5) * -15;
     const glareX = x * 100;
     const glareY = y * 100;
+
     setTiltStyle({
       transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.02, 1.02, 1.02)`,
       '--glare-x': `${glareX}%`,
@@ -29,14 +33,13 @@ export default function HeroHolographicCard({ card, size = 'normal' }) {
 
   const handleMouseLeave = useCallback(() => {
     setTiltStyle({});
+    // Keep flip state on mouse leave - user must click to toggle
   }, []);
 
   const handleClick = useCallback(() => {
     setIsFlipped(prev => !prev);
     setTiltStyle({});
   }, []);
-
-  if (!card) return null;
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-US', { 

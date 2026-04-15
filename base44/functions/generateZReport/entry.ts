@@ -23,13 +23,10 @@ Deno.serve(async (req) => {
 
     const { opening_cash, closing_cash, reconciliation_notes, venue_id } = await req.json();
 
-    // Role check — user may be null if called by scheduler
-    const userEmail = user?.email || null;
-    const nupsUsers = userEmail
-      ? await base44.asServiceRole.entities.NUPSUser.filter({ email: userEmail })
-      : [];
+    // Role check
+    const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({ email: user.email });
     const nupsUser = nupsUsers[0];
-    const userRole = nupsUser?.role || (user?.role === 'admin' ? 'PLATFORM_ADMIN' : 'PLATFORM_ADMIN');
+    const userRole = nupsUser?.role || (user?.role === 'admin' ? 'PLATFORM_ADMIN' : null);
 
     if (!ALLOWED_ROLES.includes(userRole)) {
       return Response.json({ error: 'Forbidden: insufficient role' }, { status: 403 });

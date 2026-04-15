@@ -21,7 +21,6 @@ import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import DriverDropOffTracker from "../components/nups/DriverDropOffTracker.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import SEOHead from "@/components/SEOHead";
-import NUPSEnvBanner from "../components/nups/NUPSEnvBanner.jsx";
 import { mapNUPSRoleToRBAC } from "../config/roles.js";
 import { GLYPHLOCK_DISCLAIMER } from "@/constants/legalDisclaimer";
 
@@ -130,7 +129,6 @@ export default function NUPSStaff() {
         url="/NUPSStaff"
       />
       <OfflineSyncBanner />
-      <NUPSEnvBanner user={user} />
 
       {/* Header */}
       <header className="border-b border-cyan-500/20 p-3 sticky top-0 z-50 bg-black/95 backdrop-blur-lg">
@@ -168,13 +166,13 @@ export default function NUPSStaff() {
 
       <div className="container mx-auto p-4">
         {/* Module Nav */}
-        <div className="flex gap-2 mb-5 overflow-x-auto scrollbar-hide pb-1" style={{WebkitOverflowScrolling:'touch'}}>
+        <div className="flex flex-wrap gap-2 mb-5">
           {visibleModules.map(({ key, label, icon: Icon }) => (
             <Button
               key={key}
               onClick={() => setActiveModule(key)}
               variant={currentModule === key ? "default" : "outline"}
-              className={`min-h-[44px] text-sm flex-shrink-0 transition-all ${
+              className={`min-h-[40px] text-sm transition-all ${
                 currentModule === key
                   ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500"
                   : "border-gray-700 text-gray-300 hover:border-cyan-500/50 hover:text-white bg-transparent"
