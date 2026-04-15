@@ -1,3 +1,1 @@
-export default function Data() {
-  return null;
-}
+export default function GhostFile() { return null; }
