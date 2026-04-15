@@ -11,38 +11,8 @@ import VirtualTerminal from './VirtualTerminal';
 import DiffViewer from './DiffViewer';
 import ApprovalPanel from './ApprovalPanel';
 
-// Connect to siteBuilder agent
-async function callAgent(message) {
-  try {
-    const conversation = await base44.agents.createConversation({
-      agent_name: 'siteBuilder',
-      metadata: { source: 'dev_engine' }
-    });
-    
-    await base44.agents.addMessage(conversation, {
-      role: 'user',
-      content: '[DEV ENGINE MODE] ' + message
-    });
-    
-    // Wait for response
-    return new Promise((resolve) => {
-      const unsubscribe = base44.agents.subscribeToConversation(conversation.id, (data) => {
-        const lastMsg = data.messages[data.messages.length - 1];
-        if (lastMsg?.role === 'assistant' && lastMsg?.content) {
-          unsubscribe();
-          resolve({ success: true, content: lastMsg.content, toolCalls: lastMsg.tool_calls });
-        }
-      });
-      
-      setTimeout(() => {
-        unsubscribe();
-        resolve({ error: 'Timeout waiting for agent response' });
-      }, 60000);
-    });
-  } catch (err) {
-    console.error('Agent error:', err);
-    return { error: err.message };
-  }
+async function callAgent() {
+  return { error: 'Automatic Site Builder execution is disabled. Use explicit agent actions only.' };
 }
 
 export default function DevModeLayout() {
@@ -116,7 +86,7 @@ export default function DevModeLayout() {
   async function handleAnalyzeFile() {
     if (!selectedFile) return;
     setIsBusy(true);
-    setStatus('Analyzing via agent…');
+    setStatus('Automatic agent analysis is disabled');
     
     const result = await callAgent(`[EXPLAIN MODE] Analyze the file ${selectedFile} and explain its purpose, structure, and any issues`);
     setIsBusy(false);
@@ -132,7 +102,7 @@ export default function DevModeLayout() {
   async function handleProposeChange(instructions) {
     if (!selectedFile || !fileContent) return;
     setIsBusy(true);
-    setStatus('Agent generating proposal…');
+    setStatus('Automatic agent proposal is disabled');
 
     const result = await callAgent(`[BUILD MODE] For file ${selectedFile}, propose changes: ${instructions}\n\nShow the complete updated code.`);
     setIsBusy(false);
@@ -154,7 +124,7 @@ export default function DevModeLayout() {
   async function handleApplyChange() {
     if (!selectedFile || !proposal) return;
     setIsBusy(true);
-    setStatus('Applying via agent…');
+    setStatus('Automatic agent apply is disabled');
 
     const result = await callAgent(`[BUILD MODE] Write the following code to ${selectedFile}:\n\n\`\`\`\n${proposal}\n\`\`\``);
     setIsBusy(false);

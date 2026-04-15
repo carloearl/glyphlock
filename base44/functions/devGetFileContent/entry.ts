@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: false,
-      error: 'Direct agent-based file reading is disabled for Site Builder normalization',
+      error: 'Automatic Site Builder execution is disabled. Use explicit user-triggered actions only.',
       file_path
     }, { status: 410 });
 

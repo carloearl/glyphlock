@@ -152,22 +152,11 @@ export default function AgentBrainPanel() {
   const safePlan = Array.isArray(plan) ? plan : [];
 
   useEffect(() => {
-    initConversation();
     loadSavedConversations();
   }, []);
 
   async function loadSavedConversations() {
-    try {
-      const { data } = await base44.functions.invoke('conversationList', {
-        agent_name: 'siteBuilder',
-        mode: 'brain'
-      });
-      if (data.success) {
-        setSavedConversations(data.conversations || []);
-      }
-    } catch (error) {
-      console.error('Failed to load conversations:', error);
-    }
+    setSavedConversations([]);
   }
 
   async function saveConversation() {
@@ -275,15 +264,14 @@ export default function AgentBrainPanel() {
       setConversation(conv);
       const initialMessages = Array.isArray(conv.messages) ? conv.messages : [];
       setMessages(initialMessages);
-      
-      // Subscribe to updates
+
       const unsubscribe = base44.agents.subscribeToConversation(conv.id, (data) => {
         if (data && data.messages) {
           const newMessages = Array.isArray(data.messages) ? data.messages : [];
           setMessages(newMessages);
         }
       });
-      
+
       return () => {
         if (typeof unsubscribe === 'function') {
           unsubscribe();
@@ -359,7 +347,15 @@ export default function AgentBrainPanel() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || sending || !conversation) return;
+    if (!input.trim() || sending) return;
+
+    let activeConversation = conversation;
+    if (!activeConversation) {
+      await initConversation();
+      activeConversation = conversation;
+    }
+
+    if (!activeConversation) return;
 
     const userInput = input.trim();
     const fileUrls = uploadedFiles.map(f => f.url);
@@ -399,7 +395,7 @@ export default function AgentBrainPanel() {
         ...(fileUrls.length > 0 && { file_urls: fileUrls })
       };
 
-      await base44.agents.addMessage(conversation, explainMessage);
+      await base44.agents.addMessage(activeConversation, explainMessage);
       toast.success('Agent analyzing...');
     } catch (error) {
       console.error('Send error:', error);
