@@ -135,7 +135,10 @@ export default function NUPSOwner() {
 
   const { data: transactions = [], isLoading: txLoading } = useQuery({
     queryKey: ["pos-transactions"],
-    queryFn: () => base44.entities.POSTransaction.list("-created_date"),
+    queryFn: () => base44.entities.POSTransaction.list({
+      filter: { mode: "REAL" },
+      sort: "-created_date"
+    }),
     enabled: !!user,
     staleTime: 0,
     gcTime: 0,

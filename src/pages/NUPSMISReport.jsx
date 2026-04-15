@@ -65,7 +65,10 @@ export default function NUPSMISReport() {
 
   const { data: transactions = [] } = useQuery({
     queryKey: ["mis-transactions"],
-    queryFn: () => base44.entities.POSTransaction.list("-created_date", 500),
+    queryFn: () => base44.entities.POSTransaction.list({
+      filter: { mode: "REAL" },
+      sort: "-created_date"
+    }),
   });
 
   const { data: dreamOrders = [] } = useQuery({
