@@ -3,6 +3,7 @@ import {
   QrCode, Shield, Bed, UserCheck, DollarSign, BarChart3, Key,
   Hash, Code, Lock, Fingerprint, Zap
 } from "lucide-react";
+import { filterUiArtifacts } from "@/lib/uiArtifactFilter";
 
 export const navItems = [
   {
@@ -70,4 +71,7 @@ export const navItems = [
       { id: "api-keys", label: "API Keys & Secrets", entity: "APIKey", icon: Lock },
     ]
   }
-];
+].map((category) => ({
+  ...category,
+  items: filterUiArtifacts(category.items || [])
+}));

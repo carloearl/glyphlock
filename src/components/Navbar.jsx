@@ -13,8 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { NAV_SECTIONS } from "@/components/NavigationConfig";
+import { filterUiArtifacts } from "@/lib/uiArtifactFilter";
 
-const NAV = NAV_SECTIONS;
+const NAV = filterUiArtifacts(NAV_SECTIONS).map((section) => ({
+  ...section,
+  items: filterUiArtifacts(section.items || [])
+}));
 
 // Magnetic button effect
 function MagneticButton({ children, className, ...props }) {

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Twitter, Linkedin, Instagram, Github, Mail, Phone, MapPin, Shield, ExternalLink } from "lucide-react";
 import { FOOTER_LINKS } from "@/components/NavigationConfig";
+import { filterUiArtifacts } from "@/lib/uiArtifactFilter";
 
 const certifications = [
   { name: 'ISO 27001', subtitle: 'ARCHITECTURE', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg', page: 'TrustSecurity' },
@@ -18,6 +19,10 @@ const socials = [
   { href: "https://instagram.com/glyphlock", icon: Instagram, label: "Instagram" },
   { href: "https://github.com/glyphlock", icon: Github, label: "GitHub" },
 ];
+
+const CLEAN_FOOTER_LINKS = Object.fromEntries(
+  Object.entries(FOOTER_LINKS).map(([key, links]) => [key, filterUiArtifacts(links || [])])
+);
 
 const LinkGroup = ({ title, links, hoverColor = "hover:text-blue-400" }) => (
   <div>
@@ -88,21 +93,21 @@ export default function Footer() {
 
           {/* Nav Columns — each takes 1 col on mobile (2-col grid), auto on larger */}
           <div className="col-span-1 md:col-span-2 lg:col-span-2">
-            <LinkGroup title="Company" links={FOOTER_LINKS.company} hoverColor="hover:text-blue-400" />
+            <LinkGroup title="Company" links={CLEAN_FOOTER_LINKS.company} hoverColor="hover:text-blue-400" />
           </div>
           <div className="col-span-1 md:col-span-2 lg:col-span-2">
-            <LinkGroup title="Modules" links={FOOTER_LINKS.modules} hoverColor="hover:text-cyan-400" />
+            <LinkGroup title="Modules" links={CLEAN_FOOTER_LINKS.modules} hoverColor="hover:text-cyan-400" />
           </div>
           <div className="col-span-1 md:col-span-2 lg:col-span-2">
-            <LinkGroup title="Protocols" links={FOOTER_LINKS.protocols} hoverColor="hover:text-indigo-400" />
+            <LinkGroup title="Protocols" links={CLEAN_FOOTER_LINKS.protocols} hoverColor="hover:text-indigo-400" />
           </div>
           <div className="col-span-1 md:col-span-2 lg:col-span-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <LinkGroup title="Financial" links={FOOTER_LINKS.financial} hoverColor="hover:text-amber-400" />
+              <LinkGroup title="Financial" links={CLEAN_FOOTER_LINKS.financial} hoverColor="hover:text-amber-400" />
               <div>
-                <LinkGroup title="Resources" links={FOOTER_LINKS.resources} hoverColor="hover:text-purple-400" />
+                <LinkGroup title="Resources" links={CLEAN_FOOTER_LINKS.resources} hoverColor="hover:text-purple-400" />
                 <div className="mt-6">
-                  <LinkGroup title="Account" links={FOOTER_LINKS.account} hoverColor="hover:text-blue-400" />
+                  <LinkGroup title="Account" links={CLEAN_FOOTER_LINKS.account} hoverColor="hover:text-blue-400" />
                 </div>
               </div>
             </div>
@@ -221,7 +226,7 @@ export default function Footer() {
             © {new Date().getFullYear()} GlyphLock Security LLC. All rights reserved.
           </p>
           <div className="flex items-center gap-5 flex-wrap justify-center">
-            {FOOTER_LINKS.legal && FOOTER_LINKS.legal.map((link) => (
+            {CLEAN_FOOTER_LINKS.legal && CLEAN_FOOTER_LINKS.legal.map((link) => (
               <Link 
                 key={link.page} 
                 to={createPageUrl(link.page)} 
