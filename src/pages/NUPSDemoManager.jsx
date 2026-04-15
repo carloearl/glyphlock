@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 const DEMO_VENUE_ID = "DEMO_VENUE_001";
@@ -203,6 +204,12 @@ export default function NUPSDemoManager() {
     <div style={{ padding: "28px 20px", background: "#07090d", minHeight: "100vh", color: "#fff", fontFamily: "monospace", boxSizing: "border-box" }}>
 
       <div style={{ marginBottom: 20 }}>
+        <Link
+          to="/NUPSOwner"
+          style={{ display: "inline-block", marginBottom: 10, fontSize: 12, color: "#60a5fa", textDecoration: "none" }}
+        >
+          ← Back to Owner Analytics
+        </Link>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center", marginBottom: 4 }}>
           <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
           <span style={{ fontSize: 10, color: "#f59e0b", letterSpacing: 4, textTransform: "uppercase" }}>GlyphLock NUPS</span>
