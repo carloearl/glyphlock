@@ -41,18 +41,18 @@ export default function NUPSDemoManager() {
 
     // VIP ROOMS
     const rooms = [
-      { room_number: "101", room_name: "VIP Room 1",      status: "available", rate_per_hour: 200, surveillance_camera: true, has_audio: false, venue_id: DEMO_VENUE_ID },
-      { room_number: "102", room_name: "VIP Room 2",      status: "available", rate_per_hour: 200, surveillance_camera: true, has_audio: false, venue_id: DEMO_VENUE_ID },
-      { room_number: "201", room_name: "Champagne Suite", status: "available", rate_per_hour: 500, surveillance_camera: true, has_audio: true,  venue_id: DEMO_VENUE_ID },
-      { room_number: "301", room_name: "Skybox",          status: "available", rate_per_hour: 350, surveillance_camera: true, has_audio: true,  venue_id: DEMO_VENUE_ID },
+      { room_number: "101", room_name: "VIP Room 1",      status: "available", rate_per_hour: 200, surveillance_camera: "yes", has_audio: "no", venue_id: DEMO_VENUE_ID },
+      { room_number: "102", room_name: "VIP Room 2",      status: "available", rate_per_hour: 200, surveillance_camera: "yes", has_audio: "no", venue_id: DEMO_VENUE_ID },
+      { room_number: "201", room_name: "Champagne Suite", status: "available", rate_per_hour: 500, surveillance_camera: "yes", has_audio: "yes",  venue_id: DEMO_VENUE_ID },
+      { room_number: "301", room_name: "Skybox",          status: "available", rate_per_hour: 350, surveillance_camera: "yes", has_audio: "yes",  venue_id: DEMO_VENUE_ID },
     ];
     for (const r of rooms) await tryCreate("VIPRoom: " + r.room_name, "VIPRoom", r);
 
     // VIP GUESTS
     const guests = [
-      { guest_name: "Demo Guest Alpha", membership_number: "DEMO-001", phone: "555-2001", status: "checked_in",  check_in_time: NOW(), total_spent_tonight: 850,  lifetime_spent: 4200, venue_id: DEMO_VENUE_ID },
-      { guest_name: "Demo Guest Beta",  membership_number: "DEMO-002", phone: "555-2002", status: "checked_out", check_in_time: NOW(), total_spent_tonight: 200,  lifetime_spent: 900,  venue_id: DEMO_VENUE_ID },
-      { guest_name: "Demo Guest Gamma", membership_number: "DEMO-003", phone: "555-2003", status: "checked_in",  check_in_time: NOW(), total_spent_tonight: 1100, lifetime_spent: 8700, venue_id: DEMO_VENUE_ID },
+      { guest_name: "Demo Guest Alpha", full_name: "Demo Guest Alpha", guest_id: ID("GUEST"), membership_number: "DEMO-001", phone: "555-2001", status: "checked_in",  check_in_time: NOW(), total_spent_tonight: 850,  lifetime_spent: 4200, venue_id: DEMO_VENUE_ID },
+      { guest_name: "Demo Guest Beta",  full_name: "Demo Guest Beta", guest_id: ID("GUEST"), membership_number: "DEMO-002", phone: "555-2002", status: "checked_out", check_in_time: NOW(), total_spent_tonight: 200,  lifetime_spent: 900,  venue_id: DEMO_VENUE_ID },
+      { guest_name: "Demo Guest Gamma", full_name: "Demo Guest Gamma", guest_id: ID("GUEST"), membership_number: "DEMO-003", phone: "555-2003", status: "checked_in",  check_in_time: NOW(), total_spent_tonight: 1100, lifetime_spent: 8700, venue_id: DEMO_VENUE_ID },
     ];
     for (const g of guests) await tryCreate("VIPGuest: " + g.guest_name, "VIPGuest", g);
 
@@ -83,30 +83,20 @@ export default function NUPSDemoManager() {
 
     // GLYPHBUCKS BILLS
     const bills = [
-      { serial_number: "DEMO-GB-001", denomination: 20,  status: "active",   issued_at: NOW(), venue_id: DEMO_VENUE_ID },
-      { serial_number: "DEMO-GB-002", denomination: 20,  status: "active",   issued_at: NOW(), venue_id: DEMO_VENUE_ID },
-      { serial_number: "DEMO-GB-003", denomination: 50,  status: "redeemed", issued_at: NOW(), venue_id: DEMO_VENUE_ID },
-      { serial_number: "DEMO-GB-004", denomination: 100, status: "active",   issued_at: NOW(), venue_id: DEMO_VENUE_ID },
+      { serial_number: "DEMO-GB-001", denomination: 20,  status: "active",   issued_at: NOW(), batch_id: "DEMO-BATCH-001", venue_id: DEMO_VENUE_ID },
+      { serial_number: "DEMO-GB-002", denomination: 20,  status: "active",   issued_at: NOW(), batch_id: "DEMO-BATCH-001", venue_id: DEMO_VENUE_ID },
+      { serial_number: "DEMO-GB-003", denomination: 50,  status: "redeemed", issued_at: NOW(), batch_id: "DEMO-BATCH-001", venue_id: DEMO_VENUE_ID },
+      { serial_number: "DEMO-GB-004", denomination: 100, status: "active",   issued_at: NOW(), batch_id: "DEMO-BATCH-001", venue_id: DEMO_VENUE_ID },
     ];
     for (const b of bills) await tryCreate("GlyphBucksBill: " + b.serial_number, "GlyphBucksBill", b);
 
     // ENTERTAINER SHIFTS
     const shifts = [
-      { stage_name: "Crystal", check_in_time: NOW(), status: "checked_in",  shift_earnings: 300, vip_sessions: 1, location: "Dream Palace Demo", venue_id: DEMO_VENUE_ID },
-      { stage_name: "Nova",    check_in_time: NOW(), status: "checked_in",  shift_earnings: 150, vip_sessions: 0, location: "Dream Palace Demo", venue_id: DEMO_VENUE_ID },
-      { stage_name: "Jade",    check_in_time: NOW(), status: "checked_out", shift_earnings: 480, vip_sessions: 2, location: "Dream Palace Demo", check_out_time: NOW(), venue_id: DEMO_VENUE_ID },
+      { stage_name: "Crystal", entertainer_id: "DEMO-ENT-Crystal", check_in_time: NOW(), status: "checked_in",  shift_earnings: 300, vip_sessions: 1, location: "Dream Palace Demo", venue_id: DEMO_VENUE_ID },
+      { stage_name: "Nova",    entertainer_id: "DEMO-ENT-Nova", check_in_time: NOW(), status: "checked_in",  shift_earnings: 150, vip_sessions: 0, location: "Dream Palace Demo", venue_id: DEMO_VENUE_ID },
+      { stage_name: "Jade",    entertainer_id: "DEMO-ENT-Jade", check_in_time: NOW(), status: "checked_out", shift_earnings: 480, vip_sessions: 2, location: "Dream Palace Demo", check_out_time: NOW(), venue_id: DEMO_VENUE_ID },
     ];
     for (const s of shifts) await tryCreate("EntertainerShift: " + s.stage_name, "EntertainerShift", s);
-
-    // TIP PAYOUTS
-    const tips = [
-      { recipient_name: "Demo Hostess",   role: "Hostess",   amount: 40, source: "vip_show", payout_date: TODAY, status: "pending", venue_id: DEMO_VENUE_ID },
-      { recipient_name: "Demo DJ",        role: "DJ",        amount: 10, source: "vip_show", payout_date: TODAY, status: "pending", venue_id: DEMO_VENUE_ID },
-      { recipient_name: "Demo Security",  role: "Security",  amount: 10, source: "vip_show", payout_date: TODAY, status: "pending", venue_id: DEMO_VENUE_ID },
-      { recipient_name: "Demo Bartender", role: "Bartender", amount: 35, source: "tip_pool", payout_date: TODAY, status: "pending", venue_id: DEMO_VENUE_ID },
-      { recipient_name: "Demo Manager",   role: "Manager",   amount: 60, source: "tip_pool", payout_date: TODAY, status: "pending", venue_id: DEMO_VENUE_ID },
-    ];
-    for (const t of tips) await tryCreate("TipPayout: " + t.recipient_name, "TipPayout", t);
 
     // AUDIT LOG
     await tryCreate("SystemAuditLog: DEMO_SEED", "SystemAuditLog", {
@@ -114,7 +104,7 @@ export default function NUPSDemoManager() {
       description: "Full DEMO dataset seeded via NUPSDemoManager",
       venue_id: DEMO_VENUE_ID,
       user_id: "SYSTEM",
-      metadata: JSON.stringify({ seed_time: NOW(), mode: "DEMO" }),
+      metadata: { seed_time: NOW(), mode: "DEMO" },
     });
 
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
