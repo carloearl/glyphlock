@@ -153,14 +153,19 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'generate_code': {
-        const { prompt, context, complexity = 'medium' } = payload;
+        const { prompt, context, complexity = 'medium', filePath } = payload;
         const thinkingLevel = complexity === 'high' ? 'high' : 'low';
+
+        if (typeof filePath === 'string' && filePath.startsWith('components/') && !filePath.endsWith('.jsx')) {
+          return Response.json({ error: 'Blocked: components/ only allows .jsx files' }, { status: 400 });
+        }
         
         const fullPrompt = `You are an expert full-stack developer for GlyphLock.io.
 
 Context: ${context || 'None'}
 
 Request: ${prompt}
+Target File: ${filePath || 'unspecified'}
 
 Generate production-ready React code with:
 - Tailwind CSS styling
