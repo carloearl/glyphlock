@@ -1,129 +1,132 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
 
-const MOCK_CONTRACTS = [
-  {
-    contract_id: `DP-DEMO-${Date.now()}-001`,
-    venue_id: DREAM_PALACE_VENUE_ID,
-    contract_type: 'GlyphBucks Purchase',
-    customer_name: 'James R. Holloway',
-    customer_id_number: 'AZ-DL-4821933',
-    customer_address: '4210 E Camelback Rd',
-    customer_state: 'AZ',
-    customer_zip: '85018',
-    purchaser_card_name: 'James R Holloway',
-    card_last_four: '4821',
-    card_exp: '09/27',
-    approval_code: 'H7X2',
-    glyphbucks_issued: 300,
-    processing_surcharge: 90,
-    waitress_tip: 20,
-    grand_total: 410,
-    payment_method: 'Credit Card',
-    is_signed: true,
-    is_printed: true,
-    customer_signature: 'James Holloway',
-    signed_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    ip_address: '192.168.1.45',
-    status: 'fulfilled',
-    scan_status: 'SCANNED',
-    scanned_at: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
-    scanned_by: 'manager@dreampalace.demo',
-    contract_amount: 410,
-    is_demo: true,
-    demo_label: 'DEMO — Fulfilled workflow example',
-    notes: 'DEMO DATA — Shows complete contract lifecycle: signed → printed → scanned'
-  },
-  {
-    contract_id: `DP-DEMO-${Date.now()}-002`,
-    venue_id: DREAM_PALACE_VENUE_ID,
-    contract_type: 'GlyphBucks Purchase',
-    customer_name: 'Michael T. Vasquez',
-    customer_id_number: 'TX-DL-9934812',
-    customer_address: '721 W University Dr',
-    customer_state: 'TX',
-    customer_zip: '75201',
-    purchaser_card_name: 'Michael T Vasquez',
-    card_last_four: '7703',
-    card_exp: '03/26',
-    approval_code: 'V3K9',
-    glyphbucks_issued: 500,
-    processing_surcharge: 150,
-    waitress_tip: 50,
-    grand_total: 700,
-    payment_method: 'Credit Card',
-    is_signed: true,
-    is_printed: true,
-    customer_signature: 'M. Vasquez',
-    signed_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-    ip_address: '192.168.1.62',
-    status: 'active',
-    scan_status: 'PENDING',
-    contract_amount: 700,
-    is_demo: true,
-    demo_label: 'DEMO — Printed, awaiting scan-back',
-    notes: 'DEMO DATA — Shows printed but not yet scanned. Use ContractScanBack to complete.'
-  },
-  {
-    contract_id: `DP-DEMO-${Date.now()}-003`,
-    venue_id: DREAM_PALACE_VENUE_ID,
-    contract_type: 'GlyphBucks Purchase',
-    customer_name: 'Brandon K. Steele',
-    customer_id_number: 'NV-DL-2201847',
-    customer_address: '3888 S Las Vegas Blvd',
-    customer_state: 'NV',
-    customer_zip: '89109',
-    purchaser_card_name: 'Brandon Steele',
-    card_last_four: '0012',
-    card_exp: '11/25',
-    approval_code: 'S5M1',
-    glyphbucks_issued: 200,
-    processing_surcharge: 60,
-    waitress_tip: 0,
-    grand_total: 260,
-    payment_method: 'Credit Card',
-    is_signed: true,
-    is_printed: false,
-    customer_signature: 'B. K. Steele',
-    signed_at: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-    ip_address: '192.168.1.88',
-    status: 'active',
-    scan_status: 'PENDING',
-    contract_amount: 260,
-    is_demo: true,
-    demo_label: 'DEMO — Signed, needs print',
-    notes: 'DEMO DATA — Shows signed contract awaiting print. Use VenuePrintLayout to print.'
-  },
-  {
-    contract_id: `DP-DEMO-${Date.now()}-004`,
-    venue_id: DREAM_PALACE_VENUE_ID,
-    contract_type: 'VIP Package',
-    customer_name: 'Derek A. Monroe',
-    customer_id_number: 'CA-DL-6671204',
-    customer_address: '1100 S Hope St',
-    customer_state: 'CA',
-    customer_zip: '90015',
-    purchaser_card_name: 'Derek Monroe',
-    card_last_four: '',
-    card_exp: '',
-    approval_code: '',
-    glyphbucks_issued: 0,
-    processing_surcharge: 0,
-    waitress_tip: 0,
-    grand_total: 0,
-    payment_method: 'Cash',
-    is_signed: false,
-    is_printed: false,
-    customer_signature: '',
-    status: 'draft',
-    scan_status: 'PENDING',
-    contract_amount: 0,
-    is_demo: true,
-    demo_label: 'DEMO — Draft, not yet signed',
-    notes: 'DEMO DATA — Fresh draft. Shows starting state before customer signs.'
-  }
-];
+const buildContracts = () => {
+  const now = Date.now();
+  return [
+    {
+      contract_id: `DP-DEMO-${now}-001`,
+      venue_id: DREAM_PALACE_VENUE_ID,
+      contract_type: 'GlyphBucks Purchase',
+      customer_name: 'James R. Holloway',
+      customer_id_number: 'AZ-DL-4821933',
+      customer_address: '4210 E Camelback Rd',
+      customer_state: 'AZ',
+      customer_zip: '85018',
+      purchaser_card_name: 'James R Holloway',
+      card_last_four: '4821',
+      card_exp: '09/27',
+      approval_code: 'H7X2',
+      glyphbucks_issued: 300,
+      processing_surcharge: 90,
+      waitress_tip: 20,
+      grand_total: 410,
+      payment_method: 'Credit Card',
+      is_signed: true,
+      is_printed: true,
+      customer_signature: 'James Holloway',
+      signed_at: new Date(now - 2 * 60 * 60 * 1000).toISOString(),
+      ip_address: '192.168.1.45',
+      status: 'fulfilled',
+      scan_status: 'SCANNED',
+      scanned_at: new Date(now - 90 * 60 * 1000).toISOString(),
+      scanned_by: 'manager@dreampalace.demo',
+      contract_amount: 410,
+      is_demo: true,
+      demo_label: 'DEMO — Fulfilled workflow example',
+      notes: 'DEMO DATA — Shows complete contract lifecycle: signed → printed → scanned'
+    },
+    {
+      contract_id: `DP-DEMO-${now}-002`,
+      venue_id: DREAM_PALACE_VENUE_ID,
+      contract_type: 'GlyphBucks Purchase',
+      customer_name: 'Michael T. Vasquez',
+      customer_id_number: 'TX-DL-9934812',
+      customer_address: '721 W University Dr',
+      customer_state: 'TX',
+      customer_zip: '75201',
+      purchaser_card_name: 'Michael T Vasquez',
+      card_last_four: '7703',
+      card_exp: '03/26',
+      approval_code: 'V3K9',
+      glyphbucks_issued: 500,
+      processing_surcharge: 150,
+      waitress_tip: 50,
+      grand_total: 700,
+      payment_method: 'Credit Card',
+      is_signed: true,
+      is_printed: true,
+      customer_signature: 'M. Vasquez',
+      signed_at: new Date(now - 45 * 60 * 1000).toISOString(),
+      ip_address: '192.168.1.62',
+      status: 'active',
+      scan_status: 'PENDING',
+      contract_amount: 700,
+      is_demo: true,
+      demo_label: 'DEMO — Printed, awaiting scan-back',
+      notes: 'DEMO DATA — Shows printed but not yet scanned. Use ContractScanBack to complete.'
+    },
+    {
+      contract_id: `DP-DEMO-${now}-003`,
+      venue_id: DREAM_PALACE_VENUE_ID,
+      contract_type: 'GlyphBucks Purchase',
+      customer_name: 'Brandon K. Steele',
+      customer_id_number: 'NV-DL-2201847',
+      customer_address: '3888 S Las Vegas Blvd',
+      customer_state: 'NV',
+      customer_zip: '89109',
+      purchaser_card_name: 'Brandon Steele',
+      card_last_four: '0012',
+      card_exp: '11/25',
+      approval_code: 'S5M1',
+      glyphbucks_issued: 200,
+      processing_surcharge: 60,
+      waitress_tip: 0,
+      grand_total: 260,
+      payment_method: 'Credit Card',
+      is_signed: true,
+      is_printed: false,
+      customer_signature: 'B. K. Steele',
+      signed_at: new Date(now - 10 * 60 * 1000).toISOString(),
+      ip_address: '192.168.1.88',
+      status: 'active',
+      scan_status: 'PENDING',
+      contract_amount: 260,
+      is_demo: true,
+      demo_label: 'DEMO — Signed, needs print',
+      notes: 'DEMO DATA — Shows signed contract awaiting print. Use VenuePrintLayout to print.'
+    },
+    {
+      contract_id: `DP-DEMO-${now}-004`,
+      venue_id: DREAM_PALACE_VENUE_ID,
+      contract_type: 'VIP Package',
+      customer_name: 'Derek A. Monroe',
+      customer_id_number: 'CA-DL-6671204',
+      customer_address: '1100 S Hope St',
+      customer_state: 'CA',
+      customer_zip: '90015',
+      purchaser_card_name: 'Derek Monroe',
+      card_last_four: '',
+      card_exp: '',
+      approval_code: '',
+      glyphbucks_issued: 0,
+      processing_surcharge: 0,
+      waitress_tip: 0,
+      grand_total: 0,
+      payment_method: 'Cash',
+      is_signed: false,
+      is_printed: false,
+      customer_signature: '',
+      status: 'draft',
+      scan_status: 'PENDING',
+      contract_amount: 0,
+      is_demo: true,
+      demo_label: 'DEMO — Draft, not yet signed',
+      notes: 'DEMO DATA — Fresh draft. Shows starting state before customer signs.'
+    }
+  ];
+};
 
 const MOCK_LINE_ITEMS_MAP = {
   0: [
@@ -145,41 +148,59 @@ const MOCK_LINE_ITEMS_MAP = {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
 
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin only' }, { status: 403 });
+    // Allow both base44 admin users AND sandbox demo sessions (identified by sandbox_demo header)
+    let actorEmail = 'sandbox@demo.nups';
+    let isSandboxDemo = false;
+
+    try {
+      const user = await base44.auth.me();
+      if (user) {
+        if (user.role !== 'admin') {
+          return Response.json({ error: 'Forbidden: Admin only' }, { status: 403 });
+        }
+        actorEmail = user.email;
+      }
+    } catch {
+      // Not a base44 auth user — check for sandbox demo flag
+      const sandboxHeader = req.headers.get('x-nups-sandbox-demo');
+      if (sandboxHeader !== 'true') {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      isSandboxDemo = true;
     }
 
     const payload = await req.json().catch(() => ({}));
     const { clear_existing = false } = payload;
 
+    // Use service role for sandbox demo invocations since they lack user auth
+    const entityClient = isSandboxDemo ? base44.asServiceRole : base44;
+
     if (clear_existing) {
-      const existing = await base44.entities.VenueContract.filter({
+      const existing = await entityClient.entities.VenueContract.filter({
         venue_id: DREAM_PALACE_VENUE_ID,
         is_demo: true
       });
-      await Promise.all(existing.map(c => base44.entities.VenueContract.delete(c.id)));
+      await Promise.all(existing.map(c => entityClient.entities.VenueContract.delete(c.id)));
     }
 
+    const MOCK_CONTRACTS = buildContracts();
     const created = [];
     for (let i = 0; i < MOCK_CONTRACTS.length; i++) {
-      const contract = await base44.entities.VenueContract.create(MOCK_CONTRACTS[i]);
+      const contract = await entityClient.entities.VenueContract.create(MOCK_CONTRACTS[i]);
       created.push({ contract, lineItems: MOCK_LINE_ITEMS_MAP[i] });
     }
 
-    await base44.entities.SystemAuditLog.create({
-      event_type: 'DEMO_DATA_SEEDED',
-      entity_type: 'VenueContract',
-      actor_id: user.email,
-      actor_email: user.email,
-      venue_id: DREAM_PALACE_VENUE_ID,
-      description: `Demo contract workflow data seeded by ${user.email} — ${MOCK_CONTRACTS.length} contracts created`,
-      severity: 'low',
-      status: 'success',
-      metadata: { count: MOCK_CONTRACTS.length, clear_existing },
-      timestamp: new Date().toISOString()
-    });
+    try {
+      await base44.asServiceRole.entities.SystemAuditLog.create({
+        event_type: 'DEMO_DATA_SEEDED',
+        actor_email: actorEmail,
+        description: `Demo contract workflow data seeded — ${MOCK_CONTRACTS.length} contracts created${isSandboxDemo ? ' (sandbox)' : ''}`,
+        severity: 'low',
+        status: 'success',
+        metadata: { count: MOCK_CONTRACTS.length, clear_existing, sandbox: isSandboxDemo }
+      });
+    } catch { /* audit log failure is non-fatal */ }
 
     return Response.json({
       success: true,

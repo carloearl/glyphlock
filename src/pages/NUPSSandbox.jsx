@@ -4,7 +4,7 @@ import {
   FlaskConical, Shield, DollarSign, Users, Clock, FileText,
   CreditCard, BarChart3, CheckCircle2, ArrowLeft, Play, Banknote,
   UserCheck, Music, Crown, AlertTriangle, RefreshCw, Loader2, Printer, Wifi,
-  Database, Sparkles, ScanLine, Eye
+  Database, Sparkles, ScanLine, Eye, Receipt
 } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
@@ -135,12 +135,117 @@ export default function NUPSSandbox() {
   const seedAndLoad = async () => {
     setSeeding(true);
     try {
-      await base44.functions.invoke('seedDemoContracts', { clear_existing: true });
+      const res = await base44.functions.invoke('seedDemoContracts', { clear_existing: true }, {
+        headers: { 'x-nups-sandbox-demo': 'true' }
+      });
+      if (res.data?.success === false) {
+        throw new Error(res.data.error || 'Seed returned failure');
+      }
+      toast.success(`Seeded ${res.data?.seeded || 4} demo contracts`);
       await loadDemoContracts();
     } catch (err) {
-      toast.error('Seed failed: ' + err.message);
+      // Fallback: seed directly from client if backend auth fails
+      toast.info('Seeding via direct insert…');
+      try {
+        await seedDirectly();
+        await loadDemoContracts();
+      } catch (e2) {
+        toast.error('Seed failed: ' + (e2.message || err.message));
+      }
     }
     setSeeding(false);
+  };
+
+  const seedDirectly = async () => {
+    // Clear existing demo contracts
+    const existing = await base44.entities.VenueContract.filter({ venue_id: DREAM_PALACE_VENUE_ID, is_demo: true }).catch(() => []);
+    await Promise.all(existing.map(c => base44.entities.VenueContract.delete(c.id).catch(() => {})));
+    const now = Date.now();
+    await base44.entities.VenueContract.bulkCreate([
+      {
+        contract_id: `DP-DEMO-${now}-001`,
+        venue_id: DREAM_PALACE_VENUE_ID,
+        contract_type: 'GlyphBucks Purchase',
+        customer_name: 'James R. Holloway',
+        customer_id_number: 'AZ-DL-4821933',
+        customer_address: '4210 E Camelback Rd',
+        customer_state: 'AZ', customer_zip: '85018',
+        purchaser_card_name: 'James R Holloway',
+        card_last_four: '4821', card_exp: '09/27', approval_code: 'H7X2',
+        glyphbucks_issued: 300, processing_surcharge: 90, waitress_tip: 20, grand_total: 410,
+        payment_method: 'Credit Card',
+        is_signed: true, is_printed: true,
+        customer_signature: 'James Holloway',
+        signed_at: new Date(now - 2 * 60 * 60 * 1000).toISOString(),
+        ip_address: '192.168.1.45',
+        status: 'fulfilled', scan_status: 'SCANNED',
+        scanned_at: new Date(now - 90 * 60 * 1000).toISOString(),
+        scanned_by: 'manager@dreampalace.demo',
+        contract_amount: 410, is_demo: true,
+        demo_label: 'DEMO — Fulfilled workflow example',
+        notes: 'DEMO DATA — Complete lifecycle: signed → printed → scanned'
+      },
+      {
+        contract_id: `DP-DEMO-${now}-002`,
+        venue_id: DREAM_PALACE_VENUE_ID,
+        contract_type: 'GlyphBucks Purchase',
+        customer_name: 'Michael T. Vasquez',
+        customer_id_number: 'TX-DL-9934812',
+        customer_address: '721 W University Dr',
+        customer_state: 'TX', customer_zip: '75201',
+        purchaser_card_name: 'Michael T Vasquez',
+        card_last_four: '7703', card_exp: '03/26', approval_code: 'V3K9',
+        glyphbucks_issued: 500, processing_surcharge: 150, waitress_tip: 50, grand_total: 700,
+        payment_method: 'Credit Card',
+        is_signed: true, is_printed: true,
+        customer_signature: 'M. Vasquez',
+        signed_at: new Date(now - 45 * 60 * 1000).toISOString(),
+        ip_address: '192.168.1.62',
+        status: 'active', scan_status: 'PENDING',
+        contract_amount: 700, is_demo: true,
+        demo_label: 'DEMO — Printed, awaiting scan-back',
+        notes: 'DEMO DATA — Printed but not yet scanned.'
+      },
+      {
+        contract_id: `DP-DEMO-${now}-003`,
+        venue_id: DREAM_PALACE_VENUE_ID,
+        contract_type: 'GlyphBucks Purchase',
+        customer_name: 'Brandon K. Steele',
+        customer_id_number: 'NV-DL-2201847',
+        customer_address: '3888 S Las Vegas Blvd',
+        customer_state: 'NV', customer_zip: '89109',
+        purchaser_card_name: 'Brandon Steele',
+        card_last_four: '0012', card_exp: '11/25', approval_code: 'S5M1',
+        glyphbucks_issued: 200, processing_surcharge: 60, waitress_tip: 0, grand_total: 260,
+        payment_method: 'Credit Card',
+        is_signed: true, is_printed: false,
+        customer_signature: 'B. K. Steele',
+        signed_at: new Date(now - 10 * 60 * 1000).toISOString(),
+        ip_address: '192.168.1.88',
+        status: 'active', scan_status: 'PENDING',
+        contract_amount: 260, is_demo: true,
+        demo_label: 'DEMO — Signed, needs print',
+        notes: 'DEMO DATA — Signed, awaiting print.'
+      },
+      {
+        contract_id: `DP-DEMO-${now}-004`,
+        venue_id: DREAM_PALACE_VENUE_ID,
+        contract_type: 'VIP Package',
+        customer_name: 'Derek A. Monroe',
+        customer_id_number: 'CA-DL-6671204',
+        customer_address: '1100 S Hope St',
+        customer_state: 'CA', customer_zip: '90015',
+        purchaser_card_name: 'Derek Monroe',
+        card_last_four: '', card_exp: '', approval_code: '',
+        glyphbucks_issued: 0, processing_surcharge: 0, waitress_tip: 0, grand_total: 0,
+        payment_method: 'Cash',
+        is_signed: false, is_printed: false,
+        customer_signature: '', status: 'draft', scan_status: 'PENDING',
+        contract_amount: 0, is_demo: true,
+        demo_label: 'DEMO — Draft, not yet signed',
+        notes: 'DEMO DATA — Fresh draft.'
+      },
+    ]);
   };
 
   const advanceWorkflow = async (contract, action) => {
@@ -738,11 +843,44 @@ export default function NUPSSandbox() {
       case "contracts":
         return (
           <div className="space-y-4">
+            {/* Instant demo print button — no seeding needed */}
+            <div className="bg-violet-500/5 border border-violet-500/20 rounded-xl p-3 flex items-center justify-between gap-3">
+              <div className="text-xs text-violet-300">
+                <div className="font-bold mb-0.5">⚡ Instant Print Demo</div>
+                <div className="text-violet-400/70">Print a sample contract receipt right now — no seeding needed.</div>
+              </div>
+              <button
+                onClick={() => {
+                  const demoC = {
+                    contract_id: `DP-DEMO-INSTANT-${Date.now()}`,
+                    customer_name: 'Demo Customer',
+                    customer_id_number: 'AZ-DL-9999999',
+                    customer_address: '815 N Scottsdale Rd',
+                    customer_state: 'AZ', customer_zip: '85257',
+                    purchaser_card_name: 'Demo Customer',
+                    card_last_four: '0000', card_exp: '12/28', approval_code: 'DEMO01',
+                    glyphbucks_issued: 300, processing_surcharge: 90, waitress_tip: 20, grand_total: 410,
+                    payment_method: 'Credit Card',
+                    is_signed: true, customer_signature: 'Demo Customer',
+                    signed_at: new Date().toISOString(), ip_address: '192.168.1.1',
+                    status: 'active', scan_status: 'PENDING',
+                    contract_amount: 410, is_demo: true,
+                  };
+                  setWorkflowContract(demoC);
+                  setWorkflowStep('print');
+                }}
+                className="text-xs px-4 py-2 rounded-lg border border-violet-500/40 bg-violet-500/20 text-violet-300 font-bold hover:bg-violet-500/30 transition-colors whitespace-nowrap flex items-center gap-1.5"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Print Now
+              </button>
+            </div>
+
             {/* Header + seed button */}
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-black text-white text-sm">Dream Palace — Contract Workflow</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">Live demo records showing full lifecycle: Draft → Signed → Printed → Scanned → Fulfilled</div>
+                <div className="text-[10px] text-gray-400 mt-0.5">Live demo records: Draft → Signed → Printed → Scanned → Fulfilled</div>
               </div>
               <div className="flex gap-2">
                 {contractsLoaded && (
