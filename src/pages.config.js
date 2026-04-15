@@ -91,6 +91,7 @@ import Mobile from './pages/Mobile';
 import NISTChallenge from './pages/NISTChallenge';
 import NUPSAudit from './pages/NUPSAudit';
 import NUPSLogin from './pages/NUPSLogin';
+import NUPSDemoManager from './pages/NUPSDemoManager';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSPostLogin from './pages/NUPSPostLogin';
 import NUPSReport from './pages/NUPSReport';
@@ -180,6 +181,7 @@ export const PAGES = {
     "Mobile": Mobile,
     "NISTChallenge": NISTChallenge,
     "NUPSAudit": NUPSAudit,
+    "NUPSDemoManager": NUPSDemoManager,
     "NUPSLogin": NUPSLogin,
     "NUPSOwner": NUPSOwner,
     "NUPSPostLogin": NUPSPostLogin,
