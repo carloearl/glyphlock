@@ -252,7 +252,12 @@ export default function POSCashRegister({ user, station = 'door' }) {
       venue_id: activeVenue?.id || null,
       status: "completed",
       batch_id: activeBatch?.id,
+      terminal_id: activeVenue?.id
+        ? `TERM-${activeVenue.id.slice(-6).toUpperCase()}`
+        : 'TERM-UNKNOWN',
+      cashier_id: user?.id || user?.email || null,
       ...details,
+      card_last4: details?.card_last_four || details?.card_last4 || null,
     };
     try {
       await createTransaction.mutateAsync(transactionData);

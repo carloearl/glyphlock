@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useActiveVenue } from '../../hooks/useActiveVenue';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ const TIP_PRESETS = [15, 20, 25];
 export default function POSBarRegister({ user }) {
   const qc = useQueryClient();
   const receiptRef = useRef();
+  const activeVenue = useActiveVenue();
 
   const [cart, setCart] = useState([]);
   const [tipPct, setTipPct] = useState(null);
@@ -85,11 +87,17 @@ export default function POSBarRegister({ user }) {
       payment_method: paymentMethod,
       cashier: user?.email || "bar",
       status: "completed",
-      batch_id: activeBatch?.id || "",
+      batch_id: activeBatch?.id || null,
       station: 'bar',
       mode: 'REAL',
       cashier_name: user?.full_name || user?.name || user?.email || 'Bar Staff',
       cashier_email: user?.email || null,
+      venue_id: activeBatch?.venue_id || activeVenue?.id || null,
+      terminal_id: activeBatch?.venue_id
+        ? `TERM-BAR-${activeBatch.venue_id.slice(-6).toUpperCase()}`
+        : 'TERM-BAR-UNKNOWN',
+      cashier_id: user?.id || user?.email || null,
+      card_last4: paymentMethod === "Credit Card" ? null : null,
     }),
     onSuccess: () => {
       qc.invalidateQueries(["pos-transactions"]);
