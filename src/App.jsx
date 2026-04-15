@@ -55,7 +55,7 @@ const AuthenticatedApp = () => {
   }
 
   const currentPath = window.location.pathname;
-  const nupsPublicPaths = ['/NUPSLanding', '/NUPSGateway', '/NUPSSandbox', '/NUPSLogin', '/unauthorized', '/EntertainerCheckIn'];
+  const nupsPublicPaths = ['/NUPSLanding', '/NUPSGateway', '/NUPSSandbox', '/NUPSLogin', '/unauthorized', '/EntertainerCheckIn', '/NUPSOwner', '/NUPSStaff', '/NUPSDemoManager', '/NUPSPostImplementationReport', '/NUPSMISReport', '/NUPSPostLogin'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPath.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
