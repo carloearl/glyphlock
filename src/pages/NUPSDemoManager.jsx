@@ -128,56 +128,7 @@ export default function NUPSDemoManager() {
   };
 
   const doWipe = async () => {
-    if (wipeInput.trim() !== "WIPE") return;
-    setPhase("wiping");
-    setWipeInput("");
-    logRef.current = [];
-    setLog([]);
-    push("🔴 DEMO SAFE RESET initiated — venue_id: DEMO_VENUE_001", "warn");
-    push("Deletion order: children first, parents last", "info");
-
-    const entityCounts = {};
-
-    for (const entityName of WIPE_ORDER) {
-      try {
-        const Entity = base44.entities[entityName];
-        const rows = await Entity.list({ filters: [{ field: "venue_id", operator: "eq", value: DEMO_VENUE_ID }] });
-        let wiped = 0;
-        for (const r of rows) {
-          try { await Entity.delete(r.id); wiped++; } catch (de) {
-            push(`⚠ ${entityName} delete error: ${de?.message || de}`, "error");
-          }
-        }
-        entityCounts[entityName] = wiped;
-        if (wiped > 0) push(`🗑 ${entityName}: ${wiped} deleted`, "warn");
-        else push(`— ${entityName}: 0 found`, "info");
-      } catch (e) {
-        push(`⚠ ${entityName} filter error: ${e?.message || e}`, "error");
-        entityCounts[entityName] = 0;
-      }
-    }
-
-    try {
-      await base44.entities.SystemAuditLog.create({
-        event_type: "DEMO_WIPE",
-        description: "DEMO SAFE RESET executed via NUPSDemoManager",
-        venue_id: DEMO_VENUE_ID,
-        user_id: "SYSTEM",
-        metadata: {
-          wipe_time: NOW(),
-          mode: "DEMO_ONLY",
-          executed_by: "NUPSDemoManager",
-          entity_counts: entityCounts,
-        },
-      });
-      push("📋 Audit log written: DEMO_WIPE", "success");
-    } catch (e) {
-      push("⚠ Audit log failed: " + e?.message, "error");
-    }
-
-    const total = Object.values(entityCounts).reduce((a, b) => a + b, 0);
-    push(`✅ DEMO SAFE RESET complete — ${total} records deleted — REAL data untouched`, "success");
-    setPhase("idle");
+    push("WIPE DISABLED FOR DEBUG", "warn");
   };
 
   const busy = phase === "seeding" || phase === "wiping";
