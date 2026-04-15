@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-// import { base44 } from "@/api/base44Client";
+import { base44 } from "@/api/base44Client";
 
 const DEMO_VENUE_ID = "DEMO_VENUE_001";
 const NOW = () => new Date().toISOString();
@@ -19,7 +19,6 @@ const WIPE_ORDER = [
 ];
 
 export default function NUPSDemoManager() {
-  const base44 = { entities: {} };
   const [log, setLog]               = useState([]);
   const [phase, setPhase]           = useState("idle");
   const [wipeInput, setWipeInput]   = useState("");

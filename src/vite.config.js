@@ -44,6 +44,11 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@base44/sdk']
+    include: ['react', 'react-dom', 'react-router-dom', '@base44/sdk'],
+    exclude: [
+      'src/components/internal_index',
+      'src/components/mobile',
+      'src/components/security'
+    ]
   }
 })

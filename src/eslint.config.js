@@ -1,0 +1,9 @@
+export default [
+  {
+    ignores: [
+      "src/components/internal_index/**",
+      "src/components/mobile/**",
+      "src/components/security/**"
+    ]
+  }
+];
