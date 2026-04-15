@@ -80,8 +80,9 @@ export default function NUPSStaff() {
     staleTime: 60000,
   });
 
-  // TASK 7.1 – Filter demo/test transactions from ALL financial views
+  // TASK 7.1 – Filter demo/test transactions from ALL financial views — PLUS staff isolation
   const realTransactions = transactions.filter(t =>
+    t.cashier === user?.email &&
     (!t.mode || t.mode === 'REAL') &&
     !t.transaction_id?.startsWith('DEMO-') &&
     !t.cashier?.includes('demo@')

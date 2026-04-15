@@ -108,6 +108,7 @@ export default function NUPSMISReport() {
   const gbSurchargeTotal = qDreamOrders.reduce((s, o) => s + (o.processing_surcharge || 0), 0);
   const totalDDRevenue = gbLiabilityFaceValue;
   // NOTE: totalRevenue and gbLiabilityFaceValue are NEVER combined — F-2 mandate
+  // REMOVED: const combinedRevenue — D-7 violation fix
   const avgTransaction = qTransactions.length ? totalRevenue / qTransactions.length : 0;
   const activeEntertainers = entertainers.filter(e => e.status === "active").length;
   const totalShiftHours = qShifts.reduce((s, sh) => {
@@ -270,12 +271,6 @@ export default function NUPSMISReport() {
                     <td className="p-3 text-right text-gray-400">{qTransactions.filter(t => ['Credit Card','Debit Card','Digital Wallet','Gift Card','Tab'].includes(t.payment_method)).length}</td>
                     <td className="p-3 text-right text-gray-400">{totalRevenue > 0 ? ((qTransactions.filter(t => ['Credit Card','Debit Card','Digital Wallet','Gift Card','Tab'].includes(t.payment_method)).reduce((s,t) => s+((t.total||0)-(t.tip||0)),0) / totalRevenue) * 100).toFixed(1) : '0'}%</td>
                   </tr>
-                  <tr className="border-b border-gray-700 bg-amber-900/10">
-                    <td className="p-3 text-amber-400 text-xs">Tips — staff pass-through (excluded from revenue)</td>
-                    <td className="p-3 text-right text-amber-400 font-mono text-xs">${qTransactions.reduce((s,t) => s+(t.tip||0),0).toFixed(2)}</td>
-                    <td className="p-3 text-right text-gray-500 text-xs">—</td>
-                    <td className="p-3 text-right text-gray-500 text-xs">not revenue</td>
-                  </tr>
                   <tr className="bg-gray-800/50 font-bold">
                     <td className="p-3 text-white">POS Total</td>
                     <td className="p-3 text-right text-green-400 font-mono">${totalRevenue.toFixed(2)}</td>
@@ -285,6 +280,12 @@ export default function NUPSMISReport() {
                   <tr>
                     <td className="p-3 font-bold text-white">GlyphBucks Liability</td>
                     <td className="p-3 text-right text-amber-400 font-mono">${totalDDRevenue.toFixed(2)}</td>
+                  </tr>
+                  <tr className="border-b border-gray-700 bg-amber-900/10">
+                    <td className="p-3 text-amber-400 text-xs">Tips — staff pass-through (excluded from revenue)</td>
+                    <td className="p-3 text-right text-amber-400 font-mono text-xs">${qTransactions.reduce((s,t) => s+(t.tip||0),0).toFixed(2)}</td>
+                    <td className="p-3 text-right text-gray-500 text-xs">—</td>
+                    <td className="p-3 text-right text-gray-500 text-xs">not revenue</td>
                   </tr>
                 </tbody>
               </table>

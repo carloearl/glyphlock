@@ -88,16 +88,16 @@ export default function POSBarRegister({ user }) {
       cashier: user?.email || "bar",
       status: "completed",
       batch_id: activeBatch?.id || null,
-      station: 'bar',
-      mode: 'REAL',
-      cashier_name: user?.full_name || user?.name || user?.email || 'Bar Staff',
-      cashier_email: user?.email || null,
-      venue_id: activeBatch?.venue_id || activeVenue?.id || null,
       terminal_id: activeBatch?.venue_id
         ? `TERM-BAR-${activeBatch.venue_id.slice(-6).toUpperCase()}`
         : 'TERM-BAR-UNKNOWN',
       cashier_id: user?.id || user?.email || null,
       card_last4: null,
+      station: 'bar',
+      mode: 'REAL',
+      cashier_name: user?.full_name || user?.name || user?.email || 'Bar Staff',
+      cashier_email: user?.email || null,
+      venue_id: activeBatch?.venue_id || activeVenue?.id || null,
     }),
     onSuccess: () => {
       qc.invalidateQueries(["pos-transactions"]);
