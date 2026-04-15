@@ -128,7 +128,66 @@ export default function NUPSDemoManager() {
   };
 
   const doWipe = async () => {
-    push("WIPE DISABLED FOR DEBUG", "warn");
+    if (wipeInput.trim() !== "WIPE") return;
+
+    setPhase("wiping");
+    setSuccessCount(0);
+    setErrorCount(0);
+    logRef.current = [];
+    setLog([]);
+    push("DEMO SAFE RESET initiated — venue_id: DEMO_VENUE_001", "info");
+
+    const entityCounts = {};
+    let totalDeleted = 0;
+
+    for (const entityName of WIPE_ORDER) {
+      try {
+        const records = await base44.entities[entityName].filter({ venue_id: DEMO_VENUE_ID });
+
+        if (!records.length) {
+          entityCounts[entityName] = 0;
+          push(entityName + ": 0 found", "info");
+          continue;
+        }
+
+        let deletedCount = 0;
+        for (const record of records) {
+          await base44.entities[entityName].delete(record.id);
+          deletedCount += 1;
+        }
+
+        entityCounts[entityName] = deletedCount;
+        totalDeleted += deletedCount;
+        push(entityName + ": " + deletedCount + " deleted", "success");
+      } catch (e) {
+        entityCounts[entityName] = entityCounts[entityName] ?? 0;
+        push(entityName + ": " + (e?.message || JSON.stringify(e)), "error");
+        setErrorCount(p => p + 1);
+      }
+    }
+
+    try {
+      await base44.entities.SystemAuditLog.create({
+        event_type: "DEMO_WIPE",
+        description: "DEMO SAFE RESET executed via NUPSDemoManager",
+        venue_id: DEMO_VENUE_ID,
+        user_id: "SYSTEM",
+        metadata: {
+          wipe_time: NOW(),
+          mode: "DEMO_ONLY",
+          executed_by: "NUPSDemoManager",
+          entity_counts: entityCounts
+        }
+      });
+      push("SystemAuditLog: DEMO_WIPE recorded", "success");
+    } catch (e) {
+      push("SystemAuditLog: " + (e?.message || JSON.stringify(e)), "error");
+      setErrorCount(p => p + 1);
+    }
+
+    push("DEMO SAFE RESET COMPLETE — " + totalDeleted + " records removed", "success");
+    setWipeInput("");
+    setPhase("done");
   };
 
   const busy = phase === "seeding" || phase === "wiping";
