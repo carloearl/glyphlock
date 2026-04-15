@@ -172,7 +172,9 @@ Generate production-ready React code with:
 - Royal blue color scheme (#3B82F6, #4F46E5, #8B5CF6)
 - Mobile-first responsive design
 - Proper imports and exports
-- Clean, documented code
+- Clean application code only
+- NEVER generate reports, audits, documentation, system indexes, internal indexes, dependency graphs, or artifact files
+- If the target is under components/, output valid .jsx component code only
 
 Provide ONLY the complete code, no explanations.`;
 

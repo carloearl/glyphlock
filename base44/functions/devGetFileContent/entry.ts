@@ -20,44 +20,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'file_path required' }, { status: 400 });
     }
 
-    // Call siteBuilder agent to read file
-    const conversation = await base44.agents.createConversation({
-      agent_name: 'siteBuilder',
-      metadata: { source: 'dev_engine_file_read' }
-    });
-
-    await base44.agents.addMessage(conversation, {
-      role: 'user',
-      content: `[EXPLAIN MODE] Read and return the complete contents of file: ${file_path}`
-    });
-
-    // Wait for agent response
-    const content = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Timeout waiting for file content'));
-      }, 30000);
-
-      const unsubscribe = base44.agents.subscribeToConversation(conversation.id, (data) => {
-        const lastMsg = data.messages[data.messages.length - 1];
-        if (lastMsg?.role === 'assistant' && lastMsg?.content) {
-          clearTimeout(timeout);
-          unsubscribe();
-          
-          // Extract code from markdown if present
-          const codeMatch = lastMsg.content.match(/```[\w]*\n([\s\S]*?)\n```/);
-          const fileContent = codeMatch ? codeMatch[1] : lastMsg.content;
-          
-          resolve(fileContent);
-        }
-      });
-    });
-
     return Response.json({
-      success: true,
-      file_path,
-      content,
-      lines: content.split('\n').length
-    });
+      success: false,
+      error: 'Direct agent-based file reading is disabled for Site Builder normalization',
+      file_path
+    }, { status: 410 });
 
   } catch (error) {
     console.error('File read error:', error);

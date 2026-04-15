@@ -123,7 +123,11 @@ RULES:
 - Estimate risk accurately (new files = low, modifying core = high)
 - Include ALL necessary steps
 - Consider mobile responsiveness
-- Use GlyphLock royal blue theme (#3B82F6, #4F46E5, #8B5CF6)`;
+- Use GlyphLock royal blue theme (#3B82F6, #4F46E5, #8B5CF6)
+- NEVER create documentation, reports, audits, indexes, dependency graphs, or internal artifact files
+- NEVER target any path containing internal_index
+- If target starts with components/, it MUST end with .jsx
+- Do not create .md, .json, .css, .txt, or other non-.jsx files under components/`;
 
     const result = await callLLM(
       `MODE: ${mode.toUpperCase()}\n\nUSER REQUEST:\n${userRequest}\n\nCONTEXT:\n${context || 'GlyphLock.io security platform'}`,

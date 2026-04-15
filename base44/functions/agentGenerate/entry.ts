@@ -112,6 +112,19 @@ function isBlockedComponentPath(path) {
   return path.startsWith('components/') && !path.endsWith('.jsx');
 }
 
+function isBlockedArtifactPath(path) {
+  if (typeof path !== 'string') return false;
+  const lowerPath = path.toLowerCase();
+  const fileName = lowerPath.split('/').pop() || '';
+  return lowerPath.includes('internal_index') ||
+    fileName.endsWith('.md') ||
+    fileName.includes('audit') ||
+    fileName.includes('report') ||
+    fileName.includes('site_index') ||
+    fileName.includes('dependencygraph') ||
+    fileName.includes('sitemap.json');
+}
+
 function detectFileType(path) {
   if (path.startsWith('pages/')) return 'page';
   if (path.startsWith('components/')) return 'component';
@@ -165,6 +178,15 @@ Deno.serve(async (req) => {
           path: step.target,
           action: step.action,
           error: 'Blocked: components/ only allows .jsx files'
+        });
+        continue;
+      }
+
+      if (isBlockedArtifactPath(step.target)) {
+        generatedChanges.push({
+          path: step.target,
+          action: step.action,
+          error: 'Blocked: artifact/report/index generation is disabled'
         });
         continue;
       }

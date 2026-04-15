@@ -93,6 +93,19 @@ function isBlockedComponentPath(filePath) {
   return typeof filePath === 'string' && filePath.startsWith('components/') && !filePath.endsWith('.jsx');
 }
 
+function isBlockedArtifactPath(filePath) {
+  if (typeof filePath !== 'string') return false;
+  const lowerPath = filePath.toLowerCase();
+  const fileName = lowerPath.split('/').pop() || '';
+  return lowerPath.includes('internal_index') ||
+    fileName.endsWith('.md') ||
+    fileName.includes('audit') ||
+    fileName.includes('report') ||
+    fileName.includes('site_index') ||
+    fileName.includes('dependencygraph') ||
+    fileName.includes('sitemap.json');
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -175,6 +188,10 @@ Rules:
         if (isBlockedComponentPath(filePath)) {
           return Response.json({ error: 'Blocked: components/ only allows .jsx files' }, { status: 400 });
         }
+
+        if (isBlockedArtifactPath(filePath)) {
+          return Response.json({ error: 'Blocked: artifact/report/index generation is disabled' }, { status: 400 });
+        }
         
         const fileType = filePath.endsWith('.json') ? 'json' : 
                          filePath.startsWith('functions/') ? 'deno' : 'react';
@@ -234,6 +251,10 @@ RESPOND WITH ONLY THE CODE, NO EXPLANATIONS.`
 
         if (isBlockedComponentPath(filePath)) {
           return Response.json({ error: 'Blocked: components/ only allows .jsx files' }, { status: 400 });
+        }
+
+        if (isBlockedArtifactPath(filePath)) {
+          return Response.json({ error: 'Blocked: artifact/report/index generation is disabled' }, { status: 400 });
         }
 
         // Log the action
