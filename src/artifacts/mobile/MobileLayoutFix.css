@@ -1,0 +1,9 @@
+/* Mobile Layout Fix - Prevents horizontal scroll and overflow issues */
+
+@media (max-width: 768px) {
+  .grid:not(.stats-grid):not(.preserve-cols) {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+}
