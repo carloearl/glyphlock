@@ -107,7 +107,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin role required for agent operations' }, { status: 403 });
     }
 
-    const { userRequest, context, mode = 'build' } = await req.json();
+    const { userRequest, context, mode = 'build', explicitUserTrigger } = await req.json();
+
+    if (explicitUserTrigger !== true) {
+      return Response.json({ error: 'Blocked: explicit user trigger required for agent planning.' }, { status: 403 });
+    }
 
     if (!userRequest) {
       return Response.json({ error: 'userRequest is required' }, { status: 400 });

@@ -149,7 +149,11 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
-    const { action, payload } = await req.json();
+    const { action, payload, explicitUserTrigger } = await req.json();
+
+    if (explicitUserTrigger !== true) {
+      return Response.json({ error: 'Blocked: explicit user trigger required' }, { status: 403 });
+    }
 
     switch (action) {
       case 'generate_code': {

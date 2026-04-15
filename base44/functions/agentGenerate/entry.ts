@@ -147,7 +147,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin role required' }, { status: 403 });
     }
 
-    const { changeSetId } = await req.json();
+    const { changeSetId, explicitUserTrigger } = await req.json();
+
+    if (explicitUserTrigger !== true) {
+      return Response.json({ error: 'Blocked: explicit user trigger required for code generation.' }, { status: 403 });
+    }
 
     if (!changeSetId) {
       return Response.json({ error: 'changeSetId is required' }, { status: 400 });

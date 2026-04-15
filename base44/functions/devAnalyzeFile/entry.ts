@@ -16,7 +16,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { filePath, fileContent } = await req.json();
+    const { filePath, fileContent, explicitUserTrigger } = await req.json();
+
+    if (explicitUserTrigger !== true) {
+      return Response.json({ error: 'Blocked: explicit user trigger required for file analysis.' }, { status: 403 });
+    }
 
     if (String(filePath).toLowerCase().includes('audit') || String(filePath).toLowerCase().includes('scan') || String(filePath).toLowerCase().includes('report') || String(filePath).toLowerCase().includes('sitemap') || String(filePath).toLowerCase().includes('index')) {
       return Response.json({ error: 'Audit/scan/report/index generation and analysis are blocked in dev engine context.' }, { status: 403 });

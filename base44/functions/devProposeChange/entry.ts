@@ -16,7 +16,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { filePath, fileContent, changeDescription } = await req.json();
+    const { filePath, fileContent, changeDescription, explicitUserTrigger } = await req.json();
+
+    if (explicitUserTrigger !== true) {
+      return Response.json({ error: 'Blocked: explicit user trigger required for change proposals.' }, { status: 403 });
+    }
 
     const blockedText = `${filePath} ${changeDescription}`.toLowerCase();
     if (blockedText.includes('audit') || blockedText.includes('scan') || blockedText.includes('report') || blockedText.includes('sitemap') || blockedText.includes('index') || blockedText.includes('file analysis')) {

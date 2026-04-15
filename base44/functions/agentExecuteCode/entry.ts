@@ -149,7 +149,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { action, payload } = await req.json();
+    const { action, payload, explicitUserTrigger } = await req.json();
+
+    if (explicitUserTrigger !== true) {
+      return Response.json({ error: 'Blocked: explicit user trigger required for dev execution.' }, { status: 403 });
+    }
 
     switch (action) {
       case 'analyze_request': {

@@ -44,7 +44,6 @@ export default function SiteBuilder() {
       const isAuthorized = userData.role === 'admin' || authorizedUsers.includes(userData.email);
       if (!isAuthorized) { toast.error('Access denied'); window.location.href = '/'; return; }
       setUser(userData);
-      await initConversation();
     } catch (error) {
       toast.error('Authentication failed');
     } finally {
@@ -62,25 +61,36 @@ export default function SiteBuilder() {
       });
       setConversation(conv);
       setMessages(Array.isArray(conv.messages) ? conv.messages : []);
-      const unsubscribe = base44.agents.subscribeToConversation(conv.id, (data) => {
+      base44.agents.subscribeToConversation(conv.id, (data) => {
         if (data?.messages) setMessages(Array.isArray(data.messages) ? data.messages : []);
       });
-      return () => typeof unsubscribe === 'function' && unsubscribe();
+      return conv;
     } catch (error) {
       toast.error('Failed to initialize agent');
       setMessages([]);
     }
   };
 
+  const ensureConversation = async () => {
+    if (conversation) return conversation;
+    const conv = await initConversation();
+    return conv;
+  };
+
   const sendMessage = async () => {
-    if (!input.trim() || sending || !conversation) return;
+    if (!input.trim() || sending) return;
     const modePrefix = mode === 'plan' ? '[PLAN MODE] ' : mode === 'code' ? '[CODE MODE] ' : '';
     const userMessage = { role: 'user', content: modePrefix + input };
     setMessages(prev => [...(Array.isArray(prev) ? prev : []), userMessage]);
     setInput('');
     setSending(true);
     try {
-      await base44.agents.addMessage(conversation, userMessage);
+      const activeConversation = await ensureConversation();
+      if (!activeConversation) {
+        toast.error('Failed to initialize agent');
+        return;
+      }
+      await base44.agents.addMessage(activeConversation, userMessage);
     } catch (error) {
       toast.error('Failed to send message');
     } finally {

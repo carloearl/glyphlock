@@ -32,6 +32,12 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
+    const { explicitUserTrigger } = await req.json().catch(() => ({ explicitUserTrigger: false }));
+
+    if (explicitUserTrigger !== true) {
+      return Response.json({ error: 'Blocked: explicit user trigger required', test: 'blocked' }, { status: 403 });
+    }
+
     // Test API keys
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
