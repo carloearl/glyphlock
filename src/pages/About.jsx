@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Shield, Zap, Brain, Code, Target, Users, 
   Sparkles, Crown, Lock, Blocks, FileText, 
-  Globe, TrendingUp, Award
+  Globe, TrendingUp, Award, DollarSign, CheckCircle2, Info
 } from "lucide-react";
 import SEOHead from "../components/SEOHead";
 import { motion, useInView } from "framer-motion";
@@ -362,6 +362,118 @@ export default function About() {
                   <span className="text-gray-200 font-medium">{tech}</span>
                 </motion.div>
               ))}
+            </div>
+          </motion.div>
+
+          {/* SERVICE FEES */}
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="glass-card rounded-2xl p-8 md:p-12 mb-12 border border-[#8C4BFF]/20"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 flex items-center gap-4 font-space">
+              <DollarSign className="w-8 h-8 text-[#8C4BFF]" />
+              Service Fees
+            </h2>
+            <p className="text-gray-400 mb-10 text-lg">
+              Transparent, straightforward pricing across every tier of the GlyphLock ecosystem.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              {[
+                {
+                  tier: "Free",
+                  price: "$0",
+                  period: "/ month",
+                  color: "border-white/20",
+                  accent: "text-white",
+                  badge: null,
+                  features: [
+                    "50 QR generations / mo",
+                    "20 AI images / mo",
+                    "1,000 API calls / mo",
+                    "1 GB storage",
+                    "Basic blockchain tools",
+                    "Community support"
+                  ]
+                },
+                {
+                  tier: "Professional",
+                  price: "$49",
+                  period: "/ month",
+                  color: "border-[#00E4FF]/50",
+                  accent: "text-[#00E4FF]",
+                  badge: "Most Popular",
+                  features: [
+                    "1,000 QR generations / mo",
+                    "500 AI images / mo",
+                    "100,000 API calls / mo",
+                    "50 GB storage",
+                    "Full blockchain suite",
+                    "Priority support",
+                    "Custom voice personas",
+                    "Advanced analytics"
+                  ]
+                },
+                {
+                  tier: "Enterprise",
+                  price: "$199",
+                  period: "/ month",
+                  color: "border-[#8C4BFF]/50",
+                  accent: "text-[#8C4BFF]",
+                  badge: "Full Access",
+                  features: [
+                    "Unlimited QR generations",
+                    "Unlimited AI images",
+                    "Unlimited API calls",
+                    "Unlimited storage",
+                    "Master Covenant suite",
+                    "Dedicated account manager",
+                    "SLA guarantee",
+                    "Custom integrations",
+                    "NUPS POS integration"
+                  ]
+                }
+              ].map((plan, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
+                  className={`relative bg-white/5 border-2 ${plan.color} rounded-2xl p-6 flex flex-col`}
+                >
+                  {plan.badge && (
+                    <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${plan.accent} bg-black border ${plan.color}`}>
+                      {plan.badge}
+                    </div>
+                  )}
+                  <div className="mb-6">
+                    <div className={`text-sm font-bold uppercase tracking-widest mb-2 ${plan.accent}`}>{plan.tier}</div>
+                    <div className="flex items-end gap-1">
+                      <span className="text-4xl font-black text-white">{plan.price}</span>
+                      <span className="text-gray-400 mb-1">{plan.period}</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-2 flex-1">
+                    {plan.features.map((f, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                        <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.accent}`} />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="flex items-start gap-3 bg-[#8C4BFF]/10 border border-[#8C4BFF]/30 rounded-xl p-4">
+              <Info className="w-5 h-5 text-[#8C4BFF] flex-shrink-0 mt-0.5" />
+              <p className="text-gray-400 text-sm">
+                All plans include access to the GlyphLock open framework and core platform tools. Add-ons and custom enterprise agreements available — contact us for details. Usage resets on your monthly billing cycle date.
+              </p>
             </div>
           </motion.div>
 

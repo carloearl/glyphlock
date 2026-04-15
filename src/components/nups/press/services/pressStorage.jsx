@@ -12,7 +12,7 @@ const KEYS = {
 };
 
 // ─── Telemetry ───
-export function emitPressTelemetry(event, data) {
+export async function emitPressTelemetry(event, data) {
   try {
     if (typeof window !== 'undefined' && window.console) {
       console.log(`[PRESS_TELEMETRY] ${event}`, data);
