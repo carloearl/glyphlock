@@ -29,6 +29,8 @@ export default function NUPSDemoManager() {
     } catch(e) { push("Entertainer error: " + (e?.message || JSON.stringify(e)), "error"); }
     try {
       await base44.entities.POSTransaction.create({
+        transaction_id: "DEMO-TXN-" + Date.now(),
+        total: 120,
         amount: 120,
         cash_sales: 120,
         card_sales: 0,
@@ -42,6 +44,7 @@ export default function NUPSDemoManager() {
     } catch(e) { push("Transaction error: " + (e?.message || JSON.stringify(e)), "error"); }
     try {
       await base44.entities.GlyphBucksTransaction.create({
+        transaction_id: "DEMO-GB-" + Date.now(),
         transaction_type: "purchase",
         amount: 100,
         cashier_id: "demo-hostess",
