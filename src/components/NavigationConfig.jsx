@@ -51,7 +51,7 @@ export const NAV_SECTIONS = [
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
   ]
-  }
+  },
   {
     label: "Protocols",
     visibility: "public",
