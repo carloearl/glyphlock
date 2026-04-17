@@ -75,32 +75,7 @@ export default function NUPSUnifiedOverview() {
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[28px] border border-cyan-400/15 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_28%),linear-gradient(135deg,rgba(10,18,30,0.98),rgba(8,14,24,0.96))] shadow-[0_0_60px_rgba(34,211,238,0.08)]">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.03),transparent)]" />
-        <div className="relative grid gap-6 px-5 py-6 md:px-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:py-8">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">NUPS Infrastructure</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-5xl">A sharper operating system view for modern venue infrastructure.</h2>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
-              Unified operations, contract control, internal currency workflows, POS execution, reporting, and reconciliation in one institutional-grade layer.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">Deployment</p>
-              <p className="mt-2 text-2xl font-bold text-white">Multi-Station</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">Control Layer</p>
-              <p className="mt-2 text-2xl font-bold text-white">Audit-Ready</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">Positioning</p>
-              <p className="mt-2 text-2xl font-bold text-white">Institutional</p>
-            </div>
-          </div>
-        </div>
-      </section>
+
       <section className="overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(14,25,40,0.95),rgba(10,18,29,0.95))] shadow-[0_0_40px_rgba(59,130,246,0.12)]">
         <div className="border-b border-white/10 px-5 py-5 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -110,10 +85,6 @@ export default function NUPSUnifiedOverview() {
               <p className="mt-3 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
                 Venue Operating System & Infrastructure Platform — multi-station, multi-venue, compliance-ready, and institutional-grade.
               </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2 self-start rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-3">
-              <LayoutGrid className="h-5 w-5 text-cyan-300" />
-              <span className="text-sm font-semibold text-white">Built by GlyphLock Financial LLC · GlyphLock.io</span>
             </div>
           </div>
         </div>

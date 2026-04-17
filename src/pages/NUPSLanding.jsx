@@ -125,8 +125,8 @@ export default function NUPSLanding() {
 
         .brand-bar {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+          align-items: flex-start;
+          justify-content: flex-start;
           padding-bottom: 28px;
           border-bottom: 1px solid var(--line);
           margin-bottom: 56px;
@@ -145,7 +145,7 @@ export default function NUPSLanding() {
           0%, 100% { width: 120px; opacity: 1; }
           50% { width: 240px; opacity: 0.6; }
         }
-        .brand-mark { display: flex; align-items: center; gap: 16px; }
+        .brand-mark { display: flex; align-items: flex-start; gap: 16px; }
         .logo-wrap {
           width: 48px; height: 48px;
           position: relative;
@@ -1160,12 +1160,7 @@ export default function NUPSLanding() {
               </div>
               <div className="wordmark">GLYPHLOCK</div>
             </div>
-            <div className="brand-meta">
-              <div>USPTO <span className="pat">18/584,961</span></div>
-              <div>AZ Entity <span className="pat">#23831258</span></div>
-              <div>DACO · Master Covenant</div>
-              <div className="stamp">NUPS · LIVE</div>
-            </div>
+
           </header>
 
           <section className="hero">
@@ -1178,9 +1173,9 @@ export default function NUPSLanding() {
               NUPS replaces fragmented POS and manual door ledgers with one <b>closed-loop infrastructure</b>. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>, with a printed contract that is manager-signed, hostess-signed, scanned back into the system, and hardcopy-archived for bookkeeping and litigation.
             </p>
             <div className="enter-wrap">
-              <button className="enter-btn" onClick={() => navigate('/NUPSInfrastructurePage')}>
+              <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}>
                 <span className="pulse-dot" />
-                View Infrastructure Pages
+                Enter N.U.P.S.
               </button>
             </div>
             <div className="ticker">
@@ -1323,12 +1318,7 @@ export default function NUPSLanding() {
                 </g>
               </svg>
             </div>
-            <div className="enter-wrap" style={{ marginTop: '20px', marginBottom: '12px' }}>
-              <button className="enter-btn" onClick={() => navigate('/NUPSInfrastructurePage')}>
-                <span className="pulse-dot" />
-                View Infrastructure Pages
-              </button>
-            </div>
+
             <div className="legend">
               <span><i className="ctrl" /> Platform Policy</span>
               <span><i className="data" /> Identity · Data</span>
@@ -1518,12 +1508,6 @@ export default function NUPSLanding() {
           <section className="footer-cta">
             <h3>The venue is the <span className="glow">network.</span><br />NUPS is the <span className="glow">protocol.</span></h3>
             <p>Infrastructure-grade platform for high-risk entertainment venues. Live deployments across the Phoenix metro. Sandbox access available for qualified operators, investors, and underwriting partners.</p>
-            <div className="enter-wrap">
-              <button className="enter-btn" onClick={() => navigate('/NUPSInfrastructurePage')}>
-                <span className="pulse-dot" />
-                View Infrastructure Pages
-              </button>
-            </div>
             <div className="stamp">GlyphLock LLC · Arizona · USPTO 18/584,961 · Est. 2025 · All Rights Reserved</div>
           </section>
         </div>
