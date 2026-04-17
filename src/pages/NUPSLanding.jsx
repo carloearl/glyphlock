@@ -1225,6 +1225,7 @@ export default function NUPSLanding() {
                 <g>
                   <rect x="80" y="380" width="1440" height="540" fill="url(#venue-grad)" stroke="#00d4ff" strokeWidth="1" strokeDasharray="6 3" rx="4" opacity="0.5" />
                   <text className="svg-tag" x="110" y="410" fontSize="11" fill="#00d4ff">◆ VENUE OPERATIONS · TENANT-SCOPED via venue_id ◆</text>
+
                   <g transform="translate(800, 650)">
                     <g style={{ transformOrigin: 'center', animation: 'spin-slow 40s linear infinite' }}>
                       <circle cx="0" cy="0" r="230" fill="none" stroke="#00d4ff" strokeWidth="0.5" strokeDasharray="1 8" opacity="0.3" />
@@ -1251,6 +1252,39 @@ export default function NUPSLanding() {
                     <circle className="pulse-node" cx="-173" cy="100" r="4" fill="#14b8a6" style={{ animationDelay: '1.4s' }} />
                     <circle className="pulse-node" cx="-173" cy="-100" r="4" fill="#3b82f6" style={{ animationDelay: '1.75s' }} />
                   </g>
+
+                  <g transform="translate(110, 440)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ GUEST PROFILE</text><text className="svg-serif" x="16" y="42" fontSize="13">Mag-swipe → Account</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">search: card · QR · name · addr</text></g>
+                  <g transform="translate(110, 525)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ DRIVER ONBOARDING</text><text className="svg-serif" x="16" y="42" fontSize="13">Profile + QR issued</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#00d4ff">scan → parametric payout</text></g>
+                  <g transform="translate(110, 610)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#ef4444" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#ef4444" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#ef4444">⬢ ENTERTAINER · ISOLATED</text><text className="svg-serif" x="16" y="42" fontSize="13">1099 · separate ledger</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#ef4444">NO tip pool · NO payroll</text></g>
+                  <g transform="translate(110, 695)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ STAFF CLOCK-IN / OUT</text><text className="svg-serif" x="16" y="42" fontSize="13">Biometric + Shift Log</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">hours · breaks · OT calc</text></g>
+                  <g transform="translate(110, 780)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ VIP CONTRACT</text><text className="svg-serif" x="16" y="42" fontSize="13">Click-wrap + 30s Video</text><text className="svg-mono" x="16" y="58" fontSize="9">20-Q spender · QR = receipt</text></g>
+
+                  <g transform="translate(1230, 440)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYMENT ROUTER</text><text className="svg-serif" x="16" y="42" fontSize="13">Stripe · GoDaddy · Custom</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#1e6fff">processor-agnostic</text></g>
+                  <g transform="translate(1230, 525)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ POS CATALOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Drinks · Bottles · Cover</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">total = cash + card ONLY</text></g>
+                  <g transform="translate(1230, 610)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#00d4ff" strokeWidth="1.5" /><rect x="257" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ GLYPHBUCKS · SVC</text><text className="svg-serif" x="16" y="42" fontSize="13">Closed-Loop Currency</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#00d4ff">QR = tx_id = contract_id</text></g>
+                  <g transform="translate(1230, 695)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#6366f1" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYOUT ENGINE</text><text className="svg-serif" x="16" y="42" fontSize="13">Driver · Staff · Tip Pool</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#10b981">per-venue parametric</text></g>
+                  <g transform="translate(1230, 780)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="257" y="0" width="3" height="70" fill="#8b5cf6" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#8b5cf6">⬢ SYSTEMAUDITLOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Financial · Operational</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#8b5cf6">venue-scoped · immutable</text></g>
+
+                  <g strokeWidth="1" fill="none">
+                    <path className="flow-animate" d="M 370 475 L 627 560" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 370 560 L 627 590" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 370 645 L 627 640" stroke="#ef4444" strokeDasharray="3 3" markerEnd="url(#a-cyan)" opacity="0.6" />
+                    <path className="flow-animate" d="M 370 730 L 627 680" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 370 815 L 627 720" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                  </g>
+
+                  <g strokeWidth="1" fill="none">
+                    <path className="flow-animate" d="M 973 560 L 1230 475" stroke="#1e6fff" markerEnd="url(#a-sapph)" />
+                    <path className="flow-animate" d="M 973 590 L 1230 560" stroke="#1e6fff" markerEnd="url(#a-sapph)" />
+                    <path className="flow-animate" d="M 973 640 L 1230 645" stroke="#00d4ff" strokeWidth="1.5" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 973 680 L 1230 730" stroke="#6366f1" markerEnd="url(#a-indigo)" />
+                    <path className="flow-animate" d="M 973 720 L 1230 815" stroke="#8b5cf6" markerEnd="url(#a-violet)" />
+                  </g>
+
+                  <path d="M 800 320 L 800 450" stroke="#8b5cf6" strokeWidth="2" strokeDasharray="6 8" fill="none" markerEnd="url(#a-violet)" opacity="0.7">
+                    <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="2.4s" repeatCount="indefinite" />
+                  </path>
+                  <text className="svg-mono" x="810" y="390" fontSize="9" fill="#8b5cf6">policy · scope · access</text>
                 </g>
                 <g transform="translate(800, 1130)">
                   <text className="svg-tag" x="0" y="0" textAnchor="middle" fontSize="9" fill="#7c8db8">DACO MASTER COVENANT · 71 CLAUSES · USPTO 18/584,961 · AZ #23831258</text>
