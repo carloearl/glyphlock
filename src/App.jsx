@@ -57,8 +57,9 @@ const AuthenticatedApp = () => {
   }
 
   const currentPath = window.location.pathname;
-  const nupsPublicPaths = ['/NUPSLanding', '/NUPSGateway', '/NUPSSandbox', '/NUPSLogin', '/unauthorized', '/EntertainerCheckIn'];
-  const isNupsPublicRoute = nupsPublicPaths.some(p => currentPath.startsWith(p));
+  const currentPathLower = currentPath.toLowerCase();
+  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin'];
+  const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
     if (authError.type === 'user_not_registered') {
@@ -70,20 +71,28 @@ const AuthenticatedApp = () => {
   }
 
   // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/NUPSLanding', '/NUPSGateway', '/unauthorized', '/NUPSSandbox', '/NUPSLogin', '/NUPSOwner', '/NUPSStaff', '/EntertainerCheckIn', '/GlyphLockFinancialPage'];
-  const isFullscreen = fullscreenPaths.some(p => window.location.pathname.startsWith(p));
+  const fullscreenPaths = ['/nupslanding', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage'];
+  const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
   if (isFullscreen) {
     return (
       <Routes>
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
+        <Route path="/nupslanding" element={<NUPSLanding />} />
         <Route path="/NUPSGateway" element={<NUPSGateway />} />
+        <Route path="/nupsgateway" element={<NUPSGateway />} />
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
+        <Route path="/nupssandbox" element={<NUPSSandbox />} />
         <Route path="/NUPSLogin" element={<NUPSLogin />} />
+        <Route path="/nupslogin" element={<NUPSLogin />} />
         <Route path="/NUPSOwner" element={<NUPSOwner />} />
+        <Route path="/nupsowner" element={<NUPSOwner />} />
         <Route path="/NUPSStaff" element={<NUPSStaff />} />
+        <Route path="/nupsstaff" element={<NUPSStaff />} />
         <Route path="/NUPSInfrastructurePage" element={<NUPSInfrastructurePage />} />
+        <Route path="/nupsinfrastructurepage" element={<NUPSInfrastructurePage />} />
         <Route path="/GlyphLockFinancialPage" element={<GlyphLockFinancialPage />} />
+        <Route path="/glyphlockfinancialpage" element={<GlyphLockFinancialPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
