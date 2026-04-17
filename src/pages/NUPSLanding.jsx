@@ -1197,7 +1197,7 @@ export default function NUPSLanding() {
         <div className="container">
           <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/Home')}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
