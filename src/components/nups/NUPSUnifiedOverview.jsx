@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BadgeCheck, Building2, CircleDollarSign, FileText, LayoutGrid, ShieldCheck, Workflow, ChevronRight } from "lucide-react";
+import { BadgeCheck, Building2, CircleDollarSign, FileText, ShieldCheck, Workflow, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -212,12 +212,7 @@ export default function NUPSUnifiedOverview() {
                 <li>• Role-based permissions and owner-facing dashboard controls</li>
                 <li>• Operational reporting aligned to compliance infrastructure</li>
               </ul>
-              <div className="mt-5 rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-4">
-                <p className="text-sm font-semibold text-white">Unified Positioning</p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  This page combines the infrastructure and financial narrative into one cleaner, readable experience without relying on blurry source images.
-                </p>
-              </div>
+
             </CardContent>
           </Card>
         </div>

@@ -125,8 +125,8 @@ export default function NUPSLanding() {
 
         .brand-bar {
           display: flex;
-          align-items: flex-start;
-          justify-content: flex-start;
+          align-items: center;
+          justify-content: space-between;
           padding-bottom: 28px;
           border-bottom: 1px solid var(--line);
           margin-bottom: 56px;
@@ -145,7 +145,7 @@ export default function NUPSLanding() {
           0%, 100% { width: 120px; opacity: 1; }
           50% { width: 240px; opacity: 0.6; }
         }
-        .brand-mark { display: flex; align-items: flex-start; gap: 16px; }
+        .brand-mark { display: flex; align-items: center; gap: 16px; }
         .logo-wrap {
           width: 48px; height: 48px;
           position: relative;
@@ -1160,7 +1160,12 @@ export default function NUPSLanding() {
               </div>
               <div className="wordmark">GLYPHLOCK</div>
             </div>
-
+            <div className="brand-meta">
+              <div>USPTO <span className="pat">18/584,961</span></div>
+              <div>AZ Entity <span className="pat">#23831258</span></div>
+              <div>DACO · Master Covenant</div>
+              <div className="stamp">NUPS · LIVE</div>
+            </div>
           </header>
 
           <section className="hero">
@@ -1365,7 +1370,7 @@ export default function NUPSLanding() {
               <p>NUPS builds the evidence packet in real-time. Every transaction accrues its own <b>chain of custody</b> as it happens — contract, video attestation, biometrics, still frames, receipt, ledger entry, blockchain timestamp.</p>
               <p>When a claim lands, one button assembles the package and routes it directly to the venue's <b>banking partner</b>. The processor sees a fully attested transaction with consented, biometrically-verified proof before the dispute cycle ever engages.</p>
               <p>For high-risk merchants, this is the difference between <b>operating in good standing</b> and losing the merchant account entirely.</p>
-              <button className="enter-btn" onClick={() => navigate('/NUPSInfrastructurePage')}><span className="pulse-dot" />View Infrastructure Pages</button>
+
             </div>
             <div className="shield-package">
               <div className="pkg-header"><span className="name">Evidence Package</span><span className="id">PKG-<span style={{ color: 'var(--cyan)' }}>TX_9F2A4C</span></span></div>
@@ -1464,7 +1469,7 @@ export default function NUPSLanding() {
             </div>
           </div>
 
-          <div className="section-header"><h2>Rate Card &amp; <b>Sandbox</b></h2><div className="index">§ 08 · Configuration</div></div>
+          <div className="section-header"><h2>Rate Card &amp; <b>Operations</b></h2><div className="index">§ 08 · Configuration</div></div>
           <div className="split-section">
             <div className="econ-card">
               <span className="card-label">◆ Rate Card · Per Venue</span>
@@ -1482,13 +1487,13 @@ export default function NUPSLanding() {
               </div>
             </div>
             <div className="sandbox-card">
-              <span className="card-label">◆ Runtime · Three Modes</span>
-              <h3>Safe by <b>separation.</b></h3>
-              <p>Every action runs in one of three isolated modes. Demos for investors, training for staff, and underwriting previews for merchant banks all happen in Sandbox — never touching live money.</p>
+              <span className="card-label">◆ Operating Controls</span>
+              <h3>Built for <b>controlled execution.</b></h3>
+              <p>Every venue runs on a configured operating profile with defined rates, permissions, reconciliation rules, and documented financial controls.</p>
               <div className="sandbox-modes">
-                <div className="sandbox-mode" style={{ ['--mode-color']: '#10b981' }}><span className="dot" /><div className="name">REAL <em>Live production · settled transactions</em></div><span className="key">sk_live_</span></div>
-                <div className="sandbox-mode" style={{ ['--mode-color']: '#3b82f6' }}><span className="dot" /><div className="name">DEMO <em>Simulated tx · no settlement · safe</em></div><span className="key">sk_test_</span></div>
-                <div className="sandbox-mode" style={{ ['--mode-color']: '#8b5cf6' }}><span className="dot" /><div className="name">SANDBOX <em>Engineering · feature flags · underwriting</em></div><span className="key">sk_dev_</span></div>
+                <div className="sandbox-mode" style={{ ['--mode-color']: '#10b981' }}><span className="dot" /><div className="name">Rate Configuration <em>Cover, payouts, pricing, and fee logic per venue</em></div><span className="key">CONFIG</span></div>
+                <div className="sandbox-mode" style={{ ['--mode-color']: '#3b82f6' }}><span className="dot" /><div className="name">Permissions Matrix <em>Access scoped by role and operational responsibility</em></div><span className="key">RBAC</span></div>
+                <div className="sandbox-mode" style={{ ['--mode-color']: '#8b5cf6' }}><span className="dot" /><div className="name">Reconciliation Rules <em>Cash, card, contracts, and audit outputs stay aligned</em></div><span className="key">LEDGER</span></div>
               </div>
             </div>
           </div>
