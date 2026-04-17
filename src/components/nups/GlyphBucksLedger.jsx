@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Coins, Plus, TrendingUp, TrendingDown, RotateCcw, AlertCircle, ArrowRightLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const TX_TYPES = ["Issue", "Redeem", "Transfer", "Void", "Adjustment"];
 
@@ -19,7 +20,9 @@ const TYPE_CONFIG = {
   Adjustment: { color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30", icon: RotateCcw },
 };
 
-export default function GlyphBucksLedger({ user, venue_id = "dream_palace" }) {
+export default function GlyphBucksLedger({ user }) {
+  const activeVenue = useActiveVenue();
+  const venue_id = activeVenue?.venue_id;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [filterType, setFilterType] = useState("all");

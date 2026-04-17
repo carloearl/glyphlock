@@ -5,6 +5,7 @@
  */
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,7 @@ function StepIndicator({ steps, currentStep, completedSteps }) {
 
 export default function OnboardingPacket({ currentUser }) {
   const qc = useQueryClient();
+  const activeVenue = useActiveVenue();
   const [newHire, setNewHire] = useState({
     stage_name: "", legal_name: "", email: "", phone: "",
     role: "", doc_note: "", contract_notes: "",
@@ -113,7 +115,7 @@ export default function OnboardingPacket({ currentUser }) {
       await base44.entities.UserRoleAssignment.create({
         user_email: userEmail,
         role_key: newHire.role,
-        venue_id: "dream_palace",
+        venue_id: activeVenue?.venue_id,
         assigned_by: currentUser?.email || "system",
         assigned_at: new Date().toISOString(),
         is_active: false, // blocked until activation step completes

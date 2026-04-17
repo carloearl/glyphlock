@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollText, Plus, CheckCircle, Printer, AlertCircle, Coins } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const CONTRACT_TYPES = ["VIP Package", "GlyphBucks Purchase", "Entertainer Agreement", "Service Agreement", "Custom"];
 const PAYMENT_METHODS = ["Cash", "Credit Card", "Debit Card", "GlyphBucks", "Split"];
@@ -20,7 +21,9 @@ const STATUS_CONFIG = {
   disputed:  { color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/30" },
 };
 
-export default function ContractManager({ user, venue_id = "dream_palace" }) {
+export default function ContractManager({ user }) {
+  const activeVenue = useActiveVenue();
+  const venue_id = activeVenue?.venue_id;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");

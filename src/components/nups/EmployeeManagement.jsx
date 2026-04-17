@@ -170,7 +170,7 @@ function EmployeeDialog({ open, onClose, employee, entertainers, venueId }) {
 export default function EmployeeManagement() {
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
-  const venueId = activeVenue?.venue_id || 'dream_palace';
+  const venueId = activeVenue?.venue_id;
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("active");

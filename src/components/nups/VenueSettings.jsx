@@ -8,8 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Building2, Save, CheckCircle } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 
-const VENUE_ID = "dream_palace";
-
 export default function VenueSettings({ user }) {
   const queryClient = useQueryClient();
   const [saved, setSaved] = useState(false);
@@ -69,7 +67,7 @@ export default function VenueSettings({ user }) {
 
   const saveMutation = useMutation({
     mutationFn: async (data) => {
-      const payload = { ...data, venue_id: VENUE_ID, status: "active" };
+      const payload = { ...data, venue_id: activeVenue?.venue_id, status: "active" };
       if (activeVenue?.id) {
         return base44.entities.Venue.update(activeVenue.id, payload);
       } else {

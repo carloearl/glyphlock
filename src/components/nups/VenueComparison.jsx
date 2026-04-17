@@ -7,24 +7,14 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
  * Compare revenue across all venues
  */
 
-export default function VenueComparison({ venueData }) {
-  const chartData = [
-    {
-      venue: 'Dream Palace',
-      revenue: venueData?.dream_palace || 0,
-      bills: venueData?.dream_palace_bills || 0
-    },
-    {
-      venue: 'Bones Cabaret',
-      revenue: venueData?.bones || 0,
-      bills: venueData?.bones_bills || 0
-    },
-    {
-      venue: 'Skin Cabaret',
-      revenue: venueData?.skin || 0,
-      bills: venueData?.skin_bills || 0
-    }
-  ];
+export default function VenueComparison({ venues = [] }) {
+  // venues: array of { venue_id, name, revenue, bills }
+  // Parent component should pass an array of venue performance objects.
+  const chartData = venues.map(v => ({
+    venue: v.name || v.venue_id,
+    revenue: v.revenue || 0,
+    bills: v.bills || 0,
+  }));
 
   return (
     <Card>
