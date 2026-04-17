@@ -82,6 +82,7 @@ export default function NUPSLanding() {
           border-radius: 50%;
           filter: blur(60px);
           pointer-events: none;
+          touch-action: none;
           z-index: 0;
         }
         .ambient.one {
@@ -248,6 +249,8 @@ export default function NUPSLanding() {
           margin-top: 38px;
           display: flex;
           justify-content: center;
+          position: relative;
+          z-index: 10;
         }
         .enter-btn {
           display: inline-flex;
@@ -267,7 +270,14 @@ export default function NUPSLanding() {
           clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
           transition: all 0.3s;
           box-shadow: 0 0 40px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: rgba(0, 212, 255, 0.3);
+          pointer-events: auto;
+          position: relative;
+          z-index: 10;
+          min-height: 56px;
         }
+        .enter-btn * { pointer-events: none; }
         .enter-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 10px 50px rgba(139, 92, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
