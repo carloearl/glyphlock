@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import NUPSArchitectureSections from "@/components/nups/landing/NUPSArchitectureSections";
 
 export default function NUPSLanding() {
   const navigate = useNavigate();
@@ -1210,7 +1211,7 @@ export default function NUPSLanding() {
               <span className="line-2">behind the venue.</span>
             </h1>
             <p className="lede">
-              NUPS replaces paper contracts, fragmented POS, and manual door ledgers with one <b>closed-loop infrastructure</b>. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>.
+              NUPS replaces paper contracts, fragmented POS, and manual door ledgers with one <b>closed-loop hybrid infrastructure</b> — edge nodes at the venue, cloud server as the system of record. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>.
             </p>
             <div
               style={{
@@ -1240,7 +1241,7 @@ export default function NUPSLanding() {
               </div>
             </div>
             <p className="lede" style={{ marginTop: 28, fontSize: 18 }}>
-              <b>The operating system that records, verifies, and defends every transaction inside the venue.</b> Built-in Dispute Shield — every transaction arrives pre-packaged with verifiable evidence. NUPS defines a new merchant class: <b>High-Verification Commerce</b>.
+              <b>The operating system that records, verifies, and defends every transaction inside the venue.</b> Built-in Dispute Shield — every transaction arrives pre-packaged with verifiable evidence. NUPS defines a new merchant class: <b>High-Verification Commerce</b> — a transaction model where identity, consent, payment, and evidence are captured and linked at the moment of transaction.
             </p>
             <div className="enter-wrap" style={{ gap: 16, flexWrap: 'wrap' }}>
               <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}>
@@ -1261,7 +1262,7 @@ export default function NUPSLanding() {
               <div className="stat"><span className="num">3</span><span className="label">Runtime Modes</span></div>
               <div className="stat"><span className="num">1-PUSH</span><span className="label">Dispute Shield</span></div>
               <div className="stat"><span className="num">1</span><span className="label">Signed Hardcopy</span></div>
-              <div className="stat"><span className="num">∞</span><span className="label">Venue Tenants</span></div>
+              <div className="stat"><span className="num">Multi-Tenant</span><span className="label">Scalable Architecture</span></div>
             </div>
           </section>
 
@@ -1488,7 +1489,7 @@ export default function NUPSLanding() {
                   <g transform="translate(110, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#00d4ff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ DATA · PRIMARY</text><text className="svg-serif" x="14" y="42" fontSize="12">Entity Store</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">150+ fn · 100+ entities</text></g>
                   <g transform="translate(390, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#00d4ff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ DATA · CREDENTIAL</text><text className="svg-serif" x="14" y="42" fontSize="12">External Supabase</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">JWT · auth isolated</text></g>
                   <g transform="translate(670, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#1e6fff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ HARDWARE · POS</text><text className="svg-serif" x="14" y="42" fontSize="12">Ambir · Adesso · Epson</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">ID · biometric · thermal</text></g>
-                  <g transform="translate(950, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#1e6fff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ HARDWARE · MGMT</text><text className="svg-serif" x="14" y="42" fontSize="12">iBUYPOWER · Samsung</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">oversight tier</text></g>
+                  <g transform="translate(950, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#1e6fff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ HARDWARE · MGMT</text><text className="svg-serif" x="14" y="42" fontSize="12">Samsung Tablets</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">oversight · mobile tier</text></g>
                   <g transform="translate(1230, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#10b981" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ MESSAGING INFRA</text><text className="svg-serif" x="14" y="42" fontSize="12">Twilio · SendGrid</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">OTP · alerts · 1099</text></g>
                   <g transform="translate(110, 1356)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#1e6fff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ PROCESSOR INTEG</text><text className="svg-serif" x="14" y="42" fontSize="12">Stripe · GoDaddy</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">webhooks · APIs</text></g>
                   <g transform="translate(390, 1356)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#a855f7" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ SESSION SECURITY</text><text className="svg-serif" x="14" y="42" fontSize="12">MFA · JWT verify</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">device attestation</text></g>
@@ -1547,7 +1548,7 @@ export default function NUPSLanding() {
             <div className="shield-copy">
               <span className="eyebrow">Pre-Empts the Chargeback Cycle</span>
               <h3>Stop the dispute <span className="glow">before it starts.</span></h3>
-              <p>NUPS builds the evidence packet in real-time. Every transaction accrues its own <b>chain of custody</b> as it happens — contract, video attestation, biometrics, still frames, receipt, ledger entry, blockchain timestamp. <b>Designed for court-admissible records and financial dispute defense.</b></p>
+              <p>NUPS builds the evidence packet in real-time. Every transaction accrues its own <b>chain of custody</b> as it happens — contract, video attestation, biometrics, still frames, receipt, ledger entry, blockchain timestamp. <b>Designed for audit and dispute defense.</b></p>
               <p>When a claim lands, one button assembles the package and routes it directly to the venue's banking partner. The processor sees a fully attested transaction with consented, biometrically-verified proof before the dispute cycle ever engages — the difference between <b>operating in good standing</b> and losing the merchant account.</p>
             </div>
             <div className="shield-package">
@@ -1600,7 +1601,7 @@ export default function NUPSLanding() {
                 <ul>
                   <li><span className="k">COMPUTE</span><span className="v"><b>Raspberry Pi 500+</b> — BCM2712, quad A76 @ 2.4GHz, 16GB LPDDR4X, 256GB NVMe. Wi-Fi 6, BT 5.2, dual 4K micro-HDMI. <em>~$200 per node</em></span></li>
                   <li><span className="k">DISPLAY</span><span className="v"><b>15&quot; portable touch</b> — 1080p IPS, 10-point capacitive, USB-C powered. Guest-facing for click-wrap signing. <em>Swappable per station</em></span></li>
-                  <li><span className="k">MOBILE</span><span className="v"><b>Samsung tablet</b> with AT&amp;T SIM — LTE fallback for outages, roaming door/floor staff terminal. <em>DeX + HDMI bridge</em></span></li>
+                  <li><span className="k">MOBILE · OVERSIGHT</span><span className="v"><b>Samsung tablets</b> with AT&amp;T SIM — manager oversight, roaming door/floor staff terminal, LTE fallback for outages. <em>DeX + HDMI bridge</em></span></li>
                   <li><span className="k">CAPTURE</span><span className="v"><b>Adesso biometric</b> + USB mag-stripe + chip reader + barcode/QR scanner + webcam. Full edge identity capture. <em>Plug-and-play USB</em></span></li>
                   <li><span className="k">PRINT · SIGN</span><span className="v"><b>Epson ET-5850</b> prints contract → manual wet signature → <b>Epson WiFi PDF scanner</b> rescans signed hardcopy back into the record. Thermal receipt printer for POS. <b>SVC machine</b> for GlyphBucks issuance. <em>Print → Sign → Rescan → Sealed</em></span></li>
                   <li><span className="k">NETWORK</span><span className="v">Dual-path: venue Wi-Fi primary + AT&amp;T LTE failover. Offline mode buffers to MongoDB fallback until reconnect. <em>Zero-downtime spec</em></span></li>
@@ -1615,7 +1616,7 @@ export default function NUPSLanding() {
                   <li><span className="k">COMMS</span><span className="v"><b>SendGrid</b> (email: contracts, receipts, 1099s, marketing blasts) + <b>Twilio</b> (SMS: OTP, driver alerts, shift notifications, guest re-engagement). <em>Templated · tracked · GDPR opt-in</em></span></li>
                   <li><span className="k">DJ · BOOTH</span><span className="v"><b>Entertainer DJ system</b> — self-serve login: upload songs, build sets, save preferences, generate auto-playlists, and see <b>live rotation position</b> in real-time. <em>Better than club standard · zero DJ dependency</em></span></li>
                   <li><span className="k">MARKETING</span><span className="v"><b>QR marketing + social automation</b> — track-and-trace QR campaigns, automated IG/TikTok/X posts, event-driven SMS/email blasts, guest re-engagement triggers. <em>Campaign → scan → profile match</em></span></li>
-                  <li><span className="k">PAYMENTS</span><span className="v"><b>Processor-agnostic router</b>: Stripe, GoDaddy, or venue's existing merchant. Card whitelist enforced server-side. <em>Swap without redeployment</em></span></li>
+                  <li><span className="k">PAYMENTS</span><span className="v"><b>Processor-agnostic architecture</b> — currently integrated with <b>Stripe and GoDaddy</b>; additional processors onboardable via the same adapter interface. Card whitelist enforced server-side. <em>Swap without redeployment</em></span></li>
                   <li><span className="k">CURRENCY</span><span className="v"><b>GlyphBucks SVC engine</b> — a closed-loop stored-value system tied directly to verified transactions and contracts. Denominations $10–$1000 (customizable), each note carries a steganographic QR. <em>QR = tx_id = contract_id</em></span></li>
                   <li><span className="k">SHIELD</span><span className="v"><b>Dispute evidence compiler</b> — bundles contract, video, biometric, receipt, blockchain hash into a single signed PDF package on demand. <em>One button · full chain</em></span></li>
                   <li><span className="k">GOVERNANCE</span><span className="v"><b>DACO enforcement layer</b> — immutable rules (total_sales = cash + card ONLY, 1099 isolation, tip pass-through). <em>Code-level guards · not config</em></span></li>
@@ -1630,7 +1631,7 @@ export default function NUPSLanding() {
                   <li><span className="k">MEDIA</span><span className="v"><b>Supabase Storage + CDN</b> for DJ audio tracks, VIP video attestations, still frames, ID scans. Signed URL access only. <em>Per-venue bucket isolation</em></span></li>
                   <li><span className="k">AUDIT · OPS</span><span className="v"><b>SystemAuditLog</b> — financial + operational events. <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>venue_id REQUIRED</code>. Immutable append-only. <em>Venue-scoped tenant separation</em></span></li>
                   <li><span className="k">AUDIT · PLAT</span><span className="v"><b>AuditEvent</b> — platform + security telemetry. <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>venue_id optional</code>. <em>For GlyphLock internal forensics</em></span></li>
-                  <li><span className="k">CHAIN</span><span className="v"><b>Blockchain timestamping</b> — every contract signature, video attestation, and tx hash anchored to a public chain. <em>Court-admissible chain of custody</em></span></li>
+                  <li><span className="k">CHAIN</span><span className="v"><b>Blockchain timestamping</b> — every contract signature, video attestation, and tx hash anchored to a public chain. <em>Designed for audit and dispute defense</em></span></li>
                   <li><span className="k">RETENTION</span><span className="v">Financial records <b>7 years</b>, consent records <b>statutory max</b>, video attestations <b>encrypted at rest, purged on statutory expiry or guest request</b>. <em>GDPR/CCPA compliant</em></span></li>
                   <li><span className="k">ENCRYPTION</span><span className="v">AES-256 at rest, TLS 1.3 in transit, per-venue encryption keys, biometrics hashed (never stored raw). <em>SOC-2 ready</em></span></li>
                   <li><span className="k">OWNERSHIP</span><span className="v">All venue data remains <b>tenant-scoped and encrypted</b>. Platform-level access is limited to audit and compliance enforcement. <em>No cross-venue reads · no platform data mining</em></span></li>
@@ -1733,14 +1734,14 @@ export default function NUPSLanding() {
               <span className="tag">Hardware</span>
               <h4>Turnkey certified stack.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> piecemeal peripherals from five vendors.</p>
-              <p>Ambir ID scanner, Adesso mag-stripe and biometric readers, smart card machine, Epson contract printer, thermal receipt printer, GoDaddy POS terminal. Certified, integrated, and supported as one system.</p>
+              <p>Raspberry Pi edge nodes, Samsung oversight tablets, Ambir ID scanner, Adesso mag-stripe and biometric readers, smart card machine, Epson contract printer, thermal receipt printer, GoDaddy POS terminal. Certified, integrated, and supported as one system.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="6" width="20" height="14" rx="2" /><path d="M 6 10 L 10 10 M 6 14 L 14 14" /><circle cx="18" cy="13" r="2" /></svg>
               <span className="tag">Payments</span>
               <h4>Processor-agnostic routing.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> locked-in merchant contracts.</p>
-              <p>Processor-agnostic adapter layer. Stripe today; GoDaddy Payments and venue-owned merchant accounts via the same interface. Swipe, chip, or tap.</p>
+              <p>Processor-agnostic architecture — currently integrated with Stripe and GoDaddy. Additional processors and venue-owned merchant accounts onboardable via the same adapter interface. Swipe, chip, or tap.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 12 22" /><path d="M 17 6 H 9 a 3 3 0 0 0 0 6 h 6 a 3 3 0 0 1 0 6 H 7" /></svg>
@@ -1841,6 +1842,8 @@ export default function NUPSLanding() {
               <p>Every QR scan ties back to a real guest record. Scheduled social posts across Instagram, TikTok, and X. Event-driven SMS re-engagement triggers based on visit history.</p>
             </div>
           </div>
+
+          <NUPSArchitectureSections />
 
           <section className="footer-cta">
             <h3>The venue is the <span className="glow">network.</span><br />NUPS is the <span className="glow">protocol.</span></h3>
