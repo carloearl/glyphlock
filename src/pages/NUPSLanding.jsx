@@ -1177,10 +1177,18 @@ export default function NUPSLanding() {
             <p className="lede">
               NUPS replaces fragmented POS and manual door ledgers with one <b>closed-loop infrastructure</b>. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>, with a printed contract that is manager-signed, hostess-signed, scanned back into the system, and hardcopy-archived for bookkeeping and litigation.
             </p>
-            <div className="enter-wrap">
+            <div className="enter-wrap" style={{ gap: 16, flexWrap: 'wrap' }}>
               <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}>
                 <span className="pulse-dot" />
                 Enter N.U.P.S.
+              </button>
+              <button
+                className="enter-btn"
+                onClick={() => navigate('/NUPSInfrastructurePage')}
+                style={{ background: 'linear-gradient(135deg, var(--cyan), var(--sapphire))' }}
+              >
+                <span className="pulse-dot" />
+                Infrastructure UI
               </button>
             </div>
             <div className="ticker">
