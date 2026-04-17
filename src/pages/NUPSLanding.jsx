@@ -388,13 +388,11 @@ export default function NUPSLanding() {
         .diagram-wrap { width: 100%; aspect-ratio: 1600 / 1200; min-height: 380px; position: relative; }
         svg.diagram { width: 100%; height: 100%; display: block; }
         .nups-logo-core {
-          filter: drop-shadow(0 0 18px rgba(0, 212, 255, 0.75)) drop-shadow(0 0 42px rgba(99, 102, 241, 0.45));
-          animation: nups-logo-pulse 2.8s ease-in-out infinite;
-          transform-origin: center;
+          filter: drop-shadow(0 0 22px rgba(0, 212, 255, 0.9)) drop-shadow(0 0 54px rgba(99, 102, 241, 0.5));
+          opacity: 0.98;
         }
-        @keyframes nups-logo-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.95; }
-          50% { transform: scale(1.035); opacity: 1; }
+        .arch-top-gl {
+          filter: drop-shadow(0 0 14px rgba(0, 212, 255, 0.75)) drop-shadow(0 0 32px rgba(30, 111, 255, 0.45));
         }
         .legend {
           display: flex;
@@ -1233,7 +1231,16 @@ export default function NUPSLanding() {
                 <g><rect x="60" y="335" width="1480" height="8" fill="url(#isolation)" /><text className="svg-mono" x="800" y="357" textAnchor="middle" fontSize="9" fill="#ef4444" letterSpacing="0.3em">◆ PLATFORM / VENUE ISOLATION BARRIER · TENANT SEPARATION ENFORCED ◆</text></g>
                 <g>
                   <rect x="80" y="380" width="1440" height="540" fill="url(#venue-grad)" stroke="#00d4ff" strokeWidth="1" strokeDasharray="6 3" rx="4" opacity="0.5" />
-                  <text className="svg-tag" x="110" y="410" fontSize="11" fill="#00d4ff">◆ VENUE OPERATIONS · TENANT-SCOPED via venue_id ◆</text>
+                  <image
+                    href="https://media.base44.com/images/public/697a087fb354faebb72df54b/f82c93c8c_lglogo.png"
+                    x="98"
+                    y="392"
+                    width="78"
+                    height="78"
+                    preserveAspectRatio="xMidYMid meet"
+                    className="arch-top-gl"
+                  />
+                  <text className="svg-tag" x="190" y="410" fontSize="11" fill="#00d4ff">◆ VENUE OPERATIONS · TENANT-SCOPED via venue_id ◆</text>
 
                   <g transform="translate(800, 650)">
                     <g style={{ transformOrigin: 'center', animation: 'spin-slow 40s linear infinite' }}>
@@ -1251,17 +1258,16 @@ export default function NUPSLanding() {
                     <polygon points="0,-120 104,-60 104,60 0,120 -104,60 -104,-60" fill="#030614" stroke="#1e6fff" strokeWidth="1.5" />
                     <image
                       href="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
-                      x="-138"
-                      y="-178"
-                      width="276"
-                      height="276"
+                      x="-92"
+                      y="-146"
+                      width="184"
+                      height="184"
                       preserveAspectRatio="xMidYMid meet"
                       className="nups-logo-core"
                     />
-                    <text className="svg-tag" x="0" y="106" textAnchor="middle" fontSize="12" fill="#00d4ff">NUPS</text>
-                    <text className="svg-title" x="0" y="132" textAnchor="middle" fontSize="22">CORE</text>
-                    <text className="svg-mono" x="0" y="152" textAnchor="middle" fontSize="9" fill="#7c8db8">venue_id → tenant</text>
-                    <text className="svg-mono" x="0" y="168" textAnchor="middle" fontSize="9" fill="#00d4ff">Multi-Venue Runtime</text>
+                    <text className="svg-title" x="0" y="92" textAnchor="middle" fontSize="22">CORE</text>
+                    <text className="svg-mono" x="0" y="112" textAnchor="middle" fontSize="9" fill="#7c8db8">venue_id → tenant</text>
+                    <text className="svg-mono" x="0" y="128" textAnchor="middle" fontSize="9" fill="#00d4ff">Multi-Venue Runtime</text>
                     <circle className="pulse-node" cx="0" cy="-200" r="4" fill="#00d4ff" />
                     <circle className="pulse-node" cx="173" cy="-100" r="4" fill="#1e6fff" style={{ animationDelay: '.35s' }} />
                     <circle className="pulse-node" cx="173" cy="100" r="4" fill="#6366f1" style={{ animationDelay: '.7s' }} />
@@ -1316,6 +1322,12 @@ export default function NUPSLanding() {
                   <text className="svg-mono" x="0" y="34" textAnchor="middle" fontSize="8" fill="#3d4a7a">total_sales = cash + card · entertainers 1099-isolated · hardcopy archived for bookkeeping/litigation · one-push dispute shield enabled</text>
                 </g>
               </svg>
+            </div>
+            <div className="enter-wrap" style={{ marginTop: '20px', marginBottom: '8px' }}>
+              <button className="enter-btn" onClick={() => navigate('/GlyphLockFinancial')}>
+                <span className="pulse-dot" />
+                View Infrastructure Page
+              </button>
             </div>
             <div className="legend">
               <span><i className="ctrl" /> Platform Policy</span>
