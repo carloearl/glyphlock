@@ -6,16 +6,25 @@ import base44 from '@base44/vite-plugin'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const IGNORED = [
+  '**/components/internal_index/**',
+  '**/components/mobile/**',
+  '**/components/security/README_MFA_ROUTING*',
+  '**/components/mobile/MobileLayoutFix.css.jsx',
+  '**/components/mobile/MobileOptimizationSummary.md.jsx',
+  '**/*.md.jsx',
+  '**/*.json.jsx',
+  '**/*.css.jsx',
+]
+
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      exclude: IGNORED,
+    }),
     base44({
-      exclude: [
-        'src/components/internal_index/**',
-        'src/components/mobile/**',
-        'src/components/security/**'
-      ]
-    })
+      exclude: IGNORED,
+    }),
   ],
   resolve: {
     alias: {
@@ -25,6 +34,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
+      external: IGNORED,
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
@@ -45,10 +55,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', '@base44/sdk'],
-    exclude: [
-      'src/components/internal_index',
-      'src/components/mobile',
-      'src/components/security'
-    ]
+    exclude: IGNORED,
   }
 })
