@@ -1206,11 +1206,41 @@ export default function NUPSLanding() {
           <section className="hero">
             <div className="eyebrow">Node Universal Platform System</div>
             <h1>
-              <span className="line-1">The operating system</span>
-              <span className="line-2">behind the venue.</span>
+              <span className="line-1">NUPS is not a POS.</span>
+              <span className="line-2">It is the proof layer.</span>
             </h1>
             <p className="lede">
-              NUPS replaces fragmented POS and manual door ledgers with one <b>closed-loop infrastructure</b>. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>, with a printed contract that is manager-signed, hostess-signed, scanned back into the system, and hardcopy-archived for bookkeeping and litigation.
+              NUPS is a <b>verification and enforcement layer</b> for high-risk venue commerce. Most systems record transactions. <b>NUPS proves they happened.</b> Identity, payment, contract, and audit are unified into a single closed-loop platform — every transaction arrives <b>pre-evidenced, consented, and defensible</b> before disputes occur.
+            </p>
+            <div
+              style={{
+                maxWidth: 900,
+                margin: '28px auto 0',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 18,
+                padding: '20px 24px',
+                border: '1px solid var(--line)',
+                background: 'rgba(7,9,28,0.55)',
+                backdropFilter: 'blur(12px)',
+                textAlign: 'left',
+              }}
+            >
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.28em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: 8 }}>Who it serves</div>
+                <div style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>High-risk venues operating under processor, banking, and regulatory pressure.</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.28em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: 8 }}>What it does</div>
+                <div style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>Unifies identity, payment, contract, and audit into a single closed-loop system.</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.28em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: 8 }}>Why it wins</div>
+                <div style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>Every transaction is pre-evidenced, consented, and defensible before disputes occur.</div>
+              </div>
+            </div>
+            <p className="lede" style={{ marginTop: 28, fontSize: 18 }}>
+              <b>The operating system that records, verifies, and defends every transaction inside the venue.</b> Built-in Dispute Shield — every transaction arrives pre-packaged with verifiable evidence. NUPS defines a new merchant class: <b>High-Verification Commerce</b>.
             </p>
             <div className="enter-wrap" style={{ gap: 16, flexWrap: 'wrap' }}>
               <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}>
@@ -1373,9 +1403,12 @@ export default function NUPSLanding() {
           <div className="section-header"><h2>Stakeholder <b>Protection</b></h2><div className="index">§ 02 · High-Risk Mitigation</div></div>
           <div className="protection-section">
             <div className="protection-intro">
-              <span className="eyebrow">◆ Evidence-Driven Infrastructure</span>
+              <span className="eyebrow">Evidence-Driven Infrastructure</span>
               <h3>Bad business becomes <span className="glow">self-evident.</span></h3>
-              <p>Adult entertainment, nightlife, and cash-heavy venues are flagged <b>high-risk</b> by every processor and bank on earth. The reason isn't the industry — it's the <b>lack of verifiable records</b>. Cash doesn't lie, but it also doesn't prove anything. NUPS changes the calculus: every transaction arrives pre-evidenced, pre-consented, pre-attested. Each stakeholder — bank, processor, venue, guest — gets cryptographic proof that the business happened, that it was consensual, and that it was clean.</p>
+              <p>Rising chargebacks, processor scrutiny, and regulatory pressure have made traditional POS systems insufficient for high-risk environments. The problem isn't the industry — it's the absence of verifiable records. <b>NUPS converts high-risk merchants into auditable, evidence-backed operators.</b> Every transaction arrives pre-evidenced, pre-consented, and pre-attested. Bank, processor, venue, and guest each receive cryptographic proof that the business happened, that it was consensual, and that it was clean.</p>
+              <p style={{ marginTop: 14, fontSize: 15, color: 'var(--ink)', borderLeft: '3px solid var(--violet)', paddingLeft: 16, background: 'rgba(139,92,246,0.06)' }}>
+                <b style={{ color: 'var(--violet)' }}>Moat:</b> Competitors process payments. NUPS controls <b>proof, identity, and liability</b>.
+              </p>
             </div>
             <div className="stakeholders">
               <div className="stakeholder" style={{ ['--sh-color']: '#00d4ff', ['--sh-glow']: 'rgba(0,212,255,0.2)' }}><div className="label">Protecting</div><h4>The Bank</h4><div className="risk"><em>Without NUPS</em>Underwrites blind. High reserves, MATCH-list exposure, surprise reversals.</div><div className="benefit"><em>With NUPS</em>Pre-sealed evidence on every tx. Lower reserves, lower MATCH risk, clean KYC/AML trail.</div></div>
@@ -1401,12 +1434,10 @@ export default function NUPSLanding() {
           <div className="section-header"><h2>Dispute <b>Shield</b> — One-Push Package</h2><div className="index">§ 04 · Chargeback Defense</div></div>
           <div className="shield-section">
             <div className="shield-copy">
-              <span className="eyebrow">◆ Pre-Empts the Chargeback Cycle</span>
+              <span className="eyebrow">Pre-Empts the Chargeback Cycle</span>
               <h3>Stop the dispute <span className="glow">before it starts.</span></h3>
-              <p>NUPS builds the evidence packet in real-time. Every transaction accrues its own <b>chain of custody</b> as it happens — contract, video attestation, biometrics, still frames, receipt, ledger entry, blockchain timestamp.</p>
-              <p>When a claim lands, one button assembles the package and routes it directly to the venue's <b>banking partner</b>. The processor sees a fully attested transaction with consented, biometrically-verified proof before the dispute cycle ever engages.</p>
-              <p>For high-risk merchants, this is the difference between <b>operating in good standing</b> and losing the merchant account entirely.</p>
-
+              <p>NUPS builds the evidence packet in real-time. Every transaction accrues its own <b>chain of custody</b> as it happens — contract, video attestation, biometrics, still frames, receipt, ledger entry, blockchain timestamp. <b>Designed for court-admissible records and financial dispute defense.</b></p>
+              <p>When a claim lands, one button assembles the package and routes it directly to the venue's banking partner. The processor sees a fully attested transaction with consented, biometrically-verified proof before the dispute cycle ever engages — the difference between <b>operating in good standing</b> and losing the merchant account.</p>
             </div>
             <div className="shield-package">
               <div className="pkg-header"><span className="name">Evidence Package</span><span className="id">PKG-<span style={{ color: 'var(--cyan)' }}>TX_9F2A4C</span></span></div>
@@ -1454,7 +1485,7 @@ export default function NUPSLanding() {
             <div className="tech-tabs">
               <div className="tech-tab" style={{ ['--tab-color']: '#00d4ff' }}>
                 <div className="tab-head"><div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M 6 8 L 10 8 M 6 12 L 10 12 M 6 16 L 10 16 M 14 8 L 18 8 M 14 12 L 18 12 M 14 16 L 18 16" /></svg></div><div className="num">01</div></div>
-                <h4>Hardware<em>Edge Compute Stack</em></h4>
+                <h4>Hardware<em>Resilient, edge-based infrastructure for zero-downtime venue operations.</em></h4>
                 <ul>
                   <li><span className="k">COMPUTE</span><span className="v"><b>Raspberry Pi 500+</b> — BCM2712, quad A76 @ 2.4GHz, 16GB LPDDR4X, 256GB NVMe. Wi-Fi 6, BT 5.2, dual 4K micro-HDMI. <em>~$200 per node</em></span></li>
                   <li><span className="k">DISPLAY</span><span className="v"><b>15&quot; portable touch</b> — 1080p IPS, 10-point capacitive, USB-C powered. Guest-facing for click-wrap signing. <em>Swappable per station</em></span></li>
@@ -1474,7 +1505,7 @@ export default function NUPSLanding() {
                   <li><span className="k">DJ · BOOTH</span><span className="v"><b>Entertainer DJ system</b> — self-serve login: upload songs, build sets, save preferences, generate auto-playlists, and see <b>live rotation position</b> in real-time. <em>Better than club standard · zero DJ dependency</em></span></li>
                   <li><span className="k">MARKETING</span><span className="v"><b>QR marketing + social automation</b> — track-and-trace QR campaigns, automated IG/TikTok/X posts, event-driven SMS/email blasts, guest re-engagement triggers. <em>Campaign → scan → profile match</em></span></li>
                   <li><span className="k">PAYMENTS</span><span className="v"><b>Processor-agnostic router</b>: Stripe, GoDaddy, or venue's existing merchant. Card whitelist enforced server-side. <em>Swap without redeployment</em></span></li>
-                  <li><span className="k">CURRENCY</span><span className="v"><b>GlyphBucks SVC engine</b> — closed-loop stored-value with steganographic QR, denominations $10–$1000 (customizable). <em>Not a crypto · not a gift card</em></span></li>
+                  <li><span className="k">CURRENCY</span><span className="v"><b>GlyphBucks SVC engine</b> — a closed-loop stored-value system tied directly to verified transactions and contracts. Denominations $10–$1000 (customizable), each note carries a steganographic QR. <em>QR = tx_id = contract_id</em></span></li>
                   <li><span className="k">SHIELD</span><span className="v"><b>Dispute evidence compiler</b> — bundles contract, video, biometric, receipt, blockchain hash into a single signed PDF package on demand. <em>One button · full chain</em></span></li>
                   <li><span className="k">GOVERNANCE</span><span className="v"><b>DACO enforcement layer</b> — immutable rules (total_sales = cash + card ONLY, 1099 isolation, tip pass-through). <em>Code-level guards · not config</em></span></li>
                 </ul>
@@ -1491,6 +1522,7 @@ export default function NUPSLanding() {
                   <li><span className="k">CHAIN</span><span className="v"><b>Blockchain timestamping</b> — every contract signature, video attestation, and tx hash anchored to a public chain. <em>Court-admissible chain of custody</em></span></li>
                   <li><span className="k">RETENTION</span><span className="v">Financial records <b>7 years</b>, consent records <b>statutory max</b>, video attestations <b>encrypted at rest, purged on statutory expiry or guest request</b>. <em>GDPR/CCPA compliant</em></span></li>
                   <li><span className="k">ENCRYPTION</span><span className="v">AES-256 at rest, TLS 1.3 in transit, per-venue encryption keys, biometrics hashed (never stored raw). <em>SOC-2 ready</em></span></li>
+                  <li><span className="k">OWNERSHIP</span><span className="v">All venue data remains <b>tenant-scoped and encrypted</b>. Platform-level access is limited to audit and compliance enforcement. <em>No cross-venue reads · no platform data mining</em></span></li>
                 </ul>
               </div>
             </div>
@@ -1537,7 +1569,32 @@ export default function NUPSLanding() {
             </div>
           </div>
 
-          <div className="section-header"><h2>What <b>NUPS</b> Replaces</h2><div className="index">§ 09 · Capabilities</div></div>
+          <div className="section-header"><h2>Revenue <b>Model</b></h2><div className="index">§ 09 · Commercialization</div></div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 1,
+              background: 'var(--line)',
+              border: '1px solid var(--line)',
+              marginBottom: 96,
+            }}
+          >
+            {[
+              { k: 'SaaS License', v: 'Per-venue monthly platform fee', c: '#00d4ff' },
+              { k: 'Transaction Fee', v: 'Per-transaction charge on verified commerce', c: '#1e6fff' },
+              { k: 'GlyphBucks Margin', v: 'Closed-loop stored-value issuance spread', c: '#8b5cf6' },
+              { k: 'Enterprise', v: 'Underwriting and compliance partnerships', c: '#14b8a6' },
+            ].map((r) => (
+              <div key={r.k} style={{ background: 'linear-gradient(180deg, var(--abyss), var(--deep))', padding: '32px 26px', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: r.c, boxShadow: `0 0 12px ${r.c}` }} />
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.28em', color: r.c, textTransform: 'uppercase', marginBottom: 14 }}>{r.k}</div>
+                <div style={{ fontSize: 15, color: 'var(--ink)', lineHeight: 1.5 }}>{r.v}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="section-header"><h2>What <b>NUPS</b> Replaces</h2><div className="index">§ 10 · Capabilities</div></div>
           <div className="capabilities">
             <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M 3 10 L 21 10" /><circle cx="7" cy="15" r="1" fill="currentColor" /></svg><span className="tag">Identity</span><h4>No more paper.</h4><p>Mag-stripe swipe creates a searchable profile instantly. Drivers and entertainers onboard once — scan QR forever.</p></div>
             <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 12 22" /><path d="M 17 6 H 9 a 3 3 0 0 0 0 6 h 6 a 3 3 0 0 1 0 6 H 7" /></svg><span className="tag">Currency</span><h4>GlyphBucks closed-loop.</h4><p>Proprietary SVC issues denominated notes ($10–$1000, customizable). QR on each note ties to contract, tx, and user.</p></div>
@@ -1555,7 +1612,10 @@ export default function NUPSLanding() {
 
           <section className="footer-cta">
             <h3>The venue is the <span className="glow">network.</span><br />NUPS is the <span className="glow">protocol.</span></h3>
-            <p>Infrastructure-grade platform for high-risk entertainment venues. Live deployments across the Phoenix metro. Sandbox access available for qualified operators, investors, and underwriting partners.</p>
+            <p>Infrastructure-grade platform for high-verification commerce. Live deployments across the Phoenix metro. Sandbox access available for qualified operators, investors, and underwriting partners.</p>
+            <p style={{ marginTop: 14, fontSize: 15 }}>
+              <b style={{ color: 'var(--cyan-soft)' }}>Applicable beyond nightlife</b> — hospitality, events, private security, and other high-risk commerce environments.
+            </p>
             <div className="stamp">GlyphLock LLC · Arizona · USPTO 18/584,961 · Est. 2025 · All Rights Reserved</div>
           </section>
         </div>
