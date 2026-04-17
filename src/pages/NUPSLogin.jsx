@@ -5,6 +5,7 @@ import { Shield, LogIn, Eye, EyeOff, Loader2, AlertCircle, Lock, User } from "lu
 import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
 import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
+import { saveActiveVenue } from '@/hooks/useActiveVenue';
 
 // Role → destination page mapping
 const ROLE_DESTINATIONS = {
@@ -45,6 +46,13 @@ export default function NUPSLogin() {
 
       // Store NUPS session (not the platform session)
       sessionStorage.setItem("nups_session", JSON.stringify(user));
+
+      // TASK 2 — Activate venue after authenticated login
+      try {
+        const venues = await base44.entities.Venue.filter({ status: 'active' }, '-created_date', 1);
+        const venue = venues?.[0];
+        if (venue) { saveActiveVenue(venue); }
+      } catch { /* non-blocking */ }
 
       // Demo accounts always go to sandbox
       if (user.is_demo || user.role === "DEMO") {

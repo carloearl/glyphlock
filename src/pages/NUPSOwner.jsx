@@ -67,8 +67,6 @@ import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 
-const DEFAULT_VENUE_ID = "dream_palace";
-
 export default function NUPSOwner() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -79,7 +77,7 @@ export default function NUPSOwner() {
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
 
-  const venueId = activeVenue?.id || activeVenue?.venue_id || DEFAULT_VENUE_ID;
+  const venueId = activeVenue?.id;
 
   const handleRefreshAll = () => {
     queryClient.clear();
