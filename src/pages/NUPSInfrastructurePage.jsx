@@ -9,7 +9,7 @@ export default function NUPSInfrastructurePage() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-6">
           <Link
-            to="/"
+            to="/NUPSLanding"
             className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4" />
