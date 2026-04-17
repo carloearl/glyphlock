@@ -1196,7 +1196,7 @@ export default function NUPSLanding() {
         <div className="container">
           <header className="brand-bar" style={{ justifyContent: 'flex-end' }}>
             <div className="brand-meta">
-              <div>USPTO <span className="pat">18/584,961</span></div>
+              <div>Multiple <span className="pat">Patents Pending</span></div>
               <div>AZ Entity <span className="pat">#23831258</span></div>
               <div>DACO · Master Covenant</div>
               <div className="stamp">NUPS · LIVE</div>
@@ -1297,7 +1297,7 @@ export default function NUPSLanding() {
                 <g>
                   <rect x="80" y="80" width="1440" height="240" fill="url(#platform-grad)" stroke="#4f46e5" strokeWidth="1.5" strokeDasharray="8 4" rx="4" />
                   <text className="svg-tag" x="110" y="110" fontSize="11" fill="#8b5cf6">◆ GOVERNANCE · AUTHORITY · IP · POLICY ◆</text>
-                  <g transform="translate(110, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ GOVERNANCE</text><text className="svg-title" x="20" y="46" fontSize="14">DACO Master Covenant</text><text className="svg-mono" x="20" y="62" fontSize="9">71 clauses · Carlo authority</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">USPTO 18/584,961</text></g>
+                  <g transform="translate(110, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ GOVERNANCE</text><text className="svg-title" x="20" y="46" fontSize="14">DACO Master Covenant</text><text className="svg-mono" x="20" y="62" fontSize="9">71 clauses · Carlo authority</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">Multiple Patents Pending</text></g>
                   <g transform="translate(390, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ IP VAULT</text><text className="svg-title" x="20" y="46" fontSize="14">Steganographic Engine</text><text className="svg-mono" x="20" y="62" fontSize="9">QR glyph generation · sealed</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">platform-owned · licensed out</text></g>
                   <g transform="translate(670, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ AUDIT · PLATFORM</text><text className="svg-title" x="20" y="46" fontSize="14">AuditEvent</text><text className="svg-mono" x="20" y="62" fontSize="9">venue_id optional · security</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">platform telemetry</text></g>
                   <g transform="translate(950, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ ACCESS MATRIX</text><text className="svg-title" x="20" y="46" fontSize="14">7-Tier RBAC</text><text className="svg-mono" x="20" y="62" fontSize="9">Admin → Guest scopes</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">venue_id gated</text></g>
@@ -1496,7 +1496,7 @@ export default function NUPSLanding() {
                 </g>
 
                 <g transform="translate(800, 1462)">
-                  <text className="svg-mono" x="0" y="0" textAnchor="middle" fontSize="9" fill="#7c8db8" letterSpacing="0.2em">GlyphLock LLC · AZ #23831258 · USPTO 18/584,961 · DACO Master Covenant v3.0</text>
+                  <text className="svg-mono" x="0" y="0" textAnchor="middle" fontSize="9" fill="#7c8db8" letterSpacing="0.2em">GlyphLock LLC · AZ #23831258 · Multiple Patents Pending · DACO Master Covenant v3.0</text>
                 </g>
               </svg>
             </div>
@@ -1911,14 +1911,14 @@ export default function NUPSLanding() {
                   textTransform: 'uppercase',
                 }}
               >
-                <span>◆ USPTO <span style={{ color: 'var(--cyan)' }}>18/584,961</span></span>
+                <span>◆ Patents <span style={{ color: 'var(--cyan)' }}>Pending</span></span>
                 <span>◆ Non-Provisional <span style={{ color: 'var(--cyan)' }}>Filed</span></span>
                 <span>◆ Copyrights <span style={{ color: 'var(--cyan)' }}>Registered</span></span>
                 <span>◆ Trade Secret <span style={{ color: 'var(--cyan)' }}>Protected</span></span>
               </div>
             </div>
 
-            <div className="stamp">GlyphLock LLC · Arizona · USPTO 18/584,961 · Est. 2025 · All Rights Reserved</div>
+            <div className="stamp">GlyphLock LLC · Arizona · Multiple Patents Pending · Est. 2025 · All Rights Reserved</div>
           </section>
         </div>
       </div>
