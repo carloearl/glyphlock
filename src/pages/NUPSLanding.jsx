@@ -1323,11 +1323,12 @@ export default function NUPSLanding() {
                 </g>
               </svg>
             </div>
-            <div className="enter-wrap" style={{ marginTop: '20px', marginBottom: '8px' }}>
-              <button className="enter-btn" onClick={() => navigate('/GlyphLockFinancial')}>
-                <span className="pulse-dot" />
-                View Infrastructure Page
-              </button>
+            <div style={{ marginTop: '20px', marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+              <img
+                src="https://media.base44.com/images/public/697a087fb354faebb72df54b/134919ca0_GlyphlockFinancialInfastructure5.png"
+                alt="NUPS infrastructure overview"
+                style={{ width: '100%', maxWidth: '980px', height: 'auto', border: '1px solid var(--line)', boxShadow: 'var(--shadow-panel)' }}
+              />
             </div>
             <div className="legend">
               <span><i className="ctrl" /> Platform Policy</span>
