@@ -1134,21 +1134,44 @@ export default function NUPSLanding() {
         <div
           style={{
             position: 'fixed',
-            top: 18,
-            left: 18,
-            width: 56,
-            height: 56,
+            top: 20,
+            left: 24,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
             zIndex: 9999,
             pointerEvents: 'none',
-            filter: 'drop-shadow(0 0 14px rgba(0,212,255,0.55)) drop-shadow(0 0 28px rgba(99,102,241,0.35))',
           }}
           aria-hidden="true"
         >
-          <img
-            src="https://media.base44.com/images/public/697a087fb354faebb72df54b/f82c93c8c_lglogo.png"
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-          />
+          <div
+            style={{
+              width: 52,
+              height: 52,
+              filter: 'drop-shadow(0 0 14px rgba(0,212,255,0.65)) drop-shadow(0 0 28px rgba(99,102,241,0.35))',
+            }}
+          >
+            <img
+              src="https://media.base44.com/images/public/697a087fb354faebb72df54b/77d157364_lglogo.png"
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+            />
+          </div>
+          <div
+            style={{
+              fontFamily: "'Orbitron', sans-serif",
+              fontWeight: 800,
+              fontSize: 20,
+              letterSpacing: '0.12em',
+              background: 'linear-gradient(180deg, #ffffff 0%, #00d4ff 100%)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 0 20px rgba(0,212,255,0.25)',
+            }}
+          >
+            GLYPHLOCK
+          </div>
         </div>
 
         <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
@@ -1171,15 +1194,7 @@ export default function NUPSLanding() {
         </svg>
 
         <div className="container">
-          <header className="brand-bar">
-            <div className="brand-mark">
-              <div className="logo-wrap">
-                <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%", color: "var(--cyan)" }}>
-                  <use href="#gl-mark" />
-                </svg>
-              </div>
-              <div className="wordmark">GLYPHLOCK</div>
-            </div>
+          <header className="brand-bar" style={{ justifyContent: 'flex-end' }}>
             <div className="brand-meta">
               <div>USPTO <span className="pat">18/584,961</span></div>
               <div>AZ Entity <span className="pat">#23831258</span></div>
@@ -1300,12 +1315,14 @@ export default function NUPSLanding() {
                   <g transform="translate(110, 610)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#ef4444" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#ef4444" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#ef4444">⬢ ENTERTAINER · ISOLATED</text><text className="svg-serif" x="16" y="42" fontSize="13">1099 · separate ledger</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#ef4444">NO tip pool · NO payroll</text></g>
                   <g transform="translate(110, 695)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ STAFF CLOCK-IN / OUT</text><text className="svg-serif" x="16" y="42" fontSize="13">Biometric + Shift Log</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">hours · breaks · OT calc</text></g>
                   <g transform="translate(110, 780)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ VIP CONTRACT</text><text className="svg-serif" x="16" y="42" fontSize="13">Click-wrap + 30s Video</text><text className="svg-mono" x="16" y="58" fontSize="9">20-Q spender · QR = receipt</text></g>
+                  <g transform="translate(110, 865)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#14b8a6" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#14b8a6" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#14b8a6">⬢ DJ · ROTATION ENGINE</text><text className="svg-serif" x="16" y="42" fontSize="13">Entertainer Self-Serve</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#14b8a6">playlists · sets · queue visibility</text></g>
 
                   <g transform="translate(1230, 440)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYMENT ROUTER</text><text className="svg-serif" x="16" y="42" fontSize="13">Stripe · GoDaddy · Custom</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#1e6fff">processor-agnostic</text></g>
                   <g transform="translate(1230, 525)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ POS CATALOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Drinks · Bottles · Cover</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">total = cash + card ONLY</text></g>
                   <g transform="translate(1230, 610)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#00d4ff" strokeWidth="1.5" /><rect x="257" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ GLYPHBUCKS · SVC</text><text className="svg-serif" x="16" y="42" fontSize="13">Closed-Loop Currency</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#00d4ff">QR = tx_id = contract_id</text></g>
                   <g transform="translate(1230, 695)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#6366f1" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYOUT ENGINE</text><text className="svg-serif" x="16" y="42" fontSize="13">Driver · Staff · Tip Pool</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#10b981">per-venue parametric</text></g>
                   <g transform="translate(1230, 780)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="257" y="0" width="3" height="70" fill="#8b5cf6" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#8b5cf6">⬢ SYSTEMAUDITLOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Financial · Operational</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#8b5cf6">venue-scoped · immutable</text></g>
+                  <g transform="translate(1230, 865)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="257" y="0" width="3" height="70" fill="#fbbf24" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#fbbf24">⬢ MARKETING AUTOMATION</text><text className="svg-serif" x="16" y="42" fontSize="13">QR · SMS · Social Posts</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#fbbf24">Twilio · SendGrid · scheduler</text></g>
 
                   <g strokeWidth="1" fill="none">
                     <path className="flow-animate" d="M 370 475 L 627 560" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
@@ -1453,7 +1470,9 @@ export default function NUPSLanding() {
                 <ul>
                   <li><span className="k">PLATFORM</span><span className="v"><b>Base44</b> app shell — App ID <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>697a087fb354faebb72df54b</code>. Multi-tenant by venue_id. <em>REAL · DEMO · SANDBOX modes</em></span></li>
                   <li><span className="k">AUTH</span><span className="v"><b>Auth0 + JWT</b> — 7-tier RBAC, MFA-enforced for Tier 00–02, venue-scoped tokens. <em>Role expires at shift end</em></span></li>
-                  <li><span className="k">COMMS</span><span className="v"><b>SendGrid</b> (email: contracts, receipts, 1099s) + <b>Twilio</b> (SMS: OTP, driver alerts, shift notifications). <em>Templated + tracked</em></span></li>
+                  <li><span className="k">COMMS</span><span className="v"><b>SendGrid</b> (email: contracts, receipts, 1099s, marketing blasts) + <b>Twilio</b> (SMS: OTP, driver alerts, shift notifications, guest re-engagement). <em>Templated · tracked · GDPR opt-in</em></span></li>
+                  <li><span className="k">DJ · BOOTH</span><span className="v"><b>Entertainer DJ system</b> — self-serve login: upload songs, build sets, save preferences, generate auto-playlists, and see <b>live rotation position</b> in real-time. <em>Better than club standard · zero DJ dependency</em></span></li>
+                  <li><span className="k">MARKETING</span><span className="v"><b>QR marketing + social automation</b> — track-and-trace QR campaigns, automated IG/TikTok/X posts, event-driven SMS/email blasts, guest re-engagement triggers. <em>Campaign → scan → profile match</em></span></li>
                   <li><span className="k">PAYMENTS</span><span className="v"><b>Processor-agnostic router</b>: Stripe, GoDaddy, or venue's existing merchant. Card whitelist enforced server-side. <em>Swap without redeployment</em></span></li>
                   <li><span className="k">CURRENCY</span><span className="v"><b>GlyphBucks SVC engine</b> — closed-loop stored-value with steganographic QR, denominations $10–$1000 (customizable). <em>Not a crypto · not a gift card</em></span></li>
                   <li><span className="k">SHIELD</span><span className="v"><b>Dispute evidence compiler</b> — bundles contract, video, biometric, receipt, blockchain hash into a single signed PDF package on demand. <em>One button · full chain</em></span></li>
@@ -1464,8 +1483,9 @@ export default function NUPSLanding() {
                 <div className="tab-head"><div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M 3 5 v 14 a 9 3 0 0 0 18 0 V 5" /><path d="M 3 12 a 9 3 0 0 0 18 0" /></svg></div><div className="num">03</div></div>
                 <h4>Data<em>Storage · Audit · Chain</em></h4>
                 <ul>
-                  <li><span className="k">PRIMARY</span><span className="v"><b>Supabase Postgres</b> with row-level security. Tables: GlyphBucksOrder, VIPContract, Shift, Payout, TipPool, AuditLog. <em>Realtime subscriptions + edge functions</em></span></li>
+                  <li><span className="k">PRIMARY</span><span className="v"><b>Supabase Postgres</b> with row-level security. Tables: GlyphBucksOrder, VIPContract, Shift, Payout, TipPool, DJQueue, PlaylistSet, MarketingCampaign, AuditLog. <em>Realtime subscriptions + edge functions</em></span></li>
                   <li><span className="k">FALLBACK</span><span className="v"><b>MongoDB</b> — offline document store for network outages. Idempotent sync-on-reconnect with conflict resolution. <em>Never lose a transaction</em></span></li>
+                  <li><span className="k">MEDIA</span><span className="v"><b>Supabase Storage + CDN</b> for DJ audio tracks, VIP video attestations, still frames, ID scans. Signed URL access only. <em>Per-venue bucket isolation</em></span></li>
                   <li><span className="k">AUDIT · OPS</span><span className="v"><b>SystemAuditLog</b> — financial + operational events. <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>venue_id REQUIRED</code>. Immutable append-only. <em>Venue-scoped tenant separation</em></span></li>
                   <li><span className="k">AUDIT · PLAT</span><span className="v"><b>AuditEvent</b> — platform + security telemetry. <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>venue_id optional</code>. <em>For GlyphLock internal forensics</em></span></li>
                   <li><span className="k">CHAIN</span><span className="v"><b>Blockchain timestamping</b> — every contract signature, video attestation, and tx hash anchored to a public chain. <em>Court-admissible chain of custody</em></span></li>
@@ -1527,6 +1547,10 @@ export default function NUPSLanding() {
             <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg><span className="tag">Clock</span><h4>Staff in, staff out.</h4><p>Biometric clock-in/out per shift. Hours, breaks, and OT calculated automatically. Payroll export ready.</p></div>
             <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="6" width="20" height="14" rx="2" /><path d="M 6 10 L 10 10 M 6 14 L 14 14" /><circle cx="18" cy="13" r="2" /></svg><span className="tag">Payments</span><h4>Processor-agnostic.</h4><p>Stripe, GoDaddy, or the venue's existing merchant — NUPS routes through whichever is preferred. Swipe, chip, or tap.</p></div>
             <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg><span className="tag">Compliance</span><h4>Contract is the receipt.</h4><p>Click-wrap signature + 30-second video + printed PDF. Entertainer and guest both attest. Chain of custody, end to end.</p></div>
+            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 9 18 V 5 l 12 -2 v 13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg><span className="tag">DJ Booth</span><h4>Girls run the rotation.</h4><p>Entertainers self-login, upload songs, build sets, save preferences, auto-generate playlists, and see live queue position. No DJ gatekeeping.</p></div>
+            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 3 12 h 4 l 3 -9 l 4 18 l 3 -9 h 4" /></svg><span className="tag">Marketing</span><h4>QR campaigns + auto-social.</h4><p>Scannable QR marketing with scan-to-profile match, scheduled Instagram / TikTok / X posts, event-driven SMS blasts via Twilio, and guest re-engagement triggers.</p></div>
+            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M 3 5 v 14 a 9 3 0 0 0 18 0 V 5" /><path d="M 3 12 a 9 3 0 0 0 18 0" /></svg><span className="tag">Data Plane</span><h4>Supabase + MongoDB.</h4><p>Postgres with row-level security for transactional truth; MongoDB offline store for zero-downtime capture. Sync on reconnect, never drop a tx.</p></div>
+            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 22 11.5 a 8.38 8.38 0 0 1 -.9 3.8 a 8.5 8.5 0 0 1 -7.6 4.7 a 8.38 8.38 0 0 1 -3.8 -.9 L 3 21 l 1.9 -5.7 a 8.38 8.38 0 0 1 -.9 -3.8 a 8.5 8.5 0 0 1 4.7 -7.6 a 8.38 8.38 0 0 1 3.8 -.9 h .5 a 8.48 8.48 0 0 1 8 8 v .5 z" /></svg><span className="tag">Messaging</span><h4>Twilio + SendGrid.</h4><p>OTP login, driver alerts, shift push, 1099 delivery, guest blasts, and marketing sends — all opt-in, audited, and templated at the platform layer.</p></div>
           </div>
 
           <section className="footer-cta">
