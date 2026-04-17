@@ -1267,8 +1267,8 @@ export default function NUPSLanding() {
 
           <div className="section-header"><h2>System <b>Architecture</b></h2><div className="index">§ 01 · Topology</div></div>
           <div className="diagram-frame">
-            <div className="diagram-wrap">
-              <svg className="diagram" viewBox="0 0 1600 1200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+            <div className="diagram-wrap" style={{ aspectRatio: '1600 / 1500' }}>
+              <svg className="diagram" viewBox="0 0 1600 1500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
                 <defs>
                   <marker id="a-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#00d4ff" /></marker>
                   <marker id="a-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#8b5cf6" /></marker>
@@ -1281,111 +1281,159 @@ export default function NUPSLanding() {
                   <pattern id="inner-grid" patternUnits="userSpaceOnUse" width="40" height="40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e2a5c" strokeWidth="0.5" opacity="0.4" /></pattern>
                   <pattern id="isolation" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="12" stroke="#ef4444" strokeWidth="1" opacity="0.3" /></pattern>
                 </defs>
-                <rect width="1600" height="1200" fill="url(#inner-grid)" />
+                <rect width="1600" height="1500" fill="url(#inner-grid)" />
                 <g stroke="#00d4ff" strokeWidth="1" fill="none" opacity="0.6">
                   <path d="M 20 20 L 44 20 M 20 20 L 20 44" />
                   <path d="M 1580 20 L 1556 20 M 1580 20 L 1580 44" />
-                  <path d="M 20 1180 L 44 1180 M 20 1180 L 20 1156" />
-                  <path d="M 1580 1180 L 1556 1180 M 1580 1180 L 1580 1156" />
+                  <path d="M 20 1480 L 44 1480 M 20 1480 L 20 1456" />
+                  <path d="M 1580 1480 L 1556 1480 M 1580 1480 L 1580 1456" />
                 </g>
+
+                <defs>
+                  <marker id="a-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24" /></marker>
+                  <marker id="a-coral" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#fb7185" /></marker>
+                </defs>
+                <text className="svg-tag" x="800" y="48" textAnchor="middle" fontSize="13" fill="#8b5cf6" letterSpacing="0.4em">◆ GLYPHLOCK · NUPS · 5-LAYER ARCHITECTURE ◆</text>
                 <g>
                   <rect x="80" y="80" width="1440" height="240" fill="url(#platform-grad)" stroke="#4f46e5" strokeWidth="1.5" strokeDasharray="8 4" rx="4" />
-                  <text className="svg-tag" x="110" y="110" fontSize="11" fill="#8b5cf6">◆ GLYPHLOCK PLATFORM · ISOLATED FROM VENUE OPERATIONS ◆</text>
+                  <text className="svg-tag" x="110" y="110" fontSize="11" fill="#8b5cf6">◆ GOVERNANCE · AUTHORITY · IP · POLICY ◆</text>
                   <g transform="translate(110, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ GOVERNANCE</text><text className="svg-title" x="20" y="46" fontSize="14">DACO Master Covenant</text><text className="svg-mono" x="20" y="62" fontSize="9">71 clauses · Carlo authority</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">USPTO 18/584,961</text></g>
                   <g transform="translate(390, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ IP VAULT</text><text className="svg-title" x="20" y="46" fontSize="14">Steganographic Engine</text><text className="svg-mono" x="20" y="62" fontSize="9">QR glyph generation · sealed</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">platform-owned · licensed out</text></g>
                   <g transform="translate(670, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ AUDIT · PLATFORM</text><text className="svg-title" x="20" y="46" fontSize="14">AuditEvent</text><text className="svg-mono" x="20" y="62" fontSize="9">venue_id optional · security</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">platform telemetry</text></g>
                   <g transform="translate(950, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="80" fill="#8b5cf6" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#8b5cf6">⬢ ACCESS MATRIX</text><text className="svg-title" x="20" y="46" fontSize="14">7-Tier RBAC</text><text className="svg-mono" x="20" y="62" fontSize="9">Admin → Guest scopes</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#a855f7">venue_id gated</text></g>
-                  <g transform="translate(1230, 130)"><rect width="260" height="80" fill="url(#panel-grad)" stroke="#a855f7" strokeWidth="2" /><rect x="0" y="0" width="4" height="80" fill="#a855f7" /><text className="svg-tag" x="20" y="24" fontSize="10" fill="#a855f7">⬢ DISPUTE SHIELD</text><text className="svg-title" x="20" y="46" fontSize="14">One-Push Package</text><text className="svg-mono" x="20" y="62" fontSize="9">pre-empts chargebacks</text><text className="svg-mono" x="20" y="74" fontSize="9" fill="#c4b5fd">evidence-first routing</text></g>
-                  <g transform="translate(110, 230)"><rect width="380" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="4" height="70" fill="#fbbf24" /><text className="svg-tag" x="20" y="22" fontSize="9" fill="#fbbf24">⬢ SANDBOX · NON-PROD</text><text className="svg-serif" x="20" y="42" fontSize="13">Demo · Training · Underwriting</text><text className="svg-mono" x="20" y="58" fontSize="8" fill="#7c8db8">investor walkthroughs · venue onboarding · QA</text></g>
-                  <g transform="translate(510, 230)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="4" height="70" fill="#10b981" /><text className="svg-tag" x="20" y="22" fontSize="9" fill="#10b981">⬢ REAL · PRODUCTION</text><text className="svg-serif" x="20" y="42" fontSize="13">sk_live_ · settled tx</text><text className="svg-mono" x="20" y="58" fontSize="8" fill="#7c8db8">live venue · real money</text></g>
-                  <g transform="translate(790, 230)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="4" height="70" fill="#3b82f6" /><text className="svg-tag" x="20" y="22" fontSize="9" fill="#3b82f6">⬢ DEMO · TEST</text><text className="svg-serif" x="20" y="42" fontSize="13">sk_test_ · simulated</text><text className="svg-mono" x="20" y="58" fontSize="8" fill="#7c8db8">no settlement · safe</text></g>
-                  <g transform="translate(1070, 230)"><rect width="420" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="4" height="70" fill="#8b5cf6" /><text className="svg-tag" x="20" y="22" fontSize="9" fill="#8b5cf6">⬢ DEV · SANDBOX</text><text className="svg-serif" x="20" y="42" fontSize="13">Engineering · feature flags · underwriting preview</text><text className="svg-mono" x="20" y="58" fontSize="8" fill="#7c8db8">isolated DB · reset nightly · no real PII</text></g>
                 </g>
-                <g><rect x="60" y="335" width="1480" height="8" fill="url(#isolation)" /><text className="svg-mono" x="800" y="357" textAnchor="middle" fontSize="9" fill="#ef4444" letterSpacing="0.3em">◆ PLATFORM / VENUE ISOLATION BARRIER · TENANT SEPARATION ENFORCED ◆</text></g>
-                <g>
-                  <rect x="80" y="380" width="1440" height="540" fill="url(#venue-grad)" stroke="#00d4ff" strokeWidth="1" strokeDasharray="6 3" rx="4" opacity="0.5" />
-                  <text className="svg-tag" x="98" y="410" fontSize="11" fill="#00d4ff">◆ VENUE OPERATIONS · TENANT-SCOPED via venue_id ◆</text>
 
-                  <g transform="translate(800, 650)">
-                    <g style={{ transformOrigin: 'center', animation: 'spin-slow 40s linear infinite' }}>
-                      <circle cx="0" cy="0" r="230" fill="none" stroke="#00d4ff" strokeWidth="0.5" strokeDasharray="1 8" opacity="0.3" />
-                      <circle cx="230" cy="0" r="3" fill="#00d4ff" className="orbit-glow" />
-                      <circle cx="-230" cy="0" r="3" fill="#8b5cf6" className="orbit-glow" />
+                {/* PLATFORM SERVICES BAND */}
+                <g>
+                  <rect x="80" y="240" width="1440" height="100" fill="url(#platform-grad)" stroke="#4f46e5" strokeWidth="1" strokeDasharray="6 4" rx="4" opacity="0.7" />
+                  <text className="svg-tag" x="110" y="260" fontSize="10" fill="#a855f7">◆ PLATFORM SERVICES · MULTI-TENANT · OFFERED TO ALL VENUES ◆</text>
+                  <g transform="translate(110, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#a855f7" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#a855f7" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#a855f7">⬢ DISPUTE SHIELD</text><text className="svg-serif" x="14" y="36" fontSize="12">One-Push Package</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#c4b5fd">evidence-first · processor API</text></g>
+                  <g transform="translate(390, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#fbbf24" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#fbbf24">⬢ SANDBOX MODES</text><text className="svg-serif" x="14" y="36" fontSize="12">REAL · DEMO · DEV</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">sk_live · sk_test · isolated tiers</text></g>
+                  <g transform="translate(670, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#fbbf24" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#fbbf24">⬢ MARKETING ENGINE</text><text className="svg-serif" x="14" y="36" fontSize="12">QR · SMS · Social</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">scheduler · platform-managed</text></g>
+                  <g transform="translate(950, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#1e6fff" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#1e6fff" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#1e6fff">⬢ PROC ADAPTER</text><text className="svg-serif" x="14" y="36" fontSize="12">Stripe · GoDaddy</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">processor-agnostic · unified interface</text></g>
+                  <g transform="translate(1230, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#8b5cf6" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#8b5cf6">⬢ STEGANO ENGINE</text><text className="svg-serif" x="14" y="36" fontSize="12">QR issuance</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">per-venue · IP-protected</text></g>
+                </g>
+
+                {/* GOVERNANCE BAND BOUNDARY */}
+                <g><rect x="60" y="350" width="1480" height="6" fill="#fbbf24" opacity="0.25" /><text className="svg-mono" x="800" y="368" textAnchor="middle" fontSize="9" fill="#fbbf24" letterSpacing="0.3em">◆ GOVERNANCE BOUNDARY · POLICY ENFORCEMENT ◆</text></g>
+
+                {/* PLATFORM / VENUE ISOLATION BARRIER */}
+                <g><rect x="60" y="378" width="1480" height="8" fill="url(#isolation)" /><text className="svg-mono" x="800" y="402" textAnchor="middle" fontSize="9" fill="#ef4444" letterSpacing="0.3em">◆ PLATFORM / VENUE ISOLATION BARRIER · TENANT SEPARATION ENFORCED ◆</text></g>
+                {/* VENUE OPERATIONS — HORSESHOE LAYOUT */}
+                <g>
+                  <rect x="80" y="410" width="1440" height="780" fill="url(#venue-grad)" stroke="#00d4ff" strokeWidth="1" strokeDasharray="6 3" rx="4" opacity="0.5" />
+                  <text className="svg-tag" x="98" y="438" fontSize="11" fill="#00d4ff">◆ VENUE OPERATIONS · TENANT-SCOPED VIA venue_id ◆</text>
+
+                  {/* CORE HEXAGON — BIG, CENTERED */}
+                  <g transform="translate(800, 800)">
+                    <g style={{ transformOrigin: 'center', animation: 'spin-slow 50s linear infinite' }}>
+                      <circle cx="0" cy="0" r="280" fill="none" stroke="#00d4ff" strokeWidth="0.5" strokeDasharray="1 8" opacity="0.3" />
+                      <circle cx="280" cy="0" r="3" fill="#00d4ff" className="orbit-glow" />
+                      <circle cx="-280" cy="0" r="3" fill="#8b5cf6" className="orbit-glow" />
                     </g>
-                    <g style={{ transformOrigin: 'center', animation: 'spin-reverse 30s linear infinite' }}>
-                      <circle cx="0" cy="0" r="210" fill="none" stroke="#8b5cf6" strokeWidth="0.5" strokeDasharray="3 5" opacity="0.3" />
-                      <circle cx="0" cy="-210" r="3" fill="#1e6fff" className="orbit-glow" />
-                      <circle cx="0" cy="210" r="3" fill="#14b8a6" className="orbit-glow" />
+                    <g style={{ transformOrigin: 'center', animation: 'spin-reverse 38s linear infinite' }}>
+                      <circle cx="0" cy="0" r="255" fill="none" stroke="#8b5cf6" strokeWidth="0.5" strokeDasharray="3 5" opacity="0.3" />
+                      <circle cx="0" cy="-255" r="3" fill="#1e6fff" className="orbit-glow" />
+                      <circle cx="0" cy="255" r="3" fill="#14b8a6" className="orbit-glow" />
                     </g>
-                    <polygon points="0,-200 173,-100 173,100 0,200 -173,100 -173,-100" fill="url(#core-glow)" stroke="#00d4ff" strokeWidth="2.5" />
-                    <polygon points="0,-160 139,-80 139,80 0,160 -139,80 -139,-80" fill="none" stroke="#00d4ff" strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
-                    <polygon points="0,-120 104,-60 104,60 0,120 -104,60 -104,-60" fill="#030614" stroke="#1e6fff" strokeWidth="1.5" />
+                    <polygon points="0,-240 208,-120 208,120 0,240 -208,120 -208,-120" fill="url(#core-glow)" stroke="#00d4ff" strokeWidth="2.5" />
+                    <polygon points="0,-195 169,-97 169,97 0,195 -169,97 -169,-97" fill="none" stroke="#00d4ff" strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
+                    <polygon points="0,-150 130,-75 130,75 0,150 -130,75 -130,-75" fill="#030614" stroke="#1e6fff" strokeWidth="1.5" />
                     <image
                       href="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
-                      x="-80"
-                      y="-90"
-                      width="160"
-                      height="160"
+                      x="-90"
+                      y="-110"
+                      width="180"
+                      height="180"
                       preserveAspectRatio="xMidYMid meet"
                       className="nups-logo-core"
                     />
-                    <text className="svg-title" x="0" y="110" textAnchor="middle" fontSize="22">CORE</text>
-                    <text className="svg-mono" x="0" y="130" textAnchor="middle" fontSize="9" fill="#7c8db8">venue_id → tenant</text>
-                    <text className="svg-mono" x="0" y="146" textAnchor="middle" fontSize="9" fill="#00d4ff">Multi-Venue Runtime</text>
-                    <circle className="pulse-node" cx="0" cy="-200" r="4" fill="#00d4ff" />
-                    <circle className="pulse-node" cx="173" cy="-100" r="4" fill="#1e6fff" style={{ animationDelay: '.35s' }} />
-                    <circle className="pulse-node" cx="173" cy="100" r="4" fill="#6366f1" style={{ animationDelay: '.7s' }} />
-                    <circle className="pulse-node" cx="0" cy="200" r="4" fill="#8b5cf6" style={{ animationDelay: '1.05s' }} />
-                    <circle className="pulse-node" cx="-173" cy="100" r="4" fill="#14b8a6" style={{ animationDelay: '1.4s' }} />
-                    <circle className="pulse-node" cx="-173" cy="-100" r="4" fill="#3b82f6" style={{ animationDelay: '1.75s' }} />
+                    <text className="svg-title" x="0" y="-10" textAnchor="middle" fontSize="28">CORE</text>
+                    <text className="svg-mono" x="0" y="14" textAnchor="middle" fontSize="10" fill="#7c8db8">venue_id → tenant</text>
+                    <text className="svg-mono" x="0" y="32" textAnchor="middle" fontSize="10" fill="#00d4ff">Multi-Venue Runtime</text>
+                    <text className="svg-mono" x="0" y="62" textAnchor="middle" fontSize="9" fill="#a855f7" letterSpacing="0.2em">NEXUS UNIFIED</text>
+                    <text className="svg-mono" x="0" y="78" textAnchor="middle" fontSize="9" fill="#a855f7" letterSpacing="0.2em">PORTAL SYSTEM</text>
+                    <circle className="pulse-node" cx="0" cy="-240" r="5" fill="#00d4ff" />
+                    <circle className="pulse-node" cx="208" cy="-120" r="5" fill="#1e6fff" style={{ animationDelay: '.35s' }} />
+                    <circle className="pulse-node" cx="208" cy="120" r="5" fill="#6366f1" style={{ animationDelay: '.7s' }} />
+                    <circle className="pulse-node" cx="0" cy="240" r="5" fill="#8b5cf6" style={{ animationDelay: '1.05s' }} />
+                    <circle className="pulse-node" cx="-208" cy="120" r="5" fill="#14b8a6" style={{ animationDelay: '1.4s' }} />
+                    <circle className="pulse-node" cx="-208" cy="-120" r="5" fill="#3b82f6" style={{ animationDelay: '1.75s' }} />
                   </g>
 
-                  <g transform="translate(110, 440)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ GUEST PROFILE</text><text className="svg-serif" x="16" y="42" fontSize="13">Mag-swipe → Account</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">search: card · QR · name · addr</text></g>
-                  <g transform="translate(110, 525)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ DRIVER ONBOARDING</text><text className="svg-serif" x="16" y="42" fontSize="13">Profile + QR issued</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#00d4ff">scan → parametric payout</text></g>
-                  <g transform="translate(110, 610)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#ef4444" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#ef4444" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#ef4444">⬢ ENTERTAINER · ISOLATED</text><text className="svg-serif" x="16" y="42" fontSize="13">1099 · separate ledger</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#ef4444">NO tip pool · NO payroll</text></g>
-                  <g transform="translate(110, 695)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ STAFF CLOCK-IN / OUT</text><text className="svg-serif" x="16" y="42" fontSize="13">Biometric + Shift Log</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">hours · breaks · OT calc</text></g>
-                  <g transform="translate(110, 780)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ VIP CONTRACT</text><text className="svg-serif" x="16" y="42" fontSize="13">Click-wrap + 30s Video</text><text className="svg-mono" x="16" y="58" fontSize="9">20-Q spender · QR = receipt</text></g>
-                  <g transform="translate(110, 865)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#14b8a6" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#14b8a6" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#14b8a6">⬢ DJ · ROTATION ENGINE</text><text className="svg-serif" x="16" y="42" fontSize="13">Entertainer Self-Serve</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#14b8a6">playlists · sets · queue visibility</text></g>
+                  {/* LEFT FLANK — 7 boxes */}
+                  <g transform="translate(110, 470)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ GUEST PROFILE</text><text className="svg-serif" x="16" y="42" fontSize="13">Mag-swipe → Account</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">search: card · QR · name · profile lookup</text></g>
+                  <g transform="translate(110, 555)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ DRIVER ONBOARDING</text><text className="svg-serif" x="16" y="42" fontSize="13">Profile + QR issued</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#00d4ff">scan → parametric payout · per-trip resolution</text></g>
+                  <g transform="translate(110, 640)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#fb7185" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#fb7185" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#fb7185">⬢ ENTERTAINER · ISOLATED</text><text className="svg-serif" x="16" y="42" fontSize="13">1099 · separate ledger</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#fb7185">NO tip pool · NO payroll · independent contractor</text></g>
+                  <g transform="translate(110, 725)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ STAFF CLOCK-IN/OUT</text><text className="svg-serif" x="16" y="42" fontSize="13">Biometric + Shift Log</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">hours · breaks · OT calc · payroll export ready</text></g>
+                  <g transform="translate(110, 810)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ VIP CONTRACT</text><text className="svg-serif" x="16" y="42" fontSize="13">Click-wrap + 30s Video</text><text className="svg-mono" x="16" y="58" fontSize="9">20-Q spender · QR receipt · chain of custody</text></g>
+                  <g transform="translate(110, 895)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#14b8a6" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#14b8a6" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#14b8a6">⬢ DJ ROTATION ENGINE</text><text className="svg-serif" x="16" y="42" fontSize="13">Entertainer Self-Serve</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#14b8a6">playlists · sets · queue · no DJ gatekeeping</text></g>
+                  <g transform="translate(110, 980)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#fbbf24" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#fbbf24">⬢ CAMPAIGN CONFIG</text><text className="svg-serif" x="16" y="42" fontSize="13">Venue-side scheduling</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#fbbf24">QR · SMS targeting · uses platform engine</text></g>
 
-                  <g transform="translate(1230, 440)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYMENT ROUTER</text><text className="svg-serif" x="16" y="42" fontSize="13">Stripe · GoDaddy · Custom</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#1e6fff">processor-agnostic</text></g>
-                  <g transform="translate(1230, 525)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ POS CATALOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Drinks · Bottles · Cover</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">total = cash + card ONLY</text></g>
-                  <g transform="translate(1230, 610)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#00d4ff" strokeWidth="1.5" /><rect x="257" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ GLYPHBUCKS · SVC</text><text className="svg-serif" x="16" y="42" fontSize="13">Closed-Loop Currency</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#00d4ff">QR = tx_id = contract_id</text></g>
-                  <g transform="translate(1230, 695)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="257" y="0" width="3" height="70" fill="#6366f1" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYOUT ENGINE</text><text className="svg-serif" x="16" y="42" fontSize="13">Driver · Staff · Tip Pool</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#10b981">per-venue parametric</text></g>
-                  <g transform="translate(1230, 780)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="257" y="0" width="3" height="70" fill="#8b5cf6" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#8b5cf6">⬢ SYSTEMAUDITLOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Financial · Operational</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#8b5cf6">venue-scoped · immutable</text></g>
-                  <g transform="translate(1230, 865)"><rect width="260" height="70" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="257" y="0" width="3" height="70" fill="#fbbf24" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#fbbf24">⬢ MARKETING AUTOMATION</text><text className="svg-serif" x="16" y="42" fontSize="13">QR · SMS · Social Posts</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#fbbf24">Twilio · SendGrid · scheduler</text></g>
+                  {/* RIGHT FLANK — 7 boxes */}
+                  <g transform="translate(1210, 470)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYMENT ROUTER</text><text className="svg-serif" x="16" y="42" fontSize="13">Stripe · GoDaddy · Custom</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#1e6fff">processor-agnostic · tenant routing</text></g>
+                  <g transform="translate(1210, 555)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ POS CATALOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Drinks · Bottles · Cover</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">total = cash + card ONLY · void/comp logged</text></g>
+                  <g transform="translate(1210, 640)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#00d4ff" strokeWidth="1.5" /><rect x="277" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ GLYPHBUCKS · SVC</text><text className="svg-serif" x="16" y="42" fontSize="13">Closed-Loop Currency</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#00d4ff">QR = tx_id = contract_id · liability tracked</text></g>
+                  <g transform="translate(1210, 725)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#6366f1" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYOUT ENGINE</text><text className="svg-serif" x="16" y="42" fontSize="13">Driver · Staff · Tip Pool</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#10b981">per-venue parametric · entertainer excluded</text></g>
+                  <g transform="translate(1210, 810)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="277" y="0" width="3" height="70" fill="#fbbf24" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#fbbf24">⬢ SYSTEMAUDITLOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Financial · Operational</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#fbbf24">venue-scoped · immutable · forwards to AuditEvent ↑</text></g>
+                  <g transform="translate(1210, 895)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#10b981" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#10b981">⬢ REPORTING</text><text className="svg-serif" x="16" y="42" fontSize="13">Shift close · drawer recon</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">daily deposit · weekly P&amp;L · auto-generated</text></g>
+                  <g transform="translate(1210, 980)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#10b981" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#10b981">⬢ INVENTORY</text><text className="svg-serif" x="16" y="42" fontSize="13">Cost basis · par levels</text><text className="svg-mono" x="16" y="58" fontSize="9" fill="#7c8db8">pour tracking · par-level alerts</text></g>
 
+                  {/* CONNECTOR LINES — LEFT TO CORE */}
                   <g strokeWidth="1" fill="none">
-                    <path className="flow-animate" d="M 370 475 L 627 560" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
-                    <path className="flow-animate" d="M 370 560 L 627 590" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
-                    <path className="flow-animate" d="M 370 645 L 627 640" stroke="#ef4444" strokeDasharray="3 3" markerEnd="url(#a-cyan)" opacity="0.6" />
-                    <path className="flow-animate" d="M 370 730 L 627 680" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
-                    <path className="flow-animate" d="M 370 815 L 627 720" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 390 505 L 590 720" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 390 590 L 590 760" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 390 675 L 590 800" stroke="#fb7185" strokeWidth="1.5" markerEnd="url(#a-coral)" />
+                    <path className="flow-animate" d="M 390 760 L 590 820" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 390 845 L 590 850" stroke="#00d4ff" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 390 930 L 590 880" stroke="#14b8a6" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 390 1015 L 590 910" stroke="#fbbf24" markerEnd="url(#a-gold)" />
                   </g>
 
+                  {/* CONNECTOR LINES — RIGHT TO CORE */}
                   <g strokeWidth="1" fill="none">
-                    <path className="flow-animate" d="M 973 560 L 1230 475" stroke="#1e6fff" markerEnd="url(#a-sapph)" />
-                    <path className="flow-animate" d="M 973 590 L 1230 560" stroke="#1e6fff" markerEnd="url(#a-sapph)" />
-                    <path className="flow-animate" d="M 973 640 L 1230 645" stroke="#00d4ff" strokeWidth="1.5" markerEnd="url(#a-cyan)" />
-                    <path className="flow-animate" d="M 973 680 L 1230 730" stroke="#6366f1" markerEnd="url(#a-indigo)" />
-                    <path className="flow-animate" d="M 973 720 L 1230 815" stroke="#8b5cf6" markerEnd="url(#a-violet)" />
+                    <path className="flow-animate" d="M 1010 720 L 1210 505" stroke="#1e6fff" markerEnd="url(#a-sapph)" />
+                    <path className="flow-animate" d="M 1010 760 L 1210 590" stroke="#1e6fff" markerEnd="url(#a-sapph)" />
+                    <path className="flow-animate" d="M 1010 800 L 1210 675" stroke="#00d4ff" strokeWidth="1.5" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 1010 820 L 1210 760" stroke="#6366f1" markerEnd="url(#a-indigo)" />
+                    <path className="flow-animate" d="M 1010 850 L 1210 845" stroke="#fbbf24" markerEnd="url(#a-gold)" />
+                    <path className="flow-animate" d="M 1010 880 L 1210 930" stroke="#10b981" markerEnd="url(#a-cyan)" />
+                    <path className="flow-animate" d="M 1010 910 L 1210 1015" stroke="#10b981" markerEnd="url(#a-cyan)" />
                   </g>
 
-                  <path d="M 800 320 L 800 450" stroke="#8b5cf6" strokeWidth="2" strokeDasharray="6 8" fill="none" markerEnd="url(#a-violet)" opacity="0.7">
+                  {/* GOLD AUDIT FORWARDING WIRE — crosses both barriers */}
+                  <path d="M 1350 810 L 1350 386 L 800 386 L 800 195" stroke="#fbbf24" strokeWidth="2" strokeDasharray="6 6" fill="none" markerEnd="url(#a-gold)" opacity="0.85">
+                    <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="2s" repeatCount="indefinite" />
+                  </path>
+                  <text className="svg-mono" x="1360" y="600" fontSize="9" fill="#fbbf24" letterSpacing="0.15em">audit forwarding</text>
+                  <text className="svg-mono" x="1360" y="614" fontSize="9" fill="#fbbf24" letterSpacing="0.15em">platform-scoped</text>
+
+                  {/* POLICY DOWNLINK */}
+                  <path d="M 800 386 L 800 560" stroke="#a855f7" strokeWidth="2" strokeDasharray="6 8" fill="none" markerEnd="url(#a-violet)" opacity="0.6">
                     <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="2.4s" repeatCount="indefinite" />
                   </path>
-                  <text className="svg-mono" x="810" y="390" fontSize="9" fill="#8b5cf6">policy · scope · access</text>
+                  <text className="svg-mono" x="810" y="500" fontSize="9" fill="#a855f7">policy · scope · access</text>
                 </g>
-                <g transform="translate(800, 1048)">
-                  <rect x="-640" y="0" width="1280" height="58" fill="#07091c" stroke="#1e2a5c" opacity="0.95" />
-                  <text className="svg-tag" x="-610" y="22" fontSize="8" fill="#00d4ff">◆ RUNTIME CONTROLS ◆</text>
-                  <text className="svg-mono" x="-610" y="40" fontSize="8" fill="#7c8db8">REAL · DEMO · SANDBOX · venue_id enforced · RLS active · signed media chain</text>
-                  <text className="svg-tag" x="40" y="22" fontSize="8" fill="#8b5cf6">◆ EVIDENCE STACK ◆</text>
-                  <text className="svg-mono" x="40" y="40" fontSize="8" fill="#7c8db8">printed contract · manager signature · hostess signature · scan-back archive · receipt · QR · blockchain hash</text>
+
+                {/* INFRASTRUCTURE TRUST BOUNDARY */}
+                <g><rect x="60" y="1208" width="1480" height="6" fill="#fbbf24" opacity="0.25" /><text className="svg-mono" x="800" y="1226" textAnchor="middle" fontSize="9" fill="#fbbf24" letterSpacing="0.3em">◆ INFRASTRUCTURE TRUST BOUNDARY · SECRETS ISOLATED FROM TENANT ◆</text></g>
+
+                {/* INFRASTRUCTURE BAND */}
+                <g>
+                  <rect x="80" y="1240" width="1440" height="200" fill="url(#platform-grad)" stroke="#4f46e5" strokeWidth="1" strokeDasharray="6 4" rx="4" opacity="0.6" />
+                  <text className="svg-tag" x="110" y="1262" fontSize="11" fill="#a855f7">◆ INFRASTRUCTURE SUBSTRATE · WHAT IT RUNS ON ◆</text>
+                  <g transform="translate(110, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#00d4ff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ DATA · PRIMARY</text><text className="svg-serif" x="14" y="42" fontSize="12">Entity Store</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">150+ fn · 100+ entities</text></g>
+                  <g transform="translate(390, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#00d4ff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ DATA · CREDENTIAL</text><text className="svg-serif" x="14" y="42" fontSize="12">External Supabase</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">JWT · auth isolated</text></g>
+                  <g transform="translate(670, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#1e6fff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ HARDWARE · POS</text><text className="svg-serif" x="14" y="42" fontSize="12">Ambir · Adesso · Epson</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">ID · biometric · thermal</text></g>
+                  <g transform="translate(950, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#1e6fff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ HARDWARE · MGMT</text><text className="svg-serif" x="14" y="42" fontSize="12">iBUYPOWER · Samsung</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">oversight tier</text></g>
+                  <g transform="translate(1230, 1278)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#10b981" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ MESSAGING INFRA</text><text className="svg-serif" x="14" y="42" fontSize="12">Twilio · SendGrid</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">OTP · alerts · 1099</text></g>
+                  <g transform="translate(110, 1356)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#1e6fff" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ PROCESSOR INTEG</text><text className="svg-serif" x="14" y="42" fontSize="12">Stripe · GoDaddy</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">webhooks · APIs</text></g>
+                  <g transform="translate(390, 1356)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#a855f7" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ SESSION SECURITY</text><text className="svg-serif" x="14" y="42" fontSize="12">MFA · JWT verify</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">device attestation</text></g>
+                  <g transform="translate(670, 1356)"><rect width="260" height="68" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="0" y="0" width="3" height="68" fill="#fbbf24" /><text className="svg-tag" x="14" y="22" fontSize="9">⬢ OBSERVABILITY</text><text className="svg-serif" x="14" y="42" fontSize="12">Logs · metrics · traces</text><text className="svg-mono" x="14" y="58" fontSize="8" fill="#7c8db8">incident detection</text></g>
                 </g>
-                <g transform="translate(800, 1120)">
-                  <rect x="-640" y="0" width="1280" height="46" fill="#07091c" stroke="#1e2a5c" opacity="0.95" />
-                  <text className="svg-tag" x="0" y="18" textAnchor="middle" fontSize="9" fill="#7c8db8">DACO MASTER COVENANT · 71 CLAUSES · USPTO 18/584,961 · AZ #23831258</text>
-                  <text className="svg-mono" x="0" y="34" textAnchor="middle" fontSize="8" fill="#3d4a7a">total_sales = cash + card · entertainers 1099-isolated · hardcopy archived for bookkeeping/litigation · one-push dispute shield enabled</text>
+
+                <g transform="translate(800, 1462)">
+                  <text className="svg-mono" x="0" y="0" textAnchor="middle" fontSize="9" fill="#7c8db8" letterSpacing="0.2em">GlyphLock LLC · AZ #23831258 · USPTO 18/584,961 · DACO Master Covenant v3.0</text>
                 </g>
               </svg>
             </div>
