@@ -1324,41 +1324,104 @@ export default function NUPSLanding() {
                   <rect x="80" y="410" width="1440" height="780" fill="url(#venue-grad)" stroke="#00d4ff" strokeWidth="1" strokeDasharray="6 3" rx="4" opacity="0.5" />
                   <text className="svg-tag" x="98" y="438" fontSize="11" fill="#00d4ff">◆ VENUE OPERATIONS · TENANT-SCOPED VIA venue_id ◆</text>
 
-                  {/* CORE HEXAGON — BIG, CENTERED */}
+                  {/* CORE HEXAGON — BIG, CENTERED, CLEAN VERTICAL STACK */}
+                  <defs>
+                    <radialGradient id="core-halo" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#00d4ff" stopOpacity="0.55" />
+                      <stop offset="35%" stopColor="#1e6fff" stopOpacity="0.25" />
+                      <stop offset="70%" stopColor="#8b5cf6" stopOpacity="0.1" />
+                      <stop offset="100%" stopColor="#030614" stopOpacity="0" />
+                    </radialGradient>
+                    <linearGradient id="core-title-grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ffffff" />
+                      <stop offset="55%" stopColor="#6ee7f9" />
+                      <stop offset="100%" stopColor="#00d4ff" />
+                    </linearGradient>
+                    <filter id="core-glow-filter" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="6" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
                   <g transform="translate(800, 800)">
+                    {/* SOFT OUTER HALO */}
+                    <circle cx="0" cy="0" r="320" fill="url(#core-halo)" opacity="0.8" />
+
+                    {/* ORBITS */}
                     <g style={{ transformOrigin: 'center', animation: 'spin-slow 50s linear infinite' }}>
-                      <circle cx="0" cy="0" r="280" fill="none" stroke="#00d4ff" strokeWidth="0.5" strokeDasharray="1 8" opacity="0.3" />
-                      <circle cx="280" cy="0" r="3" fill="#00d4ff" className="orbit-glow" />
-                      <circle cx="-280" cy="0" r="3" fill="#8b5cf6" className="orbit-glow" />
+                      <circle cx="0" cy="0" r="290" fill="none" stroke="#00d4ff" strokeWidth="0.5" strokeDasharray="1 8" opacity="0.35" />
+                      <circle cx="290" cy="0" r="3.5" fill="#00d4ff" className="orbit-glow" />
+                      <circle cx="-290" cy="0" r="3.5" fill="#8b5cf6" className="orbit-glow" />
                     </g>
                     <g style={{ transformOrigin: 'center', animation: 'spin-reverse 38s linear infinite' }}>
-                      <circle cx="0" cy="0" r="255" fill="none" stroke="#8b5cf6" strokeWidth="0.5" strokeDasharray="3 5" opacity="0.3" />
-                      <circle cx="0" cy="-255" r="3" fill="#1e6fff" className="orbit-glow" />
-                      <circle cx="0" cy="255" r="3" fill="#14b8a6" className="orbit-glow" />
+                      <circle cx="0" cy="0" r="265" fill="none" stroke="#8b5cf6" strokeWidth="0.5" strokeDasharray="3 5" opacity="0.35" />
+                      <circle cx="0" cy="-265" r="3.5" fill="#1e6fff" className="orbit-glow" />
+                      <circle cx="0" cy="265" r="3.5" fill="#14b8a6" className="orbit-glow" />
                     </g>
-                    <polygon points="0,-240 208,-120 208,120 0,240 -208,120 -208,-120" fill="url(#core-glow)" stroke="#00d4ff" strokeWidth="2.5" />
-                    <polygon points="0,-195 169,-97 169,97 0,195 -169,97 -169,-97" fill="none" stroke="#00d4ff" strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
-                    <polygon points="0,-150 130,-75 130,75 0,150 -130,75 -130,-75" fill="#030614" stroke="#1e6fff" strokeWidth="1.5" />
+
+                    {/* OUTER HEX */}
+                    <polygon points="0,-240 208,-120 208,120 0,240 -208,120 -208,-120" fill="url(#core-glow)" stroke="#00d4ff" strokeWidth="3" style={{ filter: 'drop-shadow(0 0 16px rgba(0,212,255,0.6))' }} />
+                    {/* MID HEX */}
+                    <polygon points="0,-200 173,-100 173,100 0,200 -173,100 -173,-100" fill="none" stroke="#00d4ff" strokeWidth="1" strokeDasharray="4 4" opacity="0.45" />
+                    {/* INNER HEX — SOLID BACKDROP */}
+                    <polygon points="0,-160 139,-80 139,80 0,160 -139,80 -139,-80" fill="#030614" stroke="#1e6fff" strokeWidth="1.5" opacity="0.95" />
+                    {/* INNERMOST ACCENT */}
+                    <polygon points="0,-130 112,-65 112,65 0,130 -112,65 -112,-65" fill="none" stroke="#1e6fff" strokeWidth="0.75" strokeDasharray="2 4" opacity="0.4" />
+
+                    {/* TOP CHEVRON ORNAMENT */}
+                    <path d="M -12 -190 L 0 -202 L 12 -190" fill="none" stroke="#00d4ff" strokeWidth="1.5" opacity="0.7" />
+                    <path d="M -12 190 L 0 202 L 12 190" fill="none" stroke="#00d4ff" strokeWidth="1.5" opacity="0.7" transform="rotate(180)" />
+
+                    {/* LOGO — TOP THIRD */}
                     <image
                       href="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
-                      x="-90"
-                      y="-110"
-                      width="180"
-                      height="180"
+                      x="-55"
+                      y="-130"
+                      width="110"
+                      height="110"
                       preserveAspectRatio="xMidYMid meet"
                       className="nups-logo-core"
                     />
-                    <text className="svg-title" x="0" y="-10" textAnchor="middle" fontSize="28">CORE</text>
-                    <text className="svg-mono" x="0" y="14" textAnchor="middle" fontSize="10" fill="#7c8db8">venue_id → tenant</text>
-                    <text className="svg-mono" x="0" y="32" textAnchor="middle" fontSize="10" fill="#00d4ff">Multi-Venue Runtime</text>
-                    <text className="svg-mono" x="0" y="62" textAnchor="middle" fontSize="9" fill="#a855f7" letterSpacing="0.2em">NEXUS UNIFIED</text>
-                    <text className="svg-mono" x="0" y="78" textAnchor="middle" fontSize="9" fill="#a855f7" letterSpacing="0.2em">PORTAL SYSTEM</text>
-                    <circle className="pulse-node" cx="0" cy="-240" r="5" fill="#00d4ff" />
-                    <circle className="pulse-node" cx="208" cy="-120" r="5" fill="#1e6fff" style={{ animationDelay: '.35s' }} />
-                    <circle className="pulse-node" cx="208" cy="120" r="5" fill="#6366f1" style={{ animationDelay: '.7s' }} />
-                    <circle className="pulse-node" cx="0" cy="240" r="5" fill="#8b5cf6" style={{ animationDelay: '1.05s' }} />
-                    <circle className="pulse-node" cx="-208" cy="120" r="5" fill="#14b8a6" style={{ animationDelay: '1.4s' }} />
-                    <circle className="pulse-node" cx="-208" cy="-120" r="5" fill="#3b82f6" style={{ animationDelay: '1.75s' }} />
+
+                    {/* DIVIDER UNDER LOGO */}
+                    <line x1="-70" y1="-18" x2="70" y2="-18" stroke="#00d4ff" strokeWidth="0.75" opacity="0.5" />
+                    <circle cx="0" cy="-18" r="2" fill="#00d4ff" />
+
+                    {/* CORE TITLE — centered mid */}
+                    <text
+                      x="0"
+                      y="18"
+                      textAnchor="middle"
+                      fontSize="44"
+                      fontFamily="'Orbitron', sans-serif"
+                      fontWeight="800"
+                      fill="url(#core-title-grad)"
+                      letterSpacing="0.12em"
+                      style={{ filter: 'drop-shadow(0 0 12px rgba(0,212,255,0.7))' }}
+                    >CORE</text>
+
+                    {/* TAGLINE */}
+                    <text className="svg-mono" x="0" y="44" textAnchor="middle" fontSize="9" fill="#6ee7f9" letterSpacing="0.32em">MULTI-VENUE RUNTIME</text>
+
+                    {/* DIVIDER */}
+                    <line x1="-50" y1="60" x2="50" y2="60" stroke="#8b5cf6" strokeWidth="0.5" opacity="0.6" />
+
+                    {/* N.U.P.S. expansion */}
+                    <text className="svg-mono" x="0" y="80" textAnchor="middle" fontSize="10" fill="#a855f7" letterSpacing="0.28em" fontWeight="600">NEXUS UNIFIED</text>
+                    <text className="svg-mono" x="0" y="96" textAnchor="middle" fontSize="10" fill="#a855f7" letterSpacing="0.28em" fontWeight="600">PORTAL SYSTEM</text>
+
+                    {/* venue_id tag */}
+                    <text className="svg-mono" x="0" y="126" textAnchor="middle" fontSize="8" fill="#7c8db8" letterSpacing="0.2em">venue_id → tenant</text>
+
+                    {/* VERTEX PULSE NODES */}
+                    <circle className="pulse-node" cx="0" cy="-240" r="6" fill="#00d4ff" />
+                    <circle className="pulse-node" cx="208" cy="-120" r="6" fill="#1e6fff" style={{ animationDelay: '.35s' }} />
+                    <circle className="pulse-node" cx="208" cy="120" r="6" fill="#6366f1" style={{ animationDelay: '.7s' }} />
+                    <circle className="pulse-node" cx="0" cy="240" r="6" fill="#8b5cf6" style={{ animationDelay: '1.05s' }} />
+                    <circle className="pulse-node" cx="-208" cy="120" r="6" fill="#14b8a6" style={{ animationDelay: '1.4s' }} />
+                    <circle className="pulse-node" cx="-208" cy="-120" r="6" fill="#3b82f6" style={{ animationDelay: '1.75s' }} />
                   </g>
 
                   {/* LEFT FLANK — 7 boxes */}
