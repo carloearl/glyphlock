@@ -1,9 +1,14 @@
 export default [
   {
     ignores: [
-      "src/components/internal_index/**",
-      "src/components/mobile/**",
-      "src/components/security/**"
+      "**/internal_index/**",
+      "**/components/internal_index/**",
+      "**/components/mobile/**",
+      "**/components/security/**",
+      "**/artifacts/**",
+      "**/*.md.jsx",
+      "**/*.json.jsx",
+      "**/*.css.jsx"
     ]
   }
 ];
