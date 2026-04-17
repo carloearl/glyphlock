@@ -6,19 +6,33 @@ import base44 from '@base44/vite-plugin'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const GHOST_PATTERN = /components\/(internal_index|mobile|security)\//
+
 const IGNORED = [
   '**/components/internal_index/**',
   '**/components/mobile/**',
-  '**/components/security/README_MFA_ROUTING*',
-  '**/components/mobile/MobileLayoutFix.css.jsx',
-  '**/components/mobile/MobileOptimizationSummary.md.jsx',
-  '**/*.md.jsx',
-  '**/*.json.jsx',
-  '**/*.css.jsx',
+  '**/components/security/**',
 ]
+
+// LAYER 1 — Ghost Firewall: hard-block any resolve/load of platform-injected files
+const ghostFirewall = {
+  name: 'ghost-firewall',
+  enforce: 'pre',
+  resolveId(id) {
+    if (GHOST_PATTERN.test(id)) {
+      return { id, external: true }
+    }
+  },
+  load(id) {
+    if (GHOST_PATTERN.test(id)) {
+      return 'export default null;'
+    }
+  },
+}
 
 export default defineConfig({
   plugins: [
+    ghostFirewall,
     react({
       exclude: IGNORED,
     }),
@@ -31,10 +45,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    watch: {
+      ignored: IGNORED,
+    },
+  },
   build: {
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
-      external: IGNORED,
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
@@ -55,6 +73,10 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', '@base44/sdk'],
-    exclude: IGNORED,
+    exclude: [
+      'src/components/internal_index',
+      'src/components/mobile',
+      'src/components/security',
+    ],
   }
 })
