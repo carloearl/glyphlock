@@ -6,16 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building2, Save, CheckCircle } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const VENUE_ID = "dream_palace";
 
 export default function VenueSettings({ user }) {
   const queryClient = useQueryClient();
   const [saved, setSaved] = useState(false);
+  const activeVenue = useActiveVenue();
 
   const { data: venues = [], isLoading } = useQuery({
-    queryKey: ["venue-settings"],
-    queryFn: () => base44.entities.Venue.filter({ venue_id: VENUE_ID }),
+    queryKey: ["venue-settings", activeVenue?.id],
+    queryFn: () => base44.entities.Venue.filter({ id: activeVenue?.id }),
+    enabled: !!activeVenue?.id,
   });
 
   const existing = venues[0];
@@ -67,8 +70,8 @@ export default function VenueSettings({ user }) {
   const saveMutation = useMutation({
     mutationFn: async (data) => {
       const payload = { ...data, venue_id: VENUE_ID, status: "active" };
-      if (existing?.id) {
-        return base44.entities.Venue.update(existing.id, payload);
+      if (activeVenue?.id) {
+        return base44.entities.Venue.update(activeVenue.id, payload);
       } else {
         return base44.entities.Venue.create(payload);
       }
