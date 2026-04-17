@@ -1195,21 +1195,21 @@ export default function NUPSLanding() {
         </svg>
 
         <div className="container">
-          <div style={{ marginBottom: 20 }}>
+          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
             <button
               onClick={() => navigate('/')}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 8,
-                padding: '10px 18px',
+                gap: 6,
+                padding: '6px 12px',
                 borderRadius: 999,
                 border: '1px solid rgba(255,255,255,0.15)',
                 background: 'rgba(255,255,255,0.05)',
                 color: '#ffffff',
                 fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 12,
-                letterSpacing: '0.15em',
+                fontSize: 10,
+                letterSpacing: '0.12em',
                 textTransform: 'uppercase',
                 cursor: 'pointer',
                 transition: 'background 0.2s',
@@ -1217,7 +1217,7 @@ export default function NUPSLanding() {
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
             >
-              ← Back to Home
+              ← Back
             </button>
           </div>
           <header className="brand-bar" style={{ justifyContent: 'flex-end' }}>
