@@ -6,12 +6,17 @@ import base44 from '@base44/vite-plugin'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const GHOST_PATTERN = /components\/(internal_index|mobile|security)\//
+// Ghost files = platform-injected markdown/JSON/CSS files given invalid .jsx extensions.
+// Pattern targets ONLY those specific files (by double-extension) + the entire
+// internal_index directory (which contains only ghost reports).
+// Real components in mobile/ and security/ remain fully usable.
+const GHOST_PATTERN = /(components\/internal_index\/|\.(md|json|css)\.jsx$)/
 
 const IGNORED = [
   '**/components/internal_index/**',
-  '**/components/mobile/**',
-  '**/components/security/**',
+  '**/*.md.jsx',
+  '**/*.json.jsx',
+  '**/*.css.jsx',
 ]
 
 // LAYER 1 — Ghost Firewall: hard-block any resolve/load of platform-injected files
@@ -53,6 +58,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
+      external: (id) => GHOST_PATTERN.test(id),
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
@@ -75,8 +81,6 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-router-dom', '@base44/sdk'],
     exclude: [
       'src/components/internal_index',
-      'src/components/mobile',
-      'src/components/security',
     ],
   }
 })
