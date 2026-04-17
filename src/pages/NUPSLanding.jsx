@@ -1206,11 +1206,11 @@ export default function NUPSLanding() {
           <section className="hero">
             <div className="eyebrow">Node Universal Platform System</div>
             <h1>
-              <span className="line-1">NUPS is not a POS.</span>
-              <span className="line-2">It is the proof layer.</span>
+              <span className="line-1">The operating system</span>
+              <span className="line-2">behind the venue.</span>
             </h1>
             <p className="lede">
-              NUPS is a <b>verification and enforcement layer</b> for high-risk venue commerce. Most systems record transactions. <b>NUPS proves they happened.</b> Identity, payment, contract, and audit are unified into a single closed-loop platform — every transaction arrives <b>pre-evidenced, consented, and defensible</b> before disputes occur.
+              NUPS replaces paper contracts, fragmented POS, and manual door ledgers with one <b>closed-loop infrastructure</b>. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>.
             </p>
             <div
               style={{
@@ -1260,7 +1260,7 @@ export default function NUPSLanding() {
               <div className="stat"><span className="num">7</span><span className="label">Access Tiers</span></div>
               <div className="stat"><span className="num">3</span><span className="label">Runtime Modes</span></div>
               <div className="stat"><span className="num">1-PUSH</span><span className="label">Dispute Shield</span></div>
-              <div className="stat"><span className="num">1</span><span className="label">Hardcopy Archive</span></div>
+              <div className="stat"><span className="num">0</span><span className="label">Paper Forms</span></div>
               <div className="stat"><span className="num">∞</span><span className="label">Venue Tenants</span></div>
             </div>
           </section>
