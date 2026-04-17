@@ -46,7 +46,7 @@ export const NAV_SECTIONS = [
   visibility: "public",
   items: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
-    { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public", requiresAccessToken: true },
+    { label: "NUPS Point-of-Sale", page: "NUPSLanding", visibility: "public" },
     { label: "Owner Analytics", page: "NUPSOwner", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
@@ -105,7 +105,7 @@ export const FOOTER_LINKS = {
   ],
   financial: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
-    { label: "NUPS Point-of-Sale", page: "NUPSLogin", visibility: "public", requiresAccessToken: true },
+    { label: "NUPS Point-of-Sale", page: "NUPSLanding", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
   ],
