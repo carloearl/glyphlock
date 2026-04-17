@@ -1,1 +1,1 @@
-export default function GhostPlaceholder() { return null; }
+export default function Stub() { return null; }
