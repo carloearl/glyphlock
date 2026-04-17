@@ -1131,6 +1131,26 @@ export default function NUPSLanding() {
         <div className="ambient two" />
         <div className="ambient three" />
 
+        <div
+          style={{
+            position: 'fixed',
+            top: 18,
+            left: 18,
+            width: 56,
+            height: 56,
+            zIndex: 9999,
+            pointerEvents: 'none',
+            filter: 'drop-shadow(0 0 14px rgba(0,212,255,0.55)) drop-shadow(0 0 28px rgba(99,102,241,0.35))',
+          }}
+          aria-hidden="true"
+        >
+          <img
+            src="https://media.base44.com/images/public/697a087fb354faebb72df54b/f82c93c8c_lglogo.png"
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+          />
+        </div>
+
         <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
           <defs>
             <symbol id="gl-mark" viewBox="0 0 100 100">
@@ -1239,16 +1259,7 @@ export default function NUPSLanding() {
                 <g><rect x="60" y="335" width="1480" height="8" fill="url(#isolation)" /><text className="svg-mono" x="800" y="357" textAnchor="middle" fontSize="9" fill="#ef4444" letterSpacing="0.3em">◆ PLATFORM / VENUE ISOLATION BARRIER · TENANT SEPARATION ENFORCED ◆</text></g>
                 <g>
                   <rect x="80" y="380" width="1440" height="540" fill="url(#venue-grad)" stroke="#00d4ff" strokeWidth="1" strokeDasharray="6 3" rx="4" opacity="0.5" />
-                  <image
-                    href="https://media.base44.com/images/public/697a087fb354faebb72df54b/f82c93c8c_lglogo.png"
-                    x="98"
-                    y="392"
-                    width="78"
-                    height="78"
-                    preserveAspectRatio="xMidYMid meet"
-                    className="arch-top-gl"
-                  />
-                  <text className="svg-tag" x="190" y="410" fontSize="11" fill="#00d4ff">◆ VENUE OPERATIONS · TENANT-SCOPED via venue_id ◆</text>
+                  <text className="svg-tag" x="98" y="410" fontSize="11" fill="#00d4ff">◆ VENUE OPERATIONS · TENANT-SCOPED via venue_id ◆</text>
 
                   <g transform="translate(800, 650)">
                     <g style={{ transformOrigin: 'center', animation: 'spin-slow 40s linear infinite' }}>
@@ -1266,16 +1277,16 @@ export default function NUPSLanding() {
                     <polygon points="0,-120 104,-60 104,60 0,120 -104,60 -104,-60" fill="#030614" stroke="#1e6fff" strokeWidth="1.5" />
                     <image
                       href="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
-                      x="-92"
-                      y="-146"
-                      width="184"
-                      height="184"
+                      x="-80"
+                      y="-90"
+                      width="160"
+                      height="160"
                       preserveAspectRatio="xMidYMid meet"
                       className="nups-logo-core"
                     />
-                    <text className="svg-title" x="0" y="92" textAnchor="middle" fontSize="22">CORE</text>
-                    <text className="svg-mono" x="0" y="112" textAnchor="middle" fontSize="9" fill="#7c8db8">venue_id → tenant</text>
-                    <text className="svg-mono" x="0" y="128" textAnchor="middle" fontSize="9" fill="#00d4ff">Multi-Venue Runtime</text>
+                    <text className="svg-title" x="0" y="110" textAnchor="middle" fontSize="22">CORE</text>
+                    <text className="svg-mono" x="0" y="130" textAnchor="middle" fontSize="9" fill="#7c8db8">venue_id → tenant</text>
+                    <text className="svg-mono" x="0" y="146" textAnchor="middle" fontSize="9" fill="#00d4ff">Multi-Venue Runtime</text>
                     <circle className="pulse-node" cx="0" cy="-200" r="4" fill="#00d4ff" />
                     <circle className="pulse-node" cx="173" cy="-100" r="4" fill="#1e6fff" style={{ animationDelay: '.35s' }} />
                     <circle className="pulse-node" cx="173" cy="100" r="4" fill="#6366f1" style={{ animationDelay: '.7s' }} />
