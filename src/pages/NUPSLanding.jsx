@@ -1848,6 +1848,76 @@ export default function NUPSLanding() {
             <p style={{ marginTop: 14, fontSize: 15 }}>
               <b style={{ color: 'var(--cyan-soft)' }}>Applicable beyond nightlife</b> — hospitality, events, private security, and other high-risk commerce environments.
             </p>
+
+            {/* IP PROTECTION BLOCK */}
+            <div
+              style={{
+                marginTop: 44,
+                maxWidth: 880,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                padding: '28px 32px',
+                border: '1px solid var(--violet)',
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(0,212,255,0.04))',
+                position: 'relative',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 2,
+                  background: 'linear-gradient(90deg, var(--violet), var(--cyan), var(--violet))',
+                  boxShadow: '0 0 12px var(--violet)',
+                }}
+              />
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 10,
+                  letterSpacing: '0.35em',
+                  color: 'var(--violet)',
+                  textTransform: 'uppercase',
+                  marginBottom: 14,
+                }}
+              >
+                ◆ Intellectual Property Protection ◆
+              </div>
+              <p
+                style={{
+                  fontSize: 17,
+                  color: 'var(--ink-bright)',
+                  lineHeight: 1.55,
+                  margin: 0,
+                  fontWeight: 500,
+                }}
+              >
+                GlyphLock's NUPS system is secured by <b style={{ color: 'var(--cyan-soft)' }}>multiple patents pending</b>, <b style={{ color: 'var(--cyan-soft)' }}>registered copyrights</b>, and a <b style={{ color: 'var(--cyan-soft)' }}>locked non-provisional patent filing</b> — establishing strong IP protection across both functionality and design.
+              </p>
+              <div
+                style={{
+                  marginTop: 18,
+                  paddingTop: 14,
+                  borderTop: '1px dashed rgba(139,92,246,0.4)',
+                  display: 'flex',
+                  gap: 24,
+                  flexWrap: 'wrap',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 10,
+                  letterSpacing: '0.2em',
+                  color: 'var(--ink-dim)',
+                  textTransform: 'uppercase',
+                }}
+              >
+                <span>◆ USPTO <span style={{ color: 'var(--cyan)' }}>18/584,961</span></span>
+                <span>◆ Non-Provisional <span style={{ color: 'var(--cyan)' }}>Filed</span></span>
+                <span>◆ Copyrights <span style={{ color: 'var(--cyan)' }}>Registered</span></span>
+                <span>◆ Trade Secret <span style={{ color: 'var(--cyan)' }}>Protected</span></span>
+              </div>
+            </div>
+
             <div className="stamp">GlyphLock LLC · Arizona · USPTO 18/584,961 · Est. 2025 · All Rights Reserved</div>
           </section>
         </div>
