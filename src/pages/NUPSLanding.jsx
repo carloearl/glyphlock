@@ -1168,7 +1168,7 @@ export default function NUPSLanding() {
               <span className="line-2">behind the venue.</span>
             </h1>
             <p className="lede">
-              NUPS replaces paper contracts, fragmented POS, and manual door ledgers with one <b>closed-loop infrastructure</b>. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>.
+              NUPS replaces fragmented POS and manual door ledgers with one <b>closed-loop infrastructure</b>. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>, with a printed contract that is manager-signed, hostess-signed, scanned back into the system, and hardcopy-archived for bookkeeping and litigation.
             </p>
             <div className="enter-wrap">
               <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}>
@@ -1180,7 +1180,7 @@ export default function NUPSLanding() {
               <div className="stat"><span className="num">7</span><span className="label">Access Tiers</span></div>
               <div className="stat"><span className="num">3</span><span className="label">Runtime Modes</span></div>
               <div className="stat"><span className="num">1-PUSH</span><span className="label">Dispute Shield</span></div>
-              <div className="stat"><span className="num">0</span><span className="label">Paper Forms</span></div>
+              <div className="stat"><span className="num">1</span><span className="label">Hardcopy Archive</span></div>
               <div className="stat"><span className="num">∞</span><span className="label">Venue Tenants</span></div>
             </div>
           </section>
