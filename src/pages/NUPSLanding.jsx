@@ -387,6 +387,15 @@ export default function NUPSLanding() {
         .diagram-frame { padding: 32px 24px; margin-bottom: 96px; overflow: hidden; }
         .diagram-wrap { width: 100%; aspect-ratio: 1600 / 1200; min-height: 380px; position: relative; }
         svg.diagram { width: 100%; height: 100%; display: block; }
+        .nups-logo-core {
+          filter: drop-shadow(0 0 18px rgba(0, 212, 255, 0.75)) drop-shadow(0 0 42px rgba(99, 102, 241, 0.45));
+          animation: nups-logo-pulse 2.8s ease-in-out infinite;
+          transform-origin: center;
+        }
+        @keyframes nups-logo-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.95; }
+          50% { transform: scale(1.035); opacity: 1; }
+        }
         .legend {
           display: flex;
           justify-content: center;
@@ -1240,11 +1249,19 @@ export default function NUPSLanding() {
                     <polygon points="0,-200 173,-100 173,100 0,200 -173,100 -173,-100" fill="url(#core-glow)" stroke="#00d4ff" strokeWidth="2.5" />
                     <polygon points="0,-160 139,-80 139,80 0,160 -139,80 -139,-80" fill="none" stroke="#00d4ff" strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
                     <polygon points="0,-120 104,-60 104,60 0,120 -104,60 -104,-60" fill="#030614" stroke="#1e6fff" strokeWidth="1.5" />
-                    <g transform="translate(-40, -85) scale(0.8)" style={{ color: '#00d4ff' }}><use href="#gl-mark" /></g>
-                    <text className="svg-tag" x="0" y="18" textAnchor="middle" fontSize="12" fill="#00d4ff">NUPS</text>
-                    <text className="svg-title" x="0" y="42" textAnchor="middle" fontSize="22">CORE</text>
-                    <text className="svg-mono" x="0" y="62" textAnchor="middle" fontSize="9" fill="#7c8db8">venue_id → tenant</text>
-                    <text className="svg-mono" x="0" y="78" textAnchor="middle" fontSize="9" fill="#00d4ff">Multi-Venue Runtime</text>
+                    <image
+                      href="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
+                      x="-138"
+                      y="-178"
+                      width="276"
+                      height="276"
+                      preserveAspectRatio="xMidYMid meet"
+                      className="nups-logo-core"
+                    />
+                    <text className="svg-tag" x="0" y="106" textAnchor="middle" fontSize="12" fill="#00d4ff">NUPS</text>
+                    <text className="svg-title" x="0" y="132" textAnchor="middle" fontSize="22">CORE</text>
+                    <text className="svg-mono" x="0" y="152" textAnchor="middle" fontSize="9" fill="#7c8db8">venue_id → tenant</text>
+                    <text className="svg-mono" x="0" y="168" textAnchor="middle" fontSize="9" fill="#00d4ff">Multi-Venue Runtime</text>
                     <circle className="pulse-node" cx="0" cy="-200" r="4" fill="#00d4ff" />
                     <circle className="pulse-node" cx="173" cy="-100" r="4" fill="#1e6fff" style={{ animationDelay: '.35s' }} />
                     <circle className="pulse-node" cx="173" cy="100" r="4" fill="#6366f1" style={{ animationDelay: '.7s' }} />
@@ -1286,9 +1303,17 @@ export default function NUPSLanding() {
                   </path>
                   <text className="svg-mono" x="810" y="390" fontSize="9" fill="#8b5cf6">policy · scope · access</text>
                 </g>
-                <g transform="translate(800, 1130)">
-                  <text className="svg-tag" x="0" y="0" textAnchor="middle" fontSize="9" fill="#7c8db8">DACO MASTER COVENANT · 71 CLAUSES · USPTO 18/584,961 · AZ #23831258</text>
-                  <text className="svg-mono" x="0" y="20" textAnchor="middle" fontSize="8" fill="#3d4a7a">total_sales = cash + card · entertainers 1099-isolated · platform IP sealed · one-push dispute shield enabled</text>
+                <g transform="translate(800, 1048)">
+                  <rect x="-640" y="0" width="1280" height="58" fill="#07091c" stroke="#1e2a5c" opacity="0.95" />
+                  <text className="svg-tag" x="-610" y="22" fontSize="8" fill="#00d4ff">◆ RUNTIME CONTROLS ◆</text>
+                  <text className="svg-mono" x="-610" y="40" fontSize="8" fill="#7c8db8">REAL · DEMO · SANDBOX · venue_id enforced · RLS active · signed media chain</text>
+                  <text className="svg-tag" x="40" y="22" fontSize="8" fill="#8b5cf6">◆ EVIDENCE STACK ◆</text>
+                  <text className="svg-mono" x="40" y="40" fontSize="8" fill="#7c8db8">printed contract · manager signature · hostess signature · scan-back archive · receipt · QR · blockchain hash</text>
+                </g>
+                <g transform="translate(800, 1120)">
+                  <rect x="-640" y="0" width="1280" height="46" fill="#07091c" stroke="#1e2a5c" opacity="0.95" />
+                  <text className="svg-tag" x="0" y="18" textAnchor="middle" fontSize="9" fill="#7c8db8">DACO MASTER COVENANT · 71 CLAUSES · USPTO 18/584,961 · AZ #23831258</text>
+                  <text className="svg-mono" x="0" y="34" textAnchor="middle" fontSize="8" fill="#3d4a7a">total_sales = cash + card · entertainers 1099-isolated · hardcopy archived for bookkeeping/litigation · one-push dispute shield enabled</text>
                 </g>
               </svg>
             </div>
