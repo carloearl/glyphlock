@@ -30,6 +30,8 @@ import ImageShare from './pages/ImageShare';
 import GlyphBucksHub from './pages/GlyphBucksHub';
 import ContractLookup from './pages/ContractLookup';
 import Unauthorized from './pages/Unauthorized';
+import NUPSInfrastructurePage from './pages/NUPSInfrastructurePage';
+import GlyphLockFinancialPage from './pages/GlyphLockFinancialPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -111,6 +113,8 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
+        <Route path="/NUPSInfrastructurePage" element={<LayoutWrapper currentPageName="NUPSInfrastructurePage"><NUPSInfrastructurePage /></LayoutWrapper>} />
+        <Route path="/GlyphLockFinancialPage" element={<LayoutWrapper currentPageName="GlyphLockFinancialPage"><GlyphLockFinancialPage /></LayoutWrapper>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
         <Route path="*" element={<PageNotFound />} />
