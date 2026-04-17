@@ -1178,9 +1178,9 @@ export default function NUPSLanding() {
               NUPS replaces fragmented POS and manual door ledgers with one <b>closed-loop infrastructure</b>. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>, with a printed contract that is manager-signed, hostess-signed, scanned back into the system, and hardcopy-archived for bookkeeping and litigation.
             </p>
             <div className="enter-wrap">
-              <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}>
+              <button className="enter-btn" onClick={() => navigate('/NUPSInfrastructurePage')}>
                 <span className="pulse-dot" />
-                Enter NUPS
+                View Infrastructure Pages
               </button>
             </div>
             <div className="ticker">
@@ -1375,7 +1375,7 @@ export default function NUPSLanding() {
               <p>NUPS builds the evidence packet in real-time. Every transaction accrues its own <b>chain of custody</b> as it happens — contract, video attestation, biometrics, still frames, receipt, ledger entry, blockchain timestamp.</p>
               <p>When a claim lands, one button assembles the package and routes it directly to the venue's <b>banking partner</b>. The processor sees a fully attested transaction with consented, biometrically-verified proof before the dispute cycle ever engages.</p>
               <p>For high-risk merchants, this is the difference between <b>operating in good standing</b> and losing the merchant account entirely.</p>
-              <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}><span className="pulse-dot" />Enter NUPS</button>
+              <button className="enter-btn" onClick={() => navigate('/NUPSInfrastructurePage')}><span className="pulse-dot" />View Infrastructure Pages</button>
             </div>
             <div className="shield-package">
               <div className="pkg-header"><span className="name">Evidence Package</span><span className="id">PKG-<span style={{ color: 'var(--cyan)' }}>TX_9F2A4C</span></span></div>
@@ -1519,9 +1519,9 @@ export default function NUPSLanding() {
             <h3>The venue is the <span className="glow">network.</span><br />NUPS is the <span className="glow">protocol.</span></h3>
             <p>Infrastructure-grade platform for high-risk entertainment venues. Live deployments across the Phoenix metro. Sandbox access available for qualified operators, investors, and underwriting partners.</p>
             <div className="enter-wrap">
-              <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}>
+              <button className="enter-btn" onClick={() => navigate('/NUPSInfrastructurePage')}>
                 <span className="pulse-dot" />
-                Enter NUPS
+                View Infrastructure Pages
               </button>
             </div>
             <div className="stamp">GlyphLock LLC · Arizona · USPTO 18/584,961 · Est. 2025 · All Rights Reserved</div>
