@@ -1596,18 +1596,139 @@ export default function NUPSLanding() {
 
           <div className="section-header"><h2>What <b>NUPS</b> Replaces</h2><div className="index">§ 10 · Capabilities</div></div>
           <div className="capabilities">
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M 3 10 L 21 10" /><circle cx="7" cy="15" r="1" fill="currentColor" /></svg><span className="tag">Identity</span><h4>No more paper.</h4><p>Mag-stripe swipe creates a searchable profile instantly. Drivers and entertainers onboard once — scan QR forever.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 12 22" /><path d="M 17 6 H 9 a 3 3 0 0 0 0 6 h 6 a 3 3 0 0 1 0 6 H 7" /></svg><span className="tag">Currency</span><h4>GlyphBucks closed-loop.</h4><p>Proprietary SVC issues denominated notes ($10–$1000, customizable). QR on each note ties to contract, tx, and user.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="1" /><path d="M 3 9 H 21 M 9 3 V 21" /></svg><span className="tag">Multi-Venue</span><h4>One platform, many rooms.</h4><p>Every venue is a venue_id tenant. Separate data, separate tax, separate payouts — one pane of glass.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 4 6 L 12 2 L 20 6 V 14 C 20 18 16 21 12 22 C 8 21 4 18 4 14 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg><span className="tag">Defense</span><h4>One-push dispute shield.</h4><p>Evidence packet assembled in real-time. One button routes directly to banking partner with sealed proof.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4" /><path d="M 4 21 C 4 16 8 14 12 14 C 16 14 20 16 20 21" /></svg><span className="tag">Entertainer</span><h4>Dancers see their numbers.</h4><p>Self-serve dashboard: nightly, weekly, monthly earnings + hours. 1099-compliant, fully isolated from staff tip pool.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg><span className="tag">Clock</span><h4>Staff in, staff out.</h4><p>Biometric clock-in/out per shift. Hours, breaks, and OT calculated automatically. Payroll export ready.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="6" width="20" height="14" rx="2" /><path d="M 6 10 L 10 10 M 6 14 L 14 14" /><circle cx="18" cy="13" r="2" /></svg><span className="tag">Payments</span><h4>Processor-agnostic.</h4><p>Stripe, GoDaddy, or the venue's existing merchant — NUPS routes through whichever is preferred. Swipe, chip, or tap.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg><span className="tag">Compliance</span><h4>Contract is the receipt.</h4><p>Click-wrap signature + 30-second video + printed PDF. Entertainer and guest both attest. Chain of custody, end to end.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 9 18 V 5 l 12 -2 v 13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg><span className="tag">DJ Booth</span><h4>Girls run the rotation.</h4><p>Entertainers self-login, upload songs, build sets, save preferences, auto-generate playlists, and see live queue position. No DJ gatekeeping.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 3 12 h 4 l 3 -9 l 4 18 l 3 -9 h 4" /></svg><span className="tag">Marketing</span><h4>QR campaigns + auto-social.</h4><p>Scannable QR marketing with scan-to-profile match, scheduled Instagram / TikTok / X posts, event-driven SMS blasts via Twilio, and guest re-engagement triggers.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M 3 5 v 14 a 9 3 0 0 0 18 0 V 5" /><path d="M 3 12 a 9 3 0 0 0 18 0" /></svg><span className="tag">Data Plane</span><h4>Supabase + MongoDB.</h4><p>Postgres with row-level security for transactional truth; MongoDB offline store for zero-downtime capture. Sync on reconnect, never drop a tx.</p></div>
-            <div className="cap"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 22 11.5 a 8.38 8.38 0 0 1 -.9 3.8 a 8.5 8.5 0 0 1 -7.6 4.7 a 8.38 8.38 0 0 1 -3.8 -.9 L 3 21 l 1.9 -5.7 a 8.38 8.38 0 0 1 -.9 -3.8 a 8.5 8.5 0 0 1 4.7 -7.6 a 8.38 8.38 0 0 1 3.8 -.9 h .5 a 8.48 8.48 0 0 1 8 8 v .5 z" /></svg><span className="tag">Messaging</span><h4>Twilio + SendGrid.</h4><p>OTP login, driver alerts, shift push, 1099 delivery, guest blasts, and marketing sends — all opt-in, audited, and templated at the platform layer.</p></div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M 3 10 L 21 10" /><circle cx="7" cy="15" r="1" fill="currentColor" /></svg>
+              <span className="tag">Identity</span>
+              <h4>Searchable guest profiles.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> paper ID logs, manual dancer files, sign-in clipboards.</p>
+              <p>Mag-stripe swipe creates a searchable profile instantly. Drivers and entertainers onboard once — scan QR forever.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+              <span className="tag">Clock</span>
+              <h4>Biometric shift tracking.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> punch cards, When I Work, Homebase.</p>
+              <p>Biometric clock-in/out per shift. Hours, breaks, and OT calculated automatically. Payroll export ready.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><circle cx="12" cy="11" r="3" /><path d="M 12 14 v 4" /></svg>
+              <span className="tag">Roles &amp; Access</span>
+              <h4>Scoped session permissions.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> shared logins, manager-only POS terminals.</p>
+              <p>Six role tiers — Manager, Bartender, Door Girl, Hostess, Security, DJ — each with scoped permissions. JWT-signed sessions carry role and venue scope on every request. Admin actions require multi-factor reset.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M 6 8 L 10 8 M 6 12 L 10 12 M 6 16 L 10 16 M 14 8 L 18 8 M 14 12 L 18 12 M 14 16 L 18 16" /></svg>
+              <span className="tag">Hardware</span>
+              <h4>Turnkey certified stack.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> piecemeal peripherals from five vendors.</p>
+              <p>Ambir ID scanner, Adesso mag-stripe and biometric readers, smart card machine, Epson contract printer, thermal receipt printer, GoDaddy POS terminal. Certified, integrated, and supported as one system.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="6" width="20" height="14" rx="2" /><path d="M 6 10 L 10 10 M 6 14 L 14 14" /><circle cx="18" cy="13" r="2" /></svg>
+              <span className="tag">Payments</span>
+              <h4>Processor-agnostic routing.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> locked-in merchant contracts.</p>
+              <p>Processor-agnostic adapter layer. Stripe today; GoDaddy Payments and venue-owned merchant accounts via the same interface. Swipe, chip, or tap.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 12 22" /><path d="M 17 6 H 9 a 3 3 0 0 0 0 6 h 6 a 3 3 0 0 1 0 6 H 7" /></svg>
+              <span className="tag">Currency</span>
+              <h4>GlyphBucks closed-loop SVC.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> hand-stamped funny money, paper scrip, IOU systems.</p>
+              <p>GlyphBucks issues denominated notes ($10–$1000, customizable). QR on each note ties to contract, transaction, and user. Tracked as a liability — never commingled with sales.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4" /><path d="M 4 21 C 4 16 8 14 12 14 C 16 14 20 16 20 21" /></svg>
+              <span className="tag">Entertainer</span>
+              <h4>Self-serve earnings visibility.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> paper count sheets, "ask the manager" earnings questions.</p>
+              <p>Nightly, weekly, monthly earnings + hours. 1099-ready earnings export. Fully isolated from staff tip pool — independent contractor by design.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 9 18 V 5 l 12 -2 v 13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+              <span className="tag">DJ Booth</span>
+              <h4>Entertainer-run rotation.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> DJ-controlled rotation, paper request slips, song bribes.</p>
+              <p>Entertainers self-login, upload songs, build sets, save preferences, auto-generate playlists, and see live queue position. No DJ gatekeeping.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg>
+              <span className="tag">Compliance</span>
+              <h4>Contract is the receipt.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> paper waivers, scattered consent forms.</p>
+              <p>Click-wrap signature + short attestation video + printed PDF. Entertainer and guest both attest. Chain of custody, end to end.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 4 6 L 12 2 L 20 6 V 14 C 20 18 16 21 12 22 C 8 21 4 18 4 14 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg>
+              <span className="tag">Defense</span>
+              <h4>One-push dispute shield.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> scrambling for evidence after a chargeback hits.</p>
+              <p>Evidence packet — signed contract, timestamped video, transaction trail — assembled in real time and submitted directly through the processor's dispute API.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 14 2 H 6 a 2 2 0 0 0 -2 2 v 16 a 2 2 0 0 0 2 2 h 12 a 2 2 0 0 0 2 -2 V 8 z" /><path d="M 14 2 v 6 h 6" /><path d="M 9 13 h 6 M 9 17 h 6" /></svg>
+              <span className="tag">Audit</span>
+              <h4>Dual-track immutable ledger.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> spreadsheet logs, "trust me" reconciliation.</p>
+              <p>Every financial event logged to <code style={{ color: 'var(--cyan)' }}>SystemAuditLog</code> with venue scope; every platform and security event logged to <code style={{ color: 'var(--cyan)' }}>AuditEvent</code>. Regulator-ready export.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M 7 11 V 7 a 5 5 0 0 1 10 0 v 4" /></svg>
+              <span className="tag">Security</span>
+              <h4>MFA on every privileged action.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> a sticky note under the keyboard.</p>
+              <p>Platform-wide MFA, JWT-signed sessions with role and tenant claims, device attestation, and session controls. Refunds, voids, role changes, and data wipes require multi-factor confirmation.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="1" /><path d="M 3 9 H 21 M 9 3 V 21" /></svg>
+              <span className="tag">Multi-Venue</span>
+              <h4>One platform, many rooms.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> separate systems per location.</p>
+              <p>Every venue is a <code style={{ color: 'var(--cyan)' }}>venue_id</code> tenant. Separate data, separate tax, separate payouts — one pane of glass.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 3 3 v 18 h 18" /><path d="M 7 17 l 4 -4 l 4 4 l 5 -6" /></svg>
+              <span className="tag">Reporting</span>
+              <h4>End-of-night, automated.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> end-of-night Excel templates, manual deposit slips.</p>
+              <p>Shift close, cash drawer reconciliation, daily deposit summary, and weekly P&amp;L generated automatically. Total sales = cash + card. GlyphBucks tracked separately as liability.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 3 7 h 18 M 3 12 h 18 M 3 17 h 18" /><circle cx="6" cy="7" r="1.5" fill="currentColor" stroke="none" /><circle cx="14" cy="12" r="1.5" fill="currentColor" stroke="none" /><circle cx="9" cy="17" r="1.5" fill="currentColor" stroke="none" /></svg>
+              <span className="tag">Inventory</span>
+              <h4>Par levels &amp; pour tracking.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> clipboard counts, eyeballed reorders.</p>
+              <p>POS product catalog with cost basis, par levels, and pour tracking. Bartender voids and comps logged to audit trail.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M 3 5 v 14 a 9 3 0 0 0 18 0 V 5" /><path d="M 3 12 a 9 3 0 0 0 18 0" /></svg>
+              <span className="tag">Data</span>
+              <h4>Row-scoped tenant isolation.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> single-vendor lock-in, opaque entity models.</p>
+              <p>Primary entity store with row-scoped isolation by <code style={{ color: 'var(--cyan)' }}>venue_id</code>. Over 150 backend functions and 100+ entities under platform governance. Every write traceable, every read scoped.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 4 4 v 16 h 16" /><path d="M 8 16 l 4 -4 l 4 4" /><path d="M 12 12 v -6" /></svg>
+              <span className="tag">Continuity</span>
+              <h4>Decoupled credential layer.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> single-vendor lock-in on user authentication.</p>
+              <p>External Supabase credential layer holds user and client identity independently of the core platform. Credential storage and platform logic are decoupled — a foundational layer for the failover and resilience roadmap.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 22 11.5 a 8.38 8.38 0 0 1 -.9 3.8 a 8.5 8.5 0 0 1 -7.6 4.7 a 8.38 8.38 0 0 1 -3.8 -.9 L 3 21 l 1.9 -5.7 a 8.38 8.38 0 0 1 -.9 -3.8 a 8.5 8.5 0 0 1 4.7 -7.6 a 8.38 8.38 0 0 1 3.8 -.9 h .5 a 8.48 8.48 0 0 1 8 8 v .5 z" /></svg>
+              <span className="tag">Messaging</span>
+              <h4>Twilio + SendGrid pipeline.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> personal cell phones for staff coordination.</p>
+              <p>OTP login, driver alerts, shift push notifications, 1099 delivery, and transactional sends via Twilio + SendGrid. Opt-in, audited, and templated at the platform layer.</p>
+            </div>
+            <div className="cap">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 3 12 h 4 l 3 -9 l 4 18 l 3 -9 h 4" /></svg>
+              <span className="tag">Marketing</span>
+              <h4>Scan-to-profile attribution.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> tabletop QR codes that go nowhere, generic Mailchimp blasts.</p>
+              <p>Every QR scan ties back to a real guest record. Scheduled social posts across Instagram, TikTok, and X. Event-driven SMS re-engagement triggers based on visit history.</p>
+            </div>
           </div>
 
           <section className="footer-cta">
