@@ -158,3 +158,34 @@ button:focus-visible {
     padding: 0;
   }
 }
+
+/* ============================================================
+   MOBILE-FIRST TAP FIX — Tablets & Touch Devices
+   Ensures button children (icons, spans, svgs) never swallow
+   touch events. This is the #1 cause of "button doesn't work
+   on tablet" bugs.
+   ============================================================ */
+button,
+[role="button"],
+a[role="button"],
+label[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(6, 182, 212, 0.25);
+}
+
+button > *,
+[role="button"] > *,
+a[role="button"] > *,
+label[role="button"] > * {
+  pointer-events: none;
+}
+
+/* Re-enable pointer events on interactive form controls inside buttons (rare but real) */
+button input,
+button select,
+button textarea,
+[role="button"] input,
+[role="button"] select,
+[role="button"] textarea {
+  pointer-events: auto;
+}
