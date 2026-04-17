@@ -70,7 +70,7 @@ const AuthenticatedApp = () => {
   }
 
   // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/NUPSLanding', '/NUPSGateway', '/unauthorized', '/NUPSSandbox', '/NUPSLogin', '/NUPSOwner', '/NUPSStaff', '/EntertainerCheckIn', '/NUPSInfrastructurePage', '/GlyphLockFinancialPage'];
+  const fullscreenPaths = ['/NUPSLanding', '/NUPSGateway', '/unauthorized', '/NUPSSandbox', '/NUPSLogin', '/NUPSOwner', '/NUPSStaff', '/EntertainerCheckIn', '/GlyphLockFinancialPage'];
   const isFullscreen = fullscreenPaths.some(p => window.location.pathname.startsWith(p));
 
   if (isFullscreen) {

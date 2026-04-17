@@ -75,6 +75,32 @@ export default function NUPSUnifiedOverview() {
 
   return (
     <div className="space-y-8">
+      <section className="relative overflow-hidden rounded-[28px] border border-cyan-400/15 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_28%),linear-gradient(135deg,rgba(10,18,30,0.98),rgba(8,14,24,0.96))] shadow-[0_0_60px_rgba(34,211,238,0.08)]">
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.03),transparent)]" />
+        <div className="relative grid gap-6 px-5 py-6 md:px-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:py-8">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">NUPS Infrastructure</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-5xl">A sharper operating system view for modern venue infrastructure.</h2>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
+              Unified operations, contract control, internal currency workflows, POS execution, reporting, and reconciliation in one institutional-grade layer.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">Deployment</p>
+              <p className="mt-2 text-2xl font-bold text-white">Multi-Station</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">Control Layer</p>
+              <p className="mt-2 text-2xl font-bold text-white">Audit-Ready</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300">Positioning</p>
+              <p className="mt-2 text-2xl font-bold text-white">Institutional</p>
+            </div>
+          </div>
+        </div>
+      </section>
       <section className="overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(14,25,40,0.95),rgba(10,18,29,0.95))] shadow-[0_0_40px_rgba(59,130,246,0.12)]">
         <div className="border-b border-white/10 px-5 py-5 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -119,7 +145,7 @@ export default function NUPSUnifiedOverview() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-white/5 p-5 md:p-8">
+      <section className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-5 md:p-8">
         <div className="mb-5 flex items-center gap-3">
           <Workflow className="h-5 w-5 text-cyan-300" />
           <h2 className="text-2xl font-bold text-white">Core System Modules</h2>
@@ -130,7 +156,7 @@ export default function NUPSUnifiedOverview() {
               {row.map((item) => (
                 <div
                   key={item}
-                  className="flex min-h-[56px] items-center justify-center rounded-xl border border-white/10 bg-[rgba(255,255,255,0.06)] px-4 text-center text-sm font-semibold text-slate-100"
+                  className="flex min-h-[64px] items-center justify-center rounded-2xl border border-cyan-400/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.95),rgba(23,37,64,0.85))] px-4 text-center text-sm font-semibold text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
                 >
                   {item}
                 </div>
@@ -140,7 +166,7 @@ export default function NUPSUnifiedOverview() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-white/5 p-5 md:p-8">
+      <section className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-5 md:p-8">
         <div className="mb-5 flex items-center gap-3">
           <ChevronRight className="h-5 w-5 text-cyan-300" />
           <div>
@@ -161,7 +187,7 @@ export default function NUPSUnifiedOverview() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(11,21,33,0.96),rgba(7,14,24,0.96))] p-5 md:p-8">
+      <section className="rounded-[28px] border border-cyan-400/10 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.12),transparent_24%),linear-gradient(180deg,rgba(11,21,33,0.98),rgba(7,14,24,0.98))] p-5 md:p-8 shadow-[0_0_40px_rgba(34,211,238,0.06)]">
         <div className="mb-6 flex items-center gap-3">
           <CircleDollarSign className="h-5 w-5 text-cyan-300" />
           <div>
