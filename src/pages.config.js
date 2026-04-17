@@ -91,10 +91,14 @@ import Mobile from './pages/Mobile';
 import NISTChallenge from './pages/NISTChallenge';
 import NUPSAudit from './pages/NUPSAudit';
 import NUPSDemoManager from './pages/NUPSDemoManager';
+import NUPSGateway from './pages/NUPSGateway';
+import NUPSInfrastructurePage from './pages/NUPSInfrastructurePage';
+import NUPSLanding from './pages/NUPSLanding';
 import NUPSLogin from './pages/NUPSLogin';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSPostLogin from './pages/NUPSPostLogin';
 import NUPSReport from './pages/NUPSReport';
+import NUPSSandbox from './pages/NUPSSandbox';
 import NUPSStaff from './pages/NUPSStaff';
 import NotFound from './pages/NotFound';
 import PartnerPortal from './pages/PartnerPortal';
@@ -182,10 +186,14 @@ export const PAGES = {
     "NISTChallenge": NISTChallenge,
     "NUPSAudit": NUPSAudit,
     "NUPSDemoManager": NUPSDemoManager,
+    "NUPSGateway": NUPSGateway,
+    "NUPSInfrastructurePage": NUPSInfrastructurePage,
+    "NUPSLanding": NUPSLanding,
     "NUPSLogin": NUPSLogin,
     "NUPSOwner": NUPSOwner,
     "NUPSPostLogin": NUPSPostLogin,
     "NUPSReport": NUPSReport,
+    "NUPSSandbox": NUPSSandbox,
     "NUPSStaff": NUPSStaff,
     "NotFound": NotFound,
     "PartnerPortal": PartnerPortal,
