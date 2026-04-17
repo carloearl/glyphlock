@@ -100,23 +100,9 @@ const AuthenticatedApp = () => {
         <Route path="/AnalyticsDashboard" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
         <Route path="/SettlementReports" element={<LayoutWrapper currentPageName="SettlementReports"><SettlementReports /></LayoutWrapper>} />
         <Route path="/GovernanceHub" element={<LayoutWrapper currentPageName="GovernanceHub"><GovernanceHub /></LayoutWrapper>} />
-        <Route path="/NUPSLanding" element={<NUPSLanding />} />
-        <Route path="/NUPSGateway" element={<NUPSGateway />} />
-        <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
-        <Route path="/NUPSLogin" element={<NUPSLogin />} />
-        <Route path="/NUPSOwner" element={<NUPSOwner />} />
-        <Route path="/NUPSStaff" element={<NUPSStaff />} />
-        <Route path="/NUPSLanding" element={<NUPSLanding />} />
-        <Route path="/NUPSGateway" element={<NUPSGateway />} />
-        <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
-        <Route path="/NUPSLogin" element={<NUPSLogin />} />
-        <Route path="/NUPSOwner" element={<NUPSOwner />} />
-        <Route path="/NUPSStaff" element={<NUPSStaff />} />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
-        <Route path="/NUPSInfrastructurePage" element={<LayoutWrapper currentPageName="NUPSInfrastructurePage"><NUPSInfrastructurePage /></LayoutWrapper>} />
-        <Route path="/GlyphLockFinancialPage" element={<LayoutWrapper currentPageName="GlyphLockFinancialPage"><GlyphLockFinancialPage /></LayoutWrapper>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
         <Route path="*" element={<PageNotFound />} />
