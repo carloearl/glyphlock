@@ -8,12 +8,12 @@ export default function DemoCredentialsPanel() {
   const [showPasswords, setShowPasswords] = useState(false);
 
   const demoAccounts = [
-    { username: "carloearl@glyphlock", pin: "4891", role: "VENUE_MANAGER", tier: "Manager" },
-    { username: "lucki@dream", pin: "9876", role: "PERFORMER", tier: "Entertainer (LUCKi)" },
-    { username: "bartender@dream", pin: "1234", role: "BARTENDER", tier: "POS Staff" },
-    { username: "doorstaff@dream", pin: "5678", role: "SECURITY", tier: "Door" },
-    { username: "hostess@dream", pin: "2468", role: "HOSTESS", tier: "VIP" },
-    { username: "dj@dream", pin: "3579", role: "DJ", tier: "Audio" },
+    { username: "demo_manager", pin: "1111", role: "VENUE_MANAGER", tier: "Manager (Owner View)" },
+    { username: "demo_bartender", pin: "2222", role: "BARTENDER", tier: "POS Staff" },
+    { username: "demo_door", pin: "3333", role: "SECURITY", tier: "Door / Security" },
+    { username: "demo_hostess", pin: "4444", role: "FLOOR_HOST", tier: "Hostess / VIP" },
+    { username: "demo_entertainer", pin: "5555", role: "PERFORMER", tier: "Entertainer" },
+    { username: "demo_dj", pin: "6666", role: "DJ", tier: "Audio" },
   ];
 
   const copyToClipboard = (text) => {
