@@ -33,7 +33,7 @@ const STAFF_MODULES = [
   { key: "entertainer", label: "Entertainers",   icon: UserCheck,    roles: new Set(["manager","door_girl"]) },
   { key: "vip",         label: "VIP Rooms",      icon: Star,         roles: new Set(["manager","hostess"]) },
   { key: "timeclock",   label: "Time Clock",     icon: Clock,        roles: new Set(["manager","bartender","door_girl","hostess","security","dj"]) },
-  { key: "dj",          label: "DJ Console",     icon: BarChart3,    roles: new Set(["manager","dj"]) },
+  { key: "dj",          label: "DJ Console",     icon: BarChart3,    roles: new Set(["manager","dj","bartender","door_girl","hostess","security"]) },
   { key: "history",     label: "My Transactions", icon: BarChart3,   roles: new Set(["manager","bartender"]) },
 ];
 

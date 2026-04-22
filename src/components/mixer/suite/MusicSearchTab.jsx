@@ -19,26 +19,34 @@ export default function MusicSearchTab() {
     e?.preventDefault?.();
     if (!query.trim() || query.trim().length < 2) return;
     setLoading(true);
+    setResults([]);
     try {
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=12&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
       const res = await fetch(url);
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('[MusicSearch] HTTP', res.status, errText);
+        toast.error(`YouTube API HTTP ${res.status} — check API key restrictions`);
+        return;
+      }
       const data = await res.json();
       if (data.error) {
-        toast.error(`YouTube API: ${data.error.message}`);
-        setResults([]);
-      } else {
-        setResults((data.items || []).map(item => ({
-          source: 'youtube',
-          id: item.id.videoId,
-          title: item.snippet.title,
-          artist: item.snippet.channelTitle,
-          thumbnail: item.snippet.thumbnails?.medium?.url || '',
-          embed_url: `https://www.youtube.com/embed/${item.id.videoId}`,
-          watch_url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-        })));
+        console.error('[MusicSearch] API error', data.error);
+        toast.error(`YouTube: ${data.error.message}`);
+        return;
       }
+      setResults((data.items || []).map(item => ({
+        source: 'youtube',
+        id: item.id.videoId,
+        title: item.snippet.title,
+        artist: item.snippet.channelTitle,
+        thumbnail: item.snippet.thumbnails?.medium?.url || '',
+        embed_url: `https://www.youtube.com/embed/${item.id.videoId}`,
+        watch_url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+      })));
     } catch (err) {
-      toast.error(`Search failed: ${err.message}`);
+      console.error('[MusicSearch] fetch failed', err);
+      toast.error(`Network error: ${err.message}`);
     } finally {
       setLoading(false);
     }

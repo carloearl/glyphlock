@@ -12,6 +12,7 @@ import PersonasTab from './PersonasTab';
 import PlaylistGenTab from './PlaylistGenTab';
 import CrowdTab from './CrowdTab';
 import JukeboxTab from './JukeboxTab';
+import SuiteErrorBoundary from './SuiteErrorBoundary';
 
 const TABS = [
   { key: 'tracks', label: 'Tracks', icon: Music, active: 'bg-purple-500/20 text-purple-300 border-purple-500/50' },
@@ -42,12 +43,14 @@ export default function MusicSuitePanel() {
       </div>
 
       <div className="min-h-[400px]">
-        {active === 'tracks' && <TracksTab />}
-        {active === 'search' && <MusicSearchTab />}
-        {active === 'personas' && <PersonasTab />}
-        {active === 'playlist' && <PlaylistGenTab />}
-        {active === 'crowd' && <CrowdTab />}
-        {active === 'jukebox' && <JukeboxTab />}
+        <SuiteErrorBoundary key={active}>
+          {active === 'tracks' && <TracksTab />}
+          {active === 'search' && <MusicSearchTab />}
+          {active === 'personas' && <PersonasTab />}
+          {active === 'playlist' && <PlaylistGenTab />}
+          {active === 'crowd' && <CrowdTab />}
+          {active === 'jukebox' && <JukeboxTab />}
+        </SuiteErrorBoundary>
       </div>
     </div>
   );
