@@ -75,7 +75,6 @@ import FAQ from './pages/FAQ';
 import FullExport from './pages/FullExport';
 import GlyphBot from './pages/GlyphBot';
 import GlyphBotJunior from './pages/GlyphBotJunior';
-import GlyphBotMixer from './pages/GlyphBotMixer';
 import GlyphLockAudit from './pages/GlyphLockAudit';
 import GlyphLockFinancial from './pages/GlyphLockFinancial';
 import GlyphLockPlayground from './pages/GlyphLockPlayground';
@@ -170,7 +169,6 @@ export const PAGES = {
     "FullExport": FullExport,
     "GlyphBot": GlyphBot,
     "GlyphBotJunior": GlyphBotJunior,
-    "GlyphBotMixer": GlyphBotMixer,
     "GlyphLockAudit": GlyphLockAudit,
     "GlyphLockFinancial": GlyphLockFinancial,
     "GlyphLockPlayground": GlyphLockPlayground,

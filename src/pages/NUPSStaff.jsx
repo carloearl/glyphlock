@@ -11,7 +11,7 @@ import {
   Loader2, BarChart3, UserCheck, Star
 } from "lucide-react";
 
-import MusicSuitePanel from "@/components/mixer/suite/MusicSuitePanel";
+import UnifiedMusicConsole from "@/components/mixer/UnifiedMusicConsole";
 import POSCashRegister from "../components/nups/POSCashRegister.jsx";
 import GuestCheckIn from "../components/nups/GuestCheckIn.jsx";
 import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
@@ -213,7 +213,7 @@ export default function NUPSStaff() {
               {currentModule === "door" && <GuestCheckIn />}
               {currentModule === "entertainer" && <EntertainerCheckIn user={user} />}
               {currentModule === "vip" && <VIPRoomBoard user={user} />}
-              {currentModule === "dj" && <MusicSuitePanel />}
+              {currentModule === "dj" && <UnifiedMusicConsole />}
             </>
           ) : null}
           {isClockedIn && currentModule === "history" && (
