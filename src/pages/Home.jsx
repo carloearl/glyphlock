@@ -9,6 +9,7 @@ import ServicesGrid from '@/components/home/ServicesGrid';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
 import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
+import ExperienceLiveSystemCTA from '@/components/demo/ExperienceLiveSystemCTA';
 
 const SectionLoader = () => (
   <div className="w-full py-20 flex items-center justify-center">
@@ -132,6 +133,8 @@ export default function Home() {
           <div className="flex justify-center -mt-8">
             <CountdownPill />
           </div>
+
+          <ExperienceLiveSystemCTA variant="home" />
         </section>
 
         {/* Value Proposition */}

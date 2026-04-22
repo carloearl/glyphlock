@@ -1,0 +1,91 @@
+{
+  "name": "DemoLead",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Prospect full name"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Prospect email"
+    },
+    "venue_name": {
+      "type": "string",
+      "description": "Prospect venue name"
+    },
+    "session_token": {
+      "type": "string",
+      "description": "Unique single-use session token"
+    },
+    "session_started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "EXPIRED",
+        "COMPLETED"
+      ],
+      "default": "ACTIVE"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "email_dispatch_status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "SENT",
+        "FAILED"
+      ],
+      "default": "PENDING"
+    },
+    "email_dispatch_error": {
+      "type": "string"
+    },
+    "action_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "action": {
+            "type": "string"
+          },
+          "source_route": {
+            "type": "string"
+          },
+          "device_fingerprint": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "full_name",
+    "email",
+    "venue_name",
+    "session_token"
+  ],
+  "rls": {
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

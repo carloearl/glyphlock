@@ -32,6 +32,9 @@ import ContractLookup from './pages/ContractLookup';
 import Unauthorized from './pages/Unauthorized';
 import NUPSInfrastructurePage from './pages/NUPSInfrastructurePage';
 import GlyphLockFinancialPage from './pages/GlyphLockFinancialPage';
+import DemoGate from './pages/DemoGate';
+import CommandCenterDemo from './pages/CommandCenterDemo';
+import DemoFloorStatus from './pages/DemoFloorStatus';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -71,7 +74,7 @@ const AuthenticatedApp = () => {
   }
 
   // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/nupslanding', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage'];
+  const fullscreenPaths = ['/nupslanding', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage', '/demo/'];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
   if (isFullscreen) {
@@ -93,6 +96,9 @@ const AuthenticatedApp = () => {
         <Route path="/nupsinfrastructurepage" element={<NUPSInfrastructurePage />} />
         <Route path="/GlyphLockFinancialPage" element={<GlyphLockFinancialPage />} />
         <Route path="/glyphlockfinancialpage" element={<GlyphLockFinancialPage />} />
+        <Route path="/demo/gate" element={<DemoGate />} />
+        <Route path="/demo/command-center" element={<CommandCenterDemo />} />
+        <Route path="/demo/floor-status" element={<DemoFloorStatus />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>

@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import NUPSArchitectureSections from "@/components/nups/landing/NUPSArchitectureSections";
+import ExperienceLiveSystemCTA from "@/components/demo/ExperienceLiveSystemCTA";
 
 export default function NUPSLanding() {
   const navigate = useNavigate();
@@ -1300,6 +1301,8 @@ export default function NUPSLanding() {
               <div className="stat"><span className="num">Multi-Tenant</span><span className="label">Scalable Architecture</span></div>
             </div>
           </section>
+
+          <ExperienceLiveSystemCTA variant="nups" />
 
           <div className="section-header"><h2>System <b>Architecture</b></h2><div className="index">§ 01 · Topology</div></div>
           <div className="diagram-frame">
