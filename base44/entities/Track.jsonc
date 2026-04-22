@@ -1,0 +1,72 @@
+{
+  "name": "Track",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Track title"
+    },
+    "artist": {
+      "type": "string",
+      "description": "Artist name"
+    },
+    "genre": {
+      "type": "string",
+      "description": "Musical genre"
+    },
+    "bpm": {
+      "type": "number",
+      "description": "Beats per minute"
+    },
+    "mood": {
+      "type": "string",
+      "enum": [
+        "high-energy",
+        "sensual",
+        "chill",
+        "aggressive",
+        "neutral"
+      ]
+    },
+    "duration": {
+      "type": "number",
+      "description": "Duration in seconds"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Uploaded audio file URL"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "upload",
+        "youtube",
+        "spotify",
+        "manual"
+      ],
+      "default": "manual"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "External platform ID (YouTube video ID, Spotify track ID)"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Cover art / thumbnail"
+    },
+    "embed_url": {
+      "type": "string",
+      "description": "Embeddable player URL"
+    },
+    "uploader_id": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

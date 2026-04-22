@@ -1,0 +1,55 @@
+{
+  "name": "JukeboxRequest",
+  "type": "object",
+  "properties": {
+    "guest_session_id": {
+      "type": "string"
+    },
+    "guest_name": {
+      "type": "string"
+    },
+    "track_id": {
+      "type": "string"
+    },
+    "track_title": {
+      "type": "string",
+      "description": "Cached for display"
+    },
+    "track_artist": {
+      "type": "string"
+    },
+    "votes": {
+      "type": "number",
+      "default": 1
+    },
+    "tip_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "is_vip": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "played",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "priority_score": {
+      "type": "number"
+    },
+    "entertainer_id": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "track_id"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "CrowdMetrics",
+  "type": "object",
+  "properties": {
+    "entertainer_id": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "energy_score": {
+      "type": "number",
+      "description": "0-10 composite energy score"
+    },
+    "tips_last_30min": {
+      "type": "number",
+      "default": 0
+    },
+    "votes_last_30min": {
+      "type": "number",
+      "default": 0
+    },
+    "playthrough_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "manual_slider": {
+      "type": "number",
+      "description": "Manual energy override 0-10"
+    },
+    "current_bpm": {
+      "type": "number"
+    },
+    "mood_votes": {
+      "type": "object",
+      "description": "Tally of mood votes {mood: count}"
+    }
+  },
+  "required": [
+    "entertainer_id"
+  ]
+}

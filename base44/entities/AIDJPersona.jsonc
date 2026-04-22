@@ -1,0 +1,89 @@
+{
+  "name": "AIDJPersona",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "entertainer_id": {
+      "type": "string",
+      "description": "Linked entertainer"
+    },
+    "weighting_model": {
+      "type": "object",
+      "properties": {
+        "crowd_weight": {
+          "type": "number",
+          "default": 0.4
+        },
+        "entertainer_weight": {
+          "type": "number",
+          "default": 0.4
+        },
+        "revenue_weight": {
+          "type": "number",
+          "default": 0.2
+        }
+      }
+    },
+    "transition_style_rules": {
+      "type": "object",
+      "properties": {
+        "bpm_range": {
+          "type": "number",
+          "default": 10
+        },
+        "mood_compatibility": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "energy_ramp": {
+          "type": "string",
+          "enum": [
+            "linear",
+            "exponential",
+            "step"
+          ],
+          "default": "linear"
+        }
+      }
+    },
+    "genre_bias_logic": {
+      "type": "object",
+      "properties": {
+        "primary_genres": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "secondary_genres": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excluded_genres": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "risk_tolerance": {
+      "type": "string",
+      "enum": [
+        "conservative",
+        "balanced",
+        "experimental"
+      ],
+      "default": "balanced"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

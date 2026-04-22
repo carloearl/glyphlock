@@ -1,0 +1,38 @@
+{
+  "name": "PerformanceAnalytics",
+  "type": "object",
+  "properties": {
+    "track_id": {
+      "type": "string"
+    },
+    "playlist_id": {
+      "type": "string"
+    },
+    "entertainer_id": {
+      "type": "string"
+    },
+    "play_count": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_crowd_energy": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_tips": {
+      "type": "number",
+      "default": 0
+    },
+    "playthrough_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "last_played": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "track_id"
+  ]
+}

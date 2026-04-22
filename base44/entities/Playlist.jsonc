@@ -1,0 +1,44 @@
+{
+  "name": "Playlist",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "entertainer_id": {
+      "type": "string"
+    },
+    "persona_id": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "ordered_tracks": {
+      "type": "array",
+      "description": "Array of {track_id, score, reason, position}",
+      "items": {
+        "type": "object"
+      }
+    },
+    "crowd_energy_score": {
+      "type": "number"
+    },
+    "generation_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "archived"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "entertainer_id"
+  ]
+}
