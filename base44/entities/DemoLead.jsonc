@@ -54,6 +54,30 @@
     "email_dispatch_error": {
       "type": "string"
     },
+    "email_transport": {
+      "type": "string",
+      "enum": [
+        "SENDGRID",
+        "CORE_SENDMAIL",
+        "FAILED",
+        "NONE"
+      ],
+      "default": "NONE",
+      "description": "Which transport was used for follow-up email dispatch"
+    },
+    "email_dispatch_detail": {
+      "type": "string",
+      "description": "Dispatch error message or provider detail"
+    },
+    "email_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of successful email dispatch"
+    },
+    "referral_source": {
+      "type": "string",
+      "description": "Which preview/entry surface produced this lead (e.g. pos-register-preview)"
+    },
     "action_log": {
       "type": "array",
       "items": {

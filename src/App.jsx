@@ -35,6 +35,11 @@ import GlyphLockFinancialPage from './pages/GlyphLockFinancialPage';
 import DemoGate from './pages/DemoGate';
 import CommandCenterDemo from './pages/CommandCenterDemo';
 import DemoFloorStatus from './pages/DemoFloorStatus';
+import DemoOpenNightPreview from './pages/DemoOpenNightPreview';
+import DemoVipBoardPreview from './pages/DemoVipBoardPreview';
+import DemoPosRegisterPreview from './pages/DemoPosRegisterPreview';
+import DemoCloseNightPreview from './pages/DemoCloseNightPreview';
+import DemoCompliancePreview from './pages/DemoCompliancePreview';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -99,6 +104,11 @@ const AuthenticatedApp = () => {
         <Route path="/demo/gate" element={<DemoGate />} />
         <Route path="/demo/command-center" element={<CommandCenterDemo />} />
         <Route path="/demo/floor-status" element={<DemoFloorStatus />} />
+        <Route path="/demo/open-night-preview" element={<DemoOpenNightPreview />} />
+        <Route path="/demo/vip-board-preview" element={<DemoVipBoardPreview />} />
+        <Route path="/demo/pos-register-preview" element={<DemoPosRegisterPreview />} />
+        <Route path="/demo/close-night-preview" element={<DemoCloseNightPreview />} />
+        <Route path="/demo/compliance-preview" element={<DemoCompliancePreview />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>

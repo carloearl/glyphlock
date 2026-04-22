@@ -160,12 +160,12 @@ export default function CommandCenterDemo() {
             Primary Actions
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
-            <DemoActionButton label="Open Night" icon={Play} variant="primary" onClick={onAction("open_night", "/demo/floor-status")} />
-            <DemoActionButton label="VIP Board" icon={Crown} onClick={onAction("vip_board", "/demo/floor-status")} />
-            <DemoActionButton label="POS Register" icon={CreditCard} onClick={onAction("pos_register", "/demo/floor-status")} />
-            <DemoActionButton label="Close Night" icon={Lock} variant="danger" onClick={onAction("close_night", "/demo/floor-status")} />
+            <DemoActionButton label="Open Night" icon={Play} variant="primary" onClick={onAction("open_night", "/demo/open-night-preview")} />
+            <DemoActionButton label="VIP Board" icon={Crown} onClick={onAction("vip_board", "/demo/vip-board-preview")} />
+            <DemoActionButton label="POS Register" icon={CreditCard} onClick={onAction("pos_register", "/demo/pos-register-preview")} />
+            <DemoActionButton label="Close Night" icon={Lock} variant="danger" onClick={onAction("close_night", "/demo/close-night-preview")} />
             <DemoActionButton label="Floor Status" icon={Users} onClick={onAction("floor_status", "/demo/floor-status")} />
-            <DemoActionButton label="Compliance" icon={Shield} onClick={onAction("compliance", "/demo/floor-status")} />
+            <DemoActionButton label="Compliance" icon={Shield} onClick={onAction("compliance", "/demo/compliance-preview")} />
           </div>
         </div>
 
