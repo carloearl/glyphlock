@@ -563,15 +563,27 @@ export default function Navbar({ user, onLogin, onLogout }) {
           )}
         </div>
 
-        {/* Mobile Toggle */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minWidth: '52px', minHeight: '52px' }}
-          className="lg:hidden relative w-14 h-14 flex items-center justify-center rounded-xl bg-white/5 border-2 border-white/10 hover:border-cyan-400/50 transition-all active:bg-cyan-500/20"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-          aria-expanded={mobileMenuOpen}
-        >
+        {/* Mobile/Tablet action cluster — always-visible Sign In + hamburger */}
+        <div className="lg:hidden flex items-center gap-2">
+          {!user && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={onLogin}
+              style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minHeight: '48px' }}
+              className="px-4 h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white text-sm font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95 border border-cyan-400/40"
+              aria-label="Sign in to GlyphLock account"
+            >
+              Sign In
+            </motion.button>
+          )}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minWidth: '52px', minHeight: '52px' }}
+            className="relative w-14 h-14 flex items-center justify-center rounded-xl bg-white/5 border-2 border-white/10 hover:border-cyan-400/50 transition-all active:bg-cyan-500/20"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+          >
           <AnimatePresence mode="wait">
             {mobileMenuOpen ? (
               <motion.div
@@ -595,7 +607,8 @@ export default function Navbar({ user, onLogin, onLogout }) {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.button>
+          </motion.button>
+        </div>
       </div>
 
       {/* Mobile Menu with staggered animations */}
