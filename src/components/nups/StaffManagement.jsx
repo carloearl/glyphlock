@@ -3,13 +3,20 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Shield, Mail, Calendar } from "lucide-react";
+import { Users, Shield, Mail, Calendar, User as UserIcon } from "lucide-react";
 
-// Allowlist of legitimate operational roles (NUPS venue staff only).
-// Any user whose role is NOT in this list is treated as a public/platform signup
-// and hidden from the Staff directory.
+// ============================================================================
+// STAFF DIRECTORY — OPERATIONAL ROSTER ONLY
+// ----------------------------------------------------------------------------
+// Source of truth: NUPSUser (venue-scoped staff records).
+// The platform-wide `User` table is NOT used here — it contains public website
+// signups, prospects, and generic auth users that have nothing to do with the
+// venue roster. We additionally surface PROTECTED platform admins (Carlo etc.)
+// so owners always see legitimate internal accounts.
+// ============================================================================
+
+// Allowlist of legitimate operational roles (NUPSUser enum per spec §9.2).
 const OPERATIONAL_ROLES = new Set([
-  'admin',
   'PLATFORM_ADMIN',
   'VENUE_OWNER',
   'VENUE_MANAGER',
@@ -18,61 +25,100 @@ const OPERATIONAL_ROLES = new Set([
   'BARTENDER',
   'SECURITY',
   'DJ',
-  // Lowercase variants used by legacy records
-  'owner',
-  'manager',
-  'host',
-  'bartender',
-  'security',
-  'dj',
-  'performer',
-  'floor_staff',
 ]);
 
-// Protected admin accounts that must always be preserved regardless of role field.
-const PROTECTED_EMAILS = new Set([
+// Admin roles (get shield badge + counted separately)
+const ADMIN_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'admin']);
+
+// Protected platform accounts that must always appear in the directory,
+// even if they only exist in the platform `User` table.
+const PROTECTED_PLATFORM_EMAILS = new Set([
   'carloearl@glyphlock.com',
   'glyphlock@gmail.com',
 ]);
 
 const ROLE_LABELS = {
-  admin: 'Admin',
   PLATFORM_ADMIN: 'Platform Admin',
   VENUE_OWNER: 'Owner',
   VENUE_MANAGER: 'Manager',
-  FLOOR_HOST: 'Host',
+  FLOOR_HOST: 'Floor Host',
   PERFORMER: 'Performer',
   BARTENDER: 'Bartender',
   SECURITY: 'Security',
   DJ: 'DJ',
-  owner: 'Owner',
-  manager: 'Manager',
-  host: 'Host',
-  bartender: 'Bartender',
-  security: 'Security',
-  dj: 'DJ',
-  performer: 'Performer',
-  floor_staff: 'Floor Staff',
+  admin: 'Admin',
 };
 
-function isOperationalStaff(u) {
-  if (!u) return false;
-  if (u.email && PROTECTED_EMAILS.has(u.email.toLowerCase())) return true;
-  return OPERATIONAL_ROLES.has(u.role);
+// Normalize a NUPSUser record into the display shape.
+function normalizeNupsUser(u) {
+  return {
+    id: u.id,
+    full_name: u.full_name || u.username || 'Unnamed Staff',
+    email: u.username ? `${u.username}@nups` : '—',
+    role: u.role,
+    created_date: u.created_date,
+    source: 'nups',
+    is_demo: !!u.is_demo,
+    status: u.status,
+  };
+}
+
+// Normalize a protected platform User into the display shape.
+function normalizePlatformUser(u) {
+  return {
+    id: u.id,
+    full_name: u.full_name || u.email,
+    email: u.email,
+    role: u.role || 'admin',
+    created_date: u.created_date,
+    source: 'platform',
+    is_demo: false,
+    status: 'active',
+  };
+}
+
+function isLegitimateStaff(n) {
+  if (!n) return false;
+  if (n.is_demo) return false;
+  if (n.status && n.status !== 'active') return false;
+  return OPERATIONAL_ROLES.has(n.role) || ADMIN_ROLES.has(n.role);
 }
 
 export default function StaffManagement() {
-  const { data: allUsers = [] } = useQuery({
-    queryKey: ['all-users'],
-    queryFn: () => base44.entities.User.list()
+  const { data: nupsUsers = [] } = useQuery({
+    queryKey: ['nups-staff-directory'],
+    queryFn: () => base44.entities.NUPSUser.list('-created_date', 200),
   });
 
-  // Filter: only keep legitimate operational staff. Hide everyone else.
-  const users = allUsers.filter(isOperationalStaff);
-  const hiddenCount = allUsers.length - users.length;
+  const { data: platformUsers = [] } = useQuery({
+    queryKey: ['platform-protected-admins'],
+    queryFn: () => base44.entities.User.list('-created_date', 200),
+  });
 
-  const staffUsers = users.filter(u => u.role !== 'admin' && u.role !== 'PLATFORM_ADMIN');
-  const adminUsers = users.filter(u => u.role === 'admin' || u.role === 'PLATFORM_ADMIN');
+  // Build the roster: NUPSUsers (operational) + protected platform admins only.
+  const operational = nupsUsers.map(normalizeNupsUser);
+
+  const protectedAdmins = platformUsers
+    .filter(u => u.email && PROTECTED_PLATFORM_EMAILS.has(u.email.toLowerCase()))
+    .map(normalizePlatformUser);
+
+  // De-dupe by email in case an admin exists in both tables.
+  const seenEmails = new Set();
+  const combined = [...protectedAdmins, ...operational].filter(n => {
+    const key = (n.email || '').toLowerCase();
+    if (!key) return true;
+    if (seenEmails.has(key)) return false;
+    seenEmails.add(key);
+    return true;
+  });
+
+  const roster = combined.filter(isLegitimateStaff);
+
+  // Hidden count = total platform users that we intentionally excluded from Staff view.
+  const hiddenCount = platformUsers.length - protectedAdmins.length;
+
+  const adminList = roster.filter(u => ADMIN_ROLES.has(u.role));
+  const staffList = roster.filter(u => !ADMIN_ROLES.has(u.role));
 
   return (
     <div className="space-y-6">
@@ -82,7 +128,7 @@ export default function StaffManagement() {
             <div className="flex items-center justify-between mb-2">
               <Users className="w-8 h-8 text-purple-400" />
             </div>
-            <div className="text-3xl font-bold text-purple-400 mb-1">{staffUsers.length}</div>
+            <div className="text-3xl font-bold text-purple-400 mb-1">{staffList.length}</div>
             <div className="text-sm text-gray-400">Staff Members</div>
           </CardContent>
         </Card>
@@ -92,7 +138,7 @@ export default function StaffManagement() {
             <div className="flex items-center justify-between mb-2">
               <Shield className="w-8 h-8 text-red-400" />
             </div>
-            <div className="text-3xl font-bold text-red-400 mb-1">{adminUsers.length}</div>
+            <div className="text-3xl font-bold text-red-400 mb-1">{adminList.length}</div>
             <div className="text-sm text-gray-400">Administrators</div>
           </CardContent>
         </Card>
@@ -111,26 +157,30 @@ export default function StaffManagement() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {users.length === 0 && (
+            {roster.length === 0 && (
               <div className="text-center text-gray-500 py-8 text-sm">
                 No operational staff records found.
               </div>
             )}
-            {users.map((user) => {
-              const isAdmin = user.role === 'admin' || user.role === 'PLATFORM_ADMIN';
+            {roster.map((user) => {
+              const isAdmin = ADMIN_ROLES.has(user.role);
               const roleLabel = ROLE_LABELS[user.role] || 'Staff';
+              const initial = (user.full_name || user.email || '?').charAt(0).toUpperCase();
               return (
-                <div key={user.id} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                <div key={`${user.source}-${user.id}`} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                        {initial}
                       </div>
                       <div>
-                        <div className="font-semibold text-white">{user.full_name || 'No Name'}</div>
+                        <div className="font-semibold text-white">{user.full_name}</div>
                         <div className="flex items-center gap-2 text-sm text-gray-400">
-                          <Mail className="w-3 h-3" />
-                          {user.email}
+                          {user.source === 'platform' ? (
+                            <><Mail className="w-3 h-3" />{user.email}</>
+                          ) : (
+                            <><UserIcon className="w-3 h-3" />{user.email}</>
+                          )}
                         </div>
                       </div>
                     </div>
