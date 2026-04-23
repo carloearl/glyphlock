@@ -11,7 +11,8 @@ import {
 import {
   Shield, DollarSign, ShoppingCart, TrendingUp, Users, LogOut, UserCheck, DoorOpen, FileText,
   Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText,
-  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star, Coins, Building2
+  RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star, Coins, Building2,
+  Music
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -54,9 +55,9 @@ import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngin
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import StaffOnboardingPanel from "../components/nups/StaffOnboardingPanel.jsx";
-import UnifiedGlyphBucksHub from "../components/nups/UnifiedGlyphBucksHub.jsx";
-import GlyphBucksLedger from "../components/nups/GlyphBucksLedger.jsx";
+import UnifiedGlyphBucksTab from "../components/nups/glyphbucks/UnifiedGlyphBucksTab.jsx";
 import ContractManager from "../components/nups/ContractManager.jsx";
+import UnifiedMusicConsole from "../components/mixer/UnifiedMusicConsole.jsx";
 import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
 import VenueSettings from "../components/nups/VenueSettings.jsx";
 import OfficialChecks from "./OfficialChecks.jsx";
@@ -237,6 +238,7 @@ export default function NUPSOwner() {
     { key: 'vip',        label: 'VIP Rooms',      icon: Star },
     { key: 'pos',        label: 'POS Register',   icon: ShoppingCart },
     { key: 'glyphbucks', label: 'GlyphBucks',     icon: Coins },
+    { key: 'dj',         label: 'DJ',             icon: Music },
     { key: 'payroll',    label: 'Payroll',         icon: DollarSign },
     { key: 'reports',    label: 'Reports',         icon: FileText },
     { key: 'analytics',  label: 'Analytics',      icon: TrendingUp },
@@ -254,7 +256,7 @@ export default function NUPSOwner() {
     door_girl: new Set(['pos','door']),
     hostess:   new Set(['vip']),
     security:  new Set(['door']),
-    dj:        new Set(['staff']),
+    dj:        new Set(['staff','dj']),
   };
   const allowedModuleSet = isAdminUser
     ? new Set(NAV_MODULES.map(m => m.key))
@@ -501,35 +503,14 @@ export default function NUPSOwner() {
             </div>
           )}
           {activeModule === 'glyphbucks' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-purple-500 pl-2">
-                  Issuance
-                </h3>
-                <UnifiedGlyphBucksHub venue_id={venueId} user={user} />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-cyan-500 pl-2">
-                  Ledger
-                </h3>
-                <GlyphBucksLedger user={user} venue_id={venueId} />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-green-500 pl-2">
-                  Inventory
-                </h3>
-                <GlyphBuckInventory />
-              </div>
-              {isAdminUser && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1 border-l-2 border-yellow-500 pl-2">
-                    Press
-                  </h3>
-                  <ClubCurrencyPressView />
-                </div>
-              )}
-            </div>
+            <UnifiedGlyphBucksTab
+              user={user}
+              venueId={venueId}
+              entertainers={entertainers}
+              isAdmin={isAdminUser}
+            />
           )}
+          {activeModule === 'dj' && <UnifiedMusicConsole />}
           {activeModule === 'payroll' && (
             <div className="space-y-4">
               <EntertainerPayrollEngine user={user} />
@@ -552,7 +533,6 @@ export default function NUPSOwner() {
           {activeModule === 'contracts' && (
             <div className="space-y-4">
               <ContractManager user={user} venue_id={venueId} />
-              <GlyphBucksContract />
             </div>
           )}
           {activeModule === 'staff' && (
@@ -579,7 +559,6 @@ export default function NUPSOwner() {
             <div className="space-y-4">
               {canInventory && <ProductManagement />}
               {canInventory && <InventoryManagement products={products} />}
-              <GlyphBuckInventory />
               {canBatch && <CashDrawerLog />}
             </div>
           )}
