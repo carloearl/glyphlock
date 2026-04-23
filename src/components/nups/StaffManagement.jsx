@@ -37,6 +37,10 @@ const PROTECTED_PLATFORM_EMAILS = new Set([
   'glyphlock@gmail.com',
 ]);
 
+// Blocklist: base44 platform support staff auto-granted admin via
+// `registered_by_platform_access`. Not part of the venue roster — hide always.
+const BLOCKED_EMAIL_DOMAINS = ['@base44.com'];
+
 const ROLE_LABELS = {
   PLATFORM_ADMIN: 'Platform Admin',
   VENUE_OWNER: 'Owner',
@@ -99,7 +103,12 @@ export default function StaffManagement() {
   const operational = nupsUsers.map(normalizeNupsUser);
 
   const protectedAdmins = platformUsers
-    .filter(u => u.email && PROTECTED_PLATFORM_EMAILS.has(u.email.toLowerCase()))
+    .filter(u => {
+      const email = (u.email || '').toLowerCase();
+      if (!email) return false;
+      if (BLOCKED_EMAIL_DOMAINS.some(d => email.endsWith(d))) return false;
+      return PROTECTED_PLATFORM_EMAILS.has(email);
+    })
     .map(normalizePlatformUser);
 
   // De-dupe by email in case an admin exists in both tables.
