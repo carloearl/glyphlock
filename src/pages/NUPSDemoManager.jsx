@@ -10,14 +10,32 @@ const ID = (prefix) => prefix + "-" + Date.now() + "-" + Math.floor(Math.random(
 const WIPE_ORDER = [
   "GlyphBucksTransaction",
   "POSTransaction",
+  "VenueContract",
+  "PayrollRecord",
+  "DailySettlement",
+  "DriverPayout",
   "EntertainerShift",
   "VIPGuest",
   "GlyphBucksBill",
   "VIPRoom",
   "Entertainer",
+  "POSProduct",
   "POSBatch",
+  "Track",
+  "AIDJPersona",
+  "NUPSUser",
   "SystemAuditLog",
 ];
+
+// Deterministic demo entertainer IDs so shifts, contracts, VIP rooms & payroll all link correctly
+const ENT_ID = {
+  Crystal: "DEMO-ENT-Crystal",
+  Nova:    "DEMO-ENT-Nova",
+  Jade:    "DEMO-ENT-Jade",
+  Sage:    "DEMO-ENT-Sage",
+};
+const MOCK_SIG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4=";
+const MOCK_BIOSCAN = "BIOSCAN-DEMO-" + Math.random().toString(36).slice(2, 10).toUpperCase();
 
 export default function NUPSDemoManager() {
   const [log, setLog]               = useState([]);
@@ -115,6 +133,146 @@ export default function NUPSDemoManager() {
       { entertainer_id: "DEMO-ENT-Jade",    stage_name: "Jade",    check_in_time: NOW(), status: "checked_out", shift_earnings: 480, vip_sessions: 2, location: "Dream Palace Demo", check_out_time: NOW(), venue_id: DEMO_VENUE_ID },
     ];
     for (const s of shifts) await tryCreate("EntertainerShift: " + s.stage_name, "EntertainerShift", s);
+
+    // ───────── NUPS STAFF (every role per §9.2) ─────────
+    const staff = [
+      { username: "demo_owner",    full_name: "Demo Owner",        role: "VENUE_OWNER",    pin: "1111", employee_id: "OWN-001", phone: "555-3001", status: "active", emergency_contact: { name: "Spouse",  phone: "555-3901" }, is_demo: true, demo_label: "Demo Owner Seat",   venue_id: DEMO_VENUE_ID },
+      { username: "demo_manager",  full_name: "Demo Manager",      role: "VENUE_MANAGER",  pin: "2222", employee_id: "MGR-001", phone: "555-3002", status: "active", emergency_contact: { name: "Parent",  phone: "555-3902" }, is_demo: true, demo_label: "Demo Manager Seat", venue_id: DEMO_VENUE_ID },
+      { username: "demo_host",     full_name: "Demo Floor Host",   role: "FLOOR_HOST",     pin: "3333", employee_id: "HST-001", phone: "555-3003", status: "active", emergency_contact: { name: "Sibling", phone: "555-3903" }, is_demo: true, demo_label: "Demo Host Seat",    venue_id: DEMO_VENUE_ID },
+      { username: "demo_bar",      full_name: "Demo Bartender",    role: "BARTENDER",      pin: "4444", employee_id: "BAR-001", phone: "555-3004", status: "active", emergency_contact: { name: "Friend",  phone: "555-3904" }, is_demo: true, demo_label: "Demo Bar Seat",     venue_id: DEMO_VENUE_ID },
+      { username: "demo_sec",      full_name: "Demo Security",     role: "SECURITY",       pin: "5555", employee_id: "SEC-001", phone: "555-3005", status: "active", emergency_contact: { name: "Spouse",  phone: "555-3905" }, is_demo: true, demo_label: "Demo Security Seat",venue_id: DEMO_VENUE_ID },
+      { username: "demo_dj",       full_name: "Demo DJ",           role: "DJ",             pin: "6666", employee_id: "DJ-001",  phone: "555-3006", status: "active", emergency_contact: { name: "Parent",  phone: "555-3906" }, is_demo: true, demo_label: "Demo DJ Seat",      venue_id: DEMO_VENUE_ID },
+      { username: "demo_perf",     full_name: "Demo Performer",    role: "PERFORMER",      pin: "7777", employee_id: "PRF-001", phone: "555-3007", status: "active", emergency_contact: { name: "Sibling", phone: "555-3907" }, is_demo: true, demo_label: "Demo Performer Seat",venue_id: DEMO_VENUE_ID },
+    ];
+    for (const s of staff) await tryCreate("NUPSUser: " + s.full_name + " (" + s.role + ")", "NUPSUser", s);
+
+    // ───────── POS PRODUCT CATALOG ─────────
+    const products = [
+      { name: "Grey Goose Bottle",      sku: "SPI-GG-750",  category: "Spirits",         price: 450, cost: 180, stock_quantity: 12, low_stock_threshold: 4, taxable: true,  tax_rate: 0.08, is_active: true, supplier: "Demo Liquor Co",   venue_id: DEMO_VENUE_ID },
+      { name: "Dom Pérignon",           sku: "CHM-DOM-750", category: "Beer & Wine",     price: 850, cost: 400, stock_quantity: 6,  low_stock_threshold: 2, taxable: true,  tax_rate: 0.08, is_active: true, supplier: "Demo Liquor Co",   venue_id: DEMO_VENUE_ID },
+      { name: "House Vodka Shot",       sku: "SPI-HV-SHT",  category: "Spirits",         price: 12,  cost: 3,   stock_quantity: 200,low_stock_threshold: 50,taxable: true,  tax_rate: 0.08, is_active: true, supplier: "Demo Liquor Co",   venue_id: DEMO_VENUE_ID },
+      { name: "Red Bull",               sku: "MIX-RB-250",  category: "Mixers",          price: 8,   cost: 2,   stock_quantity: 48, low_stock_threshold: 12,taxable: true,  tax_rate: 0.08, is_active: true, supplier: "Demo Beverage",    venue_id: DEMO_VENUE_ID },
+      { name: "VIP Bottle Service",     sku: "VIP-BTL-01",  category: "VIP Service",     price: 650, cost: 250, stock_quantity: 999,low_stock_threshold: 0, taxable: true,  tax_rate: 0.08, is_active: true, supplier: "House",            venue_id: DEMO_VENUE_ID },
+      { name: "Champagne Room (1hr)",   sku: "VIP-CHR-60",  category: "VIP Service",     price: 500, cost: 0,   stock_quantity: 999,low_stock_threshold: 0, taxable: false, tax_rate: 0,    is_active: true, supplier: "House",            venue_id: DEMO_VENUE_ID },
+      { name: "Cover Charge",           sku: "SVC-CVR-01",  category: "Services",        price: 20,  cost: 0,   stock_quantity: 999,low_stock_threshold: 0, taxable: false, tax_rate: 0,    is_active: true, supplier: "House",            venue_id: DEMO_VENUE_ID },
+      { name: "Branded T-Shirt",        sku: "MRC-TEE-BK",  category: "Merchandise",     price: 35,  cost: 10,  stock_quantity: 40, low_stock_threshold: 10,taxable: true,  tax_rate: 0.08, is_active: true, supplier: "Demo Print Co",    venue_id: DEMO_VENUE_ID },
+      { name: "Wings Basket",           sku: "FNB-WNG-12",  category: "Food & Beverage", price: 18,  cost: 6,   stock_quantity: 30, low_stock_threshold: 8, taxable: true,  tax_rate: 0.08, is_active: true, supplier: "Demo Kitchen",     venue_id: DEMO_VENUE_ID },
+    ];
+    for (const p of products) await tryCreate("POSProduct: " + p.name, "POSProduct", p);
+
+    // ───────── VENUE CONTRACTS (full fields — signatures, IDs, cards, bioscan) ─────────
+    const contracts = [
+      {
+        contract_id: ID("CON"), contract_type: "VIP Package",
+        customer_name: "Demo Guest Alpha", customer_id_number: "DL-AZ-84719203", customer_address: "123 Demo St", customer_state: "AZ", customer_zip: "85001",
+        contract_amount: 1200, glyphbucks_issued: 200, processing_surcharge: 30, waitress_tip: 100, grand_total: 1330,
+        payment_method: "Credit Card", purchaser_card_name: "DEMO ALPHA", card_last_four: "4242", card_exp: "12/28", approval_code: "APV-1001",
+        ip_address: "192.168.0.10",
+        is_printed: true, is_signed: true, customer_signature: MOCK_SIG, signed_at: NOW(),
+        entertainer_id: ENT_ID.Crystal, entertainer_name: "Crystal",
+        manager_id: "demo_manager", status: "active",
+        scan_status: "SCANNED", scanned_at: NOW(), scanned_by: "demo_manager",
+        notes: "DEMO · bioscan_ref=" + MOCK_BIOSCAN,
+        is_demo: true, demo_label: "Demo VIP Package", venue_id: DEMO_VENUE_ID,
+      },
+      {
+        contract_id: ID("CON"), contract_type: "GlyphBucks Purchase",
+        customer_name: "Demo Guest Gamma", customer_id_number: "DL-AZ-91023847", customer_address: "789 Demo Blvd", customer_state: "AZ", customer_zip: "85003",
+        contract_amount: 500, glyphbucks_issued: 500, processing_surcharge: 15, waitress_tip: 0, grand_total: 515,
+        payment_method: "Credit Card", purchaser_card_name: "DEMO GAMMA", card_last_four: "5555", card_exp: "06/27", approval_code: "APV-1002",
+        ip_address: "192.168.0.11",
+        is_printed: true, is_signed: true, customer_signature: MOCK_SIG, signed_at: NOW(),
+        manager_id: "demo_manager", status: "fulfilled",
+        scan_status: "VERIFIED", scanned_at: NOW(), scanned_by: "demo_manager",
+        notes: "DEMO · bioscan_ref=" + MOCK_BIOSCAN,
+        is_demo: true, demo_label: "Demo GB Purchase", venue_id: DEMO_VENUE_ID,
+      },
+      {
+        contract_id: ID("CON"), contract_type: "Entertainer Agreement",
+        customer_name: "Crystal Demo", customer_id_number: "DL-AZ-55544433", customer_address: "N/A — Performer", customer_state: "AZ", customer_zip: "85001",
+        contract_amount: 0, glyphbucks_issued: 0, processing_surcharge: 0, waitress_tip: 0, grand_total: 0,
+        payment_method: "Cash",
+        is_printed: true, is_signed: true, customer_signature: MOCK_SIG, signed_at: NOW(),
+        entertainer_id: ENT_ID.Crystal, entertainer_name: "Crystal",
+        manager_id: "demo_owner", status: "active",
+        scan_status: "VERIFIED",
+        notes: "DEMO · W9 on file · bioscan_ref=" + MOCK_BIOSCAN,
+        is_demo: true, demo_label: "Demo Performer Agreement", venue_id: DEMO_VENUE_ID,
+      },
+    ];
+    for (const c of contracts) await tryCreate("VenueContract: " + c.contract_type + " — " + c.customer_name, "VenueContract", c);
+
+    // ───────── ACTIVE VIP ROOM SESSION (shows live occupancy) ─────────
+    await tryCreate("VIPRoom: Active Session — Champagne Suite", "VIPRoom", {
+      room_number: "202", room_name: "Champagne Suite (Live)", status: "occupied",
+      entertainer_id: ENT_ID.Crystal, entertainer_name: "Crystal",
+      guest_name: "Demo Guest Alpha",
+      start_time: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+      duration_minutes: 60, rate_per_hour: 500, total_charge: 500,
+      surveillance_camera: "CAM-202", has_audio: true,
+      notes: "DEMO live session", venue_id: DEMO_VENUE_ID,
+    });
+
+    // ───────── PAYROLL RECORDS ─────────
+    const payStart = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+    const payEnd   = TODAY;
+    const payroll = [
+      { pay_period_start: payStart, pay_period_end: payEnd, entertainer_id: ENT_ID.Crystal, stage_name: "Crystal", legal_name: "Crystal Demo", gross_commissions: 1800, gross_tips: 600, gross_total: 2400, venue_fee: 360, venue_fee_rate: 0.15, tax_withholding: 600, tax_rate: 0.25, other_deductions: 0, net_payout: 1440, vip_sessions: 4, shift_hours: 32, status: "approved", approved_by: "demo_owner" },
+      { pay_period_start: payStart, pay_period_end: payEnd, entertainer_id: ENT_ID.Nova,    stage_name: "Nova",    legal_name: "Nova Demo",    gross_commissions: 900,  gross_tips: 250, gross_total: 1150, venue_fee: 172, venue_fee_rate: 0.15, tax_withholding: 287, tax_rate: 0.25, other_deductions: 0, net_payout: 691,  vip_sessions: 2, shift_hours: 20, status: "approved", approved_by: "demo_owner" },
+      { pay_period_start: payStart, pay_period_end: payEnd, entertainer_id: ENT_ID.Jade,    stage_name: "Jade",    legal_name: "Jade Demo",    gross_commissions: 480,  gross_tips: 180, gross_total: 660,  venue_fee: 99,  venue_fee_rate: 0.15, tax_withholding: 165, tax_rate: 0.25, other_deductions: 25, other_deductions_notes: "Locker fee", net_payout: 371, vip_sessions: 1, shift_hours: 12, status: "draft" },
+    ];
+    for (const p of payroll) await tryCreate("PayrollRecord: " + p.stage_name, "PayrollRecord", p);
+
+    // ───────── DAILY SETTLEMENT ─────────
+    await tryCreate("DailySettlement: " + TODAY, "DailySettlement", {
+      settlement_id: ID("SET"), venue_id: DEMO_VENUE_ID, settlement_date: TODAY,
+      entertainer_payouts: [
+        { entertainer_id: ENT_ID.Crystal, stage_name: "Crystal", gross_revenue: 2400, processing_fees: 72, house_commission: 360, voided_bills_deduction: 0, net_payout: 1968 },
+        { entertainer_id: ENT_ID.Nova,    stage_name: "Nova",    gross_revenue: 1150, processing_fees: 35, house_commission: 172, voided_bills_deduction: 0, net_payout: 943 },
+        { entertainer_id: ENT_ID.Jade,    stage_name: "Jade",    gross_revenue: 660,  processing_fees: 20, house_commission: 99,  voided_bills_deduction: 25, net_payout: 516 },
+      ],
+      total_gross_revenue: 4210, total_processing_fees: 127, total_house_commission: 631, total_net_payouts: 3427, venue_net_income: 758,
+      reconciliation_status: "approved", approved_by: "demo_owner", approved_at: NOW(), discrepancies: [],
+    });
+
+    // ───────── DRIVER PAYOUTS ─────────
+    const drivers = [
+      { driver_name: "Demo Driver Mike",  driver_number: "555-4001", driver_code: "DRV-001", session_date: TODAY, total_drops: 4, vip_count: 2, pass_count: 1, base_payout: 40, incentive_bonus: 20, vip_kickback: 40, total_payout: 100, status: "paid", paid_at: NOW(), paid_by: "demo_manager",
+        drop_offs: [
+          { guest_name: "Demo Guest Alpha", drop_time: NOW(), has_pass: true,  pass_type: "VIP",  went_vip: true,  notes: "Repeat guest" },
+          { guest_name: "Demo Guest Beta",  drop_time: NOW(), has_pass: false, pass_type: "",     went_vip: false, notes: "" },
+          { guest_name: "Walk-in #3",       drop_time: NOW(), has_pass: false, pass_type: "",     went_vip: true,  notes: "Bottle buyer" },
+          { guest_name: "Walk-in #4",       drop_time: NOW(), has_pass: false, pass_type: "",     went_vip: false, notes: "" },
+        ],
+        venue_id: DEMO_VENUE_ID,
+      },
+      { driver_name: "Demo Driver Sara",  driver_number: "555-4002", driver_code: "DRV-002", session_date: TODAY, total_drops: 2, vip_count: 1, pass_count: 0, base_payout: 20, incentive_bonus: 0, vip_kickback: 20, total_payout: 40, status: "open",
+        drop_offs: [
+          { guest_name: "Demo Guest Gamma", drop_time: NOW(), has_pass: false, pass_type: "",     went_vip: true,  notes: "" },
+          { guest_name: "Walk-in #2",       drop_time: NOW(), has_pass: false, pass_type: "",     went_vip: false, notes: "" },
+        ],
+        venue_id: DEMO_VENUE_ID,
+      },
+    ];
+    for (const d of drivers) await tryCreate("DriverPayout: " + d.driver_name, "DriverPayout", d);
+
+    // ───────── AI DJ PERSONAS & TRACKS ─────────
+    const djs = [
+      { name: "Aurora",  entertainer_id: ENT_ID.Crystal, risk_tolerance: "balanced",     weighting_model: { crowd_weight: 0.4, entertainer_weight: 0.4, revenue_weight: 0.2 }, transition_style_rules: { bpm_range: 10, mood_compatibility: ["sensual","chill"],      energy_ramp: "linear" },      genre_bias_logic: { primary_genres: ["R&B","Hip-Hop"], secondary_genres: ["Pop"],    excluded_genres: ["Country"] } },
+      { name: "Pulse",   entertainer_id: ENT_ID.Nova,    risk_tolerance: "experimental", weighting_model: { crowd_weight: 0.5, entertainer_weight: 0.3, revenue_weight: 0.2 }, transition_style_rules: { bpm_range: 15, mood_compatibility: ["high-energy","aggressive"],energy_ramp: "exponential" }, genre_bias_logic: { primary_genres: ["EDM","House"], secondary_genres: ["Trap"],   excluded_genres: ["Classical"] } },
+      { name: "Velvet",  entertainer_id: ENT_ID.Jade,    risk_tolerance: "conservative", weighting_model: { crowd_weight: 0.3, entertainer_weight: 0.5, revenue_weight: 0.2 }, transition_style_rules: { bpm_range: 8,  mood_compatibility: ["sensual","neutral"],     energy_ramp: "linear" },      genre_bias_logic: { primary_genres: ["R&B","Soul"],  secondary_genres: ["Jazz"],   excluded_genres: ["Metal"] } },
+    ];
+    for (const d of djs) await tryCreate("AIDJPersona: " + d.name, "AIDJPersona", d);
+
+    const tracks = [
+      { title: "Demo Midnight Groove",  artist: "DJ Demo",     genre: "R&B",      bpm: 92,  mood: "sensual",     duration: 215, source: "manual", active: true },
+      { title: "Demo High Voltage",     artist: "Pulse Demo",  genre: "EDM",      bpm: 128, mood: "high-energy", duration: 240, source: "manual", active: true },
+      { title: "Demo Slow Burn",        artist: "Velvet Demo", genre: "Soul",     bpm: 78,  mood: "chill",       duration: 198, source: "manual", active: true },
+      { title: "Demo Trap Anthem",      artist: "Trap Demo",   genre: "Trap",     bpm: 140, mood: "aggressive",  duration: 186, source: "manual", active: true },
+      { title: "Demo House Classic",    artist: "House Demo",  genre: "House",    bpm: 124, mood: "high-energy", duration: 312, source: "manual", active: true },
+      { title: "Demo Lounge Vibes",     artist: "Lounge Demo", genre: "Jazz",     bpm: 85,  mood: "neutral",     duration: 265, source: "manual", active: true },
+    ];
+    for (const t of tracks) await tryCreate("Track: " + t.title, "Track", t);
 
     await tryCreate("SystemAuditLog: DEMO_SEED", "SystemAuditLog", {
       event_type: "DEMO_SEED",
