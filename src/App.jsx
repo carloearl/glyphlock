@@ -40,6 +40,7 @@ import DemoVipBoardPreview from './pages/DemoVipBoardPreview';
 import DemoPosRegisterPreview from './pages/DemoPosRegisterPreview';
 import DemoCloseNightPreview from './pages/DemoCloseNightPreview';
 import DemoCompliancePreview from './pages/DemoCompliancePreview';
+import ClubTV from './pages/ClubTV';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -80,7 +81,7 @@ const AuthenticatedApp = () => {
   }
 
   // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/nupslanding', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage', '/demo/'];
+  const fullscreenPaths = ['/nupslanding', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage', '/demo/', '/clubtv'];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
   if (isFullscreen) {
@@ -110,6 +111,8 @@ const AuthenticatedApp = () => {
         <Route path="/demo/pos-register-preview" element={<DemoPosRegisterPreview />} />
         <Route path="/demo/close-night-preview" element={<DemoCloseNightPreview />} />
         <Route path="/demo/compliance-preview" element={<DemoCompliancePreview />} />
+        <Route path="/ClubTV" element={<ClubTV />} />
+        <Route path="/clubtv" element={<ClubTV />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>

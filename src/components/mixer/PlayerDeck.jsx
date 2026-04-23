@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 import AudioEngine from "@/components/mixer/AudioEngine";
+import YouTubePlayer from "@/components/mixer/YouTubePlayer";
 
 function extractVideoId(url) {
   if (!url) return null;
@@ -77,15 +78,13 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
 
       {/* Player area */}
       {videoId ? (
-        <div className="relative w-full aspect-video bg-black">
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`}
-            className="absolute inset-0 w-full h-full"
-            allow="autoplay; encrypted-media"
-            allowFullScreen
-            title={song.title}
-          />
-        </div>
+        <YouTubePlayer
+          videoId={videoId}
+          autoPlay
+          volume={volume}
+          muted={muted}
+          onEnded={onEnded}
+        />
       ) : isUpload ? (
         <div className="p-3">
           <AudioEngine

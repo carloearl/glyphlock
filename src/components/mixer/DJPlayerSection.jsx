@@ -7,7 +7,17 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import PlayerDeck from "@/components/mixer/PlayerDeck";
 import Crossfader from "@/components/mixer/Crossfader";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftRight, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeftRight, ChevronUp, ChevronDown, Tv } from "lucide-react";
+import { getClubTVSender, openClubTVWindow } from "@/components/mixer/ClubBroadcastChannel";
+import { parseYoutubeUrl } from "@/components/mixer/services/validation";
+
+function extractVideoId(url) {
+  if (!url) return null;
+  const parsed = parseYoutubeUrl(url);
+  if (parsed?.videoId) return parsed.videoId;
+  const m = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
 
 export default function DJPlayerSection({ playingSongId, songs, profileSongs, onSkip, collapsed, onToggleCollapse, onPlay }) {
   const [crossfade, setCrossfade] = useState(50);
@@ -19,6 +29,22 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
 
   const deckASong = useMemo(() => songs.find(s => s.id === playingSongId), [songs, playingSongId]);
   const deckBSong = useMemo(() => songs.find(s => s.id === deckBSongId), [songs, deckBSongId]);
+
+  // ── Broadcast deck state to Club TV window(s) ──
+  useEffect(() => {
+    const sender = getClubTVSender();
+    sender.publish({
+      crossfade,
+      deckA: deckASong ? {
+        title: deckASong.title, artist: deckASong.artist,
+        videoId: extractVideoId(deckASong.youtubeUrl),
+      } : null,
+      deckB: deckBSong ? {
+        title: deckBSong.title, artist: deckBSong.artist,
+        videoId: extractVideoId(deckBSong.youtubeUrl),
+      } : null,
+    });
+  }, [deckASong, deckBSong, crossfade]);
 
   // Auto-cue next when deck A loads a new song
   useEffect(() => {
@@ -93,6 +119,15 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
       <div className="flex items-center justify-between px-4 py-1 border-b border-slate-700/30">
         <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">DJ Player</span>
         <div className="flex items-center gap-1">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-[10px] gap-1 border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"
+            onClick={() => openClubTVWindow()}
+            title="Open Club TV window — drag onto the TV display or cast the tab"
+          >
+            <Tv className="w-3 h-3" /> Open Club TV
+          </Button>
           <Button size="sm" variant="ghost" className="h-6 text-[10px] gap-1 text-slate-400" onClick={handleCueNext}>
             Cue Next to B
           </Button>
