@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -6,7 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldAlert, Loader2, KeyRound, XCircle } from "lucide-react";
+import { ShieldAlert, Loader2, KeyRound, XCircle, Lock } from "lucide-react";
 
 /**
  * ManagerOverrideModal
@@ -22,6 +22,39 @@ export default function ManagerOverrideModal({ open, onClose, onApproved, action
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Detect if the signed-in user is an admin so we can show a session bypass button
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      try {
+        const me = await base44.auth.me();
+        setCurrentUser(me);
+      } catch { /* not signed in */ }
+    })();
+  }, [open]);
+
+  const handleAdminBypass = async () => {
+    if (currentUser?.role !== 'admin') return;
+    try {
+      await base44.entities.SystemAuditLog.create({
+        event_type: "MANAGER_OVERRIDE_ADMIN_BYPASS",
+        description: `Admin session bypass for: ${actionLabel}`,
+        actor_email: currentUser.email || 'admin',
+        status: "security_action",
+        severity: "high",
+        metadata: { action: actionLabel, approved_by: currentUser.full_name || currentUser.email }
+      });
+    } catch { /* best-effort */ }
+    onApproved({
+      username: currentUser.email,
+      full_name: currentUser.full_name || currentUser.email,
+      role: 'PLATFORM_ADMIN',
+      _admin_bypass: true
+    });
+    setPin(""); setUsername(""); setError("");
+  };
 
   const handleVerify = async () => {
     if (!username.trim() || pin.length < 4) {
@@ -133,6 +166,27 @@ export default function ManagerOverrideModal({ open, onClose, onApproved, action
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><KeyRound className="w-4 h-4 mr-1" />Verify &amp; Proceed</>}
             </Button>
           </div>
+
+          {/* Admin session bypass — app-wide, visible only when signed in as admin */}
+          {currentUser?.role === 'admin' && (
+            <>
+              <div className="flex items-center gap-2 pt-1">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-[10px] text-gray-500 uppercase tracking-wider">or</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+              <Button
+                onClick={handleAdminBypass}
+                className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-black"
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                Admin Override — Bypass PIN
+              </Button>
+              <p className="text-[10px] text-red-400/80 text-center -mt-1">
+                Signed in as {currentUser.full_name || currentUser.email} · logged to audit
+              </p>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
