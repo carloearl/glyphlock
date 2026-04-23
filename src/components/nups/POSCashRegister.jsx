@@ -174,13 +174,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
     toast.success('Transaction recalled');
   };
 
-  const handleManagerRefresh = async () => {
-    const validPins = ['1234', '0000'];
-    if (!validPins.includes(managerPin)) {
-      toast.error('Invalid manager PIN');
-      setManagerPin('');
-      return;
-    }
+  const performClearPOS = (actor = 'manager') => {
     setCart([]);
     setSelectedCustomer(null);
     setDiscount(0);
@@ -190,7 +184,39 @@ export default function POSCashRegister({ user, station = 'door' }) {
     setHeldTransactions([]);
     setShowManagerOverride(false);
     setManagerPin('');
-    toast.success('POS system cleared by manager');
+    toast.success(`POS system cleared by ${actor}`);
+  };
+
+  const handleManagerRefresh = async () => {
+    // Validate against the live NUPSUser directory — matches any active manager PIN
+    // (demo managers included). Falls back to the legacy bootstrap PINs if lookup fails.
+    try {
+      const matches = await base44.entities.NUPSUser.filter({
+        pin: managerPin,
+        status: 'active'
+      }, null, 5);
+      const validRoles = ['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'admin', 'manager'];
+      const manager = matches.find(m => validRoles.includes(m.role));
+      if (manager) {
+        performClearPOS(manager.full_name || manager.username || 'manager');
+        return;
+      }
+    } catch (err) {
+      // Fall through to bootstrap check
+    }
+
+    const bootstrapPins = ['1234', '0000'];
+    if (bootstrapPins.includes(managerPin)) {
+      performClearPOS('manager (bootstrap)');
+      return;
+    }
+
+    toast.error('Invalid manager PIN');
+    setManagerPin('');
+  };
+
+  const handleAdminBypass = () => {
+    performClearPOS(`admin (${user?.full_name || user?.email || 'session'})`);
   };
 
   const handleNoSale = async () => {
@@ -732,6 +758,28 @@ export default function POSCashRegister({ user, station = 'door' }) {
                 Clear POS
               </button>
             </div>
+
+            {/* Admin session bypass — appears only when the logged-in user is admin */}
+            {user?.role === 'admin' && (
+              <>
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-[10px] text-gray-500 uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
+                <button
+                  onClick={handleAdminBypass}
+                  className="w-full h-10 rounded-xl text-sm font-black text-white flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #dc2626, #991b1b)', boxShadow: '0 0 20px rgba(239,68,68,0.35)' }}
+                >
+                  <Lock className="w-4 h-4" />
+                  Admin Override — Clear POS
+                </button>
+                <p className="text-[10px] text-red-400/80 text-center">
+                  Signed in as {user?.full_name || user?.email} · session-only
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}
