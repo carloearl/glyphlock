@@ -38,10 +38,12 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
       deckA: deckASong ? {
         title: deckASong.title, artist: deckASong.artist,
         videoId: extractVideoId(deckASong.youtubeUrl),
+        audioUrl: deckASong.uploadUrl || null,
       } : null,
       deckB: deckBSong ? {
         title: deckBSong.title, artist: deckBSong.artist,
         videoId: extractVideoId(deckBSong.youtubeUrl),
+        audioUrl: deckBSong.uploadUrl || null,
       } : null,
     });
   }, [deckASong, deckBSong, crossfade]);

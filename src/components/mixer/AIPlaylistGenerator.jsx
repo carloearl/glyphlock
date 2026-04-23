@@ -7,15 +7,35 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Loader2, Plus, Music } from "lucide-react";
+import { Sparkles, Loader2, Plus, Music, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { VIBE_META } from "@/components/mixer/types/mixerTypes";
+
+// Same public, domain-restricted YouTube Data API key as MusicSearchTab.
+// Called from the browser so the domain referer matches the key's restrictions.
+const YOUTUBE_API_KEY = "AIzaSyDKesmHJytX_1MjfbVdcysMsTOa-GVcFjs";
+
+// Resolve AI-suggested track → real playable YouTube video ID (client-side).
+// Returns null on failure (track is still added, just without a playable link).
+async function resolveToYouTube(query) {
+  try {
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=1&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.items?.[0]?.id?.videoId || null;
+  } catch (_) {
+    return null;
+  }
+}
 
 export default function AIPlaylistGenerator({ isOpen, onClose, profileName, onAddSongs }) {
   const [mood, setMood] = useState("");
   const [count, setCount] = useState(10);
   const [generating, setGenerating] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [resolveProgress, setResolveProgress] = useState({ done: 0, total: 0 });
   const [results, setResults] = useState(null);
   const [selected, setSelected] = useState(new Set());
 
@@ -61,9 +81,25 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
       });
 
       if (data?.playlist?.length) {
-        setResults(data);
-        // Select all by default
-        setSelected(new Set(data.playlist.map((_, i) => i)));
+        // ── Resolve each track to a real YouTube video ID so they actually play ──
+        setResolving(true);
+        setResolveProgress({ done: 0, total: data.playlist.length });
+        const resolved = await Promise.all(
+          data.playlist.map(async (s, i) => {
+            const q = s.youtubeSearchQuery || `${s.title} ${s.artist}`;
+            const videoId = await resolveToYouTube(q);
+            setResolveProgress(p => ({ ...p, done: p.done + 1 }));
+            return { ...s, resolvedVideoId: videoId };
+          })
+        );
+        setResolving(false);
+        const okCount = resolved.filter(r => r.resolvedVideoId).length;
+        if (okCount < resolved.length) {
+          toast.info(`Resolved ${okCount}/${resolved.length} tracks to YouTube`);
+        }
+        setResults({ ...data, playlist: resolved });
+        // Only select tracks that resolved (those will actually play)
+        setSelected(new Set(resolved.map((r, i) => r.resolvedVideoId ? i : null).filter(i => i !== null)));
       } else {
         toast.error("AI returned empty playlist");
       }
@@ -92,10 +128,13 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
         artist: s.artist,
         vibeTag: s.vibeTag,
         energyLevel: s.energyLevel,
-        youtubeUrl: s.youtubeSearchQuery ? `https://www.youtube.com/results?search_query=${encodeURIComponent(s.youtubeSearchQuery)}` : "",
+        // Real, playable YouTube URL — not a search results page
+        youtubeUrl: s.resolvedVideoId
+          ? `https://www.youtube.com/watch?v=${s.resolvedVideoId}`
+          : "",
       }));
     onAddSongs(songs);
-    toast.success(`Added ${songs.length} songs to deck`);
+    toast.success(`Added ${songs.length} playable songs to deck`);
     setResults(null);
     onClose();
   };
@@ -133,12 +172,19 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
             </div>
             <Button
               onClick={handleGenerate}
-              disabled={generating}
+              disabled={generating || resolving}
               className="w-full bg-gradient-to-r from-purple-600 to-pink-600 gap-2"
             >
-              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {generating ? "Generating…" : "Generate Playlist"}
+              {(generating || resolving) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {generating
+                ? "Generating…"
+                : resolving
+                ? `Resolving tracks to YouTube… ${resolveProgress.done}/${resolveProgress.total}`
+                : "Generate Playlist"}
             </Button>
+            <p className="text-[10px] text-slate-500 text-center">
+              Each track is resolved to a real YouTube video so it actually plays on the mixer.
+            </p>
           </div>
         )}
 
@@ -167,7 +213,14 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
                       {selected.has(idx) ? "✓" : idx + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-white truncate">{song.title}</p>
+                      <p className="text-xs text-white truncate flex items-center gap-1.5">
+                        {song.title}
+                        {song.resolvedVideoId ? (
+                          <CheckCircle2 className="w-3 h-3 text-green-400 flex-shrink-0" title="Playable on mixer" />
+                        ) : (
+                          <XCircle className="w-3 h-3 text-red-400/70 flex-shrink-0" title="Not found on YouTube" />
+                        )}
+                      </p>
                       <p className="text-[10px] text-slate-500 truncate">{song.artist}</p>
                     </div>
                     {vibeMeta && (

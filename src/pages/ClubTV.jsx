@@ -11,17 +11,25 @@
 import React, { useEffect, useState, useRef } from "react";
 import { subscribeClubTV } from "@/components/mixer/ClubBroadcastChannel";
 import YouTubePlayer from "@/components/mixer/YouTubePlayer";
-import { Disc3, Radio, Maximize2 } from "lucide-react";
+import AudioVisualizer from "@/components/mixer/AudioVisualizer";
+import { Disc3, Radio, Maximize2, Volume2 } from "lucide-react";
 
 export default function ClubTV() {
   const [state, setState] = useState(null); // { deckA, deckB, crossfade }
   const [fs, setFs] = useState(false);
+  const [audioEl, setAudioEl] = useState(null);
   const rootRef = useRef(null);
+  const audioTagRef = useRef(null);
 
   useEffect(() => {
     document.title = "NUPS · Club TV";
     const unsub = subscribeClubTV((payload) => setState(payload));
     return unsub;
+  }, []);
+
+  // Expose audio tag to visualizer
+  useEffect(() => {
+    if (audioTagRef.current) setAudioEl(audioTagRef.current);
   }, []);
 
   const enterFullscreen = async () => {
@@ -39,6 +47,19 @@ export default function ClubTV() {
   const active =
     state?.crossfade >= 50 ? state?.deckB : state?.deckA; // louder deck wins
   const videoId = active?.videoId || null;
+  const audioUrl = active?.audioUrl || null;
+
+  // Load audio URL into TV's <audio> tag when it changes
+  useEffect(() => {
+    const el = audioTagRef.current;
+    if (!el) return;
+    if (audioUrl && el.src !== audioUrl) {
+      el.src = audioUrl;
+      el.play().catch(() => {});
+    } else if (!audioUrl) {
+      try { el.pause(); el.removeAttribute("src"); el.load(); } catch (_) {}
+    }
+  }, [audioUrl]);
 
   return (
     <div
@@ -79,12 +100,22 @@ export default function ClubTV() {
               muted={false}
             />
           </div>
+        ) : audioUrl ? (
+          <div className="w-full max-w-[1600px] aspect-video shadow-[0_0_120px_rgba(6,182,212,0.4)] border-2 border-cyan-500/30 rounded-2xl overflow-hidden relative bg-black">
+            {/* Hidden audio element feeds the visualizer */}
+            <audio ref={audioTagRef} crossOrigin="anonymous" autoPlay />
+            <AudioVisualizer audioEl={audioEl} active palette="cyan" mode="combo" />
+            <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 border border-cyan-500/40">
+              <Volume2 className="w-4 h-4 text-cyan-300 animate-pulse" />
+              <span className="text-xs font-bold text-cyan-100 uppercase tracking-widest">Audio Only</span>
+            </div>
+          </div>
         ) : (
           <div className="text-center">
             <Radio className="w-20 h-20 text-purple-500/40 mx-auto mb-4 animate-pulse" />
             <div className="text-3xl font-black text-white/70 mb-2">Awaiting DJ Signal…</div>
             <div className="text-sm text-white/40">
-              Waiting for a deck to load a YouTube track from the mixer.
+              Waiting for a deck to load a track from the mixer.
             </div>
           </div>
         )}

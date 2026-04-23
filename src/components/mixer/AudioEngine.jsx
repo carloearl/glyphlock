@@ -27,10 +27,17 @@ export default function AudioEngine({
   onNext,
   onPrev,
   onPlayStateChange,
+  onAudioElement, // called with the <audio> DOM element (for visualizer tap)
 }) {
   const audioRef = useRef(null);
   const progressRef = useRef(null);
   const animRef = useRef(null);
+
+  // Expose the audio element upward (once) for the visualizer
+  useEffect(() => {
+    if (audioRef.current && onAudioElement) onAudioElement(audioRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
