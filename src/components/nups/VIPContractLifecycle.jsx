@@ -3,20 +3,22 @@
  * Lifecycle: Draft → Issued → Signed → Archived
  * Connects: Entertainer identity, VIP event/show, manager approval, payout logic
  */
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
-  FileText, Plus, CheckCircle2, Archive, Send, Pen,
+  FileText, Plus, CheckCircle2, Archive, Send, Pen, ScrollText,
   DollarSign, User, Clock, AlertTriangle, ChevronDown, ChevronUp
 } from "lucide-react";
+import { VIP_ROOM_SERVICE_AGREEMENT } from "@/constants/contractText";
 
 const STATUS_CONFIG = {
   draft:    { label: "Draft",    color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",   next: "issued" },
@@ -31,14 +33,36 @@ const TRANSITION_LABELS = {
   archived: { label: "Archive",              icon: Archive,     color: "bg-gray-700 hover:bg-gray-600" },
 };
 
-function ContractCard({ contract, entertainers, onTransition, currentUser }) {
+function ContractCard({ contract, entertainers, venue, onTransition, currentUser }) {
   const [expanded, setExpanded] = useState(false);
   const [sigName, setSigName] = useState("");
+  const [hasScrolledContract, setHasScrolledContract] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const contractScrollRef = useRef(null);
   const cfg = STATUS_CONFIG[contract.status] || STATUS_CONFIG.draft;
   const nextStatus = cfg.next;
   const transitionCfg = nextStatus ? TRANSITION_LABELS[nextStatus] : null;
   const entertainer = entertainers.find(e => e.id === contract.contractor_id);
   const payout = (contract.total_payout || 0);
+
+  const handleContractScroll = (e) => {
+    const el = e.target;
+    if (el.scrollHeight - el.scrollTop <= el.clientHeight + 40) {
+      setHasScrolledContract(true);
+    }
+  };
+
+  // Build booking payload for the legal agreement template
+  const bookingPayload = {
+    uuid: contract.id || "—",
+    timestamp: contract.created_date
+      ? new Date(contract.created_date).toLocaleString()
+      : new Date().toLocaleString(),
+    guest_name: contract.contractor_name || entertainer?.stage_name || "Entertainer",
+    room_number: contract.payout_type || "—",
+    duration_minutes: contract.duration_minutes || 60,
+    minimum_spend: (contract.total_payout || 0).toFixed(2),
+  };
 
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
@@ -98,16 +122,77 @@ function ContractCard({ contract, entertainers, onTransition, currentUser }) {
             <div className="text-xs text-gray-400 bg-white/[0.02] rounded-lg p-2">{contract.notes}</div>
           )}
 
-          {/* Signature collection for "signed" transition */}
+          {/* Signature collection for "signed" transition — FULL LEGAL CONTRACT */}
           {nextStatus === "signed" && (
-            <div>
-              <Label className="text-gray-500 text-xs">Entertainer Signature (type to sign)</Label>
-              <Input
-                value={sigName}
-                onChange={e => setSigName(e.target.value)}
-                placeholder="Type full legal name to sign"
-                className="mt-1 text-white bg-white/[0.04] border-white/[0.1]"
-              />
+            <div className="space-y-3 border-t pt-3" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+              <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-blue-300">
+                <ScrollText className="w-3.5 h-3.5" />
+                VIP Room Service Agreement — Read & Sign
+              </div>
+
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-white">
+                  <span className="font-bold">You must scroll to the bottom</span> to read and accept this agreement.
+                </p>
+              </div>
+
+              <div
+                ref={contractScrollRef}
+                onScroll={handleContractScroll}
+                className="h-64 overflow-y-auto bg-gray-900/70 border border-gray-600 rounded-lg p-4 text-xs text-gray-300 leading-relaxed whitespace-pre-wrap font-mono"
+              >
+                {VIP_ROOM_SERVICE_AGREEMENT(venue, bookingPayload)}
+              </div>
+
+              {!hasScrolledContract ? (
+                <p className="text-center text-[11px] text-amber-400/70 animate-pulse">
+                  ↓ Scroll to the bottom of the contract to unlock the signature field
+                </p>
+              ) : (
+                <p className="text-center text-[11px] text-green-400">
+                  ✓ Contract fully read — you may now sign below
+                </p>
+              )}
+
+              <div
+                className={`flex items-start gap-2 p-2.5 rounded-lg border transition-all ${
+                  hasScrolledContract
+                    ? "border-blue-500/30 bg-blue-500/5"
+                    : "border-gray-700 bg-gray-800/30 opacity-50 pointer-events-none"
+                }`}
+              >
+                <Checkbox
+                  checked={agreed}
+                  onCheckedChange={setAgreed}
+                  className="mt-0.5"
+                  disabled={!hasScrolledContract}
+                />
+                <label
+                  className={`text-[11px] leading-relaxed ${
+                    hasScrolledContract ? "text-white cursor-pointer" : "text-gray-500"
+                  }`}
+                  onClick={() => hasScrolledContract && setAgreed(!agreed)}
+                >
+                  I have read the entire VIP Room Service Agreement above and agree to all terms.
+                  I understand this is a legally binding contract.
+                </label>
+              </div>
+
+              <div>
+                <Label className="text-gray-500 text-xs">Entertainer Signature (type to sign)</Label>
+                <Input
+                  value={sigName}
+                  onChange={(e) => setSigName(e.target.value)}
+                  placeholder="Type full legal name to sign"
+                  className="mt-1 text-white bg-white/[0.04] border-white/[0.1]"
+                  style={{ fontFamily: "cursive", fontSize: "1.05rem" }}
+                  disabled={!hasScrolledContract || !agreed}
+                />
+                <p className="text-[10px] text-gray-500 mt-1">
+                  By typing your name, you agree this constitutes a legal digital signature.
+                </p>
+              </div>
             </div>
           )}
 
@@ -115,7 +200,7 @@ function ContractCard({ contract, entertainers, onTransition, currentUser }) {
           {transitionCfg && (
             <Button
               size="sm"
-              disabled={nextStatus === "signed" && !sigName.trim()}
+              disabled={nextStatus === "signed" && (!sigName.trim() || !agreed || !hasScrolledContract)}
               onClick={() => onTransition(contract, nextStatus, sigName)}
               className={`text-xs ${transitionCfg.color}`}
             >
@@ -153,6 +238,13 @@ export default function VIPContractLifecycle({ currentUser }) {
     queryKey: ["vip-contract-entertainers"],
     queryFn: () => base44.entities.Entertainer.list(),
   });
+
+  const { data: venues = [] } = useQuery({
+    queryKey: ["vip-contract-venues"],
+    queryFn: () => base44.entities.Venue.list(),
+    initialData: [],
+  });
+  const currentVenue = venues?.[0] || { name: "Venue", address: "", age_requirement: 21 };
 
   const createContract = useMutation({
     mutationFn: () => base44.entities.ContractorPayout.create({
@@ -315,6 +407,7 @@ export default function VIPContractLifecycle({ currentUser }) {
               key={c.id}
               contract={c}
               entertainers={entertainers}
+              venue={currentVenue}
               currentUser={currentUser}
               onTransition={(contract, newStatus, sigName) =>
                 transition.mutate({ contract, newStatus, sigName })
