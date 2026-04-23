@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
 
@@ -63,10 +63,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Username and PIN are required.' }, { status: 400 });
     }
 
-    // Lookup user by username (service role — bypasses RLS)
-    const users = await base44.asServiceRole.entities.NUPSUser.filter({
-      username: username.trim().toLowerCase()
-    });
+    // Lookup user by username (service role — bypasses RLS, works without logged-in user)
+    const uname = username.trim().toLowerCase();
+    const allUsers = await base44.asServiceRole.entities.NUPSUser.list('-created_date', 500);
+    const users = (allUsers || []).filter(
+      u => (u.username || '').trim().toLowerCase() === uname
+    );
 
     if (!users || users.length === 0) {
       return Response.json({ error: 'Invalid credentials.' }, { status: 401 });
