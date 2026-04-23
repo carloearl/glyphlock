@@ -115,6 +115,13 @@ export default function NUPSStaff() {
   const validKeys = new Set(visibleModules.map(m => m.key));
   const currentModule = validKeys.has(activeModule) ? activeModule : (visibleModules[0]?.key || "pos");
 
+  // OWNERS / ADMINS / MANAGERS bypass the clock-in gate entirely.
+  // They need to supervise the floor without being forced onto a time clock.
+  const isOwnerOrAdmin =
+    user?.role === "admin" ||
+    ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"].includes(user?._highestRole);
+  const gateOpen = isOwnerOrAdmin || isClockedIn;
+
   const handleLogout = () => {
     sessionStorage.removeItem("nups_session");
     base44.auth.logout();
@@ -182,8 +189,9 @@ export default function NUPSStaff() {
           ))}
         </div>
 
-        {/* Clock-in gate — time clock always accessible; all other tabs locked until clocked in */}
-        {!isClockedIn && currentModule !== "timeclock" && (
+        {/* Clock-in gate — time clock always accessible; all other tabs locked until clocked in.
+            OWNERS/ADMINS/MANAGERS bypass this gate entirely. */}
+        {!gateOpen && currentModule !== "timeclock" && (
           <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
             <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
               <Clock className="w-8 h-8 text-red-400" />
@@ -206,7 +214,7 @@ export default function NUPSStaff() {
           {currentModule === "timeclock" && (
             <TimeClock user={user} role={user?._highestRole || rbacRole} onClockStatusChange={handleClockStatusChange} />
           )}
-          {isClockedIn && currentModule !== 'timeclock' ? (
+          {gateOpen && currentModule !== 'timeclock' ? (
             <>
               {currentModule === "door_pos" && <POSCashRegister user={user} station="door" />}
               {currentModule === "bar_pos" && <POSBarRegister user={user} />}
@@ -216,13 +224,13 @@ export default function NUPSStaff() {
               {currentModule === "dj" && <UnifiedMusicConsole />}
             </>
           ) : null}
-          {isClockedIn && currentModule === "history" && (
+          {gateOpen && currentModule === "history" && (
             <TransactionHistory
               transactions={realTransactions.filter(t => t.cashier === user?.email)}
               showReceipt={true}
             />
           )}
-          {isClockedIn && currentModule === "drivers" && isClockedIn && <DriverDropOffTracker user={user} />}
+          {gateOpen && currentModule === "drivers" && <DriverDropOffTracker user={user} />}
         </div>
 
         <footer className="text-center text-[10px] text-gray-700 py-4 border-t border-gray-800 mt-8">
