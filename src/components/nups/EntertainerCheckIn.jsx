@@ -9,6 +9,7 @@ import { Users, LogIn, LogOut, MapPin, Clock, DollarSign, Check, CheckCircle2 } 
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { resolveVenueId } from "@/lib/venueDefaults";
 
 const ShiftTimer = ({ checkInTime }) => {
   const [elapsed, setElapsed] = useState('');
@@ -41,18 +42,27 @@ export default function EntertainerCheckIn({ user }) {
     safetyAck: false
   });
 
+  const activeVenue = useActiveVenue();
+  const venueId = resolveVenueId(activeVenue?.id || activeVenue?.venue_id || user?.venue_id);
+
+  // Entertainer roster scoped to the active venue (Dream Palace by default),
+  // sorted by most recent VIP activity so the most-active performers surface first.
   const { data: entertainers = [] } = useQuery({
-    queryKey: ['entertainers'],
-    queryFn: () => base44.entities.Entertainer.list(),
+    queryKey: ['entertainers', venueId],
+    queryFn: async () => {
+      const list = await base44.entities.Entertainer.filter({ venue_id: venueId }, '-vip_room_count', 200);
+      // Fallback: if no venue-scoped records yet, show the global list so check-in still works.
+      return list.length ? list : base44.entities.Entertainer.list('-vip_room_count', 200);
+    },
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: 'always'
   });
 
   const { data: activeShifts = [] } = useQuery({
-    queryKey: ['active-shifts'],
+    queryKey: ['active-shifts', venueId],
     queryFn: async () => {
-      const allShifts = await base44.entities.EntertainerShift.list('-created_date', 100);
+      const allShifts = await base44.entities.EntertainerShift.filter({ venue_id: venueId }, '-created_date', 100);
       return allShifts.filter(shift => !shift.check_out_time);
     },
     staleTime: 0,
@@ -61,8 +71,6 @@ export default function EntertainerCheckIn({ user }) {
     refetchInterval: 30000
   });
 
-  const activeVenue = useActiveVenue();
-
   const checkInByPin = useMutation({
     mutationFn: async () => {
       const ent = entertainers.find(e => e.nups_pin === pin);
@@ -70,12 +78,10 @@ export default function EntertainerCheckIn({ user }) {
       if (activeShifts.some(s => s.entertainer_id === ent.id)) {
         throw new Error(`${ent.stage_name} already checked in`);
       }
-      const shiftVenueId = activeVenue?.id || activeVenue?.venue_id;
-      if (!shiftVenueId) throw new Error('Venue unavailable');
       const response = await base44.functions.invoke('createEntertainerShift', {
         entertainer_id: ent.id,
         location: 'Main Floor',
-        venue_id: shiftVenueId
+        venue_id: venueId
       });
       if (response.data?.error) throw new Error(response.data.error);
       return { shift: response.data?.shift, entertainer: ent };

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, DollarSign, Star, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle } from "lucide-react";
+import { Car, Plus, DollarSign, Star, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle, Zap } from "lucide-react";
+import { DEFAULT_VENUE_ID, DEFAULT_VENUE_NAME, resolveVenueId } from "@/lib/venueDefaults";
 
 // --- Payout config
 const INTERNAL_DRIVER_RATE = 30;  // Our drivers get $30 per drop
@@ -32,16 +33,51 @@ export default function DriverDropOffTracker({ user }) {
   const [addingDropTo, setAddingDropTo] = useState(null);
 
   const today = todayDate();
+  const venueId = resolveVenueId(user?.venue_id);
 
   const { data: records = [], isLoading } = useQuery({
-    queryKey: ["driver-payouts", today],
-    queryFn: () => base44.entities.DriverPayout.filter({ session_date: today }),
+    queryKey: ["driver-payouts", today, venueId],
+    queryFn: () => base44.entities.DriverPayout.filter({ session_date: today, venue_id: venueId }),
     refetchInterval: 30000,
   });
+
+  // Driver directory — pulls every past DriverPayout for this venue and ranks by
+  // most-active (total drops), so door staff can one-tap re-register without typing.
+  const { data: driverDirectory = [] } = useQuery({
+    queryKey: ["driver-directory", venueId],
+    queryFn: async () => {
+      const history = await base44.entities.DriverPayout.filter({ venue_id: venueId }, "-created_date", 500);
+      const byDriver = new Map();
+      for (const rec of history) {
+        const key = `${(rec.driver_name || "").toLowerCase()}|${rec.driver_number || ""}`;
+        if (!key.trim() || key === "|") continue;
+        const prev = byDriver.get(key) || {
+          driver_name: rec.driver_name,
+          driver_number: rec.driver_number,
+          driver_type: rec.driver_type || "internal",
+          total_drops: 0,
+          nights: 0,
+          last_seen: rec.session_date || rec.created_date,
+        };
+        prev.total_drops += rec.total_drops || 0;
+        prev.nights += 1;
+        if ((rec.session_date || "") > (prev.last_seen || "")) prev.last_seen = rec.session_date;
+        byDriver.set(key, prev);
+      }
+      return Array.from(byDriver.values()).sort((a, b) => b.total_drops - a.total_drops);
+    },
+    staleTime: 60000,
+  });
+
+  // Drivers already registered tonight (so we can hide them from the quick-pick list)
+  const registeredKeys = new Set(
+    records.map(r => `${(r.driver_name || "").toLowerCase()}|${r.driver_number || ""}`)
+  );
 
   const createDriver = useMutation({
     mutationFn: (data) => base44.entities.DriverPayout.create({
       ...data,
+      venue_id: resolveVenueId(data.venue_id || venueId),
       session_date: today,
       driver_code: `DRV-${data.driver_number}-${Date.now()}`,
       driver_type: data.driver_type || 'internal',
@@ -51,8 +87,17 @@ export default function DriverDropOffTracker({ user }) {
       total_payout: 0,
       status: "open",
     }),
-    onSuccess: () => { qc.invalidateQueries(["driver-payouts"]); setShowNewDriver(false); setNewDriver({ driver_name: "", driver_number: "" }); },
+    onSuccess: () => { qc.invalidateQueries(["driver-payouts"]); setShowNewDriver(false); setNewDriver({ driver_name: "", driver_number: "", driver_type: "internal" }); },
   });
+
+  // One-tap: re-register a known driver for tonight using their saved credentials
+  const quickAddDriver = (d) => {
+    createDriver.mutate({
+      driver_name: d.driver_name,
+      driver_number: d.driver_number,
+      driver_type: d.driver_type || "internal",
+    });
+  };
 
   const addDrop = useMutation({
     mutationFn: async ({ record, drop }) => {
@@ -127,7 +172,45 @@ export default function DriverDropOffTracker({ user }) {
       {showNewDriver && (
         <Card className="bg-yellow-950/30 border-yellow-500/40">
           <CardContent className="p-4 space-y-3">
-            <p className="text-yellow-300 font-semibold text-sm">Register New Driver</p>
+            <p className="text-yellow-300 font-semibold text-sm flex items-center gap-2">
+              Register Driver
+              <span className="text-[10px] text-yellow-500/80 uppercase tracking-wide">{DEFAULT_VENUE_NAME}</span>
+            </p>
+
+            {/* Quick-pick from Dream Palace driver directory (most active first) */}
+            {driverDirectory.filter(d => !registeredKeys.has(`${(d.driver_name || "").toLowerCase()}|${d.driver_number || ""}`)).length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[11px] text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-yellow-400" /> Tap to re-register (most active first)
+                </p>
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                  {driverDirectory
+                    .filter(d => !registeredKeys.has(`${(d.driver_name || "").toLowerCase()}|${d.driver_number || ""}`))
+                    .slice(0, 12)
+                    .map((d, i) => (
+                      <button
+                        key={`${d.driver_name}-${d.driver_number}-${i}`}
+                        onClick={() => quickAddDriver(d)}
+                        disabled={createDriver.isPending}
+                        className="group text-left bg-black/40 hover:bg-yellow-500/10 border border-gray-700 hover:border-yellow-500/60 rounded-lg px-3 py-2 transition-all"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-white text-sm font-semibold">{d.driver_name}</span>
+                          <Badge className={`text-[9px] ${d.driver_type === 'internal' ? 'bg-green-500/20 text-green-300 border-green-500/40' : 'bg-orange-500/20 text-orange-300 border-orange-500/40'}`}>
+                            {d.driver_type === 'internal' ? 'Ours' : 'Outside'}
+                          </Badge>
+                        </div>
+                        <div className="text-[10px] text-gray-500 mt-0.5">
+                          #{d.driver_number} · {d.total_drops} drops · {d.nights} nights
+                        </div>
+                      </button>
+                    ))}
+                </div>
+                <div className="border-t border-gray-800 my-2" />
+                <p className="text-[11px] text-gray-500">Or register someone new:</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
                       <Input
                         placeholder="Driver Name"

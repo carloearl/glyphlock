@@ -11,9 +11,7 @@ const ROLES = [
   "VENUE_MANAGER", "BARTENDER", "FLOOR_HOST", "SECURITY", "DJ", "HOSTESS", "DOOR_GIRL"
 ];
 
-// Default venue — all live-system onboards are saved to Dream Palace unless explicitly overridden.
-const DEFAULT_VENUE_ID = "dream_palace";
-const DEFAULT_VENUE_NAME = "Dream Palace";
+import { DEFAULT_VENUE_ID, DEFAULT_VENUE_NAME, resolveVenueId } from "@/lib/venueDefaults";
 
 const EMPTY_FORM = { display_name: "", username: "", pin: "", role: "FLOOR_HOST", venue_id: DEFAULT_VENUE_ID };
 
@@ -35,7 +33,7 @@ export default function StaffOnboardingPanel() {
     mutationFn: (data) => base44.entities.NUPSUser.create({
       ...data,
       // Always route live-system onboards to Dream Palace DB when no venue is specified
-      venue_id: data.venue_id?.trim() || DEFAULT_VENUE_ID,
+      venue_id: resolveVenueId(data.venue_id),
       is_active: true,
       created_by_manager: true,
     }),
