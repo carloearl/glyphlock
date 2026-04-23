@@ -1,45 +1,117 @@
 /**
- * UnifiedMusicConsole — The single merged music panel for NUPS DJ Console.
- * Combines: MixerModuleView (profiles + deck + DJ player + AI + music search)
- * with the NUPS Music Suite (Tracks/YT/Personas/Playlist/Crowd/Jukebox).
+ * UnifiedMusicConsole — NUPS AUTO-DJ
+ * One merged badass interface that replaces the human DJ.
  *
- * Mounted ONLY inside NUPS → DJ Console tab.
+ * Brings together (single cohesive shell, no mode toggles):
+ *   • Mixer Pro (profiles, decks, crossfader, AI, music search)
+ *   • Track Library
+ *   • YouTube Search
+ *   • AI DJ Personas
+ *   • AI Playlist Generator
+ *   • Live Crowd Metrics
+ *   • Jukebox Queue (tip-weighted)
+ *
+ * Mounted inside NUPS Owner → DJ tab and NUPS Staff → DJ tab.
  */
 import React, { useState } from "react";
-import { Disc3, Sparkles } from "lucide-react";
+import {
+  Disc3, Music, Youtube, Disc, Zap, Activity, Radio, Sparkles, Power,
+} from "lucide-react";
 
 import MixerModuleView from "@/components/mixer/MixerModuleView";
-import MusicSuitePanel from "@/components/mixer/suite/MusicSuitePanel";
+import TracksTab from "@/components/mixer/suite/TracksTab";
+import MusicSearchTab from "@/components/mixer/suite/MusicSearchTab";
+import PersonasTab from "@/components/mixer/suite/PersonasTab";
+import PlaylistGenTab from "@/components/mixer/suite/PlaylistGenTab";
+import CrowdTab from "@/components/mixer/suite/CrowdTab";
+import JukeboxTab from "@/components/mixer/suite/JukeboxTab";
+import SuiteErrorBoundary from "@/components/mixer/suite/SuiteErrorBoundary";
+
+const NAV = [
+  { key: "mixer",    label: "Auto-DJ Mixer",  icon: Disc3,    accent: "from-purple-500 to-fuchsia-500", ring: "border-purple-500/60 bg-purple-500/15 text-purple-200" },
+  { key: "tracks",   label: "Track Library",  icon: Music,    accent: "from-indigo-500 to-purple-500",  ring: "border-indigo-500/60 bg-indigo-500/15 text-indigo-200" },
+  { key: "search",   label: "YT Search",      icon: Youtube,  accent: "from-red-500 to-rose-500",       ring: "border-red-500/60 bg-red-500/15 text-red-200" },
+  { key: "personas", label: "AI Personas",    icon: Disc,     accent: "from-pink-500 to-rose-500",      ring: "border-pink-500/60 bg-pink-500/15 text-pink-200" },
+  { key: "playlist", label: "AI Playlist",    icon: Zap,      accent: "from-cyan-500 to-sky-500",       ring: "border-cyan-500/60 bg-cyan-500/15 text-cyan-200" },
+  { key: "crowd",    label: "Crowd Pulse",    icon: Activity, accent: "from-emerald-500 to-green-500",  ring: "border-emerald-500/60 bg-emerald-500/15 text-emerald-200" },
+  { key: "jukebox",  label: "Jukebox Queue",  icon: Radio,    accent: "from-amber-500 to-yellow-500",   ring: "border-amber-500/60 bg-amber-500/15 text-amber-200" },
+];
 
 export default function UnifiedMusicConsole() {
-  const [mode, setMode] = useState("mixer"); // "mixer" | "suite"
+  const [active, setActive] = useState("mixer");
+  const [autoDj, setAutoDj] = useState(true);
+
+  const activeNav = NAV.find((n) => n.key === active) || NAV[0];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setMode("mixer")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all border ${
-            mode === "mixer"
-              ? "bg-purple-500/20 text-purple-300 border-purple-500/50"
-              : "text-gray-400 hover:text-white border-transparent hover:bg-slate-800/50"
-          }`}
-        >
-          <Disc3 className="w-4 h-4" /> DJ Mixer Pro
-        </button>
-        <button
-          onClick={() => setMode("suite")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all border ${
-            mode === "suite"
-              ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/50"
-              : "text-gray-400 hover:text-white border-transparent hover:bg-slate-800/50"
-          }`}
-        >
-          <Sparkles className="w-4 h-4" /> NUPS Music Suite
-        </button>
+      {/* ── AUTO-DJ Command Header ── */}
+      <div className="relative overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-900 p-4">
+        <div className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{ background: "radial-gradient(600px circle at 20% 0%, rgba(168,85,247,0.35), transparent 60%)" }}
+        />
+        <div className="relative flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Disc3 className="w-10 h-10 text-purple-400 animate-spin" style={{ animationDuration: "4s" }} />
+              <Sparkles className="w-4 h-4 text-cyan-300 absolute -top-1 -right-1 animate-pulse" />
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-[0.25em] text-purple-300/80 font-bold">N.U.P.S. Autonomous DJ</div>
+              <h2 className="text-xl md:text-2xl font-black text-white leading-tight">
+                The Program That Replaces The DJ
+              </h2>
+              <div className="text-xs text-gray-400 mt-0.5">
+                AI-driven mixing · crowd-reactive playlists · tip-weighted jukebox · persona-based curation
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setAutoDj((v) => !v)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 font-bold transition-all ${
+              autoDj
+                ? "border-green-500/60 bg-green-500/15 text-green-300 shadow-[0_0_20px_rgba(34,197,94,0.35)]"
+                : "border-gray-700 bg-gray-900 text-gray-400"
+            }`}
+          >
+            <Power className={`w-4 h-4 ${autoDj ? "animate-pulse" : ""}`} />
+            {autoDj ? "AUTO-DJ: ENGAGED" : "AUTO-DJ: STANDBY"}
+          </button>
+        </div>
       </div>
 
-      {mode === "mixer" ? <MixerModuleView /> : <MusicSuitePanel />}
+      {/* ── Module Rail ── */}
+      <div className="flex flex-wrap gap-2 border-b border-slate-700/50 pb-3 overflow-x-auto">
+        {NAV.map(({ key, label, icon: Icon, ring }) => {
+          const isActive = active === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setActive(key)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all border min-h-[40px] flex-shrink-0 ${
+                isActive
+                  ? ring
+                  : "text-gray-400 hover:text-white hover:bg-slate-800/50 border-transparent"
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Active Panel ── */}
+      <SuiteErrorBoundary key={active}>
+        {active === "mixer"    && <MixerModuleView />}
+        {active === "tracks"   && <TracksTab />}
+        {active === "search"   && <MusicSearchTab />}
+        {active === "personas" && <PersonasTab />}
+        {active === "playlist" && <PlaylistGenTab />}
+        {active === "crowd"    && <CrowdTab />}
+        {active === "jukebox"  && <JukeboxTab />}
+      </SuiteErrorBoundary>
     </div>
   );
 }
