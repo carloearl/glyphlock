@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Twitter, Linkedin, Instagram, Github, Mail, Phone, MapPin, Shield, ExternalLink } from "lucide-react";
+import { Twitter, Linkedin, Instagram, Github, Mail, Phone, MapPin, Shield, ExternalLink, LogIn } from "lucide-react";
 import { FOOTER_LINKS } from "@/components/NavigationConfig";
 import { filterUiArtifacts } from "@/lib/uiArtifactFilter";
 
@@ -49,7 +49,26 @@ export default function Footer() {
       <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.4), rgba(139,92,246,0.3), transparent)' }} />
 
       <div className="max-w-7xl mx-auto px-5 md:px-8 lg:px-12 pt-16 md:pt-20 pb-8">
-        
+
+        {/* ─── SIGN-IN CTA ─── */}
+        <div className="mb-12 flex flex-col items-center gap-3 text-center">
+          <p className="text-[11px] font-bold text-white/60 uppercase tracking-[0.25em]">Staff & Venue Access</p>
+          <Link
+            to={createPageUrl("NUPSLogin")}
+            className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full font-bold text-base text-white shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-95 transition-all"
+            style={{
+              background: 'linear-gradient(135deg, #06b6d4 0%, #3B82F6 50%, #8B5CF6 100%)',
+              minHeight: '52px',
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+            aria-label="Sign in to NUPS"
+          >
+            <LogIn size={18} />
+            Sign In to NUPS
+          </Link>
+        </div>
+
         {/* ─── TOP: Brand + Nav Grid ─── */}
         <div className="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-12 gap-8 lg:gap-10 mb-14">
           
