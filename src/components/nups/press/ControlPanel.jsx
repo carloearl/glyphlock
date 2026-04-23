@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Printer, Upload, Trash2, Image, Settings, Layers, Type, Sparkles, LayoutGrid, Loader2 } from "lucide-react";
+import { Printer, Upload, Trash2, Image, Settings, Layers, Type, Sparkles, LayoutGrid, Loader2, DollarSign, Hash, QrCode, ScanBarcode, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import {
@@ -24,7 +24,7 @@ export default function ControlPanel({
   frontImages, backImage,
   onFrontImageChange, onBackImageChange,
   onPrint, onPreview,
-  elements, onAddElement,
+  elements, onAddElement, onRemoveElement,
 }) {
   const maxSlots = config.layoutMode === LayoutMode.FOUR_PER_SHEET ? 4 : 5;
   const ref0 = useRef(null);
@@ -119,7 +119,7 @@ export default function ControlPanel({
 
   return (
     <div className="space-y-4">
-      {/* Layout Toggle */}
+      {/* Layout Toggle — fixed: proper onChange batching, mobile tap targets */}
       <Card className="bg-gray-900/60 border-gray-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -130,18 +130,44 @@ export default function ControlPanel({
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => { update("layoutMode", LayoutMode.FIVE_PER_SHEET); update("billWidthInches", 6); update("billHeightInches", 2.5); }}
-              className={`p-3 rounded-lg border text-center transition-all ${!is4Up ? "border-green-500 bg-green-500/10 text-green-400" : "border-gray-700 text-gray-400 hover:border-gray-500"}`}
+              type="button"
+              onClick={() =>
+                onConfigChange({
+                  ...config,
+                  layoutMode: LayoutMode.FIVE_PER_SHEET,
+                  billWidthInches: 6,
+                  billHeightInches: 2.5,
+                })
+              }
+              className={`min-h-[56px] p-3 rounded-lg border-2 text-center transition-all active:scale-95 ${
+                !is4Up
+                  ? "border-green-500 bg-green-500/15 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                  : "border-gray-700 text-gray-400 hover:border-gray-500"
+              }`}
+              style={{ touchAction: "manipulation" }}
             >
-              <div className="text-lg font-bold">5 / Sheet</div>
-              <div className="text-[10px]">Custom Size</div>
+              <div className="text-lg font-bold pointer-events-none">5 / Sheet</div>
+              <div className="text-[10px] pointer-events-none">Custom Size</div>
             </button>
             <button
-              onClick={() => { update("layoutMode", LayoutMode.FOUR_PER_SHEET); update("billWidthInches", US_DOLLAR_DIMS.width); update("billHeightInches", US_DOLLAR_DIMS.height); }}
-              className={`p-3 rounded-lg border text-center transition-all ${is4Up ? "border-green-500 bg-green-500/10 text-green-400" : "border-gray-700 text-gray-400 hover:border-gray-500"}`}
+              type="button"
+              onClick={() =>
+                onConfigChange({
+                  ...config,
+                  layoutMode: LayoutMode.FOUR_PER_SHEET,
+                  billWidthInches: US_DOLLAR_DIMS.width,
+                  billHeightInches: US_DOLLAR_DIMS.height,
+                })
+              }
+              className={`min-h-[56px] p-3 rounded-lg border-2 text-center transition-all active:scale-95 ${
+                is4Up
+                  ? "border-green-500 bg-green-500/15 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                  : "border-gray-700 text-gray-400 hover:border-gray-500"
+              }`}
+              style={{ touchAction: "manipulation" }}
             >
-              <div className="text-lg font-bold">4 / Sheet</div>
-              <div className="text-[10px]">US Dollar Size</div>
+              <div className="text-lg font-bold pointer-events-none">4 / Sheet</div>
+              <div className="text-[10px] pointer-events-none">US Dollar Size</div>
             </button>
           </div>
           {is4Up && (
@@ -240,33 +266,180 @@ export default function ControlPanel({
         </CardContent>
       </Card>
 
-      {/* Bill Element Overlays */}
+      {/* Bill Element Overlays — all draggable */}
       <Card className="bg-gray-900/60 border-gray-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <Image className="w-4 h-4 text-pink-400" />
-            Bill Elements (Drag on Bill)
+            Bill Elements — Drag to Position
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-[10px] text-gray-500">Add text or images to the bill, then drag/resize on the preview.</p>
-          {textInputVisible ? (
-            <div className="flex gap-2">
-              <Input value={pendingText} onChange={e => setPendingText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleConfirmText()} className="h-8 bg-gray-800 border-gray-700 text-xs flex-1" autoFocus />
-              <Button size="sm" onClick={handleConfirmText} className="h-8 bg-green-600 text-xs px-2">Add</Button>
-              <Button size="sm" variant="ghost" onClick={() => setTextInputVisible(false)} className="h-8 text-xs px-2">✕</Button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs border-gray-700 gap-1" onClick={handleAddTextElement}>
-                <Type className="w-3 h-3" /> Add Text
-              </Button>
-              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs border-gray-700 gap-1" onClick={handleAddImageElement}>
-                <Upload className="w-3 h-3" /> Add Image
-              </Button>
+        <CardContent className="space-y-3">
+          <p className="text-[10px] text-gray-500">
+            Click any element below to add it, then drag, resize, or rotate on the preview.
+          </p>
+
+          {/* Default bill elements as quick-add */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="min-h-[44px] text-xs border-amber-700/50 text-amber-400 gap-1"
+              onClick={() =>
+                onAddElement({
+                  id: crypto.randomUUID().slice(0, 8),
+                  type: "denomination",
+                  x: 12, y: 10, width: 80, height: 36,
+                  content: config.denomination || "100",
+                })
+              }
+              style={{ touchAction: "manipulation" }}
+            >
+              <DollarSign className="w-3.5 h-3.5 pointer-events-none" />
+              <span className="pointer-events-none">Denom</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="min-h-[44px] text-xs border-cyan-700/50 text-cyan-400 gap-1"
+              onClick={() =>
+                onAddElement({
+                  id: crypto.randomUUID().slice(0, 8),
+                  type: "serial",
+                  x: 12, y: 145, width: 100, height: 18,
+                })
+              }
+              style={{ touchAction: "manipulation" }}
+            >
+              <Hash className="w-3.5 h-3.5 pointer-events-none" />
+              <span className="pointer-events-none">Serial</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="min-h-[44px] text-xs border-purple-700/50 text-purple-400 gap-1"
+              onClick={() =>
+                onAddElement({
+                  id: crypto.randomUUID().slice(0, 8),
+                  type: "barcode",
+                  x: 380, y: 135, width: 140, height: 32,
+                })
+              }
+              style={{ touchAction: "manipulation" }}
+            >
+              <ScanBarcode className="w-3.5 h-3.5 pointer-events-none" />
+              <span className="pointer-events-none">Barcode</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="min-h-[44px] text-xs border-blue-700/50 text-blue-400 gap-1"
+              onClick={() =>
+                onAddElement({
+                  id: crypto.randomUUID().slice(0, 8),
+                  type: "qr",
+                  x: 480, y: 15, width: 60, height: 60,
+                })
+              }
+              style={{ touchAction: "manipulation" }}
+            >
+              <QrCode className="w-3.5 h-3.5 pointer-events-none" />
+              <span className="pointer-events-none">QR Code</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="min-h-[44px] text-xs border-gray-700 text-gray-400 gap-1 col-span-2"
+              onClick={() =>
+                onAddElement({
+                  id: crypto.randomUUID().slice(0, 8),
+                  type: "watermark",
+                  x: 120, y: 70, width: 300, height: 40,
+                  content: "CLUB CURRENCY",
+                })
+              }
+              style={{ touchAction: "manipulation" }}
+            >
+              <Layers className="w-3.5 h-3.5 pointer-events-none" />
+              <span className="pointer-events-none">Watermark</span>
+            </Button>
+          </div>
+
+          <div className="border-t border-gray-800 pt-3">
+            {textInputVisible ? (
+              <div className="flex gap-2">
+                <Input
+                  value={pendingText}
+                  onChange={(e) => setPendingText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleConfirmText()}
+                  className="min-h-[44px] bg-gray-800 border-gray-700 text-xs flex-1"
+                  autoFocus
+                />
+                <Button size="sm" onClick={handleConfirmText} className="min-h-[44px] bg-green-600 text-xs px-3">Add</Button>
+                <Button size="sm" variant="ghost" onClick={() => setTextInputVisible(false)} className="min-h-[44px] text-xs px-3">
+                  ✕
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 min-h-[44px] text-xs border-gray-700 gap-1"
+                  onClick={handleAddTextElement}
+                  style={{ touchAction: "manipulation" }}
+                >
+                  <Type className="w-3.5 h-3.5 pointer-events-none" />
+                  <span className="pointer-events-none">Custom Text</span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 min-h-[44px] text-xs border-gray-700 gap-1"
+                  onClick={handleAddImageElement}
+                  style={{ touchAction: "manipulation" }}
+                >
+                  <Upload className="w-3.5 h-3.5 pointer-events-none" />
+                  <span className="pointer-events-none">Custom Image</span>
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Active elements list with remove */}
+          {elements && elements.length > 0 && (
+            <div className="border-t border-gray-800 pt-3 space-y-1">
+              <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">
+                Active Elements ({elements.length})
+              </div>
+              {elements.map((el) => (
+                <div key={el.id} className="flex items-center justify-between gap-2 p-1.5 bg-black/30 rounded text-[11px]">
+                  <span className="text-gray-300 capitalize truncate">
+                    {el.type}{el.content ? `: ${String(el.content).slice(0, 16)}` : ""}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveElement && onRemoveElement(el.id)}
+                    className="min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-red-500/20 text-red-400"
+                    style={{ touchAction: "manipulation" }}
+                    aria-label="Remove element"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 pointer-events-none" />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
-          <input ref={overlayImgRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files[0]) handleOverlayImageFile(e.target.files[0]); }} />
+
+          <input
+            ref={overlayImgRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files[0]) handleOverlayImageFile(e.target.files[0]);
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -361,11 +534,25 @@ export default function ControlPanel({
 
       {/* Actions */}
       <div className="flex gap-2">
-        <Button size="sm" onClick={onPreview} className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 gap-1.5">
-          Preview
+        <Button
+          size="sm"
+          type="button"
+          onClick={onPreview}
+          className="flex-1 min-h-[48px] bg-gradient-to-r from-cyan-600 to-blue-600 gap-1.5 text-sm font-bold"
+          style={{ touchAction: "manipulation" }}
+        >
+          <Eye className="w-4 h-4 pointer-events-none" />
+          <span className="pointer-events-none">Preview</span>
         </Button>
-        <Button size="sm" onClick={onPrint} className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 gap-1.5">
-          <Printer className="w-4 h-4" /> Print
+        <Button
+          size="sm"
+          type="button"
+          onClick={onPrint}
+          className="flex-1 min-h-[48px] bg-gradient-to-r from-purple-600 to-pink-600 gap-1.5 text-sm font-bold"
+          style={{ touchAction: "manipulation" }}
+        >
+          <Printer className="w-4 h-4 pointer-events-none" />
+          <span className="pointer-events-none">Print</span>
         </Button>
       </div>
     </div>

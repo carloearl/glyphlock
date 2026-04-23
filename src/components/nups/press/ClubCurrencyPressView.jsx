@@ -105,8 +105,15 @@ export default function ClubCurrencyPressView() {
     if (typeof window !== "undefined" && window.devicePixelRatio !== 1) {
       toast.warning("Browser zoom is not 100%. Print scaling may be affected.");
     }
+    // FIX — ensure preview is rendered BEFORE print, wait for images/layout to settle
     setShowPreview(true);
-    setTimeout(() => window.print(), 300);
+    setTimeout(() => {
+      // Force layout reflow to guarantee sheets are rendered before print
+      if (typeof window !== "undefined") {
+        void document.body.offsetHeight;
+        window.print();
+      }
+    }, 800);
   }, [config, layoutReady]);
 
   const handleAddElement = useCallback((el) => {
@@ -213,6 +220,7 @@ export default function ClubCurrencyPressView() {
                 onPreview={handlePreview}
                 elements={elements}
                 onAddElement={handleAddElement}
+                onRemoveElement={handleRemoveElement}
               />
             </div>
             <div className="flex-1 bg-gray-800/30 rounded-xl border border-gray-700/50 overflow-auto min-h-[400px]">

@@ -1,17 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Copy, ExternalLink, CheckCircle2, Loader2, Clock, AlertTriangle, QrCode } from "lucide-react";
+import { FileText, Copy, ExternalLink, CheckCircle2, Loader2, Clock, AlertTriangle, ScrollText } from "lucide-react";
+import { VIP_ROOM_SERVICE_AGREEMENT } from "@/constants/contractText";
 
 export default function VIPContractFlow({ room, guestName, onContractSigned, onClose }) {
-  const [step, setStep] = useState("idle"); // idle | generating | ready | signed | error
+  const [step, setStep] = useState("idle"); // idle | review | generating | ready | signed | error
   const [contractUrl, setContractUrl] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const scrollRef = useRef(null);
+
+  const { data: venues } = useQuery({
+    queryKey: ["venues"],
+    queryFn: () => base44.entities.Venue.list(),
+    initialData: [],
+  });
+  const currentVenue = venues?.[0] || { name: "Venue", address: "", age_requirement: 21 };
+  const bookingPayload = {
+    uuid: `VIP-${Date.now().toString(36).toUpperCase()}`,
+    timestamp: new Date().toLocaleString(),
+    guest_name: guestName || "Guest",
+    room_number: room?.room_number || "—",
+    duration_minutes: room?.duration_minutes || 60,
+    minimum_spend: ((room?.rate_per_hour || 300) * ((room?.duration_minutes || 60) / 60)).toFixed(2),
+  };
+
+  const handleContractScroll = (e) => {
+    const el = e.target;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 40) setHasScrolled(true);
+  };
 
   const generateContract = async () => {
     setStep("generating");
@@ -72,12 +97,68 @@ export default function VIPContractFlow({ room, guestName, onContractSigned, onC
               <p>• Link expires in 15 minutes (single-use)</p>
             </div>
             <Button
-              onClick={generateContract}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-black font-bold"
+              onClick={() => setStep("review")}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-black font-bold min-h-[48px]"
             >
-              <FileText className="w-4 h-4 mr-2" />
-              Generate Contract Link
+              <ScrollText className="w-4 h-4 mr-2" />
+              Review Full Contract
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "review" && (
+        <Card className="bg-gray-900/60 border-amber-500/30">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <ScrollText className="w-5 h-5 text-amber-400" />
+              <h3 className="text-white font-bold">VIP Room Service Agreement</h3>
+            </div>
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-white">
+                <span className="font-bold">You must scroll to the bottom</span> to accept and generate the signing link.
+              </p>
+            </div>
+            <div
+              ref={scrollRef}
+              onScroll={handleContractScroll}
+              className="h-72 overflow-y-auto bg-black/60 border border-gray-700 rounded-lg p-4 text-xs text-gray-300 leading-relaxed whitespace-pre-wrap font-mono"
+            >
+              {VIP_ROOM_SERVICE_AGREEMENT(currentVenue, bookingPayload)}
+            </div>
+            {!hasScrolled ? (
+              <p className="text-center text-[11px] text-amber-400 animate-pulse">
+                ↓ Scroll to the bottom of the contract to continue ↓
+              </p>
+            ) : (
+              <p className="text-center text-[11px] text-green-400">✓ Contract fully read</p>
+            )}
+            <div
+              className={`flex items-start gap-2 p-2.5 rounded-lg border transition-all ${
+                hasScrolled ? "border-amber-500/30 bg-amber-500/5" : "border-gray-700 bg-gray-800/30 opacity-50 pointer-events-none"
+              }`}
+            >
+              <Checkbox checked={agreed} onCheckedChange={setAgreed} className="mt-0.5" disabled={!hasScrolled} />
+              <label
+                className={`text-[11px] leading-relaxed ${hasScrolled ? "text-white cursor-pointer" : "text-gray-500"}`}
+                onClick={() => hasScrolled && setAgreed(!agreed)}
+              >
+                Guest has read the entire VIP Room Service Agreement above and is ready to sign.
+              </label>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setStep("idle")} className="flex-1 border-gray-700 min-h-[44px]">
+                Back
+              </Button>
+              <Button
+                onClick={generateContract}
+                disabled={!agreed || !hasScrolled}
+                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-black font-bold min-h-[44px]"
+              >
+                Generate Signing Link →
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

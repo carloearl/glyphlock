@@ -2,8 +2,70 @@
  * DraggableBillElement — Click-and-drag to move + resize + rotate elements on the bill canvas.
  * Supports text, images, and shapes.
  */
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import { Trash2, Move, Maximize2, RotateCw } from "lucide-react";
+
+// ─── Barcode mini-renderer (Code 128-ish visual) ───
+function MiniBarcode({ data, height = 30, fontSize = 8 }) {
+  const stripes = useMemo(() => {
+    if (!data) return [];
+    const bars = [];
+    let seed = 0;
+    for (let i = 0; i < data.length; i++) seed += data.charCodeAt(i) * (i + 1);
+    for (let i = 0; i < 60; i++) {
+      seed = (seed * 1103515245 + 12345) & 0x7FFFFFFF;
+      bars.push(seed % 3 === 0 ? 4 : 2);
+    }
+    return bars;
+  }, [data]);
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <div className="flex items-end" style={{ height: `calc(100% - ${fontSize + 2}px)` }}>
+        {stripes.map((w, i) => (
+          <div key={i} style={{ width: w, height: "100%", backgroundColor: i % 2 === 0 ? "#000" : "#fff" }} />
+        ))}
+      </div>
+      <span style={{ fontSize, fontFamily: "monospace", color: "#000" }}>{data}</span>
+    </div>
+  );
+}
+
+// ─── QR Code mini-renderer (pattern, not scannable — placeholder) ───
+function MiniQR({ data }) {
+  const matrix = useMemo(() => {
+    const size = 21;
+    let seed = 0;
+    for (let i = 0; i < (data || "").length; i++) seed += data.charCodeAt(i) * (i + 3);
+    const grid = [];
+    for (let r = 0; r < size; r++) {
+      const row = [];
+      for (let c = 0; c < size; c++) {
+        seed = (seed * 1103515245 + 12345) & 0x7FFFFFFF;
+        row.push(seed % 2);
+      }
+      grid.push(row);
+    }
+    // Corner finders
+    const fill = (rs, cs) => {
+      for (let r = rs; r < rs + 7; r++) for (let c = cs; c < cs + 7; c++) {
+        const border = r === rs || r === rs + 6 || c === cs || c === cs + 6;
+        const center = r >= rs + 2 && r <= rs + 4 && c >= cs + 2 && c <= cs + 4;
+        grid[r][c] = border || center ? 1 : 0;
+      }
+    };
+    fill(0, 0); fill(0, size - 7); fill(size - 7, 0);
+    return grid;
+  }, [data]);
+  return (
+    <div className="w-full h-full bg-white p-1">
+      <svg viewBox="0 0 21 21" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+        {matrix.map((row, r) =>
+          row.map((v, c) => v ? <rect key={`${r}-${c}`} x={c} y={r} width={1} height={1} fill="#000" /> : null)
+        )}
+      </svg>
+    </div>
+  );
+}
 
 export default function DraggableBillElement({ element, billWidth, billHeight, onUpdate, onRemove, isInteractive }) {
   const elRef = useRef(null);
@@ -110,9 +172,54 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
       {element.type === "text" && (
         <div
           className="w-full h-full flex items-center justify-center text-black font-bold pointer-events-none select-none"
-          style={{ fontSize: Math.max(10, element.height * 0.5), fontFamily: "serif" }}
+          style={{
+            fontSize: element.fontSize || Math.max(10, element.height * 0.5),
+            fontFamily: element.fontFamily || "serif",
+            color: element.color || "#000",
+          }}
         >
           {element.content || "Text"}
+        </div>
+      )}
+      {element.type === "denomination" && (
+        <div
+          className="w-full h-full flex items-center justify-center text-black font-black pointer-events-none select-none"
+          style={{
+            fontSize: element.fontSize || Math.max(14, element.height * 0.7),
+            fontFamily: "serif",
+            textShadow: "0 0 4px rgba(255,255,255,0.8)",
+          }}
+        >
+          ${element.content || "100"}
+        </div>
+      )}
+      {element.type === "serial" && (
+        <div
+          className="w-full h-full flex items-center justify-center text-black font-mono pointer-events-none select-none"
+          style={{ fontSize: element.fontSize || Math.max(8, element.height * 0.4) }}
+        >
+          {element.content || "CC-000000"}
+        </div>
+      )}
+      {element.type === "barcode" && (
+        <MiniBarcode data={element.content || "CC-000000"} fontSize={Math.max(6, (element.height || 30) * 0.15)} />
+      )}
+      {element.type === "qr" && (
+        <MiniQR data={element.content || "https://dream-palace.com"} />
+      )}
+      {element.type === "watermark" && (
+        <div
+          className="w-full h-full flex items-center justify-center pointer-events-none select-none"
+          style={{
+            fontSize: element.fontSize || Math.max(12, element.height * 0.5),
+            fontFamily: "serif",
+            color: "rgba(0,0,0,0.2)",
+            fontWeight: "bold",
+            letterSpacing: "0.3em",
+            textTransform: "uppercase",
+          }}
+        >
+          {element.content || "CLUB CURRENCY"}
         </div>
       )}
 

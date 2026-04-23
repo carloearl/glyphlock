@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollText, Plus, CheckCircle, Printer, AlertCircle, Coins } from "lucide-react";
+import { ScrollText, Plus, CheckCircle, Printer, AlertCircle, Coins, FileText, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
+import {
+  VIP_ROOM_SERVICE_AGREEMENT,
+  GLYPHBUCKS_PURCHASE_AGREEMENT,
+  ENTERTAINER_LICENSE_AGREEMENT,
+} from "@/constants/contractText";
 
 const CONTRACT_TYPES = ["VIP Package", "GlyphBucks Purchase", "Entertainer Agreement", "Service Agreement", "Custom"];
 const PAYMENT_METHODS = ["Cash", "Credit Card", "Debit Card", "GlyphBucks", "Split"];
@@ -21,11 +27,42 @@ const STATUS_CONFIG = {
   disputed:  { color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/30" },
 };
 
+// Resolve the full legal text for a contract based on type
+function resolveContractText(contract, venue) {
+  const v = venue || { name: "Venue", address: "", age_requirement: 21 };
+  if (contract.contract_type === "GlyphBucks Purchase") {
+    return GLYPHBUCKS_PURCHASE_AGREEMENT(v, {
+      uuid: contract.contract_id || contract.id,
+      timestamp: contract.created_date ? new Date(contract.created_date).toLocaleString() : new Date().toLocaleString(),
+      customer_name: contract.customer_name || "",
+      total: (contract.contract_amount || 0).toFixed(2),
+      payment_method: contract.payment_method || "Card",
+      approval_code: contract.approval_code || "PENDING",
+      glyphbucks_serials: `${contract.glyphbucks_issued || 0} GB`,
+    });
+  }
+  if (contract.contract_type === "Entertainer Agreement") {
+    return ENTERTAINER_LICENSE_AGREEMENT(v);
+  }
+  // Default — VIP Package, Service Agreement, Custom
+  return VIP_ROOM_SERVICE_AGREEMENT(v, {
+    uuid: contract.contract_id || contract.id,
+    timestamp: contract.created_date ? new Date(contract.created_date).toLocaleString() : new Date().toLocaleString(),
+    guest_name: contract.customer_name || "Guest",
+    room_number: contract.vip_session_id || "—",
+    duration_minutes: 60,
+    minimum_spend: (contract.contract_amount || 0).toFixed(2),
+  });
+}
+
 export default function ContractManager({ user }) {
   const activeVenue = useActiveVenue();
   const venue_id = activeVenue?.venue_id;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [signingContract, setSigningContract] = useState(null);
+  const [signingScrolled, setSigningScrolled] = useState(false);
+  const [signingAgreed, setSigningAgreed] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [form, setForm] = useState({
     contract_type: "VIP Package",
@@ -37,6 +74,13 @@ export default function ContractManager({ user }) {
     payment_method: "Cash",
     notes: "",
   });
+
+  const { data: venues = [] } = useQuery({
+    queryKey: ["cm-venues"],
+    queryFn: () => base44.entities.Venue.list(),
+    initialData: [],
+  });
+  const currentVenue = venues?.[0] || activeVenue || { name: "Venue", address: "", age_requirement: 21 };
 
   const { data: contracts = [] } = useQuery({
     queryKey: ["venue-contracts", venue_id],
@@ -294,21 +338,26 @@ export default function ContractManager({ user }) {
                   </div>
                 </div>
                 <div className="flex gap-1 flex-col items-end">
+                  <Button variant="outline" size="sm"
+                    onClick={() => { setSigningContract(contract); setSigningScrolled(false); setSigningAgreed(false); }}
+                    className="text-xs border-purple-500/50 text-purple-400 min-h-[44px] min-w-[80px]">
+                    <FileText className="w-3 h-3 mr-1" /> View
+                  </Button>
                   {!contract.is_signed && (
                     <Button variant="outline" size="sm"
-                      onClick={() => signMutation.mutate(contract.id)}
+                      onClick={() => { setSigningContract(contract); setSigningScrolled(false); setSigningAgreed(false); }}
                       disabled={signMutation.isPending}
-                      className="text-xs border-orange-500/50 text-orange-400 min-h-[32px]">Sign</Button>
+                      className="text-xs border-orange-500/50 text-orange-400 min-h-[44px] min-w-[80px]">Sign</Button>
                   )}
                   {contract.status === "active" && (
                     <Button variant="outline" size="sm"
                       onClick={() => updateStatusMutation.mutate({ id: contract.id, status: "fulfilled" })}
-                      className="text-xs border-green-500/50 text-green-400 min-h-[32px]">Fulfill</Button>
+                      className="text-xs border-green-500/50 text-green-400 min-h-[44px] min-w-[80px]">Fulfill</Button>
                   )}
                   {contract.status === "active" && (
                     <Button variant="outline" size="sm"
                       onClick={() => updateStatusMutation.mutate({ id: contract.id, status: "voided" })}
-                      className="text-xs border-red-500/50 text-red-400 min-h-[32px]">Void</Button>
+                      className="text-xs border-red-500/50 text-red-400 min-h-[44px] min-w-[80px]">Void</Button>
                   )}
                 </div>
               </div>
@@ -316,6 +365,105 @@ export default function ContractManager({ user }) {
           );
         })}
       </div>
+
+      {/* ── FULL LEGAL CONTRACT VIEW + SIGN DIALOG ── */}
+      <Dialog open={!!signingContract} onOpenChange={(o) => !o && setSigningContract(null)}>
+        <DialogContent className="bg-gray-900 border-purple-500/30 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-purple-400 flex items-center gap-2">
+              <ScrollText className="w-5 h-5" />
+              {signingContract?.contract_type || "Contract"} — Full Legal Document
+            </DialogTitle>
+          </DialogHeader>
+
+          {signingContract && (
+            <div className="space-y-3 pt-2">
+              <div className="text-xs text-gray-400">
+                {signingContract.contract_id} · {signingContract.customer_name} ·
+                <span className="text-green-400 ml-1">${(signingContract.contract_amount || 0).toFixed(2)}</span>
+              </div>
+
+              {!signingContract.is_signed && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-white">
+                    <span className="font-bold">Scroll to the bottom</span> to read and accept before signing.
+                  </p>
+                </div>
+              )}
+
+              <div
+                onScroll={(e) => {
+                  const el = e.target;
+                  if (el.scrollHeight - el.scrollTop - el.clientHeight < 40) setSigningScrolled(true);
+                }}
+                className="bg-black/60 border border-gray-700 rounded-lg p-4 text-xs text-gray-300 leading-relaxed whitespace-pre-wrap font-mono max-h-[50vh] overflow-y-auto"
+              >
+                {resolveContractText(signingContract, currentVenue)}
+              </div>
+
+              {!signingContract.is_signed && (
+                <>
+                  {!signingScrolled && (
+                    <p className="text-center text-[11px] text-amber-400 animate-pulse">
+                      ↓ Scroll to bottom to enable signing ↓
+                    </p>
+                  )}
+                  {signingScrolled && (
+                    <p className="text-center text-[11px] text-green-400">✓ Contract fully read</p>
+                  )}
+                  <div
+                    className={`flex items-start gap-2 p-2.5 rounded-lg border transition-all ${
+                      signingScrolled
+                        ? "border-purple-500/30 bg-purple-500/5"
+                        : "border-gray-700 bg-gray-800/30 opacity-50 pointer-events-none"
+                    }`}
+                  >
+                    <Checkbox
+                      checked={signingAgreed}
+                      onCheckedChange={setSigningAgreed}
+                      className="mt-0.5"
+                      disabled={!signingScrolled}
+                    />
+                    <label
+                      className={`text-[11px] leading-relaxed ${signingScrolled ? "text-white cursor-pointer" : "text-gray-500"}`}
+                      onClick={() => signingScrolled && setSigningAgreed(!signingAgreed)}
+                    >
+                      I have read the entire agreement above and agree to all terms. This constitutes a legally binding signature.
+                    </label>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSigningContract(null)}
+                      className="flex-1 border-gray-700 min-h-[44px]"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        signMutation.mutate(signingContract.id);
+                        setSigningContract(null);
+                      }}
+                      disabled={!signingAgreed || !signingScrolled || signMutation.isPending}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 font-bold min-h-[44px]"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" /> Sign Contract
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {signingContract.is_signed && (
+                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <div className="text-sm text-green-400">Contract already signed {signingContract.signed_at ? `on ${new Date(signingContract.signed_at).toLocaleString()}` : ""}</div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
