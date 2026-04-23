@@ -11,7 +11,11 @@ const ROLES = [
   "VENUE_MANAGER", "BARTENDER", "FLOOR_HOST", "SECURITY", "DJ", "HOSTESS", "DOOR_GIRL"
 ];
 
-const EMPTY_FORM = { display_name: "", username: "", pin: "", role: "FLOOR_HOST", venue_id: "" };
+// Default venue — all live-system onboards are saved to Dream Palace unless explicitly overridden.
+const DEFAULT_VENUE_ID = "dream_palace";
+const DEFAULT_VENUE_NAME = "Dream Palace";
+
+const EMPTY_FORM = { display_name: "", username: "", pin: "", role: "FLOOR_HOST", venue_id: DEFAULT_VENUE_ID };
 
 export default function StaffOnboardingPanel() {
   const qc = useQueryClient();
@@ -30,6 +34,8 @@ export default function StaffOnboardingPanel() {
   const createStaff = useMutation({
     mutationFn: (data) => base44.entities.NUPSUser.create({
       ...data,
+      // Always route live-system onboards to Dream Palace DB when no venue is specified
+      venue_id: data.venue_id?.trim() || DEFAULT_VENUE_ID,
       is_active: true,
       created_by_manager: true,
     }),
@@ -134,13 +140,21 @@ export default function StaffOnboardingPanel() {
               </div>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Venue ID (optional)</label>
+              <label className="text-xs text-gray-400 mb-1 block flex items-center gap-2">
+                Venue ID
+                <span className="text-[10px] text-purple-400 font-semibold uppercase tracking-wide">
+                  Default: {DEFAULT_VENUE_NAME}
+                </span>
+              </label>
               <Input
-                placeholder="e.g. dream_palace"
+                placeholder={DEFAULT_VENUE_ID}
                 value={form.venue_id}
                 onChange={e => setForm(v => ({ ...v, venue_id: e.target.value }))}
                 className="bg-black/50 border-gray-700 text-white"
               />
+              <p className="text-[10px] text-gray-500 mt-1">
+                Leave as <code className="text-purple-300">{DEFAULT_VENUE_ID}</code> to save to the Dream Palace DB.
+              </p>
             </div>
             <div className="flex gap-2 pt-1">
               <Button
