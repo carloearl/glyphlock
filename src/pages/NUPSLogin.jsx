@@ -109,7 +109,12 @@ export default function NUPSLogin() {
                   placeholder="your.username"
                   required
                   autoComplete="username"
-                  className="w-full bg-black/50 border border-gray-700 focus:border-violet-500 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-600 text-sm outline-none transition-colors"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  inputMode="text"
+                  style={{ fontSize: '16px' }}
+                  className="w-full bg-black/50 border border-gray-700 focus:border-violet-500 rounded-xl pl-10 pr-4 py-3 min-h-[48px] text-white placeholder-gray-600 outline-none transition-colors"
                 />
               </div>
             </div>
@@ -128,14 +133,21 @@ export default function NUPSLogin() {
                   placeholder="••••••"
                   required
                   autoComplete="current-password"
-                  className="w-full bg-black/50 border border-gray-700 focus:border-violet-500 rounded-xl pl-10 pr-10 py-3 text-white placeholder-gray-600 text-sm outline-none transition-colors"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  inputMode={showPin ? "text" : "numeric"}
+                  style={{ fontSize: '16px' }}
+                  className="w-full bg-black/50 border border-gray-700 focus:border-violet-500 rounded-xl pl-10 pr-14 py-3 min-h-[48px] text-white placeholder-gray-600 outline-none transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPin(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                  aria-label={showPin ? "Hide PIN" : "Show PIN"}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors w-11 h-11 flex items-center justify-center rounded-lg"
+                  style={{ touchAction: 'manipulation' }}
                 >
-                  {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPin ? <EyeOff className="w-5 h-5 pointer-events-none" /> : <Eye className="w-5 h-5 pointer-events-none" />}
                 </button>
               </div>
             </div>
@@ -152,7 +164,8 @@ export default function NUPSLogin() {
             <Button
               type="submit"
               disabled={loading || !username || !pin}
-              className="w-full h-12 bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] rounded-xl font-bold disabled:opacity-40 mt-2"
+              style={{ touchAction: 'manipulation' }}
+              className="w-full min-h-[52px] h-13 bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] rounded-xl font-bold text-base disabled:opacity-40 mt-2 active:scale-[0.98] transition-transform"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -170,8 +183,10 @@ export default function NUPSLogin() {
         </div>
 
         <button
+          type="button"
           onClick={() => navigate("/NUPSLanding")}
-          className="block mx-auto mt-4 text-xs text-gray-600 hover:text-gray-400 transition-colors"
+          style={{ touchAction: 'manipulation' }}
+          className="block mx-auto mt-4 px-4 py-3 min-h-[44px] text-xs text-gray-600 hover:text-gray-400 transition-colors"
         >
           ← Back to NUPS Home
         </button>
