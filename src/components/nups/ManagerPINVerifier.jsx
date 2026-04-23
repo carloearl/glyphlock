@@ -16,11 +16,32 @@ export default function ManagerPINVerifier({ onVerified, onCancel, purpose = "au
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [overriding, setOverriding] = useState(false);
   const refs = [useRef(), useRef(), useRef()];
 
   useEffect(() => {
     refs[0].current?.focus();
+    // Load current session user to enable admin override
+    base44.auth.me()
+      .then(u => setCurrentUser(u))
+      .catch(() => setCurrentUser(null));
   }, []);
+
+  const isAdmin = currentUser?.role === 'admin';
+
+  const handleAdminOverride = async () => {
+    if (!isAdmin) return;
+    setOverriding(true);
+    toast.success(`Admin override: ${currentUser.full_name || currentUser.email}`);
+    onVerified({
+      managerId: currentUser.id,
+      managerName: currentUser.full_name || currentUser.email,
+      managerEmail: currentUser.email,
+      managerPin: "ADMIN_OVERRIDE",
+      adminOverride: true
+    });
+  };
 
   const handleDigit = (idx, val) => {
     const digit = val.replace(/\D/g, "").slice(-1);
@@ -174,6 +195,28 @@ export default function ManagerPINVerifier({ onVerified, onCancel, purpose = "au
               </p>
             )}
           </>
+        )}
+
+        {/* Admin Override — only visible to logged-in admin in current session */}
+        {isAdmin && !locked && (
+          <div className="pt-3 border-t border-gray-800">
+            <Button
+              onClick={handleAdminOverride}
+              disabled={overriding}
+              className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold border border-red-400/50 shadow-[0_0_20px_rgba(239,68,68,0.35)]"
+            >
+              {overriding ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <Shield className="w-4 h-4 mr-2" />
+              )}
+              Admin Override ({currentUser?.full_name || currentUser?.email})
+            </Button>
+            <p className="text-[10px] text-red-400/80 text-center mt-2">
+              <CheckCircle2 className="w-3 h-3 inline mr-1" />
+              Bypasses PIN — session-scoped, admin only
+            </p>
+          </div>
         )}
 
         <div className="text-[10px] text-gray-600 text-center">
