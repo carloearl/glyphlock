@@ -10,11 +10,9 @@
       "type": "string",
       "enum": [
         "REAL",
-        "DEMO",
-        "SANDBOX"
+        "DEMO"
       ],
-      "default": "DEMO",
-      "description": "Layer 1 of the three-layer mode resolver. Operator-set platform default."
+      "description": "Active platform mode. Single source of truth for writeEntity gateway."
     },
     "tier": {
       "type": "string",

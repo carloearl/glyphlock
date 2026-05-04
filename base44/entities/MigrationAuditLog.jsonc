@@ -35,8 +35,7 @@
       "type": "string",
       "enum": [
         "REAL",
-        "DEMO",
-        "SANDBOX"
+        "DEMO"
       ],
       "description": "Operating mode at time of write"
     },
@@ -55,14 +54,9 @@
       "type": "string",
       "enum": [
         "allowed",
-        "warned",
         "blocked"
       ],
       "description": "Gateway decision"
-    },
-    "warning_reason": {
-      "type": "string",
-      "description": "If warned, why"
     },
     "block_reason": {
       "type": "string",

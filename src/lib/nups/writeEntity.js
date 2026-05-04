@@ -22,7 +22,9 @@ const FINANCIAL_AUTHORIZED_ROLES = new Set([
   'SOVEREIGN',
 ]);
 
-const DEMO_TOUCH_ENTITIES = [
+const PROTECTED_ENTITIES = new Set(['SystemConfig', 'MigrationAuditLog']);
+
+const DEMO_PRESENCE_CHECK_ENTITIES = [
   'NUPSUser',
   'POSTransaction',
   'POSBatch',
@@ -32,6 +34,9 @@ const DEMO_TOUCH_ENTITIES = [
   'GlyphBucksTransaction',
   'VenueContract',
 ];
+
+const GLYPHBUCKS_FIELD_PATTERN = /glyph[_-]?bucks?/i;
+const GLYPHBUCKS_FORBIDDEN_TARGETS = ['total_sales', 'subtotal', 'total'];
 
 const TWO_CENTS = 0.02;
 const approxEqual = (a, b) => Math.abs((Number(a) || 0) - (Number(b) || 0)) <= TWO_CENTS;
@@ -75,13 +80,41 @@ async function resolveMode(requestContextMode) {
     return requestContextMode;
   }
   const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-  const m = rows?.[0]?.mode;
-  if (!VALID_MODES.has(m)) throw new Error(`writeEntity: mode_unset_or_invalid: ${m || 'null'}`);
+  if (!rows || rows.length === 0) {
+    throw new Error('writeEntity: SystemConfig_global_missing');
+  }
+  if (rows.length > 1) {
+    throw new Error(`writeEntity: SystemConfig_global_duplicate: ${rows.length}_records_found`);
+  }
+  const m = rows[0].mode;
+  if (!VALID_MODES.has(m)) throw new Error(`writeEntity: mode_invalid: ${m || 'null'}`);
   return m;
+}
+
+function checkGlyphBucksLeakage(data) {
+  if (!data || typeof data !== 'object') return null;
+  for (const key of Object.keys(data)) {
+    if (!GLYPHBUCKS_FIELD_PATTERN.test(key)) continue;
+    const v = data[key];
+    if (v === undefined || v === null || v === false || v === 0 || v === '') continue;
+    if (GLYPHBUCKS_FORBIDDEN_TARGETS.includes(key)) {
+      return `glyphbucks_field_forbidden_in_protected_target: ${key}`;
+    }
+  }
+  for (const target of GLYPHBUCKS_FORBIDDEN_TARGETS) {
+    const v = data[target];
+    if (typeof v === 'string' && GLYPHBUCKS_FIELD_PATTERN.test(v)) {
+      return `glyphbucks_value_forbidden_in: ${target}`;
+    }
+  }
+  return null;
 }
 
 function validateFinancialRules(entity, data) {
   if (!data || typeof data !== 'object') return null;
+
+  const gbLeak = checkGlyphBucksLeakage(data);
+  if (gbLeak) return gbLeak;
 
   if (entity === 'POSZReport') {
     const cash = Number(data.cash_sales) || 0;
@@ -92,13 +125,6 @@ function validateFinancialRules(entity, data) {
         return `total_sales_must_equal_cash_plus_card: expected ${cash + card}, got ${total}`;
       }
     }
-    if (data.vip_revenue !== undefined && Number(data.vip_revenue) !== 0 && data.total_sales !== undefined) {
-      const total = Number(data.total_sales);
-      if (!approxEqual(total, cash + card)) {
-        return 'vip_revenue_must_not_inflate_total_sales';
-      }
-    }
-    if (data.glyphbucks_in_total === true) return 'glyphbucks_forbidden_in_total_sales';
     if (data.tips_in_total === true) return 'tips_forbidden_in_total_sales';
   }
 
@@ -111,9 +137,6 @@ function validateFinancialRules(entity, data) {
       if (!approxEqual(total, sub + tax + tip)) {
         return `pos_total_must_equal_subtotal_plus_tax_plus_tip: expected ${sub + tax + tip}, got ${total}`;
       }
-    }
-    if (data.payment_method === 'GlyphBucks' && Number(data.subtotal) > 0) {
-      return 'glyphbucks_forbidden_in_subtotal';
     }
   }
 
@@ -300,7 +323,10 @@ export async function toggleMode({ actor, newMode }) {
   if (!VALID_MODES.has(newMode)) throw new Error(`toggleMode: invalid_mode: ${newMode}`);
 
   const existing = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-  if (existing && existing.length > 0) {
+  if (existing && existing.length > 1) {
+    throw new Error(`toggleMode: SystemConfig_global_duplicate: ${existing.length}_records_found`);
+  }
+  if (existing && existing.length === 1) {
     await base44.entities.SystemConfig.update(existing[0].id, { mode: newMode });
   } else {
     await base44.entities.SystemConfig.create({ config_key: 'global', mode: newMode });
@@ -325,9 +351,12 @@ export async function seedDemoEcosystem({ actor }) {
   validateActor(actor);
   if (!isActorSovereign(actor)) throw new Error('seedDemoEcosystem: SOVEREIGN_REQUIRED');
 
-  const existing = await base44.entities.NUPSUser.filter({ mode: 'DEMO' });
-  if (existing && existing.length > 0) {
-    return { ok: false, reason: 'already_seeded' };
+  for (const entityName of DEMO_PRESENCE_CHECK_ENTITIES) {
+    if (!base44.entities[entityName]) continue;
+    const rows = await base44.entities[entityName].filter({ mode: 'DEMO' });
+    if (rows && rows.length > 0) {
+      return { ok: false, reason: 'already_seeded', detected_in: entityName };
+    }
   }
 
   const venue_id = 'DEMO_VENUE_001';
@@ -437,12 +466,28 @@ export async function clearDemoEcosystem({ actor }) {
   if (!isActorSovereign(actor)) throw new Error('clearDemoEcosystem: SOVEREIGN_REQUIRED');
 
   const removed = {};
-  for (const entityName of DEMO_TOUCH_ENTITIES) {
-    if (!base44.entities[entityName]) continue;
-    const rows = await base44.entities[entityName].filter({ mode: 'DEMO' });
+  const skipped = [];
+  const allEntityNames = Object.keys(base44.entities || {});
+
+  for (const entityName of allEntityNames) {
+    if (PROTECTED_ENTITIES.has(entityName)) {
+      skipped.push(entityName);
+      continue;
+    }
+    const ent = base44.entities[entityName];
+    if (!ent || typeof ent.filter !== 'function') continue;
+
+    let rows;
+    try {
+      rows = await ent.filter({ mode: 'DEMO' });
+    } catch {
+      continue;
+    }
+    if (!rows || rows.length === 0) continue;
+
     let count = 0;
-    for (const r of rows || []) {
-      await base44.entities[entityName].delete(r.id);
+    for (const r of rows) {
+      await ent.delete(r.id);
       count += 1;
     }
     removed[entityName] = count;
@@ -457,8 +502,8 @@ export async function clearDemoEcosystem({ actor }) {
     mode: 'DEMO',
     tier: 'TIER_1_OBSERVE',
     result: 'allowed',
-    notes: `clearDemoEcosystem: ${JSON.stringify(removed)}`,
+    notes: `clearDemoEcosystem: removed=${JSON.stringify(removed)} skipped=${JSON.stringify(skipped)}`,
   });
 
-  return { ok: true, removed };
+  return { ok: true, removed, skipped };
 }
