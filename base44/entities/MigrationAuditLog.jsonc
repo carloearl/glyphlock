@@ -1,0 +1,84 @@
+{
+  "name": "MigrationAuditLog",
+  "type": "object",
+  "properties": {
+    "entity_name": {
+      "type": "string",
+      "description": "Target entity of the write operation"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "bulkCreate"
+      ],
+      "description": "Write operation type"
+    },
+    "actor_id": {
+      "type": "string",
+      "description": "NUPSUser id or email of the actor"
+    },
+    "actor_role": {
+      "type": "string",
+      "description": "Role of the actor at time of write"
+    },
+    "fields_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of field names written"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "description": "Operating mode at time of write"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "TIER_1_OBSERVE",
+        "TIER_2_LOCKED",
+        "TIER_3_SECTIONAL",
+        "TIER_4_TOTAL"
+      ],
+      "default": "TIER_1_OBSERVE",
+      "description": "Active enforcement tier"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "allowed",
+        "warned",
+        "blocked"
+      ],
+      "description": "Gateway decision"
+    },
+    "warning_reason": {
+      "type": "string",
+      "description": "If warned, why"
+    },
+    "block_reason": {
+      "type": "string",
+      "description": "If blocked, why"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-form context"
+    }
+  },
+  "required": [
+    "entity_name",
+    "operation",
+    "result"
+  ]
+}

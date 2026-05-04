@@ -1,0 +1,50 @@
+{
+  "name": "SystemConfig",
+  "type": "object",
+  "properties": {
+    "config_key": {
+      "type": "string",
+      "description": "Unique config key. Use 'global' for platform-wide settings."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "DEMO",
+      "description": "Layer 1 of the three-layer mode resolver. Operator-set platform default."
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "TIER_1_OBSERVE",
+        "TIER_2_LOCKED",
+        "TIER_3_SECTIONAL",
+        "TIER_4_TOTAL"
+      ],
+      "default": "TIER_1_OBSERVE",
+      "description": "Active write-gateway enforcement tier."
+    },
+    "sovereign_user_id": {
+      "type": "string",
+      "description": "NUPSUser id of the bound SOVEREIGN account. Set once at bootstrap."
+    },
+    "sovereign_email": {
+      "type": "string",
+      "description": "Email of the bound SOVEREIGN account."
+    },
+    "bootstrap_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When SOVEREIGN was first bound. Immutable."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "config_key"
+  ]
+}

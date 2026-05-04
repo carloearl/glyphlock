@@ -1,0 +1,123 @@
+{
+  "name": "NUPSUser",
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string",
+      "description": "Unique username for NUPS login"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this user belongs to"
+    },
+    "pin": {
+      "type": "string",
+      "description": "PIN code for quick access"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full name of staff member"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "PLATFORM_ADMIN",
+        "VENUE_OWNER",
+        "VENUE_MANAGER",
+        "FLOOR_HOST",
+        "PERFORMER",
+        "BARTENDER",
+        "SECURITY",
+        "DJ",
+        "KIOSK",
+        "DEMO",
+        "SOVEREIGN"
+      ],
+      "default": "BARTENDER",
+      "description": "RBAC role per \u00a79.2. SOVEREIGN = DACO-level override (Carlo only). DEMO = underwriter/licensee sandbox access"
+    },
+    "sovereign_flag": {
+      "type": "boolean",
+      "default": false,
+      "description": "DACO OMEGA v6.0: True only for the single SOVEREIGN account (Carlo). Bypasses all RBAC checks. Cannot be set via UI \u2014 must be set via direct entity update by platform admin."
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Employee ID number"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "emergency_contact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "terminated"
+      ],
+      "default": "active"
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = demo/test account for underwriters, licensees, partners. Routes to NUPSSandbox."
+    },
+    "demo_tier": {
+      "type": "string",
+      "enum": [
+        "full_demo",
+        "owner_view",
+        "staff_view",
+        "entertainer_view"
+      ],
+      "description": "Controls which demo view the user lands on"
+    },
+    "demo_expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "demo_label": {
+      "type": "string"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_login": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "username",
+    "full_name",
+    "role"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
