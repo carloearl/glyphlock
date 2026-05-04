@@ -1,10 +1,6 @@
-// DACO OMEGA v6.0 — Phase 4: writeEntity() gateway (hardened)
-
 import { base44 } from '@/api/base44Client';
-import { getMode } from '@/lib/nups/modeResolver';
-import { isSovereign } from '@/lib/nups/sovereign';
 
-const VALID_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
+const VALID_MODES = new Set(['REAL', 'DEMO']);
 
 const FINANCIAL_ENTITIES = new Set([
   'POSTransaction',
@@ -26,6 +22,17 @@ const FINANCIAL_AUTHORIZED_ROLES = new Set([
   'SOVEREIGN',
 ]);
 
+const DEMO_TOUCH_ENTITIES = [
+  'NUPSUser',
+  'POSTransaction',
+  'POSBatch',
+  'POSZReport',
+  'TipPayout',
+  'PayrollRecord',
+  'GlyphBucksTransaction',
+  'VenueContract',
+];
+
 const TWO_CENTS = 0.02;
 const approxEqual = (a, b) => Math.abs((Number(a) || 0) - (Number(b) || 0)) <= TWO_CENTS;
 
@@ -36,9 +43,7 @@ async function audit(entry) {
     const created = await base44.entities.MigrationAuditLog.create(entry);
     return created?.id || null;
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('[writeEntity] MigrationAuditLog write failed', e);
-    return null;
+    throw new Error(`audit_write_failed: ${e.message}`);
   }
 }
 
@@ -48,35 +53,70 @@ function fieldsOf(data) {
 }
 
 function validateActor(actor) {
-  if (!actor || typeof actor !== 'object') return 'actor_required';
+  if (!actor || typeof actor !== 'object') throw new Error('writeEntity: actor_required');
   const id = actor.id || actor.email;
-  if (!id) return 'actor_id_or_email_required';
-  if (!actor.role) return 'actor_role_required';
-  return null;
+  if (!id) throw new Error('writeEntity: actor_id_or_email_required');
+  if (!actor.role) throw new Error('writeEntity: actor_role_required');
+  return { actorId: id, role: actor.role };
 }
 
-/**
- * Frozen financial invariants. Returns null if valid, or a string reason if invalid.
- * Applies per-record. Bulk validation calls this for every record.
- */
+function isActorSovereign(actor) {
+  if (!actor) return false;
+  if (actor.sovereign_flag === true) return true;
+  if (actor.role === 'SOVEREIGN') return true;
+  return false;
+}
+
+async function resolveMode(requestContextMode) {
+  if (requestContextMode) {
+    if (!VALID_MODES.has(requestContextMode)) {
+      throw new Error(`writeEntity: invalid_mode: ${requestContextMode}`);
+    }
+    return requestContextMode;
+  }
+  const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
+  const m = rows?.[0]?.mode;
+  if (!VALID_MODES.has(m)) throw new Error(`writeEntity: mode_unset_or_invalid: ${m || 'null'}`);
+  return m;
+}
+
 function validateFinancialRules(entity, data) {
   if (!data || typeof data !== 'object') return null;
 
-  // POSZReport: total_sales = cash_sales + card_sales (REAL transactions only).
   if (entity === 'POSZReport') {
     const cash = Number(data.cash_sales) || 0;
     const card = Number(data.card_sales) || 0;
-    const total = Number(data.total_sales);
-    if (data.total_sales !== undefined && !approxEqual(total, cash + card)) {
-      return `total_sales_mismatch: expected ${cash + card}, got ${total}`;
+    if (data.total_sales !== undefined) {
+      const total = Number(data.total_sales);
+      if (!approxEqual(total, cash + card)) {
+        return `total_sales_must_equal_cash_plus_card: expected ${cash + card}, got ${total}`;
+      }
     }
-    // GlyphBucks must never appear in total_sales
-    if (data.glyphbucks_in_total === true) {
-      return 'glyphbucks_must_not_be_in_total_sales';
+    if (data.vip_revenue !== undefined && Number(data.vip_revenue) !== 0 && data.total_sales !== undefined) {
+      const total = Number(data.total_sales);
+      if (!approxEqual(total, cash + card)) {
+        return 'vip_revenue_must_not_inflate_total_sales';
+      }
+    }
+    if (data.glyphbucks_in_total === true) return 'glyphbucks_forbidden_in_total_sales';
+    if (data.tips_in_total === true) return 'tips_forbidden_in_total_sales';
+  }
+
+  if (entity === 'POSTransaction') {
+    if (data.total !== undefined) {
+      const sub = Number(data.subtotal) || 0;
+      const tax = Number(data.tax) || 0;
+      const tip = Number(data.tip) || 0;
+      const total = Number(data.total);
+      if (!approxEqual(total, sub + tax + tip)) {
+        return `pos_total_must_equal_subtotal_plus_tax_plus_tip: expected ${sub + tax + tip}, got ${total}`;
+      }
+    }
+    if (data.payment_method === 'GlyphBucks' && Number(data.subtotal) > 0) {
+      return 'glyphbucks_forbidden_in_subtotal';
     }
   }
 
-  // GlyphBucksTransaction: amount required, non-zero, must carry expires_at on Issue.
   if (entity === 'GlyphBucksTransaction') {
     if (data.amount === undefined || Number(data.amount) === 0) {
       return 'glyphbucks_amount_required_nonzero';
@@ -86,7 +126,6 @@ function validateFinancialRules(entity, data) {
     }
   }
 
-  // TipPayout: deprecated 70/15/10/5 split is forbidden; entertainers excluded from staff pool.
   if (entity === 'TipPayout') {
     const c = data.split_config || {};
     if (
@@ -102,18 +141,12 @@ function validateFinancialRules(entity, data) {
     }
   }
 
-  // POSTransaction: total >= subtotal + tax (tip optional, additive).
-  if (entity === 'POSTransaction') {
-    const sub = Number(data.subtotal) || 0;
-    const tax = Number(data.tax) || 0;
-    const tip = Number(data.tip) || 0;
-    const total = Number(data.total);
-    if (data.total !== undefined && total + TWO_CENTS < sub + tax + tip - TWO_CENTS) {
-      return `pos_total_mismatch: expected >= ${sub + tax + tip}, got ${total}`;
-    }
-  }
-
   return null;
+}
+
+function injectMode(record, mode) {
+  if (!record || typeof record !== 'object') return record;
+  return { ...record, mode };
 }
 
 export async function writeEntity({
@@ -126,32 +159,16 @@ export async function writeEntity({
   venue_id,
   requestContext,
 }) {
-  if (!entity) throw new Error('writeEntity: entity required');
-  if (!operation) throw new Error('writeEntity: operation required');
+  if (!entity) throw new Error('writeEntity: entity_required');
+  if (!operation) throw new Error('writeEntity: operation_required');
+  if (!base44.entities[entity]) throw new Error(`writeEntity: unknown_entity: ${entity}`);
 
-  // 3. Actor identity required
-  const actorErr = validateActor(actor);
-  if (actorErr) throw new Error(`writeEntity: ${actorErr}`);
-
-  // 2. Mandatory mode validation
-  let mode;
-  if (requestContext?.mode) {
-    if (!VALID_MODES.has(requestContext.mode)) {
-      throw new Error(`writeEntity: invalid mode in requestContext: ${requestContext.mode}`);
-    }
-    mode = requestContext.mode;
-  } else {
-    mode = await getMode();
-    if (!VALID_MODES.has(mode)) throw new Error(`writeEntity: resolver returned invalid mode: ${mode}`);
-  }
-
+  const { actorId, role } = validateActor(actor);
+  const mode = await resolveMode(requestContext?.mode);
   const tier = 'TIER_1_OBSERVE';
   const isFinancial = FINANCIAL_ENTITIES.has(entity);
-  const sovereign = isSovereign(actor);
-  const role = actor.role;
-  const actorId = actor.id || actor.email;
+  const sovereign = isActorSovereign(actor);
 
-  // REAL-mode role guard
   if (mode === 'REAL' && isFinancial && !sovereign && !FINANCIAL_AUTHORIZED_ROLES.has(role)) {
     const audit_id = await audit({
       entity_name: entity,
@@ -169,11 +186,23 @@ export async function writeEntity({
     return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `role_not_authorized_in_REAL: ${role}` };
   }
 
-  // 1 & 4. Financial rules — per record (incl. bulkCreate).
   if (isFinancial) {
     const records = operation === 'bulkCreate' ? (Array.isArray(data) ? data : []) : [data];
     if (operation === 'bulkCreate' && records.length === 0) {
-      throw new Error('writeEntity: bulkCreate requires non-empty array');
+      const audit_id = await audit({
+        entity_name: entity,
+        operation,
+        actor_id: actorId,
+        actor_role: role,
+        fields_changed: [],
+        mode,
+        tier,
+        result: 'blocked',
+        block_reason: 'bulkCreate_requires_nonempty_array',
+        venue_id: venue_id || null,
+        notes: intent || null,
+      });
+      return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: 'bulkCreate_requires_nonempty_array' };
     }
     for (let i = 0; i < records.length; i += 1) {
       const reason = validateFinancialRules(entity, records[i]);
@@ -203,29 +232,36 @@ export async function writeEntity({
     }
   }
 
-  // Perform write
-  let value = null;
-  let error = null;
-  try {
-    if (operation === 'create') {
-      value = await base44.entities[entity].create(data);
-    } else if (operation === 'update') {
-      if (!id) throw new Error('writeEntity: id required for update');
-      value = await base44.entities[entity].update(id, data);
-    } else if (operation === 'delete') {
-      if (!id) throw new Error('writeEntity: id required for delete');
-      value = await base44.entities[entity].delete(id);
-    } else if (operation === 'bulkCreate') {
-      value = await base44.entities[entity].bulkCreate(data);
-    } else {
-      throw new Error(`writeEntity: unknown operation ${operation}`);
-    }
-  } catch (e) {
-    error = e;
+  let stamped;
+  if (operation === 'bulkCreate') {
+    stamped = (data || []).map((r) => injectMode(r, mode));
+  } else if (operation === 'create' || operation === 'update') {
+    stamped = injectMode(data, mode);
+  } else {
+    stamped = data;
   }
 
-  // 5. No "warned" success — failures are blocked.
-  if (error) {
+  let value = null;
+  let writeError = null;
+  try {
+    if (operation === 'create') {
+      value = await base44.entities[entity].create(stamped);
+    } else if (operation === 'update') {
+      if (!id) throw new Error('writeEntity: id_required_for_update');
+      value = await base44.entities[entity].update(id, stamped);
+    } else if (operation === 'delete') {
+      if (!id) throw new Error('writeEntity: id_required_for_delete');
+      value = await base44.entities[entity].delete(id);
+    } else if (operation === 'bulkCreate') {
+      value = await base44.entities[entity].bulkCreate(stamped);
+    } else {
+      throw new Error(`writeEntity: unknown_operation: ${operation}`);
+    }
+  } catch (e) {
+    writeError = e;
+  }
+
+  if (writeError) {
     const audit_id = await audit({
       entity_name: entity,
       operation,
@@ -235,11 +271,11 @@ export async function writeEntity({
       mode,
       tier,
       result: 'blocked',
-      block_reason: `write_failed: ${error.message}`,
+      block_reason: `write_failed: ${writeError.message}`,
       venue_id: venue_id || null,
       notes: intent || null,
     });
-    return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `write_failed: ${error.message}` };
+    return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `write_failed: ${writeError.message}` };
   }
 
   const audit_id = await audit({
@@ -258,24 +294,171 @@ export async function writeEntity({
   return { ok: true, audit_id, mode, tier, result: 'allowed', value };
 }
 
-/**
- * Direct-write bypass logger (legacy migration aid). Records as 'blocked'
- * since "warned" is no longer a success state — this is informational only.
- */
-export async function logDirectWriteBypass({ entity, operation, actor, intent, venue_id }) {
-  const actorErr = validateActor(actor);
-  if (actorErr) throw new Error(`logDirectWriteBypass: ${actorErr}`);
-  return audit({
-    entity_name: entity,
-    operation,
+export async function toggleMode({ actor, newMode }) {
+  validateActor(actor);
+  if (!isActorSovereign(actor)) throw new Error('toggleMode: SOVEREIGN_REQUIRED');
+  if (!VALID_MODES.has(newMode)) throw new Error(`toggleMode: invalid_mode: ${newMode}`);
+
+  const existing = await base44.entities.SystemConfig.filter({ config_key: 'global' });
+  if (existing && existing.length > 0) {
+    await base44.entities.SystemConfig.update(existing[0].id, { mode: newMode });
+  } else {
+    await base44.entities.SystemConfig.create({ config_key: 'global', mode: newMode });
+  }
+
+  await audit({
+    entity_name: 'SystemConfig',
+    operation: 'update',
     actor_id: actor.id || actor.email,
     actor_role: actor.role,
-    fields_changed: [],
-    mode: await getMode(),
+    fields_changed: ['mode'],
+    mode: newMode,
     tier: 'TIER_1_OBSERVE',
-    result: 'blocked',
-    block_reason: 'direct_write_bypass',
-    venue_id: venue_id || null,
-    notes: intent || 'legacy_direct_write',
+    result: 'allowed',
+    notes: `toggleMode -> ${newMode}`,
   });
+
+  return { ok: true, mode: newMode };
+}
+
+export async function seedDemoEcosystem({ actor }) {
+  validateActor(actor);
+  if (!isActorSovereign(actor)) throw new Error('seedDemoEcosystem: SOVEREIGN_REQUIRED');
+
+  const existing = await base44.entities.NUPSUser.filter({ mode: 'DEMO' });
+  if (existing && existing.length > 0) {
+    return { ok: false, reason: 'already_seeded' };
+  }
+
+  const venue_id = 'DEMO_VENUE_001';
+  const created = { staff: [], batches: [], transactions: [], tipPayouts: [] };
+
+  const staffSeed = [
+    { username: 'demo_mgr', full_name: 'Demo Manager', role: 'VENUE_MANAGER', pin: '1111', employee_id: 'MGR-DEMO-001' },
+    { username: 'demo_bar', full_name: 'Demo Bartender', role: 'BARTENDER', pin: '2222', employee_id: 'BAR-DEMO-001' },
+    { username: 'demo_door', full_name: 'Demo Door Girl', role: 'FLOOR_HOST', pin: '3333', employee_id: 'DOOR-DEMO-001' },
+    { username: 'demo_host', full_name: 'Demo Hostess', role: 'FLOOR_HOST', pin: '4444', employee_id: 'HOST-DEMO-001' },
+  ];
+  for (const s of staffSeed) {
+    const row = await base44.entities.NUPSUser.create({
+      ...s,
+      venue_id,
+      is_demo: true,
+      status: 'active',
+      mode: 'DEMO',
+    });
+    created.staff.push(row.id);
+  }
+
+  const start = new Date();
+  const end = new Date(start.getTime() + 6 * 60 * 60 * 1000);
+  const batch = await base44.entities.POSBatch.create({
+    batch_id: `DEMO-BATCH-${Date.now()}`,
+    venue_id,
+    start_time: start.toISOString(),
+    end_time: end.toISOString(),
+    opening_cash: 300,
+    closing_cash: 845,
+    total_sales: 545,
+    transaction_count: 2,
+    cashier: 'demo_bar',
+    status: 'closed',
+    mode: 'DEMO',
+  });
+  created.batches.push(batch.id);
+
+  const tx1 = await base44.entities.POSTransaction.create({
+    transaction_id: `DEMO-TX-${Date.now()}-A`,
+    venue_id,
+    items: [{ product_name: 'Demo Beer', quantity: 2, price: 12, total: 24 }],
+    subtotal: 24,
+    tax: 1.92,
+    tip: 5,
+    total: 30.92,
+    payment_method: 'Cash',
+    cashier: 'demo_bar',
+    status: 'completed',
+    mode: 'DEMO',
+  });
+  created.transactions.push(tx1.id);
+
+  const tx2 = await base44.entities.POSTransaction.create({
+    transaction_id: `DEMO-TX-${Date.now()}-B`,
+    venue_id,
+    items: [{ product_name: 'Demo Cocktail', quantity: 1, price: 18, total: 18 }],
+    subtotal: 18,
+    tax: 1.44,
+    tip: 4,
+    total: 23.44,
+    payment_method: 'Credit Card',
+    cashier: 'demo_bar',
+    status: 'completed',
+    mode: 'DEMO',
+  });
+  created.transactions.push(tx2.id);
+
+  const tipPayout = await base44.entities.TipPayout.create({
+    payout_date: new Date().toISOString().slice(0, 10),
+    venue_id,
+    total_tips: 200,
+    split_config: {
+      bucket: 'BUCKET_1_STAFF_POOL',
+      manager: 0.30,
+      hostess: 0.20,
+      asst_manager: 0.10,
+      dj: 0.10,
+      security_doorman_remainder: 0.30,
+    },
+    signatures: [],
+    manager_email: actor.email || actor.id,
+    status: 'pending',
+    mode: 'DEMO',
+  });
+  created.tipPayouts.push(tipPayout.id);
+
+  await audit({
+    entity_name: 'multi',
+    operation: 'create',
+    actor_id: actor.id || actor.email,
+    actor_role: actor.role,
+    fields_changed: ['staff', 'batches', 'transactions', 'tipPayouts'],
+    mode: 'DEMO',
+    tier: 'TIER_1_OBSERVE',
+    result: 'allowed',
+    venue_id,
+    notes: `seedDemoEcosystem: ${JSON.stringify(created)}`,
+  });
+
+  return { ok: true, mode: 'DEMO', venue_id, created };
+}
+
+export async function clearDemoEcosystem({ actor }) {
+  validateActor(actor);
+  if (!isActorSovereign(actor)) throw new Error('clearDemoEcosystem: SOVEREIGN_REQUIRED');
+
+  const removed = {};
+  for (const entityName of DEMO_TOUCH_ENTITIES) {
+    if (!base44.entities[entityName]) continue;
+    const rows = await base44.entities[entityName].filter({ mode: 'DEMO' });
+    let count = 0;
+    for (const r of rows || []) {
+      await base44.entities[entityName].delete(r.id);
+      count += 1;
+    }
+    removed[entityName] = count;
+  }
+
+  await audit({
+    entity_name: 'multi',
+    operation: 'delete',
+    actor_id: actor.id || actor.email,
+    actor_role: actor.role,
+    fields_changed: Object.keys(removed),
+    mode: 'DEMO',
+    tier: 'TIER_1_OBSERVE',
+    result: 'allowed',
+    notes: `clearDemoEcosystem: ${JSON.stringify(removed)}`,
+  });
+
+  return { ok: true, removed };
 }
