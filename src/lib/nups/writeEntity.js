@@ -1,4 +1,5 @@
 import { base44 } from '@/api/base44Client';
+import * as SEED from './demoSeedData';
 
 const VALID_MODES = new Set(['REAL', 'DEMO']);
 
@@ -347,118 +348,77 @@ export async function toggleMode({ actor, newMode }) {
   return { ok: true, mode: newMode };
 }
 
+async function createMany(entityName, records, idKey) {
+  const ent = base44.entities[entityName];
+  if (!ent) return [];
+  const ids = [];
+  for (const r of records) {
+    const row = await ent.create({ ...r, mode: 'DEMO' });
+    ids.push(row?.[idKey] || row?.id);
+  }
+  return ids;
+}
+
+async function createOne(entityName, record) {
+  const ent = base44.entities[entityName];
+  if (!ent || !record) return null;
+  const row = await ent.create({ ...record, mode: 'DEMO' });
+  return row?.id || null;
+}
+
 export async function seedDemoEcosystem({ actor }) {
   validateActor(actor);
   if (!isActorSovereign(actor)) throw new Error('seedDemoEcosystem: SOVEREIGN_REQUIRED');
 
-  for (const entityName of DEMO_PRESENCE_CHECK_ENTITIES) {
-    if (!base44.entities[entityName]) continue;
-    const rows = await base44.entities[entityName].filter({ mode: 'DEMO' });
-    if (rows && rows.length > 0) {
-      return { ok: false, reason: 'already_seeded', detected_in: entityName };
-    }
-  }
+  // Auto-wipe: clear any prior DEMO data first (idempotent reseed)
+  const wipe = await clearDemoEcosystem({ actor });
+  const wiped = wipe?.removed || {};
 
-  const venue_id = 'DEMO_VENUE_001';
-  const created = { staff: [], batches: [], transactions: [], tipPayouts: [] };
+  const venue_id = SEED.DEMO_VENUE_ID;
+  const created = {};
 
-  const staffSeed = [
-    { username: 'demo_mgr', full_name: 'Demo Manager', role: 'VENUE_MANAGER', pin: '1111', employee_id: 'MGR-DEMO-001' },
-    { username: 'demo_bar', full_name: 'Demo Bartender', role: 'BARTENDER', pin: '2222', employee_id: 'BAR-DEMO-001' },
-    { username: 'demo_door', full_name: 'Demo Door Girl', role: 'FLOOR_HOST', pin: '3333', employee_id: 'DOOR-DEMO-001' },
-    { username: 'demo_host', full_name: 'Demo Hostess', role: 'FLOOR_HOST', pin: '4444', employee_id: 'HOST-DEMO-001' },
-  ];
-  for (const s of staffSeed) {
-    const row = await base44.entities.NUPSUser.create({
-      ...s,
-      venue_id,
-      is_demo: true,
-      status: 'active',
-      mode: 'DEMO',
-    });
-    created.staff.push(row.id);
-  }
-
-  const start = new Date();
-  const end = new Date(start.getTime() + 6 * 60 * 60 * 1000);
-  const batch = await base44.entities.POSBatch.create({
-    batch_id: `DEMO-BATCH-${Date.now()}`,
-    venue_id,
-    start_time: start.toISOString(),
-    end_time: end.toISOString(),
-    opening_cash: 300,
-    closing_cash: 845,
-    total_sales: 545,
-    transaction_count: 2,
-    cashier: 'demo_bar',
-    status: 'closed',
-    mode: 'DEMO',
-  });
-  created.batches.push(batch.id);
-
-  const tx1 = await base44.entities.POSTransaction.create({
-    transaction_id: `DEMO-TX-${Date.now()}-A`,
-    venue_id,
-    items: [{ product_name: 'Demo Beer', quantity: 2, price: 12, total: 24 }],
-    subtotal: 24,
-    tax: 1.92,
-    tip: 5,
-    total: 30.92,
-    payment_method: 'Cash',
-    cashier: 'demo_bar',
-    status: 'completed',
-    mode: 'DEMO',
-  });
-  created.transactions.push(tx1.id);
-
-  const tx2 = await base44.entities.POSTransaction.create({
-    transaction_id: `DEMO-TX-${Date.now()}-B`,
-    venue_id,
-    items: [{ product_name: 'Demo Cocktail', quantity: 1, price: 18, total: 18 }],
-    subtotal: 18,
-    tax: 1.44,
-    tip: 4,
-    total: 23.44,
-    payment_method: 'Credit Card',
-    cashier: 'demo_bar',
-    status: 'completed',
-    mode: 'DEMO',
-  });
-  created.transactions.push(tx2.id);
-
-  const tipPayout = await base44.entities.TipPayout.create({
-    payout_date: new Date().toISOString().slice(0, 10),
-    venue_id,
-    total_tips: 200,
-    split_config: {
-      bucket: 'BUCKET_1_STAFF_POOL',
-      manager: 0.30,
-      hostess: 0.20,
-      asst_manager: 0.10,
-      dj: 0.10,
-      security_doorman_remainder: 0.30,
-    },
-    signatures: [],
-    manager_email: actor.email || actor.id,
-    status: 'pending',
-    mode: 'DEMO',
-  });
-  created.tipPayouts.push(tipPayout.id);
+  created.staff             = await createMany('NUPSUser',         SEED.STAFF.map(s => ({ ...s, venue_id, is_demo: true })));
+  created.entertainers      = await createMany('Entertainer',      SEED.ENTERTAINERS.map(e => ({ ...e, venue_id })));
+  created.products          = await createMany('POSProduct',       SEED.PRODUCTS.map(p => ({ ...p, venue_id, location_id: SEED.DEMO_LOCATION_ID })));
+  created.customers         = await createMany('POSCustomer',      SEED.CUSTOMERS.map(c => ({ ...c, venue_id })));
+  created.location          = await createOne('POSLocation',       SEED.LOCATION);
+  created.batch             = await createOne('POSBatch',          SEED.BATCH);
+  created.transactions      = await createMany('POSTransaction',   SEED.TRANSACTIONS);
+  created.zReport           = await createOne('POSZReport',        SEED.Z_REPORT);
+  created.tipPayout         = await createOne('TipPayout',         SEED.TIP_PAYOUT);
+  created.vipRooms          = await createMany('VIPRoom',          SEED.VIP_ROOMS);
+  created.vipGuests         = await createMany('VIPGuest',         SEED.VIP_GUESTS);
+  created.venueContracts    = await createMany('VenueContract',    SEED.VENUE_CONTRACTS);
+  created.glyphBucksTx      = await createOne('GlyphBucksTransaction', SEED.GLYPHBUCKS_TRANSACTION);
+  created.glyphBucksBatch   = await createOne('GlyphBucksBatch',   SEED.GLYPHBUCKS_BATCH);
+  created.glyphBucksBills   = await createMany('GlyphBucksBill',   SEED.GLYPHBUCKS_BILLS);
+  created.glyphBucksOrder   = await createOne('GlyphBucksOrder',   SEED.GLYPHBUCKS_ORDER);
+  created.entertainerShifts = await createMany('EntertainerShift', SEED.ENTERTAINER_SHIFTS);
+  created.vipSessionReports = await createMany('VIPSessionReport', SEED.VIP_SESSION_REPORTS);
+  created.vipContractRecords= await createMany('VIPContractRecord',SEED.VIP_CONTRACT_RECORDS);
+  created.verificationMedia = await createMany('VerificationMedia',SEED.VERIFICATION_MEDIA);
+  created.qrThreatLog       = await createOne('QRThreatLog',       SEED.QR_THREAT_LOG);
+  created.driverPayout      = await createOne('DriverPayout',      SEED.DRIVER_PAYOUT);
+  created.payrollRecords    = await createMany('PayrollRecord',    SEED.PAYROLL_RECORDS);
+  created.dailySettlement   = await createOne('DailySettlement',   SEED.DAILY_SETTLEMENT);
+  created.contractorPayout  = await createOne('ContractorPayout',  SEED.CONTRACTOR_PAYOUT);
+  created.posCampaign       = await createOne('POSCampaign',       SEED.POS_CAMPAIGN);
+  created.posInventoryBatch = await createOne('POSInventoryBatch', SEED.POS_INVENTORY_BATCH);
 
   await audit({
     entity_name: 'multi',
     operation: 'create',
     actor_id: actor.id || actor.email,
     actor_role: actor.role,
-    fields_changed: ['staff', 'batches', 'transactions', 'tipPayouts'],
+    fields_changed: Object.keys(created),
     mode: 'DEMO',
     tier: 'TIER_1_OBSERVE',
     result: 'allowed',
     venue_id,
-    notes: `seedDemoEcosystem: ${JSON.stringify(created)}`,
+    notes: `seedDemoEcosystem(realistic_night): wiped=${JSON.stringify(wiped)} created=${JSON.stringify(created)}`,
   });
 
-  return { ok: true, mode: 'DEMO', venue_id, created };
+  return { ok: true, mode: 'DEMO', venue_id, wiped, created };
 }
 
 export async function clearDemoEcosystem({ actor }) {
