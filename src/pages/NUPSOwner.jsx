@@ -581,7 +581,32 @@ export default function NUPSOwner() {
             </div>
           )}
           {activeModule === 'venue' && <VenueSettings user={user} />}
-          {activeModule === 'demo' && isAdminUser && <DemoCredentialsPanel />}
+          {activeModule === 'demo' && isAdminUser && (
+            <div className="space-y-4">
+              <Card className="bg-gradient-to-br from-amber-950/40 to-orange-950/30 border-amber-500/40">
+                <CardContent className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <KeyRound className="w-5 h-5 text-amber-400" />
+                      <h3 className="text-base font-bold text-amber-100">Demo Data Manager</h3>
+                      <Badge variant="outline" className="border-amber-500/50 text-amber-400 text-[10px]">ADMIN ONLY</Badge>
+                    </div>
+                    <p className="text-xs text-amber-200/70">
+                      Seed full demo dataset (contracts, ID scans, GlyphBucks serials, Z-Reports, payroll, settlements) or safely wipe demo records. All actions audit-logged.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => navigate('/NUPSDemoManager')}
+                    className="bg-amber-600 hover:bg-amber-500 text-black font-bold min-h-[44px] gap-2 flex-shrink-0"
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    Open Demo Manager
+                  </Button>
+                </CardContent>
+              </Card>
+              <DemoCredentialsPanel />
+            </div>
+          )}
         </div>
         )}
 
