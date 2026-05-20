@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,16 @@ export default function BatchManagement({ user, onBatchClosed }) {
     },
     enabled: !!activeBatch
   });
+
+  // ✅ REAL-TIME SYNC: Subscribe to transaction changes
+  useEffect(() => {
+    if (!activeBatch) return;
+    const unsubscribe = base44.entities.POSTransaction.subscribe((event) => {
+      // When any transaction is created/updated, refresh batch transactions
+      queryClient.invalidateQueries(['batch-transactions', activeBatch.id]);
+    });
+    return unsubscribe;
+  }, [activeBatch?.id, queryClient]);
 
   const openBatchMutation = useMutation({
     mutationFn: (data) => base44.entities.POSBatch.create(data),
