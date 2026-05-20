@@ -1,6 +1,21 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+
+// Parallel-batch helper: deletes records in chunks instead of one-at-a-time
+const BATCH_SIZE = 10;
+const deleteInBatches = async (entityName, records, onProgress) => {
+  let done = 0;
+  for (let i = 0; i < records.length; i += BATCH_SIZE) {
+    const slice = records.slice(i, i + BATCH_SIZE);
+    await Promise.all(slice.map(r =>
+      base44.entities[entityName].delete(r.id).catch(() => null)
+    ));
+    done += slice.length;
+    onProgress?.(done, records.length);
+  }
+  return done;
+};
 
 const DEMO_VENUE_ID = "DEMO_VENUE_001";
 const NOW = () => new Date().toISOString();
@@ -43,7 +58,20 @@ export default function NUPSDemoManager() {
   const [wipeInput, setWipeInput]   = useState("");
   const [successCount, setSuccessCount] = useState(0);
   const [errorCount, setErrorCount]     = useState(0);
+  const [progress, setProgress]         = useState({ current: 0, total: 0, entity: "" });
   const logRef = useRef([]);
+
+  // Block tab close / nav during seed or wipe
+  useEffect(() => {
+    if (phase !== "seeding" && phase !== "wiping") return;
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = "A demo operation is running. Leaving will cancel it.";
+      return e.returnValue;
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [phase]);
 
   const push = (msg, type) => {
     const entry = { msg, type, ts: new Date().toLocaleTimeString() };
@@ -294,41 +322,58 @@ export default function NUPSDemoManager() {
     setPhase("wiping");
     setSuccessCount(0);
     setErrorCount(0);
+    setProgress({ current: 0, total: 0, entity: "" });
     logRef.current = [];
     setLog([]);
     push("DEMO SAFE RESET initiated — venue_id: DEMO_VENUE_001", "info");
+    push("⚠ Do NOT close this tab until the wipe completes.", "warn");
 
+    // Pass 1: collect counts so we can show overall progress
+    const recordsByEntity = {};
+    let grandTotal = 0;
+    for (const entityName of WIPE_ORDER) {
+      try {
+        const recs = await base44.entities[entityName].filter({ venue_id: DEMO_VENUE_ID });
+        recordsByEntity[entityName] = recs;
+        grandTotal += recs.length;
+      } catch (e) {
+        recordsByEntity[entityName] = [];
+        push(entityName + " (scan): " + (e?.message || JSON.stringify(e)), "error");
+        setErrorCount(p => p + 1);
+      }
+    }
+    push("Found " + grandTotal + " records across " + WIPE_ORDER.length + " entities", "info");
+
+    // Pass 2: batched parallel deletes
     const entityCounts = {};
     let totalDeleted = 0;
 
     for (const entityName of WIPE_ORDER) {
+      const records = recordsByEntity[entityName] || [];
+      if (!records.length) {
+        entityCounts[entityName] = 0;
+        push(entityName + ": 0 found", "info");
+        continue;
+      }
+
       try {
-        const records = await base44.entities[entityName].filter({ venue_id: DEMO_VENUE_ID });
-
-        if (!records.length) {
-          entityCounts[entityName] = 0;
-          push(entityName + ": 0 found", "info");
-          await sleep(150);
-          continue;
-        }
-
-        let deletedCount = 0;
-        for (const record of records) {
-          await base44.entities[entityName].delete(record.id);
-          deletedCount += 1;
-          await sleep(75);
-        }
-
-        entityCounts[entityName] = deletedCount;
-        totalDeleted += deletedCount;
-        push(entityName + ": " + deletedCount + " deleted", "success");
-        await sleep(150);
+        const deleted = await deleteInBatches(entityName, records, (done) => {
+          setProgress({
+            current: totalDeleted + done,
+            total: grandTotal,
+            entity: entityName,
+          });
+        });
+        entityCounts[entityName] = deleted;
+        totalDeleted += deleted;
+        push(entityName + ": " + deleted + " deleted", "success");
       } catch (e) {
         entityCounts[entityName] = entityCounts[entityName] ?? 0;
         push(entityName + ": " + (e?.message || JSON.stringify(e)), "error");
         setErrorCount(p => p + 1);
       }
     }
+    setProgress({ current: grandTotal, total: grandTotal, entity: "complete" });
 
     try {
       await base44.entities.SystemAuditLog.create({
@@ -429,6 +474,28 @@ export default function NUPSDemoManager() {
           ))}
         </div>
       </div>
+
+      {busy && progress.total > 0 && (
+        <div style={{ marginBottom: 16, padding: "12px 14px", borderRadius: 8, background: "#0a0f1a", border: "1px solid #1e3a5f" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 11 }}>
+            <span style={{ color: "#60a5fa" }}>
+              {phase === "wiping" ? "🗑 Wiping" : "▶ Seeding"} {progress.entity && `· ${progress.entity}`}
+            </span>
+            <span style={{ color: "#94a3b8" }}>{progress.current} / {progress.total}</span>
+          </div>
+          <div style={{ height: 6, background: "#0a0a0a", borderRadius: 3, overflow: "hidden" }}>
+            <div style={{
+              height: "100%",
+              width: `${Math.min(100, (progress.current / progress.total) * 100)}%`,
+              background: "linear-gradient(90deg, #2563eb, #60a5fa)",
+              transition: "width 0.2s ease"
+            }} />
+          </div>
+          <div style={{ marginTop: 6, fontSize: 10, color: "#f59e0b" }}>
+            ⚠ Do not close this tab — operation in progress
+          </div>
+        </div>
+      )}
 
       <div style={{ background: "#0d0f14", border: "1px solid #1e2535", borderRadius: 8, padding: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
