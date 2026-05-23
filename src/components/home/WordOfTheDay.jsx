@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Sparkles, RefreshCw, Volume2, X } from 'lucide-react';
+import { RefreshCw, Volume2, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-const STORAGE_KEY = 'glyphlock_words_of_day_v3';
+const STORAGE_KEY = 'glyphlock_words_of_day_v4';
 
 const CATEGORIES = [
   { key: 'everyday', label: 'Lexicon', emoji: '✦', color: '#60A5FA', glow: 'rgba(96,165,250,0.6)' },
@@ -43,15 +43,15 @@ export default function WordOfTheDay() {
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Generate 3 high-quality "Word of the Day" entries for date ${today}. CRITICAL QUALITY RULES:
 
-1. EVERYDAY word: An elegant, sophisticated English word that EDUCATED ADULTS actually use in real conversation, writing, business, or journalism. NOT obscure or archaic. NOT basic kindergarten words. Examples of the right caliber: "ephemeral", "pragmatic", "resilient", "candid", "tangible", "nuanced", "meticulous", "succinct", "profound", "intuitive". Pick one that's genuinely useful and worth knowing.
+1. EVERYDAY word: An elegant, sophisticated English word that EDUCATED ADULTS actually use in real conversation, writing, business, or journalism. NOT obscure or archaic. NOT basic kindergarten words. Examples of caliber: "ephemeral", "pragmatic", "resilient", "candid", "tangible", "nuanced", "meticulous", "succinct", "profound", "intuitive". Pick one genuinely useful.
 
-2. TECH word: A practical technology / cybersecurity / programming / engineering term that working developers, security professionals, or tech-savvy people actually use. Examples: "idempotent", "polymorphism", "zero-trust", "containerization", "race condition", "API gateway", "throughput". Not too basic (avoid "RAM", "browser"), not too obscure.
+2. TECH word: A practical technology / cybersecurity / programming term that working developers or security professionals actually use. Examples: "idempotent", "polymorphism", "zero-trust", "containerization", "race condition", "throughput". Not too basic, not too obscure.
 
-3. AI word: A real, current AI / machine learning / data science term used in 2025 industry. Examples: "embedding", "transformer", "fine-tuning", "hallucination", "RAG", "vector database", "attention mechanism", "inference", "tokenization". Pick something a working AI engineer would actually say.
+3. AI word: A real, current AI / machine learning term used in 2025 industry. Examples: "embedding", "transformer", "fine-tuning", "hallucination", "RAG", "vector database", "attention mechanism", "inference", "tokenization".
 
-For each word provide: the word, IPA phonetic pronunciation (like "/səˈrendɪpɪti/"), part of speech, a clear concise definition (one sentence), and a natural example sentence showing real usage.
+For each word provide: word, IPA phonetic pronunciation (like "/səˈrendɪpɪti/"), part of speech, a clear concise definition, and EXACTLY 3 different example sentences showing varied real-world usage.
 
-Vary your picks — don't pick the same words every day. Today is ${today}, use the date as inspiration for variety.`,
+Vary picks daily — use date ${today} for variety.`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -62,9 +62,9 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
                 pronunciation: { type: "string" },
                 partOfSpeech: { type: "string" },
                 definition: { type: "string" },
-                example: { type: "string" }
+                examples: { type: "array", items: { type: "string" }, minItems: 3, maxItems: 3 }
               },
-              required: ["word", "pronunciation", "definition", "example"]
+              required: ["word", "pronunciation", "definition", "examples"]
             },
             tech: {
               type: "object",
@@ -73,9 +73,9 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
                 pronunciation: { type: "string" },
                 partOfSpeech: { type: "string" },
                 definition: { type: "string" },
-                example: { type: "string" }
+                examples: { type: "array", items: { type: "string" }, minItems: 3, maxItems: 3 }
               },
-              required: ["word", "pronunciation", "definition", "example"]
+              required: ["word", "pronunciation", "definition", "examples"]
             },
             ai: {
               type: "object",
@@ -84,9 +84,9 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
                 pronunciation: { type: "string" },
                 partOfSpeech: { type: "string" },
                 definition: { type: "string" },
-                example: { type: "string" }
+                examples: { type: "array", items: { type: "string" }, minItems: 3, maxItems: 3 }
               },
-              required: ["word", "pronunciation", "definition", "example"]
+              required: ["word", "pronunciation", "definition", "examples"]
             }
           },
           required: ["everyday", "tech", "ai"]
@@ -100,43 +100,138 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
     setLoading(false);
   };
 
+  // PRELOAD: fetch on mount so modal opens instantly
   useEffect(() => {
-    if (isOpen && !words) fetchWords();
-  }, [isOpen]);
+    fetchWords();
+  }, []);
 
   const currentWord = words?.[activeTab];
   const currentCat = CATEGORIES.find(c => c.key === activeTab);
 
   return (
     <>
-      {/* Glyphy Toggle Button */}
+      {/* Uiverse-style Neon Button */}
       <div className="flex justify-center px-4 py-4">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="group relative inline-flex items-center gap-3 px-7 py-3.5 rounded-full font-bold text-xs uppercase tracking-[3px] transition-all duration-500 hover:scale-105 overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, rgba(87,61,255,0.2), rgba(168,60,255,0.15), rgba(34,211,238,0.2))',
-            border: '1px solid rgba(147,197,253,0.4)',
-            color: '#93C5FD',
-            boxShadow: '0 0 25px rgba(87,61,255,0.4), inset 0 0 20px rgba(147,197,253,0.1)',
-          }}
+          className="glyph-wod-btn"
+          aria-label="Open Words of the Day"
         >
-          {/* Animated scan line */}
-          <span 
-            className="absolute inset-0 opacity-50 pointer-events-none"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(147,197,253,0.3), transparent)',
-              animation: 'wordPulse 3s ease-in-out infinite'
-            }}
-          />
-          <span className="relative z-10 text-base">✦</span>
-          <span className="relative z-10">Words of the Day</span>
-          <span className="relative z-10 text-xs opacity-70">{isOpen ? '▲' : '▼'}</span>
+          <span className="glyph-wod-btn__bg"></span>
+          <span className="glyph-wod-btn__border"></span>
+          <span className="glyph-wod-btn__content">
+            <span className="glyph-wod-btn__icon">✦</span>
+            <span className="glyph-wod-btn__text">Words of the Day</span>
+            <span className="glyph-wod-btn__arrow">{isOpen ? '▲' : '▼'}</span>
+          </span>
         </button>
+
         <style>{`
-          @keyframes wordPulse {
-            0%, 100% { transform: translateX(-100%); }
-            50% { transform: translateX(100%); }
+          .glyph-wod-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 999px;
+            background: transparent;
+            cursor: pointer;
+            overflow: hidden;
+            isolation: isolate;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-tap-highlight-color: transparent;
+          }
+          .glyph-wod-btn:hover { transform: translateY(-2px) scale(1.03); }
+          .glyph-wod-btn:active { transform: translateY(0) scale(0.98); }
+
+          .glyph-wod-btn__bg {
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(87,61,255,0.25), rgba(168,60,255,0.2), rgba(34,211,238,0.25));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: -2;
+          }
+
+          .glyph-wod-btn__border {
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+            padding: 1.5px;
+            background: linear-gradient(135deg, #60A5FA, #A78BFA, #22D3EE, #60A5FA);
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: glyphBorderFlow 4s linear infinite;
+            z-index: -1;
+          }
+
+          .glyph-wod-btn::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #60A5FA, #A78BFA, #22D3EE);
+            background-size: 200% 200%;
+            opacity: 0;
+            filter: blur(15px);
+            transition: opacity 0.4s ease;
+            z-index: -3;
+            animation: glyphBorderFlow 4s linear infinite;
+          }
+          .glyph-wod-btn:hover::before { opacity: 0.7; }
+
+          .glyph-wod-btn__content {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #DBEAFE;
+            text-shadow: 0 0 12px rgba(147,197,253,0.6);
+            z-index: 1;
+          }
+
+          .glyph-wod-btn__icon {
+            font-size: 16px;
+            color: #93C5FD;
+            text-shadow: 0 0 10px rgba(147,197,253,0.9);
+            animation: glyphSpin 6s linear infinite;
+          }
+
+          .glyph-wod-btn__arrow {
+            font-size: 9px;
+            opacity: 0.7;
+          }
+
+          /* Shimmer sweep */
+          .glyph-wod-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+          }
+          .glyph-wod-btn:hover::after { left: 100%; }
+
+          @keyframes glyphBorderFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+          @keyframes glyphSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
           }
           @keyframes glyphScan {
             0% { background-position: 0% 0%; }
@@ -157,7 +252,7 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
           onClick={() => setIsOpen(false)}
         >
           <div
-            className="w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl relative"
+            className="w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl relative max-h-[90vh] overflow-y-auto"
             style={{
               background: 'linear-gradient(135deg, rgba(15,20,60,0.98), rgba(25,15,70,0.98) 50%, rgba(10,30,80,0.98))',
               border: `1px solid ${currentCat.color}66`,
@@ -167,7 +262,7 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
             onClick={(e) => e.stopPropagation()}
           >
             {/* Cosmic grid overlay */}
-            <div 
+            <div
               className="absolute inset-0 opacity-[0.07] pointer-events-none"
               style={{
                 backgroundImage: `
@@ -179,8 +274,7 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
               }}
             />
 
-            {/* Top glow accent */}
-            <div 
+            <div
               className="absolute top-0 left-0 right-0 h-px"
               style={{ background: `linear-gradient(90deg, transparent, ${currentCat.color}, transparent)` }}
             />
@@ -218,7 +312,7 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
                   <button
                     key={cat.key}
                     onClick={() => setActiveTab(cat.key)}
-                    className="flex-1 py-2.5 px-2 rounded-xl text-[10px] font-black uppercase tracking-[2px] transition-all duration-300 relative overflow-hidden"
+                    className="flex-1 py-2.5 px-2 rounded-xl text-[10px] font-black uppercase tracking-[2px] transition-all duration-300"
                     style={{
                       background: activeTab === cat.key
                         ? `linear-gradient(135deg, ${cat.color}33, ${cat.color}11)`
@@ -248,13 +342,12 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
 
               {/* Word Display */}
               {currentWord && !loading && (
-                <div className="space-y-5 min-h-[280px]">
-                  {/* Word + Speak */}
+                <div className="space-y-5">
                   <div>
                     <div className="flex items-start gap-3 mb-2 flex-wrap">
-                      <h2 
-                        className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-none"
-                        style={{ 
+                      <h2
+                        className="text-4xl sm:text-5xl font-black tracking-tight leading-none"
+                        style={{
                           textShadow: `0 0 30px ${currentCat.glow}, 0 0 60px ${currentCat.color}33`,
                           background: `linear-gradient(135deg, #fff, ${currentCat.color})`,
                           WebkitBackgroundClip: 'text',
@@ -267,8 +360,8 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
                       <button
                         onClick={() => speak(currentWord.word)}
                         className="p-2.5 rounded-xl transition-all hover:scale-110 mt-1"
-                        style={{ 
-                          background: `${currentCat.color}1A`, 
+                        style={{
+                          background: `${currentCat.color}1A`,
                           border: `1px solid ${currentCat.color}66`,
                           boxShadow: `0 0 15px ${currentCat.glow}40`
                         }}
@@ -283,9 +376,9 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
                       </p>
                     )}
                     {currentWord.partOfSpeech && (
-                      <p 
+                      <p
                         className="text-[10px] uppercase tracking-[3px] mt-2 font-bold inline-block px-2 py-1 rounded-md"
-                        style={{ 
+                        style={{
                           color: currentCat.color,
                           background: `${currentCat.color}11`,
                           border: `1px solid ${currentCat.color}33`
@@ -296,33 +389,41 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
                     )}
                   </div>
 
-                  {/* Definition */}
                   <div className="pt-4 border-t border-white/[0.08]">
                     <p className="text-[10px] uppercase tracking-[3px] text-white/30 mb-2 font-bold">Definition</p>
                     <p className="text-white/90 leading-relaxed text-[15px]">{currentWord.definition}</p>
                   </div>
 
-                  {/* Example */}
-                  {currentWord.example && (
+                  {currentWord.examples && currentWord.examples.length > 0 && (
                     <div>
-                      <p className="text-[10px] uppercase tracking-[3px] text-white/30 mb-2 font-bold">Usage</p>
-                      <div 
-                        className="pl-4 py-2 rounded-r-lg"
-                        style={{ 
-                          borderLeft: `2px solid ${currentCat.color}`,
-                          background: `linear-gradient(90deg, ${currentCat.color}0A, transparent)`
-                        }}
-                      >
-                        <p className="text-white/75 italic text-sm leading-relaxed">
-                          "{currentWord.example}"
-                        </p>
+                      <p className="text-[10px] uppercase tracking-[3px] text-white/30 mb-3 font-bold">Usage Examples</p>
+                      <div className="space-y-2.5">
+                        {currentWord.examples.map((ex, i) => (
+                          <div
+                            key={i}
+                            className="pl-4 pr-3 py-2.5 rounded-r-lg flex gap-3 group"
+                            style={{
+                              borderLeft: `2px solid ${currentCat.color}`,
+                              background: `linear-gradient(90deg, ${currentCat.color}0A, transparent)`
+                            }}
+                          >
+                            <span
+                              className="text-[10px] font-black mt-0.5 opacity-60"
+                              style={{ color: currentCat.color }}
+                            >
+                              0{i + 1}
+                            </span>
+                            <p className="text-white/75 italic text-sm leading-relaxed flex-1">
+                              "{ex}"
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Footer glyph */}
               <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-center gap-2">
                 <span className="text-white/20 text-[9px] uppercase tracking-[4px]">
                   ✦ GlyphLock Lexicon ✦
@@ -330,8 +431,7 @@ Vary your picks — don't pick the same words every day. Today is ${today}, use 
               </div>
             </div>
 
-            {/* Bottom glow accent */}
-            <div 
+            <div
               className="absolute bottom-0 left-0 right-0 h-px"
               style={{ background: `linear-gradient(90deg, transparent, ${currentCat.color}, transparent)` }}
             />
