@@ -10,6 +10,7 @@ import TechnologyMarquee from '@/components/TechnologyMarquee';
 import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
 import ExperienceLiveSystemCTA from '@/components/demo/ExperienceLiveSystemCTA';
+import WordOfTheDay from '@/components/home/WordOfTheDay';
 
 const SectionLoader = () => (
   <div className="w-full py-20 flex items-center justify-center">
@@ -133,6 +134,8 @@ export default function Home() {
           <div className="flex justify-center -mt-8">
             <CountdownPill />
           </div>
+
+          <WordOfTheDay />
 
           <ExperienceLiveSystemCTA variant="home" />
         </section>
