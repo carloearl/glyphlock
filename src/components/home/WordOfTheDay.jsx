@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { RefreshCw, Volume2, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-const STORAGE_KEY = 'glyphlock_words_of_day_v4';
+const STORAGE_KEY = 'glyphlock_words_of_day_v5';
 
 const CATEGORIES = [
-  { key: 'everyday', label: 'Lexicon', emoji: '✦', color: '#60A5FA', glow: 'rgba(96,165,250,0.6)' },
-  { key: 'tech', label: 'Cipher', emoji: '◈', color: '#A78BFA', glow: 'rgba(167,139,250,0.6)' },
-  { key: 'ai', label: 'Neural', emoji: '⬡', color: '#22D3EE', glow: 'rgba(34,211,238,0.6)' },
+  { key: 'everyday', label: 'Lexicon', emoji: '✦', color: '#F472B6', glow: 'rgba(244,114,182,0.6)' },
+  { key: 'tech', label: 'Cipher', emoji: '◈', color: '#34D399', glow: 'rgba(52,211,153,0.6)' },
+  { key: 'ai', label: 'Neural', emoji: '⬡', color: '#FBBF24', glow: 'rgba(251,191,36,0.6)' },
 ];
 
 export default function WordOfTheDay() {
@@ -346,13 +346,15 @@ Vary picks daily — use date ${today} for variety.`,
                   <div>
                     <div className="flex items-start gap-3 mb-2 flex-wrap">
                       <h2
-                        className="text-4xl sm:text-5xl font-black tracking-tight leading-none"
+                        className="text-4xl sm:text-5xl font-black tracking-tight"
                         style={{
-                          textShadow: `0 0 30px ${currentCat.glow}, 0 0 60px ${currentCat.color}33`,
+                          lineHeight: '1.15',
+                          paddingBottom: '4px',
                           background: `linear-gradient(135deg, #fff, ${currentCat.color})`,
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text'
+                          backgroundClip: 'text',
+                          filter: `drop-shadow(0 0 20px ${currentCat.glow})`
                         }}
                       >
                         {currentWord.word}
