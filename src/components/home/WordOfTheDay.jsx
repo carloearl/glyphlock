@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { RefreshCw, Volume2, X, Copy, Heart, Bell, BellOff, Check, Share2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-const STORAGE_KEY = 'glyphlock_words_of_day_v6';
+const STORAGE_KEY = 'glyphlock_words_of_day_v7';
+const HISTORY_KEY = 'glyphlock_word_history';
 const FAVORITES_KEY = 'glyphlock_word_favorites';
 const NOTIFY_KEY = 'glyphlock_word_notify';
 const LAST_NOTIFY_KEY = 'glyphlock_word_last_notify';
@@ -134,20 +135,30 @@ export default function WordOfTheDay() {
       } catch (_) {}
     }
 
+    // Load recent history to avoid repeats (last 60 days)
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (_) {}
+    const recentWords = history.slice(0, 60).map(h => h.word).join(', ');
+
     setLoading(true);
     try {
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Generate 3 high-quality "Word of the Day" entries for date ${today}. CRITICAL QUALITY RULES:
+        prompt: `Generate 3 fresh "Word of the Day" entries for date ${today}. 
 
-1. EVERYDAY word: An elegant, sophisticated English word that EDUCATED ADULTS actually use in real conversation, writing, business, or journalism. NOT obscure or archaic. NOT basic kindergarten words. Examples of caliber: "ephemeral", "pragmatic", "resilient", "candid", "tangible", "nuanced", "meticulous", "succinct", "profound", "intuitive". Pick one genuinely useful.
+🚫 CRITICAL — DO NOT USE ANY OF THESE RECENTLY-USED WORDS: ${recentWords || '(none yet)'}
+Pick completely DIFFERENT words from those. Each call must produce novel selections.
 
-2. TECH word: A practical technology / cybersecurity / programming term that working developers or security professionals actually use. Examples: "idempotent", "polymorphism", "zero-trust", "containerization", "race condition", "throughput". Not too basic, not too obscure.
+QUALITY RULES:
 
-3. AI word: A real, current AI / machine learning term used in 2025 industry. Examples: "embedding", "transformer", "fine-tuning", "hallucination", "RAG", "vector database", "attention mechanism", "inference", "tokenization".
+1. EVERYDAY word: An elegant, sophisticated English word educated adults actually use. NOT basic kindergarten words. Think along the lines of words like "ephemeral", "pragmatic", "resilient", "candid", "tangible", "meticulous", "succinct", "intuitive", "serendipity", "ubiquitous", "quintessential", "fortuitous", "magnanimous", "tenacious", "eloquent", "perspicacious" — but DO NOT reuse any word in the banned list above. Pick something genuinely useful and varied.
 
-For each word provide: word, IPA phonetic pronunciation (like "/səˈrendɪpɪti/"), part of speech, a clear concise definition, and EXACTLY 3 different example sentences showing varied real-world usage.
+2. TECH word: A practical tech/cybersecurity/programming term real developers use. Examples of caliber: "idempotent", "polymorphism", "zero-trust", "containerization", "race condition", "throughput", "memoization", "concurrency", "kerberos", "sandboxing". Do not reuse banned words.
 
-Vary picks daily — use date ${today} for variety.`,
+3. AI word: A real, current AI/ML term used in 2025 industry. Examples: "embedding", "transformer", "fine-tuning", "hallucination", "RAG", "vector database", "attention mechanism", "inference", "tokenization", "diffusion", "quantization", "agentic". Do not reuse banned words.
+
+For each: word, IPA phonetic pronunciation (e.g. "/səˈrendɪpɪti/"), part of speech, clear concise definition, and EXACTLY 3 different example sentences.
+
+Be creative and varied. Seed: ${today}-${Math.random().toString(36).slice(2, 8)}`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -190,6 +201,14 @@ Vary picks daily — use date ${today} for variety.`,
       });
       setWords(result);
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, words: result }));
+
+      // Append picks to history so they aren't reused
+      const newEntries = ['everyday', 'tech', 'ai']
+        .map(k => result[k]?.word)
+        .filter(Boolean)
+        .map(w => ({ word: w, date: today }));
+      const updatedHistory = [...newEntries, ...history].slice(0, 120);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
     } catch (err) {
       console.error('Words of the day fetch failed:', err);
     }
