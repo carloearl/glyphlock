@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { RefreshCw, Volume2, X } from 'lucide-react';
+import { RefreshCw, Volume2, X, Copy, Heart, Bell, BellOff, Check, Share2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-const STORAGE_KEY = 'glyphlock_words_of_day_v5';
+const STORAGE_KEY = 'glyphlock_words_of_day_v6';
+const FAVORITES_KEY = 'glyphlock_word_favorites';
+const NOTIFY_KEY = 'glyphlock_word_notify';
+const LAST_NOTIFY_KEY = 'glyphlock_word_last_notify';
 
 const CATEGORIES = [
   { key: 'everyday', label: 'Lexicon', emoji: '✦', color: '#F472B6', glow: 'rgba(244,114,182,0.6)' },
@@ -15,6 +18,11 @@ export default function WordOfTheDay() {
   const [words, setWords] = useState(null);
   const [activeTab, setActiveTab] = useState('everyday');
   const [loading, setLoading] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
+  const [copiedFlash, setCopiedFlash] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
 
   const speak = (text) => {
     if ('speechSynthesis' in window) {
@@ -24,6 +32,94 @@ export default function WordOfTheDay() {
       window.speechSynthesis.speak(utter);
     }
   };
+
+  // Load favorites + notify preference
+  useEffect(() => {
+    try {
+      const favs = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+      setFavorites(favs);
+      setNotifyEnabled(localStorage.getItem(NOTIFY_KEY) === 'true');
+    } catch (_) {}
+  }, []);
+
+  const toggleFavorite = (word) => {
+    if (!word) return;
+    const exists = favorites.find(f => f.word === word.word);
+    let next;
+    if (exists) {
+      next = favorites.filter(f => f.word !== word.word);
+    } else {
+      next = [{ ...word, savedAt: new Date().toISOString(), category: activeTab }, ...favorites].slice(0, 50);
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 1200);
+    }
+    setFavorites(next);
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+  };
+
+  const isFavorited = (word) => word && favorites.some(f => f.word === word.word);
+
+  const copyWord = (word) => {
+    if (!word) return;
+    const text = `${word.word} ${word.pronunciation || ''}\n${word.partOfSpeech || ''}\n\nDefinition: ${word.definition}\n\nExamples:\n${(word.examples || []).map((e, i) => `${i + 1}. ${e}`).join('\n')}\n\n— GlyphLock Daily Lexicon`;
+    navigator.clipboard.writeText(text);
+    setCopiedFlash(true);
+    setTimeout(() => setCopiedFlash(false), 1200);
+  };
+
+  const shareWord = async (word) => {
+    if (!word) return;
+    const text = `📖 Word of the Day: ${word.word}\n${word.definition}\n\nvia GlyphLock`;
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Word of the Day', text }); } catch (_) {}
+    } else {
+      navigator.clipboard.writeText(text);
+      setCopiedFlash(true);
+      setTimeout(() => setCopiedFlash(false), 1200);
+    }
+  };
+
+  const toggleNotifications = async () => {
+    if (notifyEnabled) {
+      setNotifyEnabled(false);
+      localStorage.setItem(NOTIFY_KEY, 'false');
+      return;
+    }
+    if (!('Notification' in window)) {
+      alert('Your browser does not support notifications.');
+      return;
+    }
+    let perm = Notification.permission;
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      setNotifyEnabled(true);
+      localStorage.setItem(NOTIFY_KEY, 'true');
+      new Notification('🔔 Daily Lexicon Enabled', {
+        body: "You'll get a new word every day when you visit GlyphLock.",
+        icon: 'https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/ef67c8dbe_GLLogo.png'
+      });
+    } else {
+      alert('Notifications were blocked. Enable them in your browser settings.');
+    }
+  };
+
+  // Daily notification check (fires when user visits a new day)
+  useEffect(() => {
+    if (!notifyEnabled || !words) return;
+    const today = new Date().toISOString().split('T')[0];
+    const lastNotified = localStorage.getItem(LAST_NOTIFY_KEY);
+    if (lastNotified !== today && Notification.permission === 'granted') {
+      const w = words.everyday;
+      if (w) {
+        new Notification('✦ Today\'s Word: ' + w.word, {
+          body: w.definition?.slice(0, 140),
+          icon: 'https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/ef67c8dbe_GLLogo.png',
+          tag: 'glyphlock-word-' + today
+        });
+        localStorage.setItem(LAST_NOTIFY_KEY, today);
+      }
+    }
+  }, [notifyEnabled, words]);
 
   const fetchWords = async (force = false) => {
     const today = new Date().toISOString().split('T')[0];
@@ -307,26 +403,55 @@ Vary picks daily — use date ${today} for variety.`,
               </div>
 
               {/* Tabs */}
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-1.5 mb-6">
                 {CATEGORIES.map(cat => (
                   <button
                     key={cat.key}
-                    onClick={() => setActiveTab(cat.key)}
-                    className="flex-1 py-2.5 px-2 rounded-xl text-[10px] font-black uppercase tracking-[2px] transition-all duration-300"
+                    onClick={() => { setActiveTab(cat.key); setShowFavorites(false); }}
+                    className="flex-1 py-2 px-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-[1.5px] transition-all duration-300 flex items-center justify-center gap-1"
                     style={{
-                      background: activeTab === cat.key
+                      background: activeTab === cat.key && !showFavorites
                         ? `linear-gradient(135deg, ${cat.color}33, ${cat.color}11)`
                         : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${activeTab === cat.key ? cat.color + '99' : 'rgba(255,255,255,0.08)'}`,
-                      color: activeTab === cat.key ? cat.color : 'rgba(255,255,255,0.4)',
-                      boxShadow: activeTab === cat.key ? `0 0 20px ${cat.color}44, inset 0 0 15px ${cat.color}11` : 'none',
-                      textShadow: activeTab === cat.key ? `0 0 10px ${cat.glow}` : 'none'
+                      border: `1px solid ${activeTab === cat.key && !showFavorites ? cat.color + '99' : 'rgba(255,255,255,0.08)'}`,
+                      color: activeTab === cat.key && !showFavorites ? cat.color : 'rgba(255,255,255,0.4)',
+                      boxShadow: activeTab === cat.key && !showFavorites ? `0 0 18px ${cat.color}44` : 'none',
+                      textShadow: activeTab === cat.key && !showFavorites ? `0 0 10px ${cat.glow}` : 'none'
                     }}
                   >
-                    <span className="text-sm mr-1">{cat.emoji}</span>
-                    {cat.label}
+                    <span className="text-xs">{cat.emoji}</span>
+                    <span>{cat.label}</span>
                   </button>
                 ))}
+              </div>
+
+              {/* Action toolbar */}
+              <div className="flex items-center justify-between mb-5 gap-2 flex-wrap">
+                <button
+                  onClick={() => setShowFavorites(!showFavorites)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-[2px] font-bold transition-all"
+                  style={{
+                    background: showFavorites ? 'rgba(244,114,182,0.15)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${showFavorites ? 'rgba(244,114,182,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                    color: showFavorites ? '#F472B6' : 'rgba(255,255,255,0.5)'
+                  }}
+                >
+                  <Heart className="w-3 h-3" fill={showFavorites ? '#F472B6' : 'none'} />
+                  {favorites.length > 0 ? `Saved (${favorites.length})` : 'Saved'}
+                </button>
+                <button
+                  onClick={toggleNotifications}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-[2px] font-bold transition-all"
+                  style={{
+                    background: notifyEnabled ? 'rgba(52,211,153,0.15)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${notifyEnabled ? 'rgba(52,211,153,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                    color: notifyEnabled ? '#34D399' : 'rgba(255,255,255,0.5)'
+                  }}
+                  title={notifyEnabled ? 'Notifications enabled' : 'Get daily word notifications'}
+                >
+                  {notifyEnabled ? <Bell className="w-3 h-3" /> : <BellOff className="w-3 h-3" />}
+                  {notifyEnabled ? 'Daily On' : 'Daily Off'}
+                </button>
               </div>
 
               {/* Loading */}
@@ -340,37 +465,93 @@ Vary picks daily — use date ${today} for variety.`,
                 </div>
               )}
 
+              {/* Favorites view */}
+              {showFavorites && !loading && (
+                <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+                  {favorites.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <Heart className="w-8 h-8 mx-auto mb-3 text-pink-400/40" />
+                      <p className="text-white/40 text-xs uppercase tracking-[2px]">No saved words yet</p>
+                      <p className="text-white/30 text-[10px] mt-2">Tap the heart on any word to save it</p>
+                    </div>
+                  ) : favorites.map((f, i) => {
+                    const fcat = CATEGORIES.find(c => c.key === f.category) || CATEGORIES[0];
+                    return (
+                      <div key={i} className="p-3 rounded-lg flex items-start gap-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <span style={{ color: fcat.color }}>{fcat.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-white text-sm">{f.word}</p>
+                          <p className="text-white/60 text-xs mt-0.5 line-clamp-2">{f.definition}</p>
+                        </div>
+                        <button
+                          onClick={() => toggleFavorite(f)}
+                          className="p-1.5 rounded-md hover:bg-white/5 transition"
+                          title="Remove"
+                        >
+                          <X className="w-3 h-3 text-white/40" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Word Display */}
-              {currentWord && !loading && (
+              {currentWord && !loading && !showFavorites && (
                 <div className="space-y-5">
                   <div>
-                    <div className="flex items-start gap-3 mb-2 flex-wrap">
+                    <div className="flex items-start gap-3 mb-3 flex-wrap">
                       <h2
-                        className="text-4xl sm:text-5xl font-black tracking-tight"
+                        className="text-4xl sm:text-5xl font-black tracking-tight flex-1 min-w-0 break-words"
                         style={{
                           lineHeight: '1.15',
-                          paddingBottom: '4px',
-                          background: `linear-gradient(135deg, #fff, ${currentCat.color})`,
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                          filter: `drop-shadow(0 0 20px ${currentCat.glow})`
+                          paddingBottom: '6px',
+                          color: '#ffffff',
+                          textShadow: `0 0 30px ${currentCat.glow}, 0 0 60px ${currentCat.color}55, 0 2px 8px rgba(0,0,0,0.5)`
                         }}
                       >
                         {currentWord.word}
                       </h2>
-                      <button
-                        onClick={() => speak(currentWord.word)}
-                        className="p-2.5 rounded-xl transition-all hover:scale-110 mt-1"
-                        style={{
-                          background: `${currentCat.color}1A`,
-                          border: `1px solid ${currentCat.color}66`,
-                          boxShadow: `0 0 15px ${currentCat.glow}40`
-                        }}
-                        title="Pronounce"
-                      >
-                        <Volume2 className="w-4 h-4" style={{ color: currentCat.color }} />
-                      </button>
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <button
+                          onClick={() => speak(currentWord.word)}
+                          className="p-2 rounded-lg transition-all hover:scale-110"
+                          style={{
+                            background: `${currentCat.color}1A`,
+                            border: `1px solid ${currentCat.color}66`
+                          }}
+                          title="Pronounce"
+                        >
+                          <Volume2 className="w-3.5 h-3.5" style={{ color: currentCat.color }} />
+                        </button>
+                        <button
+                          onClick={() => toggleFavorite(currentWord)}
+                          className="p-2 rounded-lg transition-all hover:scale-110"
+                          style={{
+                            background: isFavorited(currentWord) ? 'rgba(244,114,182,0.2)' : 'rgba(255,255,255,0.04)',
+                            border: `1px solid ${isFavorited(currentWord) ? 'rgba(244,114,182,0.6)' : 'rgba(255,255,255,0.1)'}`
+                          }}
+                          title={isFavorited(currentWord) ? 'Saved' : 'Save'}
+                        >
+                          <Heart className="w-3.5 h-3.5" style={{ color: isFavorited(currentWord) ? '#F472B6' : 'rgba(255,255,255,0.6)' }} fill={isFavorited(currentWord) ? '#F472B6' : 'none'} />
+                        </button>
+                        <button
+                          onClick={() => copyWord(currentWord)}
+                          className="p-2 rounded-lg transition-all hover:scale-110"
+                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+                          title="Copy"
+                        >
+                          {copiedFlash ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-white/60" />}
+                        </button>
+                        <button
+                          onClick={() => shareWord(currentWord)}
+                          className="p-2 rounded-lg transition-all hover:scale-110"
+                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+                          title="Share"
+                        >
+                          <Share2 className="w-3.5 h-3.5 text-white/60" />
+                        </button>
+                      </div>
                     </div>
                     {currentWord.pronunciation && (
                       <p className="text-white/60 text-sm font-mono tracking-wide">
@@ -423,6 +604,19 @@ Vary picks daily — use date ${today} for variety.`,
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {savedFlash && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-[2px] z-50"
+                  style={{ background: 'rgba(244,114,182,0.2)', border: '1px solid rgba(244,114,182,0.5)', color: '#F472B6', backdropFilter: 'blur(8px)' }}>
+                  ♥ Saved to Favorites
+                </div>
+              )}
+              {copiedFlash && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-[2px] z-50"
+                  style={{ background: 'rgba(52,211,153,0.2)', border: '1px solid rgba(52,211,153,0.5)', color: '#34D399', backdropFilter: 'blur(8px)' }}>
+                  ✓ Copied
                 </div>
               )}
 
