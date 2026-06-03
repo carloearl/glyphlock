@@ -1,0 +1,141 @@
+{
+  "name": "VIPContractRecord",
+  "type": "object",
+  "properties": {
+    "serial_number": {
+      "type": "string",
+      "description": "Unique contract serial number"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue where this contract was signed"
+    },
+    "token": {
+      "type": "string",
+      "description": "Single-use contract token"
+    },
+    "record_type": {
+      "type": "string",
+      "enum": [
+        "contract_token",
+        "signed_contract"
+      ],
+      "description": "Token or signed contract record"
+    },
+    "guest_name": {
+      "type": "string"
+    },
+    "room_number": {
+      "type": "string"
+    },
+    "booking_id": {
+      "type": "string"
+    },
+    "guest_record_id": {
+      "type": "string",
+      "description": "Reference to VIPGuest record"
+    },
+    "card_last_four": {
+      "type": "string"
+    },
+    "card_type": {
+      "type": "string"
+    },
+    "government_id_type": {
+      "type": "string"
+    },
+    "government_id_state": {
+      "type": "string"
+    },
+    "signature_hash": {
+      "type": "string",
+      "description": "SHA-256 of digital signature"
+    },
+    "thumbprint_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of thumbprint biometric"
+    },
+    "id_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of government ID data"
+    },
+    "contract_hash": {
+      "type": "string",
+      "description": "Master SHA-256 hash of entire contract bundle"
+    },
+    "thumbprint_url": {
+      "type": "string",
+      "description": "Uploaded thumbprint image URL"
+    },
+    "guest_photo_url": {
+      "type": "string",
+      "description": "Guest face photo URL captured at signing"
+    },
+    "id_photo_url": {
+      "type": "string",
+      "description": "Front of government ID photo URL"
+    },
+    "id_photo_back_url": {
+      "type": "string",
+      "description": "Back of government ID photo URL"
+    },
+    "signed_hardcopy_photo_url": {
+      "type": "string",
+      "description": "Photo of the physically signed printed contract"
+    },
+    "hardcopy_barcode_scan": {
+      "type": "string",
+      "description": "Barcode/QR data scanned from printed contract"
+    },
+    "hardcopy_logged_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when hardcopy was rescanned and logged"
+    },
+    "hardcopy_logged_by": {
+      "type": "string",
+      "description": "Staff member who rescanned the hardcopy"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "used": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "signed",
+        "expired",
+        "revoked"
+      ],
+      "default": "pending"
+    },
+    "issued_by": {
+      "type": "string",
+      "description": "Admin email who generated the contract"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional audit metadata"
+    }
+  },
+  "required": [
+    "token",
+    "record_type",
+    "guest_name"
+  ]
+}

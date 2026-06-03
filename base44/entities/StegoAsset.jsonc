@@ -1,0 +1,85 @@
+{
+  "name": "StegoAsset",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the steganographic asset"
+    },
+    "description": {
+      "type": "string"
+    },
+    "algorithm": {
+      "type": "string",
+      "enum": [
+        "LSB_SIMPLE",
+        "LSB_MATRIX",
+        "AES_ENCRYPTED_LSB",
+        "ALPHA_CHANNEL",
+        "FREQUENCY_DOMAIN"
+      ],
+      "default": "AES_ENCRYPTED_LSB"
+    },
+    "encryption_method": {
+      "type": "string",
+      "default": "AES-256-GCM"
+    },
+    "carrier_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "audio",
+        "video"
+      ],
+      "default": "image"
+    },
+    "carrier_url": {
+      "type": "string",
+      "description": "Original image URL"
+    },
+    "result_url": {
+      "type": "string",
+      "description": "Processed stego image URL"
+    },
+    "payload_hash": {
+      "type": "string",
+      "description": "Hash of the hidden payload for integrity"
+    },
+    "key_hint": {
+      "type": "string",
+      "description": "Hint for the decryption key"
+    },
+    "access_level": {
+      "type": "string",
+      "enum": [
+        "public",
+        "private",
+        "top_secret"
+      ],
+      "default": "private"
+    },
+    "download_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "algorithm",
+    "result_url"
+  ],
+  "rls": {
+    "read": {
+      "created_by": "auth.uid"
+    },
+    "create": {
+      "created_by": "auth.uid"
+    },
+    "update": {
+      "created_by": "auth.uid"
+    },
+    "delete": {
+      "created_by": "auth.uid"
+    }
+  }
+}

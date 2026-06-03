@@ -1,0 +1,79 @@
+{
+  "name": "ConversationStorage",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "Agent conversation ID"
+    },
+    "title": {
+      "type": "string",
+      "description": "User-defined conversation title"
+    },
+    "agent_name": {
+      "type": "string",
+      "enum": [
+        "siteBuilder",
+        "glyphbot",
+        "glyphbot_jr",
+        "sie_architect",
+        "alfred"
+      ],
+      "description": "Which agent was used"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "visual",
+        "brain",
+        "dev"
+      ],
+      "description": "UI mode used"
+    },
+    "mode_subtype": {
+      "type": "string",
+      "description": "explain/build/refactor/debug for brain mode"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Full message history snapshot"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Custom metadata"
+    },
+    "is_archived": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_favorite": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "conversation_id",
+    "agent_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

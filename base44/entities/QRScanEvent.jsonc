@@ -1,0 +1,91 @@
+{
+  "name": "QRScanEvent",
+  "type": "object",
+  "properties": {
+    "qr_asset_id": {
+      "type": "string",
+      "description": "Reference to QrAsset"
+    },
+    "decoded_content": {
+      "type": "string",
+      "description": "Raw decoded QR data"
+    },
+    "device_context": {
+      "type": "object",
+      "properties": {
+        "userAgent": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string"
+        },
+        "screenWidth": {
+          "type": "integer"
+        },
+        "screenHeight": {
+          "type": "integer"
+        }
+      },
+      "description": "Device metadata"
+    },
+    "scan_velocity": {
+      "type": "number",
+      "description": "Scans per minute (spam detection)"
+    },
+    "scan_location": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "accuracy": {
+          "type": "number"
+        }
+      },
+      "description": "Optional geolocation"
+    },
+    "resolved_slots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Which payload slots were accepted"
+    },
+    "rejection_reasons": {
+      "type": "object",
+      "description": "Why each slot was rejected (if any)"
+    },
+    "error_correction_level": {
+      "type": "string",
+      "enum": [
+        "L",
+        "M",
+        "Q",
+        "H"
+      ],
+      "description": "QR error correction level detected"
+    },
+    "contrast_score": {
+      "type": "number",
+      "description": "Visual contrast quality 0-1"
+    },
+    "quiet_zone_valid": {
+      "type": "boolean",
+      "description": "Whether quiet zone meets spec"
+    }
+  },
+  "required": [
+    "decoded_content"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

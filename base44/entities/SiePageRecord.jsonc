@@ -1,0 +1,25 @@
+{
+  "name": "SiePageRecord",
+  "type": "object",
+  "properties": {
+    "scan_id": {
+      "type": "string"
+    },
+    "page_name": {
+      "type": "string"
+    },
+    "route_binding": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "error_state": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "scan_id",
+    "page_name"
+  ]
+}

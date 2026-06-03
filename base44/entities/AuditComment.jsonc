@@ -1,0 +1,117 @@
+{
+  "name": "AuditComment",
+  "type": "object",
+  "properties": {
+    "auditId": {
+      "type": "string",
+      "description": "Reference to parent audit report"
+    },
+    "findingId": {
+      "type": "string",
+      "description": "Reference to specific finding (optional)"
+    },
+    "authorEmail": {
+      "type": "string",
+      "description": "Email of comment author"
+    },
+    "authorName": {
+      "type": "string",
+      "description": "Display name of author"
+    },
+    "content": {
+      "type": "string",
+      "description": "Comment text"
+    },
+    "mention": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Email addresses mentioned in comment"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "info"
+      ],
+      "default": "info",
+      "description": "Comment urgency level"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "acknowledged",
+        "resolved"
+      ],
+      "default": "open",
+      "description": "Comment resolution status"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Attached files"
+    },
+    "replies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "authorEmail": {
+            "type": "string"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Threaded replies"
+    }
+  },
+  "required": [
+    "auditId",
+    "authorEmail",
+    "content"
+  ],
+  "rls": {
+    "create": {
+      "authorEmail": "{{user.email}}"
+    },
+    "read": {
+      "authorEmail": "{{user.email}}"
+    },
+    "update": {
+      "authorEmail": "{{user.email}}"
+    },
+    "delete": {
+      "authorEmail": "{{user.email}}"
+    }
+  }
+}

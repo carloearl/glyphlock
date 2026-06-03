@@ -1,0 +1,64 @@
+{
+  "name": "APIKey",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Key name"
+    },
+    "public_key": {
+      "type": "string",
+      "description": "Public API key"
+    },
+    "secret_key_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of secret key"
+    },
+    "owner_id": {
+      "type": "string",
+      "description": "Owner email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "revoked"
+      ],
+      "default": "active"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "read",
+        "write"
+      ]
+    },
+    "last_used": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "name",
+    "public_key",
+    "secret_key_hash",
+    "owner_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "HotspotPayload",
+  "type": "object",
+  "properties": {
+    "payload_id": {
+      "type": "string",
+      "description": "Unique payload identifier"
+    },
+    "hotspot_id": {
+      "type": "string",
+      "description": "Foreign key to Hotspot"
+    },
+    "payload_type": {
+      "type": "string",
+      "enum": [
+        "url",
+        "api_trigger",
+        "modal_content",
+        "internal_route",
+        "analytics_event"
+      ],
+      "description": "Type of payload action"
+    },
+    "payload_url": {
+      "type": "string",
+      "description": "HTTPS URL (required when payload_type is url)"
+    }
+  },
+  "required": [
+    "payload_id",
+    "hotspot_id",
+    "payload_type"
+  ]
+}

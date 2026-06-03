@@ -1,0 +1,53 @@
+{
+  "name": "AccessibilityAuditRow",
+  "type": "object",
+  "properties": {
+    "scan_run_id": {
+      "type": "string"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "has_alt_text": {
+      "type": "boolean"
+    },
+    "has_aria_labels": {
+      "type": "boolean"
+    },
+    "color_contrast_ok": {
+      "type": "boolean"
+    },
+    "keyboard_navigation_ok": {
+      "type": "boolean"
+    },
+    "violation_ids": {
+      "type": "string"
+    },
+    "violation_messages": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "warning",
+        "critical"
+      ]
+    },
+    "required_action": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "scan_run_id",
+    "route_path"
+  ],
+  "rls": {
+    "read": {
+      "role": "admin"
+    },
+    "create": {
+      "role": "admin"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "QrScanEvent",
+  "type": "object",
+  "properties": {
+    "qrAssetId": {
+      "type": "string",
+      "description": "Reference to scanned QR code_id"
+    },
+    "scannedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "geoApprox": {
+      "type": "string",
+      "description": "Coarse location (country/region)"
+    },
+    "deviceHint": {
+      "type": "string",
+      "description": "Device type (Mobile/Desktop/Tablet)"
+    },
+    "userAgent": {
+      "type": "string",
+      "description": "Full user agent string"
+    },
+    "referrerHint": {
+      "type": "string"
+    },
+    "resolvedUrl": {
+      "type": "string",
+      "description": "URL scanner resolved to"
+    },
+    "riskScoreAtScan": {
+      "type": "number",
+      "description": "Risk score at time of scan"
+    },
+    "tamperSuspected": {
+      "type": "boolean",
+      "default": false
+    },
+    "tamperReason": {
+      "type": "string"
+    },
+    "interactionType": {
+      "type": "string",
+      "enum": [
+        "scan",
+        "tap",
+        "hover",
+        "hold"
+      ],
+      "default": "scan"
+    },
+    "hotZoneId": {
+      "type": "string",
+      "description": "If hot zone interaction"
+    }
+  },
+  "required": [
+    "qrAssetId",
+    "scannedAt"
+  ]
+}

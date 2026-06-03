@@ -1,0 +1,82 @@
+{
+  "name": "BuilderActionLog",
+  "type": "object",
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the action occurred"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Email of user who performed the action"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "analyze",
+        "propose",
+        "modify",
+        "delete",
+        "rollback",
+        "backup"
+      ],
+      "description": "Type of operation performed"
+    },
+    "filePath": {
+      "type": "string",
+      "description": "Path of the affected file"
+    },
+    "hashBefore": {
+      "type": "string",
+      "description": "SHA-256 hash of content before change"
+    },
+    "hashAfter": {
+      "type": "string",
+      "description": "SHA-256 hash of content after change"
+    },
+    "diffSummary": {
+      "type": "string",
+      "description": "Human-readable change summary"
+    },
+    "approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether change was approved"
+    },
+    "approvedBy": {
+      "type": "string",
+      "description": "Email of approver"
+    },
+    "rollbackAvailable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a backup exists"
+    },
+    "backupPath": {
+      "type": "string",
+      "description": "Location of backup file"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "applied",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error details if operation failed"
+    }
+  },
+  "required": [
+    "timestamp",
+    "actor",
+    "action",
+    "filePath"
+  ]
+}

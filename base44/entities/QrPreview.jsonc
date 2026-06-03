@@ -1,0 +1,90 @@
+{
+  "name": "QrPreview",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User email who owns this preview"
+    },
+    "code_id": {
+      "type": "string",
+      "description": "Unique QR code identifier"
+    },
+    "payload": {
+      "type": "string",
+      "description": "QR payload data"
+    },
+    "payload_type": {
+      "type": "string",
+      "description": "Type of payload (url, text, etc)"
+    },
+    "image_data_url": {
+      "type": "string",
+      "description": "Base64 data URL of the QR image"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Thumbnail preview URL"
+    },
+    "customization": {
+      "type": "object",
+      "description": "Full customization settings object"
+    },
+    "size": {
+      "type": "number",
+      "default": 512
+    },
+    "error_correction": {
+      "type": "string",
+      "enum": [
+        "L",
+        "M",
+        "Q",
+        "H"
+      ],
+      "default": "H"
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0
+    },
+    "risk_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "immutable_hash": {
+      "type": "string"
+    },
+    "vaulted": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, saved to permanent vault"
+    },
+    "vault_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When moved to vault"
+    }
+  },
+  "required": [
+    "user_id",
+    "code_id",
+    "payload"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

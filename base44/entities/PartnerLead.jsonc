@@ -1,0 +1,85 @@
+{
+  "name": "PartnerLead",
+  "type": "object",
+  "properties": {
+    "partner_id": {
+      "type": "string",
+      "description": "Reference to Partner entity"
+    },
+    "referral_code": {
+      "type": "string",
+      "description": "Tracking code used"
+    },
+    "lead_name": {
+      "type": "string",
+      "description": "Lead full name"
+    },
+    "lead_email": {
+      "type": "string",
+      "format": "email"
+    },
+    "lead_company": {
+      "type": "string"
+    },
+    "lead_phone": {
+      "type": "string"
+    },
+    "service_interest": {
+      "type": "string"
+    },
+    "estimated_value": {
+      "type": "number",
+      "description": "Estimated deal value in USD"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "qualified",
+        "proposal_sent",
+        "negotiation",
+        "won",
+        "lost"
+      ],
+      "default": "new"
+    },
+    "conversion_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actual_revenue": {
+      "type": "number",
+      "default": 0
+    },
+    "commission_paid": {
+      "type": "number",
+      "default": 0
+    },
+    "commission_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "paid"
+      ],
+      "default": "pending"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "partner_id",
+    "referral_code",
+    "lead_email"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

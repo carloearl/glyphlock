@@ -1,0 +1,63 @@
+{
+  "name": "SecureQRCode",
+  "type": "object",
+  "properties": {
+    "qr_id": {
+      "type": "string",
+      "description": "Unique QR code identifier"
+    },
+    "order_id": {
+      "type": "string",
+      "description": "Associated order ID"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "qr_data": {
+      "type": "string",
+      "description": "Encrypted QR payload"
+    },
+    "qr_image_url": {
+      "type": "string",
+      "description": "Generated QR code image"
+    },
+    "is_single_use": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_used": {
+      "type": "boolean",
+      "default": false
+    },
+    "used_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "used_by": {
+      "type": "string"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "QR code expiration (24 hours)"
+    },
+    "scan_attempts": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "used",
+        "expired",
+        "voided"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "order_id",
+    "qr_data"
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "name": "FileStorage",
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string",
+      "description": "Original file name"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Public URL to the stored file"
+    },
+    "file_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "video",
+        "audio",
+        "document",
+        "qr",
+        "contract",
+        "voucher",
+        "receipt",
+        "report"
+      ],
+      "description": "Type of file stored"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "mime_type": {
+      "type": "string",
+      "description": "MIME type (e.g., image/png)"
+    },
+    "module": {
+      "type": "string",
+      "enum": [
+        "nups",
+        "qr",
+        "imagelab",
+        "steganography",
+        "vip",
+        "entertainer",
+        "general"
+      ],
+      "default": "general",
+      "description": "Which module uploaded this"
+    },
+    "reference_id": {
+      "type": "string",
+      "description": "ID of related entity (transaction_id, entertainer_id, etc.)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Searchable tags"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional file metadata"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether file is publicly accessible"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Auto-delete after this date"
+    }
+  },
+  "required": [
+    "file_name",
+    "file_url",
+    "file_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

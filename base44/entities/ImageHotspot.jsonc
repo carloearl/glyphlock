@@ -1,0 +1,93 @@
+{
+  "name": "ImageHotspot",
+  "type": "object",
+  "properties": {
+    "interactive_image_id": {
+      "type": "string",
+      "description": "Reference to InteractiveImage parent"
+    },
+    "x": {
+      "type": "number",
+      "description": "X coordinate (percentage)"
+    },
+    "y": {
+      "type": "number",
+      "description": "Y coordinate (percentage)"
+    },
+    "width": {
+      "type": "number",
+      "description": "Width (percentage)"
+    },
+    "height": {
+      "type": "number",
+      "description": "Height (percentage)"
+    },
+    "shape": {
+      "type": "string",
+      "enum": [
+        "rect",
+        "circle",
+        "polygon"
+      ],
+      "default": "rect",
+      "description": "Hotspot shape"
+    },
+    "label": {
+      "type": "string",
+      "description": "Hotspot label"
+    },
+    "description": {
+      "type": "string",
+      "description": "Hotspot description"
+    },
+    "actionType": {
+      "type": "string",
+      "enum": [
+        "none",
+        "openUrl",
+        "showModal",
+        "playAudio",
+        "invokeAgent",
+        "verifyAccess"
+      ],
+      "default": "none",
+      "description": "Action type"
+    },
+    "actionValue": {
+      "type": "string",
+      "description": "URL, text content, event name, or tooltip text"
+    },
+    "click_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total clicks on this hotspot"
+    },
+    "last_clicked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last click timestamp"
+    }
+  },
+  "required": [
+    "interactive_image_id",
+    "x",
+    "y",
+    "width",
+    "height",
+    "label"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

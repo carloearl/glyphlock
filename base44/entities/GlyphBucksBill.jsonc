@@ -1,0 +1,91 @@
+{
+  "name": "GlyphBucksBill",
+  "type": "object",
+  "properties": {
+    "serial_number": {
+      "type": "string",
+      "description": "Unique 12-digit serial number"
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "Reference to GlyphBucksBatch"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Parent transaction reference"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "denomination": {
+      "type": "number",
+      "description": "Face value (1, 5, 10, 20, 50, 100)"
+    },
+    "barcode_number": {
+      "type": "string",
+      "description": "Code 128 barcode identifier"
+    },
+    "barcode_url": {
+      "type": "string",
+      "description": "Generated barcode image URL"
+    },
+    "qr_code_url": {
+      "type": "string",
+      "description": "Optional QR code URL for metadata"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "issued",
+        "redeemed",
+        "voided",
+        "disputed"
+      ],
+      "default": "issued"
+    },
+    "issued_to_customer": {
+      "type": "string",
+      "description": "Customer name who received bill"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "redeemed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "redeemed_by_contractor_id": {
+      "type": "string",
+      "description": "Entertainer who redeemed bill"
+    },
+    "redemption_payout_id": {
+      "type": "string",
+      "description": "Reference to payout record"
+    },
+    "redemption_percentage": {
+      "type": "number",
+      "default": 0.5,
+      "description": "Percentage paid to contractor (50%)"
+    },
+    "redemption_amount": {
+      "type": "number",
+      "description": "Actual payout amount"
+    },
+    "voided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "voided_by": {
+      "type": "string"
+    },
+    "void_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "serial_number",
+    "batch_id",
+    "denomination"
+  ]
+}

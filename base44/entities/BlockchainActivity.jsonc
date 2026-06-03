@@ -1,0 +1,70 @@
+{
+  "name": "BlockchainActivity",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of user performing operation"
+    },
+    "operation_type": {
+      "type": "string",
+      "enum": [
+        "hash_generation",
+        "merkle_tree",
+        "block_mining",
+        "hash_verification"
+      ],
+      "description": "Type of blockchain operation"
+    },
+    "input_data": {
+      "type": "string",
+      "description": "Original input data (truncated for privacy)"
+    },
+    "input_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of input"
+    },
+    "output_hash": {
+      "type": "string",
+      "description": "Generated hash or merkle root"
+    },
+    "algorithm": {
+      "type": "string",
+      "description": "Hash algorithm used"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional operation metadata"
+    }
+  },
+  "required": [
+    "user_email",
+    "operation_type",
+    "input_hash"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

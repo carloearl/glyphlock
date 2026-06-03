@@ -1,0 +1,84 @@
+{
+  "name": "VoiceProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User email"
+    },
+    "voice": {
+      "type": "string",
+      "enum": [
+        "nova",
+        "shimmer",
+        "echo",
+        "alloy",
+        "fable",
+        "onyx"
+      ],
+      "description": "Selected voice character"
+    },
+    "speed": {
+      "type": "number",
+      "description": "Speaking rate (0.5-2.0)"
+    },
+    "breathiness": {
+      "type": "number",
+      "description": "Breathiness level (0.0-1.0)"
+    },
+    "vocalFry": {
+      "type": "number",
+      "description": "Vocal fry intensity (0.0-1.0)"
+    },
+    "emotion": {
+      "type": "string",
+      "enum": [
+        "neutral",
+        "excited",
+        "calm",
+        "confident",
+        "friendly",
+        "professional",
+        "empathetic"
+      ],
+      "description": "Emotion preset"
+    },
+    "context": {
+      "type": "string",
+      "description": "Usage context (greeting, explanation, etc.)"
+    },
+    "text_length": {
+      "type": "integer",
+      "description": "Length of synthesized text"
+    },
+    "audio_size": {
+      "type": "integer",
+      "description": "Generated audio file size in bytes"
+    },
+    "analysis_type": {
+      "type": "string",
+      "description": "Type of analysis (ai_recommendation, user_custom, etc.)"
+    },
+    "recommendations": {
+      "type": "object",
+      "description": "AI-generated recommendations"
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

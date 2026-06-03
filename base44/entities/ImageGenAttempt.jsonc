@@ -1,0 +1,92 @@
+{
+  "name": "ImageGenAttempt",
+  "type": "object",
+  "properties": {
+    "interactive_image_id": {
+      "type": "string",
+      "description": "Reference to InteractiveImage parent"
+    },
+    "attempt_number": {
+      "type": "integer",
+      "description": "Sequential attempt counter (1, 2, 3...)"
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "base44",
+        "replicate",
+        "stability",
+        "local"
+      ],
+      "description": "Image generation engine used"
+    },
+    "seed": {
+      "type": "integer",
+      "description": "Random seed for this attempt"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "success",
+        "retry",
+        "error"
+      ],
+      "description": "Attempt outcome"
+    },
+    "input_params": {
+      "type": "object",
+      "description": "All generation parameters used"
+    },
+    "validation_scores": {
+      "type": "object",
+      "properties": {
+        "face_anatomy": {
+          "type": "number"
+        },
+        "hand_anatomy": {
+          "type": "number"
+        },
+        "realism": {
+          "type": "number"
+        },
+        "composition": {
+          "type": "number"
+        },
+        "lighting": {
+          "type": "number"
+        },
+        "overall": {
+          "type": "number"
+        },
+        "identity_similarity": {
+          "type": "number"
+        }
+      },
+      "description": "Gemini validation scores"
+    },
+    "output_url": {
+      "type": "string",
+      "description": "Generated image URL (null if error)"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error details if status=error"
+    }
+  },
+  "required": [
+    "interactive_image_id",
+    "attempt_number",
+    "engine",
+    "seed",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

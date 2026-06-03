@@ -1,0 +1,80 @@
+{
+  "name": "AlertThreshold",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Threshold name (e.g., 'High Priority CVEs')"
+    },
+    "condition": {
+      "type": "object",
+      "properties": {
+        "severity": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Severity levels to trigger on"
+        },
+        "source": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Alert sources"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Trigger keywords"
+        }
+      },
+      "description": "Trigger conditions"
+    },
+    "actions": {
+      "type": "object",
+      "properties": {
+        "notifyEmails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "slackWebhook": {
+          "type": "string"
+        },
+        "assignTo": {
+          "type": "string"
+        }
+      },
+      "description": "Actions on trigger"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Is threshold active"
+    },
+    "cooldownMinutes": {
+      "type": "number",
+      "default": 60,
+      "description": "Min time between notifications"
+    }
+  },
+  "required": [
+    "name",
+    "condition"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "QRThreatLog",
+  "type": "object",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "Unique incident identifier"
+    },
+    "code_id": {
+      "type": "string",
+      "description": "Reference to QRGenHistory code_id"
+    },
+    "attack_type": {
+      "type": "string",
+      "enum": [
+        "Quishing",
+        "QRLjacking",
+        "Malicious URL",
+        "Phishing",
+        "Other"
+      ],
+      "description": "Type of attack detected"
+    },
+    "payload": {
+      "type": "string",
+      "description": "The malicious payload that was blocked"
+    },
+    "threat_description": {
+      "type": "string",
+      "description": "Detailed description of the threat"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the incident has been resolved"
+    },
+    "resolution_notes": {
+      "type": "string",
+      "description": "Admin notes on resolution"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    }
+  },
+  "required": [
+    "incident_id",
+    "code_id",
+    "attack_type",
+    "payload"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "CollaborationSession",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string"
+    },
+    "hostId": {
+      "type": "string"
+    },
+    "activeUsers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lastUpdate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "currentState": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "projectId",
+    "hostId"
+  ],
+  "rls": {
+    "read": {
+      "activeUsers": {
+        "$in": [
+          "auth.uid"
+        ]
+      }
+    },
+    "create": {
+      "hostId": "auth.uid"
+    },
+    "update": {
+      "activeUsers": {
+        "$in": [
+          "auth.uid"
+        ]
+      }
+    }
+  }
+}

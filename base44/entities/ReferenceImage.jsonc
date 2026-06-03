@@ -1,0 +1,75 @@
+{
+  "name": "ReferenceImage",
+  "type": "object",
+  "properties": {
+    "original_image_url": {
+      "type": "string",
+      "description": "Original uploaded reference image"
+    },
+    "extracted_features": {
+      "type": "object",
+      "properties": {
+        "color_palette": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lighting_signature": {
+          "type": "object"
+        },
+        "texture_signature": {
+          "type": "object"
+        },
+        "composition_signature": {
+          "type": "object"
+        },
+        "visual_mood": {
+          "type": "string"
+        },
+        "style_entropy": {
+          "type": "number"
+        },
+        "face_embedding": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "identity_lock_config": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "similarity_threshold": {
+          "type": "number",
+          "default": 0.87
+        }
+      }
+    },
+    "image_hash": {
+      "type": "string",
+      "description": "SHA-256 of original image"
+    }
+  },
+  "required": [
+    "original_image_url"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

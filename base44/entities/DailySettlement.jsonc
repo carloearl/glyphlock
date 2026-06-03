@@ -1,0 +1,93 @@
+{
+  "name": "DailySettlement",
+  "type": "object",
+  "properties": {
+    "settlement_id": {
+      "type": "string",
+      "description": "Unique settlement identifier"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "settlement_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "entertainer_payouts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entertainer_id": {
+            "type": "string"
+          },
+          "stage_name": {
+            "type": "string"
+          },
+          "gross_revenue": {
+            "type": "number"
+          },
+          "processing_fees": {
+            "type": "number"
+          },
+          "house_commission": {
+            "type": "number"
+          },
+          "voided_bills_deduction": {
+            "type": "number"
+          },
+          "net_payout": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "total_gross_revenue": {
+      "type": "number"
+    },
+    "total_processing_fees": {
+      "type": "number"
+    },
+    "total_house_commission": {
+      "type": "number"
+    },
+    "total_net_payouts": {
+      "type": "number"
+    },
+    "venue_net_income": {
+      "type": "number",
+      "description": "Venue profit after all payouts"
+    },
+    "reconciliation_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "disputed",
+        "finalized"
+      ],
+      "default": "pending"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "discrepancies": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "report_url": {
+      "type": "string",
+      "description": "Generated reconciliation report PDF"
+    }
+  },
+  "required": [
+    "venue_id",
+    "settlement_date"
+  ]
+}

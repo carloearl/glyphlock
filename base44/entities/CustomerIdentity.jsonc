@@ -1,0 +1,97 @@
+{
+  "name": "CustomerIdentity",
+  "type": "object",
+  "properties": {
+    "identity_id": {
+      "type": "string",
+      "description": "Unique identity record ID"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Full legal name"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "id_type": {
+      "type": "string",
+      "enum": [
+        "drivers_license",
+        "state_id",
+        "passport",
+        "military_id",
+        "tribal_id"
+      ],
+      "description": "Government ID type"
+    },
+    "id_number": {
+      "type": "string",
+      "description": "ID number (encrypted)"
+    },
+    "id_state": {
+      "type": "string",
+      "description": "Issuing state or country"
+    },
+    "id_expiration": {
+      "type": "string",
+      "format": "date"
+    },
+    "address_line1": {
+      "type": "string"
+    },
+    "address_line2": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "id_scan_front_url": {
+      "type": "string",
+      "description": "Front of ID image"
+    },
+    "id_scan_back_url": {
+      "type": "string",
+      "description": "Back of ID image"
+    },
+    "scan_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scanned_by": {
+      "type": "string",
+      "description": "Staff member who scanned ID"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "linked_transactions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Transaction IDs linked to this identity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "flagged",
+        "banned"
+      ],
+      "default": "active",
+      "description": "Customer status for compliance and security"
+    }
+  },
+  "required": [
+    "customer_name",
+    "id_type",
+    "id_number"
+  ]
+}

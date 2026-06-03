@@ -1,0 +1,115 @@
+{
+  "name": "POSProduct",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Product name"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this product belongs to"
+    },
+    "sku": {
+      "type": "string",
+      "description": "Stock keeping unit"
+    },
+    "barcode": {
+      "type": "string",
+      "description": "Product barcode"
+    },
+    "price": {
+      "type": "number",
+      "description": "Retail price"
+    },
+    "cost": {
+      "type": "number",
+      "description": "Product cost"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Food & Beverage",
+        "Spirits",
+        "Beer & Wine",
+        "Mixers",
+        "VIP Service",
+        "Merchandise",
+        "Services",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "stock_quantity": {
+      "type": "number",
+      "description": "Current stock level"
+    },
+    "low_stock_threshold": {
+      "type": "number",
+      "default": 10,
+      "description": "Alert threshold for low stock"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Supplier name"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "Store location ID"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "taxable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this product is subject to tax"
+    },
+    "tax_rate": {
+      "type": "number",
+      "default": 0.08,
+      "description": "Tax rate percentage (0.08 = 8%)"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Product image URL"
+    },
+    "description": {
+      "type": "string",
+      "description": "Product description"
+    }
+  },
+  "required": [
+    "name",
+    "price"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "manager"
+          ]
+        }
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "manager"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

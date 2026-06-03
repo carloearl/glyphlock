@@ -1,0 +1,39 @@
+{
+  "name": "SieScanRun",
+  "type": "object",
+  "properties": {
+    "scan_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration": {
+      "type": "number"
+    },
+    "success": {
+      "type": "boolean"
+    },
+    "error_count": {
+      "type": "number"
+    },
+    "artifacts": {
+      "type": "object",
+      "description": "JSON storage of the 5 artifacts for export"
+    }
+  },
+  "required": [
+    "scan_id",
+    "timestamp",
+    "success"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

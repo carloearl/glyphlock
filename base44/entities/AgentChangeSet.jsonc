@@ -1,0 +1,151 @@
+{
+  "name": "AgentChangeSet",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "build",
+        "debug",
+        "explain",
+        "refactor"
+      ],
+      "default": "build",
+      "description": "Agent operation mode"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "generated",
+        "approved",
+        "applied",
+        "rejected",
+        "rolled_back"
+      ],
+      "default": "planned",
+      "description": "Current status of the change set"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable summary of what this change does"
+    },
+    "userRequest": {
+      "type": "string",
+      "description": "Original user request that triggered this change"
+    },
+    "executionPlan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "number"
+          },
+          "action": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Step-by-step execution plan"
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "contentBefore": {
+            "type": "string"
+          },
+          "contentAfter": {
+            "type": "string"
+          },
+          "patchInstructions": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Actual file changes"
+    },
+    "riskLevel": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Risk assessment for this change"
+    },
+    "requiresApproval": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether manual approval is required"
+    },
+    "approvedBy": {
+      "type": "string",
+      "description": "Email of approver"
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When approval was granted"
+    },
+    "appliedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When changes were applied"
+    },
+    "applyLog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Log of apply operations"
+    },
+    "rollbackAvailable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether rollback is possible"
+    },
+    "model": {
+      "type": "string",
+      "description": "AI model used for generation"
+    }
+  },
+  "required": [
+    "mode",
+    "status",
+    "userRequest"
+  ]
+}

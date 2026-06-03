@@ -1,0 +1,87 @@
+{
+  "name": "ScanRun",
+  "type": "object",
+  "properties": {
+    "scan_id": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "warning",
+        "critical",
+        "running",
+        "failed"
+      ]
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "nav_ok_count": {
+      "type": "number",
+      "default": 0
+    },
+    "nav_warning_count": {
+      "type": "number",
+      "default": 0
+    },
+    "nav_critical_count": {
+      "type": "number",
+      "default": 0
+    },
+    "route_ok_count": {
+      "type": "number",
+      "default": 0
+    },
+    "route_warning_count": {
+      "type": "number",
+      "default": 0
+    },
+    "route_critical_count": {
+      "type": "number",
+      "default": 0
+    },
+    "sitemap_ok_count": {
+      "type": "number",
+      "default": 0
+    },
+    "sitemap_warning_count": {
+      "type": "number",
+      "default": 0
+    },
+    "sitemap_critical_count": {
+      "type": "number",
+      "default": 0
+    },
+    "backend_ok_count": {
+      "type": "number",
+      "default": 0
+    },
+    "backend_warning_count": {
+      "type": "number",
+      "default": 0
+    },
+    "backend_critical_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "scan_id",
+    "started_at"
+  ],
+  "rls": {
+    "read": true,
+    "create": true,
+    "update": true
+  }
+}

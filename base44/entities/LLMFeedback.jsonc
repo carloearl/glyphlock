@@ -1,0 +1,56 @@
+{
+  "name": "LLMFeedback",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "Unique conversation/message identifier"
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "LLM provider used"
+    },
+    "model": {
+      "type": "string",
+      "description": "Model name/label"
+    },
+    "persona": {
+      "type": "string",
+      "description": "Persona used for the response"
+    },
+    "rating": {
+      "type": "string",
+      "enum": [
+        "positive",
+        "negative"
+      ],
+      "description": "Thumbs up or down"
+    },
+    "feedback_text": {
+      "type": "string",
+      "description": "Optional text feedback from user"
+    },
+    "response_latency_ms": {
+      "type": "number",
+      "description": "Response time in milliseconds"
+    },
+    "prompt_snippet": {
+      "type": "string",
+      "description": "First 200 chars of the prompt for context"
+    },
+    "response_snippet": {
+      "type": "string",
+      "description": "First 200 chars of the response for context"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of user providing feedback"
+    }
+  },
+  "required": [
+    "conversation_id",
+    "provider_id",
+    "rating",
+    "user_email"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "name": "AgentRuntimeModule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Module name/identifier"
+    },
+    "moduleType": {
+      "type": "string",
+      "enum": [
+        "page",
+        "component",
+        "entity",
+        "function",
+        "config",
+        "layout"
+      ],
+      "description": "Type of module"
+    },
+    "targetPath": {
+      "type": "string",
+      "description": "Target file path (e.g., pages/Settings.jsx)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full module content/code"
+    },
+    "version": {
+      "type": "number",
+      "default": 1,
+      "description": "Version number for rollback"
+    },
+    "previousContent": {
+      "type": "string",
+      "description": "Previous version content for rollback"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this module is active"
+    },
+    "linkedChangeSetId": {
+      "type": "string",
+      "description": "ID of the AgentChangeSet that created this"
+    },
+    "deployedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When module was deployed"
+    },
+    "deployedBy": {
+      "type": "string",
+      "description": "Who deployed this module"
+    },
+    "hash": {
+      "type": "string",
+      "description": "Content hash for integrity check"
+    }
+  },
+  "required": [
+    "name",
+    "moduleType",
+    "targetPath",
+    "content"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "name": "ChargebackEvidence",
+  "type": "object",
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "description": "Unique evidence package ID"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Parent transaction reference"
+    },
+    "dispute_id": {
+      "type": "string",
+      "description": "Processor dispute ID"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "package_generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generated_by": {
+      "type": "string",
+      "description": "Staff member who generated package"
+    },
+    "receipt_url": {
+      "type": "string"
+    },
+    "contract_url": {
+      "type": "string"
+    },
+    "id_scan_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification_media_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "approval_code": {
+      "type": "string"
+    },
+    "processor_reference": {
+      "type": "string"
+    },
+    "evidence_pdf_url": {
+      "type": "string",
+      "description": "Compiled PDF evidence package"
+    },
+    "evidence_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of evidence package"
+    },
+    "blockchain_anchor": {
+      "type": "string",
+      "description": "Optional GlyphLock/RiffLock proof ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "accepted",
+        "rejected"
+      ],
+      "default": "draft"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "transaction_id",
+    "evidence_id"
+  ]
+}

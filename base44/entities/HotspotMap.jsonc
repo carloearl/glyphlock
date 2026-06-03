@@ -1,0 +1,23 @@
+{
+  "name": "HotspotMap",
+  "type": "object",
+  "properties": {
+    "map_id": {
+      "type": "string",
+      "description": "Unique map identifier"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Foreign key to InteractiveImage"
+    },
+    "map_version": {
+      "type": "string",
+      "default": "v1",
+      "description": "Map schema version"
+    }
+  },
+  "required": [
+    "map_id",
+    "asset_id"
+  ]
+}

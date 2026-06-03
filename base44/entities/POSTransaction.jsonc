@@ -1,0 +1,107 @@
+{
+  "name": "POSTransaction",
+  "type": "object",
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "description": "Unique transaction identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue where this transaction occurred"
+    },
+    "customer_id": {
+      "type": "string",
+      "description": "Reference to customer"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "Store location ID"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "tax": {
+      "type": "number"
+    },
+    "discount": {
+      "type": "number",
+      "default": 0
+    },
+    "tip": {
+      "type": "number",
+      "default": 0,
+      "description": "Tip amount"
+    },
+    "total": {
+      "type": "number"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "Cash",
+        "Credit Card",
+        "Debit Card",
+        "Digital Wallet",
+        "Gift Card"
+      ],
+      "default": "Cash"
+    },
+    "cashier": {
+      "type": "string",
+      "description": "Cashier email or ID"
+    },
+    "loyalty_points_earned": {
+      "type": "number",
+      "default": 0
+    },
+    "loyalty_points_redeemed": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "refunded",
+        "partial_refund"
+      ],
+      "default": "completed"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "transaction_id",
+    "total"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

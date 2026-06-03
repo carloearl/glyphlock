@@ -1,0 +1,89 @@
+{
+  "name": "TipPayout",
+  "type": "object",
+  "properties": {
+    "payout_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of this tip payout"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this payout belongs to"
+    },
+    "total_tips": {
+      "type": "number",
+      "description": "Total tip pool distributed"
+    },
+    "split_config": {
+      "type": "object",
+      "description": "Custom split percentages used: {staff, hostess, manager, entertainer}"
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "string"
+          },
+          "employee_name": {
+            "type": "string"
+          },
+          "pool": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "signed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Digital acknowledgment records per employee"
+    },
+    "cashier_summary": {
+      "type": "object",
+      "description": "Tips collected per cashier for cross-reference"
+    },
+    "printed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "manager_email": {
+      "type": "string",
+      "description": "Manager who ran the payout"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "archived"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "payout_date",
+    "total_tips"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.role}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}|"
+    },
+    "update": {
+      "created_by": "{{user.email}}|"
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

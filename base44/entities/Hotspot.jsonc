@@ -1,0 +1,42 @@
+{
+  "name": "Hotspot",
+  "type": "object",
+  "properties": {
+    "hotspot_id": {
+      "type": "string",
+      "description": "Unique hotspot identifier"
+    },
+    "map_id": {
+      "type": "string",
+      "description": "Foreign key to HotspotMap"
+    },
+    "x": {
+      "type": "number",
+      "description": "Normalized x coordinate (0.0-1.0, relative to image width)"
+    },
+    "y": {
+      "type": "number",
+      "description": "Normalized y coordinate (0.0-1.0, relative to image height)"
+    },
+    "width": {
+      "type": "number",
+      "description": "Normalized width (0.0-1.0, relative to image width)"
+    },
+    "height": {
+      "type": "number",
+      "description": "Normalized height (0.0-1.0, relative to image height)"
+    },
+    "label": {
+      "type": "string",
+      "description": "Internal editor label only, never rendered outside editor"
+    }
+  },
+  "required": [
+    "hotspot_id",
+    "map_id",
+    "x",
+    "y",
+    "width",
+    "height"
+  ]
+}

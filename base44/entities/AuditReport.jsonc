@@ -1,0 +1,156 @@
+{
+  "name": "AuditReport",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Custom report title"
+    },
+    "auditId": {
+      "type": "string",
+      "description": "Reference to the audit that generated this report"
+    },
+    "auditType": {
+      "type": "string",
+      "enum": [
+        "website",
+        "business",
+        "person",
+        "custom"
+      ],
+      "description": "Type of audit performed"
+    },
+    "reportDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the report was generated"
+    },
+    "dateRange": {
+      "type": "object",
+      "properties": {
+        "startDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "description": "Date range for audit data included"
+    },
+    "severityFilter": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "critical",
+          "high",
+          "medium",
+          "low"
+        ]
+      },
+      "default": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "description": "Severity levels included in report"
+    },
+    "pdfUrl": {
+      "type": "string",
+      "description": "URL to the generated PDF file"
+    },
+    "fileSize": {
+      "type": "number",
+      "description": "PDF file size in bytes"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "totalFindings": {
+          "type": "number"
+        },
+        "criticalCount": {
+          "type": "number"
+        },
+        "highCount": {
+          "type": "number"
+        },
+        "mediumCount": {
+          "type": "number"
+        },
+        "lowCount": {
+          "type": "number"
+        },
+        "overallRiskScore": {
+          "type": "number"
+        }
+      },
+      "description": "Summary statistics from the audit"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "remediation": {
+            "type": "string"
+          },
+          "riskScore": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Extracted findings and remediations"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "generating",
+        "completed",
+        "failed"
+      ],
+      "default": "generating",
+      "description": "Report generation status"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error details if generation failed"
+    },
+    "isPublic": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether report can be shared"
+    }
+  },
+  "required": [
+    "title",
+    "auditType",
+    "summary"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

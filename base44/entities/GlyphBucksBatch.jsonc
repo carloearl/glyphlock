@@ -1,0 +1,99 @@
+{
+  "name": "GlyphBucksBatch",
+  "type": "object",
+  "properties": {
+    "batch_id": {
+      "type": "string",
+      "description": "Unique batch identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this batch belongs to"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Reference to parent GlyphBucksOrder"
+    },
+    "order_number": {
+      "type": "string",
+      "description": "Order number from parent transaction"
+    },
+    "denominations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "denomination": {
+            "type": "number",
+            "description": "Dollar value (1, 5, 10, 20, 50, 100)"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Number of bills"
+          },
+          "total_value": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Breakdown of denominations purchased"
+    },
+    "total_face_value": {
+      "type": "number",
+      "description": "Total GlyphBucks value issued"
+    },
+    "surcharge_rate": {
+      "type": "number",
+      "default": 0.3,
+      "description": "Processing surcharge rate (30%)"
+    },
+    "surcharge_amount": {
+      "type": "number",
+      "description": "Total surcharge collected"
+    },
+    "total_charged": {
+      "type": "number",
+      "description": "Total amount charged to customer"
+    },
+    "approval_code": {
+      "type": "string",
+      "description": "Payment processor approval code"
+    },
+    "processor_reference": {
+      "type": "string",
+      "description": "Processor transaction reference"
+    },
+    "batch_barcode": {
+      "type": "string",
+      "description": "Batch barcode identifier"
+    },
+    "batch_barcode_url": {
+      "type": "string",
+      "description": "Generated barcode image URL"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "issued",
+        "partially_redeemed",
+        "fully_redeemed",
+        "voided"
+      ],
+      "default": "pending"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issued_by": {
+      "type": "string",
+      "description": "Staff member email who issued batch"
+    }
+  },
+  "required": [
+    "transaction_id",
+    "total_face_value",
+    "total_charged"
+  ]
+}

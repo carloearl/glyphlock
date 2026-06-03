@@ -1,0 +1,117 @@
+{
+  "name": "ContractorPayout",
+  "type": "object",
+  "properties": {
+    "payout_id": {
+      "type": "string",
+      "description": "Unique payout identifier"
+    },
+    "contractor_id": {
+      "type": "string",
+      "description": "Reference to Entertainer record"
+    },
+    "contractor_name": {
+      "type": "string"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "payout_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "payout_type": {
+      "type": "string",
+      "enum": [
+        "glyphbucks_redemption",
+        "vip_commission",
+        "shift_earnings",
+        "tip_share",
+        "other"
+      ],
+      "default": "glyphbucks_redemption"
+    },
+    "bills_redeemed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "serial_number": {
+            "type": "string"
+          },
+          "denomination": {
+            "type": "number"
+          },
+          "redemption_amount": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "GlyphBucks bills redeemed in this payout"
+    },
+    "total_face_value": {
+      "type": "number",
+      "description": "Total GlyphBucks face value redeemed"
+    },
+    "redemption_rate": {
+      "type": "number",
+      "default": 0.5
+    },
+    "total_payout": {
+      "type": "number",
+      "description": "Actual cash payout to contractor"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "check",
+        "direct_deposit",
+        "paycard"
+      ],
+      "default": "cash"
+    },
+    "payment_reference": {
+      "type": "string",
+      "description": "Check number or transfer reference"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Manager email who approved payout"
+    },
+    "paid_by": {
+      "type": "string",
+      "description": "Staff member who issued payment"
+    },
+    "contractor_signature": {
+      "type": "string",
+      "description": "Digital signature acknowledging receipt"
+    },
+    "signature_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "paid",
+        "disputed"
+      ],
+      "default": "pending"
+    },
+    "tax_year": {
+      "type": "number",
+      "description": "Year for 1099 reporting"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contractor_id",
+    "payout_date",
+    "total_payout"
+  ]
+}

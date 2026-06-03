@@ -1,0 +1,53 @@
+{
+  "name": "ContentAuditRow",
+  "type": "object",
+  "properties": {
+    "scan_run_id": {
+      "type": "string"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "word_count": {
+      "type": "number"
+    },
+    "reading_level": {
+      "type": "string"
+    },
+    "duplicate_content_detected": {
+      "type": "boolean"
+    },
+    "thin_content_detected": {
+      "type": "boolean"
+    },
+    "violation_ids": {
+      "type": "string"
+    },
+    "violation_messages": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "warning",
+        "critical"
+      ]
+    },
+    "required_action": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "scan_run_id",
+    "route_path"
+  ],
+  "rls": {
+    "read": {
+      "role": "admin"
+    },
+    "create": {
+      "role": "admin"
+    }
+  }
+}

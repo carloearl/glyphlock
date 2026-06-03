@@ -1,0 +1,97 @@
+{
+  "name": "GlyphBotAudit",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Owner email of this audit"
+    },
+    "targetType": {
+      "type": "string",
+      "enum": [
+        "business",
+        "person",
+        "agency"
+      ],
+      "default": "business",
+      "description": "Type of audit target"
+    },
+    "targetIdentifier": {
+      "type": "string",
+      "description": "Target URL, name, or identifier"
+    },
+    "auditMode": {
+      "type": "string",
+      "enum": [
+        "SURFACE",
+        "CONCISE",
+        "MEDIUM",
+        "DEEP",
+        "ENTERPRISE_A",
+        "ENTERPRISE_B"
+      ],
+      "default": "SURFACE",
+      "description": "Audit depth and detail level"
+    },
+    "rawInput": {
+      "type": "string",
+      "description": "Original user input or uploaded file reference"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional focus areas or notes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "IN_PROGRESS",
+        "COMPLETE",
+        "FAILED"
+      ],
+      "default": "PENDING",
+      "description": "Current audit status"
+    },
+    "findings": {
+      "type": "string",
+      "description": "JSON stringified detailed findings"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short executive summary"
+    },
+    "riskScore": {
+      "type": "number",
+      "description": "Overall risk score 0-100",
+      "default": 0
+    },
+    "overallGrade": {
+      "type": "string",
+      "description": "Letter grade A through F"
+    },
+    "isArchived": {
+      "type": "boolean",
+      "description": "Whether audit is archived",
+      "default": false
+    }
+  },
+  "required": [
+    "user_id",
+    "targetIdentifier",
+    "targetType"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

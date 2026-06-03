@@ -1,0 +1,119 @@
+{
+  "name": "AuditEvent",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Unique audit event identifier (UUID)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of the event"
+    },
+    "actor_id": {
+      "type": "string",
+      "description": "User ID or email of the actor who performed the action"
+    },
+    "actor_role": {
+      "type": "string",
+      "description": "Role of the actor at time of action"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue context where the action occurred (null for platform-level)"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Name of the entity affected (e.g. POSTransaction, VIPGuest)"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the specific record affected"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "CREATE",
+        "UPDATE",
+        "DELETE",
+        "ACCESS",
+        "TRANSFER",
+        "ESCALATE",
+        "CONFIRM"
+      ],
+      "description": "Type of action performed"
+    },
+    "before_state": {
+      "type": "string",
+      "description": "JSON-serialized state before the action (null for CREATE)"
+    },
+    "after_state": {
+      "type": "string",
+      "description": "JSON-serialized state after the action (null for DELETE)"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional context: session_id, device_hash, ip, geo",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "device_hash": {
+          "type": "string"
+        },
+        "ip_address": {
+          "type": "string"
+        },
+        "geo": {
+          "type": "string"
+        },
+        "user_agent": {
+          "type": "string"
+        }
+      }
+    },
+    "is_system_action": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if action was initiated by SYSTEM, not a human user"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "INFO",
+        "WARNING",
+        "CRITICAL"
+      ],
+      "default": "INFO",
+      "description": "Severity level for filtering and alerting"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what happened"
+    }
+  },
+  "required": [
+    "event_id",
+    "timestamp",
+    "actor_id",
+    "entity_type",
+    "entity_id",
+    "action"
+  ],
+  "rls": {
+    "create": false,
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "actor_id": "{{user.email}}"
+        }
+      ]
+    },
+    "update": false,
+    "delete": false
+  }
+}

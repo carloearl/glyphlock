@@ -1,0 +1,103 @@
+{
+  "name": "VerificationMedia",
+  "type": "object",
+  "properties": {
+    "media_id": {
+      "type": "string",
+      "description": "Unique media record ID"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Parent transaction reference"
+    },
+    "contract_barcode": {
+      "type": "string",
+      "description": "Contract barcode scanned before capture"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "media_type": {
+      "type": "string",
+      "enum": [
+        "photo",
+        "video",
+        "signature_capture",
+        "thumbprint"
+      ],
+      "default": "photo"
+    },
+    "media_url": {
+      "type": "string",
+      "description": "Uploaded media file URL"
+    },
+    "media_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of media file"
+    },
+    "media_size_bytes": {
+      "type": "number"
+    },
+    "capture_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "captured_by": {
+      "type": "string",
+      "description": "Staff member who captured media"
+    },
+    "verification_type": {
+      "type": "string",
+      "enum": [
+        "customer_signing",
+        "customer_receiving_bills",
+        "staff_witness",
+        "id_verification",
+        "other"
+      ],
+      "description": "Purpose of verification media"
+    },
+    "upload_status": {
+      "type": "string",
+      "enum": [
+        "uploading",
+        "completed",
+        "failed",
+        "archived"
+      ],
+      "default": "uploading"
+    },
+    "upload_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "secondary_archive_url": {
+      "type": "string",
+      "description": "Backup storage location"
+    },
+    "geolocation": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "accuracy_meters": {
+          "type": "number"
+        }
+      },
+      "description": "Optional location verification"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional capture metadata"
+    }
+  },
+  "required": [
+    "transaction_id",
+    "media_type",
+    "media_url"
+  ]
+}

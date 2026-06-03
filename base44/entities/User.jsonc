@@ -1,0 +1,92 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "mfaEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether MFA is enabled for this user"
+    },
+    "mfaSecretEncrypted": {
+      "type": "string",
+      "description": "Encrypted TOTP secret (base32)"
+    },
+    "mfaRecoveryCodes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Hashed recovery codes (plain codes shown only once during generation)"
+    },
+    "trustedDevices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "description": "Hashed device fingerprint"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "User-friendly device name"
+          },
+          "trustGrantedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "List of trusted devices"
+    },
+    "subscription_status": {
+      "type": "string",
+      "description": "Stripe subscription status"
+    },
+    "subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID"
+    },
+    "subscription_plan": {
+      "type": "string",
+      "description": "Plan identifier"
+    },
+    "subscription_start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subscription_end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cancel_at_period_end": {
+      "type": "boolean",
+      "default": false
+    },
+    "credentialed": {
+      "type": "boolean",
+      "default": false
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "protocol_verified": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": []
+}

@@ -1,0 +1,56 @@
+{
+  "name": "InteractiveImageShare",
+  "type": "object",
+  "properties": {
+    "interactive_image_id": {
+      "type": "string",
+      "description": "Reference to shared InteractiveImage"
+    },
+    "share_url": {
+      "type": "string",
+      "description": "Public share URL path"
+    },
+    "share_mode": {
+      "type": "string",
+      "enum": [
+        "hosted",
+        "downloadable"
+      ],
+      "description": "Delivery mode"
+    },
+    "manifest_url": {
+      "type": "string",
+      "description": "Hotspot manifest JSON URL for downloadable mode"
+    },
+    "view_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total views"
+    },
+    "click_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total hotspot clicks"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether share link is active"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional expiration date"
+    }
+  },
+  "required": [
+    "interactive_image_id",
+    "share_url",
+    "share_mode"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "description": "",
+  "instructions": "",
+  "tool_configs": [],
+  "whatsapp_greeting": "SIE Architect here. I am monitoring your site's integrity.",
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": [
+    "69c95881d337c283bc572156",
+    "69c959858ae148fd5a080ac7"
+  ],
+  "model": "automatic",
+  "memory_config": {
+    "enabled": true,
+    "scope": "both",
+    "instructions": null
+  },
+  "name": "sie_architect"
+}

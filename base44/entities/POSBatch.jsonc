@@ -1,0 +1,61 @@
+{
+  "name": "POSBatch",
+  "type": "object",
+  "properties": {
+    "batch_id": {
+      "type": "string",
+      "description": "Unique batch identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this batch belongs to"
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "opening_cash": {
+      "type": "number"
+    },
+    "closing_cash": {
+      "type": "number"
+    },
+    "total_sales": {
+      "type": "number"
+    },
+    "transaction_count": {
+      "type": "number"
+    },
+    "cashier": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "discrepancy": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "opening_cash",
+    "cashier"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

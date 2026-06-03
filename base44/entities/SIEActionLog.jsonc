@@ -1,0 +1,37 @@
+{
+  "name": "SIEActionLog",
+  "type": "object",
+  "properties": {
+    "action_id": {
+      "type": "string"
+    },
+    "scan_run_id": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string"
+    },
+    "target_entity": {
+      "type": "string"
+    },
+    "details": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "actor",
+    "action_type",
+    "timestamp"
+  ],
+  "rls": {
+    "read": true,
+    "create": true
+  }
+}

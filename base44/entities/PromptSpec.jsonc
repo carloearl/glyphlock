@@ -1,0 +1,86 @@
+{
+  "name": "PromptSpec",
+  "type": "object",
+  "properties": {
+    "original_prompt": {
+      "type": "string",
+      "description": "User's original input prompt"
+    },
+    "expanded_prompt": {
+      "type": "string",
+      "description": "AI-expanded natural language prompt"
+    },
+    "structured_spec": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "lighting": {
+          "type": "string"
+        },
+        "camera": {
+          "type": "string"
+        },
+        "realism": {
+          "type": "string"
+        },
+        "mood": {
+          "type": "string"
+        },
+        "technical_details": {
+          "type": "string"
+        }
+      }
+    },
+    "negative_constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Negative prompt elements"
+    },
+    "generation_parameters": {
+      "type": "object",
+      "properties": {
+        "seed": {
+          "type": "integer"
+        },
+        "delta_strength": {
+          "type": "number"
+        },
+        "steps": {
+          "type": "integer"
+        },
+        "guidance_scale": {
+          "type": "number"
+        }
+      }
+    },
+    "reference_blend": {
+      "type": "object",
+      "description": "Blended reference features"
+    }
+  },
+  "required": [
+    "original_prompt",
+    "expanded_prompt"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

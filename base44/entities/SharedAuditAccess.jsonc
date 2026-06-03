@@ -1,0 +1,82 @@
+{
+  "name": "SharedAuditAccess",
+  "type": "object",
+  "properties": {
+    "auditId": {
+      "type": "string",
+      "description": "Reference to shared audit"
+    },
+    "sharedBy": {
+      "type": "string",
+      "description": "Email of user who shared"
+    },
+    "sharedWith": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "commenter",
+              "editor",
+              "admin"
+            ]
+          },
+          "grantedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Users with access and their roles"
+    },
+    "shareToken": {
+      "type": "string",
+      "description": "Public share link token (optional)"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Share link expiration"
+    },
+    "accessLog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "userEmail": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Track who accessed what when"
+    }
+  },
+  "required": [
+    "auditId",
+    "sharedBy"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

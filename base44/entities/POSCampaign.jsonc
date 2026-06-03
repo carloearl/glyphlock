@@ -1,0 +1,98 @@
+{
+  "name": "POSCampaign",
+  "type": "object",
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "description": "Unique campaign identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this campaign targets"
+    },
+    "name": {
+      "type": "string",
+      "description": "Campaign name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "loyalty",
+        "promotion",
+        "birthday"
+      ],
+      "description": "Campaign type"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "scheduled",
+        "active",
+        "completed",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "target_audience": {
+      "type": "string",
+      "enum": [
+        "all",
+        "vip",
+        "new_customers",
+        "inactive",
+        "high_spenders",
+        "custom"
+      ],
+      "default": "all"
+    },
+    "message": {
+      "type": "string",
+      "description": "Campaign message"
+    },
+    "discount_type": {
+      "type": "string",
+      "enum": [
+        "percentage",
+        "fixed_amount",
+        "none"
+      ],
+      "default": "none"
+    },
+    "discount_value": {
+      "type": "number",
+      "default": 0
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sent_count": {
+      "type": "number",
+      "default": 0
+    },
+    "open_count": {
+      "type": "number",
+      "default": 0
+    },
+    "conversion_count": {
+      "type": "number",
+      "default": 0
+    },
+    "revenue_generated": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "campaign_id",
+    "name",
+    "type"
+  ]
+}

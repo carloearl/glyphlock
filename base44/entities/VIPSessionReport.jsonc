@@ -1,0 +1,60 @@
+{
+  "name": "VIPSessionReport",
+  "type": "object",
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "Unique session report identifier"
+    },
+    "contract_uuid": {
+      "type": "string",
+      "description": "Foreign key to VIPContractRecord"
+    },
+    "entertainer_id": {
+      "type": "string",
+      "description": "Foreign key to Entertainer"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Foreign key to Venue"
+    },
+    "room_number": {
+      "type": "string",
+      "description": "VIP room identifier"
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "complete",
+        "flagged"
+      ],
+      "default": "pending"
+    },
+    "incident_flagged": {
+      "type": "boolean",
+      "default": false
+    },
+    "manager_alerted": {
+      "type": "boolean",
+      "default": false
+    },
+    "demo": {
+      "type": "boolean",
+      "default": false
+    },
+    "answers": {
+      "type": "object",
+      "description": "All Q1-Q20 field values as key/value pairs"
+    }
+  },
+  "required": [
+    "session_id",
+    "contract_uuid",
+    "entertainer_id"
+  ]
+}

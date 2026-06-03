@@ -1,0 +1,80 @@
+{
+  "name": "ImageGenAudit",
+  "type": "object",
+  "properties": {
+    "image_id": {
+      "type": "string",
+      "description": "Reference to InteractiveImage"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "generate",
+        "regenerate",
+        "restyle",
+        "reinterpret",
+        "validate",
+        "reference_upload",
+        "prompt_expansion",
+        "feature_extraction",
+        "identity_check",
+        "region_lock",
+        "error"
+      ]
+    },
+    "user_id": {
+      "type": "string",
+      "description": "User email"
+    },
+    "attempt_number": {
+      "type": "integer",
+      "description": "Generation attempt counter"
+    },
+    "validation_scores": {
+      "type": "object",
+      "properties": {
+        "face_anatomy": {
+          "type": "number"
+        },
+        "hand_anatomy": {
+          "type": "number"
+        },
+        "realism": {
+          "type": "number"
+        },
+        "identity_similarity": {
+          "type": "number"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "success",
+        "failed",
+        "retry"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional context"
+    },
+    "error_details": {
+      "type": "string",
+      "description": "Error message if failed"
+    }
+  },
+  "required": [
+    "action_type",
+    "user_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

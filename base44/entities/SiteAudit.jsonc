@@ -1,0 +1,207 @@
+{
+  "name": "SiteAudit",
+  "type": "object",
+  "properties": {
+    "audit_type": {
+      "type": "string",
+      "enum": [
+        "security",
+        "performance",
+        "seo",
+        "ux",
+        "full"
+      ],
+      "default": "full",
+      "description": "Type of audit performed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "completed",
+        "failed"
+      ],
+      "default": "running"
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "Overall site health score 0-100"
+    },
+    "security_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low",
+              "info"
+            ]
+          },
+          "category": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "file_path": {
+            "type": "string"
+          },
+          "line_number": {
+            "type": "number"
+          },
+          "cwe_id": {
+            "type": "string"
+          },
+          "owasp_category": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "auto_fixable": {
+            "type": "boolean"
+          },
+          "fix_code": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Security vulnerabilities detected"
+    },
+    "performance_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "current_value": {
+            "type": "string"
+          },
+          "target_value": {
+            "type": "string"
+          },
+          "file_path": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "auto_fixable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Performance bottlenecks"
+    },
+    "seo_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "page_path": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "auto_fixable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "SEO issues"
+    },
+    "ux_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "component_path": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "auto_fixable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "UX improvement areas"
+    },
+    "files_scanned": {
+      "type": "number",
+      "description": "Total files analyzed"
+    },
+    "execution_time_ms": {
+      "type": "number",
+      "description": "Time taken to complete audit"
+    },
+    "auto_fixes_applied": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of issues auto-fixed"
+    },
+    "fix_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "finding_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "applied_at": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "audit_type",
+    "status"
+  ]
+}

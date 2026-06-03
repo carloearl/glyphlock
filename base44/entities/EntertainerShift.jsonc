@@ -1,0 +1,56 @@
+{
+  "name": "EntertainerShift",
+  "type": "object",
+  "properties": {
+    "entertainer_id": {
+      "type": "string",
+      "description": "Foreign key reference to Entertainer entity"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue where this shift is worked"
+    },
+    "check_in_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "check_out_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "location": {
+      "type": "string",
+      "enum": [
+        "Main Floor",
+        "VIP Area",
+        "Private Room",
+        "Bar",
+        "Stage"
+      ],
+      "description": "Current location"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "checked_in",
+        "on_floor",
+        "in_vip",
+        "on_break",
+        "checked_out"
+      ],
+      "default": "checked_in"
+    },
+    "shift_earnings": {
+      "type": "number",
+      "default": 0
+    },
+    "vip_sessions": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "entertainer_id",
+    "check_in_time"
+  ]
+}

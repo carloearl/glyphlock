@@ -1,0 +1,140 @@
+{
+  "name": "VerificationToken",
+  "type": "object",
+  "properties": {
+    "token_id": {
+      "type": "string",
+      "description": "Unique verification token identifier"
+    },
+    "organization_name": {
+      "type": "string",
+      "description": "Organization requesting verification"
+    },
+    "organization_email": {
+      "type": "string",
+      "format": "email"
+    },
+    "organization_domain": {
+      "type": "string"
+    },
+    "engagement_type": {
+      "type": "string",
+      "enum": [
+        "founding_cohort",
+        "standard_verification"
+      ],
+      "description": "Type of verification engagement"
+    },
+    "engagement_fee": {
+      "type": "number",
+      "description": "Fee amount for this engagement"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "refunded"
+      ],
+      "default": "pending"
+    },
+    "payment_intent_id": {
+      "type": "string"
+    },
+    "session_scheduled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_duration_minutes": {
+      "type": "number",
+      "default": 90
+    },
+    "documentation_submitted": {
+      "type": "boolean",
+      "default": false
+    },
+    "documentation_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "documentation_review",
+        "session_scheduled",
+        "session_completed",
+        "report_delivered"
+      ],
+      "default": "requested"
+    },
+    "alignment_tier": {
+      "type": "string",
+      "enum": [
+        "tier_1_structured",
+        "tier_2_partial",
+        "tier_3_gaps",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "verification_report_url": {
+      "type": "string"
+    },
+    "executive_brief_url": {
+      "type": "string"
+    },
+    "credential_eligibility": {
+      "type": "string",
+      "enum": [
+        "eligible",
+        "conditional",
+        "not_eligible",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "remediation_roadmap_url": {
+      "type": "string"
+    },
+    "session_moderator": {
+      "type": "string"
+    },
+    "session_notes": {
+      "type": "string"
+    },
+    "framework_assessments": {
+      "type": "object",
+      "properties": {
+        "authority_scope": {
+          "type": "number",
+          "description": "Score 0-100"
+        },
+        "architecture_review": {
+          "type": "number"
+        },
+        "threat_surface": {
+          "type": "number"
+        },
+        "governance_alignment": {
+          "type": "number"
+        }
+      }
+    },
+    "cohort_position": {
+      "type": "number",
+      "description": "Position in founding cohort (1-5)"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "organization_name",
+    "organization_email",
+    "engagement_type"
+  ]
+}

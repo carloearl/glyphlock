@@ -1,0 +1,42 @@
+{
+  "name": "InteractiveImage",
+  "type": "object",
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "System-generated unique asset identifier"
+    },
+    "fingerprint": {
+      "type": "string",
+      "description": "Perceptual hash or SHA-256 of image binary (internal only, never exposed)"
+    },
+    "fingerprint_method": {
+      "type": "string",
+      "enum": [
+        "phash",
+        "sha256"
+      ],
+      "description": "Method used to compute fingerprint"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Stored file location URL"
+    },
+    "owner_id": {
+      "type": "string",
+      "description": "Authenticated user identifier"
+    },
+    "published": {
+      "type": "boolean",
+      "default": false,
+      "description": "Publication status"
+    }
+  },
+  "required": [
+    "asset_id",
+    "fingerprint",
+    "fingerprint_method",
+    "image_url",
+    "owner_id"
+  ]
+}

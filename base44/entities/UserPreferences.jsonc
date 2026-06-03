@@ -1,0 +1,175 @@
+{
+  "name": "UserPreferences",
+  "type": "object",
+  "properties": {
+    "emailNotifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive email notifications"
+    },
+    "securityAlerts": {
+      "type": "boolean",
+      "default": true,
+      "description": "Receive security alerts"
+    },
+    "productUpdates": {
+      "type": "boolean",
+      "default": false,
+      "description": "Receive product update emails"
+    },
+    "defaultVoice": {
+      "type": "string",
+      "default": "aurora",
+      "description": "Default TTS voice"
+    },
+    "voiceSpeed": {
+      "type": "number",
+      "default": 1.0,
+      "description": "Voice playback speed"
+    },
+    "voicePitch": {
+      "type": "number",
+      "default": 1.0,
+      "description": "Voice pitch adjustment"
+    },
+    "voiceSettings": {
+      "type": "object",
+      "description": "User's voice TTS preferences",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "default": "openai"
+        },
+        "voice": {
+          "type": "string",
+          "default": "alloy"
+        },
+        "speed": {
+          "type": "number",
+          "default": 1.0
+        },
+        "pitch": {
+          "type": "number",
+          "default": 1.0
+        },
+        "naturalness": {
+          "type": "number",
+          "default": 0.8
+        },
+        "volume": {
+          "type": "number",
+          "default": 1.0
+        },
+        "bass": {
+          "type": "number",
+          "default": 0
+        },
+        "treble": {
+          "type": "number",
+          "default": 0
+        },
+        "mid": {
+          "type": "number",
+          "default": 0
+        },
+        "stability": {
+          "type": "number",
+          "default": 0.5
+        },
+        "similarity": {
+          "type": "number",
+          "default": 0.75
+        },
+        "style": {
+          "type": "number",
+          "default": 0.0
+        },
+        "useSpeakerBoost": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "chatSettings": {
+      "type": "object",
+      "description": "General chat preferences",
+      "properties": {
+        "autoPlayVoice": {
+          "type": "boolean",
+          "default": false
+        },
+        "theme": {
+          "type": "string",
+          "default": "dark"
+        }
+      }
+    },
+    "imageLabSettings": {
+      "type": "object",
+      "description": "Image Lab preferences",
+      "properties": {
+        "defaultStyle": {
+          "type": "string",
+          "default": "photorealistic"
+        },
+        "defaultAspectRatio": {
+          "type": "string",
+          "default": "1:1"
+        },
+        "defaultQuality": {
+          "type": "string",
+          "default": "Standard"
+        },
+        "autoSaveToGallery": {
+          "type": "boolean",
+          "default": true
+        },
+        "showOnboarding": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "toursSeen": {
+      "type": "object",
+      "description": "Track which onboarding tours have been seen",
+      "properties": {
+        "imageLab": {
+          "type": "boolean",
+          "default": false
+        },
+        "qrStudio": {
+          "type": "boolean",
+          "default": false
+        },
+        "glyphBot": {
+          "type": "boolean",
+          "default": false
+        },
+        "commandCenter": {
+          "type": "boolean",
+          "default": false
+        },
+        "videoUpload": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

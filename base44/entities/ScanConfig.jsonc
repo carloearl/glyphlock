@@ -1,0 +1,45 @@
+{
+  "name": "ScanConfig",
+  "type": "object",
+  "properties": {
+    "schedule_type": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "daily",
+        "weekly"
+      ]
+    },
+    "trigger_on_deploy": {
+      "type": "boolean",
+      "default": false
+    },
+    "trigger_on_sitemap": {
+      "type": "boolean",
+      "default": false
+    },
+    "webhook_secret": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_run": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "rls": {
+    "read": {
+      "role": "admin"
+    },
+    "create": {
+      "role": "admin"
+    },
+    "update": {
+      "role": "admin"
+    }
+  },
+  "required": []
+}

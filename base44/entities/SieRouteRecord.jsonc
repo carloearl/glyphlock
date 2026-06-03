@@ -1,0 +1,36 @@
+{
+  "name": "SieRouteRecord",
+  "type": "object",
+  "properties": {
+    "scan_id": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "route_type": {
+      "type": "string",
+      "enum": [
+        "public",
+        "protected",
+        "internal"
+      ]
+    },
+    "auth_required": {
+      "type": "boolean"
+    },
+    "role": {
+      "type": "string"
+    },
+    "feature_flag": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "scan_id",
+    "path"
+  ]
+}

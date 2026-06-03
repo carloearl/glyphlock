@@ -1,0 +1,51 @@
+{
+  "name": "SieFindingRecord",
+  "type": "object",
+  "properties": {
+    "scan_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "headers",
+        "auth_boundary",
+        "endpoint_exposure",
+        "error_handling",
+        "session",
+        "logging"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "critical"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "evidence_reference": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "scan_id",
+    "category",
+    "severity",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

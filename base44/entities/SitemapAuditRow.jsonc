@@ -1,0 +1,58 @@
+{
+  "name": "SitemapAuditRow",
+  "type": "object",
+  "properties": {
+    "scan_run_id": {
+      "type": "string"
+    },
+    "sitemap_type": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "human_readable_url": {
+      "type": "string"
+    },
+    "xml_url": {
+      "type": "string"
+    },
+    "human_exists": {
+      "type": "boolean"
+    },
+    "xml_exists": {
+      "type": "boolean"
+    },
+    "contains_preview_urls": {
+      "type": "boolean"
+    },
+    "is_indexable": {
+      "type": "boolean"
+    },
+    "violation_ids": {
+      "type": "string"
+    },
+    "violation_messages": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "warning",
+        "critical"
+      ]
+    },
+    "required_action": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "scan_run_id",
+    "sitemap_type"
+  ],
+  "rls": {
+    "read": true,
+    "create": true
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "BarcodeRegistry",
+  "type": "object",
+  "properties": {
+    "barcode_id": {
+      "type": "string",
+      "description": "Barcode identifier (Code 128 or QR)"
+    },
+    "barcode_type": {
+      "type": "string",
+      "enum": [
+        "code128",
+        "qr_code"
+      ],
+      "default": "code128"
+    },
+    "record_type": {
+      "type": "string",
+      "enum": [
+        "transaction",
+        "batch",
+        "bill",
+        "contract",
+        "receipt"
+      ],
+      "description": "Type of record this barcode identifies"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Parent transaction reference"
+    },
+    "linked_record_id": {
+      "type": "string",
+      "description": "Specific record ID (bill serial, batch ID, etc)"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "barcode_image_url": {
+      "type": "string",
+      "description": "Generated barcode image"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Extended metadata for QR codes"
+    },
+    "scan_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times scanned"
+    },
+    "last_scanned_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_scanned_by": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "voided"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "barcode_id",
+    "record_type",
+    "transaction_id"
+  ]
+}

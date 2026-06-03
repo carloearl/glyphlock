@@ -1,0 +1,46 @@
+{
+  "name": "GlyphBotMemory",
+  "type": "object",
+  "properties": {
+    "topics_discussed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Recent topics discussed (e.g., qr, image_lab, pricing)"
+    },
+    "preferences": {
+      "type": "object",
+      "description": "User preferences learned from conversations"
+    },
+    "last_interaction": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "interaction_count": {
+      "type": "number",
+      "default": 0
+    },
+    "favorite_features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

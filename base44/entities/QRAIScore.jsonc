@@ -1,0 +1,60 @@
+{
+  "name": "QRAIScore",
+  "type": "object",
+  "properties": {
+    "code_id": {
+      "type": "string",
+      "description": "Reference to QRGenHistory code_id"
+    },
+    "final_score": {
+      "type": "number",
+      "description": "Overall security score 0-100"
+    },
+    "domain_trust": {
+      "type": "number",
+      "description": "Domain trustworthiness score"
+    },
+    "sentiment_score": {
+      "type": "number",
+      "description": "NLP sentiment analysis score"
+    },
+    "entity_legitimacy": {
+      "type": "number",
+      "description": "Entity extraction legitimacy score"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "safe",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "safe"
+    },
+    "ml_version": {
+      "type": "string",
+      "description": "AI model version used for scoring"
+    },
+    "phishing_indicators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Detected phishing patterns"
+    },
+    "threat_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Detected threat types (Quishing, QRLjacking, etc.)"
+    }
+  },
+  "required": [
+    "code_id",
+    "final_score",
+    "risk_level"
+  ]
+}

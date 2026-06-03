@@ -1,0 +1,15 @@
+{
+  "description": "",
+  "instructions": "",
+  "tool_configs": [],
+  "whatsapp_greeting": "\ud83d\udee1\ufe0f Welcome to GlyphBot on WhatsApp!\n\nI'm your AI cybersecurity expert with complete knowledge of GlyphLock.io. I can help you with:\n\n\u2728 Security vulnerability analysis\n\ud83d\udcbb Code execution & debugging\n\ud83d\udd12 Smart contract auditing\n\ud83d\uddfa\ufe0f GlyphLock platform navigation\n\ud83d\udcca Feature explanations & guidance\n\ud83c\udf0d 60+ languages supported\n\ud83d\udcda Knowledge base integration\n\nWhat would you like to explore today?",
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": [],
+  "model": "automatic",
+  "memory_config": {
+    "enabled": true,
+    "scope": "both",
+    "instructions": null
+  },
+  "name": "glyphbot"
+}

@@ -1,0 +1,67 @@
+{
+  "name": "POSInventoryBatch",
+  "type": "object",
+  "properties": {
+    "batch_id": {
+      "type": "string",
+      "description": "Unique batch identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this inventory batch belongs to"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Reference to product"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Quantity in batch"
+    },
+    "cost_per_unit": {
+      "type": "number"
+    },
+    "total_cost": {
+      "type": "number"
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "location_id": {
+      "type": "string"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "batch_number": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "received",
+        "in_stock",
+        "low",
+        "depleted",
+        "expired"
+      ],
+      "default": "received"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "batch_id",
+    "product_id",
+    "quantity"
+  ]
+}

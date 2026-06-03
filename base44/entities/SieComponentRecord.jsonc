@@ -1,0 +1,25 @@
+{
+  "name": "SieComponentRecord",
+  "type": "object",
+  "properties": {
+    "scan_id": {
+      "type": "string"
+    },
+    "component_name": {
+      "type": "string"
+    },
+    "file_path": {
+      "type": "string"
+    },
+    "usage_count": {
+      "type": "number"
+    },
+    "orphaned": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "scan_id",
+    "component_name"
+  ]
+}

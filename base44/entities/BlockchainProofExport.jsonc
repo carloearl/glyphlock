@@ -1,0 +1,43 @@
+{
+  "name": "BlockchainProofExport",
+  "type": "object",
+  "properties": {
+    "proof_bundle_url": {
+      "type": "string",
+      "description": "URL to exported JSON proof bundle"
+    },
+    "operation_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "BlockchainActivity IDs included in export"
+    },
+    "export_hash": {
+      "type": "string",
+      "description": "SHA-256 of the proof bundle"
+    },
+    "operation_count": {
+      "type": "integer",
+      "description": "Number of operations in bundle"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When export was created"
+    }
+  },
+  "required": [
+    "proof_bundle_url",
+    "operation_ids",
+    "export_hash"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

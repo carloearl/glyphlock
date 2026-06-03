@@ -1,0 +1,71 @@
+{
+  "name": "UserRoleAssignment",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to NUPSUser or platform User"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the assigned user"
+    },
+    "role_key": {
+      "type": "string",
+      "enum": [
+        "PLATFORM_ADMIN",
+        "VENUE_OWNER",
+        "VENUE_MANAGER",
+        "FLOOR_HOST",
+        "PERFORMER",
+        "BARTENDER",
+        "SECURITY",
+        "DJ",
+        "KIOSK"
+      ],
+      "description": "Role assigned per \u00a79.2"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue scope for this role assignment (null for PLATFORM_ADMIN)"
+    },
+    "assigned_by": {
+      "type": "string",
+      "description": "Email of the admin/manager who assigned this role"
+    },
+    "assigned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the role was assigned"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional expiry for temporary role assignments"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this assignment is currently active"
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is the user's primary role at this venue"
+    },
+    "deactivated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deactivated_by": {
+      "type": "string"
+    },
+    "deactivation_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email",
+    "role_key"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "description": "",
+  "instructions": "",
+  "tool_configs": [],
+  "whatsapp_greeting": "\ud83c\udfc0 ALFRED Point Guard activated. Ready to execute technical plays for GlyphLock/Base44. What's blocking you right now?",
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": [],
+  "model": "automatic",
+  "memory_config": {
+    "enabled": false,
+    "scope": "both",
+    "instructions": null
+  },
+  "name": "alfred"
+}

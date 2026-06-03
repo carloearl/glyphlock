@@ -1,0 +1,30 @@
+{
+  "name": "SieFeatureRecord",
+  "type": "object",
+  "properties": {
+    "scan_id": {
+      "type": "string"
+    },
+    "feature_name": {
+      "type": "string"
+    },
+    "declared": {
+      "type": "boolean"
+    },
+    "implemented": {
+      "type": "string",
+      "enum": [
+        "none",
+        "partial",
+        "full"
+      ]
+    },
+    "used": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "scan_id",
+    "feature_name"
+  ]
+}

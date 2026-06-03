@@ -11,6 +11,7 @@ import HelpPanel from '@/components/global/HelpPanel';
 
 // Tab Components
 import GenerateTab from '@/components/imageLab/tabs/GenerateTab.jsx';
+import ForgeTab from '@/components/imageLab/tabs/ForgeTab.jsx';
 import InteractiveTab from '@/components/imageLab/tabs/InteractiveTab.jsx';
 import GalleryTab from '@/components/imageLab/tabs/GalleryTab.jsx';
 import MultimodalTab from '@/components/imageLab/tabs/MultimodalTab.jsx';
@@ -207,12 +208,37 @@ export default function ImageLab() {
               </div>
             </div>
 
-            {/* Generate Tab */}
+            {/* Generate Tab — Hosts BOTH the new guarded "Generate" engine and the original "Forge" (Core.GenerateImage) engine */}
             <TabsContent value="generate">
-              <GenerateTab
-                user={user}
-                onImageGenerated={handleImageGenerated}
-              />
+              <Tabs defaultValue="generate-engine" className="w-full">
+                <TabsList className="grid grid-cols-2 mb-6 bg-white/[0.03] border border-white/[0.08] p-1.5 h-auto rounded-2xl gap-1">
+                  <TabsTrigger
+                    value="generate-engine"
+                    className="min-h-[48px] rounded-xl text-xs uppercase tracking-wider font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white text-white/50"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Generate Engine
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="forge-engine"
+                    className="min-h-[48px] rounded-xl text-xs uppercase tracking-wider font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-600 data-[state=active]:to-blue-600 data-[state=active]:text-white text-white/50"
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Forge (Original)
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="generate-engine">
+                  <GenerateTab
+                    user={user}
+                    onImageGenerated={handleImageGenerated}
+                  />
+                </TabsContent>
+
+                <TabsContent value="forge-engine">
+                  <ForgeTab />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             {/* Interactive Tab */}

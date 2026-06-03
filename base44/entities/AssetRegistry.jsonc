@@ -1,0 +1,67 @@
+{
+  "name": "AssetRegistry",
+  "type": "object",
+  "properties": {
+    "asset_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the asset"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "qr",
+        "document",
+        "video",
+        "audio"
+      ],
+      "description": "Type of asset"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Cryptographic signature"
+    },
+    "kid": {
+      "type": "string",
+      "description": "Key ID used for signing"
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "Unique trace identifier"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional asset metadata"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "registered",
+        "verified",
+        "revoked"
+      ],
+      "default": "registered"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Email of asset owner"
+    },
+    "blockchain_tx": {
+      "type": "string",
+      "description": "Blockchain transaction ID"
+    }
+  },
+  "required": [
+    "asset_hash",
+    "signature",
+    "kid"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

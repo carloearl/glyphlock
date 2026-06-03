@@ -1,0 +1,37 @@
+{
+  "name": "ComponentRegistry",
+  "type": "object",
+  "properties": {
+    "component_name": {
+      "type": "string",
+      "description": "PascalCase component name matching file path"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "What this component does \u2014 one sentence"
+    },
+    "used_by": {
+      "type": "string",
+      "description": "Comma-separated list of pages/views that reference this component"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "DEPRECATED",
+        "FLAGGED"
+      ],
+      "default": "ACTIVE",
+      "description": "Component lifecycle state"
+    },
+    "tech_debt_notes": {
+      "type": "string",
+      "description": "Known issues, drift markers, or refactor needs. Null if clean."
+    }
+  },
+  "required": [
+    "component_name",
+    "purpose",
+    "used_by"
+  ]
+}

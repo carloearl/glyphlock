@@ -1,0 +1,65 @@
+{
+  "name": "PlatformRole",
+  "type": "object",
+  "properties": {
+    "role_key": {
+      "type": "string",
+      "enum": [
+        "PLATFORM_ADMIN",
+        "VENUE_OWNER",
+        "VENUE_MANAGER",
+        "FLOOR_HOST",
+        "PERFORMER",
+        "BARTENDER",
+        "SECURITY",
+        "DJ",
+        "KIOSK"
+      ],
+      "description": "Unique role identifier per \u00a79.2"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable role name for UI display"
+    },
+    "description": {
+      "type": "string",
+      "description": "Role purpose and scope"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this role config applies to (null for PLATFORM_ADMIN)"
+    },
+    "allowed_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of permitted action keys for this role"
+    },
+    "is_cross_venue": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only for PLATFORM_ADMIN \u2014 grants cross-venue access"
+    },
+    "session_timeout_minutes": {
+      "type": "number",
+      "description": "Session idle timeout per \u00a711.2 (Admin:30, Staff:480, Kiosk:5)"
+    },
+    "can_escalate_to": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Roles this role can escalate to (produces AUDIT_EVENT)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this role configuration is active"
+    }
+  },
+  "required": [
+    "role_key",
+    "display_name"
+  ]
+}

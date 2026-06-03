@@ -1,0 +1,70 @@
+{
+  "name": "AnalyticsPrediction",
+  "type": "object",
+  "properties": {
+    "prediction_id": {
+      "type": "string",
+      "description": "Unique prediction identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this prediction is for"
+    },
+    "prediction_type": {
+      "type": "string",
+      "enum": [
+        "peak_hours",
+        "staffing_levels",
+        "fraud_detection",
+        "revenue_forecast"
+      ],
+      "description": "Type of prediction"
+    },
+    "prediction_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this prediction applies to"
+    },
+    "predicted_values": {
+      "type": "object",
+      "description": "AI-generated predictions"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "Prediction confidence (0-1)"
+    },
+    "historical_data_points": {
+      "type": "number",
+      "description": "Number of data points used"
+    },
+    "anomalies_detected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "anomaly_type": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "prediction_type",
+    "venue_id",
+    "prediction_date"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "name": "PartnerDocument",
+  "type": "object",
+  "properties": {
+    "document_name": {
+      "type": "string",
+      "description": "Document name"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "agreement",
+        "co_branded_material",
+        "program_update",
+        "training",
+        "certification",
+        "invoice",
+        "report"
+      ],
+      "description": "Type of document"
+    },
+    "description": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Secure document URL"
+    },
+    "partner_id": {
+      "type": "string",
+      "description": "Specific partner or null for all"
+    },
+    "is_confidential": {
+      "type": "boolean",
+      "default": false
+    },
+    "requires_signature": {
+      "type": "boolean",
+      "default": false
+    },
+    "signed": {
+      "type": "boolean",
+      "default": false
+    },
+    "signed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "viewed": {
+      "type": "boolean",
+      "default": false
+    },
+    "viewed_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "document_name",
+    "document_type",
+    "file_url"
+  ],
+  "rls": {
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

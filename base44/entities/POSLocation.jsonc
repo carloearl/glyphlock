@@ -1,0 +1,79 @@
+{
+  "name": "POSLocation",
+  "type": "object",
+  "properties": {
+    "location_id": {
+      "type": "string",
+      "description": "Unique location identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Store name"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "manager_email": {
+      "type": "string",
+      "description": "Manager's email"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "opening_hours": {
+      "type": "object",
+      "properties": {
+        "monday": {
+          "type": "string"
+        },
+        "tuesday": {
+          "type": "string"
+        },
+        "wednesday": {
+          "type": "string"
+        },
+        "thursday": {
+          "type": "string"
+        },
+        "friday": {
+          "type": "string"
+        },
+        "saturday": {
+          "type": "string"
+        },
+        "sunday": {
+          "type": "string"
+        }
+      }
+    },
+    "total_revenue": {
+      "type": "number",
+      "default": 0
+    },
+    "total_transactions": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "location_id",
+    "name"
+  ]
+}

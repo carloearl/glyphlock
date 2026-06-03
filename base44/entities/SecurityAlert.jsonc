@@ -1,0 +1,85 @@
+{
+  "name": "SecurityAlert",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Alert title"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "description": "Severity level"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "audit",
+        "threat_feed",
+        "system",
+        "manual"
+      ],
+      "description": "Alert origin"
+    },
+    "relatedAuditId": {
+      "type": "string",
+      "description": "Associated audit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Alert details"
+    },
+    "threatIndicators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IOCs, CVEs, or threat signals"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "acknowledged",
+        "mitigating",
+        "resolved"
+      ],
+      "default": "new",
+      "description": "Alert status"
+    },
+    "assignedTo": {
+      "type": "string",
+      "description": "Owner email"
+    },
+    "notificationSent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether notification was sent"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Feed-specific data"
+    }
+  },
+  "required": [
+    "title",
+    "severity",
+    "source"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

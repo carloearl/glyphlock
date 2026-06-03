@@ -1,0 +1,37 @@
+{
+  "name": "QrVersion",
+  "type": "object",
+  "properties": {
+    "asset_id": {
+      "type": "string"
+    },
+    "version_number": {
+      "type": "number"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "string"
+    },
+    "design_config": {
+      "type": "object"
+    },
+    "change_log": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_id",
+    "version_number",
+    "payload"
+  ],
+  "rls": {
+    "read": {
+      "created_by": "auth.uid"
+    },
+    "create": {
+      "created_by": "auth.uid"
+    }
+  }
+}

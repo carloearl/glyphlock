@@ -1,0 +1,134 @@
+{
+  "name": "Consultation",
+  "type": "object",
+  "properties": {
+    "consultation_id": {
+      "type": "string",
+      "description": "Unique consultation identifier"
+    },
+    "organization_name": {
+      "type": "string",
+      "description": "Organization name"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Primary contact person"
+    },
+    "contact_email": {
+      "type": "string",
+      "format": "email"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "organization_size": {
+      "type": "string",
+      "enum": [
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-1000",
+        "1000+"
+      ],
+      "description": "Employee count range"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Industry or sector"
+    },
+    "verification_interest": {
+      "type": "string",
+      "enum": [
+        "founding_cohort",
+        "standard_verification",
+        "not_sure"
+      ],
+      "description": "Interest level"
+    },
+    "current_governance_maturity": {
+      "type": "string",
+      "enum": [
+        "none",
+        "basic",
+        "intermediate",
+        "advanced",
+        "enterprise"
+      ],
+      "description": "Self-assessed governance level"
+    },
+    "primary_concern": {
+      "type": "string",
+      "description": "Main concern or goal for verification"
+    },
+    "documentation_ready": {
+      "type": "boolean",
+      "default": false
+    },
+    "budget_range": {
+      "type": "string",
+      "enum": [
+        "under_5k",
+        "5k_10k",
+        "10k_25k",
+        "25k_plus",
+        "not_disclosed"
+      ]
+    },
+    "timeline": {
+      "type": "string",
+      "enum": [
+        "immediate",
+        "1_month",
+        "3_months",
+        "6_months",
+        "exploratory"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "under_review",
+        "qualified",
+        "not_qualified",
+        "engagement_started"
+      ],
+      "default": "submitted"
+    },
+    "qualification_notes": {
+      "type": "string"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Staff member handling this consultation"
+    }
+  },
+  "required": [
+    "organization_name",
+    "contact_name",
+    "contact_email"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

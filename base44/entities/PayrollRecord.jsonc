@@ -1,0 +1,109 @@
+{
+  "name": "PayrollRecord",
+  "type": "object",
+  "properties": {
+    "pay_period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Start of pay period"
+    },
+    "pay_period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "End of pay period"
+    },
+    "entertainer_id": {
+      "type": "string",
+      "description": "Reference to Entertainer record"
+    },
+    "stage_name": {
+      "type": "string"
+    },
+    "legal_name": {
+      "type": "string"
+    },
+    "gross_commissions": {
+      "type": "number",
+      "default": 0,
+      "description": "Total earned commissions before deductions"
+    },
+    "gross_tips": {
+      "type": "number",
+      "default": 0,
+      "description": "Total tips received"
+    },
+    "gross_total": {
+      "type": "number",
+      "default": 0,
+      "description": "gross_commissions + gross_tips"
+    },
+    "venue_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Venue house fee deduction"
+    },
+    "venue_fee_rate": {
+      "type": "number",
+      "default": 0.15,
+      "description": "Venue fee rate applied (e.g. 0.15 = 15%)"
+    },
+    "tax_withholding": {
+      "type": "number",
+      "default": 0,
+      "description": "Federal/state tax withholding amount"
+    },
+    "tax_rate": {
+      "type": "number",
+      "default": 0.25,
+      "description": "Tax withholding rate applied"
+    },
+    "other_deductions": {
+      "type": "number",
+      "default": 0,
+      "description": "Other deductions (e.g. locker fee, costume fee)"
+    },
+    "other_deductions_notes": {
+      "type": "string",
+      "description": "Notes for other deductions"
+    },
+    "net_payout": {
+      "type": "number",
+      "default": 0,
+      "description": "Final net payout after all deductions"
+    },
+    "vip_sessions": {
+      "type": "number",
+      "default": 0
+    },
+    "shift_hours": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "approved",
+        "paid",
+        "disputed"
+      ],
+      "default": "draft"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "pay_period_start",
+    "pay_period_end",
+    "stage_name",
+    "net_payout"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "name": "PlatformDecisions",
+  "type": "object",
+  "properties": {
+    "decision_type": {
+      "type": "string",
+      "enum": [
+        "ARCHITECTURE",
+        "DESIGN",
+        "DATA",
+        "PERMISSION",
+        "SECURITY",
+        "PROCESS"
+      ],
+      "description": "Category of the decision per constitution \u00a715.5a"
+    },
+    "decision_text": {
+      "type": "string",
+      "description": "The actual decision made"
+    },
+    "context": {
+      "type": "string",
+      "description": "Why the decision was made \u2014 circumstances and reasoning"
+    },
+    "alternatives_rejected": {
+      "type": "string",
+      "description": "Options considered and dropped, with reasons"
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp when decision was made"
+    },
+    "decided_by": {
+      "type": "string",
+      "default": "ARCHITECT",
+      "description": "Who made the decision (ARCHITECT, AGENT, or user email)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "SUPERSEDED",
+        "REVOKED"
+      ],
+      "default": "ACTIVE",
+      "description": "Lifecycle state of the decision"
+    },
+    "superseded_by": {
+      "type": "string",
+      "description": "ID of the PlatformDecisions record that replaces this one, if any"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue scope. Null = platform-level decision."
+    }
+  },
+  "required": [
+    "decision_type",
+    "decision_text",
+    "context"
+  ]
+}

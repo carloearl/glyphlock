@@ -1,0 +1,62 @@
+{
+  "name": "GlyphBotChat",
+  "type": "object",
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "Owner email of this chat"
+    },
+    "title": {
+      "type": "string",
+      "description": "Chat title or label",
+      "default": "Untitled Chat"
+    },
+    "fullHistory": {
+      "type": "string",
+      "description": "JSON stringified full message history"
+    },
+    "messageCount": {
+      "type": "number",
+      "description": "Total messages in this chat",
+      "default": 0
+    },
+    "isArchived": {
+      "type": "boolean",
+      "description": "Whether chat is archived",
+      "default": false
+    },
+    "provider": {
+      "type": "string",
+      "description": "Last used provider"
+    },
+    "persona": {
+      "type": "string",
+      "description": "Last used persona"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional tags for organization"
+    }
+  },
+  "required": [
+    "userId",
+    "fullHistory"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "ImageHashLog",
+  "type": "object",
+  "properties": {
+    "imageId": {
+      "type": "string",
+      "description": "Reference to InteractiveImage"
+    },
+    "hash": {
+      "type": "string",
+      "description": "SHA-256 hash of canonical JSON"
+    },
+    "imageFileHash": {
+      "type": "string",
+      "description": "SHA-256 hash of image file bytes"
+    },
+    "hotspotsSnapshot": {
+      "type": "string",
+      "description": "JSON snapshot of hotspots at finalization time"
+    },
+    "ownerEmail": {
+      "type": "string",
+      "description": "Email of the user who finalized this"
+    }
+  },
+  "required": [
+    "imageId",
+    "hash",
+    "imageFileHash",
+    "hotspotsSnapshot",
+    "ownerEmail"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

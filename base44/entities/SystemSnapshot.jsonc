@@ -1,0 +1,65 @@
+{
+  "name": "SystemSnapshot",
+  "type": "object",
+  "properties": {
+    "scan_run_id": {
+      "type": "string"
+    },
+    "nav_score": {
+      "type": "number"
+    },
+    "route_score": {
+      "type": "number"
+    },
+    "sitemap_score": {
+      "type": "number"
+    },
+    "backend_score": {
+      "type": "number"
+    },
+    "performance_score": {
+      "type": "number"
+    },
+    "seo_score": {
+      "type": "number"
+    },
+    "feature_score": {
+      "type": "number"
+    },
+    "ux_score": {
+      "type": "number"
+    },
+    "security_score": {
+      "type": "number"
+    },
+    "a11y_score": {
+      "type": "number"
+    },
+    "content_score": {
+      "type": "number"
+    },
+    "domain_score": {
+      "type": "number"
+    },
+    "integration_score": {
+      "type": "number"
+    },
+    "agent_score": {
+      "type": "number"
+    },
+    "global_score": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "scan_run_id"
+  ],
+  "rls": {
+    "read": {
+      "role": "admin"
+    },
+    "create": {
+      "role": "admin"
+    }
+  }
+}

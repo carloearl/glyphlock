@@ -1,0 +1,219 @@
+{
+  "name": "QrAsset",
+  "type": "object",
+  "properties": {
+    "code_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "default": "active"
+    },
+    "design_config": {
+      "type": "object"
+    },
+    "dynamic_config": {
+      "type": "object",
+      "description": "Configuration for dynamic behavior",
+      "properties": {
+        "defaultUrl": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": {
+                "type": "string",
+                "enum": [
+                  "time",
+                  "location",
+                  "device",
+                  "scan_count"
+                ]
+              },
+              "value": {
+                "type": "string"
+              },
+              "targetUrl": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "credentialed_payload": {
+      "type": "object",
+      "description": "Multi-slot credentialed payload system",
+      "properties": {
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique slot identifier"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "url",
+                  "vcard",
+                  "wifi",
+                  "text",
+                  "email",
+                  "phone",
+                  "sms",
+                  "location",
+                  "event"
+                ],
+                "description": "Payload type for this slot"
+              },
+              "credential_level": {
+                "type": "string",
+                "enum": [
+                  "public",
+                  "authenticated",
+                  "admin"
+                ],
+                "default": "public",
+                "description": "Required authentication level to access this slot"
+              },
+              "payload_data": {
+                "type": "object",
+                "description": "Slot-specific payload data"
+              },
+              "priority": {
+                "type": "integer",
+                "default": 0,
+                "description": "Slot resolution priority (higher = checked first)"
+              },
+              "conditions": {
+                "type": "object",
+                "properties": {
+                  "time_range": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string"
+                      },
+                      "end": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "geofence": {
+                    "type": "object",
+                    "properties": {
+                      "latitude": {
+                        "type": "number"
+                      },
+                      "longitude": {
+                        "type": "number"
+                      },
+                      "radius_meters": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "device_type": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "description": "Optional conditions for slot activation"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether this slot is active"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "credential_level",
+              "payload_data"
+            ]
+          }
+        },
+        "fallback_url": {
+          "type": "string",
+          "description": "Default URL when no slots match"
+        },
+        "version": {
+          "type": "string",
+          "default": "1.0",
+          "description": "Credential system version"
+        }
+      }
+    },
+    "shared_with": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of user emails who have access"
+    },
+    "access_policy": {
+      "type": "string",
+      "enum": [
+        "private",
+        "team",
+        "public"
+      ],
+      "default": "private"
+    },
+    "folder_id": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "code_id",
+    "payload"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "access_policy": "public"
+        }
+      ]
+    },
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "name": "POSCustomer",
+  "type": "object",
+  "properties": {
+    "customer_id": {
+      "type": "string",
+      "description": "Unique customer identifier"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Primary venue for this customer"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Customer full name"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "total_spent": {
+      "type": "number",
+      "default": 0
+    },
+    "visit_count": {
+      "type": "number",
+      "default": 0
+    },
+    "loyalty_points": {
+      "type": "number",
+      "default": 0
+    },
+    "loyalty_tier": {
+      "type": "string",
+      "enum": [
+        "Bronze",
+        "Silver",
+        "Gold",
+        "Platinum"
+      ],
+      "default": "Bronze"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "vip"
+      ],
+      "default": "active"
+    },
+    "last_visit": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "birthday": {
+      "type": "string",
+      "format": "date"
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "favorite_categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "communication_preferences": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "boolean",
+              "default": true
+            },
+            "sms": {
+              "type": "boolean",
+              "default": false
+            },
+            "phone": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "full_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "manager",
+            "staff"
+          ]
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "manager",
+                "staff"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "manager",
+            "staff"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

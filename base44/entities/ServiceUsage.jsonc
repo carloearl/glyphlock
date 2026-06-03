@@ -1,0 +1,40 @@
+{
+  "name": "ServiceUsage",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of user (or anonymous ID for non-logged in users)"
+    },
+    "service_name": {
+      "type": "string",
+      "enum": [
+        "QRGenerator",
+        "Steganography",
+        "Blockchain",
+        "HotzoneMapper",
+        "HSSS",
+        "GlyphBot"
+      ],
+      "description": "Name of the service used"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of times service was used"
+    },
+    "is_trial": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this is trial usage"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Browser session identifier for anonymous users"
+    }
+  },
+  "required": [
+    "user_email",
+    "service_name"
+  ]
+}
