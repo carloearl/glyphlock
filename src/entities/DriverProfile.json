@@ -1,0 +1,74 @@
+{
+  "name": "DriverProfile",
+  "type": "object",
+  "description": "Durable driver record — onboarded once at the door, issued a QR code, scanned on every subsequent visit. Tracks YTD payout for 1099 reporting. Distinct from DriverPayout (which is a per-night disbursement ledger entry).",
+  "properties": {
+    "driver_id": {
+      "type": "string",
+      "description": "Unique driver identifier (e.g. DRV-{venue_short}-{seq})."
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue scope. Driver profiles are per-venue."
+    },
+    "name": {
+      "type": "string",
+      "description": "Driver legal name."
+    },
+    "phone": {
+      "type": "string"
+    },
+    "affiliated": {
+      "type": "boolean",
+      "default": false,
+      "description": "True = NUPS-owned/contracted driver. False = outside driver. Controls payout rate leg in VenueRateConfig."
+    },
+    "qr_code": {
+      "type": "string",
+      "description": "Stable QR token printed on driver's card. Scanned at the door for instant load — no paper, no re-entry."
+    },
+    "ytd_payout_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Year-to-date payout total. Incremented atomically on every DriverPayout posting."
+    },
+    "ytd_year": {
+      "type": "number",
+      "description": "Calendar year for current ytd_payout_total. Reset January 1."
+    },
+    "ten99_flag": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when ytd_payout_total crosses 1099 reporting threshold ($600 IRS default; configurable per jurisdiction)."
+    },
+    "ten99_threshold": {
+      "type": "number",
+      "default": 600
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "suspended", "banned", "inactive"],
+      "default": "active"
+    },
+    "lifetime_drops": {
+      "type": "number",
+      "default": 0
+    },
+    "lifetime_guests": {
+      "type": "number",
+      "default": 0
+    },
+    "last_active_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "onboarded_by": {
+      "type": "string",
+      "description": "Email of staff who onboarded the driver."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": ["driver_id", "venue_id", "name"]
+}

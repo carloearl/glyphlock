@@ -1,0 +1,106 @@
+{
+  "name": "VenueRateConfig",
+  "type": "object",
+  "description": "Per-venue editable rate sheet. Single source of truth for cover charges, re-entry fees, driver payouts, and bonus tiers. NEVER hardcode any of these values in logic — always read from this entity. Seeded once per venue; admin-editable thereafter.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Foreign key to Venue. One config per venue."
+    },
+    "venue_name": {
+      "type": "string",
+      "description": "Display label only — not used in logic."
+    },
+    "cover_charge": {
+      "type": "number",
+      "default": 20,
+      "description": "Standard cover charge in USD. Read by door POS Cover — Cash / Cover — Card buttons."
+    },
+    "reentry_charge": {
+      "type": "number",
+      "default": 10,
+      "description": "Reduced re-entry fee in USD."
+    },
+    "card_discount": {
+      "type": "number",
+      "default": 10,
+      "description": "Discount applied when guest pays cover by card (affiliated driver formula leg). USD."
+    },
+    "vip_entry": {
+      "type": "number",
+      "default": 100,
+      "description": "VIP entry charge."
+    },
+    "bottle_service_base": {
+      "type": "number",
+      "default": 250,
+      "description": "Default bottle service price."
+    },
+    "two_drink_min": {
+      "type": "number",
+      "default": 25,
+      "description": "Two-drink minimum charge."
+    },
+    "late_night_fee": {
+      "type": "number",
+      "default": 15
+    },
+    "friends_military": {
+      "type": "number",
+      "default": 10,
+      "description": "Discounted cover for friends / military."
+    },
+    "driver_payout_affiliated": {
+      "type": "number",
+      "default": 30,
+      "description": "Per-guest payout in USD for affiliated (NUPS-owned) drivers."
+    },
+    "driver_payout_outside": {
+      "type": "number",
+      "default": 20,
+      "description": "Per-guest payout in USD for outside / unaffiliated drivers."
+    },
+    "driver_bonus_tiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "description": "e.g. 'Weekend', 'Special Event'" },
+          "applies_when": { "type": "string", "description": "Day of week or event tag" },
+          "bonus_amount": { "type": "number" }
+        }
+      },
+      "description": "Editable bonus rules added to driver payout formula. Empty array = no bonus."
+    },
+    "tax_rate": {
+      "type": "number",
+      "default": 0.08
+    },
+    "house_commission_rate": {
+      "type": "number",
+      "default": 0.4,
+      "description": "House commission rate for entertainer earnings."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["REAL", "DEMO", "SANDBOX"],
+      "default": "REAL",
+      "description": "Ledger mode. REAL writes to live books; DEMO is sandbox; SANDBOX is dev-only. Door + driver writes must honor this."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_edited_by": {
+      "type": "string"
+    },
+    "last_edited_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": ["venue_id"]
+}

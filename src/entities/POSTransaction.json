@@ -11,63 +11,64 @@
       "items": {
         "type": "object",
         "properties": {
-          "product_id": {
-            "type": "string"
-          },
-          "product_name": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "price": {
-            "type": "number"
-          },
-          "total": {
-            "type": "number"
-          }
+          "product_id": { "type": "string" },
+          "product_name": { "type": "string" },
+          "quantity": { "type": "number" },
+          "price": { "type": "number" },
+          "total": { "type": "number" }
         }
       }
     },
-    "subtotal": {
-      "type": "number"
-    },
-    "tax": {
-      "type": "number"
-    },
-    "total": {
-      "type": "number"
+    "subtotal": { "type": "number" },
+    "tax": { "type": "number" },
+    "discount": { "type": "number" },
+    "tip": { "type": "number" },
+    "total": { "type": "number", "description": "Gross transaction total. NEVER reduced by driver payouts." },
+    "cash_sales": { "type": "number", "description": "Cash portion. Component of total_sales rollup." },
+    "card_sales": { "type": "number", "description": "Card portion. Component of total_sales rollup." },
+    "gb_liability": {
+      "type": "number",
+      "default": 0,
+      "description": "GlyphBucks face value sold. STORED-VALUE LIABILITY. Never counted as revenue, never added to total_sales."
     },
     "payment_method": {
       "type": "string",
-      "enum": [
-        "Cash",
-        "Credit Card",
-        "Debit Card",
-        "Digital Wallet",
-        "Other"
-      ]
+      "enum": ["Cash", "Credit Card", "Debit Card", "Digital Wallet", "Gift Card", "Tab", "GlyphBucks", "Other"]
     },
     "status": {
       "type": "string",
-      "enum": [
-        "completed",
-        "void",
-        "refunded"
-      ],
+      "enum": ["completed", "void", "refunded", "held"],
       "default": "completed"
     },
-    "cashier": {
+    "station": {
       "type": "string",
-      "description": "Email of the staff member who processed the transaction"
+      "enum": ["door", "bar", "vip", "kiosk", "office"],
+      "description": "Physical station that posted the sale."
     },
-    "notes": {
-      "type": "string"
-    }
+    "mode": {
+      "type": "string",
+      "enum": ["REAL", "DEMO", "SANDBOX"],
+      "default": "REAL",
+      "description": "Ledger mode. REAL writes to live books."
+    },
+    "venue_id": { "type": "string" },
+    "batch_id": { "type": "string", "description": "Owning POSBatch." },
+    "terminal_id": { "type": "string" },
+    "cashier": { "type": "string", "description": "Legacy field — email or display name. Receipt prefers cashier_name." },
+    "cashier_name": { "type": "string", "description": "Resolved display name. Fixes 'Cashier: N/A' defect." },
+    "cashier_email": { "type": "string" },
+    "cashier_id": { "type": "string" },
+    "customer_id": { "type": "string" },
+    "card_last_four": { "type": "string" },
+    "card_last4": { "type": "string" },
+    "auth_code": { "type": "string" },
+    "cash_tendered": { "type": "number" },
+    "change_due": { "type": "number" },
+    "gift_card": { "type": "boolean" },
+    "gift_card_number": { "type": "string" },
+    "room_tab": { "type": "boolean" },
+    "room_tab_reference": { "type": "string" },
+    "notes": { "type": "string" }
   },
-  "required": [
-    "items",
-    "total",
-    "payment_method"
-  ]
+  "required": ["items", "total", "payment_method"]
 }

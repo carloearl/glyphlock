@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Percent, Plus, X, Keyboard, AlertTriangle, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 
+// NOTE: Bar presets (non-door) keep legacy seed amounts. They drive non-door
+// stations only and are NOT subject to the DACO-FRONTDOOR-DRIVER directive.
+// Door presets (below) are now SOURCED LIVE from VenueRateConfig per venue —
+// zero hardcoded dollar figures in the door path.
 const PRESETS = [
   { label: "Door Fee",       amount: 30,  accent: "#06b6d4" },
   { label: "VIP Entry",      amount: 100, accent: "#a855f7" },
@@ -15,12 +21,18 @@ const PRESETS = [
   { label: "Late Night Fee", amount: 15,  accent: "#6366f1" },
 ];
 
-const DOOR_PRESETS = [
-  { label: "Friends & Military", amount: 10,  accent: "#10b981" },
-  { label: "Door $30",           amount: 30,  accent: "#a855f7" },
-  { label: "Door $20",           amount: 20,  accent: "#f59e0b" },
-  { label: "MGR VIP Comp",       amount: 0,   accent: "#f43f5e" },
-];
+// Builds the door preset palette from the live VenueRateConfig.
+// Cover — Cash and Cover — Card share `cover_charge`; Re-Entry pulls `reentry_charge`.
+function buildDoorPresets(rates) {
+  if (!rates) return [];
+  return [
+    { label: "Cover — Cash",       amount: Number(rates.cover_charge) || 0,    accent: "#22c55e", payment_method: "Cash",        is_cover: true },
+    { label: "Cover — Card",       amount: Number(rates.cover_charge) || 0,    accent: "#06b6d4", payment_method: "Credit Card", is_cover: true },
+    { label: "Re-Entry",           amount: Number(rates.reentry_charge) || 0,  accent: "#f59e0b", payment_method: null,          is_reentry: true },
+    { label: "Friends & Military", amount: Number(rates.friends_military) || 0, accent: "#10b981" },
+    { label: "MGR VIP Comp",       amount: 0,                                  accent: "#f43f5e" },
+  ];
+}
 
 
 
@@ -146,7 +158,22 @@ function ManualItemEntry({ onAddItem }) {
 
 export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount, station, batchId, cashier, venueId }) {
   const isDoor = station === 'door';
-  const activePresets = isDoor ? DOOR_PRESETS : PRESETS;
+  const activeVenue = useActiveVenue();
+  const effectiveVenueId = venueId || activeVenue?.id || null;
+  const [doorRates, setDoorRates] = useState(null);
+  const [ratesLoading, setRatesLoading] = useState(isDoor);
+
+  // Door presets come from VenueRateConfig (no hardcoded dollars).
+  // Non-door stations keep static PRESETS list.
+  useEffect(() => {
+    if (!isDoor) return;
+    setRatesLoading(true);
+    loadVenueRates(effectiveVenueId)
+      .then(setDoorRates)
+      .finally(() => setRatesLoading(false));
+  }, [isDoor, effectiveVenueId]);
+
+  const activePresets = isDoor ? buildDoorPresets(doorRates) : PRESETS;
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [kickbackPreset, setKickbackPreset] = useState(null);
   return (
@@ -168,6 +195,14 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
       )}
 
       {/* Quick Charges */}
+      {isDoor && ratesLoading && (
+        <div className="text-[11px] text-gray-500 px-2 py-3">Loading venue rates...</div>
+      )}
+      {isDoor && !ratesLoading && doorRates?._source !== "entity" && (
+        <div className="text-[10px] text-amber-400/80 bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
+          ⚠ VenueRateConfig not yet seeded — using safe defaults. Admin: configure rates in Venue Settings.
+        </div>
+      )}
       <div className={`grid gap-2.5 ${isDoor ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-4'}`}>
         {activePresets.map((p) => (
           <button
@@ -180,6 +215,9 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
                 price: p.amount,
                 total: p.amount,
                 is_preset: true,
+                preset_payment_method: p.payment_method || null,
+                is_cover: !!p.is_cover,
+                is_reentry: !!p.is_reentry,
               });
             }}
             className="rounded-xl flex flex-col items-center justify-center gap-1 active:scale-95 transition-all select-none"

@@ -1,241 +1,394 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, DollarSign, Star, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle, Zap } from "lucide-react";
-import { DEFAULT_VENUE_ID, DEFAULT_VENUE_NAME, resolveVenueId } from "@/lib/venueDefaults";
+import { Car, Plus, DollarSign, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle, Zap, QrCode, ShieldCheck } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { loadVenueRates, computeDriverPayoutAmount } from "@/lib/nups/venueRateConfig";
 
-// --- Payout config
-const INTERNAL_DRIVER_RATE = 30;  // Our drivers get $30 per drop
-const EXTERNAL_DRIVER_RATE = 20;  // Outside drivers get $20 per drop
-const PASS_DISCOUNT = 10;          // Guests with pass get $10 off cover fee
-const COVER_FEE_BASE = 30;         // Cover fee is $30 (or $20 with pass)
+// ─── DACO-20260603-FRONTDOOR-DRIVER · Part B ────────────────────────────────
+// Driver payouts are DISBURSEMENTS, NOT negative revenue. This component:
+//   1. Resolves venue dynamically (no "dream_palace" literal anywhere)
+//   2. Loads all rates from VenueRateConfig (zero hardcoded dollars)
+//   3. Onboards drivers once → DriverProfile + QR code
+//   4. Scans QR to load a profile and start a nightly drop session
+//   5. Writes ONLY to DriverPayout on settle — never to POSTransaction
+//   6. Bumps DriverProfile.ytd_payout_total (1099 tracking)
+//   7. Writes DRIVER_PAYOUT_FINALIZED audit log per posting
+// total_sales is provably untouched.
+// ───────────────────────────────────────────────────────────────────────────
 
-function calcPayout(record) {
-  const rate = record.driver_type === 'internal' ? INTERNAL_DRIVER_RATE : EXTERNAL_DRIVER_RATE;
-  const total = (record.total_drops || 0) * rate;
-  return { total };
+function todayDate() { return new Date().toISOString().split("T")[0]; }
+function thisYear() { return new Date().getFullYear(); }
+function makeDriverId(venueId) {
+  const short = (venueId || "VENUE").toString().slice(-4).toUpperCase();
+  return `DRV-${short}-${Date.now().toString(36).toUpperCase()}`;
 }
-
-function todayDate() {
-  return new Date().toISOString().split("T")[0];
+function makeQrToken() {
+  return `DRVQR-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`.toUpperCase();
 }
 
 export default function DriverDropOffTracker({ user }) {
   const qc = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || null;
+
+  const [rates, setRates] = useState(null);
   const [expanded, setExpanded] = useState(null);
   const [showNewDriver, setShowNewDriver] = useState(false);
-  const [newDriver, setNewDriver] = useState({ driver_name: "", driver_number: "", driver_type: "internal" });
-  const [dropForm, setDropForm] = useState({ guest_name: "", has_pass: false, went_vip: false, pass_type: "" });
-  const [addingDropTo, setAddingDropTo] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
+  const [scanInput, setScanInput] = useState("");
+  const [newDriver, setNewDriver] = useState({ name: "", phone: "", affiliated: true });
+  const [guestCounter, setGuestCounter] = useState({}); // record_id -> input value
 
   const today = todayDate();
-  const venueId = resolveVenueId(user?.venue_id);
 
-  const { data: records = [], isLoading } = useQuery({
-    queryKey: ["driver-payouts", today, venueId],
-    queryFn: () => base44.entities.DriverPayout.filter({ session_date: today, venue_id: venueId }),
+  // Load rates once per venue
+  useEffect(() => {
+    if (!venueId) return;
+    loadVenueRates(venueId).then(setRates);
+  }, [venueId]);
+
+  // Tonight's open driver payout sessions for this venue
+  const { data: sessions = [], isLoading } = useQuery({
+    queryKey: ["driver-sessions", today, venueId],
+    queryFn: () => venueId
+      ? base44.entities.DriverPayout.filter({ payout_date: today, venue_id: venueId })
+      : Promise.resolve([]),
+    enabled: !!venueId,
     refetchInterval: 30000,
   });
 
-  // Driver directory — pulls every past DriverPayout for this venue and ranks by
-  // most-active (total drops), so door staff can one-tap re-register without typing.
-  const { data: driverDirectory = [] } = useQuery({
-    queryKey: ["driver-directory", venueId],
-    queryFn: async () => {
-      const history = await base44.entities.DriverPayout.filter({ venue_id: venueId }, "-created_date", 500);
-      const byDriver = new Map();
-      for (const rec of history) {
-        const key = `${(rec.driver_name || "").toLowerCase()}|${rec.driver_number || ""}`;
-        if (!key.trim() || key === "|") continue;
-        const prev = byDriver.get(key) || {
-          driver_name: rec.driver_name,
-          driver_number: rec.driver_number,
-          driver_type: rec.driver_type || "internal",
-          total_drops: 0,
-          nights: 0,
-          last_seen: rec.session_date || rec.created_date,
-        };
-        prev.total_drops += rec.total_drops || 0;
-        prev.nights += 1;
-        if ((rec.session_date || "") > (prev.last_seen || "")) prev.last_seen = rec.session_date;
-        byDriver.set(key, prev);
-      }
-      return Array.from(byDriver.values()).sort((a, b) => b.total_drops - a.total_drops);
-    },
+  // Active driver profiles for this venue (quick-pick + QR resolve)
+  const { data: profiles = [] } = useQuery({
+    queryKey: ["driver-profiles", venueId],
+    queryFn: () => venueId
+      ? base44.entities.DriverProfile.filter({ venue_id: venueId, status: "active" }, "-last_active_at", 200)
+      : Promise.resolve([]),
+    enabled: !!venueId,
     staleTime: 60000,
   });
 
-  // Drivers already registered tonight (so we can hide them from the quick-pick list)
-  const registeredKeys = new Set(
-    records.map(r => `${(r.driver_name || "").toLowerCase()}|${r.driver_number || ""}`)
-  );
+  // Drivers already registered tonight (hide from quick-pick)
+  const activeContractorIds = new Set(sessions.map(s => s.contractor_id).filter(Boolean));
 
-  const createDriver = useMutation({
-    mutationFn: (data) => base44.entities.DriverPayout.create({
-      ...data,
-      venue_id: resolveVenueId(data.venue_id || venueId),
-      session_date: today,
-      driver_code: `DRV-${data.driver_number}-${Date.now()}`,
-      driver_type: data.driver_type || 'internal',
-      drop_offs: [],
-      total_drops: 0,
-      pass_count: 0,
-      total_payout: 0,
-      status: "open",
-    }),
-    onSuccess: () => { qc.invalidateQueries(["driver-payouts"]); setShowNewDriver(false); setNewDriver({ driver_name: "", driver_number: "", driver_type: "internal" }); },
+  // ─── Onboard a brand-new driver → DriverProfile + QR ──────────────────────
+  const onboardDriver = useMutation({
+    mutationFn: async (data) => {
+      if (!venueId) throw new Error("No active venue resolved — cannot onboard.");
+      const driver_id = makeDriverId(venueId);
+      const qr_code = makeQrToken();
+      const profile = await base44.entities.DriverProfile.create({
+        driver_id,
+        venue_id: venueId,
+        name: data.name,
+        phone: data.phone || "",
+        affiliated: !!data.affiliated,
+        qr_code,
+        ytd_payout_total: 0,
+        ytd_year: thisYear(),
+        ten99_flag: false,
+        ten99_threshold: 600,
+        status: "active",
+        onboarded_by: user?.email || "unknown",
+        last_active_at: new Date().toISOString(),
+      });
+      // Immediately open a session for tonight
+      await openSession.mutateAsync(profile);
+      return profile;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["driver-profiles"] });
+      setShowNewDriver(false);
+      setNewDriver({ name: "", phone: "", affiliated: true });
+    },
   });
 
-  // One-tap: re-register a known driver for tonight using their saved credentials
-  const quickAddDriver = (d) => {
-    createDriver.mutate({
-      driver_name: d.driver_name,
-      driver_number: d.driver_number,
-      driver_type: d.driver_type || "internal",
-    });
+  // ─── Open a nightly session for an existing DriverProfile ─────────────────
+  const openSession = useMutation({
+    mutationFn: async (profile) => {
+      if (!venueId) throw new Error("No active venue.");
+      return base44.entities.DriverPayout.create({
+        payout_id: `DPO-${profile.driver_id}-${Date.now().toString(36).toUpperCase()}`,
+        contractor_id: profile.driver_id,
+        contractor_name: profile.name,
+        venue_id: venueId,
+        payout_date: today,
+        payout_type: "shift_earnings",
+        bills_redeemed: [],
+        total_face_value: 0,
+        redemption_rate: 0,
+        total_payout: 0,
+        payment_method: "cash",
+        status: "pending",
+        tax_year: thisYear(),
+        notes: JSON.stringify({
+          source: "driver_drop_session",
+          affiliated: !!profile.affiliated,
+          guests: 0,
+          rates_snapshot: rates ? {
+            cover: rates.cover_charge,
+            card_discount: rates.card_discount,
+            per_guest_affiliated: rates.driver_payout_affiliated,
+            per_guest_outside: rates.driver_payout_outside,
+            mode: rates.mode,
+          } : null,
+          drops: [],
+        }),
+      });
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
+  });
+
+  // ─── Scan QR → resolve DriverProfile → open or focus session ──────────────
+  const handleScan = async () => {
+    const token = scanInput.trim();
+    if (!token) return;
+    const matches = profiles.filter(p => p.qr_code === token);
+    const profile = matches[0];
+    if (!profile) {
+      alert("QR not recognized for this venue.");
+      return;
+    }
+    const existing = sessions.find(s => s.contractor_id === profile.driver_id);
+    if (existing) {
+      setExpanded(existing.id);
+    } else {
+      await openSession.mutateAsync(profile);
+    }
+    setShowScanner(false);
+    setScanInput("");
   };
 
-  const addDrop = useMutation({
-    mutationFn: async ({ record, drop }) => {
-      const drops = [...(record.drop_offs || []), { ...drop, drop_time: new Date().toISOString() }];
-      const total_drops = drops.length;
-      const vip_count = drops.filter(d => d.went_vip).length;
-      const pass_count = drops.filter(d => d.has_pass).length;
-      const { total } = calcPayout({ ...record, total_drops, vip_count });
-      return base44.entities.DriverPayout.update(record.id, {
-        drop_offs: drops,
-        total_drops,
-        vip_count,
-        pass_count,
-        total_payout: total,
+  // ─── Log guest count on an open session ──────────────────────────────────
+  const logGuests = useMutation({
+    mutationFn: async ({ session, guests }) => {
+      const N = Math.max(0, Number(guests) || 0);
+      if (N === 0) return session;
+      const meta = safeJSON(session.notes);
+      const drops = Array.isArray(meta.drops) ? [...meta.drops] : [];
+      drops.push({ guests: N, at: new Date().toISOString() });
+      const totalGuests = drops.reduce((s, d) => s + (d.guests || 0), 0);
+      const affiliated = !!meta.affiliated;
+      const driverPayout = computeDriverPayoutAmount(rates, { guests: totalGuests, affiliated });
+      const newMeta = { ...meta, drops, guests: totalGuests };
+      return base44.entities.DriverPayout.update(session.id, {
+        notes: JSON.stringify(newMeta),
+        total_payout: driverPayout,
       });
     },
-    onSuccess: () => { qc.invalidateQueries(["driver-payouts"]); setAddingDropTo(null); setDropForm({ guest_name: "", has_pass: false, went_vip: false, pass_type: "" }); },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
 
-  const markPaid = useMutation({
-    mutationFn: async (record) => {
-      const { total } = calcPayout(record);
-      // Record cash outflow from till so Z-report accounts for it
-      await base44.entities.POSTransaction.create({
-        transaction_id: `DRIVER-PAYOUT-${record.id}-${Date.now()}`,
-        items: [{
-          product_id: 'driver_kickback',
-          product_name: `Driver Kickback — ${record.driver_name}`,
-          quantity: 1,
-          price: -total,
-          total: -total,
-        }],
-        subtotal: -total,
-        tax: 0,
-        total: -total,
-        payment_method: 'Cash',
-        cashier: user?.email || 'manager',
-        status: 'completed',
-        notes: `Driver kickback payout: ${record.driver_name} | ${record.total_drops} drops | ${record.vip_count} VIP kickbacks | Paid from door till`,
+  // ─── Settle a session → mark DriverPayout PAID, bump DriverProfile YTD,
+  //     write SystemAuditLog. NEVER touches POSTransaction. NEVER mutates
+  //     total_sales. The drawer math is reported, not enforced via mutation.
+  const settle = useMutation({
+    mutationFn: async (session) => {
+      const meta = safeJSON(session.notes);
+      const affiliated = !!meta.affiliated;
+      const totalGuests = Number(meta.guests) || 0;
+      const driverPayout = Number(session.total_payout) || computeDriverPayoutAmount(rates, { guests: totalGuests, affiliated });
+      const coverPerGuest = Number(rates?.cover_charge) - (affiliated ? Number(rates?.card_discount) || 0 : 0);
+      const expectedCoverCollected = coverPerGuest * totalGuests;
+
+      // 1. Mark DriverPayout PAID — disbursement ledger entry (cash out)
+      await base44.entities.DriverPayout.update(session.id, {
+        status: "paid",
+        notes: JSON.stringify({ ...meta, settled_at: new Date().toISOString() }),
+        payment_reference: `DRAWER-${today}`,
       });
-      return base44.entities.DriverPayout.update(record.id, {
-        status: 'paid',
-        paid_at: new Date().toISOString(),
-        paid_by: user?.email || 'manager',
-      });
+
+      // 2. Bump DriverProfile YTD (1099 tracking)
+      try {
+        const matches = await base44.entities.DriverProfile.filter({ driver_id: session.contractor_id, venue_id: venueId }, null, 1);
+        const profile = matches[0];
+        if (profile) {
+          const year = thisYear();
+          const sameYear = profile.ytd_year === year;
+          const newYtd = (sameYear ? Number(profile.ytd_payout_total) || 0 : 0) + driverPayout;
+          const threshold = Number(profile.ten99_threshold) || 600;
+          await base44.entities.DriverProfile.update(profile.id, {
+            ytd_payout_total: newYtd,
+            ytd_year: year,
+            ten99_flag: newYtd >= threshold,
+            lifetime_drops: (Number(profile.lifetime_drops) || 0) + 1,
+            lifetime_guests: (Number(profile.lifetime_guests) || 0) + totalGuests,
+            last_active_at: new Date().toISOString(),
+          });
+        }
+      } catch (_) { /* non-fatal */ }
+
+      // 3. Audit log — DRIVER_PAYOUT_FINALIZED with venue_id
+      try {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "DRIVER_PAYOUT_FINALIZED",
+          description: `Driver payout ${session.payout_id} settled — ${session.contractor_name} · ${totalGuests} guests · $${driverPayout.toFixed(2)} disbursed from drawer`,
+          actor_email: user?.email || "unknown",
+          status: "success",
+          severity: "low",
+          metadata: {
+            venue_id: venueId,
+            driver_id: session.contractor_id,
+            driver_name: session.contractor_name,
+            payout_id: session.payout_id,
+            guests: totalGuests,
+            affiliated,
+            driver_payout_amount: driverPayout,
+            expected_cover_collected: expectedCoverCollected,
+            drawer_math: `cover_collected (${expectedCoverCollected.toFixed(2)}) - driver_payout (${driverPayout.toFixed(2)}) = ${(expectedCoverCollected - driverPayout).toFixed(2)}`,
+            rates_snapshot: meta.rates_snapshot || null,
+            mode: rates?.mode || "REAL",
+            directive: "DACO-20260603-FRONTDOOR-DRIVER",
+            part: "B",
+            note: "total_sales UNCHANGED — payout is disbursement, not negative revenue.",
+          },
+        });
+      } catch (_) { /* non-fatal */ }
+
+      return session;
     },
-    onSuccess: () => qc.invalidateQueries(['driver-payouts']),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
 
-  const openRecords = records.filter(r => r.status === "open");
-  const paidRecords = records.filter(r => r.status === "paid");
-  const tillOwes = openRecords.reduce((s, r) => s + calcPayout(r).total, 0);
+  if (!venueId) {
+    return (
+      <div className="text-amber-400 text-sm p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+        ⚠ No active venue resolved. Driver payouts require venue context (login → choose venue).
+      </div>
+    );
+  }
+
+  const openSessions = sessions.filter(s => s.status === "pending");
+  const paidSessions = sessions.filter(s => s.status === "paid");
+  const tillOwes = openSessions.reduce((s, r) => s + (Number(r.total_payout) || 0), 0);
 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Car className="w-5 h-5 text-yellow-400" />
-          <h2 className="text-lg font-bold text-white">Driver Drop-Off Tracker</h2>
+          <h2 className="text-lg font-bold text-white">Driver Payouts</h2>
           <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40 text-xs">{today}</Badge>
+          {rates?.mode && rates.mode !== "REAL" && (
+            <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-xs">{rates.mode}</Badge>
+          )}
         </div>
-        <Button
-          onClick={() => setShowNewDriver(v => !v)}
-          className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold text-sm min-h-[40px]"
-        >
-          <Plus className="w-4 h-4 mr-1" /> Add Driver
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowScanner(v => !v)} className="bg-cyan-600 hover:bg-cyan-700 text-white text-sm min-h-[40px]">
+            <QrCode className="w-4 h-4 mr-1" /> Scan QR
+          </Button>
+          <Button onClick={() => setShowNewDriver(v => !v)} className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold text-sm min-h-[40px]">
+            <Plus className="w-4 h-4 mr-1" /> Onboard Driver
+          </Button>
+        </div>
       </div>
 
-      {/* New Driver Form */}
+      {/* Rate snapshot — proves no hardcoded dollars */}
+      {rates && (
+        <div className="text-[10px] text-gray-500 bg-gray-900/40 border border-gray-800 rounded-lg p-2 flex flex-wrap gap-x-4 gap-y-1">
+          <span><ShieldCheck className="w-3 h-3 inline mr-1 text-green-400" />Rates from <strong className="text-gray-300">VenueRateConfig</strong> ({rates._source}):</span>
+          <span>Cover ${rates.cover_charge}</span>
+          <span>Card Disc ${rates.card_discount}</span>
+          <span>Affiliated ${rates.driver_payout_affiliated}/guest</span>
+          <span>Outside ${rates.driver_payout_outside}/guest</span>
+        </div>
+      )}
+
+      {/* QR Scanner */}
+      {showScanner && (
+        <Card className="bg-cyan-950/30 border-cyan-500/40">
+          <CardContent className="p-4 space-y-3">
+            <p className="text-cyan-300 font-semibold text-sm">Scan or paste driver QR token</p>
+            <div className="flex gap-2">
+              <Input
+                autoFocus
+                value={scanInput}
+                onChange={e => setScanInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleScan()}
+                placeholder="DRVQR-..."
+                className="bg-black/40 border-gray-700 text-white font-mono"
+              />
+              <Button onClick={handleScan} className="bg-cyan-600 hover:bg-cyan-700 text-white">Resolve</Button>
+              <Button variant="outline" onClick={() => { setShowScanner(false); setScanInput(""); }} className="border-gray-700 text-gray-300">Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Onboarding form */}
       {showNewDriver && (
         <Card className="bg-yellow-950/30 border-yellow-500/40">
           <CardContent className="p-4 space-y-3">
-            <p className="text-yellow-300 font-semibold text-sm flex items-center gap-2">
-              Register Driver
-              <span className="text-[10px] text-yellow-500/80 uppercase tracking-wide">{DEFAULT_VENUE_NAME}</span>
-            </p>
+            <p className="text-yellow-300 font-semibold text-sm">Onboard Driver — issues durable QR (one-time)</p>
 
-            {/* Quick-pick from Dream Palace driver directory (most active first) */}
-            {driverDirectory.filter(d => !registeredKeys.has(`${(d.driver_name || "").toLowerCase()}|${d.driver_number || ""}`)).length > 0 && (
+            {/* Quick re-open from existing profiles */}
+            {profiles.filter(p => !activeContractorIds.has(p.driver_id)).length > 0 && (
               <div className="space-y-2">
                 <p className="text-[11px] text-gray-400 uppercase tracking-wide flex items-center gap-1">
-                  <Zap className="w-3 h-3 text-yellow-400" /> Tap to re-register (most active first)
+                  <Zap className="w-3 h-3 text-yellow-400" /> Existing drivers — tap to open tonight's session
                 </p>
                 <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
-                  {driverDirectory
-                    .filter(d => !registeredKeys.has(`${(d.driver_name || "").toLowerCase()}|${d.driver_number || ""}`))
+                  {profiles
+                    .filter(p => !activeContractorIds.has(p.driver_id))
                     .slice(0, 12)
-                    .map((d, i) => (
+                    .map(p => (
                       <button
-                        key={`${d.driver_name}-${d.driver_number}-${i}`}
-                        onClick={() => quickAddDriver(d)}
-                        disabled={createDriver.isPending}
-                        className="group text-left bg-black/40 hover:bg-yellow-500/10 border border-gray-700 hover:border-yellow-500/60 rounded-lg px-3 py-2 transition-all"
+                        key={p.id}
+                        onClick={() => openSession.mutate(p)}
+                        disabled={openSession.isPending}
+                        className="text-left bg-black/40 hover:bg-yellow-500/10 border border-gray-700 hover:border-yellow-500/60 rounded-lg px-3 py-2 transition-all"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="text-white text-sm font-semibold">{d.driver_name}</span>
-                          <Badge className={`text-[9px] ${d.driver_type === 'internal' ? 'bg-green-500/20 text-green-300 border-green-500/40' : 'bg-orange-500/20 text-orange-300 border-orange-500/40'}`}>
-                            {d.driver_type === 'internal' ? 'Ours' : 'Outside'}
+                          <span className="text-white text-sm font-semibold">{p.name}</span>
+                          <Badge className={`text-[9px] ${p.affiliated ? "bg-green-500/20 text-green-300 border-green-500/40" : "bg-orange-500/20 text-orange-300 border-orange-500/40"}`}>
+                            {p.affiliated ? "Affiliated" : "Outside"}
                           </Badge>
+                          {p.ten99_flag && <Badge className="text-[9px] bg-red-500/20 text-red-300 border-red-500/40">1099</Badge>}
                         </div>
                         <div className="text-[10px] text-gray-500 mt-0.5">
-                          #{d.driver_number} · {d.total_drops} drops · {d.nights} nights
+                          YTD ${(p.ytd_payout_total || 0).toFixed(0)} · {p.lifetime_drops || 0} drops
                         </div>
                       </button>
                     ))}
                 </div>
                 <div className="border-t border-gray-800 my-2" />
-                <p className="text-[11px] text-gray-500">Or register someone new:</p>
+                <p className="text-[11px] text-gray-500">Or register a new driver:</p>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-3">
-                      <Input
-                        placeholder="Driver Name"
-                        value={newDriver.driver_name}
-                        onChange={e => setNewDriver(v => ({ ...v, driver_name: e.target.value }))}
-                        className="bg-black/40 border-gray-700 text-white"
-                      />
-                      <Input
-                        placeholder="Phone / Badge #"
-                        value={newDriver.driver_number}
-                        onChange={e => setNewDriver(v => ({ ...v, driver_number: e.target.value }))}
-                        className="bg-black/40 border-gray-700 text-white"
-                      />
-                      <select value={newDriver.driver_type} onChange={e => setNewDriver(v => ({ ...v, driver_type: e.target.value }))}
-                        className="col-span-2 h-10 rounded-lg text-white font-medium px-2 bg-black/40 border border-gray-700">
-                        <option value="internal">Our Driver ($30/drop)</option>
-                        <option value="external">Outside Driver ($20/drop)</option>
-                      </select>
-                    </div>
+              <Input
+                placeholder="Driver Name"
+                value={newDriver.name}
+                onChange={e => setNewDriver(v => ({ ...v, name: e.target.value }))}
+                className="bg-black/40 border-gray-700 text-white"
+              />
+              <Input
+                placeholder="Phone (optional)"
+                value={newDriver.phone}
+                onChange={e => setNewDriver(v => ({ ...v, phone: e.target.value }))}
+                className="bg-black/40 border-gray-700 text-white"
+              />
+              <select
+                value={newDriver.affiliated ? "affiliated" : "outside"}
+                onChange={e => setNewDriver(v => ({ ...v, affiliated: e.target.value === "affiliated" }))}
+                className="col-span-2 h-10 rounded-lg text-white font-medium px-2 bg-black/40 border border-gray-700"
+              >
+                <option value="affiliated">Affiliated (NUPS driver) · ${rates?.driver_payout_affiliated ?? "—"}/guest</option>
+                <option value="outside">Outside driver · ${rates?.driver_payout_outside ?? "—"}/guest</option>
+              </select>
+            </div>
             <div className="flex gap-2">
               <Button
-                onClick={() => createDriver.mutate(newDriver)}
-                disabled={!newDriver.driver_name || !newDriver.driver_number}
+                onClick={() => onboardDriver.mutate(newDriver)}
+                disabled={!newDriver.name || onboardDriver.isPending}
                 className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold"
-              >Register</Button>
+              >Issue QR & Open Session</Button>
               <Button variant="outline" onClick={() => setShowNewDriver(false)} className="border-gray-700 text-gray-300">Cancel</Button>
             </div>
           </CardContent>
@@ -244,170 +397,117 @@ export default function DriverDropOffTracker({ user }) {
 
       {isLoading && <p className="text-gray-500 text-sm">Loading...</p>}
 
-      {/* Till Owes Drivers — prominent alert for door staff */}
-      {openRecords.length > 0 && (
+      {/* Till owes display — drawer math only, never mutates total_sales */}
+      {openSessions.length > 0 && (
         <div className="flex items-center justify-between bg-yellow-950/40 border border-yellow-500/50 rounded-lg px-4 py-3">
           <div className="flex items-center gap-2">
             <Banknote className="w-5 h-5 text-yellow-400" />
             <div>
-              <p className="text-yellow-300 font-bold text-sm">Till Owes Drivers Tonight</p>
-              <p className="text-yellow-500 text-xs">Reserve this cash in the door till — paid out when drivers collect</p>
+              <p className="text-yellow-300 font-bold text-sm">Drawer disbursements pending</p>
+              <p className="text-yellow-500 text-xs">Cash OUT from drawer. total_sales unaffected.</p>
             </div>
           </div>
           <div className="text-2xl font-bold text-yellow-400">${tillOwes.toFixed(2)}</div>
         </div>
       )}
 
-      {/* Night Summary Bar */}
-      {records.length > 0 && (
-        <div className="grid grid-cols-4 gap-3">
-          {[
-            { label: "Drivers", val: records.length, color: "text-cyan-400" },
-            { label: "Total Drops", val: records.reduce((s, r) => s + (r.total_drops || 0), 0), color: "text-yellow-400" },
-            { label: "VIP Kickbacks", val: records.reduce((s, r) => s + (r.vip_count || 0), 0), color: "text-purple-400" },
-            { label: "Night Payout", val: `$${records.reduce((s, r) => s + (r.total_payout || 0), 0).toFixed(0)}`, color: "text-green-400" },
-          ].map(({ label, val, color }) => (
-            <Card key={label} className="bg-gray-900/60 border-gray-700/50">
-              <CardContent className="p-3 text-center">
-                <div className={`text-xl font-bold ${color}`}>{val}</div>
-                <div className="text-[10px] text-gray-400">{label}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      {/* Open sessions */}
+      {openSessions.length === 0 && !isLoading && (
+        <p className="text-gray-600 text-sm text-center py-8">No driver sessions open tonight. Scan a QR or onboard.</p>
       )}
 
-      {/* Open Driver Cards */}
-      {openRecords.length === 0 && !isLoading && (
-        <p className="text-gray-600 text-sm text-center py-8">No drivers registered tonight. Add one above.</p>
-      )}
-
-      {openRecords.map(record => {
-        const isOpen = expanded === record.id;
-        const isAddingDrop = addingDropTo === record.id;
-        const { total } = calcPayout(record);
-        const isInternal = record.driver_type === 'internal';
+      {openSessions.map(session => {
+        const isOpen = expanded === session.id;
+        const meta = safeJSON(session.notes);
+        const affiliated = !!meta.affiliated;
+        const totalGuests = Number(meta.guests) || 0;
+        const payoutAmount = Number(session.total_payout) || 0;
+        const counter = guestCounter[session.id] ?? "";
 
         return (
-          <Card key={record.id} className="bg-gray-900/60 border-gray-700/50">
+          <Card key={session.id} className="bg-gray-900/60 border-gray-700/50">
             <CardContent className="p-4 space-y-3">
-              {/* Driver Header */}
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
                     <Car className="w-4 h-4 text-yellow-400" />
-                    <span className="font-bold text-white">{record.driver_name}</span>
-                    <span className="text-gray-500 text-xs">#{record.driver_number}</span>
-                    <Badge className={`text-xs border ${ isInternal ? 'bg-green-500/20 text-green-300 border-green-500/40' : 'bg-orange-500/20 text-orange-300 border-orange-500/40'}`}>
-                      {isInternal ? 'Our Driver' : 'Outside'}
+                    <span className="font-bold text-white">{session.contractor_name}</span>
+                    <Badge className={`text-xs border ${affiliated ? "bg-green-500/20 text-green-300 border-green-500/40" : "bg-orange-500/20 text-orange-300 border-orange-500/40"}`}>
+                      {affiliated ? "Affiliated" : "Outside"}
                     </Badge>
                   </div>
                   <div className="flex gap-3 mt-1 text-xs text-gray-400">
-                    <span><Users className="w-3 h-3 inline mr-1" />{record.total_drops || 0} drops</span>
-                    <span className="text-blue-400">{record.pass_count || 0} passes</span>
+                    <span><Users className="w-3 h-3 inline mr-1" />{totalGuests} guests</span>
+                    <span className="text-gray-600">{(meta.drops || []).length} drops</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="text-right">
-                    <div className="text-green-400 font-bold text-lg">${total.toFixed(2)}</div>
+                    <div className="text-green-400 font-bold text-lg">${payoutAmount.toFixed(2)}</div>
                     <div className="text-[10px] text-gray-500">payout</div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setExpanded(isOpen ? null : record.id)}
-                    className="text-gray-400"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setExpanded(isOpen ? null : session.id)} className="text-gray-400">
                     {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </Button>
                 </div>
               </div>
 
-              {/* Payout Breakdown */}
               {isOpen && (
                 <div className="border-t border-gray-800 pt-3 space-y-3">
-                  <div className="rounded p-3 bg-gray-800/40 text-xs text-center">
-                    <div className="text-white font-bold text-lg">${total.toFixed(2)}</div>
-                    <div className="text-gray-400 mt-1">{record.total_drops} drops × ${ isInternal ? INTERNAL_DRIVER_RATE : EXTERNAL_DRIVER_RATE}/drop</div>
-                    {record.pass_count > 0 && (
-                      <div className="text-blue-400 mt-2 text-xs">ℹ Guests with passes receive ${PASS_DISCOUNT} discount on ${COVER_FEE_BASE} cover fee</div>
-                    )}
+                  <div className="rounded p-3 bg-gray-800/40 text-xs">
+                    <div className="text-white font-bold text-lg text-center">${payoutAmount.toFixed(2)}</div>
+                    <div className="text-gray-400 mt-1 text-center">
+                      {totalGuests} guests × ${affiliated ? rates?.driver_payout_affiliated : rates?.driver_payout_outside}/guest
+                    </div>
                   </div>
 
-                  {/* Drop log */}
-                  {(record.drop_offs || []).length > 0 && (
+                  {/* Log guest count */}
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      min="1"
+                      placeholder="Guests this drop"
+                      value={counter}
+                      onChange={e => setGuestCounter(c => ({ ...c, [session.id]: e.target.value }))}
+                      className="bg-black/40 border-gray-700 text-white"
+                    />
+                    <Button
+                      onClick={() => {
+                        const N = parseInt(counter, 10);
+                        if (!N || N <= 0) return;
+                        logGuests.mutate({ session, guests: N });
+                        setGuestCounter(c => ({ ...c, [session.id]: "" }));
+                      }}
+                      className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold"
+                    >Log Drop</Button>
+                  </div>
+
+                  {(meta.drops || []).length > 0 && (
                     <div className="space-y-1">
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">Drop Log</p>
-                      {record.drop_offs.map((d, i) => (
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Drop log</p>
+                      {meta.drops.map((d, i) => (
                         <div key={i} className="flex items-center justify-between bg-gray-800/40 rounded px-3 py-1.5 text-xs">
-                          <span className="text-gray-300">{d.guest_name || `Guest ${i + 1}`}</span>
-                          <div className="flex gap-2">
-                            {d.has_pass && <Badge className="bg-blue-500/20 text-blue-300 text-[10px] border-blue-500/30">Pass (${COVER_FEE_BASE - PASS_DISCOUNT})</Badge>}
-                            {!d.has_pass && <Badge className="bg-gray-500/20 text-gray-300 text-[10px] border-gray-500/30">No Pass (${COVER_FEE_BASE})</Badge>}
-                            <span className="text-gray-600">{new Date(d.drop_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
+                          <span className="text-gray-300">Drop #{i + 1} · {d.guests} guests</span>
+                          <span className="text-gray-600">{new Date(d.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                         </div>
                       ))}
                     </div>
                   )}
 
-                  {/* Add Drop Form */}
-                  {isAddingDrop ? (
-                    <div className="bg-black/30 rounded p-3 space-y-2">
-                      <Input
-                        placeholder="Guest name (optional)"
-                        value={dropForm.guest_name}
-                        onChange={e => setDropForm(v => ({ ...v, guest_name: e.target.value }))}
-                        className="bg-black/40 border-gray-700 text-white text-sm"
-                      />
-                      <div className="flex gap-3 text-sm">
-                        <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
-                          <input type="checkbox" checked={dropForm.has_pass} onChange={e => setDropForm(v => ({ ...v, has_pass: e.target.checked }))} />
-                          Has Pass
-                        </label>
-                        <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
-                          <input type="checkbox" checked={dropForm.went_vip} onChange={e => setDropForm(v => ({ ...v, went_vip: e.target.checked }))} />
-                          Went VIP
-                        </label>
-                      </div>
-                      {dropForm.has_pass && (
-                        <Input
-                          placeholder="Pass type (e.g. VIP, Comp)"
-                          value={dropForm.pass_type}
-                          onChange={e => setDropForm(v => ({ ...v, pass_type: e.target.value }))}
-                          className="bg-black/40 border-gray-700 text-white text-sm"
-                        />
-                      )}
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => addDrop.mutate({ record, drop: dropForm })}
-                          className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold text-sm"
-                        >Log Drop</Button>
-                        <Button variant="outline" onClick={() => setAddingDropTo(null)} className="border-gray-700 text-gray-300 text-sm">Cancel</Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={() => setAddingDropTo(record.id)}
-                      variant="outline"
-                      className="border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 text-sm w-full"
-                    >
-                      <Plus className="w-4 h-4 mr-1" /> Log Guest Drop-Off
-                    </Button>
-                  )}
-
-                  {/* Mark Paid — cash comes from door till, logged as till outflow */}
                   <div className="bg-gray-800/40 rounded p-2 flex items-start gap-2 text-xs text-gray-400">
                     <AlertCircle className="w-3 h-3 text-yellow-400 mt-0.5 shrink-0" />
-                    <span>Driver payout paid from <strong className="text-yellow-300">door till cash</strong>. This will be logged as a cash outflow on the Z-report.</span>
+                    <span>
+                      Settling writes to <strong className="text-yellow-300">DriverPayout</strong> ledger only.
+                      <strong className="text-green-300"> total_sales is NEVER modified.</strong> Drawer math: cover collected − this payout.
+                    </span>
                   </div>
                   <Button
-                    onClick={() => markPaid.mutate(record)}
+                    onClick={() => settle.mutate(session)}
                     className="w-full bg-green-700 hover:bg-green-600 text-white font-bold"
-                    disabled={markPaid.isPending}
+                    disabled={settle.isPending || payoutAmount <= 0}
                   >
                     <DollarSign className="w-4 h-4 mr-2" />
-                    Pay ${total.toFixed(2)} to {record.driver_name} (from till)
+                    Settle ${payoutAmount.toFixed(2)} to {session.contractor_name}
                   </Button>
                 </div>
               )}
@@ -416,22 +516,26 @@ export default function DriverDropOffTracker({ user }) {
         );
       })}
 
-      {/* Paid Records */}
-      {paidRecords.length > 0 && (
+      {/* Paid sessions */}
+      {paidSessions.length > 0 && (
         <div className="border-t border-gray-800 pt-4 space-y-2">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Paid Out Tonight</p>
-          {paidRecords.map(record => (
-            <div key={record.id} className="flex items-center justify-between bg-gray-900/30 rounded px-3 py-2">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">Settled tonight</p>
+          {paidSessions.map(s => (
+            <div key={s.id} className="flex items-center justify-between bg-gray-900/30 rounded px-3 py-2">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
-                <span className="text-gray-300 text-sm">{record.driver_name} <span className="text-gray-600">#{record.driver_number}</span></span>
-                <span className="text-gray-500 text-xs">{record.total_drops} drops</span>
+                <span className="text-gray-300 text-sm">{s.contractor_name}</span>
+                <span className="text-gray-500 text-xs">{Number(safeJSON(s.notes).guests) || 0} guests</span>
               </div>
-              <span className="text-green-400 font-bold">${(record.total_payout || 0).toFixed(2)}</span>
+              <span className="text-green-400 font-bold">${(Number(s.total_payout) || 0).toFixed(2)}</span>
             </div>
           ))}
         </div>
       )}
     </div>
   );
+}
+
+function safeJSON(s) {
+  try { return typeof s === "string" ? JSON.parse(s) : (s || {}); } catch { return {}; }
 }

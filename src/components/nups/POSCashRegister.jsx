@@ -18,6 +18,7 @@ import CashDenominationPad from "./pos/CashDenominationPad";
 import CardPaymentPanel from "./pos/CardPaymentPanel";
 import OrderDisplay from "./pos/OrderDisplay";
 import DriverDropOffTracker from "./DriverDropOffTracker";
+import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
 
 export default function POSCashRegister({ user, station = 'door' }) {
     // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
@@ -791,6 +792,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
             <h3 className="text-sm font-bold text-white">Driver Payouts</h3>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
+            <DoorPOSFinalizationAudit user={user} />
             <DriverDropOffTracker user={user} />
           </div>
         </div>
