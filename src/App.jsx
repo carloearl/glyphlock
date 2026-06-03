@@ -25,6 +25,7 @@ import NUPSStaff from './pages/NUPSStaff';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
 import CaseStudyNUPS from './pages/CaseStudyNUPS';
 import NUPSDemoManager from './pages/NUPSDemoManager';
+import NUPSStateDiff from './pages/NUPSStateDiff';
 import NUPSMISReport from './pages/NUPSMISReport';
 import ImageShare from './pages/ImageShare';
 import GlyphBucksHub from './pages/GlyphBucksHub';
@@ -132,6 +133,8 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
+        <Route path="/NUPSStateDiff" element={<NUPSStateDiff />} />
+        <Route path="/nupsstatediff" element={<NUPSStateDiff />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
         <Route path="*" element={<PageNotFound />} />
