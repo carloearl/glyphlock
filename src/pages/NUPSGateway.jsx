@@ -76,7 +76,12 @@ const ROLE_CARDS = [
   },
 ];
 
-const OWNER_EMAIL = 'carloearl@glyphlock.com';
+// Owner-tier emails — full gateway access + bypass all credential checks.
+const OWNER_EMAILS = [
+  'carloearl@glyphlock.com',
+  'svsantostefano@outlook.com',
+];
+const OWNER_EMAIL = OWNER_EMAILS[0]; // legacy reference for "Create Demo Accounts" button
 
 const TEST_ROLES = [
   { role: "PLATFORM_ADMIN", label: "Platform Admin", color: "text-violet-400", dest: "NUPSOwner" },
@@ -103,8 +108,10 @@ export default function NUPSGateway() {
         const isAuth = await base44.auth.isAuthenticated();
         if (isAuth) {
           const u = await base44.auth.me();
-          // Lock gateway to owner only
-          if (u?.email?.toLowerCase() !== OWNER_EMAIL) {
+          // Lock gateway to owner-tier emails OR base44 admins
+          const emailLower = (u?.email || '').toLowerCase();
+          const isOwnerTier = OWNER_EMAILS.includes(emailLower) || u?.role === 'admin';
+          if (!isOwnerTier) {
             navigate('/NUPSLanding');
             return;
           }
@@ -145,7 +152,7 @@ export default function NUPSGateway() {
     return card.requiredRoles.length === 0 || card.requiredRoles.some(r => allRoles.includes(r));
   };
 
-  const isOwner = user?.email?.toLowerCase() === OWNER_EMAIL;
+  const isOwner = OWNER_EMAILS.includes((user?.email || '').toLowerCase()) || user?.role === 'admin';
 
 
 
