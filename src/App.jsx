@@ -83,7 +83,7 @@ const AuthenticatedApp = () => {
   }
 
   // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/nupslanding', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage', '/demo/', '/clubtv'];
+  const fullscreenPaths = ['/nupslanding', '/landing', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage', '/demo/', '/clubtv'];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
   if (isFullscreen) {
@@ -91,6 +91,8 @@ const AuthenticatedApp = () => {
       <Routes>
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/nupslanding" element={<NUPSLanding />} />
+        <Route path="/landing" element={<NUPSLanding />} />
+        <Route path="/Landing" element={<NUPSLanding />} />
         <Route path="/NUPSGateway" element={<NUPSGateway />} />
         <Route path="/nupsgateway" element={<NUPSGateway />} />
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
