@@ -1,0 +1,96 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "description": "DACO-20260610 WS-1 \u2014 Append-only immutable audit trail of every portal access and key update. No UPDATE or DELETE endpoints exist for this entity.",
+  "properties": {
+    "log_id": {
+      "type": "string",
+      "description": "UUID, immutable, set server-side at create"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Server time, UTC. Never client-supplied."
+    },
+    "user_email": {
+      "type": "string",
+      "description": "From authenticated session only (base44.auth.me().email)"
+    },
+    "user_role": {
+      "type": "string",
+      "description": "Role captured at time of action. e.g. Manager, Bartender, Door Girl, Hostess, Security, DJ, External, PLATFORM_ADMIN, VENUE_OWNER"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "LOGIN",
+        "LOGOUT",
+        "CREATE",
+        "UPDATE",
+        "DELETE",
+        "EXPORT",
+        "SETTLEMENT_RUN",
+        "PAYOUT_TOGGLE",
+        "CONFIG_CHANGE"
+      ],
+      "description": "Action classifier"
+    },
+    "entity_affected": {
+      "type": "string",
+      "description": "Entity name + record ID (e.g. 'DriverPayout:6a26d2702a6bd706b58c3754')"
+    },
+    "before_value": {
+      "type": "object",
+      "description": "Snapshot pre-change (UPDATE/DELETE/PAYOUT_TOGGLE only)"
+    },
+    "after_value": {
+      "type": "object",
+      "description": "Snapshot post-change"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Dynamic from VenueRateConfig \u2014 no hardcoded venue strings"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "Operating mode at time of action"
+    },
+    "ip_hint": {
+      "type": "string",
+      "description": "Optional, if Base44 session exposes it"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-form context (e.g. login source, filter args for EXPORT)"
+    }
+  },
+  "required": [
+    "timestamp",
+    "user_email",
+    "action_type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}

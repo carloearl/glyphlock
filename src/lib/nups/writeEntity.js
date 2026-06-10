@@ -1,5 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import * as SEED from './demoSeedData';
+import { logActivity } from './activityLog';
 
 const VALID_MODES = new Set(['REAL', 'DEMO']);
 
@@ -127,6 +128,18 @@ function validateFinancialRules(entity, data) {
       }
     }
     if (data.tips_in_total === true) return 'tips_forbidden_in_total_sales';
+  }
+
+  // DACO-20260610 WS-2 — Same frozen rule for DailySettlement
+  if (entity === 'DailySettlement') {
+    const cash = Number(data.cash_sales) || 0;
+    const card = Number(data.card_sales) || 0;
+    if (data.total_sales !== undefined && data.total_sales !== null) {
+      const total = Number(data.total_sales);
+      if (!approxEqual(total, cash + card)) {
+        return `settlement_total_sales_must_equal_cash_plus_card: expected ${cash + card}, got ${total}`;
+      }
+    }
   }
 
   if (entity === 'POSTransaction') {
@@ -313,6 +326,19 @@ export async function writeEntity({
     result: 'allowed',
     venue_id: venue_id || null,
     notes: intent || null,
+  });
+
+  // DACO-20260610 WS-1: Mirror to ActivityLog (user-facing audit trail)
+  const actionMap = { create: 'CREATE', update: 'UPDATE', delete: 'DELETE', bulkCreate: 'CREATE' };
+  const action_type = actionMap[operation] || 'UPDATE';
+  await logActivity({
+    action_type,
+    entity_affected: `${entity}${id ? ':' + id : ''}`,
+    before_value: null,
+    after_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
+    venue_id: venue_id || null,
+    actor: { email: actorId, role },
+    notes: intent || `gateway:${operation}`,
   });
 
   return { ok: true, audit_id, mode, tier, result: 'allowed', value };

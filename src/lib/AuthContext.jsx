@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
+import { logLoginOnce, logLogout } from '@/lib/nups/activityLog';
 
 const AuthContext = createContext();
 
@@ -95,6 +96,8 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
+      // DACO-20260610 WS-1: Log LOGIN once per session (non-blocking)
+      logLoginOnce(currentUser).catch(() => {});
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
@@ -111,6 +114,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = (shouldRedirect = true) => {
+    // DACO-20260610 WS-1: Log LOGOUT (fire-and-forget; don't block redirect)
+    logLogout(user).catch(() => {});
     setUser(null);
     setIsAuthenticated(false);
     

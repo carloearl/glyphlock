@@ -1,20 +1,138 @@
 {
   "name": "DailySettlement",
   "type": "object",
+  "description": "DACO-20260610 WS-2 \u2014 Per-venue daily settlement. total_sales is computed (cash_sales + card_sales) only. GlyphBucks are NEVER in total_sales.",
   "properties": {
     "settlement_id": {
       "type": "string",
-      "description": "Unique settlement identifier"
+      "description": "Unique settlement identifier (UUID)"
     },
     "venue_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Dynamic from VenueRateConfig \u2014 no hardcoded venue strings"
     },
     "settlement_date": {
       "type": "string",
-      "format": "date"
+      "format": "date",
+      "description": "Legacy field \u2014 kept for backwards compatibility"
+    },
+    "business_date": {
+      "type": "string",
+      "format": "date",
+      "description": "DACO-20260610 WS-2 \u2014 Venue business day (rolls at close per venue config, not midnight)"
+    },
+    "cash_sales": {
+      "type": "number",
+      "default": 0,
+      "description": "DACO-20260610 WS-2 \u2014 Sum of cash transactions"
+    },
+    "card_sales": {
+      "type": "number",
+      "default": 0,
+      "description": "DACO-20260610 WS-2 \u2014 Sum of card batch (processor batch total)"
+    },
+    "total_sales": {
+      "type": "number",
+      "default": 0,
+      "description": "FROZEN: cash_sales + card_sales ONLY. GlyphBucks NEVER included. Enforced by writeEntity gateway."
+    },
+    "batch_reference": {
+      "type": "string",
+      "description": "DACO-20260610 WS-2 \u2014 Processor batch ID (GoDaddy POS or equivalent)"
+    },
+    "glyphbucks_activity": {
+      "type": "object",
+      "description": "DACO-20260610 WS-2 \u2014 Informational only. Issued/redeemed counts + face value. NEVER added to total_sales.",
+      "properties": {
+        "issued_count": {
+          "type": "number",
+          "default": 0
+        },
+        "issued_face_value": {
+          "type": "number",
+          "default": 0
+        },
+        "redeemed_count": {
+          "type": "number",
+          "default": 0
+        },
+        "redeemed_face_value": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "driver_payouts_total": {
+      "type": "number",
+      "default": 0,
+      "description": "DACO-20260610 WS-2 \u2014 Sum from DriverPayout records, payout_status=PROCESSED only"
+    },
+    "driver_payouts_outstanding": {
+      "type": "number",
+      "default": 0,
+      "description": "DACO-20260610 WS-2 \u2014 Sum from DriverPayout records, payout_status=PENDING only"
+    },
+    "tip_pool_summary": {
+      "type": "object",
+      "description": "DACO-20260610 WS-2 \u2014 Per correct hierarchy: Manager \u2192 Hostess \u2192 DJ & Asst Mgr (\u00bd each of Hostess) \u2192 Security & Doorman (remainder). Entertainers NEVER on tip line.",
+      "properties": {
+        "manager": {
+          "type": "number",
+          "default": 0
+        },
+        "hostess": {
+          "type": "number",
+          "default": 0
+        },
+        "dj": {
+          "type": "number",
+          "default": 0
+        },
+        "asst_manager": {
+          "type": "number",
+          "default": 0
+        },
+        "security": {
+          "type": "number",
+          "default": 0
+        },
+        "doorman": {
+          "type": "number",
+          "default": 0
+        },
+        "total_pool": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "variance": {
+      "type": "number",
+      "default": 0,
+      "description": "DACO-20260610 WS-2 \u2014 Expected vs counted cash (Z-report reconciliation)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "RECONCILED",
+        "LOCKED"
+      ],
+      "default": "OPEN",
+      "description": "DACO-20260610 WS-2 \u2014 Lifecycle. Once LOCKED, edits require Manager + new ActivityLog entry."
+    },
+    "locked_by": {
+      "type": "string",
+      "description": "DACO-20260610 WS-2 \u2014 User email who locked the record"
+    },
+    "locked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DACO-20260610 WS-2 \u2014 Server time at lock"
     },
     "entertainer_payouts": {
       "type": "array",
+      "description": "LEGACY \u2014 preserved for backwards compatibility",
       "items": {
         "type": "object",
         "properties": {
@@ -43,20 +161,24 @@
       }
     },
     "total_gross_revenue": {
-      "type": "number"
+      "type": "number",
+      "description": "LEGACY"
     },
     "total_processing_fees": {
-      "type": "number"
+      "type": "number",
+      "description": "LEGACY"
     },
     "total_house_commission": {
-      "type": "number"
+      "type": "number",
+      "description": "LEGACY"
     },
     "total_net_payouts": {
-      "type": "number"
+      "type": "number",
+      "description": "LEGACY"
     },
     "venue_net_income": {
       "type": "number",
-      "description": "Venue profit after all payouts"
+      "description": "LEGACY \u2014 Venue profit after all payouts"
     },
     "reconciliation_status": {
       "type": "string",
@@ -66,7 +188,8 @@
         "disputed",
         "finalized"
       ],
-      "default": "pending"
+      "default": "pending",
+      "description": "LEGACY \u2014 superseded by 'status'"
     },
     "approved_by": {
       "type": "string"
@@ -87,7 +210,6 @@
     }
   },
   "required": [
-    "venue_id",
-    "settlement_date"
+    "venue_id"
   ]
 }

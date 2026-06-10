@@ -43,6 +43,8 @@ import DemoPosRegisterPreview from './pages/DemoPosRegisterPreview';
 import DemoCloseNightPreview from './pages/DemoCloseNightPreview';
 import DemoCompliancePreview from './pages/DemoCompliancePreview';
 import ClubTV from './pages/ClubTV';
+import ActivityLogViewer from './pages/ActivityLogViewer';
+import DailySettlementDashboard from './pages/DailySettlementDashboard';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -142,6 +144,8 @@ const AuthenticatedApp = () => {
         <Route path="/dailyperformancereport" element={<DailyPerformanceReport />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
+        <Route path="/admin/activity-log" element={<LayoutWrapper currentPageName="ActivityLogViewer"><ActivityLogViewer /></LayoutWrapper>} />
+        <Route path="/admin/settlement" element={<LayoutWrapper currentPageName="DailySettlementDashboard"><DailySettlementDashboard /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>

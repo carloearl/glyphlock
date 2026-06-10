@@ -89,7 +89,26 @@
         "open",
         "paid"
       ],
-      "default": "open"
+      "default": "open",
+      "description": "LEGACY status field \u2014 preserved for DriverDropOffTracker compatibility"
+    },
+    "payout_status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "PROCESSED"
+      ],
+      "default": "PENDING",
+      "description": "DACO-20260610 WS-3 \u2014 Settlement-facing payout status. PROCESSED rolls into DailySettlement.driver_payouts_total."
+    },
+    "processed_by": {
+      "type": "string",
+      "description": "DACO-20260610 WS-3 \u2014 User email from session, set when payout_status flipped to PROCESSED"
+    },
+    "processed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DACO-20260610 WS-3 \u2014 Server time, set when payout_status flipped to PROCESSED"
     },
     "paid_at": {
       "type": "string",
