@@ -1,0 +1,72 @@
+{
+  "name": "PayoutSafetyLimit",
+  "type": "object",
+  "description": "DACO-20260611 \u2014 Per-venue safety thresholds for driver payouts. Daily audit job flags any payout that exceeds these limits.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Venue scope. Use '*' for global default."
+    },
+    "max_single_payout_usd": {
+      "type": "number",
+      "default": 300,
+      "description": "Hard cap on a single DriverPayout.total_payout"
+    },
+    "max_daily_driver_total_usd": {
+      "type": "number",
+      "default": 600,
+      "description": "Max combined payout to one driver in a single business day"
+    },
+    "max_daily_venue_total_usd": {
+      "type": "number",
+      "default": 3000,
+      "description": "Max combined payouts across all drivers per venue per day"
+    },
+    "notify_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Email recipients for safety-limit breach alerts"
+    },
+    "compliance_digest_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Email recipients for daily compliance digest"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "venue_id"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
