@@ -45,6 +45,7 @@ import DemoCompliancePreview from './pages/DemoCompliancePreview';
 import ClubTV from './pages/ClubTV';
 import ActivityLogViewer from './pages/ActivityLogViewer';
 import DailySettlementDashboard from './pages/DailySettlementDashboard';
+import DriverPayoutHistory from './pages/DriverPayoutHistory';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -146,6 +147,7 @@ const AuthenticatedApp = () => {
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
         <Route path="/admin/activity-log" element={<LayoutWrapper currentPageName="ActivityLogViewer"><ActivityLogViewer /></LayoutWrapper>} />
         <Route path="/admin/settlement" element={<LayoutWrapper currentPageName="DailySettlementDashboard"><DailySettlementDashboard /></LayoutWrapper>} />
+        <Route path="/admin/payout-history" element={<LayoutWrapper currentPageName="DriverPayoutHistory"><DriverPayoutHistory /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
