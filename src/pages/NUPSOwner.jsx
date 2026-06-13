@@ -12,7 +12,7 @@ import {
   Shield, DollarSign, ShoppingCart, TrendingUp, Users, LogOut, UserCheck, DoorOpen, FileText,
   Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText,
   RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star, Coins, Building2,
-  Music, Calculator
+  Music, Calculator, ShieldCheck
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -246,6 +246,7 @@ export default function NUPSOwner() {
     { key: 'customers',  label: 'Customers',      icon: Heart },
     { key: 'inventory',  label: 'Inventory',      icon: Package },
     { key: 'audit',      label: 'Audit Log',      icon: Shield },
+    { key: 'audit-integrity', label: 'Audit Integrity', icon: ShieldCheck, route: '/AuditIntegrity' },
     { key: 'dashboard',  label: 'Dashboard',      icon: BarChart3 },
     { key: 'admin',      label: 'Admin',           icon: KeyRound },
     { key: 'venue',      label: 'Venue Settings', icon: Building2 },

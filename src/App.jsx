@@ -49,6 +49,7 @@ import DailySettlementDashboard from './pages/DailySettlementDashboard';
 import DriverPayoutHistory from './pages/DriverPayoutHistory';
 import FrontDoor from './pages/FrontDoor';
 import Accounting from './pages/Accounting';
+import AuditIntegrity from './pages/AuditIntegrity';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -155,6 +156,8 @@ const AuthenticatedApp = () => {
         <Route path="/admin/payout-history" element={<LayoutWrapper currentPageName="DriverPayoutHistory"><DriverPayoutHistory /></LayoutWrapper>} />
         <Route path="/Accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
         <Route path="/accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
+        <Route path="/AuditIntegrity" element={<LayoutWrapper currentPageName="AuditIntegrity"><AuditIntegrity /></LayoutWrapper>} />
+        <Route path="/admin/audit-integrity" element={<LayoutWrapper currentPageName="AuditIntegrity"><AuditIntegrity /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
