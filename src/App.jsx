@@ -50,6 +50,7 @@ import DriverPayoutHistory from './pages/DriverPayoutHistory';
 import FrontDoor from './pages/FrontDoor';
 import Accounting from './pages/Accounting';
 import AuditIntegrity from './pages/AuditIntegrity';
+import UnifiedSearch from './pages/UnifiedSearch';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -157,6 +158,8 @@ const AuthenticatedApp = () => {
         <Route path="/Accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
         <Route path="/accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
         <Route path="/admin/audit-integrity" element={<LayoutWrapper currentPageName="AuditIntegrity"><AuditIntegrity /></LayoutWrapper>} />
+        <Route path="/Search" element={<LayoutWrapper currentPageName="UnifiedSearch"><UnifiedSearch /></LayoutWrapper>} />
+        <Route path="/search" element={<LayoutWrapper currentPageName="UnifiedSearch"><UnifiedSearch /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>

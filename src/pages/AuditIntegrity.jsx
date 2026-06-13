@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, ArrowLeft, RefreshCw, Loader2, Download, Lock } from "lucide-react";
+import { ShieldCheck, ArrowLeft, RefreshCw, Loader2, Download, Lock, Search } from "lucide-react";
 import { toast } from "sonner";
 import { analyzeAuditLogs } from "@/lib/audit/auditAnalytics";
 import AuditIntegrityCards from "@/components/audit/AuditIntegrityCards";
@@ -122,6 +122,14 @@ export default function AuditIntegrity() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/Search")}
+              className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
+            >
+              <Search className="w-3.5 h-3.5 mr-1.5" /> Search
+            </Button>
             <Button
               variant="outline"
               size="sm"

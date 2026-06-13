@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Calculator, Download, ArrowLeft, Loader2, ShieldCheck, FileSearch } from "lucide-react";
+import { Calculator, Download, ArrowLeft, Loader2, ShieldCheck, FileSearch, Search } from "lucide-react";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { aggregateFinancials, fmtUSD } from "@/lib/accounting/aggregateFinancials";
@@ -193,6 +193,14 @@ function AccountingContent() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/Search")}
+              className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
+            >
+              <Search className="w-3.5 h-3.5 mr-1.5" /> Search
+            </Button>
             <Button
               variant="outline"
               size="sm"
