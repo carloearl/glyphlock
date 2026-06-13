@@ -30,7 +30,12 @@ export const PERMISSIONS = {
 };
 
 export const hasPermission = (userRole, permission) => {
-  return PERMISSIONS[permission]?.includes(userRole) ?? false;
+  if (!userRole) return false;
+  // Accept both canonical RBAC roles (lowercase) and NUPS roles (uppercase) — auto-map uppercase
+  const canonical = userRole === userRole.toLowerCase()
+    ? userRole
+    : mapNUPSRoleToRBAC(userRole);
+  return PERMISSIONS[permission]?.includes(canonical) ?? false;
 };
 
 /**

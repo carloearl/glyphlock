@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { NUPSPermissionsProvider } from '@/components/nups/hooks/useNUPSPermissions';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import SettlementReports from './pages/SettlementReports';
@@ -162,7 +163,9 @@ function App() {
         <Router>
           <NavigationTracker />
           <ErrorBoundary>
-            <AuthenticatedApp />
+            <NUPSPermissionsProvider>
+              <AuthenticatedApp />
+            </NUPSPermissionsProvider>
           </ErrorBoundary>
         </Router>
         <Toaster />

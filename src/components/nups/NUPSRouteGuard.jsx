@@ -24,11 +24,13 @@ const ALL_OPERATIONAL_ROLES = [
   "PLATFORM_ADMIN",
   "VENUE_OWNER",
   "VENUE_MANAGER",
+  "FLOOR_HOST",
   "BARTENDER",
   "DJ",
   "SECURITY",
   "KIOSK",
   "PERFORMER",
+  "DEMO",
 ];
 
 export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmin = true }) {
