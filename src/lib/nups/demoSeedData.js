@@ -6,7 +6,13 @@ export const DEMO_VENUE_ID = 'DEMO_VENUE_001';
 export const DEMO_LOCATION_ID = 'DEMO_LOC_001';
 export const DEMO_NIGHT_DATE = '2026-05-15';
 
-const T = (h, m = 0) => new Date(`${DEMO_NIGHT_DATE}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00.000Z`).toISOString();
+// Supports hours > 23 (post-midnight shift times like 24, 27, 28) by rolling forward via Date arithmetic
+const T = (h, m = 0) => {
+  const d = new Date(`${DEMO_NIGHT_DATE}T00:00:00.000Z`);
+  d.setUTCHours(d.getUTCHours() + h);
+  d.setUTCMinutes(d.getUTCMinutes() + m);
+  return d.toISOString();
+};
 const DATE = DEMO_NIGHT_DATE;
 
 // ---------- STAFF (NUPSUser) ----------
