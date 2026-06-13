@@ -5,6 +5,34 @@
     <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Base44 APP</title>
+    <script>
+      // Visible crash catcher — surfaces module-load + uncaught errors instead of white screen
+      (function () {
+        function showErr(title, msg, stack) {
+          var root = document.getElementById('root');
+          if (!root) return;
+          // Only render if app hasn't mounted (root is still empty)
+          if (root.children.length > 0 && root.querySelector('[data-app-mounted]')) return;
+          root.innerHTML =
+            '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;background:#0a0a0a;color:#fff;padding:40px 24px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;">' +
+              '<div style="max-width:760px;width:100%;background:#1a1a1a;border:1px solid #ef4444;border-radius:12px;padding:32px;">' +
+                '<div style="font-size:32px;margin-bottom:12px;">⚠️</div>' +
+                '<h1 style="font-size:20px;margin:0 0 8px;color:#fca5a5;">' + title + '</h1>' +
+                '<pre style="background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:16px;font-size:12px;color:#fbbf24;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:200px;margin:12px 0;">' + (msg || 'Unknown error') + '</pre>' +
+                (stack ? '<details style="margin-top:8px;"><summary style="cursor:pointer;color:#94a3b8;font-size:12px;">Stack trace</summary><pre style="background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:12px;font-size:11px;color:#94a3b8;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:300px;margin-top:8px;">' + stack + '</pre></details>' : '') +
+                '<button onclick="window.location.reload()" style="margin-top:16px;padding:10px 20px;background:#06b6d4;border:none;border-radius:8px;color:#000;font-weight:600;cursor:pointer;font-size:14px;">Reload Page</button>' +
+              '</div>' +
+            '</div>';
+        }
+        window.addEventListener('error', function (e) {
+          showErr('App failed to load', (e.message || '') + (e.filename ? '\n\nFile: ' + e.filename + ':' + e.lineno : ''), e.error && e.error.stack);
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e.reason || {};
+          showErr('Unhandled async error', r.message || String(r), r.stack);
+        });
+      })();
+    </script>
   </head>
   <body>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
