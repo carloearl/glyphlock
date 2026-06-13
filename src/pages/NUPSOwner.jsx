@@ -12,7 +12,7 @@ import {
   Shield, DollarSign, ShoppingCart, TrendingUp, Users, LogOut, UserCheck, DoorOpen, FileText,
   Eye, Clock, Receipt, CreditCard, Loader2, BarChart3, Banknote, Package, Tag, ScrollText,
   RotateCcw, Heart, Megaphone, UserCog, Brain, PieChart, Wallet, HandCoins, KeyRound, Star, Coins, Building2,
-  Music
+  Music, Calculator
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -239,6 +239,7 @@ export default function NUPSOwner() {
     { key: 'pos',        label: 'POS Register',   icon: ShoppingCart },
     { key: 'glyphbucks', label: 'GlyphBucks',     icon: Coins },
     { key: 'dj',         label: 'DJ',             icon: Music },
+    { key: 'accounting', label: 'Accounting',     icon: Calculator, route: '/Accounting' },
     { key: 'payroll',    label: 'Payroll',         icon: DollarSign },
     { key: 'reports',    label: 'Reports',         icon: FileText },
     { key: 'analytics',  label: 'Analytics',      icon: TrendingUp },
@@ -447,12 +448,14 @@ export default function NUPSOwner() {
             return (
               <Button
                 key={mod.key}
-                onClick={() => setActiveModule(mod.key)}
+                onClick={() => mod.route ? navigate(mod.route) : setActiveModule(mod.key)}
                 variant={activeModule === mod.key ? 'default' : 'outline'}
                 className={`min-h-[44px] text-sm gap-2 flex-shrink-0 ${
                   activeModule === mod.key
                     ? 'bg-purple-600 hover:bg-purple-700 text-white border-purple-500'
-                    : 'border-gray-700 text-gray-300 hover:border-purple-500/50 bg-transparent'
+                    : mod.route
+                      ? 'border-emerald-600/50 text-emerald-300 hover:border-emerald-400 bg-emerald-900/10'
+                      : 'border-gray-700 text-gray-300 hover:border-purple-500/50 bg-transparent'
                 }`}
               >
                 <ModIcon className="w-4 h-4" />
