@@ -48,6 +48,7 @@ import ActivityLogViewer from './pages/ActivityLogViewer';
 import DailySettlementDashboard from './pages/DailySettlementDashboard';
 import DriverPayoutHistory from './pages/DriverPayoutHistory';
 import FrontDoor from './pages/FrontDoor';
+import Accounting from './pages/Accounting';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -152,6 +153,8 @@ const AuthenticatedApp = () => {
         <Route path="/admin/activity-log" element={<LayoutWrapper currentPageName="ActivityLogViewer"><ActivityLogViewer /></LayoutWrapper>} />
         <Route path="/admin/settlement" element={<LayoutWrapper currentPageName="DailySettlementDashboard"><DailySettlementDashboard /></LayoutWrapper>} />
         <Route path="/admin/payout-history" element={<LayoutWrapper currentPageName="DriverPayoutHistory"><DriverPayoutHistory /></LayoutWrapper>} />
+        <Route path="/Accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
+        <Route path="/accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
