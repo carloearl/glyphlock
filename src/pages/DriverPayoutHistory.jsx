@@ -20,18 +20,33 @@ import {
   ShieldAlert, CheckCircle2, Clock, FileText, AlertTriangle,
 } from 'lucide-react';
 import DriverPayoutStatusToggle from '@/components/nups/DriverPayoutStatusToggle';
+import BulkPayoutProcessor from '@/components/nups/BulkPayoutProcessor';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const MANAGER_ROLES = ['admin', 'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER'];
 
 function money(n) { return `$${Number(n || 0).toFixed(2)}`; }
 
-function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExpand }) {
+function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExpand, isSelected, onToggleSelect }) {
   const status = payout.payout_status || 'PENDING';
   const linked = logs.filter(l => l.entity_affected === `DriverPayout:${payout.id}`);
+  const isPending = status === 'PENDING';
 
   return (
     <>
-      <tr className="border-t border-slate-800 hover:bg-slate-800/30">
+      <tr className={`border-t border-slate-800 hover:bg-slate-800/30 ${isSelected ? 'bg-violet-500/5' : ''}`}>
+        <td className="p-3">
+          {isPending ? (
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={onToggleSelect}
+              className="border-violet-500/50 data-[state=checked]:bg-violet-500"
+              aria-label={`Select payout for ${payout.driver_name}`}
+            />
+          ) : (
+            <span className="inline-block w-4" />
+          )}
+        </td>
         <td className="p-3">
           <button onClick={onToggleExpand} className="text-slate-400 hover:text-white">
             {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -53,7 +68,7 @@ function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExp
       </tr>
       {expanded && (
         <tr className="bg-slate-900/50">
-          <td colSpan={10} className="p-4 border-t border-slate-800">
+          <td colSpan={11} className="p-4 border-t border-slate-800">
             <div className="grid md:grid-cols-2 gap-4 text-xs">
               <div className="space-y-2">
                 <div className="font-bold text-slate-300 uppercase tracking-wide">Payout breakdown</div>
@@ -115,6 +130,7 @@ export default function DriverPayoutHistory() {
     status: 'ALL',
   });
   const [expanded, setExpanded] = useState({});
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const [exporting, setExporting] = useState(false);
   const [exportErr, setExportErr] = useState(null);
 
@@ -313,6 +329,25 @@ export default function DriverPayoutHistory() {
             <table className="w-full text-sm">
               <thead className="bg-slate-800/50 text-slate-400 text-xs uppercase">
                 <tr>
+                  <th className="w-8 p-3">
+                    <Checkbox
+                      checked={
+                        filtered.filter(p => (p.payout_status || 'PENDING') === 'PENDING').length > 0 &&
+                        filtered.filter(p => (p.payout_status || 'PENDING') === 'PENDING').every(p => selectedIds.has(p.id))
+                      }
+                      onCheckedChange={(checked) => {
+                        const pendingIds = filtered.filter(p => (p.payout_status || 'PENDING') === 'PENDING').map(p => p.id);
+                        if (checked) setSelectedIds(prev => new Set([...prev, ...pendingIds]));
+                        else setSelectedIds(prev => {
+                          const next = new Set(prev);
+                          pendingIds.forEach(id => next.delete(id));
+                          return next;
+                        });
+                      }}
+                      className="border-violet-500/50 data-[state=checked]:bg-violet-500"
+                      aria-label="Select all pending"
+                    />
+                  </th>
                   <th className="w-8 p-3"></th>
                   <th className="text-left p-3">Date</th>
                   <th className="text-left p-3">Driver</th>
@@ -326,9 +361,9 @@ export default function DriverPayoutHistory() {
                 </tr>
               </thead>
               <tbody>
-                {isLoading && <tr><td colSpan={10} className="p-8 text-center text-slate-500">Loading…</td></tr>}
+                {isLoading && <tr><td colSpan={11} className="p-8 text-center text-slate-500">Loading…</td></tr>}
                 {!isLoading && filtered.length === 0 && (
-                  <tr><td colSpan={10} className="p-8 text-center text-slate-500">No matching records.</td></tr>
+                  <tr><td colSpan={11} className="p-8 text-center text-slate-500">No matching records.</td></tr>
                 )}
                 {filtered.map(p => (
                   <PayoutRow
@@ -339,6 +374,14 @@ export default function DriverPayoutHistory() {
                     expanded={!!expanded[p.id]}
                     onToggleExpand={() => setExpanded(e => ({ ...e, [p.id]: !e[p.id] }))}
                     onUpdated={() => refetch()}
+                    isSelected={selectedIds.has(p.id)}
+                    onToggleSelect={(checked) => {
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        if (checked) next.add(p.id); else next.delete(p.id);
+                        return next;
+                      });
+                    }}
                   />
                 ))}
               </tbody>
@@ -346,10 +389,17 @@ export default function DriverPayoutHistory() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-slate-600 text-center">
+        <p className="text-[10px] text-slate-600 text-center pb-24">
           Disbursement ledger · Driver payouts are money OUT — never deducted from <code>total_sales</code>. BPAAA v3.0.
         </p>
       </div>
+
+      <BulkPayoutProcessor
+        selectedPayouts={filtered.filter(p => selectedIds.has(p.id))}
+        currentUser={user}
+        onClear={() => setSelectedIds(new Set())}
+        onComplete={() => { setSelectedIds(new Set()); refetch(); }}
+      />
     </div>
   );
 }

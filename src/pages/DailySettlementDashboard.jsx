@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { DollarSign, Lock, AlertCircle, CheckCircle2, Truck, Calendar, Database } from 'lucide-react';
 import { logActivity } from '@/lib/nups/activityLog';
 import { writeEntity } from '@/lib/nups/writeEntity';
+import SettlementLockGuardModal from '@/components/nups/SettlementLockGuardModal';
 
 const STATUS_STYLES = {
   OPEN: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
@@ -47,6 +48,7 @@ export default function DailySettlementDashboard() {
   const [selectedVenue, setSelectedVenue] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
+  const [lockGuardOpen, setLockGuardOpen] = useState(false);
 
   const { data: user } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
 
@@ -176,6 +178,15 @@ export default function DailySettlementDashboard() {
     };
   }, [txns, zReports, driverPayouts]);
 
+  const handleLockClick = () => {
+    if (!user || !isManager) {
+      setErr('Manager role required.');
+      return;
+    }
+    setErr(null);
+    setLockGuardOpen(true);
+  };
+
   const handleReconcileLock = async () => {
     if (!user || !isManager) {
       setErr('Manager role required.');
@@ -231,6 +242,7 @@ export default function DailySettlementDashboard() {
       });
 
       await refetchSettlement();
+      setLockGuardOpen(false);
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -294,7 +306,7 @@ export default function DailySettlementDashboard() {
             </div>
             <div className="flex items-end">
               <Button
-                onClick={handleReconcileLock}
+                onClick={handleLockClick}
                 disabled={busy || status === 'LOCKED' || !selectedVenue}
                 className="w-full bg-emerald-600 hover:bg-emerald-500"
               >
@@ -389,6 +401,18 @@ export default function DailySettlementDashboard() {
           </div>
         )}
       </div>
+
+      <SettlementLockGuardModal
+        open={lockGuardOpen}
+        onClose={() => !busy && setLockGuardOpen(false)}
+        onConfirm={handleReconcileLock}
+        pendingCount={metrics.pending_count}
+        pendingTotal={metrics.driver_payouts_outstanding}
+        processedCount={metrics.processed_count}
+        processedTotal={metrics.driver_payouts_total}
+        businessDate={businessDate}
+        busy={busy}
+      />
     </div>
   );
 }

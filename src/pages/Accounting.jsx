@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Calculator, Download, ArrowLeft, Loader2, ShieldCheck, FileSearch, Search } from "lucide-react";
+import { Calculator, Download, ArrowLeft, Loader2, ShieldCheck, FileSearch, Search, Moon } from "lucide-react";
+import AuditFindingsBadge from "@/components/audit/AuditFindingsBadge";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { aggregateFinancials, fmtUSD } from "@/lib/accounting/aggregateFinancials";
@@ -196,6 +197,14 @@ function AccountingContent() {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => navigate("/Tonight")}
+              className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10"
+            >
+              <Moon className="w-3.5 h-3.5 mr-1.5" /> Tonight
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate("/Search")}
               className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
             >
@@ -208,6 +217,7 @@ function AccountingContent() {
               className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10"
             >
               <FileSearch className="w-3.5 h-3.5 mr-1.5" /> Audit Integrity
+              <AuditFindingsBadge />
             </Button>
             <Button
               variant="outline"
