@@ -1,0 +1,52 @@
+{
+  "name": "ContractTermsConfig",
+  "type": "object",
+  "description": "Per-venue editable contract text for GlyphBucks, VIP, and Entertainer agreements. Version-stamped on every save. Read by contract render flows.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Venue scope."
+    },
+    "contract_type": {
+      "type": "string",
+      "enum": [
+        "GLYPHBUCKS",
+        "VIP",
+        "ENTERTAINER",
+        "VENUE_GENERAL"
+      ],
+      "description": "Which contract this terms record applies to."
+    },
+    "terms_text": {
+      "type": "string",
+      "description": "Full contract body. Markdown supported."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version, e.g. v3-digital-02-06-2026. Auto-stamped on save."
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this version takes effect."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_edited_by": {
+      "type": "string"
+    },
+    "last_edited_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "venue_id",
+    "contract_type"
+  ]
+}

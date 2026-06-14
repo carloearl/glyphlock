@@ -1,0 +1,56 @@
+{
+  "name": "DailyChecklistConfig",
+  "type": "object",
+  "description": "Per-venue daily compliance checklist that entertainers must acknowledge at check-in. Admin-editable; read by EntertainerCheckIn.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Venue scope. One config per venue."
+    },
+    "items": {
+      "type": "array",
+      "description": "Ordered checklist items shown at entertainer check-in. ALL required items must be checked to proceed.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable client-side id (uuid or slug)"
+          },
+          "label": {
+            "type": "string",
+            "description": "Question / statement shown to the entertainer"
+          },
+          "required": {
+            "type": "boolean",
+            "default": true
+          },
+          "order": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ]
+      }
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_edited_by": {
+      "type": "string"
+    },
+    "last_edited_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "venue_id"
+  ]
+}

@@ -52,6 +52,7 @@ import Accounting from './pages/Accounting';
 import AuditIntegrity from './pages/AuditIntegrity';
 import UnifiedSearch from './pages/UnifiedSearch';
 import Tonight from './pages/Tonight';
+import VenueAdminSettings from './pages/VenueAdminSettings';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -163,6 +164,7 @@ const AuthenticatedApp = () => {
         <Route path="/search" element={<LayoutWrapper currentPageName="UnifiedSearch"><UnifiedSearch /></LayoutWrapper>} />
         <Route path="/Tonight" element={<LayoutWrapper currentPageName="Tonight"><Tonight /></LayoutWrapper>} />
         <Route path="/tonight" element={<LayoutWrapper currentPageName="Tonight"><Tonight /></LayoutWrapper>} />
+        <Route path="/admin/venue-settings" element={<LayoutWrapper currentPageName="VenueAdminSettings"><VenueAdminSettings /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
