@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Calculator, Download, ArrowLeft, Loader2, ShieldCheck, FileSearch, Search, Moon } from "lucide-react";
+import QuickBooksExportPanel from "@/components/accounting/QuickBooksExportPanel";
 import AuditFindingsBadge from "@/components/audit/AuditFindingsBadge";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -14,7 +15,6 @@ import RevenueBreakdown from "@/components/accounting/RevenueBreakdown";
 import DisbursementsBreakdown from "@/components/accounting/DisbursementsBreakdown";
 import LiabilityLedger from "@/components/accounting/LiabilityLedger";
 import AccountingTrendChart from "@/components/accounting/AccountingTrendChart";
-import QuickBooksExportPanel from "@/components/accounting/QuickBooksExportPanel";
 import { toast } from "sonner";
 
 /**

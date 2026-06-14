@@ -12,16 +12,15 @@ import { useActiveVenue } from '@/hooks/useActiveVenue';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { ScanLine, QrCode, IdCard, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ScanLine, ArrowLeft, ShieldCheck, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import QrGenerator from '@/components/scanner/QrGenerator';
-import QrScanTab from '@/components/scanner/QrScanTab';
-import IdScanTab from '@/components/scanner/IdScanTab';
+import ScanTab from '@/components/scanner/ScanTab';
 
 export default function MobileScanner() {
   const venue = useActiveVenue();
   const [user, setUser] = useState(null);
-  const [tab, setTab] = useState('scan_qr');
+  const [tab, setTab] = useState('scan');
   const [validationRun, setValidationRun] = useState(false);
 
   useEffect(() => {
@@ -81,24 +80,17 @@ export default function MobileScanner() {
 
         {/* TABS */}
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="w-full grid grid-cols-3 bg-slate-900 border border-slate-800">
-            <TabsTrigger value="scan_qr" className="text-xs">
-              <QrCode className="w-3.5 h-3.5 mr-1" /> Scan QR
+          <TabsList className="w-full grid grid-cols-2 bg-slate-900 border border-slate-800">
+            <TabsTrigger value="scan" className="text-sm">
+              <Camera className="w-4 h-4 mr-1.5" /> Scan
             </TabsTrigger>
-            <TabsTrigger value="scan_id" className="text-xs">
-              <IdCard className="w-3.5 h-3.5 mr-1" /> Scan ID
-            </TabsTrigger>
-            <TabsTrigger value="generate" className="text-xs">
-              <ScanLine className="w-3.5 h-3.5 mr-1" /> Generate
+            <TabsTrigger value="generate" className="text-sm">
+              <ScanLine className="w-4 h-4 mr-1.5" /> Generate
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="scan_qr" className="mt-3">
-            <QrScanTab venueId={venue?.id} validationRun={validationRun} />
-          </TabsContent>
-
-          <TabsContent value="scan_id" className="mt-3">
-            <IdScanTab venueId={venue?.id} validationRun={validationRun} />
+          <TabsContent value="scan" className="mt-3">
+            <ScanTab venueId={venue?.id} validationRun={validationRun} />
           </TabsContent>
 
           <TabsContent value="generate" className="mt-3">

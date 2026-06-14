@@ -1,187 +1,164 @@
 /**
- * QuickBooks Export — pure generators (no I/O, no React).
+ * QuickBooks Export — Builds importable journal entries from aggregated financials.
  *
- * Two formats:
- *   1. IIF  — Intuit Interchange Format, tab-separated, QuickBooks Desktop import
- *   2. CSV  — Journal Entry CSV, QuickBooks Online import
+ * Outputs:
+ *   - IIF (QuickBooks Desktop import format)
+ *   - CSV (QuickBooks Online "Journal Entries" import format)
  *
- * Source of truth: the same `aggregateFinancials()` output the Accounting page
- * already renders. No new business logic — same numbers, two new wrappers.
+ * Double-entry mapping (debits = credits per journal):
  *
- * Default chart of accounts (overridable via `accountMap`):
- *   Cash Sales       → "Cash"           (BANK)
- *   Card Sales       → "Card Clearing"  (BANK)
- *   All Sales credit → "Sales Income"   (INC)
- *   Driver Payouts   → "Driver Payouts" (EXP)
- *   Payroll          → "Payroll"        (EXP)
- *   Tip Pool         → "Tip Pool"       (EXP)
- *   Contractor       → "Contractor Pay" (EXP)
- *   GB Liability     → "Gift Card Liability" (OCLIAB)
+ *   1) Cash sales         DR Cash on Hand           CR Sales Revenue
+ *   2) Card sales         DR Merchant Account       CR Sales Revenue
+ *   3) GB issued          DR Cash on Hand           CR Gift Card Liability   (face value)
+ *   4) GB redeemed        DR Gift Card Liability    CR Sales Revenue         (face value)
+ *   5) Driver payouts     DR Contract Labor         CR Cash on Hand
+ *   6) Payroll            DR Payroll Expense        CR Cash on Hand
+ *   7) Tip payouts        DR Tip Payable            CR Cash on Hand
+ *   8) Contractor         DR Contractor Expense     CR Cash on Hand
+ *
+ * Accountant can remap account names to their actual QB chart of accounts on import.
  */
 
-export const DEFAULT_ACCOUNT_MAP = {
-  cash: 'Cash',
-  card: 'Card Clearing',
-  sales: 'Sales Income',
-  driver: 'Driver Payouts',
-  payroll: 'Payroll',
-  tips: 'Tip Pool',
-  contractor: 'Contractor Pay',
-  gb_liability: 'Gift Card Liability',
+const ACCOUNTS = {
+  CASH: 'Cash on Hand',
+  MERCHANT: 'Merchant Account',
+  SALES: 'Sales Revenue',
+  GB_LIABILITY: 'Gift Card Liability',
+  CONTRACT_LABOR: 'Contract Labor',
+  PAYROLL: 'Payroll Expense',
+  TIP_PAYABLE: 'Tip Payable',
+  CONTRACTOR: 'Contractor Expense',
 };
 
-const ACCOUNT_TYPES = {
-  cash: 'BANK',
-  card: 'BANK',
-  sales: 'INC',
-  driver: 'EXP',
-  payroll: 'EXP',
-  tips: 'EXP',
-  contractor: 'EXP',
-  gb_liability: 'OCLIAB',
-};
+function fmtDateIIF(iso) {
+  // MM/DD/YYYY
+  const [y, m, d] = iso.split('-');
+  return `${m}/${d}/${y}`;
+}
 
-const fmt = (n) => (Math.round((n || 0) * 100) / 100).toFixed(2);
-const iifDate = (iso) => {
-  // IIF wants MM/DD/YYYY
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return '';
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
-};
+function fmtAmt(n) {
+  return Number(n || 0).toFixed(2);
+}
 
-/**
- * Build the journal-entry list. One JE per day in the timeline + summary lines
- * for liability movement at end of period.
- *
- * @returns Array<{ date, lines: [{ account, debit, credit, memo }] }>
- */
-export function buildJournalEntries({ timeline = [], data, range, venueLabel = 'Venue', accountMap = DEFAULT_ACCOUNT_MAP }) {
-  const entries = [];
+function buildJournalLines(timeline) {
+  // timeline: [{ date: 'YYYY-MM-DD', cash_sales, card_sales, gb_issued, gb_redeemed,
+  //              driver_disbursements, payroll, tips, contractor }]
+  const journals = [];
+  let docCounter = 1;
 
-  // Per-day revenue + disbursement entries (only days with any activity)
-  timeline.forEach((day) => {
+  for (const row of timeline) {
+    const date = row.date;
+    const docNum = `GL-${date.replace(/-/g, '')}-${String(docCounter).padStart(3, '0')}`;
+    docCounter++;
+
     const lines = [];
-    const cashAmt = Number(day.cash_sales || 0);
-    const cardAmt = Number(day.card_sales || 0);
-    const driverAmt = Number(day.driver_disbursements || 0);
-    const payrollAmt = Number(day.payroll_disbursements || 0);
-    const tipsAmt = Number(day.tip_disbursements || 0);
-    const contractorAmt = Number(day.contractor_disbursements || 0);
 
-    if (cashAmt > 0) {
-      lines.push({ account: accountMap.cash, debit: cashAmt, credit: 0, memo: `Cash sales · ${venueLabel}` });
-      lines.push({ account: accountMap.sales, debit: 0, credit: cashAmt, memo: `Cash sales · ${venueLabel}` });
+    if (row.cash_sales > 0) {
+      lines.push({ account: ACCOUNTS.CASH, debit: row.cash_sales, credit: 0, memo: 'Cash sales' });
+      lines.push({ account: ACCOUNTS.SALES, debit: 0, credit: row.cash_sales, memo: 'Cash sales' });
     }
-    if (cardAmt > 0) {
-      lines.push({ account: accountMap.card, debit: cardAmt, credit: 0, memo: `Card sales · ${venueLabel}` });
-      lines.push({ account: accountMap.sales, debit: 0, credit: cardAmt, memo: `Card sales · ${venueLabel}` });
+    if (row.card_sales > 0) {
+      lines.push({ account: ACCOUNTS.MERCHANT, debit: row.card_sales, credit: 0, memo: 'Card sales' });
+      lines.push({ account: ACCOUNTS.SALES, debit: 0, credit: row.card_sales, memo: 'Card sales' });
     }
-    if (driverAmt > 0) {
-      lines.push({ account: accountMap.driver, debit: driverAmt, credit: 0, memo: `Driver payouts · ${venueLabel}` });
-      lines.push({ account: accountMap.cash, debit: 0, credit: driverAmt, memo: `Driver payouts · ${venueLabel}` });
+    if (row.gb_issued > 0) {
+      lines.push({ account: ACCOUNTS.CASH, debit: row.gb_issued, credit: 0, memo: 'GlyphBucks issued (liability)' });
+      lines.push({ account: ACCOUNTS.GB_LIABILITY, debit: 0, credit: row.gb_issued, memo: 'GlyphBucks issued (liability)' });
     }
-    if (payrollAmt > 0) {
-      lines.push({ account: accountMap.payroll, debit: payrollAmt, credit: 0, memo: `Payroll · ${venueLabel}` });
-      lines.push({ account: accountMap.cash, debit: 0, credit: payrollAmt, memo: `Payroll · ${venueLabel}` });
+    if (row.gb_redeemed > 0) {
+      lines.push({ account: ACCOUNTS.GB_LIABILITY, debit: row.gb_redeemed, credit: 0, memo: 'GlyphBucks redeemed' });
+      lines.push({ account: ACCOUNTS.SALES, debit: 0, credit: row.gb_redeemed, memo: 'GlyphBucks redeemed' });
     }
-    if (tipsAmt > 0) {
-      lines.push({ account: accountMap.tips, debit: tipsAmt, credit: 0, memo: `Tip pool · ${venueLabel}` });
-      lines.push({ account: accountMap.cash, debit: 0, credit: tipsAmt, memo: `Tip pool · ${venueLabel}` });
+    if (row.driver_disbursements > 0) {
+      lines.push({ account: ACCOUNTS.CONTRACT_LABOR, debit: row.driver_disbursements, credit: 0, memo: 'Driver payouts' });
+      lines.push({ account: ACCOUNTS.CASH, debit: 0, credit: row.driver_disbursements, memo: 'Driver payouts' });
     }
-    if (contractorAmt > 0) {
-      lines.push({ account: accountMap.contractor, debit: contractorAmt, credit: 0, memo: `Contractor pay · ${venueLabel}` });
-      lines.push({ account: accountMap.cash, debit: 0, credit: contractorAmt, memo: `Contractor pay · ${venueLabel}` });
+    if (row.payroll > 0) {
+      lines.push({ account: ACCOUNTS.PAYROLL, debit: row.payroll, credit: 0, memo: 'Payroll' });
+      lines.push({ account: ACCOUNTS.CASH, debit: 0, credit: row.payroll, memo: 'Payroll' });
     }
-    if (lines.length > 0) {
-      entries.push({ date: day.date, memo: `${venueLabel} — daily activity`, lines });
+    if (row.tips > 0) {
+      lines.push({ account: ACCOUNTS.TIP_PAYABLE, debit: row.tips, credit: 0, memo: 'Tip payouts' });
+      lines.push({ account: ACCOUNTS.CASH, debit: 0, credit: row.tips, memo: 'Tip payouts' });
     }
-  });
+    if (row.contractor > 0) {
+      lines.push({ account: ACCOUNTS.CONTRACTOR, debit: row.contractor, credit: 0, memo: 'Contractor payouts' });
+      lines.push({ account: ACCOUNTS.CASH, debit: 0, credit: row.contractor, memo: 'Contractor payouts' });
+    }
 
-  // GlyphBucks liability summary at end of period (delta only — issued − redeemed)
-  if (data?.glyphbucks) {
-    const issued = Number(data.glyphbucks.issued_face_value || 0);
-    const redeemed = Number(data.glyphbucks.redeemed_face_value || 0);
-    if (issued > 0 || redeemed > 0) {
-      const endDate = range?.end || timeline[timeline.length - 1]?.date || new Date().toISOString().slice(0, 10);
-      const lines = [];
-      if (issued > 0) {
-        lines.push({ account: accountMap.cash, debit: issued, credit: 0, memo: 'GB issued (cash received)' });
-        lines.push({ account: accountMap.gb_liability, debit: 0, credit: issued, memo: 'GB issued (liability)' });
-      }
-      if (redeemed > 0) {
-        lines.push({ account: accountMap.gb_liability, debit: redeemed, credit: 0, memo: 'GB redeemed (liability cleared)' });
-        lines.push({ account: accountMap.cash, debit: 0, credit: redeemed, memo: 'GB redeemed (cash paid)' });
-      }
-      entries.push({ date: endDate, memo: `${venueLabel} — GlyphBucks liability movement`, lines });
-    }
+    if (lines.length > 0) journals.push({ date, docNum, lines });
   }
 
-  return entries;
+  return journals;
 }
 
 /**
- * Build IIF (QuickBooks Desktop) — tab-separated, header + per-account chart + per-JE block.
+ * Build IIF (QuickBooks Desktop) — tab-delimited.
  */
-export function buildIIF({ timeline, data, range, venueLabel, accountMap = DEFAULT_ACCOUNT_MAP }) {
-  const entries = buildJournalEntries({ timeline, data, range, venueLabel, accountMap });
-  const TAB = '\t';
+export function buildIIF(timeline) {
+  const journals = buildJournalLines(timeline);
   const lines = [];
 
-  // Chart of accounts header
-  lines.push(['!ACCNT', 'NAME', 'ACCNTTYPE'].join(TAB));
-  Object.keys(accountMap).forEach((key) => {
-    lines.push(['ACCNT', accountMap[key], ACCOUNT_TYPES[key] || 'EXP'].join(TAB));
-  });
+  // IIF headers
+  lines.push(['!TRNS', 'TRNSTYPE', 'DATE', 'ACCNT', 'AMOUNT', 'DOCNUM', 'MEMO'].join('\t'));
+  lines.push(['!SPL', 'TRNSTYPE', 'DATE', 'ACCNT', 'AMOUNT', 'DOCNUM', 'MEMO'].join('\t'));
+  lines.push(['!ENDTRNS'].join('\t'));
 
-  // Transaction headers
-  lines.push(['!TRNS', 'TRNSTYPE', 'DATE', 'ACCNT', 'AMOUNT', 'MEMO'].join(TAB));
-  lines.push(['!SPL', 'TRNSTYPE', 'DATE', 'ACCNT', 'AMOUNT', 'MEMO'].join(TAB));
-  lines.push('!ENDTRNS');
+  for (const j of journals) {
+    const date = fmtDateIIF(j.date);
+    // First line is TRNS (must net to zero with SPLs; convention = first debit line)
+    const first = j.lines[0];
+    const firstAmt = first.debit > 0 ? first.debit : -first.credit;
+    lines.push(['TRNS', 'GENERAL JOURNAL', date, first.account, fmtAmt(firstAmt), j.docNum, first.memo].join('\t'));
 
-  // One block per JE
-  entries.forEach((entry) => {
-    const date = iifDate(entry.date);
-    // IIF convention: TRNS = first line (debit positive, credit negative);
-    // SPL lines flip sign. We always put the first line as TRNS, rest as SPL.
-    entry.lines.forEach((ln, idx) => {
-      const amt = ln.debit > 0 ? ln.debit : -ln.credit;
-      const tag = idx === 0 ? 'TRNS' : 'SPL';
-      // SPL amounts are sign-flipped from TRNS in IIF
-      const out = idx === 0 ? amt : -amt;
-      lines.push([tag, 'GENERAL JOURNAL', date, ln.account, fmt(out), ln.memo].join(TAB));
-    });
+    for (let i = 1; i < j.lines.length; i++) {
+      const l = j.lines[i];
+      // SPL convention: opposite sign of TRNS leg
+      const amt = l.debit > 0 ? l.debit : -l.credit;
+      // For double-entry IIF, the SPL must net the TRNS to zero, so we flip credits to negative.
+      const splAmt = l.credit > 0 ? -l.credit : -l.debit;
+      lines.push(['SPL', 'GENERAL JOURNAL', date, l.account, fmtAmt(splAmt), j.docNum, l.memo].join('\t'));
+    }
     lines.push('ENDTRNS');
-  });
+  }
 
   return lines.join('\n');
 }
 
 /**
  * Build QuickBooks Online Journal Entry CSV.
- * QBO accepts: JournalNo, JournalDate, Memo, AccountName, Debits, Credits, Description
+ * Format expected by QBO "Import Journal Entries": one row per line item.
  */
-export function buildQBOJournalCSV({ timeline, data, range, venueLabel, accountMap = DEFAULT_ACCOUNT_MAP }) {
-  const entries = buildJournalEntries({ timeline, data, range, venueLabel, accountMap });
-  const headers = ['JournalNo', 'JournalDate', 'Memo', 'AccountName', 'Debits', 'Credits', 'Description'];
+export function buildQBOCsv(timeline) {
+  const journals = buildJournalLines(timeline);
+  const rows = [['*JournalNo', '*JournalDate', '*AccountName', 'Debits', 'Credits', 'Description']];
+
+  for (const j of journals) {
+    const date = fmtDateIIF(j.date);
+    for (const l of j.lines) {
+      rows.push([
+        j.docNum,
+        date,
+        l.account,
+        l.debit > 0 ? fmtAmt(l.debit) : '',
+        l.credit > 0 ? fmtAmt(l.credit) : '',
+        l.memo,
+      ]);
+    }
+  }
+
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const rows = [headers.join(',')];
-
-  entries.forEach((entry, jeIdx) => {
-    const journalNo = `JE-${entry.date}-${jeIdx + 1}`;
-    entry.lines.forEach((ln) => {
-      rows.push(
-        [
-          escape(journalNo),
-          escape(entry.date),
-          escape(entry.memo),
-          escape(ln.account),
-          escape(ln.debit > 0 ? fmt(ln.debit) : ''),
-          escape(ln.credit > 0 ? fmt(ln.credit) : ''),
-          escape(ln.memo),
-        ].join(',')
-      );
-    });
-  });
-
-  return rows.join('\n');
+  return rows.map((r) => r.map(escape).join(',')).join('\n');
 }
+
+export function downloadText(filename, text, mime = 'text/plain;charset=utf-8') {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export const QB_ACCOUNTS = ACCOUNTS;
