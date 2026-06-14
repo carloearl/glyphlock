@@ -1,7 +1,7 @@
 {
   "name": "DriverProfile",
   "type": "object",
-  "description": "Durable driver record — onboarded once at the door, issued a QR code, scanned on every subsequent visit. Tracks YTD payout for 1099 reporting. Distinct from DriverPayout (which is a per-night disbursement ledger entry).",
+  "description": "Durable driver record \u2014 onboarded once at the door, issued a QR code, scanned on every subsequent visit. Tracks YTD payout for 1099 reporting. Distinct from DriverPayout (which is a per-night disbursement ledger entry).",
   "properties": {
     "driver_id": {
       "type": "string",
@@ -60,7 +60,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["active", "suspended", "banned", "inactive"],
+      "enum": [
+        "active",
+        "suspended",
+        "banned",
+        "inactive"
+      ],
       "default": "active"
     },
     "lifetime_drops": {
@@ -83,5 +88,9 @@
       "type": "string"
     }
   },
-  "required": ["driver_id", "venue_id", "name"]
+  "required": [
+    "driver_id",
+    "venue_id",
+    "name"
+  ]
 }
