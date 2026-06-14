@@ -968,13 +968,19 @@ export default function POSCashRegister({ user, station = 'door' }) {
             </div>
           )}
 
-          {/* Post-ring-up manager overrides — Discount + Comp. Both PIN-gated;
-              both only appear once the door girl has rung something up. */}
-          {cart.length > 0 && !compAuth && (
+          {/* Post-ring-up manager overrides — Discount + Comp. Both PIN-gated.
+              Always rendered so the door girl can see they exist; disabled
+              when the cart is empty (nothing to discount or comp yet) or when
+              a comp is already authorized. */}
+          {!compAuth && (
             <div className="grid grid-cols-2 gap-2 mb-2">
               <button
-                onClick={() => setShowDiscountModal(true)}
-                className="rounded-xl text-xs font-bold py-2.5 flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                onClick={() => {
+                  if (cart.length === 0) { toast.info('Ring up an amount first'); return; }
+                  setShowDiscountModal(true);
+                }}
+                disabled={cart.length === 0}
+                className="rounded-xl text-xs font-bold py-2.5 flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
                   background: 'rgba(245,158,11,0.10)',
                   border: '1px dashed rgba(245,158,11,0.45)',
@@ -985,8 +991,12 @@ export default function POSCashRegister({ user, station = 'door' }) {
                 <Percent className="w-3.5 h-3.5" /> Discount
               </button>
               <button
-                onClick={() => setShowCompModal(true)}
-                className="rounded-xl text-xs font-bold py-2.5 flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                onClick={() => {
+                  if (cart.length === 0) { toast.info('Ring up an amount first'); return; }
+                  setShowCompModal(true);
+                }}
+                disabled={cart.length === 0}
+                className="rounded-xl text-xs font-bold py-2.5 flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
                   background: 'rgba(244,63,94,0.10)',
                   border: '1px dashed rgba(244,63,94,0.45)',
