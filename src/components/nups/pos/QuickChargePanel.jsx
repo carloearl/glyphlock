@@ -21,21 +21,17 @@ const PRESETS = [
   { label: "Late Night Fee", amount: 15,  accent: "#6366f1" },
 ];
 
-// Builds the door preset palette from the live VenueRateConfig.
-// Cover — Cash and Cover — Card share `cover_charge`; Re-Entry pulls `reentry_charge`.
-// Promo card is sourced from `promo_card_amount` — each press posts a negative
-// line item flagged is_promo:true so reports can count usage per shift/night.
-function buildDoorPresets(rates) {
-  if (!rates) return [];
-  const promoAmt = Number(rates.promo_card_amount) || 5;
-  return [
-    { label: "Cover",              amount: Number(rates.cover_charge) || 0,    accent: "#22c55e", is_cover: true },
-    { label: `$${promoAmt} OFF Promo`, amount: promoAmt,                       accent: "#fbbf24", is_promo: true },
-    { label: "Re-Entry",           amount: Number(rates.reentry_charge) || 0,  accent: "#f59e0b", payment_method: null,          is_reentry: true },
-    { label: "Friends & Military", amount: Number(rates.friends_military) || 0, accent: "#10b981" },
-    { label: "VIP Entry",          amount: Number(rates.vip_entry) || Number(rates.cover_charge) * 3 || 0, accent: "#a855f7" },
-  ];
-}
+// Door presets — pure dollar-amount buttons. No labels, no cover/re-entry/VIP
+// categories, no promo button. The door girl picks the amount; everything that
+// modifies the ring-up (discounts, comp, payment method) lives AFTER ring-up in
+// the cart pane under manager-PIN gates.
+const DOOR_PRESETS = [
+  { label: "$50", amount: 50, accent: "#a855f7" },
+  { label: "$40", amount: 40, accent: "#ec4899" },
+  { label: "$30", amount: 30, accent: "#06b6d4" },
+  { label: "$20", amount: 20, accent: "#22c55e" },
+  { label: "$10", amount: 10, accent: "#f59e0b" },
+];
 
 
 
@@ -159,26 +155,10 @@ function ManualItemEntry({ onAddItem }) {
   );
 }
 
-export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount, station, batchId, cashier, venueId }) {
+export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDiscount, station }) {
   const isDoor = station === 'door';
-  const activeVenue = useActiveVenue();
-  const effectiveVenueId = venueId || activeVenue?.id || null;
-  const [doorRates, setDoorRates] = useState(null);
-  const [ratesLoading, setRatesLoading] = useState(isDoor);
-
-  // Door presets come from VenueRateConfig (no hardcoded dollars).
-  // Non-door stations keep static PRESETS list.
-  useEffect(() => {
-    if (!isDoor) return;
-    setRatesLoading(true);
-    loadVenueRates(effectiveVenueId)
-      .then(setDoorRates)
-      .finally(() => setRatesLoading(false));
-  }, [isDoor, effectiveVenueId]);
-
-  const activePresets = isDoor ? buildDoorPresets(doorRates) : PRESETS;
+  const activePresets = isDoor ? DOOR_PRESETS : PRESETS;
   const [showQuickAdd, setShowQuickAdd] = useState(false);
-  const [kickbackPreset, setKickbackPreset] = useState(null);
   return (
     <div className="space-y-5">
       {/* Manual Entry — HIDDEN at door. Door girl is locked to preset buttons
@@ -198,84 +178,37 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
         )
       )}
 
-      {/* Quick Charges */}
-      {isDoor && ratesLoading && (
-        <div className="text-[11px] text-gray-500 px-2 py-3">Loading venue rates...</div>
-      )}
-      {isDoor && !ratesLoading && doorRates?._source !== "entity" && (
-        <div className="text-[10px] text-amber-400/80 bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
-          ⚠ VenueRateConfig not yet seeded — using safe defaults. Admin: configure rates in Venue Settings.
-        </div>
-      )}
-      <div className={`grid gap-2.5 ${isDoor ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-4'}`}>
-        {activePresets.map((p) => {
-          // Cover buttons (Cash / Card $20 / $30) get extra visual weight so
-          // the Door Girl can't miss them on a busy tablet at the door.
-          const isCover = !!p.is_cover;
-          const isPromo = !!p.is_promo;
-          return (
-            <button
-              key={p.label}
-              onClick={() => {
-                if (isPromo) {
-                  // Promo card — subtract from cart as a tracked, counted line item.
-                  // Reporting filters POSTransaction.items where is_promo === true
-                  // to tally promo card usage per shift / night / venue.
-                  onAddItem({
-                    product_id: `promo-${Date.now()}`,
-                    product_name: `Promo: ${p.label}`,
-                    quantity: 1,
-                    price: -Math.abs(p.amount),
-                    total: -Math.abs(p.amount),
-                    is_promo: true,
-                  });
-                  return;
-                }
-                onAddItem({
-                  product_id: `preset-${p.label.toLowerCase().replace(/\s/g, '-')}`,
-                  product_name: p.label,
-                  quantity: 1,
-                  price: p.amount,
-                  total: p.amount,
-                  is_preset: true,
-                  preset_payment_method: p.payment_method || null,
-                  is_cover: !!p.is_cover,
-                  is_reentry: !!p.is_reentry,
-                });
-              }}
-              className="rounded-xl flex flex-col items-center justify-center gap-1 active:scale-95 transition-all select-none"
-              style={{
-                height: isDoor ? (isCover ? '118px' : '96px') : '76px',
-                background: isCover
-                  ? `linear-gradient(135deg, ${p.accent}38, ${p.accent}14)`
-                  : `linear-gradient(135deg, ${p.accent}18, ${p.accent}08)`,
-                border: isPromo
-                  ? `2px dashed ${p.accent}`
-                  : isCover ? `2.5px solid ${p.accent}` : `1.5px solid ${p.accent}35`,
-                boxShadow: isCover ? `0 0 24px ${p.accent}55, inset 0 1px 0 rgba(255,255,255,0.08)` : 'none',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = isPromo ? p.accent : (isCover ? p.accent : `${p.accent}70`);
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = isPromo ? p.accent : (isCover ? p.accent : `${p.accent}35`);
-              }}
+      {/* Quick Charges — door = 5 big amount-only buttons */}
+      <div className={`grid gap-2.5 ${isDoor ? 'grid-cols-5' : 'grid-cols-4'}`}>
+        {activePresets.map((p) => (
+          <button
+            key={p.label}
+            onClick={() => {
+              onAddItem({
+                product_id: `preset-${p.label.toLowerCase().replace(/\s/g, '-')}`,
+                product_name: isDoor ? `Door Entry ${p.label}` : p.label,
+                quantity: 1,
+                price: p.amount,
+                total: p.amount,
+                is_preset: true,
+              });
+            }}
+            className="rounded-xl flex items-center justify-center active:scale-95 transition-all select-none"
+            style={{
+              height: isDoor ? '118px' : '76px',
+              background: `linear-gradient(135deg, ${p.accent}38, ${p.accent}14)`,
+              border: `2.5px solid ${p.accent}`,
+              boxShadow: `0 0 24px ${p.accent}55, inset 0 1px 0 rgba(255,255,255,0.08)`,
+            }}
+          >
+            <span
+              className={isDoor ? 'text-5xl font-black tracking-tight' : 'text-xl font-black'}
+              style={{ color: p.accent, textShadow: `0 0 18px ${p.accent}99` }}
             >
-              <span
-                className={isCover ? 'text-[12px] font-black uppercase tracking-wider leading-tight text-center px-1' : 'text-[11px] font-semibold leading-tight text-center px-1'}
-                style={{ color: isCover ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.75)' }}
-              >
-                {p.label}
-              </span>
-              <span
-                className={isCover ? 'text-4xl font-black tracking-tight' : 'text-xl font-black'}
-                style={{ color: p.accent, textShadow: isCover ? `0 0 18px ${p.accent}99` : 'none' }}
-              >
-                {isPromo ? `−$${p.amount}` : `$${p.amount}`}
-              </span>
-            </button>
-          );
-        })}
+              {p.label}
+            </span>
+          </button>
+        ))}
       </div>
 
       {/* Discount strip — hidden on door station */}

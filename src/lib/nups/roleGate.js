@@ -88,4 +88,16 @@ export function enforceRoleScope({ role, entity, operation, data, actor }) {
   return reason || null;
 }
 
+/**
+ * Returns true if `role` is gated by this module (has a specific per-entity
+ * policy). Used by the writeEntity gateway to skip the generic
+ * FINANCIAL_AUTHORIZED_ROLES check once enforceRoleScope has approved the
+ * write — otherwise a DOOR_GIRL would pass scope ("yes, door girls may write
+ * a validation-run cover at the door") and then immediately get re-blocked by
+ * the financial-roles check ("DOOR_GIRL not in [PLATFORM_ADMIN, ...]").
+ */
+export function isScopedRole(role) {
+  return SCOPED_ROLES.has(role);
+}
+
 export const __INTERNAL__ = { SCOPED_ROLES, POLICY };

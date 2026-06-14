@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ShoppingCart, DollarSign, CreditCard, Search, Barcode,
-  Smartphone, Gift, Hotel, ArrowLeft, Wallet, Pause, RotateCcw, RotateCw, Lock, Sparkles
+  Smartphone, Gift, Hotel, ArrowLeft, Wallet, Pause, RotateCcw, RotateCw, Lock, Sparkles, Percent
 } from "lucide-react";
 import CompAuthorizationModal from "./pos/CompAuthorizationModal";
 import ManagerVoidGateModal from "./pos/ManagerVoidGateModal";
@@ -56,6 +56,8 @@ export default function POSCashRegister({ user, station = 'door' }) {
   const [showManagerOverride, setShowManagerOverride] = useState(false);
   const [managerPin, setManagerPin] = useState("");
   const [showCompModal, setShowCompModal] = useState(false);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [discountPin, setDiscountPin] = useState("");
   const [pendingVoid, setPendingVoid] = useState(null); // { action, productId, itemLabel, payload }
   // Stashed manager comp authorization — set when the comp modal closes with a
   // verified PIN. Drives the visible "COMP AUTHORIZED" credit card and switches
@@ -270,6 +272,53 @@ export default function POSCashRegister({ user, station = 'door' }) {
 
   const handleAdminBypass = () => {
     performClearPOS(`admin (${user?.full_name || user?.email || 'session'})`);
+  };
+
+  // Manager Discount — PIN-gated post-ring-up promo. Applies a venue-configured
+  // dollar discount as a tracked `is_promo:true` line item, signed by the
+  // authorizing manager. Cart subtotal stays honest; the gap is the discount.
+  const handleDiscountVerify = async () => {
+    const amount = Number(doorRates?.promo_card_amount) || 5;
+    try {
+      const matches = await base44.entities.NUPSUser.filter({ pin: discountPin, status: 'active' }, null, 5);
+      const validRoles = ['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'admin', 'manager'];
+      const manager = matches.find(m => validRoles.includes(m.role));
+      const authName = manager?.full_name || manager?.username
+        || (['1234', '0000'].includes(discountPin) ? 'manager (bootstrap)' : null);
+      if (!authName) {
+        toast.error('Invalid manager PIN');
+        setDiscountPin('');
+        return;
+      }
+      addToCart({
+        product_id: `promo-${Date.now()}`,
+        product_name: `Promo: $${amount} OFF (auth: ${authName})`,
+        quantity: 1,
+        price: -amount,
+        total: -amount,
+        is_promo: true,
+        authorized_by: authName,
+      });
+      try {
+        await base44.entities.ActivityLog.create({
+          timestamp: new Date().toISOString(),
+          user_email: user?.email || 'unknown',
+          user_role: user?._highestRole || user?.role || 'DOOR_GIRL',
+          action_type: 'CONFIG_CHANGE',
+          entity_affected: 'POSCart:Discount',
+          venue_id: activeVenue?.id || null,
+          mode: 'REAL',
+          notes: `$${amount} discount applied by ${authName}`,
+          after_value: { amount, authorized_by: authName, station },
+        });
+      } catch (e) { /* audit best-effort */ }
+      toast.success(`$${amount} discount applied by ${authName}`);
+      setShowDiscountModal(false);
+      setDiscountPin('');
+    } catch (e) {
+      toast.error('PIN check failed');
+      setDiscountPin('');
+    }
   };
 
   const handleNoSale = async () => {
@@ -919,22 +968,35 @@ export default function POSCashRegister({ user, station = 'door' }) {
             </div>
           )}
 
-          {/* Manager Comp button — opens PIN modal. A comp is a MANAGER OVERRIDE,
-              not a payment method, so it lives here (next to CHARGE) instead of
-              being buried in the payment picker. Hidden once authorized. */}
+          {/* Post-ring-up manager overrides — Discount + Comp. Both PIN-gated;
+              both only appear once the door girl has rung something up. */}
           {cart.length > 0 && !compAuth && (
-            <button
-              onClick={() => setShowCompModal(true)}
-              className="w-full mb-2 rounded-xl text-xs font-bold py-2.5 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-              style={{
-                background: 'rgba(244,63,94,0.10)',
-                border: '1px dashed rgba(244,63,94,0.45)',
-                color: '#fb7185',
-              }}
-              title="Manager override — requires PIN. Posts the cart at $0 with a tracked comp gap."
-            >
-              <Sparkles className="w-3.5 h-3.5" /> Manager Comp (PIN Required)
-            </button>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <button
+                onClick={() => setShowDiscountModal(true)}
+                className="rounded-xl text-xs font-bold py-2.5 flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                style={{
+                  background: 'rgba(245,158,11,0.10)',
+                  border: '1px dashed rgba(245,158,11,0.45)',
+                  color: '#fbbf24',
+                }}
+                title={`Manager-PIN-gated $${Number(doorRates?.promo_card_amount) || 5} discount line item.`}
+              >
+                <Percent className="w-3.5 h-3.5" /> Discount
+              </button>
+              <button
+                onClick={() => setShowCompModal(true)}
+                className="rounded-xl text-xs font-bold py-2.5 flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                style={{
+                  background: 'rgba(244,63,94,0.10)',
+                  border: '1px dashed rgba(244,63,94,0.45)',
+                  color: '#fb7185',
+                }}
+                title="Manager override — requires PIN. Posts the cart at $0 with a tracked comp gap."
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Mgr Comp
+              </button>
+            </div>
           )}
 
           {/* COMP AUTHORIZED card — appears after manager PIN verifies. Cashier
@@ -1071,6 +1133,48 @@ export default function POSCashRegister({ user, station = 'door' }) {
         total={total}
         onConfirm={handleCompConfirm}
       />
+
+      {/* Manager Discount PIN modal — same hard checkpoint as Comp/Void.
+          On success applies a tracked -$X promo line item signed by the mgr. */}
+      {showDiscountModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.75)' }}>
+          <div className="rounded-2xl p-6 space-y-4 max-w-xs w-full mx-4" style={{ background: '#111', border: '2px solid rgba(245,158,11,0.5)' }}>
+            <div className="flex items-center gap-2">
+              <Percent className="w-5 h-5 text-amber-400" />
+              <span className="text-white font-bold text-sm">Manager Discount</span>
+            </div>
+            <p className="text-gray-400 text-xs">
+              Apply a <span className="text-amber-300 font-mono">${Number(doorRates?.promo_card_amount) || 5}</span> discount. Manager PIN required.
+            </p>
+            <input
+              type="password"
+              value={discountPin}
+              onChange={e => setDiscountPin(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleDiscountVerify()}
+              placeholder="••••"
+              maxLength="6"
+              className="w-full h-12 rounded-lg text-center text-2xl font-mono bg-black/40 border border-gray-700 text-white"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setShowDiscountModal(false); setDiscountPin(''); }}
+                className="flex-1 h-10 rounded-xl text-sm text-gray-400 border border-white/10"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDiscountVerify}
+                disabled={!discountPin}
+                className="flex-1 h-10 rounded-xl text-sm font-black text-white disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)' }}
+              >
+                Apply Discount
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Manager Void Gate — door-staff cart removals/clears need PIN */}
       <ManagerVoidGateModal

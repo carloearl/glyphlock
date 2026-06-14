@@ -1,7 +1,7 @@
 import { base44 } from '@/api/base44Client';
 import * as SEED from './demoSeedData';
 import { logActivity } from './activityLog';
-import { enforceRoleScope } from './roleGate';
+import { enforceRoleScope, isScopedRole } from './roleGate';
 
 const VALID_MODES = new Set(['REAL', 'DEMO']);
 
@@ -23,6 +23,8 @@ const FINANCIAL_AUTHORIZED_ROLES = new Set([
   'VENUE_OWNER',
   'VENUE_MANAGER',
   'SOVEREIGN',
+  'admin',    // Base44 platform admin — operational ops / testing the door
+  'manager',  // generic manager alias used by some legacy paths
 ]);
 
 const PROTECTED_ENTITIES = new Set(['SystemConfig', 'MigrationAuditLog']);
@@ -231,7 +233,11 @@ export async function writeEntity({
     }
   }
 
-  if (mode === 'REAL' && isFinancial && !sovereign && !FINANCIAL_AUTHORIZED_ROLES.has(role)) {
+  // Scoped roles (DOOR_GIRL / DOORMAN) have already been gated by
+  // enforceRoleScope above with a stricter per-entity policy. Re-blocking
+  // them here would void their explicit grant — skip the generic financial
+  // roles check for them.
+  if (mode === 'REAL' && isFinancial && !sovereign && !isScopedRole(role) && !FINANCIAL_AUTHORIZED_ROLES.has(role)) {
     const audit_id = await audit({
       entity_name: entity,
       operation,
