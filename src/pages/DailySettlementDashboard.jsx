@@ -13,10 +13,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, Lock, AlertCircle, CheckCircle2, Truck, Calendar, Database } from 'lucide-react';
+import { DollarSign, Lock, AlertCircle, CheckCircle2, Truck, Calendar, Database, Download } from 'lucide-react';
 import { logActivity } from '@/lib/nups/activityLog';
 import { writeEntity } from '@/lib/nups/writeEntity';
 import SettlementLockGuardModal from '@/components/nups/SettlementLockGuardModal';
+import { downloadSettlementCsv } from '@/lib/accounting/settlementCsv';
 
 const STATUS_STYLES = {
   OPEN: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
@@ -304,13 +305,41 @@ export default function DailySettlementDashboard() {
               <label className="text-xs text-slate-400 flex items-center gap-1"><Calendar className="w-3 h-3" /> Business date</label>
               <Input type="date" value={businessDate} onChange={e => setBusinessDate(e.target.value)} className="bg-slate-800 border-slate-700 text-white" />
             </div>
-            <div className="flex items-end">
+            <div className="flex items-end gap-2">
               <Button
                 onClick={handleLockClick}
                 disabled={busy || status === 'LOCKED' || !selectedVenue}
-                className="w-full bg-emerald-600 hover:bg-emerald-500"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500"
               >
                 {busy ? 'Working…' : status === 'LOCKED' ? <><Lock className="w-4 h-4 mr-1" /> Locked</> : <><CheckCircle2 className="w-4 h-4 mr-1" /> Reconcile & Lock</>}
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!selectedVenue) return;
+                  const venueName = venues.find(v => v.venue_id === selectedVenue)?.venue_name;
+                  const filename = downloadSettlementCsv({
+                    venueId: selectedVenue,
+                    venueName,
+                    businessDate,
+                    status,
+                    metrics,
+                    driverPayouts,
+                    existingSettlement,
+                    generatedBy: user?.email || '',
+                  });
+                  await logActivity({
+                    action_type: 'EXPORT',
+                    entity_affected: existingSettlement?.id ? `DailySettlement:${existingSettlement.id}` : null,
+                    venue_id: selectedVenue,
+                    notes: `CSV export — ${filename} — total=${metrics.total_sales}`,
+                  });
+                }}
+                disabled={!selectedVenue}
+                variant="outline"
+                className="border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
+                title="Download accounting CSV (cash, card, GlyphBucks, driver payouts)"
+              >
+                <Download className="w-4 h-4 mr-1" /> CSV
               </Button>
             </div>
           </CardContent>
