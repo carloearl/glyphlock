@@ -14,6 +14,7 @@ import RevenueBreakdown from "@/components/accounting/RevenueBreakdown";
 import DisbursementsBreakdown from "@/components/accounting/DisbursementsBreakdown";
 import LiabilityLedger from "@/components/accounting/LiabilityLedger";
 import AccountingTrendChart from "@/components/accounting/AccountingTrendChart";
+import QuickBooksExportPanel from "@/components/accounting/QuickBooksExportPanel";
 import { toast } from "sonner";
 
 /**
@@ -235,6 +236,7 @@ function AccountingContent() {
             >
               <Download className="w-3.5 h-3.5 mr-1.5" /> Timeline CSV
             </Button>
+            <QuickBooksExportPanel data={data} range={range} venueLabel={activeVenue?.name || venueId || "Venue"} />
           </div>
         </div>
       </div>
