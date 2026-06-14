@@ -81,6 +81,11 @@
       "default": 0.035,
       "description": "Credit card processing fee rate applied at the door register only. Door cover charges are sales-tax-exempt; this rate is the pass-through processor fee added when the guest pays cover by card."
     },
+    "promo_card_amount": {
+      "type": "number",
+      "default": 5,
+      "description": "Dollar value of the one-tap door promo card button (e.g. $5 OFF). Each use posts a negative line item with is_promo:true so accounting can count usage."
+    },
     "house_commission_rate": {
       "type": "number",
       "default": 0.4,

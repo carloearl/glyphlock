@@ -28,6 +28,7 @@ const SEED_DEFAULTS = {
   driver_bonus_tiers: [],
   tax_rate: 0.08,
   cc_processing_fee_rate: 0.035, // 3.5% door card fee — cover charges are tax-exempt
+  promo_card_amount: 5,          // door promo card ($X OFF) — counted via is_promo line items
   house_commission_rate: 0.40,
   mode: "REAL",
 };

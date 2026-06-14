@@ -23,11 +23,15 @@ const PRESETS = [
 
 // Builds the door preset palette from the live VenueRateConfig.
 // Cover — Cash and Cover — Card share `cover_charge`; Re-Entry pulls `reentry_charge`.
+// Promo card is sourced from `promo_card_amount` — each press posts a negative
+// line item flagged is_promo:true so reports can count usage per shift/night.
 function buildDoorPresets(rates) {
   if (!rates) return [];
+  const promoAmt = Number(rates.promo_card_amount) || 5;
   return [
     { label: "Cover — Cash",       amount: Number(rates.cover_charge) || 0,    accent: "#22c55e", payment_method: "Cash",        is_cover: true },
     { label: "Cover — Card",       amount: Number(rates.cover_charge) || 0,    accent: "#06b6d4", payment_method: "Credit Card", is_cover: true },
+    { label: `$${promoAmt} OFF Promo`, amount: promoAmt,                       accent: "#fbbf24", is_promo: true },
     { label: "Re-Entry",           amount: Number(rates.reentry_charge) || 0,  accent: "#f59e0b", payment_method: null,          is_reentry: true },
     { label: "Friends & Military", amount: Number(rates.friends_military) || 0, accent: "#10b981" },
     { label: "VIP Entry",          amount: Number(rates.vip_entry) || Number(rates.cover_charge) * 3 || 0, accent: "#a855f7" },
@@ -178,8 +182,9 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
   const [kickbackPreset, setKickbackPreset] = useState(null);
   return (
     <div className="space-y-5">
-      {/* Manager Comp / Manual Entry — always visible */}
-      <ManualItemEntry onAddItem={onAddItem} />
+      {/* Manual Entry — HIDDEN at door. Door girl is locked to preset buttons
+          only (strip-club entry + driver payouts). No freeform ring-ups. */}
+      {!isDoor && <ManualItemEntry onAddItem={onAddItem} />}
 
       {/* Quick Add Product — hidden on door */}
       {!isDoor && (
@@ -208,10 +213,25 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
           // Cover buttons (Cash / Card $20 / $30) get extra visual weight so
           // the Door Girl can't miss them on a busy tablet at the door.
           const isCover = !!p.is_cover;
+          const isPromo = !!p.is_promo;
           return (
             <button
               key={p.label}
               onClick={() => {
+                if (isPromo) {
+                  // Promo card — subtract from cart as a tracked, counted line item.
+                  // Reporting filters POSTransaction.items where is_promo === true
+                  // to tally promo card usage per shift / night / venue.
+                  onAddItem({
+                    product_id: `promo-${Date.now()}`,
+                    product_name: `Promo: ${p.label}`,
+                    quantity: 1,
+                    price: -Math.abs(p.amount),
+                    total: -Math.abs(p.amount),
+                    is_promo: true,
+                  });
+                  return;
+                }
                 onAddItem({
                   product_id: `preset-${p.label.toLowerCase().replace(/\s/g, '-')}`,
                   product_name: p.label,
@@ -230,11 +250,17 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
                 background: isCover
                   ? `linear-gradient(135deg, ${p.accent}38, ${p.accent}14)`
                   : `linear-gradient(135deg, ${p.accent}18, ${p.accent}08)`,
-                border: isCover ? `2.5px solid ${p.accent}` : `1.5px solid ${p.accent}35`,
+                border: isPromo
+                  ? `2px dashed ${p.accent}`
+                  : isCover ? `2.5px solid ${p.accent}` : `1.5px solid ${p.accent}35`,
                 boxShadow: isCover ? `0 0 24px ${p.accent}55, inset 0 1px 0 rgba(255,255,255,0.08)` : 'none',
               }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = isCover ? p.accent : `${p.accent}70`}
-              onMouseLeave={e => e.currentTarget.style.borderColor = isCover ? p.accent : `${p.accent}35`}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = isPromo ? p.accent : (isCover ? p.accent : `${p.accent}70`);
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = isPromo ? p.accent : (isCover ? p.accent : `${p.accent}35`);
+              }}
             >
               <span
                 className={isCover ? 'text-[12px] font-black uppercase tracking-wider leading-tight text-center px-1' : 'text-[11px] font-semibold leading-tight text-center px-1'}
@@ -246,7 +272,7 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
                 className={isCover ? 'text-4xl font-black tracking-tight' : 'text-xl font-black'}
                 style={{ color: p.accent, textShadow: isCover ? `0 0 18px ${p.accent}99` : 'none' }}
               >
-                ${p.amount}
+                {isPromo ? `−$${p.amount}` : `$${p.amount}`}
               </span>
             </button>
           );
