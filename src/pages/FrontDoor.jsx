@@ -11,6 +11,7 @@ import ShiftClockInOut from "@/components/nups/ShiftClockInOut";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
 import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
 import FrontDoorConfigPanel from "@/components/nups/frontdoor/FrontDoorConfigPanel";
+import EmergencyOverrideButton from "@/components/nups/frontdoor/EmergencyOverrideButton";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useFrontDoorConfig, DEFAULT_FRONT_DOOR_CONFIG } from "@/hooks/useFrontDoorConfig";
 
@@ -110,6 +111,7 @@ function FrontDoorContent() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <EmergencyOverrideButton venueId={venueId} />
             {canEditConfig && (
               <Button
                 variant="outline"
