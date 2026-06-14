@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Car, Plus, DollarSign, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle, Zap, QrCode, ShieldCheck, Lock, Clock } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates, computeDriverPayoutAmount } from "@/lib/nups/venueRateConfig";
+import DriverQRDeliveryModal from "@/components/nups/frontdoor/DriverQRDeliveryModal";
 
 // ─── DACO-20260603-FRONTDOOR-DRIVER · Part B ────────────────────────────────
 // Driver payouts are DISBURSEMENTS, NOT negative revenue. This component:
@@ -48,6 +49,7 @@ export default function DriverDropOffTracker({ user }) {
   const [scanInput, setScanInput] = useState("");
   const [newDriver, setNewDriver] = useState({ name: "", phone: "", affiliated: true });
   const [guestCounter, setGuestCounter] = useState({}); // record_id -> input value
+  const [qrDelivery, setQrDelivery] = useState(null); // newly-onboarded driver profile awaiting QR delivery
 
   const today = todayDate();
 
@@ -105,10 +107,12 @@ export default function DriverDropOffTracker({ user }) {
       await openSession.mutateAsync(profile);
       return profile;
     },
-    onSuccess: () => {
+    onSuccess: (profile) => {
       qc.invalidateQueries({ queryKey: ["driver-profiles"] });
       setShowNewDriver(false);
       setNewDriver({ name: "", phone: "", affiliated: true });
+      // Immediately surface the QR delivery modal — driver can't scan in next time without it
+      setQrDelivery(profile);
     },
   });
 
@@ -595,6 +599,14 @@ export default function DriverDropOffTracker({ user }) {
           </Card>
         );
       })}
+
+      {/* QR delivery modal — shown right after onboarding */}
+      <DriverQRDeliveryModal
+        open={!!qrDelivery}
+        onOpenChange={(v) => { if (!v) setQrDelivery(null); }}
+        driver={qrDelivery}
+        venueName={activeVenue?.name || activeVenue?.venue_name}
+      />
 
       {/* Paid sessions */}
       {paidSessions.length > 0 && (
