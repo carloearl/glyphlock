@@ -36,6 +36,11 @@ export default function DriverDropOffTracker({ user }) {
   const activeVenue = useActiveVenue();
   const venueId = activeVenue?.id || null;
 
+  // ─── Role split — Doorman onboards & logs drops; Door Girl pays out ─────
+  const role = (user?.role || "").toUpperCase();
+  const isDoorGirl = ["FLOOR_HOST", "VENUE_MANAGER", "VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN"].includes(role);
+  const isDoorman = role === "SECURITY";
+
   const [rates, setRates] = useState(null);
   const [expanded, setExpanded] = useState(null);
   const [showNewDriver, setShowNewDriver] = useState(false);
@@ -274,6 +279,12 @@ export default function DriverDropOffTracker({ user }) {
           <Car className="w-5 h-5 text-yellow-400" />
           <h2 className="text-lg font-bold text-white">Driver Payouts</h2>
           <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40 text-xs">{today}</Badge>
+          {isDoorman && (
+            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/40 text-xs">DOORMAN · Onboard + Log</Badge>
+          )}
+          {isDoorGirl && (
+            <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/40 text-xs">DOOR GIRL · Payouts</Badge>
+          )}
           {rates?.mode && rates.mode !== "REAL" && (
             <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-xs">{rates.mode}</Badge>
           )}
@@ -501,14 +512,22 @@ export default function DriverDropOffTracker({ user }) {
                       <strong className="text-green-300"> total_sales is NEVER modified.</strong> Drawer math: cover collected − this payout.
                     </span>
                   </div>
-                  <Button
-                    onClick={() => settle.mutate(session)}
-                    className="w-full bg-green-700 hover:bg-green-600 text-white font-bold"
-                    disabled={settle.isPending || payoutAmount <= 0}
-                  >
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    Settle ${payoutAmount.toFixed(2)} to {session.contractor_name}
-                  </Button>
+
+                  {isDoorGirl ? (
+                    <Button
+                      onClick={() => settle.mutate(session)}
+                      className="w-full bg-green-700 hover:bg-green-600 text-white font-bold"
+                      disabled={settle.isPending || payoutAmount <= 0}
+                    >
+                      <DollarSign className="w-4 h-4 mr-2" />
+                      Pay ${payoutAmount.toFixed(2)} to {session.contractor_name}
+                    </Button>
+                  ) : (
+                    <div className="w-full bg-pink-950/30 border border-pink-500/40 rounded-lg px-3 py-3 flex items-center gap-2 text-pink-300 text-sm font-semibold">
+                      <Banknote className="w-4 h-4" />
+                      Headcount confirmed — hand off to Door Girl for ${payoutAmount.toFixed(2)} payout
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
