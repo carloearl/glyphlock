@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, DollarSign, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle, Zap, QrCode, ShieldCheck } from "lucide-react";
+import { Car, Plus, DollarSign, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle, Zap, QrCode, ShieldCheck, Lock, Clock } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates, computeDriverPayoutAmount } from "@/lib/nups/venueRateConfig";
 
@@ -167,6 +167,23 @@ export default function DriverDropOffTracker({ user }) {
     setShowScanner(false);
     setScanInput("");
   };
+
+  // ─── Doorman confirms final headcount — locks the count, unlocks payout ──
+  const confirmHeadcount = useMutation({
+    mutationFn: async (session) => {
+      const meta = safeJSON(session.notes);
+      const newMeta = {
+        ...meta,
+        headcount_confirmed: true,
+        confirmed_by: user?.email || user?.username || "doorman",
+        confirmed_at: new Date().toISOString(),
+      };
+      return base44.entities.DriverPayout.update(session.id, {
+        notes: JSON.stringify(newMeta),
+      });
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
+  });
 
   // ─── Log guest count on an open session ──────────────────────────────────
   const logGuests = useMutation({
@@ -434,18 +451,30 @@ export default function DriverDropOffTracker({ user }) {
         const totalGuests = Number(meta.guests) || 0;
         const payoutAmount = Number(session.total_payout) || 0;
         const counter = guestCounter[session.id] ?? "";
+        const confirmed = !!meta.headcount_confirmed;
+
+        // Live status badge — shown at-a-glance
+        let statusBadge;
+        if (confirmed) {
+          statusBadge = <Badge className="bg-green-500/20 text-green-300 border-green-500/40 text-xs"><Lock className="w-3 h-3 mr-1 inline" />Ready for Payout</Badge>;
+        } else if (totalGuests > 0) {
+          statusBadge = <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/40 text-xs"><Clock className="w-3 h-3 mr-1 inline" />Awaiting Confirmation</Badge>;
+        } else {
+          statusBadge = <Badge className="bg-gray-500/20 text-gray-300 border-gray-500/40 text-xs">No Drops Logged</Badge>;
+        }
 
         return (
-          <Card key={session.id} className="bg-gray-900/60 border-gray-700/50">
+          <Card key={session.id} className={`bg-gray-900/60 border ${confirmed ? "border-green-500/40 shadow-[0_0_15px_rgba(34,197,94,0.15)]" : "border-gray-700/50"}`}>
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Car className="w-4 h-4 text-yellow-400" />
                     <span className="font-bold text-white">{session.contractor_name}</span>
                     <Badge className={`text-xs border ${affiliated ? "bg-green-500/20 text-green-300 border-green-500/40" : "bg-orange-500/20 text-orange-300 border-orange-500/40"}`}>
                       {affiliated ? "Affiliated" : "Outside"}
                     </Badge>
+                    {statusBadge}
                   </div>
                   <div className="flex gap-3 mt-1 text-xs text-gray-400">
                     <span><Users className="w-3 h-3 inline mr-1" />{totalGuests} guests</span>
@@ -513,20 +542,52 @@ export default function DriverDropOffTracker({ user }) {
                     </span>
                   </div>
 
-                  {isDoorGirl ? (
-                    <Button
-                      onClick={() => settle.mutate(session)}
-                      className="w-full bg-green-700 hover:bg-green-600 text-white font-bold"
-                      disabled={settle.isPending || payoutAmount <= 0}
-                    >
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      Pay ${payoutAmount.toFixed(2)} to {session.contractor_name}
-                    </Button>
+                  {/* Two-step handshake: Doorman confirms → Door Girl pays */}
+                  {!confirmed ? (
+                    <>
+                      {/* Doorman view: confirm headcount button */}
+                      {!isDoorGirl && (
+                        <Button
+                          onClick={() => confirmHeadcount.mutate(session)}
+                          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold"
+                          disabled={confirmHeadcount.isPending || totalGuests === 0}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          {totalGuests === 0
+                            ? "Log a drop before confirming"
+                            : `Confirm Final Headcount (${totalGuests} guests)`}
+                        </Button>
+                      )}
+                      {/* Door Girl view: locked until Doorman confirms */}
+                      {isDoorGirl && (
+                        <div className="w-full bg-blue-950/30 border border-blue-500/40 rounded-lg px-3 py-3 flex items-center gap-2 text-blue-300 text-sm font-semibold">
+                          <Clock className="w-4 h-4" />
+                          Waiting for Doorman to confirm headcount ({totalGuests} so far)
+                        </div>
+                      )}
+                    </>
                   ) : (
-                    <div className="w-full bg-pink-950/30 border border-pink-500/40 rounded-lg px-3 py-3 flex items-center gap-2 text-pink-300 text-sm font-semibold">
-                      <Banknote className="w-4 h-4" />
-                      Headcount confirmed — hand off to Door Girl for ${payoutAmount.toFixed(2)} payout
-                    </div>
+                    <>
+                      <div className="text-[11px] text-green-400 flex items-center gap-1 -mb-1">
+                        <Lock className="w-3 h-3" />
+                        Locked by {meta.confirmed_by} · {new Date(meta.confirmed_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                      {isDoorGirl ? (
+                        <Button
+                          onClick={() => settle.mutate(session)}
+                          className="w-full bg-green-700 hover:bg-green-600 text-white font-bold text-lg h-12"
+                          disabled={settle.isPending || payoutAmount <= 0}
+                        >
+                          <DollarSign className="w-5 h-5 mr-2" />
+                          Pay ${payoutAmount.toFixed(2)} to {session.contractor_name}
+                        </Button>
+                      ) : (
+                        <div className="w-full bg-pink-950/30 border border-pink-500/40 rounded-lg px-3 py-3 flex items-center gap-2 text-pink-300 text-sm font-semibold">
+                          <Banknote className="w-4 h-4" />
+                          Hand off to Door Girl — ${payoutAmount.toFixed(2)} ready
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
