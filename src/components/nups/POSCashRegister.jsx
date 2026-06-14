@@ -10,7 +10,7 @@ import {
   Smartphone, Gift, Hotel, ArrowLeft, Wallet, Pause, RotateCcw, RotateCw, Lock, Sparkles
 } from "lucide-react";
 import CompAuthorizationModal from "./pos/CompAuthorizationModal";
-import CartGuardModal from "./pos/CartGuardModal";
+import ManagerVoidGateModal from "./pos/ManagerVoidGateModal";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReceiptPrinter from "./ReceiptPrinter";
@@ -55,7 +55,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
   const [showManagerOverride, setShowManagerOverride] = useState(false);
   const [managerPin, setManagerPin] = useState("");
   const [showCompModal, setShowCompModal] = useState(false);
-  const [pendingCartAction, setPendingCartAction] = useState(null); // { label, run }
+  const [pendingVoid, setPendingVoid] = useState(null); // { action, productId, itemLabel, payload }
 
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products'],
@@ -136,6 +136,18 @@ export default function POSCashRegister({ user, station = 'door' }) {
   };
 
   const updateQuantity = (productId, newQuantity) => {
+    const existing = cart.find((i) => i.product_id === productId);
+    const isDecrease = existing && newQuantity < existing.quantity;
+    // Door staff: ANY decrease/remove needs manager PIN. Increases are free.
+    if (isDoorGirlLocked && isDecrease) {
+      setPendingVoid({
+        action: newQuantity <= 0 ? 'remove' : 'decrement',
+        productId,
+        itemLabel: existing?.product_name,
+        payload: { newQuantity, oldQuantity: existing?.quantity },
+      });
+      return;
+    }
     if (newQuantity <= 0) {
       removeFromCart(productId);
       return;
@@ -148,7 +160,27 @@ export default function POSCashRegister({ user, station = 'door' }) {
   };
 
   const removeFromCart = (productId) => {
+    const existing = cart.find((i) => i.product_id === productId);
+    if (isDoorGirlLocked) {
+      setPendingVoid({
+        action: 'remove',
+        productId,
+        itemLabel: existing?.product_name,
+        payload: { oldQuantity: existing?.quantity },
+      });
+      return;
+    }
     setCart(cart.filter(item => item.product_id !== productId));
+  };
+
+  // Door-staff cart clear — also gated. Used by OrderDisplay Clear button.
+  const requestClearCart = () => {
+    if (cart.length === 0) return;
+    if (isDoorGirlLocked) {
+      setPendingVoid({ action: 'clear', productId: null, itemLabel: `${cart.length} item(s)`, payload: {} });
+      return;
+    }
+    setCart([]);
   };
 
   const holdTransaction = () => {
@@ -243,77 +275,44 @@ export default function POSCashRegister({ user, station = 'door' }) {
   const isManagerPOS = user?.role === 'admin' ||
     ['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER'].includes(user?._highestRole);
 
-  // Door checks-and-balances: a Door Girl can ADD items but cannot REMOVE,
-  // DECREMENT, or CLEAR without a manager PIN. Managers/admins bypass.
-  const isCartLocked = station === 'door' && !isManagerPOS;
+  // Checks & balances — door staff can ADD to cart but cannot void/clear/decrement
+  // without a manager PIN. Closes the add→delete gap (ring it, pocket it).
+  const isDoorGirlLocked = station === 'door' && !isManagerPOS;
 
-  const writeCartGuardLog = async (auth, label, beforeItem) => {
+  // Apply pending void after the manager PIN is verified
+  const applyPendingVoid = (auth) => {
+    if (!pendingVoid) return;
+    const { action, productId, payload } = pendingVoid;
+    if (action === 'remove') {
+      setCart((c) => c.filter((i) => i.product_id !== productId));
+    } else if (action === 'decrement') {
+      const newQty = payload?.newQuantity ?? 0;
+      if (newQty <= 0) {
+        setCart((c) => c.filter((i) => i.product_id !== productId));
+      } else {
+        setCart((c) => c.map((i) =>
+          i.product_id === productId ? { ...i, quantity: newQty, total: newQty * i.price } : i
+        ));
+      }
+    } else if (action === 'clear') {
+      setCart([]);
+    }
+    // Append-only audit log of the void
     try {
-      await base44.entities.ActivityLog.create({
+      base44.entities.ActivityLog.create({
         timestamp: new Date().toISOString(),
-        user_email: user?.email || "unknown",
-        user_role: user?._highestRole || user?.role || "DOOR_GIRL",
-        action_type: "DELETE",
-        entity_affected: "POSTransaction:Cart",
+        user_email: user?.email || 'unknown',
+        user_role: user?._highestRole || user?.role || 'DOOR_GIRL',
+        action_type: 'DELETE',
+        entity_affected: `POSCart:${action}`,
         venue_id: activeVenue?.id || null,
-        mode: "REAL",
-        before_value: beforeItem || null,
-        after_value: {
-          action: label,
-          authorized_by: auth.authorized_by_name,
-          authorized_by_id: auth.authorized_by_id,
-          reason: auth.reason,
-          station,
-        },
-        notes: `Door-cart edit "${label}" approved by ${auth.authorized_by_name} (${auth.reason})`,
+        mode: 'REAL',
+        notes: `Void approved by ${auth.authorized_by_name} — ${auth.reason}${auth.note ? ` · ${auth.note}` : ''}`,
+        before_value: { action, productId, itemLabel: pendingVoid.itemLabel, payload },
+        after_value: { authorized_by: auth.authorized_by_email, authorized_by_id: auth.authorized_by_id, reason: auth.reason, note: auth.note },
       });
-    } catch (e) { console.warn("Cart guard log failed:", e); }
-  };
-
-  const requestCartChange = (label, run, beforeItem) => {
-    if (!isCartLocked) { run(); return; }
-    setPendingCartAction({ label, run, beforeItem });
-  };
-
-  const handleCartGuardConfirm = async (auth) => {
-    if (!pendingCartAction) return;
-    const { label, run, beforeItem } = pendingCartAction;
-    run();
-    setPendingCartAction(null);
-    await writeCartGuardLog(auth, label, beforeItem);
-    toast.success(`Approved by ${auth.authorized_by_name}`);
-  };
-
-  // Guarded handlers passed to OrderDisplay
-  const guardedUpdateQuantity = (productId, newQty) => {
-    const item = cart.find(i => i.product_id === productId);
-    if (!item) return;
-    if (newQty >= item.quantity) { updateQuantity(productId, newQty); return; } // ADD/up is free
-    requestCartChange(
-      newQty <= 0 ? `Remove "${item.product_name}"` : `Decrease "${item.product_name}" to ${newQty}`,
-      () => updateQuantity(productId, newQty),
-      { product_id: productId, product_name: item.product_name, was_quantity: item.quantity, was_total: item.total }
-    );
-  };
-
-  const guardedRemove = (productId) => {
-    const item = cart.find(i => i.product_id === productId);
-    if (!item) return;
-    requestCartChange(
-      `Remove "${item.product_name}" ($${item.total.toFixed(2)})`,
-      () => removeFromCart(productId),
-      { product_id: productId, product_name: item.product_name, was_quantity: item.quantity, was_total: item.total }
-    );
-  };
-
-  const guardedClear = () => {
-    if (cart.length === 0) return;
-    const snapshot = cart.map(i => ({ product_name: i.product_name, quantity: i.quantity, total: i.total }));
-    requestCartChange(
-      `Clear entire cart (${cart.length} item${cart.length === 1 ? '' : 's'})`,
-      () => setCart([]),
-      { items: snapshot }
-    );
+    } catch (e) { console.warn('Void ActivityLog write failed:', e); }
+    setPendingVoid(null);
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
@@ -817,10 +816,10 @@ export default function POSCashRegister({ user, station = 'door' }) {
           discount={discount}
           discountAmount={discountAmount}
           total={total}
-          onUpdateQuantity={guardedUpdateQuantity}
-          onRemoveItem={guardedRemove}
-          onClearCart={guardedClear}
-          isLocked={isCartLocked}
+          onUpdateQuantity={updateQuantity}
+          onRemoveItem={removeFromCart}
+          onClearCart={requestClearCart}
+          lockVoids={isDoorGirlLocked}
         />
 
         <div className="p-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
@@ -961,20 +960,21 @@ export default function POSCashRegister({ user, station = 'door' }) {
         </div>
       )}
 
-      {/* Cart guard modal — gates door-girl deletions */}
-      <CartGuardModal
-        open={!!pendingCartAction}
-        onOpenChange={(o) => { if (!o) setPendingCartAction(null); }}
-        action={pendingCartAction}
-        onConfirm={handleCartGuardConfirm}
-      />
-
       {/* Comp authorization modal — overlay */}
       <CompAuthorizationModal
         open={showCompModal}
         onOpenChange={setShowCompModal}
         total={total}
         onConfirm={handleCompConfirm}
+      />
+
+      {/* Manager Void Gate — door-staff cart removals/clears need PIN */}
+      <ManagerVoidGateModal
+        open={!!pendingVoid}
+        onOpenChange={(v) => { if (!v) setPendingVoid(null); }}
+        action={pendingVoid?.action}
+        itemLabel={pendingVoid?.itemLabel}
+        onConfirm={applyPendingVoid}
       />
 
       {/* Driver Payout System — door register only */}
