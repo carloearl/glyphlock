@@ -22,6 +22,7 @@ import OrderDisplay from "./pos/OrderDisplay";
 import DriverDropOffTracker from "./DriverDropOffTracker";
 import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
 import { writeEntity } from "@/lib/nups/writeEntity";
+import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 
 export default function POSCashRegister({ user, station = 'door' }) {
     // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
@@ -79,6 +80,14 @@ export default function POSCashRegister({ user, station = 'door' }) {
       return batches[0];
     }
   });
+
+  // Door-only: pull the venue's card processing fee rate. Cover charges are
+  // sales-tax-exempt; the only add-on at the door is the card fee.
+  const [doorRates, setDoorRates] = useState(null);
+  useEffect(() => {
+    if (station !== 'door') return;
+    loadVenueRates(activeVenue?.id).then(setDoorRates).catch(() => {});
+  }, [station, activeVenue?.id]);
 
   const createTransaction = useMutation({
     mutationFn: (data) => base44.entities.POSTransaction.create(data),
@@ -322,9 +331,14 @@ export default function POSCashRegister({ user, station = 'door' }) {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-  const tax = subtotal * 0.08;
+  // Door: no sales tax on cover charges. The `tax` field is reused as the
+  // card processing fee bucket — only non-zero when paying by card at the door.
+  const ccFeeRate = station === 'door' ? (Number(doorRates?.cc_processing_fee_rate) || 0.035) : 0;
+  const tax = station === 'door'
+    ? (paymentMethod === 'Credit Card' ? subtotal * ccFeeRate : 0)
+    : subtotal * 0.08;
   const discountAmount = (subtotal * discount) / 100;
-  const tipAmount = tip;
+  const tipAmount = station === 'door' ? 0 : tip; // no tips on cover charges
   const total = subtotal + tax - discountAmount + tipAmount;
   // When a comp is authorized the credit zeros out what the guest owes, but
   // the gross stays on the books (visible in OrderDisplay) so accounting can
@@ -468,7 +482,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
     }
   };
 
-  const PAYMENT_METHODS = [
+  const ALL_PAYMENT_METHODS = [
     { key: "Cash", icon: <DollarSign className="w-6 h-6" />, label: "Cash", color: "green" },
     { key: "Credit Card", icon: <CreditCard className="w-6 h-6" />, label: "Credit Card", color: "cyan" },
     { key: "Debit Card", icon: <CreditCard className="w-6 h-6" />, label: "Debit Card", color: "blue" },
@@ -477,6 +491,11 @@ export default function POSCashRegister({ user, station = 'door' }) {
     { key: "Tab", icon: <Hotel className="w-6 h-6" />, label: "Room Tab", color: "pink" },
     { key: "Comp", icon: <Sparkles className="w-6 h-6" />, label: "Comp (Mgr Auth)", color: "rose" },
   ];
+  // Door register only accepts cash, credit card, and (manager-authorized) comp.
+  // No tabs, no gift cards, no digital wallets — cover entry is simple.
+  const PAYMENT_METHODS = station === 'door'
+    ? ALL_PAYMENT_METHODS.filter(m => ['Cash', 'Credit Card', 'Comp'].includes(m.key))
+    : ALL_PAYMENT_METHODS;
 
   const getMethodColor = (color) => ({
     green: { bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.5)', text: '#22c55e' },
@@ -645,6 +664,8 @@ export default function POSCashRegister({ user, station = 'door' }) {
           </div>
         </div>
 
+        {/* Tip selector — hidden at door. Cover charges aren't tipped. */}
+        {station !== 'door' && (
         <div>
           <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Add Tip</div>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -666,6 +687,15 @@ export default function POSCashRegister({ user, station = 'door' }) {
             })}
           </div>
         </div>
+        )}
+
+        {/* Door fee hint — explains why Card total is higher than Cash */}
+        {station === 'door' && (
+          <div className="text-[11px] text-gray-400 bg-cyan-500/5 border border-cyan-500/20 rounded-lg px-3 py-2 text-center">
+            <span className="text-cyan-300 font-semibold">No sales tax on cover.</span>{' '}
+            Card payments include a <span className="font-mono">{(ccFeeRate * 100).toFixed(2)}%</span> processing fee.
+          </div>
+        )}
 
         <div>
           <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">Select Payment</div>
@@ -786,7 +816,8 @@ export default function POSCashRegister({ user, station = 'door' }) {
             </div>
           )}
 
-          {/* Customer — search */}
+          {/* Customer — search — hidden at door (no guest membership at the door) */}
+          {station !== 'door' && (
           <div className="relative">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Customer</span>
@@ -848,6 +879,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
 

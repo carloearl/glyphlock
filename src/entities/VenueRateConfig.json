@@ -76,6 +76,11 @@
       "type": "number",
       "default": 0.08
     },
+    "cc_processing_fee_rate": {
+      "type": "number",
+      "default": 0.035,
+      "description": "Credit card processing fee rate applied at the door register only. Door cover charges are sales-tax-exempt; this rate is the pass-through processor fee added when the guest pays cover by card."
+    },
     "house_commission_rate": {
       "type": "number",
       "default": 0.4,
