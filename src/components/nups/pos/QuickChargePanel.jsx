@@ -178,8 +178,9 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
         )
       )}
 
-      {/* Quick Charges — door = 5 big amount-only buttons */}
-      <div className={`grid gap-2.5 ${isDoor ? 'grid-cols-5' : 'grid-cols-4'}`}>
+      {/* Quick Charges — door = 5 amount-only buttons sized to fit the narrow
+          preset column without text overflow on tablets. */}
+      <div className={`grid gap-2 ${isDoor ? 'grid-cols-5' : 'grid-cols-4'}`}>
         {activePresets.map((p) => (
           <button
             key={p.label}
@@ -193,17 +194,17 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
                 is_preset: true,
               });
             }}
-            className="rounded-xl flex items-center justify-center active:scale-95 transition-all select-none"
+            className="rounded-xl flex items-center justify-center active:scale-95 transition-all select-none px-1"
             style={{
-              height: isDoor ? '118px' : '76px',
+              height: isDoor ? '74px' : '70px',
               background: `linear-gradient(135deg, ${p.accent}38, ${p.accent}14)`,
-              border: `2.5px solid ${p.accent}`,
-              boxShadow: `0 0 24px ${p.accent}55, inset 0 1px 0 rgba(255,255,255,0.08)`,
+              border: `2px solid ${p.accent}`,
+              boxShadow: `0 0 14px ${p.accent}40, inset 0 1px 0 rgba(255,255,255,0.08)`,
             }}
           >
             <span
-              className={isDoor ? 'text-5xl font-black tracking-tight' : 'text-xl font-black'}
-              style={{ color: p.accent, textShadow: `0 0 18px ${p.accent}99` }}
+              className={isDoor ? 'text-2xl font-black tracking-tight' : 'text-lg font-black'}
+              style={{ color: p.accent, textShadow: `0 0 10px ${p.accent}80` }}
             >
               {p.label}
             </span>
