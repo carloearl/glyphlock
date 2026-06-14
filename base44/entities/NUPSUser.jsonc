@@ -25,6 +25,8 @@
         "VENUE_OWNER",
         "VENUE_MANAGER",
         "FLOOR_HOST",
+        "DOOR_GIRL",
+        "DOORMAN",
         "PERFORMER",
         "BARTENDER",
         "SECURITY",
@@ -34,7 +36,7 @@
         "SOVEREIGN"
       ],
       "default": "BARTENDER",
-      "description": "RBAC role per \u00a79.2. SOVEREIGN = DACO-level override (Carlo only). DEMO = underwriter/licensee sandbox access"
+      "description": "RBAC role per \u00a79.2. DACO-20260613-DOOR-RBAC added DOOR_GIRL + DOORMAN \u2014 distinct from FLOOR_HOST for door-scope role gating."
     },
     "sovereign_flag": {
       "type": "boolean",

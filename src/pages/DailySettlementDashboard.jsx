@@ -79,9 +79,11 @@ export default function DailySettlementDashboard() {
     queryFn: async () => {
       if (!selectedVenue) return [];
       const all = await base44.entities.POSTransaction.list('-created_date', 1000);
+      // DACO-20260613-DOOR-RBAC — validation_run rows are funds-off and MUST
+      // be excluded from booked revenue / settlement rollups.
       return all.filter(t => {
         const dt = (t.created_date || '').slice(0, 10);
-        return t.venue_id === selectedVenue && dt === businessDate;
+        return t.venue_id === selectedVenue && dt === businessDate && t.validation_run !== true;
       });
     },
     enabled: !!selectedVenue,

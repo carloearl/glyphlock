@@ -19,6 +19,7 @@ import CardPaymentPanel from "./pos/CardPaymentPanel";
 import OrderDisplay from "./pos/OrderDisplay";
 import DriverDropOffTracker from "./DriverDropOffTracker";
 import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 export default function POSCashRegister({ user, station = 'door' }) {
     // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
@@ -287,7 +288,42 @@ export default function POSCashRegister({ user, station = 'door' }) {
       card_last4: details?.card_last_four || details?.card_last4 || null,
     };
     try {
-      await createTransaction.mutateAsync(transactionData);
+      // DACO-20260613-DOOR-RBAC — Door writes go through the gateway with
+      // validation_run=true (funds-off). The gateway enforces the DOOR_GIRL
+      // role scope and stamps cashier_role for audit.
+      if (station === 'door') {
+        const doorRole = user?._highestRole || user?.role || 'External';
+        const gateResult = await writeEntity({
+          entity: 'POSTransaction',
+          operation: 'create',
+          data: {
+            ...transactionData,
+            station: 'door',
+            validation_run: true,
+            funds_settled: false,
+            cashier_role: doorRole,
+          },
+          actor: { email: user?.email, role: doorRole, id: user?.id },
+          venue_id: activeVenue?.id || null,
+          intent: 'DOOR_COVER_VALIDATION_RUN',
+        });
+        if (!gateResult.ok) {
+          toast.error(gateResult.block_reason || 'Door write rejected by gateway');
+          setIsSubmitting(false);
+          return;
+        }
+        queryClient.invalidateQueries(['pos-transactions']);
+        queryClient.invalidateQueries(['active-batch']);
+        setLastTransaction(gateResult.value);
+        setCart([]);
+        setSelectedCustomer(null);
+        setDiscount(0);
+        setTip(0);
+        setPaymentStep("register");
+        setPaymentMethod(null);
+      } else {
+        await createTransaction.mutateAsync(transactionData);
+      }
             // AUDIT LOG: Transaction created — BPAAA Phase 7
                   try {
                           await base44.entities.SystemAuditLog.create({

@@ -1,6 +1,7 @@
 import { base44 } from '@/api/base44Client';
 import * as SEED from './demoSeedData';
 import { logActivity } from './activityLog';
+import { enforceRoleScope } from './roleGate';
 
 const VALID_MODES = new Set(['REAL', 'DEMO']);
 
@@ -205,6 +206,30 @@ export async function writeEntity({
   const tier = 'TIER_1_OBSERVE';
   const isFinancial = FINANCIAL_ENTITIES.has(entity);
   const sovereign = isActorSovereign(actor);
+
+  // DACO-20260613-DOOR-RBAC — role scope gate (DOOR_GIRL / DOORMAN). Runs
+  // BEFORE the financial authorization check so scoped roles get a precise
+  // rejection reason instead of the generic "role_not_authorized_in_REAL".
+  // Sovereign bypasses (consistent with existing precedent).
+  if (!sovereign) {
+    const scopeReason = enforceRoleScope({ role, entity, operation, data, actor });
+    if (scopeReason) {
+      const audit_id = await audit({
+        entity_name: entity,
+        operation,
+        actor_id: actorId,
+        actor_role: role,
+        fields_changed: fieldsOf(data),
+        mode,
+        tier,
+        result: 'blocked',
+        block_reason: `role_scope_violation: ${scopeReason}`,
+        venue_id: venue_id || null,
+        notes: intent || null,
+      });
+      return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `role_scope_violation: ${scopeReason}` };
+    }
+  }
 
   if (mode === 'REAL' && isFinancial && !sovereign && !FINANCIAL_AUTHORIZED_ROLES.has(role)) {
     const audit_id = await audit({

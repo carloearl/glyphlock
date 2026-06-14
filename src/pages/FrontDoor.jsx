@@ -8,6 +8,7 @@ import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import DriverDropOffTracker from "@/components/nups/DriverDropOffTracker";
 import ShiftClockInOut from "@/components/nups/ShiftClockInOut";
+import StaffClockInOut from "@/components/nups/StaffClockInOut";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
 import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
 import FrontDoorConfigPanel from "@/components/nups/frontdoor/FrontDoorConfigPanel";
@@ -29,6 +30,8 @@ export default function FrontDoor() {
         "VENUE_OWNER",
         "VENUE_MANAGER",
         "FLOOR_HOST",
+        "DOOR_GIRL",
+        "DOORMAN",
         "SECURITY",
       ]}
     >
@@ -193,7 +196,9 @@ function FrontDoorContent() {
               <TabsContent value="drivers" className="mt-0"><DriverDropOffTracker user={user} /></TabsContent>
             )}
             {visibleTabs.some(t => t.id === "staff") && (
-              <TabsContent value="staff" className="mt-0"><ShiftClockInOut user={user} /></TabsContent>
+              <TabsContent value="staff" className="mt-0">
+                <StaffClockInOut user={user} venueId={venueId} station="door" />
+              </TabsContent>
             )}
           </Tabs>
         )}

@@ -1,0 +1,72 @@
+{
+  "name": "StaffShift",
+  "type": "object",
+  "description": "DACO-20260613-DOOR-RBAC \u2014 Non-entertainer staff shift records (Door Girl, Doorman, Bartender, Security, etc.). Identity-bound on clock-in: user_email is captured from live base44.auth.me() rebind, NEVER client-supplied. Separate from EntertainerShift so entertainer flow is undisturbed.",
+  "properties": {
+    "shift_id": {
+      "type": "string",
+      "description": "Unique shift identifier (uuid)"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Authenticated user email \u2014 bound from live base44.auth.me() at clock-in"
+    },
+    "user_full_name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "description": "Role active during shift (DOOR_GIRL, DOORMAN, BARTENDER, SECURITY, etc.)"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "station": {
+      "type": "string",
+      "enum": [
+        "door",
+        "bar",
+        "vip",
+        "floor",
+        "office",
+        "security"
+      ],
+      "default": "door"
+    },
+    "check_in_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "check_out_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "checked_in",
+        "checked_out",
+        "contaminated_blocked"
+      ],
+      "default": "checked_in",
+      "description": "contaminated_blocked = ID-01 rebind failed at clock-in attempt"
+    },
+    "identity_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "True iff base44.auth.me() email matched the session-claimed identity at clock-in moment"
+    },
+    "session_fingerprint": {
+      "type": "string",
+      "description": "Compact hash of {email|role|venue|userAgent} captured at clock-in for forensic trace"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email",
+    "role",
+    "check_in_time"
+  ]
+}
