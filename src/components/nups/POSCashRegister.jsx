@@ -643,7 +643,18 @@ export default function POSCashRegister({ user, station = 'door' }) {
                 <Button
                   key={m.key}
                   variant="outline"
-                  onClick={() => { setPaymentMethod(m.key); setPaymentStep("pay"); }}
+                  onClick={() => {
+                    // HARD CHECKPOINT — Comp jumps straight to manager PIN
+                    // entry. No intermediate "ready to comp" screen the cashier
+                    // can sit on. Accounting integrity per BPAAA v3.0.
+                    if (m.key === "Comp") {
+                      setPaymentMethod("Comp");
+                      setShowCompModal(true);
+                      return;
+                    }
+                    setPaymentMethod(m.key);
+                    setPaymentStep("pay");
+                  }}
                   className="h-20 sm:h-24 flex-col gap-2 border-white/10 hover:border-white/30 bg-black/40 active:scale-95 transition-all text-xs sm:text-sm"
                 >
                   <span style={{ color: c.text }}>{m.icon}</span>
