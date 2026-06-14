@@ -85,8 +85,17 @@ async function resolveMode(requestContextMode) {
     return requestContextMode;
   }
   const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
+  // Auto-bootstrap on first use. Throwing here blocks every write in the app
+  // (door POS, settlements, payouts) on a fresh tenant. Default = REAL.
   if (!rows || rows.length === 0) {
-    throw new Error('writeEntity: SystemConfig_global_missing');
+    try {
+      await base44.entities.SystemConfig.create({ config_key: 'global', mode: 'REAL' });
+    } catch (e) {
+      // Race: someone else just created it. Re-read below.
+    }
+    const after = await base44.entities.SystemConfig.filter({ config_key: 'global' });
+    if (after && after.length === 1 && VALID_MODES.has(after[0].mode)) return after[0].mode;
+    return 'REAL';
   }
   if (rows.length > 1) {
     throw new Error(`writeEntity: SystemConfig_global_duplicate: ${rows.length}_records_found`);
