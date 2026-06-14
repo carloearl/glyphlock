@@ -1,10 +1,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus, X, ShoppingCart, Trash2 } from "lucide-react";
+import { Plus, Minus, X, ShoppingCart, Trash2, Lock } from "lucide-react";
 
 /**
  * Order display panel — shows current items, totals, 
  * with quantity controls, like the receipt tape on a register.
+ *
+ * isLocked=true means the operator (Door Girl) needs a manager PIN to
+ * decrement, remove, or clear items. Adding is always free.
  */
 export default function OrderDisplay({
   cart,
@@ -16,6 +19,7 @@ export default function OrderDisplay({
   onUpdateQuantity,
   onRemoveItem,
   onClearCart,
+  isLocked = false,
 }) {
   return (
     <div className="flex flex-col h-full">
@@ -35,10 +39,17 @@ export default function OrderDisplay({
           <button onClick={onClearCart}
             className="flex items-center gap-1 text-[11px] font-semibold rounded-lg px-2 py-1 transition-all active:scale-95"
             style={{ color: 'rgba(239,68,68,0.7)', background: 'rgba(239,68,68,0.08)' }}>
-            <Trash2 className="w-3 h-3" /> Clear
+            {isLocked ? <Lock className="w-3 h-3" /> : <Trash2 className="w-3 h-3" />} Clear
           </button>
         )}
       </div>
+
+      {isLocked && cart.length > 0 && (
+        <div className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold flex items-center gap-1.5"
+             style={{ background: 'rgba(239,68,68,0.06)', borderBottom: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.75)' }}>
+          <Lock className="w-3 h-3" /> Manager PIN required to remove or reduce items
+        </div>
+      )}
 
       {/* Items */}
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5 min-h-0" style={{ scrollbarWidth: 'none' }}>
