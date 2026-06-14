@@ -124,7 +124,16 @@ function AccountingContent() {
     queryFn: () => base44.entities.GlyphBucksBill.filter(venueFilter, "-created_date", 5000),
   });
 
-  const loading = lS || lD || lP || lT || lC || lO || lB;
+  // POS transactions — needed so the aggregator can surface comp gross (gap)
+  const { data: posTransactions = [], isLoading: lTx } = useQuery({
+    queryKey: ["acct-pos-tx", venueId, range.start, range.end],
+    queryFn: async () => {
+      const all = await base44.entities.POSTransaction.filter(venueFilter, "-created_date", 2000);
+      return all.filter((r) => inRange(r.created_date, range.start, range.end));
+    },
+  });
+
+  const loading = lS || lD || lP || lT || lC || lO || lB || lTx;
 
   const data = useMemo(
     () =>
@@ -136,8 +145,9 @@ function AccountingContent() {
         contractorPayouts,
         glyphBucksOrders,
         glyphBucksBills,
+        posTransactions,
       }),
-    [settlements, driverPayouts, payrollRecords, tipPayouts, contractorPayouts, glyphBucksOrders, glyphBucksBills]
+    [settlements, driverPayouts, payrollRecords, tipPayouts, contractorPayouts, glyphBucksOrders, glyphBucksBills, posTransactions]
   );
 
   const handleExportSummary = () => {

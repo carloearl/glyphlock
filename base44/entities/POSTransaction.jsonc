@@ -43,20 +43,37 @@
     },
     "total": {
       "type": "number",
-      "description": "Gross transaction total. NEVER reduced by driver payouts."
+      "description": "Gross transaction total. NEVER reduced by driver payouts or comps \u2014 gross stays on the books so accounting can see the comp gap."
     },
     "cash_sales": {
       "type": "number",
-      "description": "Cash portion. Component of total_sales rollup."
+      "description": "Cash portion. Component of total_sales rollup. ZERO when payment_method=Comp."
     },
     "card_sales": {
       "type": "number",
-      "description": "Card portion. Component of total_sales rollup."
+      "description": "Card portion. Component of total_sales rollup. ZERO when payment_method=Comp."
     },
     "gb_liability": {
       "type": "number",
       "default": 0,
       "description": "GlyphBucks face value sold. STORED-VALUE LIABILITY. Never counted as revenue, never added to total_sales."
+    },
+    "comp_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Gross value comped on this transaction. payment_method=Comp \u21d2 comp_amount = total. Tracked as accounting GAP \u2014 never revenue, never disbursement."
+    },
+    "comp_authorized_by": {
+      "type": "string",
+      "description": "Manager full name / email who authorized the comp. Captured at payment time via PIN re-verification."
+    },
+    "comp_authorized_by_id": {
+      "type": "string",
+      "description": "NUPSUser id of the authorizing manager."
+    },
+    "comp_reason": {
+      "type": "string",
+      "description": "Categorical reason (VIP, industry, owner guest, etc.) plus optional free-text note."
     },
     "payment_method": {
       "type": "string",
@@ -68,6 +85,7 @@
         "Gift Card",
         "Tab",
         "GlyphBucks",
+        "Comp",
         "Other"
       ]
     },

@@ -30,7 +30,7 @@ function buildDoorPresets(rates) {
     { label: "Cover — Card",       amount: Number(rates.cover_charge) || 0,    accent: "#06b6d4", payment_method: "Credit Card", is_cover: true },
     { label: "Re-Entry",           amount: Number(rates.reentry_charge) || 0,  accent: "#f59e0b", payment_method: null,          is_reentry: true },
     { label: "Friends & Military", amount: Number(rates.friends_military) || 0, accent: "#10b981" },
-    { label: "MGR VIP Comp",       amount: 0,                                  accent: "#f43f5e" },
+    { label: "VIP Entry",          amount: Number(rates.vip_entry) || Number(rates.cover_charge) * 3 || 0, accent: "#a855f7" },
   ];
 }
 

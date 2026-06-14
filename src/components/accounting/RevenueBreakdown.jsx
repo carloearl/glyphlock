@@ -1,12 +1,17 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Banknote, CreditCard } from "lucide-react";
+import { Banknote, CreditCard, Sparkles } from "lucide-react";
 import { fmtUSD } from "@/lib/accounting/aggregateFinancials";
 
 export default function RevenueBreakdown({ data, settlements = [] }) {
   const { cash_sales, card_sales, gross_revenue } = data.revenue;
   const cashPct = gross_revenue > 0 ? (cash_sales / gross_revenue) * 100 : 0;
   const cardPct = gross_revenue > 0 ? (card_sales / gross_revenue) * 100 : 0;
+  const comps = data.comps || { total: 0, count: 0, by_reason: {} };
+  const compPctOfPotential =
+    gross_revenue + comps.total > 0
+      ? (comps.total / (gross_revenue + comps.total)) * 100
+      : 0;
 
   return (
     <Card className="bg-gray-900/60 border-emerald-500/30">
@@ -48,6 +53,39 @@ export default function RevenueBreakdown({ data, settlements = [] }) {
               style={{ width: `${cardPct}%` }}
             />
           </div>
+        </div>
+
+        {/* Comp GAP — gross rung up but never collected */}
+        <div className="border-t border-gray-800 pt-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] uppercase tracking-wider text-rose-400 font-bold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Comps (Accounting Gap)
+            </span>
+            <span className="text-rose-300 font-mono font-bold text-sm">
+              {fmtUSD(comps.total)} · {comps.count} txn
+            </span>
+          </div>
+          <div className="h-2 bg-gray-800 rounded-full overflow-hidden mb-2">
+            <div
+              className="h-full bg-gradient-to-r from-rose-600 to-amber-400"
+              style={{ width: `${Math.min(100, compPctOfPotential)}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-gray-500 mb-2">
+            {compPctOfPotential.toFixed(1)}% of potential gross was comped. Gross stays on the books; cash &amp; card stay at zero — this is the visible gap.
+          </p>
+          {Object.keys(comps.by_reason).length > 0 && (
+            <div className="space-y-1">
+              {Object.entries(comps.by_reason)
+                .sort((a, b) => b[1] - a[1])
+                .map(([reason, amt]) => (
+                  <div key={reason} className="flex justify-between text-[11px] bg-black/40 rounded px-2 py-1">
+                    <span className="text-gray-400 truncate">{reason}</span>
+                    <span className="text-rose-300 font-mono">{fmtUSD(amt)}</span>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
 
         {/* Per-settlement ledger */}

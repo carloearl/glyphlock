@@ -7,8 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ShoppingCart, DollarSign, CreditCard, Search, Barcode,
-  Smartphone, Gift, Hotel, ArrowLeft, Wallet, Pause, RotateCcw, RotateCw, Lock
+  Smartphone, Gift, Hotel, ArrowLeft, Wallet, Pause, RotateCcw, RotateCw, Lock, Sparkles
 } from "lucide-react";
+import CompAuthorizationModal from "./pos/CompAuthorizationModal";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReceiptPrinter from "./ReceiptPrinter";
@@ -52,6 +53,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [showManagerOverride, setShowManagerOverride] = useState(false);
   const [managerPin, setManagerPin] = useState("");
+  const [showCompModal, setShowCompModal] = useState(false);
 
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products'],
@@ -262,6 +264,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
     }
     setIsSubmitting(true);
     const cashierName = user?.full_name || user?.name || user?.email || 'Staff';
+    const isComp = (details?.payment_method || paymentMethod) === "Comp";
     const transactionData = {
       transaction_id: `TXN-${Date.now()}`,
       customer_id: selectedCustomer?.id,
@@ -271,6 +274,9 @@ export default function POSCashRegister({ user, station = 'door' }) {
       discount: discountAmount,
       tip: tipAmount,
       total,
+      // Comps: gross stays on `total` (so the gap is visible) but cash/card stay zero
+      cash_sales: isComp ? 0 : undefined,
+      card_sales: isComp ? 0 : undefined,
       payment_method: paymentMethod || "Cash",
       cashier: cashierName,
       cashier_name: cashierName,
@@ -361,6 +367,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
     { key: "Digital Wallet", icon: <Smartphone className="w-6 h-6" />, label: "Tap to Pay", color: "purple" },
     { key: "Gift Card", icon: <Gift className="w-6 h-6" />, label: "Gift Card", color: "amber" },
     { key: "Tab", icon: <Hotel className="w-6 h-6" />, label: "Room Tab", color: "pink" },
+    { key: "Comp", icon: <Sparkles className="w-6 h-6" />, label: "Comp (Mgr Auth)", color: "rose" },
   ];
 
   const getMethodColor = (color) => ({
@@ -370,7 +377,44 @@ export default function POSCashRegister({ user, station = 'door' }) {
     purple: { bg: 'rgba(168,85,247,0.12)', border: 'rgba(168,85,247,0.5)', text: '#a855f7' },
     amber: { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.5)', text: '#f59e0b' },
     pink: { bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.5)', text: '#ec4899' },
+    rose: { bg: 'rgba(244,63,94,0.12)', border: 'rgba(244,63,94,0.5)', text: '#f43f5e' },
   }[color]);
+
+  // Comp confirmation — caller from the modal
+  const handleCompConfirm = async (auth) => {
+    await completePayment({
+      payment_method: "Comp",
+      comp_amount: auth.comp_amount,
+      comp_authorized_by: auth.authorized_by_email || auth.authorized_by_name,
+      comp_authorized_by_id: auth.authorized_by_id,
+      comp_reason: auth.note ? `${auth.reason} — ${auth.note}` : auth.reason,
+      cash_tendered: 0,
+      change_due: 0,
+    });
+    // Append-only audit trail of the comp authorization
+    try {
+      await base44.entities.ActivityLog.create({
+        timestamp: new Date().toISOString(),
+        user_email: user?.email || "unknown",
+        user_role: user?._highestRole || user?.role || "DOOR_GIRL",
+        action_type: "CONFIG_CHANGE",
+        entity_affected: "POSTransaction:Comp",
+        venue_id: activeVenue?.id || null,
+        mode: "REAL",
+        notes: `COMP $${auth.comp_amount.toFixed(2)} authorized by ${auth.authorized_by_name} — reason: ${auth.reason}${auth.note ? ` · ${auth.note}` : ""}`,
+        after_value: {
+          comp_amount: auth.comp_amount,
+          authorized_by: auth.authorized_by_email || auth.authorized_by_name,
+          authorized_by_id: auth.authorized_by_id,
+          reason: auth.reason,
+          note: auth.note,
+          station,
+        },
+      });
+    } catch (e) {
+      console.warn("Comp ActivityLog write failed:", e);
+    }
+  };
 
     if (ageBlocked) {
           return (
@@ -426,6 +470,26 @@ export default function POSCashRegister({ user, station = 'door' }) {
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-600"
             >
               Redeem Gift Card
+            </Button>
+          </div>
+        )}
+
+        {paymentMethod === "Comp" && (
+          <div className="space-y-4">
+            <div className="bg-black/70 border border-rose-500/30 rounded-xl p-4 text-center">
+              <div className="text-4xl mb-2">✨</div>
+              <div className="text-[10px] uppercase tracking-widest text-rose-300/70 mb-1">Comp Gross</div>
+              <div className="text-3xl font-black text-rose-400">${total.toFixed(2)}</div>
+              <div className="text-[11px] text-gray-500 mt-2">
+                Manager PIN required. Gross stays on the books — accounting will see the comp gap.
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowCompModal(true)}
+              disabled={isSubmitting}
+              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-rose-500"
+            >
+              <Sparkles className="w-5 h-5 mr-2" /> Get Manager Authorization
             </Button>
           </div>
         )}
@@ -820,6 +884,14 @@ export default function POSCashRegister({ user, station = 'door' }) {
           </div>
         </div>
       )}
+
+      {/* Comp authorization modal — overlay */}
+      <CompAuthorizationModal
+        open={showCompModal}
+        onOpenChange={setShowCompModal}
+        total={total}
+        onConfirm={handleCompConfirm}
+      />
 
       {/* Driver Payout System — door register only */}
       {station === 'door' && (

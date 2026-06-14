@@ -20,11 +20,25 @@ export function aggregateFinancials({
   contractorPayouts = [],
   glyphBucksOrders = [],
   glyphBucksBills = [],
+  posTransactions = [],
 } = {}) {
   // Revenue — from DailySettlement (canonical)
   const cash_sales = settlements.reduce((s, r) => s + safeNum(r.cash_sales), 0);
   const card_sales = settlements.reduce((s, r) => s + safeNum(r.card_sales), 0);
   const gross_revenue = cash_sales + card_sales;
+
+  // Comps — gross value rung up but given away. Tracked as an accounting GAP,
+  // never as revenue (cash_sales/card_sales for comp transactions are zero).
+  const compTxs = posTransactions.filter(
+    (t) => t.payment_method === "Comp" && t.status !== "void" && !t.validation_run
+  );
+  const comps_total = compTxs.reduce((s, t) => s + safeNum(t.comp_amount || t.total), 0);
+  const comps_count = compTxs.length;
+  const comps_by_reason = compTxs.reduce((acc, t) => {
+    const r = (t.comp_reason || "Unspecified").split(" — ")[0];
+    acc[r] = (acc[r] || 0) + safeNum(t.comp_amount || t.total);
+    return acc;
+  }, {});
 
   // Disbursements (only PAID / PROCESSED count toward outflow)
   const driver_disbursements = driverPayouts
@@ -127,6 +141,11 @@ export function aggregateFinancials({
       outstanding_face_value: gb_outstanding_face_value,
       redemption_rate: gb_redemption_rate,
     },
+    comps: {
+      total: comps_total,
+      count: comps_count,
+      by_reason: comps_by_reason,
+    },
     net_position,
     timeline,
     _meta: {
@@ -138,6 +157,8 @@ export function aggregateFinancials({
         contractorPayouts: contractorPayouts.length,
         glyphBucksOrders: glyphBucksOrders.length,
         glyphBucksBills: glyphBucksBills.length,
+        posTransactions: posTransactions.length,
+        comps: comps_count,
       },
     },
   };
