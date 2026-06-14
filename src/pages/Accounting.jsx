@@ -15,6 +15,7 @@ import DisbursementsBreakdown from "@/components/accounting/DisbursementsBreakdo
 import LiabilityLedger from "@/components/accounting/LiabilityLedger";
 import AccountingTrendChart from "@/components/accounting/AccountingTrendChart";
 import QuickBooksExportModal from "@/components/accounting/QuickBooksExportModal";
+import QuickBooksDriveSyncButton from "@/components/accounting/QuickBooksDriveSyncButton";
 import { toast } from "sonner";
 
 /**
@@ -247,6 +248,7 @@ function AccountingContent() {
             >
               <Download className="w-3.5 h-3.5 mr-1.5" /> Timeline CSV
             </Button>
+            <QuickBooksDriveSyncButton range={range} venueId={venueId} />
             <Button
               size="sm"
               onClick={() => setQbOpen(true)}
