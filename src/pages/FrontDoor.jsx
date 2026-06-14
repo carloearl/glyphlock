@@ -9,6 +9,7 @@ import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import DriverDropOffTracker from "@/components/nups/DriverDropOffTracker";
 import ShiftClockInOut from "@/components/nups/ShiftClockInOut";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
+import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 /**
@@ -92,8 +93,11 @@ function FrontDoorContent() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Live stats */}
-        <FrontDoorStats venueId={venueId} />
+         {/* Live stats */}
+         <FrontDoorStats venueId={venueId} />
+
+         {/* Live settlement ticker */}
+         <SettlementTicker venueId={venueId} businessDate={new Date().toISOString().split("T")[0]} />
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
