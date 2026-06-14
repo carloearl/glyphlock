@@ -489,12 +489,13 @@ export default function POSCashRegister({ user, station = 'door' }) {
     { key: "Digital Wallet", icon: <Smartphone className="w-6 h-6" />, label: "Tap to Pay", color: "purple" },
     { key: "Gift Card", icon: <Gift className="w-6 h-6" />, label: "Gift Card", color: "amber" },
     { key: "Tab", icon: <Hotel className="w-6 h-6" />, label: "Room Tab", color: "pink" },
-    { key: "Comp", icon: <Sparkles className="w-6 h-6" />, label: "Comp (Mgr Auth)", color: "rose" },
+    // Comp intentionally REMOVED from payment methods. A comp is NOT a payment —
+    // it's a manager override. Use the dedicated "Manager Comp" button on the
+    // register screen (opens PIN modal → on auth, finalize as $0 with comp_amount).
   ];
-  // Door register only accepts cash, credit card, and (manager-authorized) comp.
-  // No tabs, no gift cards, no digital wallets — cover entry is simple.
+  // Door register only accepts cash and credit card.
   const PAYMENT_METHODS = station === 'door'
-    ? ALL_PAYMENT_METHODS.filter(m => ['Cash', 'Credit Card', 'Comp'].includes(m.key))
+    ? ALL_PAYMENT_METHODS.filter(m => ['Cash', 'Credit Card'].includes(m.key))
     : ALL_PAYMENT_METHODS;
 
   const getMethodColor = (color) => ({
@@ -600,26 +601,6 @@ export default function POSCashRegister({ user, station = 'door' }) {
           </div>
         )}
 
-        {paymentMethod === "Comp" && (
-          <div className="space-y-4">
-            <div className="bg-black/70 border border-rose-500/30 rounded-xl p-4 text-center">
-              <div className="text-4xl mb-2">✨</div>
-              <div className="text-[10px] uppercase tracking-widest text-rose-300/70 mb-1">Comp Gross</div>
-              <div className="text-3xl font-black text-rose-400">${total.toFixed(2)}</div>
-              <div className="text-[11px] text-gray-500 mt-2">
-                Manager PIN required. Gross stays on the books — accounting will see the comp gap.
-              </div>
-            </div>
-            <Button
-              onClick={() => setShowCompModal(true)}
-              disabled={isSubmitting}
-              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-rose-500"
-            >
-              <Sparkles className="w-5 h-5 mr-2" /> Get Manager Authorization
-            </Button>
-          </div>
-        )}
-
         {paymentMethod === "Tab" && (
           <div className="space-y-4">
             <div className="bg-black/70 border border-pink-500/30 rounded-xl p-4 text-center">
@@ -707,14 +688,6 @@ export default function POSCashRegister({ user, station = 'door' }) {
                   key={m.key}
                   variant="outline"
                   onClick={() => {
-                    // HARD CHECKPOINT — Comp jumps straight to manager PIN
-                    // entry. No intermediate "ready to comp" screen the cashier
-                    // can sit on. Accounting integrity per BPAAA v3.0.
-                    if (m.key === "Comp") {
-                      setPaymentMethod("Comp");
-                      setShowCompModal(true);
-                      return;
-                    }
                     setPaymentMethod(m.key);
                     setPaymentStep("pay");
                   }}
@@ -946,9 +919,26 @@ export default function POSCashRegister({ user, station = 'door' }) {
             </div>
           )}
 
-          {/* COMP AUTHORIZED card — the "promo card" that visibly removes the
-              fee. Gross stays on the books (cart shows full total) so the
-              accounting gap is preserved. Cashier still has to tap CHARGE. */}
+          {/* Manager Comp button — opens PIN modal. A comp is a MANAGER OVERRIDE,
+              not a payment method, so it lives here (next to CHARGE) instead of
+              being buried in the payment picker. Hidden once authorized. */}
+          {cart.length > 0 && !compAuth && (
+            <button
+              onClick={() => setShowCompModal(true)}
+              className="w-full mb-2 rounded-xl text-xs font-bold py-2.5 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              style={{
+                background: 'rgba(244,63,94,0.10)',
+                border: '1px dashed rgba(244,63,94,0.45)',
+                color: '#fb7185',
+              }}
+              title="Manager override — requires PIN. Posts the cart at $0 with a tracked comp gap."
+            >
+              <Sparkles className="w-3.5 h-3.5" /> Manager Comp (PIN Required)
+            </button>
+          )}
+
+          {/* COMP AUTHORIZED card — appears after manager PIN verifies. Cashier
+              taps the red CHARGE COMP button to finalize (two-step audit). */}
           {compAuth && cart.length > 0 && (
             <div
               className="rounded-2xl p-3 mb-2"
