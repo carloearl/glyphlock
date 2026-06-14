@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Calculator, Download, ArrowLeft, Loader2, ShieldCheck, FileSearch, Search, Moon } from "lucide-react";
-import QuickBooksExportPanel from "@/components/accounting/QuickBooksExportPanel";
 import AuditFindingsBadge from "@/components/audit/AuditFindingsBadge";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -15,6 +14,7 @@ import RevenueBreakdown from "@/components/accounting/RevenueBreakdown";
 import DisbursementsBreakdown from "@/components/accounting/DisbursementsBreakdown";
 import LiabilityLedger from "@/components/accounting/LiabilityLedger";
 import AccountingTrendChart from "@/components/accounting/AccountingTrendChart";
+import QuickBooksExportModal from "@/components/accounting/QuickBooksExportModal";
 import { toast } from "sonner";
 
 /**
@@ -68,6 +68,7 @@ function AccountingContent() {
   const initial = computeRange({ key: "7d", days: 7 });
   const [range, setRange] = useState(initial);
   const [preset, setPreset] = useState("7d");
+  const [qbOpen, setQbOpen] = useState(false);
 
   // Data fetches — frontend pulls, in-memory aggregation
   const venueFilter = venueId ? { venue_id: venueId } : {};
@@ -236,10 +237,19 @@ function AccountingContent() {
             >
               <Download className="w-3.5 h-3.5 mr-1.5" /> Timeline CSV
             </Button>
-            <QuickBooksExportPanel data={data} range={range} venueLabel={activeVenue?.name || venueId || "Venue"} />
+            <Button
+              size="sm"
+              onClick={() => setQbOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white"
+            >
+              <span className="inline-flex w-4 h-4 rounded-sm bg-white/20 items-center justify-center text-[8px] font-mono mr-1.5">QB</span>
+              QuickBooks
+            </Button>
           </div>
         </div>
       </div>
+
+      <QuickBooksExportModal open={qbOpen} onOpenChange={setQbOpen} range={range} venueId={venueId} />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         <AccountingDateFilter
