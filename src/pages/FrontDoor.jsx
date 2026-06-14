@@ -14,6 +14,7 @@ import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
 import FundsOffDrawerPanel from "@/components/nups/frontdoor/FundsOffDrawerPanel";
 import FrontDoorConfigPanel from "@/components/nups/frontdoor/FrontDoorConfigPanel";
 import EmergencyOverrideButton from "@/components/nups/frontdoor/EmergencyOverrideButton";
+import TabIntroHint from "@/components/nups/frontdoor/TabIntroHint";
 import OperatorStatusBar from "@/components/nups/frontdoor/OperatorStatusBar";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useFrontDoorConfig, DEFAULT_FRONT_DOOR_CONFIG } from "@/hooks/useFrontDoorConfig";
@@ -81,6 +82,8 @@ function FrontDoorContent() {
   }, [visibleTabs, activeTab]);
 
   const handleSignOut = () => {
+    if (typeof window !== "undefined" &&
+        !window.confirm("Sign out of Front Door? Any unsaved work will be lost.")) return;
     sessionStorage.removeItem("nups_session");
     navigate("/NUPSLogin");
   };
@@ -104,7 +107,22 @@ function FrontDoorContent() {
               <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.4)]">
                 <Shield className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-black text-white leading-tight">Front Door</h1>
+              <div>
+                <h1 className="text-xl font-black text-white leading-tight">Front Door</h1>
+                {(user?.full_name || user?.role || activeVenue?.name) && (
+                  <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
+                    {user?.full_name || user?.username || "Operator"}
+                    {user?.role && (
+                      <span className="ml-2 text-violet-400 uppercase tracking-wider">
+                        {user.role.replace(/_/g, " ")}
+                      </span>
+                    )}
+                    {activeVenue?.name && (
+                      <span className="ml-2 text-slate-400">· {activeVenue.name}</span>
+                    )}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <EmergencyOverrideButton venueId={venueId} />
@@ -194,13 +212,28 @@ function FrontDoorContent() {
             </TabsList>
 
             {visibleTabs.some(t => t.id === "guests") && (
-              <TabsContent value="guests" className="mt-0"><GuestCheckIn /></TabsContent>
+              <TabsContent value="guests" className="mt-0">
+                <TabIntroHint>
+                  Greet the guest, scan their ID, then ring up cover or promo on the door register.
+                </TabIntroHint>
+                <GuestCheckIn />
+              </TabsContent>
             )}
             {visibleTabs.some(t => t.id === "dancers") && (
-              <TabsContent value="dancers" className="mt-0"><EntertainerCheckIn user={user} /></TabsContent>
+              <TabsContent value="dancers" className="mt-0">
+                <TabIntroHint>
+                  Check entertainers in, confirm tonight's acknowledgments, then send them to the floor.
+                </TabIntroHint>
+                <EntertainerCheckIn user={user} />
+              </TabsContent>
             )}
             {visibleTabs.some(t => t.id === "drivers") && (
-              <TabsContent value="drivers" className="mt-0"><DriverDropOffTracker user={user} /></TabsContent>
+              <TabsContent value="drivers" className="mt-0">
+                <TabIntroHint>
+                  Scan the driver's QR (or pick from the list), log each drop-off, and confirm payout with the doorman.
+                </TabIntroHint>
+                <DriverDropOffTracker user={user} />
+              </TabsContent>
             )}
             {visibleTabs.some(t => t.id === "staff") && (
               <TabsContent value="staff" className="mt-0">
