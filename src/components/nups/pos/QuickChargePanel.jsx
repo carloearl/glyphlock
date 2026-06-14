@@ -204,39 +204,53 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
         </div>
       )}
       <div className={`grid gap-2.5 ${isDoor ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-4'}`}>
-        {activePresets.map((p) => (
-          <button
-            key={p.label}
-            onClick={() => {
-              onAddItem({
-                product_id: `preset-${p.label.toLowerCase().replace(/\s/g, '-')}`,
-                product_name: p.label,
-                quantity: 1,
-                price: p.amount,
-                total: p.amount,
-                is_preset: true,
-                preset_payment_method: p.payment_method || null,
-                is_cover: !!p.is_cover,
-                is_reentry: !!p.is_reentry,
-              });
-            }}
-            className="rounded-xl flex flex-col items-center justify-center gap-1 active:scale-95 transition-all select-none"
-            style={{
-              height: isDoor ? '90px' : '76px',
-              background: `linear-gradient(135deg, ${p.accent}18, ${p.accent}08)`,
-              border: `1.5px solid ${p.accent}35`,
-            }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = `${p.accent}70`}
-            onMouseLeave={e => e.currentTarget.style.borderColor = `${p.accent}35`}
-          >
-            <span className="text-[11px] font-semibold leading-tight text-center px-1" style={{ color: 'rgba(255,255,255,0.75)' }}>
-              {p.label}
-            </span>
-            <span className="text-xl font-black" style={{ color: p.accent }}>
-              ${p.amount}
-            </span>
-          </button>
-        ))}
+        {activePresets.map((p) => {
+          // Cover buttons (Cash / Card $20 / $30) get extra visual weight so
+          // the Door Girl can't miss them on a busy tablet at the door.
+          const isCover = !!p.is_cover;
+          return (
+            <button
+              key={p.label}
+              onClick={() => {
+                onAddItem({
+                  product_id: `preset-${p.label.toLowerCase().replace(/\s/g, '-')}`,
+                  product_name: p.label,
+                  quantity: 1,
+                  price: p.amount,
+                  total: p.amount,
+                  is_preset: true,
+                  preset_payment_method: p.payment_method || null,
+                  is_cover: !!p.is_cover,
+                  is_reentry: !!p.is_reentry,
+                });
+              }}
+              className="rounded-xl flex flex-col items-center justify-center gap-1 active:scale-95 transition-all select-none"
+              style={{
+                height: isDoor ? (isCover ? '118px' : '96px') : '76px',
+                background: isCover
+                  ? `linear-gradient(135deg, ${p.accent}38, ${p.accent}14)`
+                  : `linear-gradient(135deg, ${p.accent}18, ${p.accent}08)`,
+                border: isCover ? `2.5px solid ${p.accent}` : `1.5px solid ${p.accent}35`,
+                boxShadow: isCover ? `0 0 24px ${p.accent}55, inset 0 1px 0 rgba(255,255,255,0.08)` : 'none',
+              }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = isCover ? p.accent : `${p.accent}70`}
+              onMouseLeave={e => e.currentTarget.style.borderColor = isCover ? p.accent : `${p.accent}35`}
+            >
+              <span
+                className={isCover ? 'text-[12px] font-black uppercase tracking-wider leading-tight text-center px-1' : 'text-[11px] font-semibold leading-tight text-center px-1'}
+                style={{ color: isCover ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.75)' }}
+              >
+                {p.label}
+              </span>
+              <span
+                className={isCover ? 'text-4xl font-black tracking-tight' : 'text-xl font-black'}
+                style={{ color: p.accent, textShadow: isCover ? `0 0 18px ${p.accent}99` : 'none' }}
+              >
+                ${p.amount}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Discount strip — hidden on door station */}

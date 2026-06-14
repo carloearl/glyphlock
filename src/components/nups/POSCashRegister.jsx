@@ -56,6 +56,11 @@ export default function POSCashRegister({ user, station = 'door' }) {
   const [managerPin, setManagerPin] = useState("");
   const [showCompModal, setShowCompModal] = useState(false);
   const [pendingVoid, setPendingVoid] = useState(null); // { action, productId, itemLabel, payload }
+  // Stashed manager comp authorization — set when the comp modal closes with a
+  // verified PIN. Drives the visible "COMP AUTHORIZED" credit card and switches
+  // the CHARGE button to a one-tap comp finalization. Cleared on cart change
+  // and after charge is posted.
+  const [compAuth, setCompAuth] = useState(null);
 
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products'],
@@ -87,6 +92,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
       setTip(0);
       setPaymentStep("register");
       setPaymentMethod(null);
+      setCompAuth(null);
     }
   });
 
@@ -320,6 +326,19 @@ export default function POSCashRegister({ user, station = 'door' }) {
   const discountAmount = (subtotal * discount) / 100;
   const tipAmount = tip;
   const total = subtotal + tax - discountAmount + tipAmount;
+  // When a comp is authorized the credit zeros out what the guest owes, but
+  // the gross stays on the books (visible in OrderDisplay) so accounting can
+  // see the gap. The CHARGE button uses finalTotal; OrderDisplay keeps `total`.
+  const finalTotal = compAuth ? 0 : total;
+
+  // Invalidate comp auth if the cart changes after authorization — forces
+  // re-auth so a manager can't pre-comp and then have someone ring more in.
+  useEffect(() => {
+    if (compAuth && Math.abs(total - (compAuth.comp_amount || 0)) > 0.01) {
+      setCompAuth(null);
+      toast.warning("Cart changed — comp authorization cleared. Re-authorize.");
+    }
+  }, [total, compAuth]);
 
   const handleCheckout = () => {
     if (!activeBatch) {
@@ -327,6 +346,20 @@ export default function POSCashRegister({ user, station = 'door' }) {
       return;
     }
     if (cart.length === 0) return;
+    // Comp already authorized — go straight to finalize as Comp. No method
+    // picker, no second PIN prompt. The receipt prints with COMP status.
+    if (compAuth) {
+      completePayment({
+        payment_method: "Comp",
+        comp_amount: compAuth.comp_amount,
+        comp_authorized_by: compAuth.authorized_by_email || compAuth.authorized_by_name,
+        comp_authorized_by_id: compAuth.authorized_by_id,
+        comp_reason: compAuth.note ? `${compAuth.reason} — ${compAuth.note}` : compAuth.reason,
+        cash_tendered: 0,
+        change_due: 0,
+      });
+      return;
+    }
     setPaymentStep("method");
   };
 
@@ -401,6 +434,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
         setTip(0);
         setPaymentStep("register");
         setPaymentMethod(null);
+        setCompAuth(null);
       } else {
         await createTransaction.mutateAsync(transactionData);
       }
@@ -454,18 +488,17 @@ export default function POSCashRegister({ user, station = 'door' }) {
     rose: { bg: 'rgba(244,63,94,0.12)', border: 'rgba(244,63,94,0.5)', text: '#f43f5e' },
   }[color]);
 
-  // Comp confirmation — caller from the modal
+  // Comp confirmation — PIN verified, manager picked, reason captured.
+  // We DO NOT post the transaction here. Instead we stash the auth on the
+  // cart so the cashier sees the visible "COMP AUTHORIZED" credit card and
+  // explicitly taps CHARGE to finalize. That's the hard checkpoint flow.
   const handleCompConfirm = async (auth) => {
-    await completePayment({
-      payment_method: "Comp",
-      comp_amount: auth.comp_amount,
-      comp_authorized_by: auth.authorized_by_email || auth.authorized_by_name,
-      comp_authorized_by_id: auth.authorized_by_id,
-      comp_reason: auth.note ? `${auth.reason} — ${auth.note}` : auth.reason,
-      cash_tendered: 0,
-      change_due: 0,
-    });
-    // Append-only audit trail of the comp authorization
+    setCompAuth(auth);
+    setPaymentMethod("Comp");
+    setPaymentStep("register");
+    toast.success(`Comp authorized by ${auth.authorized_by_name} — tap CHARGE to finalize`);
+    // Append-only audit trail of the authorization moment (the charge audit
+    // is logged separately when CHARGE is tapped).
     try {
       await base44.entities.ActivityLog.create({
         timestamp: new Date().toISOString(),
@@ -881,6 +914,36 @@ export default function POSCashRegister({ user, station = 'door' }) {
             </div>
           )}
 
+          {/* COMP AUTHORIZED card — the "promo card" that visibly removes the
+              fee. Gross stays on the books (cart shows full total) so the
+              accounting gap is preserved. Cashier still has to tap CHARGE. */}
+          {compAuth && cart.length > 0 && (
+            <div
+              className="rounded-2xl p-3 mb-2"
+              style={{
+                background: 'linear-gradient(135deg, rgba(244,63,94,0.18), rgba(245,158,11,0.12))',
+                border: '2px solid rgba(244,63,94,0.55)',
+                boxShadow: '0 0 24px rgba(244,63,94,0.35)',
+              }}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] uppercase tracking-widest font-black text-rose-300">✨ Comp Authorized</span>
+                <button
+                  onClick={() => { setCompAuth(null); setPaymentMethod(null); }}
+                  className="text-[10px] text-gray-500 hover:text-red-400"
+                  title="Remove comp"
+                >✕</button>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xs text-gray-300">Credit applied</span>
+                <span className="text-2xl font-black text-rose-400 font-mono">−${(compAuth.comp_amount || 0).toFixed(2)}</span>
+              </div>
+              <div className="text-[10px] text-gray-400 mt-1 truncate">
+                {compAuth.authorized_by_name} · {compAuth.reason}
+              </div>
+            </div>
+          )}
+
           {cart.length > 0 ? (
            <button
              onClick={handleCheckout}
@@ -888,13 +951,21 @@ export default function POSCashRegister({ user, station = 'door' }) {
              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
              style={{
                height: '68px',
-               background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
-               boxShadow: '0 0 40px rgba(34,197,94,0.35), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
+               background: compAuth
+                 ? 'linear-gradient(135deg, #f43f5e 0%, #b91c1c 100%)'
+                 : 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
+               boxShadow: compAuth
+                 ? '0 0 40px rgba(244,63,94,0.4), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)'
+                 : '0 0 40px rgba(34,197,94,0.35), 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
                letterSpacing: '-0.5px',
              }}
            >
              <Wallet className="w-6 h-6" />
-             {isSubmitting ? 'Processing...' : `CHARGE $${total.toFixed(2)}`}
+             {isSubmitting
+               ? 'Processing...'
+               : compAuth
+                 ? `CHARGE COMP $${finalTotal.toFixed(2)}`
+                 : `CHARGE $${total.toFixed(2)}`}
            </button>
           ) : (
            <div className="text-center text-sm py-5 font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>
