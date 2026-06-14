@@ -9,6 +9,7 @@ import { Car, Plus, DollarSign, Users, CheckCircle, ChevronDown, ChevronUp, Bank
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates, computeDriverPayoutAmount } from "@/lib/nups/venueRateConfig";
 import DriverQRDeliveryModal from "@/components/nups/frontdoor/DriverQRDeliveryModal";
+import FlowSteps from "@/components/nups/pos/FlowSteps";
 
 // ─── DACO-20260603-FRONTDOOR-DRIVER · Part B ────────────────────────────────
 // Driver payouts are DISBURSEMENTS, NOT negative revenue. This component:
@@ -209,6 +210,19 @@ export default function DriverDropOffTracker({ user }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
 
+  // Confirm prompt before settling — disbursing cash from the drawer is the
+  // single riskiest action on this screen, so we make the operator say yes
+  // to the exact amount and driver.
+  const requestSettle = (session) => {
+    const amount = Number(session.total_payout) || 0;
+    if (amount <= 0) return;
+    const ok = typeof window === "undefined" ? true : window.confirm(
+      `Pay $${amount.toFixed(2)} cash from the drawer to ${session.contractor_name}?\n\nThis records a disbursement. Press OK to confirm the handoff.`
+    );
+    if (!ok) return;
+    settle.mutate(session);
+  };
+
   // ─── Settle a session → mark DriverPayout PAID, bump DriverProfile YTD,
   //     write SystemAuditLog. NEVER touches POSTransaction. NEVER mutates
   //     total_sales. The drawer math is reported, not enforced via mutation.
@@ -319,6 +333,23 @@ export default function DriverDropOffTracker({ user }) {
           </Button>
         </div>
       </div>
+
+      {/* Standard driver handshake — coaching strip for new operators */}
+      <FlowSteps
+        tone="yellow"
+        currentStep={
+          openSessions.length === 0
+            ? 0
+            : openSessions.some(s => !safeJSON(s.notes).headcount_confirmed)
+              ? 1
+              : 2
+        }
+        steps={[
+          { id: "register", label: "1. Register / Scan", hint: "Onboard or scan the driver's QR" },
+          { id: "log",      label: "2. Log Drops",       hint: "Add each drop-off as it happens" },
+          { id: "pay",      label: "3. Confirm & Pay",   hint: "Doorman confirms, Door Girl pays" },
+        ]}
+      />
 
       {/* Rate snapshot — proves no hardcoded dollars */}
       {rates && (
@@ -578,7 +609,7 @@ export default function DriverDropOffTracker({ user }) {
                       </div>
                       {isDoorGirl ? (
                         <Button
-                          onClick={() => settle.mutate(session)}
+                          onClick={() => requestSettle(session)}
                           className="w-full bg-green-700 hover:bg-green-600 text-white font-bold text-lg h-12"
                           disabled={settle.isPending || payoutAmount <= 0}
                         >

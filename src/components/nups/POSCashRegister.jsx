@@ -19,6 +19,7 @@ import QuickChargePanel from "./pos/QuickChargePanel";
 import CashDenominationPad from "./pos/CashDenominationPad";
 import CardPaymentPanel from "./pos/CardPaymentPanel";
 import OrderDisplay from "./pos/OrderDisplay";
+import FlowSteps from "./pos/FlowSteps";
 import DriverDropOffTracker from "./DriverDropOffTracker";
 import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
 import { writeEntity } from "@/lib/nups/writeEntity";
@@ -409,9 +410,14 @@ export default function POSCashRegister({ user, station = 'door' }) {
       return;
     }
     if (cart.length === 0) return;
-    // Comp already authorized — go straight to finalize as Comp. No method
-    // picker, no second PIN prompt. The receipt prints with COMP status.
+    // Comp already authorized — go straight to finalize as Comp. Confirm
+    // the comp once more before posting — this is a manager override and
+    // the gross stays on the books as an audit gap.
     if (compAuth) {
+      const ok = typeof window === "undefined" ? true : window.confirm(
+        `Charge as COMP?\n\nGross $${total.toFixed(2)} will post at $0 collected.\nAuthorized by ${compAuth.authorized_by_name}.\n\nPress OK to finalize.`
+      );
+      if (!ok) return;
       completePayment({
         payment_method: "Comp",
         comp_amount: compAuth.comp_amount,
@@ -907,6 +913,25 @@ export default function POSCashRegister({ user, station = 'door' }) {
 
       {/* CENTER: CART + TOTALS (desktop only) */}
       <div className="hidden lg:flex lg:w-80 flex-col shrink-0 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.4)', borderLeftWidth: '1px', borderLeftColor: 'rgba(255,255,255,0.06)' }}>
+        {/* Standard register flow — coaching strip for new operators */}
+        <div className="p-3 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <FlowSteps
+            tone="cyan"
+            currentStep={cart.length === 0 && lastTransaction ? 2 : (paymentStep === "register" ? 0 : 1)}
+            steps={[
+              { id: "ring",    label: "1. Add Items",     hint: "Tap a preset on the left" },
+              { id: "pay",     label: "2. Take Payment",  hint: "Choose Cash or Card" },
+              { id: "receipt", label: "3. Receipt",       hint: "Print or hand to guest" },
+            ]}
+          />
+          {cart.length === 0 && !lastTransaction && (
+            <div className="mt-2 text-[11px] text-slate-400 leading-relaxed">
+              <strong className="text-cyan-300">Standard flow:</strong> tap a preset to ring up cover or promo,
+              then tap <span className="text-emerald-300 font-bold">CHARGE</span> when the guest is ready to pay.
+            </div>
+          )}
+        </div>
+
         <OrderDisplay
           cart={cart}
           subtotal={subtotal}
@@ -1062,8 +1087,11 @@ export default function POSCashRegister({ user, station = 'door' }) {
                  : `CHARGE $${total.toFixed(2)}`}
            </button>
           ) : (
-           <div className="text-center text-sm py-5 font-medium" style={{ color: 'rgba(255,255,255,0.15)' }}>
-             Tap a charge to begin
+           <div className="rounded-xl border border-dashed border-slate-700/70 bg-slate-900/40 p-3 text-center">
+             <div className="text-xs font-bold text-slate-300">Cart is empty</div>
+             <div className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+               Tap a preset to add an item. The <span className="text-emerald-400 font-bold">CHARGE</span> button shows up here when the cart has a total.
+             </div>
            </div>
           )}
           {isManagerPOS && (
