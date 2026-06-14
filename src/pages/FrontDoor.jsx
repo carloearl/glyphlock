@@ -11,6 +11,7 @@ import ShiftClockInOut from "@/components/nups/ShiftClockInOut";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
 import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
+import FundsOffDrawerPanel from "@/components/nups/frontdoor/FundsOffDrawerPanel";
 import FrontDoorConfigPanel from "@/components/nups/frontdoor/FrontDoorConfigPanel";
 import EmergencyOverrideButton from "@/components/nups/frontdoor/EmergencyOverrideButton";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -154,6 +155,13 @@ function FrontDoorContent() {
             businessDate={new Date().toISOString().split("T")[0]}
           />
         )}
+
+        {/* DACO-20260613-DOOR-RBAC — Funds-Off Drawer panel.
+            Auto-hides when no validation_run records exist. */}
+        <FundsOffDrawerPanel
+          venueId={venueId}
+          businessDate={new Date().toISOString().split("T")[0]}
+        />
 
         {visibleTabs.length === 0 ? (
           <div className="bg-red-950/30 border border-red-500/40 rounded-lg p-6 text-center">
