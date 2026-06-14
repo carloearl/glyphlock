@@ -53,6 +53,7 @@ import AuditIntegrity from './pages/AuditIntegrity';
 import UnifiedSearch from './pages/UnifiedSearch';
 import Tonight from './pages/Tonight';
 import VenueAdminSettings from './pages/VenueAdminSettings';
+import MobileScanner from './pages/MobileScanner';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -93,7 +94,7 @@ const AuthenticatedApp = () => {
   }
 
   // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/nupslanding', '/landing', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage', '/demo/', '/clubtv'];
+  const fullscreenPaths = ['/nupslanding', '/landing', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner'];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
   if (isFullscreen) {
@@ -129,6 +130,8 @@ const AuthenticatedApp = () => {
         <Route path="/demo/compliance-preview" element={<DemoCompliancePreview />} />
         <Route path="/ClubTV" element={<ClubTV />} />
         <Route path="/clubtv" element={<ClubTV />} />
+        <Route path="/MobileScanner" element={<MobileScanner />} />
+        <Route path="/mobilescanner" element={<MobileScanner />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
