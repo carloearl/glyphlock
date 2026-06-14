@@ -27,6 +27,19 @@
       "type": "string",
       "description": "Stable QR token printed on driver's card. Scanned at the door for instant load — no paper, no re-entry."
     },
+    "qr_token": {
+      "type": "string",
+      "description": "DACO-20260613-MOBILE-SCANNER — Server-signed HMAC payload for QR generation. Format: {driver_id}|{venue_id}|{issued_at}|{signature}. Signature recomputed server-side on verify."
+    },
+    "qr_signature": {
+      "type": "string",
+      "description": "DACO-20260613-MOBILE-SCANNER — HMAC-SHA256 signature of qr_token, computed server-side with per-venue key. Never exposed to client."
+    },
+    "qr_issued_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DACO-20260613-MOBILE-SCANNER — Timestamp when QR was signed. Used to detect replay attacks and stale tokens."
+    },
     "ytd_payout_total": {
       "type": "number",
       "default": 0,

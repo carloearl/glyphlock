@@ -1,0 +1,66 @@
+{
+  "name": "ScanEvent",
+  "type": "object",
+  "description": "DACO-20260613-MOBILE-SCANNER — Append-only scan participation log. Records every QR scan, ID barcode read, and camera capture event from mobile or fixed scanners. Quarantine-aware: validation_run flag isolates funds-off training runs from live events.",
+  "properties": {
+    "scan_id": {
+      "type": "string",
+      "description": "Unique scan event identifier."
+    },
+    "subject_id": {
+      "type": "string",
+      "description": "ID of the entity scanned (driver_id, guest_id, id_number)."
+    },
+    "subject_type": {
+      "type": "string",
+      "enum": ["driver", "guest", "id", "other"],
+      "description": "Type of entity scanned."
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue where scan occurred. Dynamic — never hardcoded."
+    },
+    "scan_type": {
+      "type": "string",
+      "enum": ["qr", "id_barcode", "camera", "manual"],
+      "description": "QR code, ID barcode (PDF417), camera capture, or manual entry."
+    },
+    "scanned_by": {
+      "type": "string",
+      "description": "Email of staff member who performed the scan."
+    },
+    "scanned_by_role": {
+      "type": "string",
+      "description": "Role of scanner (DOOR_GIRL, DOORMAN, SECURITY, etc.)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Server time of the scan."
+    },
+    "validation_run": {
+      "type": "boolean",
+      "default": false,
+      "description": "DACO-20260613-DOOR-RBAC — true = funds-off training run. Quarantined from booked reports."
+    },
+    "funds_settled": {
+      "type": "boolean",
+      "default": true,
+      "description": "false when validation_run=true. Excludes record from settlement rollups."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["REAL", "DEMO", "SANDBOX"],
+      "default": "REAL",
+      "description": "Ledger mode at scan time."
+    },
+    "details": {
+      "type": "string",
+      "description": "JSON-encoded scan metadata (e.g., age_verified, name_match, barcode_data)."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": ["scan_id", "subject_id", "subject_type", "venue_id", "scan_type", "scanned_by", "timestamp"]
+}
