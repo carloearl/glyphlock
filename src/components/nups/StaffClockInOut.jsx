@@ -19,7 +19,7 @@ import { verifyLiveIdentity, sessionFingerprint } from '@/lib/nups/identityVerif
 import { logActivity } from '@/lib/nups/activityLog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, LogIn, LogOut, ShieldCheck, ShieldAlert, User } from 'lucide-react';
+import { Clock, LogIn, LogOut, ShieldCheck, ShieldAlert, User, Info } from 'lucide-react';
 
 const ROLE_BADGE_STYLES = {
   DOOR_GIRL: 'bg-pink-500/15 border-pink-500/40 text-pink-300',
@@ -159,28 +159,23 @@ export default function StaffClockInOut({ user, venueId, station = 'door' }) {
   return (
     <Card className="bg-slate-900 border-slate-800">
       <CardContent className="p-5 space-y-4">
-        {/* IDENTITY BANNER — the live proof required by acceptance criterion #1 */}
-        <div className={`p-3 rounded-lg border flex items-start gap-3 ${
+        {/* WHO'S CLOCKING IN — friendly identity card */}
+        <div className={`p-4 rounded-lg border flex items-center gap-3 ${
           identityState.checking ? 'border-slate-700 bg-slate-800/40' :
           identityState.ok ? 'border-emerald-500/40 bg-emerald-500/5' :
           'border-red-500/50 bg-red-500/10'
         }`}>
           {identityState.checking ? (
-            <Clock className="w-5 h-5 text-slate-400 mt-0.5 animate-pulse" />
+            <Clock className="w-6 h-6 text-slate-400 animate-pulse" />
           ) : identityState.ok ? (
-            <ShieldCheck className="w-5 h-5 text-emerald-400 mt-0.5" />
+            <ShieldCheck className="w-6 h-6 text-emerald-400" />
           ) : (
-            <ShieldAlert className="w-5 h-5 text-red-400 mt-0.5" />
+            <ShieldAlert className="w-6 h-6 text-red-400" />
           )}
           <div className="flex-1 min-w-0">
-            <div className="text-xs uppercase tracking-wider text-slate-400">
-              {identityState.checking ? 'Verifying session…' :
-               identityState.ok ? 'Session verified · identity bound' :
-               'Session contamination — clock-in blocked'}
-            </div>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span className="font-bold text-white truncate">
+              <span className="font-bold text-white truncate text-base">
                 {user?.full_name || identityState.liveEmail || user?.email || 'Unknown'}
               </span>
               {role && (
@@ -189,8 +184,15 @@ export default function StaffClockInOut({ user, venueId, station = 'door' }) {
                 </span>
               )}
             </div>
+            <div className="text-xs text-slate-400 mt-0.5">
+              {identityState.checking ? 'Checking your sign-in…' :
+               identityState.ok ? "You're signed in and ready" :
+               "Your sign-in doesn't match this account"}
+            </div>
             {!identityState.checking && !identityState.ok && (
-              <div className="text-[11px] text-red-300 mt-1 font-mono">{identityState.reason}</div>
+              <div className="text-[11px] text-red-300 mt-1">
+                Please sign out and sign back in to continue.
+              </div>
             )}
           </div>
         </div>
@@ -198,42 +200,55 @@ export default function StaffClockInOut({ user, venueId, station = 'door' }) {
         {/* SHIFT CONTROLS */}
         {activeShift ? (
           <div className="space-y-3">
-            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-              <div className="text-[10px] uppercase tracking-wider text-emerald-400">On Shift</div>
-              <div className="text-sm text-emerald-200">
-                Since {new Date(activeShift.check_in_time).toLocaleTimeString()}
+            <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
+              <div className="text-[10px] uppercase tracking-wider text-emerald-400 mb-1">You're On Shift</div>
+              <div className="text-2xl font-black text-emerald-200">
+                Since {new Date(activeShift.check_in_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
               </div>
-              <div className="text-[10px] text-emerald-500/80 font-mono mt-1">
-                fp: {activeShift.session_fingerprint || '—'}
+              <div className="text-xs text-emerald-400/80 mt-1">
+                Tap Clock Out when you're done for the night.
               </div>
             </div>
             <Button
               onClick={handleClockOut}
               disabled={busy || !identityState.ok}
-              className="w-full bg-red-600 hover:bg-red-500"
+              className="w-full bg-red-600 hover:bg-red-500 h-12 text-base font-bold"
             >
-              <LogOut className="w-4 h-4 mr-1" /> {busy ? 'Working…' : 'Clock Out'}
+              <LogOut className="w-5 h-5 mr-2" /> {busy ? 'Clocking Out…' : 'Clock Out'}
             </Button>
           </div>
         ) : (
-          <Button
-            onClick={handleClockIn}
-            disabled={busy || !identityState.ok}
-            className="w-full bg-emerald-600 hover:bg-emerald-500"
-          >
-            <LogIn className="w-4 h-4 mr-1" /> {busy ? 'Verifying & clocking in…' : 'Clock In'}
-          </Button>
+          <div className="space-y-3">
+            <div className="p-4 rounded-lg bg-slate-800/60 border border-slate-700 text-center">
+              <Clock className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+              <div className="text-sm font-bold text-white">Ready to start your shift?</div>
+              <div className="text-xs text-slate-400 mt-1">
+                Tap Clock In below. You'll stay clocked in until you tap Clock Out.
+              </div>
+            </div>
+            <Button
+              onClick={handleClockIn}
+              disabled={busy || !identityState.ok}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 h-12 text-base font-bold"
+            >
+              <LogIn className="w-5 h-5 mr-2" /> {busy ? 'Clocking In…' : 'Clock In'}
+            </Button>
+          </div>
         )}
 
         {err && (
-          <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded p-2 font-mono">
+          <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded p-3">
+            <span className="font-bold block mb-1">Couldn't complete that:</span>
             {err}
           </div>
         )}
 
-        <div className="text-[10px] text-slate-500 leading-relaxed">
-          Every clock-in re-verifies your live session before stamping the record. If the live identity
-          and the door session diverge, the write is rejected at the data gateway (ID-01 mitigation).
+        <div className="flex items-start gap-2 text-[11px] text-slate-500 leading-relaxed">
+          <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <span>
+            Your shift is stamped under <strong className="text-slate-400">{user?.full_name || user?.email || 'your account'}</strong>.
+            Only you can clock yourself out — so nobody can punch your timecard for you.
+          </span>
         </div>
       </CardContent>
     </Card>
