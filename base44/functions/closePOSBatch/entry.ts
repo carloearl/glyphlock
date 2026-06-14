@@ -52,7 +52,9 @@ Deno.serve(async (req) => {
     // Calculate batch totals from real transactions
     const allTxns = await base44.asServiceRole.entities.POSTransaction.list('-created_date', 500);
     const batchTxns = allTxns.filter(t => t.batch_id === batch_id || t.batch_id === batch.id);
-    const realTxns = batchTxns.filter(t => !t.mode || t.mode === 'REAL');
+    // DACO-20260613-DOOR-RBAC — exclude funds-off validation records from booked totals.
+    // `!== true` preserves legacy rows (undefined/null/false → included).
+    const realTxns = batchTxns.filter(t => (!t.mode || t.mode === 'REAL') && t.validation_run !== true);
 
     const totalSales = realTxns.reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
     const closingCashNum = Number(closing_cash) || 0;

@@ -37,7 +37,10 @@ Deno.serve(async (req) => {
     const today = new Date().toDateString();
     const todayTxns = allTxns.filter(t => new Date(t.created_date).toDateString() === today);
 
-    const realTxns = todayTxns.filter(t => !t.mode || t.mode === 'REAL');
+    // DACO-20260613-DOOR-RBAC — exclude funds-off validation records from booked totals.
+    // `!== true` preserves legacy rows (undefined/null/false → included). Applies to
+    // cashSales, cardSales, totalSales, doorTxns, barTxns, products_sold — all derive from realTxns.
+    const realTxns = todayTxns.filter(t => (!t.mode || t.mode === 'REAL') && t.validation_run !== true);
     const demoTxns = todayTxns.filter(t => t.mode === 'DEMO' || t.mode === 'TEST');
 
     if (realTxns.length === 0) {
