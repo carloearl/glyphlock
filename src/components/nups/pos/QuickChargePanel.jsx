@@ -29,8 +29,7 @@ function buildDoorPresets(rates) {
   if (!rates) return [];
   const promoAmt = Number(rates.promo_card_amount) || 5;
   return [
-    { label: "Cover — Cash",       amount: Number(rates.cover_charge) || 0,    accent: "#22c55e", payment_method: "Cash",        is_cover: true },
-    { label: "Cover — Card",       amount: Number(rates.cover_charge) || 0,    accent: "#06b6d4", payment_method: "Credit Card", is_cover: true },
+    { label: "Cover",              amount: Number(rates.cover_charge) || 0,    accent: "#22c55e", is_cover: true },
     { label: `$${promoAmt} OFF Promo`, amount: promoAmt,                       accent: "#fbbf24", is_promo: true },
     { label: "Re-Entry",           amount: Number(rates.reentry_charge) || 0,  accent: "#f59e0b", payment_method: null,          is_reentry: true },
     { label: "Friends & Military", amount: Number(rates.friends_military) || 0, accent: "#10b981" },
