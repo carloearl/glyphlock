@@ -1,0 +1,60 @@
+{
+  "name": "FrontDoorConfig",
+  "type": "object",
+  "description": "Per-venue runtime configuration for the Front Door page. Admins can toggle tabs, reorder them, rename labels, and hide dashboard widgets without code changes.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Venue this config applies to. One config per venue."
+    },
+    "tabs": {
+      "type": "array",
+      "description": "Ordered list of front door tabs. Disabled tabs are hidden from the operator.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "guests",
+              "dancers",
+              "drivers",
+              "staff"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label for the tab (overrideable per venue)"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "order": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "show_stats": {
+      "type": "boolean",
+      "default": true,
+      "description": "Toggle the live stats strip (active guests/dancers/drivers)"
+    },
+    "show_settlement_ticker": {
+      "type": "boolean",
+      "default": true,
+      "description": "Toggle the live cash + card settlement ticker"
+    },
+    "last_updated_by": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Operator-facing note for why a tab was disabled (e.g. 'Driver tab disabled: QR scanner offline')"
+    }
+  },
+  "required": [
+    "venue_id"
+  ]
+}
