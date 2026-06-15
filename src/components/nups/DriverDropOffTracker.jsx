@@ -70,6 +70,23 @@ export default function DriverDropOffTracker({ user }) {
     refetchInterval: 30000,
   });
 
+  // Active POS batch for this venue — driver payouts ride the SAME open
+  // batch as the door register so end-of-night Z-report sees POS sales AND
+  // driver disbursements under one transaction umbrella. We stamp every
+  // session + settle with batch_id so the reconciliation joins cleanly.
+  const { data: activeBatch } = useQuery({
+    queryKey: ["driver-active-batch", venueId],
+    queryFn: async () => {
+      if (!venueId) return null;
+      const batches = await base44.entities.POSBatch.filter({ status: "open" });
+      return batches.find(b => b.venue_id === venueId) || batches[0] || null;
+    },
+    enabled: !!venueId,
+    refetchInterval: 60000,
+  });
+  const batchId = activeBatch?.id || null;
+  const batchRef = activeBatch?.batch_id || activeBatch?.id || null;
+
   // Active driver profiles for this venue (quick-pick + QR resolve)
   const { data: profiles = [] } = useQuery({
     queryKey: ["driver-profiles", venueId],
@@ -135,10 +152,15 @@ export default function DriverDropOffTracker({ user }) {
         payment_method: "cash",
         status: "pending",
         tax_year: thisYear(),
+        // Pin disbursement to the open door batch — same transaction window
+        // as POS sales. payment_reference doubles as the join key downstream.
+        payment_reference: batchRef ? `BATCH-${batchRef}` : null,
         notes: JSON.stringify({
           source: "driver_drop_session",
           affiliated: !!profile.affiliated,
           guests: 0,
+          batch_id: batchId,
+          batch_reference: batchRef,
           rates_snapshot: rates ? {
             cover: rates.cover_charge,
             card_discount: rates.card_discount,
@@ -235,11 +257,23 @@ export default function DriverDropOffTracker({ user }) {
       const coverPerGuest = Number(rates?.cover_charge) - (affiliated ? Number(rates?.card_discount) || 0 : 0);
       const expectedCoverCollected = coverPerGuest * totalGuests;
 
-      // 1. Mark DriverPayout PAID — disbursement ledger entry (cash out)
+      // 1. Mark DriverPayout PAID — disbursement ledger entry (cash out).
+      // Re-stamp the open batch at settle time (in case onboarding happened
+      // before the batch was opened) so the disbursement joins the right
+      // transaction window in the Z-report.
+      const settleBatchRef = batchRef || meta.batch_reference || null;
+      const settleBatchId  = batchId  || meta.batch_id        || null;
       await base44.entities.DriverPayout.update(session.id, {
         status: "paid",
-        notes: JSON.stringify({ ...meta, settled_at: new Date().toISOString() }),
-        payment_reference: `DRAWER-${today}`,
+        notes: JSON.stringify({
+          ...meta,
+          settled_at: new Date().toISOString(),
+          batch_id: settleBatchId,
+          batch_reference: settleBatchRef,
+        }),
+        payment_reference: settleBatchRef
+          ? `BATCH-${settleBatchRef}`
+          : `DRAWER-${today}`,
       });
 
       // 2. Bump DriverProfile YTD (1099 tracking)
@@ -272,6 +306,8 @@ export default function DriverDropOffTracker({ user }) {
           severity: "low",
           metadata: {
             venue_id: venueId,
+            batch_id: settleBatchId,
+            batch_reference: settleBatchRef,
             driver_id: session.contractor_id,
             driver_name: session.contractor_name,
             payout_id: session.payout_id,
@@ -284,7 +320,7 @@ export default function DriverDropOffTracker({ user }) {
             mode: rates?.mode || "REAL",
             directive: "DACO-20260603-FRONTDOOR-DRIVER",
             part: "B",
-            note: "total_sales UNCHANGED — payout is disbursement, not negative revenue.",
+            note: "total_sales UNCHANGED — payout is disbursement, not negative revenue. Linked to POSBatch for Z-report join.",
           },
         });
       } catch (_) { /* non-fatal */ }
@@ -322,6 +358,17 @@ export default function DriverDropOffTracker({ user }) {
           )}
           {rates?.mode && rates.mode !== "REAL" && (
             <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-xs">{rates.mode}</Badge>
+          )}
+          {batchRef ? (
+            <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-xs">
+              <Lock className="w-3 h-3 mr-1 inline" />
+              Batch {String(batchRef).slice(-6).toUpperCase()}
+            </Badge>
+          ) : (
+            <Badge className="bg-red-500/20 text-red-300 border-red-500/40 text-xs">
+              <AlertCircle className="w-3 h-3 mr-1 inline" />
+              No Open Batch
+            </Badge>
           )}
         </div>
         <div className="flex gap-2">
