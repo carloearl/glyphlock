@@ -27,10 +27,28 @@ const MANAGER_ROLES = ['admin', 'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER'
 
 function money(n) { return `$${Number(n || 0).toFixed(2)}`; }
 
-function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExpand, isSelected, onToggleSelect }) {
+// Pull the POS Batch reference out of the payout's notes blob.
+// DriverDropOffTracker stamps "Batch ABC123" (or "batch_id=...") on disbursement.
+function extractBatchRef(payout) {
+  const src = `${payout?.notes || ''} ${payout?.payment_reference || ''}`;
+  const m = src.match(/batch(?:[\s_:=#-]+)([A-Za-z0-9-]{4,})/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+function fmtShort(ts) {
+  if (!ts) return '—';
+  try {
+    const d = new Date(ts);
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  } catch { return '—'; }
+}
+
+function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExpand, isSelected, onToggleSelect, runningTotal }) {
   const status = payout.payout_status || 'PENDING';
   const linked = logs.filter(l => l.entity_affected === `DriverPayout:${payout.id}`);
   const isPending = status === 'PENDING';
+  const batchRef = extractBatchRef(payout);
+  const handshakeTs = payout.paid_at || payout.processed_at;
 
   return (
     <>
@@ -59,6 +77,15 @@ function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExp
         <td className="p-3 text-center text-slate-300">{payout.total_drops || 0}</td>
         <td className="p-3 text-center text-purple-300">{payout.vip_count || 0}</td>
         <td className="p-3 text-right font-bold text-emerald-300">{money(payout.total_payout)}</td>
+        <td className="p-3 text-right text-cyan-300 font-mono text-xs">{money(runningTotal)}</td>
+        <td className="p-3 text-xs text-slate-400 whitespace-nowrap">
+          {handshakeTs ? fmtShort(handshakeTs) : <span className="text-slate-600">—</span>}
+        </td>
+        <td className="p-3 text-xs">
+          {batchRef
+            ? <Badge variant="outline" className="text-[10px] border-cyan-500/40 text-cyan-300 font-mono">{batchRef}</Badge>
+            : <span className="text-slate-600">—</span>}
+        </td>
         <td className="p-3">
           <DriverPayoutStatusToggle payout={payout} currentUser={currentUser} onUpdated={onUpdated} />
         </td>
@@ -68,7 +95,25 @@ function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExp
       </tr>
       {expanded && (
         <tr className="bg-slate-900/50">
-          <td colSpan={11} className="p-4 border-t border-slate-800">
+          <td colSpan={14} className="p-4 border-t border-slate-800">
+            {/* Handshake block — Doorman headcount lock → Door Girl cash disbursement */}
+            <div className="mb-4 grid sm:grid-cols-3 gap-3 text-xs">
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                <div className="text-[10px] text-amber-400 uppercase tracking-wide font-bold mb-1">① Headcount Confirmed</div>
+                <div className="text-white font-medium">{payout.paid_by || payout.processed_by || '—'}</div>
+                <div className="text-slate-400 mt-1">{payout.paid_at ? new Date(payout.paid_at).toLocaleString() : '—'}</div>
+              </div>
+              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+                <div className="text-[10px] text-emerald-400 uppercase tracking-wide font-bold mb-1">② Cash Disbursed</div>
+                <div className="text-white font-medium">{payout.processed_by || '—'}</div>
+                <div className="text-slate-400 mt-1">{payout.processed_at ? new Date(payout.processed_at).toLocaleString() : '—'}</div>
+              </div>
+              <div className="rounded-lg border border-cyan-500/30 bg-cyan-500/5 p-3">
+                <div className="text-[10px] text-cyan-400 uppercase tracking-wide font-bold mb-1">③ POS Batch Link</div>
+                <div className="text-white font-mono">{batchRef || 'Unlinked'}</div>
+                <div className="text-slate-400 mt-1">{batchRef ? 'Reconciles with door register batch' : 'Pre-batch-linkage record'}</div>
+              </div>
+            </div>
             <div className="grid md:grid-cols-2 gap-4 text-xs">
               <div className="space-y-2">
                 <div className="font-bold text-slate-300 uppercase tracking-wide">Payout breakdown</div>
@@ -181,6 +226,20 @@ export default function DriverPayoutHistory() {
       drops: filtered.reduce((s, p) => s + (Number(p.total_drops) || 0), 0),
       vip: filtered.reduce((s, p) => s + (Number(p.vip_count) || 0), 0),
     };
+  }, [filtered]);
+
+  // Compute a running disbursement total per row (oldest → newest within current filter).
+  // Map keyed by payout id so display can stay sorted newest-first without re-sorting.
+  const runningById = useMemo(() => {
+    const asc = [...filtered].sort((a, b) => {
+      const da = (a.session_date || '') + (a.processed_at || a.paid_at || a.created_date || '');
+      const db = (b.session_date || '') + (b.processed_at || b.paid_at || b.created_date || '');
+      return da.localeCompare(db);
+    });
+    const map = {};
+    let run = 0;
+    asc.forEach(p => { run += Number(p.total_payout) || 0; map[p.id] = run; });
+    return map;
   }, [filtered]);
 
   const handleExportPdf = async () => {
@@ -356,14 +415,17 @@ export default function DriverPayoutHistory() {
                   <th className="text-center p-3">Drops</th>
                   <th className="text-center p-3">VIP</th>
                   <th className="text-right p-3">Payout</th>
+                  <th className="text-right p-3" title="Cumulative disbursed across rows in this filter, oldest → newest">Running</th>
+                  <th className="text-left p-3" title="Handshake timestamp: Doorman confirms headcount → Door Girl disburses cash">Paid</th>
+                  <th className="text-left p-3" title="POS Batch the payout is reconciled against">Batch</th>
                   <th className="text-left p-3">Status</th>
                   <th className="text-left p-3">Audit</th>
                 </tr>
               </thead>
               <tbody>
-                {isLoading && <tr><td colSpan={11} className="p-8 text-center text-slate-500">Loading…</td></tr>}
+                {isLoading && <tr><td colSpan={14} className="p-8 text-center text-slate-500">Loading…</td></tr>}
                 {!isLoading && filtered.length === 0 && (
-                  <tr><td colSpan={11} className="p-8 text-center text-slate-500">No matching records.</td></tr>
+                  <tr><td colSpan={14} className="p-8 text-center text-slate-500">No matching records.</td></tr>
                 )}
                 {filtered.map(p => (
                   <PayoutRow
@@ -374,6 +436,7 @@ export default function DriverPayoutHistory() {
                     expanded={!!expanded[p.id]}
                     onToggleExpand={() => setExpanded(e => ({ ...e, [p.id]: !e[p.id] }))}
                     onUpdated={() => refetch()}
+                    runningTotal={runningById[p.id] || 0}
                     isSelected={selectedIds.has(p.id)}
                     onToggleSelect={(checked) => {
                       setSelectedIds(prev => {
