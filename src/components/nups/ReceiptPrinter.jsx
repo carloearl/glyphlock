@@ -43,6 +43,14 @@ export default function ReceiptPrinter({
     const tipAmount = transaction.tip || 0;
     const grandTotal = transaction.total || 0;
 
+    // Door cover charges are sales-tax-exempt; the `tax` field on a door
+    // transaction is actually the credit-card processing fee. Split it on
+    // the receipt so the customer reads honest line items.
+    const isDoor = (transaction.station || '').toLowerCase() === 'door';
+    const taxLabel = isDoor ? 'Sales Tax (0%)' : 'Sales Tax (AZ 8%)';
+    const taxValue = isDoor ? 0 : (transaction.tax || 0);
+    const ccFee    = isDoor ? (transaction.tax || 0) : 0;
+
     const vipSection = isVIP && vipDetails ? `
       <div style="border:2px solid #000;padding:8px;margin:8px 0;background:#f9f9f9;">
         <div style="text-align:center;font-weight:bold;font-size:14px;margin-bottom:4px;">★ VIP SHOW SERVICE ★</div>
@@ -121,7 +129,8 @@ export default function ReceiptPrinter({
         <div class="double-divider"></div>
         <table>
           <tr><td>Subtotal:</td><td class="right">$${(transaction.subtotal || 0).toFixed(2)}</td></tr>
-          <tr><td>Sales Tax (AZ 8.0%):</td><td class="right">$${(transaction.tax || 0).toFixed(2)}</td></tr>
+          <tr><td>${taxLabel}:</td><td class="right">$${taxValue.toFixed(2)}</td></tr>
+          ${ccFee > 0 ? `<tr><td>Card Processing Fee:</td><td class="right">$${ccFee.toFixed(2)}</td></tr>` : ''}
           ${transaction.discount > 0 ? `<tr><td>Discount:</td><td class="right" style="color:red;">-$${transaction.discount.toFixed(2)}</td></tr>` : ''}
           ${tipAmount > 0 ? `<tr><td>Gratuity:</td><td class="right">$${tipAmount.toFixed(2)}</td></tr>` : ''}
         </table>
@@ -188,6 +197,12 @@ export default function ReceiptPrinter({
   const txDate = new Date(transaction.created_date);
   const cashierDisplay = getCashierDisplay(transaction);
 
+  // Match the printable receipt: door = 0% sales tax, surface CC fee separately.
+  const isDoor = (transaction.station || '').toLowerCase() === 'door';
+  const taxLabelScreen = isDoor ? 'Tax (0%)' : 'Tax (AZ 8%)';
+  const taxValueScreen = isDoor ? 0 : (transaction.tax || 0);
+  const ccFeeScreen    = isDoor ? (transaction.tax || 0) : 0;
+
   return (
     <div className="space-y-3" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
       {/* On-screen receipt preview */}
@@ -233,7 +248,8 @@ export default function ReceiptPrinter({
 
         <div className="border-t border-double border-gray-600 pt-2 space-y-1">
           <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>${(transaction.subtotal || 0).toFixed(2)}</span></div>
-          <div className="flex justify-between text-gray-400"><span>Tax (AZ 8%)</span><span>${(transaction.tax || 0).toFixed(2)}</span></div>
+          <div className="flex justify-between text-gray-400"><span>{taxLabelScreen}</span><span>${taxValueScreen.toFixed(2)}</span></div>
+          {ccFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>Card Processing Fee</span><span>${ccFeeScreen.toFixed(2)}</span></div>}
           {transaction.discount > 0 && <div className="flex justify-between text-red-400"><span>Discount</span><span>-${transaction.discount.toFixed(2)}</span></div>}
           {tipAmount > 0 && <div className="flex justify-between text-gray-400"><span>Gratuity</span><span>${tipAmount.toFixed(2)}</span></div>}
           <div className="border-t border-gray-700 pt-1 flex justify-between text-lg font-black text-green-400">
