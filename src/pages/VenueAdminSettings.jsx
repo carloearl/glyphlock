@@ -13,11 +13,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Lock, Settings, ClipboardCheck, FileText, DollarSign, Database } from 'lucide-react';
+import { Lock, Settings, ClipboardCheck, FileText, DollarSign, Database, BookOpen } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import RateFeeEditor from '@/components/admin/RateFeeEditor';
 import DailyChecklistEditor from '@/components/admin/DailyChecklistEditor';
 import ContractTermsEditor from '@/components/admin/ContractTermsEditor';
+import ChartOfAccountsEditor from '@/components/admin/ChartOfAccountsEditor';
 
 export default function VenueAdminSettings() {
   const [selectedVenue, setSelectedVenue] = useState('');
@@ -108,6 +109,9 @@ export default function VenueAdminSettings() {
               <TabsTrigger value="contracts" className="data-[state=active]:bg-slate-800">
                 <FileText className="w-3 h-3 mr-1" /> Contracts
               </TabsTrigger>
+              <TabsTrigger value="coa" className="data-[state=active]:bg-slate-800">
+                <BookOpen className="w-3 h-3 mr-1" /> Chart of Accounts
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="rates">
@@ -118,6 +122,9 @@ export default function VenueAdminSettings() {
             </TabsContent>
             <TabsContent value="contracts">
               <ContractTermsEditor venueId={selectedVenue} user={user} />
+            </TabsContent>
+            <TabsContent value="coa">
+              <ChartOfAccountsEditor venueId={selectedVenue} user={user} />
             </TabsContent>
           </Tabs>
         ) : (

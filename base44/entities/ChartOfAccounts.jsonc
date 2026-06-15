@@ -1,0 +1,71 @@
+{
+  "name": "ChartOfAccounts",
+  "type": "object",
+  "description": "Per-venue (per-tenant) customizable Chart of Accounts. Each row is a single ledger account: code, name, type, optional parent for sub-accounts, and a documentation field that maps app data (POSTransaction.cash_sales, DriverPayout.total_payout, etc.) into that account. Read by accounting exports (QuickBooks IIF/CSV) to label journal lines. Never hardcode account codes in logic \u2014 always read from this entity for the active venue.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Tenant / venue scope. One Chart of Accounts per venue."
+    },
+    "account_code": {
+      "type": "string",
+      "description": "Numeric or alphanumeric account code (e.g. '4000', '5000-DRV'). Unique within venue."
+    },
+    "account_name": {
+      "type": "string",
+      "description": "Human-readable account name (e.g. 'Cover Charges \u2014 Cash')."
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "ASSET",
+        "LIABILITY",
+        "EQUITY",
+        "REVENUE",
+        "CONTRA_REVENUE",
+        "EXPENSE",
+        "COGS"
+      ],
+      "description": "Top-level GAAP classification. Drives sign convention in exports."
+    },
+    "category": {
+      "type": "string",
+      "description": "Free-form sub-grouping for UI rollups (e.g. 'Door Revenue', 'Disbursements', 'Stored Value')."
+    },
+    "parent_code": {
+      "type": "string",
+      "description": "Optional parent account_code for sub-accounts (e.g. 4000 parent \u2192 4001 'Cover \u2014 Friends/Military')."
+    },
+    "mapped_source": {
+      "type": "string",
+      "description": "Documentation field \u2014 describes what app data flows into this account (e.g. 'POSTransaction.cash_sales WHERE station=door AND validation_run=false')."
+    },
+    "description": {
+      "type": "string",
+      "description": "Free-form notes for the bookkeeper."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Soft-disable. Inactive accounts are hidden from new entries but remain on historical exports."
+    },
+    "system_seed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Informational \u2014 true if row was created by the default-seed action."
+    },
+    "last_edited_by": {
+      "type": "string"
+    },
+    "last_edited_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "venue_id",
+    "account_code",
+    "account_name",
+    "account_type"
+  ]
+}
