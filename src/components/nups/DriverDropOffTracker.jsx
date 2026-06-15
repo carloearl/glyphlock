@@ -345,9 +345,9 @@ export default function DriverDropOffTracker({ user }) {
               : 2
         }
         steps={[
-          { id: "register", label: "1. Register / Scan", hint: "Onboard or scan the driver's QR" },
-          { id: "log",      label: "2. Log Drops",       hint: "Add each drop-off as it happens" },
-          { id: "pay",      label: "3. Confirm & Pay",   hint: "Doorman confirms, Door Girl pays" },
+          { id: "register", label: "1. Register",         hint: "Onboard or scan the driver's QR" },
+          { id: "log",      label: "2. Log & Confirm",    hint: "Doorman logs drops, then confirms headcount" },
+          { id: "pay",      label: "3. Pay Driver",       hint: "Door Girl hands cash from the drawer" },
         ]}
       />
 

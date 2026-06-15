@@ -525,7 +525,7 @@ export default function POSCashRegister({ user, station = 'door' }) {
                                                                                                                                                                         }
                                                                                                                                                                                 });
                                                                                                                                                                                       } catch(auditErr) { console.warn('Audit log write failed:', auditErr); }
-      if (selectedCustomer?.id) {
+                                                                                                                                                                                      if (selectedCustomer?.id) {
         await base44.entities.POSCustomer.update(selectedCustomer.id, {
           visit_count: (selectedCustomer.visit_count || 0) + 1,
           total_spent: (selectedCustomer.total_spent || 0) + total,
@@ -613,6 +613,15 @@ export default function POSCashRegister({ user, station = 'door' }) {
                                                                                     if (paymentStep === "pay") {
     return (
       <div className="max-w-md mx-auto space-y-4 p-4">
+        <FlowSteps
+          tone="cyan"
+          currentStep={1}
+          steps={[
+            { id: "ring",    label: "1. Add Items" },
+            { id: "pay",     label: "2. Take Payment", hint: `Tendering ${paymentMethod || ""}` },
+            { id: "receipt", label: "3. Receipt" },
+          ]}
+        />
         <Button variant="ghost" onClick={() => setPaymentStep("method")} className="text-gray-400 hover:text-white mb-2">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to methods
         </Button>
@@ -686,6 +695,15 @@ export default function POSCashRegister({ user, station = 'door' }) {
   if (paymentStep === "method") {
     return (
       <div className="max-w-lg mx-auto space-y-4 p-4 overflow-y-auto max-h-screen">
+        <FlowSteps
+          tone="cyan"
+          currentStep={1}
+          steps={[
+            { id: "ring",    label: "1. Add Items" },
+            { id: "pay",     label: "2. Take Payment", hint: "Choose Cash or Card" },
+            { id: "receipt", label: "3. Receipt" },
+          ]}
+        />
         <Button variant="ghost" onClick={() => setPaymentStep("register")} className="text-gray-400 hover:text-white mb-2">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to register
         </Button>
