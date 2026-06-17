@@ -54,6 +54,7 @@ import UnifiedSearch from './pages/UnifiedSearch';
 import Tonight from './pages/Tonight';
 import VenueAdminSettings from './pages/VenueAdminSettings';
 import MobileScanner from './pages/MobileScanner';
+import ContractsHub from './pages/ContractsHub';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -168,6 +169,9 @@ const AuthenticatedApp = () => {
         <Route path="/Tonight" element={<LayoutWrapper currentPageName="Tonight"><Tonight /></LayoutWrapper>} />
         <Route path="/tonight" element={<LayoutWrapper currentPageName="Tonight"><Tonight /></LayoutWrapper>} />
         <Route path="/admin/venue-settings" element={<LayoutWrapper currentPageName="VenueAdminSettings"><VenueAdminSettings /></LayoutWrapper>} />
+        <Route path="/Contracts" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
+        <Route path="/contracts" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
+        <Route path="/ContractsHub" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
