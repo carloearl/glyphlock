@@ -16,6 +16,7 @@ import LiabilityLedger from "@/components/accounting/LiabilityLedger";
 import AccountingTrendChart from "@/components/accounting/AccountingTrendChart";
 import QuickBooksExportModal from "@/components/accounting/QuickBooksExportModal";
 import QuickBooksDriveSyncButton from "@/components/accounting/QuickBooksDriveSyncButton";
+import SettlementDiffPanel from "@/components/accounting/SettlementDiffPanel";
 import { toast } from "sonner";
 
 /**
@@ -291,6 +292,11 @@ function AccountingContent() {
 
             <div className="mb-6">
               <LiabilityLedger data={data} />
+            </div>
+
+            {/* Before/After diff log for locked settlements */}
+            <div className="mb-6">
+              <SettlementDiffPanel venueId={venueId} limit={5} />
             </div>
 
             {/* Data integrity footer */}

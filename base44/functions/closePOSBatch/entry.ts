@@ -61,6 +61,22 @@ Deno.serve(async (req) => {
     const expectedCash = (batch.opening_cash || 0) + realTxns.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
     const discrepancy = closingCashNum - expectedCash;
 
+    // Snapshot pre-close batch state for differential audit
+    const beforeSnap = {
+      status: batch.status,
+      total_sales: batch.total_sales || 0,
+      closing_cash: batch.closing_cash || 0,
+      discrepancy: batch.discrepancy || 0,
+      transaction_count: batch.transaction_count || 0,
+    };
+    const afterSnap = {
+      status: 'closed',
+      total_sales: totalSales,
+      closing_cash: closingCashNum,
+      discrepancy,
+      transaction_count: realTxns.length,
+    };
+
     await base44.asServiceRole.entities.POSBatch.update(batch.id, {
       status: 'closed',
       closing_cash: closingCashNum,
@@ -80,6 +96,20 @@ Deno.serve(async (req) => {
       severity: Math.abs(discrepancy) > 0.01 ? 'medium' : 'low',
       resource_id: batch_id,
       metadata: { batch_id, total_sales: totalSales, closing_cash: closingCashNum, discrepancy, real_txns: realTxns.length }
+    });
+
+    // Append-only differential audit trail (ActivityLog) — feeds the Accounting Diff panel
+    await base44.asServiceRole.entities.ActivityLog.create({
+      timestamp: new Date().toISOString(),
+      user_email: user.email,
+      user_role: userRole,
+      action_type: 'UPDATE',
+      entity_affected: `POSBatch:${batch.id}`,
+      before_value: beforeSnap,
+      after_value: afterSnap,
+      venue_id: batch.venue_id || null,
+      mode: 'REAL',
+      notes: `DIFFERENTIAL [BATCH_CLOSE] batch=${batch_id} txns=${realTxns.length} variance=$${discrepancy.toFixed(2)}`
     });
 
     return Response.json({ batch_id, total_sales: totalSales, discrepancy, status: 'closed' });
