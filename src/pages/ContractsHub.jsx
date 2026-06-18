@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +31,29 @@ import BigSpenderLetter from "@/components/nups/contracts/BigSpenderLetter";
  *  • Venue General Terms
  *  • Spend Vault & Lookup
  */
+const TAB_ALIASES = {
+  bigspender: "big_spender",
+  "big-spender": "big_spender",
+  big_spender: "big_spender",
+  glyphbucks: "glyphbucks",
+  vip: "vip",
+  entertainer: "entertainer",
+  venue: "venue",
+  lookup: "lookup",
+};
+
 export default function ContractsHub() {
   const [activeTab, setActiveTab] = useState("glyphbucks");
   const [bigSpenderView, setBigSpenderView] = useState("letter"); // 'letter' | 'questionnaire'
+
+  // Deep-link support: /Contracts?tab=bigspender from Tonight's BigSpenderAlert
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab && TAB_ALIASES[tab.toLowerCase()]) {
+      setActiveTab(TAB_ALIASES[tab.toLowerCase()]);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white p-4 sm:p-6">

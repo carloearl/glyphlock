@@ -47,6 +47,11 @@ export const NAV_SECTIONS = [
   items: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
     { label: "NUPS Point-of-Sale", page: "NUPSLanding", visibility: "public" },
+    { label: "NUPS Operator Hub", page: "NUPSHub", visibility: "public" },
+    { label: "Register Console", page: "Register", visibility: "public" },
+    { label: "Contracts Hub", page: "Contracts", visibility: "public" },
+    { label: "Tonight Dashboard", page: "Tonight", visibility: "public" },
+    { label: "Accounting", page: "Accounting", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
   ]
@@ -105,6 +110,11 @@ export const FOOTER_LINKS = {
   financial: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
     { label: "NUPS Point-of-Sale", page: "NUPSLanding", visibility: "public" },
+    { label: "NUPS Operator Hub", page: "NUPSHub", visibility: "public" },
+    { label: "Register Console", page: "Register", visibility: "public" },
+    { label: "Contracts Hub", page: "Contracts", visibility: "public" },
+    { label: "Tonight Dashboard", page: "Tonight", visibility: "public" },
+    { label: "Accounting", page: "Accounting", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
   ],

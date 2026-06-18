@@ -17,6 +17,7 @@ import AccountingTrendChart from "@/components/accounting/AccountingTrendChart";
 import QuickBooksExportModal from "@/components/accounting/QuickBooksExportModal";
 import QuickBooksDriveSyncButton from "@/components/accounting/QuickBooksDriveSyncButton";
 import SettlementDiffPanel from "@/components/accounting/SettlementDiffPanel";
+import ZReportReconciliationPanel from "@/components/accounting/ZReportReconciliationPanel";
 import { toast } from "sonner";
 
 /**
@@ -292,6 +293,11 @@ function AccountingContent() {
 
             <div className="mb-6">
               <LiabilityLedger data={data} />
+            </div>
+
+            {/* Z-Report reconciliation (live POS vs saved snapshot) */}
+            <div className="mb-6">
+              <ZReportReconciliationPanel venueId={venueId} />
             </div>
 
             {/* Before/After diff log for locked settlements */}

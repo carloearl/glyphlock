@@ -56,6 +56,7 @@ import VenueAdminSettings from './pages/VenueAdminSettings';
 import MobileScanner from './pages/MobileScanner';
 import ContractsHub from './pages/ContractsHub';
 import RegisterConsole from './pages/RegisterConsole';
+import NUPSHub from './pages/NUPSHub';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -176,6 +177,9 @@ const AuthenticatedApp = () => {
         <Route path="/Register" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
         <Route path="/register" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
         <Route path="/RegisterConsole" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
+        <Route path="/NUPSHub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
+        <Route path="/nupshub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
+        <Route path="/Hub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>

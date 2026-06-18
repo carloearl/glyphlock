@@ -17,8 +17,9 @@ import { analyzeAuditLogs } from "@/lib/audit/auditAnalytics";
 import {
   Moon, ArrowLeft, DollarSign, Clock, ShieldAlert, Truck,
   DoorOpen, Search as SearchIcon, FileSearch, Calculator,
-  Activity, Lock, CheckCircle2, RefreshCw, Banknote,
+  Activity, Lock, CheckCircle2, RefreshCw, Banknote, LayoutGrid,
 } from "lucide-react";
+import BigSpenderAlert from "@/components/nups/tonight/BigSpenderAlert";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -180,6 +181,9 @@ export default function Tonight() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate("/NUPSHub")} className="border-violet-500/30 text-violet-300">
+              <LayoutGrid className="w-3.5 h-3.5 mr-1.5" /> Hub
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/Search")} className="border-emerald-500/30 text-emerald-300">
               <SearchIcon className="w-3.5 h-3.5 mr-1.5" /> Search
             </Button>
@@ -191,6 +195,9 @@ export default function Tonight() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Big Spender Protocol alert — only renders when a guest crosses $10k */}
+        <BigSpenderAlert venueId={venueId} />
+
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <KpiCard
