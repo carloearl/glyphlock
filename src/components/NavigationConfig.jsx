@@ -42,19 +42,31 @@ export const NAV_SECTIONS = [
     ]
   },
   {
-  label: "Financial",
-  visibility: "public",
-  items: [
-    { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
-    { label: "NUPS Point-of-Sale", page: "NUPSLanding", visibility: "public" },
-    { label: "NUPS Operator Hub", page: "NUPSHub", visibility: "public" },
-    { label: "Register Console", page: "Register", visibility: "public" },
-    { label: "Contracts Hub", page: "Contracts", visibility: "public" },
-    { label: "Tonight Dashboard", page: "Tonight", visibility: "public" },
-    { label: "Accounting", page: "Accounting", visibility: "public" },
-    { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
-    { label: "Security Tools", page: "SecurityTools", visibility: "public" },
-  ]
+    label: "Financial",
+    visibility: "public",
+    items: [
+      { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
+      { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
+      { label: "Security Tools", page: "SecurityTools", visibility: "public" },
+    ]
+  },
+  {
+    label: "NUPS",
+    visibility: "public",
+    items: [
+      { label: "NUPS Landing", page: "NUPSLanding", visibility: "public" },
+      { label: "Operator Hub", page: "NUPSHub", visibility: "public" },
+      { label: "Front Door", page: "FrontDoor", visibility: "public" },
+      { label: "Register Console", page: "Register", visibility: "public" },
+      { label: "Tonight Dashboard", page: "Tonight", visibility: "public" },
+      { label: "Accounting", page: "Accounting", visibility: "public" },
+      { label: "Contracts Hub", page: "Contracts", visibility: "public" },
+      { label: "Daily Settlement", page: "admin/settlement", visibility: "admin" },
+      { label: "Driver Payout History", page: "admin/payout-history", visibility: "admin" },
+      { label: "Activity Log", page: "admin/activity-log", visibility: "admin" },
+      { label: "Audit Integrity", page: "admin/audit-integrity", visibility: "admin" },
+      { label: "Venue Settings", page: "admin/venue-settings", visibility: "admin" },
+    ]
   },
   {
     label: "Protocols",
@@ -109,14 +121,17 @@ export const FOOTER_LINKS = {
   ],
   financial: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
-    { label: "NUPS Point-of-Sale", page: "NUPSLanding", visibility: "public" },
-    { label: "NUPS Operator Hub", page: "NUPSHub", visibility: "public" },
-    { label: "Register Console", page: "Register", visibility: "public" },
-    { label: "Contracts Hub", page: "Contracts", visibility: "public" },
-    { label: "Tonight Dashboard", page: "Tonight", visibility: "public" },
-    { label: "Accounting", page: "Accounting", visibility: "public" },
     { label: "Blockchain Verification", page: "Blockchain", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
+  ],
+  nups: [
+    { label: "NUPS Landing", page: "NUPSLanding", visibility: "public" },
+    { label: "Operator Hub", page: "NUPSHub", visibility: "public" },
+    { label: "Front Door", page: "FrontDoor", visibility: "public" },
+    { label: "Register Console", page: "Register", visibility: "public" },
+    { label: "Tonight Dashboard", page: "Tonight", visibility: "public" },
+    { label: "Accounting", page: "Accounting", visibility: "public" },
+    { label: "Contracts Hub", page: "Contracts", visibility: "public" },
   ],
   protocols: [
     { label: "Master Covenant", page: "GovernanceHub", visibility: "public" },
