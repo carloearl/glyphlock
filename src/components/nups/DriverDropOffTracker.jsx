@@ -9,6 +9,7 @@ import { Car, Plus, DollarSign, Users, CheckCircle, ChevronDown, ChevronUp, Bank
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates, computeDriverPayoutAmount } from "@/lib/nups/venueRateConfig";
 import DriverQRDeliveryModal from "@/components/nups/frontdoor/DriverQRDeliveryModal";
+import DriverProfileDrawer from "@/components/nups/DriverProfileDrawer";
 import FlowSteps from "@/components/nups/pos/FlowSteps";
 
 // ─── DACO-20260603-FRONTDOOR-DRIVER · Part B ────────────────────────────────
@@ -51,6 +52,7 @@ export default function DriverDropOffTracker({ user }) {
   const [newDriver, setNewDriver] = useState({ name: "", phone: "", affiliated: true });
   const [guestCounter, setGuestCounter] = useState({}); // record_id -> input value
   const [qrDelivery, setQrDelivery] = useState(null); // newly-onboarded driver profile awaiting QR delivery
+  const [profileDrawer, setProfileDrawer] = useState(null); // existing driver profile being inspected (read-only)
 
   const today = todayDate();
 
@@ -447,23 +449,35 @@ export default function DriverDropOffTracker({ user }) {
                     .filter(p => !activeContractorIds.has(p.driver_id))
                     .slice(0, 12)
                     .map(p => (
-                      <button
+                      <div
                         key={p.id}
-                        onClick={() => openSession.mutate(p)}
-                        disabled={openSession.isPending}
-                        className="text-left bg-black/40 hover:bg-yellow-500/10 border border-gray-700 hover:border-yellow-500/60 rounded-lg px-3 py-2 transition-all"
+                        className="bg-black/40 border border-gray-700 hover:border-yellow-500/60 rounded-lg overflow-hidden transition-all"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-white text-sm font-semibold">{p.name}</span>
-                          <Badge className={`text-[9px] ${p.affiliated ? "bg-green-500/20 text-green-300 border-green-500/40" : "bg-orange-500/20 text-orange-300 border-orange-500/40"}`}>
-                            {p.affiliated ? "Affiliated" : "Outside"}
-                          </Badge>
-                          {p.ten99_flag && <Badge className="text-[9px] bg-red-500/20 text-red-300 border-red-500/40">1099</Badge>}
-                        </div>
-                        <div className="text-[10px] text-gray-500 mt-0.5">
-                          YTD ${(p.ytd_payout_total || 0).toFixed(0)} · {p.lifetime_drops || 0} drops
-                        </div>
-                      </button>
+                        <button
+                          onClick={() => setProfileDrawer(p)}
+                          className="text-left w-full px-3 py-2 hover:bg-yellow-500/5 transition-all"
+                          title="View driver profile & history"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-white text-sm font-semibold">{p.name}</span>
+                            <Badge className={`text-[9px] ${p.affiliated ? "bg-green-500/20 text-green-300 border-green-500/40" : "bg-orange-500/20 text-orange-300 border-orange-500/40"}`}>
+                              {p.affiliated ? "Affiliated" : "Outside"}
+                            </Badge>
+                            {p.ten99_flag && <Badge className="text-[9px] bg-red-500/20 text-red-300 border-red-500/40">1099</Badge>}
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-0.5">
+                            YTD ${(p.ytd_payout_total || 0).toFixed(0)} · {p.lifetime_drops || 0} drops
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => openSession.mutate(p)}
+                          disabled={openSession.isPending}
+                          className="w-full text-[10px] uppercase tracking-wider font-bold py-1.5 bg-yellow-500/10 hover:bg-yellow-500/25 text-yellow-300 border-t border-gray-800 transition-all disabled:opacity-50"
+                          title="Open tonight's session for this driver"
+                        >
+                          + Open Session
+                        </button>
+                      </div>
                     ))}
                 </div>
                 <div className="border-t border-gray-800 my-2" />
@@ -583,12 +597,20 @@ export default function DriverDropOffTracker({ user }) {
                     </div>
                   </div>
 
-                  {/* Log guest count */}
+                  {/* Log guest count — one-tap +1 for fast entry, or type a number */}
                   <div className="flex gap-2">
+                    <Button
+                      onClick={() => logGuests.mutate({ session, guests: 1 })}
+                      disabled={logGuests.isPending || confirmed}
+                      className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold whitespace-nowrap"
+                      title="One-tap quick add — most common case"
+                    >
+                      <Plus className="w-4 h-4 mr-0.5" /> 1 Guest
+                    </Button>
                     <Input
                       type="number"
                       min="1"
-                      placeholder="Guests this drop"
+                      placeholder="Or batch count..."
                       value={counter}
                       onChange={e => setGuestCounter(c => ({ ...c, [session.id]: e.target.value }))}
                       className="bg-black/40 border-gray-700 text-white"
@@ -600,8 +622,9 @@ export default function DriverDropOffTracker({ user }) {
                         logGuests.mutate({ session, guests: N });
                         setGuestCounter(c => ({ ...c, [session.id]: "" }));
                       }}
+                      disabled={confirmed}
                       className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold"
-                    >Log Drop</Button>
+                    >Log</Button>
                   </div>
 
                   {(meta.drops || []).length > 0 && (
@@ -684,6 +707,13 @@ export default function DriverDropOffTracker({ user }) {
         onOpenChange={(v) => { if (!v) setQrDelivery(null); }}
         driver={qrDelivery}
         venueName={activeVenue?.name || activeVenue?.venue_name}
+      />
+
+      {/* Read-only driver profile + history drawer */}
+      <DriverProfileDrawer
+        open={!!profileDrawer}
+        onOpenChange={(v) => { if (!v) setProfileDrawer(null); }}
+        profile={profileDrawer}
       />
 
       {/* Paid sessions */}
