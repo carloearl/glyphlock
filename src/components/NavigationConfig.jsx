@@ -54,18 +54,10 @@ export const NAV_SECTIONS = [
     label: "NUPS",
     visibility: "public",
     items: [
+      // Single public entry point — staff/entertainer login on the landing page
+      // unlocks Operator Hub, Front Door, Register, Tonight, Accounting, etc.
+      // Sovereign (Carlo / AI) bypasses every gate downstream.
       { label: "NUPS Landing", page: "NUPSLanding", visibility: "public" },
-      { label: "Operator Hub", page: "NUPSHub", visibility: "public" },
-      { label: "Front Door", page: "FrontDoor", visibility: "public" },
-      { label: "Register Console", page: "Register", visibility: "public" },
-      { label: "Tonight Dashboard", page: "Tonight", visibility: "public" },
-      { label: "Accounting", page: "Accounting", visibility: "public" },
-      { label: "Contracts Hub", page: "Contracts", visibility: "public" },
-      { label: "Daily Settlement", page: "admin/settlement", visibility: "admin" },
-      { label: "Driver Payout History", page: "admin/payout-history", visibility: "admin" },
-      { label: "Activity Log", page: "admin/activity-log", visibility: "admin" },
-      { label: "Audit Integrity", page: "admin/audit-integrity", visibility: "admin" },
-      { label: "Venue Settings", page: "admin/venue-settings", visibility: "admin" },
     ]
   },
   {
@@ -126,12 +118,6 @@ export const FOOTER_LINKS = {
   ],
   nups: [
     { label: "NUPS Landing", page: "NUPSLanding", visibility: "public" },
-    { label: "Operator Hub", page: "NUPSHub", visibility: "public" },
-    { label: "Front Door", page: "FrontDoor", visibility: "public" },
-    { label: "Register Console", page: "Register", visibility: "public" },
-    { label: "Tonight Dashboard", page: "Tonight", visibility: "public" },
-    { label: "Accounting", page: "Accounting", visibility: "public" },
-    { label: "Contracts Hub", page: "Contracts", visibility: "public" },
   ],
   protocols: [
     { label: "Master Covenant", page: "GovernanceHub", visibility: "public" },

@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isSovereign } from "@/lib/nups/sovereign";
 
 // All valid operational roles — public GlyphLock users have NONE of these
 const ALL_OPERATIONAL_ROLES = [
@@ -49,6 +50,17 @@ export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmi
         }
 
         const user = await base44.auth.me();
+
+        // SOVEREIGN BYPASS — Carlo (Vinnie) + AI skip every gate.
+        // Resolved by NUPSUser.sovereign_flag === true OR role === "SOVEREIGN",
+        // looked up by created_by === auth email.
+        try {
+          const sovMatches = await base44.entities.NUPSUser.filter({ created_by: user.email });
+          if ((sovMatches || []).some(isSovereign)) {
+            if (!cancelled) setStatus("granted");
+            return;
+          }
+        } catch { /* fall through to standard checks */ }
 
         // Base44 admin role always gets access
         if (allowAdmin && user.role === "admin") {
