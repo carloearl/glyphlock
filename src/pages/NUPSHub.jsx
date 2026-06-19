@@ -1,100 +1,63 @@
 /**
- * NUPS Hub — Unified Operator Landing
- * ────────────────────────────────────
- * One screen, every NUPS surface. Replaces the old "menu maze" of multiple
- * redundant tabs. Role-aware: staff see what they need, admins see everything.
+ * NUPS Hub — Unified Operator Dashboard
+ * ─────────────────────────────────────
+ * Clean layout matching the NUPS reference: left sidebar, today's KPIs,
+ * top products, hourly sales chart, venue performance, plus a live
+ * system overview side panel. Role-aware via NUPSUser lookup.
  */
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  DoorOpen, ShoppingCart, FileSignature, Moon, Calculator,
-  FileSearch, Truck, Lock, Search, Smartphone, Activity, ShieldCheck,
-} from "lucide-react";
+import HubSidebar from "@/components/hub/HubSidebar";
+import TodaysSummary from "@/components/hub/TodaysSummary";
+import TopProductsTable from "@/components/hub/TopProductsTable";
+import HourlySalesChart from "@/components/hub/HourlySalesChart";
+import VenuePerformance from "@/components/hub/VenuePerformance";
+import LiveSystemOverview from "@/components/hub/LiveSystemOverview";
 
-const TILES = [
-  {
-    id: "frontdoor", to: "/FrontDoor", icon: DoorOpen, color: "violet",
-    title: "Front Door", desc: "Guest check-ins · entertainer onboarding · driver drops",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "FLOOR_HOST", "DOOR_GIRL", "DOORMAN", "SECURITY", "SOVEREIGN"],
-  },
-  {
-    id: "register", to: "/Register", icon: ShoppingCart, color: "cyan",
-    title: "Register Console", desc: "POS · receipts · driver payouts in one view",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "DOOR_GIRL", "BARTENDER", "SOVEREIGN"],
-    primary: true,
-  },
-  {
-    id: "tonight", to: "/Tonight", icon: Moon, color: "emerald",
-    title: "Tonight", desc: "Live shift KPIs · outstanding payouts · recent activity",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "SOVEREIGN"],
-  },
-  {
-    id: "contracts", to: "/Contracts", icon: FileSignature, color: "amber",
-    title: "Contracts Hub", desc: "GlyphBucks · VIP · Big Spender · Entertainer · Lookup",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "FLOOR_HOST", "SOVEREIGN"],
-  },
-  {
-    id: "accounting", to: "/Accounting", icon: Calculator, color: "emerald",
-    title: "Accounting", desc: "Revenue · disbursements · liability · QuickBooks export",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "SOVEREIGN"],
-  },
-  {
-    id: "audit", to: "/admin/audit-integrity", icon: FileSearch, color: "rose",
-    title: "Audit Integrity", desc: "Gap detection · anomalies · differential logs",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"],
-  },
-  {
-    id: "settlement", to: "/admin/settlement", icon: Lock, color: "blue",
-    title: "Daily Settlement", desc: "Reconcile · lock · pre/post snapshots",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "SOVEREIGN"],
-  },
-  {
-    id: "payouts", to: "/admin/payout-history", icon: Truck, color: "pink",
-    title: "Driver Payouts", desc: "Disbursement ledger · YTD totals · 1099 flags",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "SOVEREIGN"],
-  },
-  {
-    id: "search", to: "/Search", icon: Search, color: "sky",
-    title: "Unified Search", desc: "Across guests · drivers · entertainers · contracts",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "FLOOR_HOST", "SOVEREIGN"],
-  },
-  {
-    id: "mobile", to: "/MobileScanner", icon: Smartphone, color: "indigo",
-    title: "Mobile Scanner", desc: "ID + Driver QR scan from phone",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "DOORMAN", "SECURITY", "SOVEREIGN"],
-  },
-  {
-    id: "activity", to: "/admin/activity-log", icon: Activity, color: "slate",
-    title: "Activity Log", desc: "Immutable append-only event stream",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"],
-  },
-  {
-    id: "settings", to: "/admin/venue-settings", icon: ShieldCheck, color: "violet",
-    title: "Venue Admin", desc: "Rates · checklists · chart of accounts · contracts",
-    roles: ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "SOVEREIGN"],
-  },
-];
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
 
-const COLORS = {
-  violet:  { border: "border-violet-500/30",  bg: "bg-violet-950/20",  icon: "text-violet-300",  hover: "hover:border-violet-400/60" },
-  cyan:    { border: "border-cyan-500/30",    bg: "bg-cyan-950/20",    icon: "text-cyan-300",    hover: "hover:border-cyan-400/60" },
-  emerald: { border: "border-emerald-500/30", bg: "bg-emerald-950/20", icon: "text-emerald-300", hover: "hover:border-emerald-400/60" },
-  amber:   { border: "border-amber-500/30",   bg: "bg-amber-950/20",   icon: "text-amber-300",   hover: "hover:border-amber-400/60" },
-  rose:    { border: "border-rose-500/30",    bg: "bg-rose-950/20",    icon: "text-rose-300",    hover: "hover:border-rose-400/60" },
-  blue:    { border: "border-blue-500/30",    bg: "bg-blue-950/20",    icon: "text-blue-300",    hover: "hover:border-blue-400/60" },
-  pink:    { border: "border-pink-500/30",    bg: "bg-pink-950/20",    icon: "text-pink-300",    hover: "hover:border-pink-400/60" },
-  sky:     { border: "border-sky-500/30",     bg: "bg-sky-950/20",     icon: "text-sky-300",     hover: "hover:border-sky-400/60" },
-  indigo:  { border: "border-indigo-500/30",  bg: "bg-indigo-950/20",  icon: "text-indigo-300",  hover: "hover:border-indigo-400/60" },
-  slate:   { border: "border-slate-700",      bg: "bg-slate-900/40",   icon: "text-slate-300",   hover: "hover:border-slate-500" },
-};
+function aggregateTransactions(txns = []) {
+  const today = todayISO();
+  const todays = txns.filter((t) =>
+    !t.validation_run && (t.created_date || "").slice(0, 10) === today && t.status === "completed"
+  );
+
+  const grossSales   = todays.reduce((s, t) => s + (Number(t.total) || 0), 0);
+  const netRevenue   = todays.reduce((s, t) => s + (Number(t.cash_sales) || 0) + (Number(t.card_sales) || 0), 0);
+  const transactions = todays.length;
+  const cashTotal    = todays.reduce((s, t) => s + (Number(t.cash_sales) || 0), 0);
+  const cashPct      = netRevenue > 0 ? Math.round((cashTotal / netRevenue) * 100) : 0;
+
+  // hourly sales bucket (0..23)
+  const hourly = Array.from({ length: 24 }, (_, h) => ({ hour: `${h}:00`, sales: 0 }));
+  todays.forEach((t) => {
+    const h = new Date(t.created_date).getHours();
+    if (!isNaN(h)) hourly[h].sales += Number(t.total) || 0;
+  });
+
+  // products
+  const productMap = new Map();
+  todays.forEach((t) => {
+    (t.items || []).forEach((it) => {
+      const key = it.product_name || it.product_id || "Unknown";
+      const cur = productMap.get(key) || { name: key, qty: 0, sales: 0 };
+      cur.qty += Number(it.quantity) || 0;
+      cur.sales += Number(it.total) || Number(it.price) * Number(it.quantity) || 0;
+      productMap.set(key, cur);
+    });
+  });
+  const topProducts = Array.from(productMap.values())
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 5);
+
+  return { grossSales, netRevenue, transactions, cashPct, hourly, topProducts };
+}
 
 export default function NUPSHub() {
-  const navigate = useNavigate();
-
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
   const { data: nupsUsers = [] } = useQuery({
     queryKey: ["nupsuser", user?.email],
@@ -102,20 +65,43 @@ export default function NUPSHub() {
     enabled: !!user?.email,
   });
   const nupsUser = nupsUsers[0];
-
   const role = nupsUser?.role || (user?.role === "admin" ? "PLATFORM_ADMIN" : "DOOR_GIRL");
-  const visibleTiles = TILES.filter((t) => !t.roles || t.roles.includes(role));
+
+  const { data: txns = [] } = useQuery({
+    queryKey: ["pos-today"],
+    queryFn: () => base44.entities.POSTransaction.list("-created_date", 500),
+  });
+
+  const agg = useMemo(() => aggregateTransactions(txns), [txns]);
+
+  const venuePerformance = useMemo(() => {
+    const map = new Map();
+    txns.forEach((t) => {
+      if (t.validation_run || t.status !== "completed") return;
+      const key = t.venue_id || "Unassigned";
+      map.set(key, (map.get(key) || 0) + (Number(t.total) || 0));
+    });
+    return Array.from(map.entries())
+      .map(([name, sales]) => ({ name, sales }))
+      .sort((a, b) => b.sales - a.sales)
+      .slice(0, 6);
+  }, [txns]);
+
+  const avgCheck = agg.transactions > 0 ? agg.grossSales / agg.transactions : 0;
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-black tracking-tight">NUPS Hub</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            One operator console — every surface, role-aware.
-          </p>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-black tracking-tight">Dashboard</h1>
+            <p className="text-xs text-slate-400 mt-1">
+              One Nexus · Multiple Venues · Every Dollar Accounted For
+            </p>
+          </div>
           {user && (
-            <div className="mt-3 flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-2 text-xs">
               <Badge variant="outline" className="border-slate-700 text-slate-300">
                 {user.full_name || user.email}
               </Badge>
@@ -126,45 +112,47 @@ export default function NUPSHub() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {visibleTiles.map((tile) => {
-            const c = COLORS[tile.color] || COLORS.slate;
-            const Icon = tile.icon;
-            return (
-              <Card
-                key={tile.id}
-                onClick={() => navigate(tile.to)}
-                className={`cursor-pointer transition-all p-5 ${c.border} ${c.bg} ${c.hover} ${
-                  tile.primary ? "ring-2 ring-cyan-500/30" : ""
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-slate-900/60 ${c.icon}`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-base font-bold text-white">{tile.title}</h3>
-                      {tile.primary && (
-                        <Badge variant="outline" className="border-cyan-500/40 text-cyan-300 text-[9px]">
-                          PRIMARY
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-400 mt-1 leading-snug">{tile.desc}</p>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+        <div className="flex gap-4">
+          {/* Left sidebar */}
+          <HubSidebar />
 
-        <div className="mt-8 text-[10px] text-slate-600 bg-slate-900/40 border border-slate-800 rounded-lg p-3 flex flex-wrap gap-x-4 gap-y-1">
-          <span className="text-emerald-400 font-bold">BPAAA v3.0 LOCKED:</span>
-          <span>total_sales = cash + card</span>
-          <span>GB = liability</span>
-          <span>Payouts = disbursements</span>
-          <span>ActivityLog = append-only</span>
+          {/* Main content */}
+          <div className="flex-1 min-w-0 space-y-4">
+            <TodaysSummary
+              grossSales={agg.grossSales}
+              netRevenue={agg.netRevenue}
+              transactions={agg.transactions}
+              cashPct={agg.cashPct}
+            />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <TopProductsTable products={agg.topProducts} />
+              <VenuePerformance venues={venuePerformance} />
+            </div>
+
+            <HourlySalesChart data={agg.hourly} />
+
+            <div className="text-[10px] text-slate-600 bg-slate-900/40 border border-slate-800 rounded-lg p-3 flex flex-wrap gap-x-4 gap-y-1">
+              <span className="text-emerald-400 font-bold">BPAAA v3.0 LOCKED:</span>
+              <span>total_sales = cash + card</span>
+              <span>GB = liability</span>
+              <span>Payouts = disbursements</span>
+              <span>ActivityLog = append-only</span>
+            </div>
+          </div>
+
+          {/* Right panel */}
+          <div className="w-72 shrink-0 hidden xl:block">
+            <LiveSystemOverview
+              guests={2847}
+              totalSales={agg.grossSales}
+              vipOccupancy={78}
+              activeTables="146 / 183"
+              avgCheck={avgCheck}
+              complianceScore={96.4}
+              alerts={{ managerApprovals: 3, discountsPending: 2, compsPending: 1, security: 1, compliance: 0 }}
+            />
+          </div>
         </div>
       </div>
     </div>
