@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { enterKioskMode } from "@/lib/nups/kioskMode";
 import {
   Shield, Crown, Users, UserCheck, Music, FlaskConical,
   ChevronRight, Lock, AlertTriangle, Loader2, LogOut, ArrowLeft,
@@ -157,14 +158,15 @@ export default function NUPSGateway() {
 
 
   const handleCardClick = (card) => {
-    // Sandbox — always accessible
+    // Sandbox — always accessible (no kiosk lock)
     if (card.key === "sandbox") {
       navigate("/NUPSSandbox");
       return;
     }
 
-    // Owner bypasses all credential checks — go directly
+    // Owner bypasses all credential checks — go directly into kiosk
     if (isOwner) {
+      enterKioskMode();
       navigate(`/${card.destination}`);
       return;
     }
@@ -182,6 +184,8 @@ export default function NUPSGateway() {
       return;
     }
 
+    // Staff / Entertainer / Manager → lock into kiosk mode
+    enterKioskMode();
     navigate(`/${card.destination}`);
   };
 

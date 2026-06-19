@@ -57,6 +57,7 @@ import MobileScanner from './pages/MobileScanner';
 import ContractsHub from './pages/ContractsHub';
 import RegisterConsole from './pages/RegisterConsole';
 import NUPSHub from './pages/NUPSHub';
+import KioskShell from './components/nups/KioskShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -96,12 +97,36 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Fullscreen pages that must render WITHOUT the layout wrapper
-  const fullscreenPaths = ['/nupslanding', '/landing', '/nupsgateway', '/unauthorized', '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin', '/glyphlockfinancialpage', '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner'];
+  // Fullscreen pages that must render WITHOUT the GlyphLock layout wrapper.
+  // All NUPS operator pages live here so kiosk mode shows only the NUPS UI.
+  const fullscreenPaths = [
+    '/nupslanding', '/landing', '/nupsgateway', '/unauthorized',
+    '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff',
+    '/frontdoor', '/entertainercheckin', '/glyphlockfinancialpage',
+    '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
+    // NUPS operator surface — kiosk-wrapped
+    '/nupshub', '/hub', '/register', '/registerconsole',
+    '/accounting', '/tonight', '/contracts', '/contractshub',
+    '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
+    '/admin/audit-integrity', '/admin/venue-settings',
+  ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
+  // NUPS operator surface gets the kiosk shell (exit requires Manager PIN).
+  // Public landing / gateway / login / sandbox stay open so users can enter.
+  const nupsKioskRoots = [
+    '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
+    '/nupshub', '/hub', '/register', '/registerconsole',
+    '/accounting', '/tonight', '/contracts', '/contractshub',
+    '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
+    '/admin/audit-integrity', '/admin/venue-settings',
+  ];
+  const isNupsKioskRoute = nupsKioskRoots.some(p => currentPathLower.startsWith(p));
+
   if (isFullscreen) {
-    return (
+    // Lazily-imported NUPS operator pages — already imported elsewhere via the
+    // pagesConfig loop. Re-import inline so they render under KioskShell here.
+    const inner = (
       <Routes>
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/nupslanding" element={<NUPSLanding />} />
@@ -135,10 +160,30 @@ const AuthenticatedApp = () => {
         <Route path="/clubtv" element={<ClubTV />} />
         <Route path="/MobileScanner" element={<MobileScanner />} />
         <Route path="/mobilescanner" element={<MobileScanner />} />
+        {/* NUPS operator surface */}
+        <Route path="/NUPSHub" element={<NUPSHub />} />
+        <Route path="/nupshub" element={<NUPSHub />} />
+        <Route path="/Hub" element={<NUPSHub />} />
+        <Route path="/Register" element={<RegisterConsole />} />
+        <Route path="/register" element={<RegisterConsole />} />
+        <Route path="/RegisterConsole" element={<RegisterConsole />} />
+        <Route path="/Accounting" element={<Accounting />} />
+        <Route path="/accounting" element={<Accounting />} />
+        <Route path="/Tonight" element={<Tonight />} />
+        <Route path="/tonight" element={<Tonight />} />
+        <Route path="/Contracts" element={<ContractsHub />} />
+        <Route path="/contracts" element={<ContractsHub />} />
+        <Route path="/ContractsHub" element={<ContractsHub />} />
+        <Route path="/admin/settlement" element={<DailySettlementDashboard />} />
+        <Route path="/admin/payout-history" element={<DriverPayoutHistory />} />
+        <Route path="/admin/activity-log" element={<ActivityLogViewer />} />
+        <Route path="/admin/audit-integrity" element={<AuditIntegrity />} />
+        <Route path="/admin/venue-settings" element={<VenueAdminSettings />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     );
+    return isNupsKioskRoute ? <KioskShell>{inner}</KioskShell> : inner;
   }
 
   return (
