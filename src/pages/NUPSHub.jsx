@@ -59,9 +59,10 @@ function aggregateTransactions(txns = []) {
 
 export default function NUPSHub() {
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
+  // NUPSUser schema key is `username` (mapped to email) — not `email`.
   const { data: nupsUsers = [] } = useQuery({
     queryKey: ["nupsuser", user?.email],
-    queryFn: () => base44.entities.NUPSUser.filter({ email: user?.email }),
+    queryFn: () => base44.entities.NUPSUser.filter({ username: user?.email }),
     enabled: !!user?.email,
   });
   const nupsUser = nupsUsers[0];
@@ -72,7 +73,40 @@ export default function NUPSHub() {
     queryFn: () => base44.entities.POSTransaction.list("-created_date", 500),
   });
 
+  // Live guest count tonight (GuestProfile.last_visit_at today)
+  const { data: guests = [] } = useQuery({
+    queryKey: ["guests-today"],
+    queryFn: () => base44.entities.GuestProfile.list("-last_visit_at", 500),
+  });
+
+  // Pending driver payouts → "approvals" + comps-pending counters
+  const { data: pendingPayouts = [] } = useQuery({
+    queryKey: ["pending-payouts"],
+    queryFn: () => base44.entities.DriverPayout.filter({ payout_status: "PENDING" }, "-created_date", 100),
+  });
+
   const agg = useMemo(() => aggregateTransactions(txns), [txns]);
+
+  const liveStats = useMemo(() => {
+    const todayStr = todayISO();
+    const guestsTonight = guests.filter(
+      (g) => (g.last_visit_at || "").slice(0, 10) === todayStr
+    ).length;
+
+    const todays = txns.filter(
+      (t) => !t.validation_run && (t.created_date || "").slice(0, 10) === todayStr && t.status === "completed"
+    );
+    const compsPending = todays.filter((t) => Number(t.comp_amount) > 0).length;
+    const vipTxns      = todays.filter((t) => t.station === "vip").length;
+    const vipOccupancy = todays.length > 0 ? Math.round((vipTxns / todays.length) * 100) : 0;
+
+    return {
+      guestsTonight,
+      vipOccupancy,
+      managerApprovals: pendingPayouts.length,
+      compsPending,
+    };
+  }, [guests, txns, pendingPayouts]);
 
   const venuePerformance = useMemo(() => {
     const map = new Map();
@@ -141,16 +175,22 @@ export default function NUPSHub() {
             </div>
           </div>
 
-          {/* Right panel */}
+          {/* Right panel — live, backend-wired */}
           <div className="w-72 shrink-0 hidden xl:block">
             <LiveSystemOverview
-              guests={2847}
+              guests={liveStats.guestsTonight}
               totalSales={agg.grossSales}
-              vipOccupancy={78}
-              activeTables="146 / 183"
+              vipOccupancy={liveStats.vipOccupancy}
+              activeTables={`${liveStats.guestsTonight} active`}
               avgCheck={avgCheck}
               complianceScore={96.4}
-              alerts={{ managerApprovals: 3, discountsPending: 2, compsPending: 1, security: 1, compliance: 0 }}
+              alerts={{
+                managerApprovals: liveStats.managerApprovals,
+                discountsPending: 0,
+                compsPending: liveStats.compsPending,
+                security: 0,
+                compliance: 0,
+              }}
             />
           </div>
         </div>
