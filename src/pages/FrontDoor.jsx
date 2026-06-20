@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Shield, Users, Sparkles, Car, Clock, LogOut, Settings, AlertCircle } from "lucide-react";
+import { Shield, LogOut, Settings, AlertCircle } from "lucide-react";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
-import ShiftClockInOut from "@/components/nups/ShiftClockInOut";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
 import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
 import FundsOffDrawerPanel from "@/components/nups/frontdoor/FundsOffDrawerPanel";
 import FrontDoorConfigPanel from "@/components/nups/frontdoor/FrontDoorConfigPanel";
 import EmergencyOverrideButton from "@/components/nups/frontdoor/EmergencyOverrideButton";
-import TabIntroHint from "@/components/nups/frontdoor/TabIntroHint";
 import OperatorStatusBar from "@/components/nups/frontdoor/OperatorStatusBar";
+import FrontDoorSideNav from "@/components/nups/frontdoor/FrontDoorSideNav";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useFrontDoorConfig, DEFAULT_FRONT_DOOR_CONFIG } from "@/hooks/useFrontDoorConfig";
 
@@ -43,14 +41,8 @@ export default function FrontDoor() {
   );
 }
 
-// Static tab definitions — visual chrome only. Visibility / order / labels
-// come from FrontDoorConfig.
-const TAB_VISUALS = {
-  guests:  { icon: Users,    activeCls: "data-[state=active]:bg-cyan-600/30 data-[state=active]:text-cyan-300" },
-  dancers: { icon: Sparkles, activeCls: "data-[state=active]:bg-pink-600/30 data-[state=active]:text-pink-300" },
-  drivers: { icon: Car,      activeCls: "data-[state=active]:bg-yellow-600/30 data-[state=active]:text-yellow-300" },
-  staff:   { icon: Clock,    activeCls: "data-[state=active]:bg-violet-600/30 data-[state=active]:text-violet-300" },
-};
+// Workflow order — what comes first in real life at the door.
+const STEP_ORDER = ["drivers", "guests", "dancers", "staff"];
 
 function FrontDoorContent() {
   const navigate = useNavigate();
@@ -62,7 +54,10 @@ function FrontDoorContent() {
 
   const { config, save } = useFrontDoorConfig(venueId);
   const effective = config || { ...DEFAULT_FRONT_DOOR_CONFIG, venue_id: venueId };
-  const visibleTabs = (effective.tabs || []).filter(t => t.enabled);
+  const enabledIds = (effective.tabs || [])
+    .filter(t => t.enabled)
+    .map(t => t.id)
+    .sort((a, b) => STEP_ORDER.indexOf(a) - STEP_ORDER.indexOf(b));
 
   useEffect(() => {
     try {
@@ -73,13 +68,13 @@ function FrontDoorContent() {
     }
   }, []);
 
-  // Pick the first visible tab if the active one was disabled
+  // Default to step 1 — the first thing that happens at the door.
   useEffect(() => {
-    if (visibleTabs.length === 0) return;
-    if (!activeTab || !visibleTabs.find(t => t.id === activeTab)) {
-      setActiveTab(visibleTabs[0].id);
+    if (enabledIds.length === 0) return;
+    if (!activeTab || !enabledIds.includes(activeTab)) {
+      setActiveTab(enabledIds[0]);
     }
-  }, [visibleTabs, activeTab]);
+  }, [enabledIds, activeTab]);
 
   const handleSignOut = () => {
     if (typeof window !== "undefined" &&
@@ -90,12 +85,6 @@ function FrontDoorContent() {
 
   const role = (user?.role || "").toUpperCase();
   const canEditConfig = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "SOVEREIGN"].includes(role);
-
-  const gridColsCls =
-    visibleTabs.length === 1 ? "grid-cols-1"
-    : visibleTabs.length === 2 ? "grid-cols-2"
-    : visibleTabs.length === 3 ? "grid-cols-3"
-    : "grid-cols-4";
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -180,9 +169,9 @@ function FrontDoorContent() {
           businessDate={new Date().toISOString().split("T")[0]}
         />
 
-        {visibleTabs.length === 0 ? (
+        {enabledIds.length === 0 ? (
           <div className="bg-red-950/30 border border-red-500/40 rounded-lg p-6 text-center">
-            <p className="text-red-300 font-semibold">All tabs are disabled.</p>
+            <p className="text-red-300 font-semibold">All workflow steps are disabled.</p>
             {canEditConfig && (
               <Button
                 onClick={() => setConfigOpen(true)}
@@ -193,54 +182,19 @@ function FrontDoorContent() {
             )}
           </div>
         ) : (
-          <Tabs value={activeTab || visibleTabs[0].id} onValueChange={setActiveTab} className="w-full">
-            <TabsList className={`grid ${gridColsCls} w-full bg-gray-900/60 border border-white/5 h-auto p-1 mb-6`}>
-              {visibleTabs.map(tab => {
-                const visual = TAB_VISUALS[tab.id];
-                const Icon = visual?.icon || Users;
-                return (
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    className={`${visual?.activeCls || ""} py-3 flex flex-col gap-1 h-auto`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="text-xs font-bold">{tab.label}</span>
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-
-            {visibleTabs.some(t => t.id === "guests") && (
-              <TabsContent value="guests" className="mt-0">
-                <TabIntroHint>
-                  Greet the guest, scan their ID, then ring up cover or promo on the door register.
-                </TabIntroHint>
-                <GuestCheckIn />
-              </TabsContent>
-            )}
-            {visibleTabs.some(t => t.id === "dancers") && (
-              <TabsContent value="dancers" className="mt-0">
-                <TabIntroHint>
-                  Check entertainers in, confirm tonight's acknowledgments, then send them to the floor.
-                </TabIntroHint>
-                <EntertainerCheckIn user={user} />
-              </TabsContent>
-            )}
-            {visibleTabs.some(t => t.id === "drivers") && (
-              <TabsContent value="drivers" className="mt-0">
-                <TabIntroHint>
-                  Tap a saved driver to add a drop-off. Pay them out later on the Register's Driver Payouts tab.
-                </TabIntroHint>
-                <DriverQuickAdd user={user} />
-              </TabsContent>
-            )}
-            {visibleTabs.some(t => t.id === "staff") && (
-              <TabsContent value="staff" className="mt-0">
-                <StaffClockInOut user={user} venueId={venueId} station="door" />
-              </TabsContent>
-            )}
-          </Tabs>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <FrontDoorSideNav
+              activeId={activeTab}
+              onSelect={setActiveTab}
+              enabledIds={enabledIds}
+            />
+            <div className="flex-1 min-w-0">
+              {activeTab === "drivers" && <DriverQuickAdd user={user} />}
+              {activeTab === "guests" && <GuestCheckIn />}
+              {activeTab === "dancers" && <EntertainerCheckIn user={user} />}
+              {activeTab === "staff" && <StaffClockInOut user={user} venueId={venueId} station="door" />}
+            </div>
+          </div>
         )}
       </div>
 
