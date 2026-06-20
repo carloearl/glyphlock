@@ -25,15 +25,10 @@ export default function KioskShell({ children }) {
   const path = (location.pathname || "").toLowerCase();
   const hideBack = ["/nupslanding", "/landing", "/nupslogin"].some(p => path.startsWith(p));
 
-  // Walk back to the previous page. If there's no history (page opened
-  // directly), fall back to the NUPS Hub so the operator never gets stuck.
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate("/NUPSHub");
-    }
-  };
+  // Back inside NUPS = go to the NUPS Hub. Browser history can drop the
+  // operator outside the system (or onto an unmounted route → white
+  // screen), so we always route to a known-good NUPS surface.
+  const handleBack = () => navigate("/NUPSHub");
 
   // Force the entire NUPS system into kiosk mode on entry.
   useEffect(() => {

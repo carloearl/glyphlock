@@ -217,13 +217,11 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Back — browser-history back. Falls back to NUPS Hub if the
-                page was opened directly so the operator never gets stuck. */}
+            {/* Back inside NUPS = go to the NUPS Hub (always a valid
+                surface). Browser history can land on unmounted routes
+                and produce a white screen, so we route to a known page. */}
             <button
-              onClick={() => {
-                if (window.history.length > 1) navigate(-1);
-                else navigate("/NUPSHub");
-              }}
+              onClick={() => navigate("/NUPSHub")}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] text-slate-300 hover:text-white text-[12px] font-semibold transition-colors"
               aria-label="Go back"
               title="Back"
