@@ -30,6 +30,7 @@ import POSCashRegister from "@/components/nups/POSCashRegister";
 import POSBarRegister from "@/components/nups/POSBarRegister";
 import TransactionHistory from "@/components/nups/TransactionHistory";
 import DriverDropOffTracker from "@/components/nups/DriverDropOffTracker";
+import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
 import UnifiedMusicConsole from "@/components/mixer/UnifiedMusicConsole";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import StaffOnboardingPanel from "@/components/nups/StaffOnboardingPanel";
@@ -151,13 +152,16 @@ function RegisterConsoleInner() {
         {/* Tab content */}
         <div className="space-y-4">
           {/* Register tab — vertical Quick Charges live INSIDE POSCashRegister
-              (left column). Driver panel sits to the right on the SAME page so
-              the door girl runs covers + driver payouts without tab-hopping. */}
+              (left column). Driver onboarding + guest drop-off tracker sits to
+              the right on the SAME page so the door girl onboards new drivers,
+              taps +1 per guest as cars roll up, and rings cover charges without
+              ever leaving this screen. Settled payouts still go through the
+              full Driver Payouts tab. */}
           {activeTab === "register" && (
-            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_400px] gap-4">
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-4">
               <POSCashRegister showDriverPanel={false} user={user} station="door" />
               <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-4 max-h-[calc(100vh-220px)] overflow-y-auto">
-                <DriverDropOffTracker user={user} />
+                <DriverQuickAdd user={user} />
               </div>
             </div>
           )}
