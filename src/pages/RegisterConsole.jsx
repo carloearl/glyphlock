@@ -152,16 +152,24 @@ function RegisterConsoleInner() {
         {/* Tab content */}
         <div className="space-y-4">
           {/* Register tab — vertical Quick Charges live INSIDE POSCashRegister
-              (left column). Driver onboarding + guest drop-off tracker sits to
-              the right on the SAME page so the door girl onboards new drivers,
-              taps +1 per guest as cars roll up, and rings cover charges without
-              ever leaving this screen. Settled payouts still go through the
-              full Driver Payouts tab. */}
+              (left column). Right column stacks Driver onboarding + guest
+              drop-off tracker ON TOP of the daily Entertainer Check-In so the
+              door girl handles cover, drivers, AND dancer arrivals from one
+              screen. (Entertainer onboarding stays on its own tab.) */}
           {activeTab === "register" && (
             <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-4">
               <POSCashRegister showDriverPanel={false} user={user} station="door" />
-              <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-4 max-h-[calc(100vh-220px)] overflow-y-auto">
-                <DriverQuickAdd user={user} />
+              <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
+                <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-4">
+                  <DriverQuickAdd user={user} />
+                </div>
+                <div className="rounded-xl border border-pink-500/20 bg-slate-950/60 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <UserCheck className="w-5 h-5 text-pink-400" />
+                    <h2 className="text-lg font-bold text-white">Entertainer Daily Check-In</h2>
+                  </div>
+                  <EntertainerCheckIn user={user} />
+                </div>
               </div>
             </div>
           )}
