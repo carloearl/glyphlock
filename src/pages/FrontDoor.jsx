@@ -6,7 +6,7 @@ import { Shield, Users, Sparkles, Car, Clock, LogOut, Settings, AlertCircle } fr
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
-import DriverDropOffTracker from "@/components/nups/DriverDropOffTracker";
+import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
 import ShiftClockInOut from "@/components/nups/ShiftClockInOut";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
@@ -230,9 +230,9 @@ function FrontDoorContent() {
             {visibleTabs.some(t => t.id === "drivers") && (
               <TabsContent value="drivers" className="mt-0">
                 <TabIntroHint>
-                  Scan the driver's QR (or pick from the list), log each drop-off, and confirm payout with the doorman.
+                  Tap a saved driver to add a drop-off. Pay them out later on the Register's Driver Payouts tab.
                 </TabIntroHint>
-                <DriverDropOffTracker user={user} />
+                <DriverQuickAdd user={user} />
               </TabsContent>
             )}
             {visibleTabs.some(t => t.id === "staff") && (
