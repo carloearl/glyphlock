@@ -25,6 +25,16 @@ export default function KioskShell({ children }) {
   const path = (location.pathname || "").toLowerCase();
   const hideBack = ["/nupslanding", "/landing", "/nupslogin"].some(p => path.startsWith(p));
 
+  // Walk back to the previous page. If there's no history (page opened
+  // directly), fall back to the NUPS Hub so the operator never gets stuck.
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/NUPSHub");
+    }
+  };
+
   // Force the entire NUPS system into kiosk mode on entry.
   useEffect(() => {
     if (!isKioskMode()) {
@@ -47,7 +57,7 @@ export default function KioskShell({ children }) {
           <div className="flex items-center gap-3">
             {!hideBack && (
               <button
-                onClick={() => navigate(-1)}
+                onClick={handleBack}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-white/[0.05] border border-white/15 text-slate-200 text-xs font-bold hover:bg-white/[0.1] hover:text-white transition-colors"
                 aria-label="Go back"
                 title="Back"
