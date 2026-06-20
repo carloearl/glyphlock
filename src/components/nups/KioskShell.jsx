@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { LogOut, Shield } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { LogOut, Shield, ArrowLeft } from "lucide-react";
 import ManagerPINVerifier from "@/components/nups/ManagerPINVerifier";
 import { enterKioskMode, exitKioskMode, isKioskMode } from "@/lib/nups/kioskMode";
 
@@ -15,8 +15,15 @@ import { enterKioskMode, exitKioskMode, isKioskMode } from "@/lib/nups/kioskMode
  */
 export default function KioskShell({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showExit, setShowExit] = useState(false);
   const [kiosk, setKiosk] = useState(isKioskMode());
+
+  // Hide the global back chip on the NUPS Landing (nothing to go back to
+  // inside NUPS) and login screens. Everywhere else, the operator can
+  // always retreat one step.
+  const path = (location.pathname || "").toLowerCase();
+  const hideBack = ["/nupslanding", "/landing", "/nupslogin"].some(p => path.startsWith(p));
 
   // Force the entire NUPS system into kiosk mode on entry.
   useEffect(() => {
@@ -36,10 +43,23 @@ export default function KioskShell({ children }) {
   return (
     <div className="min-h-screen bg-black text-white">
       {kiosk && (
-        <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-2 bg-gradient-to-r from-slate-950 via-blue-950/40 to-slate-950 border-b border-cyan-500/20 backdrop-blur">
-          <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-cyan-300/80 uppercase">
-            <Shield className="w-3.5 h-3.5" />
-            NUPS · Kiosk Mode
+        <div className="sticky top-0 z-50 flex items-center justify-between gap-2 px-4 py-2 bg-gradient-to-r from-slate-950 via-blue-950/40 to-slate-950 border-b border-cyan-500/20 backdrop-blur">
+          <div className="flex items-center gap-3">
+            {!hideBack && (
+              <button
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-white/[0.05] border border-white/15 text-slate-200 text-xs font-bold hover:bg-white/[0.1] hover:text-white transition-colors"
+                aria-label="Go back"
+                title="Back"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back
+              </button>
+            )}
+            <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-cyan-300/80 uppercase">
+              <Shield className="w-3.5 h-3.5" />
+              NUPS · Kiosk Mode
+            </div>
           </div>
           <button
             onClick={() => setShowExit(true)}
