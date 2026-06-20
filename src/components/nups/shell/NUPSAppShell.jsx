@@ -5,6 +5,8 @@ import {
   ShieldCheck, Banknote, ScrollText, Settings, Building2,
   Menu, ChevronRight, ReceiptText, Truck, ArrowLeft,
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
+  TrendingUp, BarChart3, Users, Package, Heart, DollarSign, Music,
+  Star, Sparkles, ShieldAlert as ShieldAlertIcon, KeyRound, ClipboardList,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -22,9 +24,6 @@ const NAV_SECTIONS = [
     items: [
       { id: "dashboard", label: "Dashboard",   icon: LayoutDashboard, to: "/NUPSHub" },
       { id: "frontdoor", label: "Front Door",  icon: DoorOpen,        to: "/FrontDoor" },
-      // Three distinct pages — each has its own route so the back button
-      // works naturally and the operator never sees three workspaces on one
-      // screen. Sidebar still groups them under "Register".
       { id: "register",  label: "Register",       icon: ShoppingCart, to: "/Register" },
       { id: "receipts",  label: "Receipts",       icon: ReceiptText,  to: "/Receipts" },
       { id: "drivers",   label: "Driver Payouts", icon: Truck,        to: "/DriverPayouts" },
@@ -32,9 +31,23 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: "Floor & Staff",
+    items: [
+      { id: "vip",         label: "VIP Rooms",          icon: Star,         to: "/NUPSOwner?tab=vip" },
+      { id: "staff",       label: "Staff",              icon: Users,        to: "/NUPSOwner?tab=staff" },
+      { id: "customers",   label: "Customers",          icon: Heart,        to: "/NUPSOwner?tab=customers" },
+      { id: "dj",          label: "DJ Console",         icon: Music,        to: "/NUPSOwner?tab=dj" },
+      { id: "glyphbucks",  label: "GlyphBucks",         icon: Coins,        to: "/NUPSOwner?tab=glyphbucks" },
+    ],
+  },
+  {
     label: "Financials",
     items: [
       { id: "accounting", label: "Accounting",  icon: Calculator, to: "/Accounting" },
+      { id: "analytics",  label: "Analytics",   icon: TrendingUp, to: "/NUPSOwner?tab=analytics" },
+      { id: "reports",    label: "Reports",     icon: BarChart3,  to: "/NUPSOwner?tab=reports" },
+      { id: "payroll",    label: "Payroll",     icon: DollarSign, to: "/NUPSOwner?tab=payroll" },
+      { id: "inventory",  label: "Inventory",   icon: Package,    to: "/NUPSOwner?tab=inventory" },
       { id: "settlement", label: "Settlements", icon: Banknote,   to: "/admin/settlement" },
       { id: "payouts",    label: "Payout Log",  icon: ScrollText, to: "/admin/payout-history" },
       {
@@ -53,9 +66,12 @@ const NAV_SECTIONS = [
   {
     label: "Admin",
     items: [
-      { id: "audit",    label: "Audit Integrity", icon: ShieldCheck, to: "/admin/audit-integrity" },
-      { id: "activity", label: "Activity Log",    icon: ScrollText,  to: "/admin/activity-log" },
-      { id: "venue",    label: "Venue Settings",  icon: Settings,    to: "/admin/venue-settings" },
+      { id: "audit-log",      label: "Audit Log",       icon: ClipboardList, to: "/NUPSOwner?tab=audit" },
+      { id: "audit",          label: "Audit Integrity", icon: ShieldCheck,   to: "/admin/audit-integrity" },
+      { id: "activity",       label: "Activity Log",    icon: ScrollText,    to: "/admin/activity-log" },
+      { id: "rbac",           label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
+      { id: "demo",           label: "Demo Keys",       icon: Sparkles,      to: "/NUPSOwner?tab=demo" },
+      { id: "venue",          label: "Venue Settings",  icon: Settings,      to: "/admin/venue-settings" },
     ],
   },
 ];

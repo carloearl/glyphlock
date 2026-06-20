@@ -119,7 +119,7 @@ function FrontDoorContent() {
       actions={actions}
       role={(user?.role || "DOOR_GIRL").toUpperCase()}
     >
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-[1500px] mx-auto">
         <OperatorStatusBar
           user={user}
           venueId={venueId}
@@ -131,22 +131,6 @@ function FrontDoorContent() {
             <span>{effective.notes}</span>
           </div>
         )}
-
-        {effective.show_stats && <FrontDoorStats venueId={venueId} />}
-
-        {effective.show_settlement_ticker && (
-          <SettlementTicker
-            venueId={venueId}
-            businessDate={new Date().toISOString().split("T")[0]}
-          />
-        )}
-
-        {/* DACO-20260613-DOOR-RBAC — Funds-Off Drawer panel.
-            Auto-hides when no validation_run records exist. */}
-        <FundsOffDrawerPanel
-          venueId={venueId}
-          businessDate={new Date().toISOString().split("T")[0]}
-        />
 
         {enabledIds.length === 0 ? (
           <div className="bg-red-950/30 border border-red-500/40 rounded-lg p-6 text-center">
@@ -161,17 +145,51 @@ function FrontDoorContent() {
             )}
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-6">
-            <FrontDoorSideNav
-              activeId={activeTab}
-              onSelect={setActiveTab}
-              enabledIds={enabledIds}
-            />
-            <div className="flex-1 min-w-0">
+          // ─── 3-PANEL FRONT DOOR ──────────────────────────────────────────
+          // ┌─────────────┬──────────────────────┬──────────────────────────┐
+          // │ ① Workflow  │  ② Active Step       │  ③ Live Pulse            │
+          // │   Rail      │     (Driver / Guest  │     (Stats · Settlement  │
+          // │             │      / Dancer /Staff)│      · Funds-Off Drawer) │
+          // └─────────────┴──────────────────────┴──────────────────────────┘
+          <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_320px] gap-5">
+            {/* Panel 1 — Workflow rail */}
+            <div>
+              <FrontDoorSideNav
+                activeId={activeTab}
+                onSelect={setActiveTab}
+                enabledIds={enabledIds}
+              />
+            </div>
+
+            {/* Panel 2 — Active workflow content */}
+            <div className="min-w-0 rounded-xl border border-white/5 bg-slate-950/40 p-4">
               {activeTab === "drivers" && <DriverQuickAdd user={user} />}
               {activeTab === "guests" && <GuestCheckIn />}
               {activeTab === "dancers" && <EntertainerCheckIn user={user} />}
               {activeTab === "staff" && <StaffClockInOut user={user} venueId={venueId} station="door" />}
+            </div>
+
+            {/* Panel 3 — Live pulse */}
+            <div className="space-y-4">
+              {effective.show_stats && (
+                <div className="rounded-xl border border-white/5 bg-slate-950/40 p-3">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-2">Live Floor</div>
+                  <FrontDoorStats venueId={venueId} />
+                </div>
+              )}
+              {effective.show_settlement_ticker && (
+                <div className="rounded-xl border border-white/5 bg-slate-950/40 p-3">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-2">Settlement</div>
+                  <SettlementTicker
+                    venueId={venueId}
+                    businessDate={new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+              )}
+              <FundsOffDrawerPanel
+                venueId={venueId}
+                businessDate={new Date().toISOString().split("T")[0]}
+              />
             </div>
           </div>
         )}

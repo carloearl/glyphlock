@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import CompAuthorizationModal from "./pos/CompAuthorizationModal";
 import ManagerVoidGateModal from "./pos/ManagerVoidGateModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReceiptPrinter from "./ReceiptPrinter";
@@ -59,6 +61,9 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   const [showCompModal, setShowCompModal] = useState(false);
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [discountPin, setDiscountPin] = useState("");
+  // Surfaces a post-sale confirmation modal so the receipt is impossible to
+  // miss on any device — even when the cart sidebar is collapsed on mobile.
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [pendingVoid, setPendingVoid] = useState(null); // { action, productId, itemLabel, payload }
   // Stashed manager comp authorization — set when the comp modal closes with a
   // verified PIN. Drives the visible "COMP AUTHORIZED" credit card and switches
@@ -98,6 +103,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       queryClient.invalidateQueries(['pos-transactions']);
       queryClient.invalidateQueries(['active-batch']);
       setLastTransaction(result);
+      setShowReceiptModal(true);
       setCart([]);
       setSelectedCustomer(null);
       setDiscount(0);
@@ -497,6 +503,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         queryClient.invalidateQueries(['pos-transactions']);
         queryClient.invalidateQueries(['active-batch']);
         setLastTransaction(gateResult.value);
+        setShowReceiptModal(true);
         setCart([]);
         setSelectedCustomer(null);
         setDiscount(0);
@@ -1240,6 +1247,40 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         itemLabel={pendingVoid?.itemLabel}
         onConfirm={applyPendingVoid}
       />
+
+      {/* Post-sale receipt confirmation — visible on every device. Cart
+          resets immediately on charge, so this modal is the only place the
+          door girl sees the completed transaction. Auto-shows on success. */}
+      <Dialog open={showReceiptModal && !!lastTransaction} onOpenChange={setShowReceiptModal}>
+        <DialogContent className="max-w-md bg-slate-950 border-emerald-500/40 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-emerald-300">
+              <CheckCircle2 className="w-5 h-5" />
+              Transaction Complete
+            </DialogTitle>
+          </DialogHeader>
+          {lastTransaction && (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
+                <div className="text-[10px] uppercase tracking-widest text-emerald-400/70">Total Charged</div>
+                <div className="text-3xl font-black text-emerald-300 font-mono">
+                  ${Number(lastTransaction.total || 0).toFixed(2)}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  {lastTransaction.payment_method} · {lastTransaction.transaction_id}
+                </div>
+              </div>
+              <ReceiptPrinter transaction={lastTransaction} />
+              <Button
+                onClick={() => setShowReceiptModal(false)}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12"
+              >
+                New Transaction
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Driver Payout System — door register only, and only when host page
           requests it. The sidebar Register tab hides this column because

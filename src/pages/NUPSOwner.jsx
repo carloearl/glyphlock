@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -70,10 +70,26 @@ import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 
 export default function NUPSOwner() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Sidebar deep-links via /NUPSOwner?tab=staff. Read it on every render so
+  // navigation between sidebar items lands on the right module.
+  const initialTab = (() => {
+    try { return new URLSearchParams(location.search).get('tab') || 'dashboard'; }
+    catch { return 'dashboard'; }
+  })();
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [posSubTab, setPosSubTab] = useState("cash");
-  const [activeModule, setActiveModule] = useState('dashboard');
+  const [activeModule, setActiveModule] = useState(initialTab);
+
+  // Keep active module in sync if the URL changes (sidebar click while page mounted)
+  useEffect(() => {
+    try {
+      const next = new URLSearchParams(location.search).get('tab');
+      if (next && next !== activeModule) setActiveModule(next);
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
   const [rbacRole, setRbacRole] = useState('manager');
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();

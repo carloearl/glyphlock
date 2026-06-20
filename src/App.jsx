@@ -144,13 +144,13 @@ const AuthenticatedApp = () => {
         <Route path="/nupssandbox" element={<NUPSSandbox />} />
         <Route path="/NUPSLogin" element={<NUPSLogin />} />
         <Route path="/nupslogin" element={<NUPSLogin />} />
-        {/* Legacy NUPS surfaces — superseded by the unified NUPSHub. Any
-            direct visit redirects into the new operator dashboard so the
-            old UI is no longer reachable. */}
-        <Route path="/NUPSOwner" element={<NUPSHub />} />
-        <Route path="/nupsowner" element={<NUPSHub />} />
-        <Route path="/NUPSStaff" element={<NUPSHub />} />
-        <Route path="/nupsstaff" element={<NUPSHub />} />
+        {/* NUPSOwner restored — hosts all legacy operator tabs
+            (Analytics, GlyphBucks, Staff, VIP, Reports, Payroll, Audit Log,
+            Admin, Demo Keys, etc.). Sidebar deep-links via ?tab=. */}
+        <Route path="/NUPSOwner" element={<NUPSOwner />} />
+        <Route path="/nupsowner" element={<NUPSOwner />} />
+        <Route path="/NUPSStaff" element={<NUPSStaff />} />
+        <Route path="/nupsstaff" element={<NUPSStaff />} />
         <Route path="/FrontDoor" element={<FrontDoor />} />
         <Route path="/frontdoor" element={<FrontDoor />} />
         <Route path="/NUPSInfrastructurePage" element={<NUPSInfrastructurePage />} />
