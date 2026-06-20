@@ -56,6 +56,8 @@ import VenueAdminSettings from './pages/VenueAdminSettings';
 import MobileScanner from './pages/MobileScanner';
 import ContractsHub from './pages/ContractsHub';
 import RegisterConsole from './pages/RegisterConsole';
+import Receipts from './pages/Receipts';
+import DriverPayouts from './pages/DriverPayouts';
 import NUPSHub from './pages/NUPSHub';
 import KioskShell from './components/nups/KioskShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -106,6 +108,7 @@ const AuthenticatedApp = () => {
     '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
     // NUPS operator surface — kiosk-wrapped
     '/nupshub', '/hub', '/register', '/registerconsole',
+    '/receipts', '/driverpayouts',
     '/accounting', '/tonight', '/contracts', '/contractshub',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/venue-settings',
@@ -119,6 +122,7 @@ const AuthenticatedApp = () => {
     '/nupslanding', '/landing', '/nupsgateway',
     '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
     '/nupshub', '/hub', '/register', '/registerconsole',
+    '/receipts', '/driverpayouts',
     '/accounting', '/tonight', '/contracts', '/contractshub',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/venue-settings',
@@ -169,6 +173,10 @@ const AuthenticatedApp = () => {
         <Route path="/Register" element={<RegisterConsole />} />
         <Route path="/register" element={<RegisterConsole />} />
         <Route path="/RegisterConsole" element={<RegisterConsole />} />
+        <Route path="/Receipts" element={<Receipts />} />
+        <Route path="/receipts" element={<Receipts />} />
+        <Route path="/DriverPayouts" element={<DriverPayouts />} />
+        <Route path="/driverpayouts" element={<DriverPayouts />} />
         <Route path="/Accounting" element={<Accounting />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/Tonight" element={<Tonight />} />
@@ -224,6 +232,10 @@ const AuthenticatedApp = () => {
         <Route path="/Register" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
         <Route path="/register" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
         <Route path="/RegisterConsole" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
+        <Route path="/Receipts" element={<LayoutWrapper currentPageName="Receipts"><Receipts /></LayoutWrapper>} />
+        <Route path="/receipts" element={<LayoutWrapper currentPageName="Receipts"><Receipts /></LayoutWrapper>} />
+        <Route path="/DriverPayouts" element={<LayoutWrapper currentPageName="DriverPayouts"><DriverPayouts /></LayoutWrapper>} />
+        <Route path="/driverpayouts" element={<LayoutWrapper currentPageName="DriverPayouts"><DriverPayouts /></LayoutWrapper>} />
         <Route path="/NUPSHub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
         <Route path="/nupshub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
         <Route path="/Hub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />

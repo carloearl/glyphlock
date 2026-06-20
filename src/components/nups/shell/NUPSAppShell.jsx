@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, DoorOpen, ShoppingCart, Moon, Calculator, FileText,
   ShieldCheck, Banknote, ScrollText, Settings, Building2,
-  Menu, ChevronRight, ReceiptText, Truck,
+  Menu, ChevronRight, ReceiptText, Truck, ArrowLeft,
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -22,14 +22,12 @@ const NAV_SECTIONS = [
     items: [
       { id: "dashboard", label: "Dashboard",   icon: LayoutDashboard, to: "/NUPSHub" },
       { id: "frontdoor", label: "Front Door",  icon: DoorOpen,        to: "/FrontDoor" },
-      {
-        id: "register",  label: "Register",    icon: ShoppingCart,    to: "/Register",
-        children: [
-          { id: "register-pos",      label: "POS Terminal",     icon: ShoppingCart, to: "/Register?tab=register" },
-          { id: "register-receipts", label: "Receipts & History", icon: ReceiptText, to: "/Register?tab=receipts" },
-          { id: "register-drivers",  label: "Driver Payouts",   icon: Truck,        to: "/Register?tab=drivers" },
-        ],
-      },
+      // Three distinct pages — each has its own route so the back button
+      // works naturally and the operator never sees three workspaces on one
+      // screen. Sidebar still groups them under "Register".
+      { id: "register",  label: "Register",       icon: ShoppingCart, to: "/Register" },
+      { id: "receipts",  label: "Receipts",       icon: ReceiptText,  to: "/Receipts" },
+      { id: "drivers",   label: "Driver Payouts", icon: Truck,        to: "/DriverPayouts" },
       { id: "tonight",   label: "Tonight",     icon: Moon,            to: "/Tonight" },
     ],
   },
@@ -217,6 +215,18 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
+            </button>
+
+            {/* Back — browser-history back; never leaves NUPS because the
+                kiosk shell only allows NUPS routes. */}
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] text-slate-300 hover:text-white text-[12px] font-semibold transition-colors"
+              aria-label="Go back"
+              title="Back"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Back</span>
             </button>
 
             <div className="flex-1 min-w-0">
