@@ -8,15 +8,22 @@ import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
 import { saveActiveVenue } from '@/hooks/useActiveVenue';
 
 // Role → destination page mapping
+// Every operator lands on NUPSHub — the new unified operator dashboard.
+// From there the persistent sidebar takes them to Register, Receipts,
+// Driver Payouts, Accounting, Contracts, etc. The legacy NUPSOwner /
+// NUPSStaff pages are no longer the primary entry points.
 const ROLE_DESTINATIONS = {
-  PLATFORM_ADMIN: "NUPSOwner",
-  VENUE_OWNER:    "NUPSOwner",
-  VENUE_MANAGER:  "NUPSOwner",
-  FLOOR_HOST:     "NUPSStaff",
-  BARTENDER:      "NUPSStaff",
-  SECURITY:       "NUPSStaff",
-  DJ:             "NUPSStaff",
-  KIOSK:          "NUPSStaff",
+  PLATFORM_ADMIN: "NUPSHub",
+  VENUE_OWNER:    "NUPSHub",
+  VENUE_MANAGER:  "NUPSHub",
+  FLOOR_HOST:     "NUPSHub",
+  DOOR_GIRL:      "NUPSHub",
+  DOORMAN:        "NUPSHub",
+  BARTENDER:      "NUPSHub",
+  SECURITY:       "NUPSHub",
+  DJ:             "NUPSHub",
+  KIOSK:          "NUPSHub",
+  SOVEREIGN:      "NUPSHub",
   PERFORMER:      "EntertainerCheckIn",
 };
 

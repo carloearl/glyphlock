@@ -20,7 +20,7 @@ const ROLE_CARDS = [
     iconColor: "text-violet-400",
     iconBg: "bg-violet-500/10",
     requiredRoles: ["PLATFORM_ADMIN", "VENUE_OWNER"],
-    destination: "NUPSOwner",
+    destination: "NUPSHub",
     requiresAuth: true,
   },
   {
@@ -33,7 +33,7 @@ const ROLE_CARDS = [
     iconColor: "text-blue-400",
     iconBg: "bg-blue-500/10",
     requiredRoles: ["VENUE_MANAGER"],
-    destination: "NUPSOwner",
+    destination: "NUPSHub",
     requiresAuth: true,
   },
   {
@@ -45,8 +45,8 @@ const ROLE_CARDS = [
     border: "border-cyan-500/30 hover:border-cyan-400/60",
     iconColor: "text-cyan-400",
     iconBg: "bg-cyan-500/10",
-    requiredRoles: ["BARTENDER", "DJ", "SECURITY", "KIOSK", "HOSTESS"],
-    destination: "NUPSStaff",
+    requiredRoles: ["BARTENDER", "DJ", "SECURITY", "KIOSK", "HOSTESS", "DOOR_GIRL", "DOORMAN", "FLOOR_HOST"],
+    destination: "NUPSHub",
     requiresAuth: true,
   },
   {
@@ -85,12 +85,12 @@ const OWNER_EMAILS = [
 const OWNER_EMAIL = OWNER_EMAILS[0]; // legacy reference for "Create Demo Accounts" button
 
 const TEST_ROLES = [
-  { role: "PLATFORM_ADMIN", label: "Platform Admin", color: "text-violet-400", dest: "NUPSOwner" },
-  { role: "VENUE_OWNER", label: "Venue Owner", color: "text-purple-400", dest: "NUPSOwner" },
-  { role: "VENUE_MANAGER", label: "Manager", color: "text-blue-400", dest: "NUPSOwner" },
-  { role: "BARTENDER", label: "Bartender", color: "text-cyan-400", dest: "NUPSStaff" },
-  { role: "DJ", label: "DJ", color: "text-pink-400", dest: "NUPSStaff" },
-  { role: "SECURITY", label: "Security", color: "text-orange-400", dest: "NUPSStaff" },
+  { role: "PLATFORM_ADMIN", label: "Platform Admin", color: "text-violet-400", dest: "NUPSHub" },
+  { role: "VENUE_OWNER", label: "Venue Owner", color: "text-purple-400", dest: "NUPSHub" },
+  { role: "VENUE_MANAGER", label: "Manager", color: "text-blue-400", dest: "NUPSHub" },
+  { role: "BARTENDER", label: "Bartender", color: "text-cyan-400", dest: "NUPSHub" },
+  { role: "DJ", label: "DJ", color: "text-pink-400", dest: "NUPSHub" },
+  { role: "SECURITY", label: "Security", color: "text-orange-400", dest: "NUPSHub" },
   { role: "PERFORMER", label: "Performer", color: "text-rose-400", dest: "EntertainerCheckIn" },
   { role: "DEMO", label: "Demo / Sandbox", color: "text-emerald-400", dest: "NUPSSandbox" },
 ];

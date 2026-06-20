@@ -42,16 +42,14 @@ export default function NUPSPostLogin() {
         return;
       }
 
-      // Fallback: Auto-redirect based on actual user role
+      // Fallback: Every operator lands on NUPSHub — the new unified
+      // dashboard with the persistent sidebar. Entertainers still go
+      // to their dedicated check-in flow.
       setTimeout(() => {
-        if (currentUser.role === 'owner' || currentUser.role === 'admin') {
-          navigate('/NUPSOwner');
-        } else if (currentUser.role === 'staff') {
-          navigate('/NUPSStaff');
-        } else if (currentUser.role === 'entertainer') {
+        if (currentUser.role === 'entertainer') {
           navigate('/EntertainerCheckIn');
         } else {
-          navigate('/GlyphBucksHub');
+          navigate('/NUPSHub');
         }
       }, 2000);
 
