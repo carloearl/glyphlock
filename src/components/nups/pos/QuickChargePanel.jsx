@@ -178,9 +178,10 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
         )
       )}
 
-      {/* Quick Charges — door = 5 amount-only buttons sized to fit the narrow
-          preset column without text overflow on tablets. */}
-      <div className={`grid gap-2 ${isDoor ? 'grid-cols-5' : 'grid-cols-4'}`}>
+      {/* Quick Charges — door uses a VERTICAL stack (single column) so the
+          panel can sit alongside the Driver pane without cramping. Other
+          stations keep the 4-up grid for product density. */}
+      <div className={isDoor ? 'flex flex-col gap-2' : 'grid grid-cols-4 gap-2'}>
         {activePresets.map((p) => (
           <button
             key={p.label}
@@ -194,16 +195,16 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
                 is_preset: true,
               });
             }}
-            className="rounded-xl flex items-center justify-center active:scale-95 transition-all select-none px-1"
+            className="rounded-xl flex items-center justify-center active:scale-95 transition-all select-none px-2 w-full"
             style={{
-              height: isDoor ? '74px' : '70px',
+              height: isDoor ? '64px' : '70px',
               background: `linear-gradient(135deg, ${p.accent}38, ${p.accent}14)`,
               border: `2px solid ${p.accent}`,
               boxShadow: `0 0 14px ${p.accent}40, inset 0 1px 0 rgba(255,255,255,0.08)`,
             }}
           >
             <span
-              className={isDoor ? 'text-2xl font-black tracking-tight' : 'text-lg font-black'}
+              className={isDoor ? 'text-3xl font-black tracking-tight' : 'text-lg font-black'}
               style={{ color: p.accent, textShadow: `0 0 10px ${p.accent}80` }}
             >
               {p.label}

@@ -22,8 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Lock, Unlock, Circle, Activity,
-  ShoppingCart, Receipt, Users, Beer, Music,
-  UserPlus, UserCheck, Clock, Shield,
+  ShoppingCart, Receipt, Beer, Music,
+  UserPlus, UserCheck, Clock, Shield, Sparkles,
 } from "lucide-react";
 
 import POSCashRegister from "@/components/nups/POSCashRegister";
@@ -35,14 +35,18 @@ import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import StaffOnboardingPanel from "@/components/nups/StaffOnboardingPanel";
 import TimeClock from "@/components/nups/TimeClock";
 import AuditLogDashboard from "@/components/nups/AuditLogDashboard";
+import OneClickSeedSwitch from "@/components/nups/OneClickSeedSwitch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 
+// Driver Drop-offs intentionally REMOVED from tabs — it now lives on the
+// Register tab itself so the operator never has to switch context while
+// running cover charges and paying out drivers in the same shift.
 const TABS = [
-  { key: "register",   label: "Register",           icon: ShoppingCart },
+  { key: "register",   label: "Register · Door",    icon: ShoppingCart },
   { key: "receipts",   label: "Receipts",           icon: Receipt },
-  { key: "drivers",    label: "Driver Drop-offs",   icon: Users },
   { key: "bar",        label: "Bar",                icon: Beer },
   { key: "dj",         label: "DJ",                 icon: Music },
   { key: "onboarding", label: "Entertainer Onboard",icon: UserPlus },
@@ -79,6 +83,7 @@ function BatchStatusBadge({ batch }) {
 function RegisterConsoleInner() {
   const [activeTab, setActiveTab] = useState("register");
   const [user, setUser] = useState(null);
+  const [showSeedDialog, setShowSeedDialog] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -106,7 +111,21 @@ function RegisterConsoleInner() {
     <NUPSAppShell
       title="Register · POS"
       subtitle="POS Terminal · Active batch · Live ring-up"
-      actions={<BatchStatusBadge batch={activeBatch} />}
+      actions={
+        <div className="flex items-center gap-2">
+          <BatchStatusBadge batch={activeBatch} />
+          <Button
+            onClick={() => setShowSeedDialog(true)}
+            size="sm"
+            variant="outline"
+            className="border-violet-500/40 text-violet-300 hover:bg-violet-500/10 gap-1.5"
+            title="Seed or wipe the demo dataset for a quick walkthrough"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Demo Data</span>
+          </Button>
+        </div>
+      }
       role="CASHIER"
     >
       <div className="max-w-[1600px] mx-auto">
@@ -131,13 +150,20 @@ function RegisterConsoleInner() {
 
         {/* Tab content */}
         <div className="space-y-4">
+          {/* Register tab — vertical Quick Charges live INSIDE POSCashRegister
+              (left column). Driver panel sits to the right on the SAME page so
+              the door girl runs covers + driver payouts without tab-hopping. */}
           {activeTab === "register" && (
-            <POSCashRegister showDriverPanel={false} user={user} station="door" />
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_400px] gap-4">
+              <POSCashRegister showDriverPanel={false} user={user} station="door" />
+              <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-4 max-h-[calc(100vh-220px)] overflow-y-auto">
+                <DriverDropOffTracker user={user} />
+              </div>
+            </div>
           )}
           {activeTab === "receipts" && (
             <TransactionHistory transactions={transactions} showReceipt={true} />
           )}
-          {activeTab === "drivers" && <DriverDropOffTracker user={user} />}
           {activeTab === "bar" && <POSBarRegister user={user} />}
           {activeTab === "dj" && <UnifiedMusicConsole />}
           {activeTab === "onboarding" && <StaffOnboardingPanel />}
@@ -153,6 +179,25 @@ function RegisterConsoleInner() {
           )}
         </div>
       </div>
+
+      {/* Demo Data dialog — single ON/OFF switch wipes + reseeds DEMO_VENUE_001
+          so the operator can walk through a full night in seconds. */}
+      <Dialog open={showSeedDialog} onOpenChange={setShowSeedDialog}>
+        <DialogContent className="max-w-2xl bg-slate-950 border-violet-500/40 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-violet-300">
+              <Sparkles className="w-5 h-5" />
+              Demo Data Control
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-slate-400 -mt-2">
+            One-click seed for live walkthroughs. Flip <strong className="text-emerald-300">ON</strong> to
+            populate every field with realistic demo rows; flip <strong className="text-rose-300">OFF</strong> to
+            wipe everything in DEMO_VENUE_001 clean.
+          </p>
+          <OneClickSeedSwitch />
+        </DialogContent>
+      </Dialog>
     </NUPSAppShell>
   );
 }
