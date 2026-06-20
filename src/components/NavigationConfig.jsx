@@ -51,23 +51,14 @@ export const NAV_SECTIONS = [
     ]
   },
   {
+    // Single entry — operators authenticate at the Landing/Gateway, then the
+    // NUPS sidebar takes over. No more public dropdown listing every
+    // operator surface (Front Door, Register, Accounting, …) — those live
+    // inside the NUPS sidebar, only visible after sign-in.
     label: "NUPS",
     visibility: "public",
     items: [
-      // Every NUPS surface lives under this one dropdown.
-      // NUPSRouteGuard gates each page — non-staff see the access gate.
-      // Sovereign (Carlo / AI) bypasses every gate.
-      { label: "NUPS Landing", page: "NUPSLanding", visibility: "public" },
-      { label: "Operator Hub", page: "NUPSHub", visibility: "public" },
-      { label: "Front Door", page: "FrontDoor", visibility: "public" },
-      { label: "Register", page: "RegisterConsole", visibility: "public" },
-      { label: "Tonight", page: "Tonight", visibility: "public" },
-      { label: "Accounting", page: "Accounting", visibility: "public" },
-      { label: "Contracts", page: "ContractsHub", visibility: "public" },
-      { label: "Settlement", page: "admin/settlement", visibility: "public" },
-      { label: "Activity Log", page: "admin/activity-log", visibility: "public" },
-      { label: "Audit Integrity", page: "admin/audit-integrity", visibility: "public" },
-      { label: "Venue Settings", page: "admin/venue-settings", visibility: "public" },
+      { label: "Open NUPS Portal", page: "NUPSLanding", visibility: "public" },
     ]
   },
   {

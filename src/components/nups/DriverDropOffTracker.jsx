@@ -51,6 +51,7 @@ export default function DriverDropOffTracker({ user }) {
   const [scanInput, setScanInput] = useState("");
   const [newDriver, setNewDriver] = useState({ name: "", phone: "", affiliated: true });
   const [guestCounter, setGuestCounter] = useState({}); // record_id -> input value
+  const [promoCounter, setPromoCounter] = useState({}); // record_id -> promo cards given count
   const [qrDelivery, setQrDelivery] = useState(null); // newly-onboarded driver profile awaiting QR delivery
   const [profileDrawer, setProfileDrawer] = useState(null); // existing driver profile being inspected (read-only)
 
@@ -214,6 +215,22 @@ export default function DriverDropOffTracker({ user }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
 
+  // Recompute the net payout: guests × per-guest rate, minus promo cards he
+  // handed out to his own guests (promo amount comes out of HIS pay, not the
+  // house). Promos are tracked separately so the audit log shows exactly how
+  // many he gave and how much was deducted.
+  const computeNetPayout = (meta) => {
+    const totalGuests = Number(meta.guests) || 0;
+    const promosGiven = Number(meta.promo_cards_given) || 0;
+    const promoAmount = Number(rates?.promo_card_amount) || 5;
+    const gross = computeDriverPayoutAmount(rates, {
+      guests: totalGuests,
+      affiliated: !!meta.affiliated,
+    });
+    const deduction = promosGiven * promoAmount;
+    return Math.max(0, gross - deduction);
+  };
+
   // ─── Log guest count on an open session ──────────────────────────────────
   const logGuests = useMutation({
     mutationFn: async ({ session, guests }) => {
@@ -223,12 +240,26 @@ export default function DriverDropOffTracker({ user }) {
       const drops = Array.isArray(meta.drops) ? [...meta.drops] : [];
       drops.push({ guests: N, at: new Date().toISOString() });
       const totalGuests = drops.reduce((s, d) => s + (d.guests || 0), 0);
-      const affiliated = !!meta.affiliated;
-      const driverPayout = computeDriverPayoutAmount(rates, { guests: totalGuests, affiliated });
       const newMeta = { ...meta, drops, guests: totalGuests };
+      const netPayout = computeNetPayout(newMeta);
       return base44.entities.DriverPayout.update(session.id, {
         notes: JSON.stringify(newMeta),
-        total_payout: driverPayout,
+        total_payout: netPayout,
+      });
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
+  });
+
+  // ─── Log promo cards the DRIVER gave to his guests — deducted from his pay ─
+  const logPromoCards = useMutation({
+    mutationFn: async ({ session, count }) => {
+      const N = Math.max(0, Number(count) || 0);
+      const meta = safeJSON(session.notes);
+      const newMeta = { ...meta, promo_cards_given: N };
+      const netPayout = computeNetPayout(newMeta);
+      return base44.entities.DriverPayout.update(session.id, {
+        notes: JSON.stringify(newMeta),
+        total_payout: netPayout,
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
@@ -590,12 +621,25 @@ export default function DriverDropOffTracker({ user }) {
 
               {isOpen && (
                 <div className="border-t border-gray-800 pt-3 space-y-3">
-                  <div className="rounded p-3 bg-gray-800/40 text-xs">
-                    <div className="text-white font-bold text-lg text-center">${payoutAmount.toFixed(2)}</div>
-                    <div className="text-gray-400 mt-1 text-center">
-                      {totalGuests} guests × ${affiliated ? rates?.driver_payout_affiliated : rates?.driver_payout_outside}/guest
-                    </div>
-                  </div>
+                  {(() => {
+                    const promosGiven = Number(meta.promo_cards_given) || 0;
+                    const promoAmount = Number(rates?.promo_card_amount) || 5;
+                    const grossPay = computeDriverPayoutAmount(rates, { guests: totalGuests, affiliated });
+                    const deduction = promosGiven * promoAmount;
+                    return (
+                      <div className="rounded p-3 bg-gray-800/40 text-xs">
+                        <div className="text-white font-bold text-2xl text-center">${payoutAmount.toFixed(2)}</div>
+                        <div className="text-gray-400 mt-1 text-center text-[11px]">
+                          {totalGuests} guests × ${affiliated ? rates?.driver_payout_affiliated : rates?.driver_payout_outside} = ${grossPay.toFixed(2)}
+                        </div>
+                        {promosGiven > 0 && (
+                          <div className="text-rose-300 mt-1 text-center text-[11px]">
+                            − {promosGiven} promo card{promosGiven !== 1 ? "s" : ""} × ${promoAmount} = −${deduction.toFixed(2)}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Log guest count — one-tap +1 for fast entry, or type a number */}
                   <div className="flex gap-2">
@@ -638,6 +682,41 @@ export default function DriverDropOffTracker({ user }) {
                       ))}
                     </div>
                   )}
+
+                  {/* Promo cards the DRIVER gave his guests — deducted from his pay,
+                      NOT the house. Door Girl enters the count; payout auto-recalculates. */}
+                  <div className="rounded-lg border border-rose-500/30 bg-rose-950/20 p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Banknote className="w-3.5 h-3.5 text-rose-300" />
+                      <span className="text-[11px] uppercase tracking-wider font-bold text-rose-300">
+                        Promo Cards Given by Driver
+                      </span>
+                      <span className="text-[10px] text-gray-500 ml-auto">
+                        Deducted from his pay · ${Number(rates?.promo_card_amount) || 5} each
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={promoCounter[session.id] ?? (Number(meta.promo_cards_given) || "")}
+                        onChange={e => setPromoCounter(c => ({ ...c, [session.id]: e.target.value }))}
+                        disabled={confirmed}
+                        className="bg-black/40 border-rose-500/30 text-white h-9"
+                      />
+                      <Button
+                        onClick={() => {
+                          const N = Math.max(0, parseInt(promoCounter[session.id], 10) || 0);
+                          logPromoCards.mutate({ session, count: N });
+                        }}
+                        disabled={confirmed || logPromoCards.isPending}
+                        className="bg-rose-600 hover:bg-rose-700 text-white font-bold h-9"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </div>
 
                   <div className="bg-gray-800/40 rounded p-2 flex items-start gap-2 text-xs text-gray-400">
                     <AlertCircle className="w-3 h-3 text-yellow-400 mt-0.5 shrink-0" />

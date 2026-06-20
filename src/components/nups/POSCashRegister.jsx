@@ -25,7 +25,7 @@ import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
 import { writeEntity } from "@/lib/nups/writeEntity";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 
-export default function POSCashRegister({ user, station = 'door' }) {
+export default function POSCashRegister({ user, station = 'door', showDriverPanel = true }) {
     // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
       const [ageBlocked, setAgeBlocked] = useState(false);
         useEffect(() => {
@@ -1241,8 +1241,10 @@ export default function POSCashRegister({ user, station = 'door' }) {
         onConfirm={applyPendingVoid}
       />
 
-      {/* Driver Payout System — door register only */}
-      {station === 'door' && (
+      {/* Driver Payout System — door register only, and only when host page
+          requests it. The sidebar Register tab hides this column because
+          "Driver Payouts" has its own sidebar page. */}
+      {station === 'door' && showDriverPanel && (
         <div className="flex-1 flex flex-col overflow-hidden" style={{ borderLeftWidth: '1px', borderLeftColor: 'rgba(255,255,255,0.06)' }}>
           <div className="p-4 border-b border-white/10">
             <h3 className="text-sm font-bold text-white">Driver Payouts</h3>

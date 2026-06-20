@@ -109,7 +109,8 @@ function RegisterConsoleInner() {
       <div className="max-w-[1600px] mx-auto">
         {tab === "register" && (
           <div className="space-y-4">
-            <POSCashRegister />
+            {/* showDriverPanel=false — Driver Payouts has its own sidebar tab. */}
+            <POSCashRegister showDriverPanel={false} />
           </div>
         )}
 
