@@ -1,27 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Shield } from "lucide-react";
 import ManagerPINVerifier from "@/components/nups/ManagerPINVerifier";
-import { exitKioskMode, isKioskMode } from "@/lib/nups/kioskMode";
+import { enterKioskMode, exitKioskMode, isKioskMode } from "@/lib/nups/kioskMode";
 
 /**
  * KioskShell
  *
- * Wraps every post-login NUPS page. While kiosk mode is active, the GlyphLock
- * marketing navbar/footer are NOT rendered (those pages are listed as fullscreen
- * in App.jsx). This shell adds a thin top bar with a single "Exit" button —
- * exiting requires Manager PIN verification (admin override available inside
+ * Wraps every NUPS page (including the public NUPS Landing). Entering ANY
+ * NUPS route auto-locks the session into kiosk mode so the GlyphLock
+ * marketing navbar/footer never appear next to NUPS surfaces. Exiting kiosk
+ * mode requires Manager PIN (admin override available inside
  * ManagerPINVerifier for Carlo / AI / platform admins).
  */
 export default function KioskShell({ children }) {
   const navigate = useNavigate();
   const [showExit, setShowExit] = useState(false);
-  const kiosk = isKioskMode();
+  const [kiosk, setKiosk] = useState(isKioskMode());
+
+  // Force the entire NUPS system into kiosk mode on entry.
+  useEffect(() => {
+    if (!isKioskMode()) {
+      enterKioskMode();
+      setKiosk(true);
+    }
+  }, []);
 
   const handleVerified = () => {
     exitKioskMode();
+    setKiosk(false);
     setShowExit(false);
-    navigate("/NUPSLanding");
+    navigate("/");
   };
 
   return (

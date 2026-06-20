@@ -112,9 +112,11 @@ const AuthenticatedApp = () => {
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
-  // NUPS operator surface gets the kiosk shell (exit requires Manager PIN).
-  // Public landing / gateway / login / sandbox stay open so users can enter.
+  // Every NUPS surface gets the kiosk shell. KioskShell auto-engages kiosk
+  // mode on mount so the entire NUPS system runs locked from first entry.
+  // Exit requires Manager PIN.
   const nupsKioskRoots = [
+    '/nupslanding', '/landing', '/nupsgateway',
     '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
     '/nupshub', '/hub', '/register', '/registerconsole',
     '/accounting', '/tonight', '/contracts', '/contractshub',
