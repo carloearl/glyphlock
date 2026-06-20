@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, LogOut, Settings, AlertCircle } from "lucide-react";
+import { LogOut, Settings, AlertCircle } from "lucide-react";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
+import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
@@ -86,66 +87,44 @@ function FrontDoorContent() {
   const role = (user?.role || "").toUpperCase();
   const canEditConfig = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "SOVEREIGN"].includes(role);
 
-  return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="border-b border-white/5 bg-gradient-to-r from-violet-950/30 via-black to-blue-950/30 px-4 py-3 sticky top-0 z-30 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.4)]">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-black text-white leading-tight">Front Door</h1>
-                {(user?.full_name || user?.role || activeVenue?.name) && (
-                  <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
-                    {user?.full_name || user?.username || "Operator"}
-                    {user?.role && (
-                      <span className="ml-2 text-violet-400 uppercase tracking-wider">
-                        {user.role.replace(/_/g, " ")}
-                      </span>
-                    )}
-                    {activeVenue?.name && (
-                      <span className="ml-2 text-slate-400">· {activeVenue.name}</span>
-                    )}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <EmergencyOverrideButton venueId={venueId} />
-              {canEditConfig && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setConfigOpen(true)}
-                  className="border-violet-500/40 text-violet-300 hover:bg-violet-500/10"
-                  title="Configure Front Door tabs and dashboard"
-                >
-                  <Settings className="w-3.5 h-3.5 mr-1.5" /> Configure
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-              >
-                <LogOut className="w-3.5 h-3.5 mr-1.5" /> Sign Out
-              </Button>
-            </div>
-          </div>
-          {/* Always-on operator status: name · role · venue · mode · shift */}
-          <OperatorStatusBar
-            user={user}
-            venueId={venueId}
-            venueName={activeVenue?.name || activeVenue?.venue_name}
-          />
-        </div>
-      </div>
+  const actions = (
+    <>
+      <EmergencyOverrideButton venueId={venueId} />
+      {canEditConfig && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setConfigOpen(true)}
+          className="border-violet-500/40 text-violet-300 hover:bg-violet-500/10"
+          title="Configure Front Door tabs and dashboard"
+        >
+          <Settings className="w-3.5 h-3.5 sm:mr-1.5" /> <span className="hidden sm:inline">Configure</span>
+        </Button>
+      )}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleSignOut}
+        className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+      >
+        <LogOut className="w-3.5 h-3.5 sm:mr-1.5" /> <span className="hidden sm:inline">Sign Out</span>
+      </Button>
+    </>
+  );
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
+  return (
+    <NUPSAppShell
+      title="Front Door"
+      subtitle={`${user?.full_name || user?.username || "Operator"}${user?.role ? " · " + user.role.replace(/_/g, " ") : ""}${activeVenue?.name ? " · " + activeVenue.name : ""}`}
+      actions={actions}
+      role={(user?.role || "DOOR_GIRL").toUpperCase()}
+    >
+      <div className="max-w-[1400px] mx-auto">
+        <OperatorStatusBar
+          user={user}
+          venueId={venueId}
+          venueName={activeVenue?.name || activeVenue?.venue_name}
+        />
         {effective.notes && (
           <div className="mb-4 flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-sm text-amber-300">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -205,6 +184,6 @@ function FrontDoorContent() {
         onSave={(next) => save.mutateAsync(next)}
         user={user}
       />
-    </div>
+    </NUPSAppShell>
   );
 }

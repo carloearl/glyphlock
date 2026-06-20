@@ -7,24 +7,27 @@
  * - Driver Payouts pinned to active POSBatch
  * - POSBatch status surfaced globally with color-coded badges
  */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  ShoppingCart, ReceiptText, Truck, Lock, Unlock, Circle, Activity,
+  Lock, Unlock, Circle, Activity,
 } from "lucide-react";
 import POSCashRegister from "@/components/nups/POSCashRegister";
 import TransactionHistory from "@/components/nups/TransactionHistory";
 import DriverPayoutHistory from "@/pages/DriverPayoutHistory";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
+import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 
-const TABS = [
-  { id: "register", label: "Register", icon: ShoppingCart, color: "cyan" },
-  { id: "receipts", label: "Receipts & History", icon: ReceiptText, color: "emerald" },
-  { id: "drivers", label: "Driver Payouts", icon: Truck, color: "pink" },
-];
+const VALID_TABS = ["register", "receipts", "drivers"];
+const SUBTITLE = {
+  register: "POS Terminal · Active batch · Live ring-up",
+  receipts: "Today's receipts & transaction log",
+  drivers:  "Driver payouts — coupled to active batch",
+};
 
 function BatchStatusBadge({ batch }) {
   if (!batch) {
@@ -52,7 +55,15 @@ function BatchStatusBadge({ batch }) {
 }
 
 function RegisterConsoleInner() {
-  const [tab, setTab] = useState("register");
+  const location = useLocation();
+  const queryTab = new URLSearchParams(location.search).get("tab");
+  const initialTab = VALID_TABS.includes(queryTab) ? queryTab : "register";
+  const [tab, setTab] = useState(initialTab);
+
+  // Keep sub-view in sync with sidebar deep-links (?tab=…)
+  useEffect(() => {
+    if (VALID_TABS.includes(queryTab) && queryTab !== tab) setTab(queryTab);
+  }, [queryTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Active POSBatch — surfaced across every sub-tab so the operator always
   // knows what batch their actions are tied to.
@@ -82,53 +93,20 @@ function RegisterConsoleInner() {
     return transactions.filter((t) => (t.created_date || "").slice(0, 10) === today);
   }, [transactions]);
 
+  const titleMap = {
+    register: "Register · POS",
+    receipts: "Register · Receipts",
+    drivers:  "Register · Driver Payouts",
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      {/* Persistent header — operator context never disappears */}
-      <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <ShoppingCart className="w-6 h-6 text-cyan-400" />
-            <div>
-              <h1 className="text-lg font-bold">Register Console</h1>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest">
-                One register · One receipt log · One payout ledger
-              </p>
-            </div>
-          </div>
-          <BatchStatusBadge batch={activeBatch} />
-        </div>
-
-        {/* Sub-tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-2 flex gap-1 overflow-x-auto">
-          {TABS.map((t) => {
-            const Icon = t.icon;
-            const active = tab === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg text-sm font-semibold whitespace-nowrap transition-all border-b-2 ${
-                  active
-                    ? `text-${t.color}-300 border-${t.color}-400 bg-${t.color}-500/10`
-                    : "text-slate-400 border-transparent hover:text-slate-200 hover:bg-slate-800/40"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {t.label}
-                {t.id === "receipts" && todayTransactions.length > 0 && (
-                  <Badge variant="outline" className="ml-1 text-[10px] border-emerald-500/30 text-emerald-300">
-                    {todayTransactions.length}
-                  </Badge>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </header>
-
-      {/* Sub-tab body */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+    <NUPSAppShell
+      title={titleMap[tab]}
+      subtitle={SUBTITLE[tab]}
+      actions={<BatchStatusBadge batch={activeBatch} />}
+      role="CASHIER"
+    >
+      <div className="max-w-[1600px] mx-auto">
         {tab === "register" && (
           <div className="space-y-4">
             <POSCashRegister />
@@ -137,7 +115,7 @@ function RegisterConsoleInner() {
 
         {tab === "receipts" && (
           <div className="space-y-3">
-            <Card className="bg-slate-900/60 border-emerald-500/30">
+            <Card className="bg-white/[0.02] border-emerald-500/20">
               <CardContent className="p-4 flex items-center justify-between gap-3 flex-wrap">
                 <div>
                   <h2 className="text-base font-bold text-emerald-300">Today's Receipts & Transaction Log</h2>
@@ -156,7 +134,7 @@ function RegisterConsoleInner() {
 
         {tab === "drivers" && (
           <div className="space-y-3">
-            <Card className="bg-slate-900/60 border-pink-500/30">
+            <Card className="bg-white/[0.02] border-pink-500/20">
               <CardContent className="p-4">
                 <h2 className="text-base font-bold text-pink-300">Driver Payouts — Coupled to Active Batch</h2>
                 <p className="text-xs text-slate-400 mt-1">
@@ -168,8 +146,8 @@ function RegisterConsoleInner() {
             <DriverPayoutHistory />
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </NUPSAppShell>
   );
 }
 

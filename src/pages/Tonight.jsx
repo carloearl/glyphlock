@@ -15,11 +15,12 @@ import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { analyzeAuditLogs } from "@/lib/audit/auditAnalytics";
 import {
-  Moon, ArrowLeft, DollarSign, Clock, ShieldAlert, Truck,
-  DoorOpen, Search as SearchIcon, FileSearch, Calculator,
-  Activity, Lock, CheckCircle2, RefreshCw, Banknote, LayoutGrid,
+  DollarSign, Clock, ShieldAlert, Truck,
+  DoorOpen, FileSearch, Calculator,
+  Activity, Lock, CheckCircle2, RefreshCw,
 } from "lucide-react";
 import BigSpenderAlert from "@/components/nups/tonight/BigSpenderAlert";
+import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -160,41 +161,23 @@ export default function Tonight() {
     ? (STATUS_STYLES[shiftStatus] || STATUS_STYLES.OPEN)
     : "bg-violet-500/20 border-violet-500/40 text-violet-300";
 
-  return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="border-b border-white/5 bg-gradient-to-r from-violet-950/40 via-black to-emerald-950/40 px-4 py-4 sticky top-0 z-30 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="border-white/10 text-gray-400">
-              <ArrowLeft className="w-3.5 h-3.5" />
-            </Button>
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-emerald-600 rounded-xl flex items-center justify-center">
-              <Moon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-white leading-tight">Tonight</h1>
-              <p className="text-[11px] text-gray-500">
-                {activeVenue?.venue_name || venueId || "All venues"} · {t} ·{" "}
-                <Badge className={`border text-[10px] px-1.5 py-0 ${shiftStatusStyle}`}>{shiftStatusLabel}</Badge>
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate("/NUPSHub")} className="border-violet-500/30 text-violet-300">
-              <LayoutGrid className="w-3.5 h-3.5 mr-1.5" /> Hub
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/Search")} className="border-emerald-500/30 text-emerald-300">
-              <SearchIcon className="w-3.5 h-3.5 mr-1.5" /> Search
-            </Button>
-            <Button variant="outline" size="sm" onClick={refreshAll} className="border-blue-500/30 text-blue-300">
-              <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
-            </Button>
-          </div>
-        </div>
-      </div>
+  const actions = (
+    <>
+      <Badge className={`border text-[10px] px-2 py-1 ${shiftStatusStyle} hidden sm:inline-flex`}>{shiftStatusLabel}</Badge>
+      <Button variant="outline" size="sm" onClick={refreshAll} className="border-blue-500/30 text-blue-300">
+        <RefreshCw className="w-3.5 h-3.5 sm:mr-1.5" /> <span className="hidden sm:inline">Refresh</span>
+      </Button>
+    </>
+  );
 
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+  return (
+    <NUPSAppShell
+      title="Tonight"
+      subtitle={`${activeVenue?.venue_name || venueId || "All venues"} · ${t}`}
+      actions={actions}
+      role="MANAGER"
+    >
+      <div className="max-w-[1600px] mx-auto space-y-6">
         {/* Big Spender Protocol alert — only renders when a guest crosses $10k */}
         <BigSpenderAlert venueId={venueId} />
 
@@ -314,15 +297,7 @@ export default function Tonight() {
           </div>
         </div>
 
-        {/* Frozen-rules footer */}
-        <div className="text-[10px] text-gray-600 bg-gray-900/30 border border-gray-800 rounded-lg p-3 flex flex-wrap gap-x-4 gap-y-1">
-          <span className="text-emerald-400 font-bold">BPAAA v3.0:</span>
-          <span>total_sales = cash + card ONLY</span>
-          <span>GB = liability (excluded)</span>
-          <span>Driver payouts = disbursements</span>
-          <span>ActivityLog = append-only</span>
-        </div>
       </div>
-    </div>
+    </NUPSAppShell>
   );
 }
