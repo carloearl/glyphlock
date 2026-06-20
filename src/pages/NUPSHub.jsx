@@ -8,11 +8,11 @@
 import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Badge } from "@/components/ui/badge";
 import TodaysSummary from "@/components/hub/TodaysSummary";
 import TopProductsTable from "@/components/hub/TopProductsTable";
 import HourlySalesChart from "@/components/hub/HourlySalesChart";
 import VenuePerformance from "@/components/hub/VenuePerformance";
+import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -87,28 +87,12 @@ export default function NUPSHub() {
   }, [txns]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-4">
-        {/* Header */}
-        <div className="flex items-end justify-between flex-wrap gap-3">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight">Dashboard</h1>
-            <p className="text-xs text-slate-400 mt-1">
-              One Nexus · Multiple Venues · Every Dollar Accounted For
-            </p>
-          </div>
-          {user && (
-            <div className="flex items-center gap-2 text-xs">
-              <Badge variant="outline" className="border-slate-700 text-slate-300">
-                {user.full_name || user.email}
-              </Badge>
-              <Badge variant="outline" className="border-violet-500/40 text-violet-300 font-mono">
-                {role}
-              </Badge>
-            </div>
-          )}
-        </div>
-
+    <NUPSAppShell
+      title="Dashboard"
+      subtitle="One Nexus · Multiple Venues · Every Dollar Accounted For"
+      role={role}
+    >
+      <div className="space-y-5 max-w-[1600px] mx-auto">
         <TodaysSummary
           grossSales={agg.grossSales}
           netRevenue={agg.netRevenue}
@@ -116,21 +100,13 @@ export default function NUPSHub() {
           cashPct={agg.cashPct}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <TopProductsTable products={agg.topProducts} />
           <VenuePerformance venues={venuePerformance} />
         </div>
 
         <HourlySalesChart data={agg.hourly} />
-
-        <div className="text-[10px] text-slate-600 bg-slate-900/40 border border-slate-800 rounded-lg p-3 flex flex-wrap gap-x-4 gap-y-1">
-          <span className="text-emerald-400 font-bold">BPAAA v3.0 LOCKED:</span>
-          <span>total_sales = cash + card</span>
-          <span>GB = liability</span>
-          <span>Payouts = disbursements</span>
-          <span>ActivityLog = append-only</span>
-        </div>
       </div>
-    </div>
+    </NUPSAppShell>
   );
 }

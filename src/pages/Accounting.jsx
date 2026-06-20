@@ -3,11 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Calculator, Download, ArrowLeft, Loader2, ShieldCheck, FileSearch, Search, Moon } from "lucide-react";
+import { Download, Loader2, FileSearch } from "lucide-react";
 import AuditFindingsBadge from "@/components/audit/AuditFindingsBadge";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
+import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
-import { aggregateFinancials, fmtUSD } from "@/lib/accounting/aggregateFinancials";
+import { aggregateFinancials } from "@/lib/accounting/aggregateFinancials";
 import AccountingDateFilter, { computeRange } from "@/components/accounting/AccountingDateFilter";
 import AccountingSummaryCards from "@/components/accounting/AccountingSummaryCards";
 import RevenueBreakdown from "@/components/accounting/RevenueBreakdown";
@@ -183,89 +184,47 @@ function AccountingContent() {
     toast.success("Timeline exported");
   };
 
-  return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="border-b border-white/5 bg-gradient-to-r from-violet-950/30 via-black to-emerald-950/30 px-4 py-4 sticky top-0 z-30 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="border-white/10 text-gray-400"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-            </Button>
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-emerald-600 rounded-xl flex items-center justify-center">
-              <Calculator className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-white leading-tight">Accounting</h1>
-              <p className="text-[11px] text-gray-500 flex items-center gap-1.5">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                Revenue · Disbursements · Liability — single source of truth
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/Tonight")}
-              className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10"
-            >
-              <Moon className="w-3.5 h-3.5 mr-1.5" /> Tonight
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/Search")}
-              className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
-            >
-              <Search className="w-3.5 h-3.5 mr-1.5" /> Search
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/admin/audit-integrity")}
-              className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10"
-            >
-              <FileSearch className="w-3.5 h-3.5 mr-1.5" /> Audit Integrity
-              <AuditFindingsBadge />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportSummary}
-              className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10"
-            >
-              <Download className="w-3.5 h-3.5 mr-1.5" /> Summary CSV
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportTimeline}
-              className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
-            >
-              <Download className="w-3.5 h-3.5 mr-1.5" /> Timeline CSV
-            </Button>
-            <QuickBooksDriveSyncButton range={range} venueId={venueId} />
-            <Button
-              size="sm"
-              onClick={() => setQbOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white"
-            >
-              <span className="inline-flex w-4 h-4 rounded-sm bg-white/20 items-center justify-center text-[8px] font-mono mr-1.5">QB</span>
-              QuickBooks
-            </Button>
-          </div>
-        </div>
-      </div>
+  const actions = (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => navigate("/admin/audit-integrity")}
+        className="border-violet-500/30 text-violet-300 hover:bg-violet-500/10 hidden sm:inline-flex"
+      >
+        <FileSearch className="w-3.5 h-3.5 mr-1.5" /> Audit
+        <AuditFindingsBadge />
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleExportSummary}
+        className="border-white/10 text-slate-300 hover:bg-white/5 hidden lg:inline-flex"
+      >
+        <Download className="w-3.5 h-3.5 mr-1.5" /> CSV
+      </Button>
+      <QuickBooksDriveSyncButton range={range} venueId={venueId} />
+      <Button
+        size="sm"
+        onClick={() => setQbOpen(true)}
+        className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-[0_0_20px_-6px_rgba(16,185,129,0.6)]"
+      >
+        <span className="inline-flex w-4 h-4 rounded-sm bg-white/20 items-center justify-center text-[8px] font-mono mr-1.5">QB</span>
+        QuickBooks
+      </Button>
+    </>
+  );
 
+  return (
+    <NUPSAppShell
+      title="Accounting"
+      subtitle="Revenue · Disbursements · Liability — single source of truth"
+      actions={actions}
+      role="MANAGER"
+    >
       <QuickBooksExportModal open={qbOpen} onOpenChange={setQbOpen} range={range} venueId={venueId} />
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-[1600px] mx-auto">
         <AccountingDateFilter
           value={range}
           onChange={setRange}
@@ -286,7 +245,7 @@ function AccountingContent() {
               <AccountingTrendChart timeline={data.timeline} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
               <RevenueBreakdown data={data} settlements={settlements} />
               <DisbursementsBreakdown data={data} />
             </div>
@@ -295,34 +254,53 @@ function AccountingContent() {
               <LiabilityLedger data={data} />
             </div>
 
-            {/* Z-Report reconciliation (live POS vs saved snapshot) */}
             <div className="mb-6">
               <ZReportReconciliationPanel venueId={venueId} />
             </div>
 
-            {/* Before/After diff log for locked settlements */}
             <div className="mb-6">
               <SettlementDiffPanel venueId={venueId} limit={5} />
             </div>
 
-            {/* Data integrity footer */}
-            <div className="text-[10px] text-gray-600 bg-gray-900/40 border border-gray-800 rounded-lg p-3 flex flex-wrap gap-x-4 gap-y-1">
-              <span className="text-emerald-400 font-bold">✓ DACO-LOCKED:</span>
-              <span>total_sales = cash + card only</span>
-              <span>GlyphBucks ≠ revenue</span>
-              <span>Payouts = disbursements</span>
-              <span className="ml-auto text-gray-700">
-                Records aggregated: {data._meta.counts.settlements} settlements ·{" "}
+            <div className="flex items-center justify-between flex-wrap gap-2 text-[10px] text-slate-500 bg-white/[0.02] border border-white/[0.06] rounded-xl p-3">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-300 font-bold uppercase tracking-widest">DACO Locked</span>
+                <span className="ml-2 hidden sm:inline">total_sales = cash + card</span>
+                <span className="hidden sm:inline">· GlyphBucks ≠ revenue</span>
+                <span className="hidden sm:inline">· Payouts = disbursements</span>
+              </div>
+              <div className="font-mono text-slate-600">
+                {data._meta.counts.settlements} settlements ·{" "}
                 {data._meta.counts.driverPayouts} driver ·{" "}
                 {data._meta.counts.payrollRecords} payroll ·{" "}
                 {data._meta.counts.tipPayouts} tips ·{" "}
-                {data._meta.counts.contractorPayouts} contractor ·{" "}
-                {data._meta.counts.glyphBucksOrders} GB orders
-              </span>
+                {data._meta.counts.contractorPayouts} 1099 ·{" "}
+                {data._meta.counts.glyphBucksOrders} GB
+              </div>
+            </div>
+
+            <div className="lg:hidden mt-4 flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportSummary}
+                className="flex-1 border-white/10 text-slate-300"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5" /> Summary CSV
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportTimeline}
+                className="flex-1 border-white/10 text-slate-300"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5" /> Timeline CSV
+              </Button>
             </div>
           </>
         )}
       </div>
-    </div>
+    </NUPSAppShell>
   );
 }
