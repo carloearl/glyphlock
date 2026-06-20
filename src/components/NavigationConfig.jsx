@@ -118,13 +118,10 @@ export const FOOTER_LINKS = {
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
   ],
   nups: [
-    { label: "NUPS Landing", page: "NUPSLanding", visibility: "public" },
-    { label: "Operator Hub", page: "NUPSHub", visibility: "public" },
-    { label: "Front Door", page: "FrontDoor", visibility: "public" },
-    { label: "Register", page: "RegisterConsole", visibility: "public" },
-    { label: "Tonight", page: "Tonight", visibility: "public" },
-    { label: "Accounting", page: "Accounting", visibility: "public" },
-    { label: "Contracts", page: "ContractsHub", visibility: "public" },
+    // Single public entry point. Every operator surface (Hub, Register,
+    // Receipts, Driver Payouts, Front Door, Tonight, Accounting,
+    // Contracts) lives inside the NUPS sidebar after authentication.
+    { label: "Open NUPS Portal", page: "NUPSLanding", visibility: "public" },
   ],
   protocols: [
     { label: "Master Covenant", page: "GovernanceHub", visibility: "public" },
