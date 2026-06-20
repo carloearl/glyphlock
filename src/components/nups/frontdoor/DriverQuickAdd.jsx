@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, Minus, Users, CheckCircle, Banknote, AlertCircle } from "lucide-react";
+import { Car, Plus, Users, CheckCircle, Banknote, AlertCircle, Ticket, Edit3 } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
-import { loadVenueRates, computeDriverPayoutAmount } from "@/lib/nups/venueRateConfig";
+import { loadVenueRates } from "@/lib/nups/venueRateConfig";
+import DriverPayoutPanel from "@/components/nups/frontdoor/DriverPayoutPanel";
 
 /**
  * DriverQuickAdd — the simple door flow
@@ -41,6 +42,8 @@ export default function DriverQuickAdd({ user }) {
   const [rates, setRates] = useState(null);
   const [newName, setNewName] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  // The driver currently being edited in the payout panel
+  const [editingDriver, setEditingDriver] = useState(null);
 
   useEffect(() => {
     if (venueId) loadVenueRates(venueId).then(setRates);
@@ -84,14 +87,28 @@ export default function DriverQuickAdd({ user }) {
   const sessionByDriver = new Map();
   sessions.forEach(s => { if (s.status === "pending") sessionByDriver.set(s.contractor_id, s); });
 
-  // Tap a driver row → open or focus session, then bump guests
-  const addGuest = useMutation({
-    mutationFn: async ({ profile, delta = 1 }) => {
+  // Save a full payout breakdown from the panel (guests + promo + waived).
+  // This REPLACES the per-tap +1 flow — the door girl now sets all three
+  // counts at once after the cover has been rung up at the register.
+  const savePayout = useMutation({
+    mutationFn: async ({ profile, payload }) => {
       let session = sessionByDriver.get(profile.driver_id);
+      const baseMeta = {
+        source: "driver_quick_add",
+        affiliated: !!profile.affiliated,
+        guests: payload.guests,
+        promo_guests: payload.promo_guests,
+        waived_guests: payload.waived_guests,
+        batch_id: batchId,
+        batch_reference: batchRef,
+        breakdown: payload.breakdown,
+        headcount_confirmed: true,
+        confirmed_by: user?.email || user?.username || "door",
+        confirmed_at: new Date().toISOString(),
+      };
 
-      // No session yet → create one auto-confirmed (door girl handles end-to-end)
       if (!session) {
-        session = await base44.entities.DriverPayout.create({
+        return base44.entities.DriverPayout.create({
           payout_id: `DPO-${profile.driver_id}-${Date.now().toString(36).toUpperCase()}`,
           contractor_id: profile.driver_id,
           contractor_name: profile.name,
@@ -101,41 +118,30 @@ export default function DriverQuickAdd({ user }) {
           bills_redeemed: [],
           total_face_value: 0,
           redemption_rate: 0,
-          total_payout: 0,
+          total_payout: payload.total_payout,
           payment_method: "cash",
           status: "pending",
           tax_year: thisYear(),
           payment_reference: batchRef ? `BATCH-${batchRef}` : null,
-          notes: JSON.stringify({
-            source: "driver_quick_add",
-            affiliated: !!profile.affiliated,
-            guests: 0,
-            batch_id: batchId,
-            batch_reference: batchRef,
-            drops: [],
-            // Auto-confirmed at create — door girl owns the whole flow
-            headcount_confirmed: true,
-            confirmed_by: user?.email || user?.username || "door",
-            confirmed_at: new Date().toISOString(),
-          }),
+          notes: JSON.stringify(baseMeta),
         });
       }
 
-      const meta = safeJSON(session.notes);
-      const drops = Array.isArray(meta.drops) ? [...meta.drops] : [];
-      const N = Math.max(0, (Number(meta.guests) || 0) + delta);
-      drops.push({ guests: delta, at: new Date().toISOString() });
-      const affiliated = !!meta.affiliated;
-      const driverPayout = computeDriverPayoutAmount(rates, { guests: N, affiliated });
+      const prevMeta = safeJSON(session.notes);
       return base44.entities.DriverPayout.update(session.id, {
-        notes: JSON.stringify({ ...meta, drops, guests: N }),
-        total_payout: driverPayout,
+        notes: JSON.stringify({ ...prevMeta, ...baseMeta }),
+        total_payout: payload.total_payout,
       });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["driver-sessions"] });
+      setEditingDriver(null);
+    },
   });
 
-  // Onboard a brand new driver — name only, defaults to affiliated
+  // Onboard a brand new driver — name only, defaults to affiliated.
+  // After save, immediately open the payout panel so the door girl can set
+  // guests + promo + waived for that driver.
   const onboardDriver = useMutation({
     mutationFn: async (name) => {
       if (!venueId) throw new Error("No active venue");
@@ -152,21 +158,15 @@ export default function DriverQuickAdd({ user }) {
         onboarded_by: user?.email || "door",
         last_active_at: new Date().toISOString(),
       });
-      // Immediately log first guest so the row appears with a count
-      await addGuest.mutateAsync({ profile, delta: 1 });
       return profile;
     },
-    onSuccess: () => {
+    onSuccess: (profile) => {
       qc.invalidateQueries({ queryKey: ["driver-profiles"] });
       setNewName("");
       setShowAdd(false);
+      setEditingDriver(profile);
     },
   });
-
-  // Subtract a guest (undo button) — never goes below 0
-  const subtractGuest = (profile) => {
-    addGuest.mutate({ profile, delta: -1 });
-  };
 
   if (!venueId) {
     return (
@@ -197,9 +197,9 @@ export default function DriverQuickAdd({ user }) {
       </div>
 
       <p className="text-xs text-gray-400 bg-gray-900/40 border border-gray-800 rounded-lg p-3">
-        Tap a driver to add one drop-off. The payout is calculated automatically and
-        appears on the Register under <strong className="text-pink-300">Driver Payouts</strong> —
-        pay it out from the drawer after you finish ringing up cover and drinks.
+        <strong className="text-amber-300">Vinnie principle:</strong> ring up cover at the register first,
+        then tap a driver to set how many guests they brought, how many had promo cards, and how many
+        waived cover. The payout calculates automatically and appears under <strong className="text-pink-300">Driver Payouts</strong>.
       </p>
 
       {/* New driver inline form */}
@@ -228,63 +228,79 @@ export default function DriverQuickAdd({ user }) {
         </Card>
       )}
 
-      {/* Saved drivers — tap to add guest */}
-      <div className="grid sm:grid-cols-2 gap-2">
-        {profiles.length === 0 && (
-          <p className="text-gray-600 text-sm col-span-2 text-center py-8">
-            No drivers saved yet. Tap <strong className="text-yellow-300">New Driver</strong> to add one.
-          </p>
-        )}
-        {profiles.map(p => {
-          const session = sessionByDriver.get(p.driver_id);
-          const guests = session ? (Number(safeJSON(session.notes).guests) || 0) : 0;
-          const owed = session ? (Number(session.total_payout) || 0) : 0;
-          const active = guests > 0;
-          return (
-            <button
-              key={p.id}
-              onClick={() => addGuest.mutate({ profile: p, delta: 1 })}
-              disabled={addGuest.isPending}
-              className={`text-left rounded-lg border p-3 transition-all active:scale-[0.98] ${
-                active
-                  ? "bg-emerald-950/40 border-emerald-500/50 hover:border-emerald-400"
-                  : "bg-gray-900/40 border-gray-700 hover:border-yellow-500/50"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Car className={`w-4 h-4 shrink-0 ${active ? "text-emerald-300" : "text-yellow-400"}`} />
-                  <span className="font-bold text-white truncate">{p.name}</span>
-                  {!p.affiliated && (
-                    <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/40 text-[9px]">Outside</Badge>
+      {/* Editing panel — modal-ish inline, replaces the grid while open */}
+      {editingDriver ? (
+        <DriverPayoutPanel
+          driver={editingDriver}
+          rates={rates}
+          initial={(() => {
+            const s = sessionByDriver.get(editingDriver.driver_id);
+            const m = s ? safeJSON(s.notes) : {};
+            return {
+              guests: m.guests || 0,
+              promo_guests: m.promo_guests || 0,
+              waived_guests: m.waived_guests || 0,
+            };
+          })()}
+          onSave={(payload) => savePayout.mutate({ profile: editingDriver, payload })}
+          onCancel={() => setEditingDriver(null)}
+        />
+      ) : (
+        <div className="grid sm:grid-cols-2 gap-2">
+          {profiles.length === 0 && (
+            <p className="text-gray-600 text-sm col-span-2 text-center py-8">
+              No drivers saved yet. Tap <strong className="text-yellow-300">New Driver</strong> to add one.
+            </p>
+          )}
+          {profiles.map(p => {
+            const session = sessionByDriver.get(p.driver_id);
+            const meta = session ? safeJSON(session.notes) : {};
+            const guests = Number(meta.guests) || 0;
+            const promoGuests = Number(meta.promo_guests) || 0;
+            const waivedGuests = Number(meta.waived_guests) || 0;
+            const owed = session ? (Number(session.total_payout) || 0) : 0;
+            const active = guests > 0;
+            return (
+              <button
+                key={p.id}
+                onClick={() => setEditingDriver(p)}
+                className={`text-left rounded-lg border p-3 transition-all active:scale-[0.98] ${
+                  active
+                    ? "bg-emerald-950/40 border-emerald-500/50 hover:border-emerald-400"
+                    : "bg-gray-900/40 border-gray-700 hover:border-yellow-500/50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Car className={`w-4 h-4 shrink-0 ${active ? "text-emerald-300" : "text-yellow-400"}`} />
+                    <span className="font-bold text-white truncate">{p.name}</span>
+                    {!p.affiliated && (
+                      <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/40 text-[9px]">Outside</Badge>
+                    )}
+                  </div>
+                  <Edit3 className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-gray-400 flex items-center gap-2 flex-wrap">
+                    <span><Users className="w-3 h-3 inline mr-0.5" />{guests}</span>
+                    {promoGuests > 0 && (
+                      <span className="text-pink-300"><Ticket className="w-3 h-3 inline mr-0.5" />{promoGuests}</span>
+                    )}
+                    {waivedGuests > 0 && (
+                      <span className="text-cyan-300">⊘ {waivedGuests} waived</span>
+                    )}
+                  </span>
+                  {owed > 0 ? (
+                    <span className="text-emerald-300 font-bold text-sm">${owed.toFixed(2)}</span>
+                  ) : (
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wide">Tap to log</span>
                   )}
                 </div>
-                {active && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); subtractGuest(p); }}
-                    className="p-1 rounded hover:bg-red-500/20 text-red-400"
-                    title="Subtract one guest"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-xs text-gray-400">
-                  <Users className="w-3 h-3 inline mr-1" />
-                  {guests} guest{guests === 1 ? "" : "s"}
-                </span>
-                {owed > 0 && (
-                  <span className="text-emerald-300 font-bold text-sm">${owed.toFixed(2)}</span>
-                )}
-                {!active && (
-                  <span className="text-[10px] text-gray-500 uppercase tracking-wide">Tap to +1</span>
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Summary — total owed, paid at the Register */}
       {totalOwed > 0 && (
