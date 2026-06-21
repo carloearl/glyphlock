@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { UserCheck, AlertTriangle, CheckCircle2, Loader2, LogOut, Users } from "lucide-react";
 import { toast } from "sonner";
+import SeedDoorGuestsButton from "@/components/nups/SeedDoorGuestsButton";
 
 const MIN_AGE = 21;
 
@@ -231,9 +232,13 @@ export default function GuestCheckIn() {
       {/* In-Building Guests */}
       <Card className="bg-gray-900/60 border-purple-500/30">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-purple-400" />
-            In Building ({guests.length})
+          <CardTitle className="text-white flex items-center justify-between gap-2 flex-wrap">
+            <span className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-400" />
+              In Building ({guests.length})
+            </span>
+            {/* One-tap seed for VIP contract demos — drops 3 ready-to-attach guests */}
+            <SeedDoorGuestsButton variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 h-8 text-xs" />
           </CardTitle>
         </CardHeader>
         <CardContent>
