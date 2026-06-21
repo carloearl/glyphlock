@@ -50,6 +50,11 @@ const ROLE_CARDS = [
     requiresAuth: true,
   },
   {
+    // Entertainer Check-In is a door-mounted PIN station. Each entertainer
+    // authenticates with their OWN 4-digit PIN inside the screen, so the
+    // gateway should never gate this tile by operator role — the previous
+    // PERFORMER requirement bounced everyone (including the door tablet
+    // operator) into Access Restricted, which surfaced as a 404 to the user.
     key: "entertainer",
     label: "Entertainer Check-In",
     sub: "Clock in · Contract · Earnings · Profile",
@@ -58,9 +63,9 @@ const ROLE_CARDS = [
     border: "border-pink-500/30 hover:border-pink-400/60",
     iconColor: "text-pink-400",
     iconBg: "bg-pink-500/10",
-    requiredRoles: ["PERFORMER"],
+    requiredRoles: [],
     destination: "EntertainerCheckIn",
-    requiresAuth: true,
+    requiresAuth: false,
   },
   {
     key: "sandbox",
