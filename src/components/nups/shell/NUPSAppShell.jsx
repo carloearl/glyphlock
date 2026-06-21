@@ -7,6 +7,7 @@ import {
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
   TrendingUp, BarChart3, Users, Package, Heart, DollarSign, Music,
   Star, Sparkles, ShieldAlert as ShieldAlertIcon, KeyRound, ClipboardList,
+  Mic2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -22,12 +23,13 @@ const NAV_SECTIONS = [
   {
     label: "Operations",
     items: [
-      { id: "dashboard", label: "Dashboard",   icon: LayoutDashboard, to: "/NUPSHub" },
-      { id: "frontdoor", label: "Front Door",  icon: DoorOpen,        to: "/FrontDoor" },
-      { id: "register",  label: "Register",       icon: ShoppingCart, to: "/Register" },
-      { id: "receipts",  label: "Receipts",       icon: ReceiptText,  to: "/Receipts" },
-      { id: "drivers",   label: "Driver Payouts", icon: Truck,        to: "/DriverPayouts" },
-      { id: "tonight",   label: "Tonight",     icon: Moon,            to: "/Tonight" },
+      { id: "dashboard",    label: "Dashboard",       icon: LayoutDashboard, to: "/NUPSHub" },
+      { id: "frontdoor",    label: "Front Door",      icon: DoorOpen,        to: "/FrontDoor" },
+      { id: "entertainers", label: "Entertainers",    icon: Mic2,            to: "/EntertainerCheckIn" },
+      { id: "register",     label: "Register",        icon: ShoppingCart,    to: "/Register" },
+      { id: "receipts",     label: "Receipts",        icon: ReceiptText,     to: "/Receipts" },
+      { id: "drivers",      label: "Driver Payouts",  icon: Truck,           to: "/DriverPayouts" },
+      { id: "tonight",      label: "Tonight",         icon: Moon,            to: "/Tonight" },
     ],
   },
   {
