@@ -28,17 +28,17 @@ import { writeEntity } from "@/lib/nups/writeEntity";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 
 export default function POSCashRegister({ user, station = 'door', showDriverPanel = true }) {
-    // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
-      const [ageBlocked, setAgeBlocked] = useState(false);
-        useEffect(() => {
-            if (station === 'bar' && user?.date_of_birth) {
-                  const dob = new Date(user.date_of_birth);
-                        const today = new Date();
-                              const age = today.getFullYear() - dob.getFullYear()
-                                      - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
-                                            if (age < 21) setAgeBlocked(true);
-                                                }
-                                                  }, [station, user]);
+  // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
+  const [ageBlocked, setAgeBlocked] = useState(false);
+  useEffect(() => {
+    if (station === 'bar' && user?.date_of_birth) {
+      const dob = new Date(user.date_of_birth);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear()
+        - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+      if (age < 21) setAgeBlocked(true);
+    }
+  }, [station, user]);
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
   const [cart, setCart] = useState([]);
@@ -514,25 +514,25 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       } else {
         await createTransaction.mutateAsync(transactionData);
       }
-            // AUDIT LOG: Transaction created — BPAAA Phase 7
-                  try {
-                          await base44.entities.SystemAuditLog.create({
-                                    event_type: 'TRANSACTION_CREATED',
-                                              description: `Transaction ${transactionData.transaction_id} created — $${total.toFixed(2)} via ${paymentMethod} at ${station} station`,
-                                                        actor_email: user?.email || 'unknown',
-                                                                  status: 'success',
-                                                                            severity: 'low',
-                                                                                      metadata: {
-                                                                                                  transaction_id: transactionData.transaction_id,
-                                                                                                              total: total,
-                                                                                                                          payment_method: paymentMethod,
-                                                                                                                                      station,
-                                                                                                                                                  batch_id: activeBatch?.id,
-                                                                                                                                                              cashier: user?.email
-                                                                                                                                                                        }
-                                                                                                                                                                                });
-                                                                                                                                                                                      } catch(auditErr) { console.warn('Audit log write failed:', auditErr); }
-                                                                                                                                                                                      if (selectedCustomer?.id) {
+      // AUDIT LOG: Transaction created — BPAAA Phase 7
+      try {
+        await base44.entities.SystemAuditLog.create({
+          event_type: 'TRANSACTION_CREATED',
+          description: `Transaction ${transactionData.transaction_id} created — $${total.toFixed(2)} via ${paymentMethod} at ${station} station`,
+          actor_email: user?.email || 'unknown',
+          status: 'success',
+          severity: 'low',
+          metadata: {
+            transaction_id: transactionData.transaction_id,
+            total: total,
+            payment_method: paymentMethod,
+            station,
+            batch_id: activeBatch?.id,
+            cashier: user?.email,
+          },
+        });
+      } catch (auditErr) { console.warn('Audit log write failed:', auditErr); }
+      if (selectedCustomer?.id) {
         await base44.entities.POSCustomer.update(selectedCustomer.id, {
           visit_count: (selectedCustomer.visit_count || 0) + 1,
           total_spent: (selectedCustomer.total_spent || 0) + total,
@@ -605,20 +605,21 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     }
   };
 
-    if (ageBlocked) {
-          return (
-                <div className="min-h-[200px] flex items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/5 p-8 text-center">
-                        <div>
-                                  <div className="text-4xl mb-3">🔞</div>
-                                            <h3 className="text-xl font-bold text-red-400 mb-2">Access Denied — Bar Register</h3>
-                                                      <p className="text-gray-400 text-sm">Bar register access requires minimum age of 21. Your account does not meet this requirement.</p>
-                                                                <p className="text-xs text-gray-600 mt-3">Contact a manager for assistance. This access attempt has been logged.</p>
-                                                                        </div>
-                                                                              </div>
-                                                                                  );
-                                                                                    }
-                                                                                    if (paymentStep === "pay") {
+  if (ageBlocked) {
     return (
+      <div className="min-h-[200px] flex items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/5 p-8 text-center">
+        <div>
+          <div className="text-4xl mb-3">🔞</div>
+          <h3 className="text-xl font-bold text-red-400 mb-2">Access Denied — Bar Register</h3>
+          <p className="text-gray-400 text-sm">Bar register access requires minimum age of 21. Your account does not meet this requirement.</p>
+          <p className="text-xs text-gray-600 mt-3">Contact a manager for assistance. This access attempt has been logged.</p>
+        </div>
+      </div>
+    );
+  }
+  if (paymentStep === "pay") {
+    return (
+      <>
       <div className="max-w-md mx-auto space-y-4 p-4">
         <FlowSteps
           tone="cyan"
@@ -696,11 +697,46 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           </div>
         )}
       </div>
+
+      {/* Receipt modal — must be reachable from every paymentStep so the
+          cashier is never stranded on a blank screen after a completed sale. */}
+      <Dialog open={showReceiptModal && !!lastTransaction} onOpenChange={setShowReceiptModal}>
+        <DialogContent className="max-w-md bg-slate-950 border-emerald-500/40 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-emerald-300">
+              <CheckCircle2 className="w-5 h-5" />
+              Transaction Complete
+            </DialogTitle>
+          </DialogHeader>
+          {lastTransaction && (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
+                <div className="text-[10px] uppercase tracking-widest text-emerald-400/70">Total Charged</div>
+                <div className="text-3xl font-black text-emerald-300 font-mono">
+                  ${Number(lastTransaction.total || 0).toFixed(2)}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  {lastTransaction.payment_method} · {lastTransaction.transaction_id}
+                </div>
+              </div>
+              <ReceiptPrinter transaction={lastTransaction} />
+              <Button
+                onClick={() => setShowReceiptModal(false)}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12"
+              >
+                New Transaction
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      </>
     );
   }
 
   if (paymentStep === "method") {
     return (
+      <>
       <div className="max-w-lg mx-auto space-y-4 p-4 overflow-y-auto max-h-screen">
         <FlowSteps
           tone="cyan"
@@ -781,6 +817,39 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           </div>
         </div>
       </div>
+
+      {/* Receipt modal — reachable from method picker too */}
+      <Dialog open={showReceiptModal && !!lastTransaction} onOpenChange={setShowReceiptModal}>
+        <DialogContent className="max-w-md bg-slate-950 border-emerald-500/40 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-emerald-300">
+              <CheckCircle2 className="w-5 h-5" />
+              Transaction Complete
+            </DialogTitle>
+          </DialogHeader>
+          {lastTransaction && (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
+                <div className="text-[10px] uppercase tracking-widest text-emerald-400/70">Total Charged</div>
+                <div className="text-3xl font-black text-emerald-300 font-mono">
+                  ${Number(lastTransaction.total || 0).toFixed(2)}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  {lastTransaction.payment_method} · {lastTransaction.transaction_id}
+                </div>
+              </div>
+              <ReceiptPrinter transaction={lastTransaction} />
+              <Button
+                onClick={() => setShowReceiptModal(false)}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12"
+              >
+                New Transaction
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      </>
     );
   }
 
