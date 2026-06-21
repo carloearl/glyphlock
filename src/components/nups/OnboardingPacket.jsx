@@ -153,10 +153,24 @@ export default function OnboardingPacket({ currentUser }) {
       if (existing?.length > 0) {
         await base44.entities.UserRoleAssignment.update(existing[0].id, { is_active: true }).catch(() => {});
       }
-      return base44.entities.Entertainer.update(createdEntertainer.id, {
+      const updated = await base44.entities.Entertainer.update(createdEntertainer.id, {
         status: "active",
+        contract_status: "VALID",
         contract_signature: `Activated by ${currentUser?.email} on ${new Date().toLocaleDateString()}`,
       });
+      // Contractor convention: signing IS the check-in. Open a shift so the
+      // contractor appears on the active floor roster immediately — same as Lucky.
+      try {
+        await base44.entities.EntertainerShift.create({
+          entertainer_id: createdEntertainer.id,
+          check_in_time: new Date().toISOString(),
+          location: "Main Floor",
+          status: "checked_in",
+          shift_earnings: 0,
+          vip_sessions: 0,
+        });
+      } catch (e) { /* non-fatal: roster will reconcile on next check-in */ }
+      return updated;
     },
     onSuccess: () => {
       markStep("activated");
