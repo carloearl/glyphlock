@@ -13,6 +13,7 @@ import TopProductsTable from "@/components/hub/TopProductsTable";
 import HourlySalesChart from "@/components/hub/HourlySalesChart";
 import VenuePerformance from "@/components/hub/VenuePerformance";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
+import DemoReadinessBanner from "@/components/hub/DemoReadinessBanner";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -93,6 +94,9 @@ export default function NUPSHub() {
       role={role}
     >
       <div className="space-y-5 max-w-[1600px] mx-auto">
+        {/* Live integrity strip — Vinnie sees real data flowing at a glance */}
+        <DemoReadinessBanner />
+
         <TodaysSummary
           grossSales={agg.grossSales}
           netRevenue={agg.netRevenue}

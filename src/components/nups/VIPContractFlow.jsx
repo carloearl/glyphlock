@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Copy, ExternalLink, CheckCircle2, Loader2, Clock, AlertTriangle, ScrollText } from "lucide-react";
 import { VIP_ROOM_SERVICE_AGREEMENT } from "@/constants/contractText";
+import VIPGlyphBucksAutoMint from "@/components/nups/VIPGlyphBucksAutoMint";
 
 export default function VIPContractFlow({ room, guestName, onContractSigned, onClose }) {
   const [step, setStep] = useState("idle"); // idle | review | generating | ready | signed | error
@@ -230,13 +231,34 @@ export default function VIPContractFlow({ room, guestName, onContractSigned, onC
       )}
 
       {step === "signed" && (
-        <Card className="bg-green-500/10 border-green-500/40">
-          <CardContent className="p-6 text-center space-y-2">
-            <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto" />
-            <h3 className="text-green-400 font-bold text-lg">Contract Signed & Verified</h3>
-            <p className="text-sm text-gray-400">VIP session is now active.</p>
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <Card className="bg-green-500/10 border-green-500/40">
+            <CardContent className="p-6 text-center space-y-2">
+              <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto" />
+              <h3 className="text-green-400 font-bold text-lg">Contract Signed & Verified</h3>
+              <p className="text-sm text-gray-400">VIP session is now active.</p>
+            </CardContent>
+          </Card>
+
+          {/* Auto-mint GlyphBucks matching the room's minimum spend. The
+              backend writes the batch + bills + audit trail; the 30%
+              surcharge becomes revenue and the face value stays in the
+              liability ledger — accounting rules preserved. */}
+          <VIPGlyphBucksAutoMint
+            guestName={guestName}
+            faceValue={Math.round(Number(bookingPayload.minimum_spend) || 0)}
+            approvalCode={`VIP-${bookingPayload.uuid}`}
+            processorReference={bookingPayload.uuid}
+            cardLastFour=""
+            vipTier={
+              Number(bookingPayload.minimum_spend) >= 1000
+                ? "whale"
+                : Number(bookingPayload.minimum_spend) >= 500
+                ? "high_roller"
+                : "standard"
+            }
+          />
+        </div>
       )}
 
       {step === "error" && (
