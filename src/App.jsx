@@ -59,6 +59,7 @@ import RegisterConsole from './pages/RegisterConsole';
 import Receipts from './pages/Receipts';
 import DriverPayouts from './pages/DriverPayouts';
 import NUPSHub from './pages/NUPSHub';
+import EntertainerCheckIn from './pages/EntertainerCheckIn';
 import KioskShell from './components/nups/KioskShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -153,6 +154,8 @@ const AuthenticatedApp = () => {
         <Route path="/nupsstaff" element={<NUPSStaff />} />
         <Route path="/FrontDoor" element={<FrontDoor />} />
         <Route path="/frontdoor" element={<FrontDoor />} />
+        <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />
+        <Route path="/entertainercheckin" element={<EntertainerCheckIn />} />
         <Route path="/NUPSInfrastructurePage" element={<NUPSInfrastructurePage />} />
         <Route path="/nupsinfrastructurepage" element={<NUPSInfrastructurePage />} />
         <Route path="/GlyphLockFinancialPage" element={<GlyphLockFinancialPage />} />
