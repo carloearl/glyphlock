@@ -130,23 +130,28 @@ function RegisterConsoleInner() {
       role="CASHIER"
     >
       <div className="max-w-[1600px] mx-auto">
-        {/* Tab strip */}
-        <div className="flex flex-wrap gap-2 mb-5 pb-4 border-b border-slate-800 overflow-x-auto">
-          {TABS.map(({ key, label, icon: Icon }) => (
-            <Button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              variant={activeTab === key ? "default" : "outline"}
-              className={`min-h-[40px] text-sm gap-2 flex-shrink-0 transition-all ${
-                activeTab === key
-                  ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500"
-                  : "border-slate-700 text-slate-300 hover:border-cyan-500/50 hover:text-white bg-transparent"
-              }`}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {label}
-            </Button>
-          ))}
+        {/* Tab strip — tablet-first: horizontal scroll on narrow screens,
+            wraps cleanly on wider ones, every chip stays ≥44px tall so
+            fingers never miss. No overlap with the Demo Data button in
+            the shell header. */}
+        <div className="-mx-2 px-2 mb-4 pb-3 border-b border-slate-800 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 min-w-max md:flex-wrap md:min-w-0">
+            {TABS.map(({ key, label, icon: Icon }) => (
+              <Button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                variant={activeTab === key ? "default" : "outline"}
+                className={`min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm gap-1.5 sm:gap-2 flex-shrink-0 transition-all ${
+                  activeTab === key
+                    ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500 shadow-[0_0_18px_rgba(6,182,212,0.35)]"
+                    : "border-slate-700 text-slate-300 hover:border-cyan-500/50 hover:text-white bg-transparent"
+                }`}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="whitespace-nowrap">{label}</span>
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Tab content */}
@@ -157,16 +162,19 @@ function RegisterConsoleInner() {
               door girl handles cover, drivers, AND dancer arrivals from one
               screen. (Entertainer onboarding stays on its own tab.) */}
           {activeTab === "register" && (
-            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-4">
+            // Tablet-first: stacks on portrait, becomes 1-col + side rail
+            // at lg (1024px+), full 2-col at xl. Side rail caps its own
+            // height so the register never gets pushed off-screen.
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px] gap-3 sm:gap-4">
               <POSCashRegister showDriverPanel={false} user={user} station="door" />
-              <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
-                <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-4">
+              <div className="space-y-3 sm:space-y-4 lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto lg:pr-1">
+                <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-3 sm:p-4">
                   <DriverQuickAdd user={user} />
                 </div>
-                <div className="rounded-xl border border-pink-500/20 bg-slate-950/60 p-4">
+                <div className="rounded-xl border border-pink-500/20 bg-slate-950/60 p-3 sm:p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <UserCheck className="w-5 h-5 text-pink-400" />
-                    <h2 className="text-lg font-bold text-white">Entertainer Daily Check-In</h2>
+                    <h2 className="text-base sm:text-lg font-bold text-white">Entertainer Daily Check-In</h2>
                   </div>
                   <EntertainerCheckIn user={user} />
                 </div>
