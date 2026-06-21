@@ -14,6 +14,13 @@ import HourlySalesChart from "@/components/hub/HourlySalesChart";
 import VenuePerformance from "@/components/hub/VenuePerformance";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import DemoReadinessBanner from "@/components/hub/DemoReadinessBanner";
+import StaffClockInOut from "@/components/nups/StaffClockInOut";
+
+// Roles that actually punch a clock at the door. Owners / platform admins
+// don't see the clock-in card.
+const CLOCK_IN_ROLES = new Set([
+  "DOOR_GIRL", "DOORMAN", "BARTENDER", "SECURITY", "DJ", "FLOOR_HOST", "PERFORMER",
+]);
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -96,6 +103,15 @@ export default function NUPSHub() {
       <div className="space-y-5 max-w-[1600px] mx-auto">
         {/* Live integrity strip — Vinnie sees real data flowing at a glance */}
         <DemoReadinessBanner />
+
+        {/* Staff punch-clock — only for on-floor roles */}
+        {user && CLOCK_IN_ROLES.has(role) && (
+          <StaffClockInOut
+            user={{ ...user, role, full_name: nupsUser?.full_name || user.full_name }}
+            venueId={nupsUser?.venue_id}
+            station="door"
+          />
+        )}
 
         <TodaysSummary
           grossSales={agg.grossSales}
