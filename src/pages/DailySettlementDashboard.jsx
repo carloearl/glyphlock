@@ -292,28 +292,30 @@ export default function DailySettlementDashboard() {
         </div>
 
         <Card className="bg-slate-900 border-slate-800">
-          <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label className="text-xs text-slate-400 flex items-center gap-1"><Database className="w-3 h-3" /> Venue</label>
-              <Select value={selectedVenue} onValueChange={setSelectedVenue}>
-                <SelectTrigger className="bg-slate-800 border-slate-700"><SelectValue placeholder="Select venue…" /></SelectTrigger>
-                <SelectContent>
-                  {venues.length === 0 && <SelectItem value="__none__" disabled>No VenueRateConfig records</SelectItem>}
-                  {venues.map(v => <SelectItem key={v.id} value={v.venue_id}>{v.venue_name || v.venue_id}</SelectItem>)}
-                </SelectContent>
-              </Select>
+          <CardContent className="p-4 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-400 flex items-center gap-1"><Database className="w-3 h-3" /> Venue</label>
+                <Select value={selectedVenue} onValueChange={setSelectedVenue}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700"><SelectValue placeholder="Select venue…" /></SelectTrigger>
+                  <SelectContent>
+                    {venues.length === 0 && <SelectItem value="__none__" disabled>No VenueRateConfig records</SelectItem>}
+                    {venues.map(v => <SelectItem key={v.id} value={v.venue_id}>{v.venue_name || v.venue_id}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-400 flex items-center gap-1"><Calendar className="w-3 h-3" /> Business date</label>
+                <Input type="date" value={businessDate} onChange={e => setBusinessDate(e.target.value)} className="bg-slate-800 border-slate-700 text-white" />
+              </div>
             </div>
-            <div>
-              <label className="text-xs text-slate-400 flex items-center gap-1"><Calendar className="w-3 h-3" /> Business date</label>
-              <Input type="date" value={businessDate} onChange={e => setBusinessDate(e.target.value)} className="bg-slate-800 border-slate-700 text-white" />
-            </div>
-            <div className="flex items-end gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 pt-1 border-t border-slate-800">
               <Button
                 onClick={handleLockClick}
                 disabled={busy || status === 'LOCKED' || !selectedVenue}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 whitespace-nowrap"
               >
-                {busy ? 'Working…' : status === 'LOCKED' ? <><Lock className="w-4 h-4 mr-1" /> Locked</> : <><CheckCircle2 className="w-4 h-4 mr-1" /> Reconcile & Lock</>}
+                {busy ? 'Working…' : status === 'LOCKED' ? <><Lock className="w-4 h-4 mr-1.5" /> Locked</> : <><CheckCircle2 className="w-4 h-4 mr-1.5" /> Reconcile & Lock</>}
               </Button>
               <Button
                 onClick={async () => {
@@ -338,10 +340,10 @@ export default function DailySettlementDashboard() {
                 }}
                 disabled={!selectedVenue}
                 variant="outline"
-                className="border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
+                className="sm:w-32 border-blue-500/40 text-blue-300 hover:bg-blue-500/10 whitespace-nowrap"
                 title="Download accounting CSV (cash, card, GlyphBucks, driver payouts)"
               >
-                <Download className="w-4 h-4 mr-1" /> CSV
+                <Download className="w-4 h-4 mr-1.5" /> Export CSV
               </Button>
             </div>
           </CardContent>
