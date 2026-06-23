@@ -1,0 +1,94 @@
+{
+  "name": "FeatureRegistry",
+  "type": "object",
+  "description": "BPAA-NUPS-MASTER-001 \u00a73 \u2014 THE KEYSTONE. Single source of truth for every feature in NUPS. Navigation, global search, help guide, and assistant all READ from this entity \u2014 never their own copies. Invariants: F-1 unique feature_id/route, F-2 no orphan routes, F-3 consumers render only from here, F-4 explicit deprecation. Reconciled against live router by reconcileFeatureRegistry().",
+  "properties": {
+    "feature_id": {
+      "type": "string",
+      "description": "Stable unique slug, e.g. 'bar_pos'. UNIQUE across registry (F-1)."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable feature name shown in nav/search."
+    },
+    "route": {
+      "type": "string",
+      "description": "Canonical client-side route, e.g. '/bar'. UNIQUE across registry (F-1)."
+    },
+    "icon": {
+      "type": "string",
+      "description": "Lucide icon name (e.g. 'DollarSign'). Optional."
+    },
+    "group": {
+      "type": "string",
+      "enum": [
+        "Operations",
+        "Currency",
+        "Accounting",
+        "Staff",
+        "Admin",
+        "System"
+      ],
+      "description": "Top-level nav group. Fixed set; no ad-hoc groups."
+    },
+    "order": {
+      "type": "number",
+      "description": "Sort order within its group (ascending)."
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "RBAC roles allowed to see this feature. ['all'] = every staff role. F-11 enforced at consumer."
+    },
+    "modes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "REAL",
+          "DEMO",
+          "SANDBOX"
+        ]
+      },
+      "description": "Modes this feature is visible in. Default: all three."
+    },
+    "help_anchor": {
+      "type": "string",
+      "description": "Help article key (e.g. 'help-bar_pos'). Default: 'help-{feature_id}'. CI checks article exists."
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Search keywords. Used by global search and assistant retrieval."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "DEPRECATED",
+        "ROADMAP"
+      ],
+      "default": "ACTIVE",
+      "description": "ACTIVE = built and surfaced. ROADMAP = registered spec, not yet built (won't render but reserved). DEPRECATED = explicit removal (F-4)."
+    },
+    "discovered_by_crawl": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if added by reconcileFeatureRegistry() from a live router crawl (F-2 enforcement)."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "feature_id",
+    "label",
+    "route",
+    "group",
+    "order"
+  ]
+}
