@@ -1,0 +1,69 @@
+{
+  "name": "ReconciliationRecord",
+  "type": "object",
+  "description": "BPAA-NUPS-ACCT-001 \u00a78 \u2014 Reconciliation outcomes (drawer count, card-settlement match, daily proof). expected_cents is read from the LEDGER (1000 Cash / 1010 Card Clearing balances), actual_cents is counted/processor-reported. variance flagged when non-zero (beyond fee tolerance for cards).",
+  "properties": {
+    "venue_id": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "DRAWER",
+        "CARD_SETTLEMENT",
+        "DAILY"
+      ],
+      "description": "DRAWER = cash drawer count vs ledger. CARD_SETTLEMENT = Stripe payout vs 1010 Card Clearing. DAILY = full day proof tied to generateDailySettlement."
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expected_cents": {
+      "type": "number",
+      "description": "From the ledger (I-2 integer cents)."
+    },
+    "actual_cents": {
+      "type": "number",
+      "description": "Counted cash / Stripe payout / etc (I-2)."
+    },
+    "variance_cents": {
+      "type": "number",
+      "description": "actual_cents - expected_cents."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "RECONCILED",
+        "FLAGGED"
+      ],
+      "default": "OPEN"
+    },
+    "actor_user_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "venue_id",
+    "kind",
+    "period_start",
+    "period_end"
+  ]
+}

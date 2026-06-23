@@ -99,6 +99,51 @@
       "default": 0.4,
       "description": "House commission rate for entertainer earnings."
     },
+    "driver_payout_treatment": {
+      "type": "string",
+      "enum": [
+        "UNSET",
+        "HOUSE_ABSORBED",
+        "GUEST_DISCOUNT"
+      ],
+      "default": "UNSET",
+      "description": "BPAA-NUPS-ACCT-001 \u00a77 \u2014 DACO ruling required. UNSET blocks all driver payout posting. HOUSE_ABSORBED = revenue gross, payout is 6000 Driver Payout Expense. GUEST_DISCOUNT = revenue net of payout; no expense line."
+    },
+    "tax_mode": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "EXCLUSIVE",
+        "INCLUSIVE"
+      ],
+      "default": "NONE",
+      "description": "BPAA-NUPS-ACCT-001 \u2014 tax treatment for non-door revenue. NONE = no tax line. EXCLUSIVE = tax added on top. INCLUSIVE = tax embedded; gross split into net + tax for posting."
+    },
+    "tax_rate_bps": {
+      "type": "number",
+      "default": 0,
+      "description": "BPAA-NUPS-ACCT-001 \u2014 tax rate in basis points (integer). 800 = 8.00%. Replaces float tax_rate for ledger math (I-2)."
+    },
+    "track_cogs": {
+      "type": "boolean",
+      "default": false,
+      "description": "BPAA-NUPS-ACCT-001 \u2014 when true, every sale posts a COGS leg (5000 COGS / 1200 Inventory). Defer until cost data is reliable."
+    },
+    "processing_fee_account": {
+      "type": "string",
+      "default": "6100",
+      "description": "BPAA-NUPS-ACCT-001 \u2014 account code for card processing fees. Default 6100."
+    },
+    "breakage_policy": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "ON_EXPIRY",
+        "PERIODIC"
+      ],
+      "default": "NONE",
+      "description": "BPAA-NUPS-ACCT-001 \u00a76 \u2014 GlyphBucks breakage recognition policy. Leave NONE until DACO sets policy."
+    },
     "mode": {
       "type": "string",
       "enum": [

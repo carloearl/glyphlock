@@ -7,7 +7,7 @@ import {
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
   TrendingUp, BarChart3, Users, Package, Heart, DollarSign, Music,
   Star, Sparkles, KeyRound, ClipboardList, Megaphone,
-  Mic2, Archive,
+  Mic2, Archive, BookOpen,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -47,6 +47,8 @@ const NAV_SECTIONS = [
     label: "Financials",
     items: [
       { id: "accounting", label: "Accounting",  icon: Calculator, to: "/Accounting" },
+      { id: "gl-reports", label: "GL Reports",  icon: BarChart3,  to: "/AccountingHub" },
+      { id: "trial-bal",  label: "Trial Balance", icon: BookOpen, to: "/admin/ledger" },
       { id: "analytics",  label: "Analytics",   icon: TrendingUp, to: "/NUPSOwner?tab=analytics" },
       { id: "reports",    label: "Reports",     icon: BarChart3,  to: "/NUPSOwner?tab=reports" },
       { id: "payroll",    label: "Payroll",     icon: DollarSign, to: "/NUPSOwner?tab=payroll" },

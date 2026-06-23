@@ -63,6 +63,7 @@ import EntertainerCheckIn from './pages/EntertainerCheckIn';
 import ManagerConsole from './pages/ManagerConsole';
 import PeopleArchive from './pages/PeopleArchive';
 import LedgerTrialBalance from './pages/LedgerTrialBalance';
+import AccountingHub from './pages/AccountingHub';
 import KioskShell from './components/nups/KioskShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -115,6 +116,7 @@ const AuthenticatedApp = () => {
     '/receipts', '/driverpayouts',
     '/accounting', '/tonight', '/contracts', '/contractshub',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
+    '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/venue-settings',
   ];
@@ -130,6 +132,7 @@ const AuthenticatedApp = () => {
     '/receipts', '/driverpayouts',
     '/accounting', '/tonight', '/contracts', '/contractshub',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
+    '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/venue-settings',
   ];
@@ -188,6 +191,9 @@ const AuthenticatedApp = () => {
         <Route path="/LedgerTrialBalance" element={<LedgerTrialBalance />} />
         <Route path="/ledgertrialbalance" element={<LedgerTrialBalance />} />
         <Route path="/admin/ledger" element={<LedgerTrialBalance />} />
+        <Route path="/AccountingHub" element={<AccountingHub />} />
+        <Route path="/accountinghub" element={<AccountingHub />} />
+        <Route path="/admin/accounting-reports" element={<AccountingHub />} />
         <Route path="/Register" element={<RegisterConsole />} />
         <Route path="/register" element={<RegisterConsole />} />
         <Route path="/RegisterConsole" element={<RegisterConsole />} />
