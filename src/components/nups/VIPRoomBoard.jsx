@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { DoorOpen, Clock, User, DollarSign, Plus, CheckCircle2, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import GuestProfileCard from "@/components/nups/vip/GuestProfileCard";
 
 function RoomTimer({ startTime }) {
   const [elapsed, setElapsed] = useState(0);
@@ -447,11 +448,8 @@ export default function VIPRoomBoard({ user }) {
                 </SelectContent>
               </Select>
               {selectedGuest && (
-                <div className="mt-2 p-2 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300 space-y-0.5">
-                  <div className="font-bold text-white">{selectedGuest.full_name}</div>
-                  {selectedGuest.card_last4 && <div>💳 {selectedGuest.card_type} ····{selectedGuest.card_last4} · Exp {selectedGuest.card_exp}</div>}
-                  {selectedGuest.visit_count > 1 && <div>🔁 {selectedGuest.visit_count} prior visits · ${(selectedGuest.total_spend_lifetime || 0).toLocaleString()} lifetime</div>}
-                  {selectedGuest.phone && <div>📞 {selectedGuest.phone}</div>}
+                <div className="mt-3">
+                  <GuestProfileCard guest={selectedGuest} />
                 </div>
               )}
             </div>
