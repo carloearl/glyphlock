@@ -7,7 +7,6 @@
  * for reports, analytics, payroll audits, and legal defense.
  */
 import React, { useState, useMemo, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
