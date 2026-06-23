@@ -18,6 +18,8 @@ import EntertainerContract from "@/components/nups/EntertainerContract";
 import ContractLookup from "@/pages/ContractLookup";
 import BigSpenderQuestionnaire from "@/components/nups/contracts/BigSpenderQuestionnaire";
 import BigSpenderLetter from "@/components/nups/contracts/BigSpenderLetter";
+import VIPRoomBoard from "@/components/nups/VIPRoomBoard";
+import VIPContractLifecycle from "@/components/nups/VIPContractLifecycle";
 
 /**
  * Master Covenant & Contracts Hub
@@ -43,7 +45,7 @@ const TAB_ALIASES = {
 
 const TAB_TITLES = {
   glyphbucks: "Contracts · GlyphBucks",
-  vip: "Contracts · VIP Extended",
+  vip: "VIP Shows · Rooms · GlyphBucks · Contracts",
   big_spender: "Contracts · Big Spender Protocol",
   entertainer: "Contracts · Entertainer",
   venue: "Contracts · Venue Terms",
@@ -86,34 +88,38 @@ export default function ContractsHub() {
         )}
 
         {activeTab === "vip" && (
-          <Card className="bg-white/[0.02] border-purple-500/20">
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-purple-400" />
-                <h2 className="text-lg font-bold">VIP Extended Contract</h2>
-                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-xs">
-                  Biometric + 3 Signatures
-                </Badge>
-              </div>
-              <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-4 text-sm text-gray-300 space-y-2">
-                <p>
-                  The full VIP Extended Contract requires a one-time secure token issued from the VIP Room
-                  Board. It walks the guest through 5 steps:
-                </p>
-                <ol className="list-decimal ml-5 text-xs text-gray-400 space-y-1">
-                  <li>Identity capture (name, DOB, gov ID, card)</li>
-                  <li>Biometrics — thumbprint, face photo, ID front/back</li>
-                  <li>Full 10-section contract review</li>
-                  <li>Guest digital signature</li>
-                  <li>Host + Manager approval signatures</li>
-                </ol>
-                <p className="text-xs text-purple-300 pt-2 border-t border-purple-500/20">
-                  Open the VIP Room Board → select a guest → "Generate VIP Contract" to issue a single-use
-                  signing link.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {/* Live room board — open/close rooms, assign guests & entertainers */}
+            <Card className="bg-white/[0.02] border-purple-500/20">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Crown className="w-5 h-5 text-purple-400" />
+                  <h2 className="text-lg font-bold">VIP Room Board</h2>
+                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-xs">Live</Badge>
+                </div>
+                <VIPRoomBoard />
+              </CardContent>
+            </Card>
+
+            {/* GlyphBucks section — sits here under VIP Shows, not separate */}
+            <Card className="bg-white/[0.02] border-pink-500/20">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Coins className="w-5 h-5 text-pink-400" />
+                  <h2 className="text-lg font-bold">GlyphBucks Purchase</h2>
+                  <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/40 text-xs">Club Currency</Badge>
+                </div>
+                <GlyphBucksContract />
+              </CardContent>
+            </Card>
+
+            {/* Entertainer payout contracts for VIP shows */}
+            <Card className="bg-white/[0.02] border-blue-500/20">
+              <CardContent className="p-4 sm:p-6">
+                <VIPContractLifecycle />
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {activeTab === "big_spender" && (

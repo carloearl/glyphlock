@@ -35,11 +35,10 @@ const NAV_SECTIONS = [
   {
     label: "Floor & Staff",
     items: [
-      { id: "vip",         label: "VIP Rooms",          icon: Star,         to: "/NUPSOwner?tab=vip" },
-      { id: "staff",       label: "Staff",              icon: Users,        to: "/NUPSOwner?tab=staff" },
-      { id: "customers",   label: "Customers",          icon: Heart,        to: "/NUPSOwner?tab=customers" },
-      { id: "dj",          label: "DJ Console",         icon: Music,        to: "/NUPSOwner?tab=dj" },
-      { id: "glyphbucks",  label: "GlyphBucks",         icon: Coins,        to: "/NUPSOwner?tab=glyphbucks" },
+      { id: "vip",       label: "VIP Shows",   icon: Star,  to: "/Contracts?tab=vip" },
+      { id: "staff",     label: "Staff",       icon: Users, to: "/NUPSOwner?tab=staff" },
+      { id: "customers", label: "Customers",   icon: Heart, to: "/NUPSOwner?tab=customers" },
+      { id: "dj",        label: "DJ Console",  icon: Music, to: "/NUPSOwner?tab=dj" },
     ],
   },
   {
@@ -55,8 +54,8 @@ const NAV_SECTIONS = [
       {
         id: "contracts",  label: "Contracts",   icon: FileText,   to: "/Contracts",
         children: [
+          { id: "c-vip",    label: "VIP Shows",    icon: Crown,           to: "/Contracts?tab=vip" },
           { id: "c-glyph",  label: "GlyphBucks",   icon: Coins,           to: "/Contracts?tab=glyphbucks" },
-          { id: "c-vip",    label: "VIP Extended", icon: Crown,           to: "/Contracts?tab=vip" },
           { id: "c-big",    label: "Big Spender",  icon: ShieldAlert,     to: "/Contracts?tab=big_spender" },
           { id: "c-ent",    label: "Entertainer",  icon: ClipboardCheck,  to: "/Contracts?tab=entertainer" },
           { id: "c-venue",  label: "Venue Terms",  icon: Building2,       to: "/Contracts?tab=venue" },

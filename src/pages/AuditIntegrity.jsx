@@ -95,7 +95,7 @@ export default function AuditIntegrity() {
           <p className="text-sm text-gray-400 mb-6">
             Audit Integrity is admin-only per BPAAA §11.
           </p>
-          <Button variant="outline" onClick={() => navigate(-1)} className="border-gray-700">
+          <Button variant="outline" onClick={() => navigate("/NUPSHub")} className="border-gray-700">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
         </div>
@@ -108,7 +108,7 @@ export default function AuditIntegrity() {
       <div className="border-b border-white/5 bg-gradient-to-r from-violet-950/30 via-black to-blue-950/30 px-4 py-4 sticky top-0 z-30 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="border-white/10 text-gray-400">
+            <Button variant="outline" size="sm" onClick={() => navigate("/NUPSHub")} className="border-white/10 text-gray-400">
               <ArrowLeft className="w-3.5 h-3.5" />
             </Button>
             <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-blue-600 rounded-xl flex items-center justify-center">
