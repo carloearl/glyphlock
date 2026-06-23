@@ -38,6 +38,8 @@ export async function loadRegistry() {
 function isVisible(feature, { role, mode }) {
   if (!feature) return false;
   if (feature.status !== "ACTIVE") return false;
+  // F-11 SOVEREIGN bypass — Carlo's account sees every ACTIVE feature.
+  if (role === "SOVEREIGN") return true;
   const modes = Array.isArray(feature.modes) && feature.modes.length
     ? feature.modes
     : ["REAL", "DEMO", "SANDBOX"];
