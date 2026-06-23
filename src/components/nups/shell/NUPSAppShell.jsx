@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import GlobalSearchDrawer from "./GlobalSearchDrawer";
-import ModeBadge from "./ModeBadge";
+import ModeToggle from "./ModeToggle";
 
 /**
  * NUPSAppShell — unified chrome for every NUPS operator page.
@@ -287,8 +287,9 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
             </button>
 
             <div className="hidden md:flex items-center gap-2">
-              {/* MODE BADGE — F-7: always visible, color-distinct, before venue. */}
-              <ModeBadge />
+              {/* MODE TOGGLE — F-7: always visible, color-distinct, before venue.
+                  Click to switch LIVE/DEMO/SANDBOX, seed or clear demo data. */}
+              <ModeToggle />
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5">
                 <Building2 className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-[11px] font-medium text-slate-200 truncate max-w-[140px]">
