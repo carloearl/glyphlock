@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { resolveVenueId } from "@/lib/venueDefaults";
+import { snapshotPerson } from "@/lib/nups/personArchive";
 
 const ShiftTimer = ({ checkInTime }) => {
   const [elapsed, setElapsed] = useState('');
@@ -86,7 +87,14 @@ export default function EntertainerCheckIn({ user }) {
       if (response.data?.error) throw new Error(response.data.error);
       return { shift: response.data?.shift, entertainer: ent };
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      // Permanent archive snapshot — survives demo wipes
+      await snapshotPerson({
+        type: "entertainer",
+        event: "checked_in",
+        record: data.entertainer,
+        actor: user,
+      });
       queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
       toast.success(`${data.entertainer.stage_name} checked in!`);
       setPin('');
@@ -96,8 +104,19 @@ export default function EntertainerCheckIn({ user }) {
 
   const checkOut = useMutation({
     mutationFn: async (shiftId) => {
+      const shift = activeShifts.find(s => s.id === shiftId);
       const response = await base44.functions.invoke('checkoutEntertainerShift', { shift_id: shiftId });
       if (response.data?.error) throw new Error(response.data.error);
+      // Permanent archive snapshot for the check-out event
+      if (shift) {
+        const entertainer = entertainers.find(e => e.id === shift.entertainer_id);
+        await snapshotPerson({
+          type: "entertainer",
+          event: "checked_out",
+          record: entertainer || { id: shift.entertainer_id, stage_name: shift.stage_name, venue_id: shift.venue_id },
+          actor: user,
+        });
+      }
       return response.data;
     },
     onSuccess: () => {

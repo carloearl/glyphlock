@@ -7,7 +7,7 @@ import {
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
   TrendingUp, BarChart3, Users, Package, Heart, DollarSign, Music,
   Star, Sparkles, KeyRound, ClipboardList, Megaphone,
-  Mic2,
+  Mic2, Archive,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -35,11 +35,12 @@ const NAV_SECTIONS = [
   {
     label: "Floor & Staff",
     items: [
-      { id: "vip",        label: "VIP Shows",   icon: Star,      to: "/Contracts?tab=vip" },
-      { id: "staff",      label: "Staff",        icon: Users,     to: "/NUPSOwner?tab=staff" },
-      { id: "dj",         label: "DJ Console",   icon: Music,     to: "/NUPSOwner?tab=dj" },
-      { id: "customers",  label: "Customers",    icon: Heart,     to: "/NUPSOwner?tab=customers" },
-      { id: "marketing",  label: "Marketing",    icon: Megaphone, to: "/NUPSOwner?tab=marketing" },
+      { id: "vip",         label: "VIP Shows",       icon: Star,      to: "/Contracts?tab=vip" },
+      { id: "staff",       label: "Staff",           icon: Users,     to: "/NUPSOwner?tab=staff" },
+      { id: "dj",          label: "DJ Console",      icon: Music,     to: "/NUPSOwner?tab=dj" },
+      { id: "customers",   label: "Customers",       icon: Heart,     to: "/NUPSOwner?tab=customers" },
+      { id: "marketing",   label: "Marketing",       icon: Megaphone, to: "/NUPSOwner?tab=marketing" },
+      { id: "people",      label: "People Archive",  icon: Archive,   to: "/PeopleArchive" },
     ],
   },
   {

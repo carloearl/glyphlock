@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Users, Eye, EyeOff, Pencil, Check, X, ToggleLeft, ToggleRight } from "lucide-react";
+import { snapshotPerson } from "@/lib/nups/personArchive";
 
 const ROLES = [
   "VENUE_MANAGER", "BARTENDER", "FLOOR_HOST", "SECURITY", "DJ", "HOSTESS", "DOOR_GIRL"
@@ -30,13 +31,25 @@ export default function StaffOnboardingPanel() {
   });
 
   const createStaff = useMutation({
-    mutationFn: (data) => base44.entities.NUPSUser.create({
-      ...data,
-      // Always route live-system onboards to Dream Palace DB when no venue is specified
-      venue_id: resolveVenueId(data.venue_id),
-      is_active: true,
-      created_by_manager: true,
-    }),
+    mutationFn: async (data) => {
+      const payload = {
+        ...data,
+        // Always route live-system onboards to Dream Palace DB when no venue is specified
+        venue_id: resolveVenueId(data.venue_id),
+        full_name: data.display_name || data.username,
+        status: "active",
+        is_active: true,
+        created_by_manager: true,
+      };
+      const result = await base44.entities.NUPSUser.create(payload);
+      // Permanent archive snapshot
+      await snapshotPerson({
+        type: "staff",
+        event: "created",
+        record: result,
+      });
+      return result;
+    },
     onSuccess: () => {
       qc.invalidateQueries(["nups-users"]);
       setForm(EMPTY_FORM);
@@ -45,7 +58,16 @@ export default function StaffOnboardingPanel() {
   });
 
   const updateStaff = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.NUPSUser.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const result = await base44.entities.NUPSUser.update(id, data);
+      const eventType = "is_active" in data ? "status_change" : "updated";
+      await snapshotPerson({
+        type: "staff",
+        event: eventType,
+        record: result,
+      });
+      return result;
+    },
     onSuccess: () => {
       qc.invalidateQueries(["nups-users"]);
       setEditingId(null);

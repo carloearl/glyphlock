@@ -43,14 +43,36 @@ async function deleteInBatches(entityName, records) {
   return done;
 }
 
+// Entities that carry an `is_demo` boolean flag. For these we ONLY delete
+// rows explicitly marked as demo, so real records (Sativa, real staff,
+// real guests) can never be lost to a demo wipe.
+const IS_DEMO_FLAGGED = new Set([
+  "Entertainer", "NUPSUser", "VIPGuest", "EntertainerShift",
+  "POSTransaction", "VIPRoom", "DriverPayout", "VenueContract",
+  "PayrollRecord", "GlyphBucksBill", "GlyphBucksTransaction",
+  "POSProduct", "POSBatch", "DailySettlement",
+]);
+
 export async function wipeDemoVenue(onLog) {
   const log = (msg, type = "info") => onLog?.({ msg, type });
   let totalDeleted = 0;
+  let totalProtected = 0;
   const perEntity = {};
 
   for (const entityName of WIPE_ORDER) {
     try {
-      const recs = await base44.entities[entityName].filter({ venue_id: DEMO_VENUE_ID });
+      const all = await base44.entities[entityName].filter({ venue_id: DEMO_VENUE_ID });
+      // Protect real records: only wipe is_demo === true. Records without
+      // the flag are treated as REAL and survive.
+      let recs = all;
+      if (IS_DEMO_FLAGGED.has(entityName)) {
+        recs = all.filter(r => r.is_demo === true);
+        const protectedCount = all.length - recs.length;
+        if (protectedCount > 0) {
+          totalProtected += protectedCount;
+          log(`🛡 ${entityName}: ${protectedCount} real record(s) protected`, "info");
+        }
+      }
       if (!recs.length) {
         perEntity[entityName] = 0;
         continue;
@@ -58,12 +80,12 @@ export async function wipeDemoVenue(onLog) {
       const deleted = await deleteInBatches(entityName, recs);
       perEntity[entityName] = deleted;
       totalDeleted += deleted;
-      log(`🗑 ${entityName}: ${deleted} removed`, "success");
+      log(`🗑 ${entityName}: ${deleted} demo removed`, "success");
     } catch (e) {
       log(`❌ ${entityName}: ${e?.message || e}`, "error");
     }
   }
-  return { totalDeleted, perEntity };
+  return { totalDeleted, totalProtected, perEntity };
 }
 
 async function safeCreate(entityName, data, onLog, label) {
@@ -99,11 +121,12 @@ export async function seedDemoVenue(onLog) {
   ];
   for (const t of txns) await safeCreate("POSTransaction", t, onLog, `POSTransaction ${t.items[0].name}`);
 
-  // Entertainers
+  // Entertainers — all tagged is_demo:true so they can be wiped without
+  // touching real performers (e.g. Sativa).
   const ents = [
-    { stage_name: "Crystal", legal_name: "Crystal Demo", phone: "555-1001", email: "crystal@demo.test", contract_signed: true, contract_signature: "Crystal Demo", contract_signed_date: today, status: "active",   commission_rate: 60, total_earnings: 1200, vip_room_count: 4, venue_id: DEMO_VENUE_ID },
-    { stage_name: "Nova",    legal_name: "Nova Demo",    phone: "555-1002", email: "nova@demo.test",    contract_signed: true, contract_signature: "Nova Demo",    contract_signed_date: today, status: "active",   commission_rate: 60, total_earnings: 750,  vip_room_count: 2, venue_id: DEMO_VENUE_ID },
-    { stage_name: "Jade",    legal_name: "Jade Demo",    phone: "555-1003", email: "jade@demo.test",    contract_signed: true, contract_signature: "Jade Demo",    contract_signed_date: today, status: "active",   commission_rate: 60, total_earnings: 480,  vip_room_count: 1, venue_id: DEMO_VENUE_ID },
+    { stage_name: "Crystal", legal_name: "Crystal Demo", phone: "555-1001", email: "crystal@demo.test", contract_signed: true, contract_signature: "Crystal Demo", contract_signed_date: today, status: "active",   commission_rate: 60, total_earnings: 1200, vip_room_count: 4, is_demo: true, venue_id: DEMO_VENUE_ID },
+    { stage_name: "Nova",    legal_name: "Nova Demo",    phone: "555-1002", email: "nova@demo.test",    contract_signed: true, contract_signature: "Nova Demo",    contract_signed_date: today, status: "active",   commission_rate: 60, total_earnings: 750,  vip_room_count: 2, is_demo: true, venue_id: DEMO_VENUE_ID },
+    { stage_name: "Jade",    legal_name: "Jade Demo",    phone: "555-1003", email: "jade@demo.test",    contract_signed: true, contract_signature: "Jade Demo",    contract_signed_date: today, status: "active",   commission_rate: 60, total_earnings: 480,  vip_room_count: 1, is_demo: true, venue_id: DEMO_VENUE_ID },
   ];
   for (const e of ents) await safeCreate("Entertainer", e, onLog, `Entertainer ${e.stage_name}`);
 
@@ -134,17 +157,17 @@ export async function seedDemoVenue(onLog) {
   ];
   for (const s of staff) await safeCreate("NUPSUser", s, onLog, `NUPSUser ${s.role}`);
 
-  // VIP guests
+  // VIP guests — tagged is_demo
   const guests = [
-    { guest_id: ID("VG"), full_name: "Demo Alpha", phone: "555-2001", email: "alpha@demo.test", status: "in_building",  last_visit: NOW(), date_of_birth: "1985-06-15", id_verified: true, venue_id: DEMO_VENUE_ID },
-    { guest_id: ID("VG"), full_name: "Demo Beta",  phone: "555-2002", email: "beta@demo.test",  status: "left_building", last_visit: NOW(), date_of_birth: "1990-03-22", id_verified: true, venue_id: DEMO_VENUE_ID },
+    { guest_id: ID("VG"), full_name: "Demo Alpha", phone: "555-2001", email: "alpha@demo.test", status: "in_building",  last_visit: NOW(), date_of_birth: "1985-06-15", id_verified: true, is_demo: true, venue_id: DEMO_VENUE_ID },
+    { guest_id: ID("VG"), full_name: "Demo Beta",  phone: "555-2002", email: "beta@demo.test",  status: "left_building", last_visit: NOW(), date_of_birth: "1990-03-22", id_verified: true, is_demo: true, venue_id: DEMO_VENUE_ID },
   ];
   for (const g of guests) await safeCreate("VIPGuest", g, onLog, `VIPGuest ${g.full_name}`);
 
-  // Entertainer shifts
+  // Entertainer shifts — tagged is_demo
   const shifts = [
-    { entertainer_id: "DEMO-ENT-Crystal", stage_name: "Crystal", check_in_time: NOW(), status: "checked_in",  shift_earnings: 300, vip_sessions: 1, venue_id: DEMO_VENUE_ID },
-    { entertainer_id: "DEMO-ENT-Nova",    stage_name: "Nova",    check_in_time: NOW(), status: "checked_in",  shift_earnings: 150, vip_sessions: 0, venue_id: DEMO_VENUE_ID },
+    { entertainer_id: "DEMO-ENT-Crystal", stage_name: "Crystal", check_in_time: NOW(), status: "checked_in",  shift_earnings: 300, vip_sessions: 1, is_demo: true, venue_id: DEMO_VENUE_ID },
+    { entertainer_id: "DEMO-ENT-Nova",    stage_name: "Nova",    check_in_time: NOW(), status: "checked_in",  shift_earnings: 150, vip_sessions: 0, is_demo: true, venue_id: DEMO_VENUE_ID },
   ];
   for (const s of shifts) await safeCreate("EntertainerShift", s, onLog, `EntertainerShift ${s.stage_name}`);
 

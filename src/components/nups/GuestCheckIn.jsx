@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import SeedDoorGuestsButton from "@/components/nups/SeedDoorGuestsButton";
+import { snapshotPerson } from "@/lib/nups/personArchive";
 
 const MIN_AGE = 21;
 
@@ -122,11 +123,19 @@ export default function GuestCheckIn() {
   });
 
   const checkOutMutation = useMutation({
-    mutationFn: (id) =>
-      base44.entities.VIPGuest.update(id, {
+    mutationFn: async (id) => {
+      const updated = await base44.entities.VIPGuest.update(id, {
         status: "left_building",
         last_visit: new Date().toISOString(),
-      }),
+      });
+      // Permanent archive snapshot
+      await snapshotPerson({
+        type: "guest",
+        event: "checked_out",
+        record: updated,
+      });
+      return updated;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["vip-guests-active"]);
       queryClient.invalidateQueries(["vip-guests"]);
@@ -185,7 +194,7 @@ export default function GuestCheckIn() {
 
       if (returningGuest) {
         // UPDATE returning guest — increment visit count, mark in-building
-        await base44.entities.VIPGuest.update(returningGuest.id, {
+        const updated = await base44.entities.VIPGuest.update(returningGuest.id, {
           status: "in_building",
           last_visit: now,
           visit_count: (returningGuest.visit_count || 1) + 1,
@@ -195,10 +204,12 @@ export default function GuestCheckIn() {
           ...(form.card_last4 && { card_last4: form.card_last4, card_name: form.card_name, card_exp: form.card_exp, card_type: form.card_type }),
           ...(form.phone && { phone: form.phone }),
         });
+        // Permanent archive snapshot — survives demo wipes
+        await snapshotPerson({ type: "guest", event: "checked_in", record: updated });
         toast.success(`Welcome back, ${form.full_name}! Visit #${(returningGuest.visit_count || 1) + 1}`);
       } else {
         // CREATE new guest profile
-        await base44.entities.VIPGuest.create({
+        const created = await base44.entities.VIPGuest.create({
           guest_id: guestId,
           full_name: form.full_name.trim(),
           date_of_birth: new Date(form.date_of_birth).toISOString(),
@@ -220,6 +231,9 @@ export default function GuestCheckIn() {
           total_spend_lifetime: 0,
           vip_sessions_count: 0,
         });
+        // Permanent archive snapshot for the new guest creation + check-in
+        await snapshotPerson({ type: "guest", event: "created", record: created });
+        await snapshotPerson({ type: "guest", event: "checked_in", record: created });
         toast.success(`${form.full_name} checked in`);
       }
 

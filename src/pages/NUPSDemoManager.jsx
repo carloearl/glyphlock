@@ -42,6 +42,15 @@ const WIPE_ORDER = [
   "SystemAuditLog",
 ];
 
+// Entities with an is_demo flag — we ONLY delete is_demo:true rows from
+// these tables. Real records (no is_demo flag) are protected.
+const IS_DEMO_FLAGGED = new Set([
+  "Entertainer", "NUPSUser", "VIPGuest", "EntertainerShift",
+  "POSTransaction", "VIPRoom", "DriverPayout", "VenueContract",
+  "PayrollRecord", "GlyphBucksBill", "GlyphBucksTransaction",
+  "POSProduct", "POSBatch", "DailySettlement",
+]);
+
 // Deterministic demo entertainer IDs so shifts, contracts, VIP rooms & payroll all link correctly
 const ENT_ID = {
   Crystal: "DEMO-ENT-Crystal",
@@ -328,12 +337,24 @@ export default function NUPSDemoManager() {
     push("DEMO SAFE RESET initiated — venue_id: DEMO_VENUE_001", "info");
     push("⚠ Do NOT close this tab until the wipe completes.", "warn");
 
-    // Pass 1: collect counts so we can show overall progress
+    // Pass 1: collect counts so we can show overall progress.
+    // For is_demo-flagged entities, ONLY include rows with is_demo:true so
+    // real performers (Sativa), real staff, and real guests are protected.
     const recordsByEntity = {};
     let grandTotal = 0;
+    let totalProtected = 0;
     for (const entityName of WIPE_ORDER) {
       try {
-        const recs = await base44.entities[entityName].filter({ venue_id: DEMO_VENUE_ID });
+        const all = await base44.entities[entityName].filter({ venue_id: DEMO_VENUE_ID });
+        let recs = all;
+        if (IS_DEMO_FLAGGED.has(entityName)) {
+          recs = all.filter(r => r.is_demo === true);
+          const protectedCount = all.length - recs.length;
+          if (protectedCount > 0) {
+            totalProtected += protectedCount;
+            push("🛡 " + entityName + ": " + protectedCount + " real record(s) protected", "info");
+          }
+        }
         recordsByEntity[entityName] = recs;
         grandTotal += recs.length;
       } catch (e) {
@@ -342,7 +363,7 @@ export default function NUPSDemoManager() {
         setErrorCount(p => p + 1);
       }
     }
-    push("Found " + grandTotal + " records across " + WIPE_ORDER.length + " entities", "info");
+    push("Found " + grandTotal + " demo records to wipe (" + totalProtected + " real records protected)", "info");
 
     // Pass 2: batched parallel deletes
     const entityCounts = {};

@@ -1,0 +1,72 @@
+{
+  "name": "PersonRecord",
+  "type": "object",
+  "description": "Append-only durable archive of every person (entertainer, staff, guest, driver) who has ever existed in the system. Snapshot is written on every create / update / delete / check-in / check-out. Records here CANNOT be wiped by demo seeders. This is the legal record of truth for reports, analytics, and audits.",
+  "properties": {
+    "person_type": {
+      "type": "string",
+      "enum": [
+        "entertainer",
+        "staff",
+        "guest",
+        "driver"
+      ],
+      "description": "Which roster this person belongs to."
+    },
+    "person_id": {
+      "type": "string",
+      "description": "Stable id of the source entity record (Entertainer.id, NUPSUser.id, VIPGuest.guest_id, DriverProfile.driver_id). Same id across every snapshot for the same person."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Best-effort display name: stage_name for entertainers, full_name for staff/guests, name for drivers."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "created",
+        "updated",
+        "deleted",
+        "checked_in",
+        "checked_out",
+        "status_change",
+        "contract_signed",
+        "snapshot"
+      ],
+      "description": "What happened. 'snapshot' = periodic backup."
+    },
+    "event_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor_email": {
+      "type": "string",
+      "description": "Who triggered this event (staff member email)."
+    },
+    "actor_name": {
+      "type": "string"
+    },
+    "snapshot": {
+      "type": "object",
+      "description": "Full snapshot of the entity at the moment of the event. JSON copy \u2014 never altered after write.",
+      "additionalProperties": true
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Was this a demo record? Real records (false) are NEVER auto-purged."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "person_type",
+    "person_id",
+    "event_type",
+    "event_timestamp"
+  ]
+}

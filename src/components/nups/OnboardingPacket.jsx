@@ -18,6 +18,7 @@ import {
   UserPlus, Upload, Shield, FileText, CheckCircle2, Clock,
   ChevronRight, AlertTriangle, Lock, Users, Star
 } from "lucide-react";
+import { snapshotPerson } from "@/lib/nups/personArchive";
 
 const ONBOARDING_STEPS = [
   { key: "profile",   label: "Profile Created",       icon: UserPlus,     desc: "Basic info & stage name" },
@@ -93,8 +94,15 @@ export default function OnboardingPacket({ currentUser }) {
       status: "inactive", // blocked until onboarding complete
       contract_signed: false,
     }),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       setCreatedEntertainer(result);
+      // Permanent archive snapshot — survives demo wipes and entity deletion
+      await snapshotPerson({
+        type: "entertainer",
+        event: "created",
+        record: result,
+        actor: currentUser,
+      });
       markStep("profile");
       toast.success("Profile created — proceed to document upload");
     },
@@ -170,6 +178,19 @@ export default function OnboardingPacket({ currentUser }) {
           vip_sessions: 0,
         });
       } catch (e) { /* non-fatal: roster will reconcile on next check-in */ }
+      // Permanent archive snapshot for activation + contract signing
+      await snapshotPerson({
+        type: "entertainer",
+        event: "contract_signed",
+        record: updated,
+        actor: currentUser,
+      });
+      await snapshotPerson({
+        type: "entertainer",
+        event: "checked_in",
+        record: updated,
+        actor: currentUser,
+      });
       return updated;
     },
     onSuccess: () => {
