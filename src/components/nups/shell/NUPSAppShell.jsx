@@ -37,7 +37,6 @@ const NAV_SECTIONS = [
   {
     label: "Floor & Staff",
     items: [
-      { id: "vip",         label: "VIP Shows",       icon: Star,      to: "/Contracts?tab=vip" },
       { id: "staff",       label: "Staff",           icon: Users,     to: "/NUPSOwner?tab=staff" },
       { id: "dj",          label: "DJ Console",      icon: Music,     to: "/NUPSOwner?tab=dj" },
       { id: "customers",   label: "Customers",       icon: Heart,     to: "/NUPSOwner?tab=customers" },
@@ -45,18 +44,25 @@ const NAV_SECTIONS = [
       { id: "people",      label: "People Archive",  icon: Archive,   to: "/PeopleArchive" },
     ],
   },
+  // Accounting is ONE entry with internal children. Each child is a
+  // distinct screen that reads the same ledger — never duplicate top-level
+  // items for things that share data. (Audit-fix 2026-06-23.)
   {
-    label: "Financials",
+    label: "Accounting",
     items: [
-      { id: "accounting", label: "Accounting",  icon: Calculator, to: "/Accounting" },
-      { id: "gl-reports", label: "GL Reports",  icon: BarChart3,  to: "/AccountingHub" },
-      { id: "trial-bal",  label: "Trial Balance", icon: BookOpen, to: "/admin/ledger" },
+      {
+        id: "accounting",  label: "Accounting",  icon: Calculator, to: "/Accounting",
+        children: [
+          { id: "gl-reports", label: "GL Reports",   icon: BarChart3,  to: "/AccountingHub" },
+          { id: "trial-bal",  label: "Trial Balance",icon: BookOpen,   to: "/admin/ledger" },
+          { id: "settlement", label: "Settlements",  icon: Banknote,   to: "/admin/settlement" },
+          { id: "payouts",    label: "Payout Log",   icon: ScrollText, to: "/admin/payout-history" },
+        ],
+      },
       { id: "analytics",  label: "Analytics",   icon: TrendingUp, to: "/NUPSOwner?tab=analytics" },
       { id: "reports",    label: "Reports",     icon: BarChart3,  to: "/NUPSOwner?tab=reports" },
       { id: "payroll",    label: "Payroll",     icon: DollarSign, to: "/NUPSOwner?tab=payroll" },
       { id: "inventory",  label: "Inventory",   icon: Package,    to: "/NUPSOwner?tab=inventory" },
-      { id: "settlement", label: "Settlements", icon: Banknote,   to: "/admin/settlement" },
-      { id: "payouts",    label: "Payout Log",  icon: ScrollText, to: "/admin/payout-history" },
       {
         id: "contracts",  label: "Contracts",   icon: FileText,   to: "/Contracts",
         children: [
@@ -70,12 +76,18 @@ const NAV_SECTIONS = [
       },
     ],
   },
+  // Audit consolidated under one parent — was three flat entries.
   {
     label: "Admin",
     items: [
-      { id: "audit-log", label: "Audit Log",       icon: ClipboardList, to: "/NUPSOwner?tab=audit" },
-      { id: "audit",     label: "Audit Integrity", icon: ShieldCheck,   to: "/admin/audit-integrity" },
-      { id: "activity",  label: "Activity Log",    icon: ScrollText,    to: "/admin/activity-log" },
+      {
+        id: "audit",       label: "Audit",            icon: ShieldCheck, to: "/admin/audit-integrity",
+        children: [
+          { id: "audit-integrity", label: "Integrity",   icon: ShieldCheck,   to: "/admin/audit-integrity" },
+          { id: "audit-log",       label: "Audit Log",   icon: ClipboardList, to: "/NUPSOwner?tab=audit" },
+          { id: "activity",        label: "Activity",    icon: ScrollText,    to: "/admin/activity-log" },
+        ],
+      },
       { id: "rbac",      label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
       { id: "registry",  label: "Feature Registry",icon: BookOpen,      to: "/admin/registry" },
       { id: "demo",      label: "Demo Keys",       icon: Sparkles,      to: "/NUPSOwner?tab=demo" },
