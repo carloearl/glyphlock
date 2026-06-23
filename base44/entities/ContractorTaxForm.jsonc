@@ -1,0 +1,159 @@
+{
+  "name": "ContractorTaxForm",
+  "type": "object",
+  "description": "1099 contractor tax records (W-9 intake + 1099-NEC year-end). One record per entertainer per tax year. PII-sensitive \u2014 TIN is masked on display, full value only accessible via admin role. Linked to Entertainer by entertainer_id.",
+  "properties": {
+    "entertainer_id": {
+      "type": "string",
+      "description": "Foreign key to Entertainer record."
+    },
+    "stage_name": {
+      "type": "string",
+      "description": "Stage name snapshot for display."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "tax_year": {
+      "type": "number",
+      "description": "Tax year this form covers (e.g. 2026)."
+    },
+    "form_type": {
+      "type": "string",
+      "enum": [
+        "W-9",
+        "1099-NEC",
+        "1099-MISC"
+      ],
+      "default": "W-9",
+      "description": "W-9 = contractor intake. 1099-NEC = year-end issued form."
+    },
+    "legal_name": {
+      "type": "string",
+      "description": "Name as shown on tax return (W-9 Line 1)."
+    },
+    "business_name": {
+      "type": "string",
+      "description": "Business/disregarded entity name if different (W-9 Line 2)."
+    },
+    "tax_classification": {
+      "type": "string",
+      "enum": [
+        "individual_sole_prop",
+        "single_member_llc",
+        "c_corp",
+        "s_corp",
+        "partnership",
+        "trust_estate",
+        "llc_corp",
+        "other"
+      ],
+      "default": "individual_sole_prop",
+      "description": "Federal tax classification (W-9 Line 3)."
+    },
+    "address_street": {
+      "type": "string"
+    },
+    "address_city": {
+      "type": "string"
+    },
+    "address_state": {
+      "type": "string"
+    },
+    "address_zip": {
+      "type": "string"
+    },
+    "tin_type": {
+      "type": "string",
+      "enum": [
+        "SSN",
+        "EIN"
+      ],
+      "default": "SSN",
+      "description": "Taxpayer ID type (W-9 Part I)."
+    },
+    "tin_last4": {
+      "type": "string",
+      "description": "Last 4 digits of TIN for display. Full TIN never stored in plaintext \u2014 only last 4 retained."
+    },
+    "backup_withholding_exempt": {
+      "type": "boolean",
+      "default": true,
+      "description": "Subject to backup withholding (W-9 Part II)."
+    },
+    "signature_data": {
+      "type": "string",
+      "description": "Base64 signature image or signature token."
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signed_ip": {
+      "type": "string"
+    },
+    "scanned_form_url": {
+      "type": "string",
+      "description": "URL of uploaded/scanned signed W-9 PDF/image (Wix Media Manager or base44 UploadFile)."
+    },
+    "ytd_payments_gross": {
+      "type": "number",
+      "default": 0,
+      "description": "Year-to-date gross 1099 payments. Auto-rolled from ContractorPayout records."
+    },
+    "ten99_threshold": {
+      "type": "number",
+      "default": 600,
+      "description": "IRS reporting threshold ($600 federal default)."
+    },
+    "ten99_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when ytd_payments_gross >= ten99_threshold."
+    },
+    "ten99_issued": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when 1099-NEC has been generated and delivered."
+    },
+    "ten99_issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ten99_pdf_url": {
+      "type": "string",
+      "description": "URL of generated 1099-NEC PDF."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "expired",
+        "revoked"
+      ],
+      "default": "draft"
+    },
+    "received_by": {
+      "type": "string",
+      "description": "Email of admin who received/verified the form."
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "entertainer_id",
+    "tax_year",
+    "form_type",
+    "legal_name"
+  ]
+}

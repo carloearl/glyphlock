@@ -55,7 +55,7 @@ function generatePayStubHTML(record) {
 <body>
   <div class="header">
     <div class="company">N.U.P.S. ENTERTAINMENT</div>
-    <div class="stub-title">Entertainer Pay Stub — Confidential</div>
+    <div class="stub-title">1099 Contractor Earnings Statement — Confidential</div>
   </div>
 
   <div class="meta">
@@ -83,9 +83,9 @@ function generatePayStubHTML(record) {
   <div class="section">
     <h3>Deductions</h3>
     <div class="row negative"><span>Venue House Fee (${((record.venue_fee_rate || 0) * 100).toFixed(0)}%)</span><span>-${fmt(record.venue_fee)}</span></div>
-    <div class="row negative"><span>Tax Withholding (${((record.tax_rate || 0) * 100).toFixed(0)}%)</span><span>-${fmt(record.tax_withholding)}</span></div>
     ${record.other_deductions > 0 ? `<div class="row negative"><span>Other: ${record.other_deductions_notes || "Misc"}</span><span>-${fmt(record.other_deductions)}</span></div>` : ""}
-    <div class="row total negative"><span>TOTAL DEDUCTIONS</span><span>-${fmt((record.venue_fee || 0) + (record.tax_withholding || 0) + (record.other_deductions || 0))}</span></div>
+    <div class="row total negative"><span>TOTAL DEDUCTIONS</span><span>-${fmt((record.venue_fee || 0) + (record.other_deductions || 0))}</span></div>
+    <div class="row" style="font-size:10px;color:#666;margin-top:6px;font-style:italic;">No federal/state tax, FICA, or Medicare withheld — contractor responsible for own quarterly estimated taxes (1099-NEC).</div>
   </div>
 
   <div class="net-box">
@@ -118,7 +118,9 @@ export default function EntertainerPayrollEngine({ user }) {
   });
   const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString().split("T")[0]);
   const [venueFeeRate, setVenueFeeRate] = useState(15);
-  const [taxRate, setTaxRate] = useState(25);
+  // 1099 contractors: NO tax withholding by the venue. Contractor pays own
+  // estimated taxes. Field kept at 0 and locked to preserve schema/pay-stub.
+  const [taxRate] = useState(0);
   const [otherDeductionAmt, setOtherDeductionAmt] = useState(0);
   const [otherDeductionNote, setOtherDeductionNote] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -171,6 +173,12 @@ export default function EntertainerPayrollEngine({ user }) {
     queryFn: () => base44.entities.PayrollRecord.list("-created_date", 200),
   });
 
+  // W-9 status per entertainer — block payout if no active W-9 on file
+  const { data: taxForms = [] } = useQuery({
+    queryKey: ["contractor-tax-forms-current"],
+    queryFn: () => base44.entities.ContractorTaxForm.filter({ tax_year: new Date().getFullYear() }, "-created_date", 500),
+  });
+
   // Compute per-entertainer payroll data
   const payrollData = useMemo(() => {
     return entertainers.map(ent => {
@@ -200,9 +208,13 @@ export default function EntertainerPayrollEngine({ user }) {
 
       const grossTotal = grossCommissions + entTips;
       const venueFee = grossTotal * (venueFeeRate / 100);
-      const taxWithholding = (grossTotal - venueFee) * (taxRate / 100);
+      // 1099 contractors — venue does NOT withhold tax. Always 0.
+      const taxWithholding = 0;
       const otherDed = Number(otherDeductionAmt) || 0;
-      const netPayout = grossTotal - venueFee - taxWithholding - otherDed;
+      const netPayout = grossTotal - venueFee - otherDed;
+
+      const w9 = taxForms.find(f => f.entertainer_id === ent.id && f.status === "active");
+      const hasW9 = !!w9;
 
       // Check if record exists for this period
       const existing = existingRecords.find(r =>
@@ -223,9 +235,11 @@ export default function EntertainerPayrollEngine({ user }) {
         otherDeductions: otherDed,
         netPayout,
         existing,
+        hasW9,
+        w9,
       };
     });
-  }, [entertainers, shifts, vipSessions, tipPayouts, venueFeeRate, taxRate, otherDeductionAmt, periodStart, periodEnd, existingRecords]);
+  }, [entertainers, shifts, vipSessions, tipPayouts, venueFeeRate, taxRate, otherDeductionAmt, periodStart, periodEnd, existingRecords, taxForms]);
 
   const savePayroll = useMutation({
     mutationFn: async (data) => {
@@ -242,7 +256,19 @@ export default function EntertainerPayrollEngine({ user }) {
         });
         throw new Error(`Payout blocked: Contract status is ${data.entertainer.contract_status || 'PENDING'}. Contract must be VALID to process payout.`);
       }
-      // GATE PASSED — proceed to process payout
+      // 1099 W-9 GATE — IRS requires W-9 on file before issuing payments
+      if (!data.hasW9) {
+        await base44.entities.SystemAuditLog.create({
+          event_type: "PAYOUT_GATE_BLOCKED",
+          description: `Payout blocked: no active W-9 on file for ${data.entertainer.stage_name}`,
+          actor_email: user?.email,
+          status: "blocked",
+          severity: "CRITICAL",
+          metadata: { entertainer_id: data.entertainer.id, reason: "missing_w9", section: "1099-W9-GATE" }
+        });
+        throw new Error(`Payout blocked: No active W-9 on file. Collect a W-9 from this contractor before processing payment.`);
+      }
+      // GATES PASSED — proceed to process payout
       const payload = {
         pay_period_start: periodStart,
         pay_period_end: periodEnd,
@@ -383,10 +409,12 @@ export default function EntertainerPayrollEngine({ user }) {
               <Input type="number" min={0} max={100} value={venueFeeRate} onChange={e => setVenueFeeRate(Number(e.target.value))}
                 className="mt-1 h-9 text-sm text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)" }} />
             </div>
-            <div>
-              <Label className="text-gray-400 text-xs">Tax Withholding %</Label>
-              <Input type="number" min={0} max={100} value={taxRate} onChange={e => setTaxRate(Number(e.target.value))}
-                className="mt-1 h-9 text-sm text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)" }} />
+            <div className="opacity-60">
+              <Label className="text-gray-400 text-xs">Tax W/H (1099)</Label>
+              <div className="mt-1 h-9 px-3 flex items-center text-sm text-gray-400 font-mono rounded-md"
+                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                N/A — 1099
+              </div>
             </div>
             <div>
               <Label className="text-gray-400 text-xs">Other Deduction $</Label>
@@ -441,14 +469,14 @@ export default function EntertainerPayrollEngine({ user }) {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "rgba(255,255,255,0.02)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                {["Performer", "Shifts (hrs)", "VIP Sessions", "Gross Earnings", "Venue Fee", "Tax W/H", "Other Ded.", "NET PAYOUT", "Status", "Actions"].map(h => (
+                {["Performer", "W-9", "Shifts (hrs)", "VIP Sessions", "1099 Gross", "Venue Fee", "Other Ded.", "NET PAYOUT", "Status", "Actions"].map(h => (
                   <th key={h} className="text-left px-3 py-3 text-[10px] uppercase tracking-widest text-gray-500 font-bold whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {activePayrollData.length === 0 && (
-                <tr><td colSpan={10} className="text-center py-10 text-gray-600 text-sm">No payroll data for this period. Check in staff and close VIP sessions to generate earnings.</td></tr>
+                <tr><td colSpan={10} className="text-center py-10 text-gray-600 text-sm">No 1099 earnings data for this period. Check in entertainers and close VIP sessions to generate earnings.</td></tr>
               )}
               {activePayrollData.map(row => {
                 const statusCfg = STATUS_COLORS[row.existing?.status || "draft"];
@@ -458,11 +486,15 @@ export default function EntertainerPayrollEngine({ user }) {
                       <div className="font-semibold text-white text-sm">{row.entertainer.stage_name}</div>
                       <div className="text-[10px] text-gray-500">{row.entertainer.legal_name}</div>
                     </td>
+                    <td className="px-3 py-3">
+                      {row.hasW9
+                        ? <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-emerald-300 bg-emerald-500/10 border border-emerald-500/30">✓ ON FILE</span>
+                        : <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-red-300 bg-red-500/10 border border-red-500/30">MISSING</span>}
+                    </td>
                     <td className="px-3 py-3 text-gray-300 text-sm font-mono">{row.shiftHours.toFixed(1)}</td>
                     <td className="px-3 py-3 text-gray-300 text-sm font-mono">{row.vipSessions}</td>
                     <td className="px-3 py-3 font-mono text-cyan-400 font-bold">{fmt(row.grossTotal)}</td>
                     <td className="px-3 py-3 font-mono text-red-400 text-sm">-{fmt(row.venueFee)}</td>
-                    <td className="px-3 py-3 font-mono text-orange-400 text-sm">-{fmt(row.taxWithholding)}</td>
                     <td className="px-3 py-3 font-mono text-yellow-400 text-sm">-{fmt(row.otherDeductions)}</td>
                     <td className="px-3 py-3 font-mono font-black text-green-400 text-base">{fmt(row.netPayout)}</td>
                     <td className="px-3 py-3">
@@ -474,7 +506,9 @@ export default function EntertainerPayrollEngine({ user }) {
                       <div className="flex gap-1.5 flex-wrap">
                         <button
                           onClick={() => savePayroll.mutate(row)}
-                          className="text-[9px] px-2 py-1 rounded font-bold"
+                          disabled={!row.hasW9}
+                          title={!row.hasW9 ? "W-9 required before payout" : ""}
+                          className="text-[9px] px-2 py-1 rounded font-bold disabled:opacity-40 disabled:cursor-not-allowed"
                           style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.4)", color: "#c084fc" }}
                         >Save</button>
                         <button

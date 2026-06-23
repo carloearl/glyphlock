@@ -52,6 +52,7 @@ import SEOHead from "@/components/SEOHead";
 import GlyphBuckInventory from "../components/nups/GlyphBuckInventory.jsx";
 import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
+import ContractorTaxFormsList from "../components/nups/payroll/ContractorTaxFormsList.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import StaffOnboardingPanel from "../components/nups/StaffOnboardingPanel.jsx";
@@ -496,8 +497,15 @@ export default function NUPSOwner() {
           )}
           {activeModule === 'dj' && <UnifiedMusicConsole />}
           {activeModule === 'payroll' && (
-            <div className="space-y-4">
-              <EntertainerPayrollEngine user={user} />
+            <div className="space-y-6">
+              {/* 1099 contractor tax forms — must be on file before any payout */}
+              {canPayroll && <ContractorTaxFormsList currentUser={user} />}
+              <div className="border-t border-white/5 pt-6">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-3">
+                  1099 Earnings & Payouts
+                </div>
+                <EntertainerPayrollEngine user={user} />
+              </div>
               {canPayroll && <TipBreakdown transactions={realTransactions} />}
               {canPayroll && <PayrollReport />}
               {canPayroll && <OfficialChecks />}
