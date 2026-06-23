@@ -6,7 +6,7 @@
  * system overview side panel. Role-aware via NUPSUser lookup.
  */
 import React, { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import TodaysSummary from "@/components/hub/TodaysSummary";
 import TopProductsTable from "@/components/hub/TopProductsTable";
@@ -15,6 +15,8 @@ import VenuePerformance from "@/components/hub/VenuePerformance";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import DemoReadinessBanner from "@/components/hub/DemoReadinessBanner";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
+import DemoSeedControl from "@/components/nups/DemoSeedControl";
+import { seedVenuePerformance, clearVenuePerformance } from "@/lib/nups/demoSeeders";
 
 // Roles that actually punch a clock at the door. Owners / platform admins
 // don't see the clock-in card.
@@ -64,6 +66,7 @@ function aggregateTransactions(txns = []) {
 }
 
 export default function NUPSHub() {
+  const qc = useQueryClient();
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
   // NUPSUser schema key is `username` (mapped to email) — not `email`.
   const { data: nupsUsers = [] } = useQuery({
@@ -112,6 +115,15 @@ export default function NUPSHub() {
             station="door"
           />
         )}
+
+        <div className="flex items-center justify-end">
+          <DemoSeedControl
+            sectionName="Venue Performance"
+            onSeed={seedVenuePerformance}
+            onClear={clearVenuePerformance}
+            onAfter={() => qc.invalidateQueries({ queryKey: ["pos-today"] })}
+          />
+        </div>
 
         <TodaysSummary
           grossSales={agg.grossSales}
