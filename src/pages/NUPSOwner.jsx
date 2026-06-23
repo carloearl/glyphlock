@@ -247,24 +247,21 @@ export default function NUPSOwner() {
 
   const isAdminUser = user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin';
 
+  // NUPSOwner tabs = ONLY modules that don't have a dedicated standalone page.
+  // Front Door → /FrontDoor, Register → /Register, VIP → /Contracts?tab=vip,
+  // GlyphBucks → /Contracts?tab=glyphbucks. Those are NOT listed here.
   const NAV_MODULES = [
+    { key: 'dashboard',  label: 'Dashboard',      icon: BarChart3 },
     { key: 'staff',      label: 'Staff',          icon: Users },
-    { key: 'contracts',  label: 'Contracts',      icon: ScrollText },
-    { key: 'door',       label: 'Door Check-In',  icon: DoorOpen },
-    { key: 'vip',        label: 'VIP Rooms',      icon: Star },
-    { key: 'pos',        label: 'POS Register',   icon: ShoppingCart },
-    { key: 'glyphbucks', label: 'GlyphBucks',     icon: Coins },
     { key: 'dj',         label: 'DJ',             icon: Music },
-    { key: 'accounting', label: 'Accounting',     icon: Calculator, route: '/Accounting' },
-    { key: 'payroll',    label: 'Payroll',         icon: DollarSign },
-    { key: 'reports',    label: 'Reports',         icon: FileText },
-    { key: 'analytics',  label: 'Analytics',      icon: TrendingUp },
     { key: 'customers',  label: 'Customers',      icon: Heart },
+    { key: 'marketing',  label: 'Marketing',      icon: Megaphone },
+    { key: 'payroll',    label: 'Payroll',        icon: DollarSign },
+    { key: 'reports',    label: 'Reports',        icon: FileText },
+    { key: 'analytics',  label: 'Analytics',      icon: TrendingUp },
     { key: 'inventory',  label: 'Inventory',      icon: Package },
     { key: 'audit',      label: 'Audit Log',      icon: Shield },
-    { key: 'audit-integrity', label: 'Audit Integrity', icon: ShieldCheck, route: '/AuditIntegrity' },
-    { key: 'dashboard',  label: 'Dashboard',      icon: BarChart3 },
-    { key: 'admin',      label: 'Admin',           icon: KeyRound },
+    { key: 'admin',      label: 'Admin',          icon: KeyRound },
     { key: 'venue',      label: 'Venue Settings', icon: Building2 },
     { key: 'demo',       label: 'Demo Keys',      icon: KeyRound },
   ];
@@ -497,39 +494,6 @@ export default function NUPSOwner() {
               activeGuestsCount={activeGuestsCount}
             />
           )}
-          {activeModule === 'pos' && (
-            <div className="space-y-4">
-              {canBatch && <BatchManagement user={user} onBatchClosed={() => setActiveModule('reports')} />}
-              <div className="flex gap-2">
-                {[{key:'cash',label:'Door Register'},{key:'bar',label:'Bar Register'}].map(t => (
-                  <Button key={t.key} onClick={() => setPosSubTab(t.key)}
-                    variant={posSubTab === t.key ? 'default' : 'outline'}
-                    className={`min-h-[44px] text-sm ${
-                      posSubTab === t.key
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white border-purple-500'
-                        : 'border-gray-700 text-gray-300 hover:border-purple-500/50 bg-transparent'
-                    }`}>{t.label}</Button>
-                ))}
-              </div>
-              {posSubTab === 'cash' && <POSCashRegister user={user} station="door" />}
-              {posSubTab === 'bar' && <POSBarRegister user={user} />}
-            </div>
-          )}
-          {activeModule === 'door' && <GuestCheckIn />}
-          {activeModule === 'vip' && (
-            <div className="space-y-4">
-              <VIPRoomBoard user={user} />
-              <VIPRoomManagement />
-            </div>
-          )}
-          {activeModule === 'glyphbucks' && (
-            <UnifiedGlyphBucksTab
-              user={user}
-              venueId={venueId}
-              entertainers={entertainers}
-              isAdmin={isAdminUser}
-            />
-          )}
           {activeModule === 'dj' && <UnifiedMusicConsole />}
           {activeModule === 'payroll' && (
             <div className="space-y-4">
@@ -572,7 +536,12 @@ export default function NUPSOwner() {
               <GuestTracking />
               {canMarketing && <CustomerManagement />}
               {canMarketing && <LoyaltyProgram />}
+            </div>
+          )}
+          {activeModule === 'marketing' && (
+            <div className="space-y-4">
               {canMarketing && <MarketingCampaigns />}
+              {canMarketing && <AIInsights />}
             </div>
           )}
           {activeModule === 'inventory' && (
@@ -592,7 +561,6 @@ export default function NUPSOwner() {
             <div className="space-y-4">
               {canRBAC && <RBACAdminPanel />}
               {canVoid && <RefundManager user={user} />}
-              {canMarketing && <AIInsights />}
               <LiveFloorView />
               {isAdminUser && (
                 <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />

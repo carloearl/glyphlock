@@ -6,7 +6,7 @@ import {
   Menu, ChevronRight, ReceiptText, Truck, ArrowLeft,
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
   TrendingUp, BarChart3, Users, Package, Heart, DollarSign, Music,
-  Star, Sparkles, ShieldAlert as ShieldAlertIcon, KeyRound, ClipboardList,
+  Star, Sparkles, KeyRound, ClipboardList, Megaphone,
   Mic2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -35,10 +35,11 @@ const NAV_SECTIONS = [
   {
     label: "Floor & Staff",
     items: [
-      { id: "vip",       label: "VIP Shows",   icon: Star,  to: "/Contracts?tab=vip" },
-      { id: "staff",     label: "Staff",       icon: Users, to: "/NUPSOwner?tab=staff" },
-      { id: "customers", label: "Customers",   icon: Heart, to: "/NUPSOwner?tab=customers" },
-      { id: "dj",        label: "DJ Console",  icon: Music, to: "/NUPSOwner?tab=dj" },
+      { id: "vip",        label: "VIP Shows",   icon: Star,      to: "/Contracts?tab=vip" },
+      { id: "staff",      label: "Staff",        icon: Users,     to: "/NUPSOwner?tab=staff" },
+      { id: "dj",         label: "DJ Console",   icon: Music,     to: "/NUPSOwner?tab=dj" },
+      { id: "customers",  label: "Customers",    icon: Heart,     to: "/NUPSOwner?tab=customers" },
+      { id: "marketing",  label: "Marketing",    icon: Megaphone, to: "/NUPSOwner?tab=marketing" },
     ],
   },
   {
@@ -67,12 +68,12 @@ const NAV_SECTIONS = [
   {
     label: "Admin",
     items: [
-      { id: "audit-log",      label: "Audit Log",       icon: ClipboardList, to: "/NUPSOwner?tab=audit" },
-      { id: "audit",          label: "Audit Integrity", icon: ShieldCheck,   to: "/admin/audit-integrity" },
-      { id: "activity",       label: "Activity Log",    icon: ScrollText,    to: "/admin/activity-log" },
-      { id: "rbac",           label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
-      { id: "demo",           label: "Demo Keys",       icon: Sparkles,      to: "/NUPSOwner?tab=demo" },
-      { id: "venue",          label: "Venue Settings",  icon: Settings,      to: "/admin/venue-settings" },
+      { id: "audit-log", label: "Audit Log",       icon: ClipboardList, to: "/NUPSOwner?tab=audit" },
+      { id: "audit",     label: "Audit Integrity", icon: ShieldCheck,   to: "/admin/audit-integrity" },
+      { id: "activity",  label: "Activity Log",    icon: ScrollText,    to: "/admin/activity-log" },
+      { id: "rbac",      label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
+      { id: "demo",      label: "Demo Keys",       icon: Sparkles,      to: "/NUPSOwner?tab=demo" },
+      { id: "venue",     label: "Venue Settings",  icon: Settings,      to: "/admin/venue-settings" },
     ],
   },
 ];
