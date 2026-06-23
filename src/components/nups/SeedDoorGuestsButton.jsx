@@ -27,30 +27,21 @@ import { toast } from "sonner";
  */
 const DEMO_GUESTS = [
   {
-    guest_name: "Robert Spender",
-    date_of_birth: "1985-06-15",
+    full_name: "Robert Spender",
+    date_of_birth: "1985-06-15T00:00:00.000Z",
     phone: "555-2001",
-    government_id_type: "Drivers License",
-    government_id_number: "AZ-DL-1234567",
-    government_id_state: "AZ",
     tier_hint: "high_roller",
   },
   {
-    guest_name: "Anthony Platinum",
-    date_of_birth: "1980-09-30",
+    full_name: "Anthony Platinum",
+    date_of_birth: "1980-09-30T00:00:00.000Z",
     phone: "555-2004",
-    government_id_type: "Drivers License",
-    government_id_number: "AZ-DL-7654321",
-    government_id_state: "AZ",
     tier_hint: "whale",
   },
   {
-    guest_name: "James Walker",
-    date_of_birth: "1990-11-22",
+    full_name: "James Walker",
+    date_of_birth: "1990-11-22T00:00:00.000Z",
     phone: "555-2099",
-    government_id_type: "State ID",
-    government_id_number: "AZ-ID-9988776",
-    government_id_state: "AZ",
     tier_hint: "standard",
   },
 ];
@@ -70,26 +61,21 @@ export default function SeedDoorGuestsButton({ variant = "default", className = 
       const have = new Set(
         existing
           .filter((g) => g.status === "in_building")
-          .map((g) => `${(g.guest_name || "").toLowerCase()}|${g.phone || ""}`)
+          .map((g) => `${(g.full_name || "").toLowerCase()}|${g.phone || ""}`)
       );
 
       let created = 0;
       for (const g of DEMO_GUESTS) {
-        const key = `${g.guest_name.toLowerCase()}|${g.phone}`;
+        const key = `${g.full_name.toLowerCase()}|${g.phone}`;
         if (have.has(key)) continue;
         await base44.entities.VIPGuest.create({
-          guest_name: g.guest_name,
+          guest_id: `DEMO-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          full_name: g.full_name,
           date_of_birth: g.date_of_birth,
           phone: g.phone,
-          government_id_type: g.government_id_type,
-          government_id_number: g.government_id_number,
-          government_id_state: g.government_id_state,
           status: "in_building",
-          check_in_time: new Date().toISOString(),
-          verification_status: "verified",
           id_verified: true,
           id_verified_at: new Date().toISOString(),
-          current_location: "Main Floor",
           notes: `DEMO_DOOR_SEED · tier:${g.tier_hint}`,
         });
         created += 1;
