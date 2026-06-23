@@ -60,6 +60,7 @@ import Receipts from './pages/Receipts';
 import DriverPayouts from './pages/DriverPayouts';
 import NUPSHub from './pages/NUPSHub';
 import EntertainerCheckIn from './pages/EntertainerCheckIn';
+import ManagerConsole from './pages/ManagerConsole';
 import KioskShell from './components/nups/KioskShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -111,6 +112,7 @@ const AuthenticatedApp = () => {
     '/nupshub', '/hub', '/register', '/registerconsole',
     '/receipts', '/driverpayouts',
     '/accounting', '/tonight', '/contracts', '/contractshub',
+    '/managerconsole',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/venue-settings',
   ];
@@ -125,6 +127,7 @@ const AuthenticatedApp = () => {
     '/nupshub', '/hub', '/register', '/registerconsole',
     '/receipts', '/driverpayouts',
     '/accounting', '/tonight', '/contracts', '/contractshub',
+    '/managerconsole',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/venue-settings',
   ];
@@ -176,6 +179,8 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSHub" element={<NUPSHub />} />
         <Route path="/nupshub" element={<NUPSHub />} />
         <Route path="/Hub" element={<NUPSHub />} />
+        <Route path="/ManagerConsole" element={<ManagerConsole />} />
+        <Route path="/managerconsole" element={<ManagerConsole />} />
         <Route path="/Register" element={<RegisterConsole />} />
         <Route path="/register" element={<RegisterConsole />} />
         <Route path="/RegisterConsole" element={<RegisterConsole />} />

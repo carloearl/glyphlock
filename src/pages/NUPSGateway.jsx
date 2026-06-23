@@ -26,28 +26,31 @@ const ROLE_CARDS = [
   {
     key: "manager",
     label: "Manager Access",
-    sub: "Floor ops · Staff oversight · Approval workflows",
+    sub: "Onboard staff · Assign PINs · Contracts · Live floor",
     icon: Users,
     gradient: "from-blue-600/20 to-cyan-600/20",
     border: "border-blue-500/30 hover:border-blue-400/60",
     iconColor: "text-blue-400",
     iconBg: "bg-blue-500/10",
     requiredRoles: ["VENUE_MANAGER"],
-    destination: "NUPSHub",
+    destination: "ManagerConsole",
     requiresAuth: true,
   },
   {
+    // Staff Login is the PIN credential entry — every staff member punches
+    // their personal PIN here, then the system routes them to the right
+    // surface based on their role. Owner/manager bypass this card.
     key: "staff",
     label: "Staff Login",
-    sub: "Register · Timeclock · Batches · My sales",
+    sub: "Enter your username + PIN to clock in",
     icon: UserCheck,
     gradient: "from-cyan-600/20 to-teal-600/20",
     border: "border-cyan-500/30 hover:border-cyan-400/60",
     iconColor: "text-cyan-400",
     iconBg: "bg-cyan-500/10",
-    requiredRoles: ["BARTENDER", "DJ", "SECURITY", "KIOSK", "HOSTESS", "DOOR_GIRL", "DOORMAN", "FLOOR_HOST"],
-    destination: "NUPSHub",
-    requiresAuth: true,
+    requiredRoles: [],
+    destination: "NUPSLogin",
+    requiresAuth: false,
   },
   {
     // Entertainer Check-In is a door-mounted PIN station. Each entertainer

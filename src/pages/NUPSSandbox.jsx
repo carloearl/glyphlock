@@ -69,6 +69,7 @@ const STATUS_BADGE = {
 };
 
 const SECTIONS = [
+  { key: "walkthrough", label: "Guided Walkthrough", icon: Play },
   { key: "overview", label: "Overview", icon: BarChart3 },
   { key: "hardware", label: "Hardware Test", icon: Wifi },
   { key: "pos", label: "POS Register", icon: CreditCard },
@@ -80,9 +81,59 @@ const SECTIONS = [
   { key: "payroll", label: "Payroll", icon: DollarSign },
 ];
 
+// One-night workflow — each step links to the matching sandbox section
+// so a demo viewer can walk the exact path an operator walks at the venue.
+const WORKFLOW_STEPS = [
+  {
+    n: 1, label: "Open the venue",
+    sub: "Manager logs in via Gateway → Staff Login, hardware boots, batch opens.",
+    section: "hardware", icon: Wifi, color: "blue",
+  },
+  {
+    n: 2, label: "Staff clock in",
+    sub: "Bartenders, DJ, security, hostess punch their PIN at the door tablet.",
+    section: "staff", icon: Clock, color: "cyan",
+  },
+  {
+    n: 3, label: "Entertainers check in",
+    sub: "Each entertainer agrees to the daily checklist, enters their 4-digit PIN.",
+    section: "entertainers", icon: Music, color: "pink",
+  },
+  {
+    n: 4, label: "Sell at the door & bar",
+    sub: "Cover charges, drinks, packages — every sale tied to a cashier + batch.",
+    section: "pos", icon: CreditCard, color: "emerald",
+  },
+  {
+    n: 5, label: "Dream Dollar contracts",
+    sub: "Customer signs → staff prints hardcopy → scanned back into the ledger.",
+    section: "dreamdollar", icon: Banknote, color: "amber",
+  },
+  {
+    n: 6, label: "Run the Z-Report",
+    sub: "End of night: cash + card + GB liability totals printed for the manager.",
+    section: "zreport", icon: FileText, color: "violet",
+  },
+  {
+    n: 7, label: "Approve payroll",
+    sub: "Gross → deductions → net for every entertainer, ready to mark paid.",
+    section: "payroll", icon: DollarSign, color: "green",
+  },
+];
+
+const STEP_COLORS = {
+  blue:    "border-blue-500/40 bg-blue-500/5 text-blue-300 hover:border-blue-400/60",
+  cyan:    "border-cyan-500/40 bg-cyan-500/5 text-cyan-300 hover:border-cyan-400/60",
+  pink:    "border-pink-500/40 bg-pink-500/5 text-pink-300 hover:border-pink-400/60",
+  emerald: "border-emerald-500/40 bg-emerald-500/5 text-emerald-300 hover:border-emerald-400/60",
+  amber:   "border-amber-500/40 bg-amber-500/5 text-amber-300 hover:border-amber-400/60",
+  violet:  "border-violet-500/40 bg-violet-500/5 text-violet-300 hover:border-violet-400/60",
+  green:   "border-green-500/40 bg-green-500/5 text-green-300 hover:border-green-400/60",
+};
+
 export default function NUPSSandbox() {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState("overview");
+  const [activeSection, setActiveSection] = useState("walkthrough");
   const [cart, setCart] = useState([]);
   const [lastTx, setLastTx] = useState(null);
   const [resetting, setResetting] = useState(false);
@@ -480,6 +531,56 @@ export default function NUPSSandbox() {
 
   const renderSection = () => {
     switch (activeSection) {
+      case "walkthrough":
+        return (
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-2xl p-5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0">
+                  <Play className="w-5 h-5 text-emerald-300" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-lg font-black text-white">One Full Night, Step by Step</div>
+                  <p className="text-sm text-emerald-200/80 mt-1">
+                    This is the exact workflow your team follows every shift — from opening the venue to printing the Z-Report.
+                    Tap any step to jump straight into the live demo for that piece.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {WORKFLOW_STEPS.map((step) => {
+                const Icon = step.icon;
+                return (
+                  <button
+                    key={step.n}
+                    onClick={() => setActiveSection(step.section)}
+                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left ${STEP_COLORS[step.color]}`}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center font-black text-white flex-shrink-0">
+                      {step.n}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Icon className="w-4 h-4" />
+                        <div className="font-bold text-white">{step.label}</div>
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">{step.sub}</div>
+                    </div>
+                    <Play className="w-4 h-4 flex-shrink-0 opacity-60" />
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-300/80 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>Sandbox mode — every action above writes mock data only. Nothing here touches the live venue books.</span>
+            </div>
+          </div>
+        );
+
       case "hardware":
         return (
           <div className="space-y-4">
