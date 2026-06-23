@@ -15,12 +15,14 @@
  * GlyphBucks Hub, Audit Integrity, Demo Manager, etc. Managers don't
  * need (or want) those during a busy night.
  */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import StaffOnboardingPanel from "@/components/nups/StaffOnboardingPanel";
+import StaffManagement from "@/components/nups/StaffManagement";
+import ContractManager from "@/components/nups/ContractManager";
 import OnboardingPacket from "@/components/nups/OnboardingPacket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import {
   Users, Music, Clock, DollarSign, FileText, Activity, UserPlus, ChevronRight, ShieldCheck,
 } from "lucide-react";
+import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 
 const TABS = [
   { key: "tonight",      label: "Tonight",      icon: Activity },
@@ -67,6 +70,11 @@ function StatTile({ label, value, sub, Icon, tone }) {
 export default function ManagerConsole() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("tonight");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => setUser(null));
+  }, []);
 
   // ── Live data feeds (manager-relevant only) ────────────────────────
   const { data: staffShifts = [] } = useQuery({
@@ -205,6 +213,32 @@ export default function ManagerConsole() {
     </div>
   );
 
+  const renderStaff = () => (
+    <div className="space-y-5">
+      <Card className="bg-slate-900/60 border-slate-800">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <UserPlus className="w-4 h-4 text-cyan-400" /> Staff Onboarding, PINs & Access
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StaffOnboardingPanel />
+        </CardContent>
+      </Card>
+
+      <Card className="bg-slate-900/60 border-slate-800">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <Users className="w-4 h-4 text-violet-400" /> Current Staff Directory
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StaffManagement />
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   const renderFloor = () => (
     <div className="space-y-5">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -257,25 +291,20 @@ export default function ManagerConsole() {
   );
 
   const renderContracts = () => (
-    <Card className="bg-slate-900/60 border-slate-800">
-      <CardHeader>
-        <CardTitle className="text-white">Contracts</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-sm text-slate-400">
-          {todaysContracts.length} created today · {signedToday} signed · {contracts.length} all-time.
-        </p>
-        <Button onClick={() => navigate("/ContractsHub")} className="bg-cyan-600 hover:bg-cyan-500 text-white">
-          Open Contracts Hub <ChevronRight className="w-4 h-4 ml-1" />
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <StatTile label="Created Today" value={todaysContracts.length} Icon={FileText} tone="amber" />
+        <StatTile label="Signed Today" value={signedToday} Icon={ShieldCheck} tone="emerald" />
+        <StatTile label="All Contracts" value={contracts.length} Icon={Activity} tone="violet" />
+      </div>
+      <ContractManager user={user} />
+    </div>
   );
 
   const renderBody = () => {
     switch (tab) {
       case "tonight":      return renderTonight();
-      case "staff":        return <StaffOnboardingPanel />;
+      case "staff":        return renderStaff();
       case "entertainers": return <OnboardingPacket />;
       case "floor":        return renderFloor();
       case "contracts":    return renderContracts();
@@ -284,35 +313,37 @@ export default function ManagerConsole() {
   };
 
   return (
-    <NUPSAppShell
-      title="Manager Console"
-      subtitle="Floor ops · Onboarding · Live oversight"
-      role="VENUE_MANAGER"
-    >
-      <div className="max-w-[1600px] mx-auto space-y-4">
-        {/* Tab strip */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {TABS.map(t => {
-            const Icon = t.icon;
-            const active = tab === t.key;
-            return (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                  active
-                    ? "bg-blue-600/30 border border-blue-500/50 text-white"
-                    : "bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
-                }`}
-              >
-                <Icon className="w-4 h-4" /> {t.label}
-              </button>
-            );
-          })}
-        </div>
+    <NUPSRouteGuard requiredRoles={["VENUE_MANAGER", "VENUE_OWNER", "PLATFORM_ADMIN", "DEMO"]}>
+      <NUPSAppShell
+        title="Manager Console"
+        subtitle="Floor ops · Onboarding · Live oversight"
+        role="VENUE_MANAGER"
+      >
+        <div className="max-w-[1600px] mx-auto space-y-4">
+          {/* Tab strip */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {TABS.map(t => {
+              const Icon = t.icon;
+              const active = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                    active
+                      ? "bg-blue-600/30 border border-blue-500/50 text-white"
+                      : "bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" /> {t.label}
+                </button>
+              );
+            })}
+          </div>
 
-        {renderBody()}
-      </div>
-    </NUPSAppShell>
+          {renderBody()}
+        </div>
+      </NUPSAppShell>
+    </NUPSRouteGuard>
   );
 }
