@@ -24,6 +24,8 @@ import OrderDisplay from "./pos/OrderDisplay";
 import FlowSteps from "./pos/FlowSteps";
 import DriverDropOffTracker from "./DriverDropOffTracker";
 import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
+import IDScannerCamera from "./IDScannerCamera";
+import GuestCheckIn from "./GuestCheckIn";
 import { writeEntity } from "@/lib/nups/writeEntity";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 
@@ -60,6 +62,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   const [managerPin, setManagerPin] = useState("");
   const [showCompModal, setShowCompModal] = useState(false);
   const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [scannedGuestData, setScannedGuestData] = useState(null);
   const [discountPin, setDiscountPin] = useState("");
   // Surfaces a post-sale confirmation modal so the receipt is impossible to
   // miss on any device — even when the cart sidebar is collapsed on mobile.
@@ -409,6 +412,20 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       toast.warning("Cart changed — comp authorization cleared. Re-authorize.");
     }
   }, [total, compAuth]);
+
+    const handleIDScan = (data) => {
+    setScannedGuestData(data);
+    if(data.customer_name){
+      setCustomerQuery(data.customer_name);
+      const existingCustomer = customers.find(c => c.full_name?.toLowerCase() === data.customer_name.toLowerCase());
+      if(existingCustomer) {
+        setSelectedCustomer(existingCustomer);
+      } else {
+        setSelectedCustomer({ full_name: data.customer_name, isNew: true });
+      }
+    }
+    toast.success("Guest ID Scanned: " + data.customer_name);
+  };
 
   const handleCheckout = () => {
     if (!activeBatch) {
@@ -917,7 +934,12 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
                 <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Products</span>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <IDScannerCamera venue_id={activeVenue?.id} onDataExtracted={handleIDScan} />
+            <GuestCheckIn />
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                 {filteredProducts.map((product) => (
                   <button
                     key={product.id}

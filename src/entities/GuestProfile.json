@@ -1,0 +1,67 @@
+{
+  "name": "GuestProfile",
+  "type": "object",
+  "description": "Durable guest record created on first ID scan at the door. Deduplicated by SHA-256 hash of license number (irreversible). Tracks visit history, age verification, and per-venue status (active/banned/vip). DACO-authorized PII: name, DOB, license_state — required for re-verification across visits.",
+  "properties": {
+    "guest_id": {
+      "type": "string",
+      "description": "Deterministic dedup key: first 24 chars of SHA-256(license_number). One-way hash — raw license# never stored."
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue scope. Guest profiles are per-venue."
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "dob": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of birth (YYYY-MM-DD). Required for re-age-verification on every visit."
+    },
+    "license_state": {
+      "type": "string",
+      "description": "Issuing state/jurisdiction (e.g. AZ, CA)."
+    },
+    "age_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if age >= 21 at most recent scan."
+    },
+    "visit_count": {
+      "type": "number",
+      "default": 0
+    },
+    "first_visit_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_visit_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "banned",
+        "vip",
+        "watchlist"
+      ],
+      "default": "active"
+    },
+    "ban_reason": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "guest_id",
+    "venue_id"
+  ]
+}

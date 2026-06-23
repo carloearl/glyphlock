@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CreditCard, Smartphone, Wifi } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import IDScannerCamera from "../IDScannerCamera";
 
 /**
  * Card / Tap-to-Pay / Digital Wallet panel.
@@ -9,7 +11,8 @@ import { CreditCard, Smartphone, Wifi } from "lucide-react";
  * In production, this would integrate with Stripe Terminal SDK.
  */
 export default function CardPaymentPanel({ total, method, onConfirm }) {
-  const [lastFour, setLastFour] = useState("");
+    const [lastFour, setLastFour] = useState("");
+  const [showScanner, setShowScanner] = useState(false);
   const [approvalCode, setApprovalCode] = useState("");
   const [processing, setProcessing] = useState(false);
 
@@ -29,8 +32,19 @@ export default function CardPaymentPanel({ total, method, onConfirm }) {
     }, 1500);
   };
 
-  return (
+    return (
     <div className="space-y-4">
+      {showScanner && (
+        <Dialog open={showScanner} onOpenChange={setShowScanner}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Scan Guest ID</DialogTitle>
+            </DialogHeader>
+            <IDScannerCamera onDataExtracted={handleProcess} />
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* Amount */}
       <div className="bg-black/70 border border-cyan-500/30 rounded-xl p-4 text-center">
         <div className="text-[10px] text-gray-500 uppercase tracking-widest">Charge Amount</div>
@@ -90,7 +104,7 @@ export default function CardPaymentPanel({ total, method, onConfirm }) {
           </div>
 
           <Button
-            onClick={handleProcess}
+            onClick={() => setShowScanner(true)} // This is a placeholder, in a real scenario it would be integrated with the card reader SDK
             className="w-full h-16 text-xl font-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
           >
             {isTap ? "📱 Process Tap Payment" : "💳 Process Card"}

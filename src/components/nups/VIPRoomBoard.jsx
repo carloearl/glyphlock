@@ -43,7 +43,7 @@ const STATUS_CONFIG = {
 export default function VIPRoomBoard({ user }) {
   const queryClient = useQueryClient();
   const [openDialog, setOpenDialog] = useState(null); // null | roomId
-  const [guestName, setGuestName] = useState('');
+  const [selectedGuest, setSelectedGuest] = useState(null);
   const [entertainerId, setEntertainerId] = useState('');
   const [ratePerHour, setRatePerHour] = useState(300);
   const [notes, setNotes] = useState('');
@@ -54,6 +54,11 @@ export default function VIPRoomBoard({ user }) {
     queryKey: ['vip-rooms'],
     queryFn: () => base44.entities.VIPRoom.list(),
     refetchInterval: 30000,
+  });
+
+    const { data: guests = [] } = useQuery({
+    queryKey: ['guest-profiles'],
+    queryFn: () => base44.entities.GuestProfile.list(),
   });
 
   const { data: entertainers = [] } = useQuery({
@@ -100,7 +105,7 @@ export default function VIPRoomBoard({ user }) {
 
   const handleOpenRoom = async (room) => {
     if (isOpening) return;
-    if (!guestName.trim()) {
+    if (!selectedGuest) {
       toast.error('Guest name is required');
       return;
     }
@@ -110,17 +115,17 @@ export default function VIPRoomBoard({ user }) {
        const minimumAge = activeVenue?.minimum_age || 21;
        // For now, prompt manager to confirm guest age manually (DOB would come from VIPGuest record in full implementation)
        const ageConfirmed = window.confirm(
-         `Confirm: Guest ${guestName.trim()} is ${minimumAge}+ years old?\n\n(Standard venue requirement: ${minimumAge}+)`
+         `Confirm: Guest ${selectedGuest.first_name} ${selectedGuest.last_name} is ${minimumAge}+ years old?\n\n(Standard venue requirement: ${minimumAge}+)`
        );
        if (!ageConfirmed) {
          await base44.entities.SystemAuditLog.create({
            event_type: "VIP_GUEST_GATE_BLOCKED",
-           description: `VIP session blocked: Guest age not confirmed. guest_name=${guestName.trim()}`,
+           description: `VIP session blocked: Guest age not confirmed. guest_name=${selectedGuest.first_name} ${selectedGuest.last_name}`,
            actor_email: user?.email,
            status: "blocked",
            severity: "HIGH",
            metadata: {
-             guest_name: guestName.trim(),
+             guest_name: `${selectedGuest.first_name} ${selectedGuest.last_name}`,
              minimum_age: minimumAge,
              reason: "guest_age_not_confirmed",
              section: "AUDIT-2-GATE"
@@ -203,7 +208,7 @@ export default function VIPRoomBoard({ user }) {
         id: room.id,
         data: {
           status: 'occupied',
-          guest_name: guestName.trim(),
+          guest_name: `${selectedGuest.first_name} ${selectedGuest.last_name}`,
           entertainer_id: entertainerId || null,
           entertainer_name: entertainer?.stage_name || null,
           start_time: new Date().toISOString(),
@@ -213,7 +218,7 @@ export default function VIPRoomBoard({ user }) {
         }
       });
       setOpenDialog(null);
-      setGuestName('');
+      setSelectedGuest(null);
       setEntertainerId('');
       setNotes('');
     } finally {
@@ -419,13 +424,15 @@ export default function VIPRoomBoard({ user }) {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Guest Name *</Label>
-              <Input
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                placeholder="Guest name..."
-                className="bg-gray-800 border-gray-700"
-              />
+              <Label>Guest *</Label>
+              <Select onValueChange={(guestId) => setSelectedGuest(guests.find(g => g.id === guestId))}>
+                <SelectTrigger className="bg-gray-800 border-gray-700">
+                  <SelectValue placeholder="Select guest..." />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 border-gray-700">
+                  {guests.map(g => <SelectItem key={g.id} value={g.id}>{g.first_name} {g.last_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Assign Entertainer</Label>
@@ -465,7 +472,7 @@ export default function VIPRoomBoard({ user }) {
               </Button>
               <Button
                 onClick={() => handleOpenRoom(selectedRoom)}
-                disabled={isOpening || !guestName.trim()}
+                disabled={isOpening || !selectedGuest}
                 className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600"
               >
                 {isOpening ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <DoorOpen className="w-4 h-4 mr-2" />}
