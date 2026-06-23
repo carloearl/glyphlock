@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { LogOut, Shield, ArrowLeft } from "lucide-react";
-import ManagerPINVerifier from "@/components/nups/ManagerPINVerifier";
+import KioskExitModal from "@/components/nups/KioskExitModal";
 import { enterKioskMode, exitKioskMode, isKioskMode } from "@/lib/nups/kioskMode";
 
 /**
@@ -81,9 +81,8 @@ export default function KioskShell({ children }) {
       {showExit && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-md">
-            <ManagerPINVerifier
-              purpose="exit kiosk mode"
-              onVerified={handleVerified}
+            <KioskExitModal
+              onUnlock={handleVerified}
               onCancel={() => setShowExit(false)}
             />
           </div>
