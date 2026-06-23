@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Percent, Plus, X, Keyboard, AlertTriangle, Check } from "lucide-react";
+import { Percent, Plus, X, Keyboard, AlertTriangle, Check, Gift } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -159,6 +159,38 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
   const isDoor = station === 'door';
   const activePresets = isDoor ? DOOR_PRESETS : PRESETS;
   const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const { venueId } = useActiveVenue();
+  const [promoAmount, setPromoAmount] = useState(5);
+
+  // Live-load the venue's promo card amount (no hardcoded dollar figures at door)
+  useEffect(() => {
+    if (!isDoor || !venueId) return;
+    let cancelled = false;
+    (async () => {
+      const rates = await loadVenueRates(venueId);
+      if (!cancelled && rates?.promo_card_amount > 0) {
+        setPromoAmount(Number(rates.promo_card_amount));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isDoor, venueId]);
+
+  const handlePromoCard = () => {
+    // Negative line item, flagged is_promo:true so accounting can count usage
+    // (per VenueRateConfig.promo_card_amount description). Walk-in / no-driver
+    // discount — applied directly to the gross ring-up, not a driver payout.
+    onAddItem({
+      product_id: `promo-no-driver-${Date.now()}`,
+      product_name: `Promo Card (No Driver) -$${promoAmount}`,
+      quantity: 1,
+      price: -promoAmount,
+      total: -promoAmount,
+      is_preset: true,
+      is_promo: true,
+      promo_reason: 'no_driver_walk_in',
+    });
+  };
+
   return (
     <div className="space-y-5">
       {/* Manual Entry — HIDDEN at door. Door girl is locked to preset buttons
@@ -212,6 +244,33 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
           </button>
         ))}
       </div>
+
+      {/* Promo Card — DOOR ONLY. One-tap discount for guests who arrived
+          WITHOUT a driver. Amount sourced live from VenueRateConfig
+          (promo_card_amount). Posts as a negative line item with
+          is_promo:true so accounting can count usage. */}
+      {isDoor && (
+        <button
+          onClick={handlePromoCard}
+          className="w-full rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all select-none px-3"
+          style={{
+            height: '56px',
+            background: 'linear-gradient(135deg, rgba(16,185,129,0.22), rgba(16,185,129,0.08))',
+            border: '2px solid #10b981',
+            boxShadow: '0 0 14px rgba(16,185,129,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
+          }}
+        >
+          <Gift className="w-5 h-5" style={{ color: '#10b981' }} />
+          <div className="flex flex-col items-start leading-tight">
+            <span className="text-base font-black tracking-tight" style={{ color: '#10b981', textShadow: '0 0 10px rgba(16,185,129,0.6)' }}>
+              PROMO CARD −${promoAmount}
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'rgba(16,185,129,0.7)' }}>
+              Guest · No Driver
+            </span>
+          </div>
+        </button>
+      )}
 
       {/* Discount strip — hidden on door station */}
       {!isDoor && (
