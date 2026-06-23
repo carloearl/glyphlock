@@ -1,0 +1,74 @@
+{
+  "name": "LedgerAccount",
+  "type": "object",
+  "description": "BPAA-NUPS-ACCT-001 \u2014 Chart of Accounts row. One per (venue_id, mode, code). Stable across time; never deleted. Inactive accounts soft-disabled via active=false but stay on historical entries. All posting code resolves account codes through this entity \u2014 NEVER inline literals (I-10).",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Tenant scope. One COA per (venue_id, mode)."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "Ledger mode. REAL = live books, DEMO = sandbox demo, SANDBOX = dev. Modes never mix (I-12)."
+    },
+    "code": {
+      "type": "string",
+      "description": "Stable account code e.g. '1000', '4200'. Unique within (venue_id, mode). Referenced by JournalEntry.lines[].account_code."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name e.g. 'Cash on Hand', 'Bar Revenue'."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "ASSET",
+        "LIABILITY",
+        "EQUITY",
+        "REVENUE",
+        "COGS",
+        "EXPENSE"
+      ],
+      "description": "Top-level GAAP classification."
+    },
+    "normal_side": {
+      "type": "string",
+      "enum": [
+        "DEBIT",
+        "CREDIT"
+      ],
+      "description": "Side that increases the balance. ASSET/COGS/EXPENSE => DEBIT; LIABILITY/EQUITY/REVENUE => CREDIT. Stored for fast validation, derived from type at seed time."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Soft-disable. Inactive accounts hidden from new entries, kept for historical reports."
+    },
+    "parent_code": {
+      "type": "string",
+      "description": "Optional parent account code for roll-ups (e.g. 4001 parent => 4000)."
+    },
+    "description": {
+      "type": "string"
+    },
+    "seeded_by_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for rows created by seedDefaultCoa(); false for admin-added rows."
+    }
+  },
+  "required": [
+    "venue_id",
+    "mode",
+    "code",
+    "name",
+    "type",
+    "normal_side"
+  ]
+}

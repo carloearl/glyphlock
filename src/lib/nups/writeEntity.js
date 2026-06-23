@@ -16,6 +16,8 @@ const FINANCIAL_ENTITIES = new Set([
   'VenueContract',
   'DriverPayout',
   'DailySettlement',
+  // BPAA-NUPS-ACCT-001 — double-entry GL
+  'JournalEntry',
 ]);
 
 const FINANCIAL_AUTHORIZED_ROLES = new Set([

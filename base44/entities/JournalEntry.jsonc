@@ -1,0 +1,126 @@
+{
+  "name": "JournalEntry",
+  "type": "object",
+  "description": "BPAA-NUPS-ACCT-001 \u2014 Append-only double-entry journal entry. Header + embedded balanced lines (one atomic write \u2014 avoids partial-post risk of separate line entities). NEVER edited or deleted after POSTED. Corrections: post a REVERSAL entry with reverses_entry_id set.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Tenant scope. All reports filter by venue_id (I-9)."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "Ledger mode (I-12). Modes never mix in a report or balance."
+    },
+    "posted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Server time of posting. Set by postToLedger(), never client-supplied."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "BAR_SALE",
+        "DOOR",
+        "VIP_SHOW",
+        "VENDING",
+        "GLYPHBUCKS_SALE",
+        "GLYPHBUCKS_REDEEM",
+        "DRIVER_PAYOUT",
+        "TIP_IN",
+        "TIP_PAYOUT",
+        "SERVICE_REVENUE",
+        "CARD_SETTLEMENT",
+        "DRAWER_ADJ",
+        "REVERSAL"
+      ],
+      "description": "Originating event type. Drives reporting drill-down."
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID of the originating record (sale id, shift id, payout id, etc). Drill-down anchor."
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Unique per source event. Re-posting same key is a no-op (I-4). Format: '{source_type}:{source_id}:{operation}' is the convention."
+    },
+    "actor_user_id": {
+      "type": "string",
+      "description": "Who triggered the post. \u26a0 MDL ID-01: actor field trustworthiness gated on identity-contamination fix. Account-level reports safe now; actor-level wait on ID-01."
+    },
+    "actor_email": {
+      "type": "string"
+    },
+    "memo": {
+      "type": "string",
+      "description": "Human-readable description of the entry."
+    },
+    "reverses_entry_id": {
+      "type": "string",
+      "description": "Set ONLY on reversing entries (I-3). Points to the original entry id this reverses."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "POSTED",
+        "REVERSED"
+      ],
+      "default": "POSTED",
+      "description": "POSTED on creation. Flipped to REVERSED only by the posting engine when a reversal entry references this entry. Never deleted."
+    },
+    "lines": {
+      "type": "array",
+      "description": "Balanced line items. sum(debit_cents) === sum(credit_cents) \u2014 validated pre-write (I-1). Exactly one of debit_cents/credit_cents > 0 per line.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account_code": {
+            "type": "string",
+            "description": "References LedgerAccount.code in the same (venue_id, mode)."
+          },
+          "debit_cents": {
+            "type": "number",
+            "default": 0,
+            "description": "Integer cents (I-2). Either this or credit_cents > 0, never both, never neither."
+          },
+          "credit_cents": {
+            "type": "number",
+            "default": 0,
+            "description": "Integer cents (I-2)."
+          },
+          "memo": {
+            "type": "string",
+            "description": "Optional per-line note."
+          }
+        },
+        "required": [
+          "account_code"
+        ]
+      }
+    },
+    "total_debits_cents": {
+      "type": "number",
+      "description": "Cached sum(lines[].debit_cents). Equals total_credits_cents (I-1). Stored for fast trial-balance queries."
+    },
+    "total_credits_cents": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "venue_id",
+    "mode",
+    "posted_at",
+    "source_type",
+    "idempotency_key",
+    "lines",
+    "status"
+  ]
+}
