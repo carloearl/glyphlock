@@ -57,8 +57,12 @@ export default function VIPRoomBoard({ user }) {
   });
 
     const { data: guests = [] } = useQuery({
-    queryKey: ['guest-profiles'],
-    queryFn: () => base44.entities.GuestProfile.list(),
+    queryKey: ["vip-guests-active"],
+    queryFn: async () => {
+      const all = await base44.entities.VIPGuest.list("-last_visit", 200);
+      return all.filter((g) => g.status === "in_building");
+    },
+    refetchInterval: 30000,
   });
 
   const { data: entertainers = [] } = useQuery({
@@ -115,17 +119,17 @@ export default function VIPRoomBoard({ user }) {
        const minimumAge = activeVenue?.minimum_age || 21;
        // For now, prompt manager to confirm guest age manually (DOB would come from VIPGuest record in full implementation)
        const ageConfirmed = window.confirm(
-         `Confirm: Guest ${selectedGuest.first_name} ${selectedGuest.last_name} is ${minimumAge}+ years old?\n\n(Standard venue requirement: ${minimumAge}+)`
+       `Confirm: Guest ${selectedGuest.full_name} is ${minimumAge}+ years old?\n\n(Standard venue requirement: ${minimumAge}+)`
        );
        if (!ageConfirmed) {
          await base44.entities.SystemAuditLog.create({
            event_type: "VIP_GUEST_GATE_BLOCKED",
-           description: `VIP session blocked: Guest age not confirmed. guest_name=${selectedGuest.first_name} ${selectedGuest.last_name}`,
+           description: `VIP session blocked: Guest age not confirmed. guest_name=${selectedGuest.full_name}`,
            actor_email: user?.email,
            status: "blocked",
            severity: "HIGH",
            metadata: {
-             guest_name: `${selectedGuest.first_name} ${selectedGuest.last_name}`,
+             guest_name: selectedGuest.full_name,
              minimum_age: minimumAge,
              reason: "guest_age_not_confirmed",
              section: "AUDIT-2-GATE"
@@ -425,14 +429,31 @@ export default function VIPRoomBoard({ user }) {
           <div className="space-y-4">
             <div>
               <Label>Guest *</Label>
-              <Select onValueChange={(guestId) => setSelectedGuest(guests.find(g => g.id === guestId))}>
-                <SelectTrigger className="bg-gray-800 border-gray-700">
-                  <SelectValue placeholder="Select guest..." />
+              <Select onValueChange={(guestId) => setSelectedGuest(guests.find((g) => g.id === guestId))}>
+                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Select in-building guest..." />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-900 border-gray-700">
-                  {guests.map(g => <SelectItem key={g.id} value={g.id}>{g.first_name} {g.last_name}</SelectItem>)}
+                  {guests.length === 0 && (
+                    <SelectItem value="__none__" disabled>No guests checked in at door</SelectItem>
+                  )}
+                  {guests.map((g) => (
+                    <SelectItem key={g.id} value={g.id} className="text-white">
+                      {g.full_name}
+                      {g.tier && g.tier !== "standard" ? ` · ${g.tier === "whale" ? "🐋 Whale" : "⭐ High Roller"}` : ""}
+                      {g.card_last4 ? ` · ····${g.card_last4}` : ""}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {selectedGuest && (
+                <div className="mt-2 p-2 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300 space-y-0.5">
+                  <div className="font-bold text-white">{selectedGuest.full_name}</div>
+                  {selectedGuest.card_last4 && <div>💳 {selectedGuest.card_type} ····{selectedGuest.card_last4} · Exp {selectedGuest.card_exp}</div>}
+                  {selectedGuest.visit_count > 1 && <div>🔁 {selectedGuest.visit_count} prior visits · ${(selectedGuest.total_spend_lifetime || 0).toLocaleString()} lifetime</div>}
+                  {selectedGuest.phone && <div>📞 {selectedGuest.phone}</div>}
+                </div>
+              )}
             </div>
             <div>
               <Label>Assign Entertainer</Label>

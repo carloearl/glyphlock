@@ -4,15 +4,15 @@
   "properties": {
     "guest_id": {
       "type": "string",
-      "description": "Unique guest identifier"
+      "description": "Deterministic dedup key: SHA-256 prefix of license number"
     },
     "venue_id": {
       "type": "string",
-      "description": "Venue where guest is registered"
+      "description": "Venue scope"
     },
     "full_name": {
       "type": "string",
-      "description": "Guest full name"
+      "description": "Guest full legal name"
     },
     "phone": {
       "type": "string"
@@ -21,40 +21,127 @@
       "type": "string",
       "format": "email"
     },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DOB for age verification"
+    },
+    "id_type": {
+      "type": "string",
+      "enum": [
+        "Drivers License",
+        "State ID",
+        "Passport",
+        "Military ID",
+        "Tribal ID"
+      ]
+    },
+    "id_number": {
+      "type": "string",
+      "description": "Government ID number (used to generate guest_id hash)"
+    },
+    "id_state": {
+      "type": "string",
+      "description": "Issuing state (2-letter)"
+    },
+    "id_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "id_verified_by": {
+      "type": "string"
+    },
+    "id_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "status": {
       "type": "string",
       "enum": [
         "in_building",
         "left_building",
-        "banned"
+        "banned",
+        "vip"
       ],
       "default": "in_building"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "high_roller",
+        "whale"
+      ],
+      "default": "standard"
+    },
+    "visit_count": {
+      "type": "number",
+      "default": 1
     },
     "last_visit": {
       "type": "string",
       "format": "date-time"
     },
-    "date_of_birth": {
+    "first_visit": {
       "type": "string",
-      "format": "date-time",
-      "description": "Guest DOB for age verification (AUDIT-2 gate)"
+      "format": "date-time"
     },
-    "id_verified": {
-      "type": "boolean",
-      "default": false,
-      "description": "True when ID has been checked by staff"
-    },
-    "id_verified_by": {
+    "card_name": {
       "type": "string",
-      "description": "Email of staff who verified the ID"
+      "description": "Name on payment card"
     },
-    "id_verified_at": {
+    "card_last4": {
       "type": "string",
-      "format": "date-time",
-      "description": "Timestamp of ID verification"
+      "description": "Last 4 digits of card on file"
+    },
+    "card_exp": {
+      "type": "string",
+      "description": "Card expiry MM/YY"
+    },
+    "card_type": {
+      "type": "string",
+      "enum": [
+        "Visa",
+        "Mastercard",
+        "Amex",
+        "Discover",
+        "Other"
+      ]
+    },
+    "approval_code": {
+      "type": "string",
+      "description": "Most recent processor approval code"
+    },
+    "signature_data": {
+      "type": "string",
+      "description": "Base64 or token of last signed contract"
+    },
+    "signature_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "total_spend_lifetime": {
+      "type": "number",
+      "default": 0
+    },
+    "vip_sessions_count": {
+      "type": "number",
+      "default": 0
+    },
+    "current_room_id": {
+      "type": "string",
+      "description": "VIPRoom id if currently in session"
+    },
+    "current_entertainer": {
+      "type": "string",
+      "description": "Stage name of entertainer in current session"
     },
     "notes": {
       "type": "string"
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [
