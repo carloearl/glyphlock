@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
+import GlobalSearchDrawer from "./GlobalSearchDrawer";
+import ModeBadge from "./ModeBadge";
 
 /**
  * NUPSAppShell — unified chrome for every NUPS operator page.
@@ -75,6 +77,7 @@ const NAV_SECTIONS = [
       { id: "audit",     label: "Audit Integrity", icon: ShieldCheck,   to: "/admin/audit-integrity" },
       { id: "activity",  label: "Activity Log",    icon: ScrollText,    to: "/admin/activity-log" },
       { id: "rbac",      label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
+      { id: "registry",  label: "Feature Registry",icon: BookOpen,      to: "/admin/registry" },
       { id: "demo",      label: "Demo Keys",       icon: Sparkles,      to: "/NUPSOwner?tab=demo" },
       { id: "venue",     label: "Venue Settings",  icon: Settings,      to: "/admin/venue-settings" },
     ],
@@ -160,9 +163,22 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   const activeVenue = useActiveVenue();
   const now = useClock();
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const dateStr = now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+
+  // ⌘K / Ctrl+K opens global search (BPAA-NUPS-MASTER-001 §4)
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const SideRail = (
     <aside className="w-64 shrink-0 border-r border-white/5 bg-gradient-to-b from-slate-950 via-slate-950 to-black flex flex-col">
@@ -258,7 +274,21 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               )}
             </div>
 
+            {/* Global search trigger — always visible (§4 discoverability). */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] text-slate-400 hover:text-white text-[12px] transition-colors"
+              title="Search features (⌘K)"
+              aria-label="Search"
+            >
+              <SearchIcon className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Search…</span>
+              <kbd className="hidden lg:inline text-[9px] font-mono px-1 py-0.5 rounded bg-white/[0.05] border border-white/10 ml-1">⌘K</kbd>
+            </button>
+
             <div className="hidden md:flex items-center gap-2">
+              {/* MODE BADGE — F-7: always visible, color-distinct, before venue. */}
+              <ModeBadge />
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5">
                 <Building2 className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-[11px] font-medium text-slate-200 truncate max-w-[140px]">
@@ -283,6 +313,9 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
           {children}
         </div>
       </main>
+
+      {/* Global Search Drawer — reads from Feature Registry (§3 keystone) */}
+      <GlobalSearchDrawer open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }

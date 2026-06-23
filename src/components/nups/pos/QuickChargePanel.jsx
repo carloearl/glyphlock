@@ -159,7 +159,8 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
   const isDoor = station === 'door';
   const activePresets = isDoor ? DOOR_PRESETS : PRESETS;
   const [showQuickAdd, setShowQuickAdd] = useState(false);
-  const { venueId } = useActiveVenue();
+  const venue = useActiveVenue();
+  const venueId = venue?.id;
   const [promoAmount, setPromoAmount] = useState(5);
 
   // Live-load the venue's promo card amount (no hardcoded dollar figures at door)
