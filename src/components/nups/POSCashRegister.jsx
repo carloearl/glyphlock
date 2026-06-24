@@ -28,6 +28,9 @@ import IDScannerCamera from "./IDScannerCamera";
 import GuestCheckIn from "./GuestCheckIn";
 import { writeEntity } from "@/lib/nups/writeEntity";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
+// BPAA-NUPS-AUDIT-001 §3.2 — emit financial_context on door sale finalize
+import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
+import { fromPOSTransaction } from "@/lib/nups/audit/financialContext";
 
 export default function POSCashRegister({ user, station = 'door', showDriverPanel = true }) {
   // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
@@ -517,8 +520,33 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           setIsSubmitting(false);
           return;
         }
-        queryClient.invalidateQueries(['pos-transactions']);
-        queryClient.invalidateQueries(['active-batch']);
+        // BPAA-NUPS-AUDIT-001 §3.2 — explicit AuditEvent with financial_context
+        // for the canonical door-sale case. Observational; never blocks the
+        // business write. §3.1 invariant is enforced inside the emitter.
+        try {
+          const fc = fromPOSTransaction({
+            total: transactionData.total,
+            discount: transactionData.discount,
+            payment_method: transactionData.payment_method,
+            comp_amount: transactionData.comp_amount,
+          });
+          await emitAuditEvent({
+            venue_id: activeVenue?.id || null,
+            mode: 'real',
+            event_type: (transactionData.payment_method === 'Comp') ? 'Comp' : 'DoorSale',
+            event_category: 'sales',
+            severity: 'low',
+            source: 'door',
+            session_id: transactionData.transaction_id,
+            entity_type: 'POSTransaction',
+            entity_id: gateResult.value?.id || transactionData.transaction_id,
+            financial_context: fc,
+            reason: transactionData.comp_reason || undefined,
+            notes: { station: 'door', batch_id: activeBatch?.id },
+            actor_ref: user?.email,
+            retention_class: 'financial',
+          });
+        } catch (_) { /* observational — never block the door write */ }
         setLastTransaction(gateResult.value);
         setShowReceiptModal(true);
         setCart([]);
