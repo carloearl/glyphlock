@@ -205,6 +205,50 @@ Deno.serve(async (req) => {
       timestamp: redemptionTime
     });
 
+    // BPAA-NUPS-AUDIT-001 §3.2 case 4 — GlyphBucks REDEEM event.
+    // Face value flows through glyphbucks_portion ONLY; total_sales_impact
+    // is HARD ZERO so the §3.1 invariant holds by construction. GlyphBucks
+    // is stored-value liability, never revenue. Observational; non-blocking.
+    try {
+      await base44.asServiceRole.entities.AuditEvent.create({
+        venue_id,
+        timestamp: redemptionTime,
+        event_type: 'GlyphBucksPayment',
+        event_category: 'glyphbucks',
+        severity: 'low',
+        mode: 'real',
+        session_id: payout_id,
+        correlation_id: `glyphbucks-redeem-${payout_id}`,
+        source: 'pos',
+        entity_type: 'ContractorPayout',
+        entity_id: payout_id,
+        reason: 'glyphbucks_redemption',
+        financial_context: {
+          gross_value: total_face_value,
+          discount_amount: 0,
+          comp_amount: 0,
+          promo_amount: 0,
+          driver_credit_amount: 0,
+          payment_type: 'glyphbucks',
+          cash_portion: 0,
+          card_portion: 0,
+          glyphbucks_portion: total_face_value,
+          total_sales_impact: 0
+        },
+        notes: {
+          contractor_id,
+          contractor_name,
+          bills_count: valid_bills.length,
+          total_payout,
+          redemption_rate: VERIFIED_REDEMPTION_RATE
+        },
+        actor_ref: user.email,
+        identity_verified: false,
+        retention_class: 'financial',
+        event_version: 1
+      });
+    } catch (_) { /* observational only — never block redemption */ }
+
     return Response.json({
       success: true,
       payout,

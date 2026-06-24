@@ -9,6 +9,9 @@ import { Car, Plus, Users, CheckCircle, Banknote, AlertCircle, Ticket, Edit3 } f
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import DriverPayoutPanel from "@/components/nups/frontdoor/DriverPayoutPanel";
+// BPAA-NUPS-AUDIT-001 §4 — driver credit is a SEPARATE house-absorbed event
+import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
+import { buildFinancialContext } from "@/lib/nups/audit/financialContext";
 
 /**
  * DriverQuickAdd — the simple door flow
@@ -133,8 +136,50 @@ export default function DriverQuickAdd({ user }) {
         total_payout: payload.total_payout,
       });
     },
-    onSuccess: () => {
+    onSuccess: (saved, variables) => {
       qc.invalidateQueries({ queryKey: ["driver-sessions"] });
+      // BPAA-NUPS-AUDIT-001 §4 — emit a SEPARATE DriverCredit event. The door
+      // sale already posted at full price (§4 house-absorbed). Driver credit
+      // is a liability, not a sale adjustment → total_sales_impact = 0. Rate
+      // resolves from VenueRateConfig (no literals). Observational; never blocks.
+      try {
+        const profile = variables?.profile;
+        const payload = variables?.payload;
+        if (profile && payload) {
+          const fc = buildFinancialContext({
+            gross: 0,
+            driver_credit_amount: Number(payload.total_payout) || 0,
+            // §3.1 invariant: cash/card portions are 0 here — driver credit
+            // is a liability event, not a sale leg.
+          });
+          emitAuditEvent({
+            venue_id: venueId,
+            mode: 'real',
+            event_type: 'DriverCredit',
+            event_category: 'driver',
+            severity: 'low',
+            source: 'door',
+            session_id: saved?.payout_id || saved?.id || `dc_${profile.driver_id}_${Date.now()}`,
+            correlation_id: `driver-${profile.driver_id}-${today}`,
+            entity_type: 'DriverPayout',
+            entity_id: saved?.id || profile.driver_id,
+            financial_context: fc,
+            reason: 'house_absorbed_per_guest_credit',
+            notes: {
+              driver_id: profile.driver_id,
+              driver_name: profile.name,
+              affiliated: !!profile.affiliated,
+              guests: payload.guests,
+              promo_guests: payload.promo_guests,
+              waived_guests: payload.waived_guests,
+              breakdown: payload.breakdown,
+              rate_source: 'VenueRateConfig',
+            },
+            actor_ref: user?.email,
+            retention_class: 'financial',
+          });
+        }
+      } catch (_) { /* observational — never block driver save */ }
       setEditingDriver(null);
     },
   });
