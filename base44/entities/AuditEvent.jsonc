@@ -1,119 +1,239 @@
 {
   "name": "AuditEvent",
   "type": "object",
+  "description": "BPAA-NUPS-AUDIT-001 \u2014 Observational, append-only audit ledger. Explains every business fact but is NEVER the source of truth for revenue, totals, balances, or payouts (those derive from authoritative entities). Emitted as a side effect of writeEntity(). Identity fields are gated behind MDL ID-01 \u2014 identity_verified is hardcoded false until ID-01 clears.",
   "properties": {
-    "event_id": {
+    "venue_id": {
       "type": "string",
-      "description": "Unique audit event identifier (UUID)"
+      "description": "Dynamic venue scope. NEVER hardcoded. Inherited from writeEntity() request context."
     },
     "timestamp": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO 8601 UTC timestamp of the event"
+      "description": "Server time (ISO). Set by the emitter, never client-supplied."
     },
-    "actor_id": {
-      "type": "string",
-      "description": "User ID or email of the actor who performed the action"
-    },
-    "actor_role": {
-      "type": "string",
-      "description": "Role of the actor at time of action"
-    },
-    "venue_id": {
-      "type": "string",
-      "description": "Venue context where the action occurred (null for platform-level)"
-    },
-    "entity_type": {
-      "type": "string",
-      "description": "Name of the entity affected (e.g. POSTransaction, VIPGuest)"
-    },
-    "entity_id": {
-      "type": "string",
-      "description": "ID of the specific record affected"
-    },
-    "action": {
+    "event_type": {
       "type": "string",
       "enum": [
-        "CREATE",
-        "UPDATE",
-        "DELETE",
-        "ACCESS",
-        "TRANSFER",
-        "ESCALATE",
-        "CONFIRM"
+        "GuestScan",
+        "GuestEntry",
+        "DoorSale",
+        "PromoApplied",
+        "DriverCredit",
+        "Discount",
+        "Comp",
+        "CashPayment",
+        "CardPayment",
+        "GlyphBucksPayment",
+        "Refund",
+        "Void",
+        "InventoryDeduction",
+        "BottleSale",
+        "StageFee",
+        "VipCharge",
+        "ShiftOpen",
+        "ShiftClose",
+        "DrawerCount",
+        "PayoutCreated",
+        "PayoutApproved",
+        "PayoutPaid",
+        "PriceOverride",
+        "SystemError",
+        "PerformanceSnapshot",
+        "SelfAuditAlert",
+        "UserLogin",
+        "PermissionChange",
+        "ManualEntry",
+        "ManagerApproval"
       ],
-      "description": "Type of action performed"
+      "description": "\u00a72.1. UserLogin/PermissionChange/ManualEntry/ManagerApproval are GATED \u2014 defined but never emitted until ID-01 clears."
     },
-    "before_state": {
+    "event_category": {
       "type": "string",
-      "description": "JSON-serialized state before the action (null for CREATE)"
-    },
-    "after_state": {
-      "type": "string",
-      "description": "JSON-serialized state after the action (null for DELETE)"
-    },
-    "metadata": {
-      "type": "object",
-      "description": "Additional context: session_id, device_hash, ip, geo",
-      "properties": {
-        "session_id": {
-          "type": "string"
-        },
-        "device_hash": {
-          "type": "string"
-        },
-        "ip_address": {
-          "type": "string"
-        },
-        "geo": {
-          "type": "string"
-        },
-        "user_agent": {
-          "type": "string"
-        }
-      }
-    },
-    "is_system_action": {
-      "type": "boolean",
-      "default": false,
-      "description": "True if action was initiated by SYSTEM, not a human user"
+      "enum": [
+        "financial",
+        "cash",
+        "card",
+        "sales",
+        "inventory",
+        "driver",
+        "glyphbucks",
+        "payout",
+        "system",
+        "security",
+        "identity"
+      ]
     },
     "severity": {
       "type": "string",
       "enum": [
-        "INFO",
-        "WARNING",
-        "CRITICAL"
+        "low",
+        "medium",
+        "high",
+        "critical"
       ],
-      "default": "INFO",
-      "description": "Severity level for filtering and alerting"
+      "default": "low"
     },
-    "description": {
+    "mode": {
       "type": "string",
-      "description": "Human-readable description of what happened"
+      "enum": [
+        "real",
+        "demo",
+        "sandbox"
+      ],
+      "description": "Lowercased per \u00a72. Existing gateway REAL/DEMO is normalized to real/demo at emission time. Filter mode='real' for production reporting."
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Links related events inside ONE transaction (e.g. door sale + driver credit). Required."
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "Links larger chains across transactions/days (e.g. GuestEntry \u2192 DoorSale \u2192 DriverCredit \u2192 PayoutCreated \u2192 PayoutPaid). Optional."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "door",
+        "pos",
+        "inventory",
+        "payout",
+        "system",
+        "sync"
+      ]
+    },
+    "device": {
+      "type": "string"
+    },
+    "workstation": {
+      "type": "string"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "The entity this event describes (e.g. DoorSale, InventoryItem, Payout)."
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "Reference to the affected record."
+    },
+    "previous_value": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Null for create events."
+    },
+    "new_value": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Null for delete events."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Required for discounts/comps/voids/refunds/overrides/adjustments."
+    },
+    "notes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Free structured context."
+    },
+    "financial_context": {
+      "type": "object",
+      "description": "\u00a73. REQUIRED for any financial/cash/card/sales/glyphbucks/driver event. Hard invariant (\u00a73.1): total_sales_impact === cash_portion + card_portion. GlyphBucks and comps NEVER add to total_sales_impact.",
+      "properties": {
+        "gross_value": {
+          "type": "number"
+        },
+        "discount_amount": {
+          "type": "number",
+          "default": 0
+        },
+        "comp_amount": {
+          "type": "number",
+          "default": 0
+        },
+        "promo_amount": {
+          "type": "number",
+          "default": 0
+        },
+        "driver_credit_amount": {
+          "type": "number",
+          "default": 0
+        },
+        "payment_type": {
+          "type": "string",
+          "enum": [
+            "cash",
+            "card",
+            "glyphbucks",
+            "mixed",
+            "comp"
+          ]
+        },
+        "cash_portion": {
+          "type": "number",
+          "default": 0
+        },
+        "card_portion": {
+          "type": "number",
+          "default": 0
+        },
+        "glyphbucks_portion": {
+          "type": "number",
+          "default": 0
+        },
+        "total_sales_impact": {
+          "type": "number"
+        }
+      }
+    },
+    "actor_ref": {
+      "type": "string",
+      "description": "\u00a76. RAW unverified user reference. NEVER trusted until ID-01 clears."
+    },
+    "identity_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u00a76. HARDCODED false until MDL ID-01 clears. Do not build verification logic."
+    },
+    "approval_user_ref": {
+      "type": "string",
+      "description": "\u00a76. RAW unverified approver reference. Gated like actor_ref."
+    },
+    "alert": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when emitted by the self-audit engine (\u00a77)."
+    },
+    "retention_class": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "financial",
+        "compliance",
+        "security",
+        "permanent"
+      ],
+      "default": "operational",
+      "description": "Drives lifecycle/retention later. Set at write to avoid migration."
+    },
+    "event_version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Schema version of this record. Future format changes bump the version; old records are NEVER rewritten."
     }
   },
   "required": [
-    "event_id",
+    "venue_id",
     "timestamp",
-    "actor_id",
+    "event_type",
+    "event_category",
+    "severity",
+    "mode",
+    "session_id",
+    "source",
     "entity_type",
     "entity_id",
-    "action"
-  ],
-  "rls": {
-    "create": false,
-    "read": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "actor_id": "{{user.email}}"
-        }
-      ]
-    },
-    "update": false,
-    "delete": false
-  }
+    "identity_verified",
+    "retention_class",
+    "event_version"
+  ]
 }
