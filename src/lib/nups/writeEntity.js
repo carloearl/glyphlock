@@ -2,6 +2,8 @@ import { base44 } from '@/api/base44Client';
 import * as SEED from './demoSeedData';
 import { logActivity } from './activityLog';
 import { enforceRoleScope, isScopedRole } from './roleGate';
+// BPAA-NUPS-AUDIT-001 §5 — automatic AuditEvent coverage on every gated write
+import { emitFromGatewayWrite } from './audit/auditEventEmitter';
 
 const VALID_MODES = new Set(['REAL', 'DEMO']);
 
@@ -369,6 +371,25 @@ export async function writeEntity({
     venue_id: venue_id || null,
     notes: intent || null,
   });
+
+  // BPAA-NUPS-AUDIT-001 §5 — emit observational AuditEvent. Recursion guard
+  // is inside the emitter (skips entity===AuditEvent and audit_depth>=max).
+  // §5.4 — audit failure is NON-BLOCKING for the originating write.
+  if (entity !== 'AuditEvent') {
+    try {
+      await emitFromGatewayWrite({
+        entity,
+        operation,
+        data,
+        id: id || (value && value.id) || null,
+        mode,
+        venue_id: venue_id || null,
+        session_id: requestContext?.session_id,
+        audit_depth: (requestContext?.audit_depth || 0),
+        actor_ref: actorId, // §6 — RAW unverified ref; identity_verified forced false
+      });
+    } catch (_) { /* observational only — never block the business write */ }
+  }
 
   // DACO-20260610 WS-1: Mirror to ActivityLog (user-facing audit trail)
   const actionMap = { create: 'CREATE', update: 'UPDATE', delete: 'DELETE', bulkCreate: 'CREATE' };
