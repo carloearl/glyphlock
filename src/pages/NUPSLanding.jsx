@@ -1206,7 +1206,34 @@ export default function NUPSLanding() {
         </svg>
 
         <div className="container">
-          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => navigate('/NUPSGateway')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 16px',
+                borderRadius: 999,
+                border: '1px solid rgba(0,212,255,0.5)',
+                background: 'linear-gradient(135deg, rgba(0,212,255,0.18), rgba(139,92,246,0.18))',
+                color: '#ffffff',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 11,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                fontWeight: 700,
+                boxShadow: '0 0 16px rgba(0,212,255,0.25)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 0 28px rgba(0,212,255,0.55)')}
+              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 0 16px rgba(0,212,255,0.25)')}
+              title="Skip the landing page and enter NUPS directly"
+            >
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00d4ff', boxShadow: '0 0 8px #00d4ff' }} />
+              Bypass → Enter NUPS
+            </button>
             <button
               onClick={() => navigate('/Home')}
               style={{
