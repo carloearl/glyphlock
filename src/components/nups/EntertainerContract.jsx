@@ -43,6 +43,7 @@ export default function EntertainerContract({ onContractSigned }) {
     id_number: "",
     id_expiration: "",
     ssn_or_ein: "",
+    nups_pin: "",
     independent_contractor_acknowledgment: false
   });
 
@@ -131,6 +132,10 @@ export default function EntertainerContract({ onContractSigned }) {
       alert('SSN or EIN is required');
       return;
     }
+    if (!/^\d{4}$/.test(entertainerData.nups_pin)) {
+      alert('Please choose a 4-digit check-in PIN');
+      return;
+    }
     const cleaned = {
       stage_name: stripHtml(entertainerData.stage_name),
       legal_name: stripHtml(entertainerData.legal_name),
@@ -146,6 +151,7 @@ export default function EntertainerContract({ onContractSigned }) {
       id_number: stripHtml(entertainerData.id_number),
       id_expiration: entertainerData.id_expiration,
       ssn_or_ein: stripHtml(entertainerData.ssn_or_ein),
+      nups_pin: entertainerData.nups_pin,
       independent_contractor_acknowledgment: true
     };
     if (cleaned.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.email)) {
@@ -311,6 +317,27 @@ export default function EntertainerContract({ onContractSigned }) {
                     />
                     <p className="text-xs text-gray-400 mt-1">Stored securely for tax reporting purposes</p>
                   </div>
+                </div>
+                <div>
+                  <Label className="text-white">Check-In PIN (4 digits) *</Label>
+                  <Input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="\d{4}"
+                    maxLength={4}
+                    value={entertainerData.nups_pin}
+                    onChange={(e) => setEntertainerData({
+                      ...entertainerData,
+                      nups_pin: e.target.value.replace(/\D/g, '').slice(0, 4)
+                    })}
+                    className="glass-input tracking-[0.5em] text-center text-lg"
+                    placeholder="••••"
+                    autoComplete="new-password"
+                    required
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    You'll type this at the door kiosk to check in. Keep it private.
+                  </p>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5">
                   <Checkbox

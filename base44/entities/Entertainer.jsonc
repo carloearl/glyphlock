@@ -69,6 +69,10 @@
       "default": "INVALID",
       "description": "Contract validation status. Must be VALID for check-in. Set to VALID only after all contract fields are verified."
     },
+    "nups_pin": {
+      "type": "string",
+      "description": "4-digit PIN the entertainer enters at the door check-in kiosk. Captured during signup; required to check in."
+    },
     "status": {
       "type": "string",
       "enum": [

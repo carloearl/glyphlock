@@ -74,8 +74,8 @@ export default function EntertainerCheckIn({ user }) {
 
   const checkInByPin = useMutation({
     mutationFn: async () => {
-      const ent = entertainers.find(e => e.nups_pin === pin);
-      if (!ent) throw new Error('PIN not found');
+      const ent = entertainers.find(e => e.nups_pin && e.nups_pin === pin);
+      if (!ent) throw new Error('PIN not recognized — if you just signed up, ask the manager to confirm your PIN was saved.');
       if (activeShifts.some(s => s.entertainer_id === ent.id)) {
         throw new Error(`${ent.stage_name} already checked in`);
       }
