@@ -1,10 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/AuthContext";
 import NUPSArchitectureSections from "@/components/nups/landing/NUPSArchitectureSections";
 import ExperienceLiveSystemCTA from "@/components/demo/ExperienceLiveSystemCTA";
 
+// DACO-20260626 — Landing-page bypass allow-list.
+// These emails skip the marketing landing and venue-mode gate, landing
+// directly inside NUPS on every visit.
+const BYPASS_EMAILS = [
+  "cecepmpn7@icloud.com",
+];
+
 export default function NUPSLanding() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+
+  // Auto-bypass: allow-listed operators jump straight to the NUPS Gateway,
+  // skipping the landing scroll and the venue-mode selector.
+  useEffect(() => {
+    if (!isAuthenticated || !user?.email) return;
+    const email = String(user.email).trim().toLowerCase();
+    if (BYPASS_EMAILS.includes(email)) {
+      navigate("/NUPSGateway", { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   return (
     <>
