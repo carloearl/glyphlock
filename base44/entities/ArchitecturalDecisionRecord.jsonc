@@ -1,0 +1,160 @@
+{
+  "name": "ArchitecturalDecisionRecord",
+  "type": "object",
+  "description": "DACO Directive 003 \u2014 Architectural Decision Register (ADR). Append-only record of every material architectural decision in NUPS. Historical ADRs shall never be deleted; superseded ADRs reference their replacement. Authority: DACO / GlyphLock LLC.",
+  "properties": {
+    "adr_number": {
+      "type": "string",
+      "description": "Sequential identifier, formatted ADR-### (e.g. 'ADR-001'). Unique across the register."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short descriptive title."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Proposed",
+        "Approved",
+        "Superseded",
+        "Deprecated",
+        "Rejected"
+      ],
+      "default": "Proposed",
+      "description": "Lifecycle state. Approved = governing. Superseded = replaced by a newer ADR (see superseded_by). Deprecated = no longer relevant. Rejected = decision not adopted."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Financial Calculation",
+        "Business Rule",
+        "Database Schema",
+        "Entity / Relationship",
+        "Workflow",
+        "Approval Chain",
+        "RBAC",
+        "API Contract",
+        "Audit Behavior",
+        "Compliance Logic",
+        "Reporting",
+        "Security Control",
+        "AI Decision Boundary",
+        "Integration Architecture",
+        "Governance"
+      ],
+      "description": "Material decision area (Directive 003 \u00a7Requirement)."
+    },
+    "decision": {
+      "type": "string",
+      "description": "The architectural decision itself. Markdown supported."
+    },
+    "context": {
+      "type": "string",
+      "description": "Business or technical problem requiring the decision."
+    },
+    "alternatives_considered": {
+      "type": "string",
+      "description": "Reasonable alternatives evaluated and why each was not selected."
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Why the chosen approach best satisfies accounting, compliance, maintainability, performance, simplicity, auditability, and future scalability."
+    },
+    "consequences": {
+      "type": "string",
+      "description": "Expected effects: positive impacts, tradeoffs, known limitations, future considerations."
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "Affected platform surfaces.",
+      "properties": {
+        "modules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "apis": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workflows": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rbac_rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "audit_events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "approval_authority": {
+      "type": "string",
+      "description": "Decision authority (e.g. 'DACO', 'GlyphLock LLC')."
+    },
+    "approval_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the ADR was approved (or proposed if not yet approved)."
+    },
+    "directive_references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "DACO directives, BPAAA sections, or external references the ADR is bound to (e.g. 'DACO Directive 003', 'BPAA-NUPS-ACCT-001 \u00a73.1')."
+    },
+    "supersedes": {
+      "type": "string",
+      "description": "ADR number this entry replaces, e.g. 'ADR-007'. Empty if not superseding."
+    },
+    "superseded_by": {
+      "type": "string",
+      "description": "ADR number that replaced this entry, set when status transitions to Superseded. Historical record \u2014 never deleted."
+    },
+    "supersession_notes": {
+      "type": "string",
+      "description": "Exactly what changed between the previous ADR and this one."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "adr_number",
+    "title",
+    "status",
+    "category",
+    "decision"
+  ]
+}

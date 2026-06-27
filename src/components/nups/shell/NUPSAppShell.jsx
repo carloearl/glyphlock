@@ -90,6 +90,7 @@ const NAV_SECTIONS = [
       },
       { id: "rbac",      label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
       { id: "registry",  label: "Feature Registry",icon: BookOpen,      to: "/admin/registry" },
+      { id: "adr",       label: "Decision Register", icon: FileText,    to: "/admin/adr" },
       { id: "demo",      label: "Demo Keys",       icon: Sparkles,      to: "/NUPSOwner?tab=demo" },
       { id: "venue",     label: "Venue Settings",  icon: Settings,      to: "/admin/venue-settings" },
     ],

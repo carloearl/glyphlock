@@ -65,6 +65,7 @@ import PeopleArchive from './pages/PeopleArchive';
 import LedgerTrialBalance from './pages/LedgerTrialBalance';
 import AccountingHub from './pages/AccountingHub';
 import RegistryAdmin from './pages/RegistryAdmin';
+import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
 import KioskShell from './components/nups/KioskShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -121,6 +122,7 @@ const AuthenticatedApp = () => {
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/venue-settings',
     '/admin/registry', '/registryadmin',
+    '/admin/adr', '/architecturaldecisionregister',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
@@ -138,6 +140,7 @@ const AuthenticatedApp = () => {
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/venue-settings',
     '/admin/registry', '/registryadmin',
+    '/admin/adr', '/architecturaldecisionregister',
   ];
   const isNupsKioskRoute = nupsKioskRoots.some(p => currentPathLower.startsWith(p));
 
@@ -219,6 +222,9 @@ const AuthenticatedApp = () => {
         <Route path="/admin/registry" element={<RegistryAdmin />} />
         <Route path="/RegistryAdmin" element={<RegistryAdmin />} />
         <Route path="/registryadmin" element={<RegistryAdmin />} />
+        <Route path="/admin/adr" element={<ArchitecturalDecisionRegister />} />
+        <Route path="/ArchitecturalDecisionRegister" element={<ArchitecturalDecisionRegister />} />
+        <Route path="/architecturaldecisionregister" element={<ArchitecturalDecisionRegister />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
