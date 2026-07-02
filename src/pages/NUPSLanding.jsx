@@ -9,6 +9,7 @@ import ExperienceLiveSystemCTA from "@/components/demo/ExperienceLiveSystemCTA";
 // directly inside NUPS on every visit.
 const BYPASS_EMAILS = [
   "cecepmpn7@icloud.com",
+  "dbenz602@gmail.com",
 ];
 
 export default function NUPSLanding() {
