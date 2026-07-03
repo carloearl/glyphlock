@@ -19,6 +19,7 @@ import { base44 } from "@/api/base44Client";
 import { Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isSovereign } from "@/lib/nups/sovereign";
+import { readVerdict, writeVerdict } from "@/lib/nups/routeGuardCache";
 
 // All valid operational roles — public GlyphLock users have NONE of these
 const ALL_OPERATIONAL_ROLES = [
@@ -36,7 +37,10 @@ const ALL_OPERATIONAL_ROLES = [
 
 export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmin = true }) {
   const navigate = useNavigate();
-  const [status, setStatus] = useState("loading"); // loading | granted | denied | unauthenticated
+  // Seed initial status from the session cache so admins don't re-see the
+  // full-screen "Verifying access..." spinner on every internal navigation.
+  const cached = typeof window !== "undefined" ? readVerdict() : null;
+  const [status, setStatus] = useState(cached?.status === "granted" ? "granted" : "loading");
 
   useEffect(() => {
     let cancelled = false;
@@ -57,14 +61,20 @@ export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmi
         try {
           const sovMatches = await base44.entities.NUPSUser.filter({ created_by: user.email });
           if ((sovMatches || []).some(isSovereign)) {
-            if (!cancelled) setStatus("granted");
+            if (!cancelled) {
+              writeVerdict({ status: "granted", email: user.email, why: "sovereign" });
+              setStatus("granted");
+            }
             return;
           }
         } catch { /* fall through to standard checks */ }
 
         // Base44 admin role always gets access
         if (allowAdmin && user.role === "admin") {
-          if (!cancelled) setStatus("granted");
+          if (!cancelled) {
+            writeVerdict({ status: "granted", email: user.email, why: "admin" });
+            setStatus("granted");
+          }
           return;
         }
 
@@ -99,7 +109,10 @@ export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmi
           }
         }
 
-        if (!cancelled) setStatus("granted");
+        if (!cancelled) {
+          writeVerdict({ status: "granted", email: user.email, why: "rbac" });
+          setStatus("granted");
+        }
       } catch {
         if (!cancelled) setStatus("unauthenticated");
       }

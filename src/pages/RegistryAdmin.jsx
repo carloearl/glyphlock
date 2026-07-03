@@ -8,6 +8,11 @@ import { base44 } from "@/api/base44Client";
 import { seedFeatureRegistry } from "@/lib/registry/reconcileRegistry";
 import { LIVE_APP_ROUTES } from "@/lib/registry/liveRouteCrawler";
 import { loadRegistry, invalidateRegistryCache } from "@/lib/registry/featureRegistry";
+import { base44 as _base44 } from "@/api/base44Client";
+
+// Session guard — auto-seed at most once per admin session, so navigating
+// back to Registry Admin doesn't re-run the reconcile every time.
+const AUTOSEED_KEY = "nups.registry.autoSeed";
 
 /**
  * BPAA-NUPS-MASTER-001 §3 — Registry Admin.
@@ -36,6 +41,35 @@ export default function RegistryAdmin() {
   };
 
   useEffect(() => { refresh(); }, []);
+
+  // Auto-seed once per session for admins/SOVEREIGN so newly-added routes
+  // appear in the registry immediately — no manual "Seed + Reconcile" needed.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        if (sessionStorage.getItem(AUTOSEED_KEY) === "done") return;
+        const me = await _base44.auth.me().catch(() => null);
+        if (!me) return;
+        const isAdmin = me.role === "admin";
+        let isSov = false;
+        try {
+          const sov = await _base44.entities.NUPSUser.filter({ created_by: me.email });
+          isSov = (sov || []).some((u) => u?.sovereign_flag === true || u?.role === "SOVEREIGN");
+        } catch { /* ignore */ }
+        if (!isAdmin && !isSov) return;
+        if (cancelled) return;
+        const result = await seedFeatureRegistry({ liveRoutes: LIVE_APP_ROUTES });
+        if (cancelled) return;
+        sessionStorage.setItem(AUTOSEED_KEY, "done");
+        setReport(result);
+        await refresh();
+      } catch {
+        /* silent — user can still click Seed + Reconcile manually */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const runSeed = async () => {
     setRunning(true);

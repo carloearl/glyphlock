@@ -22,6 +22,7 @@ import CashDenominationPad from "./pos/CashDenominationPad";
 import CardPaymentPanel from "./pos/CardPaymentPanel";
 import OrderDisplay from "./pos/OrderDisplay";
 import FlowSteps from "./pos/FlowSteps";
+import MobileCartBar from "./pos/MobileCartBar";
 import DriverDropOffTracker from "./DriverDropOffTracker";
 import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
 import IDScannerCamera from "./IDScannerCamera";
@@ -1400,6 +1401,23 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Mobile cart + CHARGE bar — the desktop cart column above is
+          `hidden lg:flex`, which left phones/small tablets with no way to
+          see totals or take payment. This sticky bar restores parity. */}
+      <MobileCartBar
+        cart={cart}
+        subtotal={subtotal}
+        tax={tax}
+        total={total}
+        finalTotal={finalTotal}
+        compAuth={compAuth}
+        isSubmitting={isSubmitting}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeFromCart}
+        onCheckout={handleCheckout}
+        lockVoids={isDoorGirlLocked}
+      />
 
       {/* Driver Payout System — door register only, and only when host page
           requests it. The sidebar Register tab hides this column because

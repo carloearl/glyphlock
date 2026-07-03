@@ -4,6 +4,7 @@ import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import { logLoginOnce, logLogout } from '@/lib/nups/activityLog';
 import { ensurePrivilegedAccess } from '@/lib/nups/privilegedAccess';
+import { clearVerdict as clearRouteGuardCache } from '@/lib/nups/routeGuardCache';
 
 const AuthContext = createContext();
 
@@ -119,6 +120,7 @@ export const AuthProvider = ({ children }) => {
   const logout = (shouldRedirect = true) => {
     // DACO-20260610 WS-1: Log LOGOUT (fire-and-forget; don't block redirect)
     logLogout(user).catch(() => {});
+    clearRouteGuardCache();
     setUser(null);
     setIsAuthenticated(false);
     
