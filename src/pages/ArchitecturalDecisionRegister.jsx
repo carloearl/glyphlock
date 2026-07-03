@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   BookOpen, Plus, Search, ShieldCheck, FileText, ArrowRightLeft,
+  ArrowLeft, Pencil,
 } from "lucide-react";
 
 const STATUSES = ["Proposed", "Approved", "Superseded", "Deprecated", "Rejected"];
@@ -70,6 +71,9 @@ export default function ArchitecturalDecisionRegister() {
   const [editing, setEditing] = useState(null); // null | "new" | record
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  // Mobile: track whether the operator has tapped into a record. On desktop
+  // both columns are always visible, so this only affects <lg screens.
+  const [mobileView, setMobileView] = useState("list"); // "list" | "detail"
 
   useEffect(() => { load(); }, []);
 
@@ -77,7 +81,6 @@ export default function ArchitecturalDecisionRegister() {
     setLoading(true);
     try {
       const list = await base44.entities.ArchitecturalDecisionRecord.list("-approval_date", 500);
-      // Sort by adr_number descending for the list view.
       list.sort((a, b) => String(b.adr_number || "").localeCompare(String(a.adr_number || "")));
       setRecords(list);
       if (list.length && !selected) setSelected(list[0]);
@@ -114,6 +117,11 @@ export default function ArchitecturalDecisionRegister() {
     setEditing(record);
   }
 
+  function pickRecord(record) {
+    setSelected(record);
+    setMobileView("detail");
+  }
+
   async function save() {
     setSaving(true);
     try {
@@ -143,7 +151,6 @@ export default function ArchitecturalDecisionRegister() {
         saved = await base44.entities.ArchitecturalDecisionRecord.update(editing.id, payload);
       }
 
-      // Supersession: if this ADR supersedes another, mark the previous one.
       if (payload.supersedes) {
         const prev = records.find((r) => r.adr_number === payload.supersedes);
         if (prev && prev.status !== "Superseded") {
@@ -167,14 +174,15 @@ export default function ArchitecturalDecisionRegister() {
       title="Architectural Decision Register"
       subtitle="DACO Directive 003 · Governance of platform architecture"
       actions={
-        <Button onClick={openNew} className="bg-emerald-600 hover:bg-emerald-500">
-          <Plus className="w-4 h-4 mr-1.5" /> New ADR
+        <Button onClick={openNew} className="bg-emerald-600 hover:bg-emerald-500 h-9">
+          <Plus className="w-4 h-4 sm:mr-1.5" />
+          <span className="hidden sm:inline">New ADR</span>
         </Button>
       }
     >
       {/* Directive banner */}
-      <Card className="mb-5 bg-gradient-to-br from-violet-950/40 via-slate-950 to-slate-950 border-violet-500/30">
-        <CardContent className="p-4 flex items-start gap-3">
+      <Card className="mb-4 bg-gradient-to-br from-violet-950/40 via-slate-950 to-slate-950 border-violet-500/30">
+        <CardContent className="p-3 sm:p-4 flex items-start gap-3">
           <ShieldCheck className="w-5 h-5 text-violet-300 mt-0.5 flex-shrink-0" />
           <div className="text-[12px] text-slate-300 leading-relaxed">
             <span className="font-bold text-violet-200">BINDING:</span>{" "}
@@ -185,26 +193,26 @@ export default function ArchitecturalDecisionRegister() {
         </CardContent>
       </Card>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+      {/* Filters — stack on mobile, row on tablet+ */}
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 mb-4">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search ADRs by number, title, decision, rationale…"
-            className="pl-8 bg-white/[0.03] border-white/10 text-white text-[13px]"
+            placeholder="Search ADRs…"
+            className="pl-8 h-10 bg-white/[0.03] border-white/10 text-white text-[13px]"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[160px] bg-white/[0.03] border-white/10 text-[12px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-10 w-full sm:w-[150px] bg-white/[0.03] border-white/10 text-[12px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[200px] bg-white/[0.03] border-white/10 text-[12px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-10 w-full sm:w-[190px] bg-white/[0.03] border-white/10 text-[12px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All categories</SelectItem>
             {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -212,16 +220,21 @@ export default function ArchitecturalDecisionRegister() {
         </Select>
       </div>
 
+      {/* Master/Detail — split on desktop, one-at-a-time on mobile.
+          `lg:!block` overrides the mobile hide so both columns show on
+          tablet/desktop regardless of the mobileView state. */}
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4">
-        {/* List */}
-        <Card className="bg-slate-950/60 border-white/5 max-h-[calc(100vh-300px)] overflow-hidden flex flex-col">
+        {/* LIST */}
+        <Card className={`bg-slate-950/60 border-white/10 lg:max-h-[calc(100vh-320px)] lg:flex lg:flex-col ${
+          mobileView === "detail" ? "hidden lg:flex" : "flex flex-col"
+        }`}>
           <CardHeader className="py-3 border-b border-white/5">
             <CardTitle className="text-[13px] flex items-center gap-2 text-slate-200">
               <BookOpen className="w-4 h-4 text-violet-300" />
               Register · {filtered.length}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0 overflow-y-auto flex-1">
+          <CardContent className="p-0 overflow-y-auto flex-1 max-h-[70vh] lg:max-h-none">
             {loading ? (
               <div className="p-6 text-center text-[12px] text-slate-500">Loading…</div>
             ) : filtered.length === 0 ? (
@@ -233,8 +246,8 @@ export default function ArchitecturalDecisionRegister() {
               return (
                 <button
                   key={r.id}
-                  onClick={() => setSelected(r)}
-                  className={`w-full text-left px-4 py-3 border-b border-white/5 transition-colors ${
+                  onClick={() => pickRecord(r)}
+                  className={`w-full text-left px-4 py-3 min-h-[64px] border-b border-white/5 transition-colors active:bg-white/[0.05] ${
                     active ? "bg-emerald-500/10" : "hover:bg-white/[0.03]"
                   }`}
                 >
@@ -245,7 +258,7 @@ export default function ArchitecturalDecisionRegister() {
                     </Badge>
                   </div>
                   <div className="text-[13px] text-white font-medium leading-snug">{r.title}</div>
-                  <div className="text-[10px] text-slate-500 mt-1 font-mono uppercase tracking-wider">
+                  <div className="text-[10px] text-slate-500 mt-1 font-mono uppercase tracking-wider truncate">
                     {r.category}
                   </div>
                 </button>
@@ -254,18 +267,28 @@ export default function ArchitecturalDecisionRegister() {
           </CardContent>
         </Card>
 
-        {/* Detail */}
-        <Card className="bg-slate-950/60 border-white/5">
+        {/* DETAIL */}
+        <Card className={`bg-slate-950/60 border-white/10 ${
+          mobileView === "list" ? "hidden lg:block" : "block"
+        }`}>
           {!selected ? (
             <CardContent className="p-10 text-center text-slate-500 text-[13px]">
               Select an ADR to view its full record.
             </CardContent>
           ) : (
             <>
-              <CardHeader className="border-b border-white/5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+              <CardHeader className="border-b border-white/5 p-4 sm:p-6">
+                {/* Mobile back button — returns to list without losing selection */}
+                <button
+                  onClick={() => setMobileView("list")}
+                  className="lg:hidden inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-white mb-3 -ml-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back to list
+                </button>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span className="font-mono text-[12px] font-bold text-emerald-300">{selected.adr_number}</span>
                       <Badge variant="outline" className={`text-[10px] font-mono ${STATUS_STYLES[selected.status] || ""}`}>
                         {selected.status}
@@ -274,18 +297,21 @@ export default function ArchitecturalDecisionRegister() {
                         {selected.category}
                       </Badge>
                     </div>
-                    <CardTitle className="text-white text-lg leading-tight">{selected.title}</CardTitle>
+                    <CardTitle className="text-white text-base sm:text-lg leading-tight break-words">
+                      {selected.title}
+                    </CardTitle>
                   </div>
                   <Button
                     onClick={() => openEdit(selected)}
                     variant="outline"
-                    className="border-white/10 text-slate-200 hover:bg-white/5"
+                    className="border-white/10 text-slate-200 hover:bg-white/5 h-9 self-start"
                   >
-                    Edit
+                    <Pencil className="w-3.5 h-3.5 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Edit</span>
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="p-5 space-y-5 text-[13px] text-slate-200">
+              <CardContent className="p-4 sm:p-6 space-y-5 text-[13px] text-slate-200">
                 <Section label="Decision" value={selected.decision} />
                 <Section label="Context" value={selected.context} />
                 <Section label="Alternatives Considered" value={selected.alternatives_considered} />
@@ -295,12 +321,12 @@ export default function ArchitecturalDecisionRegister() {
                 {selected.dependencies && Object.values(selected.dependencies).some((v) => v?.length) && (
                   <div>
                     <FieldLabel>Dependencies</FieldLabel>
-                    <div className="grid grid-cols-2 gap-3 mt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                       {Object.entries(selected.dependencies).map(([k, v]) =>
                         v?.length ? (
                           <div key={k} className="bg-white/[0.02] border border-white/5 rounded p-2">
                             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">{k.replace(/_/g, " ")}</div>
-                            <div className="text-[12px] text-slate-200">{v.join(", ")}</div>
+                            <div className="text-[12px] text-slate-200 break-words">{v.join(", ")}</div>
                           </div>
                         ) : null
                       )}
@@ -311,17 +337,17 @@ export default function ArchitecturalDecisionRegister() {
                 {(selected.supersedes || selected.superseded_by) && (
                   <div className="bg-amber-500/5 border border-amber-500/20 rounded p-3 flex items-start gap-2">
                     <ArrowRightLeft className="w-4 h-4 text-amber-300 mt-0.5 flex-shrink-0" />
-                    <div className="text-[12px] text-amber-100/90">
+                    <div className="text-[12px] text-amber-100/90 min-w-0">
                       {selected.supersedes && <div>Supersedes <b className="font-mono">{selected.supersedes}</b></div>}
                       {selected.superseded_by && <div>Superseded by <b className="font-mono">{selected.superseded_by}</b></div>}
                       {selected.supersession_notes && (
-                        <div className="mt-1 text-slate-300">{selected.supersession_notes}</div>
+                        <div className="mt-1 text-slate-300 break-words">{selected.supersession_notes}</div>
                       )}
                     </div>
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-white/5">
                   <Meta label="Authority" value={selected.approval_authority} />
                   <Meta label="Approval Date" value={selected.approval_date} />
                   {selected.directive_references?.length > 0 && (
@@ -337,25 +363,25 @@ export default function ArchitecturalDecisionRegister() {
         </Card>
       </div>
 
-      {/* Editor */}
+      {/* Editor dialog — single-column on mobile, two-column on tablet+ */}
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
-        <DialogContent className="bg-slate-950 border-white/10 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-950 border-white/10 text-white w-[calc(100vw-1rem)] max-w-3xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-base">
               <FileText className="w-4 h-4 text-violet-300" />
               {editing === "new" ? "New ADR" : `Edit ${form.adr_number}`}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-3 mt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
             <Field label="ADR Number">
               <Input value={form.adr_number}
                 onChange={(e) => setForm({ ...form, adr_number: e.target.value })}
-                className="font-mono bg-white/[0.03] border-white/10" />
+                className="font-mono bg-white/[0.03] border-white/10 h-10" />
             </Field>
             <Field label="Status">
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                <SelectTrigger className="bg-white/[0.03] border-white/10"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-white/[0.03] border-white/10 h-10"><SelectValue /></SelectTrigger>
                 <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
@@ -363,12 +389,12 @@ export default function ArchitecturalDecisionRegister() {
             <Field label="Title" full>
               <Input value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="bg-white/[0.03] border-white/10" />
+                className="bg-white/[0.03] border-white/10 h-10" />
             </Field>
 
             <Field label="Category" full>
               <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                <SelectTrigger className="bg-white/[0.03] border-white/10"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-white/[0.03] border-white/10 h-10"><SelectValue /></SelectTrigger>
                 <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
@@ -402,31 +428,31 @@ export default function ArchitecturalDecisionRegister() {
             <Field label="Approval Authority">
               <Input value={form.approval_authority}
                 onChange={(e) => setForm({ ...form, approval_authority: e.target.value })}
-                className="bg-white/[0.03] border-white/10" />
+                className="bg-white/[0.03] border-white/10 h-10" />
             </Field>
             <Field label="Approval Date">
               <Input type="date" value={form.approval_date}
                 onChange={(e) => setForm({ ...form, approval_date: e.target.value })}
-                className="bg-white/[0.03] border-white/10" />
+                className="bg-white/[0.03] border-white/10 h-10" />
             </Field>
 
             <Field label="Directive References (comma-separated)" full>
               <Input value={form.directive_references}
                 onChange={(e) => setForm({ ...form, directive_references: e.target.value })}
                 placeholder="DACO Directive 003, BPAA-NUPS-ACCT-001 §3.1"
-                className="bg-white/[0.03] border-white/10" />
+                className="bg-white/[0.03] border-white/10 h-10" />
             </Field>
 
             <Field label="Supersedes (ADR number)">
               <Input value={form.supersedes}
                 onChange={(e) => setForm({ ...form, supersedes: e.target.value })}
                 placeholder="ADR-007"
-                className="font-mono bg-white/[0.03] border-white/10" />
+                className="font-mono bg-white/[0.03] border-white/10 h-10" />
             </Field>
             <Field label="Tags (comma-separated)">
               <Input value={form.tags}
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
-                className="bg-white/[0.03] border-white/10" />
+                className="bg-white/[0.03] border-white/10 h-10" />
             </Field>
 
             {form.supersedes && (
@@ -438,10 +464,12 @@ export default function ArchitecturalDecisionRegister() {
             )}
           </div>
 
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setEditing(null)} className="border-white/10">Cancel</Button>
+          <DialogFooter className="mt-5 flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setEditing(null)} className="border-white/10 w-full sm:w-auto h-10">
+              Cancel
+            </Button>
             <Button onClick={save} disabled={saving || !form.adr_number || !form.title || !form.decision}
-              className="bg-emerald-600 hover:bg-emerald-500">
+              className="bg-emerald-600 hover:bg-emerald-500 w-full sm:w-auto h-10">
               {saving ? "Saving…" : editing === "new" ? "Create ADR" : "Save changes"}
             </Button>
           </DialogFooter>
@@ -460,7 +488,7 @@ function Section({ label, value }) {
   return (
     <div>
       <FieldLabel>{label}</FieldLabel>
-      <div className="mt-1.5 text-[13px] text-slate-100 whitespace-pre-wrap leading-relaxed">{value}</div>
+      <div className="mt-1.5 text-[13px] text-slate-100 whitespace-pre-wrap leading-relaxed break-words">{value}</div>
     </div>
   );
 }
@@ -468,16 +496,16 @@ function Section({ label, value }) {
 function Meta({ label, value, full }) {
   if (!value) return null;
   return (
-    <div className={full ? "col-span-2" : ""}>
+    <div className={full ? "sm:col-span-2" : ""}>
       <FieldLabel>{label}</FieldLabel>
-      <div className="mt-1 text-[12px] text-slate-200">{value}</div>
+      <div className="mt-1 text-[12px] text-slate-200 break-words">{value}</div>
     </div>
   );
 }
 
 function Field({ label, full, children }) {
   return (
-    <div className={full ? "col-span-2" : ""}>
+    <div className={full ? "sm:col-span-2" : ""}>
       <Label className="text-[11px] uppercase tracking-wider text-slate-400 mb-1 block">{label}</Label>
       {children}
     </div>
