@@ -54,6 +54,7 @@ import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import ContractorTaxFormsList from "../components/nups/payroll/ContractorTaxFormsList.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
+import ActivityAuditPanel from "../components/admin/ActivityAuditPanel.jsx";
 import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import StaffOnboardingPanel from "../components/nups/StaffOnboardingPanel.jsx";
 import UnifiedGlyphBucksTab from "../components/nups/glyphbucks/UnifiedGlyphBucksTab.jsx";
@@ -561,6 +562,8 @@ export default function NUPSOwner() {
           )}
           {activeModule === 'audit' && (
             <div className="space-y-4">
+              {/* Unified Activity + Audit browser with role/action filters */}
+              {canAudit && <ActivityAuditPanel />}
               {canAudit && <AuditLogDashboard user={user} />}
               <TransactionHistory transactions={realTransactions} showReceipt={true} />
             </div>

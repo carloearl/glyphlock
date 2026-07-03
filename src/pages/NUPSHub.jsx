@@ -13,6 +13,7 @@ import TopProductsTable from "@/components/hub/TopProductsTable";
 import HourlySalesChart from "@/components/hub/HourlySalesChart";
 import VenuePerformance from "@/components/hub/VenuePerformance";
 import OperatorFlowStrip from "@/components/hub/OperatorFlowStrip";
+import DailySettlementSummary from "@/components/hub/DailySettlementSummary";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import DemoReadinessBanner from "@/components/hub/DemoReadinessBanner";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
@@ -135,6 +136,9 @@ export default function NUPSHub() {
           transactions={agg.transactions}
           cashPct={agg.cashPct}
         />
+
+        {/* Cash + card split, driver payouts, and net deposit for today */}
+        <DailySettlementSummary />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <TopProductsTable products={agg.topProducts} />
