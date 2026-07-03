@@ -22,16 +22,19 @@ import ModeToggle from "./ModeToggle";
  * which the host page reads to switch views (Register, Contracts, etc.).
  */
 const NAV_SECTIONS = [
+  // Operations — ordered front-to-back so the sidebar mirrors the
+  // Hub's Operator Flow strip. Dashboard is the landing page; the
+  // numbered steps below run a shift end-to-end.
   {
-    label: "Operations",
+    label: "Operations · Tonight's Flow",
     items: [
-      { id: "dashboard",    label: "Dashboard",       icon: LayoutDashboard, to: "/NUPSHub" },
-      { id: "frontdoor",    label: "Front Door",      icon: DoorOpen,        to: "/FrontDoor" },
-      { id: "entertainers", label: "Entertainers",    icon: Mic2,            to: "/EntertainerCheckIn" },
-      { id: "register",     label: "Register",        icon: ShoppingCart,    to: "/Register" },
-      { id: "receipts",     label: "Receipts",        icon: ReceiptText,     to: "/Receipts" },
-      { id: "drivers",      label: "Driver Payouts",  icon: Truck,           to: "/DriverPayouts" },
-      { id: "tonight",      label: "Tonight",         icon: Moon,            to: "/Tonight" },
+      { id: "dashboard",    label: "Dashboard",             icon: LayoutDashboard, to: "/NUPSHub" },
+      { id: "frontdoor",    label: "1 · Open Night",        icon: DoorOpen,        to: "/FrontDoor" },
+      { id: "entertainers", label: "2 · Check In Talent",   icon: Mic2,            to: "/EntertainerCheckIn" },
+      { id: "register",     label: "3 · Register",          icon: ShoppingCart,    to: "/Register" },
+      { id: "drivers",      label: "4 · Driver Payouts",    icon: Truck,           to: "/DriverPayouts" },
+      { id: "receipts",     label: "5 · Receipts",          icon: ReceiptText,     to: "/Receipts" },
+      { id: "tonight",      label: "6 · Tonight Snapshot",  icon: Moon,            to: "/Tonight" },
     ],
   },
   {

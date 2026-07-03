@@ -12,6 +12,7 @@ import TodaysSummary from "@/components/hub/TodaysSummary";
 import TopProductsTable from "@/components/hub/TopProductsTable";
 import HourlySalesChart from "@/components/hub/HourlySalesChart";
 import VenuePerformance from "@/components/hub/VenuePerformance";
+import OperatorFlowStrip from "@/components/hub/OperatorFlowStrip";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import DemoReadinessBanner from "@/components/hub/DemoReadinessBanner";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
@@ -104,6 +105,9 @@ export default function NUPSHub() {
       role={role}
     >
       <div className="space-y-5 max-w-[1600px] mx-auto">
+        {/* Canonical front-to-back operator sequence — every shift starts here */}
+        <OperatorFlowStrip />
+
         {/* Live integrity strip — Vinnie sees real data flowing at a glance */}
         <DemoReadinessBanner />
 
