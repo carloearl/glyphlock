@@ -33,13 +33,24 @@ export default function ReceiptPrinter({
     return () => { alive = false; };
   }, [transaction?.venue_id, activeVenue?.venue_id, activeVenue?.id]);
 
-  // Compute SHA-256 blockchain fingerprint of the transaction.
+  // Blockchain fingerprint — prefer the persisted `receipt_hash` written at
+  // sale time (canonical, ledger-verifiable). Fall back to recomputing for
+  // legacy transactions written before the hash field existed.
   useEffect(() => {
     let alive = true;
     if (!transaction) { setHashInfo(null); return; }
+    if (transaction.receipt_hash) {
+      setHashInfo({
+        hash: transaction.receipt_hash,
+        short: String(transaction.receipt_hash).slice(0, 12),
+        algorithm: "SHA-256",
+        version: transaction.receipt_hash_version || 1,
+      });
+      return;
+    }
     computeReceiptHash(transaction).then(h => { if (alive) setHashInfo(h); }).catch(() => {});
     return () => { alive = false; };
-  }, [transaction?.transaction_id, transaction?.total, transaction?.created_date]);
+  }, [transaction?.transaction_id, transaction?.receipt_hash, transaction?.total, transaction?.created_date]);
 
   const BIZ_NAME = activeVenue?.name || transaction?.venue_name || 'N.U.P.S. POS';
   const BIZ_LEGAL = activeVenue?.legal_name || activeVenue?.name || BIZ_NAME;
@@ -83,8 +94,11 @@ export default function ReceiptPrinter({
     const isDoor = (transaction.station || '').toLowerCase() === 'door';
     const taxLabel = isDoor ? 'Sales Tax (0%)' : 'Sales Tax (AZ 8%)';
     const taxValue = isDoor ? 0 : (transaction.tax || 0);
-    // Processing fee: explicit tx field wins, otherwise derived from door tax slot.
-    const ccFee = Number(transaction.processing_fee || (isDoor ? (transaction.tax || 0) : 0));
+    // Processing fee: prefer the persisted field. Legacy door records used to
+    // stash the CC fee in `tax`, so fall back to that only when explicit field is absent.
+    const ccFee = transaction.processing_fee != null
+      ? Number(transaction.processing_fee)
+      : (isDoor ? Number(transaction.tax || 0) : 0);
     const ccFeeLabel = procRate > 0
       ? `Card Processing Fee (${(procRate * 100).toFixed(2)}%)`
       : 'Card Processing Fee';
@@ -263,7 +277,9 @@ export default function ReceiptPrinter({
   const isDoor = (transaction.station || '').toLowerCase() === 'door';
   const taxLabelScreen = isDoor ? 'Tax (0%)' : 'Tax (AZ 8%)';
   const taxValueScreen = isDoor ? 0 : (transaction.tax || 0);
-  const ccFeeScreen    = Number(transaction.processing_fee || (isDoor ? (transaction.tax || 0) : 0));
+  const ccFeeScreen    = transaction.processing_fee != null
+    ? Number(transaction.processing_fee)
+    : (isDoor ? Number(transaction.tax || 0) : 0);
   const ccFeeLabelScreen = procRate > 0
     ? `Card Processing Fee (${(procRate * 100).toFixed(2)}%)`
     : 'Card Processing Fee';
@@ -280,7 +296,8 @@ export default function ReceiptPrinter({
           <div className="text-base font-black text-white tracking-widest">{BIZ_NAME}</div>
           <div className="text-[9px] text-gray-500">N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE</div>
           <div className="text-[9px] text-gray-400 mt-1">{BIZ_ADDRESS}</div>
-          <div className="text-[9px] text-gray-400">Tel: {BIZ_PHONE}</div>
+          {BIZ_PHONE && <div className="text-[9px] text-gray-400">Tel: {BIZ_PHONE}</div>}
+          {BIZ_TAX_ID && <div className="text-[9px] text-gray-500 mt-0.5">{BIZ_TAX_ID}</div>}
         </div>
 
         {isVIP && (
@@ -364,8 +381,15 @@ export default function ReceiptPrinter({
         )}
 
         <div className="border-t border-dashed border-gray-700 pt-2 mt-2 text-center text-[10px] text-gray-600">
-          <div className="text-gray-400 text-xs mb-1">Thank you for your patronage!</div>
-          <div>All sales final • Disputes: {BIZ_PHONE}</div>
+          {FOOTER_TEXT ? (
+            <div className="text-gray-300 text-[10px] whitespace-pre-line leading-snug">{FOOTER_TEXT}</div>
+          ) : (
+            <>
+              <div className="text-gray-400 text-xs mb-1">Thank you for your patronage!</div>
+              <div>All sales final{BIZ_PHONE ? ` • Disputes: ${BIZ_PHONE}` : ''}</div>
+            </>
+          )}
+          {BIZ_TAX_ID && <div className="mt-1 text-[8px] text-gray-500">{BIZ_TAX_ID}</div>}
           <div className="mt-1 text-[8px] text-gray-700">{BIZ_ADDRESS}</div>
           <div className="mt-1 tracking-[4px] text-gray-700">||| {transaction.transaction_id} |||</div>
         </div>

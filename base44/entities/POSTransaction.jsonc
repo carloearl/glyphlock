@@ -41,6 +41,16 @@
     "tip": {
       "type": "number"
     },
+    "processing_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Card processing fee charged to the guest on this transaction (rate \u00d7 subtotal). Included in `total`. Read from VenueRateConfig.cc_processing_fee_rate at write time."
+    },
+    "service_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Service fee line charged to the guest (rate \u00d7 subtotal). Included in `total`. Read from VenueRateConfig.service_fee_pct at write time, only when show_service_fee=true."
+    },
     "total": {
       "type": "number",
       "description": "Gross transaction total. NEVER reduced by driver payouts or comps \u2014 gross stays on the books so accounting can see the comp gap."
@@ -187,6 +197,15 @@
     },
     "room_tab_reference": {
       "type": "string"
+    },
+    "receipt_hash": {
+      "type": "string",
+      "description": "SHA-256 hex fingerprint of the transaction payload (buildReceiptPayload). Persisted at write time so the printed hash on the receipt is auditable and verifiable after the fact. Tamper-evident anchor for blockchain proof exports."
+    },
+    "receipt_hash_version": {
+      "type": "number",
+      "default": 1,
+      "description": "Version of the receipt hash payload schema. Bump when buildReceiptPayload changes so historic hashes can still be reproduced."
     },
     "notes": {
       "type": "string"

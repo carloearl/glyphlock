@@ -29,6 +29,7 @@ import IDScannerCamera from "./IDScannerCamera";
 import GuestCheckIn from "./GuestCheckIn";
 import { writeEntity } from "@/lib/nups/writeEntity";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
+import { computeReceiptHash } from "@/lib/nups/receiptHash";
 // BPAA-NUPS-AUDIT-001 §3.2 — emit financial_context on door sale finalize
 import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
 import { fromPOSTransaction } from "@/lib/nups/audit/financialContext";
@@ -96,13 +97,12 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     }
   });
 
-  // Door-only: pull the venue's card processing fee rate. Cover charges are
-  // sales-tax-exempt; the only add-on at the door is the card fee.
+  // Load the venue's rate sheet. Drives processing fee + service fee lines on
+  // every station (door, bar, vip). Admin-editable via Venue Settings → Receipts.
   const [doorRates, setDoorRates] = useState(null);
   useEffect(() => {
-    if (station !== 'door') return;
     loadVenueRates(activeVenue?.id).then(setDoorRates).catch(() => {});
-  }, [station, activeVenue?.id]);
+  }, [activeVenue?.id]);
 
   const createTransaction = useMutation({
     mutationFn: (data) => base44.entities.POSTransaction.create(data),
@@ -394,15 +394,20 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-  // Door: no sales tax on cover charges. The `tax` field is reused as the
-  // card processing fee bucket — only non-zero when paying by card at the door.
-  const ccFeeRate = station === 'door' ? (Number(doorRates?.cc_processing_fee_rate) || 0.035) : 0;
-  const tax = station === 'door'
-    ? (paymentMethod === 'Credit Card' ? subtotal * ccFeeRate : 0)
-    : subtotal * 0.08;
+  // Door: no sales tax on cover charges. Bar/VIP: sales tax applies.
+  const ccFeeRate = Number(doorRates?.cc_processing_fee_rate) || 0.035;
+  const tax = station === 'door' ? 0 : subtotal * 0.08;
+  // Processing fee — separate line, charged only on card at the door.
+  const showProcFee = doorRates?.show_processing_fee !== false;
+  const isCardMethod = ['Credit Card', 'Debit Card', 'Digital Wallet'].includes(paymentMethod);
+  const processingFee = (station === 'door' && isCardMethod && showProcFee) ? subtotal * ccFeeRate : 0;
+  // Service fee — separate line, applied at any station when the venue turns it on.
+  const showSvcFee = !!doorRates?.show_service_fee;
+  const svcPct = Number(doorRates?.service_fee_pct) || 0;
+  const serviceFee = (showSvcFee && svcPct > 0) ? subtotal * svcPct : 0;
   const discountAmount = (subtotal * discount) / 100;
   const tipAmount = station === 'door' ? 0 : tip; // no tips on cover charges
-  const total = subtotal + tax - discountAmount + tipAmount;
+  const total = subtotal + tax + processingFee + serviceFee - discountAmount + tipAmount;
   // When a comp is authorized the credit zeros out what the guest owes, but
   // the gross stays on the books (visible in OrderDisplay) so accounting can
   // see the gap. The CHARGE button uses finalTotal; OrderDisplay keeps `total`.
@@ -474,6 +479,8 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       items: cart,
       subtotal,
       tax,
+      processing_fee: processingFee,
+      service_fee: serviceFee,
       discount: discountAmount,
       tip: tipAmount,
       total,
@@ -489,6 +496,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       venue_id: activeVenue?.id || null,
       status: "completed",
       batch_id: activeBatch?.id,
+      created_date: new Date().toISOString(), // pin for reproducible receipt hash
       terminal_id: activeVenue?.id
         ? `TERM-${activeVenue.id.slice(-6).toUpperCase()}`
         : 'TERM-UNKNOWN',
@@ -496,6 +504,14 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       ...details,
       card_last4: details?.card_last_four || details?.card_last4 || null,
     };
+
+    // SHA-256 receipt fingerprint — persisted on the record so the hash
+    // printed on paper can be re-verified against the ledger later.
+    try {
+      const { hash, version } = await computeReceiptHash(transactionData);
+      transactionData.receipt_hash = hash;
+      transactionData.receipt_hash_version = version;
+    } catch (_) { /* best-effort — never block the sale */ }
     try {
       // DACO-20260613-DOOR-RBAC — Door writes go through the gateway with
       // validation_run=true (funds-off). The gateway enforces the DOOR_GIRL
