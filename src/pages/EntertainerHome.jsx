@@ -5,13 +5,17 @@
  * task. Every other NUPS surface is hidden. Route guarded to
  * ENTERTAINER + MANAGER + ADMIN.
  */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
+import EntertainerShiftFlow from "@/components/nups/flows/EntertainerShiftFlow";
 
-export default function EntertainerHome() {
+export default function EntertainerHome({ user: userProp }) {
+  const [user, setUser] = useState(userProp || null);
+  useEffect(() => {
+    if (!user) base44.auth.me().then(setUser).catch(() => {});
+  }, []);
   return (
     <div className="min-h-screen bg-[#05070d] text-white flex flex-col">
       <header className="border-b border-white/5 bg-black/40 backdrop-blur">
@@ -32,7 +36,7 @@ export default function EntertainerHome() {
       </header>
 
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
-        <EntertainerCheckIn />
+        <EntertainerShiftFlow user={user} />
       </main>
     </div>
   );

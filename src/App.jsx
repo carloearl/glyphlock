@@ -68,6 +68,7 @@ import LedgerTrialBalance from './pages/LedgerTrialBalance';
 import AccountingHub from './pages/AccountingHub';
 import RegistryAdmin from './pages/RegistryAdmin';
 import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
+import NUPSAdminPortal from './pages/NUPSAdminPortal';
 import KioskShell from './components/nups/KioskShell';
 import RoleClassGuard from './components/nups/RoleClassGuard';
 import RoleClassBadge from './components/nups/RoleClassBadge';
@@ -127,6 +128,7 @@ const AuthenticatedApp = () => {
     '/admin/audit-integrity', '/admin/venue-settings',
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
+    '/nupsadminportal', '/NUPSAdminPortal',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
@@ -146,6 +148,7 @@ const AuthenticatedApp = () => {
     '/admin/audit-integrity', '/admin/venue-settings',
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
+    '/nupsadminportal', '/NUPSAdminPortal',
   ];
   const isNupsKioskRoute = nupsKioskRoots.some(p => currentPathLower.startsWith(p));
 
@@ -169,6 +172,8 @@ const AuthenticatedApp = () => {
             Admin, Demo Keys, etc.). Sidebar deep-links via ?tab=.
             DACO 003 §2: ADMIN-only. */}
         <Route path="/NUPSOwner" element={<RoleClassGuard allow={["ADMIN"]}><NUPSOwner /></RoleClassGuard>} />
+        <Route path="/NUPSAdminPortal" element={<RoleClassGuard allow={["ADMIN"]}><NUPSAdminPortal /></RoleClassGuard>} />
+        <Route path="/nupsadminportal" element={<RoleClassGuard allow={["ADMIN"]}><NUPSAdminPortal /></RoleClassGuard>} />
         <Route path="/nupsowner" element={<RoleClassGuard allow={["ADMIN"]}><NUPSOwner /></RoleClassGuard>} />
         <Route path="/NUPSStaff" element={<NUPSStaff />} />
         <Route path="/nupsstaff" element={<NUPSStaff />} />

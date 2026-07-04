@@ -10,16 +10,13 @@
  * see a lesser class's home for support purposes).
  */
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { DoorOpen, LogOut } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import StaffClockInOut from "@/components/nups/StaffClockInOut";
+import StaffShiftFlow from "@/components/nups/flows/StaffShiftFlow";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 export default function StaffHome() {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const venue = useActiveVenue();
 
@@ -68,44 +65,14 @@ export default function StaffHome() {
       </header>
 
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-5">
-        {/* 1 — Clock in / out */}
-        <div>
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-500 mb-2 px-1">
-            Step 1 · My Shift
-          </div>
-          {user && (
-            <StaffClockInOut
-              user={user}
-              venueId={venue?.venue_id || venue?.id}
-              station="door"
-            />
-          )}
-        </div>
-
-        {/* 2 — Front Door Register */}
-        <div>
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-500 mb-2 px-1">
-            Step 2 · Work the Door
-          </div>
-          <Card
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate("/FrontDoor")}
-            onKeyDown={(e) => { if (e.key === "Enter") navigate("/FrontDoor"); }}
-            className="cursor-pointer bg-gradient-to-br from-emerald-600/20 via-emerald-500/10 to-transparent border-emerald-500/30 hover:border-emerald-400/60 transition-colors"
-          >
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                <DoorOpen className="w-7 h-7 text-emerald-300" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-black text-white text-lg">Open Front Door Register</div>
-                <div className="text-sm text-slate-400">Ring covers, comps, drivers, and guests.</div>
-              </div>
-              <div className="hidden sm:block text-emerald-300 font-mono text-xs">GO →</div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* §3 linear flow — next required action is always the largest element */}
+        {user && (
+          <StaffShiftFlow
+            user={user}
+            venueId={venue?.venue_id || venue?.id}
+            station="door"
+          />
+        )}
       </main>
     </div>
   );

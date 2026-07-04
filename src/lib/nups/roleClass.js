@@ -26,7 +26,8 @@ export const HOME_BY_CLASS = {
   STAFF:       "/StaffHome",
   ENTERTAINER: "/EntertainerHome",
   MANAGER:     "/NUPSHub",
-  ADMIN:       "/NUPSOwner",
+  // §6 — back office has its own portal, separate from live floor ops.
+  ADMIN:       "/NUPSAdminPortal",
 };
 
 /**
