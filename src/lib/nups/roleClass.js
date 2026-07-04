@@ -20,9 +20,11 @@ export const ROLE_CLASS = {
 };
 
 // Home screen per §2. One class = one home = one linear flow.
+// STAFF and ENTERTAINER go to purpose-built minimal landings — never
+// the operator hub — so their surface is bounded by design.
 export const HOME_BY_CLASS = {
-  STAFF:       "/NUPSStaff",
-  ENTERTAINER: "/EntertainerCheckIn",
+  STAFF:       "/StaffHome",
+  ENTERTAINER: "/EntertainerHome",
   MANAGER:     "/NUPSHub",
   ADMIN:       "/NUPSOwner",
 };

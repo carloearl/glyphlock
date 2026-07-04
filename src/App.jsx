@@ -60,6 +60,8 @@ import Receipts from './pages/Receipts';
 import DriverPayouts from './pages/DriverPayouts';
 import NUPSHub from './pages/NUPSHub';
 import EntertainerCheckIn from './pages/EntertainerCheckIn';
+import StaffHome from './pages/StaffHome';
+import EntertainerHome from './pages/EntertainerHome';
 import ManagerConsole from './pages/ManagerConsole';
 import PeopleArchive from './pages/PeopleArchive';
 import LedgerTrialBalance from './pages/LedgerTrialBalance';
@@ -113,7 +115,7 @@ const AuthenticatedApp = () => {
   const fullscreenPaths = [
     '/nupslanding', '/landing', '/nupsgateway', '/unauthorized',
     '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff',
-    '/frontdoor', '/entertainercheckin', '/glyphlockfinancialpage',
+    '/frontdoor', '/entertainercheckin', '/staffhome', '/entertainerhome', '/glyphlockfinancialpage',
     '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
     // NUPS operator surface — kiosk-wrapped
     '/nupshub', '/hub', '/register', '/registerconsole',
@@ -134,6 +136,7 @@ const AuthenticatedApp = () => {
   const nupsKioskRoots = [
     '/nupslanding', '/landing', '/nupsgateway',
     '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
+    '/staffhome', '/entertainerhome',
     '/nupshub', '/hub', '/register', '/registerconsole',
     '/receipts', '/driverpayouts',
     '/accounting', '/tonight', '/contracts', '/contractshub',
@@ -173,6 +176,12 @@ const AuthenticatedApp = () => {
         <Route path="/frontdoor" element={<FrontDoor />} />
         <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />
         <Route path="/entertainercheckin" element={<EntertainerCheckIn />} />
+        {/* DACO 003 §2 — dedicated class homes. Guards allow the class itself
+            plus higher classes (managers/admins can shadow support them). */}
+        <Route path="/StaffHome" element={<RoleClassGuard allow={["STAFF","MANAGER","ADMIN"]}><StaffHome /></RoleClassGuard>} />
+        <Route path="/staffhome" element={<RoleClassGuard allow={["STAFF","MANAGER","ADMIN"]}><StaffHome /></RoleClassGuard>} />
+        <Route path="/EntertainerHome" element={<RoleClassGuard allow={["ENTERTAINER","MANAGER","ADMIN"]}><EntertainerHome /></RoleClassGuard>} />
+        <Route path="/entertainerhome" element={<RoleClassGuard allow={["ENTERTAINER","MANAGER","ADMIN"]}><EntertainerHome /></RoleClassGuard>} />
         <Route path="/NUPSInfrastructurePage" element={<NUPSInfrastructurePage />} />
         <Route path="/nupsinfrastructurepage" element={<NUPSInfrastructurePage />} />
         <Route path="/GlyphLockFinancialPage" element={<GlyphLockFinancialPage />} />
