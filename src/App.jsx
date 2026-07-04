@@ -68,6 +68,7 @@ import RegistryAdmin from './pages/RegistryAdmin';
 import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
 import KioskShell from './components/nups/KioskShell';
 import RoleClassGuard from './components/nups/RoleClassGuard';
+import RoleClassBadge from './components/nups/RoleClassBadge';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -149,7 +150,7 @@ const AuthenticatedApp = () => {
     // Lazily-imported NUPS operator pages — already imported elsewhere via the
     // pagesConfig loop. Re-import inline so they render under KioskShell here.
     const inner = (
-      <Routes>
+      <><RoleClassBadge /><Routes>
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/nupslanding" element={<NUPSLanding />} />
         <Route path="/landing" element={<NUPSLanding />} />
@@ -197,12 +198,13 @@ const AuthenticatedApp = () => {
         <Route path="/managerconsole" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ManagerConsole /></RoleClassGuard>} />
         <Route path="/PeopleArchive" element={<PeopleArchive />} />
         <Route path="/peoplearchive" element={<PeopleArchive />} />
-        <Route path="/LedgerTrialBalance" element={<LedgerTrialBalance />} />
-        <Route path="/ledgertrialbalance" element={<LedgerTrialBalance />} />
-        <Route path="/admin/ledger" element={<LedgerTrialBalance />} />
-        <Route path="/AccountingHub" element={<AccountingHub />} />
-        <Route path="/accountinghub" element={<AccountingHub />} />
-        <Route path="/admin/accounting-reports" element={<AccountingHub />} />
+        {/* DACO 003 §2: ADMIN-only accounting surfaces. */}
+        <Route path="/LedgerTrialBalance" element={<RoleClassGuard allow={["ADMIN"]}><LedgerTrialBalance /></RoleClassGuard>} />
+        <Route path="/ledgertrialbalance" element={<RoleClassGuard allow={["ADMIN"]}><LedgerTrialBalance /></RoleClassGuard>} />
+        <Route path="/admin/ledger" element={<RoleClassGuard allow={["ADMIN"]}><LedgerTrialBalance /></RoleClassGuard>} />
+        <Route path="/AccountingHub" element={<RoleClassGuard allow={["ADMIN"]}><AccountingHub /></RoleClassGuard>} />
+        <Route path="/accountinghub" element={<RoleClassGuard allow={["ADMIN"]}><AccountingHub /></RoleClassGuard>} />
+        <Route path="/admin/accounting-reports" element={<RoleClassGuard allow={["ADMIN"]}><AccountingHub /></RoleClassGuard>} />
         <Route path="/Register" element={<RegisterConsole />} />
         <Route path="/register" element={<RegisterConsole />} />
         <Route path="/RegisterConsole" element={<RegisterConsole />} />
@@ -217,20 +219,21 @@ const AuthenticatedApp = () => {
         <Route path="/Contracts" element={<ContractsHub />} />
         <Route path="/contracts" element={<ContractsHub />} />
         <Route path="/ContractsHub" element={<ContractsHub />} />
-        <Route path="/admin/settlement" element={<DailySettlementDashboard />} />
-        <Route path="/admin/payout-history" element={<DriverPayoutHistory />} />
-        <Route path="/admin/activity-log" element={<ActivityLogViewer />} />
-        <Route path="/admin/audit-integrity" element={<AuditIntegrity />} />
-        <Route path="/admin/venue-settings" element={<VenueAdminSettings />} />
-        <Route path="/admin/registry" element={<RegistryAdmin />} />
-        <Route path="/RegistryAdmin" element={<RegistryAdmin />} />
-        <Route path="/registryadmin" element={<RegistryAdmin />} />
-        <Route path="/admin/adr" element={<ArchitecturalDecisionRegister />} />
-        <Route path="/ArchitecturalDecisionRegister" element={<ArchitecturalDecisionRegister />} />
-        <Route path="/architecturaldecisionregister" element={<ArchitecturalDecisionRegister />} />
+        {/* DACO 003 §2: ADMIN-only admin/audit/registry surfaces. */}
+        <Route path="/admin/settlement" element={<RoleClassGuard allow={["ADMIN"]}><DailySettlementDashboard /></RoleClassGuard>} />
+        <Route path="/admin/payout-history" element={<RoleClassGuard allow={["ADMIN"]}><DriverPayoutHistory /></RoleClassGuard>} />
+        <Route path="/admin/activity-log" element={<RoleClassGuard allow={["ADMIN"]}><ActivityLogViewer /></RoleClassGuard>} />
+        <Route path="/admin/audit-integrity" element={<RoleClassGuard allow={["ADMIN"]}><AuditIntegrity /></RoleClassGuard>} />
+        <Route path="/admin/venue-settings" element={<RoleClassGuard allow={["ADMIN"]}><VenueAdminSettings /></RoleClassGuard>} />
+        <Route path="/admin/registry" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />
+        <Route path="/RegistryAdmin" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />
+        <Route path="/registryadmin" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />
+        <Route path="/admin/adr" element={<RoleClassGuard allow={["ADMIN"]}><ArchitecturalDecisionRegister /></RoleClassGuard>} />
+        <Route path="/ArchitecturalDecisionRegister" element={<RoleClassGuard allow={["ADMIN"]}><ArchitecturalDecisionRegister /></RoleClassGuard>} />
+        <Route path="/architecturaldecisionregister" element={<RoleClassGuard allow={["ADMIN"]}><ArchitecturalDecisionRegister /></RoleClassGuard>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
-      </Routes>
+      </Routes></>
     );
     return isNupsKioskRoute ? <KioskShell>{inner}</KioskShell> : inner;
   }
