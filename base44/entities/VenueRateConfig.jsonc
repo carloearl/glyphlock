@@ -1,7 +1,7 @@
 {
   "name": "VenueRateConfig",
   "type": "object",
-  "description": "Per-venue editable rate sheet. Single source of truth for cover charges, re-entry fees, driver payouts, and bonus tiers. NEVER hardcode any of these values in logic \u2014 always read from this entity. Seeded once per venue; admin-editable thereafter.",
+  "description": "Per-venue editable rate sheet. Single source of truth for cover charges, re-entry fees, driver payouts, bonus tiers, and receipt-level configuration (processing fee, service fee, footer text, tax id). NEVER hardcode any of these values in logic \u2014 always read from this entity. Seeded once per venue; admin-editable thereafter.",
   "properties": {
     "venue_id": {
       "type": "string",
@@ -88,6 +88,36 @@
       "type": "number",
       "default": 0.035,
       "description": "Credit card processing fee rate applied at the door register only. Door cover charges are sales-tax-exempt; this rate is the pass-through processor fee added when the guest pays cover by card."
+    },
+    "service_fee_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Optional service fee percentage applied to POS transactions and shown as a distinct line on the receipt. 0 = disabled. Expressed as a decimal (0.05 = 5%)."
+    },
+    "service_fee_label": {
+      "type": "string",
+      "default": "Service Fee",
+      "description": "Label printed on the receipt for the service fee line."
+    },
+    "show_processing_fee": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, receipts print a Processing Fee line (rate + amount). Turn off if the fee is absorbed by the house."
+    },
+    "show_service_fee": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, receipts print a Service Fee line at service_fee_pct."
+    },
+    "receipt_footer_text": {
+      "type": "string",
+      "default": "",
+      "description": "Custom footer paragraph printed at the bottom of every receipt (return policy, event, promotion). Empty falls back to the default 'Thank you for your patronage' block."
+    },
+    "receipt_tax_id": {
+      "type": "string",
+      "default": "",
+      "description": "Legal / tax id printed on the receipt header (EIN, resale, business license #). Empty = hidden."
     },
     "promo_card_amount": {
       "type": "number",

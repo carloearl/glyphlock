@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, ShieldCheck } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { loadVenueRates } from "@/lib/nups/venueRateConfig";
+import { computeReceiptHash } from "@/lib/nups/receiptHash";
 
 const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
 
@@ -14,12 +16,44 @@ export default function ReceiptPrinter({
   vipDetails = null
 }) {
   const activeVenue = useActiveVenue();
+  const [rates, setRates] = useState(null);
+  const [hashInfo, setHashInfo] = useState(null);
+
+  // Load per-venue receipt config (processing fee, service fee, footer, tax id).
+  useEffect(() => {
+    let alive = true;
+    const venueId = transaction?.venue_id || activeVenue?.venue_id || activeVenue?.id;
+    if (!venueId) { setRates({}); return; }
+    (async () => {
+      try {
+        const r = await loadVenueRates(venueId);
+        if (alive) setRates(r || {});
+      } catch { if (alive) setRates({}); }
+    })();
+    return () => { alive = false; };
+  }, [transaction?.venue_id, activeVenue?.venue_id, activeVenue?.id]);
+
+  // Compute SHA-256 blockchain fingerprint of the transaction.
+  useEffect(() => {
+    let alive = true;
+    if (!transaction) { setHashInfo(null); return; }
+    computeReceiptHash(transaction).then(h => { if (alive) setHashInfo(h); }).catch(() => {});
+    return () => { alive = false; };
+  }, [transaction?.transaction_id, transaction?.total, transaction?.created_date]);
 
   const BIZ_NAME = activeVenue?.name || transaction?.venue_name || 'N.U.P.S. POS';
   const BIZ_LEGAL = activeVenue?.legal_name || activeVenue?.name || BIZ_NAME;
   const BIZ_ADDRESS = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || 'Address on file';
   const BIZ_PHONE = activeVenue?.phone || '';
-  const BIZ_TAX_ID = '';
+  const BIZ_TAX_ID = rates?.receipt_tax_id || '';
+  const FOOTER_TEXT = rates?.receipt_footer_text || '';
+
+  // Fee toggles + rates
+  const showProcFee = rates?.show_processing_fee !== false; // default true
+  const showSvcFee  = !!rates?.show_service_fee;
+  const svcPct      = Number(rates?.service_fee_pct || 0);
+  const svcLabel    = rates?.service_fee_label || 'Service Fee';
+  const procRate    = Number(rates?.cc_processing_fee_rate || 0);
 
   const printReceipt = () => {
     if (!transaction) return;
@@ -49,7 +83,16 @@ export default function ReceiptPrinter({
     const isDoor = (transaction.station || '').toLowerCase() === 'door';
     const taxLabel = isDoor ? 'Sales Tax (0%)' : 'Sales Tax (AZ 8%)';
     const taxValue = isDoor ? 0 : (transaction.tax || 0);
-    const ccFee    = isDoor ? (transaction.tax || 0) : 0;
+    // Processing fee: explicit tx field wins, otherwise derived from door tax slot.
+    const ccFee = Number(transaction.processing_fee || (isDoor ? (transaction.tax || 0) : 0));
+    const ccFeeLabel = procRate > 0
+      ? `Card Processing Fee (${(procRate * 100).toFixed(2)}%)`
+      : 'Card Processing Fee';
+    // Service fee: explicit tx field wins; otherwise compute from subtotal × pct.
+    const svcFee = Number(transaction.service_fee || (showSvcFee ? (Number(transaction.subtotal || 0) * svcPct) : 0));
+    const svcFeeLabelFull = svcPct > 0
+      ? `${svcLabel} (${(svcPct * 100).toFixed(2)}%)`
+      : svcLabel;
 
     const vipSection = isVIP && vipDetails ? `
       <div style="border:2px solid #000;padding:8px;margin:8px 0;background:#f9f9f9;">
@@ -130,7 +173,8 @@ export default function ReceiptPrinter({
         <table>
           <tr><td>Subtotal:</td><td class="right">$${(transaction.subtotal || 0).toFixed(2)}</td></tr>
           <tr><td>${taxLabel}:</td><td class="right">$${taxValue.toFixed(2)}</td></tr>
-          ${ccFee > 0 ? `<tr><td>Card Processing Fee:</td><td class="right">$${ccFee.toFixed(2)}</td></tr>` : ''}
+          ${showProcFee && ccFee > 0 ? `<tr><td>${ccFeeLabel}:</td><td class="right">$${ccFee.toFixed(2)}</td></tr>` : ''}
+          ${showSvcFee && svcFee > 0 ? `<tr><td>${svcFeeLabelFull}:</td><td class="right">$${svcFee.toFixed(2)}</td></tr>` : ''}
           ${transaction.discount > 0 ? `<tr><td>Discount:</td><td class="right" style="color:red;">-$${transaction.discount.toFixed(2)}</td></tr>` : ''}
           ${tipAmount > 0 ? `<tr><td>Gratuity:</td><td class="right">$${tipAmount.toFixed(2)}</td></tr>` : ''}
         </table>
@@ -151,19 +195,37 @@ export default function ReceiptPrinter({
         <div class="audit-box">
           <div style="text-align:center;font-weight:bold;margin-bottom:3px;">AUDIT TRAIL</div>
           <table style="font-size:9px;">
-            <tr><td>Terminal:</td><td class="right">NUPS-001</td></tr>
+            <tr><td>Terminal:</td><td class="right">${transaction.terminal_id || 'NUPS-001'}</td></tr>
             <tr><td>Sequence:</td><td class="right">${transaction.transaction_id}</td></tr>
             <tr><td>Timestamp:</td><td class="right">${txDate.toISOString()}</td></tr>
             <tr><td>Operator:</td><td class="right">${cashierDisplay}</td></tr>
           </table>
         </div>
+        ${hashInfo ? `
+        <div class="audit-box" style="border-color:#0a7;">
+          <div style="text-align:center;font-weight:bold;margin-bottom:3px;">◆ BLOCKCHAIN FINGERPRINT ◆</div>
+          <div style="font-size:8px;color:#555;text-align:center;margin-bottom:3px;">
+            ${hashInfo.algorithm} · v${hashInfo.version}
+          </div>
+          <div style="font-family:monospace;font-size:10px;text-align:center;font-weight:bold;letter-spacing:1px;margin-bottom:3px;">
+            ${hashInfo.short}
+          </div>
+          <div style="font-family:monospace;font-size:7px;color:#666;word-break:break-all;text-align:center;line-height:1.3;">
+            ${hashInfo.hash}
+          </div>
+          <div style="font-size:8px;color:#666;text-align:center;margin-top:3px;">
+            Tamper-evident. Verify at ${BIZ_PHONE || 'venue office'}.
+          </div>
+        </div>` : ''}
         <div class="center barcode">||| ${transaction.transaction_id} |||</div>
         <div class="divider"></div>
         <div class="center footer">
-          <div style="font-size:10px;font-weight:bold;margin-bottom:4px;">Thank you for your patronage!</div>
-          <div>All sales are final. Refunds require manager</div>
-          <div>approval within 24 hours with valid receipt.</div>
-          <div style="margin-top:4px;">For disputes contact: ${BIZ_PHONE}</div>
+          ${FOOTER_TEXT
+            ? `<div style="font-size:10px;">${FOOTER_TEXT.replace(/\n/g, '<br/>')}</div>`
+            : `<div style="font-size:10px;font-weight:bold;margin-bottom:4px;">Thank you for your patronage!</div>
+               <div>All sales are final. Refunds require manager</div>
+               <div>approval within 24 hours with valid receipt.</div>`}
+          ${BIZ_PHONE ? `<div style="margin-top:4px;">For disputes contact: ${BIZ_PHONE}</div>` : ''}
           <div style="margin-top:6px;font-size:7px;color:#888;">
             ${BIZ_LEGAL}<br/>
             ${BIZ_ADDRESS}<br/>
@@ -197,11 +259,18 @@ export default function ReceiptPrinter({
   const txDate = new Date(transaction.created_date);
   const cashierDisplay = getCashierDisplay(transaction);
 
-  // Match the printable receipt: door = 0% sales tax, surface CC fee separately.
+  // Match the printable receipt: door = 0% sales tax, surface fees separately.
   const isDoor = (transaction.station || '').toLowerCase() === 'door';
   const taxLabelScreen = isDoor ? 'Tax (0%)' : 'Tax (AZ 8%)';
   const taxValueScreen = isDoor ? 0 : (transaction.tax || 0);
-  const ccFeeScreen    = isDoor ? (transaction.tax || 0) : 0;
+  const ccFeeScreen    = Number(transaction.processing_fee || (isDoor ? (transaction.tax || 0) : 0));
+  const ccFeeLabelScreen = procRate > 0
+    ? `Card Processing Fee (${(procRate * 100).toFixed(2)}%)`
+    : 'Card Processing Fee';
+  const svcFeeScreen = Number(transaction.service_fee || (showSvcFee ? (Number(transaction.subtotal || 0) * svcPct) : 0));
+  const svcFeeLabelScreen = svcPct > 0
+    ? `${svcLabel} (${(svcPct * 100).toFixed(2)}%)`
+    : svcLabel;
 
   return (
     <div className="space-y-3" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
@@ -249,7 +318,8 @@ export default function ReceiptPrinter({
         <div className="border-t border-double border-gray-600 pt-2 space-y-1">
           <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>${(transaction.subtotal || 0).toFixed(2)}</span></div>
           <div className="flex justify-between text-gray-400"><span>{taxLabelScreen}</span><span>${taxValueScreen.toFixed(2)}</span></div>
-          {ccFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>Card Processing Fee</span><span>${ccFeeScreen.toFixed(2)}</span></div>}
+          {showProcFee && ccFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>{ccFeeLabelScreen}</span><span>${ccFeeScreen.toFixed(2)}</span></div>}
+          {showSvcFee && svcFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>{svcFeeLabelScreen}</span><span>${svcFeeScreen.toFixed(2)}</span></div>}
           {transaction.discount > 0 && <div className="flex justify-between text-red-400"><span>Discount</span><span>-${transaction.discount.toFixed(2)}</span></div>}
           {tipAmount > 0 && <div className="flex justify-between text-gray-400"><span>Gratuity</span><span>${tipAmount.toFixed(2)}</span></div>}
           <div className="border-t border-gray-700 pt-1 flex justify-between text-lg font-black text-green-400">
@@ -274,6 +344,24 @@ export default function ReceiptPrinter({
             <div className="flex justify-between"><span>ISO:</span><span>{txDate.toISOString().split('.')[0]}</span></div>
           </div>
         </div>
+
+        {/* Blockchain hash — printed on every receipt, cannot be disabled */}
+        {hashInfo && (
+          <div className="border border-emerald-500/40 rounded-lg mt-2 p-2 bg-emerald-500/5">
+            <div className="flex items-center justify-center gap-1 text-[9px] text-emerald-300 font-bold mb-1">
+              <ShieldCheck className="w-3 h-3" /> BLOCKCHAIN FINGERPRINT
+            </div>
+            <div className="text-center font-mono text-[11px] tracking-widest text-emerald-200 font-bold">
+              {hashInfo.short}
+            </div>
+            <div className="text-center font-mono text-[7px] text-emerald-400/50 mt-1 break-all leading-tight">
+              {hashInfo.hash}
+            </div>
+            <div className="text-center text-[8px] text-gray-500 mt-1">
+              {hashInfo.algorithm} · v{hashInfo.version} · tamper-evident
+            </div>
+          </div>
+        )}
 
         <div className="border-t border-dashed border-gray-700 pt-2 mt-2 text-center text-[10px] text-gray-600">
           <div className="text-gray-400 text-xs mb-1">Thank you for your patronage!</div>

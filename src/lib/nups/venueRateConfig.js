@@ -28,6 +28,12 @@ const SEED_DEFAULTS = {
   driver_bonus_tiers: [],
   tax_rate: 0.08,
   cc_processing_fee_rate: 0.035, // 3.5% door card fee — cover charges are tax-exempt
+  service_fee_pct: 0,            // 0 = disabled. e.g. 0.05 = 5% service fee line on receipt
+  service_fee_label: "Service Fee",
+  show_processing_fee: true,
+  show_service_fee: false,
+  receipt_footer_text: "",
+  receipt_tax_id: "",
   promo_card_amount: 5,          // door promo card ($X OFF) — counted via is_promo line items
   house_commission_rate: 0.40,
   mode: "REAL",

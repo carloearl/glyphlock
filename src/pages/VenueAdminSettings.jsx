@@ -13,12 +13,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Lock, Settings, ClipboardCheck, FileText, DollarSign, Database, BookOpen } from 'lucide-react';
+import { Lock, Settings, ClipboardCheck, FileText, DollarSign, Database, BookOpen, Receipt } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import RateFeeEditor from '@/components/admin/RateFeeEditor';
 import DailyChecklistEditor from '@/components/admin/DailyChecklistEditor';
 import ContractTermsEditor from '@/components/admin/ContractTermsEditor';
 import ChartOfAccountsEditor from '@/components/admin/ChartOfAccountsEditor';
+import ReceiptConfigEditor from '@/components/admin/ReceiptConfigEditor';
 
 export default function VenueAdminSettings() {
   const [selectedVenue, setSelectedVenue] = useState('');
@@ -103,6 +104,9 @@ export default function VenueAdminSettings() {
               <TabsTrigger value="rates" className="data-[state=active]:bg-slate-800">
                 <DollarSign className="w-3 h-3 mr-1" /> Rates & Fees
               </TabsTrigger>
+              <TabsTrigger value="receipts" className="data-[state=active]:bg-slate-800">
+                <Receipt className="w-3 h-3 mr-1" /> Receipts
+              </TabsTrigger>
               <TabsTrigger value="checklist" className="data-[state=active]:bg-slate-800">
                 <ClipboardCheck className="w-3 h-3 mr-1" /> Daily Checklist
               </TabsTrigger>
@@ -116,6 +120,9 @@ export default function VenueAdminSettings() {
 
             <TabsContent value="rates">
               <RateFeeEditor venueId={selectedVenue} user={user} />
+            </TabsContent>
+            <TabsContent value="receipts">
+              <ReceiptConfigEditor venueId={selectedVenue} user={user} />
             </TabsContent>
             <TabsContent value="checklist">
               <DailyChecklistEditor venueId={selectedVenue} user={user} />
