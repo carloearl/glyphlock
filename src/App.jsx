@@ -67,6 +67,7 @@ import AccountingHub from './pages/AccountingHub';
 import RegistryAdmin from './pages/RegistryAdmin';
 import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
 import KioskShell from './components/nups/KioskShell';
+import RoleClassGuard from './components/nups/RoleClassGuard';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -161,9 +162,10 @@ const AuthenticatedApp = () => {
         <Route path="/nupslogin" element={<NUPSLogin />} />
         {/* NUPSOwner restored — hosts all legacy operator tabs
             (Analytics, GlyphBucks, Staff, VIP, Reports, Payroll, Audit Log,
-            Admin, Demo Keys, etc.). Sidebar deep-links via ?tab=. */}
-        <Route path="/NUPSOwner" element={<NUPSOwner />} />
-        <Route path="/nupsowner" element={<NUPSOwner />} />
+            Admin, Demo Keys, etc.). Sidebar deep-links via ?tab=.
+            DACO 003 §2: ADMIN-only. */}
+        <Route path="/NUPSOwner" element={<RoleClassGuard allow={["ADMIN"]}><NUPSOwner /></RoleClassGuard>} />
+        <Route path="/nupsowner" element={<RoleClassGuard allow={["ADMIN"]}><NUPSOwner /></RoleClassGuard>} />
         <Route path="/NUPSStaff" element={<NUPSStaff />} />
         <Route path="/nupsstaff" element={<NUPSStaff />} />
         <Route path="/FrontDoor" element={<FrontDoor />} />
@@ -190,8 +192,9 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSHub" element={<NUPSHub />} />
         <Route path="/nupshub" element={<NUPSHub />} />
         <Route path="/Hub" element={<NUPSHub />} />
-        <Route path="/ManagerConsole" element={<ManagerConsole />} />
-        <Route path="/managerconsole" element={<ManagerConsole />} />
+        {/* DACO 003 §2: MANAGER + ADMIN only. */}
+        <Route path="/ManagerConsole" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ManagerConsole /></RoleClassGuard>} />
+        <Route path="/managerconsole" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ManagerConsole /></RoleClassGuard>} />
         <Route path="/PeopleArchive" element={<PeopleArchive />} />
         <Route path="/peoplearchive" element={<PeopleArchive />} />
         <Route path="/LedgerTrialBalance" element={<LedgerTrialBalance />} />
