@@ -1,7 +1,7 @@
 {
   "name": "VenueRateConfig",
   "type": "object",
-  "description": "Per-venue editable rate sheet. Single source of truth for cover charges, re-entry fees, driver payouts, bonus tiers, and receipt-level configuration (processing fee, service fee, footer text, tax id). NEVER hardcode any of these values in logic \u2014 always read from this entity. Seeded once per venue; admin-editable thereafter.",
+  "description": "Per-venue editable rate sheet. Single source of truth for cover charges, re-entry fees, driver payouts, bonus tiers, and receipt-level configuration (legal name, processing fee, service fee, footer text, tax id). NEVER hardcode any of these values in logic \u2014 always read from this entity. Seeded once per venue; admin-editable thereafter.",
   "properties": {
     "venue_id": {
       "type": "string",
@@ -82,12 +82,13 @@
     },
     "tax_rate": {
       "type": "number",
-      "default": 0.08
+      "default": 0.08,
+      "description": "Sales tax rate (0.08 = 8%). Applied to bar/VIP transactions. Door cover charges are tax-exempt."
     },
     "cc_processing_fee_rate": {
       "type": "number",
-      "default": 0.035,
-      "description": "Credit card processing fee rate applied at the door register only. Door cover charges are sales-tax-exempt; this rate is the pass-through processor fee added when the guest pays cover by card."
+      "default": 0.05,
+      "description": "Credit card processing fee rate (0.05 = 5%). Applied at the door register when guest pays by card. Door cover charges are sales-tax-exempt; this rate is the pass-through processor fee."
     },
     "service_fee_pct": {
       "type": "number",
@@ -108,6 +109,11 @@
       "type": "boolean",
       "default": false,
       "description": "When true, receipts print a Service Fee line at service_fee_pct."
+    },
+    "receipt_legal_name": {
+      "type": "string",
+      "default": "",
+      "description": "Legal entity name printed as the main header on every receipt (e.g. 'RAS Liberty Holding LLC'). When empty, falls back to venue name. This is the DBA / legal entity \u2014 NOT the venue brand name \u2014 for tax and compliance."
     },
     "receipt_footer_text": {
       "type": "string",

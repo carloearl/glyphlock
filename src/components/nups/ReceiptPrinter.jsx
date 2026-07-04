@@ -52,8 +52,9 @@ export default function ReceiptPrinter({
     return () => { alive = false; };
   }, [transaction?.transaction_id, transaction?.receipt_hash, transaction?.total, transaction?.created_date]);
 
-  const BIZ_NAME = activeVenue?.name || transaction?.venue_name || 'N.U.P.S. POS';
-  const BIZ_LEGAL = activeVenue?.legal_name || activeVenue?.name || BIZ_NAME;
+  const VENUE_BRAND = activeVenue?.name || transaction?.venue_name || '';
+  const BIZ_LEGAL = rates?.receipt_legal_name || VENUE_BRAND || 'N.U.P.S. POS';
+  const BIZ_NAME = VENUE_BRAND || BIZ_LEGAL;
   const BIZ_ADDRESS = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || 'Address on file';
   const BIZ_PHONE = activeVenue?.phone || '';
   const BIZ_TAX_ID = rates?.receipt_tax_id || '';
@@ -152,9 +153,8 @@ export default function ReceiptPrinter({
       </head>
       <body>
         <div class="center">
-          <div class="header-logo">${BIZ_NAME}</div>
-          <div style="font-size:9px;">N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE</div>
-          <div style="font-size:9px;margin-top:4px;">${BIZ_LEGAL}</div>
+          <div class="header-logo">${BIZ_LEGAL}</div>
+          ${VENUE_BRAND && VENUE_BRAND !== BIZ_LEGAL ? `<div style="font-size:10px;font-weight:bold;">${VENUE_BRAND}</div>` : ''}
           <div style="font-size:10px;margin-top:2px;font-weight:bold;">${BIZ_ADDRESS}</div>
           <div style="font-size:10px;">Tel: ${BIZ_PHONE}</div>
           <div style="font-size:9px;margin-top:2px;">${BIZ_TAX_ID}</div>
@@ -186,11 +186,11 @@ export default function ReceiptPrinter({
         <div class="double-divider"></div>
         <table>
           <tr><td>Subtotal:</td><td class="right">$${(transaction.subtotal || 0).toFixed(2)}</td></tr>
-          <tr><td>${taxLabel}:</td><td class="right">$${taxValue.toFixed(2)}</td></tr>
-          ${showProcFee && ccFee > 0 ? `<tr><td>${ccFeeLabel}:</td><td class="right">$${ccFee.toFixed(2)}</td></tr>` : ''}
           ${showSvcFee && svcFee > 0 ? `<tr><td>${svcFeeLabelFull}:</td><td class="right">$${svcFee.toFixed(2)}</td></tr>` : ''}
           ${transaction.discount > 0 ? `<tr><td>Discount:</td><td class="right" style="color:red;">-$${transaction.discount.toFixed(2)}</td></tr>` : ''}
           ${tipAmount > 0 ? `<tr><td>Gratuity:</td><td class="right">$${tipAmount.toFixed(2)}</td></tr>` : ''}
+          ${showProcFee && ccFee > 0 ? `<tr><td>${ccFeeLabel}:</td><td class="right">$${ccFee.toFixed(2)}</td></tr>` : ''}
+          <tr><td>${taxLabel}:</td><td class="right">$${taxValue.toFixed(2)}</td></tr>
         </table>
         <div class="divider"></div>
         <table><tr class="total-row"><td>TOTAL DUE:</td><td class="right">$${grandTotal.toFixed(2)}</td></tr></table>
@@ -293,8 +293,8 @@ export default function ReceiptPrinter({
       {/* On-screen receipt preview */}
       <div className="bg-black/90 border border-cyan-500/40 rounded-xl p-4 font-mono text-xs max-w-sm mx-auto shadow-[0_0_30px_rgba(6,182,212,0.2)]">
         <div className="text-center mb-3">
-          <div className="text-base font-black text-white tracking-widest">{BIZ_NAME}</div>
-          <div className="text-[9px] text-gray-500">N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE</div>
+          <div className="text-base font-black text-white tracking-widest">{BIZ_LEGAL}</div>
+          {VENUE_BRAND && VENUE_BRAND !== BIZ_LEGAL && <div className="text-[10px] font-bold text-gray-300">{VENUE_BRAND}</div>}
           <div className="text-[9px] text-gray-400 mt-1">{BIZ_ADDRESS}</div>
           {BIZ_PHONE && <div className="text-[9px] text-gray-400">Tel: {BIZ_PHONE}</div>}
           {BIZ_TAX_ID && <div className="text-[9px] text-gray-500 mt-0.5">{BIZ_TAX_ID}</div>}
@@ -334,11 +334,11 @@ export default function ReceiptPrinter({
 
         <div className="border-t border-double border-gray-600 pt-2 space-y-1">
           <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>${(transaction.subtotal || 0).toFixed(2)}</span></div>
-          <div className="flex justify-between text-gray-400"><span>{taxLabelScreen}</span><span>${taxValueScreen.toFixed(2)}</span></div>
-          {showProcFee && ccFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>{ccFeeLabelScreen}</span><span>${ccFeeScreen.toFixed(2)}</span></div>}
           {showSvcFee && svcFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>{svcFeeLabelScreen}</span><span>${svcFeeScreen.toFixed(2)}</span></div>}
           {transaction.discount > 0 && <div className="flex justify-between text-red-400"><span>Discount</span><span>-${transaction.discount.toFixed(2)}</span></div>}
           {tipAmount > 0 && <div className="flex justify-between text-gray-400"><span>Gratuity</span><span>${tipAmount.toFixed(2)}</span></div>}
+          {showProcFee && ccFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>{ccFeeLabelScreen}</span><span>${ccFeeScreen.toFixed(2)}</span></div>}
+          <div className="flex justify-between text-gray-400"><span>{taxLabelScreen}</span><span>${taxValueScreen.toFixed(2)}</span></div>
           <div className="border-t border-gray-700 pt-1 flex justify-between text-lg font-black text-green-400">
             <span>TOTAL</span><span>${grandTotal.toFixed(2)}</span>
           </div>

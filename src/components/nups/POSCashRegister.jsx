@@ -395,7 +395,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
 
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
   // Door: no sales tax on cover charges. Bar/VIP: sales tax applies.
-  const ccFeeRate = Number(doorRates?.cc_processing_fee_rate) || 0.035;
+  const ccFeeRate = Number(doorRates?.cc_processing_fee_rate) || 0.05;
   const tax = station === 'door' ? 0 : subtotal * 0.08;
   // Processing fee — separate line, charged only on card at the door.
   const showProcFee = doorRates?.show_processing_fee !== false;

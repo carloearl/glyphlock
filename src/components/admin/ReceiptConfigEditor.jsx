@@ -45,11 +45,12 @@ export default function ReceiptConfigEditor({ venueId, user }) {
         if (!alive) return;
         setRecord(row || null);
         setDraft({
-          cc_processing_fee_rate: row?.cc_processing_fee_rate ?? 0.035,
+          cc_processing_fee_rate: row?.cc_processing_fee_rate ?? 0.05,
           service_fee_pct: row?.service_fee_pct ?? 0,
           service_fee_label: row?.service_fee_label ?? "Service Fee",
           show_processing_fee: row?.show_processing_fee ?? true,
           show_service_fee: row?.show_service_fee ?? false,
+          receipt_legal_name: row?.receipt_legal_name ?? "",
           receipt_footer_text: row?.receipt_footer_text ?? "",
           receipt_tax_id: row?.receipt_tax_id ?? "",
         });
@@ -173,6 +174,18 @@ export default function ReceiptConfigEditor({ venueId, user }) {
       <Card className="bg-slate-900 border-slate-800">
         <CardContent className="p-5 space-y-4">
           <div className="text-sm font-bold text-white">Receipt Header & Footer</div>
+
+          <div>
+            <Label className="text-xs text-slate-400">Legal Entity Name (printed as receipt header)</Label>
+            <Input
+              disabled={readOnly}
+              value={draft.receipt_legal_name}
+              onChange={(e) => setDraft({ ...draft, receipt_legal_name: e.target.value })}
+              className="bg-black/40 border-slate-700 text-white mt-1"
+              placeholder="RAS Liberty Holding LLC"
+            />
+            <div className="text-[10px] text-slate-500 mt-1">This is the legal entity name on the receipt — NOT the venue brand name. Required for tax compliance.</div>
+          </div>
 
           <div>
             <Label className="text-xs text-slate-400">Legal / Tax ID (printed in header)</Label>
