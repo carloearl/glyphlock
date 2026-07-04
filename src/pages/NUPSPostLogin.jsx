@@ -1,58 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  ShoppingCart, 
-  DollarSign, 
-  Users, 
-  BarChart3,
-  Lock,
-  Loader2
-} from 'lucide-react';
+import { Lock, Loader2 } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
+import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from '@/lib/nups/roleClass';
+import { isSovereign } from '@/lib/nups/sovereign';
 
 export default function NUPSPostLogin() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [roleClass, setRoleClass] = useState(null);
+  const [destination, setDestination] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkAuthAndRedirect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAuthAndRedirect = async () => {
     try {
       const currentUser = await base44.auth.me();
-      
-      if (!currentUser) {
-        navigate('/NUPSLanding');
-        return;
-      }
-
+      if (!currentUser) { navigate('/NUPSLanding'); return; }
       setUser(currentUser);
 
-      // Check for stored destination from NUPSLogin flow
+      // Look up NUPSUser + SOVEREIGN flag by created_by email (matches guard logic).
+      let nupsUser = null;
+      let sovereign = false;
+      try {
+        const matches = await base44.entities.NUPSUser.filter({ created_by: currentUser.email });
+        nupsUser = (matches || [])[0] || null;
+        sovereign = (matches || []).some(isSovereign);
+      } catch { /* fall through */ }
+
+      // §2 Role Matrix — one role class, one home, one flow.
+      const cls = resolveRoleClass({ user: currentUser, nupsUser, sovereign });
+      setRoleClass(cls);
+
+      // Honor an explicit destination hint from NUPSLogin only if it matches
+      // the resolved class's home tree — otherwise fall back to class home.
+      // (Prevents cross-role deep-links defeating role scoping.)
       const savedDest = sessionStorage.getItem('nups_destination');
-      if (savedDest) {
-        sessionStorage.removeItem('nups_destination');
-        sessionStorage.removeItem('nups_role_hint');
-        setTimeout(() => navigate(`/${savedDest}`), 2000);
-        return;
-      }
+      sessionStorage.removeItem('nups_destination');
+      sessionStorage.removeItem('nups_role_hint');
+      const classHome = homeForRoleClass(cls);
+      const dest = savedDest ? `/${savedDest}` : classHome;
+      setDestination(dest);
 
-      // Fallback: Every operator lands on NUPSHub — the new unified
-      // dashboard with the persistent sidebar. Entertainers still go
-      // to their dedicated check-in flow.
-      setTimeout(() => {
-        if (currentUser.role === 'entertainer') {
-          navigate('/EntertainerCheckIn');
-        } else {
-          navigate('/NUPSHub');
-        }
-      }, 2000);
-
+      setTimeout(() => navigate(dest), 1500);
     } catch (error) {
       console.error('Auth check failed:', error);
       navigate('/NUPSLanding');
@@ -61,9 +57,7 @@ export default function NUPSPostLogin() {
     }
   };
 
-  const handleManualNavigation = (path) => {
-    navigate(path);
-  };
+  const handleManualNavigation = (path) => navigate(path);
 
   if (loading) {
     return (
@@ -106,133 +100,25 @@ export default function NUPSPostLogin() {
           )}
         </div>
 
-        {/* Role-Based Cards */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {/* Staff Portal */}
-          {user?.role === 'staff' && (
-            <Card 
-              className="bg-slate-900/50 border-cyan-500/30 hover:border-cyan-400/60 transition-all cursor-pointer group"
-              onClick={() => handleManualNavigation('/NUPSStaff')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/NUPSStaff'); }}}
-              aria-label="Navigate to Staff Terminal - Access POS, contracts, batch management, and time clock"
+        {/* DACO 003 §2 — Single-class landing card. No cross-role links. */}
+        <div className="max-w-md mx-auto bg-slate-900/50 border border-cyan-500/30 rounded-2xl p-8 text-center mb-6">
+          <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500 mb-2">Role Class</div>
+          <div className="text-3xl font-black text-white mb-4">{roleClass || '—'}</div>
+          <p className="text-slate-400 text-sm mb-6">
+            You'll be taken to your workflow home in a moment. Only your role's tools will be visible.
+          </p>
+          {destination && (
+            <Button
+              onClick={() => handleManualNavigation(destination)}
+              className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500"
             >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-cyan-400">
-                  <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  Staff Terminal
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-400 mb-4">
-                  Access POS, contracts, batch management, and time clock
-                </p>
-                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                  <span className="bg-slate-800 px-2 py-1 rounded">Register</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Contracts</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Batches</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Clock In/Out</span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Owner/Admin Portal */}
-          {(user?.role === 'owner' || user?.role === 'admin') && (
-            <Card 
-              className="bg-slate-900/50 border-purple-500/30 hover:border-purple-400/60 transition-all cursor-pointer group"
-              onClick={() => handleManualNavigation('/NUPSOwner')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/NUPSOwner'); }}}
-              aria-label="Navigate to Owner Dashboard - Analytics, reports, staff management, and system controls"
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-purple-400">
-                  <BarChart3 className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  Owner Dashboard
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-400 mb-4">
-                  Analytics, reports, staff management, and system controls
-                </p>
-                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                  <span className="bg-slate-800 px-2 py-1 rounded">Analytics</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Reports</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Staff</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Settings</span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* GlyphBucks Hub */}
-          <Card 
-            className="bg-slate-900/50 border-blue-500/30 hover:border-blue-400/60 transition-all cursor-pointer group"
-            onClick={() => handleManualNavigation('/GlyphBucksHub')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/GlyphBucksHub'); }}}
-            aria-label="Navigate to GlyphBucks Hub - Currency operations, sales, press, redemption, and fraud monitoring"
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-blue-400">
-                <DollarSign className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                GlyphBucks Hub
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-400 mb-4">
-                Currency operations, sales, press, redemption, and fraud monitoring
-              </p>
-              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                <span className="bg-slate-800 px-2 py-1 rounded">New Sale</span>
-                <span className="bg-slate-800 px-2 py-1 rounded">Press Bills</span>
-                <span className="bg-slate-800 px-2 py-1 rounded">Redeem</span>
-                <span className="bg-slate-800 px-2 py-1 rounded">Analytics</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Entertainer Portal */}
-          {user?.role === 'entertainer' && (
-            <Card 
-              className="bg-slate-900/50 border-pink-500/30 hover:border-pink-400/60 transition-all cursor-pointer group"
-              onClick={() => handleManualNavigation('/EntertainerCheckIn')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleManualNavigation('/EntertainerCheckIn'); }}}
-              aria-label="Navigate to Entertainer Portal - Check in, view schedule, track earnings, and manage profile"
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-pink-400">
-                  <Users className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  Entertainer Portal
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-400 mb-4">
-                  Check in, view schedule, track earnings, and manage profile
-                </p>
-                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                  <span className="bg-slate-800 px-2 py-1 rounded">Check In</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Schedule</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Earnings</span>
-                  <span className="bg-slate-800 px-2 py-1 rounded">Profile</span>
-                </div>
-              </CardContent>
-            </Card>
+              Continue to {destination.replace(/^\//, '')}
+            </Button>
           )}
         </div>
 
-        {/* Auto-redirect notice */}
         <div className="text-center">
-          <p className="text-slate-500 text-sm">
-            Redirecting to your dashboard automatically...
-          </p>
-          <div className="flex items-center justify-center gap-2 mt-3">
+          <div className="flex items-center justify-center gap-2">
             <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
             <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse delay-75"></div>
             <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse delay-150"></div>

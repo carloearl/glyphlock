@@ -13,6 +13,20 @@ import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import GlobalSearchDrawer from "./GlobalSearchDrawer";
 import ModeToggle from "./ModeToggle";
+import { base44 } from "@/api/base44Client";
+import { resolveRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
+import { isSovereign } from "@/lib/nups/sovereign";
+
+// DACO 003 §2 — which sections each role class may see.
+// STAFF / ENTERTAINER never reach this shell for general nav (they use their
+// own scoped shells) but if they do, they get an empty sidebar — no cross-role
+// leakage.
+const SECTIONS_BY_CLASS = {
+  ADMIN:       ["Operations · Tonight's Flow", "Floor & Staff", "Accounting", "Admin"],
+  MANAGER:     ["Operations · Tonight's Flow", "Floor & Staff", "Accounting"],
+  STAFF:       [],
+  ENTERTAINER: [],
+};
 
 /**
  * NUPSAppShell — unified chrome for every NUPS operator page.
@@ -180,6 +194,28 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   const now = useClock();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [roleClass, setRoleClass] = useState(ROLE_CLASS.ADMIN);
+
+  // Resolve role class once — drives which sidebar sections render (DACO 003 §2).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const u = await base44.auth.me();
+        let nu = null, sov = false;
+        try {
+          const matches = await base44.entities.NUPSUser.filter({ created_by: u.email });
+          nu = (matches || [])[0] || null;
+          sov = (matches || []).some(isSovereign);
+        } catch { /* fall through */ }
+        if (!cancelled) setRoleClass(resolveRoleClass({ user: u, nupsUser: nu, sovereign: sov }));
+      } catch { /* leave default */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const visibleSectionLabels = SECTIONS_BY_CLASS[roleClass] || [];
+  const visibleSections = NAV_SECTIONS.filter(s => visibleSectionLabels.includes(s.label));
 
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const dateStr = now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
@@ -211,9 +247,9 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
         </div>
       </div>
 
-      {/* Nav sections */}
+      {/* Nav sections — role-scoped per DACO 003 §2 */}
       <nav className="flex-1 overflow-y-auto py-3 px-2">
-        {NAV_SECTIONS.map((section) => (
+        {visibleSections.map((section) => (
           <div key={section.label} className="mb-4">
             <div className="px-3 mb-1 text-[9px] font-mono uppercase tracking-[0.18em] text-slate-600">
               {section.label}
