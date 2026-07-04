@@ -22,7 +22,6 @@ import CashDenominationPad from "./pos/CashDenominationPad";
 import CardPaymentPanel from "./pos/CardPaymentPanel";
 import OrderDisplay from "./pos/OrderDisplay";
 import FlowSteps from "./pos/FlowSteps";
-import MobileCartBar from "./pos/MobileCartBar";
 import DriverDropOffTracker from "./DriverDropOffTracker";
 import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
 import IDScannerCamera from "./IDScannerCamera";
@@ -917,7 +916,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
 
   return (
     <div
-      className="flex flex-col lg:flex-row gap-0 rounded-2xl overflow-hidden min-h-screen lg:min-h-[640px]"
+      className="flex flex-col gap-0 rounded-2xl overflow-hidden min-h-screen"
       style={{
         background: 'rgba(10,10,14,0.95)',
         border: '1px solid rgba(255,255,255,0.08)',
@@ -928,7 +927,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       }}
     >
       {/* LEFT: PRODUCTS + SEARCH */}
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderRightWidth: '1px', borderRightColor: 'rgba(255,255,255,0.06)', borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.06)' }}>
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.06)' }}>
 
         {/* Top bar: search + scan — hidden on door */}
         {station !== 'door' && (
@@ -1072,8 +1071,8 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         </div>
       </div>
 
-      {/* CENTER: CART + TOTALS (desktop only) */}
-      <div className="hidden lg:flex lg:w-80 flex-col shrink-0 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.4)', borderLeftWidth: '1px', borderLeftColor: 'rgba(255,255,255,0.06)' }}>
+      {/* CART + TOTALS — stacked below products (top-to-bottom flow) */}
+      <div className="flex w-full flex-col shrink-0 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.4)', borderTopWidth: '1px', borderTopColor: 'rgba(255,255,255,0.06)' }}>
         {/* Standard register flow — coaching strip for new operators */}
         <div className="p-3 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <FlowSteps
@@ -1418,28 +1417,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         </DialogContent>
       </Dialog>
 
-      {/* Mobile cart + CHARGE bar — the desktop cart column above is
-          `hidden lg:flex`, which left phones/small tablets with no way to
-          see totals or take payment. This sticky bar restores parity. */}
-      <MobileCartBar
-        cart={cart}
-        subtotal={subtotal}
-        tax={tax}
-        total={total}
-        finalTotal={finalTotal}
-        compAuth={compAuth}
-        isSubmitting={isSubmitting}
-        onUpdateQuantity={updateQuantity}
-        onRemoveItem={removeFromCart}
-        onCheckout={handleCheckout}
-        lockVoids={isDoorGirlLocked}
-      />
-
       {/* Driver Payout System — door register only, and only when host page
           requests it. The sidebar Register tab hides this column because
           "Driver Payouts" has its own sidebar page. */}
       {station === 'door' && showDriverPanel && (
-        <div className="flex-1 flex flex-col overflow-hidden" style={{ borderLeftWidth: '1px', borderLeftColor: 'rgba(255,255,255,0.06)' }}>
+        <div className="flex-1 flex flex-col overflow-hidden" style={{ borderTopWidth: '1px', borderTopColor: 'rgba(255,255,255,0.06)' }}>
           <div className="p-4 border-b border-white/10">
             <h3 className="text-sm font-bold text-white">Driver Payouts</h3>
           </div>

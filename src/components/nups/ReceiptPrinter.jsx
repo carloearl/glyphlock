@@ -77,12 +77,11 @@ export default function ReceiptPrinter({
     const cashierDisplay = getCashierDisplay(transaction);
 
     const itemsHtml = items.map((item, idx) =>
-      `<tr>
-        <td style="text-align:left;padding:3px 0;border-bottom:1px dotted #ddd;">${idx + 1}. ${item.product_name}</td>
-        <td style="text-align:center;padding:3px 0;border-bottom:1px dotted #ddd;">${item.quantity}</td>
-        <td style="text-align:right;padding:3px 0;border-bottom:1px dotted #ddd;">$${item.price?.toFixed(2)}</td>
-        <td style="text-align:right;padding:3px 0;border-bottom:1px dotted #ddd;font-weight:bold;">$${item.total?.toFixed(2)}</td>
-      </tr>`
+      `<div style="padding:4px 0;border-bottom:1px dotted #ddd;">
+         <div style="font-weight:bold;">${idx + 1}. ${item.product_name}</div>
+         <div style="font-size:10px;color:#555;padding-left:8px;">Qty: ${item.quantity} × $${item.price?.toFixed(2)}</div>
+         <div style="text-align:right;font-weight:bold;padding-top:2px;">$${item.total?.toFixed(2)}</div>
+       </div>`
     ).join('');
 
     const totalItems = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
@@ -171,29 +170,22 @@ export default function ReceiptPrinter({
         </table>
         ${vipSection}
         <div class="divider"></div>
-        <table>
-          <tr class="item-header">
-            <td style="text-align:left;">ITEM</td>
-            <td style="text-align:center;">QTY</td>
-            <td style="text-align:right;">PRICE</td>
-            <td style="text-align:right;">TOTAL</td>
-          </tr>
-        </table>
-        <table>${itemsHtml}</table>
+        <div style="font-size:9px;font-weight:bold;border-bottom:1px solid #000;padding-bottom:4px;margin-bottom:4px;">ITEMS</div>
+        <div>${itemsHtml}</div>
         <div style="font-size:9px;text-align:right;color:#666;padding-top:2px;">
           ${totalItems} item${totalItems !== 1 ? 's' : ''} sold
         </div>
         <div class="double-divider"></div>
-        <table>
-          <tr><td>Subtotal:</td><td class="right">$${(transaction.subtotal || 0).toFixed(2)}</td></tr>
-          ${showSvcFee && svcFee > 0 ? `<tr><td>${svcFeeLabelFull}:</td><td class="right">$${svcFee.toFixed(2)}</td></tr>` : ''}
-          ${transaction.discount > 0 ? `<tr><td>Discount:</td><td class="right" style="color:red;">-$${transaction.discount.toFixed(2)}</td></tr>` : ''}
-          ${tipAmount > 0 ? `<tr><td>Gratuity:</td><td class="right">$${tipAmount.toFixed(2)}</td></tr>` : ''}
-          ${showProcFee && ccFee > 0 ? `<tr><td>${ccFeeLabel}:</td><td class="right">$${ccFee.toFixed(2)}</td></tr>` : ''}
-          <tr><td>${taxLabel}:</td><td class="right">$${taxValue.toFixed(2)}</td></tr>
-        </table>
+        <div style="font-size:11px;">
+          <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>Subtotal</span><span>$${(transaction.subtotal || 0).toFixed(2)}</span></div>
+          ${showSvcFee && svcFee > 0 ? `<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>${svcFeeLabelFull}</span><span>$${svcFee.toFixed(2)}</span></div>` : ''}
+          ${transaction.discount > 0 ? `<div style="display:flex;justify-content:space-between;padding:2px 0;color:red;"><span>Discount</span><span>-$${transaction.discount.toFixed(2)}</span></div>` : ''}
+          ${tipAmount > 0 ? `<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>Gratuity</span><span>$${tipAmount.toFixed(2)}</span></div>` : ''}
+          <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>${taxLabel}</span><span>$${taxValue.toFixed(2)}</span></div>
+          ${showProcFee && ccFee > 0 ? `<div style="display:flex;justify-content:space-between;padding:2px 0;font-weight:bold;"><span>${ccFeeLabel}</span><span>$${ccFee.toFixed(2)}</span></div>` : ''}
+        </div>
         <div class="divider"></div>
-        <table><tr class="total-row"><td>TOTAL DUE:</td><td class="right">$${grandTotal.toFixed(2)}</td></tr></table>
+        <div class="total-row" style="display:flex;justify-content:space-between;"><span>TOTAL DUE:</span><span>$${grandTotal.toFixed(2)}</span></div>
         <div class="divider"></div>
         <table>
           <tr><td class="bold">Payment:</td><td class="right bold">${transaction.payment_method}</td></tr>
@@ -315,18 +307,12 @@ export default function ReceiptPrinter({
         </div>
 
         <div className="border-t border-dashed border-gray-700 pt-2 mb-2">
-          <div className="flex justify-between text-gray-500 text-[10px] mb-1 font-bold">
-            <span className="flex-1">ITEM</span>
-            <span className="w-8 text-center">QTY</span>
-            <span className="w-14 text-right">PRICE</span>
-            <span className="w-16 text-right">TOTAL</span>
-          </div>
+          <div className="text-gray-500 text-[10px] mb-1 font-bold">ITEMS</div>
           {items.map((item, idx) => (
-            <div key={idx} className="flex justify-between text-gray-300 py-0.5">
-              <span className="flex-1 truncate">{item.product_name}</span>
-              <span className="w-8 text-center text-gray-500">{item.quantity}</span>
-              <span className="w-14 text-right text-gray-500">${item.price?.toFixed(2)}</span>
-              <span className="w-16 text-right text-white font-bold">${item.total?.toFixed(2)}</span>
+            <div key={idx} className="py-1 border-b border-dotted border-gray-800">
+              <div className="text-gray-200 font-bold">{idx + 1}. {item.product_name}</div>
+              <div className="text-[10px] text-gray-500 pl-2">Qty: {item.quantity} × ${item.price?.toFixed(2)}</div>
+              <div className="text-right text-white font-bold mt-0.5">${item.total?.toFixed(2)}</div>
             </div>
           ))}
           <div className="text-right text-[10px] text-gray-600 mt-1">{totalItems} item{totalItems !== 1 ? 's' : ''}</div>
@@ -337,8 +323,8 @@ export default function ReceiptPrinter({
           {showSvcFee && svcFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>{svcFeeLabelScreen}</span><span>${svcFeeScreen.toFixed(2)}</span></div>}
           {transaction.discount > 0 && <div className="flex justify-between text-red-400"><span>Discount</span><span>-${transaction.discount.toFixed(2)}</span></div>}
           {tipAmount > 0 && <div className="flex justify-between text-gray-400"><span>Gratuity</span><span>${tipAmount.toFixed(2)}</span></div>}
-          {showProcFee && ccFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>{ccFeeLabelScreen}</span><span>${ccFeeScreen.toFixed(2)}</span></div>}
           <div className="flex justify-between text-gray-400"><span>{taxLabelScreen}</span><span>${taxValueScreen.toFixed(2)}</span></div>
+          {showProcFee && ccFeeScreen > 0 && <div className="flex justify-between text-amber-400 font-bold"><span>{ccFeeLabelScreen}</span><span>${ccFeeScreen.toFixed(2)}</span></div>}
           <div className="border-t border-gray-700 pt-1 flex justify-between text-lg font-black text-green-400">
             <span>TOTAL</span><span>${grandTotal.toFixed(2)}</span>
           </div>

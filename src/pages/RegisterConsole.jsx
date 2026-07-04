@@ -162,22 +162,19 @@ function RegisterConsoleInner() {
               door girl handles cover, drivers, AND dancer arrivals from one
               screen. (Entertainer onboarding stays on its own tab.) */}
           {activeTab === "register" && (
-            // Tablet-first: stacks on portrait, becomes 1-col + side rail
-            // at lg (1024px+), full 2-col at xl. Side rail caps its own
-            // height so the register never gets pushed off-screen.
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px] gap-3 sm:gap-4">
+            // Top-to-bottom vertical flow: register, then driver onboarding,
+            // then entertainer check-in — all stacked, no side-by-side panels.
+            <div className="flex flex-col gap-3 sm:gap-4">
               <POSCashRegister showDriverPanel={false} user={user} station="door" />
-              <div className="space-y-3 sm:space-y-4 lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto lg:pr-1">
-                <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-3 sm:p-4">
-                  <DriverQuickAdd user={user} />
+              <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-3 sm:p-4">
+                <DriverQuickAdd user={user} />
+              </div>
+              <div className="rounded-xl border border-pink-500/20 bg-slate-950/60 p-3 sm:p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <UserCheck className="w-5 h-5 text-pink-400" />
+                  <h2 className="text-base sm:text-lg font-bold text-white">Entertainer Daily Check-In</h2>
                 </div>
-                <div className="rounded-xl border border-pink-500/20 bg-slate-950/60 p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <UserCheck className="w-5 h-5 text-pink-400" />
-                    <h2 className="text-base sm:text-lg font-bold text-white">Entertainer Daily Check-In</h2>
-                  </div>
-                  <EntertainerCheckIn user={user} />
-                </div>
+                <EntertainerCheckIn user={user} />
               </div>
             </div>
           )}
