@@ -8,6 +8,7 @@ import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
+import POSCashRegister from "@/components/nups/POSCashRegister";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
 import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
 import FundsOffDrawerPanel from "@/components/nups/frontdoor/FundsOffDrawerPanel";
@@ -165,6 +166,7 @@ function FrontDoorContent() {
             <div className="min-w-0 rounded-xl border border-white/5 bg-slate-950/40 p-4">
               {activeTab === "drivers" && <DriverQuickAdd user={user} />}
               {activeTab === "guests" && <GuestCheckIn />}
+              {activeTab === "register" && <POSCashRegister station="door" user={user} venueId={venueId} />}
               {activeTab === "dancers" && <EntertainerCheckIn user={user} />}
               {activeTab === "staff" && <StaffClockInOut user={user} venueId={venueId} station="door" />}
             </div>

@@ -38,7 +38,7 @@ const STEPS = [
     label: "Ring Up",
     hint: "Cover, drinks, payouts",
     color: "emerald",
-    href: "/Register",
+    // In-place tab — POS mounts inside FrontDoor, no new route/tab.
   },
   {
     id: "dancers",
@@ -68,7 +68,8 @@ const CLS = {
 };
 
 export default function FrontDoorSideNav({ activeId, onSelect, enabledIds }) {
-  const visible = STEPS.filter(s => s.href || enabledIds.includes(s.id));
+  // Register is a permanent in-place step, always visible.
+  const visible = STEPS.filter(s => s.id === "register" || enabledIds.includes(s.id));
 
   return (
     <nav className="w-full lg:w-64 shrink-0 space-y-2">
@@ -83,15 +84,17 @@ export default function FrontDoorSideNav({ activeId, onSelect, enabledIds }) {
         const Icon = s.icon;
         const isActive = activeId === s.id;
         const cls = CLS[s.color];
-        const inner = (
-          <div
-            className={`group relative w-full text-left rounded-xl border p-3 flex items-center gap-3 transition-all ${
+        return (
+          <button
+            key={s.id}
+            onClick={() => onSelect(s.id)}
+            className={`block w-full text-left rounded-xl border p-3 min-h-[64px] flex items-center gap-3 transition-all active:scale-[0.99] ${
               isActive
                 ? `${cls.active} shadow-[0_0_20px_-8px_currentColor]`
                 : "bg-slate-900/40 border-slate-800 hover:border-slate-600 text-slate-300"
             }`}
           >
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shrink-0 ${
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-black text-sm shrink-0 ${
               isActive ? cls.ring : "bg-slate-800 text-slate-400"
             }`}>
               {s.n}
@@ -103,20 +106,6 @@ export default function FrontDoorSideNav({ activeId, onSelect, enabledIds }) {
               </div>
               <p className="text-[10px] text-slate-500 mt-0.5 truncate">{s.hint}</p>
             </div>
-          </div>
-        );
-
-        if (s.href) {
-          return (
-            <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer">
-              {inner}
-              <p className="text-[9px] text-slate-600 mt-1 pl-3 uppercase tracking-wider">opens register →</p>
-            </a>
-          );
-        }
-        return (
-          <button key={s.id} onClick={() => onSelect(s.id)} className="block w-full">
-            {inner}
           </button>
         );
       })}
