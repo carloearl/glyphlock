@@ -14,7 +14,7 @@ import { useActiveVenue } from "@/hooks/useActiveVenue";
 import GlobalSearchDrawer from "./GlobalSearchDrawer";
 import ModeToggle from "./ModeToggle";
 import { base44 } from "@/api/base44Client";
-import { resolveRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
+import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
 import { isSovereign } from "@/lib/nups/sovereign";
 
 // DACO 003 §2 — which sections each role class may see.
@@ -197,6 +197,9 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   const [roleClass, setRoleClass] = useState(ROLE_CLASS.ADMIN);
 
   // Resolve role class once — drives which sidebar sections render (DACO 003 §2).
+  // If STAFF or ENTERTAINER lands on an app-shell page, kick them back to their
+  // class home. §2 says lower classes never see the operator shell — an empty
+  // sidebar is a UX dead-end, not a valid state.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -208,10 +211,21 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
           nu = (matches || [])[0] || null;
           sov = (matches || []).some(isSovereign);
         } catch { /* fall through */ }
-        if (!cancelled) setRoleClass(resolveRoleClass({ user: u, nupsUser: nu, sovereign: sov }));
+        if (cancelled) return;
+        const cls = resolveRoleClass({ user: u, nupsUser: nu, sovereign: sov });
+        setRoleClass(cls);
+        // Bounce STAFF / ENTERTAINER off the operator shell — they never
+        // belong here. FrontDoor / EntertainerCheckIn opt out explicitly by
+        // rendering their own chrome (see StaffHome, EntertainerHome).
+        if ((cls === ROLE_CLASS.STAFF || cls === ROLE_CLASS.ENTERTAINER)
+            && !location.pathname.toLowerCase().startsWith("/frontdoor")
+            && !location.pathname.toLowerCase().startsWith("/entertainercheckin")) {
+          navigate(homeForRoleClass(cls), { replace: true });
+        }
       } catch { /* leave default */ }
     })();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const visibleSectionLabels = SECTIONS_BY_CLASS[roleClass] || [];

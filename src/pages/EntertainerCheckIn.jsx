@@ -9,6 +9,7 @@
  * checklist + active-shift roster) as a fullscreen kiosk surface.
  */
 import React from "react";
+import RoleClassGuard from "@/components/nups/RoleClassGuard";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Music } from "lucide-react";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
@@ -16,7 +17,10 @@ import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 export default function EntertainerCheckInPage() {
   const navigate = useNavigate();
 
+  // DACO 003 §2 — door PIN station. Entertainers check themselves in; STAFF
+  // (door girl / doorman) supervises; MANAGER + ADMIN can shadow-support.
   return (
+    <RoleClassGuard allow={["ENTERTAINER", "STAFF", "MANAGER", "ADMIN"]}>
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <header className="border-b border-white/10 px-4 py-3 bg-black/95 sticky top-0 z-40">
@@ -42,5 +46,6 @@ export default function EntertainerCheckInPage() {
         <EntertainerCheckIn />
       </main>
     </div>
+    </RoleClassGuard>
   );
 }

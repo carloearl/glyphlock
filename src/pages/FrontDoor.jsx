@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings, AlertCircle } from "lucide-react";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
+import RoleClassGuard from "@/components/nups/RoleClassGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
@@ -26,6 +27,10 @@ import { useFrontDoorConfig, DEFAULT_FRONT_DOOR_CONFIG } from "@/hooks/useFrontD
  * (per-venue, edited live by admins via the gear icon). Zero hardcoded layout.
  */
 export default function FrontDoor() {
+  // DACO 003 §2 — role-class scoping. STAFF works the door, MANAGER supervises,
+  // ADMIN is the superset. ENTERTAINERs never see the register.
+  // Legacy NUPSRouteGuard stays as an authentication gate; RoleClassGuard is
+  // the canonical §2 scope check.
   return (
     <NUPSRouteGuard
       requiredRoles={[
@@ -38,7 +43,9 @@ export default function FrontDoor() {
         "SECURITY",
       ]}
     >
-      <FrontDoorContent />
+      <RoleClassGuard allow={["STAFF", "MANAGER", "ADMIN"]}>
+        <FrontDoorContent />
+      </RoleClassGuard>
     </NUPSRouteGuard>
   );
 }

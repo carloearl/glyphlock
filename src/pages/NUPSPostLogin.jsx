@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Lock, Loader2 } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
-import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from '@/lib/nups/roleClass';
+import { resolveRoleClass, homeForRoleClass, HOME_BY_CLASS } from '@/lib/nups/roleClass';
 import { isSovereign } from '@/lib/nups/sovereign';
 
 export default function NUPSPostLogin() {
@@ -38,14 +38,17 @@ export default function NUPSPostLogin() {
       const cls = resolveRoleClass({ user: currentUser, nupsUser, sovereign });
       setRoleClass(cls);
 
-      // Honor an explicit destination hint from NUPSLogin only if it matches
-      // the resolved class's home tree — otherwise fall back to class home.
-      // (Prevents cross-role deep-links defeating role scoping.)
+      // Honor an explicit destination hint from NUPSLogin ONLY when it points
+      // to the resolved class's own home (or ADMIN, which is a superset).
+      // Everything else falls back to the class home. Closes the cross-role
+      // deep-link bypass §2 forbids.
       const savedDest = sessionStorage.getItem('nups_destination');
       sessionStorage.removeItem('nups_destination');
       sessionStorage.removeItem('nups_role_hint');
       const classHome = homeForRoleClass(cls);
-      const dest = savedDest ? `/${savedDest}` : classHome;
+      const validDests = new Set([classHome, HOME_BY_CLASS.ADMIN]);
+      const hinted = savedDest ? `/${savedDest}` : null;
+      const dest = (hinted && validDests.has(hinted)) ? hinted : classHome;
       setDestination(dest);
 
       setTimeout(() => navigate(dest), 1500);

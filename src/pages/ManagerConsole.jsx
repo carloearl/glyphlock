@@ -31,6 +31,7 @@ import {
   Users, Music, Clock, DollarSign, FileText, Activity, UserPlus, ChevronRight, ShieldCheck,
 } from "lucide-react";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
+import RoleClassGuard from "@/components/nups/RoleClassGuard";
 
 const TABS = [
   { key: "tonight",      label: "Tonight",      icon: Activity },
@@ -312,8 +313,11 @@ export default function ManagerConsole() {
     }
   };
 
+  // DACO 003 §2 — MANAGER + ADMIN class only. Legacy NUPSRouteGuard is kept
+  // as the auth gate; RoleClassGuard enforces canonical §2 scope.
   return (
     <NUPSRouteGuard requiredRoles={["VENUE_MANAGER", "VENUE_OWNER", "PLATFORM_ADMIN", "DEMO"]}>
+     <RoleClassGuard allow={["MANAGER", "ADMIN"]}>
       <NUPSAppShell
         title="Manager Console"
         subtitle="Floor ops · Onboarding · Live oversight"
@@ -344,6 +348,7 @@ export default function ManagerConsole() {
           {renderBody()}
         </div>
       </NUPSAppShell>
+     </RoleClassGuard>
     </NUPSRouteGuard>
   );
 }
