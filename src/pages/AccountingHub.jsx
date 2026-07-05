@@ -127,7 +127,7 @@ export default function AccountingHub() {
 
         {/* Reports grid */}
         {venueId && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <PnLPanel venue_id={venueId} from={from} to={to} />
             <BalanceSheetPanel venue_id={venueId} asOf={to} />
             <CashFlowPanel venue_id={venueId} from={from} to={to} />

@@ -362,7 +362,7 @@ export default function DailySettlementDashboard() {
           <MetricCard label="Variance" value={`$${metrics.variance.toFixed(2)}`} sub="Z-Report over/short" accent={metrics.variance < 0 ? 'red' : 'slate'} warning={metrics.variance !== 0} />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-3">
           <Card className="bg-slate-900 border-slate-800">
             <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Truck className="w-4 h-4 text-pink-400" /> Driver Payouts</CardTitle></CardHeader>
             <CardContent className="space-y-2">
@@ -433,6 +433,30 @@ export default function DailySettlementDashboard() {
             Locked by {existingSettlement.locked_by} at {new Date(existingSettlement.locked_at).toLocaleString()}
           </div>
         )}
+      </div>
+
+      {/* Pinned bottom summary — total_sales always visible */}
+      <div className="sticky bottom-0 z-30 border-t border-slate-800 bg-slate-950/95 backdrop-blur-md px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-6 text-sm">
+            <div>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Cash</span>
+              <p className="font-mono font-bold text-emerald-300">${metrics.cash_sales.toFixed(2)}</p>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Card</span>
+              <p className="font-mono font-bold text-blue-300">${metrics.card_sales.toFixed(2)}</p>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Driver Payouts</span>
+              <p className="font-mono font-bold text-amber-300">${metrics.driver_payouts_total.toFixed(2)}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider">Total Sales (cash + card)</span>
+            <p className="font-mono font-black text-lg text-purple-300">${metrics.total_sales.toFixed(2)}</p>
+          </div>
+        </div>
       </div>
 
       <SettlementLockGuardModal

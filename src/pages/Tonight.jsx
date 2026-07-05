@@ -230,8 +230,8 @@ export default function Tonight() {
           </div>
         </div>
 
-        {/* Two-column: payouts + recent activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Vertical stack: payouts then recent activity */}
+        <div className="space-y-4 pb-20">
           {/* Pending payouts list */}
           <div className="bg-gray-900/40 border border-gray-800 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
@@ -297,6 +297,30 @@ export default function Tonight() {
           </div>
         </div>
 
+      </div>
+
+      {/* Pinned bottom summary — live revenue always visible */}
+      <div className="sticky bottom-0 z-30 border-t border-gray-800 bg-slate-950/95 backdrop-blur-md px-4 py-3">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-6 text-sm">
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Cash</span>
+              <p className="font-mono font-bold text-emerald-300">${liveRevenue.cash.toFixed(2)}</p>
+            </div>
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Card</span>
+              <p className="font-mono font-bold text-blue-300">${liveRevenue.card.toFixed(2)}</p>
+            </div>
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Pending Payouts</span>
+              <p className="font-mono font-bold text-amber-300">${pendingTotal.toFixed(2)}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider">Live Revenue</span>
+            <p className="font-mono font-black text-lg text-emerald-400">${liveRevenue.total.toFixed(2)}</p>
+          </div>
+        </div>
       </div>
     </NUPSAppShell>
   );

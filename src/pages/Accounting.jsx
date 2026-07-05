@@ -245,7 +245,7 @@ function AccountingContent() {
               <AccountingTrendChart timeline={data.timeline} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+            <div className="space-y-5 mb-6">
               <RevenueBreakdown data={data} settlements={settlements} />
               <DisbursementsBreakdown data={data} />
             </div>
@@ -301,6 +301,34 @@ function AccountingContent() {
           </>
         )}
       </div>
+
+      {/* Pinned bottom summary — net position always visible */}
+      {!loading && (
+        <div className="sticky bottom-0 z-30 border-t border-white/10 bg-slate-950/95 backdrop-blur-md px-4 py-3">
+          <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-6 text-sm">
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Gross Revenue</span>
+                <p className="font-mono font-bold text-emerald-300">${data.revenue.gross_revenue.toFixed(2)}</p>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Disbursements</span>
+                <p className="font-mono font-bold text-amber-300">${data.disbursements.total.toFixed(2)}</p>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">GB Liability</span>
+                <p className="font-mono font-bold text-violet-300">${data.glyphbucks.outstanding_face_value.toFixed(2)}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Net Position</span>
+              <p className={`font-mono font-black text-lg ${data.net_position >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                ${data.net_position.toFixed(2)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </NUPSAppShell>
   );
 }

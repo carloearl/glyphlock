@@ -452,9 +452,33 @@ export default function DriverPayoutHistory() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-slate-600 text-center pb-24">
+        <p className="text-[10px] text-slate-600 text-center pb-2">
           Disbursement ledger · Driver payouts are money OUT — never deducted from <code>total_sales</code>. BPAAA v3.0.
         </p>
+      </div>
+
+      {/* Pinned bottom summary — disbursement totals always visible */}
+      <div className="sticky bottom-0 z-30 border-t border-slate-800 bg-slate-950/95 backdrop-blur-md px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-6 text-sm">
+            <div>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Records</span>
+              <p className="font-mono font-bold text-white">{totals.count}</p>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Processed</span>
+              <p className="font-mono font-bold text-emerald-300">{money(totals.processed_amt)}</p>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Pending</span>
+              <p className="font-mono font-bold text-amber-300">{money(totals.pending_amt)}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider">Total Disbursed</span>
+            <p className="font-mono font-black text-lg text-purple-300">{money(totals.processed_amt + totals.pending_amt)}</p>
+          </div>
+        </div>
       </div>
 
       <BulkPayoutProcessor
