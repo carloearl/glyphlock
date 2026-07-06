@@ -615,9 +615,9 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     // it's a manager override. Use the dedicated "Manager Comp" button on the
     // register screen (opens PIN modal → on auth, finalize as $0 with comp_amount).
   ];
-  // Door register only accepts cash and credit card.
+  // Door register accepts cash, credit card, and tap-to-pay (Digital Wallet).
   const PAYMENT_METHODS = station === 'door'
-    ? ALL_PAYMENT_METHODS.filter(m => ['Cash', 'Credit Card'].includes(m.key))
+    ? ALL_PAYMENT_METHODS.filter(m => ['Cash', 'Credit Card', 'Digital Wallet'].includes(m.key))
     : ALL_PAYMENT_METHODS;
 
   const getMethodColor = (color) => ({
