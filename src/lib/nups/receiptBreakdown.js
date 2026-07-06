@@ -73,11 +73,11 @@ export function buildReceiptBreakdown(tx, rates = {}) {
   // Build the ordered line-item array so every consumer renders identically.
   const lines = [
     { key: 'subtotal', label: 'Subtotal', amount: subtotal, always: true },
-    { key: 'service_fee', label: svcFeeLabel, amount: svcFee, show: showSvcFee && svcFee > 0 },
+    { key: 'service_fee', label: svcFeeLabel, amount: svcFee, show: showSvcFee, always: false },
     { key: 'discount', label: 'Discount', amount: -discount, show: discount > 0, negative: true },
     { key: 'tip', label: 'Gratuity', amount: tipAmount, show: tipAmount > 0 },
     { key: 'tax', label: taxLabel, amount: taxValue, always: true },
-    { key: 'processing_fee', label: ccFeeLabel, amount: ccFee, show: showProcFee && ccFee > 0, emphasis: true },
+    { key: 'processing_fee', label: ccFeeLabel, amount: ccFee, show: showProcFee, always: false },
   ];
 
   const visibleLines = lines.filter(l => l.always || l.show);

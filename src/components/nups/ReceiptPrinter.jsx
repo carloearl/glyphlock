@@ -160,6 +160,12 @@ export default function ReceiptPrinter({
         <div class="divider"></div>
         <div class="total-row" style="display:flex;justify-content:space-between;"><span>TOTAL DUE:</span><span>$${grandTotal.toFixed(2)}</span></div>
         <div class="divider"></div>
+        <div style="font-size:9px;color:#666;border:1px dashed #999;padding:4px;margin:4px 0;">
+          <div style="font-weight:bold;margin-bottom:2px;font-size:8px;letter-spacing:1px;">ACCOUNTING</div>
+          <div style="display:flex;justify-content:space-between;padding:1px 0;"><span>${bd.svcFeeLabel}</span><span>$${bd.svcFee.toFixed(2)}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:1px 0;"><span>${bd.ccFeeLabel}</span><span>$${bd.ccFee.toFixed(2)}</span></div>
+        </div>
+        <div class="divider"></div>
         <table>
           <tr><td class="bold">Payment:</td><td class="right bold">${transaction.payment_method}</td></tr>
           ${transaction.payment_method === 'Cash' && transaction.cash_tendered ? `
@@ -289,6 +295,20 @@ export default function ReceiptPrinter({
           ))}
           <div className="border-t border-gray-700 pt-1 flex justify-between text-lg font-black text-green-400">
             <span>TOTAL</span><span>${grandTotal.toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* Accounting footer — always shows service fee + processing fee
+            even when $0.00 (cash) for ledger reconciliation. */}
+        <div className="border border-dashed border-gray-700 rounded px-2 py-1 mt-1 space-y-0.5">
+          <div className="text-[8px] uppercase tracking-widest text-gray-600 font-bold mb-0.5">Accounting</div>
+          <div className="flex justify-between text-[10px] text-gray-500">
+            <span>{bd.svcFeeLabel}</span>
+            <span className="font-mono">${bd.svcFee.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-[10px] text-gray-500">
+            <span>{bd.ccFeeLabel}</span>
+            <span className="font-mono">${bd.ccFee.toFixed(2)}</span>
           </div>
         </div>
 
