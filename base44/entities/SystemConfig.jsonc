@@ -1,18 +1,24 @@
 {
   "name": "SystemConfig",
   "type": "object",
+  "description": "Platform configuration. Supports global mode (config_key: 'global') and per-venue mode (config_key: 'venue', venue_id set). Per-venue takes priority; global is the fallback.",
   "properties": {
     "config_key": {
       "type": "string",
-      "description": "Unique config key. Use 'global' for platform-wide settings."
+      "description": "Config scope key. Use 'global' for platform-wide, 'venue' for per-venue (requires venue_id)."
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "DACO WAVE 1 \u2014 When config_key is 'venue', this identifies which venue the config applies to. Null for global config."
     },
     "mode": {
       "type": "string",
       "enum": [
         "REAL",
-        "DEMO"
+        "DEMO",
+        "SANDBOX"
       ],
-      "description": "Active platform mode. Single source of truth for writeEntity gateway."
+      "description": "Active platform mode. Single source of truth for writeEntity gateway. Per-venue record takes priority over global."
     },
     "tier": {
       "type": "string",

@@ -5,7 +5,7 @@ import { enforceRoleScope, isScopedRole } from './roleGate';
 // BPAA-NUPS-AUDIT-001 §5 — automatic AuditEvent coverage on every gated write
 import { emitFromGatewayWrite } from './audit/auditEventEmitter';
 
-const VALID_MODES = new Set(['REAL', 'DEMO']);
+const VALID_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
 
 const FINANCIAL_ENTITIES = new Set([
   'POSTransaction',
@@ -81,13 +81,29 @@ function isActorSovereign(actor) {
   return false;
 }
 
-async function resolveMode(requestContextMode) {
+async function resolveMode(requestContextMode, venue_id) {
   if (requestContextMode) {
     if (!VALID_MODES.has(requestContextMode)) {
       throw new Error(`writeEntity: invalid_mode: ${requestContextMode}`);
     }
     return requestContextMode;
   }
+  // DACO WAVE 1 — Layer 1: per-venue SystemConfig (if venue_id provided)
+  if (venue_id) {
+    try {
+      const venueRows = await base44.entities.SystemConfig.filter({ venue_id, config_key: 'venue' });
+      if (venueRows && venueRows.length === 1 && VALID_MODES.has(venueRows[0].mode)) {
+        return venueRows[0].mode;
+      }
+      if (venueRows && venueRows.length > 1) {
+        throw new Error(`writeEntity: SystemConfig_venue_duplicate: ${venueRows.length}_records_found`);
+      }
+    } catch (e) {
+      if (e.message && e.message.includes('SystemConfig_venue_duplicate')) throw e;
+      // Fall through to global on any other error
+    }
+  }
+  // DACO WAVE 1 — Layer 2: global SystemConfig (fallback)
   const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
   // Auto-bootstrap on first use. Throwing here blocks every write in the app
   // (door POS, settlements, payouts) on a fresh tenant. Default = REAL.
@@ -217,7 +233,7 @@ export async function writeEntity({
   if (!base44.entities[entity]) throw new Error(`writeEntity: unknown_entity: ${entity}`);
 
   const { actorId, role } = validateActor(actor);
-  const mode = await resolveMode(requestContext?.mode);
+  const mode = await resolveMode(requestContext?.mode, venue_id);
   const tier = 'TIER_1_OBSERVE';
   const isFinancial = FINANCIAL_ENTITIES.has(entity);
   const sovereign = isActorSovereign(actor);
@@ -313,8 +329,12 @@ export async function writeEntity({
     }
   }
 
+  // DACO WAVE 1 — Stamp mode on all entities EXCEPT protected entities
+  // (SystemConfig manages its own mode field; MigrationAuditLog is audit-only).
   let stamped;
-  if (operation === 'bulkCreate') {
+  if (PROTECTED_ENTITIES.has(entity)) {
+    stamped = data;
+  } else if (operation === 'bulkCreate') {
     stamped = (data || []).map((r) => injectMode(r, mode));
   } else if (operation === 'create' || operation === 'update') {
     stamped = injectMode(data, mode);
@@ -407,19 +427,33 @@ export async function writeEntity({
   return { ok: true, audit_id, mode, tier, result: 'allowed', value };
 }
 
-export async function toggleMode({ actor, newMode }) {
+export async function toggleMode({ actor, newMode, venue_id }) {
   validateActor(actor);
   if (!isActorSovereign(actor)) throw new Error('toggleMode: SOVEREIGN_REQUIRED');
   if (!VALID_MODES.has(newMode)) throw new Error(`toggleMode: invalid_mode: ${newMode}`);
 
-  const existing = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-  if (existing && existing.length > 1) {
-    throw new Error(`toggleMode: SystemConfig_global_duplicate: ${existing.length}_records_found`);
-  }
-  if (existing && existing.length === 1) {
-    await base44.entities.SystemConfig.update(existing[0].id, { mode: newMode });
+  // DACO WAVE 1 — Per-venue toggle (if venue_id provided)
+  if (venue_id) {
+    const existing = await base44.entities.SystemConfig.filter({ venue_id, config_key: 'venue' });
+    if (existing && existing.length > 1) {
+      throw new Error(`toggleMode: SystemConfig_venue_duplicate: ${existing.length}_records_found`);
+    }
+    if (existing && existing.length === 1) {
+      await base44.entities.SystemConfig.update(existing[0].id, { mode: newMode });
+    } else {
+      await base44.entities.SystemConfig.create({ config_key: 'venue', venue_id, mode: newMode });
+    }
   } else {
-    await base44.entities.SystemConfig.create({ config_key: 'global', mode: newMode });
+    // Global toggle (legacy / fallback)
+    const existing = await base44.entities.SystemConfig.filter({ config_key: 'global' });
+    if (existing && existing.length > 1) {
+      throw new Error(`toggleMode: SystemConfig_global_duplicate: ${existing.length}_records_found`);
+    }
+    if (existing && existing.length === 1) {
+      await base44.entities.SystemConfig.update(existing[0].id, { mode: newMode });
+    } else {
+      await base44.entities.SystemConfig.create({ config_key: 'global', mode: newMode });
+    }
   }
 
   await audit({
@@ -431,10 +465,11 @@ export async function toggleMode({ actor, newMode }) {
     mode: newMode,
     tier: 'TIER_1_OBSERVE',
     result: 'allowed',
-    notes: `toggleMode -> ${newMode}`,
+    venue_id: venue_id || null,
+    notes: `toggleMode -> ${newMode}${venue_id ? ` (venue: ${venue_id})` : ' (global)'}`,
   });
 
-  return { ok: true, mode: newMode };
+  return { ok: true, mode: newMode, venue_id: venue_id || null };
 }
 
 async function createMany(entityName, records, idKey) {

@@ -1,100 +1,108 @@
-// DACO OMEGA v6.0 — Phase 3: Three-layer mode resolver
+// DACO WAVE 1 — Phase 4 Mode Resolver (session override removed, per-venue added)
 //
 // Priority (highest wins):
 //   1. Request context override (per-call argument)
-//   2. Session storage flag (runtime override, set by SOVEREIGN)
-//   3. SystemConfig.mode (operator default)
+//   2. SystemConfig per-venue record (config_key: 'venue', venue_id match)
+//   3. SystemConfig global record (config_key: 'global')
 //
 // Modes: REAL | DEMO | SANDBOX
-// Default if nothing is set: 'DEMO'.
+// Default if nothing is set: 'REAL'.
+//
+// DACO WAVE 1 CHANGE: The client-side session override layer has been
+// REMOVED. Mode overrides must go through SystemConfig (per-venue or global)
+// so that UI and write gateway always agree. Session-based mode functions
+// are no longer exported.
 
 import { base44 } from '@/api/base44Client';
 
 const VALID_MODES = ['REAL', 'DEMO', 'SANDBOX'];
-const SESSION_KEY = 'nups_mode_override';
+
+let _globalCache = null;
+const _venueCache = {};
 
 /**
- * Layer 3: SystemConfig (operator default). Cached for the page lifetime.
+ * Read per-venue SystemConfig record. Returns null if not found.
  */
-let _configCache = null;
-async function readSystemConfig() {
-  if (_configCache) return _configCache;
+async function readVenueConfig(venue_id) {
+  if (!venue_id) return null;
+  if (_venueCache[venue_id]) return _venueCache[venue_id];
+  try {
+    const rows = await base44.entities.SystemConfig.filter({ venue_id, config_key: 'venue' });
+    _venueCache[venue_id] = rows?.[0] || null;
+  } catch {
+    _venueCache[venue_id] = null;
+  }
+  return _venueCache[venue_id];
+}
+
+/**
+ * Read global SystemConfig record. Returns null if not found.
+ */
+async function readGlobalConfig() {
+  if (_globalCache) return _globalCache;
   try {
     const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-    _configCache = rows?.[0] || null;
+    _globalCache = rows?.[0] || null;
   } catch {
-    _configCache = null;
+    _globalCache = null;
   }
-  return _configCache;
+  return _globalCache;
 }
 
 /**
- * Layer 2: session-storage override. Returns null if unset or invalid.
+ * Invalidate the mode cache. Call after a mode toggle so subsequent reads
+ * pick up the new value.
  */
-function readSessionOverride() {
-  try {
-    if (typeof window === 'undefined') return null;
-    const v = window.sessionStorage.getItem(SESSION_KEY);
-    return VALID_MODES.includes(v) ? v : null;
-  } catch {
-    return null;
+export function invalidateModeCache(venue_id) {
+  if (venue_id) {
+    delete _venueCache[venue_id];
+  } else {
+    _globalCache = null;
+    Object.keys(_venueCache).forEach((k) => delete _venueCache[k]);
   }
 }
 
 /**
- * Set the session-level mode override. SOVEREIGN-only at the app level
- * (caller must enforce). Audited by writeEntity() when used in writes.
- */
-export function setSessionMode(mode) {
-  if (!VALID_MODES.includes(mode)) {
-    throw new Error(`INVALID_MODE: ${mode}`);
-  }
-  if (typeof window !== 'undefined') {
-    window.sessionStorage.setItem(SESSION_KEY, mode);
-  }
-}
-
-export function clearSessionMode() {
-  if (typeof window !== 'undefined') {
-    window.sessionStorage.removeItem(SESSION_KEY);
-  }
-}
-
-/**
- * Resolve mode using all three layers.
+ * Resolve mode using the three-layer priority.
  * @param {object} requestContext optional { mode: 'REAL' | 'DEMO' | 'SANDBOX' }
+ * @param {string} venue_id optional venue scope for per-venue resolution
  */
-export async function getMode(requestContext) {
-  // Layer 1
+export async function getMode(requestContext, venue_id) {
+  // Layer 1: request context
   if (requestContext?.mode && VALID_MODES.includes(requestContext.mode)) {
     return requestContext.mode;
   }
-  // Layer 2
-  const sess = readSessionOverride();
-  if (sess) return sess;
-  // Layer 3
-  const cfg = await readSystemConfig();
+  // Layer 2: per-venue SystemConfig
+  if (venue_id) {
+    const venueCfg = await readVenueConfig(venue_id);
+    if (venueCfg?.mode && VALID_MODES.includes(venueCfg.mode)) return venueCfg.mode;
+  }
+  // Layer 3: global SystemConfig
+  const cfg = await readGlobalConfig();
   if (cfg?.mode && VALID_MODES.includes(cfg.mode)) return cfg.mode;
   // Default
-  return 'DEMO';
+  return 'REAL';
 }
 
 /**
  * Convenience for callers that have no request context.
+ * @param {string} venue_id optional venue scope
  */
-export async function getActiveMode() {
-  return getMode(undefined);
+export async function getActiveMode(venue_id) {
+  return getMode(undefined, venue_id);
 }
 
 /**
- * Returns all three layers for diagnostics / mode-badge UI.
+ * Returns all layers for diagnostics / mode-badge UI.
+ * @param {string} venue_id optional venue scope
  */
-export async function describeMode() {
-  const cfg = await readSystemConfig();
+export async function describeMode(venue_id) {
+  const venueCfg = venue_id ? await readVenueConfig(venue_id) : null;
+  const globalCfg = await readGlobalConfig();
   return {
-    layer1_systemConfig: cfg?.mode || null,
-    layer2_session: readSessionOverride(),
-    layer3_request: null,
-    resolved: await getActiveMode(),
+    venue_config: venueCfg?.mode || null,
+    global_config: globalCfg?.mode || null,
+    request: null,
+    resolved: await getActiveMode(venue_id),
   };
 }

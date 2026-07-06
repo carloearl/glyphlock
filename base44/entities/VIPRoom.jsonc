@@ -77,6 +77,16 @@
       "type": "boolean",
       "default": false,
       "description": "SECTION 5D \u2014 Set true when GlyphBucks voucher print is triggered on session close"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "DACO WAVE 1 \u2014 Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
     }
   },
   "required": [

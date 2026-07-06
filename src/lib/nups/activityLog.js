@@ -38,8 +38,16 @@ async function resolveCurrentUser() {
   }
 }
 
-async function resolveMode() {
+async function resolveMode(venue_id) {
+  // DACO WAVE 1 — Per-venue SystemConfig first, global fallback
   try {
+    if (venue_id) {
+      const venueRows = await base44.entities.SystemConfig.filter({ venue_id, config_key: 'venue' });
+      if (venueRows && venueRows.length === 1) {
+        const vm = venueRows[0].mode;
+        if (VALID_MODES.has(vm)) return vm;
+      }
+    }
     const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
     const m = rows?.[0]?.mode;
     return VALID_MODES.has(m) ? m : 'REAL';
@@ -73,7 +81,7 @@ export async function logActivity(opts = {}) {
       if (opts.action_type !== 'LOGIN') return null;
     }
 
-    const mode = await resolveMode();
+    const mode = await resolveMode(opts.venue_id);
 
     const record = {
       log_id: uuid(),

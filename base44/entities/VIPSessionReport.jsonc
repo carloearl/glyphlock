@@ -50,6 +50,16 @@
     "answers": {
       "type": "object",
       "description": "All Q1-Q20 field values as key/value pairs"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "DACO WAVE 1 \u2014 Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
     }
   },
   "required": [

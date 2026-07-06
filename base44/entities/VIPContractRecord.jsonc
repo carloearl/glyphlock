@@ -131,6 +131,16 @@
     "metadata": {
       "type": "object",
       "description": "Additional audit metadata"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "DACO WAVE 1 \u2014 Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
     }
   },
   "required": [
