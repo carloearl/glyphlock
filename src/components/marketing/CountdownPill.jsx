@@ -5,24 +5,15 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 // ─── CONSTANTS ───
-const LAUNCH_UTC = Date.UTC(2026, 6, 4, 7, 0, 0);
 const BETA_START_UTC = Date.UTC(2026, 0, 1, 7, 0, 0);
 const GLYPHS_STR = '◆◇◈◉◊○●◐◑◒◓◔◕◖◗◘◙◚◛◜◝◞◟◠◡◢◣◤◥◦◧◨◩◪◫◬◭◮◯';
 const CODE_SNIPPETS = ['0x', '1A', 'FF', 'A3', 'E9', '7C', 'B2', 'D4', '5F', '8E'];
 
 const pad = (n) => n.toString().padStart(2, "0");
 
+// System is now ACTIVE — no more countdown
 function getCountdown() {
-  const now = Date.now();
-  const diff = LAUNCH_UTC - now;
-  if (diff <= 0) return { launched: true, d: 0, h: 0, m: 0, s: 0 };
-  return {
-    launched: false,
-    d: Math.floor(diff / 86400000),
-    h: Math.floor((diff / 3600000) % 24),
-    m: Math.floor((diff / 60000) % 60),
-    s: Math.floor((diff / 1000) % 60),
-  };
+  return { launched: true, d: 0, h: 0, m: 0, s: 0 };
 }
 
 function getUptime() {
@@ -259,16 +250,16 @@ const StatMini = ({ value, label }) => (
 
 // ─── MILESTONES ───
 const MILESTONES = [
-  { label: "Beta 1.0", done: true },
-  { label: "QR Engine", done: true },
-  { label: "Image Lab", done: true },
-  { label: "GlyphBot AI", done: true },
-  { label: "Beta 2.0", done: true },
-  { label: "Voice Studio", done: true },
-  { label: "Beta 3.0", done: true, current: true },
-  { label: "SOC Module", done: false },
-  { label: "Enterprise", done: false },
-  { label: "LAUNCH", done: false, launch: true },
+  { label: "NUPS Core", done: true },
+  { label: "POS Register", done: true },
+  { label: "Double-Entry GL", done: true },
+  { label: "Driver Payouts", done: true },
+  { label: "1099 Payroll", done: true },
+  { label: "Audit Engine", done: true },
+  { label: "BPAAA v3.0", done: true, current: true },
+  { label: "Multi-Venue", done: false },
+  { label: "Mobile Kiosk", done: false },
+  { label: "FULL ROLLOUT", done: false, launch: true },
 ];
 
 // ─── MAIN COMPONENT ───
@@ -429,8 +420,8 @@ export default function CountdownPill() {
             {/* Status bar */}
             <div className="flex flex-col gap-1.5 mb-4 items-center lg:items-start">
               {[
-                { color: '#06b6d4', text: 'SYSTEMS NOMINAL' },
-                { color: '#4f46e5', text: 'ENCRYPTED' },
+                { color: '#10b981', text: 'NUPS ONLINE' },
+                { color: '#06b6d4', text: 'GATEWAY OPEN' },
                 { color: '#7c3aed', text: uptime },
               ].map((s, i) => (
                 <div key={i} className="flex items-center gap-2 text-[9px] sm:text-[10px] uppercase tracking-[0.1em] text-white/50">
@@ -442,15 +433,15 @@ export default function CountdownPill() {
             </div>
 
             {/* Live badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 text-[10px] font-black tracking-[0.15em] text-cyan-400 uppercase"
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 text-[10px] font-black tracking-[0.15em] text-emerald-400 uppercase"
               style={{
-                background: 'rgba(6,182,212,0.08)',
-                border: '2px solid rgba(6,182,212,0.5)',
+                background: 'rgba(16,185,129,0.08)',
+                border: '2px solid rgba(16,185,129,0.5)',
                 clipPath: 'polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)',
               }}
             >
               <span style={{ display: 'inline-block', animation: 'liveBadgeSpin 3s linear infinite' }}>◆</span>
-              BETA 3.0
+              NUPS LIVE
             </div>
 
             {/* Title */}
@@ -466,7 +457,7 @@ export default function CountdownPill() {
                   animation: 'gradShift 4s linear infinite',
                   filter: 'drop-shadow(0 0 15px rgba(6,182,212,0.4))',
                 }}
-              >INDEPENDENCE</span>
+              >NEXUS UNIFIED</span>
               <span className="block text-xl sm:text-2xl md:text-3xl font-black uppercase"
                 style={{
                   fontFamily: "'Orbitron', sans-serif",
@@ -478,41 +469,55 @@ export default function CountdownPill() {
                   animation: 'shimmerText 3s ease-in-out infinite',
                   filter: 'drop-shadow(0 0 15px rgba(124,58,237,0.4))',
                 }}
-              >PROTOCOL</span>
+              >PORTAL SYSTEM</span>
             </div>
 
             <p className="text-[11px] sm:text-xs font-semibold text-white/80 mb-2">
-              <span className="text-cyan-400 font-black" style={{ textShadow: '0 0 15px rgba(6,182,212,0.6)' }}>JULY 4TH, 2026</span>
+              <span className="text-emerald-400 font-black" style={{ textShadow: '0 0 15px rgba(16,185,129,0.6)' }}>NOW ACTIVE</span>
             </p>
 
             <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.05em] text-violet-400 leading-relaxed font-mono">
-              NO LOCKED BOXES<br />
-              NO PERMISSION SLIPS<br />
-              FULL SOVEREIGNTY
+              VENUE OPERATIONS<br />
+              POS · ACCOUNTING · COMPLIANCE<br />
+              BPAAA v3.0 CERTIFIED
             </p>
           </div>
 
-          {/* CENTER — COUNTDOWN */}
+          {/* CENTER — ACTIVE STATUS */}
           <div className="flex flex-col items-center px-0 lg:px-5 py-4 lg:py-0 border-t lg:border-t-0 lg:border-l lg:border-r border-indigo-600/20">
-            <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-5">
-              <CountdownBlock value={t.d} label="DAYS" />
-              <CountdownBlock value={pad(t.h)} label="HRS" />
-              <CountdownBlock value={pad(t.m)} label="MIN" />
-              <CountdownBlock value={pad(t.s)} label="SEC" />
+            <div className="flex flex-col items-center gap-3 mb-5">
+              <div className="relative">
+                <span className="block text-5xl sm:text-6xl font-black"
+                  style={{
+                    background: 'linear-gradient(135deg, #06b6d4, #4f46e5, #7c3aed)',
+                    backgroundSize: '200% auto',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    animation: 'shimmerText 3s ease-in-out infinite',
+                    filter: 'drop-shadow(0 0 20px rgba(6,182,212,0.6))',
+                  }}
+                >ACTIVE</span>
+                <span className="absolute -top-2 -right-3 w-3 h-3 rounded-full bg-emerald-400"
+                  style={{ boxShadow: '0 0 15px #10b981', animation: 'statusPulsePill 1.5s ease-in-out infinite' }} />
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-emerald-400 font-bold font-mono">
+                ◆ SYSTEM ONLINE ◆
+              </div>
             </div>
 
             {/* Progress */}
             <div className="w-full max-w-[260px]">
               <div className="flex justify-between text-[8px] sm:text-[9px] uppercase tracking-[0.1em] text-white/40 mb-2 font-mono">
-                <span>◆ MILESTONES</span>
-                <span className="text-violet-400 font-black">7/10</span>
+                <span>◆ OPERATIONAL</span>
+                <span className="text-emerald-400 font-black">100%</span>
               </div>
               <div className="relative h-[5px] bg-indigo-900/40 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full rounded-full relative"
-                  style={{ background: 'linear-gradient(90deg, #4f46e5, #06b6d4, #7c3aed)', boxShadow: '0 0 15px rgba(6,182,212,0.5)' }}
+                  style={{ background: 'linear-gradient(90deg, #4f46e5, #06b6d4, #10b981)', boxShadow: '0 0 15px rgba(6,182,212,0.5)' }}
                   initial={{ width: 0 }}
-                  animate={isInView ? { width: '70%' } : { width: 0 }}
+                  animate={isInView ? { width: '100%' } : { width: 0 }}
                   transition={{ delay: 0.8, duration: 2, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <div className="absolute top-0 h-full w-full"
@@ -528,15 +533,15 @@ export default function CountdownPill() {
           {/* RIGHT */}
           <div className="text-center lg:text-right">
             <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-5">
-              <StatMini value="63" label="MODULES" />
-              <StatMini value="1.2K" label="AUDITS" />
-              <StatMini value="0" label="BREACHES" />
-              <StatMini value="99.99%" label="UPTIME" />
+              <StatMini value="POS" label="REGISTER" />
+              <StatMini value="GL" label="LEDGER" />
+              <StatMini value="1099" label="PAYROLL" />
+              <StatMini value="0" label="VARIANCE" />
             </div>
 
             <div className="flex gap-3 justify-center lg:justify-end mb-3">
               <Link
-                to={createPageUrl("Pricing")}
+                to="/NUPSLanding"
                 className="inline-block px-5 py-2.5 text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] text-black no-underline relative overflow-hidden"
                 style={{
                   background: 'linear-gradient(135deg, #06b6d4, #7c3aed)',
@@ -545,23 +550,23 @@ export default function CountdownPill() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                <span className="relative z-10">◆ JOIN ◆</span>
+                <span className="relative z-10">◆ ENTER NUPS ◆</span>
               </Link>
               <Link
-                to={createPageUrl("About")}
+                to="/NUPSGateway"
                 className="inline-block px-4 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-cyan-400 border-2 border-cyan-400/60 no-underline"
                 style={{
                   clipPath: 'polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%)',
                   transition: 'all 0.3s ease',
                 }}
               >
-                <span className="relative z-10">WATCH</span>
+                <span className="relative z-10">GATEWAY</span>
               </Link>
             </div>
 
             <div className="text-[8px] sm:text-[9px] text-white/25 font-mono">
               OPERATIONAL SINCE <span className="text-cyan-400/60">JAN 1, 2026</span><br />
-              MASTER COVENANT PROTECTED
+              BPAAA v3.0 COMPLIANT
             </div>
           </div>
         </div>

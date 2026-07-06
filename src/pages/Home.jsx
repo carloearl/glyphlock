@@ -108,14 +108,14 @@ export default function Home() {
   return (
     <>
       <SEOHead 
-        title="Intelligent Security & Creator Infrastructure | GlyphLock Security LLC"
-        description="GlyphLock Security LLC — where intelligent security meets creator sovereignty. Post-quantum encryption, AI-orchestrated defense, blockchain-anchored authorship, and the Master Covenant governance framework. Build what's yours. Prove it forever."
-        keywords="GlyphLock Security, creator infrastructure, AI security orchestration, quantum-resistant encryption, post-quantum cryptography, secure QR identity, blockchain authorship proof, venue management POS, AI threat detection, zero-trust architecture, Master Covenant, digital sovereignty"
+        title="NUPS — Nexus Unified Portal System | GlyphLock"
+        description="NUPS is live — the Nexus Unified Portal System for venue operations, POS, double-entry accounting, and BPAAA v3.0 compliance. Built by GlyphLock."
+        keywords="NUPS, Nexus Unified Portal System, venue management, POS, point of sale, double-entry accounting, 1099 contractor payroll, driver payouts, BPAAA compliance, GlyphLock, venue operations"
         url="/"
       />
       
       {/* SEO H1 - Hidden but crawlable */}
-      <h1 className="sr-only">GlyphLock Security — Intelligent Security Infrastructure for Creators, Builders, and Sovereign Digital Ecosystems</h1>
+      <h1 className="sr-only">NUPS — Nexus Unified Portal System. Live venue operations, POS, accounting & compliance by GlyphLock.</h1>
 
       <main className="w-full relative" style={{ background: 'transparent', position: 'relative' }}>
         
@@ -123,7 +123,7 @@ export default function Home() {
         <section className="w-full">
           <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
             <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-3xl mx-auto text-white/90 uppercase tracking-[3px]">
-              The next-generation system where autonomous agents, post-quantum security, and creator ownership converge.
+              NUPS — Nexus Unified Portal System. Live venue operations, POS, accounting & compliance — now active.
             </p>
           </div>
 
