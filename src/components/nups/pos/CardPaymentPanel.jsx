@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CreditCard, Smartphone, Wifi } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import IDScannerCamera from "../IDScannerCamera";
+import { CreditCard, Smartphone, Wifi, Loader2 } from "lucide-react";
 
 /**
  * Card / Tap-to-Pay / Digital Wallet panel.
@@ -11,8 +9,7 @@ import IDScannerCamera from "../IDScannerCamera";
  * In production, this would integrate with Stripe Terminal SDK.
  */
 export default function CardPaymentPanel({ total, method, onConfirm }) {
-    const [lastFour, setLastFour] = useState("");
-  const [showScanner, setShowScanner] = useState(false);
+  const [lastFour, setLastFour] = useState("");
   const [approvalCode, setApprovalCode] = useState("");
   const [processing, setProcessing] = useState(false);
 
@@ -21,29 +18,19 @@ export default function CardPaymentPanel({ total, method, onConfirm }) {
 
   const handleProcess = () => {
     setProcessing(true);
-    // Simulate processing
+    // Simulate card reader processing — replaces ID scanner hack
     setTimeout(() => {
       setProcessing(false);
       onConfirm({
-        card_last_four: lastFour || "0000",
+        card_last_four: lastFour || "4242",
         approval_code: approvalCode || `APR-${Date.now().toString(36).toUpperCase()}`,
         method,
       });
-    }, 1500);
+    }, 1800);
   };
 
     return (
     <div className="space-y-4">
-      {showScanner && (
-        <Dialog open={showScanner} onOpenChange={setShowScanner}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Scan Guest ID</DialogTitle>
-            </DialogHeader>
-            <IDScannerCamera onDataExtracted={handleProcess} />
-          </DialogContent>
-        </Dialog>
-      )}
 
       {/* Amount */}
       <div className="bg-black/70 border border-cyan-500/30 rounded-xl p-4 text-center">
@@ -78,7 +65,7 @@ export default function CardPaymentPanel({ total, method, onConfirm }) {
           <div className="w-16 h-16 mx-auto border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
           <div className="text-lg font-bold text-cyan-400">Processing...</div>
           <div className="text-xs text-gray-500">
-            {isTap ? "Hold device near terminal" : "Waiting for card reader"}
+            {isTap ? "Hold device near terminal" : "Insert / swipe / tap card on reader"}
           </div>
         </div>
       ) : (
@@ -104,10 +91,16 @@ export default function CardPaymentPanel({ total, method, onConfirm }) {
           </div>
 
           <Button
-            onClick={() => setShowScanner(true)} // This is a placeholder, in a real scenario it would be integrated with the card reader SDK
+            onClick={handleProcess}
+            disabled={processing}
             className="w-full h-16 text-xl font-black bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
           >
-            {isTap ? "📱 Process Tap Payment" : "💳 Process Card"}
+            {processing ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                {isTap ? "Waiting for tap..." : "Reading card..."}
+              </>
+            ) : isTap ? "📱 Process Tap Payment" : "💳 Process Card"}
           </Button>
         </>
       )}
