@@ -20,6 +20,7 @@ import { useActiveVenue } from '../../hooks/useActiveVenue';
 import QuickChargePanel from "./pos/QuickChargePanel";
 import CashDenominationPad from "./pos/CashDenominationPad";
 import CardPaymentPanel from "./pos/CardPaymentPanel";
+import TransactionReceiptModal from "./pos/TransactionReceiptModal";
 import OrderDisplay from "./pos/OrderDisplay";
 import FlowSteps from "./pos/FlowSteps";
 import DriverDropOffTracker from "./DriverDropOffTracker";
@@ -484,8 +485,8 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       tip: tipAmount,
       total,
       // Comps: gross stays on `total` (so the gap is visible) but cash/card stay zero
-      cash_sales: isComp ? 0 : undefined,
-      card_sales: isComp ? 0 : undefined,
+      cash_sales: isComp ? 0 : ((details?.payment_method || paymentMethod) === 'Cash' ? total : 0),
+      card_sales: isComp ? 0 : (['Credit Card','Debit Card','Digital Wallet'].includes(details?.payment_method || paymentMethod) ? total : 0),
       payment_method: paymentMethod || "Cash",
       cashier: cashierName,
       cashier_name: cashierName,
@@ -759,38 +760,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         )}
       </div>
 
-      {/* Receipt modal — must be reachable from every paymentStep so the
-          cashier is never stranded on a blank screen after a completed sale. */}
-      <Dialog open={showReceiptModal && !!lastTransaction} onOpenChange={setShowReceiptModal}>
-        <DialogContent className="max-w-md bg-slate-950 border-emerald-500/40 text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-emerald-300">
-              <CheckCircle2 className="w-5 h-5" />
-              Transaction Complete
-            </DialogTitle>
-          </DialogHeader>
-          {lastTransaction && (
-            <div className="space-y-3">
-              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
-                <div className="text-[10px] uppercase tracking-widest text-emerald-400/70">Total Charged</div>
-                <div className="text-3xl font-black text-emerald-300 font-mono">
-                  ${Number(lastTransaction.total || 0).toFixed(2)}
-                </div>
-                <div className="text-[11px] text-slate-400 mt-1">
-                  {lastTransaction.payment_method} · {lastTransaction.transaction_id}
-                </div>
-              </div>
-              <ReceiptPrinter transaction={lastTransaction} />
-              <Button
-                onClick={() => setShowReceiptModal(false)}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12"
-              >
-                New Transaction
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <TransactionReceiptModal
+        open={showReceiptModal}
+        onClose={() => setShowReceiptModal(false)}
+        transaction={lastTransaction}
+      />
       </>
     );
   }
@@ -879,37 +853,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         </div>
       </div>
 
-      {/* Receipt modal — reachable from method picker too */}
-      <Dialog open={showReceiptModal && !!lastTransaction} onOpenChange={setShowReceiptModal}>
-        <DialogContent className="max-w-md bg-slate-950 border-emerald-500/40 text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-emerald-300">
-              <CheckCircle2 className="w-5 h-5" />
-              Transaction Complete
-            </DialogTitle>
-          </DialogHeader>
-          {lastTransaction && (
-            <div className="space-y-3">
-              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
-                <div className="text-[10px] uppercase tracking-widest text-emerald-400/70">Total Charged</div>
-                <div className="text-3xl font-black text-emerald-300 font-mono">
-                  ${Number(lastTransaction.total || 0).toFixed(2)}
-                </div>
-                <div className="text-[11px] text-slate-400 mt-1">
-                  {lastTransaction.payment_method} · {lastTransaction.transaction_id}
-                </div>
-              </div>
-              <ReceiptPrinter transaction={lastTransaction} />
-              <Button
-                onClick={() => setShowReceiptModal(false)}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12"
-              >
-                New Transaction
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <TransactionReceiptModal
+        open={showReceiptModal}
+        onClose={() => setShowReceiptModal(false)}
+        transaction={lastTransaction}
+      />
       </>
     );
   }
@@ -972,16 +920,22 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
             />
           )}
 
+          {/* ID Scanner + Guest Check-In — DOOR ONLY. These are door-station
+              features (guest intake, age verification). Must NOT be hidden
+              inside the bar products grid. */}
+          {station === 'door' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <IDScannerCamera venue_id={activeVenue?.id} onDataExtracted={handleIDScan} />
+              <GuestCheckIn />
+            </div>
+          )}
+
           {station !== 'door' && filteredProducts.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-[10px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>Products</span>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <IDScannerCamera venue_id={activeVenue?.id} onDataExtracted={handleIDScan} />
-            <GuestCheckIn />
-          </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                 {filteredProducts.map((product) => (
@@ -1383,39 +1337,12 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         onConfirm={applyPendingVoid}
       />
 
-      {/* Post-sale receipt confirmation — visible on every device. Cart
-          resets immediately on charge, so this modal is the only place the
-          door girl sees the completed transaction. Auto-shows on success. */}
-      <Dialog open={showReceiptModal && !!lastTransaction} onOpenChange={setShowReceiptModal}>
-        <DialogContent className="max-w-md bg-slate-950 border-emerald-500/40 text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-emerald-300">
-              <CheckCircle2 className="w-5 h-5" />
-              Transaction Complete
-            </DialogTitle>
-          </DialogHeader>
-          {lastTransaction && (
-            <div className="space-y-3">
-              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
-                <div className="text-[10px] uppercase tracking-widest text-emerald-400/70">Total Charged</div>
-                <div className="text-3xl font-black text-emerald-300 font-mono">
-                  ${Number(lastTransaction.total || 0).toFixed(2)}
-                </div>
-                <div className="text-[11px] text-slate-400 mt-1">
-                  {lastTransaction.payment_method} · {lastTransaction.transaction_id}
-                </div>
-              </div>
-              <ReceiptPrinter transaction={lastTransaction} />
-              <Button
-                onClick={() => setShowReceiptModal(false)}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12"
-              >
-                New Transaction
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Post-sale receipt confirmation — shared modal, visible on every device. */}
+      <TransactionReceiptModal
+        open={showReceiptModal}
+        onClose={() => setShowReceiptModal(false)}
+        transaction={lastTransaction}
+      />
 
       {/* Driver Payout System — door register only, and only when host page
           requests it. The sidebar Register tab hides this column because
