@@ -1,13 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const DREAM_PALACE_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
+const DEFAULT_VENUE_ID = '69ce5aa38db1dbb6df081a4b';
 
-const buildContracts = () => {
+const buildContracts = (venueId) => {
   const now = Date.now();
   return [
     {
       contract_id: `DP-DEMO-${now}-001`,
-      venue_id: DREAM_PALACE_VENUE_ID,
+      venue_id: venueId,
       contract_type: 'GlyphBucks Purchase',
       customer_name: 'James R. Holloway',
       customer_id_number: 'AZ-DL-4821933',
@@ -39,7 +39,7 @@ const buildContracts = () => {
     },
     {
       contract_id: `DP-DEMO-${now}-002`,
-      venue_id: DREAM_PALACE_VENUE_ID,
+      venue_id: venueId,
       contract_type: 'GlyphBucks Purchase',
       customer_name: 'Michael T. Vasquez',
       customer_id_number: 'TX-DL-9934812',
@@ -69,7 +69,7 @@ const buildContracts = () => {
     },
     {
       contract_id: `DP-DEMO-${now}-003`,
-      venue_id: DREAM_PALACE_VENUE_ID,
+      venue_id: venueId,
       contract_type: 'GlyphBucks Purchase',
       customer_name: 'Brandon K. Steele',
       customer_id_number: 'NV-DL-2201847',
@@ -99,7 +99,7 @@ const buildContracts = () => {
     },
     {
       contract_id: `DP-DEMO-${now}-004`,
-      venue_id: DREAM_PALACE_VENUE_ID,
+      venue_id: venueId,
       contract_type: 'VIP Package',
       customer_name: 'Derek A. Monroe',
       customer_id_number: 'CA-DL-6671204',
@@ -125,6 +125,199 @@ const buildContracts = () => {
       demo_label: 'DEMO — Draft, not yet signed',
       notes: 'DEMO DATA — Fresh draft. Shows starting state before customer signs.'
     }
+  ];
+};
+
+const buildVIPRooms = (venueId) => {
+  const now = Date.now();
+  return [
+    {
+      room_number: 'VIP-1',
+      venue_id: venueId,
+      room_name: 'Skyline Suite',
+      status: 'occupied',
+      rate_per_hour: 300,
+      suite_class: 'premium',
+      current_entertainer_id: 'DEMO-ENT-Crystal',
+      current_guest_id: 'DEMO-VG-001',
+      session_start: new Date(now - 35 * 60 * 1000).toISOString(),
+      session_notes: 'DEMO — Active VIP session',
+      is_demo: true,
+    },
+    {
+      room_number: 'VIP-2',
+      venue_id: venueId,
+      room_name: 'Velvet Room',
+      status: 'available',
+      rate_per_hour: 300,
+      suite_class: 'premium',
+      is_demo: true,
+    },
+    {
+      room_number: 'VIP-3',
+      venue_id: venueId,
+      room_name: 'Diamond Lounge',
+      status: 'cleaning',
+      rate_per_hour: 400,
+      suite_class: 'ultra',
+      last_session_end: new Date(now - 15 * 60 * 1000).toISOString(),
+      is_demo: true,
+    },
+  ];
+};
+
+const buildVIPGuests = (venueId) => {
+  const now = Date.now();
+  return [
+    {
+      guest_id: 'DEMO-VG-001',
+      venue_id: venueId,
+      full_name: 'Robert Spender',
+      phone: '555-2001',
+      email: 'robert@demo.test',
+      date_of_birth: '1985-06-15T00:00:00.000Z',
+      id_type: 'Drivers License',
+      id_number: 'AZ-DL-1234567',
+      id_state: 'AZ',
+      id_verified: true,
+      id_verified_by: 'Demo Manager',
+      id_verified_at: new Date(now - 60 * 60 * 1000).toISOString(),
+      status: 'in_building',
+      tier: 'high_roller',
+      visit_count: 12,
+      last_visit: new Date(now - 60 * 60 * 1000).toISOString(),
+      first_visit: new Date(now - 90 * 24 * 60 * 60 * 1000).toISOString(),
+      total_spend_lifetime: 4200,
+      vip_sessions_count: 8,
+      is_demo: true,
+      notes: 'DEMO — VIP high-roller guest',
+    },
+    {
+      guest_id: 'DEMO-VG-002',
+      venue_id: venueId,
+      full_name: 'Anthony Platinum',
+      phone: '555-2004',
+      email: 'anthony@demo.test',
+      date_of_birth: '1980-09-30T00:00:00.000Z',
+      id_type: 'Drivers License',
+      id_number: 'AZ-DL-7654321',
+      id_state: 'AZ',
+      id_verified: true,
+      id_verified_by: 'Demo Manager',
+      id_verified_at: new Date(now - 30 * 60 * 1000).toISOString(),
+      status: 'in_building',
+      tier: 'whale',
+      visit_count: 42,
+      last_visit: new Date(now - 30 * 60 * 1000).toISOString(),
+      first_visit: new Date(now - 365 * 24 * 60 * 60 * 1000).toISOString(),
+      total_spend_lifetime: 18500,
+      vip_sessions_count: 35,
+      is_demo: true,
+      notes: 'DEMO — Whale-tier VIP guest',
+    },
+    {
+      guest_id: 'DEMO-VG-003',
+      venue_id: venueId,
+      full_name: 'Derek Monroe',
+      phone: '555-2005',
+      email: 'derek@demo.test',
+      date_of_birth: '1990-03-12T00:00:00.000Z',
+      id_type: 'Drivers License',
+      id_number: 'CA-DL-6671204',
+      id_state: 'CA',
+      id_verified: true,
+      id_verified_by: 'Demo Manager',
+      id_verified_at: new Date(now - 2 * 60 * 60 * 1000).toISOString(),
+      status: 'left_building',
+      tier: 'standard',
+      visit_count: 3,
+      last_visit: new Date(now - 2 * 60 * 60 * 1000).toISOString(),
+      first_visit: new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      total_spend_lifetime: 850,
+      vip_sessions_count: 1,
+      is_demo: true,
+      notes: 'DEMO — Standard guest, draft VIP contract pending',
+    },
+  ];
+};
+
+const buildContractorPayouts = (venueId) => {
+  const now = Date.now();
+  const today = new Date().toISOString().split('T')[0];
+  return [
+    {
+      payout_id: `DEMO-CP-${now}-001`,
+      contractor_id: 'DEMO-ENT-Crystal',
+      contractor_name: 'Crystal',
+      venue_id: venueId,
+      payout_date: today,
+      payout_type: 'vip_commission',
+      total_face_value: 600,
+      redemption_rate: 0.85,
+      total_payout: 510,
+      payment_method: 'cash',
+      approved_by: 'manager@demo.nups',
+      paid_by: 'Demo Manager',
+      contractor_signature: 'Crystal',
+      signature_timestamp: new Date(now - 30 * 60 * 1000).toISOString(),
+      status: 'signed',
+      tax_year: new Date().getFullYear(),
+      is_demo: true,
+      notes: 'DEMO — VIP commission, signed awaiting payout',
+    },
+    {
+      payout_id: `DEMO-CP-${now}-002`,
+      contractor_id: 'DEMO-ENT-Nova',
+      contractor_name: 'Nova',
+      venue_id: venueId,
+      payout_date: today,
+      payout_type: 'shift_earnings',
+      total_face_value: 300,
+      redemption_rate: 0.85,
+      total_payout: 255,
+      payment_method: 'cash',
+      approved_by: 'manager@demo.nups',
+      status: 'issued',
+      tax_year: new Date().getFullYear(),
+      is_demo: true,
+      notes: 'DEMO — Shift earnings, issued to entertainer',
+    },
+    {
+      payout_id: `DEMO-CP-${now}-003`,
+      contractor_id: 'DEMO-ENT-Jade',
+      contractor_name: 'Jade',
+      venue_id: venueId,
+      payout_date: today,
+      payout_type: 'tip_share',
+      total_face_value: 150,
+      redemption_rate: 0.85,
+      total_payout: 127.50,
+      payment_method: 'paycard',
+      status: 'draft',
+      tax_year: new Date().getFullYear(),
+      is_demo: true,
+      notes: 'DEMO — Tip share, fresh draft',
+    },
+    {
+      payout_id: `DEMO-CP-${now}-004`,
+      contractor_id: 'DEMO-ENT-Crystal',
+      contractor_name: 'Crystal',
+      venue_id: venueId,
+      payout_date: today,
+      payout_type: 'glyphbucks_redemption',
+      total_face_value: 1000,
+      redemption_rate: 0.85,
+      total_payout: 850,
+      payment_method: 'cash',
+      approved_by: 'manager@demo.nups',
+      paid_by: 'Demo Manager',
+      contractor_signature: 'Crystal',
+      signature_timestamp: new Date(now - 3 * 60 * 60 * 1000).toISOString(),
+      status: 'archived',
+      tax_year: new Date().getFullYear(),
+      is_demo: true,
+      notes: 'DEMO — Archived GlyphBucks redemption from earlier shift',
+    },
   ];
 };
 
@@ -171,41 +364,102 @@ Deno.serve(async (req) => {
     }
 
     const payload = await req.json().catch(() => ({}));
-    const { clear_existing = false } = payload;
+    const { clear_existing = false, venue_id } = payload;
+
+    // Use the venue_id from the request, falling back to the default.
+    const targetVenueId = venue_id || DEFAULT_VENUE_ID;
 
     // Use service role for sandbox demo invocations since they lack user auth
     const entityClient = isSandboxDemo ? base44.asServiceRole : base44;
 
     if (clear_existing) {
-      const existing = await entityClient.entities.VenueContract.filter({
-        venue_id: DREAM_PALACE_VENUE_ID,
+      // Clear demo contracts
+      const existingContracts = await entityClient.entities.VenueContract.filter({
+        venue_id: targetVenueId,
         is_demo: true
       });
-      await Promise.all(existing.map(c => entityClient.entities.VenueContract.delete(c.id)));
+      await Promise.all(existingContracts.map(c => entityClient.entities.VenueContract.delete(c.id)));
+
+      // Clear demo VIP rooms
+      const existingRooms = await entityClient.entities.VIPRoom.filter({
+        venue_id: targetVenueId,
+        is_demo: true
+      });
+      await Promise.all(existingRooms.map(r => entityClient.entities.VIPRoom.delete(r.id)));
+
+      // Clear demo VIP guests
+      const existingGuests = await entityClient.entities.VIPGuest.filter({
+        venue_id: targetVenueId,
+        is_demo: true
+      });
+      await Promise.all(existingGuests.map(g => entityClient.entities.VIPGuest.delete(g.id)));
+
+      // Clear demo contractor payouts
+      const existingPayouts = await entityClient.entities.ContractorPayout.filter({
+        venue_id: targetVenueId,
+        is_demo: true
+      });
+      await Promise.all(existingPayouts.map(p => entityClient.entities.ContractorPayout.delete(p.id)));
     }
 
-    const MOCK_CONTRACTS = buildContracts();
-    const created = [];
+    const MOCK_CONTRACTS = buildContracts(targetVenueId);
+    const VIP_ROOMS = buildVIPRooms(targetVenueId);
+    const VIP_GUESTS = buildVIPGuests(targetVenueId);
+    const CONTRACTOR_PAYOUTS = buildContractorPayouts(targetVenueId);
+
+    const created = { contracts: [], vipRooms: [], vipGuests: [], contractorPayouts: [] };
+
+    // --- Venue Contracts ---
     for (let i = 0; i < MOCK_CONTRACTS.length; i++) {
       const contract = await entityClient.entities.VenueContract.create(MOCK_CONTRACTS[i]);
-      created.push({ contract, lineItems: MOCK_LINE_ITEMS_MAP[i] });
+      created.contracts.push({ contract, lineItems: MOCK_LINE_ITEMS_MAP[i] });
+    }
+
+    // --- VIP Rooms (displayed by VIPRoomBoard) ---
+    for (const room of VIP_ROOMS) {
+      try {
+        const r = await entityClient.entities.VIPRoom.create(room);
+        created.vipRooms.push(r.id);
+      } catch (e) { /* skip if entity missing */ }
+    }
+
+    // --- VIP Guests (displayed by VIPRoomBoard guest picker) ---
+    for (const guest of VIP_GUESTS) {
+      try {
+        const g = await entityClient.entities.VIPGuest.create(guest);
+        created.vipGuests.push(g.id);
+      } catch (e) { /* skip if entity missing */ }
+    }
+
+    // --- Contractor Payouts (displayed by VIPContractLifecycle) ---
+    for (const payout of CONTRACTOR_PAYOUTS) {
+      try {
+        const p = await entityClient.entities.ContractorPayout.create(payout);
+        created.contractorPayouts.push(p.id);
+      } catch (e) { /* skip if entity missing */ }
     }
 
     try {
       await base44.asServiceRole.entities.SystemAuditLog.create({
         event_type: 'DEMO_DATA_SEEDED',
         actor_email: actorEmail,
-        description: `Demo contract workflow data seeded — ${MOCK_CONTRACTS.length} contracts created${isSandboxDemo ? ' (sandbox)' : ''}`,
+        description: `Demo contract + VIP data seeded for venue ${targetVenueId} — ${MOCK_CONTRACTS.length} contracts, ${VIP_ROOMS.length} rooms, ${VIP_GUESTS.length} guests, ${CONTRACTOR_PAYOUTS.length} payouts${isSandboxDemo ? ' (sandbox)' : ''}`,
         severity: 'low',
         status: 'success',
-        metadata: { count: MOCK_CONTRACTS.length, clear_existing, sandbox: isSandboxDemo }
+        metadata: { venue_id: targetVenueId, clear_existing, sandbox: isSandboxDemo, counts: { contracts: MOCK_CONTRACTS.length, vipRooms: VIP_ROOMS.length, vipGuests: VIP_GUESTS.length, contractorPayouts: CONTRACTOR_PAYOUTS.length } }
       });
     } catch { /* audit log failure is non-fatal */ }
 
     return Response.json({
       success: true,
-      seeded: MOCK_CONTRACTS.length,
-      contracts: created.map(c => ({
+      venue_id: targetVenueId,
+      seeded: {
+        contracts: MOCK_CONTRACTS.length,
+        vipRooms: created.vipRooms.length,
+        vipGuests: created.vipGuests.length,
+        contractorPayouts: created.contractorPayouts.length,
+      },
+      contracts: created.contracts.map(c => ({
         id: c.contract.id,
         contract_id: c.contract.contract_id,
         customer_name: c.contract.customer_name,
