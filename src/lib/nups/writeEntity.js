@@ -4,6 +4,8 @@ import { logActivity } from './activityLog';
 import { enforceRoleScope, isScopedRole } from './roleGate';
 // BPAA-NUPS-AUDIT-001 §5 — automatic AuditEvent coverage on every gated write
 import { emitFromGatewayWrite } from './audit/auditEventEmitter';
+// DACO WAVE 2 — ID-01 identity rebind for every protected write
+import { rebindIdentity, isIdentityCritical } from './identityRebind';
 
 const VALID_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
 
@@ -233,6 +235,39 @@ export async function writeEntity({
   if (!base44.entities[entity]) throw new Error(`writeEntity: unknown_entity: ${entity}`);
 
   const { actorId, role } = validateActor(actor);
+
+  // DACO WAVE 2 — ID-01: Live identity rebind before any protected write.
+  // The claimed actor must match the live base44.auth.me() session, unless
+  // SOVEREIGN override is explicitly authorized. Contaminated writes are
+  // blocked with an auditable rejection trail.
+  const rebind = await rebindIdentity(actor);
+  if (!rebind.ok) {
+    const audit_id = await audit({
+      entity_name: entity,
+      operation,
+      actor_id: actorId,
+      actor_role: role,
+      fields_changed: fieldsOf(data),
+      mode: requestContext?.mode || 'REAL',
+      tier: 'TIER_1_OBSERVE',
+      result: 'blocked',
+      block_reason: `identity_contamination_blocked: ${rebind.reason}`,
+      venue_id: venue_id || null,
+      notes: intent || null,
+    });
+    return {
+      ok: false,
+      audit_id,
+      mode: requestContext?.mode || 'REAL',
+      tier: 'TIER_1_OBSERVE',
+      result: 'blocked',
+      block_reason: `identity_contamination_blocked: ${rebind.reason}`,
+    };
+  }
+  // Rebind succeeded — use the live email as authority for the rest of the flow.
+  const verifiedActorEmail = rebind.live.email;
+  const identity_verified = !rebind.sovereign_override;
+
   const mode = await resolveMode(requestContext?.mode, venue_id);
   const tier = 'TIER_1_OBSERVE';
   const isFinancial = FINANCIAL_ENTITIES.has(entity);
@@ -406,7 +441,8 @@ export async function writeEntity({
         venue_id: venue_id || null,
         session_id: requestContext?.session_id,
         audit_depth: (requestContext?.audit_depth || 0),
-        actor_ref: actorId, // §6 — RAW unverified ref; identity_verified forced false
+        actor_ref: actorId,
+        identity_verified, // DACO WAVE 2 — true when rebind matched live session
       });
     } catch (_) { /* observational only — never block the business write */ }
   }
@@ -420,7 +456,7 @@ export async function writeEntity({
     before_value: null,
     after_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
     venue_id: venue_id || null,
-    actor: { email: actorId, role },
+    actor: { email: verifiedActorEmail, role },
     notes: intent || `gateway:${operation}`,
   });
 
@@ -431,6 +467,25 @@ export async function toggleMode({ actor, newMode, venue_id }) {
   validateActor(actor);
   if (!isActorSovereign(actor)) throw new Error('toggleMode: SOVEREIGN_REQUIRED');
   if (!VALID_MODES.has(newMode)) throw new Error(`toggleMode: invalid_mode: ${newMode}`);
+
+  // DACO WAVE 2 — ID-01: Rebind SOVEREIGN actor to live session.
+  const rebind = await rebindIdentity(actor);
+  if (!rebind.ok) {
+    await audit({
+      entity_name: 'SystemConfig',
+      operation: 'update',
+      actor_id: actor.id || actor.email,
+      actor_role: actor.role,
+      fields_changed: ['mode'],
+      mode: newMode,
+      tier: 'TIER_1_OBSERVE',
+      result: 'blocked',
+      block_reason: `identity_contamination_blocked: ${rebind.reason}`,
+      venue_id: venue_id || null,
+      notes: `toggleMode BLOCKED -> ${newMode}`,
+    });
+    throw new Error(`toggleMode: identity_contamination_blocked: ${rebind.reason}`);
+  }
 
   // DACO WAVE 1 — Per-venue toggle (if venue_id provided)
   if (venue_id) {

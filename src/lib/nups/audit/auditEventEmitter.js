@@ -137,7 +137,8 @@ export function validateFinancialContext(fc) {
  *
  * Identity gating (§6):
  *   - Gated event types are dropped (returns { ok: false, reason }).
- *   - identity_verified is FORCED false.
+ *   - identity_verified is FORCED false UNLESS the gateway has rebound
+ *     the actor via live base44.auth.me() (DACO WAVE 2 ID-01).
  *
  * Financial invariant (§3.1):
  *   - For financial categories, financial_context must satisfy the invariant.
@@ -221,8 +222,8 @@ export async function emitAuditEvent(opts) {
     reason: opts.reason,
     notes: opts.notes,
     financial_context: opts.financial_context,
-    actor_ref: opts.actor_ref,            // RAW, never trusted
-    identity_verified: false,              // §6 — hardcoded
+    actor_ref: opts.actor_ref,            // RAW ref — see identity_verified
+    identity_verified: opts.identity_verified === true,  // §6 + WAVE 2: true only when gateway rebound
     approval_user_ref: opts.approval_user_ref,
     alert: !!opts.alert,
     retention_class: opts.retention_class || defaultRetention(event_category),
@@ -282,6 +283,7 @@ export async function emitFromGatewayWrite({
   session_id,
   audit_depth,
   actor_ref,
+  identity_verified,
 }) {
   // Guard: never self-audit AuditEvent writes (§5).
   if (entity === 'AuditEvent') return { ok: false, reason: 'recursion_guard_entity' };
@@ -302,6 +304,7 @@ export async function emitFromGatewayWrite({
       new_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
       notes: { gateway_op: operation },
       actor_ref,
+      identity_verified,
       retention_class: 'operational',
     });
   }
@@ -318,6 +321,7 @@ export async function emitFromGatewayWrite({
     new_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
     notes: { gateway_op: operation },
     actor_ref,
+    identity_verified,
     retention_class: defaultRetention(defaults.category),
     // NOTE: no financial_context derived automatically — the §3 spec
     // requires explicit fields. Authoritative call sites that know the

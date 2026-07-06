@@ -1,0 +1,98 @@
+/**
+ * DACO WAVE 2 — ID-01 Identity Remediation.
+ *
+ * Live identity rebind for every protected write path. Before any
+ * identity-stamped write (StaffShift, EntertainerShift, VIPContractRecord,
+ * DriverPayout, ContractorPayout, JournalEntry, DailySettlement, VIPRoom,
+ * ActivityLog, AuditEvent, and all financial entities), the claimed actor
+ * must be rebound against a live base44.auth.me() call.
+ *
+ * Trust model:
+ *   claimed_actor.email  MUST MATCH  live_auth.me().email
+ *   EXCEPT when the claimed actor is SOVEREIGN AND the live user is also
+ *   SOVEREIGN (explicit override — audited).
+ *
+ * Never trusts: browser storage, client props, or URL params as identity authority.
+ */
+import { base44 } from '@/api/base44Client';
+
+export const IDENTITY_CRITICAL_ENTITIES = new Set([
+  'StaffShift',
+  'EntertainerShift',
+  'VIPContractRecord',
+  'DriverPayout',
+  'ContractorPayout',
+  'JournalEntry',
+  'DailySettlement',
+  'VIPRoom',
+  'ActivityLog',
+  'AuditEvent',
+]);
+
+function normalizeEmail(e) {
+  return e ? String(e).trim().toLowerCase() : '';
+}
+
+function isSovereignActor(actor) {
+  if (!actor) return false;
+  if (actor.sovereign_flag === true) return true;
+  if (actor.role === 'SOVEREIGN') return true;
+  return false;
+}
+
+/**
+ * Rebind a claimed actor against the live authenticated session.
+ *
+ * @param {object} claimedActor — { email, id, role, sovereign_flag? }
+ * @returns {Promise<{ ok: boolean, live?: object, verified?: boolean, sovereign_override?: boolean, reason?: string }>}
+ */
+export async function rebindIdentity(claimedActor) {
+  let live;
+  try {
+    live = await base44.auth.me();
+  } catch (e) {
+    return { ok: false, reason: `auth_me_failed: ${e.message}` };
+  }
+  if (!live?.email) {
+    return { ok: false, reason: 'no_live_session_email' };
+  }
+
+  const claimedEmail = normalizeEmail(claimedActor?.email || claimedActor?.id);
+  const liveEmail = normalizeEmail(live.email);
+
+  // ── Match: claimed actor IS the live user ──
+  if (claimedEmail && claimedEmail === liveEmail) {
+    return { ok: true, live, verified: true };
+  }
+
+  // ── SOVEREIGN override: claimed sovereign + live user is also sovereign ──
+  if (isSovereignActor(claimedActor)) {
+    try {
+      const matches = await base44.entities.NUPSUser.filter({ created_by: live.email });
+      const liveIsSovereign = (matches || []).some(
+        (u) => u?.sovereign_flag === true || u?.role === 'SOVEREIGN'
+      );
+      if (liveIsSovereign) {
+        return { ok: true, live, verified: true, sovereign_override: true };
+      }
+    } catch {
+      // Fall through to block
+    }
+  }
+
+  // ── Contamination: claimed email does not match live, no override ──
+  return {
+    ok: false,
+    reason: `identity_contamination_detected: claimed=${claimedEmail || '(empty)'} live=${liveEmail}`,
+    live,
+  };
+}
+
+/**
+ * Synchronous check: is this entity in the identity-critical set?
+ * Used by the gateway to decide whether to run the full rebind or skip it
+ * for non-identity-critical reads/public paths.
+ */
+export function isIdentityCritical(entity) {
+  return IDENTITY_CRITICAL_ENTITIES.has(entity);
+}
