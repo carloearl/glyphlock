@@ -66,7 +66,12 @@ async function resolveMode(venue_id) {
  * @param {object} [opts.after_value]
  * @param {string} [opts.venue_id]
  * @param {string} [opts.notes]
- * @param {object} [opts.actor]            - Override actor (rare; default = live session)
+ * @param {object} [opts.actor]            - Override actor (gateway pre-validated; default = live session)
+ *
+ * DACO WAVE 2: If opts.actor is supplied, its email must match the live
+ * base44.auth.me() session. The only exception is a LOGIN action (which
+ * may run before the session is fully established). The gateway already
+ * rebinds before calling this, so the override is safe from that path.
  */
 export async function logActivity(opts = {}) {
   try {
@@ -75,7 +80,23 @@ export async function logActivity(opts = {}) {
       return null;
     }
 
-    const actor = opts.actor || await resolveCurrentUser();
+    let actor;
+    if (opts.actor && opts.action_type !== 'LOGIN') {
+      // DACO WAVE 2 — rebind any supplied actor against the live session
+      const live = await resolveCurrentUser();
+      if (live && opts.actor.email &&
+          String(opts.actor.email).toLowerCase() !== String(live.email).toLowerCase()) {
+        // Contamination: caller-supplied actor does not match live session.
+        // Fall back to the live session (safer than rejecting — logging is
+        // non-blocking) and note the discrepancy.
+        console.warn('[ActivityLog] actor_email_mismatch, using live session:', live.email);
+        actor = live;
+      } else {
+        actor = opts.actor;
+      }
+    } else {
+      actor = opts.actor || await resolveCurrentUser();
+    }
     if (!actor) {
       // No session = LOGIN attempt or unauth path. Still log as "anonymous" only for LOGIN.
       if (opts.action_type !== 'LOGIN') return null;
