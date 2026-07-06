@@ -16,6 +16,34 @@ Every DACO directive must explicitly state which governance version it was execu
 
 ---
 
+## DIRECTIVE LINEAGE (REQUIRED METADATA)
+
+Every DACO directive must declare:
+- Parent Directive
+- Prerequisite Directives
+- Supersedes
+- Superseded By
+- Architecture Baseline
+- BPAAA Version
+
+This establishes a traceable chain across time.
+
+---
+
+## EVIDENCE PRESERVATION (IMMUTABLE RULE)
+
+Before any authorized mutation:
+- Preserve affected source.
+- Preserve affected configuration.
+- Preserve affected logs.
+- Preserve affected records.
+
+Evidence must be captured before any modification.
+Never destroy evidence prior to reporting.
+If evidence cannot be preserved: STOP. Report the blocker.
+
+---
+
 ## PHASE -1 — DIRECTIVE VALIDATION (MANDATORY)
 
 Before any planning or implementation begins, validate the directive itself.
@@ -151,3 +179,24 @@ P. Executive Summary
 ## STOP CONDITIONS
 
 Immediately stop if: unauthorized schema changes required, identity contamination detected, production credential exposure detected, service role escalation detected, payment integrity cannot be guaranteed, directive conflict detected, architecture conflict detected. Return a blocker report only.
+
+---
+
+## DIRECTIVE CLOSURE
+
+A directive remains OPEN until DACO explicitly marks it:
+- APPROVED
+- REJECTED
+- SUPERSEDED
+- CANCELLED
+
+Completion of implementation alone does not close a directive.
+
+---
+
+## GOVERNANCE SEPARATION (STRUCTURAL NOTE)
+
+BPAAA is the Governance Standard (timeless rules — the constitution).
+DACO Directives are project-specific legislation that apply BPAAA rules to specific work.
+BPAAA rarely changes; DACO directives evolve per project.
+This document defines the rules of governance; directives apply them to specific work.
