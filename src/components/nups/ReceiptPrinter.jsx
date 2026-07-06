@@ -4,11 +4,9 @@ import { Printer, ShieldCheck } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import { computeReceiptHash } from "@/lib/nups/receiptHash";
+import { buildReceiptBreakdown, getCashierDisplay } from "@/lib/nups/receiptBreakdown";
 
 const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
-
-// E7 — always prefer cashier_name over raw email
-const getCashierDisplay = (tx) => tx?.cashier_name || tx?.cashier || 'N/A';
 
 export default function ReceiptPrinter({
   transaction,
@@ -84,29 +82,9 @@ export default function ReceiptPrinter({
        </div>`
     ).join('');
 
-    const totalItems = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
-    const tipAmount = transaction.tip || 0;
-    const grandTotal = transaction.total || 0;
-
-    // Door cover charges are sales-tax-exempt; the `tax` field on a door
-    // transaction is actually the credit-card processing fee. Split it on
-    // the receipt so the customer reads honest line items.
-    const isDoor = (transaction.station || '').toLowerCase() === 'door';
-    const taxLabel = isDoor ? 'Sales Tax (0%)' : 'Sales Tax (AZ 8%)';
-    const taxValue = isDoor ? 0 : (transaction.tax || 0);
-    // Processing fee: prefer the persisted field. Legacy door records used to
-    // stash the CC fee in `tax`, so fall back to that only when explicit field is absent.
-    const ccFee = transaction.processing_fee != null
-      ? Number(transaction.processing_fee)
-      : (isDoor ? Number(transaction.tax || 0) : 0);
-    const ccFeeLabel = procRate > 0
-      ? `Card Processing Fee (${(procRate * 100).toFixed(2)}%)`
-      : 'Card Processing Fee';
-    // Service fee: explicit tx field wins; otherwise compute from subtotal × pct.
-    const svcFee = Number(transaction.service_fee || (showSvcFee ? (Number(transaction.subtotal || 0) * svcPct) : 0));
-    const svcFeeLabelFull = svcPct > 0
-      ? `${svcLabel} (${(svcPct * 100).toFixed(2)}%)`
-      : svcLabel;
+    // Standardized breakdown — single source of truth from receiptBreakdown.js
+    const bd = buildReceiptBreakdown(transaction, rates);
+    const { grandTotal, totalItems } = bd;
 
     const vipSection = isVIP && vipDetails ? `
       <div style="border:2px solid #000;padding:8px;margin:8px 0;background:#f9f9f9;">
@@ -177,12 +155,7 @@ export default function ReceiptPrinter({
         </div>
         <div class="double-divider"></div>
         <div style="font-size:11px;">
-          <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>Subtotal</span><span>$${(transaction.subtotal || 0).toFixed(2)}</span></div>
-          ${showSvcFee && svcFee > 0 ? `<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>${svcFeeLabelFull}</span><span>$${svcFee.toFixed(2)}</span></div>` : ''}
-          ${transaction.discount > 0 ? `<div style="display:flex;justify-content:space-between;padding:2px 0;color:red;"><span>Discount</span><span>-$${transaction.discount.toFixed(2)}</span></div>` : ''}
-          ${tipAmount > 0 ? `<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>Gratuity</span><span>$${tipAmount.toFixed(2)}</span></div>` : ''}
-          <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>${taxLabel}</span><span>$${taxValue.toFixed(2)}</span></div>
-          ${showProcFee && ccFee > 0 ? `<div style="display:flex;justify-content:space-between;padding:2px 0;font-weight:bold;"><span>${ccFeeLabel}</span><span>$${ccFee.toFixed(2)}</span></div>` : ''}
+          ${bd.lines.map(l => `<div style="display:flex;justify-content:space-between;padding:2px 0;${l.emphasis ? 'font-weight:bold;' : ''}${l.negative ? 'color:red;' : ''}"><span>${l.label}</span><span>${l.negative ? '-' : ''}$${Math.abs(l.amount).toFixed(2)}</span></div>`).join('')}
         </div>
         <div class="divider"></div>
         <div class="total-row" style="display:flex;justify-content:space-between;"><span>TOTAL DUE:</span><span>$${grandTotal.toFixed(2)}</span></div>
@@ -259,26 +232,12 @@ export default function ReceiptPrinter({
   }
 
   const items = transaction.items || [];
-  const totalItems = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
-  const tipAmount = transaction.tip || 0;
-  const grandTotal = transaction.total || 0;
   const txDate = new Date(transaction.created_date);
   const cashierDisplay = getCashierDisplay(transaction);
 
-  // Match the printable receipt: door = 0% sales tax, surface fees separately.
-  const isDoor = (transaction.station || '').toLowerCase() === 'door';
-  const taxLabelScreen = isDoor ? 'Tax (0%)' : 'Tax (AZ 8%)';
-  const taxValueScreen = isDoor ? 0 : (transaction.tax || 0);
-  const ccFeeScreen    = transaction.processing_fee != null
-    ? Number(transaction.processing_fee)
-    : (isDoor ? Number(transaction.tax || 0) : 0);
-  const ccFeeLabelScreen = procRate > 0
-    ? `Card Processing Fee (${(procRate * 100).toFixed(2)}%)`
-    : 'Card Processing Fee';
-  const svcFeeScreen = Number(transaction.service_fee || (showSvcFee ? (Number(transaction.subtotal || 0) * svcPct) : 0));
-  const svcFeeLabelScreen = svcPct > 0
-    ? `${svcLabel} (${(svcPct * 100).toFixed(2)}%)`
-    : svcLabel;
+  // Standardized breakdown — shared with the printable receipt.
+  const bd = buildReceiptBreakdown(transaction, rates);
+  const { grandTotal, totalItems } = bd;
 
   return (
     <div className="space-y-3" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
@@ -319,12 +278,15 @@ export default function ReceiptPrinter({
         </div>
 
         <div className="border-t border-double border-gray-600 pt-2 space-y-1">
-          <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>${(transaction.subtotal || 0).toFixed(2)}</span></div>
-          {showSvcFee && svcFeeScreen > 0 && <div className="flex justify-between text-gray-400"><span>{svcFeeLabelScreen}</span><span>${svcFeeScreen.toFixed(2)}</span></div>}
-          {transaction.discount > 0 && <div className="flex justify-between text-red-400"><span>Discount</span><span>-${transaction.discount.toFixed(2)}</span></div>}
-          {tipAmount > 0 && <div className="flex justify-between text-gray-400"><span>Gratuity</span><span>${tipAmount.toFixed(2)}</span></div>}
-          <div className="flex justify-between text-gray-400"><span>{taxLabelScreen}</span><span>${taxValueScreen.toFixed(2)}</span></div>
-          {showProcFee && ccFeeScreen > 0 && <div className="flex justify-between text-amber-400 font-bold"><span>{ccFeeLabelScreen}</span><span>${ccFeeScreen.toFixed(2)}</span></div>}
+          {bd.lines.map(l => (
+            <div
+              key={l.key}
+              className={`flex justify-between ${l.emphasis ? 'text-amber-400 font-bold' : l.negative ? 'text-red-400' : 'text-gray-400'}`}
+            >
+              <span>{l.label}</span>
+              <span>{l.negative ? '-' : ''}${Math.abs(l.amount).toFixed(2)}</span>
+            </div>
+          ))}
           <div className="border-t border-gray-700 pt-1 flex justify-between text-lg font-black text-green-400">
             <span>TOTAL</span><span>${grandTotal.toFixed(2)}</span>
           </div>
