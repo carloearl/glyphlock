@@ -11,8 +11,6 @@ import {
 } from "lucide-react";
 import CompAuthorizationModal from "./pos/CompAuthorizationModal";
 import ManagerVoidGateModal from "./pos/ManagerVoidGateModal";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReceiptPrinter from "./ReceiptPrinter";
