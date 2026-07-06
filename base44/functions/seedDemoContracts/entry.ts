@@ -340,9 +340,20 @@ const MOCK_LINE_ITEMS_MAP = {
 
 Deno.serve(async (req) => {
   try {
+    // ================================================================
+    // DACO CONTAINMENT-01 (2026-07-06) — EMERGENCY FREEZE
+    // All execution prohibited. Function returns 423 immediately.
+    // No auth, no parsing, no entity access, no logging, no writes.
+    // Original code preserved below as forensic evidence.
+    // ================================================================
+    return Response.json(
+      { error: 'Function frozen by DACO CONTAINMENT-01' },
+      { status: 423 }
+    );
+
+    // --- ORIGINAL CODE BELOW (PRESERVED AS FORENSIC EVIDENCE) ---
     const base44 = createClientFromRequest(req);
 
-    // Allow both base44 admin users AND sandbox demo sessions (identified by sandbox_demo header)
     let actorEmail = 'sandbox@demo.nups';
     let isSandboxDemo = false;
 
@@ -355,12 +366,12 @@ Deno.serve(async (req) => {
         actorEmail = user.email;
       }
     } catch {
-      // Not a base44 auth user — check for sandbox demo flag
-      const sandboxHeader = req.headers.get('x-nups-sandbox-demo');
-      if (sandboxHeader !== 'true') {
-        return Response.json({ error: 'Forbidden' }, { status: 403 });
-      }
-      isSandboxDemo = true;
+      // DACO CONTAINMENT-01: Sandbox header escalation path permanently disabled.
+      // The x-nups-sandbox-demo header can no longer obtain service-role privileges.
+      return Response.json(
+        { error: 'Forbidden: Sandbox escalation path disabled by DACO CONTAINMENT-01' },
+        { status: 403 }
+      );
     }
 
     const payload = await req.json().catch(() => ({}));
