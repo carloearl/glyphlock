@@ -7,6 +7,13 @@
  *
  * GlyphBucks NEVER touches total_sales (I-6). Sale is a liability;
  * redemption recognizes revenue. ASC 606 / gift-card accounting.
+ *
+ * W3-006 REMEDIATION — Dual-invocation hardened auth model:
+ *   - Automation path: requires event.entity_name + event.entity_id; source
+ *     entity ALWAYS fetched from DB. payload.data is NEVER trusted.
+ *   - Direct HTTP path: requires base44.auth.me() + admin role.
+ *   - All financial values (venue_id, mode, total_charged, denomination,
+ *     face_value, actor attribution) originate from persisted DB state only.
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
@@ -68,14 +75,84 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
     const event = payload?.event || {};
-    const data = payload?.data || {};
     const oldData = payload?.old_data || null;
+
+    // ── W3-006: Dual-invocation detection ───────────────────────
+    // Automation calls carry event.entity_name + event.entity_id.
+    // Direct HTTP calls carry neither — they must pass auth.
+    const isAutomationCall = !!(event.entity_name && event.entity_id);
+
+    // ── Direct HTTP path: require authenticated admin ───────────
+    if (!isAutomationCall) {
+      let user;
+      try {
+        user = await base44.auth.me();
+      } catch (_) {
+        return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+      }
+      if (!user) {
+        return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+      }
+
+      // Resolve NUPSUser for role check
+      let nupsUser = null;
+      try {
+        const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter(
+          { email: user.email }, null, 1,
+        );
+        nupsUser = nupsUsers?.[0] || null;
+      } catch (_) { /* fall through to role check */ }
+
+      const role = nupsUser?.role || user.role;
+      const isSovereign = nupsUser?.sovereign_flag === true || role === 'SOVEREIGN';
+
+      if (!isSovereign && role !== 'admin' && role !== 'ADMIN') {
+        return Response.json({
+          ok: false,
+          error: 'Forbidden: admin role required for direct ledger invocation',
+          role,
+        }, { status: 403 });
+      }
+
+      // Direct calls must specify which entity to process
+      const entityType = payload.entity_type || payload.entity_name;
+      const entityId = payload.entity_id;
+      if (!entityType || !entityId) {
+        return Response.json({
+          ok: false,
+          error: 'Bad Request: entity_type and entity_id required for direct invocation',
+        }, { status: 400 });
+      }
+
+      // Synthesize event for unified processing below
+      event.entity_name = entityType;
+      event.entity_id = entityId;
+      event.type = payload.event_type || 'create';
+    }
 
     // ── BATCH CREATE → GB SALE (liability) ─────────────────────
     if (event.entity_name === 'GlyphBucksBatch' && event.type === 'create') {
-      const b = data?.id ? data : await base44.asServiceRole.entities.GlyphBucksBatch.get(event.entity_id);
-      if (!b || !b.venue_id) return Response.json({ ok: true, skipped: 'no_venue_id' });
+      // W3-006: ALWAYS fetch from DB — never trust payload.data
+      let b;
+      try {
+        b = await base44.asServiceRole.entities.GlyphBucksBatch.get(event.entity_id);
+      } catch (_) {
+        return Response.json({
+          ok: false,
+          skipped: 'source_batch_not_found',
+          entity_id: event.entity_id,
+        });
+      }
+      if (!b || !b.id) {
+        return Response.json({
+          ok: false,
+          skipped: 'source_batch_not_found',
+          entity_id: event.entity_id,
+        });
+      }
+      if (!b.venue_id) return Response.json({ ok: true, skipped: 'no_venue_id' });
 
+      // W3-006: mode always from DB-fetched record
       const mode = b.mode || 'REAL';
       const tender_cents = toCents(b.total_charged);
       if (tender_cents <= 0) return Response.json({ ok: true, skipped: 'zero_tender' });
@@ -83,7 +160,6 @@ Deno.serve(async (req) => {
       await ensureAccounts(base44, b.venue_id, mode, [ACCT.CASH, ACCT.CARD_CLEARING, ACCT.GLYPHBUCKS_LIAB]);
 
       // Default to card clearing — most GB sales are processed via card.
-      // (Future: read payment_method from GlyphBucksBatch if added.)
       const tender_acct = ACCT.CARD_CLEARING;
       const face_cents = toCents(b.total_face_value);
       const surcharge_cents = tender_cents - face_cents; // surcharge is revenue
@@ -93,15 +169,16 @@ Deno.serve(async (req) => {
         { account_code: ACCT.GLYPHBUCKS_LIAB, debit_cents: 0, credit_cents: face_cents, memo: 'GB issued (liability)' },
       ];
       if (surcharge_cents > 0) {
-        // Surcharge counts as VIP revenue (the GB program funds VIP shows).
         await ensureAccounts(base44, b.venue_id, mode, [ACCT.VIP_REVENUE]);
         lines.push({ account_code: ACCT.VIP_REVENUE, debit_cents: 0, credit_cents: surcharge_cents, memo: 'GB surcharge revenue' });
       }
 
+      // W3-006: actor attribution from persisted record only
+      const actor_user_id = b.issued_by || 'system';
       const result = await postIfNew(base44, b.venue_id, mode, `GlyphBucksBatch:${b.id}`, {
         source_type: 'GLYPHBUCKS_SALE',
         source_id: b.id,
-        actor_user_id: b.issued_by || 'system',
+        actor_user_id,
         actor_email: b.issued_by || null,
         memo: `GB sale · batch ${b.batch_id} · $${b.total_charged}`,
         lines,
@@ -111,13 +188,33 @@ Deno.serve(async (req) => {
 
     // ── BILL UPDATE → status flipped to redeemed → REDEMPTION (revenue) ──
     if (event.entity_name === 'GlyphBucksBill' && event.type === 'update') {
-      const bill = data?.id ? data : await base44.asServiceRole.entities.GlyphBucksBill.get(event.entity_id);
-      if (!bill || !bill.venue_id) return Response.json({ ok: true, skipped: 'no_venue_id' });
+      // W3-006: ALWAYS fetch from DB — never trust payload.data
+      let bill;
+      try {
+        bill = await base44.asServiceRole.entities.GlyphBucksBill.get(event.entity_id);
+      } catch (_) {
+        return Response.json({
+          ok: false,
+          skipped: 'source_bill_not_found',
+          entity_id: event.entity_id,
+        });
+      }
+      if (!bill || !bill.id) {
+        return Response.json({
+          ok: false,
+          skipped: 'source_bill_not_found',
+          entity_id: event.entity_id,
+        });
+      }
+      if (!bill.venue_id) return Response.json({ ok: true, skipped: 'no_venue_id' });
       if (bill.status !== 'redeemed') return Response.json({ ok: true, skipped: 'not_redeemed' });
-      if (oldData && oldData.status === 'redeemed') {
+
+      // W3-006: oldData only trusted from automation (entity automation engine provides it)
+      if (isAutomationCall && oldData && oldData.status === 'redeemed') {
         return Response.json({ ok: true, skipped: 'already_redeemed_before' });
       }
 
+      // W3-006: mode always from DB-fetched record
       const mode = bill.mode || 'REAL';
       const face_cents = toCents(bill.denomination);
       if (face_cents <= 0) return Response.json({ ok: true, skipped: 'zero_denom' });
@@ -129,10 +226,12 @@ Deno.serve(async (req) => {
         { account_code: ACCT.VIP_REVENUE,     debit_cents: 0,           credit_cents: face_cents, memo: 'revenue recognized' },
       ];
 
+      // W3-006: actor attribution from persisted record only
+      const actor_user_id = bill.redeemed_by_contractor_id || 'system';
       const result = await postIfNew(base44, bill.venue_id, mode, `GlyphBucksBill:redeem:${bill.id}`, {
         source_type: 'GLYPHBUCKS_REDEEM',
         source_id: bill.id,
-        actor_user_id: bill.redeemed_by_contractor_id || 'system',
+        actor_user_id,
         memo: `GB redeemed · serial ${bill.serial_number} · $${bill.denomination}`,
         lines,
       });
