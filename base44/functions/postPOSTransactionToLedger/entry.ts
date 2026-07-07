@@ -56,13 +56,59 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
     const event = payload?.event || {};
-    const data = payload?.data || {};
 
-    // Entity automation may omit data if oversized — fetch fresh.
-    let tx = data;
-    if (!tx?.id && event?.entity_id) {
+    // ── W3-004 REMEDIATION: Authentication & source verification ──
+    // Two call paths:
+    //   1. Automation-triggered (entity event): payload has event.entity_id.
+    //      Source entity is ALWAYS fetched from DB — payload.data is NEVER
+    //      trusted. This prevents forged direct HTTP calls from injecting
+    //      arbitrary JournalEntry records.
+    //   2. Direct HTTP invocation: requires authenticated admin session.
+    let tx = null;
+    const isAutomationCall = !!(event?.entity_id && event?.entity_name === 'POSTransaction');
+
+    if (isAutomationCall) {
+      // Automation path — fetch source from DB, never trust payload data
       tx = await base44.asServiceRole.entities.POSTransaction.get(event.entity_id);
+    } else {
+      // Direct HTTP path — require authenticated admin
+      let user;
+      try {
+        user = await base44.auth.me();
+      } catch {
+        return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+      }
+      if (!user || !user.email) {
+        return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+      }
+
+      // Resolve NUPSUser for role check
+      const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+        created_by: user.email,
+      });
+      const nupsUser = (nupsUsers && nupsUsers.length > 0) ? nupsUsers[0] : null;
+      const isSovereign = nupsUser && (nupsUser.sovereign_flag === true || nupsUser.role === 'SOVEREIGN');
+      const ADMIN_ROLES = new Set([
+        'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN', 'admin',
+      ]);
+      const isAdmin = isSovereign || (nupsUser && ADMIN_ROLES.has(nupsUser.role));
+
+      if (!isAdmin) {
+        return Response.json({
+          ok: false,
+          error: 'Forbidden: admin role required for direct ledger invocation',
+          role: nupsUser?.role || 'none',
+        }, { status: 403 });
+      }
+
+      // Direct call requires a transaction_id in the payload
+      const txId = payload?.transaction_id || payload?.data?.id;
+      if (!txId) {
+        return Response.json({ ok: false, error: 'transaction_id required for direct invocation' }, { status: 400 });
+      }
+      tx = await base44.asServiceRole.entities.POSTransaction.get(txId);
     }
+
     if (!tx || !tx.id) {
       return Response.json({ ok: false, skipped: 'no_transaction' });
     }
@@ -85,7 +131,11 @@ Deno.serve(async (req) => {
       return Response.json({ ok: false, skipped: 'no_venue_id' });
     }
 
+    // W3-004: mode is always taken from the DB-fetched record, never from
+    // the payload. actor_user_id is derived from the transaction's audit
+    // fields — these were set at write time through writeEntity().
     const mode = tx.mode || 'REAL';
+    const actor_user_id = tx.cashier_email || tx.cashier_id || tx.cashier || 'system';
     const idempotency_key = `POSTransaction:${tx.id}`;
 
     // ── Idempotency (I-4) ────────────────────────────────────────
@@ -175,7 +225,7 @@ Deno.serve(async (req) => {
       source_type,
       source_id: tx.id,
       idempotency_key,
-      actor_user_id: tx.cashier_id || tx.cashier_email || tx.cashier || 'system',
+      actor_user_id,
       actor_email: tx.cashier_email || null,
       memo: `${source_type} · ${tx.transaction_id || tx.id} · ${tx.payment_method}`,
       status: 'POSTED',
