@@ -68,8 +68,18 @@ Deno.serve(async (req) => {
     const isAutomationCall = !!(event?.entity_id && event?.entity_name === 'POSTransaction');
 
     if (isAutomationCall) {
-      // Automation path — fetch source from DB, never trust payload data
-      tx = await base44.asServiceRole.entities.POSTransaction.get(event.entity_id);
+      // Automation path — fetch source from DB, never trust payload data.
+      // Return a controlled response if the source entity does not exist,
+      // rather than letting the SDK throw a 500 to the caller.
+      try {
+        tx = await base44.asServiceRole.entities.POSTransaction.get(event.entity_id);
+      } catch {
+        return Response.json({
+          ok: false,
+          skipped: 'source_transaction_not_found',
+          entity_id: event.entity_id,
+        });
+      }
     } else {
       // Direct HTTP path — require authenticated admin
       let user;
@@ -106,11 +116,23 @@ Deno.serve(async (req) => {
       if (!txId) {
         return Response.json({ ok: false, error: 'transaction_id required for direct invocation' }, { status: 400 });
       }
-      tx = await base44.asServiceRole.entities.POSTransaction.get(txId);
+      try {
+        tx = await base44.asServiceRole.entities.POSTransaction.get(txId);
+      } catch {
+        return Response.json({
+          ok: false,
+          error: 'transaction_not_found',
+          transaction_id: txId,
+        }, { status: 404 });
+      }
     }
 
     if (!tx || !tx.id) {
-      return Response.json({ ok: false, skipped: 'no_transaction' });
+      return Response.json({
+        ok: false,
+        skipped: 'no_transaction',
+        entity_id: event.entity_id || null,
+      });
     }
 
     // ── Skip rules ───────────────────────────────────────────────
