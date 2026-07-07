@@ -10,7 +10,16 @@
  * Trust model:
  *   claimed_actor.email  MUST MATCH  live_auth.me().email
  *   EXCEPT when the claimed actor is SOVEREIGN AND the live user is also
- *   SOVEREIGN (explicit override — audited).
+ *   SOVEREIGN (explicit override — audited separately).
+ *
+ * Return shape (on success):
+ *   { ok: true, live, identity_verified: true, sovereign_override: bool,
+ *     claimed_actor_id, verified_actor_id, live_authenticated_email,
+ *     verification_timestamp }
+ *
+ * identity_verified is TRUE after ANY successful live rebind (both match
+ * and sovereign_override paths). sovereign_override is tracked SEPARATELY
+ * so audit trails can distinguish a direct match from an override.
  *
  * Never trusts: browser storage, client props, or URL params as identity authority.
  */
@@ -44,25 +53,38 @@ function isSovereignActor(actor) {
  * Rebind a claimed actor against the live authenticated session.
  *
  * @param {object} claimedActor — { email, id, role, sovereign_flag? }
- * @returns {Promise<{ ok: boolean, live?: object, verified?: boolean, sovereign_override?: boolean, reason?: string }>}
+ * @returns {Promise<object>} see module JSDoc for full shape
  */
 export async function rebindIdentity(claimedActor) {
+  const verification_timestamp = new Date().toISOString();
   let live;
   try {
     live = await base44.auth.me();
   } catch (e) {
-    return { ok: false, reason: `auth_me_failed: ${e.message}` };
+    return { ok: false, reason: `auth_me_failed: ${e.message}`, verification_timestamp };
   }
   if (!live?.email) {
-    return { ok: false, reason: 'no_live_session_email' };
+    return { ok: false, reason: 'no_live_session_email', verification_timestamp };
   }
 
   const claimedEmail = normalizeEmail(claimedActor?.email || claimedActor?.id);
   const liveEmail = normalizeEmail(live.email);
+  const claimed_actor_id = claimedActor?.id || claimedActor?.email || null;
+  const verified_actor_id = live.id || live.email;
+  const live_authenticated_email = live.email;
 
   // ── Match: claimed actor IS the live user ──
   if (claimedEmail && claimedEmail === liveEmail) {
-    return { ok: true, live, verified: true };
+    return {
+      ok: true,
+      live,
+      identity_verified: true,
+      sovereign_override: false,
+      claimed_actor_id,
+      verified_actor_id,
+      live_authenticated_email,
+      verification_timestamp,
+    };
   }
 
   // ── SOVEREIGN override: claimed sovereign + live user is also sovereign ──
@@ -73,7 +95,16 @@ export async function rebindIdentity(claimedActor) {
         (u) => u?.sovereign_flag === true || u?.role === 'SOVEREIGN'
       );
       if (liveIsSovereign) {
-        return { ok: true, live, verified: true, sovereign_override: true };
+        return {
+          ok: true,
+          live,
+          identity_verified: true,          // rebind succeeded → verified
+          sovereign_override: true,          // tracked separately
+          claimed_actor_id,
+          verified_actor_id,
+          live_authenticated_email,
+          verification_timestamp,
+        };
       }
     } catch {
       // Fall through to block
@@ -85,6 +116,10 @@ export async function rebindIdentity(claimedActor) {
     ok: false,
     reason: `identity_contamination_detected: claimed=${claimedEmail || '(empty)'} live=${liveEmail}`,
     live,
+    claimed_actor_id,
+    verified_actor_id,
+    live_authenticated_email,
+    verification_timestamp,
   };
 }
 

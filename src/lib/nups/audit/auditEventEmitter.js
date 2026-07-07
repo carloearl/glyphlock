@@ -230,6 +230,19 @@ export async function emitAuditEvent(opts) {
     event_version: AUDIT_EVENT_VERSION,
   };
 
+  // DACO WAVE 2 — Persist identity metadata in notes for forensic trace.
+  // claimed_actor_id is persisted SEPARATELY from verified_actor_id.
+  const _identityMeta = {
+    claimed_actor_id: opts.claimed_actor_id || null,
+    verified_actor_id: opts.verified_actor_id || null,
+    live_authenticated_email: opts.live_authenticated_email || null,
+    verification_timestamp: opts.verification_timestamp || null,
+    sovereign_override: !!opts.sovereign_override,
+  };
+  row.notes = row.notes && typeof row.notes === 'object'
+    ? { ...row.notes, identity: _identityMeta }
+    : { message: row.notes, identity: _identityMeta };
+
   try {
     const created = await base44.entities.AuditEvent.create(row);
     return { ok: true, id: created?.id };
@@ -284,6 +297,11 @@ export async function emitFromGatewayWrite({
   audit_depth,
   actor_ref,
   identity_verified,
+  sovereign_override,
+  claimed_actor_id,
+  verified_actor_id,
+  live_authenticated_email,
+  verification_timestamp,
 }) {
   // Guard: never self-audit AuditEvent writes (§5).
   if (entity === 'AuditEvent') return { ok: false, reason: 'recursion_guard_entity' };
@@ -305,6 +323,11 @@ export async function emitFromGatewayWrite({
       notes: { gateway_op: operation },
       actor_ref,
       identity_verified,
+      sovereign_override,
+      claimed_actor_id,
+      verified_actor_id,
+      live_authenticated_email,
+      verification_timestamp,
       retention_class: 'operational',
     });
   }
@@ -322,6 +345,11 @@ export async function emitFromGatewayWrite({
     notes: { gateway_op: operation },
     actor_ref,
     identity_verified,
+    sovereign_override,
+    claimed_actor_id,
+    verified_actor_id,
+    live_authenticated_email,
+    verification_timestamp,
     retention_class: defaultRetention(defaults.category),
     // NOTE: no financial_context derived automatically — the §3 spec
     // requires explicit fields. Authoritative call sites that know the

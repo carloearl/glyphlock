@@ -54,9 +54,14 @@ const approxEqual = (a, b) => Math.abs((Number(a) || 0) - (Number(b) || 0)) <= T
 
 const DEPRECATED_TIP_SPLIT = { staff: 0.7, hostess: 0.15, manager: 0.1, entertainer: 0.05 };
 
-async function audit(entry) {
+async function audit(entry, identity) {
   try {
-    const created = await base44.entities.MigrationAuditLog.create(entry);
+    let notes = entry.notes;
+    if (identity) {
+      const meta = JSON.stringify(identity);
+      notes = notes ? `${notes} | identity:${meta}` : `identity:${meta}`;
+    }
+    const created = await base44.entities.MigrationAuditLog.create({ ...entry, notes });
     return created?.id || null;
   } catch (e) {
     throw new Error(`audit_write_failed: ${e.message}`);
@@ -241,6 +246,19 @@ export async function writeEntity({
   // SOVEREIGN override is explicitly authorized. Contaminated writes are
   // blocked with an auditable rejection trail.
   const rebind = await rebindIdentity(actor);
+
+  // DACO WAVE 2 — Persist identity metadata separately for every audit trail.
+  // claimed_actor_id (from caller) is persisted SEPARATELY from verified_actor_id
+  // (from live base44.auth.me()). live_authenticated_email and verification_timestamp
+  // are captured at rebind time for forensic trace.
+  const identityContext = {
+    claimed_actor_id: rebind.claimed_actor_id || actorId,
+    verified_actor_id: rebind.verified_actor_id || (rebind.live && (rebind.live.id || rebind.live.email)) || null,
+    live_authenticated_email: rebind.live_authenticated_email || (rebind.live && rebind.live.email) || null,
+    verification_timestamp: rebind.verification_timestamp || null,
+    sovereign_override: !!rebind.sovereign_override,
+  };
+
   if (!rebind.ok) {
     const audit_id = await audit({
       entity_name: entity,
@@ -254,7 +272,7 @@ export async function writeEntity({
       block_reason: `identity_contamination_blocked: ${rebind.reason}`,
       venue_id: venue_id || null,
       notes: intent || null,
-    });
+    }, identityContext);
     return {
       ok: false,
       audit_id,
@@ -264,9 +282,15 @@ export async function writeEntity({
       block_reason: `identity_contamination_blocked: ${rebind.reason}`,
     };
   }
-  // Rebind succeeded — use the live email as authority for the rest of the flow.
+  // Rebind succeeded — identity IS verified. sovereign_override is tracked
+  // separately (still a verified rebind, just via the override path).
+  const identity_verified = true;
+  const sovereign_override = !!rebind.sovereign_override;
+  const claimed_actor_id = identityContext.claimed_actor_id;
+  const verified_actor_id = identityContext.verified_actor_id;
+  const live_authenticated_email = identityContext.live_authenticated_email;
+  const verification_timestamp = identityContext.verification_timestamp;
   const verifiedActorEmail = rebind.live.email;
-  const identity_verified = !rebind.sovereign_override;
 
   const mode = await resolveMode(requestContext?.mode, venue_id);
   const tier = 'TIER_1_OBSERVE';
@@ -292,7 +316,7 @@ export async function writeEntity({
         block_reason: `role_scope_violation: ${scopeReason}`,
         venue_id: venue_id || null,
         notes: intent || null,
-      });
+      }, identityContext);
       return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `role_scope_violation: ${scopeReason}` };
     }
   }
@@ -314,7 +338,7 @@ export async function writeEntity({
       block_reason: `role_not_authorized_in_REAL: ${role}`,
       venue_id: venue_id || null,
       notes: intent || null,
-    });
+    }, identityContext);
     return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `role_not_authorized_in_REAL: ${role}` };
   }
 
@@ -333,7 +357,7 @@ export async function writeEntity({
         block_reason: 'bulkCreate_requires_nonempty_array',
         venue_id: venue_id || null,
         notes: intent || null,
-      });
+        }, identityContext);
       return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: 'bulkCreate_requires_nonempty_array' };
     }
     for (let i = 0; i < records.length; i += 1) {
@@ -351,7 +375,7 @@ export async function writeEntity({
           block_reason: `financial_rule_violation[${i}]: ${reason}`,
           venue_id: venue_id || null,
           notes: intent || null,
-        });
+          }, identityContext);
         return {
           ok: false,
           audit_id,
@@ -410,7 +434,7 @@ export async function writeEntity({
       block_reason: `write_failed: ${writeError.message}`,
       venue_id: venue_id || null,
       notes: intent || null,
-    });
+    }, identityContext);
     return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `write_failed: ${writeError.message}` };
   }
 
@@ -425,7 +449,7 @@ export async function writeEntity({
     result: 'allowed',
     venue_id: venue_id || null,
     notes: intent || null,
-  });
+  }, identityContext);
 
   // BPAA-NUPS-AUDIT-001 §5 — emit observational AuditEvent. Recursion guard
   // is inside the emitter (skips entity===AuditEvent and audit_depth>=max).
@@ -442,7 +466,12 @@ export async function writeEntity({
         session_id: requestContext?.session_id,
         audit_depth: (requestContext?.audit_depth || 0),
         actor_ref: actorId,
-        identity_verified, // DACO WAVE 2 — true when rebind matched live session
+        identity_verified,
+        sovereign_override,
+        claimed_actor_id,
+        verified_actor_id,
+        live_authenticated_email,
+        verification_timestamp,
       });
     } catch (_) { /* observational only — never block the business write */ }
   }
@@ -470,6 +499,13 @@ export async function toggleMode({ actor, newMode, venue_id }) {
 
   // DACO WAVE 2 — ID-01: Rebind SOVEREIGN actor to live session.
   const rebind = await rebindIdentity(actor);
+  const identityContext = {
+    claimed_actor_id: rebind.claimed_actor_id || actor.id || actor.email,
+    verified_actor_id: rebind.verified_actor_id || (rebind.live && (rebind.live.id || rebind.live.email)) || null,
+    live_authenticated_email: rebind.live_authenticated_email || (rebind.live && rebind.live.email) || null,
+    verification_timestamp: rebind.verification_timestamp || null,
+    sovereign_override: !!rebind.sovereign_override,
+  };
   if (!rebind.ok) {
     await audit({
       entity_name: 'SystemConfig',
@@ -483,7 +519,7 @@ export async function toggleMode({ actor, newMode, venue_id }) {
       block_reason: `identity_contamination_blocked: ${rebind.reason}`,
       venue_id: venue_id || null,
       notes: `toggleMode BLOCKED -> ${newMode}`,
-    });
+    }, identityContext);
     throw new Error(`toggleMode: identity_contamination_blocked: ${rebind.reason}`);
   }
 
@@ -522,7 +558,7 @@ export async function toggleMode({ actor, newMode, venue_id }) {
     result: 'allowed',
     venue_id: venue_id || null,
     notes: `toggleMode -> ${newMode}${venue_id ? ` (venue: ${venue_id})` : ' (global)'}`,
-  });
+  }, identityContext);
 
   return { ok: true, mode: newMode, venue_id: venue_id || null };
 }
