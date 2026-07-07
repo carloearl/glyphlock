@@ -3,6 +3,7 @@
 // view can both call it with no duplication.
 
 import { base44 } from "@/api/base44Client";
+import { getCurrentSovereign } from "./sovereign";
 
 export const DEMO_VENUE_ID = "DEMO_VENUE_001";
 
@@ -55,6 +56,16 @@ const IS_DEMO_FLAGGED = new Set([
 
 export async function wipeDemoVenue(onLog) {
   const log = (msg, type = "info") => onLog?.({ msg, type });
+
+  // ── W3-002 REMEDIATION: Sovereign identity verification ──
+  // No wipe may proceed without a live SOVEREIGN session. Resolved from
+  // base44.auth.me() → NUPSUser lookup, never client-supplied.
+  const sovereign = await getCurrentSovereign();
+  if (!sovereign) {
+    log("❌ SOVEREIGN_REQUIRED: demo wipe blocked", "error");
+    return { totalDeleted: 0, totalProtected: 0, perEntity: {}, blocked: true, reason: "SOVEREIGN_REQUIRED" };
+  }
+
   let totalDeleted = 0;
   let totalProtected = 0;
   const perEntity = {};
@@ -90,7 +101,11 @@ export async function wipeDemoVenue(onLog) {
 
 async function safeCreate(entityName, data, onLog, label) {
   try {
-    const res = await base44.entities[entityName].create(data);
+    // ── W3-002 REMEDIATION: Stamp mode on all created records ──
+    // DEMO records must never default to REAL mode. This prevents
+    // demo data from contaminating REAL-mode financial reports.
+    const stamped = { ...data, mode: 'DEMO' };
+    const res = await base44.entities[entityName].create(stamped);
     onLog?.({ msg: `✅ ${label}`, type: "success" });
     return res;
   } catch (e) {
@@ -102,6 +117,16 @@ async function safeCreate(entityName, data, onLog, label) {
 export async function seedDemoVenue(onLog) {
   const today = TODAY();
   const log = (msg, type = "info") => onLog?.({ msg, type });
+
+  // ── W3-002 REMEDIATION: Sovereign identity verification ──
+  // No seed may proceed without a live SOVEREIGN session. Resolved from
+  // base44.auth.me() → NUPSUser lookup, never client-supplied.
+  const sovereign = await getCurrentSovereign();
+  if (!sovereign) {
+    log("❌ SOVEREIGN_REQUIRED: demo seed blocked", "error");
+    return { ok: false, blocked: true, reason: "SOVEREIGN_REQUIRED" };
+  }
+
   log("▶ Seeding DEMO_VENUE_001…", "info");
 
   // POSBatch (open shift)

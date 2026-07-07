@@ -1,10 +1,18 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+
+    // ── W3-001 REMEDIATION: Authentication gate ──
+    // No write may proceed without a live authenticated session.
+    const liveUser = await base44.auth.me();
+    if (!liveUser || !liveUser.email) {
+      return Response.json({ error: 'Unauthorized: authentication required' }, { status: 401 });
+    }
+
     const body = await req.json();
-    const { 
+    const {
       token, signature, guest_name, serial_number,
       date_of_birth, government_id_type, government_id_number, government_id_state,
       card_last_four, card_type, phone,
@@ -52,7 +60,64 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Contract has already been signed' }, { status: 400 });
     }
 
-    const clientIP = req.headers.get('cf-connecting-ip') || 
+    // ── W3-001 REMEDIATION: Identity rebind + role check ──
+    // Resolve NUPSUser by created_by (RLS pattern) to verify the live
+    // session maps to an authorized staff record. Only MANAGER-class
+    // roles or SOVEREIGN may witness a VIP contract signing.
+    const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+      created_by: liveUser.email
+    });
+
+    const nupsUser = (nupsUsers && nupsUsers.length > 0) ? nupsUsers[0] : null;
+    const isSovereign = nupsUser && (nupsUser.sovereign_flag === true || nupsUser.role === 'SOVEREIGN');
+    const MANAGER_CLASS_ROLES = new Set([
+      'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN'
+    ]);
+    const roleAuthorized = isSovereign || (nupsUser && MANAGER_CLASS_ROLES.has(nupsUser.role));
+
+    if (!roleAuthorized) {
+      return Response.json({
+        error: 'Forbidden: MANAGER-class role required to witness VIP contract signing',
+        role: nupsUser?.role || 'none'
+      }, { status: 403 });
+    }
+
+    // Identity metadata for audit trail
+    const verification_timestamp = new Date().toISOString();
+    const identityContext = {
+      claimed_actor_id: liveUser.email,
+      verified_actor_id: liveUser.id || liveUser.email,
+      live_authenticated_email: liveUser.email,
+      verification_timestamp,
+      sovereign_override: !!isSovereign,
+    };
+
+    // ── W3-001 REMEDIATION: Mode resolution ──
+    // Resolve from SystemConfig (per-venue → global → default REAL).
+    const venue_id = tokenRecord.venue_id || null;
+    let resolvedMode = 'REAL';
+    if (venue_id) {
+      try {
+        const venueCfgRows = await base44.asServiceRole.entities.SystemConfig.filter({
+          venue_id, config_key: 'venue'
+        });
+        if (venueCfgRows && venueCfgRows.length === 1 && venueCfgRows[0].mode) {
+          resolvedMode = venueCfgRows[0].mode;
+        }
+      } catch { /* fall through to global */ }
+    }
+    if (resolvedMode === 'REAL') {
+      try {
+        const globalCfgRows = await base44.asServiceRole.entities.SystemConfig.filter({
+          config_key: 'global'
+        });
+        if (globalCfgRows && globalCfgRows.length === 1 && globalCfgRows[0].mode) {
+          resolvedMode = globalCfgRows[0].mode;
+        }
+      } catch { /* default REAL */ }
+    }
+
+    const clientIP = req.headers.get('cf-connecting-ip') ||
                      req.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';
     const now = new Date().toISOString();
@@ -70,7 +135,7 @@ Deno.serve(async (req) => {
     const idHash = await sha256(`${government_id_number}:${guest_name}:${date_of_birth}`);
     const contractHash = await sha256(`${serial_number}:${guest_name}:${card_last_four}:${thumbprintHash}:${signatureHash}:${hostSignatureHash}:${managerSignatureHash}:${now}`);
 
-    // Mark token record as used
+    // Mark token record as used — stamp mode
     await base44.asServiceRole.entities.VIPContractRecord.update(tokenRecord.id, {
       used: true,
       status: "signed",
@@ -91,6 +156,7 @@ Deno.serve(async (req) => {
       guest_photo_url: guest_photo_url || "",
       ip_address: clientIP,
       user_agent: userAgent,
+      mode: resolvedMode,
       metadata: {
         host_name,
         host_signature_hash: hostSignatureHash,
@@ -100,7 +166,7 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Create VIPGuest record with full biometric data
+    // Create VIPGuest record with full biometric data — stamp is_demo if DEMO
     const guestRecord = await base44.asServiceRole.entities.VIPGuest.create({
       guest_name,
       date_of_birth,
@@ -132,6 +198,7 @@ Deno.serve(async (req) => {
       verification_status: "verified",
       id_verified_date: now,
       membership_number: serial_number,
+      is_demo: resolvedMode === 'DEMO',
     });
 
     // Update contract record with guest reference
@@ -139,12 +206,40 @@ Deno.serve(async (req) => {
       guest_record_id: guestRecord.id,
     });
 
-    return Response.json({ 
+    // ── W3-001 REMEDIATION: AuditEvent emission ──
+    // Emit observational AuditEvent with packed identity metadata.
+    try {
+      await base44.asServiceRole.entities.AuditEvent.create({
+        venue_id: venue_id || 'unknown',
+        timestamp: now,
+        event_type: 'ManagerApproval',
+        event_category: 'identity',
+        severity: 'high',
+        mode: resolvedMode.toLowerCase(),
+        session_id: `vipContractSign:${tokenRecord.id}`,
+        source: 'door',
+        entity_type: 'VIPContractRecord',
+        entity_id: tokenRecord.id,
+        identity_verified: true,
+        retention_class: 'compliance',
+        event_version: 1,
+        notes: {
+          action: 'vip_contract_signed',
+          guest_name,
+          serial_number,
+          contract_hash: contractHash,
+          ...identityContext,
+        },
+      });
+    } catch { /* observational only — never block the business write */ }
+
+    return Response.json({
       success: true,
       serial_number,
       guest_id: guestRecord.id,
       contract_id: tokenRecord.id,
       contract_hash: contractHash,
+      mode: resolvedMode,
       message: 'Contract signed with biometric verification. Welcome to VIP.'
     });
   } catch (error) {

@@ -1,12 +1,13 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
 
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // ── W3-003 REMEDIATION: Authentication gate ──
+    const user = await base44.auth.me();
+    if (!user || !user.email) {
+      return Response.json({ error: 'Unauthorized: authentication required' }, { status: 401 });
     }
 
     const { signature, entertainer_id, location } = await req.json();
@@ -15,36 +16,120 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // ── W3-003 REMEDIATION: Identity rebind + role check ──
+    // Resolve NUPSUser by created_by (RLS pattern) to verify the live
+    // session maps to an authorized staff record.
+    const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+      created_by: user.email
+    });
+
+    const nupsUser = (nupsUsers && nupsUsers.length > 0) ? nupsUsers[0] : null;
+    const isSovereign = nupsUser && (nupsUser.sovereign_flag === true || nupsUser.role === 'SOVEREIGN');
+    const MANAGER_CLASS_ROLES = new Set([
+      'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN'
+    ]);
+    const isManagerClass = isSovereign || (nupsUser && MANAGER_CLASS_ROLES.has(nupsUser.role));
+    const isPerformer = nupsUser && nupsUser.role === 'PERFORMER';
+
+    if (!isManagerClass && !isPerformer) {
+      return Response.json({
+        error: 'Forbidden: PERFORMER or MANAGER-class role required to check in',
+        role: nupsUser?.role || 'none'
+      }, { status: 403 });
+    }
+
+    // Fetch the Entertainer record to verify ownership (for PERFORMER self-check-in)
+    // and resolve venue_id for mode stamping.
+    let entertainerRecord = null;
+    try {
+      entertainerRecord = await base44.asServiceRole.entities.Entertainer.get(entertainer_id);
+    } catch {
+      // Entertainer record may not exist if entertainer_id is a user ID
+    }
+
+    // ── W3-003 REMEDIATION: Self-check-in ownership verification ──
+    // If the caller is a PERFORMER, they may only check in as themselves.
+    if (isPerformer && !isManagerClass) {
+      const entertainerEmail = entertainerRecord?.email?.toLowerCase();
+      const callerEmail = user.email.toLowerCase();
+      if (entertainerRecord && entertainerEmail && entertainerEmail !== callerEmail) {
+        return Response.json({
+          error: 'Forbidden: PERFORMER may only self-check-in',
+          entertainer_email: entertainerEmail,
+          caller_email: callerEmail
+        }, { status: 403 });
+      }
+    }
+
+    // Identity metadata for audit trail
+    const verification_timestamp = new Date().toISOString();
+    const identityContext = {
+      claimed_actor_id: user.email,
+      verified_actor_id: user.id || user.email,
+      live_authenticated_email: user.email,
+      verification_timestamp,
+      sovereign_override: !!isSovereign,
+    };
+
+    // ── W3-003 REMEDIATION: Mode resolution ──
+    const venue_id = entertainerRecord?.venue_id || nupsUser?.venue_id || null;
+    let resolvedMode = 'REAL';
+    if (venue_id) {
+      try {
+        const venueCfgRows = await base44.asServiceRole.entities.SystemConfig.filter({
+          venue_id, config_key: 'venue'
+        });
+        if (venueCfgRows && venueCfgRows.length === 1 && venueCfgRows[0].mode) {
+          resolvedMode = venueCfgRows[0].mode;
+        }
+      } catch { /* fall through to global */ }
+    }
+    if (resolvedMode === 'REAL') {
+      try {
+        const globalCfgRows = await base44.asServiceRole.entities.SystemConfig.filter({
+          config_key: 'global'
+        });
+        if (globalCfgRows && globalCfgRows.length === 1 && globalCfgRows[0].mode) {
+          resolvedMode = globalCfgRows[0].mode;
+        }
+      } catch { /* default REAL */ }
+    }
+
     // Get client IP and user agent
-    const clientIP = req.headers.get('cf-connecting-ip') || 
-                     req.headers.get('x-forwarded-for') || 
-                     req.headers.get('x-real-ip') || 
+    const clientIP = req.headers.get('cf-connecting-ip') ||
+                     req.headers.get('x-forwarded-for') ||
+                     req.headers.get('x-real-ip') ||
                      'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';
+    const now = new Date().toISOString();
 
-    // Create shift record with digital signature
+    // Create shift record with digital signature — stamp mode
     const shift = await base44.asServiceRole.entities.EntertainerShift.create({
       entertainer_id,
       stage_name: user.full_name,
-      check_in_time: new Date().toISOString(),
+      check_in_time: now,
       location: location || "Main Floor",
       status: "checked_in",
       shift_earnings: 0,
       vip_sessions: 0,
+      mode: resolvedMode,
     });
 
-    // Update entertainer contract status (skip if entertainer_id is a user ID, not an Entertainer record)
-    try {
-      await base44.asServiceRole.entities.Entertainer.update(entertainer_id, {
-        contract_signed: true,
-        contract_signature: signature,
-        contract_signed_date: new Date().toISOString(),
-        contract_ip_address: clientIP,
-        status: "active"
-      });
-    } catch (updateErr) {
-      // Entertainer record may not exist yet if user is self-checking in
-      console.warn('Entertainer update skipped:', updateErr.message);
+    // Update entertainer contract status — stamp mode (skip if no Entertainer record)
+    if (entertainerRecord) {
+      try {
+        await base44.asServiceRole.entities.Entertainer.update(entertainer_id, {
+          contract_signed: true,
+          contract_signature: signature,
+          contract_signed_date: now,
+          contract_ip_address: clientIP,
+          contract_status: "VALID",
+          status: "active",
+          mode: resolvedMode,
+        });
+      } catch (updateErr) {
+        console.warn('Entertainer update skipped:', updateErr.message);
+      }
     }
 
     // Log signature for non-repudiation via SystemAuditLog
@@ -62,14 +147,41 @@ Deno.serve(async (req) => {
       metadata: {
         signature_hash: sigHash,
         user_agent: userAgent,
-        timestamp: new Date().toISOString(),
+        timestamp: now,
       }
     });
 
-    return Response.json({ 
-      success: true, 
+    // ── W3-003 REMEDIATION: AuditEvent emission ──
+    try {
+      await base44.asServiceRole.entities.AuditEvent.create({
+        venue_id: venue_id || 'unknown',
+        timestamp: now,
+        event_type: 'ShiftOpen',
+        event_category: 'identity',
+        severity: 'medium',
+        mode: resolvedMode.toLowerCase(),
+        session_id: `entertainerCheckIn:${shift.id}`,
+        source: 'door',
+        entity_type: 'EntertainerShift',
+        entity_id: shift.id,
+        identity_verified: true,
+        retention_class: 'operational',
+        event_version: 1,
+        notes: {
+          action: 'entertainer_check_in',
+          entertainer_id,
+          stage_name: user.full_name,
+          signature_hash: sigHash,
+          ...identityContext,
+        },
+      });
+    } catch { /* observational only — never block the business write */ }
+
+    return Response.json({
+      success: true,
       shift_id: shift.id,
-      message: 'Check-in successful. Contract digitally signed.' 
+      mode: resolvedMode,
+      message: 'Check-in successful. Contract digitally signed.'
     });
   } catch (error) {
     console.error('Check-in error:', error);
