@@ -28,18 +28,92 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
     const event = payload?.event || {};
-    const data = payload?.data || {};
-    const oldData = payload?.old_data || null;
 
-    if (event.entity_name !== 'DriverPayout') {
-      return Response.json({ ok: true, skipped: 'not_driver_payout' });
+    // ── W3-005 REMEDIATION: Dual invocation model ──
+    //   1. Automation-triggered (entity event): payload has
+    //      event.entity_name=DriverPayout + event.entity_id.
+    //      Source entity is ALWAYS fetched from DB — payload.data is NEVER
+    //      trusted. This prevents forged direct HTTP calls from injecting
+    //      arbitrary JournalEntry records.
+    //   2. Direct HTTP invocation: requires authenticated admin session.
+    let dp = null;
+    let oldData = null;
+    const isAutomationCall = !!(event?.entity_id && event?.entity_name === 'DriverPayout');
+
+    if (isAutomationCall) {
+      // Automation path — fetch source from DB, never trust payload data.
+      // Return controlled response if source does not exist.
+      try {
+        dp = await base44.asServiceRole.entities.DriverPayout.get(event.entity_id);
+      } catch {
+        return Response.json({
+          ok: false,
+          skipped: 'source_driver_payout_not_found',
+          entity_id: event.entity_id,
+        });
+      }
+      oldData = payload?.old_data || null;
+    } else {
+      // Direct HTTP path — require authenticated admin
+      let user;
+      try {
+        user = await base44.auth.me();
+      } catch {
+        return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+      }
+      if (!user || !user.email) {
+        return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+      }
+
+      // Resolve NUPSUser for role check
+      const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+        created_by: user.email,
+      });
+      const nupsUser = (nupsUsers && nupsUsers.length > 0) ? nupsUsers[0] : null;
+      const isSovereign = nupsUser && (nupsUser.sovereign_flag === true || nupsUser.role === 'SOVEREIGN');
+      const ADMIN_ROLES = new Set([
+        'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN', 'admin',
+      ]);
+      const isAdmin = isSovereign || (nupsUser && ADMIN_ROLES.has(nupsUser.role));
+
+      if (!isAdmin) {
+        return Response.json({
+          ok: false,
+          error: 'Forbidden: admin role required for direct ledger invocation',
+          role: nupsUser?.role || 'none',
+        }, { status: 403 });
+      }
+
+      // Direct call requires a driver_payout_id in the payload
+      const dpId = payload?.driver_payout_id || payload?.data?.id;
+      if (!dpId) {
+        return Response.json({
+          ok: false,
+          error: 'driver_payout_id required for direct invocation',
+        }, { status: 400 });
+      }
+      try {
+        dp = await base44.asServiceRole.entities.DriverPayout.get(dpId);
+      } catch {
+        return Response.json({
+          ok: false,
+          error: 'driver_payout_not_found',
+          driver_payout_id: dpId,
+        }, { status: 404 });
+      }
     }
 
-    let dp = data;
-    if (!dp?.id && event?.entity_id) {
-      dp = await base44.asServiceRole.entities.DriverPayout.get(event.entity_id);
+    if (!dp || !dp.id) {
+      return Response.json({
+        ok: false,
+        skipped: 'no_payout',
+        entity_id: event.entity_id || null,
+      });
     }
-    if (!dp || !dp.id) return Response.json({ ok: true, skipped: 'no_payout' });
+
+    // Non-DriverPayout entity_name for automation calls is not applicable
+    // (already gated by isAutomationCall check). For direct calls, entity
+    // type is verified by the DB fetch above.
 
     // Only fire when payout_status crosses → PROCESSED
     if (dp.payout_status !== 'PROCESSED') {
@@ -49,9 +123,13 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, skipped: 'already_processed_before' });
     }
 
+    // W3-005: mode is always taken from the DB-fetched record, never from
+    // the payload. All financial values (venue_id, total_payout, driver_id,
+    // etc.) come from the persisted DriverPayout — never from request JSON.
     const venue_id = dp.venue_id;
     if (!venue_id) return Response.json({ ok: true, skipped: 'no_venue_id' });
     const mode = dp.mode || 'REAL';
+    const actor_user_id = dp.processed_by || dp.paid_by || 'system';
 
     // ── Resolve treatment from VenueRateConfig ───────────────────
     const cfgs = await base44.asServiceRole.entities.VenueRateConfig.filter({ venue_id }, null, 1);
@@ -117,7 +195,7 @@ Deno.serve(async (req) => {
       source_type: 'DRIVER_PAYOUT',
       source_id: dp.id,
       idempotency_key,
-      actor_user_id: dp.processed_by || dp.paid_by || 'system',
+      actor_user_id,
       memo: `Driver payout · ${dp.driver_name} · ${treatment} · $${dp.total_payout}`,
       status: 'POSTED',
       lines,
