@@ -1,5 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
+// W3-007: Server-side surcharge rate — NEVER accept from client payload.
+// Client-controlled surcharge_rate flows to total_charged → GlyphBucksBatch
+// → postGlyphBucksToLedger automation → JournalEntry. Must be server-fixed.
+const SURCHARGE_RATE = 0.30;
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -28,7 +33,6 @@ Deno.serve(async (req) => {
       customer_name,
       customer_identity_id,
       denominations,
-      surcharge_rate = 0.30,
       approval_code,
       processor_reference,
       payment_method,
@@ -76,8 +80,21 @@ Deno.serve(async (req) => {
       };
     });
 
-    const surcharge_amount = total_face_value * surcharge_rate;
+    // W3-007: surcharge_rate is server-fixed — never from payload
+    const surcharge_amount = total_face_value * SURCHARGE_RATE;
     const total_charged = total_face_value + surcharge_amount;
+
+    // W3-007: Resolve mode from SystemConfig — never trust client for mode
+    let resolvedMode = 'REAL';
+    try {
+      const venueConfig = await base44.asServiceRole.entities.SystemConfig.filter(
+        { config_key: 'venue', venue_id }, null, 1
+      );
+      const globalConfig = await base44.asServiceRole.entities.SystemConfig.filter(
+        { config_key: 'global' }, null, 1
+      );
+      resolvedMode = venueConfig?.[0]?.mode || globalConfig?.[0]?.mode || 'REAL';
+    } catch (_) { /* default to REAL on config fetch failure */ }
 
     const batch_id = `GB-${Date.now()}-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
 
@@ -88,14 +105,15 @@ Deno.serve(async (req) => {
       venue_id,
       denominations: processed_denominations,
       total_face_value,
-      surcharge_rate,
+      surcharge_rate: SURCHARGE_RATE,
       surcharge_amount,
       total_charged,
       approval_code,
       processor_reference,
       status: 'issued',
       issued_at: new Date().toISOString(),
-      issued_by: user.email
+      issued_by: user.email,
+      mode: resolvedMode
       });
     } catch (dbError) {
       await base44.asServiceRole.entities.SystemAuditLog.create({
@@ -127,7 +145,8 @@ Deno.serve(async (req) => {
           barcode_number,
           status: 'issued',
           issued_to_customer: customer_name,
-          issued_at: new Date().toISOString()
+          issued_at: new Date().toISOString(),
+          mode: resolvedMode
         });
       }
     }
