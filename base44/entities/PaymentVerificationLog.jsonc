@@ -1,0 +1,82 @@
+{
+  "name": "PaymentVerificationLog",
+  "type": "object",
+  "description": "W3-008B \u2014 Append-only verification trail for every payment record. Each step in the verification process gets a log entry. This is the forensic audit trail that binds PaymentRecord status changes to actor, method, and response hashes.",
+  "properties": {
+    "log_id": {
+      "type": "string",
+      "description": "Unique log entry identifier."
+    },
+    "payment_record_id": {
+      "type": "string",
+      "description": "Foreign key to PaymentRecord."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "verification_step": {
+      "type": "string",
+      "enum": [
+        "record_created",
+        "provider_routed",
+        "api_call_made",
+        "api_response_received",
+        "fields_validated",
+        "manager_authorized",
+        "record_confirmed",
+        "record_failed",
+        "record_voided",
+        "record_refunded"
+      ],
+      "description": "Which step in the verification lifecycle this log captures."
+    },
+    "provider_code": {
+      "type": "string"
+    },
+    "request_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the verification request payload (no PII in plaintext)."
+    },
+    "response_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the processor/adapter response."
+    },
+    "status_before": {
+      "type": "string"
+    },
+    "status_after": {
+      "type": "string"
+    },
+    "actor_email": {
+      "type": "string",
+      "description": "Who triggered this step."
+    },
+    "actor_role": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    }
+  },
+  "required": [
+    "log_id",
+    "payment_record_id",
+    "venue_id",
+    "verification_step",
+    "provider_code",
+    "timestamp"
+  ]
+}

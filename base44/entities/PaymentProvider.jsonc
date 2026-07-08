@@ -1,0 +1,61 @@
+{
+  "name": "PaymentProvider",
+  "type": "object",
+  "description": "W3-008B \u2014 Registered payment processor adapters. System-level catalog; venues select from these via VenuePaymentConfig. Each provider has an adapter_type that routes verification logic in createPaymentRecord. Stripe, Clover, GoDaddy, Elavon, TSYS, manual external, and cash are the built-in adapters.",
+  "properties": {
+    "provider_code": {
+      "type": "string",
+      "description": "Stable unique slug (e.g. 'stripe', 'clover', 'godaddy', 'elavon', 'tsys', 'manual_external', 'cash')."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable provider name."
+    },
+    "adapter_type": {
+      "type": "string",
+      "enum": [
+        "api_verify",
+        "external_manual",
+        "cash",
+        "api_create_and_verify"
+      ],
+      "description": "api_verify = verify existing processor reference via API (Stripe PI retrieval). api_create_and_verify = create intent then verify (Stripe full flow). external_manual = manager enters approval code, no API call. cash = no processor, simple confirmation."
+    },
+    "required_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fields required for verification (e.g. ['processor_reference', 'approval_code', 'amount'])."
+    },
+    "is_external": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for manual/cash \u2014 no API calls to a processor."
+    },
+    "supports_refunds": {
+      "type": "boolean",
+      "default": true
+    },
+    "supports_partial_capture": {
+      "type": "boolean",
+      "default": false
+    },
+    "secret_name": {
+      "type": "string",
+      "description": "Name of the secret key this adapter needs (e.g. 'STRIPE_SECRET_KEY'). Empty for external/cash."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "provider_code",
+    "display_name",
+    "adapter_type"
+  ]
+}

@@ -95,40 +95,71 @@ Deno.serve(async (req) => {
     const expected_surcharge = total_face_value * SURCHARGE_RATE;
     const expected_total_charged = total_face_value + expected_surcharge;
 
-    // W3-007: Verify processor_reference against persisted confirmed order.
-    // Do NOT create bills from client-provided payment proof.
-    // The GlyphBucksOrder is created by confirmGlyphBucksPayment after
-    // Stripe verification, with grand_total from paymentIntent.amount/100.
-    let confirmedOrder = null;
+    // W3-008B: Verify against PaymentRecord (provider-agnostic proof layer).
+    // PaymentRecord is created by createPaymentRecord after any provider adapter
+    // (Stripe, Clover, manual external, cash) verifies the payment. This replaces
+    // the Stripe-hardcoded GlyphBucksOrder-only check. PaymentRecord is THE proof.
+    let surcharge_amount;
+    let total_charged;
+    let confirmedRecord = null;
     try {
-      const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
-        card_token: processor_reference,
+      const records = await base44.asServiceRole.entities.PaymentRecord.filter({
+        processor_reference,
         venue_id,
-        status: 'COMPLETE'
+        status: { $in: ['CONFIRMED', 'EXTERNAL_CONFIRMED', 'CAPTURED'] }
       }, null, 1);
-      confirmedOrder = orders?.[0] || null;
+      confirmedRecord = records?.[0] || null;
     } catch (_) { /* fall through to not-found error */ }
 
-    if (!confirmedOrder || !confirmedOrder.id) {
-      return Response.json({
-        error: 'PAYMENT_NOT_CONFIRMED',
-        message: 'No confirmed payment order found for this processor reference. Payment must be confirmed before creating GlyphBucks.'
-      }, { status: 400 });
-    }
+    if (!confirmedRecord || !confirmedRecord.id) {
+      // W3-008B: Fallback to legacy GlyphBucksOrder path for backward compatibility
+      // during migration. New payments should route through PaymentRecord.
+      let legacyOrder = null;
+      try {
+        const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
+          card_token: processor_reference,
+          venue_id,
+          status: 'COMPLETE'
+        }, null, 1);
+        legacyOrder = orders?.[0] || null;
+      } catch (_) { /* fall through to not-found error */ }
 
-    // W3-007: Cross-validate — order grand_total must match expected total_charged.
-    // This prevents denomination manipulation after payment was made.
-    const order_total = confirmedOrder.grand_total || 0;
-    if (Math.abs(order_total - expected_total_charged) > 0.01) {
-      return Response.json({
-        error: 'PAYMENT_AMOUNT_MISMATCH',
-        message: `Order total ($${order_total}) does not match expected charge ($${expected_total_charged}). Denominations may have been altered.`
-      }, { status: 400 });
-    }
+      if (!legacyOrder || !legacyOrder.id) {
+        return Response.json({
+          error: 'PAYMENT_NOT_CONFIRMED',
+          message: 'No confirmed PaymentRecord or GlyphBucksOrder found for this processor reference. Payment must be verified via createPaymentRecord before creating GlyphBucks.'
+        }, { status: 400 });
+      }
 
-    // W3-007: total_charged from persisted order — server-derived source of truth
-    const surcharge_amount = expected_surcharge;
-    const total_charged = order_total;
+      // Legacy path — validate against GlyphBucksOrder grand_total
+      const order_total = legacyOrder.grand_total || 0;
+      if (Math.abs(order_total - expected_total_charged) > 0.01) {
+        return Response.json({
+          error: 'PAYMENT_AMOUNT_MISMATCH',
+          message: `Order total ($${order_total}) does not match expected charge ($${expected_total_charged}). Denominations may have been altered.`
+        }, { status: 400 });
+      }
+
+      surcharge_amount = expected_surcharge;
+      total_charged = order_total;
+      // Continue with legacy path below — set variables for the rest of the function
+      // The code after this block uses surcharge_amount and total_charged
+
+    } else {
+
+      // W3-008B: Primary path — validate against PaymentRecord (provider-agnostic)
+      const record_total = confirmedRecord.amount || 0;
+      if (Math.abs(record_total - expected_total_charged) > 0.01) {
+        return Response.json({
+          error: 'PAYMENT_AMOUNT_MISMATCH',
+          message: `PaymentRecord amount ($${record_total}) does not match expected charge ($${expected_total_charged}). Denominations may have been altered.`
+        }, { status: 400 });
+      }
+
+      surcharge_amount = expected_surcharge;
+      total_charged = record_total;
+
+    }
 
     // W3-007: Resolve mode from SystemConfig — never trust client for mode
     let resolvedMode = 'REAL';

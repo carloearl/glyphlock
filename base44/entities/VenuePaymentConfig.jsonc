@@ -1,0 +1,70 @@
+{
+  "name": "VenuePaymentConfig",
+  "type": "object",
+  "description": "W3-008B \u2014 Per-venue payment processor configuration. Venues select a primary provider and optional fallback. When no config exists, Stripe is the default fallback. This is the switchboard that createPaymentRecord reads to route verification to the correct adapter.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Foreign key to Venue. One config per venue."
+    },
+    "primary_provider_code": {
+      "type": "string",
+      "default": "stripe",
+      "description": "Provider code from PaymentProvider. Default 'stripe' for backward compatibility."
+    },
+    "fallback_provider_code": {
+      "type": "string",
+      "description": "Fallback provider when primary is unavailable. Common: 'manual_external'."
+    },
+    "merchant_id": {
+      "type": "string",
+      "description": "Processor merchant account ID."
+    },
+    "terminal_id": {
+      "type": "string",
+      "description": "Terminal/device ID for card-present flows."
+    },
+    "external_approval_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when manager must manually enter approval code (external terminal)."
+    },
+    "manager_pin_required_for_external": {
+      "type": "boolean",
+      "default": true,
+      "description": "True when external/manual payments require manager PIN re-verification."
+    },
+    "config_metadata": {
+      "type": "object",
+      "description": "Provider-specific config (gateway URL, API version, etc.).",
+      "additionalProperties": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_edited_by": {
+      "type": "string"
+    },
+    "last_edited_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "Ledger mode. REAL = live payments. DEMO/SANDBOX = test processors."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "venue_id"
+  ]
+}

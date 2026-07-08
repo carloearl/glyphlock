@@ -1,0 +1,126 @@
+{
+  "name": "PaymentRecord",
+  "type": "object",
+  "description": "W3-008B \u2014 THE PROOF LAYER. Created by createPaymentRecord after provider adapter verification. This is what createGlyphBucksSale trusts \u2014 NEVER raw client payment data. Binds processor money movement to NUPS compliance chain. One record per payment event. Immutable once status=CONFIRMED.",
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "description": "Unique payment record identifier (e.g. PR-{venue_short}-{timestamp}-{seq})."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "provider_code": {
+      "type": "string",
+      "description": "Which adapter verified this payment (stripe, clover, manual_external, cash, etc.)."
+    },
+    "processor_reference": {
+      "type": "string",
+      "description": "Reference from the processor (Stripe PI ID, Clover order ID, manual approval code, etc.)."
+    },
+    "approval_code": {
+      "type": "string",
+      "description": "Approval/auth code from processor. For external/manual, entered by manager."
+    },
+    "amount": {
+      "type": "number",
+      "description": "Authorized/captured amount in USD. Server-verified \u2014 never client-supplied for API providers."
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "Cash",
+        "Credit Card",
+        "Debit Card",
+        "Digital Wallet",
+        "Gift Card",
+        "GlyphBucks",
+        "Comp",
+        "Other"
+      ],
+      "description": "Tender type as recorded by the processor."
+    },
+    "card_last_four": {
+      "type": "string"
+    },
+    "card_brand": {
+      "type": "string",
+      "description": "Visa, Mastercard, Amex, Discover, etc."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "AUTHORIZED",
+        "CAPTURED",
+        "CONFIRMED",
+        "FAILED",
+        "VOIDED",
+        "REFUNDED",
+        "EXTERNAL_CONFIRMED"
+      ],
+      "default": "PENDING",
+      "description": "PENDING = created awaiting verification. AUTHORIZED = processor authorized but not captured. CAPTURED = funds captured. CONFIRMED = NUPS verification complete, locked. EXTERNAL_CONFIRMED = manager-confirmed external payment. FAILED = verification failed. VOIDED/REFUNDED = post-confirmation state changes."
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verified_by": {
+      "type": "string",
+      "description": "Email of staff who confirmed/verified. For API providers, the system user."
+    },
+    "manager_authorized_by": {
+      "type": "string",
+      "description": "Manager email who authorized external/manual payment. Required when external_approval_required=true."
+    },
+    "linked_order_id": {
+      "type": "string",
+      "description": "GlyphBucksOrder ID created/updated from this record."
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "api_retrieval",
+        "api_webhook",
+        "manager_manual",
+        "cash_settlement",
+        "terminal_scan"
+      ],
+      "description": "How the payment was verified."
+    },
+    "raw_response_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of raw processor response (for audit without storing PII)."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Provider-specific metadata (denominations, customer info, etc.)."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "record_id",
+    "venue_id",
+    "provider_code",
+    "processor_reference",
+    "amount",
+    "status"
+  ]
+}
