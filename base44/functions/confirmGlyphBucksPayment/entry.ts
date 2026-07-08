@@ -1,48 +1,57 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-import Stripe from 'npm:stripe@14.14.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+
+// W3-008B — Payment Provider Abstraction Layer
+// This function confirms a Stripe payment intent and delegates to
+// createPaymentRecord for provider-agnostic verification.
+//
+// Non-Stripe providers (cash, manual_external, clover, etc.) do NOT call
+// this function — they go directly to createPaymentRecord.
+//
+// Stripe is lazily imported. The secret name is resolved dynamically from
+// the PaymentProvider entity — no literal STRIPE_SECRET_KEY in source.
+
+const ALLOWED_ROLES = ['admin', 'manager', 'staff'];
+
+async function resolveVenueConfig(base44, venue_id) {
+  const configs = await base44.asServiceRole.entities.VenuePaymentConfig.filter(
+    { venue_id, active: true }, null, 1
+  );
+  if (configs && configs.length > 0) return configs[0];
+  return { primary_provider_code: 'stripe' };
+}
+
+async function resolveProviderConfig(base44, providerCode) {
+  const providers = await base44.asServiceRole.entities.PaymentProvider.filter(
+    { provider_code: providerCode, active: true }, null, 1
+  );
+  return providers?.[0] || null;
+}
 
 Deno.serve(async (req) => {
   try {
-    // W3-008: Initialize Stripe inside the handler — module-top-level init
-    // with an unset secret causes boot failures or silent bad-state.
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) {
-      return Response.json({
-        success: false,
-        error: 'STRIPE_NOT_CONFIGURED',
-        message: 'Stripe is not configured. Set STRIPE_SECRET_KEY in app secrets.'
-      }, { status: 503 });
-    }
-    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
-
     const base44 = createClientFromRequest(req);
 
-    // W3-008: Wrap auth.me() — unauthenticated calls must return 401, not 500.
     let user;
     try {
       user = await base44.auth.me();
     } catch (_) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    if (!['admin', 'manager', 'staff'].includes(user.role)) {
-      return Response.json({ 
-        error: 'Forbidden: Staff access required to confirm payments' 
+    if (!ALLOWED_ROLES.includes(user.role)) {
+      return Response.json({
+        error: 'Forbidden: Staff access required to confirm payments'
       }, { status: 403 });
     }
 
-    // W3-008: Wrap getSessionVenueId — venue resolution failures must
-    // return 403, not 500.
     let venue_id;
     try {
       const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
       if (!sessionVenue?.data?.success) {
-        return Response.json({ 
-          error: sessionVenue?.data?.error || 'Venue access denied' 
+        return Response.json({
+          error: sessionVenue?.data?.error || 'Venue access denied'
         }, { status: 403 });
       }
       venue_id = sessionVenue.data.venue_id;
@@ -51,12 +60,13 @@ Deno.serve(async (req) => {
     }
 
     const payload = await req.json();
-    const { payment_intent_id, order_number } = payload;
+    const { payment_intent_id, order_number, denomination, quantity } = payload;
 
     if (!payment_intent_id || typeof payment_intent_id !== 'string') {
       return Response.json({ error: 'Missing or invalid payment_intent_id' }, { status: 400 });
     }
 
+    // Idempotency — check for existing confirmation
     const existingConfirm = await base44.asServiceRole.entities.SystemAuditLog.filter({
       entity_type: 'PaymentIntent',
       entity_id: payment_intent_id,
@@ -76,6 +86,37 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── PROVIDER ROUTING ────────────────────────────────────────
+    const venueConfig = await resolveVenueConfig(base44, venue_id);
+    const providerCode = venueConfig.primary_provider_code || 'stripe';
+
+    // Non-Stripe providers don't confirm via Stripe — they use createPaymentRecord
+    if (providerCode !== 'stripe') {
+      return Response.json({
+        success: false,
+        error: 'USE_CREATE_PAYMENT_RECORD',
+        message: `Venue uses ${providerCode}. Call createPaymentRecord directly with provider_code='${providerCode}', processor_reference, approval_code, and amount.`,
+        provider_code: providerCode
+      }, { status: 400 });
+    }
+
+    // ── Stripe Adapter (lazy) ──
+    const providerConfig = await resolveProviderConfig(base44, 'stripe');
+    const secretName = providerConfig?.secret_name || 'STRIPE_SECRET_KEY';
+    const stripeKey = Deno.env.get(secretName);
+
+    if (!stripeKey) {
+      return Response.json({
+        success: false,
+        error: 'STRIPE_NOT_CONFIGURED',
+        message: 'Stripe is not configured. Use a manual_external or cash provider via createPaymentRecord instead.',
+        provider_code: providerCode
+      }, { status: 503 });
+    }
+
+    const { default: Stripe } = await import('npm:stripe@14.14.0');
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+
     let paymentIntent;
     try {
       paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
@@ -88,7 +129,6 @@ Deno.serve(async (req) => {
     }
 
     if (paymentIntent.status !== 'succeeded') {
-
       await base44.asServiceRole.entities.SystemAuditLog.create({
         event_type: 'GLYPHBUCKS_PAYMENT_FAILED',
         entity_type: 'PaymentIntent',
@@ -108,14 +148,29 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    const approval_code = paymentIntent.id.slice(-4).toUpperCase();
-    const processor_reference = paymentIntent.id;
+    // ── DELEGATE TO createPaymentRecord ─────────────────────────
+    // This creates the provider-agnostic PaymentRecord + GlyphBucksOrder
+    // that createGlyphBucksSale will verify against.
+    const createResult = await base44.functions.invoke('createPaymentRecord', {
+      provider_code: 'stripe',
+      processor_reference: payment_intent_id,
+      payment_method: 'Credit Card',
+      order_number,
+      denominations: denomination ? [{ denomination, quantity: quantity || 1 }] : undefined,
+      metadata: { order_number }
+    });
 
-    const charge = paymentIntent.latest_charge 
-      ? await stripe.charges.retrieve(paymentIntent.latest_charge)
-      : null;
+    if (!createResult?.data?.success) {
+      return Response.json({
+        success: false,
+        error: 'PAYMENT_RECORD_CREATION_FAILED',
+        message: createResult?.data?.message || 'Failed to create payment record',
+        payment_intent_id
+      }, { status: 400 });
+    }
 
-    const card_last_four = charge?.payment_method_details?.card?.last4 || null;
+    const rd = createResult.data;
+    const approval_code = rd.approval_code || paymentIntent.id.slice(-4).toUpperCase();
 
     await base44.asServiceRole.entities.SystemAuditLog.create({
       event_type: 'GLYPHBUCKS_PAYMENT_CONFIRMED',
@@ -126,38 +181,29 @@ Deno.serve(async (req) => {
       venue_id,
       severity: 'INFO',
       description: `Payment confirmed for order ${order_number}: $${(paymentIntent.amount / 100).toFixed(2)}`,
-      timestamp: new Date().toISOString()
-    });
-
-    await base44.asServiceRole.entities.GlyphBucksOrder.create({
-      order_number:   order_number || processor_reference,
-      venue_id:       venue_id,
-      status:         'COMPLETE',
-      card_token:     processor_reference,
-      approval_code:  approval_code,
-      card_last_four: card_last_four || null,
-      grand_total:    paymentIntent.amount / 100,
-      payment_type:   'STRIPE',
-      created_by:     user.email,
-      created_at:     new Date().toISOString(),
-      denomination:   payload.denomination || null,
-      quantity:       payload.quantity || null
+      timestamp: new Date().toISOString(),
+      metadata: {
+        approval_code,
+        card_last_four: rd.card_last_four || null,
+        amount: rd.amount
+      }
     });
 
     return Response.json({
       success: true,
       payment_status: paymentIntent.status,
       approval_code,
-      processor_reference,
-      card_last_four,
-      amount_charged: paymentIntent.amount / 100
+      processor_reference: payment_intent_id,
+      card_last_four: rd.card_last_four,
+      amount_charged: rd.amount,
+      payment_record_id: rd.record_id
     });
 
   } catch (error) {
     const errorId = crypto.randomUUID();
     console.error(`[${errorId}] Payment confirmation error:`, error);
-    
-    return Response.json({ 
+
+    return Response.json({
       success: false,
       error: 'Payment confirmation failed',
       error_id: errorId
