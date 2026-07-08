@@ -1,7 +1,7 @@
 {
   "name": "ReconciliationException",
   "type": "object",
-  "description": "W3-009 \u2014 Payment Reconciliation Engine output. Each record represents a detected discrepancy in the payment chain: Processor \u2192 PaymentRecord \u2192 GlyphBucksOrder \u2192 GlyphBucksBatch \u2192 GlyphBucksBill \u2192 JournalEntry. Created by paymentReconciliationEngine. Managers triage from the exception queue UI.",
+  "description": "W3-009 \u2014 Payment Reconciliation Engine output. Each record represents a detected discrepancy in the payment chain: Processor \u2192 PaymentRecord \u2192 GlyphBucksOrder \u2192 GlyphBucksBatch \u2192 GlyphBucksBill \u2192 JournalEntry. Created by paymentReconciliationEngine. READ-ONLY detection \u2014 no auto-correction. Managers triage from the exception queue UI.",
   "properties": {
     "exception_id": {
       "type": "string",
@@ -26,7 +26,9 @@
         "bill_face_value_mismatch",
         "duplicate_processor_reference",
         "payment_record_stuck_pending",
-        "unconfirmed_payment_record_with_bills"
+        "unconfirmed_payment_record_with_bills",
+        "issued_bills_without_ledger_posting",
+        "ledger_posting_without_payment_record"
       ],
       "description": "Type of discrepancy detected."
     },
@@ -41,7 +43,7 @@
     },
     "entity_type": {
       "type": "string",
-      "description": "Which entity type this exception is about (PaymentRecord, GlyphBucksOrder, etc.)."
+      "description": "Which entity type this exception is about (PaymentRecord, GlyphBucksOrder, GlyphBucksBatch, JournalEntry, etc.)."
     },
     "entity_id": {
       "type": "string",

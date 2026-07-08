@@ -15,6 +15,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 //   8. Duplicate processor references
 //   9. PaymentRecord stuck in PENDING > 1 hour
 //  10. Unconfirmed PaymentRecord with issued bills
+//  11. Issued bills without ledger posting (batch has bills, no JournalEntry)
+//  12. Ledger posting without source payment record (JournalEntry, no PaymentRecord)
 //
 // Dual invocation: scheduled automation (service role) or admin HTTP (auth required).
 // Idempotent: skips exceptions that already exist as 'open' for the same entity + type.
@@ -74,11 +76,13 @@ Deno.serve(async (req) => {
       const gbOrders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({ venue_id: venueId }, null, 500);
       const gbBatches = await base44.asServiceRole.entities.GlyphBucksBatch.filter({ venue_id: venueId }, null, 500);
       const gbBills = await base44.asServiceRole.entities.GlyphBucksBill.filter({ venue_id: venueId }, null, 500);
+      const journalEntries = await base44.asServiceRole.entities.JournalEntry.filter({ venue_id: venueId, source_type: 'GLYPHBUCKS_SALE' }, null, 500);
 
       summary.records_checked.payment_records += paymentRecords.length;
       summary.records_checked.glyphbucks_orders += gbOrders.length;
       summary.records_checked.glyphbucks_batches += gbBatches.length;
       summary.records_checked.glyphbucks_bills += gbBills.length;
+      summary.records_checked.journal_entries = (summary.records_checked.journal_entries || 0) + journalEntries.length;
 
       // ── BUILD LOOKUP MAPS ──
       const prByRef = new Map();
@@ -97,6 +101,12 @@ Deno.serve(async (req) => {
       for (const bill of gbBills) {
         if (!billsByBatch.has(bill.batch_id)) billsByBatch.set(bill.batch_id, []);
         billsByBatch.get(bill.batch_id).push(bill);
+      }
+      // JournalEntry lookup: source_id → entries (for GLYPHBUCKS_SALE, source_id = batch_id)
+      const jeBySource = new Map();
+      for (const je of journalEntries) {
+        if (!jeBySource.has(je.source_id)) jeBySource.set(je.source_id, []);
+        jeBySource.get(je.source_id).push(je);
       }
 
       // ── PREFETCH OPEN EXCEPTIONS FOR IDEMPOTENCY ──
@@ -151,7 +161,7 @@ Deno.serve(async (req) => {
 
       // ── CHECK 2: Orphaned GlyphBucksOrders ──
       for (const o of gbOrders) {
-        if (o.status === 'COMPLETE') {
+        if (o.status === 'archived') {
           const prs = prByRef.get(o.card_token) || [];
           if (prs.length === 0) {
             queue({
@@ -169,7 +179,7 @@ Deno.serve(async (req) => {
         if (!['CONFIRMED', 'EXTERNAL_CONFIRMED', 'CAPTURED'].includes(pr.status)) continue;
         const orders = orderByToken.get(pr.processor_reference) || [];
         for (const o of orders) {
-          if (o.status !== 'COMPLETE') continue;
+          if (o.status === 'draft') continue;
           if (Math.abs((pr.amount || 0) - (o.grand_total || 0)) > 0.01) {
             queue({
               exception_type: 'amount_mismatch_payment_to_order', severity: 'critical',
@@ -197,7 +207,7 @@ Deno.serve(async (req) => {
 
       // ── CHECK 5: Amount mismatch GlyphBucksOrder → GlyphBucksBatch ──
       for (const o of gbOrders) {
-        if (o.status !== 'COMPLETE') continue;
+        if (o.status === 'draft') continue;
         const b = batchByRef.get(o.card_token);
         if (b && Math.abs((o.grand_total || 0) - (b.total_charged || 0)) > 0.01) {
           queue({
@@ -287,6 +297,53 @@ Deno.serve(async (req) => {
               mode: pr.mode
             });
           }
+        }
+      }
+
+      // ── CHECK 11: Issued bills without ledger posting ──
+      // A GlyphBucksBatch with issued/redeemed bills should have a JournalEntry
+      // with source_type='GLYPHBUCKS_SALE' and source_id=batch_id.
+      for (const b of gbBatches) {
+        const bills = billsByBatch.get(b.batch_id) || [];
+        const activeBills = bills.filter(bill => bill.status === 'issued' || bill.status === 'redeemed');
+        if (activeBills.length > 0) {
+          const jes = jeBySource.get(b.batch_id) || [];
+          if (jes.length === 0) {
+            queue({
+              exception_type: 'issued_bills_without_ledger_posting', severity: 'critical',
+              entity_type: 'GlyphBucksBatch', entity_id: b.batch_id || b.id,
+              description: `Batch ${b.batch_id} has ${activeBills.length} active bills but no GLYPHBUCKS_SALE journal entry`,
+              expected_value: 'JournalEntry (GLYPHBUCKS_SALE)', actual_value: 'none', mode: b.mode
+            });
+          }
+        }
+      }
+
+      // ── CHECK 12: Ledger posting without source payment record ──
+      // A JournalEntry with source_type='GLYPHBUCKS_SALE' should trace back to
+      // a PaymentRecord via the batch's processor_reference.
+      for (const je of journalEntries) {
+        if (je.status !== 'POSTED') continue;
+        const batch = gbBatches.find(b => b.batch_id === je.source_id || b.id === je.source_id);
+        if (batch) {
+          const prs = prByRef.get(batch.processor_reference) || [];
+          if (prs.length === 0) {
+            queue({
+              exception_type: 'ledger_posting_without_payment_record', severity: 'critical',
+              entity_type: 'JournalEntry', entity_id: je.id,
+              related_entity_type: 'GlyphBucksBatch', related_entity_id: batch.batch_id || batch.id,
+              description: `JournalEntry ${je.idempotency_key} (GLYPHBUCKS_SALE) has no matching PaymentRecord (batch ${batch.batch_id}, ref ${batch.processor_reference})`,
+              expected_value: 'PaymentRecord exists', actual_value: 'none', mode: je.mode
+            });
+          }
+        } else {
+          // JournalEntry references a batch that doesn't exist
+          queue({
+            exception_type: 'ledger_posting_without_payment_record', severity: 'critical',
+            entity_type: 'JournalEntry', entity_id: je.id,
+            description: `JournalEntry ${je.idempotency_key} references batch ${je.source_id} which does not exist`,
+            expected_value: 'GlyphBucksBatch exists', actual_value: 'not found', mode: je.mode
+          });
         }
       }
 
