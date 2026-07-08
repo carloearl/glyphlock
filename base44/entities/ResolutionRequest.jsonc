@@ -1,0 +1,339 @@
+{
+  "name": "ResolutionRequest",
+  "type": "object",
+  "description": "W3-011 AFRW \u2014 Authorized Financial Resolution Request. Created by managers to correct financial discrepancies discovered during reconciliation. The ONLY authorized path for financial record correction. Original records remain immutable \u2014 corrections create compensating entries. Approval chain: Manager \u2192 Corporate Accounting \u2192 Compliance \u2192 Ownership \u2192 Execution.",
+  "properties": {
+    "resolution_id": {
+      "type": "string",
+      "description": "Unique resolution identifier (RR-{venue_short}-{timestamp}-{seq})."
+    },
+    "exception_id": {
+      "type": "string",
+      "description": "Foreign key to ReconciliationException that triggered this resolution."
+    },
+    "reconciliation_run_id": {
+      "type": "string"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "requested_by": {
+      "type": "string",
+      "description": "Email of manager who submitted the request."
+    },
+    "requested_by_id": {
+      "type": "string"
+    },
+    "requested_by_role": {
+      "type": "string"
+    },
+    "request_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolution_type": {
+      "type": "string",
+      "enum": [
+        "compensating_ledger_entry",
+        "adjustment_entry",
+        "reclassification_entry",
+        "replacement_bill",
+        "replacement_batch",
+        "void_record",
+        "refund",
+        "partial_refund",
+        "credit_memo",
+        "debit_memo",
+        "write_off",
+        "charge_reversal",
+        "provider_retry",
+        "provider_reconciliation",
+        "manual_external_confirmation",
+        "manager_override",
+        "corporate_override",
+        "ownership_override"
+      ],
+      "description": "Approved resolution method. No other methods permitted."
+    },
+    "amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Dollar amount involved in the correction. Determines approval chain depth."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Categorical reason for the correction."
+    },
+    "business_justification": {
+      "type": "string",
+      "description": "Detailed business justification."
+    },
+    "supporting_evidence": {
+      "type": "array",
+      "description": "File URLs, descriptions, and references supporting the correction.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "linked_financial_records": {
+      "type": "array",
+      "description": "Records that will be affected by this correction (read-only references \u2014 originals never modified).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entity_type": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "manager_notes": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "PENDING_CORPORATE",
+        "PENDING_COMPLIANCE",
+        "PENDING_OWNERSHIP",
+        "APPROVED",
+        "REJECTED",
+        "CHANGES_REQUESTED",
+        "EXECUTING",
+        "EXECUTED",
+        "EXECUTION_FAILED",
+        "ROLLED_BACK"
+      ],
+      "default": "PENDING_CORPORATE",
+      "description": "Current state in the approval/execution lifecycle."
+    },
+    "required_approval_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Computed approval chain based on amount and resolution type. E.g. ['corporate_accounting','ownership']."
+    },
+    "approval_chain": {
+      "type": "array",
+      "description": "Append-only record of each approval step.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "description": "corporate_accounting, compliance, ownership."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected",
+              "changes_requested",
+              "skipped"
+            ]
+          },
+          "approver_email": {
+            "type": "string"
+          },
+          "approver_role": {
+            "type": "string"
+          },
+          "action_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signature": {
+            "type": "string",
+            "description": "Digital signature or MFA/PIN verification token."
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "current_approval_level": {
+      "type": "string",
+      "description": "Which approval level is currently pending."
+    },
+    "execution_locked": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when execution is in progress. Prevents double execution."
+    },
+    "execution_lock_held_by": {
+      "type": "string"
+    },
+    "execution_lock_acquired_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "execution_snapshot": {
+      "type": "object",
+      "description": "Immutable JSON snapshot of all linked financial records captured before execution. Never altered after creation.",
+      "additionalProperties": true
+    },
+    "compensating_entry_ids": {
+      "type": "array",
+      "description": "IDs of compensating records created during execution.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "executed_by": {
+      "type": "string"
+    },
+    "execution_result": {
+      "type": "string",
+      "enum": [
+        "success",
+        "partial",
+        "failed"
+      ],
+      "description": "Outcome of the execution attempt."
+    },
+    "execution_error": {
+      "type": "string"
+    },
+    "rollback_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "initiated",
+        "completed",
+        "failed"
+      ],
+      "default": "none"
+    },
+    "rolled_back_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rolled_back_by": {
+      "type": "string"
+    },
+    "rollback_reason": {
+      "type": "string"
+    },
+    "rollback_compensating_entry_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notifications_sent": {
+      "type": "array",
+      "description": "Append-only log of notifications generated.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "recipient": {
+            "type": "string"
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "assignment_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "assigned_to": {
+            "type": "string"
+          },
+          "assigned_to_role": {
+            "type": "string"
+          },
+          "assigned_by": {
+            "type": "string"
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "transition_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from_status": {
+            "type": "string"
+          },
+          "to_status": {
+            "type": "string"
+          },
+          "changed_by": {
+            "type": "string"
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    }
+  },
+  "required": [
+    "resolution_id",
+    "exception_id",
+    "venue_id",
+    "requested_by",
+    "request_time",
+    "resolution_type",
+    "reason",
+    "business_justification"
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "name": "FinancialResolutionLog",
+  "type": "object",
+  "description": "W3-011 AFRW \u2014 Append-only forensic evidence trail for every action in the Authorized Financial Resolution Workflow. Each step (request creation, approval, rejection, execution, snapshot, compensating entry, rollback, notification) generates a log entry. Immutable \u2014 never edited or deleted.",
+  "properties": {
+    "log_id": {
+      "type": "string",
+      "description": "Unique log entry identifier."
+    },
+    "resolution_id": {
+      "type": "string",
+      "description": "Foreign key to ResolutionRequest."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "log_type": {
+      "type": "string",
+      "enum": [
+        "request_created",
+        "approval_submitted",
+        "approval_granted",
+        "approval_rejected",
+        "changes_requested",
+        "escalated",
+        "execution_lock_acquired",
+        "execution_started",
+        "snapshot_captured",
+        "compensating_entry_created",
+        "exception_resolved",
+        "execution_completed",
+        "execution_failed",
+        "rollback_initiated",
+        "rollback_compensating_created",
+        "rollback_completed",
+        "rollback_failed",
+        "notification_sent",
+        "assignment_changed"
+      ],
+      "description": "Which step in the resolution lifecycle this log captures."
+    },
+    "actor_email": {
+      "type": "string",
+      "description": "Who triggered this action."
+    },
+    "actor_role": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "previous_state": {
+      "type": "string",
+      "description": "Approval status before this action."
+    },
+    "new_state": {
+      "type": "string",
+      "description": "Approval status after this action."
+    },
+    "details": {
+      "type": "object",
+      "description": "Action-specific details (approval level, signature token, execution result, etc.).",
+      "additionalProperties": true
+    },
+    "evidence_snapshot": {
+      "type": "object",
+      "description": "Immutable JSON snapshot of affected records at this moment (for execution steps).",
+      "additionalProperties": true
+    },
+    "linked_entity_type": {
+      "type": "string"
+    },
+    "linked_entity_id": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    }
+  },
+  "required": [
+    "log_id",
+    "resolution_id",
+    "venue_id",
+    "log_type",
+    "actor_email",
+    "timestamp"
+  ]
+}
