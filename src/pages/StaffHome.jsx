@@ -14,6 +14,7 @@ import { base44 } from "@/api/base44Client";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StaffShiftFlow from "@/components/nups/flows/StaffShiftFlow";
+import StaffQuickActions from "@/components/nups/staff/StaffQuickActions";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 export default function StaffHome() {
@@ -64,15 +65,27 @@ export default function StaffHome() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-5">
-        {/* §3 linear flow — next required action is always the largest element */}
-        {user && (
-          <StaffShiftFlow
-            user={user}
-            venueId={venue?.venue_id || venue?.id}
-            station="door"
-          />
-        )}
+      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-6">
+        {/* Step 1 — §3 linear flow: clock in/out is always the largest element */}
+        <section aria-label="Your shift">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-500">Step 1 · Clock In</span>
+            <div className="flex-1 h-px bg-white/5" />
+          </div>
+          {user && (
+            <StaffShiftFlow
+              user={user}
+              venueId={venue?.venue_id || venue?.id}
+              station="door"
+            />
+          )}
+        </section>
+
+        {/* Step 2 — W3-012B Cycle 1: big station tiles so a first-shift
+            employee can find Front Door, Check-In, Register, Driver
+            Payouts, and Receipts without hunting. Navigation only —
+            each destination keeps its own route guard. */}
+        <StaffQuickActions />
       </main>
     </div>
   );
