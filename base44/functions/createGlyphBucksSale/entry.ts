@@ -81,8 +81,43 @@ Deno.serve(async (req) => {
     });
 
     // W3-007: surcharge_rate is server-fixed — never from payload
-    const surcharge_amount = total_face_value * SURCHARGE_RATE;
-    const total_charged = total_face_value + surcharge_amount;
+    const expected_surcharge = total_face_value * SURCHARGE_RATE;
+    const expected_total_charged = total_face_value + expected_surcharge;
+
+    // W3-007: Verify processor_reference against persisted confirmed order.
+    // Do NOT create bills from client-provided payment proof.
+    // The GlyphBucksOrder is created by confirmGlyphBucksPayment after
+    // Stripe verification, with grand_total from paymentIntent.amount/100.
+    let confirmedOrder = null;
+    try {
+      const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
+        card_token: processor_reference,
+        venue_id,
+        status: 'COMPLETE'
+      }, null, 1);
+      confirmedOrder = orders?.[0] || null;
+    } catch (_) { /* fall through to not-found error */ }
+
+    if (!confirmedOrder || !confirmedOrder.id) {
+      return Response.json({
+        error: 'PAYMENT_NOT_CONFIRMED',
+        message: 'No confirmed payment order found for this processor reference. Payment must be confirmed before creating GlyphBucks.'
+      }, { status: 400 });
+    }
+
+    // W3-007: Cross-validate — order grand_total must match expected total_charged.
+    // This prevents denomination manipulation after payment was made.
+    const order_total = confirmedOrder.grand_total || 0;
+    if (Math.abs(order_total - expected_total_charged) > 0.01) {
+      return Response.json({
+        error: 'PAYMENT_AMOUNT_MISMATCH',
+        message: `Order total ($${order_total}) does not match expected charge ($${expected_total_charged}). Denominations may have been altered.`
+      }, { status: 400 });
+    }
+
+    // W3-007: total_charged from persisted order — server-derived source of truth
+    const surcharge_amount = expected_surcharge;
+    const total_charged = order_total;
 
     // W3-007: Resolve mode from SystemConfig — never trust client for mode
     let resolvedMode = 'REAL';
