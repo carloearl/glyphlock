@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import GlobalSearchDrawer from "./GlobalSearchDrawer";
+import WorkspaceSwitcher from "./WorkspaceSwitcher";
 import ModeToggle from "./ModeToggle";
 import { base44 } from "@/api/base44Client";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
@@ -353,6 +354,10 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
             </button>
 
             <div className="hidden md:flex items-center gap-2">
+              {/* W3-012A — Workspace Switcher: lets users switch between
+                  Staff, Register, Manager, Back Office, Owner, System Admin
+                  workspaces without logging out. */}
+              <WorkspaceSwitcher roleClass={roleClass} />
               {/* MODE TOGGLE — F-7: always visible, color-distinct, before venue.
                   Click to switch LIVE/DEMO/SANDBOX, seed or clear demo data. */}
               <ModeToggle />
