@@ -37,6 +37,7 @@ import StaffOnboardingPanel from "@/components/nups/StaffOnboardingPanel";
 import TimeClock from "@/components/nups/TimeClock";
 import AuditLogDashboard from "@/components/nups/AuditLogDashboard";
 import OneClickSeedSwitch from "@/components/nups/OneClickSeedSwitch";
+import NoBatchBanner from "@/components/nups/register/NoBatchBanner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
@@ -51,7 +52,7 @@ const TABS = [
   { key: "bar",        label: "Bar",                icon: Beer },
   { key: "dj",         label: "DJ",                 icon: Music },
   { key: "onboarding", label: "Entertainer Onboard",icon: UserPlus },
-  { key: "checkin",    label: "Daily Check-In",     icon: UserCheck },
+  { key: "checkin",    label: "Talent Check-In",    icon: UserCheck },
   { key: "staff",      label: "Staff Check-In",     icon: Clock },
   { key: "audit",      label: "Audit Trail",        icon: Shield },
 ];
@@ -165,6 +166,8 @@ function RegisterConsoleInner() {
             // Top-to-bottom vertical flow: register, then driver onboarding,
             // then entertainer check-in — all stacked, no side-by-side panels.
             <div className="flex flex-col gap-3 sm:gap-4">
+              {/* W3-012B Cycle 2 — display-only guidance when no batch is open */}
+              <NoBatchBanner batch={activeBatch} />
               <POSCashRegister showDriverPanel={false} user={user} station="door" />
               <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-3 sm:p-4">
                 <DriverQuickAdd user={user} />
