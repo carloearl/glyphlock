@@ -50,6 +50,7 @@ import DriverPayoutHistory from './pages/DriverPayoutHistory';
 import FrontDoor from './pages/FrontDoor';
 import Accounting from './pages/Accounting';
 import AuditIntegrity from './pages/AuditIntegrity';
+import PaymentReconciliation from './pages/PaymentReconciliation';
 import UnifiedSearch from './pages/UnifiedSearch';
 import Tonight from './pages/Tonight';
 import VenueAdminSettings from './pages/VenueAdminSettings';
@@ -125,7 +126,7 @@ const AuthenticatedApp = () => {
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
-    '/admin/audit-integrity', '/admin/venue-settings',
+    '/admin/audit-integrity', '/admin/payment-reconciliation', '/admin/venue-settings',
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
@@ -145,7 +146,7 @@ const AuthenticatedApp = () => {
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
-    '/admin/audit-integrity', '/admin/venue-settings',
+    '/admin/audit-integrity', '/admin/payment-reconciliation', '/admin/venue-settings',
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
@@ -238,6 +239,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/payout-history" element={<RoleClassGuard allow={["ADMIN"]}><DriverPayoutHistory /></RoleClassGuard>} />
         <Route path="/admin/activity-log" element={<RoleClassGuard allow={["ADMIN"]}><ActivityLogViewer /></RoleClassGuard>} />
         <Route path="/admin/audit-integrity" element={<RoleClassGuard allow={["ADMIN"]}><AuditIntegrity /></RoleClassGuard>} />
+        <Route path="/admin/payment-reconciliation" element={<RoleClassGuard allow={["ADMIN"]}><PaymentReconciliation /></RoleClassGuard>} />
         <Route path="/admin/venue-settings" element={<RoleClassGuard allow={["ADMIN"]}><VenueAdminSettings /></RoleClassGuard>} />
         <Route path="/admin/registry" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />
         <Route path="/RegistryAdmin" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />

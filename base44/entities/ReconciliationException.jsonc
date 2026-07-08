@@ -1,0 +1,118 @@
+{
+  "name": "ReconciliationException",
+  "type": "object",
+  "description": "W3-009 \u2014 Payment Reconciliation Engine output. Each record represents a detected discrepancy in the payment chain: Processor \u2192 PaymentRecord \u2192 GlyphBucksOrder \u2192 GlyphBucksBatch \u2192 GlyphBucksBill \u2192 JournalEntry. Created by paymentReconciliationEngine. Managers triage from the exception queue UI.",
+  "properties": {
+    "exception_id": {
+      "type": "string",
+      "description": "Unique exception identifier (RE-{venue_short}-{timestamp}-{seq})."
+    },
+    "reconciliation_run_id": {
+      "type": "string",
+      "description": "Groups all exceptions from a single reconciliation run."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "exception_type": {
+      "type": "string",
+      "enum": [
+        "orphaned_payment_record",
+        "orphaned_glyphbucks_order",
+        "orphaned_glyphbucks_batch",
+        "amount_mismatch_payment_to_order",
+        "amount_mismatch_order_to_batch",
+        "bill_count_mismatch",
+        "bill_face_value_mismatch",
+        "duplicate_processor_reference",
+        "payment_record_stuck_pending",
+        "unconfirmed_payment_record_with_bills"
+      ],
+      "description": "Type of discrepancy detected."
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "warning",
+        "info"
+      ],
+      "default": "warning"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Which entity type this exception is about (PaymentRecord, GlyphBucksOrder, etc.)."
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the primary entity involved."
+    },
+    "related_entity_type": {
+      "type": "string",
+      "description": "Secondary entity type if applicable."
+    },
+    "related_entity_id": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the discrepancy."
+    },
+    "expected_value": {
+      "type": "string",
+      "description": "What the system expected (amount, count, status, etc.)."
+    },
+    "actual_value": {
+      "type": "string",
+      "description": "What was actually found."
+    },
+    "detected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "detected_by": {
+      "type": "string",
+      "description": "Email of admin who triggered the run, or 'automation' for scheduled runs."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "investigating",
+        "resolved",
+        "false_positive"
+      ],
+      "default": "open"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_by": {
+      "type": "string"
+    },
+    "resolution_notes": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    }
+  },
+  "required": [
+    "exception_id",
+    "reconciliation_run_id",
+    "venue_id",
+    "exception_type",
+    "severity",
+    "entity_type",
+    "entity_id",
+    "description",
+    "detected_at"
+  ]
+}
