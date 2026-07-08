@@ -38,6 +38,8 @@ import TimeClock from "@/components/nups/TimeClock";
 import AuditLogDashboard from "@/components/nups/AuditLogDashboard";
 import OneClickSeedSwitch from "@/components/nups/OneClickSeedSwitch";
 import NoBatchBanner from "@/components/nups/register/NoBatchBanner";
+import RegisterStatusHeader from "@/components/nups/register/RegisterStatusHeader";
+import RecentTransactionsStrip from "@/components/nups/register/RecentTransactionsStrip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
@@ -131,6 +133,17 @@ function RegisterConsoleInner() {
       role="CASHIER"
     >
       <div className="max-w-[1600px] mx-auto">
+        {/* W3-012B Cycle 2B — BPAAA Register Standard §1.1 status header.
+            Display-only: venue, register type, cashier, shift, batch, mode,
+            clock, connection. Register type follows the active tab. */}
+        {(activeTab === "register" || activeTab === "bar") && (
+          <RegisterStatusHeader
+            user={user}
+            batch={activeBatch}
+            registerType={activeTab === "bar" ? "Bar" : "Door"}
+          />
+        )}
+
         {/* Tab strip — tablet-first: horizontal scroll on narrow screens,
             wraps cleanly on wider ones, every chip stays ≥44px tall so
             fingers never miss. No overlap with the Demo Data button in
@@ -169,6 +182,8 @@ function RegisterConsoleInner() {
               {/* W3-012B Cycle 2 — display-only guidance when no batch is open */}
               <NoBatchBanner batch={activeBatch} />
               <POSCashRegister showDriverPanel={false} user={user} station="door" />
+              {/* §1.4 awareness — read-only last-5 receipts, links to Receipts tab */}
+              <RecentTransactionsStrip onViewAll={() => setActiveTab("receipts")} />
               <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-3 sm:p-4">
                 <DriverQuickAdd user={user} />
               </div>
