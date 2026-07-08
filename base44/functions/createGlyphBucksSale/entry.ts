@@ -8,7 +8,13 @@ const SURCHARGE_RATE = 0.30;
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch (_) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -20,13 +26,18 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
-    const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
-    if (!sessionVenue.data.success) {
-      return Response.json({ 
-        error: sessionVenue.data.error || 'Venue access denied' 
-      }, { status: 403 });
+    let venue_id;
+    try {
+      const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
+      if (!sessionVenue?.data?.success) {
+        return Response.json({ 
+          error: sessionVenue?.data?.error || 'Venue access denied' 
+        }, { status: 403 });
+      }
+      venue_id = sessionVenue.data.venue_id;
+    } catch (_) {
+      return Response.json({ error: 'Venue access denied' }, { status: 403 });
     }
-    const venue_id = sessionVenue.data.venue_id;
 
     const payload = await req.json();
     const {
