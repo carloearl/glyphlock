@@ -1,7 +1,7 @@
 {
   "name": "ReconciliationException",
   "type": "object",
-  "description": "W3-009 \u2014 Payment Reconciliation Engine output. Each record represents a detected discrepancy in the payment chain: Processor \u2192 PaymentRecord \u2192 GlyphBucksOrder \u2192 GlyphBucksBatch \u2192 GlyphBucksBill \u2192 JournalEntry. Created by paymentReconciliationEngine. READ-ONLY detection \u2014 no auto-correction. Managers triage from the exception queue UI.",
+  "description": "W3-009/W3-010 \u2014 Payment Reconciliation Exception. Created by paymentReconciliationEngine (W3-009, read-only detection). Managed by reconciliationExceptionWorkflow (W3-010, manager review). NEVER auto-corrects financial records \u2014 observation only.",
   "properties": {
     "exception_id": {
       "type": "string",
@@ -43,15 +43,14 @@
     },
     "entity_type": {
       "type": "string",
-      "description": "Which entity type this exception is about (PaymentRecord, GlyphBucksOrder, GlyphBucksBatch, JournalEntry, etc.)."
+      "description": "Which entity type this exception is about."
     },
     "entity_id": {
       "type": "string",
       "description": "ID of the primary entity involved."
     },
     "related_entity_type": {
-      "type": "string",
-      "description": "Secondary entity type if applicable."
+      "type": "string"
     },
     "related_entity_id": {
       "type": "string"
@@ -61,12 +60,10 @@
       "description": "Human-readable description of the discrepancy."
     },
     "expected_value": {
-      "type": "string",
-      "description": "What the system expected (amount, count, status, etc.)."
+      "type": "string"
     },
     "actual_value": {
-      "type": "string",
-      "description": "What was actually found."
+      "type": "string"
     },
     "detected_at": {
       "type": "string",
@@ -74,17 +71,119 @@
     },
     "detected_by": {
       "type": "string",
-      "description": "Email of admin who triggered the run, or 'automation' for scheduled runs."
+      "description": "Email of admin who triggered the run, or 'automation'."
     },
     "status": {
       "type": "string",
       "enum": [
-        "open",
-        "investigating",
-        "resolved",
-        "false_positive"
+        "NEW",
+        "UNDER_REVIEW",
+        "NEEDS_INFORMATION",
+        "ESCALATED",
+        "RESOLVED",
+        "FALSE_POSITIVE",
+        "ARCHIVED"
       ],
-      "default": "open"
+      "default": "NEW",
+      "description": "W3-010 review workflow status."
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email of the manager currently assigned."
+    },
+    "assigned_to_role": {
+      "type": "string",
+      "description": "Assignment target category: self, manager, accounting, corporate, compliance, ownership."
+    },
+    "assignment_history": {
+      "type": "array",
+      "description": "Permanent, append-only assignment log.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "assigned_to": {
+            "type": "string"
+          },
+          "assigned_to_role": {
+            "type": "string"
+          },
+          "assigned_by": {
+            "type": "string"
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "review_notes": {
+      "type": "array",
+      "description": "Immutable, append-only notes. Edits create new versions. Deletion prohibited.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "author_email": {
+            "type": "string"
+          },
+          "author_role": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "transition_history": {
+      "type": "array",
+      "description": "Permanent, append-only status transition log.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from_status": {
+            "type": "string"
+          },
+          "to_status": {
+            "type": "string"
+          },
+          "changed_by": {
+            "type": "string"
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "escalated": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this exception has been escalated to corporate/compliance."
+    },
+    "escalated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "escalated_by": {
+      "type": "string"
+    },
+    "escalation_reason": {
+      "type": "string"
     },
     "resolved_at": {
       "type": "string",
@@ -95,6 +194,11 @@
     },
     "resolution_notes": {
       "type": "string"
+    },
+    "notification_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when a dashboard alert has been generated."
     },
     "mode": {
       "type": "string",

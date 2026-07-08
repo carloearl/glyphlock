@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
 
       // ── PREFETCH OPEN EXCEPTIONS FOR IDEMPOTENCY ──
       const openExcs = await base44.asServiceRole.entities.ReconciliationException.filter(
-        { venue_id: venueId, status: 'open' }, null, 500
+        { venue_id: venueId, status: 'NEW' }, null, 500
       );
       const openKeys = new Set(openExcs.map(e => `${e.entity_id}|${e.exception_type}`));
 
@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
           actual_value: params.actual_value != null ? String(params.actual_value) : null,
           detected_at: new Date().toISOString(),
           detected_by: actorEmail,
-          status: 'open',
+          status: 'NEW',
           mode: params.mode || 'REAL'
         });
         summary.exceptions_created++;

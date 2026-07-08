@@ -239,7 +239,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/payout-history" element={<RoleClassGuard allow={["ADMIN"]}><DriverPayoutHistory /></RoleClassGuard>} />
         <Route path="/admin/activity-log" element={<RoleClassGuard allow={["ADMIN"]}><ActivityLogViewer /></RoleClassGuard>} />
         <Route path="/admin/audit-integrity" element={<RoleClassGuard allow={["ADMIN"]}><AuditIntegrity /></RoleClassGuard>} />
-        <Route path="/admin/payment-reconciliation" element={<RoleClassGuard allow={["ADMIN"]}><PaymentReconciliation /></RoleClassGuard>} />
+        <Route path="/admin/payment-reconciliation" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><PaymentReconciliation /></RoleClassGuard>} />
         <Route path="/admin/venue-settings" element={<RoleClassGuard allow={["ADMIN"]}><VenueAdminSettings /></RoleClassGuard>} />
         <Route path="/admin/registry" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />
         <Route path="/RegistryAdmin" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />
