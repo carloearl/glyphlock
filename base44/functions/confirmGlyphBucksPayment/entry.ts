@@ -1,14 +1,29 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe@14.14.0';
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
-  apiVersion: '2023-10-16',
-});
-
 Deno.serve(async (req) => {
   try {
+    // W3-008: Initialize Stripe inside the handler — module-top-level init
+    // with an unset secret causes boot failures or silent bad-state.
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      return Response.json({
+        success: false,
+        error: 'STRIPE_NOT_CONFIGURED',
+        message: 'Stripe is not configured. Set STRIPE_SECRET_KEY in app secrets.'
+      }, { status: 503 });
+    }
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+
+    // W3-008: Wrap auth.me() — unauthenticated calls must return 401, not 500.
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch (_) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -20,13 +35,20 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
-    const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
-    if (!sessionVenue.data.success) {
-      return Response.json({ 
-        error: sessionVenue.data.error || 'Venue access denied' 
-      }, { status: 403 });
+    // W3-008: Wrap getSessionVenueId — venue resolution failures must
+    // return 403, not 500.
+    let venue_id;
+    try {
+      const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
+      if (!sessionVenue?.data?.success) {
+        return Response.json({ 
+          error: sessionVenue?.data?.error || 'Venue access denied' 
+        }, { status: 403 });
+      }
+      venue_id = sessionVenue.data.venue_id;
+    } catch (_) {
+      return Response.json({ error: 'Venue access denied' }, { status: 403 });
     }
-    const venue_id = sessionVenue.data.venue_id;
 
     const payload = await req.json();
     const { payment_intent_id, order_number } = payload;

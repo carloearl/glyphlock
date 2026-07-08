@@ -18,7 +18,14 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
 
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+
+    // W3-008: Wrap auth.me() — unauthenticated calls must return 401, not 500.
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch (_) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
