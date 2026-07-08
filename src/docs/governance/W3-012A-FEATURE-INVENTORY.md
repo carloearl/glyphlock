@@ -95,8 +95,13 @@
 
 | Component | Previous Location | New Location | Action | Reason | Status |
 |---|---|---|---|---|---|
-| WorkspaceSwitcher | (new) | NUPSAppShell top bar | Created | W3-012A Phase 1 workspace separation | Pending |
-| Workspace config | (new) | src/lib/nups/workspaceConfig.js | Created | Single source of truth for workspace definitions | Pending |
+| WorkspaceSwitcher | (new) | NUPSAppShell top bar | Created | W3-012A Phase 1 workspace separation | Done |
+| Workspace config | (new) | src/lib/nups/workspaceConfig.js | Created | Single source of truth for workspace definitions (6 workspaces, role-scoped) | Done |
+| WORKSPACE_ITEM_MAP | (new) | src/lib/nups/workspaceConfig.js | Created | Maps every sidebar item ID to workspace tags for filtering | Done |
+| getWorkspaceForPath | (new) | src/lib/nups/workspaceConfig.js | Created | Detects active workspace from URL + role class, priority-ordered | Done |
+| NUPSAppShell sidebar | Showed all role-scoped sections | Filters by active workspace | Enhanced | Sidebar now shows only items relevant to the active workspace (Staff, Register, Manager, Back Office, Owner, System) | Done |
+| Directive doc | (new) | src/docs/governance/DACO-W3-012A-UIX-001.md | Created | Formal directive with 5-phase plan and acceptance criteria | Done |
+| Feature inventory | (new) | src/docs/governance/W3-012A-FEATURE-INVENTORY.md | Created | Complete route/page/workspace inventory with change log | Done |
 
 **Action values:** Preserved, Enhanced, Relocated, Merged, Expanded, Simplified, Renamed
 

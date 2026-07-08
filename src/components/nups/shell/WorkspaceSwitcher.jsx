@@ -35,8 +35,8 @@ export default function WorkspaceSwitcher({ roleClass = ROLE_CLASS.ADMIN }) {
   );
 
   const activeWorkspaceId = useMemo(
-    () => getWorkspaceForPath(location.pathname) || availableWorkspaces[0]?.id,
-    [location.pathname, availableWorkspaces]
+    () => getWorkspaceForPath(location.pathname, roleClass) || availableWorkspaces[0]?.id,
+    [location.pathname, availableWorkspaces, roleClass]
   );
 
   const activeWorkspace = WORKSPACES[activeWorkspaceId] || availableWorkspaces[0];

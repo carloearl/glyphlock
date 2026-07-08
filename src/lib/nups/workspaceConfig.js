@@ -2,14 +2,13 @@
  * W3-012A — Workspace Configuration
  * ─────────────────────────────────
  * Single source of truth for NUPS workspace definitions.
- * Each workspace maps to a role tier, has a set of modules,
- * and defines which role classes may access it.
  *
- * The WorkspaceSwitcher reads from this config to render
- * the available workspaces for the current user.
+ * WORKSPACES — workspace metadata + module lists (used by WorkspaceSwitcher)
+ * WORKSPACE_ITEM_MAP — maps sidebar item IDs to workspace tags (used by sidebar filter)
+ * getWorkspaceForPath — detects active workspace from URL + role class
  *
- * NON-DESTRUCTIVE: This does not remove or change any existing
- * routes — it adds a workspace abstraction layer on top.
+ * NON-DESTRUCTIVE: This does not remove or change any existing routes —
+ * it adds a workspace abstraction layer on top of the existing navigation.
  */
 
 import {
@@ -30,10 +29,12 @@ export const WORKSPACES = {
     allowedClasses: ["STAFF", "MANAGER", "ADMIN"],
     home: "/StaffHome",
     modules: [
-      { label: "Clock In / Out", to: "/StaffHome", icon: Users },
-      { label: "Register", to: "/Register", icon: ShoppingCart },
-      { label: "Open Night", to: "/FrontDoor", icon: DoorOpen },
       { label: "Dashboard", to: "/NUPSHub", icon: LayoutDashboard },
+      { label: "Open Night", to: "/FrontDoor", icon: DoorOpen },
+      { label: "Check In Talent", to: "/EntertainerCheckIn", icon: Users },
+      { label: "Register", to: "/Register", icon: ShoppingCart },
+      { label: "Driver Payouts", to: "/DriverPayouts", icon: Truck },
+      { label: "Receipts", to: "/Receipts", icon: ReceiptText },
     ],
   },
 
@@ -49,6 +50,7 @@ export const WORKSPACES = {
       { label: "Register", to: "/Register", icon: ShoppingCart },
       { label: "Receipts", to: "/Receipts", icon: ReceiptText },
       { label: "Driver Payouts", to: "/DriverPayouts", icon: Truck },
+      { label: "Tonight Snapshot", to: "/Tonight", icon: Moon },
     ],
   },
 
@@ -130,9 +132,59 @@ export const WORKSPACES = {
 };
 
 /**
+ * Maps sidebar NAV_SECTIONS item IDs to workspace tags.
+ * Used by NUPSAppShell to filter sidebar items by active workspace.
+ * Items not listed here default to showing in all workspaces.
+ */
+export const WORKSPACE_ITEM_MAP = {
+  // Operations · Tonight's Flow
+  dashboard:    ["STAFF", "MANAGER", "OWNER"],
+  frontdoor:    ["STAFF", "MANAGER"],
+  entertainers: ["STAFF", "MANAGER"],
+  register:     ["STAFF", "REGISTER"],
+  drivers:      ["STAFF", "REGISTER"],
+  receipts:     ["STAFF", "REGISTER"],
+  tonight:      ["MANAGER", "REGISTER"],
+
+  // Floor & Staff
+  staff:      ["MANAGER", "OWNER"],
+  dj:         ["MANAGER", "OWNER"],
+  customers:  ["MANAGER", "OWNER"],
+  marketing:  ["MANAGER", "OWNER"],
+  people:     ["MANAGER"],
+
+  // Accounting
+  accounting:   ["BACK_OFFICE"],
+  "gl-reports": ["BACK_OFFICE"],
+  "trial-bal":  ["BACK_OFFICE"],
+  settlement:   ["BACK_OFFICE"],
+  payouts:      ["BACK_OFFICE"],
+  analytics:    ["BACK_OFFICE", "OWNER"],
+  reports:      ["BACK_OFFICE", "OWNER"],
+  payroll:      ["OWNER"],
+  inventory:    ["BACK_OFFICE", "OWNER"],
+  contracts:    ["BACK_OFFICE"],
+  "c-vip":      ["BACK_OFFICE"],
+  "c-glyph":    ["BACK_OFFICE"],
+  "c-big":      ["BACK_OFFICE"],
+  "c-ent":      ["BACK_OFFICE"],
+  "c-venue":    ["BACK_OFFICE"],
+  "c-lookup":   ["BACK_OFFICE"],
+
+  // Admin
+  audit:             ["BACK_OFFICE", "SYSTEM"],
+  "audit-integrity": ["BACK_OFFICE", "SYSTEM"],
+  "audit-log":       ["BACK_OFFICE", "SYSTEM"],
+  activity:          ["BACK_OFFICE", "SYSTEM"],
+  rbac:              ["SYSTEM"],
+  registry:          ["SYSTEM"],
+  adr:               ["SYSTEM"],
+  demo:              ["SYSTEM", "OWNER"],
+  venue:             ["SYSTEM"],
+};
+
+/**
  * Get the list of workspaces available to a given role class.
- * @param {string} roleClass — One of ROLE_CLASS values
- * @returns {Array} Array of workspace config objects
  */
 export function getWorkspacesForClass(roleClass) {
   return Object.values(WORKSPACES).filter((ws) =>
@@ -141,30 +193,79 @@ export function getWorkspacesForClass(roleClass) {
 }
 
 /**
- * Find which workspace a given route path belongs to.
- * Used to auto-select the active workspace based on the current page.
- * @param {string} pathname — Current route path (lowercase)
- * @returns {string|null} Workspace ID or null
+ * Detect which workspace a given route belongs to.
+ * Uses priority ordering: most specific workspaces checked first.
+ * For shared routes (like /NUPSHub), the roleClass determines which
+ * workspace wins — managers see MANAGER, admins see OWNER, staff see STAFF.
+ *
+ * @param {string} pathname — Current route path
+ * @param {string} roleClass — User's resolved role class
+ * @returns {string|null} Workspace ID or null if undetermined
  */
-export function getWorkspaceForPath(pathname) {
+export function getWorkspaceForPath(pathname, roleClass = "ADMIN") {
   const path = (pathname || "").toLowerCase();
 
-  // Check each workspace's modules for a matching route prefix
-  for (const ws of Object.values(WORKSPACES)) {
-    for (const mod of ws.modules) {
-      const modBase = (mod.to || "").split("?")[0].toLowerCase();
-      if (path.startsWith(modBase)) {
-        return ws.id;
-      }
-    }
+  // 1. SYSTEM — admin config surfaces (most specific)
+  if (path.startsWith("/admin/registry") ||
+      path.startsWith("/admin/venue-settings") ||
+      path.startsWith("/admin/adr") ||
+      path.startsWith("/nupsadminportal") ||
+      path.startsWith("/registryadmin")) {
+    return "SYSTEM";
   }
 
-  // Fallback: check home routes
-  for (const ws of Object.values(WORKSPACES)) {
-    const home = (ws.home || "").toLowerCase();
-    if (home && path.startsWith(home)) {
-      return ws.id;
-    }
+  // 2. BACK_OFFICE — financial/accounting surfaces
+  if (path.startsWith("/accounting") ||
+      path.startsWith("/accounthub") ||
+      path.startsWith("/admin/ledger") ||
+      path.startsWith("/admin/settlement") ||
+      path.startsWith("/admin/payout-history") ||
+      path.startsWith("/admin/activity-log") ||
+      path.startsWith("/admin/audit-integrity") ||
+      path.startsWith("/admin/payment-reconciliation") ||
+      path.startsWith("/admin/financial-resolution") ||
+      path.startsWith("/financialresolution") ||
+      path.startsWith("/contracts") ||
+      path.startsWith("/contractshub") ||
+      path.startsWith("/ledgertrialbalance")) {
+    return "BACK_OFFICE";
+  }
+
+  // 3. OWNER — executive command center
+  if (path.startsWith("/nupsowner")) {
+    return "OWNER";
+  }
+
+  // 4. MANAGER — operational management
+  if (path.startsWith("/managerconsole") ||
+      path.startsWith("/peoplearchive")) {
+    return "MANAGER";
+  }
+
+  // 5. REGISTER — POS terminal
+  if (path.startsWith("/register") ||
+      path.startsWith("/registerconsole") ||
+      path.startsWith("/receipts") ||
+      path.startsWith("/driverpayouts")) {
+    return "REGISTER";
+  }
+
+  // 6. STAFF — daily operations (also catches /FrontDoor, /EntertainerCheckIn)
+  if (path.startsWith("/frontdoor") ||
+      path.startsWith("/entertainercheckin") ||
+      path.startsWith("/staffhome")) {
+    return "STAFF";
+  }
+
+  // Shared routes — resolve by role class
+  if (path.startsWith("/nupshub") || path.startsWith("/hub")) {
+    if (roleClass === "ADMIN") return "OWNER";
+    if (roleClass === "MANAGER") return "MANAGER";
+    return "STAFF";
+  }
+
+  if (path.startsWith("/tonight")) {
+    return "MANAGER";
   }
 
   return null;

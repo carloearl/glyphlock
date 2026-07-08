@@ -17,6 +17,7 @@ import ModeToggle from "./ModeToggle";
 import { base44 } from "@/api/base44Client";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
 import { isSovereign } from "@/lib/nups/sovereign";
+import { getWorkspaceForPath, WORKSPACE_ITEM_MAP } from "@/lib/nups/workspaceConfig";
 
 // DACO 003 §2 — which sections each role class may see.
 // STAFF / ENTERTAINER never reach this shell for general nav (they use their
@@ -230,7 +231,31 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   }, []);
 
   const visibleSectionLabels = SECTIONS_BY_CLASS[roleClass] || [];
-  const visibleSections = NAV_SECTIONS.filter(s => visibleSectionLabels.includes(s.label));
+  const activeWorkspace = getWorkspaceForPath(location.pathname, roleClass);
+
+  // W3-012A — Filter sidebar by active workspace. When a workspace is
+  // detected, only items tagged with that workspace render. When no
+  // workspace is detected (fallback), all role-scoped items show.
+  const visibleSections = NAV_SECTIONS
+    .filter(s => visibleSectionLabels.includes(s.label))
+    .map(section => ({
+      ...section,
+      items: section.items
+        .filter(item => {
+          if (!activeWorkspace) return true;
+          const ws = WORKSPACE_ITEM_MAP[item.id] || [];
+          return ws.includes(activeWorkspace);
+        })
+        .map(item => item.children ? ({
+          ...item,
+          children: item.children.filter(child => {
+            if (!activeWorkspace) return true;
+            const ws = WORKSPACE_ITEM_MAP[child.id] || [];
+            return ws.includes(activeWorkspace);
+          }),
+        }) : item),
+    }))
+    .filter(section => section.items.length > 0);
 
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const dateStr = now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
