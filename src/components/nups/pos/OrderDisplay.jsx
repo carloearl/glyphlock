@@ -93,7 +93,10 @@ export default function OrderDisplay({
             <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            <span>Tax (8%)</span><span>${tax.toFixed(2)}</span>
+            {/* W3-013A: label only — rate text removed because door station is
+                tax-exempt (tax=0) and the rate itself lives in business logic.
+                The displayed value is the same computed `tax` as before. */}
+            <span>Tax</span><span>${tax.toFixed(2)}</span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-xs font-semibold" style={{ color: '#f59e0b' }}>
