@@ -17,7 +17,7 @@ import ModeToggle from "./ModeToggle";
 import { base44 } from "@/api/base44Client";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
 import { isSovereign } from "@/lib/nups/sovereign";
-import { getWorkspaceForPath, WORKSPACE_ITEM_MAP } from "@/lib/nups/workspaceConfig";
+
 
 // DACO 003 §2 — which sections each role class may see.
 // STAFF / ENTERTAINER never reach this shell for general nav (they use their
@@ -56,6 +56,8 @@ const NAV_SECTIONS = [
   {
     label: "Floor & Staff",
     items: [
+      { id: "viprooms",    label: "VIP Rooms",       icon: Crown,     to: "/NUPSOwner?tab=vip" },
+      { id: "glyphbucks",  label: "GlyphBucks Hub",  icon: Coins,     to: "/GlyphBucksHub" },
       { id: "staff",       label: "Staff",           icon: Users,     to: "/NUPSOwner?tab=staff" },
       { id: "dj",          label: "DJ Console",      icon: Music,     to: "/NUPSOwner?tab=dj" },
       { id: "customers",   label: "Customers",       icon: Heart,     to: "/NUPSOwner?tab=customers" },
@@ -231,30 +233,13 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   }, []);
 
   const visibleSectionLabels = SECTIONS_BY_CLASS[roleClass] || [];
-  const activeWorkspace = getWorkspaceForPath(location.pathname, roleClass);
 
-  // W3-012A — Filter sidebar by active workspace. When a workspace is
-  // detected, only items tagged with that workspace render. When no
-  // workspace is detected (fallback), all role-scoped items show.
+  // FULL MENU RESTORED (operator feedback 2026-07-09): workspace filtering
+  // hid half the sidebar (Accounting, Contracts, VIP, etc.) depending on the
+  // current page. The sidebar now always shows every role-scoped item — the
+  // only filter left is the DACO 003 §2 role-class scope.
   const visibleSections = NAV_SECTIONS
     .filter(s => visibleSectionLabels.includes(s.label))
-    .map(section => ({
-      ...section,
-      items: section.items
-        .filter(item => {
-          if (!activeWorkspace) return true;
-          const ws = WORKSPACE_ITEM_MAP[item.id] || [];
-          return ws.includes(activeWorkspace);
-        })
-        .map(item => item.children ? ({
-          ...item,
-          children: item.children.filter(child => {
-            if (!activeWorkspace) return true;
-            const ws = WORKSPACE_ITEM_MAP[child.id] || [];
-            return ws.includes(activeWorkspace);
-          }),
-        }) : item),
-    }))
     .filter(section => section.items.length > 0);
 
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });

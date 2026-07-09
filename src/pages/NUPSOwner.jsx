@@ -254,6 +254,7 @@ export default function NUPSOwner() {
   // GlyphBucks → /Contracts?tab=glyphbucks. Those are NOT listed here.
   const NAV_MODULES = [
     { key: 'dashboard',  label: 'Dashboard',      icon: BarChart3 },
+    { key: 'vip',        label: 'VIP Rooms',      icon: Star },
     { key: 'staff',      label: 'Staff',          icon: Users },
     { key: 'dj',         label: 'DJ',             icon: Music },
     { key: 'customers',  label: 'Customers',      icon: Heart },
@@ -495,6 +496,13 @@ export default function NUPSOwner() {
               occupiedRooms={occupiedRooms}
               activeGuestsCount={activeGuestsCount}
             />
+          )}
+          {activeModule === 'vip' && (
+            <div className="space-y-4">
+              <VIPRoomBoard user={user} />
+              <VIPRoomManagement user={user} />
+              <GuestCheckIn />
+            </div>
           )}
           {activeModule === 'dj' && <UnifiedMusicConsole />}
           {activeModule === 'payroll' && (

@@ -21,7 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Lock, Unlock, Circle, Activity,
+  Lock, Unlock, Circle, Activity, Truck,
   ShoppingCart, Receipt, Beer, Music,
   UserPlus, UserCheck, Clock, Shield, Sparkles,
 } from "lucide-react";
@@ -50,6 +50,7 @@ import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 // running cover charges and paying out drivers in the same shift.
 const TABS = [
   { key: "register",   label: "Register · Door",    icon: ShoppingCart },
+  { key: "drivers",    label: "Drivers",            icon: Truck },
   { key: "receipts",   label: "Receipts",           icon: Receipt },
   { key: "bar",        label: "Bar",                icon: Beer },
   { key: "dj",         label: "DJ",                 icon: Music },
@@ -170,30 +171,22 @@ function RegisterConsoleInner() {
 
         {/* Tab content */}
         <div className="space-y-4">
-          {/* Register tab — vertical Quick Charges live INSIDE POSCashRegister
-              (left column). Right column stacks Driver onboarding + guest
-              drop-off tracker ON TOP of the daily Entertainer Check-In so the
-              door girl handles cover, drivers, AND dancer arrivals from one
-              screen. (Entertainer onboarding stays on its own tab.) */}
+          {/* Register tab — the till ONLY. Drivers and Talent Check-In have
+              their own tabs so the register never becomes a stacked wall.
+              (Operator feedback 2026-07-09.) */}
           {activeTab === "register" && (
-            // Top-to-bottom vertical flow: register, then driver onboarding,
-            // then entertainer check-in — all stacked, no side-by-side panels.
             <div className="flex flex-col gap-3 sm:gap-4">
-              {/* W3-012B Cycle 2 — display-only guidance when no batch is open */}
               <NoBatchBanner batch={activeBatch} />
               <POSCashRegister showDriverPanel={false} user={user} station="door" />
-              {/* §1.4 awareness — read-only last-5 receipts, links to Receipts tab */}
               <RecentTransactionsStrip onViewAll={() => setActiveTab("receipts")} />
+            </div>
+          )}
+          {activeTab === "drivers" && (
+            <div className="flex flex-col gap-3 sm:gap-4">
               <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-3 sm:p-4">
                 <DriverQuickAdd user={user} />
               </div>
-              <div className="rounded-xl border border-pink-500/20 bg-slate-950/60 p-3 sm:p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <UserCheck className="w-5 h-5 text-pink-400" />
-                  <h2 className="text-base sm:text-lg font-bold text-white">Entertainer Daily Check-In</h2>
-                </div>
-                <EntertainerCheckIn user={user} />
-              </div>
+              <DriverDropOffTracker user={user} />
             </div>
           )}
           {activeTab === "receipts" && (

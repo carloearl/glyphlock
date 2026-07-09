@@ -122,7 +122,7 @@ const AuthenticatedApp = () => {
     '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
     // NUPS operator surface — kiosk-wrapped
     '/nupshub', '/hub', '/register', '/registerconsole',
-    '/receipts', '/driverpayouts',
+    '/receipts', '/driverpayouts', '/glyphbuckshub',
     '/accounting', '/tonight', '/contracts', '/contractshub',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
@@ -142,7 +142,7 @@ const AuthenticatedApp = () => {
     '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
     '/staffhome', '/entertainerhome',
     '/nupshub', '/hub', '/register', '/registerconsole',
-    '/receipts', '/driverpayouts',
+    '/receipts', '/driverpayouts', '/glyphbuckshub',
     '/accounting', '/tonight', '/contracts', '/contractshub',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
@@ -228,6 +228,8 @@ const AuthenticatedApp = () => {
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/DriverPayouts" element={<DriverPayouts />} />
         <Route path="/driverpayouts" element={<DriverPayouts />} />
+        <Route path="/GlyphBucksHub" element={<GlyphBucksHub />} />
+        <Route path="/glyphbuckshub" element={<GlyphBucksHub />} />
         <Route path="/Accounting" element={<Accounting />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/Tonight" element={<Tonight />} />
