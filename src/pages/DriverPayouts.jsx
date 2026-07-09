@@ -16,6 +16,7 @@ import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import QuickDriverGuestAdd from "@/components/nups/QuickDriverGuestAdd";
 import DriverDropOffTracker from "@/components/nups/DriverDropOffTracker";
 import DriverPayoutHistory from "@/pages/DriverPayoutHistory";
+import ShiftAuditExportButton from "@/components/nups/ShiftAuditExportButton";
 
 function DriverPayoutsInner() {
   const [me, setMe] = useState(null);
@@ -40,6 +41,11 @@ function DriverPayoutsInner() {
               Every payout below is a money-OUT disbursement, reconciled against the POS Batch
               it was issued under. Driver payouts are never deducted from <code>total_sales</code>.
             </p>
+            {/* End-of-shift audit ledger — driver payouts + entertainer
+                check-ins → Google Sheets (manager/admin only, enforced server-side) */}
+            <div className="mt-3">
+              <ShiftAuditExportButton />
+            </div>
           </CardContent>
         </Card>
 
