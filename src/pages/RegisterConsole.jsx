@@ -85,6 +85,19 @@ function BatchStatusBadge({ batch }) {
   );
 }
 
+// Role-scoped tab access — each staff role sees ONLY its own workstation.
+// Managers/admins see everything (onboarding, PINs, audit stay exclusive
+// to them because no staff role lists those keys).
+const STAFF_TAB_ACCESS = {
+  DOOR_GIRL:  ["register", "drivers", "checkin", "receipts", "staff"],
+  DOORMAN:    ["register", "drivers", "checkin", "receipts", "staff"],
+  FLOOR_HOST: ["register", "drivers", "checkin", "receipts", "staff"],
+  HOSTESS:    ["register", "drivers", "checkin", "receipts", "staff"],
+  BARTENDER:  ["bar", "receipts", "staff"],
+  DJ:         ["dj", "staff"],
+  SECURITY:   ["staff"],
+};
+
 function RegisterConsoleInner() {
   const [activeTab, setActiveTab] = useState("register");
   const [user, setUser] = useState(null);
@@ -93,6 +106,24 @@ function RegisterConsoleInner() {
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  // Resolve role → allowed tabs. Admin (base44 role or NUPS elevated role)
+  // and Managers get the full console; each staff role gets its own station.
+  const rawRole = String(user?._highestRole || user?.role || "").toUpperCase();
+  const isManagerOrAdmin =
+    user?.role === "admin" ||
+    ["ADMIN", "OWNER", "VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN", "BOOKKEEPER", "MANAGER", "VENUE_MANAGER"].includes(rawRole);
+  const allowedKeys = isManagerOrAdmin
+    ? TABS.map((t) => t.key)
+    : (STAFF_TAB_ACCESS[rawRole] || (user ? ["register", "receipts", "staff"] : ["register"]));
+  const visibleTabs = TABS.filter((t) => allowedKeys.includes(t.key));
+
+  // If the current tab isn't permitted for this role, snap to the first allowed.
+  useEffect(() => {
+    if (user && !allowedKeys.includes(activeTab)) {
+      setActiveTab(allowedKeys[0]);
+    }
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: batches = [] } = useQuery({
     queryKey: ["active-pos-batch"],
@@ -119,6 +150,7 @@ function RegisterConsoleInner() {
       actions={
         <div className="flex items-center gap-2">
           <BatchStatusBadge batch={activeBatch} />
+          {isManagerOrAdmin && (
           <Button
             onClick={() => setShowSeedDialog(true)}
             size="sm"
@@ -129,6 +161,7 @@ function RegisterConsoleInner() {
             <Sparkles className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Demo Data</span>
           </Button>
+          )}
         </div>
       }
       role="CASHIER"
@@ -151,7 +184,7 @@ function RegisterConsoleInner() {
             the shell header. */}
         <div className="-mx-2 px-2 mb-4 pb-3 border-b border-slate-800 overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 min-w-max md:flex-wrap md:min-w-0">
-            {TABS.map(({ key, label, icon: Icon }) => (
+            {visibleTabs.map(({ key, label, icon: Icon }) => (
               <Button
                 key={key}
                 onClick={() => setActiveTab(key)}

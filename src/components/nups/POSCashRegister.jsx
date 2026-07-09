@@ -862,7 +862,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
 
   return (
     <div
-      className="flex flex-col lg:flex-row lg:items-start gap-0 rounded-2xl overflow-hidden min-h-screen"
+      className="flex flex-col lg:flex-row lg:flex-wrap lg:items-start gap-0 rounded-2xl overflow-hidden min-h-screen"
       style={{
         background: 'rgba(10,10,14,0.95)',
         border: '1px solid rgba(255,255,255,0.08)',
@@ -917,16 +917,6 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
               currentDiscount={discount}
               station={station}
             />
-          )}
-
-          {/* ID Scanner + Guest Check-In — DOOR ONLY. These are door-station
-              features (guest intake, age verification). Must NOT be hidden
-              inside the bar products grid. */}
-          {station === 'door' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <IDScannerCamera venue_id={activeVenue?.id} onDataExtracted={handleIDScan} />
-              <GuestCheckIn />
-            </div>
           )}
 
           {station !== 'door' && filteredProducts.length > 0 && (
@@ -1229,6 +1219,16 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           </div>
           )}
       </div>
+
+      {/* ID Scanner + Guest Check-In — DOOR ONLY. Moved BELOW the cart so
+          the flow reads: Quick Charges → Cart/Charge → guest intake tools.
+          Full-width row under the two register columns on lg+. */}
+      {station === 'door' && (
+        <div className="w-full p-4 grid grid-cols-1 md:grid-cols-2 gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <IDScannerCamera venue_id={activeVenue?.id} onDataExtracted={handleIDScan} />
+          <GuestCheckIn />
+        </div>
+      )}
 
       {/* Mobile sticky charge bar — keeps the drawer connected to the
           quick-charge buttons on phones. Tap a preset up top, then charge
