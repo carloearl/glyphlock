@@ -63,6 +63,7 @@ const NAV_SECTIONS = [
       { id: "customers",   label: "Customers",       icon: Heart,     to: "/NUPSOwner?tab=customers" },
       { id: "marketing",   label: "Marketing",       icon: Megaphone, to: "/NUPSOwner?tab=marketing" },
       { id: "people",      label: "People Archive",  icon: Archive,   to: "/PeopleArchive" },
+      { id: "manager",     label: "Manager Console", icon: ShieldCheck, to: "/ManagerConsole" },
     ],
   },
   // Accounting is ONE entry with internal children. Each child is a
@@ -110,6 +111,8 @@ const NAV_SECTIONS = [
         ],
       },
       { id: "rbac",      label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
+      { id: "recon",     label: "Reconciliation",  icon: Banknote,      to: "/admin/payment-reconciliation" },
+      { id: "resolution",label: "Resolutions",     icon: ClipboardCheck,to: "/admin/financial-resolution" },
       { id: "registry",  label: "Feature Registry",icon: BookOpen,      to: "/admin/registry" },
       { id: "adr",       label: "Decision Register", icon: FileText,    to: "/admin/adr" },
       { id: "demo",      label: "Demo Keys",       icon: Sparkles,      to: "/NUPSOwner?tab=demo" },

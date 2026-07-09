@@ -29,6 +29,30 @@ export default function TransactionReceiptModal({ open, onClose, transaction }) 
               <div className="text-[11px] text-slate-400 mt-1">
                 {transaction.payment_method} · {transaction.transaction_id}
               </div>
+              {/* Fee breakdown at a glance — no scrolling required */}
+              <div className="mt-2 pt-2 border-t border-emerald-500/20 text-[11px] font-mono space-y-0.5">
+                <div className="flex justify-between text-slate-400">
+                  <span>Subtotal</span><span>${Number(transaction.subtotal || 0).toFixed(2)}</span>
+                </div>
+                {Number(transaction.tax || 0) > 0 && (
+                  <div className="flex justify-between text-slate-400">
+                    <span>Tax</span><span>${Number(transaction.tax).toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-amber-300">
+                  <span>Processing Fee</span><span>${Number(transaction.processing_fee || 0).toFixed(2)}</span>
+                </div>
+                {Number(transaction.service_fee || 0) > 0 && (
+                  <div className="flex justify-between text-slate-400">
+                    <span>Service Fee</span><span>${Number(transaction.service_fee).toFixed(2)}</span>
+                  </div>
+                )}
+                {Number(transaction.discount || 0) > 0 && (
+                  <div className="flex justify-between text-red-400">
+                    <span>Discount</span><span>-${Number(transaction.discount).toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
             </div>
             <ReceiptPrinter transaction={transaction} />
             <Button

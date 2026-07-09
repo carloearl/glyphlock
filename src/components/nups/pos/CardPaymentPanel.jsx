@@ -38,26 +38,41 @@ export default function CardPaymentPanel({ total, method, onConfirm }) {
         <div className="text-4xl font-mono font-black text-cyan-400">${total.toFixed(2)}</div>
       </div>
 
-      {/* Payment Method Indicator */}
+      {/* Payment Method tiles — TAPPABLE. Tapping any tile starts the reader,
+          same as the big Process button below. (Fix: these were decorative
+          before, so tapping "NFC Tap" did nothing.) */}
       <div className="grid grid-cols-3 gap-3 text-center">
-        <div className={`rounded-xl p-4 border transition-all ${
-          !isTap ? 'bg-cyan-500/10 border-cyan-500/40 scale-105' : 'bg-black/30 border-white/10 opacity-50'
-        }`}>
+        <button
+          onClick={handleProcess}
+          disabled={processing}
+          className={`rounded-xl p-4 border transition-all active:scale-95 min-h-[44px] ${
+            !isTap ? 'bg-cyan-500/10 border-cyan-500/40' : 'bg-black/30 border-white/10 opacity-60'
+          }`}
+        >
           <CreditCard className="w-8 h-8 mx-auto mb-1 text-cyan-400" />
           <div className="text-[10px] text-gray-300 font-bold">Swipe / Insert</div>
-        </div>
-        <div className={`rounded-xl p-4 border transition-all ${
-          isTap ? 'bg-purple-500/10 border-purple-500/40 scale-105' : 'bg-black/30 border-white/10 opacity-50'
-        }`}>
+        </button>
+        <button
+          onClick={handleProcess}
+          disabled={processing}
+          className={`rounded-xl p-4 border transition-all active:scale-95 min-h-[44px] ${
+            isTap ? 'bg-purple-500/10 border-purple-500/40' : 'bg-black/30 border-white/10 opacity-60'
+          }`}
+        >
           <Smartphone className="w-8 h-8 mx-auto mb-1 text-purple-400" />
           <div className="text-[10px] text-gray-300 font-bold">Phone / Watch</div>
-        </div>
-        <div className={`rounded-xl p-4 border transition-all bg-black/30 border-white/10 ${
-          !isTap ? 'opacity-100' : 'opacity-50'
-        }`}>
+        </button>
+        <button
+          onClick={handleProcess}
+          disabled={processing}
+          className="rounded-xl p-4 border transition-all active:scale-95 min-h-[44px] bg-blue-500/10 border-blue-500/40"
+        >
           <Wifi className="w-8 h-8 mx-auto mb-1 text-blue-400" />
           <div className="text-[10px] text-gray-300 font-bold">NFC Tap</div>
-        </div>
+        </button>
+      </div>
+      <div className="text-center text-[10px] text-gray-500 -mt-2">
+        Tap a method above or the button below to start the reader
       </div>
 
       {processing ? (
