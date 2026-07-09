@@ -862,7 +862,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
 
   return (
     <div
-      className="flex flex-col gap-0 rounded-2xl overflow-hidden min-h-screen"
+      className="flex flex-col lg:flex-row lg:items-start gap-0 rounded-2xl overflow-hidden min-h-screen"
       style={{
         background: 'rgba(10,10,14,0.95)',
         border: '1px solid rgba(255,255,255,0.08)',
@@ -872,8 +872,9 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         pointerEvents: 'auto',
       }}
     >
-      {/* LEFT: PRODUCTS + SEARCH */}
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.06)' }}>
+      {/* LEFT: PRODUCTS + SEARCH — on lg+ screens the drawer sits directly
+          to the right so quick charges and the order are never separated. */}
+      <div className="flex-1 flex flex-col overflow-hidden lg:border-b-0 lg:border-r" style={{ borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.06)', borderRightColor: 'rgba(255,255,255,0.06)' }}>
 
         {/* Top bar: search + scan — hidden on door */}
         {station !== 'door' && (
@@ -1023,8 +1024,14 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         </div>
       </div>
 
-      {/* CART + TOTALS — stacked below products (top-to-bottom flow) */}
-      <div className="flex w-full flex-col shrink-0 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.4)', borderTopWidth: '1px', borderTopColor: 'rgba(255,255,255,0.06)' }}>
+      {/* CART + TOTALS ("the drawer") — attached to the register:
+          • lg+ screens: fixed right column, sticky, always visible next to
+            the quick-charge buttons (no more 3-panels-apart scrolling).
+          • phones/small tablets: stacked below, but the sticky CHARGE bar
+            (bottom of screen) keeps the total + charge one tap away. */}
+      <div
+        className="flex w-full flex-col shrink-0 overflow-y-auto lg:w-[400px] lg:max-w-[400px] lg:border-t-0 lg:sticky lg:top-0 lg:self-start lg:max-h-screen"
+        style={{ background: 'rgba(0,0,0,0.4)', borderTopWidth: '1px', borderTopColor: 'rgba(255,255,255,0.06)' }}>
         {/* Standard register flow — coaching strip for new operators */}
         <div className="p-3 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <FlowSteps
@@ -1222,6 +1229,33 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           </div>
           )}
       </div>
+
+      {/* Mobile sticky charge bar — keeps the drawer connected to the
+          quick-charge buttons on phones. Tap a preset up top, then charge
+          right here without scrolling. Hidden on lg+ (side-by-side layout). */}
+      {cart.length > 0 && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 px-3 pb-3 pt-2"
+          style={{ background: 'linear-gradient(to top, rgba(5,5,8,0.98) 70%, transparent)' }}>
+          <button
+            onClick={handleCheckout}
+            disabled={isSubmitting}
+            className="w-full rounded-2xl font-black text-lg text-white active:scale-[0.97] transition-all flex items-center justify-between px-5 disabled:opacity-60"
+            style={{
+              height: '60px',
+              background: compAuth
+                ? 'linear-gradient(135deg, #f43f5e 0%, #b91c1c 100%)'
+                : 'linear-gradient(135deg, #16a34a 0%, #059669 100%)',
+              boxShadow: '0 -4px 24px rgba(0,0,0,0.5), 0 0 30px rgba(34,197,94,0.25)',
+            }}
+          >
+            <span className="flex items-center gap-2 text-sm font-bold">
+              <Wallet className="w-5 h-5" />
+              {cart.reduce((s, i) => s + i.quantity, 0)} item{cart.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}
+            </span>
+            <span>{isSubmitting ? 'Processing...' : `CHARGE $${(compAuth ? finalTotal : total).toFixed(2)}`}</span>
+          </button>
+        </div>
+      )}
 
       {/* Manager Override Modal */}
       {showManagerOverride && (
