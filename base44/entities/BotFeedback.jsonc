@@ -1,0 +1,71 @@
+{
+  "name": "BotFeedback",
+  "type": "object",
+  "description": "DACO DIRECTIVE 006 Phase 1 \u2014 per-response GlyphBot feedback ratings. All writes via writeEntity() gateway (dual audit logging). venue_id MANDATORY (ID-01 lesson). DEMO/SANDBOX records excluded by default from analytics (F-2). No user message content stored (F-3).",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "MANDATORY on every record. No venue_id, no write."
+    },
+    "operating_mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "description": "Stamped at write time from the resolved active mode."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "Gateway mode stamp (writeEntity injects). Mirrors operating_mode; used by F-2 analytics exclusion and demo-wipe tooling."
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Groups feedback to a chat session."
+    },
+    "message_id": {
+      "type": "string",
+      "description": "The specific bot response rated."
+    },
+    "persona_id": {
+      "type": "string",
+      "description": "Which agent produced the response (glyphbot, glyphbot_jr, sie_architect, ...)."
+    },
+    "rating": {
+      "type": "string",
+      "enum": [
+        "up",
+        "down"
+      ]
+    },
+    "feedback_text": {
+      "type": "string",
+      "description": "Optional free-text comment, max 1000 chars (enforced in service via config)."
+    },
+    "response_preview": {
+      "type": "string",
+      "description": "First 280 chars of the rated bot response. Bot output only \u2014 never user message content (F-3)."
+    },
+    "user_role": {
+      "type": "string",
+      "description": "Rater's role if authenticated, else 'anonymous'."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "venue_id",
+    "message_id",
+    "persona_id",
+    "rating"
+  ]
+}

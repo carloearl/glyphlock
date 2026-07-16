@@ -61,6 +61,7 @@ import RegisterConsole from './pages/RegisterConsole';
 import Receipts from './pages/Receipts';
 import DriverPayouts from './pages/DriverPayouts';
 import NUPSHub from './pages/NUPSHub';
+import BotAnalytics from './pages/BotAnalytics';
 import EntertainerCheckIn from './pages/EntertainerCheckIn';
 import StaffHome from './pages/StaffHome';
 import EntertainerHome from './pages/EntertainerHome';
@@ -302,6 +303,8 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSHub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
         <Route path="/nupshub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
         <Route path="/Hub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
+        <Route path="/BotAnalytics" element={<LayoutWrapper currentPageName="BotAnalytics"><BotAnalytics /></LayoutWrapper>} />
+        <Route path="/botanalytics" element={<LayoutWrapper currentPageName="BotAnalytics"><BotAnalytics /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>

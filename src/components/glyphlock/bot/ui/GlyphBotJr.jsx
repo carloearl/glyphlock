@@ -4,6 +4,7 @@ import { Sparkles, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { PERSONAS } from '../config/personas';
 import { motion, AnimatePresence } from "framer-motion";
+import FeedbackButtons from './FeedbackButtons';
 
 export default function GlyphBotJr({ onClose, forceExpanded = false }) {
   const jrPersona = PERSONAS.find(p => p.id === "glyphbot_jr") || PERSONAS[4];
@@ -256,8 +257,15 @@ When answering questions, use the knowledge bases to provide accurate informatio
               >
                 {msg.text}
               </ReactMarkdown>
-              
 
+              {/* DACO 006 P1 — per-response feedback */}
+              {msg.role === "assistant" && (
+                <FeedbackButtons
+                  messageId={`jr-${msg.timestamp || idx}`}
+                  personaId="glyphbot_jr"
+                  responseText={msg.text}
+                />
+              )}
             </div>
           </div>
         ))}

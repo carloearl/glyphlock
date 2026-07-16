@@ -1,5 +1,6 @@
 import React from 'react';
 import { Volume2 } from 'lucide-react';
+import FeedbackButtons from './FeedbackButtons';
 
 export default function ChatMessage({ msg, isAssistant, onReplay }) {
   if (!msg || !msg.content) return null;
@@ -25,6 +26,14 @@ export default function ChatMessage({ msg, isAssistant, onReplay }) {
       }}
     >
       {msg.content}
+      {/* DACO 006 P1 — per-response feedback */}
+      {isAssistant && (
+        <FeedbackButtons
+          messageId={msg.id}
+          personaId="glyphbot"
+          responseText={msg.content}
+        />
+      )}
       {isAssistant && onReplay && msg.ttsMetadata && (
         <button
           onClick={() => onReplay(msg.id, msg.ttsMetadata)}

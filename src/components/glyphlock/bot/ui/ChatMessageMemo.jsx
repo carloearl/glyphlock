@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Volume2, Bot, User } from 'lucide-react';
+import FeedbackButtons from './FeedbackButtons';
 
 const ChatMessage = React.memo(function ChatMessage({ msg, isAssistant, onReplay }) {
   if (!msg || !msg.content) return null;
@@ -62,6 +63,15 @@ const ChatMessage = React.memo(function ChatMessage({ msg, isAssistant, onReplay
           >
             <Volume2 className="w-3 h-3" />
           </button>
+        )}
+
+        {/* DACO 006 P1 — per-response feedback */}
+        {isAssistant && (
+          <FeedbackButtons
+            messageId={msg.id}
+            personaId="glyphbot"
+            responseText={msg.content}
+          />
         )}
 
         {/* Provider badge for assistant messages */}
