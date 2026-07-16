@@ -19,48 +19,41 @@ async function runProviderChain(base44, query, num) {
   let results = null;
   let provider = 'none';
 
+  // TRACK 4.2 fix — all provider-chain fetches route through pubFetch
+  // (8s per-request timeout) so a hung provider cannot stall the message.
   const serpApiKey = Deno.env.get('SERP_API_KEY');
   if (serpApiKey) {
-    try {
-      const r = await fetch(`https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=${num}`);
-      if (r.ok) {
-        const data = await r.json();
-        results = (data.organic_results || []).map((x) => ({ title: x.title, snippet: x.snippet, url: x.link }));
-        provider = 'serpapi';
-      }
-    } catch (e) { console.error('SerpAPI failed:', e); }
+    const data = await pubFetch(`https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=${num}`, { timeout: 8000 });
+    if (data) {
+      results = (data.organic_results || []).map((x) => ({ title: x.title, snippet: x.snippet, url: x.link }));
+      provider = 'serpapi';
+    }
   }
 
   const googleApiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY');
   const googleCx = Deno.env.get('GOOGLE_SEARCH_CX');
   if (googleApiKey && googleCx && !results) {
-    try {
-      // Google CSE returns max 10/page — paginate to reach num.
-      const collected = [];
-      for (let start = 1; start <= num && start <= 91; start += 10) {
-        const r = await fetch(`https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${encodeURIComponent(query)}&num=10&start=${start}`);
-        if (!r.ok) break;
-        const data = await r.json();
-        (data.items || []).forEach((x) => collected.push({ title: x.title, snippet: x.snippet, url: x.link }));
-        if (!data.items || data.items.length < 10) break;
-      }
-      if (collected.length) { results = collected; provider = 'google'; }
-    } catch (e) { console.error('Google Search failed:', e); }
+    // Google CSE returns max 10/page — paginate to reach num.
+    const collected = [];
+    for (let start = 1; start <= num && start <= 91; start += 10) {
+      const data = await pubFetch(`https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${encodeURIComponent(query)}&num=10&start=${start}`, { timeout: 8000 });
+      if (!data) break;
+      (data.items || []).forEach((x) => collected.push({ title: x.title, snippet: x.snippet, url: x.link }));
+      if (!data.items || data.items.length < 10) break;
+    }
+    if (collected.length) { results = collected; provider = 'google'; }
   }
 
   if (!results) {
-    try {
-      const r = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`);
-      if (r.ok) {
-        const data = await r.json();
-        const out = [];
-        if (data.AbstractText) out.push({ title: data.Heading || 'Summary', snippet: data.AbstractText, url: data.AbstractURL || 'https://duckduckgo.com' });
-        (data.RelatedTopics || []).forEach((t) => {
-          if (t.Text) out.push({ title: t.Text.split(' - ')[0] || 'Related', snippet: t.Text, url: t.FirstURL || 'https://duckduckgo.com' });
-        });
-        if (out.length) { results = out; provider = 'duckduckgo'; }
-      }
-    } catch (e) { console.error('DuckDuckGo failed:', e); }
+    const data = await pubFetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`, { timeout: 8000 });
+    if (data) {
+      const out = [];
+      if (data.AbstractText) out.push({ title: data.Heading || 'Summary', snippet: data.AbstractText, url: data.AbstractURL || 'https://duckduckgo.com' });
+      (data.RelatedTopics || []).forEach((t) => {
+        if (t.Text) out.push({ title: t.Text.split(' - ')[0] || 'Related', snippet: t.Text, url: t.FirstURL || 'https://duckduckgo.com' });
+      });
+      if (out.length) { results = out; provider = 'duckduckgo'; }
+    }
   }
 
   return { results: results || [], provider };

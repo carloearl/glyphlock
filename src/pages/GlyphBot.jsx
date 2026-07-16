@@ -15,6 +15,7 @@ import TypingIndicator from '@/components/glyphlock/bot/ui/chat/TypingIndicator'
 import useChatScroll from '@/components/glyphlock/bot/ui/chat/useChatScroll';
 import JumpToLatest from '@/components/glyphlock/bot/ui/chat/JumpToLatest';
 import GlobalAudioEngine from '@/audio/GlobalAudioEngine';
+import { validateAuditResults } from '@/components/glyphlock/bot/logic/auditResultSchema';
 
 const { 
   useGlyphBotPersistence, 
@@ -505,23 +506,12 @@ export default function GlyphBotPage() {
       
       console.log('[GlyphBot] LLM response received:', response);
 
-      let auditResults = {};
-      try {
-        auditResults = typeof response.text === 'string' 
-          ? JSON.parse(response.text)
-          : response.text;
-      } catch {
-        auditResults = {
-          target: auditData.targetIdentifier,
-          targetType: auditData.targetType,
-          auditMode: auditData.auditMode,
-          overallGrade: 'N/A',
-          riskScore: 0,
-          summary: response.text || 'Audit completed but results format was unexpected.',
-          technicalFindings: [],
-          businessRisks: [],
-          fixPlan: []
-        };
+      // MDL-V09 — schema-validated audit output (replaces fallback-to-text).
+      // Always yields a conformant object; nonconformance is logged, not hidden.
+      const validation = validateAuditResults(response.text, auditData);
+      const auditResults = validation.value;
+      if (!validation.valid) {
+        console.warn('[GlyphBot] MDL-V09: audit output failed schema validation:', validation.errors);
       }
 
       // Update audit with results
