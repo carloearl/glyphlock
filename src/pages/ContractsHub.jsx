@@ -9,6 +9,8 @@ import {
   Building2,
   ScrollText,
   ClipboardCheck,
+  Search,
+  Stamp,
 } from "lucide-react";
 import { GLYPHLOCK_DISCLAIMER } from "@/constants/legalDisclaimer";
 
@@ -20,6 +22,7 @@ import BigSpenderQuestionnaire from "@/components/nups/contracts/BigSpenderQuest
 import BigSpenderLetter from "@/components/nups/contracts/BigSpenderLetter";
 import VIPRoomBoard from "@/components/nups/VIPRoomBoard";
 import VIPContractLifecycle from "@/components/nups/VIPContractLifecycle";
+import VIPShowContracts from "@/pages/VIPShowContracts";
 
 /**
  * Master Covenant & Contracts Hub
@@ -41,7 +44,19 @@ const TAB_ALIASES = {
   entertainer: "entertainer",
   venue: "venue",
   lookup: "lookup",
+  sealed: "sealed",
+  vipshow: "sealed",
 };
+
+const TABS = [
+  { key: "glyphbucks", label: "GlyphBucks", Icon: Coins },
+  { key: "vip", label: "VIP Shows", Icon: Crown },
+  { key: "sealed", label: "Sealed VIP Records", Icon: Stamp },
+  { key: "big_spender", label: "Big Spender", Icon: ShieldAlert },
+  { key: "entertainer", label: "Entertainer", Icon: ClipboardCheck },
+  { key: "venue", label: "Venue Terms", Icon: Building2 },
+  { key: "lookup", label: "Lookup", Icon: Search },
+];
 
 const TAB_TITLES = {
   glyphbucks: "Contracts · GlyphBucks",
@@ -50,6 +65,7 @@ const TAB_TITLES = {
   entertainer: "Contracts · Entertainer",
   venue: "Contracts · Venue Terms",
   lookup: "Contracts · Lookup",
+  sealed: "Contracts · Sealed VIP Show Records",
 };
 
 export default function ContractsHub() {
@@ -74,6 +90,24 @@ export default function ContractsHub() {
       role="MANAGER"
     >
       <div className="max-w-[1400px] mx-auto space-y-6">
+        {/* Module tab rail — every contract surface, one click away */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          {TABS.map(({ key, label, Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`flex items-center gap-2 whitespace-nowrap px-4 py-2.5 rounded-lg text-sm font-semibold min-h-[44px] transition-all ${
+                activeTab === key
+                  ? "bg-purple-500/20 text-purple-200 border-2 border-purple-500/40"
+                  : "bg-white/[0.03] text-gray-400 border-2 border-transparent hover:border-purple-500/20"
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </button>
+          ))}
+        </div>
+
         {activeTab === "glyphbucks" && (
           <Card className="bg-white/[0.02] border-pink-500/20">
             <CardContent className="p-4 sm:p-6">
@@ -199,6 +233,14 @@ export default function ContractsHub() {
                   panel and version-stamped on every save.
                 </p>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "sealed" && (
+          <Card className="bg-white/[0.02] border-emerald-500/20">
+            <CardContent className="p-0 overflow-hidden rounded-xl">
+              <VIPShowContracts />
             </CardContent>
           </Card>
         )}
