@@ -160,6 +160,62 @@ async function runPublicSources(query) {
         providers.add('wayback');
       }
     })(),
+    // Wikidata — structured entity records (people, orgs, places)
+    (async () => {
+      const r = await fetch(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&format=json&limit=8&origin=*`);
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.search || []).forEach((x) => out.push({
+        title: `Wikidata: ${x.label || x.id}`,
+        snippet: x.description || 'Structured entity record',
+        url: x.concepturi || `https://www.wikidata.org/wiki/${x.id}`,
+        source: 'wikidata',
+      }));
+      if (data?.search?.length) providers.add('wikidata');
+    })(),
+    // USASpending — US federal award/contract/grant recipient public records
+    (async () => {
+      const r = await fetch(`https://api.usaspending.gov/api/v2/autocomplete/recipient/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ search_text: query, limit: 8 }),
+      });
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.results || []).forEach((x) => out.push({
+        title: `Federal Award Recipient: ${x.recipient_name || ''}`,
+        snippet: `USASpending.gov federal contracts/grants record${x.uei ? ` · UEI ${x.uei}` : ''}`,
+        url: 'https://www.usaspending.gov/search',
+        source: 'usaspending',
+      }));
+      if (data?.results?.length) providers.add('usaspending');
+    })(),
+    // Federal Register — US government/regulatory public records
+    (async () => {
+      const r = await fetch(`https://www.federalregister.gov/api/v1/documents.json?per_page=10&order=relevance&conditions[term]=${encodeURIComponent(query)}`);
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.results || []).forEach((x) => out.push({
+        title: `Federal Register: ${x.title || 'Document'}`,
+        snippet: `${x.type || ''} · ${x.agencies?.map((a) => a.name).join(', ') || ''} · ${x.publication_date || ''}`,
+        url: x.html_url,
+        source: 'federal-register',
+      }));
+      if (data?.results?.length) providers.add('federal-register');
+    })(),
+    // OpenFEC — US campaign finance public records (keyless via DEMO_KEY)
+    (async () => {
+      const r = await fetch(`https://api.open.fec.gov/v1/candidates/search/?q=${encodeURIComponent(query)}&per_page=8&api_key=DEMO_KEY`);
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.results || []).forEach((x) => out.push({
+        title: `FEC Candidate: ${x.name || ''}`,
+        snippet: `${x.party_full || x.party || ''} · ${x.office_full || ''} · ${x.state || ''}`,
+        url: `https://www.fec.gov/data/candidate/${x.candidate_id}/`,
+        source: 'openfec',
+      }));
+      if (data?.results?.length) providers.add('openfec');
+    })(),
   ];
   await Promise.allSettled(tasks);
   return { results: out, providers: Array.from(providers) };
@@ -223,19 +279,18 @@ Deno.serve(async (req) => {
     const aggregated = [];
     const providersUsed = new Set();
 
-    // KEYLESS public sources (Wikipedia, GDELT news, CourtListener, SEC EDGAR,
-    // Hacker News, Wayback) — run in parallel on the base query. Always in
-    // deep mode; free, no API keys required.
-    if (deep) {
-      try {
-        const pub = await runPublicSources(query);
-        pub.providers.forEach((p) => providersUsed.add(p));
-        for (const r of pub.results) {
-          const key = (r.url || r.title || '').toLowerCase();
-          if (key && !seen.has(key)) { seen.add(key); aggregated.push({ ...r, query }); }
-        }
-      } catch (e) { console.error('Public sources failed:', e); }
-    }
+    // KEYLESS public-record scraper (Wikipedia, GDELT news, CourtListener,
+    // SEC EDGAR, Hacker News, Wayback, Wikidata, Federal Register, OpenFEC,
+    // USASpending) — run in parallel on the base query. Runs on EVERY search;
+    // all free, no API keys required.
+    try {
+      const pub = await runPublicSources(query);
+      pub.providers.forEach((p) => providersUsed.add(p));
+      for (const r of pub.results) {
+        const key = (r.url || r.title || '').toLowerCase();
+        if (key && !seen.has(key)) { seen.add(key); aggregated.push({ ...r, query }); }
+      }
+    } catch (e) { console.error('Public sources failed:', e); }
 
     for (const q of subQueries) {
       const { results, provider } = await runProviderChain(base44, q, perQuery);
