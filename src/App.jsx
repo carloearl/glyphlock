@@ -72,6 +72,8 @@ import AccountingHub from './pages/AccountingHub';
 import RegistryAdmin from './pages/RegistryAdmin';
 import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
 import NUPSAdminPortal from './pages/NUPSAdminPortal';
+import VIPShowVerify from './pages/VIPShowVerify';
+import VIPShowContracts from './pages/VIPShowContracts';
 import KioskShell from './components/nups/KioskShell';
 import RoleClassGuard from './components/nups/RoleClassGuard';
 import RoleClassBadge from './components/nups/RoleClassBadge';
@@ -102,7 +104,7 @@ const AuthenticatedApp = () => {
 
   const currentPath = location.pathname;
   const currentPathLower = currentPath.toLowerCase();
-  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/'];
+  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
@@ -132,6 +134,7 @@ const AuthenticatedApp = () => {
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
+    '/v/', '/vipshowcontracts',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
@@ -152,6 +155,7 @@ const AuthenticatedApp = () => {
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
+    '/vipshowcontracts',
   ];
   const isNupsKioskRoute = nupsKioskRoots.some(p => currentPathLower.startsWith(p));
 
@@ -253,6 +257,10 @@ const AuthenticatedApp = () => {
         <Route path="/admin/adr" element={<RoleClassGuard allow={["ADMIN"]}><ArchitecturalDecisionRegister /></RoleClassGuard>} />
         <Route path="/ArchitecturalDecisionRegister" element={<RoleClassGuard allow={["ADMIN"]}><ArchitecturalDecisionRegister /></RoleClassGuard>} />
         <Route path="/architecturaldecisionregister" element={<RoleClassGuard allow={["ADMIN"]}><ArchitecturalDecisionRegister /></RoleClassGuard>} />
+        {/* DACO VIP SHOW CONTRACT SYSTEM v2 */}
+        <Route path="/v/:ref" element={<VIPShowVerify />} />
+        <Route path="/VIPShowContracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
+        <Route path="/vipshowcontracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes></>

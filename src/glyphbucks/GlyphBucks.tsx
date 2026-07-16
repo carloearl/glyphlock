@@ -1,762 +1,464 @@
 /**
- * GlyphBucks Module — stored-value contract-receipt system
- * ---------------------------------------------------------
- * Standalone React/TypeScript module for a Lovable (React + Vite + Tailwind +
- * Supabase) project. Generate a signed purchase agreement + receipt, and
- * verify it OFFLINE with the published Ed25519 public key.
+ * GlyphBucks Stored-Value Contract-Receipt Module  (standalone, for Lovable)
+ * ---------------------------------------------------------------------------
+ * Drop-in React/TypeScript module. Exports:
+ *   - <GlyphBucksReceipt/>   render a sealed purchase agreement + receipt
+ *   - <GlyphBucksGenerator/> form + live preview
+ *   - <GlyphBucksVerifier/>  offline signature verifier (Web Crypto Ed25519)
+ *   - seal utilities         canonicalize / verifyToken (client verify only)
  *
- * Peer deps:  npm i qrcode jsqr
+ * SIGNING IS SERVER-SIDE ONLY. The private key never lives in this module.
+ * See supabase/functions/seal-transaction — the client sends a sale, the
+ * server signs, and returns { token, verifyRef }. This module renders and
+ * verifies; it never signs.
  *
- * Exports:
- *   - GlyphBucksGenerator   (sell page)
- *   - GlyphBucksVerifier    (verify page)
- *   - GlyphBucksReceipt     (printable receipt)
- *   - types: SaleInput, SealResult, SealedPayload
- *   - utils: canonicalize, sha256Hex, b64uEncode/Decode, buildQrText,
- *            parseQrText, verifySeal
+ * Honest-by-construction guardrails (do not remove):
+ *   • The charge IS the GlyphBucks purchase — code it under your real,
+ *     underwritten stored-value MCC. No wrapper category.
+ *   • FCBA cardholder dispute rights are never waived (Term 11).
+ *   • GlyphBucks issuance is a stored-value LIABILITY, never revenue.
  *
- * NON-NEGOTIABLE GUARDRAILS (baked in — keep them):
- *   1. Real MCC: category is always STORED_VALUE. No wrapper category.
- *   2. No chargeback suppression: dispute defense is representment evidence only.
- *   3. FCBA non-waiver (Term 11) is mandatory and must never be removed.
- *   4. No performance/service framing. This sells stored-value instruments.
- *   5. GlyphBucks issuance is a LIABILITY, not revenue — excluded from total_sales.
- *
- * This is engineering scaffolding, not legal advice.
+ * Peer deps (install in Lovable): react, qrcode  (and jsqr for camera scan)
+ *   npm i qrcode jsqr
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import QRCode from "qrcode";
-import jsQR from "jsqr";
 
-/* ============================================================
- * TYPES
- * ============================================================ */
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
-/** The transaction category is fixed. The edge function rejects anything else. */
-export const TRANSACTION_CATEGORY = "STORED_VALUE" as const;
-
-export type Mode = "DEMO" | "SANDBOX" | "REAL";
-
-export interface Denomination {
-  /** Face value of a single GlyphBucks bill, in whole dollars. */
-  face: number;
-  /** How many bills of this face value. */
-  count: number;
-}
+/* ============================ types ============================ */
 
 export interface SaleInput {
+  operator: string;           // Issuer of record, e.g. "LIBERTY HOLDINGS LLC"
   venueId: string;
-  /** Total stored value purchased, in dollars. Must equal sum(face*count). */
-  amount: number;
-  denominations: Denomination[];
-  /** Non-PII hashed reference to the buyer (never a raw name/ID). */
-  buyerRef?: string;
-  cardBrand?: string;
-  cardLast4?: string;
-  operatorId?: string;
-  mode?: Mode;
-  /** Always STORED_VALUE. Kept in the type so it travels with the sale. */
-  category?: typeof TRANSACTION_CATEGORY;
+  terminal: string;
+  mode: "REAL" | "DEMO" | "SANDBOX";
+  purchaser: string;
+  memberNo: string;
+  tier: string;
+  gbAccountLast4: string;
+  gbPrevCents: number;
+  denomCents: number;         // e.g. 1000 = $10
+  qty: number;
+  serialStart: number;        // numeric serial start
+  cardLast4: string;
+  authCode: string;
+  cardFeeRatePct: number;     // e.g. 2.90
+  staff: string;
+  managerAuthRef: string;
 }
 
-/** The exact object that gets canonicalized and signed. */
-export interface SealedPayload {
-  v: 1;
-  serial: string;
-  category: typeof TRANSACTION_CATEGORY;
-  venueId: string;
-  amount: number;
-  denominations: Denomination[];
-  buyerRef: string | null;
-  cardBrand: string | null;
-  cardLast4: string | null;
-  operatorId: string | null;
-  issuedAt: string; // ISO-8601
-  mode: Mode;
-  prevChainHash: string;
-  payloadHash: string; // sha256 of the payload minus this field + chainHash
-  chainHash: string; // sha256(prevChainHash + payloadHash)
-  termsHash: string; // sha256 of the frozen contract terms text
+export interface SealedRecord {
+  v: "NUPS1";
+  ref: string;
+  iss: string;
+  doc: string;
+  prod: string;
+  amt: number;                // cents charged
+  cur: string;
+  face: number;               // cents face value
+  sn: string;
+  acct: string;
+  th: string;                 // terms hash (sha256 hex)
+  ch: string;                 // chain seal (sha256 hex)
+  ts: string;                 // sealed-at ISO
 }
 
 export interface SealResult {
-  serial: string;
-  issuedAt: string;
-  payload: SealedPayload;
-  payloadB64u: string;
-  signatureB64u: string;
-  publicKeyB64u: string;
+  token: string;              // NUPS1.<payload>.<sig>  (from the server)
+  verifyRef: string;
+  publicKeyB64u: string;      // published public key
+  sealedAtISO: string;
+  termsHash: string;
   chainHash: string;
-  prevChainHash: string;
-  payloadHash: string;
-  qrText: string;
-  tsaToken: string | null; // RFC 3161 token (null in DEMO/SANDBOX)
-  mode: Mode;
+  prevBlock: string;
+  thisBlock: string;
 }
 
-/* ============================================================
- * FROZEN CONTRACT TERMS — DO NOT ALTER
- * Term 11 (FCBA non-waiver) is mandatory. No performance/service framing.
- * ============================================================ */
+/* ======================= seal / verify utils ======================= */
 
-export const CONTRACT_TERMS: { n: number; title: string; text: string }[] = [
-  {
-    n: 1,
-    title: "Stored-Value Instrument",
-    text:
-      "GlyphBucks are prepaid stored-value instruments issued by the venue. This agreement records the purchase of stored value only. It confers no goods, services, performance, or entertainment of any kind.",
-  },
-  {
-    n: 2,
-    title: "Purchase, Not Deposit",
-    text:
-      "The buyer purchases GlyphBucks at face value in the transaction category STORED_VALUE. The charge settled to the buyer's payment instrument is for the purchase of these stored-value instruments and nothing else.",
-  },
-  {
-    n: 3,
-    title: "Redemption",
-    text:
-      "GlyphBucks are redeemable at the issuing venue in accordance with venue rules in effect at time of redemption. They are not legal tender and are not redeemable for cash except where required by law.",
-  },
-  {
-    n: 4,
-    title: "No Performance or Service",
-    text:
-      "This instrument does not represent, promise, or guarantee any performance, service, appearance, or outcome. No performance or service line item is part of this transaction.",
-  },
-  {
-    n: 5,
-    title: "Segregated Reserve",
-    text:
-      "Outstanding stored value is backed by a segregated reserve account maintained by the issuer for the benefit of holders of outstanding value.",
-  },
-  {
-    n: 6,
-    title: "Liability, Not Revenue",
-    text:
-      "Issuance of GlyphBucks creates a liability of the issuer to the holder. Issued value is not recognized as sales revenue and is excluded from total_sales until redeemed.",
-  },
-  {
-    n: 7,
-    title: "Non-Transfer Restrictions",
-    text:
-      "Transfer, resale, or exchange of GlyphBucks is permitted only as expressly allowed by venue rules. Unauthorized transfer may void the instrument.",
-  },
-  {
-    n: 8,
-    title: "Expiration and Fees",
-    text:
-      "Any expiration date or service fee applies only to the extent permitted by applicable state and federal law, including the CARD Act where applicable.",
-  },
-  {
-    n: 9,
-    title: "Record Integrity",
-    text:
-      "This record is sealed with an Ed25519 digital signature and a hash chain. The signature proves the record was not altered after issuance; it does not by itself make the underlying terms enforceable.",
-  },
-  {
-    n: 10,
-    title: "Governing Law",
-    text:
-      "This agreement is governed by the laws of the State of Arizona, including its treatment of stored-value instruments and the A.R.S. § 42-5061 tax position, subject to review by Arizona counsel.",
-  },
-  {
-    n: 11,
-    title: "FCBA Non-Waiver (MANDATORY)",
-    text:
-      "Nothing in this agreement waives, limits, or otherwise impairs the buyer's rights under the federal Fair Credit Billing Act (15 U.S.C. § 1666 et seq.) or the buyer's right to dispute a charge with the card issuer. Any dispute defense prepared by the issuer is representment evidence only and shall never be used to block, suppress, or discourage the buyer's issuer dispute path.",
-  },
-];
+export const TERMS_VERSION = "NUPS-GBK-SVA-v2.0";
 
-/** Stable, frozen serialization of the terms for hashing. */
-export const CONTRACT_TERMS_TEXT: string = CONTRACT_TERMS.map(
-  (t) => `${t.n}. ${t.title}\n${t.text}`
-).join("\n\n");
-
-/* ============================================================
- * SEAL UTILITIES (framework-free, browser + Deno compatible)
- * ============================================================ */
-
-const enc = new TextEncoder();
-
-/** Deterministic JSON: object keys sorted recursively. */
-export function canonicalize(value: unknown): string {
-  const seen = new WeakSet();
-  const norm = (v: any): any => {
-    if (v === null || typeof v !== "object") return v;
-    if (seen.has(v)) throw new Error("Cannot canonicalize circular structure");
-    seen.add(v);
-    if (Array.isArray(v)) return v.map(norm);
-    return Object.keys(v)
-      .sort()
-      .reduce((acc: Record<string, any>, k) => {
-        acc[k] = norm(v[k]);
-        return acc;
-      }, {});
-  };
-  return JSON.stringify(norm(value));
-}
-
-function toHex(buf: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-export async function sha256Hex(input: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", enc.encode(input));
-  return toHex(digest);
-}
-
-export function b64uEncode(bytes: Uint8Array): string {
-  let bin = "";
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-export function b64uDecode(s: string): Uint8Array {
-  const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4);
-  const bin = atob(b64);
+function b64uToBytes(s: string): Uint8Array {
+  s = s.replace(/-/g, "+").replace(/_/g, "/");
+  while (s.length % 4) s += "=";
+  const bin = atob(s);
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
 
-export function encodePayloadB64u(payload: SealedPayload): string {
-  return b64uEncode(enc.encode(canonicalize(payload)));
-}
-
-/** Compact QR envelope: GB1.<payloadB64u>.<signatureB64u> */
-export function buildQrText(payloadB64u: string, signatureB64u: string): string {
-  return `GB1.${payloadB64u}.${signatureB64u}`;
-}
-
-export function parseQrText(
-  qrText: string
-): { payloadB64u: string; signatureB64u: string; payload: SealedPayload } | null {
-  const parts = (qrText || "").trim().split(".");
-  if (parts.length !== 3 || parts[0] !== "GB1") return null;
+/** Verify a NUPS1 token offline against the published public key. */
+export async function verifyToken(
+  token: string,
+  publicKeyB64u: string
+): Promise<{ valid: boolean; record: SealedRecord | null; reason?: string }> {
+  const parts = (token || "").trim().split(".");
+  if (parts.length !== 3 || parts[0] !== "NUPS1")
+    return { valid: false, record: null, reason: "Not a NUPS token." };
+  let record: SealedRecord;
   try {
-    const payloadB64u = parts[1];
-    const signatureB64u = parts[2];
-    const json = new TextDecoder().decode(b64uDecode(payloadB64u));
-    const payload = JSON.parse(json) as SealedPayload;
-    return { payloadB64u, signatureB64u, payload };
+    record = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[1])));
   } catch {
-    return null;
+    return { valid: false, record: null, reason: "Damaged payload." };
+  }
+  try {
+    const key = await crypto.subtle.importKey(
+      "raw",
+      b64uToBytes(publicKeyB64u),
+      { name: "Ed25519" },
+      false,
+      ["verify"]
+    );
+    const ok = await crypto.subtle.verify(
+      { name: "Ed25519" },
+      key,
+      b64uToBytes(parts[2]),
+      new TextEncoder().encode(parts[0] + "." + parts[1])
+    );
+    return {
+      valid: ok,
+      record,
+      reason: ok ? undefined : "Signature does not match — altered or not genuine.",
+    };
+  } catch (e: any) {
+    return { valid: false, record, reason: "Browser lacks Ed25519 Web Crypto: " + e.message };
   }
 }
 
-/** Import a raw 32-byte Ed25519 public key (base64url) for verification. */
-async function importEd25519PublicKey(publicKeyB64u: string): Promise<CryptoKey> {
-  const raw = b64uDecode(publicKeyB64u);
-  return crypto.subtle.importKey("raw", raw, { name: "Ed25519" }, false, ["verify"]);
+const money = (cents: number) =>
+  "$" + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** Derived totals (mirrors the server; server value is authoritative). */
+export function computeTotals(s: Pick<SaleInput, "denomCents" | "qty" | "cardFeeRatePct">) {
+  const faceCents = s.denomCents * s.qty;
+  const cardFeeCents = Math.round(faceCents * (s.cardFeeRatePct / 100));
+  const totalCents = faceCents + cardFeeCents;
+  return { faceCents, cardFeeCents, totalCents };
 }
 
-export interface VerifyOutcome {
-  ok: boolean;
-  reason?: string;
-  payload?: SealedPayload;
-}
+/* ============================ receipt ============================ */
+
+const modeColor: Record<SaleInput["mode"], string> = {
+  REAL: "text-emerald-700",
+  DEMO: "text-amber-600",
+  SANDBOX: "text-blue-600",
+};
 
 /**
- * Offline verification:
- *  - signature valid over the canonical payload bytes
- *  - internal payloadHash / chainHash consistent
- *  - termsHash matches the frozen terms shipped in this module
+ * Faithful render of the v2.0 GlyphBucks Purchase Agreement & Receipt.
+ * `seal` is optional: when present, the signed QR + evidence are shown.
  */
-export async function verifySeal(
-  qrText: string,
-  publicKeyB64u: string
-): Promise<VerifyOutcome> {
-  const parsed = parseQrText(qrText);
-  if (!parsed) return { ok: false, reason: "Unreadable or non-GlyphBucks code." };
-  const { payloadB64u, signatureB64u, payload } = parsed;
-
-  if (payload.category !== TRANSACTION_CATEGORY) {
-    return { ok: false, reason: "Invalid category — not a STORED_VALUE instrument.", payload };
-  }
-
-  // Recompute integrity hashes.
-  const { payloadHash, chainHash, ...rest } = payload as any;
-  const recomputedPayloadHash = await sha256Hex(canonicalize(rest));
-  if (recomputedPayloadHash !== payload.payloadHash) {
-    return { ok: false, reason: "Payload hash mismatch — record altered.", payload };
-  }
-  const recomputedChainHash = await sha256Hex(payload.prevChainHash + payload.payloadHash);
-  if (recomputedChainHash !== payload.chainHash) {
-    return { ok: false, reason: "Chain hash mismatch — record altered.", payload };
-  }
-  const termsHash = await sha256Hex(CONTRACT_TERMS_TEXT);
-  if (termsHash !== payload.termsHash) {
-    return { ok: false, reason: "Terms hash mismatch — contract text differs.", payload };
-  }
-
-  // Verify the Ed25519 signature over the canonical payload bytes.
-  let key: CryptoKey;
-  try {
-    key = await importEd25519PublicKey(publicKeyB64u);
-  } catch {
-    return { ok: false, reason: "This browser does not support Ed25519 verification.", payload };
-  }
-  const valid = await crypto.subtle.verify(
-    { name: "Ed25519" },
-    key,
-    b64uDecode(signatureB64u),
-    b64uDecode(payloadB64u)
-  );
-  return valid
-    ? { ok: true, payload }
-    : { ok: false, reason: "Signature invalid — not sealed by the issuer.", payload };
-}
-
-const usd = (n: number) =>
-  n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-
-/* ============================================================
- * RECEIPT — printable contract + receipt
- * ============================================================ */
-
 export function GlyphBucksReceipt({
-  result,
-  verifyUrl,
+  sale,
+  seal,
   nupsLogoUrl,
   glyphLogoUrl,
 }: {
-  result: SealResult;
-  verifyUrl?: string;
+  sale: SaleInput;
+  seal?: SealResult;
   nupsLogoUrl?: string;
   glyphLogoUrl?: string;
 }) {
-  const [qrDataUrl, setQrDataUrl] = useState<string>("");
-  const p = result.payload;
+  const { faceCents, cardFeeCents, totalCents } = computeTotals(sale);
+  const qrRef = useRef<HTMLDivElement>(null);
+  const serialLo = `GB-${sale.venueId.split("-")[0] || "LH"}-0${sale.serialStart}`;
+  const serialHi = `GB-${sale.venueId.split("-")[0] || "LH"}-0${sale.serialStart + sale.qty - 1}`;
 
+  // client-side QR of the server-issued token (render only; never signs)
   useEffect(() => {
-    QRCode.toDataURL(result.qrText, { margin: 1, width: 320, errorCorrectionLevel: "M" })
-      .then(setQrDataUrl)
-      .catch(() => setQrDataUrl(""));
-  }, [result.qrText]);
+    let cancelled = false;
+    async function draw() {
+      if (!seal?.token || !qrRef.current) return;
+      try {
+        const QR = (await import("qrcode")).default;
+        const url = await QR.toDataURL(seal.token, { errorCorrectionLevel: "L", margin: 1, width: 150 });
+        if (!cancelled && qrRef.current) qrRef.current.innerHTML = `<img src="${url}" width="138" height="138" alt="Signed QR"/>`;
+      } catch {
+        if (qrRef.current) qrRef.current.textContent = "[QR]";
+      }
+    }
+    draw();
+    return () => { cancelled = true; };
+  }, [seal?.token]);
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm print:shadow-none">
-      <div className="flex items-center justify-between gap-3">
-        {nupsLogoUrl ? <img src={nupsLogoUrl} alt="NUPS" className="h-8 w-auto" /> : <span />}
+    <div className="mx-auto w-[800px] max-w-full bg-white text-neutral-900 border-2 border-neutral-900 p-6 text-[12px] leading-snug"
+         style={{ fontVariantNumeric: "tabular-nums" }}>
+      {/* header */}
+      <div className="grid grid-cols-[86px_1fr_250px] gap-4 border-b-[3px] border-neutral-900 pb-2">
+        <div>{nupsLogoUrl && <img src={nupsLogoUrl} alt="NUPS" className="w-[78px]" />}</div>
         <div className="text-center">
-          <h2 className="text-lg font-bold tracking-tight">GlyphBucks Purchase Agreement</h2>
-          <p className="text-xs text-slate-500">Stored-Value Instrument · {p.category}</p>
+          <h1 className="font-serif text-[23px] tracking-wide text-[#152049] leading-none">{sale.operator}</h1>
+          <div className="tracking-[4px] text-[10px] font-bold mt-1">TEMPE, ARIZONA</div>
+          <div className="text-[10.5px] mt-1 text-neutral-500">Issuer of record · AZ stored-value program</div>
+          <div className="inline-flex items-center gap-1 mt-1 text-[10.5px] text-neutral-500">
+            {glyphLogoUrl && <img src={glyphLogoUrl} alt="GlyphLock" className="h-4" />}
+            GlyphBucks™ issued on <b className="text-[#2456d6]">NUPS®</b> by GlyphLock LLC
+          </div>
         </div>
-        {glyphLogoUrl ? <img src={glyphLogoUrl} alt="GlyphLock" className="h-8 w-auto" /> : <span />}
+        <div>
+          <div className="bg-[#6b5416] text-white font-bold text-center py-1.5 text-[11.5px]">
+            GLYPHBUCKS™ STORED-VALUE<br />PURCHASE AGREEMENT &amp; RECEIPT
+          </div>
+          <div className="text-center font-bold my-1 text-[10.5px]">CUSTOMER COPY</div>
+          <table className="w-full text-[11.5px]"><tbody>
+            <Row k="MODE:" v={<span className={`font-bold ${modeColor[sale.mode]}`}>{sale.mode}</span>} right />
+            <Row k="TERMS VER:" v="v2.0" right />
+            <Row k="TERMINAL:" v={sale.terminal} right />
+            <Row k="VENUE ID:" v={sale.venueId} right />
+          </tbody></table>
+        </div>
       </div>
 
-      {p.mode !== "REAL" && (
-        <div className="mt-3 rounded-md bg-amber-100 px-3 py-1 text-center text-xs font-semibold text-amber-800">
-          {p.mode} MODE — not a live transaction
-        </div>
-      )}
+      {/* item + money rail */}
+      <table className="w-full border-collapse mt-3">
+        <thead>
+          <tr className="bg-[#152049] text-white text-left text-[11.5px]">
+            <th className="p-1.5 w-10">QTY</th><th className="p-1.5">ITEM / DESCRIPTION</th>
+            <th className="p-1.5 w-32">CATEGORY</th>
+            <th className="p-1.5 text-right w-24">UNIT PRICE</th>
+            <th className="p-1.5 text-right w-24">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b border-neutral-300">
+            <td className="p-2">{sale.qty}</td>
+            <td className="p-2">GLYPHBUCKS™ STORED-VALUE VOUCHERS — {money(sale.denomCents)} DENOMINATION
+              <div className="italic text-neutral-500 text-[11px] mt-0.5">
+                Closed-loop stored-value notes, security-stamped; serials {serialLo} through {serialHi}, ledger-registered. Not currency; not a bank instrument.
+              </div></td>
+            <td className="p-2">STORED VALUE</td>
+            <td className="p-2 text-right">{money(sale.denomCents)}</td>
+            <td className="p-2 text-right">{money(faceCents)}</td>
+          </tr>
+          <TotalRow label="STORED VALUE ISSUED" value={<b>{money(faceCents)}</b>} pad />
+          <TotalRow label={<>TAX <span className="font-normal text-neutral-500 text-[11px]">($0.00 — stored-value issuance is not a retail sale; A.R.S. § 42-5061; Term 6)</span></>} value="$0.00" />
+          <TotalRow label={<>CARD PROCESSING FEE <span className="font-normal text-neutral-500 text-[11px]">({sale.cardFeeRatePct.toFixed(2)}% of {money(faceCents)})</span></>} value={money(cardFeeCents)} />
+          <tr><td colSpan={5} className="px-2 pb-1 text-right italic text-neutral-500 text-[10.5px]">
+            Credit cards only (Visa, MC, Discover); rounded to nearest cent. Not applied to cash, debit, or prepaid.
+          </td></tr>
+          <tr><td colSpan={4} className="bg-[#152049] text-white py-2.5 px-3.5 text-right font-bold text-[14px]">TOTAL AMOUNT DUE</td>
+              <td className="bg-[#152049] text-white py-2.5 px-3.5 text-right font-bold text-[19px]">{money(totalCents)}</td></tr>
+          <tr><td colSpan={5} className="px-2 pt-1 pb-1.5 text-right italic text-[10.5px]">Total in words: {inWords(totalCents)}</td></tr>
+          <tr><td colSpan={4} className="border border-t-0 border-emerald-700 text-emerald-700 font-bold py-1.5 px-3.5 text-right">
+            PAID — VISA •••• {sale.cardLast4} (CHIP) · AUTH {sale.authCode}</td>
+            <td className="border border-t-0 border-emerald-700 text-emerald-700 font-bold py-1.5 px-3.5 text-right">{money(totalCents)}</td></tr>
+        </tbody>
+      </table>
 
-      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-        <dt className="text-slate-500">Serial</dt>
-        <dd className="text-right font-mono">{p.serial}</dd>
-        <dt className="text-slate-500">Issued</dt>
-        <dd className="text-right">{new Date(p.issuedAt).toLocaleString()}</dd>
-        <dt className="text-slate-500">Venue</dt>
-        <dd className="text-right">{p.venueId}</dd>
-        {p.cardBrand && (
-          <>
-            <dt className="text-slate-500">Card</dt>
-            <dd className="text-right">
-              {p.cardBrand} ····{p.cardLast4}
-            </dd>
-          </>
-        )}
-      </dl>
-
-      <div className="mt-4 rounded-lg bg-slate-50 p-3">
-        <div className="flex items-center justify-between text-sm font-medium">
-          <span>Stored value purchased</span>
-          <span className="text-lg font-bold">{usd(p.amount)}</span>
-        </div>
-        <ul className="mt-2 space-y-0.5 text-xs text-slate-600">
-          {p.denominations.map((d, i) => (
-            <li key={i} className="flex justify-between">
-              <span>
-                {d.count} × {usd(d.face)} bill
-              </span>
-              <span>{usd(d.face * d.count)}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2 text-[10px] leading-tight text-slate-400">
-          GlyphBucks issuance is a liability of the issuer, not revenue. This amount is excluded
-          from total_sales until redeemed.
-        </p>
+      {/* terms */}
+      <div className="border border-neutral-900 p-3 mt-3 text-[10.2px] leading-relaxed">
+        <h3 className="text-[11.5px] font-bold mb-1.5">GLYPHBUCKS™ STORED-VALUE PURCHASE AGREEMENT (v2.0) — STATE OF ARIZONA, COUNTY OF MARICOPA</h3>
+        <ol className="list-decimal ml-4 space-y-1">
+          {TERMS.map((t, i) => <li key={i} dangerouslySetInnerHTML={{ __html: t }} />)}
+        </ol>
       </div>
 
-      {qrDataUrl && (
-        <div className="mt-4 flex flex-col items-center">
-          <img src={qrDataUrl} alt="Sealed record QR" className="h-40 w-40" />
-          <p className="mt-1 text-center text-[10px] text-slate-500">
-            Scan to verify offline
-            {verifyUrl ? (
-              <>
-                {" · "}
-                <span className="font-mono">{verifyUrl}</span>
-              </>
-            ) : null}
-          </p>
-        </div>
-      )}
+      {/* verification block */}
+      <table className="w-full border border-neutral-900 mt-3"><tbody><tr>
+        <td className="p-2.5 align-top">
+          <h3 className="text-[11px] font-bold mb-1">✓ NUPS® VERIFIED TRANSACTION</h3>
+          <table className="text-[10px]"><tbody>
+            <Row k="VERIFY REF:" v={seal?.verifyRef ?? "—"} />
+            <Row k="CHAIN STATUS:" v={<span className="text-emerald-700 font-bold">{seal ? "SEALED · Ed25519 SIGNED" : "UNSEALED (preview)"}</span>} />
+            <Row k="SIGNATURE:" v={<span className="text-emerald-700 font-bold">SELF-VERIFYING (offline)</span>} />
+            <Row k="SEALED AT:" v={seal?.sealedAtISO ?? "—"} />
+            <Row k="SERIAL RANGE:" v={`${serialLo} – ${serialHi}`} />
+          </tbody></table>
+        </td>
+        <td className="p-2.5 w-[150px] text-center align-middle">
+          <div ref={qrRef} className="inline-block" />
+          <div className="text-[8px] text-neutral-500 mt-0.5">signed · verify offline</div>
+        </td>
+        <td className="p-2.5 w-[178px] text-[10.5px] leading-snug align-top">
+          <b>SCAN TO VERIFY</b><br />This QR carries the record and its Ed25519 signature. Verify it offline in the NUPS Verify app against the published public key — no server needed.
+        </td>
+      </tr></tbody></table>
 
-      <div className="mt-4 space-y-2 text-[10px] leading-snug text-slate-600">
-        <h3 className="text-xs font-semibold text-slate-800">Terms</h3>
-        {CONTRACT_TERMS.map((t) => (
-          <p key={t.n}>
-            <span className="font-semibold">
-              {t.n}. {t.title}.
-            </span>{" "}
-            {t.text}
-          </p>
-        ))}
+      <div className="border-t-2 border-neutral-900 mt-3 pt-1.5 text-center text-[9.5px] text-neutral-500 leading-normal">
+        GLYPHBUCKS™ ARE CLOSED-LOOP STORED VALUE · NON-REFUNDABLE EXCEPT AS REQUIRED BY LAW · NO CASH VALUE · NOT CURRENCY · NOT A BANK DEPOSIT · NOT FDIC INSURED · CARDHOLDER DISPUTE RIGHTS UNDER 15 U.S.C. § 1666 ARE NOT WAIVED
+        <div className="font-serif italic text-[11.5px] text-[#152049] mt-1">Thank you for your patronage.</div>
       </div>
-
-      <div className="mt-4 break-all rounded bg-slate-900 p-2 font-mono text-[8px] leading-tight text-emerald-300">
-        <div>chain: {p.chainHash}</div>
-        <div>sig: {result.signatureB64u}</div>
-      </div>
-
-      <p className="mt-3 text-center text-[9px] text-slate-400">
-        Sealed with Ed25519. The signature proves this record was not altered; it does not by itself
-        make the underlying terms enforceable. Have Arizona counsel review before REAL use.
-      </p>
     </div>
   );
 }
 
-/* ============================================================
- * GENERATOR — the sell page
- * ============================================================ */
+const Row = ({ k, v, right }: { k: string; v: React.ReactNode; right?: boolean }) => (
+  <tr><td className="font-bold pr-2 whitespace-nowrap py-[1.5px]">{k}</td>
+      <td className={`py-[1.5px] ${right ? "text-right" : ""}`}>{v}</td></tr>
+);
+const TotalRow = ({ label, value, pad }: { label: React.ReactNode; value: React.ReactNode; pad?: boolean }) => (
+  <tr><td colSpan={4} className={`font-bold text-right px-2 ${pad ? "pt-2.5" : ""} py-1`}>{label}</td>
+      <td className={`text-right px-2 ${pad ? "pt-2.5" : ""} py-1`}>{value}</td></tr>
+);
 
+/* ============================ generator ============================ */
+
+const DEFAULT_SALE: SaleInput = {
+  operator: "LIBERTY HOLDINGS LLC", venueId: "LH-0001", terminal: "CG01-T1", mode: "DEMO",
+  purchaser: "Marcus J. Whitfield", memberNo: "LH-MBR-108347", tier: "PLATINUM ELITE",
+  gbAccountLast4: "1842", gbPrevCents: 14500,
+  denomCents: 1000, qty: 100, serialStart: 184201,
+  cardLast4: "4821", authCode: "552017", cardFeeRatePct: 2.9,
+  staff: "CARLO", managerAuthRef: "MGR-260713-0409",
+};
+
+/**
+ * @param onSeal  async fn that calls YOUR server (Supabase edge fn) to sign.
+ *                Must return SealResult. If omitted, preview renders unsigned.
+ */
 export function GlyphBucksGenerator({
   onSeal,
-  venueId = "DEMO-VENUE",
-  verifyUrl,
   nupsLogoUrl,
   glyphLogoUrl,
-  mode = "DEMO",
+  initial = DEFAULT_SALE,
 }: {
-  onSeal: (sale: SaleInput) => Promise<SealResult>;
-  venueId?: string;
-  verifyUrl?: string;
+  onSeal?: (sale: SaleInput) => Promise<SealResult>;
   nupsLogoUrl?: string;
   glyphLogoUrl?: string;
-  mode?: Mode;
+  initial?: SaleInput;
 }) {
-  const [rows, setRows] = useState<Denomination[]>([{ face: 20, count: 1 }]);
-  const [cardBrand, setCardBrand] = useState("");
-  const [cardLast4, setCardLast4] = useState("");
+  const [sale, setSale] = useState<SaleInput>(initial);
+  const [seal, setSeal] = useState<SealResult | undefined>();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [result, setResult] = useState<SealResult | null>(null);
+  const totals = useMemo(() => computeTotals(sale), [sale]);
+  const set = <K extends keyof SaleInput>(k: K, v: SaleInput[K]) => { setSale(s => ({ ...s, [k]: v })); setSeal(undefined); };
 
-  const total = useMemo(
-    () => rows.reduce((sum, r) => sum + (Number(r.face) || 0) * (Number(r.count) || 0), 0),
-    [rows]
-  );
-
-  const setRow = (i: number, patch: Partial<Denomination>) =>
-    setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
-  const addRow = () => setRows((rs) => [...rs, { face: 20, count: 1 }]);
-  const removeRow = (i: number) => setRows((rs) => rs.filter((_, idx) => idx !== i));
-
-  const handleSeal = useCallback(async () => {
-    setError("");
-    if (total <= 0) {
-      setError("Enter at least one bill with a face value and count.");
-      return;
-    }
+  async function handleSeal() {
+    if (!onSeal) return;
     setBusy(true);
-    try {
-      const sale: SaleInput = {
-        venueId,
-        amount: total,
-        denominations: rows
-          .map((r) => ({ face: Number(r.face) || 0, count: Number(r.count) || 0 }))
-          .filter((r) => r.face > 0 && r.count > 0),
-        cardBrand: cardBrand || undefined,
-        cardLast4: cardLast4 || undefined,
-        mode,
-        category: TRANSACTION_CATEGORY,
-      };
-      const sealed = await onSeal(sale);
-      setResult(sealed);
-    } catch (e: any) {
-      setError(e?.message || "Sealing failed. Check the seal-transaction function and its secrets.");
-    } finally {
-      setBusy(false);
-    }
-  }, [rows, total, cardBrand, cardLast4, venueId, mode, onSeal]);
-
-  if (result) {
-    return (
-      <div className="mx-auto max-w-md space-y-4 py-6">
-        <GlyphBucksReceipt
-          result={result}
-          verifyUrl={verifyUrl}
-          nupsLogoUrl={nupsLogoUrl}
-          glyphLogoUrl={glyphLogoUrl}
-        />
-        <div className="flex gap-2 print:hidden">
-          <button
-            onClick={() => window.print()}
-            className="flex-1 rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-          >
-            Print receipt
-          </button>
-          <button
-            onClick={() => setResult(null)}
-            className="flex-1 rounded-lg border border-slate-300 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            New sale
-          </button>
-        </div>
-      </div>
-    );
+    try { setSeal(await onSeal(sale)); }
+    finally { setBusy(false); }
   }
 
   return (
-    <div className="mx-auto max-w-md space-y-4 py-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900">Sell GlyphBucks</h2>
-        <p className="text-xs text-slate-500">
-          Stored-value instrument · category {TRANSACTION_CATEGORY} · {mode} mode
-        </p>
-
-        <div className="mt-4 space-y-2">
-          {rows.map((r, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <label className="text-xs text-slate-500">$</label>
-              <input
-                type="number"
-                min={1}
-                value={r.face}
-                onChange={(e) => setRow(i, { face: Number(e.target.value) })}
-                className="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm"
-                aria-label="Face value"
-              />
-              <span className="text-xs text-slate-500">×</span>
-              <input
-                type="number"
-                min={1}
-                value={r.count}
-                onChange={(e) => setRow(i, { count: Number(e.target.value) })}
-                className="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm"
-                aria-label="Count"
-              />
-              <span className="ml-auto text-sm font-medium">{usd((r.face || 0) * (r.count || 0))}</span>
-              {rows.length > 1 && (
-                <button
-                  onClick={() => removeRow(i)}
-                  className="rounded-md px-2 py-1 text-xs text-red-600 hover:bg-red-50"
-                  aria-label="Remove row"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            onClick={addRow}
-            className="text-xs font-semibold text-slate-600 hover:text-slate-900"
-          >
-            + Add denomination
-          </button>
+    <div className="flex flex-col lg:flex-row gap-6">
+      <aside className="lg:w-[320px] shrink-0 space-y-4">
+        <div>
+          <h2 className="text-lg font-bold">GlyphBucks Generator</h2>
+          <p className="text-sm text-neutral-500">Preview updates live. Seal calls your server to sign — the private key stays server-side.</p>
         </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <input
-            value={cardBrand}
-            onChange={(e) => setCardBrand(e.target.value)}
-            placeholder="Card brand (opt.)"
-            className="rounded-md border border-slate-300 px-2 py-1 text-sm"
-          />
-          <input
-            value={cardLast4}
-            onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
-            placeholder="Last 4 (opt.)"
-            className="rounded-md border border-slate-300 px-2 py-1 text-sm"
-          />
+        <Field label="Operator (Issuer)"><input className={inp} value={sale.operator} onChange={e => set("operator", e.target.value)} /></Field>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Purchaser"><input className={inp} value={sale.purchaser} onChange={e => set("purchaser", e.target.value)} /></Field>
+          <Field label="Member #"><input className={inp} value={sale.memberNo} onChange={e => set("memberNo", e.target.value)} /></Field>
         </div>
-
-        <div className="mt-4 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-          <span className="text-sm font-medium text-slate-700">Total stored value</span>
-          <span className="text-xl font-bold text-slate-900">{usd(total)}</span>
+        <div className="grid grid-cols-3 gap-2">
+          <Field label="Denom ($)"><input type="number" className={inp} value={sale.denomCents / 100} onChange={e => set("denomCents", Math.round(+e.target.value * 100))} /></Field>
+          <Field label="Qty"><input type="number" className={inp} value={sale.qty} onChange={e => set("qty", +e.target.value)} /></Field>
+          <Field label="Fee %"><input type="number" step="0.01" className={inp} value={sale.cardFeeRatePct} onChange={e => set("cardFeeRatePct", +e.target.value)} /></Field>
         </div>
-
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-
-        <button
-          onClick={handleSeal}
-          disabled={busy}
-          className="mt-4 w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-        >
-          {busy ? "Sealing…" : "Seal & issue receipt"}
+        <div className="grid grid-cols-3 gap-2">
+          <Field label="Mode">
+            <select className={inp} value={sale.mode} onChange={e => set("mode", e.target.value as SaleInput["mode"])}>
+              <option>DEMO</option><option>SANDBOX</option><option>REAL</option>
+            </select>
+          </Field>
+          <Field label="Card ••"><input className={inp} value={sale.cardLast4} onChange={e => set("cardLast4", e.target.value)} /></Field>
+          <Field label="Auth"><input className={inp} value={sale.authCode} onChange={e => set("authCode", e.target.value)} /></Field>
+        </div>
+        <div className="rounded-lg border border-neutral-200 p-3 text-sm">
+          <div className="flex justify-between"><span>Stored value</span><span>{money(totals.faceCents)}</span></div>
+          <div className="flex justify-between"><span>Card fee</span><span>{money(totals.cardFeeCents)}</span></div>
+          <div className="flex justify-between font-bold border-t mt-1 pt-1"><span>Total charge</span><span>{money(totals.totalCents)}</span></div>
+        </div>
+        <button onClick={handleSeal} disabled={!onSeal || busy}
+          className="w-full rounded-lg bg-blue-600 text-white font-bold py-3 disabled:opacity-40">
+          {busy ? "Sealing…" : seal ? "Sealed ✓ — re-seal" : onSeal ? "Seal & sign (server)" : "Preview only (no server)"}
         </button>
+        <p className="text-[11px] text-neutral-400 leading-relaxed">
+          The charge is the GlyphBucks purchase — code it under your real stored-value MCC. Cardholder dispute rights are preserved. Keep in DEMO until the production gate is met.
+        </p>
+      </aside>
+
+      <div className="flex-1 overflow-auto">
+        <GlyphBucksReceipt sale={sale} seal={seal} nupsLogoUrl={nupsLogoUrl} glyphLogoUrl={glyphLogoUrl} />
       </div>
     </div>
   );
 }
 
-/* ============================================================
- * VERIFIER — the /verify page (offline, camera or paste)
- * ============================================================ */
+const inp = "w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <label className="block"><span className="block text-[11px] text-neutral-500 mb-1">{label}</span>{children}</label>
+);
 
-export function GlyphBucksVerifier({ publicKeyB64u }: { publicKeyB64u: string }) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+/* ============================ verifier ============================ */
+
+/**
+ * Offline verifier. Pass the published public key. If `jsqr` is installed and
+ * `enableCamera` is true, it scans; otherwise paste the token.
+ */
+export function GlyphBucksVerifier({ publicKeyB64u, enableCamera = true }: { publicKeyB64u: string; enableCamera?: boolean }) {
+  const [token, setToken] = useState("");
+  const [res, setRes] = useState<Awaited<ReturnType<typeof verifyToken>> | null>(null);
   const [scanning, setScanning] = useState(false);
-  const [pasteText, setPasteText] = useState("");
-  const [outcome, setOutcome] = useState<VerifyOutcome | null>(null);
-  const [camError, setCamError] = useState("");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const rafRef = useRef<number>();
 
-  const stopCamera = useCallback(() => {
+  async function check(t: string) { setRes(await verifyToken(t, publicKeyB64u)); setScanning(false); stopCam(); }
+
+  function stopCam() {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = null;
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-    setScanning(false);
-  }, []);
-
-  const runVerify = useCallback(
-    async (qrText: string) => {
-      const res = await verifySeal(qrText, publicKeyB64u);
-      setOutcome(res);
-      if (res.ok) stopCamera();
-    },
-    [publicKeyB64u, stopCamera]
-  );
-
-  const tick = useCallback(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas || video.readyState !== video.HAVE_ENOUGH_DATA) {
-      rafRef.current = requestAnimationFrame(tick);
-      return;
-    }
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(img.data, img.width, img.height, { inversionAttempts: "attemptBoth" });
-    if (code?.data) {
-      runVerify(code.data);
-      return;
-    }
-    rafRef.current = requestAnimationFrame(tick);
-  }, [runVerify]);
-
-  const startCamera = useCallback(async () => {
-    setCamError("");
-    setOutcome(null);
+    const v = videoRef.current;
+    if (v?.srcObject) (v.srcObject as MediaStream).getTracks().forEach(t => t.stop());
+  }
+  async function startCam() {
+    if (!enableCamera) return;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-      setScanning(true);
-      rafRef.current = requestAnimationFrame(tick);
-    } catch {
-      setCamError("Camera unavailable. Serve over HTTPS and grant permission, or paste the code.");
-    }
-  }, [tick]);
+      const jsQR = (await import("jsqr")).default;
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      const v = videoRef.current!; v.srcObject = stream; await v.play(); setScanning(true);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+      const loop = () => {
+        if (v.readyState === v.HAVE_ENOUGH_DATA) {
+          canvas.width = v.videoWidth; canvas.height = v.videoHeight;
+          ctx.drawImage(v, 0, 0);
+          const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(img.data, img.width, img.height, { inversionAttempts: "dontInvert" });
+          if (code?.data) { check(code.data); return; }
+        }
+        rafRef.current = requestAnimationFrame(loop);
+      };
+      loop();
+    } catch { /* camera unavailable — fall back to paste */ }
+  }
+  useEffect(() => () => stopCam(), []);
 
-  useEffect(() => () => stopCamera(), [stopCamera]);
-
+  const pass = res?.valid;
   return (
-    <div className="mx-auto max-w-md space-y-4 py-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900">Verify GlyphBucks</h2>
-        <p className="text-xs text-slate-500">Offline signature check with the published key.</p>
-
-        <div className="mt-4 overflow-hidden rounded-lg bg-black">
-          <video ref={videoRef} className="aspect-square w-full object-cover" muted playsInline />
-        </div>
-        <canvas ref={canvasRef} className="hidden" />
-
-        <div className="mt-3 flex gap-2">
-          {!scanning ? (
-            <button
-              onClick={startCamera}
-              className="flex-1 rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-            >
-              Start camera
-            </button>
-          ) : (
-            <button
-              onClick={stopCamera}
-              className="flex-1 rounded-lg border border-slate-300 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              Stop
-            </button>
-          )}
-        </div>
-        {camError && <p className="mt-2 text-xs text-amber-600">{camError}</p>}
-
-        <div className="mt-4">
-          <label className="text-xs font-medium text-slate-500">Or paste code text</label>
-          <textarea
-            value={pasteText}
-            onChange={(e) => setPasteText(e.target.value)}
-            rows={3}
-            placeholder="GB1.…"
-            className="mt-1 w-full rounded-md border border-slate-300 p-2 font-mono text-xs"
-          />
-          <button
-            onClick={() => runVerify(pasteText)}
-            className="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-          >
-            Verify pasted code
-          </button>
-        </div>
+    <div className="max-w-md mx-auto p-4 text-neutral-100 bg-[#0f1424] rounded-2xl">
+      <div className="flex items-center gap-2 mb-3">
+        <h2 className="font-extrabold">NUPS Verify</h2>
+        <span className="ml-auto text-[10px] font-bold tracking-wide text-emerald-300 bg-emerald-950 border border-emerald-500 rounded-full px-2 py-0.5">OFFLINE</span>
       </div>
 
-      {outcome && (
-        <div
-          className={`rounded-2xl border p-5 shadow-sm ${
-            outcome.ok ? "border-emerald-300 bg-emerald-50" : "border-red-300 bg-red-50"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <span className={`text-2xl ${outcome.ok ? "text-emerald-600" : "text-red-600"}`}>
-              {outcome.ok ? "✓" : "✕"}
-            </span>
-            <div>
-              <p className={`font-bold ${outcome.ok ? "text-emerald-800" : "text-red-800"}`}>
-                {outcome.ok ? "Authentic — sealed by issuer" : "Not verified"}
-              </p>
-              {outcome.reason && <p className="text-xs text-slate-600">{outcome.reason}</p>}
-            </div>
-          </div>
+      {enableCamera && (
+        <div className="rounded-xl overflow-hidden bg-black aspect-square mb-3 relative">
+          <video ref={videoRef} playsInline muted className="w-full h-full object-cover" />
+          {!scanning && <div className="absolute inset-0 grid place-items-center text-neutral-400 text-sm">Camera preview</div>}
+        </div>
+      )}
+      <div className="flex gap-2 mb-3">
+        {enableCamera && <button onClick={startCam} className="flex-1 rounded-lg bg-blue-600 py-2.5 font-bold">Start camera</button>}
+        <button onClick={() => check(token)} className="flex-1 rounded-lg bg-neutral-700 py-2.5 font-semibold">Verify pasted</button>
+      </div>
+      <textarea value={token} onChange={e => setToken(e.target.value)} placeholder="NUPS1.<payload>.<signature>"
+        className="w-full h-20 bg-[#0f1424] border border-[#33405f] rounded-lg p-2 font-mono text-[11px]" />
 
-          {outcome.payload && (
-            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-              <dt className="text-slate-500">Serial</dt>
-              <dd className="text-right font-mono">{outcome.payload.serial}</dd>
-              <dt className="text-slate-500">Amount</dt>
-              <dd className="text-right font-semibold">{usd(outcome.payload.amount)}</dd>
-              <dt className="text-slate-500">Category</dt>
-              <dd className="text-right">{outcome.payload.category}</dd>
-              <dt className="text-slate-500">Issued</dt>
-              <dd className="text-right">{new Date(outcome.payload.issuedAt).toLocaleString()}</dd>
-              <dt className="text-slate-500">Mode</dt>
-              <dd className="text-right">{outcome.payload.mode}</dd>
+      {res && (
+        <div className={`mt-4 rounded-xl p-4 border ${pass ? "border-emerald-500 bg-emerald-950/40" : "border-red-500 bg-red-950/40"}`}>
+          <div className={`text-2xl font-extrabold ${pass ? "text-emerald-300" : "text-red-300"}`}>{pass ? "✓ AUTHENTIC" : "✗ NOT VALID"}</div>
+          <div className="text-sm text-neutral-300 mt-1">
+            {pass ? "Sealed by NUPS and unaltered." : res.reason}
+          </div>
+          {res.record && (
+            <dl className="mt-3 text-[13px] space-y-1">
+              <Line k="Issuer" v={res.record.iss} />
+              <Line k="Amount" v={money(res.record.amt)} />
+              <Line k="Value issued" v={money(res.record.face)} />
+              <Line k="Serials" v={res.record.sn} />
+              <Line k="Sealed" v={res.record.ts} />
             </dl>
           )}
         </div>
@@ -764,5 +466,47 @@ export function GlyphBucksVerifier({ publicKeyB64u }: { publicKeyB64u: string })
     </div>
   );
 }
+const Line = ({ k, v }: { k: string; v: string }) => (
+  <div className="flex justify-between gap-3"><span className="text-neutral-400">{k}</span><span className="font-semibold text-right">{v}</span></div>
+);
+
+/* ============================ content ============================ */
+
+function inWords(cents: number): string {
+  const d = Math.floor(cents / 100), c = cents % 100;
+  const ones = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+  const tens = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+  const under1000 = (n: number): string => {
+    if (n < 20) return ones[n];
+    if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? "-"+ones[n%10] : "");
+    return ones[Math.floor(n/100)] + " hundred" + (n%100 ? " " + under1000(n%100) : "");
+  };
+  const words = (n: number): string => {
+    if (n === 0) return "zero";
+    let out = "";
+    if (n >= 1000) { out += under1000(Math.floor(n/1000)) + " thousand"; n %= 1000; if (n) out += " "; }
+    if (n) out += under1000(n);
+    return out;
+  };
+  const dollars = words(d).replace(/\b\w/, m => m.toUpperCase());
+  return `${dollars} and ${String(c).padStart(2, "0")}/100 U.S. dollars`;
+}
+
+const TERMS: string[] = [
+  `<b>Nature of the transaction; consideration.</b> Purchaser hereby purchases, and the Issuer hereby issues, GlyphBucks™ closed-loop stored-value vouchers in the face amount stated above. The amount charged is the purchase price of the vouchers. This is a completed sale of the vouchers and is <b>not</b> a purchase of, deposit toward, prepayment for, or guarantee of any good, service, or performance from Issuer or any other person.`,
+  `<b>What the vouchers are, and are not.</b> The vouchers are a closed-loop stored-value medium redeemable only within Issuer's program. This Agreement does not obligate, price, schedule, or guarantee any future redemption. Any later use of a voucher — whether applied by the holder toward Issuer's separately-priced retail goods, or tendered by the holder at the holder's sole discretion to any individual lawfully present — is a <b>separate transaction</b> occurring, if at all, after and apart from this sale. Issuer is not a party to, and receives no consideration from, any tender the holder chooses to make to a third party.`,
+  `<b>Non-refundable; no cash value.</b> The vouchers are non-refundable and non-redeemable for cash, except to the extent required by applicable law. They carry no expiration date and no dormancy, inactivity, or service fee. <span class="text-neutral-500">A.R.S. § 44-7402.</span>`,
+  `<b>Purchaser concerns; dispute process.</b> A purchaser who believes an error occurred may raise it with Issuer's front desk at the point of sale, or in writing to Issuer's records office, within sixty (60) days of the transaction date, referencing the Agreement number. Issuer will respond in writing within ten (10) business days. This internal process is in addition to, and does not limit, Term 11.`,
+  `<b>Funds backing outstanding value.</b> Value represented by outstanding vouchers is recorded as a stored-value liability of Issuer and maintained in a segregated reserve account held for redemption, not commingled with operating funds. Vouchers are obligations of Issuer only; they are <b>not</b> a bank deposit and are <b>not</b> insured by the FDIC or any government agency.`,
+  `<b>Tax treatment.</b> Issuance of stored value is not a retail sale, and no Arizona transaction privilege tax is imposed at issuance. <span class="text-neutral-500">A.R.S. § 42-5061.</span> Applicable TPT, if any, is calculated and remitted by Issuer if and when a voucher is later redeemed with Issuer for taxable goods, as a separate transaction under Term 2.`,
+  `<b>Accounting.</b> Issued vouchers are recorded on the NUPS® ledger as a stored-value liability and are excluded from Issuer's sales revenue unless and until redeemed with Issuer. The serial numbers above are registered to this Agreement.`,
+  `<b>Age and identity.</b> Purchaser is 21 years of age or older; government-issued identification was electronically scanned and verified, and Purchaser's live photograph was matched to the identification presented. Purchaser affirms being the lawful cardholder or authorized user of the card charged.`,
+  `<b>Formation and electronic assent.</b> Purchaser forms this Agreement and manifests assent by the conjunctive acts of (a) affirmative clickwrap acceptance following display of these terms in full, (b) card authorization, (c) biometric verification, (d) photographic capture, and (e) an electronic signature captured at the terminal — each electronically timestamped, hashed, and sealed in the Evidence Record. <span class="text-neutral-500">A.R.S. §§ 44-7001 et seq.; 15 U.S.C. § 7001.</span>`,
+  `<b>Chargeback responsibility.</b> As between Issuer and GlyphLock LLC, Issuer bears sole and exclusive responsibility for any dispute, chargeback, reversal, or associated fee arising from this transaction, and shall indemnify and hold harmless GlyphLock LLC and the NUPS® platform, which act solely as the software and record-keeping provider and are not the merchant, seller, or party to the sale.`,
+  `<b>Dispute record; non-waiver of cardholder rights.</b> The sealed NUPS® Evidence Record is the authoritative record of this transaction and may be produced in any dispute. <b>Nothing in this Agreement waives, limits, or impairs any non-waivable cardholder right, including the right to dispute a charge with the issuing bank under the Fair Credit Billing Act</b> <span class="text-neutral-500">(15 U.S.C. § 1666; Reg. Z, 12 C.F.R. § 1026.12–.13).</span>`,
+  `<b>Delivery of terms.</b> A complete copy of this executed Agreement was delivered to Purchaser at execution: a printed copy at the terminal and an electronic copy with verification link transmitted to the contact of record. Delivery is logged in the Evidence Record.`,
+  `<b>Records; retention; tamper-evidence.</b> Records are generated, sequenced, and cryptographically sealed by NUPS® (GlyphLock LLC, Arizona Entity #23831258) under license to Issuer, using an Ed25519 digital signature and a hash chain to the prior ledger block; any alteration is detectable on verification. Issuer retains the sealed record for not less than seven (7) years and will produce it upon lawful request.`,
+  `<b>Governing law; integration; severability.</b> Governed by Arizona law; exclusive venue Maricopa County, Arizona. This is the entire agreement regarding this sale and supersedes prior understandings; if any provision is held unenforceable, the remainder stands in full force.`,
+];
 
 export default GlyphBucksGenerator;

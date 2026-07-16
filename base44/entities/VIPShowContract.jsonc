@@ -1,0 +1,115 @@
+{
+  "name": "VIPShowContract",
+  "type": "object",
+  "description": "DACO VIP SHOW CONTRACT SYSTEM v2 \u2014 sealed VIP Suite & Performance Contract record. One row per executed contract. Fields exactly as emitted by the generator payload writes[0].data. Immutable evidence: verification and reprints ALWAYS use sealed_json (JSON key order is hash-significant). guest.membership_id extracted to membership_id for indexed membership linkage. Non-REAL modes excluded from settlement.",
+  "properties": {
+    "verify_ref": {
+      "type": "string",
+      "description": "12-char uppercase unique reference, derived from chain_seal. QR resolves to /v/:ref."
+    },
+    "contract_ref": {
+      "type": "string",
+      "description": "VIP-YYMMDD-NNNN"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "e.g. DP-TEMPE-001 \u2014 every query venue-scoped (MDL ID-01 lesson)."
+    },
+    "venue": {
+      "type": "string"
+    },
+    "operator": {
+      "type": "string"
+    },
+    "software": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "Non-REAL excluded from settlement and membership history views."
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "guest": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "name, membership_id, member_tier, id_scan_ref, card_last4, face_match_pct, thumb_match_pct. No raw biometrics, no full PAN."
+    },
+    "membership_id": {
+      "type": "string",
+      "description": "Extracted column from guest.membership_id \u2014 foreign key to the existing customer/membership entity."
+    },
+    "staff": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "hostess, duty_manager, suite"
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "description": "description, qty, amount"
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "card_fee": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "tender": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "cash_sales, card_sales, total_sales. INVARIANT: total_sales === cash_sales + card_sales."
+    },
+    "notes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "glyphbucks_tendered, treatment, statute \u2014 stored-value LIABILITY, never revenue."
+    },
+    "terms_hash": {
+      "type": "string",
+      "description": "SHA-256 hex (64)"
+    },
+    "record_hash": {
+      "type": "string",
+      "description": "SHA-256 hex (64)"
+    },
+    "prev_seal": {
+      "type": "string",
+      "description": "SHA-256 hex (64)"
+    },
+    "chain_seal": {
+      "type": "string",
+      "description": "SHA-256 hex (64)"
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "status (ANCHOR_PENDING_SERVER \u2192 ANCHOR_SUBMITTED \u2192 BITCOIN_ATTESTED), protocol, calendar, proof_b64 (stored unmodified \u2014 cryptographic evidence), submitted_at."
+    },
+    "sealed_json": {
+      "type": "string",
+      "description": "Byte-exact JSON of the record as received at ingest (pre-anchor-completion). Seal verification recomputes from THIS string \u2014 JSON.stringify is insertion-ordered and key order is hash-significant. Reprints render from this stored sealed record; hashes are never regenerated."
+    }
+  },
+  "required": [
+    "verify_ref",
+    "contract_ref",
+    "venue_id",
+    "mode",
+    "executed_at"
+  ]
+}
