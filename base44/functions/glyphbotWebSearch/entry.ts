@@ -66,30 +66,68 @@ async function runProviderChain(base44, query, num) {
   return { results: results || [], provider };
 }
 
+// Reliability helper — every keyless source fetch goes through this so a
+// single slow/hung endpoint can't stall the whole crawl. Adds a per-source
+// timeout (AbortController) and a consistent User-Agent (several government
+// APIs reject requests that omit one). Returns parsed JSON or null on any
+// failure/timeout — never throws.
+async function pubFetch(url, { timeout = 6000, ...opts } = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const r = await fetch(url, {
+      ...opts,
+      signal: ctrl.signal,
+      headers: {
+        'User-Agent': 'GlyphLock-Audit/1.0 (public-records crawler; glyphlock@gmail.com)',
+        'Accept': 'application/json',
+        ...(opts.headers || {}),
+      },
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) {
+    console.error(`pubFetch failed for ${url.slice(0, 80)}:`, e?.message || e);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // KEYLESS public-source engines — free public APIs, no credentials needed.
-// Run in parallel on the base query for deep intel gathering.
+// Run in parallel on the base query for entity intel gathering.
 async function runPublicSources(query) {
   const out = [];
   const providers = new Set();
   const tasks = [
-    // Wikipedia search
+    // Wikipedia search — index of matching articles
     (async () => {
-      const r = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=8&format=json&origin=*`);
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=8&format=json&origin=*`);
       (data?.query?.search || []).forEach((x) => out.push({
         title: `Wikipedia: ${x.title}`,
         snippet: (x.snippet || '').replace(/<[^>]+>/g, ''),
         url: `https://en.wikipedia.org/wiki/${encodeURIComponent(x.title.replace(/ /g, '_'))}`,
         source: 'wikipedia',
-      })) && providers.add('wikipedia');
+      }));
       if (data?.query?.search?.length) providers.add('wikipedia');
+    })(),
+    // Wikipedia REST summary — clean prose extract for the top entity match,
+    // giving a reliable, readable public-record summary of the subject.
+    (async () => {
+      const data = await pubFetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query.replace(/ /g, '_'))}?redirect=true`);
+      if (data?.extract) {
+        out.push({
+          title: `Wikipedia Summary: ${data.title || query}`,
+          snippet: `${data.description ? data.description + ' — ' : ''}${data.extract}`,
+          url: data?.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(query.replace(/ /g, '_'))}`,
+          source: 'wikipedia-summary',
+        });
+        providers.add('wikipedia-summary');
+      }
     })(),
     // GDELT — global news coverage
     (async () => {
-      const r = await fetch(`https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(`"${query}"`)}&mode=artlist&maxrecords=15&format=json`);
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(`"${query}"`)}&mode=artlist&maxrecords=15&format=json`);
       (data?.articles || []).forEach((x) => out.push({
         title: `News: ${x.title}`,
         snippet: `${x.sourcecountry || ''} · ${x.domain || ''} · ${x.seendate || ''}`,
@@ -100,11 +138,7 @@ async function runPublicSources(query) {
     })(),
     // CourtListener — US court records / legal opinions
     (async () => {
-      const r = await fetch(`https://www.courtlistener.com/api/rest/v4/search/?q=${encodeURIComponent(query)}&type=o&order_by=score%20desc`, {
-        headers: { 'User-Agent': 'GlyphLock-Audit/1.0' },
-      });
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://www.courtlistener.com/api/rest/v4/search/?q=${encodeURIComponent(query)}&type=o&order_by=score%20desc`);
       (data?.results || []).slice(0, 10).forEach((x) => out.push({
         title: `Court Record: ${x.caseName || x.caseNameFull || 'Case'} (${x.court || ''})`,
         snippet: `Filed: ${x.dateFiled || 'n/a'} · Docket: ${x.docketNumber || 'n/a'}`,
@@ -115,11 +149,7 @@ async function runPublicSources(query) {
     })(),
     // SEC EDGAR full-text search — regulatory filings
     (async () => {
-      const r = await fetch(`https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${query}"`)}`, {
-        headers: { 'User-Agent': 'GlyphLock Audit glyphlock@gmail.com' },
-      });
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${query}"`)}`);
       (data?.hits?.hits || []).slice(0, 10).forEach((h) => {
         const s = h._source || {};
         out.push({
@@ -133,9 +163,7 @@ async function runPublicSources(query) {
     })(),
     // Hacker News (Algolia) — tech/startup mentions & discussions
     (async () => {
-      const r = await fetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&hitsPerPage=8`);
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&hitsPerPage=8`);
       (data?.hits || []).forEach((x) => out.push({
         title: `HN: ${x.title || x.story_title || 'Discussion'}`,
         snippet: `${x.points || 0} points · ${x.num_comments || 0} comments · ${x.created_at?.slice(0, 10) || ''}`,
@@ -146,9 +174,7 @@ async function runPublicSources(query) {
     })(),
     // Wayback Machine — archived-site presence check
     (async () => {
-      const r = await fetch(`https://archive.org/wayback/available?url=${encodeURIComponent(query)}`);
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://archive.org/wayback/available?url=${encodeURIComponent(query)}`);
       const snap = data?.archived_snapshots?.closest;
       if (snap?.available) {
         out.push({
@@ -162,9 +188,7 @@ async function runPublicSources(query) {
     })(),
     // Wikidata — structured entity records (people, orgs, places)
     (async () => {
-      const r = await fetch(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&format=json&limit=8&origin=*`);
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&format=json&limit=8&origin=*`);
       (data?.search || []).forEach((x) => out.push({
         title: `Wikidata: ${x.label || x.id}`,
         snippet: x.description || 'Structured entity record',
@@ -173,15 +197,25 @@ async function runPublicSources(query) {
       }));
       if (data?.search?.length) providers.add('wikidata');
     })(),
+    // OpenStreetMap Nominatim — public address/location record for an entity
+    // (business, org, or place). Keyless; UA header (added by pubFetch) required.
+    (async () => {
+      const data = await pubFetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`);
+      (Array.isArray(data) ? data : []).forEach((x) => out.push({
+        title: `Location: ${x.display_name?.split(',')[0] || query}`,
+        snippet: `${x.type || ''}${x.class ? ` (${x.class})` : ''} · ${x.display_name || ''}`,
+        url: `https://www.openstreetmap.org/${x.osm_type || 'node'}/${x.osm_id || ''}`,
+        source: 'openstreetmap',
+      }));
+      if (Array.isArray(data) && data.length) providers.add('openstreetmap');
+    })(),
     // USASpending — US federal award/contract/grant recipient public records
     (async () => {
-      const r = await fetch(`https://api.usaspending.gov/api/v2/autocomplete/recipient/`, {
+      const data = await pubFetch(`https://api.usaspending.gov/api/v2/autocomplete/recipient/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ search_text: query, limit: 8 }),
       });
-      if (!r.ok) return;
-      const data = await r.json();
       (data?.results || []).forEach((x) => out.push({
         title: `Federal Award Recipient: ${x.recipient_name || ''}`,
         snippet: `USASpending.gov federal contracts/grants record${x.uei ? ` · UEI ${x.uei}` : ''}`,
@@ -192,9 +226,7 @@ async function runPublicSources(query) {
     })(),
     // Federal Register — US government/regulatory public records
     (async () => {
-      const r = await fetch(`https://www.federalregister.gov/api/v1/documents.json?per_page=10&order=relevance&conditions[term]=${encodeURIComponent(query)}`);
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://www.federalregister.gov/api/v1/documents.json?per_page=10&order=relevance&conditions[term]=${encodeURIComponent(query)}`);
       (data?.results || []).forEach((x) => out.push({
         title: `Federal Register: ${x.title || 'Document'}`,
         snippet: `${x.type || ''} · ${x.agencies?.map((a) => a.name).join(', ') || ''} · ${x.publication_date || ''}`,
@@ -205,9 +237,7 @@ async function runPublicSources(query) {
     })(),
     // OpenFEC — US campaign finance public records (keyless via DEMO_KEY)
     (async () => {
-      const r = await fetch(`https://api.open.fec.gov/v1/candidates/search/?q=${encodeURIComponent(query)}&per_page=8&api_key=DEMO_KEY`);
-      if (!r.ok) return;
-      const data = await r.json();
+      const data = await pubFetch(`https://api.open.fec.gov/v1/candidates/search/?q=${encodeURIComponent(query)}&per_page=8&api_key=DEMO_KEY`);
       (data?.results || []).forEach((x) => out.push({
         title: `FEC Candidate: ${x.name || ''}`,
         snippet: `${x.party_full || x.party || ''} · ${x.office_full || ''} · ${x.state || ''}`,
