@@ -37,7 +37,7 @@ class GlyphBotClient {
             { deep }
           );
           if (searchResult.success && searchResult.summary) {
-            realTimeContext = `\n\n[REAL-TIME WEB CONTEXT — ${searchResult.results?.length || 0} sources, ${searchResult.subQueries?.length || 1} queries]\n${searchResult.summary}\n[END CONTEXT]\n`;
+            realTimeContext = `\n\n[REAL-TIME WEB CONTEXT — ${searchResult.results?.length || 0} sources, ${searchResult.subQueries?.length || 1} queries, incl. site-specific dorks]\nThis live web intelligence is AUTHORITATIVE — prioritize it over internal/model knowledge. Cite these URLs.\n${searchResult.summary}\n[END CONTEXT]\n`;
           }
         } catch (e) {
           console.warn('Real-time search failed:', e);

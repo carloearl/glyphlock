@@ -76,7 +76,6 @@ export default function ContractsHub() {
 
   const [activeTab, setActiveTab] = useState(initial);
   const [bigSpenderView, setBigSpenderView] = useState("letter");
-  const [sealedView, setSealedView] = useState("generate");
 
   // Sync with sidebar deep-links
   useEffect(() => {
@@ -258,33 +257,25 @@ export default function ContractsHub() {
                 </Badge>
               </div>
 
-              <div className="flex gap-2">
-                {[
-                  ["generate", "Generate Contract"],
-                  ["search", "Search · Membership · Reprint"],
-                  ["verify", "QR Verify"],
-                ].map(([key, label]) => (
-                  <button
-                    key={key}
-                    onClick={() => setSealedView(key)}
-                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold min-h-[44px] transition-all ${
-                      sealedView === key
-                        ? "bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/40"
-                        : "bg-white/[0.03] text-gray-400 border-2 border-transparent hover:border-emerald-500/20"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
+              {/* Unified workspace — generator, QR verify, and membership search
+                  all live on ONE screen. No sub-view switching. */}
+              <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+                <div className="xl:col-span-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                  <h3 className="text-sm font-bold text-emerald-300 mb-3">Generate Contract</h3>
+                  <VIPShowGenerator />
+                </div>
+                <div className="xl:col-span-2 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                  <h3 className="text-sm font-bold text-emerald-300 mb-3">QR Verify</h3>
+                  <VIPShowVerifyPanel />
+                </div>
               </div>
 
-              {sealedView === "generate" && <VIPShowGenerator />}
-              {sealedView === "search" && (
-                <div className="-m-4 sm:-m-6 mt-0 overflow-hidden rounded-b-xl">
-                  <VIPShowContracts />
+              <div className="rounded-xl border border-white/10 overflow-hidden">
+                <div className="px-4 pt-4">
+                  <h3 className="text-sm font-bold text-emerald-300">Search · Membership · Reprint</h3>
                 </div>
-              )}
-              {sealedView === "verify" && <VIPShowVerifyPanel />}
+                <VIPShowContracts />
+              </div>
             </CardContent>
           </Card>
         )}

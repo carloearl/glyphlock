@@ -7,7 +7,7 @@ import {
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
   TrendingUp, BarChart3, Users, Package, Heart, DollarSign, Music,
   Star, Sparkles, KeyRound, ClipboardList, Megaphone,
-  Mic2, Archive, BookOpen,
+  Mic2, Archive, BookOpen, Stamp,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -56,7 +56,9 @@ const NAV_SECTIONS = [
   {
     label: "Floor & Staff",
     items: [
-      { id: "viprooms",    label: "VIP Rooms",       icon: Crown,     to: "/NUPSOwner?tab=vip" },
+      // VIP Rooms merged with the Contracts VIP surface — the live room board
+      // lives at /Contracts?tab=vip; the legacy NUPSOwner?tab=vip duplicate is retired.
+      { id: "viprooms",    label: "VIP Rooms",       icon: Crown,     to: "/Contracts?tab=vip" },
       { id: "glyphbucks",  label: "GlyphBucks Hub",  icon: Coins,     to: "/GlyphBucksHub" },
       { id: "staff",       label: "Staff",           icon: Users,     to: "/NUPSOwner?tab=staff" },
       { id: "dj",          label: "DJ Console",      icon: Music,     to: "/NUPSOwner?tab=dj" },
@@ -88,12 +90,14 @@ const NAV_SECTIONS = [
       {
         id: "contracts",  label: "Contracts",   icon: FileText,   to: "/Contracts",
         children: [
-          { id: "c-vip",    label: "VIP Shows",    icon: Crown,           to: "/Contracts?tab=vip" },
-          { id: "c-glyph",  label: "GlyphBucks",   icon: Coins,           to: "/Contracts?tab=glyphbucks" },
-          { id: "c-big",    label: "Big Spender",  icon: ShieldAlert,     to: "/Contracts?tab=big_spender" },
-          { id: "c-ent",    label: "Entertainer",  icon: ClipboardCheck,  to: "/Contracts?tab=entertainer" },
-          { id: "c-venue",  label: "Venue Terms",  icon: Building2,       to: "/Contracts?tab=venue" },
-          { id: "c-lookup", label: "Lookup",       icon: SearchIcon,      to: "/Contracts?tab=lookup" },
+          // Active contract surfaces only — legacy Venue Terms + Lookup
+          // merged into the single Archive entry (sidebar cleanup 2026-07-16).
+          { id: "c-sealed", label: "Sealed VIP Shows", icon: Stamp,          to: "/Contracts?tab=sealed" },
+          { id: "c-vip",    label: "VIP Rooms",        icon: Crown,          to: "/Contracts?tab=vip" },
+          { id: "c-glyph",  label: "GlyphBucks",       icon: Coins,          to: "/Contracts?tab=glyphbucks" },
+          { id: "c-big",    label: "Big Spender",      icon: ShieldAlert,    to: "/Contracts?tab=big_spender" },
+          { id: "c-ent",    label: "Entertainer",      icon: ClipboardCheck, to: "/Contracts?tab=entertainer" },
+          { id: "c-archive",label: "Archive",          icon: Archive,        to: "/Contracts?tab=archive" },
         ],
       },
     ],

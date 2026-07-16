@@ -102,6 +102,20 @@ Deno.serve(async (req) => {
       } catch (e) {
         console.error('Query expansion failed, using base query only:', e);
       }
+
+      // DETERMINISTIC site-specific dorks — always run these regardless of
+      // LLM expansion, so deep intel is never limited to internal data or a
+      // flaky expansion pass. Canvas the highest-signal public sources.
+      const SITE_DORKS = [
+        'linkedin.com', 'bbb.org', 'yelp.com', 'trustpilot.com', 'glassdoor.com',
+        'reddit.com', 'news.google.com', 'courtlistener.com', 'sec.gov',
+        'facebook.com', 'twitter.com', 'web.archive.org',
+      ];
+      const dorkQueries = SITE_DORKS.map((site) => `site:${site} "${query}"`);
+      const seenQ = new Set(subQueries.map((q) => q.toLowerCase()));
+      for (const dq of dorkQueries) {
+        if (!seenQ.has(dq.toLowerCase())) { seenQ.add(dq.toLowerCase()); subQueries.push(dq); }
+      }
     }
 
     // Run every sub-query across the provider chain and aggregate.
