@@ -63,7 +63,10 @@ export default function GlyphBucksVerify() {
         <div className="flex items-center gap-3 mb-4 print:hidden flex-wrap">
           <h1 className="text-xl font-extrabold tracking-tight text-glow-blue">NUPS® GlyphBucks Verify</h1>
           <span className="text-[10px] font-bold tracking-wide text-amber-300 bg-amber-950 border border-amber-500 rounded-full px-2 py-0.5">READ-ONLY</span>
-          <div className="ml-auto"><GlyphBucksScanVerify /></div>
+          <div className="ml-auto flex items-center gap-2">
+            <a href="/offlineverify" className="text-[11px] font-bold text-emerald-300 border border-emerald-500/50 bg-emerald-950/40 rounded-full px-3 py-1.5 hover:bg-emerald-900/40">Offline mode</a>
+            <GlyphBucksScanVerify />
+          </div>
         </div>
 
         {loading && <div className="rounded-2xl border border-[#33405f] p-6 text-center text-neutral-400">Verifying sealed record {String(ref || "").toUpperCase()}…</div>}

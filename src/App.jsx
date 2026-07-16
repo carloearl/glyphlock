@@ -73,6 +73,7 @@ import RegistryAdmin from './pages/RegistryAdmin';
 import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
 import NUPSAdminPortal from './pages/NUPSAdminPortal';
 import VIPShowVerify from './pages/VIPShowVerify';
+import OfflineVerify from './pages/OfflineVerify';
 import VerifyDispatch from './pages/VerifyDispatch';
 import VIPShowContracts from './pages/VIPShowContracts';
 import KioskShell from './components/nups/KioskShell';
@@ -105,7 +106,7 @@ const AuthenticatedApp = () => {
 
   const currentPath = location.pathname;
   const currentPathLower = currentPath.toLowerCase();
-  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/'];
+  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
@@ -135,7 +136,7 @@ const AuthenticatedApp = () => {
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
-    '/v/', '/vipshowcontracts',
+    '/v/', '/vipshowcontracts', '/offlineverify',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
@@ -261,6 +262,8 @@ const AuthenticatedApp = () => {
         {/* DACO VIP SHOW CONTRACT SYSTEM v2 */}
         {/* VRF-… refs = GlyphBucks stored-value seals; others = VIP Show contracts */}
         <Route path="/v/:ref" element={<VerifyDispatch />} />
+        <Route path="/OfflineVerify" element={<OfflineVerify />} />
+        <Route path="/offlineverify" element={<OfflineVerify />} />
         <Route path="/VIPShowContracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
         <Route path="/vipshowcontracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
