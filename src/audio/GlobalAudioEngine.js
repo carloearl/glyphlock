@@ -3,9 +3,12 @@
 // State machine: IDLE → FETCHING → PLAYING → IDLE  (any speak() interrupts first)
 // R1: interrupt-before-play | R2: no speechSynthesis | R3: one output element | R4: generation token
 
+import { base44 } from '@/api/base44Client';
 import { resolvePersonaVoice } from './personaVoiceRegistry';
 
-const TTS_ENDPOINT = '/.netlify/functions/textToSpeechOpenAI';
+// DACO HOTFIX 005-H1 (MDL-V06): transport reverted to the proven pre-005 path —
+// base44.functions.invoke('tts') returning base64 audio. Streaming (§3.1) is
+// SUSPENDED, not cancelled. Do not re-add under this order.
 
 function cleanTextForSpeech(text) {
   return String(text)
@@ -132,27 +135,29 @@ class GlobalAudioEngine {
 
     this.state = 'FETCHING';
     this._lastError = null;
-    this._abort = new AbortController();
     this._emit();
 
     const t0 = performance.now();
     console.log('[GlobalAudioEngine] speak start', { gen, voiceProfile: cfg.voiceProfile, speed: cfg.speed });
 
     try {
-      const response = await fetch(TTS_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        signal: this._abort.signal,
-        body: JSON.stringify({
-          text: cleanText.slice(0, 4096),
-          voiceProfile: cfg.voiceProfile,
-          speed: cfg.speed,
-        }),
+      // 005-H1: proven transport — Base44 SDK invoke, base64 audio payload
+      const response = await base44.functions.invoke('tts', {
+        text: cleanText.slice(0, 4096),
+        voice: cfg.voiceProfile,
+        speed: cfg.speed,
       });
 
       if (gen !== this._generation) return false;      // stale (R4)
-      if (!response.ok) throw new Error(`TTS HTTP ${response.status}`);
+      if (response.status !== 200 || !response.data?.audio_base64) {
+        throw new Error(response.data?.error || `TTS HTTP ${response.status}`);
+      }
+
+      // Decode base64 → Blob (audio/mpeg)
+      const binaryStr = atob(response.data.audio_base64);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+      if (gen !== this._generation) return false;      // stale (R4)
 
       const audio = this._getAudio();
       audio.volume = cfg.volume;
@@ -176,9 +181,9 @@ class GlobalAudioEngine {
         this._emit();
       };
 
-      const streamed = await this._attachStreaming(response, gen, audio);
-      if (gen !== this._generation) return false;
-      if (!streamed) return false;
+      const blob = new Blob([bytes], { type: 'audio/mpeg' });
+      this._objectUrl = URL.createObjectURL(blob);
+      audio.src = this._objectUrl;
 
       await audio.play();
       if (gen !== this._generation) { this._interrupt(); return false; }
@@ -194,56 +199,6 @@ class GlobalAudioEngine {
     }
   }
 
-  // §3.1 — streaming playback: MediaSource when supported, blob fallback.
-  async _attachStreaming(response, gen, audio) {
-    const canStream =
-      typeof window !== 'undefined' &&
-      window.MediaSource &&
-      MediaSource.isTypeSupported('audio/mpeg') &&
-      response.body;
-
-    if (canStream) {
-      const ms = new MediaSource();
-      this._objectUrl = URL.createObjectURL(ms);
-      audio.src = this._objectUrl;
-
-      ms.addEventListener('sourceopen', () => {
-        let sb;
-        try { sb = ms.addSourceBuffer('audio/mpeg'); }
-        catch { try { ms.endOfStream('decode'); } catch { /* noop */ } return; }
-
-        const reader = response.body.getReader();
-        const pump = async () => {
-          try {
-            for (;;) {
-              const { done, value } = await reader.read();
-              if (gen !== this._generation) { try { reader.cancel(); } catch { /* noop */ } return; }
-              if (done) {
-                if (ms.readyState === 'open') { try { ms.endOfStream(); } catch { /* noop */ } }
-                return;
-              }
-              if (sb.updating) {
-                await new Promise((res) => sb.addEventListener('updateend', res, { once: true }));
-              }
-              if (gen !== this._generation || ms.readyState !== 'open') return;
-              sb.appendBuffer(value);
-            }
-          } catch { /* stream torn down mid-pump — interrupted */ }
-        };
-        pump();
-      }, { once: true });
-
-      return true;
-    }
-
-    // Fallback: buffer fully, then play (older Safari)
-    const buf = await response.arrayBuffer();
-    if (gen !== this._generation) return false;
-    const blob = new Blob([buf], { type: 'audio/mpeg' });
-    this._objectUrl = URL.createObjectURL(blob);
-    audio.src = this._objectUrl;
-    return true;
-  }
 }
 
 export { GlobalAudioEngine };
