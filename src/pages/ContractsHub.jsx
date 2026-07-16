@@ -42,20 +42,20 @@ const TAB_ALIASES = {
   glyphbucks: "glyphbucks",
   vip: "vip",
   entertainer: "entertainer",
-  venue: "venue",
-  lookup: "lookup",
+  venue: "archive",
+  lookup: "archive",
   sealed: "sealed",
   vipshow: "sealed",
+  archive: "archive",
 };
 
 const TABS = [
+  { key: "sealed", label: "VIP Show Contracts", Icon: Stamp },
+  { key: "vip", label: "VIP Rooms", Icon: Crown },
   { key: "glyphbucks", label: "GlyphBucks", Icon: Coins },
-  { key: "vip", label: "VIP Shows", Icon: Crown },
-  { key: "sealed", label: "Sealed VIP Records", Icon: Stamp },
   { key: "big_spender", label: "Big Spender", Icon: ShieldAlert },
   { key: "entertainer", label: "Entertainer", Icon: ClipboardCheck },
-  { key: "venue", label: "Venue Terms", Icon: Building2 },
-  { key: "lookup", label: "Lookup", Icon: Search },
+  { key: "archive", label: "Archive", Icon: Building2 },
 ];
 
 const TAB_TITLES = {
@@ -63,15 +63,14 @@ const TAB_TITLES = {
   vip: "VIP Shows · Rooms · GlyphBucks · Contracts",
   big_spender: "Contracts · Big Spender Protocol",
   entertainer: "Contracts · Entertainer",
-  venue: "Contracts · Venue Terms",
-  lookup: "Contracts · Lookup",
-  sealed: "Contracts · Sealed VIP Show Records",
+  archive: "Contracts · Archive",
+  sealed: "Contracts · VIP Show Contracts (Sealed)",
 };
 
 export default function ContractsHub() {
   const location = useLocation();
   const queryTab = new URLSearchParams(location.search).get("tab");
-  const initial = queryTab && TAB_ALIASES[queryTab.toLowerCase()] ? TAB_ALIASES[queryTab.toLowerCase()] : "glyphbucks";
+  const initial = queryTab && TAB_ALIASES[queryTab.toLowerCase()] ? TAB_ALIASES[queryTab.toLowerCase()] : "sealed";
 
   const [activeTab, setActiveTab] = useState(initial);
   const [bigSpenderView, setBigSpenderView] = useState("letter");
@@ -132,18 +131,6 @@ export default function ContractsHub() {
                   <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-xs">Live</Badge>
                 </div>
                 <VIPRoomBoard />
-              </CardContent>
-            </Card>
-
-            {/* GlyphBucks section — sits here under VIP Shows, not separate */}
-            <Card className="bg-white/[0.02] border-pink-500/20">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Coins className="w-5 h-5 text-pink-400" />
-                  <h2 className="text-lg font-bold">GlyphBucks Purchase</h2>
-                  <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/40 text-xs">Club Currency</Badge>
-                </div>
-                <GlyphBucksContract />
               </CardContent>
             </Card>
 
@@ -217,24 +204,44 @@ export default function ContractsHub() {
           </Card>
         )}
 
-        {activeTab === "venue" && (
-          <Card className="bg-white/[0.02] border-cyan-500/20">
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-cyan-400" />
-                <h2 className="text-lg font-bold">Venue General Terms</h2>
-                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-xs">Reference</Badge>
-              </div>
-              <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-4 text-sm text-gray-300 space-y-2">
-                <p>
-                  Venue general terms are embedded in every signed contract (GlyphBucks, VIP, Entertainer).
-                  Master text is maintained per-venue in the{" "}
-                  <span className="text-cyan-300 font-semibold">Venue Admin Settings → Contract Terms</span>{" "}
-                  panel and version-stamped on every save.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        {activeTab === "archive" && (
+          <div className="space-y-6">
+            <div className="bg-white/[0.03] border border-white/10 rounded-lg p-4 text-sm text-gray-400">
+              <span className="font-semibold text-gray-300">Archive</span> — legacy and reference contract
+              surfaces. Superseded by the sealed VIP Show Contract system for live operations.
+            </div>
+
+            {/* Legacy contract lookup — superseded by sealed record search */}
+            <Card className="bg-white/[0.02] border-emerald-500/20">
+              <CardContent className="p-0">
+                <div className="px-6 pt-6 flex items-center gap-2">
+                  <Search className="w-5 h-5 text-emerald-400" />
+                  <h2 className="text-lg font-bold">Legacy Contract Lookup</h2>
+                  <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-xs">Archived</Badge>
+                </div>
+                <ContractLookup />
+              </CardContent>
+            </Card>
+
+            {/* Venue general terms — reference only */}
+            <Card className="bg-white/[0.02] border-cyan-500/20">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-cyan-400" />
+                  <h2 className="text-lg font-bold">Venue General Terms</h2>
+                  <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-xs">Reference</Badge>
+                </div>
+                <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-4 text-sm text-gray-300 space-y-2">
+                  <p>
+                    Venue general terms are embedded in every signed contract (GlyphBucks, VIP, Entertainer).
+                    Master text is maintained per-venue in the{" "}
+                    <span className="text-cyan-300 font-semibold">Venue Admin Settings → Contract Terms</span>{" "}
+                    panel and version-stamped on every save.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {activeTab === "sealed" && (
@@ -245,13 +252,6 @@ export default function ContractsHub() {
           </Card>
         )}
 
-        {activeTab === "lookup" && (
-          <Card className="bg-white/[0.02] border-emerald-500/20">
-            <CardContent className="p-0">
-              <ContractLookup />
-            </CardContent>
-          </Card>
-        )}
 
         <div className="text-center text-xs text-gray-600 pt-6 border-t border-white/5">
           {GLYPHLOCK_DISCLAIMER}
