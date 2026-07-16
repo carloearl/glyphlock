@@ -26,12 +26,21 @@ class GlyphBotClient {
     // Auditor personas ALWAYS browse the web — audits are useless without live
     // public data, so web access is implied even when the Live toggle is off.
     const auditPersona = personaId === 'AUDITOR' || personaId === 'AUDIT';
-    const wantsWeb = !!finalOptions.realTime || !!finalOptions.auditMode || auditPersona;
+
+    // The heavy, multi-source pre-fetch (keyless scrapers + deep synthesis) is
+    // expensive, so it stays gated to the Live toggle / audit mode.
+    const wantsPrefetch = !!finalOptions.realTime || !!finalOptions.auditMode || auditPersona;
+
+    // But EVERY main persona gets live internet grounding by default, so an
+    // ordinary question ("who is X", "what happened with Y") returns real web
+    // answers like any other chatbot — no toggle required. Jr stays on the fast
+    // tier for site help and doesn't need general web access.
+    const wantsWeb = wantsPrefetch || personaId !== 'glyphbot_jr';
 
     // Real-time web context. Audits run DEEP, uncapped, multi-source intel
     // gathering (site-turn searches across every provider + AI synthesis).
     let realTimeContext = '';
-    if (wantsWeb) {
+    if (wantsPrefetch) {
       const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
       if (lastUserMsg) {
         try {
