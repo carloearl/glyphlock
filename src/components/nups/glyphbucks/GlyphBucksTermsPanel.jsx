@@ -45,39 +45,39 @@ export default function GlyphBucksTermsPanel({ assent, onAssent }) {
       onChange={(e) => setInitials((p) => ({ ...p, [k]: e.target.value.replace(/[^a-zA-Z.]/g, "").slice(0, 5) }))}
       placeholder="INITIAL"
       disabled={!!assent}
-      className="inline-block w-20 ml-2 rounded border border-pink-500/60 bg-[#101528] px-2 py-1 text-center text-xs font-bold tracking-widest uppercase text-pink-200 placeholder:text-neutral-600"
+      className="inline-block w-20 ml-2 rounded-lg border border-[#e8c86a]/60 bg-[#e8c86a]/10 px-2 py-1 text-center text-xs font-bold tracking-widest uppercase text-[#e8c86a] placeholder:text-white/30"
     />
   );
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-pink-300">Terms — GlyphBucks Purchase Agreement {GB_TERMS_VERSION}</h3>
-        <span className="text-[10px] text-neutral-400 font-mono">read {depth}%</span>
+        <h4 className="text-xs font-bold text-blue-200/80 uppercase tracking-wider">Purchase Agreement {GB_TERMS_VERSION}</h4>
+        <span className="text-[10px] text-blue-300/60 font-mono">read {depth}%</span>
       </div>
       <div ref={boxRef} onScroll={onScroll}
-        className="h-48 overflow-y-auto rounded-lg bg-[#171e33] border border-[#33405f] p-3 text-xs text-neutral-300 space-y-2">
+        className="h-48 overflow-y-auto rounded-xl bg-white/[0.04] backdrop-blur border border-white/10 p-3 text-xs text-blue-100/80 space-y-2">
         {GB_TERMS.map((t, i) => {
           const needsInitial = t.includes("[PURCHASER INITIALS]");
           const text = t.replace(" [PURCHASER INITIALS]", "");
           return (
             <p key={i}>
-              <span className="font-bold text-neutral-100">{i + 1}.</span> {text}
+              <span className="font-bold text-white">{i + 1}.</span> {text}
               {needsInitial && <InitialInput k={i === 0 ? "term1" : "term3"} />}
             </p>
           );
         })}
-        <p className="text-[10px] text-neutral-500 pt-2 border-t border-white/10">
+        <p className="text-[10px] text-white/40 pt-2 border-t border-white/10">
           NOT CURRENCY · NOT A BANK DEPOSIT · NOT FDIC INSURED
         </p>
       </div>
       {assent ? (
-        <div className="rounded-lg bg-emerald-950/40 border border-emerald-500/40 px-3 py-2 text-xs text-emerald-300 font-semibold">
+        <div className="rounded-xl bg-emerald-500/10 border border-emerald-400/40 px-3 py-2 text-xs text-emerald-300 font-semibold">
           ✓ I AGREE captured {new Date(assent.accepted_at).toLocaleTimeString()} · scroll {assent.scroll_depth_pct}% · dwell {assent.dwell_seconds}s · initials {assent.initials_term1}/{assent.initials_term3}
         </div>
       ) : (
         <button onClick={agree} disabled={depth < 90 || !initialsOk}
-          className="w-full rounded-lg bg-pink-600 hover:bg-pink-500 disabled:opacity-40 font-extrabold py-3 min-h-[48px]">
+          className="w-full rounded-xl btn-glow-blue font-extrabold py-3 min-h-[48px] disabled:opacity-40 transition-all">
           {depth < 90 ? "Scroll to read the full terms to enable I AGREE"
             : !initialsOk ? "Enter purchaser initials on Terms 1 and 3 to enable I AGREE"
             : "I AGREE — Clickwrap Assent"}
