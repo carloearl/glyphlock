@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import GlyphBucksTermsPanel from "./GlyphBucksTermsPanel";
 import GlyphBucksReceipt from "./GlyphBucksReceipt";
 import IDScannerCamera from "@/components/nups/IDScannerCamera";
+import ThumbprintScanner from "./ThumbprintScanner";
 import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
 import { Stamp, Printer, ShieldCheck, Coins, Fingerprint, CreditCard, PenLine, CheckCircle2 } from "lucide-react";
 
@@ -192,6 +193,9 @@ export default function GlyphBucksSaleFlow() {
 
       <Section n="3" icon={Fingerprint} title="Identity Binding — Camera ID Scan" sub="Scores + masked refs only, never raw biometrics" done={!!f.age_verified && !!f.id_scan_ref}>
         <IDScannerCamera venue_id={venueId} onDataExtracted={handleIdExtracted} />
+        <div className="mt-3">
+          <ThumbprintScanner venueId={venueId} onCapture={(c) => set("thumb_match_pct", String(c.match_pct))} />
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
           <label><span className={lbl}>ID scan ref</span><input className={inp} value={f.id_scan_ref} onChange={(e) => set("id_scan_ref", e.target.value)} /></label>
           <label><span className={lbl}>Face match %</span><input className={inp} type="number" value={f.face_id_match_pct} onChange={(e) => set("face_id_match_pct", e.target.value)} /></label>
