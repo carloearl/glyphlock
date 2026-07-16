@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import QRCode from "qrcode";
-import { Plus, Trash2, Stamp } from "lucide-react";
+import { Plus, Trash2, Stamp, FlaskConical } from "lucide-react";
 
 /**
  * DACO VIP SHOW CONTRACT — FULL IN-APP GENERATOR
@@ -45,6 +45,27 @@ export default function VIPShowGenerator() {
   const tenderTotal = +(Number(cash) + Number(card)).toFixed(2);
 
   const setLine = (i, k, v) => setLines(lines.map((l, idx) => (idx === i ? { ...l, [k]: v } : l)));
+
+  // One-click demo scenario — fills every field with consistent, seal-ready mock
+  // data (tender settles the total exactly) so the full flow can be demonstrated.
+  const fillDemo = () => {
+    setMode("DEMO");
+    setVenueId("DP-TEMPE-001");
+    setVenue("Diamond Palace Tempe");
+    setGuest({ name: "Robert Spender", membership_id: "MBR-0001", member_tier: "PLATINUM", id_scan_ref: "DEMO-ID-001", card_last4: "9921", face_match_pct: "98.2", thumb_match_pct: "97.1" });
+    setStaff({ hostess: "Amber", duty_manager: "M. Reyes", suite: "Skyline Suite" });
+    setLines([
+      { description: "VIP Suite — 60 min", qty: 1, amount: 300 },
+      { description: "Performance — Crystal", qty: 2, amount: 150 },
+    ]);
+    setCardFeePct(5);
+    // subtotal 600 + 5% card fee 30 = 630 → cash 200 + card 430 settles exactly
+    setCash(200);
+    setCard(430);
+    setGlyphbucks(0);
+    setTreatment("DEMO walkthrough — training scenario");
+    setError("");
+  };
 
   const seal = async () => {
     setError("");
@@ -144,6 +165,12 @@ export default function VIPShowGenerator() {
 
   return (
     <div className="space-y-5">
+      {/* Demo fill — populate the whole form for a training walkthrough */}
+      <button onClick={fillDemo}
+        className="flex items-center gap-2 rounded-lg bg-amber-500/15 border-2 border-amber-500/40 hover:bg-amber-500/25 text-amber-300 text-xs font-bold px-4 py-2.5 min-h-[44px] transition-all">
+        <FlaskConical className="w-4 h-4" /> Fill Demo Data (DEMO mode)
+      </button>
+
       {/* Venue / mode */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <label><span className={lbl}>Venue ID</span><input className={inp} value={venueId} onChange={(e) => setVenueId(e.target.value)} /></label>
