@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
 import HelpPanel from '@/components/global/HelpPanel';
 import useTTSClean from '@/components/glyphlock/bot/logic/useTTSClean';
+import GlobalAudioEngine from '@/audio/GlobalAudioEngine';
 
 const { 
   useGlyphBotPersistence, 
@@ -1041,7 +1042,12 @@ export default function GlyphBotPage() {
               isSending={isSending}
               disabled={isSending}
               selectedAgent={selectedAgent}
-              onAgentChange={setSelectedAgent}
+              onAgentChange={(agentId) => {
+                // DACO 005 §4 V-ISO-1: agent switch flushes voice buffers +
+                // persona-bound settings before the new persona loads.
+                GlobalAudioEngine.get().setPersona(agentId);
+                setSelectedAgent(agentId);
+              }}
             />
           </ChatErrorBoundary>
         </div>

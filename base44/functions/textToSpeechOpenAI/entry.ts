@@ -66,16 +66,16 @@ Deno.serve(async (req) => {
       }, { status: response.status });
     }
 
-    const audioBuffer = await response.arrayBuffer();
+    // DACO DIRECTIVE 005 §3.1 — stream OpenAI audio through to the client.
+    // Do NOT buffer the full file server-side; time-to-first-byte drops to
+    // OpenAI's first chunk instead of full-generation time.
+    console.log('[OpenAI TTS] Streaming audio response');
 
-    console.log(`[OpenAI TTS] Generated ${audioBuffer.byteLength} bytes`);
-
-    return new Response(audioBuffer, {
+    return new Response(response.body, {
       status: 200,
       headers: {
         'Content-Type': 'audio/mpeg',
-        'Content-Length': audioBuffer.byteLength.toString(),
-        'Cache-Control': 'public, max-age=86400' // Cache for 24 hours
+        'Cache-Control': 'no-store'
       }
     });
 
