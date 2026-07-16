@@ -8,7 +8,13 @@ export const ROLES = {
   HOSTESS: 'hostess',
   SECURITY: 'security',
   DJ: 'dj',
+  // DACO-NUPS-VIP-20260716-01 §2a — venue-scoped VIP hostess cohort role.
+  VIP_HOSTESS: 'vip_hostess',
 };
+
+// §2a — the ONLY actions vip_hostess may perform. Nothing else renders:
+// no settlement, no rate admin, no other roles, no all-contracts view.
+export const VIP_HOSTESS_ALLOWLIST = ['clock_self', 'create_vip_contract', 'view_own_contracts'];
 
 export const PERMISSIONS = {
   ACCESS_POS: ['manager', 'bartender', 'door_girl'],
@@ -18,7 +24,10 @@ export const PERMISSIONS = {
   ACCESS_FINANCIAL_OVERVIEW: ['manager'],
   MANAGE_ENTERTAINERS: ['manager'],
   MANAGE_STAFF: ['manager'],
-  CLOCK_IN_OUT: ['manager', 'bartender', 'door_girl', 'hostess', 'security', 'dj'],
+  CLOCK_IN_OUT: ['manager', 'bartender', 'door_girl', 'hostess', 'security', 'dj', 'vip_hostess'],
+  // DACO-NUPS-VIP-20260716-01 §2a — vip_hostess allowlist surface only.
+  CREATE_VIP_CONTRACT: ['manager', 'vip_hostess'],
+  VIEW_OWN_CONTRACTS: ['manager', 'vip_hostess'],
   ACCESS_DJ_APP: ['manager', 'dj'],
   APPLY_DISCOUNTS: ['manager', 'bartender', 'door_girl'],
   VOID_TRANSACTIONS: ['manager'],
@@ -54,6 +63,7 @@ export const mapNUPSRoleToRBAC = (nupsRole) => {
     SECURITY: ROLES.SECURITY,
     DJ: ROLES.DJ,
     KIOSK: ROLES.HOSTESS,
+    VIP_HOSTESS: ROLES.VIP_HOSTESS,
     PERFORMER: null, // performers use their own dashboard
     DEMO: ROLES.MANAGER, // demo sees everything
     admin: ROLES.MANAGER, // base44 admin

@@ -58,7 +58,7 @@ export function resolveRoleClass({ user, nupsUser, sovereign = false } = {}) {
     return ROLE_CLASS.ENTERTAINER;
   }
   // Staff (W-2 employees)
-  if (["FLOOR_HOST", "DOOR_GIRL", "DOORMAN", "BARTENDER", "SECURITY", "DJ", "HOSTESS", "KIOSK", "STAFF"].includes(raw)) {
+  if (["FLOOR_HOST", "DOOR_GIRL", "DOORMAN", "BARTENDER", "SECURITY", "DJ", "HOSTESS", "KIOSK", "STAFF", "VIP_HOSTESS"].includes(raw)) {
     return ROLE_CLASS.STAFF;
   }
   return ROLE_CLASS.STAFF;

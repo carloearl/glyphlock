@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, AlertCircle } from "lucide-react";
+import { LogOut, Settings, AlertCircle, Ticket } from "lucide-react";
+import { hasPermission } from "@/config/roles";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
@@ -94,9 +95,23 @@ function FrontDoorContent() {
 
   const role = (user?.role || "").toUpperCase();
   const canEditConfig = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "SOVEREIGN"].includes(role);
+  // §4b — permission-gated, NOT hidden-by-CSS. The button renders ONLY when the
+  // logged-in role's allowlist includes create_vip_contract; every other role
+  // is not-rendered (no inert element left in the DOM).
+  const canCreateVipContract = hasPermission(role, "CREATE_VIP_CONTRACT");
 
   const actions = (
     <>
+      {canCreateVipContract && (
+        <Button
+          size="sm"
+          onClick={() => navigate("/Contracts")}
+          className="min-h-[64px] px-5 font-bold rounded-xl bg-gradient-to-r from-[#1e293b] to-[#0f172a] border border-amber-400/50 text-amber-300 hover:border-amber-300 hover:text-amber-200 shadow-[0_0_20px_-6px_rgba(251,191,36,0.5)]"
+          title="Start a new VIP contract"
+        >
+          <Ticket className="w-5 h-5 mr-2" /> VIP Contract
+        </Button>
+      )}
       <EmergencyOverrideButton venueId={venueId} />
       {canEditConfig && (
         <Button
