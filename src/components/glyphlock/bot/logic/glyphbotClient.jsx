@@ -23,14 +23,19 @@ class GlyphBotClient {
     const finalOptions = { ...this.defaultOptions, ...options };
     const personaId = options.persona || this.defaultPersona;
 
+    // Auditor personas ALWAYS browse the web — audits are useless without live
+    // public data, so web access is implied even when the Live toggle is off.
+    const auditPersona = personaId === 'AUDITOR' || personaId === 'AUDIT';
+    const wantsWeb = !!finalOptions.realTime || !!finalOptions.auditMode || auditPersona;
+
     // Real-time web context. Audits run DEEP, uncapped, multi-source intel
     // gathering (site-turn searches across every provider + AI synthesis).
     let realTimeContext = '';
-    if (finalOptions.realTime) {
+    if (wantsWeb) {
       const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
       if (lastUserMsg) {
         try {
-          const deep = !!finalOptions.auditMode;
+          const deep = !!finalOptions.auditMode || auditPersona;
           const searchResult = await this.webSearch(
             lastUserMsg.content || lastUserMsg.text,
             deep ? 40 : 5,
@@ -55,11 +60,11 @@ class GlyphBotClient {
     const result = await askGlyphBot({
       personaId,
       messages: enhancedMessages,
-      // When real-time is on (audits always set it), route to the web-capable
-      // model with live internet context enabled — not just the pre-fetched
-      // search summary. This makes People/Business/Agency audits actually
-      // research the web instead of answering from memory.
-      webContext: !!finalOptions.realTime,
+      // When web is wanted (Live toggle, audit mode, or an auditor persona),
+      // route to the web-capable model with live internet context enabled —
+      // not just the pre-fetched search summary. This makes People/Business/
+      // Agency audits actually research the web instead of answering from memory.
+      webContext: wantsWeb,
       onChunk: options.onChunk || null,
     });
 
@@ -77,7 +82,7 @@ class GlyphBotClient {
       providerLabel: 'GlyphLock Brain',
       auditEngineActive: isAuditActive,
       jsonModeUsed: false,
-      meta: { truncated: result.truncated },
+      meta: { truncated: result.truncated, webUsed: wantsWeb },
     };
   }
 

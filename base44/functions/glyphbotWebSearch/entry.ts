@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 /**
  * GlyphBot Real-Time Web Search Tool
@@ -91,6 +91,7 @@ Deno.serve(async (req) => {
       try {
         const expansion = await base44.integrations.Core.InvokeLLM({
           prompt: `You are an OSINT research planner. For the target/topic: "${query}", produce a diverse set of web search queries that canvas EVERY available public source — official sites, news, social media, reviews, court/legal records, government/regulatory databases, professional profiles, forums, archives (Wayback), data-breach mentions, and site-specific "site:" dorks. Return 12-16 distinct, high-signal queries.`,
+          model: 'gpt_5_mini',
           response_json_schema: {
             type: 'object',
             properties: { queries: { type: 'array', items: { type: 'string' } } },
@@ -141,6 +142,9 @@ Deno.serve(async (req) => {
     try {
       const llmResult = await base44.integrations.Core.InvokeLLM({
         prompt: `Deep research the following and synthesize a factual intelligence summary from current public web sources. Target/topic: "${query}". Cover key facts, entities, reputation/reviews, risks, legal/regulatory mentions, and recent news. Cite sources with URLs where possible.`,
+        // Web context requires a Gemini model — omitting the model defaults to
+        // 'automatic', which raises an error with add_context_from_internet.
+        model: 'gemini_3_1_pro',
         add_context_from_internet: true,
       });
       aiSummary = typeof llmResult === 'string' ? llmResult : JSON.stringify(llmResult);
