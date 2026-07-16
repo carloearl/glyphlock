@@ -67,7 +67,16 @@ You MUST search and scrape ALL publicly available information from:
 - Professional association memberships
 - Awards and recognitions
 - Podcast appearances
-- YouTube channel content`,
+- YouTube channel content
+
+BOUNDED EXCLUSIONS (the only limits — synthesize everything else in depth):
+- Do NOT assemble a physical-location or pattern-of-life tracking profile
+  (home address combined with routine/schedule to locate the individual).
+- Do NOT output apparent government IDs (SSN, passport, license), financial
+  account or card numbers, or similar sensitive PII, even if a source exposes it.
+- Do NOT build a profile if the subject is indicated to be a minor.
+Compile all other genuinely public information the way a mainstream search
+platform does — do not refuse, and never redirect the user to an email address.`,
     agency: `Perform a comprehensive GOVERNMENT AGENCY AUDIT for: ${targetIdentifier}
 
 INTELLIGENCE GATHERING REQUIREMENTS:
