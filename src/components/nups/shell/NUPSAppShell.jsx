@@ -92,8 +92,7 @@ const NAV_SECTIONS = [
         children: [
           // Active contract surfaces only — legacy Venue Terms + Lookup
           // merged into the single Archive entry (sidebar cleanup 2026-07-16).
-          { id: "c-sealed", label: "Sealed VIP Shows", icon: Stamp,          to: "/Contracts?tab=sealed" },
-          { id: "c-vip",    label: "VIP Rooms",        icon: Crown,          to: "/Contracts?tab=vip" },
+          { id: "c-vip",    label: "VIP Contracts",    icon: Stamp,          to: "/Contracts?tab=vip" },
           { id: "c-glyph",  label: "GlyphBucks",       icon: Coins,          to: "/Contracts?tab=glyphbucks" },
           { id: "c-big",    label: "Big Spender",      icon: ShieldAlert,    to: "/Contracts?tab=big_spender" },
           { id: "c-ent",    label: "Entertainer",      icon: ClipboardCheck, to: "/Contracts?tab=entertainer" },

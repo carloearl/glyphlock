@@ -1,0 +1,95 @@
+{
+  "name": "GlyphBucksSale",
+  "type": "object",
+  "description": "DACO GlyphBucks Stored-Value Contract-Receipt System \u2014 one row per stored-value voucher sale. Instrument sale ONLY (never performance/service framing). Issuance is a LIABILITY, never revenue \u2014 excluded from total_sales. REAL mode locked until Production Readiness Gate (\u00a79) sign-off.",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Unique sale identifier (GBS-\u2026)."
+    },
+    "agreement_no": {
+      "type": "string",
+      "description": "GB-YYMMDD-NNNN agreement number."
+    },
+    "receipt_no": {
+      "type": "string",
+      "description": "Receipt number."
+    },
+    "verify_ref": {
+      "type": "string",
+      "description": "VRF-YYMMDD-NNNNNN-XXXX \u2014 QR verification reference. Regex ^VRF-\\d{6}-\\d{6}-[0-9A-F]{4}$."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "purchaser_member_id": {
+      "type": "string"
+    },
+    "gb_account_last4": {
+      "type": "string"
+    },
+    "denom_cents": {
+      "type": "number",
+      "description": "Face value per voucher in cents."
+    },
+    "qty": {
+      "type": "number"
+    },
+    "face_cents": {
+      "type": "number",
+      "description": "denom_cents \u00d7 qty."
+    },
+    "card_fee_cents": {
+      "type": "number"
+    },
+    "amount_cents": {
+      "type": "number",
+      "description": "face_cents + card_fee_cents. Tax $0.00 \u2014 stored-value issuance is not a retail sale (tax at redemption, A.R.S. \u00a7 42-5061)."
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "serial_lo": {
+      "type": "number",
+      "description": "First registered voucher serial in this sale."
+    },
+    "serial_hi": {
+      "type": "number",
+      "description": "Last registered voucher serial in this sale."
+    },
+    "mcc": {
+      "type": "string",
+      "description": "The real, underwritten stored-value merchant category \u2014 recorded for audit. NEVER misrepresented (\u00a70.1)."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "DEMO",
+      "description": "REAL locked until \u00a79 gate."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "SEALED",
+        "VOID"
+      ],
+      "default": "SEALED"
+    },
+    "sealed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "sale_id",
+    "agreement_no",
+    "verify_ref",
+    "venue_id",
+    "mode"
+  ]
+}

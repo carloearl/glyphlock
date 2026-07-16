@@ -1,0 +1,70 @@
+{
+  "name": "SealRecord",
+  "type": "object",
+  "description": "DACO GlyphBucks \u2014 APPEND-ONLY cryptographic seal record. One per sealed sale. chain_hash = sha256(prev_block_hash + terms_hash + agreement_no); prev_block_hash links to the prior record's chain_hash per venue (hash chain). signed_token is the Ed25519-signed NUPS1.\u2026 compact token encoded in the receipt QR. Signing is SERVER-SIDE ONLY \u2014 the private key never reaches any client. No updates, no deletes.",
+  "properties": {
+    "verify_ref": {
+      "type": "string"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "agreement_no": {
+      "type": "string"
+    },
+    "terms_version": {
+      "type": "string",
+      "default": "v2.0"
+    },
+    "terms_hash": {
+      "type": "string",
+      "description": "SHA-256 hex of the canonical v2.0 terms text."
+    },
+    "prev_block_hash": {
+      "type": "string",
+      "description": "Prior SealRecord.chain_hash for this venue; 64 zeros for genesis."
+    },
+    "chain_hash": {
+      "type": "string",
+      "description": "sha256(prev_block_hash + terms_hash + agreement_no)."
+    },
+    "ed25519_pub_id": {
+      "type": "string",
+      "description": "Identifier (hash prefix) of the public key used."
+    },
+    "public_key_hex": {
+      "type": "string",
+      "description": "Published Ed25519 public key (hex) \u2014 safe to expose; printed on the receipt."
+    },
+    "signed_token": {
+      "type": "string",
+      "description": "NUPS1.<payload_b64url>.<sig_b64url> compact signed token. This is what the receipt QR encodes."
+    },
+    "tsa_token": {
+      "type": "string",
+      "description": "RFC 3161 timestamp token. NULL until a real TSA integration is live \u2014 the document must NOT claim TSA until then (\u00a74)."
+    },
+    "sealed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "DEMO"
+    }
+  },
+  "required": [
+    "verify_ref",
+    "venue_id",
+    "agreement_no",
+    "terms_hash",
+    "chain_hash",
+    "signed_token",
+    "sealed_at"
+  ]
+}

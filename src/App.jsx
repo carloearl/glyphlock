@@ -73,6 +73,7 @@ import RegistryAdmin from './pages/RegistryAdmin';
 import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
 import NUPSAdminPortal from './pages/NUPSAdminPortal';
 import VIPShowVerify from './pages/VIPShowVerify';
+import VerifyDispatch from './pages/VerifyDispatch';
 import VIPShowContracts from './pages/VIPShowContracts';
 import KioskShell from './components/nups/KioskShell';
 import RoleClassGuard from './components/nups/RoleClassGuard';
@@ -258,7 +259,8 @@ const AuthenticatedApp = () => {
         <Route path="/ArchitecturalDecisionRegister" element={<RoleClassGuard allow={["ADMIN"]}><ArchitecturalDecisionRegister /></RoleClassGuard>} />
         <Route path="/architecturaldecisionregister" element={<RoleClassGuard allow={["ADMIN"]}><ArchitecturalDecisionRegister /></RoleClassGuard>} />
         {/* DACO VIP SHOW CONTRACT SYSTEM v2 */}
-        <Route path="/v/:ref" element={<VIPShowVerify />} />
+        {/* VRF-… refs = GlyphBucks stored-value seals; others = VIP Show contracts */}
+        <Route path="/v/:ref" element={<VerifyDispatch />} />
         <Route path="/VIPShowContracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
         <Route path="/vipshowcontracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
         <Route path="/unauthorized" element={<Unauthorized />} />

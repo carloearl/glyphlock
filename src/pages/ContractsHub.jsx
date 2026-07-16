@@ -25,6 +25,7 @@ import VIPContractLifecycle from "@/components/nups/VIPContractLifecycle";
 import VIPShowContracts from "@/pages/VIPShowContracts";
 import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
 import VIPShowVerifyPanel from "@/components/nups/vip/VIPShowVerifyPanel";
+import GlyphBucksSaleFlow from "@/components/nups/glyphbucks/GlyphBucksSaleFlow";
 
 /**
  * Master Covenant & Contracts Hub
@@ -46,14 +47,13 @@ const TAB_ALIASES = {
   entertainer: "entertainer",
   venue: "archive",
   lookup: "archive",
-  sealed: "sealed",
-  vipshow: "sealed",
+  sealed: "vip",
+  vipshow: "vip",
   archive: "archive",
 };
 
 const TABS = [
-  { key: "sealed", label: "VIP Show Contracts", Icon: Stamp },
-  { key: "vip", label: "VIP Rooms", Icon: Crown },
+  { key: "vip", label: "VIP Contracts", Icon: Stamp },
   { key: "glyphbucks", label: "GlyphBucks", Icon: Coins },
   { key: "big_spender", label: "Big Spender", Icon: ShieldAlert },
   { key: "entertainer", label: "Entertainer", Icon: ClipboardCheck },
@@ -62,17 +62,16 @@ const TABS = [
 
 const TAB_TITLES = {
   glyphbucks: "Contracts · GlyphBucks",
-  vip: "VIP Shows · Rooms · GlyphBucks · Contracts",
+  vip: "Contracts · VIP (Sealed Records + Rooms)",
   big_spender: "Contracts · Big Spender Protocol",
   entertainer: "Contracts · Entertainer",
   archive: "Contracts · Archive",
-  sealed: "Contracts · VIP Show Contracts (Sealed)",
 };
 
 export default function ContractsHub() {
   const location = useLocation();
   const queryTab = new URLSearchParams(location.search).get("tab");
-  const initial = queryTab && TAB_ALIASES[queryTab.toLowerCase()] ? TAB_ALIASES[queryTab.toLowerCase()] : "sealed";
+  const initial = queryTab && TAB_ALIASES[queryTab.toLowerCase()] ? TAB_ALIASES[queryTab.toLowerCase()] : "vip";
 
   const [activeTab, setActiveTab] = useState(initial);
   const [bigSpenderView, setBigSpenderView] = useState("letter");
@@ -114,16 +113,51 @@ export default function ContractsHub() {
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Coins className="w-5 h-5 text-pink-400" />
-                <h2 className="text-lg font-bold">GlyphBucks Purchase Contract</h2>
-                <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/40 text-xs">Club Currency</Badge>
+                <h2 className="text-lg font-bold">GlyphBucks™ Stored-Value Sale — Contract-Receipt System</h2>
+                <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/40 text-xs">
+                  Stored Value · Ed25519 Sealed · DEMO
+                </Badge>
               </div>
-              <GlyphBucksContract />
+              <GlyphBucksSaleFlow />
             </CardContent>
           </Card>
         )}
 
         {activeTab === "vip" && (
           <div className="space-y-6">
+            {/* UNIFIED VIP CONTRACTS — new sealed evidence system + live room
+                board on one tab. Legacy VIP contract lifecycle (duplicate
+                surface) lives in Archive. */}
+            <Card className="bg-white/[0.02] border-emerald-500/20">
+              <CardContent className="p-4 sm:p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Stamp className="w-5 h-5 text-emerald-400" />
+                  <h2 className="text-lg font-bold">VIP Show Contracts — Sealed Evidence System</h2>
+                  <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-xs">
+                    Hash-Chained · Bitcoin Anchored
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+                  <div className="xl:col-span-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                    <h3 className="text-sm font-bold text-emerald-300 mb-3">Generate Contract</h3>
+                    <VIPShowGenerator />
+                  </div>
+                  <div className="xl:col-span-2 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                    <h3 className="text-sm font-bold text-emerald-300 mb-3">QR Verify</h3>
+                    <VIPShowVerifyPanel />
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-white/10 overflow-hidden">
+                  <div className="px-4 pt-4">
+                    <h3 className="text-sm font-bold text-emerald-300">Search · Membership · Reprint</h3>
+                  </div>
+                  <VIPShowContracts />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Live room board — open/close rooms, assign guests & entertainers */}
             <Card className="bg-white/[0.02] border-purple-500/20">
               <CardContent className="p-4 sm:p-6">
@@ -133,13 +167,6 @@ export default function ContractsHub() {
                   <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-xs">Live</Badge>
                 </div>
                 <VIPRoomBoard />
-              </CardContent>
-            </Card>
-
-            {/* Entertainer payout contracts for VIP shows */}
-            <Card className="bg-white/[0.02] border-blue-500/20">
-              <CardContent className="p-4 sm:p-6">
-                <VIPContractLifecycle />
               </CardContent>
             </Card>
           </div>
@@ -210,8 +237,33 @@ export default function ContractsHub() {
           <div className="space-y-6">
             <div className="bg-white/[0.03] border border-white/10 rounded-lg p-4 text-sm text-gray-400">
               <span className="font-semibold text-gray-300">Archive</span> — legacy and reference contract
-              surfaces. Superseded by the sealed VIP Show Contract system for live operations.
+              surfaces. Superseded by the sealed VIP Show Contract and GlyphBucks stored-value systems
+              for live operations.
             </div>
+
+            {/* Legacy VIP entertainer payout contracts — superseded by the sealed system */}
+            <Card className="bg-white/[0.02] border-blue-500/20">
+              <CardContent className="p-4 sm:p-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Crown className="w-5 h-5 text-blue-400" />
+                  <h2 className="text-lg font-bold">Legacy VIP Contract Lifecycle</h2>
+                  <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/40 text-xs">Archived</Badge>
+                </div>
+                <VIPContractLifecycle />
+              </CardContent>
+            </Card>
+
+            {/* Legacy GlyphBucks purchase contract — superseded by the sealed stored-value flow */}
+            <Card className="bg-white/[0.02] border-pink-500/20">
+              <CardContent className="p-4 sm:p-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-pink-400" />
+                  <h2 className="text-lg font-bold">Legacy GlyphBucks Purchase Contract</h2>
+                  <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/40 text-xs">Archived</Badge>
+                </div>
+                <GlyphBucksContract />
+              </CardContent>
+            </Card>
 
             {/* Legacy contract lookup — superseded by sealed record search */}
             <Card className="bg-white/[0.02] border-emerald-500/20">
@@ -244,40 +296,6 @@ export default function ContractsHub() {
               </CardContent>
             </Card>
           </div>
-        )}
-
-        {activeTab === "sealed" && (
-          <Card className="bg-white/[0.02] border-emerald-500/20">
-            <CardContent className="p-4 sm:p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Stamp className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-lg font-bold">VIP Show Contracts — Sealed Evidence System</h2>
-                <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-xs">
-                  Hash-Chained · Bitcoin Anchored
-                </Badge>
-              </div>
-
-              {/* Unified workspace — generator, QR verify, and membership search
-                  all live on ONE screen. No sub-view switching. */}
-              <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-                <div className="xl:col-span-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                  <h3 className="text-sm font-bold text-emerald-300 mb-3">Generate Contract</h3>
-                  <VIPShowGenerator />
-                </div>
-                <div className="xl:col-span-2 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                  <h3 className="text-sm font-bold text-emerald-300 mb-3">QR Verify</h3>
-                  <VIPShowVerifyPanel />
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-white/10 overflow-hidden">
-                <div className="px-4 pt-4">
-                  <h3 className="text-sm font-bold text-emerald-300">Search · Membership · Reprint</h3>
-                </div>
-                <VIPShowContracts />
-              </div>
-            </CardContent>
-          </Card>
         )}
 
 

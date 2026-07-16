@@ -1,0 +1,59 @@
+{
+  "name": "GlyphBucksLedger",
+  "type": "object",
+  "description": "DACO GlyphBucks \u2014 stored-value LIABILITY ledger. Issuance posts as a liability delta, NEVER revenue. INVARIANT (preserved from NUPS): total_sales = cash_sales + card_sales only \u2014 GlyphBucks issuance must NOT appear in that sum.",
+  "properties": {
+    "entry_id": {
+      "type": "string"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "verify_ref": {
+      "type": "string"
+    },
+    "sale_id": {
+      "type": "string"
+    },
+    "entry_type": {
+      "type": "string",
+      "enum": [
+        "ISSUANCE",
+        "REDEMPTION",
+        "ADJUSTMENT"
+      ],
+      "default": "ISSUANCE"
+    },
+    "liability_delta_cents": {
+      "type": "number",
+      "description": "Positive on issuance (liability increases), negative on redemption."
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "posted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "DEMO"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "entry_id",
+    "venue_id",
+    "entry_type",
+    "liability_delta_cents",
+    "mode"
+  ]
+}
