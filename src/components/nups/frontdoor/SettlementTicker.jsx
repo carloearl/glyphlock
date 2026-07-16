@@ -20,23 +20,25 @@ const TONES = {
   slate:   { ring: "border-slate-600/30",   glow: "from-slate-500/5",    label: "text-slate-400/80",   value: "text-slate-100",   sub: "text-slate-500",      icon: "text-slate-400/60" },
 };
 
+// Compact horizontal row — label left, value right. Sized for the narrow
+// Live Pulse side rail on FrontDoor (stacked list, not a 5-wide strip).
 function MetricCard({ tone, label, value, sub, icon: Icon }) {
   const t = TONES[tone];
   return (
-    <div className={`relative overflow-hidden rounded-xl border ${t.ring} bg-gradient-to-br ${t.glow} via-transparent to-transparent bg-black/40 backdrop-blur px-4 py-3.5`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className={`text-[10px] font-semibold uppercase tracking-[0.14em] ${t.label}`}>
-            {label}
-          </div>
-          <div className={`mt-1.5 text-2xl lg:text-[26px] font-black tabular-nums tracking-tight ${t.value} truncate`}>
-            {value}
-          </div>
-          <div className={`mt-0.5 text-[11px] ${t.sub} truncate`}>
-            {sub}
+    <div className={`relative overflow-hidden rounded-lg border ${t.ring} bg-gradient-to-br ${t.glow} via-transparent to-transparent bg-black/40 backdrop-blur px-3 py-2`}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 flex items-center gap-2">
+          <Icon className={`w-3.5 h-3.5 shrink-0 ${t.icon}`} />
+          <div className="min-w-0">
+            <div className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${t.label} truncate`}>
+              {label}
+            </div>
+            <div className={`text-[10px] ${t.sub} truncate`}>{sub}</div>
           </div>
         </div>
-        <Icon className={`w-4 h-4 shrink-0 ${t.icon}`} />
+        <div className={`text-base font-black tabular-nums tracking-tight ${t.value} shrink-0`}>
+          {value}
+        </div>
       </div>
     </div>
   );
@@ -70,7 +72,7 @@ export default function SettlementTicker({ venueId, businessDate }) {
 
   if (isError) {
     return (
-      <div className="mb-5 flex items-center gap-3 rounded-xl border border-rose-500/30 bg-rose-500/5 px-4 py-3">
+      <div className="flex items-center gap-3 rounded-lg border border-rose-500/30 bg-rose-500/5 px-3 py-2.5">
         <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
         <span className="text-sm text-rose-200">Settlement data unavailable</span>
       </div>
@@ -79,16 +81,16 @@ export default function SettlementTicker({ venueId, businessDate }) {
 
   if (isLoading || !settlement) {
     return (
-      <div className="mb-5 grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="space-y-2">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-[88px] rounded-xl border border-white/5 bg-white/[0.02] animate-pulse" />
+          <div key={i} className="h-[46px] rounded-lg border border-white/5 bg-white/[0.02] animate-pulse" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="mb-5 grid grid-cols-2 lg:grid-cols-5 gap-3">
+    <div className="space-y-2">
       <MetricCard
         tone="emerald"
         label="Cash Sales"

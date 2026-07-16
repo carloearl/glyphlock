@@ -53,23 +53,24 @@ export default function FrontDoorStats({ venueId }) {
     violet: "border-violet-500/40 text-violet-400",
   };
 
+  // Compact 2×2 grid — sized for the narrow Live Pulse side rail.
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div className="grid grid-cols-2 gap-2">
       {stats.map((s) => {
         const Icon = s.icon;
         return (
           <div
             key={s.label}
-            className={`bg-gray-900/60 border rounded-xl p-4 ${colorMap[s.color]}`}
+            className={`bg-gray-900/60 border rounded-lg p-2.5 ${colorMap[s.color]}`}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold truncate">
                   {s.label}
                 </div>
-                <div className="text-2xl font-black text-white mt-1">{s.value}</div>
+                <div className="text-lg font-black text-white mt-0.5 tabular-nums">{s.value}</div>
               </div>
-              <Icon className="w-6 h-6 opacity-70" />
+              <Icon className="w-4 h-4 opacity-70 shrink-0" />
             </div>
           </div>
         );

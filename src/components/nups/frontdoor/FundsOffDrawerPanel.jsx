@@ -40,36 +40,37 @@ export default function FundsOffDrawerPanel({ venueId, businessDate }) {
   const card = txns.reduce((s, t) => s + (Number(t.card_sales) || 0), 0);
   const total = cash + card;
 
+  // Compact stacked rows — sized for the narrow Live Pulse side rail.
   return (
-    <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-950/20 p-4">
-      <div className="flex items-center gap-2 mb-3 flex-wrap">
+    <div className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-3">
+      <div className="flex items-center gap-2 mb-1">
         <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-        <span className="text-[11px] font-bold uppercase tracking-widest text-amber-300">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-amber-300">
           Funds-Off Drawer · Validation Run
         </span>
-        <span className="ml-auto text-[10px] text-amber-500/70">
-          {txns.length} record{txns.length === 1 ? "" : "s"} · excluded from official settlement
-        </span>
+      </div>
+      <div className="text-[10px] text-amber-500/70 mb-3">
+        {txns.length} record{txns.length === 1 ? "" : "s"} · excluded from official settlement
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-black/30 border border-amber-500/30 rounded-lg p-3">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between bg-black/30 border border-amber-500/30 rounded-lg px-3 py-2">
           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-amber-500 font-semibold">
             <Banknote className="w-3 h-3" /> Cash
           </div>
-          <div className="text-2xl font-black text-amber-200 mt-1.5">${cash.toFixed(2)}</div>
+          <div className="text-base font-black text-amber-200 tabular-nums">${cash.toFixed(2)}</div>
         </div>
-        <div className="bg-black/30 border border-amber-500/30 rounded-lg p-3">
+        <div className="flex items-center justify-between bg-black/30 border border-amber-500/30 rounded-lg px-3 py-2">
           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-amber-500 font-semibold">
             <CreditCard className="w-3 h-3" /> Card
           </div>
-          <div className="text-2xl font-black text-amber-200 mt-1.5">${card.toFixed(2)}</div>
+          <div className="text-base font-black text-amber-200 tabular-nums">${card.toFixed(2)}</div>
         </div>
-        <div className="bg-amber-500/10 border border-amber-500/50 rounded-lg p-3">
+        <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/50 rounded-lg px-3 py-2">
           <div className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold">
             Funds-Off Total
           </div>
-          <div className="text-2xl font-black text-amber-100 mt-1.5">${total.toFixed(2)}</div>
+          <div className="text-base font-black text-amber-100 tabular-nums">${total.toFixed(2)}</div>
         </div>
       </div>
 
