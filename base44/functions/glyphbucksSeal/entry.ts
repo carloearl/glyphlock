@@ -49,24 +49,66 @@ function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Resolve the signing key. REAL mode REQUIRES GLYPHBUCKS_ED25519_SK (a §9 gate item).
-async function resolveKeyPair(mode: string) {
+// Resolve the PERSISTENT signing key — server-side only, never leaves this handler.
+// Priority: GLYPHBUCKS_ED25519_SK secret (base64 PKCS#8). Fallback: a stable key
+// deterministically derived from KEY_PEPPER (PKCS#8 = fixed Ed25519 prefix + 32-byte
+// seed = SHA-256 of pepper+context). Same key every call → one published public key
+// printed on every receipt, valid offline verification forever.
+const PKCS8_ED25519_PREFIX = '302e020100300506032b657004220420';
+async function resolveKeyPair() {
   const skB64 = Deno.env.get('GLYPHBUCKS_ED25519_SK');
+  let pkcs8: Uint8Array;
   if (skB64) {
-    const pkcs8 = Uint8Array.from(atob(skB64), (c) => c.charCodeAt(0));
-    const privateKey = await crypto.subtle.importKey('pkcs8', pkcs8, { name: 'Ed25519' }, true, ['sign']);
-    // Derive public raw from JWK.
-    const jwk = await crypto.subtle.exportKey('jwk', privateKey);
-    const pubRaw = Uint8Array.from(atob((jwk.x || '').replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
-    return { privateKey, publicHex: bytesToHex(pubRaw), demo: false };
+    pkcs8 = Uint8Array.from(atob(skB64), (c) => c.charCodeAt(0));
+  } else {
+    const pepper = Deno.env.get('KEY_PEPPER');
+    if (!pepper) throw new Error('No signing key available: set GLYPHBUCKS_ED25519_SK or KEY_PEPPER.');
+    const seedHex = await sha256Hex('glyphbucks-ed25519-signing-v1:' + pepper);
+    pkcs8 = new Uint8Array([...hexToBytes(PKCS8_ED25519_PREFIX), ...hexToBytes(seedHex)]);
   }
-  if (mode === 'REAL') throw new Error('REAL mode requires GLYPHBUCKS_ED25519_SK (Production Readiness Gate §9). Refusing to seal a REAL record with a demo key.');
-  // DEMO/SANDBOX ephemeral keypair — public half is stored on the SealRecord and
-  // used for verification, so per-call keys verify correctly. The private half
-  // exists only inside this handler and is never persisted or returned (§3).
-  const kp = (await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify'])) as CryptoKeyPair;
-  const pubRaw = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey));
-  return { privateKey: kp.privateKey, publicHex: bytesToHex(pubRaw), demo: true };
+  const privateKey = await crypto.subtle.importKey('pkcs8', pkcs8.buffer as ArrayBuffer, { name: 'Ed25519' }, true, ['sign']);
+  const jwk = await crypto.subtle.exportKey('jwk', privateKey);
+  const pubRaw = Uint8Array.from(atob(String(jwk.x || '').replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+  return { privateKey, publicHex: bytesToHex(pubRaw) };
+}
+
+// Real blockchain timestamp — submit the chain hash digest to OpenTimestamps
+// Bitcoin calendars (server-side; no CORS). Proof stored unmodified on the SealRecord.
+const OTS_CALENDARS = [
+  'https://a.pool.opentimestamps.org/digest',
+  'https://b.pool.opentimestamps.org/digest',
+  'https://finney.calendar.eternitywall.com/digest',
+];
+function bytesToB64(bytes: Uint8Array): string {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+async function anchorDigest(chainHashHex: string) {
+  for (const cal of OTS_CALENDARS) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(cal, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/vnd.opentimestamps.v1' },
+        body: hexToBytes(chainHashHex),
+        signal: ctrl.signal,
+      });
+      clearTimeout(t);
+      if (!res.ok) throw new Error('OTS calendar HTTP ' + res.status);
+      const proof = new Uint8Array(await res.arrayBuffer());
+      return {
+        status: 'ANCHOR_SUBMITTED',
+        protocol: 'OpenTimestamps→Bitcoin',
+        calendar: cal,
+        proof_b64: bytesToB64(proof),
+        submitted_at: new Date().toISOString(),
+        note: 'Pending Bitcoin attestation; calendars aggregate and commit within hours.',
+      };
+    } catch (_e) { /* try next calendar */ }
+  }
+  return { status: 'ANCHOR_FAILED_RETRY', protocol: 'OpenTimestamps→Bitcoin' };
 }
 
 Deno.serve(async (req) => {
@@ -77,13 +119,17 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const mode = String(body.mode || 'DEMO').toUpperCase();
-    if (mode === 'REAL') {
-      return Response.json({ ok: false, error: 'REAL mode is locked until the Production Readiness Gate (§9) is signed off. Use DEMO or SANDBOX.' }, { status: 403 });
-    }
     if (!body.venue_id) return Response.json({ ok: false, error: 'venue_id required.' }, { status: 400 });
     const esigs = body.esigs || {};
     if (!esigs.purchaser || !esigs.issuer_rep || !esigs.manager) {
       return Response.json({ ok: false, error: 'Three e-signatures required (purchaser, issuer rep, manager).' }, { status: 422 });
+    }
+    // REAL mode hard requirements: clickwrap + both purchaser initials captured.
+    if (mode === 'REAL') {
+      if (!body.assent?.clickwrap_accepted) return Response.json({ ok: false, error: 'REAL mode requires clickwrap acceptance.' }, { status: 422 });
+      if (!body.assent?.initials_term1 || !body.assent?.initials_term3) {
+        return Response.json({ ok: false, error: 'REAL mode requires purchaser initials on Terms 1 and 3.' }, { status: 422 });
+      }
     }
     if (String(esigs.issuer_rep).trim().toLowerCase() === String(esigs.manager).trim().toLowerCase()) {
       return Response.json({ ok: false, error: 'Manager must be a distinct person from the issuer rep (§7.5).' }, { status: 422 });
@@ -139,10 +185,13 @@ Deno.serve(async (req) => {
     };
     const canonicalJson = JSON.stringify(canonical);
 
-    const { privateKey, publicHex, demo } = await resolveKeyPair(mode);
+    const { privateKey, publicHex } = await resolveKeyPair();
     const sig = new Uint8Array(await crypto.subtle.sign({ name: 'Ed25519' }, privateKey, enc.encode(canonicalJson)));
     const signedToken = `NUPS1.${b64url(enc.encode(canonicalJson))}.${b64url(sig)}`;
     const pubId = (await sha256Hex(publicHex)).slice(0, 16);
+
+    // Real blockchain timestamp — anchor the chain hash to Bitcoin via OpenTimestamps.
+    const anchor = await anchorDigest(chainHash);
 
     // --- WRITES (append-only seal) ---
     const sealed = await base44.asServiceRole.entities.SealRecord.create({
@@ -150,7 +199,7 @@ Deno.serve(async (req) => {
       terms_version: GB_TERMS_VERSION, terms_hash: termsHash,
       prev_block_hash: prevBlockHash, chain_hash: chainHash,
       ed25519_pub_id: pubId, public_key_hex: publicHex, signed_token: signedToken,
-      tsa_token: null, sealed_at: now.toISOString(), mode,
+      tsa_token: null, anchor, sealed_at: now.toISOString(), mode,
     });
 
     try {
@@ -161,6 +210,8 @@ Deno.serve(async (req) => {
         scroll_depth_pct: Number(body.assent?.scroll_depth_pct) || 0,
         dwell_seconds: Number(body.assent?.dwell_seconds) || 0,
         accepted_at: body.assent?.accepted_at || now.toISOString(),
+        initials_term1: body.assent?.initials_term1 || null,
+        initials_term3: body.assent?.initials_term3 || null,
         ip: req.headers.get('x-forwarded-for') || null,
         id_scan_ref: body.identity?.id_scan_ref || null,
         age_verified: !!body.identity?.age_verified,
@@ -177,7 +228,8 @@ Deno.serve(async (req) => {
       const saleId = `GBS-${ymd}-${seq}`;
       await base44.asServiceRole.entities.GlyphBucksSale.create({
         sale_id: saleId, agreement_no: agreementNo, receipt_no: receiptNo, verify_ref: verifyRef,
-        venue_id: body.venue_id, purchaser_member_id: body.purchaser_member_id || null,
+        venue_id: body.venue_id, purchaser_name: body.purchaser_name || null,
+        purchaser_member_id: body.purchaser_member_id || null,
         gb_account_last4: body.gb_account_last4 || null,
         denom_cents: denom, qty, face_cents: faceCents, card_fee_cents: cardFee, amount_cents: amountCents,
         currency: body.currency || 'USD', serial_lo: serialLo, serial_hi: serialHi,
@@ -196,7 +248,7 @@ Deno.serve(async (req) => {
         event_type: 'GLYPHBUCKS_SALE_SEALED',
         description: `GlyphBucks sale ${agreementNo} sealed (${verifyRef}) — $${(amountCents / 100).toFixed(2)}`,
         actor_email: user.email, resource_id: sealed.id,
-        metadata: { verify_ref: verifyRef, agreement_no: agreementNo, venue_id: body.venue_id, mode, face_cents: faceCents, amount_cents: amountCents, demo_key: demo },
+        metadata: { verify_ref: verifyRef, agreement_no: agreementNo, venue_id: body.venue_id, mode, face_cents: faceCents, amount_cents: amountCents, anchor_status: anchor.status },
         status: 'success',
       }).catch(() => {});
 
@@ -222,8 +274,9 @@ Deno.serve(async (req) => {
     return Response.json({
       ok: true, verify_ref: verifyRef, agreement_no: agreementNo, receipt_no: receiptNo,
       face_cents: faceCents, amount_cents: amountCents, serial_lo: serialLo, serial_hi: serialHi,
+      terms_hash: termsHash, prev_block_hash: prevBlockHash,
       chain_hash: chainHash, public_key_hex: publicHex, signed_token: signedToken,
-      sealed_at: now.toISOString(), mode, demo_key: demo,
+      anchor, sealed_at: now.toISOString(), mode,
     });
   } catch (error) {
     return Response.json({ ok: false, error: (error as Error).message }, { status: 500 });

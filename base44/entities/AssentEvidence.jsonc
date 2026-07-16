@@ -27,6 +27,14 @@
       "type": "string",
       "format": "date-time"
     },
+    "initials_term1": {
+      "type": "string",
+      "description": "Purchaser initials for Term 1 (nature of transaction) \u2014 captured at clickwrap."
+    },
+    "initials_term3": {
+      "type": "string",
+      "description": "Purchaser initials for Term 3 (non-refundable) \u2014 captured at clickwrap."
+    },
     "ip": {
       "type": "string"
     },

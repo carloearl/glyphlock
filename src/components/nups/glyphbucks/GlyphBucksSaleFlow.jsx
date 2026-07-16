@@ -17,11 +17,11 @@ const lbl = "block text-[11px] text-neutral-400 mb-1";
 const DENOMS = [500, 1000, 2000, 5000, 10000];
 
 export default function GlyphBucksSaleFlow() {
-  const [mode, setMode] = useState("DEMO");
+  const [mode, setMode] = useState("REAL");
   const [venueId, setVenueId] = useState("DP-TEMPE-001");
   const [assent, setAssent] = useState(null);
   const [f, setF] = useState({
-    purchaser_member_id: "", gb_account_last4: "",
+    purchaser_name: "", purchaser_member_id: "", gb_account_last4: "",
     denom_cents: 2000, qty: 5, card_fee_cents: 500,
     card_last4: "", card_auth_code: "", card_entry: "CHIP",
     id_scan_ref: "", age_verified: false, face_id_match_pct: "", thumb_match_pct: "",
@@ -46,6 +46,7 @@ export default function GlyphBucksSaleFlow() {
     try {
       const res = await base44.functions.invoke("glyphbucksSeal", {
         mode, venue_id: venueId,
+        purchaser_name: f.purchaser_name.trim(),
         purchaser_member_id: f.purchaser_member_id.trim(),
         gb_account_last4: f.gb_account_last4.trim(),
         denom_cents: Number(f.denom_cents), qty: Number(f.qty), card_fee_cents: Number(f.card_fee_cents) || 0,
@@ -68,12 +69,29 @@ export default function GlyphBucksSaleFlow() {
   };
 
   if (result) {
+    const doc = {
+      mode: result.mode, venue_id: venueId,
+      agreement_no: result.agreement_no, receipt_no: result.receipt_no,
+      verify_ref: result.verify_ref, sealed_at: result.sealed_at,
+      purchaser_name: f.purchaser_name, purchaser_member_id: f.purchaser_member_id,
+      gb_account_last4: f.gb_account_last4,
+      denom_cents: Number(f.denom_cents), qty: Number(f.qty),
+      face_cents: result.face_cents, card_fee_cents: Number(f.card_fee_cents) || 0,
+      amount_cents: result.amount_cents, serial_lo: result.serial_lo, serial_hi: result.serial_hi,
+      card_last4: f.card_last4, card_auth_code: f.card_auth_code, card_entry: f.card_entry,
+      esigs: { purchaser: f.esig_purchaser, issuer_rep: f.esig_issuer_rep, manager: f.esig_manager },
+      assent,
+      identity: { id_scan_ref: f.id_scan_ref, age_verified: f.age_verified, face_id_match_pct: f.face_id_match_pct, thumb_match_pct: f.thumb_match_pct },
+      terms_hash: result.terms_hash, prev_block_hash: result.prev_block_hash,
+      chain_hash: result.chain_hash, public_key_hex: result.public_key_hex,
+      signed_token: result.signed_token, anchor: result.anchor,
+    };
     return (
       <div className="space-y-4">
-        <GlyphBucksReceipt result={result} sale={{ ...f, esigs: { purchaser: f.esig_purchaser, issuer_rep: f.esig_issuer_rep, manager: f.esig_manager } }} />
+        <GlyphBucksReceipt doc={doc} />
         <div className="flex gap-2 justify-center print:hidden">
           <button onClick={() => window.print()} className="rounded-lg bg-[#33405f] hover:bg-[#42537a] font-bold px-5 py-2.5 min-h-[44px] flex items-center gap-2">
-            <Printer className="w-4 h-4" /> Print
+            <Printer className="w-4 h-4" /> Print (Legal 8.5×14)
           </button>
           <a href={`/v/${result.verify_ref}`} target="_blank" rel="noreferrer" className="rounded-lg bg-blue-600 hover:bg-blue-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Open Verify Page</a>
           <button onClick={() => { setResult(null); setAssent(null); }} className="rounded-lg border border-neutral-500 px-5 py-2.5 font-semibold min-h-[44px]">New Sale</button>
@@ -84,14 +102,16 @@ export default function GlyphBucksSaleFlow() {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-lg bg-amber-950/40 border border-amber-500/40 px-3 py-2 text-xs text-amber-300 font-semibold">
-        MODE GATE — REAL mode is locked until the Production Readiness Gate (§9) is signed off. DEMO/SANDBOX only.
+      <div className={`rounded-lg px-3 py-2 text-xs font-semibold ${mode === "REAL" ? "bg-emerald-950/40 border border-emerald-500/40 text-emerald-300" : "bg-amber-950/40 border border-amber-500/40 text-amber-300"}`}>
+        {mode === "REAL"
+          ? "LIVE MODE — sales are sealed to the real ledger, Ed25519-signed, and anchored to Bitcoin via OpenTimestamps."
+          : `${mode} MODE — records are quarantined from the real ledger.`}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <label><span className={lbl}>Venue ID</span><input className={inp} value={venueId} onChange={(e) => setVenueId(e.target.value)} /></label>
         <label><span className={lbl}>Mode</span>
-          <select className={inp} value={mode} onChange={(e) => setMode(e.target.value)}><option>DEMO</option><option>SANDBOX</option></select>
+          <select className={inp} value={mode} onChange={(e) => setMode(e.target.value)}><option>REAL</option><option>DEMO</option><option>SANDBOX</option></select>
         </label>
       </div>
 
@@ -113,6 +133,7 @@ export default function GlyphBucksSaleFlow() {
           </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+          <label className="col-span-2"><span className={lbl}>Purchaser name (as printed on agreement)</span><input className={inp} value={f.purchaser_name} onChange={(e) => set("purchaser_name", e.target.value)} /></label>
           <label><span className={lbl}>Member ID</span><input className={inp} value={f.purchaser_member_id} onChange={(e) => set("purchaser_member_id", e.target.value)} /></label>
           <label><span className={lbl}>GB acct last 4</span><input className={inp} maxLength={4} value={f.gb_account_last4} onChange={(e) => set("gb_account_last4", e.target.value.replace(/\D/g, ""))} /></label>
           <label><span className={lbl}>Card last 4</span><input className={inp} maxLength={4} value={f.card_last4} onChange={(e) => set("card_last4", e.target.value.replace(/\D/g, ""))} /></label>

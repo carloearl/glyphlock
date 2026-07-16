@@ -1,7 +1,7 @@
 {
   "name": "GlyphBucksSale",
   "type": "object",
-  "description": "DACO GlyphBucks Stored-Value Contract-Receipt System \u2014 one row per stored-value voucher sale. Instrument sale ONLY (never performance/service framing). Issuance is a LIABILITY, never revenue \u2014 excluded from total_sales. REAL mode locked until Production Readiness Gate (\u00a79) sign-off.",
+  "description": "DACO GlyphBucks Stored-Value Contract-Receipt System \u2014 one row per stored-value voucher sale. Instrument sale ONLY (never performance/service framing). Issuance is a LIABILITY, never revenue \u2014 excluded from total_sales.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -21,6 +21,10 @@
     },
     "venue_id": {
       "type": "string"
+    },
+    "purchaser_name": {
+      "type": "string",
+      "description": "Purchaser display name as printed on the agreement."
     },
     "purchaser_member_id": {
       "type": "string"
@@ -69,8 +73,7 @@
         "DEMO",
         "SANDBOX"
       ],
-      "default": "DEMO",
-      "description": "REAL locked until \u00a79 gate."
+      "default": "DEMO"
     },
     "status": {
       "type": "string",

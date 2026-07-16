@@ -39,6 +39,8 @@ Deno.serve(async (req) => {
 
     const sales = await base44.asServiceRole.entities.GlyphBucksSale.filter({ verify_ref: ref }, '-created_date', 1);
     const sale = sales?.[0] || {};
+    const assents = await base44.asServiceRole.entities.AssentEvidence.filter({ verify_ref: ref }, '-created_date', 1);
+    const assent = assents?.[0] || {};
 
     // Recompute chain hash from stored inputs.
     const recomputedChain = await sha256Hex(String(seal.prev_block_hash) + String(seal.terms_hash) + String(seal.agreement_no));
@@ -68,12 +70,43 @@ Deno.serve(async (req) => {
       terms_version: seal.terms_version,
       mode: seal.mode,
       sealed_at: seal.sealed_at,
+      receipt_no: sale.receipt_no ?? null,
+      venue_id: seal.venue_id,
+      purchaser_name: sale.purchaser_name ?? null,
+      purchaser_member_id: sale.purchaser_member_id ?? null,
+      denom_cents: sale.denom_cents ?? null,
+      qty: sale.qty ?? null,
       face_cents: sale.face_cents ?? null,
+      card_fee_cents: sale.card_fee_cents ?? null,
       amount_cents: sale.amount_cents ?? null,
       serial_lo: sale.serial_lo ?? null,
       serial_hi: sale.serial_hi ?? null,
       gb_account_last4: sale.gb_account_last4 ?? null,
+      signed_token: seal.signed_token,
+      anchor: seal.anchor ?? null,
+      // Redacted assent evidence — enough to render the sealed contract document.
+      // Never raw biometrics; card is last4 only.
+      assent: {
+        clickwrap_accepted: !!assent.clickwrap_accepted,
+        terms_shown_at: assent.terms_shown_at ?? null,
+        scroll_depth_pct: assent.scroll_depth_pct ?? null,
+        dwell_seconds: assent.dwell_seconds ?? null,
+        accepted_at: assent.accepted_at ?? null,
+        initials_term1: assent.initials_term1 ?? null,
+        initials_term3: assent.initials_term3 ?? null,
+        id_scan_ref: assent.id_scan_ref ?? null,
+        age_verified: !!assent.age_verified,
+        face_id_match_pct: assent.face_id_match_pct ?? null,
+        thumbprint_match_pct: assent.thumbprint_match_pct ?? null,
+        card_last4: assent.card_last4 ?? null,
+        card_entry: assent.card_entry ?? null,
+        card_auth_code: assent.card_auth_code ?? null,
+        esig_purchaser: assent.esig_purchaser_ref ?? null,
+        esig_issuer_rep: assent.esig_issuer_rep_ref ?? null,
+        esig_manager: assent.esig_manager_ref ?? null,
+      },
       integrity: {
+        prev_block_hash: seal.prev_block_hash,
         chain_hash: seal.chain_hash,
         chain_valid: chainValid,
         signature_valid: signatureValid,

@@ -44,6 +44,11 @@
       "type": "string",
       "description": "RFC 3161 timestamp token. NULL until a real TSA integration is live \u2014 the document must NOT claim TSA until then (\u00a74)."
     },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Blockchain timestamp anchor: status (ANCHOR_SUBMITTED \u2192 BITCOIN_ATTESTED | ANCHOR_FAILED_RETRY), protocol (OpenTimestamps\u2192Bitcoin), calendar, proof_b64 (stored unmodified \u2014 cryptographic evidence), submitted_at."
+    },
     "sealed_at": {
       "type": "string",
       "format": "date-time"
