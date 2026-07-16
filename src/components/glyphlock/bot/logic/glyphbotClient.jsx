@@ -49,6 +49,11 @@ class GlyphBotClient {
     const result = await askGlyphBot({
       personaId,
       messages: enhancedMessages,
+      // When real-time is on (audits always set it), route to the web-capable
+      // model with live internet context enabled — not just the pre-fetched
+      // search summary. This makes People/Business/Agency audits actually
+      // research the web instead of answering from memory.
+      webContext: !!finalOptions.realTime,
       onChunk: options.onChunk || null,
     });
 
