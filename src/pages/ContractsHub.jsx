@@ -26,6 +26,7 @@ import VIPShowContracts from "@/pages/VIPShowContracts";
 import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
 import VIPShowVerifyPanel from "@/components/nups/vip/VIPShowVerifyPanel";
 import GlyphBucksSaleFlow from "@/components/nups/glyphbucks/GlyphBucksSaleFlow";
+import DemoContractSeeder from "@/components/nups/contracts/DemoContractSeeder";
 
 /**
  * Master Covenant & Contracts Hub
@@ -91,6 +92,9 @@ export default function ContractsHub() {
     >
       <div className="max-w-[1400px] mx-auto space-y-6">
         {/* Module tab rail — every contract surface, one click away */}
+        {/* Demo mode — one-click mock data for the new sealed contract systems */}
+        <DemoContractSeeder />
+
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           {TABS.map(({ key, label, Icon }) => (
             <button
