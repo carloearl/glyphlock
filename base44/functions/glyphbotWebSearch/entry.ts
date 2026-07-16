@@ -2,166 +2,177 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 /**
  * GlyphBot Real-Time Web Search Tool
- * Provides fresh information from the internet for GlyphBot queries
- * 
- * Environment Variables Required:
- * - SEARCH_API_KEY: API key for search provider (SerpAPI, Google Custom Search, etc.)
- * - SEARCH_API_URL: Optional custom endpoint (defaults to SerpAPI)
+ * Provides fresh information from the internet for GlyphBot queries.
+ *
+ * Modes:
+ * - standard: single query across the provider chain.
+ * - deep (deep=true): expands the query into many angled sub-queries
+ *   (site-turn / intel gathering), runs each across the provider chain,
+ *   aggregates + dedupes across ALL sources. No small result cap.
+ *
+ * Optional env vars: SERP_API_KEY, GOOGLE_SEARCH_API_KEY, GOOGLE_SEARCH_CX.
+ * Falls back to DuckDuckGo (free) and Base44 LLM internet context.
  */
+
+// Run one query across the full provider chain. Returns {results, provider}.
+async function runProviderChain(base44, query, num) {
+  let results = null;
+  let provider = 'none';
+
+  const serpApiKey = Deno.env.get('SERP_API_KEY');
+  if (serpApiKey) {
+    try {
+      const r = await fetch(`https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=${num}`);
+      if (r.ok) {
+        const data = await r.json();
+        results = (data.organic_results || []).map((x) => ({ title: x.title, snippet: x.snippet, url: x.link }));
+        provider = 'serpapi';
+      }
+    } catch (e) { console.error('SerpAPI failed:', e); }
+  }
+
+  const googleApiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY');
+  const googleCx = Deno.env.get('GOOGLE_SEARCH_CX');
+  if (googleApiKey && googleCx && !results) {
+    try {
+      // Google CSE returns max 10/page — paginate to reach num.
+      const collected = [];
+      for (let start = 1; start <= num && start <= 91; start += 10) {
+        const r = await fetch(`https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${encodeURIComponent(query)}&num=10&start=${start}`);
+        if (!r.ok) break;
+        const data = await r.json();
+        (data.items || []).forEach((x) => collected.push({ title: x.title, snippet: x.snippet, url: x.link }));
+        if (!data.items || data.items.length < 10) break;
+      }
+      if (collected.length) { results = collected; provider = 'google'; }
+    } catch (e) { console.error('Google Search failed:', e); }
+  }
+
+  if (!results) {
+    try {
+      const r = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`);
+      if (r.ok) {
+        const data = await r.json();
+        const out = [];
+        if (data.AbstractText) out.push({ title: data.Heading || 'Summary', snippet: data.AbstractText, url: data.AbstractURL || 'https://duckduckgo.com' });
+        (data.RelatedTopics || []).forEach((t) => {
+          if (t.Text) out.push({ title: t.Text.split(' - ')[0] || 'Related', snippet: t.Text, url: t.FirstURL || 'https://duckduckgo.com' });
+        });
+        if (out.length) { results = out; provider = 'duckduckgo'; }
+      }
+    } catch (e) { console.error('DuckDuckGo failed:', e); }
+  }
+
+  return { results: results || [], provider };
+}
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    
+
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { query, maxResults = 5 } = await req.json();
-    
+    const { query, maxResults = 5, deep = false } = await req.json();
+
     if (!query || typeof query !== 'string') {
       return Response.json({ error: 'Query is required' }, { status: 400 });
     }
 
-    // Try multiple search providers with fallback
-    let searchResults = null;
-    let providerUsed = 'none';
+    // Per-query result depth — uncapped for deep intel gathering.
+    const perQuery = deep ? Math.max(30, Number(maxResults) || 0) : (Number(maxResults) || 5);
 
-    // Provider 1: SerpAPI (if configured)
-    const serpApiKey = Deno.env.get('SERP_API_KEY');
-    if (serpApiKey && !searchResults) {
+    // Build the list of sub-queries. Deep mode expands into many angles
+    // (site-turn searches, intel sources) so we canvas every corner.
+    let subQueries = [query];
+    if (deep) {
       try {
-        const serpResponse = await fetch(
-          `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=${maxResults}`
-        );
-        if (serpResponse.ok) {
-          const data = await serpResponse.json();
-          searchResults = data.organic_results?.map(r => ({
-            title: r.title,
-            snippet: r.snippet,
-            url: r.link
-          })) || [];
-          providerUsed = 'serpapi';
-        }
-      } catch (e) {
-        console.error('SerpAPI failed:', e);
-      }
-    }
-
-    // Provider 2: Google Custom Search (if configured)
-    const googleApiKey = Deno.env.get('GOOGLE_SEARCH_API_KEY');
-    const googleCx = Deno.env.get('GOOGLE_SEARCH_CX');
-    if (googleApiKey && googleCx && !searchResults) {
-      try {
-        const googleResponse = await fetch(
-          `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${encodeURIComponent(query)}&num=${maxResults}`
-        );
-        if (googleResponse.ok) {
-          const data = await googleResponse.json();
-          searchResults = data.items?.map(r => ({
-            title: r.title,
-            snippet: r.snippet,
-            url: r.link
-          })) || [];
-          providerUsed = 'google';
-        }
-      } catch (e) {
-        console.error('Google Search failed:', e);
-      }
-    }
-
-    // Provider 3: DuckDuckGo Instant Answer (free, no API key)
-    if (!searchResults) {
-      try {
-        const ddgResponse = await fetch(
-          `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`
-        );
-        if (ddgResponse.ok) {
-          const data = await ddgResponse.json();
-          searchResults = [];
-          
-          if (data.AbstractText) {
-            searchResults.push({
-              title: data.Heading || 'Summary',
-              snippet: data.AbstractText,
-              url: data.AbstractURL || 'https://duckduckgo.com'
-            });
-          }
-          
-          if (data.RelatedTopics) {
-            data.RelatedTopics.slice(0, maxResults - 1).forEach(topic => {
-              if (topic.Text) {
-                searchResults.push({
-                  title: topic.Text.split(' - ')[0] || 'Related',
-                  snippet: topic.Text,
-                  url: topic.FirstURL || 'https://duckduckgo.com'
-                });
-              }
-            });
-          }
-          
-          if (searchResults.length > 0) {
-            providerUsed = 'duckduckgo';
-          }
-        }
-      } catch (e) {
-        console.error('DuckDuckGo failed:', e);
-      }
-    }
-
-    // Fallback: Use Base44 LLM with internet context
-    if (!searchResults || searchResults.length === 0) {
-      try {
-        const llmResult = await base44.integrations.Core.InvokeLLM({
-          prompt: `Search query: "${query}". Provide a brief, factual summary of what you know about this topic. Include any relevant recent information.`,
-          add_context_from_internet: true
+        const expansion = await base44.integrations.Core.InvokeLLM({
+          prompt: `You are an OSINT research planner. For the target/topic: "${query}", produce a diverse set of web search queries that canvas EVERY available public source — official sites, news, social media, reviews, court/legal records, government/regulatory databases, professional profiles, forums, archives (Wayback), data-breach mentions, and site-specific "site:" dorks. Return 12-16 distinct, high-signal queries.`,
+          response_json_schema: {
+            type: 'object',
+            properties: { queries: { type: 'array', items: { type: 'string' } } },
+            required: ['queries'],
+          },
         });
-        
-        searchResults = [{
-          title: 'AI Summary',
-          snippet: llmResult,
-          url: 'https://glyphlock.io'
-        }];
-        providerUsed = 'base44-llm';
+        const extra = Array.isArray(expansion?.queries) ? expansion.queries : [];
+        subQueries = [query, ...extra].filter(Boolean);
       } catch (e) {
-        console.error('LLM fallback failed:', e);
+        console.error('Query expansion failed, using base query only:', e);
       }
     }
 
-    // Format results for GlyphBot consumption
-    const summary = searchResults?.length > 0
-      ? searchResults.map((r, i) => `[${i + 1}] ${r.title}: ${r.snippet}`).join('\n\n')
+    // Run every sub-query across the provider chain and aggregate.
+    const seen = new Set();
+    const aggregated = [];
+    const providersUsed = new Set();
+
+    for (const q of subQueries) {
+      const { results, provider } = await runProviderChain(base44, q, perQuery);
+      if (provider !== 'none') providersUsed.add(provider);
+      for (const r of results) {
+        const key = (r.url || r.title || '').toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          aggregated.push({ ...r, query: q });
+        }
+      }
+    }
+
+    // Always add a Base44 LLM internet-context pass for a synthesized
+    // intel summary (and as a fallback when provider results are thin).
+    let aiSummary = '';
+    try {
+      const llmResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Deep research the following and synthesize a factual intelligence summary from current public web sources. Target/topic: "${query}". Cover key facts, entities, reputation/reviews, risks, legal/regulatory mentions, and recent news. Cite sources with URLs where possible.`,
+        add_context_from_internet: true,
+      });
+      aiSummary = typeof llmResult === 'string' ? llmResult : JSON.stringify(llmResult);
+      if (aiSummary) {
+        aggregated.push({ title: 'AI Intel Synthesis (live internet)', snippet: aiSummary, url: 'https://glyphlock.io', query });
+        providersUsed.add('base44-llm');
+      }
+    } catch (e) {
+      console.error('LLM internet synthesis failed:', e);
+    }
+
+    const summary = aggregated.length > 0
+      ? aggregated.map((r, i) => `[${i + 1}] ${r.title}: ${r.snippet}${r.url ? ` (${r.url})` : ''}`).join('\n\n')
       : 'No search results found.';
 
-    // Log search for analytics
     await base44.entities.SystemAuditLog.create({
       event_type: 'GLYPHBOT_WEB_SEARCH',
-      description: `Web search: ${query.slice(0, 100)}`,
+      description: `${deep ? 'DEEP ' : ''}Web search: ${query.slice(0, 100)}`,
       actor_email: user.email,
       resource_id: 'glyphbot-search',
       metadata: {
         query,
-        provider: providerUsed,
-        resultCount: searchResults?.length || 0
+        deep,
+        subQueryCount: subQueries.length,
+        providers: Array.from(providersUsed),
+        resultCount: aggregated.length,
       },
-      status: 'success'
+      status: 'success',
     }).catch(console.error);
 
     return Response.json({
       success: true,
       query,
-      provider: providerUsed,
-      results: searchResults || [],
+      deep,
+      provider: Array.from(providersUsed).join(',') || 'none',
+      subQueries,
+      results: aggregated,
       summary,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
   } catch (error) {
     console.error('Web search error:', error);
-    return Response.json({ 
+    return Response.json({
       error: error.message,
-      success: false 
+      success: false,
     }, { status: 500 });
   }
 });

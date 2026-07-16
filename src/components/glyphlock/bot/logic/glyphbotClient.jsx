@@ -23,15 +23,21 @@ class GlyphBotClient {
     const finalOptions = { ...this.defaultOptions, ...options };
     const personaId = options.persona || this.defaultPersona;
 
-    // Real-time web context (existing search service, unchanged)
+    // Real-time web context. Audits run DEEP, uncapped, multi-source intel
+    // gathering (site-turn searches across every provider + AI synthesis).
     let realTimeContext = '';
     if (finalOptions.realTime) {
       const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
       if (lastUserMsg) {
         try {
-          const searchResult = await this.webSearch(lastUserMsg.content || lastUserMsg.text);
+          const deep = !!finalOptions.auditMode;
+          const searchResult = await this.webSearch(
+            lastUserMsg.content || lastUserMsg.text,
+            deep ? 40 : 5,
+            { deep }
+          );
           if (searchResult.success && searchResult.summary) {
-            realTimeContext = `\n\n[REAL-TIME WEB CONTEXT]\n${searchResult.summary}\n[END CONTEXT]\n`;
+            realTimeContext = `\n\n[REAL-TIME WEB CONTEXT — ${searchResult.results?.length || 0} sources, ${searchResult.subQueries?.length || 1} queries]\n${searchResult.summary}\n[END CONTEXT]\n`;
           }
         } catch (e) {
           console.warn('Real-time search failed:', e);
@@ -75,8 +81,8 @@ class GlyphBotClient {
     };
   }
 
-  async webSearch(query, maxResults = 5) {
-    return await searchService.query(query, maxResults);
+  async webSearch(query, maxResults = 5, options = {}) {
+    return await searchService.query(query, maxResults, options);
   }
 
   async askWithRealTime(prompt, persona = 'GENERAL') {

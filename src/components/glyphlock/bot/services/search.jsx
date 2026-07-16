@@ -4,11 +4,12 @@ import { base44 } from '@/api/base44Client';
  * Search Service - Wrapper around glyphbotWebSearch backend function
  */
 
-export async function query(searchQuery, maxResults = 5) {
+export async function query(searchQuery, maxResults = 5, options = {}) {
   try {
     const response = await base44.functions.invoke('glyphbotWebSearch', {
       query: searchQuery,
-      maxResults
+      maxResults,
+      deep: !!options.deep
     });
     return response.data;
   } catch (error) {
