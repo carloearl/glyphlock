@@ -1,28 +1,28 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, Send, Loader2, Volume2, ArrowLeft } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { Sparkles, Send, Volume2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
+import { askGlyphBot } from "@/lib/glyphbot/brain/orchestrator";
+import MarkdownRenderer from "@/components/glyphlock/bot/ui/chat/MarkdownRenderer";
+import TypingIndicator from "@/components/glyphlock/bot/ui/chat/TypingIndicator";
+import useChatScroll from "@/components/glyphlock/bot/ui/chat/useChatScroll";
+import JumpToLatest from "@/components/glyphlock/bot/ui/chat/JumpToLatest";
+import FeedbackButtons from "@/components/glyphlock/bot/ui/FeedbackButtons";
 
 export default function GlyphBotJuniorPage() {
-  const jrPersona = {
-    system: "You are GlyphBot Junior, a friendly AI assistant designed for kids and beginners. You explain complex topics in simple, fun ways using emojis and encouraging language. You're patient, supportive, and make learning about technology exciting!"
-  };
-  
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Hi there! I'm GlyphBot Junior! 🌟 How can I help you today?", timestamp: Date.now() }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
   const audioRef = useRef(null);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  // DACO 007 Phase B — autoscroll with scroll-lock
+  const lastLen = messages[messages.length - 1]?.text?.length || 0;
+  const { ref: scrollRef, pinned, onScroll, scrollToBottom } = useChatScroll(`${messages.length}-${lastLen}-${loading}`);
 
   const playVoice = async (text) => {
     try {
@@ -61,62 +61,39 @@ export default function GlyphBotJuniorPage() {
     setLoading(true);
 
     try {
+      // DACO 007 Phase A/B — routed through the single brain orchestrator (A1);
+      // progressive reveal streaming fallback; no audio auto-play (explicit gesture only).
       const { QR_KNOWLEDGE_BASE } = await import('../components/qr/QrKnowledgeBase');
-      const { IMAGE_LAB_KNOWLEDGE } = await import('../components/imageLab/ImageLabKnowledge');
       const { default: faqData } = await import('@/components/content/faqMasterData');
       const { default: sitemapKnowledge } = await import('@/components/content/sitemapKnowledge');
-      
-      const faqContext = faqData.map(item => 
-        `Q: ${item.q}\nA: ${item.a.join(' ')}`
-      ).join('\n\n');
 
-      const sitemapContext = `
-Site Structure:
-${sitemapKnowledge.tools.map(t => `- ${t.name} at ${t.path}`).join('\n')}
-
-Navigation Questions:
-${sitemapKnowledge.commonQuestions.map(q => `Q: ${q.q}\nA: ${q.a}`).join('\n')}
-`;
+      const extraContext = [
+        'QR Studio Knowledge:', QR_KNOWLEDGE_BASE,
+        'FAQ:', faqData.map(item => `Q: ${item.q}\nA: ${item.a.join(' ')}`).join('\n\n'),
+        'Site Structure:', sitemapKnowledge.tools.map(t => `- ${t.name} at ${t.path}`).join('\n'),
+        'Navigation Q&A:', sitemapKnowledge.commonQuestions.map(q => `Q: ${q.q}\nA: ${q.a}`).join('\n'),
+      ].join('\n');
 
       const conversationHistory = messages.map(msg => ({
         role: msg.role,
         content: msg.text
       })).concat([{ role: "user", content: userMessage }]);
 
-      const promptText = `${jrPersona?.system || 'You are GlyphBot Junior, a friendly AI assistant for beginners. Be helpful and explain things in simple terms.'}
+      const ts = Date.now();
+      setLoading(false);
+      setMessages(prev => [...prev, { role: "assistant", text: "", streaming: true, timestamp: ts }]);
 
-QR Studio Knowledge Base:
-${QR_KNOWLEDGE_BASE || 'QR code generation and security features.'}
-
-Image Lab Knowledge Base:
-${JSON.stringify(IMAGE_LAB_KNOWLEDGE || {}, null, 2)}
-
-GlyphLock FAQ Knowledge Base:
-${faqContext || ''}
-
-${sitemapContext || ''}
-
-Conversation history:
-${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
-
-When answering questions, use the knowledge bases to provide accurate information about GlyphLock features, pricing, navigation, and tools. Be friendly, helpful, and explain things simply!`;
-
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: promptText,
-        add_context_from_internet: false
+      await askGlyphBot({
+        personaId: 'glyphbot_jr',
+        messages: conversationHistory,
+        extraContext,
+        onChunk: (partial) => {
+          setMessages(prev => prev.map(m => (m.timestamp === ts && m.role === "assistant") ? { ...m, text: partial } : m));
+        },
       });
 
-      const assistantMessage = { 
-        role: "assistant", 
-        text: response, 
-        timestamp: Date.now() 
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-      
-      // Auto-play voice response
-      setTimeout(() => playVoice(response), 300);
-      
+      setMessages(prev => prev.map(m => (m.timestamp === ts && m.role === "assistant") ? { ...m, streaming: false } : m));
+
     } catch (error) {
       setMessages(prev => [...prev, {
         role: "assistant",
@@ -164,59 +141,64 @@ When answering questions, use the knowledge bases to provide accurate informatio
           </div>
         </header>
 
-        {/* Chat Messages */}
-        <main className="flex-1 overflow-y-auto px-4 py-6 space-y-4 relative z-10">
+        {/* Chat Messages — DACO 007 Phase B */}
+        <main
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="flex-1 overflow-y-auto px-4 py-6 space-y-4 relative z-10"
+        >
           {messages.map((msg, idx) => (
             <div
-              key={idx}
+              key={msg.timestamp || idx}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[85%] rounded-2xl px-5 py-3 shadow-lg ${
+                className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-lg ${
                   msg.role === "user"
                     ? "bg-gradient-to-br from-blue-600 to-blue-800 text-white"
                     : "bg-blue-950/80 backdrop-blur text-white border border-blue-400/30"
                 }`}
                 style={msg.role === "assistant" ? { boxShadow: '0 0 20px rgba(37, 99, 235, 0.3)' } : {}}
               >
-                <ReactMarkdown
-                  className="prose prose-invert prose-sm max-w-none"
-                  components={{
-                    p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
-                    code: ({ inline, children }) =>
-                      inline ? (
-                        <code className="bg-gray-200 px-1.5 py-0.5 rounded text-sm">{children}</code>
-                      ) : (
-                        <code className="block bg-gray-100 p-3 rounded-lg text-sm overflow-x-auto">{children}</code>
-                      )
-                  }}
-                >
-                  {msg.text}
-                </ReactMarkdown>
-                
-                {msg.role === "assistant" && (
-                  <button
-                    onClick={() => playVoice(msg.text)}
-                    className="mt-3 text-xs bg-blue-600/30 hover:bg-blue-600/50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-blue-400/30"
-                    style={{ boxShadow: '0 0 10px rgba(37, 99, 235, 0.2)' }}
-                  >
-                    <Volume2 className="w-3 h-3" />
-                    Listen
-                  </button>
+                {msg.role === "assistant" ? (
+                  <>
+                    <MarkdownRenderer>{msg.text}</MarkdownRenderer>
+                    {msg.streaming && (
+                      <span className="inline-block w-1.5 h-4 bg-blue-300 animate-pulse ml-0.5 align-middle rounded-sm" />
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
+                )}
+
+                {msg.role === "assistant" && !msg.streaming && msg.text && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => playVoice(msg.text)}
+                      style={{ minHeight: '32px', touchAction: 'manipulation' }}
+                      className="mt-2 text-xs bg-blue-600/30 hover:bg-blue-600/50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 border border-blue-400/30"
+                    >
+                      <Volume2 className="w-3 h-3" />
+                      Listen
+                    </button>
+                    <FeedbackButtons
+                      messageId={`jrpage-${msg.timestamp || idx}`}
+                      personaId="glyphbot_jr"
+                      surface="glyphbot_jr_public"
+                      responseText={msg.text}
+                    />
+                  </div>
                 )}
               </div>
             </div>
           ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-blue-950/80 backdrop-blur rounded-2xl px-5 py-3 shadow-lg flex items-center gap-2 border border-blue-400/30" style={{ boxShadow: '0 0 20px rgba(37, 99, 235, 0.3)' }}>
-                <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
-                <span className="text-blue-200 text-sm">Thinking...</span>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+          {loading && <TypingIndicator label="GlyphBot Jr is thinking" />}
         </main>
+        {!pinned && (
+          <div className="relative z-20">
+            <JumpToLatest onClick={() => scrollToBottom()} />
+          </div>
+        )}
 
         {/* Input Area */}
         <footer className="flex-none glyph-glass-dark border-t border-blue-400/20 px-4 py-4 relative z-10">

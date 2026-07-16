@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { askGlyphBot } from "@/lib/glyphbot/brain/orchestrator";
-import { Sparkles, Send, Loader2 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import { PERSONAS } from '../config/personas';
+import { Sparkles, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FeedbackButtons from './FeedbackButtons';
+import MarkdownRenderer from './chat/MarkdownRenderer';
+import TypingIndicator from './chat/TypingIndicator';
+import useChatScroll from './chat/useChatScroll';
+import JumpToLatest from './chat/JumpToLatest';
 
 export default function GlyphBotJr({ onClose, forceExpanded = false }) {
-  const jrPersona = PERSONAS.find(p => p.id === "glyphbot_jr") || PERSONAS[4];
-  
   const [isOpen, setIsOpen] = useState(forceExpanded);
   const [isHovered, setIsHovered] = useState(false);
   const [messages, setMessages] = useState([
@@ -16,11 +16,11 @@ export default function GlyphBotJr({ onClose, forceExpanded = false }) {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [showAllMessages, setShowAllMessages] = useState(false);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  // DACO 007 Phase B — autoscroll with scroll-lock
+  const lastLen = messages[messages.length - 1]?.text?.length || 0;
+  const { ref: scrollRef, pinned, onScroll, scrollToBottom } = useChatScroll(`${messages.length}-${lastLen}-${loading}`);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -211,57 +211,64 @@ export default function GlyphBotJr({ onClose, forceExpanded = false }) {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-4 py-6 space-y-4 relative z-10" style={{ background: 'rgba(15, 23, 42, 0.95)' }}>
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl px-5 py-3 shadow-lg ${
-                msg.role === "user"
-                  ? "bg-gradient-to-br from-blue-600 to-blue-800 text-white"
-                  : "bg-blue-950/80 backdrop-blur text-white border border-blue-400/30"
-              }`}
-              style={msg.role === "assistant" ? { boxShadow: '0 0 20px rgba(37, 99, 235, 0.3)' } : {}}
+      <main
+        ref={scrollRef}
+        onScroll={onScroll}
+        className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-4 relative z-10"
+        style={{ background: 'rgba(15, 23, 42, 0.95)' }}
+      >
+          {messages.length > 50 && !showAllMessages && (
+            <button
+              onClick={() => setShowAllMessages(true)}
+              style={{ minHeight: '44px', touchAction: 'manipulation' }}
+              className="mx-auto block px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-blue-300 hover:border-blue-400/40 transition-all"
             >
-              <ReactMarkdown
-                className="prose prose-invert prose-sm max-w-none"
-                components={{
-                  p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
-                  code: ({ inline, children }) =>
-                    inline ? (
-                      <code className="bg-gray-200 px-1.5 py-0.5 rounded text-sm">{children}</code>
-                    ) : (
-                      <code className="block bg-gray-100 p-3 rounded-lg text-sm overflow-x-auto">{children}</code>
-                    )
-                }}
+              Show {messages.length - 50} earlier messages
+            </button>
+          )}
+          {(showAllMessages || messages.length <= 50 ? messages : messages.slice(-50)).map((msg, idx) => (
+            <div
+              key={msg.timestamp || idx}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-lg ${
+                  msg.role === "user"
+                    ? "bg-gradient-to-br from-blue-600 to-blue-800 text-white"
+                    : "bg-blue-950/80 backdrop-blur text-white border border-blue-400/30"
+                }`}
+                style={msg.role === "assistant" ? { boxShadow: '0 0 20px rgba(37, 99, 235, 0.3)' } : {}}
               >
-                {msg.text}
-              </ReactMarkdown>
+                {msg.role === "assistant" ? (
+                  <>
+                    <MarkdownRenderer>{msg.text}</MarkdownRenderer>
+                    {msg.streaming && (
+                      <span className="inline-block w-1.5 h-4 bg-blue-300 animate-pulse ml-0.5 align-middle rounded-sm" />
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
+                )}
 
-              {/* DACO 006 P1 — per-response feedback (hidden while streaming) */}
-              {msg.role === "assistant" && !msg.streaming && msg.text && (
-                <FeedbackButtons
-                  messageId={`jr-${msg.timestamp || idx}`}
-                  personaId="glyphbot_jr"
-                  surface="glyphbot_jr_public"
-                  responseText={msg.text}
-                />
-              )}
+                {/* DACO 006 P1 — per-response feedback (hidden while streaming) */}
+                {msg.role === "assistant" && !msg.streaming && msg.text && (
+                  <FeedbackButtons
+                    messageId={`jr-${msg.timestamp || idx}`}
+                    personaId="glyphbot_jr"
+                    surface="glyphbot_jr_public"
+                    responseText={msg.text}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-blue-950/80 backdrop-blur rounded-2xl px-5 py-3 shadow-lg flex items-center gap-2 border border-blue-400/30" style={{ boxShadow: '0 0 20px rgba(37, 99, 235, 0.3)' }}>
-              <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
-              <span className="text-blue-200 text-sm">Thinking...</span>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+          ))}
+          {loading && <TypingIndicator label="GlyphBot Jr is thinking" />}
       </main>
+      {!pinned && (
+        <div className="relative z-20">
+          <JumpToLatest onClick={() => scrollToBottom()} />
+        </div>
+      )}
 
       <footer className="border-t border-blue-400/30 px-4 py-4 relative z-10" style={{ background: 'rgba(30, 41, 59, 0.95)' }}>
         <div className="flex items-center gap-3">

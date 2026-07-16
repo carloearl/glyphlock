@@ -5,12 +5,15 @@ import ChatMessageMemo from '@/components/glyphlock/bot/ui/ChatMessageMemo';
 import ChatErrorBoundary from '@/components/glyphlock/bot/ui/ChatErrorBoundary';
 import SEOHead from '@/components/SEOHead';
 import { base44 } from '@/api/base44Client';
-import { Activity, Shield, Bot, AlertTriangle, X, PanelRightOpen, PanelRightClose, Menu, ChevronDown } from 'lucide-react';
+import { Activity, Shield, Bot, AlertTriangle, X, PanelRightOpen, PanelRightClose, Menu, ChevronDown, VolumeX } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 import { injectSoftwareSchema } from '@/components/utils/seoHelpers';
 import HelpPanel from '@/components/global/HelpPanel';
 import useTTSClean from '@/components/glyphlock/bot/logic/useTTSClean';
+import TypingIndicator from '@/components/glyphlock/bot/ui/chat/TypingIndicator';
+import useChatScroll from '@/components/glyphlock/bot/ui/chat/useChatScroll';
+import JumpToLatest from '@/components/glyphlock/bot/ui/chat/JumpToLatest';
 import GlobalAudioEngine from '@/audio/GlobalAudioEngine';
 
 const { 
@@ -59,7 +62,11 @@ export default function GlyphBotPage() {
 
   const [lastMeta, setLastMeta] = useState(null);
   const [providerMeta, setProviderMeta] = useState(null);
-  const chatContainerRef = useRef(null);
+  const [showAllMessages, setShowAllMessages] = useState(false);
+
+  // DACO 007 Phase B — autoscroll with scroll-lock (follows only while pinned to bottom)
+  const lastMsgLen = messages[messages.length - 1]?.content?.length || 0;
+  const { ref: chatContainerRef, pinned, onScroll, scrollToBottom } = useChatScroll(`${messages.length}-${lastMsgLen}-${isSending}`);
   
   // Phase 7: TTS settings state with ENHANCED CONTROLS
   const [voiceSettings, setVoiceSettings] = useState(() => {
@@ -229,16 +236,6 @@ export default function GlyphBotPage() {
     }
   }, [chatCount, persona, provider, modes, voiceSettings]);
 
-  // Auto-scroll chat
-  useEffect(() => {
-    const el = chatContainerRef.current;
-    if (el) {
-      requestAnimationFrame(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-      });
-    }
-  }, [messages, isSending]);
-
   const handleSend = useCallback(async (files = []) => {
     const trimmed = input.trim();
     if (!trimmed || isSending) return;
@@ -247,6 +244,7 @@ export default function GlyphBotPage() {
       id: `user-${Date.now()}`, 
       role: 'user', 
       content: trimmed,
+      ts: Date.now(),
       files: files.map(f => ({ name: f.name, size: f.size, type: f.type }))
     };
     const updatedMessages = [...messages, newUserMsg];
@@ -257,8 +255,17 @@ export default function GlyphBotPage() {
     // Track user message for full history persistence
     trackMessage(newUserMsg);
 
+    const botId = `bot-${Date.now()}`;
     try {
       const response = await glyphbotClient.sendMessage(updatedMessages, {
+        // DACO 007 Phase B — progressive reveal into a streaming bubble
+        onChunk: (partial) => {
+          setMessages(prev => {
+            const exists = prev.some(m => m.id === botId);
+            const base = exists ? prev : [...prev, { id: botId, role: 'assistant', content: '', streaming: true, ts: Date.now() }];
+            return base.map(m => m.id === botId ? { ...m, content: partial } : m);
+          });
+        },
         persona,
         auditMode: modes.audit,
         oneTestMode: modes.test,
@@ -293,9 +300,10 @@ export default function GlyphBotPage() {
       console.log('[GlyphBot] Response received:', { botText, fullResponse: response });
 
       const botMsg = { 
-        id: `bot-${Date.now()}`,
+        id: botId,
         role: 'assistant', 
         content: botText,
+        ts: Date.now(),
         audit: response.audit || response.data?.audit || null,
         providerId: response.providerUsed || response.data?.providerUsed || 'unknown',
         latencyMs: response.meta?.providerStats?.[response.providerUsed]?.lastLatencyMs || response.data?.latencyMs,
@@ -310,7 +318,9 @@ export default function GlyphBotPage() {
         } : null
       };
       
-      setMessages(prev => [...prev, botMsg]);
+      setMessages(prev => prev.some(m => m.id === botId)
+        ? prev.map(m => m.id === botId ? botMsg : m)
+        : [...prev, botMsg]);
       trackMessage(botMsg);
 
       setChatCount(prev => {
@@ -685,8 +695,8 @@ export default function GlyphBotPage() {
           {/* Header */}
           <header className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-transparent backdrop-blur-md">
             <div className="flex items-center gap-3">
-              <div className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 flex items-center justify-center">
-                <Bot className="w-5 h-5 text-cyan-300" />
+              <div className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-blue-900/60 to-slate-900/60 border border-amber-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(251,191,36,0.15)]">
+                <Bot className="w-5 h-5 text-amber-300" />
                 <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-950" />
               </div>
               <div>
@@ -704,6 +714,17 @@ export default function GlyphBotPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              {isSpeaking && (
+                <button
+                  onClick={stopTTS}
+                  style={{ touchAction: 'manipulation', minHeight: '40px', minWidth: '40px' }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-amber-500/20 border border-amber-400/50 text-amber-300 hover:bg-amber-500/30 transition-all"
+                  title="Stop voice"
+                >
+                  <VolumeX className="w-3.5 h-3.5 animate-pulse" />
+                  <span className="hidden sm:inline">Speaking</span>
+                </button>
+              )}
               {currentUser && (
                 <>
                   <button
@@ -891,36 +912,53 @@ export default function GlyphBotPage() {
               </>
             )}
 
-            {/* Messages */}
-            <div 
-              ref={chatContainerRef}
-              className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-4"
-            >
-              {messages.filter(msg => msg && msg.content).map((msg, idx) => {
-                const msgId = msg.id || `msg-${idx}`;
-                return (
-                  <ChatMessageMemo 
-                    key={msgId}
-                    msg={msg}
-                    isAssistant={msg.role === 'assistant'}
-                    onReplay={handleReplayWithSettings}
-                  />
-                );
-              })}
-
-              {isSending && (
-                <div className="flex items-center gap-3 px-4 py-3 mx-auto max-w-[80%]">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-cyan-400 animate-pulse" />
-                  </div>
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                  <span className="text-sm text-slate-400">Thinking...</span>
-                </div>
-              )}
+            {/* Messages — DACO 007 Phase B: windowed list, scroll-lock, typing indicator */}
+            <div className="flex-1 min-h-0 relative">
+              <div
+                ref={chatContainerRef}
+                onScroll={onScroll}
+                className="absolute inset-0 overflow-y-auto px-3 sm:px-4 py-6 space-y-4"
+              >
+                {(() => {
+                  const filtered = messages.filter(msg => msg && (msg.content || msg.streaming));
+                  const visible = (showAllMessages || filtered.length <= 50) ? filtered : filtered.slice(-50);
+                  const hidden = filtered.length - visible.length;
+                  return (
+                    <>
+                      {hidden > 0 && (
+                        <button
+                          onClick={() => setShowAllMessages(true)}
+                          style={{ minHeight: '44px', touchAction: 'manipulation' }}
+                          className="mx-auto block px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-slate-400 hover:text-amber-300 hover:border-amber-400/30 transition-all"
+                        >
+                          Show {hidden} earlier messages
+                        </button>
+                      )}
+                      {visible.map((msg, idx) => {
+                        const msgId = msg.id || `msg-${idx}`;
+                        const prevMsg = visible[idx - 1];
+                        const showTime = msg.ts && (!prevMsg?.ts || msg.ts - prevMsg.ts > 5 * 60 * 1000);
+                        return (
+                          <React.Fragment key={msgId}>
+                            {showTime && (
+                              <div className="text-center text-[10px] text-slate-500 uppercase tracking-wider">
+                                {new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            )}
+                            <ChatMessageMemo
+                              msg={msg}
+                              isAssistant={msg.role === 'assistant'}
+                              onReplay={handleReplayWithSettings}
+                            />
+                          </React.Fragment>
+                        );
+                      })}
+                      {isSending && !messages.some(m => m.streaming) && <TypingIndicator />}
+                    </>
+                  );
+                })()}
+              </div>
+              {!pinned && <JumpToLatest onClick={() => scrollToBottom()} />}
             </div>
 
             {/* Live Feed Panel */}
