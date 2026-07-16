@@ -27,24 +27,26 @@ class GlyphBotClient {
     // public data, so web access is implied even when the Live toggle is off.
     const auditPersona = personaId === 'AUDITOR' || personaId === 'AUDIT';
 
-    // The heavy, multi-source pre-fetch (keyless scrapers + deep synthesis) is
-    // expensive, so it stays gated to the Live toggle / audit mode.
-    const wantsPrefetch = !!finalOptions.realTime || !!finalOptions.auditMode || auditPersona;
+    // The DEEP multi-source sweep (LLM query expansion + site dorks + 40
+    // results) is expensive, so it stays gated to audit mode / auditor persona.
+    const wantsDeep = !!finalOptions.auditMode || auditPersona;
 
-    // But EVERY main persona gets live internet grounding by default, so an
+    // EVERY main persona gets live internet grounding by default, so an
     // ordinary question ("who is X", "what happened with Y") returns real web
     // answers like any other chatbot — no toggle required. Jr stays on the fast
     // tier for site help and doesn't need general web access.
-    const wantsWeb = wantsPrefetch || personaId !== 'glyphbot_jr';
+    const wantsWeb = wantsDeep || !!finalOptions.realTime || personaId !== 'glyphbot_jr';
 
-    // Real-time web context. Audits run DEEP, uncapped, multi-source intel
-    // gathering (site-turn searches across every provider + AI synthesis).
+    // Built-in keyless public-record scraper (Wikipedia, GDELT, CourtListener,
+    // SEC EDGAR, Wikidata, Federal Register, OpenFEC, USASpending, etc.) runs on
+    // EVERY web-enabled search — no external API key required — so public
+    // business/entity info is pulled directly on any query, not just Live/Audit.
     let realTimeContext = '';
-    if (wantsPrefetch) {
+    if (wantsWeb) {
       const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
       if (lastUserMsg) {
         try {
-          const deep = !!finalOptions.auditMode || auditPersona;
+          const deep = wantsDeep;
           const searchResult = await this.webSearch(
             lastUserMsg.content || lastUserMsg.text,
             deep ? 40 : 5,
