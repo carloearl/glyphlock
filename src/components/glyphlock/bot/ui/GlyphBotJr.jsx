@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { askGlyphBot } from "@/lib/glyphbot/brain/orchestrator";
 import { Sparkles, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { PERSONAS } from '../config/personas';
@@ -31,57 +31,39 @@ export default function GlyphBotJr({ onClose, forceExpanded = false }) {
     setLoading(true);
 
     try {
+      // DACO 007 Phase A — all LLM calls route through the brain orchestrator (A1).
       const { QR_KNOWLEDGE_BASE } = await import('@/components/qr/QrKnowledgeBase');
-      const { IMAGE_LAB_KNOWLEDGE } = await import('@/components/imageLab/ImageLabKnowledge');
       const { default: faqData } = await import('@/components/content/faqMasterData');
       const { default: sitemapKnowledge } = await import('@/components/content/sitemapKnowledge');
-      
-      const faqContext = faqData.map(item => 
-        `Q: ${item.q}\nA: ${item.a.join(' ')}`
-      ).join('\n\n');
 
-      const sitemapContext = `
-Site Structure:
-${sitemapKnowledge.tools.map(t => `- ${t.name} at ${t.path}`).join('\n')}
-
-Navigation Questions:
-${sitemapKnowledge.commonQuestions.map(q => `Q: ${q.q}\nA: ${q.a}`).join('\n')}
-`;
+      const extraContext = [
+        'QR Studio Knowledge:', QR_KNOWLEDGE_BASE,
+        'FAQ:', faqData.map(item => `Q: ${item.q}\nA: ${item.a.join(' ')}`).join('\n\n'),
+        'Site Structure:', sitemapKnowledge.tools.map(t => `- ${t.name} at ${t.path}`).join('\n'),
+        'Navigation Q&A:', sitemapKnowledge.commonQuestions.map(q => `Q: ${q.q}\nA: ${q.a}`).join('\n'),
+      ].join('\n');
 
       const conversationHistory = messages.map(msg => ({
         role: msg.role,
         content: msg.text
       })).concat([{ role: "user", content: userMessage }]);
 
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `${jrPersona.system}
+      // Progressive reveal (A1 streaming fallback): placeholder bubble fills as text arrives.
+      const ts = Date.now();
+      setLoading(false);
+      setMessages(prev => [...prev, { role: "assistant", text: "", streaming: true, timestamp: ts }]);
 
-QR Studio Knowledge Base:
-${QR_KNOWLEDGE_BASE}
-
-Image Lab Knowledge Base:
-${JSON.stringify(IMAGE_LAB_KNOWLEDGE, null, 2)}
-
-GlyphLock FAQ Knowledge Base:
-${faqContext}
-
-${sitemapContext}
-
-Conversation history:
-${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
-
-When answering questions, use the knowledge bases to provide accurate information about GlyphLock features, pricing, navigation, and tools. Be friendly, helpful, and explain things simply!`,
-        add_context_from_internet: false
+      await askGlyphBot({
+        personaId: 'glyphbot_jr',
+        messages: conversationHistory,
+        extraContext,
+        onChunk: (partial) => {
+          setMessages(prev => prev.map(m => (m.timestamp === ts && m.role === "assistant") ? { ...m, text: partial } : m));
+        },
       });
 
-      const assistantMessage = { 
-        role: "assistant", 
-        text: response, 
-        timestamp: Date.now() 
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-      
+      setMessages(prev => prev.map(m => (m.timestamp === ts && m.role === "assistant") ? { ...m, streaming: false } : m));
+
     } catch (error) {
       setMessages(prev => [...prev, {
         role: "assistant",
@@ -258,8 +240,8 @@ When answering questions, use the knowledge bases to provide accurate informatio
                 {msg.text}
               </ReactMarkdown>
 
-              {/* DACO 006 P1 — per-response feedback */}
-              {msg.role === "assistant" && (
+              {/* DACO 006 P1 — per-response feedback (hidden while streaming) */}
+              {msg.role === "assistant" && !msg.streaming && msg.text && (
                 <FeedbackButtons
                   messageId={`jr-${msg.timestamp || idx}`}
                   personaId="glyphbot_jr"
