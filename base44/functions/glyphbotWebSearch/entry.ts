@@ -66,6 +66,105 @@ async function runProviderChain(base44, query, num) {
   return { results: results || [], provider };
 }
 
+// KEYLESS public-source engines — free public APIs, no credentials needed.
+// Run in parallel on the base query for deep intel gathering.
+async function runPublicSources(query) {
+  const out = [];
+  const providers = new Set();
+  const tasks = [
+    // Wikipedia search
+    (async () => {
+      const r = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=8&format=json&origin=*`);
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.query?.search || []).forEach((x) => out.push({
+        title: `Wikipedia: ${x.title}`,
+        snippet: (x.snippet || '').replace(/<[^>]+>/g, ''),
+        url: `https://en.wikipedia.org/wiki/${encodeURIComponent(x.title.replace(/ /g, '_'))}`,
+        source: 'wikipedia',
+      })) && providers.add('wikipedia');
+      if (data?.query?.search?.length) providers.add('wikipedia');
+    })(),
+    // GDELT — global news coverage
+    (async () => {
+      const r = await fetch(`https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(`"${query}"`)}&mode=artlist&maxrecords=15&format=json`);
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.articles || []).forEach((x) => out.push({
+        title: `News: ${x.title}`,
+        snippet: `${x.sourcecountry || ''} · ${x.domain || ''} · ${x.seendate || ''}`,
+        url: x.url,
+        source: 'gdelt-news',
+      }));
+      if (data?.articles?.length) providers.add('gdelt-news');
+    })(),
+    // CourtListener — US court records / legal opinions
+    (async () => {
+      const r = await fetch(`https://www.courtlistener.com/api/rest/v4/search/?q=${encodeURIComponent(query)}&type=o&order_by=score%20desc`, {
+        headers: { 'User-Agent': 'GlyphLock-Audit/1.0' },
+      });
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.results || []).slice(0, 10).forEach((x) => out.push({
+        title: `Court Record: ${x.caseName || x.caseNameFull || 'Case'} (${x.court || ''})`,
+        snippet: `Filed: ${x.dateFiled || 'n/a'} · Docket: ${x.docketNumber || 'n/a'}`,
+        url: x.absolute_url ? `https://www.courtlistener.com${x.absolute_url}` : 'https://www.courtlistener.com',
+        source: 'courtlistener',
+      }));
+      if (data?.results?.length) providers.add('courtlistener');
+    })(),
+    // SEC EDGAR full-text search — regulatory filings
+    (async () => {
+      const r = await fetch(`https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${query}"`)}`, {
+        headers: { 'User-Agent': 'GlyphLock Audit glyphlock@gmail.com' },
+      });
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.hits?.hits || []).slice(0, 10).forEach((h) => {
+        const s = h._source || {};
+        out.push({
+          title: `SEC Filing: ${(s.display_names || []).join(', ') || s.file_type || 'Filing'}`,
+          snippet: `${s.file_type || ''} · Filed: ${s.file_date || 'n/a'}`,
+          url: `https://www.sec.gov/Archives/edgar/data/${(s.ciks || [])[0] || ''}`,
+          source: 'sec-edgar',
+        });
+      });
+      if (data?.hits?.hits?.length) providers.add('sec-edgar');
+    })(),
+    // Hacker News (Algolia) — tech/startup mentions & discussions
+    (async () => {
+      const r = await fetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&hitsPerPage=8`);
+      if (!r.ok) return;
+      const data = await r.json();
+      (data?.hits || []).forEach((x) => out.push({
+        title: `HN: ${x.title || x.story_title || 'Discussion'}`,
+        snippet: `${x.points || 0} points · ${x.num_comments || 0} comments · ${x.created_at?.slice(0, 10) || ''}`,
+        url: x.url || `https://news.ycombinator.com/item?id=${x.objectID}`,
+        source: 'hackernews',
+      }));
+      if (data?.hits?.length) providers.add('hackernews');
+    })(),
+    // Wayback Machine — archived-site presence check
+    (async () => {
+      const r = await fetch(`https://archive.org/wayback/available?url=${encodeURIComponent(query)}`);
+      if (!r.ok) return;
+      const data = await r.json();
+      const snap = data?.archived_snapshots?.closest;
+      if (snap?.available) {
+        out.push({
+          title: 'Wayback Machine: archived snapshot found',
+          snippet: `Snapshot from ${snap.timestamp}`,
+          url: snap.url,
+          source: 'wayback',
+        });
+        providers.add('wayback');
+      }
+    })(),
+  ];
+  await Promise.allSettled(tasks);
+  return { results: out, providers: Array.from(providers) };
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -123,6 +222,20 @@ Deno.serve(async (req) => {
     const seen = new Set();
     const aggregated = [];
     const providersUsed = new Set();
+
+    // KEYLESS public sources (Wikipedia, GDELT news, CourtListener, SEC EDGAR,
+    // Hacker News, Wayback) — run in parallel on the base query. Always in
+    // deep mode; free, no API keys required.
+    if (deep) {
+      try {
+        const pub = await runPublicSources(query);
+        pub.providers.forEach((p) => providersUsed.add(p));
+        for (const r of pub.results) {
+          const key = (r.url || r.title || '').toLowerCase();
+          if (key && !seen.has(key)) { seen.add(key); aggregated.push({ ...r, query }); }
+        }
+      } catch (e) { console.error('Public sources failed:', e); }
+    }
 
     for (const q of subQueries) {
       const { results, provider } = await runProviderChain(base44, q, perQuery);
