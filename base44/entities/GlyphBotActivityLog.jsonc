@@ -1,0 +1,35 @@
+{
+  "name": "GlyphBotActivityLog",
+  "type": "object",
+  "description": "DACO GLYPHBOT CLOSEOUT REV A \u00a72a \u2014 GlyphBot product-domain activity ledger. NOT a NUPS entity: no venue_id, no session_id, no NUPS enum reuse. Direct backend/frontend .create() authorized per Amendment 006-A product-domain precedent. Append-only. DIRECTIVE_RATIFIED added beyond the \u00a72a base enum to carry the \u00a71b ratification row inside this ledger (disclosed deviation).",
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "WEB_SEARCH",
+        "AUDIT_RUN",
+        "SYNTHESIS_PASS",
+        "SCHEMA_VALIDATION_FAIL",
+        "DIRECTIVE_RATIFIED"
+      ],
+      "description": "GlyphBot-domain event class."
+    },
+    "actor_email": {
+      "type": "string",
+      "description": "Authenticated user email from live auth at event time."
+    },
+    "query_meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Event context: query slice, flags, providers, result counts, errors, MDL refs. No full user message content."
+    },
+    "success": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "event_type",
+    "success"
+  ]
+}

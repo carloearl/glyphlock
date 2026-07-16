@@ -512,6 +512,13 @@ export default function GlyphBotPage() {
       const auditResults = validation.value;
       if (!validation.valid) {
         console.warn('[GlyphBot] MDL-V09: audit output failed schema validation:', validation.errors);
+        // DACO REV A §2c — validation failures are ledgered, not just warned.
+        base44.entities.GlyphBotActivityLog.create({
+          event_type: 'SCHEMA_VALIDATION_FAIL',
+          actor_email: currentUser?.email || 'unknown',
+          query_meta: { auditTarget: auditData.targetIdentifier, errors: validation.errors, mdl: 'MDL-V09' },
+          success: false,
+        }).catch(() => {});
       }
 
       // Update audit with results
@@ -557,7 +564,7 @@ export default function GlyphBotPage() {
     } finally {
       setIsProcessingAudit(false);
     }
-  }, [createAudit, updateAudit, messages, trackMessage, glyphbotClient, provider, modes.voice, playText, loadAudits]);
+  }, [createAudit, updateAudit, messages, trackMessage, glyphbotClient, provider, modes.voice, playText, loadAudits, currentUser]);
 
   // Phase 6: View audit from history
   const handleViewAudit = useCallback((audit) => {

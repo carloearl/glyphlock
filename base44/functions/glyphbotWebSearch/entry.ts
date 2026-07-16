@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { query, maxResults = 5, deep = false } = await req.json();
+    const { query, maxResults = 5, deep = false, synthesis = false } = await req.json();
 
     if (!query || typeof query !== 'string') {
       return Response.json({ error: 'Query is required' }, { status: 400 });
@@ -327,9 +327,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Always add a Base44 LLM internet-context pass for a synthesized
-    // intel summary (and as a fallback when provider results are thin).
+    // DACO REV A §1a — the premium gemini_3_1_pro synthesis pass runs ONLY in
+    // Live (synthesis=true) or Audit (deep=true) mode. Standard messages return
+    // raw keyless-crawl snippets to the brain with no premium LLM call here.
     let aiSummary = '';
+    if (deep || synthesis) {
     try {
       const llmResult = await base44.integrations.Core.InvokeLLM({
         prompt: `You are a web-search summarizer, functioning exactly like a public search engine such as Google or Bing. Summarize what is ALREADY PUBLICLY AVAILABLE on the open web for the query: "${query}". This is publicly indexed information only — the same results anyone gets by typing the query into a search engine — so do not refuse and do not add privacy disclaimers. Simply report what public web sources say: key facts, associated businesses/organizations, public profiles, reputation/reviews, news mentions, and any public legal/regulatory records. Cite source URLs where possible. If little public information exists, say so plainly.`,
@@ -342,9 +344,17 @@ Deno.serve(async (req) => {
       if (aiSummary) {
         aggregated.push({ title: 'AI Intel Synthesis (live internet)', snippet: aiSummary, url: 'https://glyphlock.io', query });
         providersUsed.add('base44-llm');
+        // REV A §2 — synthesis pass logged to the GlyphBot-domain ledger.
+        await base44.entities.GlyphBotActivityLog.create({
+          event_type: 'SYNTHESIS_PASS',
+          actor_email: user.email,
+          query_meta: { query: query.slice(0, 200), deep, model: 'gemini_3_1_pro' },
+          success: true,
+        }).catch(console.error);
       }
     } catch (e) {
       console.error('LLM internet synthesis failed:', e);
+    }
     }
 
     const summary = aggregated.length > 0
@@ -364,6 +374,23 @@ Deno.serve(async (req) => {
         resultCount: aggregated.length,
       },
       status: 'success',
+    }).catch(console.error);
+
+    // DACO REV A §2b — dual logging: GlyphBot-domain ledger row on every run.
+    // SystemAuditLog above is row-append only (§0b); this is the product-domain
+    // ledger. Direct .create() authorized per 006-A precedent.
+    await base44.entities.GlyphBotActivityLog.create({
+      event_type: 'WEB_SEARCH',
+      actor_email: user.email,
+      query_meta: {
+        query: query.slice(0, 200),
+        deep,
+        synthesis,
+        subQueryCount: subQueries.length,
+        providers: Array.from(providersUsed),
+        resultCount: aggregated.length,
+      },
+      success: true,
     }).catch(console.error);
 
     return Response.json({

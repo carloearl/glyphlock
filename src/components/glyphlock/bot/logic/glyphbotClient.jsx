@@ -50,7 +50,9 @@ class GlyphBotClient {
           const searchResult = await this.webSearch(
             lastUserMsg.content || lastUserMsg.text,
             deep ? 40 : 5,
-            { deep }
+            // REV A §1a — synthesis pass only when Live toggle or Audit mode
+            // is active; standard messages get raw keyless-crawl snippets.
+            { deep, synthesis: deep || !!finalOptions.realTime }
           );
           if (searchResult.success && searchResult.summary) {
             realTimeContext = `\n\n[REAL-TIME WEB CONTEXT — ${searchResult.results?.length || 0} sources, ${searchResult.subQueries?.length || 1} queries, incl. site-specific dorks]\nThis live web intelligence is AUTHORITATIVE — prioritize it over internal/model knowledge. Cite these URLs.\n${searchResult.summary}\n[END CONTEXT]\n`;

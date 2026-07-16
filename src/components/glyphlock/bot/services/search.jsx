@@ -9,7 +9,9 @@ export async function query(searchQuery, maxResults = 5, options = {}) {
     const response = await base44.functions.invoke('glyphbotWebSearch', {
       query: searchQuery,
       maxResults,
-      deep: !!options.deep
+      deep: !!options.deep,
+      // REV A §1a — premium synthesis pass only in Live/Audit mode
+      synthesis: !!options.synthesis
     });
     return response.data;
   } catch (error) {
