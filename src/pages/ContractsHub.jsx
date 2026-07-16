@@ -23,6 +23,8 @@ import BigSpenderLetter from "@/components/nups/contracts/BigSpenderLetter";
 import VIPRoomBoard from "@/components/nups/VIPRoomBoard";
 import VIPContractLifecycle from "@/components/nups/VIPContractLifecycle";
 import VIPShowContracts from "@/pages/VIPShowContracts";
+import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
+import VIPShowVerifyPanel from "@/components/nups/vip/VIPShowVerifyPanel";
 
 /**
  * Master Covenant & Contracts Hub
@@ -74,6 +76,7 @@ export default function ContractsHub() {
 
   const [activeTab, setActiveTab] = useState(initial);
   const [bigSpenderView, setBigSpenderView] = useState("letter");
+  const [sealedView, setSealedView] = useState("generate");
 
   // Sync with sidebar deep-links
   useEffect(() => {
@@ -246,8 +249,42 @@ export default function ContractsHub() {
 
         {activeTab === "sealed" && (
           <Card className="bg-white/[0.02] border-emerald-500/20">
-            <CardContent className="p-0 overflow-hidden rounded-xl">
-              <VIPShowContracts />
+            <CardContent className="p-4 sm:p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Stamp className="w-5 h-5 text-emerald-400" />
+                <h2 className="text-lg font-bold">VIP Show Contracts — Sealed Evidence System</h2>
+                <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-xs">
+                  Hash-Chained · Bitcoin Anchored
+                </Badge>
+              </div>
+
+              <div className="flex gap-2">
+                {[
+                  ["generate", "Generate Contract"],
+                  ["search", "Search · Membership · Reprint"],
+                  ["verify", "QR Verify"],
+                ].map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSealedView(key)}
+                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold min-h-[44px] transition-all ${
+                      sealedView === key
+                        ? "bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/40"
+                        : "bg-white/[0.03] text-gray-400 border-2 border-transparent hover:border-emerald-500/20"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {sealedView === "generate" && <VIPShowGenerator />}
+              {sealedView === "search" && (
+                <div className="-m-4 sm:-m-6 mt-0 overflow-hidden rounded-b-xl">
+                  <VIPShowContracts />
+                </div>
+              )}
+              {sealedView === "verify" && <VIPShowVerifyPanel />}
             </CardContent>
           </Card>
         )}
