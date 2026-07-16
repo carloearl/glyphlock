@@ -1,30 +1,24 @@
 {
   "name": "BotFeedback",
   "type": "object",
-  "description": "DACO DIRECTIVE 006 Phase 1 \u2014 per-response GlyphBot feedback ratings. All writes via writeEntity() gateway (dual audit logging). venue_id MANDATORY (ID-01 lesson). DEMO/SANDBOX records excluded by default from analytics (F-2). No user message content stored (F-3).",
+  "description": "DACO 006-A \u2014 GlyphBot product-domain feedback (GLYPHBOT product, NOT a NUPS venue entity). Direct writes, anonymous raters allowed (R-006A-2). Analytics defaults to app_env=production only. No user message content stored (F-3).",
   "properties": {
-    "venue_id": {
+    "product": {
       "type": "string",
-      "description": "MANDATORY on every record. No venue_id, no write."
+      "default": "glyphbot",
+      "description": "Product domain stamp."
     },
-    "operating_mode": {
+    "surface": {
+      "type": "string",
+      "description": "Where the rating came from: glyphbot_main, glyphbot_jr_public, etc."
+    },
+    "app_env": {
       "type": "string",
       "enum": [
-        "REAL",
-        "DEMO",
-        "SANDBOX"
+        "production",
+        "preview"
       ],
-      "description": "Stamped at write time from the resolved active mode."
-    },
-    "mode": {
-      "type": "string",
-      "enum": [
-        "REAL",
-        "DEMO",
-        "SANDBOX"
-      ],
-      "default": "REAL",
-      "description": "Gateway mode stamp (writeEntity injects). Mirrors operating_mode; used by F-2 analytics exclusion and demo-wipe tooling."
+      "description": "Deployment environment stamp. Analytics defaults to production only (contamination guard on the correct axis)."
     },
     "conversation_id": {
       "type": "string",
@@ -36,7 +30,7 @@
     },
     "persona_id": {
       "type": "string",
-      "description": "Which agent produced the response (glyphbot, glyphbot_jr, sie_architect, ...)."
+      "description": "Which agent produced the response (glyphbot, glyphbot_jr, ...)."
     },
     "rating": {
       "type": "string",
@@ -47,11 +41,11 @@
     },
     "feedback_text": {
       "type": "string",
-      "description": "Optional free-text comment, max 1000 chars (enforced in service via config)."
+      "description": "Optional free-text comment, max length from feedbackConfig."
     },
     "response_preview": {
       "type": "string",
-      "description": "First 280 chars of the rated bot response. Bot output only \u2014 never user message content (F-3)."
+      "description": "First N chars of the rated bot response. Bot output only \u2014 never user message content."
     },
     "user_role": {
       "type": "string",
@@ -63,7 +57,6 @@
     }
   },
   "required": [
-    "venue_id",
     "message_id",
     "persona_id",
     "rating"

@@ -7,7 +7,7 @@ import React, { useState, useRef } from 'react';
 import { ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import { submitBotFeedback, attachFeedbackComment, getOrCreateConversationId } from '@/lib/glyphbot/submitBotFeedback';
 
-export default function FeedbackButtons({ messageId, personaId = 'glyphbot', responseText = '' }) {
+export default function FeedbackButtons({ messageId, personaId = 'glyphbot', surface = 'glyphbot_main', responseText = '' }) {
   const [rating, setRating] = useState(null);
   const [showComment, setShowComment] = useState(false);
   const [comment, setComment] = useState('');
@@ -20,7 +20,7 @@ export default function FeedbackButtons({ messageId, personaId = 'glyphbot', res
     if (r === 'down') setShowComment(true);
     submitBotFeedback({
       conversationId: getOrCreateConversationId(personaId),
-      messageId, personaId, rating: r, responseText,
+      messageId, personaId, surface, rating: r, responseText,
     }).then((res) => { recordIdRef.current = res?.value?.id || null; })
       .catch(() => { /* feedback must never break chat */ });
   };
@@ -35,7 +35,7 @@ export default function FeedbackButtons({ messageId, personaId = 'glyphbot', res
     } else {
       submitBotFeedback({
         conversationId: getOrCreateConversationId(personaId),
-        messageId, personaId, rating: 'down', feedbackText: text, responseText,
+        messageId, personaId, surface, rating: 'down', feedbackText: text, responseText,
       }).catch(() => {});
     }
   };

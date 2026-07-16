@@ -70,6 +70,7 @@ const ChatMessage = React.memo(function ChatMessage({ msg, isAssistant, onReplay
           <FeedbackButtons
             messageId={msg.id}
             personaId="glyphbot"
+            surface="glyphbot_main"
             responseText={msg.content}
           />
         )}

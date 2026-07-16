@@ -1,14 +1,12 @@
-// DACO DIRECTIVE 006 Phase 1 — BotFeedback write service.
-// All writes go through writeEntity() (standing architecture law):
-// mode stamping, identity rebind (ID-01), MigrationAuditLog + AuditEvent +
-// ActivityLog coverage. F-1's SystemAuditLog leg is emitted here explicitly.
-// Failures are silent toward the chat UI — feedback must never break chat.
+// DACO 006-A — GlyphBot product-domain feedback write service.
+// GlyphBot is a standalone GlyphLock product (R-006A-1): direct
+// base44.entities writes, no NUPS gateway, no venue resolution, no identity
+// rebind. Anonymous raters are allowed and wanted (R-006A-2). No imports
+// from src/lib/nups/* or useActiveVenue (R-006A-3).
+// SystemAuditLog visibility is retained. Failures are silent toward chat.
 
 import { base44 } from '@/api/base44Client';
-import { writeEntity } from '@/lib/nups/writeEntity';
-import { getActiveVenueId } from '@/hooks/useActiveVenue';
-import { getActiveMode } from '@/lib/nups/modeResolver';
-import { FEEDBACK_CONFIG } from './feedbackConfig';
+import { FEEDBACK_CONFIG, getAppEnv } from './feedbackConfig';
 
 /**
  * Stable per-surface conversation id for the current browser session.
@@ -27,107 +25,82 @@ export function getOrCreateConversationId(personaId = 'glyphbot') {
   }
 }
 
-async function emitSystemAuditLog({ rating, personaId, operatingMode, conversationId, messageId, result }) {
-  // F-1 dual logging — SystemAuditLog leg. Fire-and-forget.
+async function emitSystemAuditLog({ rating, personaId, surface, appEnv, conversationId, messageId, recordId, ok, userRole }) {
+  // Audit visibility leg — fire-and-forget, never surfaces in chat.
   try {
     await base44.entities.SystemAuditLog.create({
       event_type: 'BOT_FEEDBACK_SUBMITTED',
-      description: `GlyphBot feedback '${rating}' on persona '${personaId}' (${operatingMode})`,
-      actor_email: result?.actor_email || undefined,
-      resource_id: result?.value?.id || messageId,
+      description: `GlyphBot feedback '${rating}' on persona '${personaId}' via ${surface} (${appEnv})`,
+      resource_id: recordId || String(messageId),
       metadata: {
+        product: FEEDBACK_CONFIG.PRODUCT,
+        surface,
+        app_env: appEnv,
         conversation_id: conversationId,
-        message_id: messageId,
+        message_id: String(messageId),
         persona_id: personaId,
         rating,
-        operating_mode: operatingMode,
-        gateway_result: result?.result || 'unknown',
-        gateway_audit_id: result?.audit_id || null,
+        user_role: userRole,
       },
-      status: result?.ok ? 'success' : 'failure',
+      status: ok ? 'success' : 'failure',
     });
   } catch { /* audit leg must never surface in chat */ }
 }
 
 /**
  * Submit a thumbs up/down rating for a bot response.
- * Returns the gateway result ({ ok, value, ... }) or { ok:false, block_reason }.
+ * Anonymous submissions proceed with user_role: "anonymous".
  */
-export async function submitBotFeedback({ conversationId, messageId, personaId, rating, feedbackText = '', responseText = '' }) {
-  const venue_id = getActiveVenueId();
-  if (!venue_id) {
-    // §1.1 — no venue_id, no write (ID-01 lesson)
-    console.warn('[BotFeedback] blocked: venue_id_required');
-    return { ok: false, block_reason: 'venue_id_required' };
-  }
-
+export async function submitBotFeedback({ conversationId, messageId, personaId, surface = 'glyphbot_main', rating, feedbackText = '', responseText = '' }) {
   let user = null;
-  try { user = await base44.auth.me(); } catch { /* unauthenticated rater */ }
-  const actor = user
-    ? { id: user.id, email: user.email, role: user.role || 'user' }
-    : { email: 'anonymous', role: 'anonymous' };
-
-  const operating_mode = await getActiveMode(venue_id);
+  try { user = await base44.auth.me(); } catch { /* anonymous rater — allowed */ }
+  const userRole = user?.role || 'anonymous';
+  const appEnv = getAppEnv();
+  const convId = conversationId || getOrCreateConversationId(personaId);
 
   const data = {
-    venue_id,
-    operating_mode,
-    conversation_id: conversationId || getOrCreateConversationId(personaId),
+    product: FEEDBACK_CONFIG.PRODUCT,
+    surface,
+    app_env: appEnv,
+    conversation_id: convId,
     message_id: String(messageId),
     persona_id: personaId,
     rating,
     feedback_text: (feedbackText || '').slice(0, FEEDBACK_CONFIG.FEEDBACK_TEXT_MAX_CHARS),
     response_preview: (responseText || '').slice(0, FEEDBACK_CONFIG.RESPONSE_PREVIEW_CHARS),
-    user_role: user?.role || 'anonymous',
+    user_role: userRole,
     created_at: new Date().toISOString(),
   };
 
-  let result;
+  let record = null;
+  let ok = false;
   try {
-    result = await writeEntity({
-      entity: 'BotFeedback',
-      operation: 'create',
-      data,
-      actor,
-      intent: 'DACO-006-P1 bot response feedback',
-      venue_id,
-    });
+    record = await base44.entities.BotFeedback.create(data);
+    ok = true;
   } catch (e) {
-    result = { ok: false, block_reason: `gateway_error: ${e.message}` };
+    console.warn('[BotFeedback] write failed:', e.message);
   }
 
   await emitSystemAuditLog({
-    rating, personaId, operatingMode: operating_mode,
-    conversationId: data.conversation_id, messageId, result: { ...result, actor_email: actor.email },
+    rating, personaId, surface, appEnv,
+    conversationId: convId, messageId, recordId: record?.id, ok, userRole,
   });
 
-  return result;
+  return { ok, value: record };
 }
 
 /**
  * Attach a follow-up comment to an already-submitted down-vote.
  */
-export async function attachFeedbackComment({ recordId, feedbackText, venueId }) {
-  const venue_id = venueId || getActiveVenueId();
-  if (!recordId || !venue_id) return { ok: false, block_reason: 'record_or_venue_missing' };
-
-  let user = null;
-  try { user = await base44.auth.me(); } catch { /* unauthenticated */ }
-  const actor = user
-    ? { id: user.id, email: user.email, role: user.role || 'user' }
-    : { email: 'anonymous', role: 'anonymous' };
-
+export async function attachFeedbackComment({ recordId, feedbackText }) {
+  if (!recordId) return { ok: false };
   try {
-    return await writeEntity({
-      entity: 'BotFeedback',
-      operation: 'update',
-      id: recordId,
-      data: { feedback_text: (feedbackText || '').slice(0, FEEDBACK_CONFIG.FEEDBACK_TEXT_MAX_CHARS) },
-      actor,
-      intent: 'DACO-006-P1 feedback comment follow-up',
-      venue_id,
+    const value = await base44.entities.BotFeedback.update(recordId, {
+      feedback_text: (feedbackText || '').slice(0, FEEDBACK_CONFIG.FEEDBACK_TEXT_MAX_CHARS),
     });
+    return { ok: true, value };
   } catch (e) {
-    return { ok: false, block_reason: `gateway_error: ${e.message}` };
+    console.warn('[BotFeedback] comment update failed:', e.message);
+    return { ok: false };
   }
 }

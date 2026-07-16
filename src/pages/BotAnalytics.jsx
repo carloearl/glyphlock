@@ -1,6 +1,6 @@
-// DACO DIRECTIVE 006 §4 — minimum viable, read-only feedback analytics.
-// Admin-only. REAL mode only by default (F-2 guard — DEMO/SANDBOX excluded).
-// Phase 1 scope: feedback metrics only. Telemetry sections arrive in Phase 2.
+// DACO 006 §4 / 006-A — minimum viable, read-only feedback analytics.
+// Platform admin only. GlyphBot is a GlyphLock product surface — production
+// environment only by default. Phase 1 scope: feedback metrics only.
 
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
@@ -18,13 +18,13 @@ export default function BotAnalytics() {
     (async () => {
       try {
         const user = await base44.auth.me();
-        // §4 — manager role or above; platform admin qualifies
+        // 006-A — platform admin only (NUPS venue role-classes do not govern GlyphBot)
         const ok = user && (user.role === 'admin');
         setAuthorized(!!ok);
         if (ok) {
-          // F-2 guard: REAL mode only by default
+          // Contamination guard: production environment only by default
           const data = await base44.entities.BotFeedback.filter(
-            { mode: FEEDBACK_CONFIG.ANALYTICS_DEFAULT_MODE }, '-created_date', 500
+            { product: FEEDBACK_CONFIG.PRODUCT, app_env: FEEDBACK_CONFIG.ANALYTICS_DEFAULT_ENV }, '-created_date', 500
           );
           setRows(data || []);
         }
@@ -73,7 +73,7 @@ export default function BotAnalytics() {
         <div>
           <h1 className="text-xl font-bold text-white">GlyphBot Feedback Analytics</h1>
           <p className="text-xs text-slate-400">
-            DACO 006 §4 — REAL mode only (DEMO/SANDBOX excluded per F-2) · {total} ratings
+            DACO 006-A — production only · {total} ratings
           </p>
         </div>
       </div>

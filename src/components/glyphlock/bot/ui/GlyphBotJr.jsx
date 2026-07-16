@@ -263,6 +263,7 @@ When answering questions, use the knowledge bases to provide accurate informatio
                 <FeedbackButtons
                   messageId={`jr-${msg.timestamp || idx}`}
                   personaId="glyphbot_jr"
+                  surface="glyphbot_jr_public"
                   responseText={msg.text}
                 />
               )}
