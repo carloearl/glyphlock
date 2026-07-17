@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { vip } from "@/components/vip2/vipApi";
-import ContractWizard from "@/components/vip2/ContractWizard";
+import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
 import ContractDesk from "@/components/vip2/ContractDesk";
 import ContractSearch from "@/components/vip2/ContractSearch";
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +70,9 @@ export default function VIPSale() {
             ))}
           </nav>
           <main className="p-4">
-            {tab === "New Contract" && <ContractWizard state={state} refresh={refresh} onCreated={() => setTab("Active Contracts")} />}
+            {/* Sealed in-depth contract system — contract IS the receipt:
+                biometrics, clickwrap, chain seal, Bitcoin anchor, legal 8.5×14 print */}
+            {tab === "New Contract" && <VIPShowGenerator />}
             {tab === "Active Contracts" && <ContractDesk state={state} refresh={refresh} />}
             {tab === "Search" && <ContractSearch />}
           </main>

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import QRCode from "qrcode";
-import { Plus, Trash2, Stamp, FlaskConical } from "lucide-react";
+import { Plus, Trash2, Stamp, FlaskConical, Printer } from "lucide-react";
+import VIPShowReprint from "@/components/nups/vip/VIPShowReprint";
 
 /**
  * DACO VIP SHOW CONTRACT — FULL IN-APP GENERATOR
@@ -35,6 +36,7 @@ export default function VIPShowGenerator() {
   const [card, setCard] = useState(0);
   const [glyphbucks, setGlyphbucks] = useState(0);
   const [treatment, setTreatment] = useState("");
+  const [clickwrap, setClickwrap] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sealed, setSealed] = useState(null); // { verify_ref, contract_ref, anchor, qr, url, total }
@@ -64,6 +66,7 @@ export default function VIPShowGenerator() {
     setCard(430);
     setGlyphbucks(0);
     setTreatment("DEMO walkthrough — training scenario");
+    setClickwrap(true);
     setError("");
   };
 
@@ -71,6 +74,7 @@ export default function VIPShowGenerator() {
     setError("");
     if (!guest.name.trim()) return setError("Guest name is required.");
     if (!staff.suite.trim()) return setError("Suite is required.");
+    if (!clickwrap) return setError("Guest must accept the contract terms (clickwrap) before sealing.");
     if (Math.abs(tenderTotal + Number(glyphbucks) - total) > 0.005 && Math.abs(tenderTotal - total) > 0.005) {
       return setError(`Tender ($${tenderTotal.toFixed(2)} + $${Number(glyphbucks).toFixed(2)} GB) must settle the total ($${total.toFixed(2)}).`);
     }
@@ -113,7 +117,12 @@ export default function VIPShowGenerator() {
         card_fee: cardFee,
         total,
         tender: { cash_sales: Number(cash) || 0, card_sales: Number(card) || 0, total_sales: tenderTotal },
-        notes: { glyphbucks_tendered: Number(glyphbucks) || 0, treatment: treatment.trim() || null, statute: "15 U.S.C. § 1666 — FCBA rights not waived" },
+        notes: {
+          glyphbucks_tendered: Number(glyphbucks) || 0,
+          treatment: treatment.trim() || null,
+          statute: "15 U.S.C. § 1666 — FCBA rights not waived",
+          clickwrap: { accepted: true, accepted_at: now.toISOString() },
+        },
         terms_hash: termsHash,
       };
 
@@ -134,7 +143,8 @@ export default function VIPShowGenerator() {
 
       const url = `${window.location.origin}/v/${record.verify_ref}`;
       const qr = await QRCode.toDataURL(url, { width: 220, margin: 1 });
-      setSealed({ verify_ref: record.verify_ref, contract_ref: contractRef, anchor: res.data.anchor, qr, url, total });
+      setSealed({ verify_ref: record.verify_ref, contract_ref: contractRef, anchor: res.data.anchor, qr, url, total, record });
+      setClickwrap(false);
     } catch (e) {
       setError(e?.response?.data?.error || e.message || "Sealing failed.");
     } finally {
@@ -144,20 +154,34 @@ export default function VIPShowGenerator() {
 
   if (sealed) {
     return (
-      <div className="max-w-md mx-auto text-center space-y-4 py-6">
-        <div className="rounded-2xl border border-emerald-500 bg-emerald-950/30 p-6">
+      <div className="space-y-4 py-4">
+        {/* Legal-size print: only the contract document prints, on 8.5×14 */}
+        <style>{`@media print {
+          @page { size: 8.5in 14in; margin: 0.4in; }
+          body * { visibility: hidden; }
+          .vip-contract-print, .vip-contract-print * { visibility: visible; }
+          .vip-contract-print { position: absolute; left: 0; top: 0; width: 100%; }
+        }`}</style>
+
+        <div className="max-w-md mx-auto text-center rounded-2xl border border-emerald-500 bg-emerald-950/30 p-5">
           <Stamp className="w-8 h-8 text-emerald-300 mx-auto mb-2" />
           <div className="text-2xl font-extrabold text-emerald-300">CONTRACT SEALED</div>
           <div className="mt-2 font-mono text-sm text-neutral-200">{sealed.verify_ref}</div>
           <div className="font-mono text-xs text-neutral-400">{sealed.contract_ref} · ${sealed.total.toFixed(2)}</div>
           <div className="mt-1 text-xs font-bold text-emerald-400">Anchor: {sealed.anchor}</div>
-          <img src={sealed.qr} alt={`Verification QR for ${sealed.verify_ref}`} className="mx-auto mt-4 rounded-lg bg-white p-2" />
-          <p className="text-[11px] text-neutral-400 mt-2 break-all">{sealed.url}</p>
         </div>
-        <div className="flex gap-2 justify-center">
+
+        <div className="flex gap-2 justify-center flex-wrap">
+          <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold px-6 py-2.5 min-h-[44px]">
+            <Printer className="w-4 h-4" /> Print Contract (Legal 8.5×14)
+          </button>
           <a href={sealed.url} target="_blank" rel="noreferrer" className="rounded-lg bg-blue-600 hover:bg-blue-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Open Verify Page</a>
-          <button onClick={() => window.print()} className="rounded-lg bg-[#33405f] hover:bg-[#42537a] font-bold px-5 py-2.5 min-h-[44px]">Print QR Slip</button>
           <button onClick={() => setSealed(null)} className="rounded-lg border border-neutral-500 px-5 py-2.5 font-semibold min-h-[44px]">New Contract</button>
+        </div>
+
+        {/* The contract IS the receipt — full sealed document, on-screen and printable */}
+        <div className="vip-contract-print overflow-x-auto">
+          <VIPShowReprint record={sealed.record} anchor={{ status: sealed.anchor }} />
         </div>
       </div>
     );
@@ -234,6 +258,19 @@ export default function VIPShowGenerator() {
           <label><span className={lbl}>Card fee %</span><input className={inp} type="number" value={cardFeePct} onChange={(e) => setCardFeePct(e.target.value)} /></label>
         </div>
         <label className="block mt-3"><span className={lbl}>Treatment / notes</span><input className={inp} value={treatment} onChange={(e) => setTreatment(e.target.value)} /></label>
+      </div>
+
+      {/* Clickwrap — guest reviews and accepts terms before sealing */}
+      <div className="rounded-xl border border-[#33405f] bg-[#171e33] p-4">
+        <h3 className="text-sm font-bold text-purple-300 mb-2">Contract Terms — Clickwrap</h3>
+        <p className="text-[11px] text-neutral-400 leading-relaxed mb-3">{TERMS_TEXT}</p>
+        <label className="flex items-start gap-3 cursor-pointer min-h-[44px]">
+          <input type="checkbox" checked={clickwrap} onChange={(e) => setClickwrap(e.target.checked)}
+            className="mt-0.5 w-5 h-5 accent-emerald-500" />
+          <span className="text-sm font-semibold text-neutral-200">
+            Guest has reviewed and accepts the contract terms above (recorded with timestamp in the sealed record)
+          </span>
+        </label>
       </div>
 
       {/* Totals + seal */}
