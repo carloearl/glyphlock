@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import QRCode from "qrcode";
 import { Plus, Trash2, Stamp, FlaskConical, Printer } from "lucide-react";
@@ -25,7 +25,7 @@ async function sha256Hex(s) {
 const inp = "w-full rounded-lg bg-[#171e33] border border-[#33405f] px-3 py-2.5 text-sm min-h-[44px]";
 const lbl = "block text-[11px] text-neutral-400 mb-1";
 
-export default function VIPShowGenerator() {
+export default function VIPShowGenerator({ prefill }) {
   const [mode, setMode] = useState("REAL");
   const [venueId, setVenueId] = useState("DP-TEMPE-001");
   const [venue, setVenue] = useState("Diamond Palace Tempe");
@@ -41,6 +41,26 @@ export default function VIPShowGenerator() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sealed, setSealed] = useState(null); // { verify_ref, contract_ref, anchor, qr, url, total }
+
+  // Auto-fill from the shared data bridge (GlyphBucks flow on the unified desk):
+  // guest identity, ID scan ref, card last 4, biometric scores, venue, and mode.
+  useEffect(() => {
+    if (!prefill) return;
+    const tierMap = { MEMBER: "STANDARD", SILVER: "GOLD", GOLD: "GOLD", "PLATINUM ELITE": "PLATINUM" };
+    setGuest((g) => ({
+      ...g,
+      name: prefill.purchaser_name || g.name,
+      membership_id: prefill.purchaser_member_id || g.membership_id,
+      member_tier: prefill.member_tier ? (tierMap[prefill.member_tier] || g.member_tier) : g.member_tier,
+      id_scan_ref: prefill.id_scan_ref || g.id_scan_ref,
+      card_last4: prefill.card_last4 || g.card_last4,
+      face_match_pct: prefill.face_id_match_pct !== "" && prefill.face_id_match_pct != null ? String(prefill.face_id_match_pct) : g.face_match_pct,
+      thumb_match_pct: prefill.thumb_match_pct !== "" && prefill.thumb_match_pct != null ? String(prefill.thumb_match_pct) : g.thumb_match_pct,
+    }));
+    if (prefill.venue_id) setVenueId(prefill.venue_id);
+    if (prefill.mode) setMode(prefill.mode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(prefill)]);
 
   const subtotal = lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.amount) || 0), 0);
   const cardFee = Number(card) > 0 ? +(subtotal * (Number(cardFeePct) / 100)).toFixed(2) : 0;

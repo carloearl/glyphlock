@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import GlyphBucksTermsPanel from "./GlyphBucksTermsPanel";
 import GlyphBucksReceipt from "./GlyphBucksReceipt";
@@ -34,7 +34,7 @@ const Section = ({ n, icon: Icon, title, sub, done, children }) => (
   </div>
 );
 
-export default function GlyphBucksSaleFlow() {
+export default function GlyphBucksSaleFlow({ onShared }) {
   const [mode, setMode] = useState("REAL");
   const [venueId, setVenueId] = useState("DP-TEMPE-001");
   const [assent, setAssent] = useState(null);
@@ -54,6 +54,19 @@ export default function GlyphBucksSaleFlow() {
 
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
   const faceCents = Number(f.denom_cents) * Number(f.qty || 0);
+
+  // Shared data bridge — pushes identity/card/purchaser data to a parallel
+  // contract flow (e.g. VIP contract auto-fill on the unified desk).
+  useEffect(() => {
+    onShared?.({
+      venue_id: venueId, mode,
+      purchaser_name: f.purchaser_name, purchaser_member_id: f.purchaser_member_id,
+      member_tier: f.member_tier, id_scan_ref: f.id_scan_ref,
+      card_last4: f.card_last4, card_brand: f.card_brand,
+      face_id_match_pct: f.face_id_match_pct, thumb_match_pct: f.thumb_match_pct,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [venueId, mode, f.purchaser_name, f.purchaser_member_id, f.member_tier, f.id_scan_ref, f.card_last4, f.card_brand, f.face_id_match_pct, f.thumb_match_pct]);
 
   // Camera ID scan → identity binding + purchaser autofill (never raw PII beyond agreement fields)
   const handleIdExtracted = (d) => {
