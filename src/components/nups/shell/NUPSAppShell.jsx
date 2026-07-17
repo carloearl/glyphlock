@@ -108,6 +108,8 @@ const NAV_SECTIONS = [
   {
     label: "Admin",
     items: [
+      // Admin/Owner role-view switcher — open any role's live workspace.
+      { id: "roleviews", label: "Role Views",      icon: Users,         to: "/RoleViews" },
       {
         id: "audit",       label: "Audit",            icon: ShieldCheck, to: "/admin/audit-integrity",
         children: [

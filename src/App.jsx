@@ -78,6 +78,7 @@ import VIPCommandCenter from './pages/VIPCommandCenter';
 import NUPSKiosk from './pages/NUPSKiosk';
 import VIPSale from './pages/VIPSale';
 import AccessRequests from './pages/AccessRequests';
+import RoleViews from './pages/RoleViews';
 import KioskShell from './components/nups/KioskShell';
 import KioskSessionGuard from './components/nups/KioskSessionGuard';
 import RoleClassGuard from './components/nups/RoleClassGuard';
@@ -140,7 +141,7 @@ const AuthenticatedApp = () => {
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
     '/v/', '/vipshowcontracts', '/offlineverify', '/vipcommand',
-    '/nupskiosk', '/vipsale', '/accessrequests',
+    '/nupskiosk', '/vipsale', '/accessrequests', '/roleviews',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
@@ -162,7 +163,7 @@ const AuthenticatedApp = () => {
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
     '/vipshowcontracts', '/vipcommand',
-    '/vipsale', '/accessrequests',
+    '/vipsale', '/accessrequests', '/roleviews',
   ];
   const isNupsKioskRoute = nupsKioskRoots.some(p => currentPathLower.startsWith(p));
 
@@ -283,6 +284,8 @@ const AuthenticatedApp = () => {
         <Route path="/vipsale" element={<KioskSessionGuard roles={["HOSTESS","FLOOR_HOST"]}><VIPSale /></KioskSessionGuard>} />
         <Route path="/AccessRequests" element={<RoleClassGuard allow={["ADMIN"]}><AccessRequests /></RoleClassGuard>} />
         <Route path="/accessrequests" element={<RoleClassGuard allow={["ADMIN"]}><AccessRequests /></RoleClassGuard>} />
+        <Route path="/RoleViews" element={<RoleClassGuard allow={["ADMIN"]}><RoleViews /></RoleClassGuard>} />
+        <Route path="/roleviews" element={<RoleClassGuard allow={["ADMIN"]}><RoleViews /></RoleClassGuard>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes></>

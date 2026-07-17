@@ -22,7 +22,9 @@ export default function OwnerAdminSignIn() {
       }
       const res = await base44.functions.invoke("nupsAccessControl", { action: "checkAccess" });
       if (res.data?.authorized) {
-        navigate(res.data.destination || "/NUPSAdminPortal");
+        // Authorized Owner/Admin lands on the Role Views picker — choose any
+        // role's live workspace (Hostess, Door Girl, DJ, Manager, Owner, …).
+        navigate("/RoleViews");
       } else {
         setDenied(res.data?.reason || "Access denied.");
       }
