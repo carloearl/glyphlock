@@ -258,6 +258,17 @@ export default function GlyphBotPage() {
 
     const botId = `bot-${Date.now()}`;
     try {
+      // DACO-GB-20260716-02 §3 — upload attachments first so they reach the
+      // model as file_urls input (previously only name/size metadata was kept
+      // and the actual files were dropped).
+      let fileUrls = [];
+      if (files.length > 0) {
+        const uploads = await Promise.all(
+          files.map(f => base44.integrations.Core.UploadFile({ file: f }))
+        );
+        fileUrls = uploads.map(u => u.file_url).filter(Boolean);
+      }
+
       const response = await glyphbotClient.sendMessage(updatedMessages, {
         // DACO 007 Phase B — progressive reveal into a streaming bubble
         onChunk: (partial) => {
@@ -268,6 +279,7 @@ export default function GlyphBotPage() {
           });
         },
         persona,
+        fileUrls,
         auditMode: modes.audit,
         oneTestMode: modes.test,
         realTime: modes.live,

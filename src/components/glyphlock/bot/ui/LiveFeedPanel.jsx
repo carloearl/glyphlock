@@ -281,7 +281,7 @@ export default function LiveFeedPanel({ isOpen, onClose }) {
               ) : (
                 <div className="space-y-2">
                   <p className="text-[10px] text-slate-500">
-                    Ask a question or get a daily briefing. Free sources checked first, AI used as fallback.
+                    Ask a question or get a daily briefing.
                   </p>
                   <div className="flex gap-1.5">
                     <input
@@ -320,7 +320,7 @@ export default function LiveFeedPanel({ isOpen, onClose }) {
       {/* Footer */}
       <div className="px-3 py-1.5 border-t border-white/5 bg-white/[0.01]">
         <div className="flex items-center justify-between text-[8px] text-slate-600">
-          <span>Sources: NIST NVD · RSS · Perplexity</span>
+          <span>Sources: NIST NVD · RSS · Live Web</span>
           <span>Cache: 5m news / 15m intel</span>
         </div>
       </div>

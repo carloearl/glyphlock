@@ -1,4 +1,3 @@
-
 export const STORAGE_KEYS = {
   MESSAGES: 'glyphbot_messages',
   SETTINGS: 'glyphbot_settings',
@@ -16,7 +15,7 @@ export const PROVIDER_PRIORITY = ['PUTER', 'GEMINI', 'OPENAI', 'CLAUDE', 'OPENRO
 export const WELCOME_MESSAGE = {
   id: 'welcome-1',
   role: 'assistant',
-  content: `Hey — I'm GlyphBot. Ask me anything about security, code, or threats.`,
+  content: `Hi, I'm GlyphBot — what would you like me to do?`,
   audit: null
 };
 

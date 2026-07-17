@@ -3,16 +3,16 @@ import { Send, Square, RotateCcw, Mic, MicOff, Paperclip, Bot, ChevronDown, X } 
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 
+// DACO-GB-20260716-02 §5c — dropdown trimmed after §5a diagnosis confirmed all
+// options were inert stubs (selection only set local state + voice persona; the
+// send path never read selectedAgent, and the counter tracked the separate
+// browser-agent budget). Removed: GlyphBot Jr (duplicates the Junior persona in
+// the Persona selector), Alfred, Site Builder, SIE Architect (governance/dev
+// agents — not FOH surfaces).
 const AGENTS = [
   { id: 'none', label: 'No Agent (LLM Direct)', description: 'Direct LLM chat — no agent tools' },
   { id: 'glyphbot', label: 'GlyphBot', description: 'Security analysis, code audit, threat detection' },
-  { id: 'glyphbot_jr', label: 'GlyphBot Jr', description: 'Platform guidance & quick answers' },
-  { id: 'alfred', label: 'Alfred', description: 'Technical orchestrator — build & ship' },
-  { id: 'siteBuilder', label: 'Site Builder', description: 'Autonomous dev agent — create & debug' },
-  { id: 'sie_architect', label: 'SIE Architect', description: 'Site integrity monitoring & auto-fix' },
 ];
-
-const DAILY_LIMIT = 25;
 
 export default function ChatInput({ 
   value, 
@@ -34,7 +34,6 @@ export default function ChatInput({
   const restartAttemptsRef = useRef(0);
   const [attachedFiles, setAttachedFiles] = useState([]);
   const [showAgentPicker, setShowAgentPicker] = useState(false);
-  const [agentUsage, setAgentUsage] = useState(null);
   const agentPickerRef = useRef(null);
 
   // Auto-resize textarea
@@ -56,18 +55,6 @@ export default function ChatInput({
     if (showAgentPicker) document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showAgentPicker]);
-
-  // Check agent usage on mount
-  useEffect(() => {
-    (async () => {
-      try {
-        const resp = await base44.functions.invoke('browserAgent', { action: 'checkUsage' });
-        setAgentUsage(resp.data);
-      } catch (e) {
-        // Non-critical — just hide usage
-      }
-    })();
-  }, []);
 
   // Speech recognition setup
   useEffect(() => {
@@ -129,6 +116,9 @@ export default function ChatInput({
     }
   };
 
+  // §3b — types the model can actually read as input.
+  const SUPPORTED_EXT = /\.(png|jpe?g|gif|webp|pdf|txt|json|csv|js|jsx|ts|tsx|py|md)$/i;
+
   const handleFileSelect = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -136,6 +126,11 @@ export default function ChatInput({
     for (const file of files) {
       if (file.size > 10 * 1024 * 1024) {
         toast.error(`${file.name} exceeds 10MB limit`);
+        continue;
+      }
+      const isImage = (file.type || '').startsWith('image/');
+      if (!isImage && !SUPPORTED_EXT.test(file.name)) {
+        toast.error(`${file.name}: unsupported file type — attach images, PDFs, or text/code files`);
         continue;
       }
       setAttachedFiles(prev => [...prev, { file, name: file.name, size: file.size, type: file.type }]);
@@ -154,7 +149,6 @@ export default function ChatInput({
   };
 
   const currentAgent = AGENTS.find(a => a.id === (selectedAgent || 'none')) || AGENTS[0];
-  const remaining = agentUsage?.remaining ?? null;
 
   return (
     <div className="border-t border-white/10 px-4 py-3" style={{ position: 'relative', zIndex: 9999, background: 'rgba(10, 10, 20, 0.95)', backdropFilter: 'blur(20px)' }}>
@@ -186,9 +180,6 @@ export default function ChatInput({
           >
             <Bot className="w-3.5 h-3.5" />
             <span>{currentAgent.label}</span>
-            {remaining !== null && selectedAgent && selectedAgent !== 'none' && (
-              <span className="text-[9px] text-cyan-400 ml-1">{remaining}/{DAILY_LIMIT} left</span>
-            )}
             <ChevronDown className={`w-3 h-3 ml-auto transition-transform ${showAgentPicker ? 'rotate-180' : ''}`} />
           </button>
 
@@ -217,11 +208,6 @@ export default function ChatInput({
                   </button>
                 ))}
               </div>
-              {remaining !== null && (
-                <div className="px-3 py-2 border-t border-white/5 text-[10px] text-slate-500">
-                  Agent sessions: <span className="text-cyan-400 font-medium">{remaining}</span> remaining today
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -233,7 +219,7 @@ export default function ChatInput({
             ref={fileInputRef}
             type="file"
             multiple
-            accept="image/*,.pdf,.zip,.txt,.json,.csv,.js,.jsx,.ts,.tsx,.py,.md"
+            accept="image/*,.pdf,.txt,.json,.csv,.js,.jsx,.ts,.tsx,.py,.md"
             onChange={handleFileSelect}
             className="hidden"
           />

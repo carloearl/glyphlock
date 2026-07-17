@@ -64,10 +64,11 @@ export function streamReveal(fullText, onChunk) {
  * @param {Array}    messages     conversation history [{role, content|text}] incl. latest user msg
  * @param {string}   extraContext optional surface-specific context (e.g. Jr site knowledge)
  * @param {boolean}  webContext   authenticated web lookup — routes to the web-capable tier
+ * @param {Array}    fileUrls     uploaded attachment URLs passed to the model (§3)
  * @param {Function} onChunk      optional (partialText) => void for progressive reveal
  * @returns {Promise<{text, model, personaId, truncated}>}
  */
-export async function askGlyphBot({ personaId = 'GENERAL', messages = [], extraContext = '', webContext = false, onChunk = null }) {
+export async function askGlyphBot({ personaId = 'GENERAL', messages = [], extraContext = '', webContext = false, fileUrls = [], onChunk = null }) {
   const knowledge = renderKnowledgeContext();
   const system = buildSystemInstructions(personaId, knowledge);
   const { transcript, truncated } = buildHistoryBlock(messages);
@@ -84,6 +85,8 @@ export async function askGlyphBot({ personaId = 'GENERAL', messages = [], extraC
     prompt,
     model,
     add_context_from_internet: !!webContext,
+    // §3 — attached files (image/PDF/text URLs) reach the model as input.
+    file_urls: fileUrls && fileUrls.length > 0 ? fileUrls : undefined,
   });
 
   const text = typeof response === 'string' ? response : (response?.text || String(response));

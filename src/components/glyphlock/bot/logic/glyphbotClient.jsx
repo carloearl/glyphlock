@@ -23,13 +23,10 @@ class GlyphBotClient {
     const finalOptions = { ...this.defaultOptions, ...options };
     const personaId = options.persona || this.defaultPersona;
 
-    // Auditor personas ALWAYS browse the web — audits are useless without live
-    // public data, so web access is implied even when the Live toggle is off.
-    const auditPersona = personaId === 'AUDITOR' || personaId === 'AUDIT';
-
-    // The DEEP multi-source sweep (LLM query expansion + site dorks + 40
-    // results) is expensive, so it stays gated to audit mode / auditor persona.
-    const wantsDeep = !!finalOptions.auditMode || auditPersona;
+    // DACO-GB-20260716-02 §1a — AUDITOR/AUDIT personas removed (folded into
+    // SECURITY). The DEEP multi-source sweep (LLM query expansion + site dorks
+    // + 40 results) is expensive, so it stays gated to audit mode.
+    const wantsDeep = !!finalOptions.auditMode;
 
     // EVERY main persona gets live internet grounding by default, so an
     // ordinary question ("who is X", "what happened with Y") returns real web
@@ -75,6 +72,8 @@ class GlyphBotClient {
     const result = await askGlyphBot({
       personaId,
       messages: enhancedMessages,
+      // §3 — attached files (uploaded URLs) reach the model as input.
+      fileUrls: options.fileUrls || [],
       // When web is wanted (Live toggle, audit mode, or an auditor persona),
       // route to the web-capable model with live internet context enabled —
       // not just the pre-fetched search summary. This makes People/Business/
@@ -83,7 +82,7 @@ class GlyphBotClient {
       onChunk: options.onChunk || null,
     });
 
-    const isAuditActive = finalOptions.auditMode || personaId === 'AUDIT' || personaId === 'AUDITOR';
+    const isAuditActive = !!finalOptions.auditMode;
 
     // Legacy-compatible return shape
     return {
