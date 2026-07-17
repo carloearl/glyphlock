@@ -101,18 +101,30 @@ const STAFF_TAB_ACCESS = {
 function RegisterConsoleInner() {
   const [activeTab, setActiveTab] = useState("register");
   const [user, setUser] = useState(null);
+  const [operator, setOperator] = useState(null);
   const [showSeedDialog, setShowSeedDialog] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
+    // Kiosk operator session — the PIN-clocked-in staff member actually
+    // working this station. When present, THEIR role scopes the console,
+    // not the tablet's platform login (which is often the owner account).
+    try {
+      const op = sessionStorage.getItem("nups_kiosk_operator") || sessionStorage.getItem("nups_session");
+      if (op) setOperator(JSON.parse(op));
+    } catch { /* no operator context */ }
   }, []);
 
-  // Resolve role → allowed tabs. Admin (base44 role or NUPS elevated role)
-  // and Managers get the full console; each staff role gets its own station.
-  const rawRole = String(user?._highestRole || user?.role || "").toUpperCase();
-  const isManagerOrAdmin =
-    user?.role === "admin" ||
-    ["ADMIN", "OWNER", "VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN", "BOOKKEEPER", "MANAGER", "VENUE_MANAGER"].includes(rawRole);
+  // Resolve role → allowed tabs. The clocked-in kiosk operator's role wins;
+  // platform role only applies when nobody is clocked in on this device.
+  // Onboarding, PINs, and Audit stay manager/admin-exclusive: no staff role
+  // lists those keys, and a staff operator session overrides an admin login.
+  const opRole = String(operator?.role || "").toUpperCase();
+  const rawRole = opRole || String(user?._highestRole || user?.role || "").toUpperCase();
+  const isManagerOrAdmin = STAFF_TAB_ACCESS[rawRole]
+    ? false
+    : (user?.role === "admin" ||
+       ["ADMIN", "OWNER", "VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN", "BOOKKEEPER", "MANAGER", "VENUE_MANAGER"].includes(rawRole));
   const allowedKeys = isManagerOrAdmin
     ? TABS.map((t) => t.key)
     : (STAFF_TAB_ACCESS[rawRole] || (user ? ["register", "receipts", "staff"] : ["register"]));
@@ -120,10 +132,10 @@ function RegisterConsoleInner() {
 
   // If the current tab isn't permitted for this role, snap to the first allowed.
   useEffect(() => {
-    if (user && !allowedKeys.includes(activeTab)) {
+    if ((user || operator) && !allowedKeys.includes(activeTab)) {
       setActiveTab(allowedKeys[0]);
     }
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, operator]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: batches = [] } = useQuery({
     queryKey: ["active-pos-batch"],
@@ -227,12 +239,14 @@ function RegisterConsoleInner() {
           )}
           {activeTab === "bar" && <POSBarRegister user={user} />}
           {activeTab === "dj" && <UnifiedMusicConsole />}
-          {activeTab === "onboarding" && <StaffOnboardingPanel />}
+          {/* Manager/Admin ONLY — permission-gated render, never reachable by
+              door/bar/DJ staff even if tab state is forced. */}
+          {activeTab === "onboarding" && isManagerOrAdmin && <StaffOnboardingPanel />}
           {activeTab === "checkin" && <EntertainerCheckIn user={user} />}
           {activeTab === "staff" && (
             <TimeClock user={user} role={user?._highestRole || user?.role || "STAFF"} />
           )}
-          {activeTab === "audit" && (
+          {activeTab === "audit" && isManagerOrAdmin && (
             <div className="space-y-4">
               <AuditLogDashboard user={user} />
               <TransactionHistory transactions={transactions} showReceipt={true} />
