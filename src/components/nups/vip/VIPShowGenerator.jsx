@@ -31,7 +31,7 @@ export default function VIPShowGenerator({ prefill }) {
   const [venue, setVenue] = useState("Diamond Palace Tempe");
   const [guest, setGuest] = useState({ name: "", membership_id: "", member_tier: "STANDARD", id_scan_ref: "", card_last4: "", face_match_pct: "", thumb_match_pct: "" });
   const [staff, setStaff] = useState({ hostess: "", duty_manager: "", suite: "" });
-  const [lines, setLines] = useState([{ description: "VIP Suite — 1 hour", qty: 1, amount: 300 }]);
+  const [lines, setLines] = useState([{ description: "", qty: 1, amount: 0 }]);
   const [cardFeePct, setCardFeePct] = useState(5);
   const [cash, setCash] = useState(0);
   const [card, setCard] = useState(0);
@@ -59,8 +59,22 @@ export default function VIPShowGenerator({ prefill }) {
     }));
     if (prefill.venue_id) setVenueId(prefill.venue_id);
     if (prefill.mode) setMode(prefill.mode);
+    // Shared clickwrap — assent captured once in the GlyphBucks terms panel
+    // (scroll-tracked, initials on Terms 1 & 3) satisfies the VIP clickwrap too.
+    if (prefill.assent?.clickwrap_accepted) setClickwrap(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(prefill)]);
+
+  // Wipe all form data (incl. demo-seeded data) — used when the flow completes
+  // through to the receipt and a new contract is started.
+  const resetForm = () => {
+    setMode("REAL");
+    setGuest({ name: "", membership_id: "", member_tier: "STANDARD", id_scan_ref: "", card_last4: "", face_match_pct: "", thumb_match_pct: "" });
+    setStaff((s) => ({ hostess: "", duty_manager: "", suite: "" }));
+    setLines([{ description: "", qty: 1, amount: 0 }]);
+    setCash(0); setCard(0); setGlyphbucks(0);
+    setTreatment(""); setClickwrap(false); setError("");
+  };
 
   const subtotal = lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.amount) || 0), 0);
   const cardFee = Number(card) > 0 ? +(subtotal * (Number(cardFeePct) / 100)).toFixed(2) : 0;
@@ -142,7 +156,15 @@ export default function VIPShowGenerator({ prefill }) {
           glyphbucks_tendered: Number(glyphbucks) || 0,
           treatment: treatment.trim() || null,
           statute: "15 U.S.C. § 1666 — FCBA rights not waived",
-          clickwrap: { accepted: true, accepted_at: now.toISOString(), terms_version: VIP_TERMS_VERSION, clause_count: VIP_TERMS.length },
+          clickwrap: {
+            accepted: true, accepted_at: now.toISOString(), terms_version: VIP_TERMS_VERSION, clause_count: VIP_TERMS.length,
+            ...(prefill?.assent?.clickwrap_accepted ? {
+              shared_from: "GLYPHBUCKS_CLICKWRAP",
+              initials_term1: prefill.assent.initials_term1 || null,
+              initials_term3: prefill.assent.initials_term3 || null,
+              scroll_depth_pct: prefill.assent.scroll_depth_pct ?? null,
+            } : {}),
+          },
         },
         terms_hash: termsHash,
       };
@@ -197,7 +219,7 @@ export default function VIPShowGenerator({ prefill }) {
             <Printer className="w-4 h-4" /> Print Contract (Legal 8.5×14)
           </button>
           <a href={sealed.url} target="_blank" rel="noreferrer" className="rounded-lg bg-blue-600 hover:bg-blue-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Open Verify Page</a>
-          <button onClick={() => setSealed(null)} className="rounded-lg border border-neutral-500 px-5 py-2.5 font-semibold min-h-[44px]">New Contract</button>
+          <button onClick={() => { setSealed(null); resetForm(); }} className="rounded-lg border border-neutral-500 px-5 py-2.5 font-semibold min-h-[44px]">New Contract</button>
         </div>
 
         {/* The contract IS the receipt — full sealed document, on-screen and printable */}
@@ -292,6 +314,11 @@ export default function VIPShowGenerator({ prefill }) {
             </p>
           ))}
         </div>
+        {prefill?.assent?.clickwrap_accepted && (
+          <div className="rounded-lg bg-emerald-500/10 border border-emerald-400/40 px-3 py-2 mb-3 text-xs text-emerald-300 font-semibold">
+            ✓ Assent shared from the GlyphBucks clickwrap above — initials {prefill.assent.initials_term1}/{prefill.assent.initials_term3} · scroll {prefill.assent.scroll_depth_pct}% · filled once, applies to both contracts
+          </div>
+        )}
         <label className="flex items-start gap-3 cursor-pointer min-h-[44px]">
           <input type="checkbox" checked={clickwrap} onChange={(e) => setClickwrap(e.target.checked)}
             className="mt-0.5 w-5 h-5 accent-emerald-500" />

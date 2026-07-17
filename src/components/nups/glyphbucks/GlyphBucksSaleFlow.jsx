@@ -34,7 +34,7 @@ const Section = ({ n, icon: Icon, title, sub, done, children }) => (
   </div>
 );
 
-export default function GlyphBucksSaleFlow({ onShared }) {
+export default function GlyphBucksSaleFlow({ onShared, prefill }) {
   const [mode, setMode] = useState("REAL");
   const [venueId, setVenueId] = useState("DP-TEMPE-001");
   const [assent, setAssent] = useState(null);
@@ -64,9 +64,27 @@ export default function GlyphBucksSaleFlow({ onShared }) {
       member_tier: f.member_tier, id_scan_ref: f.id_scan_ref,
       card_last4: f.card_last4, card_brand: f.card_brand,
       face_id_match_pct: f.face_id_match_pct, thumb_match_pct: f.thumb_match_pct,
+      assent,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [venueId, mode, f.purchaser_name, f.purchaser_member_id, f.member_tier, f.id_scan_ref, f.card_last4, f.card_brand, f.face_id_match_pct, f.thumb_match_pct]);
+  }, [venueId, mode, assent, f.purchaser_name, f.purchaser_member_id, f.member_tier, f.id_scan_ref, f.card_last4, f.card_brand, f.face_id_match_pct, f.thumb_match_pct]);
+
+  // Member check-in autofill (from the unified desk picker)
+  useEffect(() => {
+    if (!prefill) return;
+    setF((p) => ({
+      ...p,
+      purchaser_name: prefill.purchaser_name || p.purchaser_name,
+      purchaser_member_id: prefill.purchaser_member_id || p.purchaser_member_id,
+      member_tier: prefill.member_tier || p.member_tier,
+      card_last4: prefill.card_last4 || p.card_last4,
+      card_brand: prefill.card_brand || p.card_brand,
+      id_scan_ref: prefill.id_scan_ref || p.id_scan_ref,
+      age_verified: prefill.age_verified || p.age_verified,
+      esig_purchaser: p.esig_purchaser || prefill.purchaser_name || "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(prefill)]);
 
   // Camera ID scan → identity binding + purchaser autofill (never raw PII beyond agreement fields)
   const handleIdExtracted = (d) => {

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import GlyphBucksSaleFlow from "@/components/nups/glyphbucks/GlyphBucksSaleFlow";
 import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
-import { Coins, Crown, Columns2, ArrowRightLeft } from "lucide-react";
+import MemberCheckInAutofill from "@/components/nups/contracts/MemberCheckInAutofill";
+import { Coins, Crown, Rows3, ArrowRightLeft } from "lucide-react";
 
 /**
  * Unified Contract Desk — GlyphBucks stored-value sale + VIP Show contract on
@@ -11,6 +12,7 @@ import { Coins, Crown, Columns2, ArrowRightLeft } from "lucide-react";
 export default function UnifiedContractDesk() {
   const [view, setView] = useState("BOTH"); // BOTH | GLYPHBUCKS | VIP
   const [shared, setShared] = useState(null);
+  const [memberFill, setMemberFill] = useState(null);
 
   const tabBtn = (v, label, Icon) => (
     <button key={v} onClick={() => setView(v)}
@@ -23,9 +25,10 @@ export default function UnifiedContractDesk() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        {tabBtn("BOTH", "Both (Parallel)", Columns2)}
+        {tabBtn("BOTH", "Both (Flow)", Rows3)}
         {tabBtn("GLYPHBUCKS", "GlyphBucks", Coins)}
         {tabBtn("VIP", "VIP Contract", Crown)}
+        <MemberCheckInAutofill onPick={setMemberFill} />
         {shared?.purchaser_name && (
           <span className="ml-auto flex items-center gap-2 text-[11px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-400/40 rounded-lg px-3 py-1.5">
             <ArrowRightLeft className="w-3.5 h-3.5" />
@@ -34,10 +37,11 @@ export default function UnifiedContractDesk() {
         )}
       </div>
 
-      <div className={view === "BOTH" ? "grid grid-cols-1 xl:grid-cols-2 gap-4 items-start" : ""}>
+      {/* Top-to-bottom flow — GlyphBucks capture first, VIP contract auto-fills below */}
+      <div className={view === "BOTH" ? "flex flex-col gap-6" : ""}>
         {(view === "BOTH" || view === "GLYPHBUCKS") && (
           <div className="min-w-0">
-            <GlyphBucksSaleFlow onShared={setShared} />
+            <GlyphBucksSaleFlow onShared={setShared} prefill={memberFill} />
           </div>
         )}
         {(view === "BOTH" || view === "VIP") && (
