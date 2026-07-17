@@ -64,10 +64,12 @@ const NAV_SECTIONS = [
       { id: "vipcommand",  label: "VIP Command",     icon: Star,      to: "/VIPCommand" },
       { id: "viprooms",    label: "VIP Rooms",       icon: Crown,     to: "/Contracts?tab=vip" },
       { id: "glyphbucks",  label: "GlyphBucks Hub",  icon: Coins,     to: "/GlyphBucksHub" },
-      { id: "staff",       label: "Staff",           icon: Users,     to: "/NUPSOwner?tab=staff" },
-      { id: "dj",          label: "DJ Console",      icon: Music,     to: "/NUPSOwner?tab=dj" },
-      { id: "customers",   label: "Customers",       icon: Heart,     to: "/NUPSOwner?tab=customers" },
-      { id: "marketing",   label: "Marketing",       icon: Megaphone, to: "/NUPSOwner?tab=marketing" },
+      // Legacy NUPSOwner tabs — ADMIN-only route (RoleClassGuard). Never
+      // shown to MANAGER: they'd be dead links (guard denies the route).
+      { id: "staff",       label: "Staff",           icon: Users,     to: "/NUPSOwner?tab=staff",     adminOnly: true },
+      { id: "dj",          label: "DJ Console",      icon: Music,     to: "/NUPSOwner?tab=dj",        adminOnly: true },
+      { id: "customers",   label: "Customers",       icon: Heart,     to: "/NUPSOwner?tab=customers", adminOnly: true },
+      { id: "marketing",   label: "Marketing",       icon: Megaphone, to: "/NUPSOwner?tab=marketing", adminOnly: true },
       { id: "people",      label: "People Archive",  icon: Archive,   to: "/PeopleArchive" },
       { id: "manager",     label: "Manager Console", icon: ShieldCheck, to: "/ManagerConsole" },
     ],
@@ -81,16 +83,18 @@ const NAV_SECTIONS = [
       {
         id: "accounting",  label: "Accounting",  icon: Calculator, to: "/Accounting",
         children: [
-          { id: "gl-reports", label: "GL Reports",   icon: BarChart3,  to: "/AccountingHub" },
-          { id: "trial-bal",  label: "Trial Balance",icon: BookOpen,   to: "/admin/ledger" },
-          { id: "settlement", label: "Settlements",  icon: Banknote,   to: "/admin/settlement" },
-          { id: "payouts",    label: "Payout Log",   icon: ScrollText, to: "/admin/payout-history" },
+          // All four children resolve to ADMIN-only routes (App.jsx guards).
+          { id: "gl-reports", label: "GL Reports",   icon: BarChart3,  to: "/AccountingHub",          adminOnly: true },
+          { id: "trial-bal",  label: "Trial Balance",icon: BookOpen,   to: "/admin/ledger",           adminOnly: true },
+          { id: "settlement", label: "Settlements",  icon: Banknote,   to: "/admin/settlement",       adminOnly: true },
+          { id: "payouts",    label: "Payout Log",   icon: ScrollText, to: "/admin/payout-history",   adminOnly: true },
         ],
       },
-      { id: "analytics",  label: "Analytics",   icon: TrendingUp, to: "/NUPSOwner?tab=analytics" },
-      { id: "reports",    label: "Reports",     icon: BarChart3,  to: "/NUPSOwner?tab=reports" },
-      { id: "payroll",    label: "Payroll",     icon: DollarSign, to: "/NUPSOwner?tab=payroll" },
-      { id: "inventory",  label: "Inventory",   icon: Package,    to: "/NUPSOwner?tab=inventory" },
+      // Legacy NUPSOwner tabs — ADMIN-only (see Floor & Staff note above).
+      { id: "analytics",  label: "Analytics",   icon: TrendingUp, to: "/NUPSOwner?tab=analytics", adminOnly: true },
+      { id: "reports",    label: "Reports",     icon: BarChart3,  to: "/NUPSOwner?tab=reports",   adminOnly: true },
+      { id: "payroll",    label: "Payroll",     icon: DollarSign, to: "/NUPSOwner?tab=payroll",   adminOnly: true },
+      { id: "inventory",  label: "Inventory",   icon: Package,    to: "/NUPSOwner?tab=inventory", adminOnly: true },
       {
         id: "contracts",  label: "Contracts",   icon: FileText,   to: "/Contracts",
         children: [
@@ -252,8 +256,17 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   // hid half the sidebar (Accounting, Contracts, VIP, etc.) depending on the
   // current page. The sidebar now always shows every role-scoped item — the
   // only filter left is the DACO 003 §2 role-class scope.
+  const isAdmin = roleClass === ROLE_CLASS.ADMIN;
   const visibleSections = NAV_SECTIONS
     .filter(s => visibleSectionLabels.includes(s.label))
+    .map(section => ({
+      ...section,
+      items: section.items
+        .filter(i => !i.adminOnly || isAdmin)
+        .map(i => (i.children
+          ? { ...i, children: i.children.filter(c => !c.adminOnly || isAdmin) }
+          : i)),
+    }))
     .filter(section => section.items.length > 0);
 
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
