@@ -12,7 +12,11 @@
     },
     "pin": {
       "type": "string",
-      "description": "PIN code for quick access"
+      "description": "LEGACY plaintext PIN \u2014 being migrated to pin_hash. New accounts must use pin_hash."
+    },
+    "pin_hash": {
+      "type": "string",
+      "description": "DACO-NUPS-ROLE-VIP-BUILD-20260717 \u00a710 \u2014 SHA-256 hex of the assigned PIN. Never returned to clients, never logged."
     },
     "full_name": {
       "type": "string",
@@ -25,8 +29,10 @@
         "VENUE_OWNER",
         "VENUE_MANAGER",
         "FLOOR_HOST",
+        "HOSTESS",
         "DOOR_GIRL",
         "DOORMAN",
+        "DRIVER",
         "PERFORMER",
         "BARTENDER",
         "SECURITY",
@@ -36,7 +42,15 @@
         "SOVEREIGN"
       ],
       "default": "BARTENDER",
-      "description": "RBAC role per \u00a79.2. DACO-20260613-DOOR-RBAC added DOOR_GIRL + DOORMAN \u2014 distinct from FLOOR_HOST for door-scope role gating."
+      "description": "RBAC role per \u00a79.2. DACO-NUPS-ROLE-VIP-BUILD-20260717 added HOSTESS (VIP contract sale workspace) and DRIVER (clock in/out only)."
+    },
+    "platform_email": {
+      "type": "string",
+      "description": "Base44 platform auth email bound to this account (owner/admin back-office sign-in)."
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Owner email that approved this account (owner/admin accounts)."
     },
     "sovereign_flag": {
       "type": "boolean",

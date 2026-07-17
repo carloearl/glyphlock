@@ -1,0 +1,101 @@
+{
+  "name": "NUPSAccessRequest",
+  "type": "object",
+  "description": "DACO-NUPS-ROLE-VIP-BUILD-20260717 \u00a74-5 \u2014 Owner/Administrator access requests. New requests start PENDING_OWNER_APPROVAL. No applicant may self-approve. Every decision records applicant, approver, requested vs granted role, reason, timestamp.",
+  "properties": {
+    "full_legal_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "description": "Platform-verified email of the requester (from base44 auth)."
+    },
+    "phone": {
+      "type": "string"
+    },
+    "requested_role": {
+      "type": "string",
+      "enum": [
+        "ADMINISTRATOR",
+        "OWNER"
+      ],
+      "default": "ADMINISTRATOR"
+    },
+    "venue_id": {
+      "type": "string",
+      "default": "dream_palace"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why access is being requested."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING_OWNER_APPROVAL",
+        "NEEDS_INFORMATION",
+        "APPROVED",
+        "REJECTED",
+        "SUSPENDED",
+        "REVOKED"
+      ],
+      "default": "PENDING_OWNER_APPROVAL"
+    },
+    "granted_role": {
+      "type": "string",
+      "description": "Role actually granted on approval (ADMINISTRATOR | OWNER). May differ from requested."
+    },
+    "decided_by": {
+      "type": "string",
+      "description": "Approving owner's email."
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision_note": {
+      "type": "string"
+    },
+    "decision_log": {
+      "type": "array",
+      "description": "Append-only decision history.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string"
+          },
+          "by": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "nups_user_id": {
+      "type": "string",
+      "description": "NUPSUser record created on approval."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "TEST",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    }
+  },
+  "required": [
+    "full_legal_name",
+    "email",
+    "requested_role"
+  ]
+}

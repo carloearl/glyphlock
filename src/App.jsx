@@ -77,6 +77,9 @@ import OfflineVerify from './pages/OfflineVerify';
 import VerifyDispatch from './pages/VerifyDispatch';
 import VIPShowContracts from './pages/VIPShowContracts';
 import VIPCommandCenter from './pages/VIPCommandCenter';
+import NUPSKiosk from './pages/NUPSKiosk';
+import VIPSale from './pages/VIPSale';
+import AccessRequests from './pages/AccessRequests';
 import KioskShell from './components/nups/KioskShell';
 import RoleClassGuard from './components/nups/RoleClassGuard';
 import RoleClassBadge from './components/nups/RoleClassBadge';
@@ -107,7 +110,7 @@ const AuthenticatedApp = () => {
 
   const currentPath = location.pathname;
   const currentPathLower = currentPath.toLowerCase();
-  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify'];
+  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
@@ -138,6 +141,7 @@ const AuthenticatedApp = () => {
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
     '/v/', '/vipshowcontracts', '/offlineverify', '/vipcommand',
+    '/nupskiosk', '/vipsale', '/accessrequests',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
@@ -159,6 +163,7 @@ const AuthenticatedApp = () => {
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
     '/vipshowcontracts', '/vipcommand',
+    '/vipsale', '/accessrequests',
   ];
   const isNupsKioskRoute = nupsKioskRoots.some(p => currentPathLower.startsWith(p));
 
@@ -269,6 +274,13 @@ const AuthenticatedApp = () => {
         <Route path="/vipcommand" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPCommandCenter /></RoleClassGuard>} />
         <Route path="/VIPShowContracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
         <Route path="/vipshowcontracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
+        {/* DACO-NUPS-ROLE-VIP-BUILD-20260717 — role-gated kiosk system */}
+        <Route path="/NUPSKiosk" element={<NUPSKiosk />} />
+        <Route path="/nupskiosk" element={<NUPSKiosk />} />
+        <Route path="/VIPSale" element={<VIPSale />} />
+        <Route path="/vipsale" element={<VIPSale />} />
+        <Route path="/AccessRequests" element={<RoleClassGuard allow={["ADMIN"]}><AccessRequests /></RoleClassGuard>} />
+        <Route path="/accessrequests" element={<RoleClassGuard allow={["ADMIN"]}><AccessRequests /></RoleClassGuard>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes></>

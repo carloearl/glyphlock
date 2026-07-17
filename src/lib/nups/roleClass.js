@@ -25,7 +25,8 @@ export const ROLE_CLASS = {
 export const HOME_BY_CLASS = {
   STAFF:       "/StaffHome",
   ENTERTAINER: "/EntertainerHome",
-  MANAGER:     "/NUPSHub",
+  // DACO-NUPS-ROLE-VIP-BUILD-20260717 §9 — managers get the Approval Console, never the operator hub.
+  MANAGER:     "/ManagerConsole",
   // §6 — back office has its own portal, separate from live floor ops.
   ADMIN:       "/NUPSAdminPortal",
 };

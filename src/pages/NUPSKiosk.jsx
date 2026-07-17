@@ -1,0 +1,100 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import KioskPinPad from "@/components/nups/kiosk/KioskPinPad";
+import OwnerAdminSignIn from "@/components/nups/kiosk/OwnerAdminSignIn";
+import AccessRequestForm from "@/components/nups/kiosk/AccessRequestForm";
+import { Clock, LogOut, ShieldCheck, UserPlus, ArrowLeft, CheckCircle2 } from "lucide-react";
+
+// DACO-NUPS-ROLE-VIP-BUILD-20260717 §3 — Public kiosk entry.
+// Shows ONLY: Staff Clock In, Staff Clock Out, Owner/Admin Sign In, Request Owner/Admin Access.
+// No dashboards, menus, revenue, staff lists, contracts, or configuration before authentication.
+
+const PANELS = [
+  { key: "clockIn", label: "Staff Clock In", icon: Clock, color: "from-cyan-700 to-cyan-900" },
+  { key: "clockOut", label: "Staff Clock Out", icon: LogOut, color: "from-slate-700 to-slate-900" },
+  { key: "admin", label: "Owner / Admin Sign In", icon: ShieldCheck, color: "from-violet-700 to-violet-900" },
+  { key: "request", label: "Request Owner / Admin Access", icon: UserPlus, color: "from-indigo-700 to-indigo-900" },
+];
+
+export default function NUPSKiosk() {
+  const navigate = useNavigate();
+  const [panel, setPanel] = useState(null);
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("panel");
+    if (p && PANELS.some((x) => x.key === p)) setPanel(p);
+  }, []);
+
+  const onClockIn = (data) => {
+    if (data?.user) {
+      sessionStorage.setItem("nups_kiosk_operator", JSON.stringify({
+        name: data.user.full_name, role: data.user.role, workspace: data.workspace, shift_id: data.shift_id,
+      }));
+    }
+    if (data?.destination && data.destination !== "/NUPSKiosk") {
+      navigate(data.destination);
+    } else {
+      setResult({ type: "in", name: data?.user?.full_name, workspace: data?.workspace });
+    }
+  };
+
+  const onClockOut = (data) => {
+    sessionStorage.removeItem("nups_kiosk_operator");
+    setResult({ type: "out", name: data?.user?.full_name });
+  };
+
+  const active = PANELS.find((p) => p.key === panel);
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <img src="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
+            alt="NUPS" className="w-16 h-16 mx-auto mb-3 object-contain" />
+          <h1 className="text-2xl font-bold tracking-wide">DREAM PALACE</h1>
+          <p className="text-slate-500 text-sm mt-1">Staff Entry & Clock Station</p>
+        </div>
+
+        {result ? (
+          <div className="text-center space-y-4 bg-slate-900 border border-slate-800 rounded-2xl p-8">
+            <CheckCircle2 className="w-14 h-14 mx-auto text-emerald-400" />
+            <p className="text-xl font-semibold">
+              {result.type === "in" ? `Clocked in — ${result.name}` : `Clocked out — ${result.name}`}
+            </p>
+            {result.type === "in" && result.workspace && (
+              <p className="text-slate-400 text-sm">Workspace: {result.workspace}</p>
+            )}
+            <button onClick={() => { setResult(null); setPanel(null); }}
+              className="w-full h-12 rounded-xl bg-slate-800 border border-slate-700 text-slate-300">
+              Done
+            </button>
+          </div>
+        ) : !panel ? (
+          <div className="grid gap-4">
+            {PANELS.map((p) => (
+              <button key={p.key} onClick={() => setPanel(p.key)}
+                className={`h-20 rounded-2xl bg-gradient-to-br ${p.color} border border-white/10 flex items-center gap-4 px-6 text-left shadow-lg active:scale-[0.99]`}>
+                <p.icon className="w-7 h-7 shrink-0" />
+                <span className="text-lg font-semibold">{p.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <button onClick={() => setPanel(null)} className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <h2 className="text-lg font-bold">{active.label}</h2>
+            </div>
+            {panel === "clockIn" && <KioskPinPad mode="clockIn" onSuccess={onClockIn} />}
+            {panel === "clockOut" && <KioskPinPad mode="clockOut" onSuccess={onClockOut} />}
+            {panel === "admin" && <OwnerAdminSignIn />}
+            {panel === "request" && <AccessRequestForm />}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
