@@ -34,7 +34,7 @@ const WORKSPACE_BY_ROLE = {
   // SECURITY clocks in/out only — no workspace. Shift is logged to StaffShift
   // (payroll + Manager Console visibility); kiosk shows the confirmation screen.
   SECURITY:       { destination: '/NUPSKiosk',       workspace: 'Security Clock In/Out', station: 'security' },
-  DJ:             { destination: '/StaffHome',       workspace: 'Staff Home', station: 'floor' },
+  DJ:             { destination: '/DJHome',          workspace: 'DJ Booth — Auto-DJ Console', station: 'floor' },
   KIOSK:          { destination: '/NUPSKiosk',       workspace: 'Clock In/Out', station: 'door' },
   DEMO:           { destination: '/NUPSSandbox',     workspace: 'Sandbox', station: 'floor' },
 };

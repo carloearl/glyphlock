@@ -79,6 +79,7 @@ import NUPSKiosk from './pages/NUPSKiosk';
 import VIPSale from './pages/VIPSale';
 import AccessRequests from './pages/AccessRequests';
 import RoleViews from './pages/RoleViews';
+import DJHome from './pages/DJHome';
 import KioskShell from './components/nups/KioskShell';
 import KioskSessionGuard from './components/nups/KioskSessionGuard';
 import RoleClassGuard from './components/nups/RoleClassGuard';
@@ -141,7 +142,7 @@ const AuthenticatedApp = () => {
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
     '/v/', '/vipshowcontracts', '/offlineverify', '/vipcommand',
-    '/nupskiosk', '/vipsale', '/accessrequests', '/roleviews',
+    '/nupskiosk', '/vipsale', '/accessrequests', '/roleviews', '/djhome',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
@@ -163,7 +164,7 @@ const AuthenticatedApp = () => {
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
     '/vipshowcontracts', '/vipcommand',
-    '/vipsale', '/accessrequests', '/roleviews',
+    '/vipsale', '/accessrequests', '/roleviews', '/djhome',
   ];
   const isNupsKioskRoute = nupsKioskRoots.some(p => currentPathLower.startsWith(p));
 
@@ -280,6 +281,8 @@ const AuthenticatedApp = () => {
         {/* DACO-NUPS-ROLE-VIP-BUILD-20260717 — role-gated kiosk system */}
         <Route path="/NUPSKiosk" element={<NUPSKiosk />} />
         <Route path="/nupskiosk" element={<NUPSKiosk />} />
+        <Route path="/DJHome" element={<KioskSessionGuard roles={["DJ"]}><DJHome /></KioskSessionGuard>} />
+        <Route path="/djhome" element={<KioskSessionGuard roles={["DJ"]}><DJHome /></KioskSessionGuard>} />
         <Route path="/VIPSale" element={<KioskSessionGuard roles={["HOSTESS","FLOOR_HOST"]}><VIPSale /></KioskSessionGuard>} />
         <Route path="/vipsale" element={<KioskSessionGuard roles={["HOSTESS","FLOOR_HOST"]}><VIPSale /></KioskSessionGuard>} />
         <Route path="/AccessRequests" element={<RoleClassGuard allow={["ADMIN"]}><AccessRequests /></RoleClassGuard>} />

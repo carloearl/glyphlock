@@ -12,7 +12,7 @@ const VIEWS = [
   { label: "Front Door", pov: "Door Girl / Doorman view", icon: DoorOpen, to: "/FrontDoor", color: "border-cyan-500/40", iconColor: "text-cyan-400" },
   { label: "VIP Sale", pov: "Hostess / Floor Host view", icon: Crown, to: "/VIPSale", color: "border-pink-500/40", iconColor: "text-pink-400" },
   { label: "Manager Console", pov: "Venue Manager view", icon: ShieldCheck, to: "/ManagerConsole", color: "border-blue-500/40", iconColor: "text-blue-400" },
-  { label: "DJ Console", pov: "DJ view", icon: Music, to: "/NUPSOwner?tab=dj", color: "border-violet-500/40", iconColor: "text-violet-400" },
+  { label: "DJ Booth", pov: "DJ view — Auto-DJ console", icon: Music, to: "/DJHome", color: "border-violet-500/40", iconColor: "text-violet-400" },
   { label: "Register", pov: "Bartender / POS view", icon: ShoppingCart, to: "/Register", color: "border-emerald-500/40", iconColor: "text-emerald-400" },
   { label: "Entertainer Check-In", pov: "Entertainer view", icon: Mic2, to: "/EntertainerCheckIn", color: "border-rose-500/40", iconColor: "text-rose-400" },
   { label: "Clock Station", pov: "Security / Driver view", icon: Clock, to: "/NUPSKiosk", color: "border-slate-500/40", iconColor: "text-slate-400" },
