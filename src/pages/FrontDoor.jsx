@@ -18,6 +18,7 @@ import FrontDoorConfigPanel from "@/components/nups/frontdoor/FrontDoorConfigPan
 import EmergencyOverrideButton from "@/components/nups/frontdoor/EmergencyOverrideButton";
 import OperatorStatusBar from "@/components/nups/frontdoor/OperatorStatusBar";
 import FrontDoorSideNav from "@/components/nups/frontdoor/FrontDoorSideNav";
+import { base44 } from "@/api/base44Client";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useFrontDoorConfig, DEFAULT_FRONT_DOOR_CONFIG } from "@/hooks/useFrontDoorConfig";
 
@@ -70,12 +71,26 @@ function FrontDoorContent() {
     .sort((a, b) => STEP_ORDER.indexOf(a) - STEP_ORDER.indexOf(b));
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("nups_session");
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      // guard already validated auth
-    }
+    (async () => {
+      // 1) Kiosk PIN session (staff clocked in at the door)
+      try {
+        const raw = sessionStorage.getItem("nups_session");
+        if (raw) { setUser(JSON.parse(raw)); return; }
+      } catch { /* fall through */ }
+      // 2) Platform sign-in (owner/admin/manager back-office identity)
+      try {
+        const me = await base44.auth.me();
+        const rows = await base44.entities.NUPSUser.filter({ username: me.email });
+        const nu = rows?.[0];
+        setUser({
+          full_name: nu?.full_name || me.full_name,
+          username: me.email,
+          email: me.email,
+          role: nu?.role || (me.role === "admin" ? "PLATFORM_ADMIN" : ""),
+          venue_id: nu?.venue_id,
+        });
+      } catch { /* guard already validated auth */ }
+    })();
   }, []);
 
   // Default to step 1 — the first thing that happens at the door.
