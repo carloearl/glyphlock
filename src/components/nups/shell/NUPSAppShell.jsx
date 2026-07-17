@@ -18,6 +18,7 @@ import ModeToggle from "./ModeToggle";
 import { base44 } from "@/api/base44Client";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
 import { isSovereign } from "@/lib/nups/sovereign";
+import { useAdminOverride, setAdminOverride } from "@/lib/nups/adminView";
 
 
 // DACO 003 §2 — which sections each role class may see.
@@ -25,7 +26,7 @@ import { isSovereign } from "@/lib/nups/sovereign";
 // own scoped shells) but if they do, they get an empty sidebar — no cross-role
 // leakage.
 const SECTIONS_BY_CLASS = {
-  ADMIN:       ["Operations · Tonight's Flow", "Floor & Staff", "Accounting", "Admin"],
+  ADMIN:       ["Operations · Tonight's Flow", "Floor & Staff", "Accounting", "Admin", "Legacy"],
   MANAGER:     ["Operations · Tonight's Flow", "Floor & Staff", "Accounting"],
   STAFF:       [],
   ENTERTAINER: [],
@@ -64,12 +65,8 @@ const NAV_SECTIONS = [
       { id: "vipcommand",  label: "VIP Command",     icon: Star,      to: "/VIPCommand" },
       { id: "viprooms",    label: "VIP Rooms",       icon: Crown,     to: "/Contracts?tab=vip" },
       { id: "glyphbucks",  label: "GlyphBucks Hub",  icon: Coins,     to: "/GlyphBucksHub" },
-      // Legacy NUPSOwner tabs — ADMIN-only route (RoleClassGuard). Never
-      // shown to MANAGER: they'd be dead links (guard denies the route).
-      { id: "staff",       label: "Staff",           icon: Users,     to: "/NUPSOwner?tab=staff",     adminOnly: true },
-      { id: "dj",          label: "DJ Console",      icon: Music,     to: "/NUPSOwner?tab=dj",        adminOnly: true },
-      { id: "customers",   label: "Customers",       icon: Heart,     to: "/NUPSOwner?tab=customers", adminOnly: true },
-      { id: "marketing",   label: "Marketing",       icon: Megaphone, to: "/NUPSOwner?tab=marketing", adminOnly: true },
+      // Legacy NUPSOwner tabs moved to the dedicated Legacy section below —
+      // one way in, no duplicates (owner directive 2026-07-17).
       { id: "people",      label: "People Archive",  icon: Archive,   to: "/PeopleArchive" },
       { id: "manager",     label: "Manager Console", icon: ShieldCheck, to: "/ManagerConsole" },
     ],
@@ -90,11 +87,7 @@ const NAV_SECTIONS = [
           { id: "payouts",    label: "Payout Log",   icon: ScrollText, to: "/admin/payout-history",   adminOnly: true },
         ],
       },
-      // Legacy NUPSOwner tabs — ADMIN-only (see Floor & Staff note above).
-      { id: "analytics",  label: "Analytics",   icon: TrendingUp, to: "/NUPSOwner?tab=analytics", adminOnly: true },
-      { id: "reports",    label: "Reports",     icon: BarChart3,  to: "/NUPSOwner?tab=reports",   adminOnly: true },
-      { id: "payroll",    label: "Payroll",     icon: DollarSign, to: "/NUPSOwner?tab=payroll",   adminOnly: true },
-      { id: "inventory",  label: "Inventory",   icon: Package,    to: "/NUPSOwner?tab=inventory", adminOnly: true },
+      // Legacy NUPSOwner tabs moved to the Legacy section (2026-07-17).
       {
         id: "contracts",  label: "Contracts",   icon: FileText,   to: "/Contracts",
         children: [
@@ -119,19 +112,35 @@ const NAV_SECTIONS = [
         id: "audit",       label: "Audit",            icon: ShieldCheck, to: "/admin/audit-integrity",
         children: [
           { id: "audit-integrity", label: "Integrity",   icon: ShieldCheck,   to: "/admin/audit-integrity" },
-          { id: "audit-log",       label: "Audit Log",   icon: ClipboardList, to: "/NUPSOwner?tab=audit" },
           { id: "activity",        label: "Activity",    icon: ScrollText,    to: "/admin/activity-log" },
         ],
       },
-      { id: "rbac",      label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
       // Owner/Administrator access request approvals — DACO-NUPS-FINAL-LAUNCH-GATE.
       { id: "access",    label: "Access Requests", icon: ShieldAlert,   to: "/AccessRequests" },
       { id: "recon",     label: "Reconciliation",  icon: Banknote,      to: "/admin/payment-reconciliation" },
       { id: "resolution",label: "Resolutions",     icon: ClipboardCheck,to: "/admin/financial-resolution" },
       { id: "registry",  label: "Feature Registry",icon: BookOpen,      to: "/admin/registry" },
       { id: "adr",       label: "Decision Register", icon: FileText,    to: "/admin/adr" },
-      { id: "demo",      label: "Demo Keys",       icon: Sparkles,      to: "/NUPSOwner?tab=demo" },
       { id: "venue",     label: "Venue Settings",  icon: Settings,      to: "/admin/venue-settings" },
+    ],
+  },
+  // Legacy — the SINGLE home for every retired NUPSOwner tab. Visible only
+  // to admins with Admin Override ON. Nothing here has a second entry
+  // anywhere else in the sidebar (owner directive 2026-07-17).
+  {
+    label: "Legacy",
+    items: [
+      { id: "lg-staff",     label: "Staff",         icon: Users,         to: "/NUPSOwner?tab=staff" },
+      { id: "lg-dj",        label: "DJ Console",    icon: Music,         to: "/NUPSOwner?tab=dj" },
+      { id: "lg-customers", label: "Customers",     icon: Heart,         to: "/NUPSOwner?tab=customers" },
+      { id: "lg-marketing", label: "Marketing",     icon: Megaphone,     to: "/NUPSOwner?tab=marketing" },
+      { id: "lg-analytics", label: "Analytics",     icon: TrendingUp,    to: "/NUPSOwner?tab=analytics" },
+      { id: "lg-reports",   label: "Reports",       icon: BarChart3,     to: "/NUPSOwner?tab=reports" },
+      { id: "lg-payroll",   label: "Payroll",       icon: DollarSign,    to: "/NUPSOwner?tab=payroll" },
+      { id: "lg-inventory", label: "Inventory",     icon: Package,       to: "/NUPSOwner?tab=inventory" },
+      { id: "lg-audit",     label: "Audit Log",     icon: ClipboardList, to: "/NUPSOwner?tab=audit" },
+      { id: "lg-admin",     label: "Admin Console", icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
+      { id: "lg-demo",      label: "Demo Keys",     icon: Sparkles,      to: "/NUPSOwner?tab=demo" },
     ],
   },
 ];
@@ -250,21 +259,26 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const visibleSectionLabels = SECTIONS_BY_CLASS[roleClass] || [];
-
-  // FULL MENU RESTORED (operator feedback 2026-07-09): workspace filtering
-  // hid half the sidebar (Accounting, Contracts, VIP, etc.) depending on the
-  // current page. The sidebar now always shows every role-scoped item — the
-  // only filter left is the DACO 003 §2 role-class scope.
+  // Owner directive 2026-07-17: admins default to STAFF-PARITY (manager-tier)
+  // view everywhere. The Admin Override header pill unlocks the Admin +
+  // Legacy sections and adminOnly items. State is session-scoped and shared
+  // across every NUPS surface via useAdminOverride().
+  const adminOverride = useAdminOverride();
   const isAdmin = roleClass === ROLE_CLASS.ADMIN;
+  const effectiveAdmin = isAdmin && adminOverride;
+  const visibleSectionLabels = effectiveAdmin
+    ? SECTIONS_BY_CLASS.ADMIN
+    : isAdmin
+      ? SECTIONS_BY_CLASS.MANAGER
+      : (SECTIONS_BY_CLASS[roleClass] || []);
   const visibleSections = NAV_SECTIONS
     .filter(s => visibleSectionLabels.includes(s.label))
     .map(section => ({
       ...section,
       items: section.items
-        .filter(i => !i.adminOnly || isAdmin)
+        .filter(i => !i.adminOnly || effectiveAdmin)
         .map(i => (i.children
-          ? { ...i, children: i.children.filter(c => !c.adminOnly || isAdmin) }
+          ? { ...i, children: i.children.filter(c => !c.adminOnly || effectiveAdmin) }
           : i)),
     }))
     .filter(section => section.items.length > 0);
@@ -394,6 +408,19 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               {/* W3-012A — Workspace Switcher: lets users switch between
                   Staff, Register, Manager, Back Office, Owner, System Admin
                   workspaces without logging out. */}
+              {isAdmin && (
+                <button
+                  onClick={() => setAdminOverride(!adminOverride)}
+                  className={`px-3 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${
+                    adminOverride
+                      ? "border-amber-400/50 text-amber-300 bg-amber-500/10 hover:bg-amber-500/20"
+                      : "border-white/10 text-slate-400 bg-white/[0.03] hover:bg-white/[0.07]"
+                  }`}
+                  title="Admins default to the staff view. Toggle to unlock admin and legacy tools."
+                >
+                  {adminOverride ? "Admin Override" : "Staff View"}
+                </button>
+              )}
               <WorkspaceSwitcher roleClass={roleClass} />
               {/* MODE TOGGLE — F-7: always visible, color-distinct, before venue.
                   Click to switch LIVE/DEMO/SANDBOX, seed or clear demo data. */}

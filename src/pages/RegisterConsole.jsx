@@ -42,6 +42,7 @@ import RegisterStatusHeader from "@/components/nups/register/RegisterStatusHeade
 import RecentTransactionsStrip from "@/components/nups/register/RecentTransactionsStrip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+import { useAdminOverride } from "@/lib/nups/adminView";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 
@@ -103,6 +104,7 @@ function RegisterConsoleInner() {
   const [user, setUser] = useState(null);
   const [operator, setOperator] = useState(null);
   const [showSeedDialog, setShowSeedDialog] = useState(false);
+  const adminOverride = useAdminOverride();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -130,10 +132,17 @@ function RegisterConsoleInner() {
   // The expanded management view lives only in the Admin Portal / Manager
   // Console. A clocked-in operator's role scopes tabs; an admin login with
   // no operator gets the default door-staff set — never the full tab list.
+  // Tiers: staff → their station only · manager → all operational tabs
+  // (no audit) · admin → staff-parity door set unless Admin Override is ON.
+  const isManagerRole = ["MANAGER", "VENUE_MANAGER"].includes(rawRole);
   const allowedKeys =
     STAFF_TAB_ACCESS[rawRole] ||
     (isManagerOrAdmin
-      ? ["register", "drivers", "checkin", "receipts", "staff"]
+      ? (isManagerRole
+          ? ["register", "drivers", "checkin", "receipts", "staff", "bar", "dj", "onboarding"]
+          : adminOverride
+            ? TABS.map((t) => t.key)
+            : ["register", "drivers", "checkin", "receipts", "staff"])
       : (user ? ["register", "receipts", "staff"] : ["register"]));
   const visibleTabs = TABS.filter((t) => allowedKeys.includes(t.key));
 
@@ -142,7 +151,7 @@ function RegisterConsoleInner() {
     if ((user || operator) && !allowedKeys.includes(activeTab)) {
       setActiveTab(allowedKeys[0]);
     }
-  }, [user, operator]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, operator, adminOverride]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: batches = [] } = useQuery({
     queryKey: ["active-pos-batch"],
