@@ -55,7 +55,7 @@ const Toggle = ({ on, onChange, label }) => (
 const BLANK = {
   guest: { name: "", member_id: "", tier: "MEMBER", gb_account_last4: "", id_scan_ref: "", age_verified: false, face_pct: "", thumb_pct: "" },
   gb: { denom_cents: 2000, qty: 5, card_fee_cents: 500, terminal_id: "CG01-T1" },
-  vip: { suite: "", hostess: "", duty_manager: "", lines: [{ description: "", qty: 1, amount: 0 }], card_fee_pct: 5, cash: 0, card: 0, glyphbucks: 0, treatment: "" },
+  vip: { suite: "", hostess: "", duty_manager: "", lines: [{ description: "", qty: 1, amount: 0 }], card_fee_pct: 5, cash: 0, card: 0, glyphbucks: 0, treatment: "", tip_pct: null, tip_custom: "" },
   card: { last4: "", auth_code: "", entry: "CHIP", brand: "VISA" },
   esigs: { purchaser: "", issuer_rep: "", manager: "" },
 };
@@ -108,7 +108,7 @@ export default function UnifiedContractFlow({ memberFill }) {
     setAssent({ clickwrap_accepted: true, terms_shown_at: now, scroll_depth_pct: 100, dwell_seconds: 45, accepted_at: now, initials_term1: "R.S.", initials_term3: "R.S." });
     setGuest({ name: "Robert Spender", member_id: "MBR-0001", tier: "PLATINUM ELITE", gb_account_last4: "4471", id_scan_ref: "IDS-AZ-0001", age_verified: true, face_pct: "98.2", thumb_pct: "98.7" });
     setGb({ denom_cents: 2000, qty: 5, card_fee_cents: 500, terminal_id: "CG01-T1" });
-    setVip({ suite: "Skyline Suite", hostess: "Amber", duty_manager: "M. Reyes", lines: [{ description: "VIP Suite — 60 min", qty: 1, amount: 300 }, { description: "Performance — Crystal", qty: 2, amount: 150 }], card_fee_pct: 5, cash: 200, card: 430, glyphbucks: 0, treatment: "DEMO walkthrough — training scenario" });
+    setVip({ suite: "Skyline Suite", hostess: "Amber", duty_manager: "M. Reyes", lines: [{ description: "VIP Suite — 60 min", qty: 1, amount: 300 }, { description: "Performance — Crystal", qty: 2, amount: 150 }], card_fee_pct: 5, cash: 200, card: 550, glyphbucks: 0, treatment: "DEMO walkthrough — training scenario", tip_pct: 20, tip_custom: "" });
     setCard({ last4: "9921", auth_code: "AUTH88231", entry: "CHIP", brand: "VISA" });
     setEsigs({ purchaser: "Robert Spender", issuer_rep: "Amber Cole", manager: "M. Reyes" });
     setError("");
@@ -116,8 +116,9 @@ export default function UnifiedContractFlow({ memberFill }) {
 
   const gbFaceCents = Number(gb.denom_cents) * Number(gb.qty || 0);
   const vipSubtotal = vip.lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.amount) || 0), 0);
+  const vipTip = vip.tip_pct ? +(vipSubtotal * (vip.tip_pct / 100)).toFixed(2) : +(Number(vip.tip_custom) || 0).toFixed(2);
   const vipCardFee = Number(vip.card) > 0 ? +(vipSubtotal * (Number(vip.card_fee_pct) / 100)).toFixed(2) : 0;
-  const vipTotal = +(vipSubtotal + vipCardFee).toFixed(2);
+  const vipTotal = +(vipSubtotal + vipTip + vipCardFee).toFixed(2);
   const vipTender = +(Number(vip.cash) + Number(vip.card)).toFixed(2);
   const setLine = (i, k, v) => setVip((p) => ({ ...p, lines: p.lines.map((l, idx) => (idx === i ? { ...l, [k]: v } : l)) }));
 
@@ -202,8 +203,11 @@ export default function UnifiedContractFlow({ memberFill }) {
             thumb_match_pct: guest.thumb_pct === "" ? null : Number(guest.thumb_pct),
           },
           staff: { hostess: vip.hostess.trim(), duty_manager: vip.duty_manager.trim(), suite: vip.suite.trim() },
-          lines: vip.lines.map((l) => ({ description: l.description, qty: Number(l.qty) || 0, amount: Number(l.amount) || 0 })),
-          subtotal: vipSubtotal, card_fee: vipCardFee, total: vipTotal,
+          lines: [
+            ...vip.lines.map((l) => ({ description: l.description, qty: Number(l.qty) || 0, amount: Number(l.amount) || 0 })),
+            ...(vipTip > 0 ? [{ description: `GRATUITY${vip.tip_pct ? ` (${vip.tip_pct}%)` : " (custom)"}`, qty: 1, amount: vipTip }] : []),
+          ],
+          subtotal: +(vipSubtotal + vipTip).toFixed(2), card_fee: vipCardFee, total: vipTotal,
           tender: { cash_sales: Number(vip.cash) || 0, card_sales: Number(vip.card) || 0, total_sales: vipTender },
           notes: {
             glyphbucks_tendered: Number(vip.glyphbucks) || 0,
@@ -398,8 +402,35 @@ export default function UnifiedContractFlow({ memberFill }) {
               <label><span className={lbl}>Card fee %</span><input className={inp} type="number" value={vip.card_fee_pct} onChange={(e) => setVip({ ...vip, card_fee_pct: e.target.value })} /></label>
             </div>
             <label className="block"><span className={lbl}>Treatment / notes</span><input className={inp} value={vip.treatment} onChange={(e) => setVip({ ...vip, treatment: e.target.value })} /></label>
+
+            {/* Gratuity — one-tap 20%/30% (math done for the guest) or custom (guest does the math) */}
+            <div className="rounded-xl border border-[#e8c86a]/40 bg-[#e8c86a]/5 p-3">
+              <span className={lbl}>Gratuity</span>
+              <div className="flex flex-wrap gap-2 items-center">
+                {[20, 30].map((p) => (
+                  <button key={p} onClick={() => setVip({ ...vip, tip_pct: p, tip_custom: "" })}
+                    className={`rounded-xl px-5 py-3 min-h-[52px] font-extrabold text-base transition-all border-2 ${vip.tip_pct === p
+                      ? "bg-gradient-to-r from-[#e8c86a] to-[#d4af37] text-[#1a1405] border-[#e8c86a] shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+                      : "bg-white/5 border-white/20 text-white hover:border-[#e8c86a]/60"}`}>
+                    {p}% <span className={vip.tip_pct === p ? "text-[#1a1405]/70" : "text-[#e8c86a]"}>= ${(vipSubtotal * p / 100).toFixed(2)}</span>
+                  </button>
+                ))}
+                <div className={`flex items-center gap-2 rounded-xl border-2 px-3 min-h-[52px] ${vip.tip_pct === null && vip.tip_custom !== "" ? "border-[#e8c86a]/60 bg-white/5" : "border-white/15 bg-white/[0.03]"}`}>
+                  <span className="text-xs font-bold text-white/60">Custom $</span>
+                  <input type="number" min="0" placeholder="you do the math"
+                    className="w-32 bg-transparent outline-none text-sm font-bold text-white placeholder:text-white/30 placeholder:font-normal"
+                    value={vip.tip_custom}
+                    onChange={(e) => setVip({ ...vip, tip_pct: null, tip_custom: e.target.value })} />
+                </div>
+                {vipTip > 0 && (
+                  <button onClick={() => setVip({ ...vip, tip_pct: null, tip_custom: "" })} className="text-xs text-white/40 hover:text-white/70 underline min-h-[44px] px-2">clear</button>
+                )}
+              </div>
+            </div>
+
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm space-y-0.5">
               <div className="flex justify-between"><span className="text-white/50">Subtotal</span><span>${vipSubtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-white/50">Gratuity{vip.tip_pct ? ` (${vip.tip_pct}%)` : ""}</span><span>${vipTip.toFixed(2)}</span></div>
               <div className="flex justify-between"><span className="text-white/50">Card fee</span><span>${vipCardFee.toFixed(2)}</span></div>
               <div className="flex justify-between font-extrabold"><span>Total</span><span>${vipTotal.toFixed(2)}</span></div>
               <div className="flex justify-between text-xs text-white/40"><span>Tender (cash+card)</span><span>${vipTender.toFixed(2)}</span></div>
