@@ -125,9 +125,16 @@ function RegisterConsoleInner() {
     ? false
     : (user?.role === "admin" ||
        ["ADMIN", "OWNER", "VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN", "BOOKKEEPER", "MANAGER", "VENUE_MANAGER"].includes(rawRole));
-  const allowedKeys = isManagerOrAdmin
-    ? TABS.map((t) => t.key)
-    : (STAFF_TAB_ACCESS[rawRole] || (user ? ["register", "receipts", "staff"] : ["register"]));
+  // Operational parity rule (owner directive 2026-07-17): on the Register
+  // console the owner/admin sees EXACTLY what the station's staff sees.
+  // The expanded management view lives only in the Admin Portal / Manager
+  // Console. A clocked-in operator's role scopes tabs; an admin login with
+  // no operator gets the default door-staff set — never the full tab list.
+  const allowedKeys =
+    STAFF_TAB_ACCESS[rawRole] ||
+    (isManagerOrAdmin
+      ? ["register", "drivers", "checkin", "receipts", "staff"]
+      : (user ? ["register", "receipts", "staff"] : ["register"]));
   const visibleTabs = TABS.filter((t) => allowedKeys.includes(t.key));
 
   // If the current tab isn't permitted for this role, snap to the first allowed.
