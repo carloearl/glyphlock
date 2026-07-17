@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { useActiveVenue } from '@/hooks/useActiveVenue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DollarSign, Scan, Search, Shield, FileText, Settings, Camera } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
@@ -17,8 +18,11 @@ import ClubCurrencyPressView from '@/components/nups/press/ClubCurrencyPressView
 
 export default function GlyphBucksHub() {
   const [user, setUser] = useState(null);
-  const [venueId, setVenueId] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Venue from the active-venue context — 'default_venue' hardcode returned
+  // zero entertainers because live data is venue-scoped (audit fix 2026-07-17).
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || 'dream_palace';
   const [demoMode, setDemoMode] = useState(false);
   const [activeTab, setActiveTab] = useState('sales');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -29,7 +33,6 @@ export default function GlyphBucksHub() {
       try {
         const userData = await base44.auth.me();
         setUser(userData);
-        setVenueId('default_venue');
       } catch (err) {
         console.error('Auth error:', err);
         base44.auth.redirectToLogin();

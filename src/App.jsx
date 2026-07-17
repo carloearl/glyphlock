@@ -245,15 +245,19 @@ const AuthenticatedApp = () => {
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/DriverPayouts" element={<DriverPayouts />} />
         <Route path="/driverpayouts" element={<DriverPayouts />} />
-        <Route path="/GlyphBucksHub" element={<GlyphBucksHub />} />
-        <Route path="/glyphbuckshub" element={<GlyphBucksHub />} />
+        {/* GlyphBucks Hub = stored-value sales/redemption/fraud — financial
+            surface, MANAGER/ADMIN only (audit fix 2026-07-17). */}
+        <Route path="/GlyphBucksHub" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><GlyphBucksHub /></RoleClassGuard>} />
+        <Route path="/glyphbuckshub" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><GlyphBucksHub /></RoleClassGuard>} />
         <Route path="/Accounting" element={<Accounting />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/Tonight" element={<Tonight />} />
         <Route path="/tonight" element={<Tonight />} />
-        <Route path="/Contracts" element={<ContractsHub />} />
-        <Route path="/contracts" element={<ContractsHub />} />
-        <Route path="/ContractsHub" element={<ContractsHub />} />
+        {/* Contracts Hub hosts entertainer onboarding + VIP generation +
+            GlyphBucks sales — MANAGER/ADMIN only (audit fix 2026-07-17). */}
+        <Route path="/Contracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ContractsHub /></RoleClassGuard>} />
+        <Route path="/contracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ContractsHub /></RoleClassGuard>} />
+        <Route path="/ContractsHub" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ContractsHub /></RoleClassGuard>} />
         {/* DACO 003 §2: ADMIN-only admin/audit/registry surfaces. */}
         <Route path="/admin/settlement" element={<RoleClassGuard allow={["ADMIN"]}><DailySettlementDashboard /></RoleClassGuard>} />
         <Route path="/admin/payout-history" element={<RoleClassGuard allow={["ADMIN"]}><DriverPayoutHistory /></RoleClassGuard>} />
