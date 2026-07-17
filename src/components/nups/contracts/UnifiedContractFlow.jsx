@@ -268,8 +268,8 @@ export default function UnifiedContractFlow({ memberFill }) {
           <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold px-6 py-2.5 min-h-[44px]">
             <Printer className="w-4 h-4" /> Print (Legal 8.5×14)
           </button>
-          {done.gbDoc && <a href={`/v/${done.gbDoc.verify_ref}`} target="_blank" rel="noreferrer" className="rounded-lg bg-blue-600 hover:bg-blue-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Verify GlyphBucks</a>}
-          {done.vipRecord && <a href={`/v/${done.vipRecord.verify_ref}`} target="_blank" rel="noreferrer" className="rounded-lg bg-purple-600 hover:bg-purple-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Verify VIP</a>}
+          {done.gbDoc && <a href={`/v/${done.gbDoc.verify_ref}`} className="rounded-lg bg-blue-600 hover:bg-blue-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Verify GlyphBucks</a>}
+          {done.vipRecord && <a href={`/v/${done.vipRecord.verify_ref}`} className="rounded-lg bg-purple-600 hover:bg-purple-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Verify VIP</a>}
           <button onClick={() => { setDone(null); resetForm(); }} className="rounded-lg border border-neutral-500 px-5 py-2.5 font-semibold min-h-[44px]">New Contract</button>
         </div>
         <div className="unified-contract-print space-y-6 overflow-x-auto">

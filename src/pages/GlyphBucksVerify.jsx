@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import GlyphBucksReceipt from "@/components/nups/glyphbucks/GlyphBucksReceipt";
 import GlyphBucksScanVerify from "@/components/nups/glyphbucks/GlyphBucksScanVerify";
+import RoleHomeButton from "@/components/nups/RoleHomeButton";
 import { Printer } from "lucide-react";
 
 /**
@@ -61,6 +62,7 @@ export default function GlyphBucksVerify() {
     <div className="min-h-screen bg-[#0f1424] text-neutral-100 px-4 py-8">
       <div className="w-full max-w-[840px] mx-auto">
         <div className="flex items-center gap-3 mb-4 print:hidden flex-wrap">
+          <RoleHomeButton />
           <h1 className="text-xl font-extrabold tracking-tight text-glow-blue">NUPS® GlyphBucks Verify</h1>
           <span className="text-[10px] font-bold tracking-wide text-amber-300 bg-amber-950 border border-amber-500 rounded-full px-2 py-0.5">READ-ONLY</span>
           <div className="ml-auto flex items-center gap-2">
