@@ -18,6 +18,7 @@ const VIEWS = [
   { label: "Clock Station", pov: "Security / Driver view", icon: Clock, to: "/NUPSKiosk", color: "border-slate-500/40", iconColor: "text-slate-400" },
   { label: "Owner Dashboard", pov: "Full back office", icon: LayoutDashboard, to: "/NUPSHub", color: "border-amber-500/40", iconColor: "text-amber-400" },
   { label: "Admin Portal", pov: "System administration", icon: KeyRound, to: "/NUPSAdminPortal", color: "border-indigo-500/40", iconColor: "text-indigo-400" },
+  { label: "Legacy Console", pov: "Full legacy owner system — all tabs", icon: LayoutDashboard, to: "/NUPSOwner", color: "border-slate-600/50", iconColor: "text-slate-300" },
 ];
 
 export default function RoleViews() {

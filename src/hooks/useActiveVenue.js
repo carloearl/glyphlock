@@ -10,17 +10,18 @@ export const useActiveVenue = () => {
   });
 
   useEffect(() => {
-    // Always validate the cached venue against the live Venue entity.
-    // A stale localStorage entry (e.g. an old SANDBOX venue) must never
-    // survive — the DB's active venue is the source of truth.
-    base44.entities.Venue.filter({ status: 'active' }, '-created_date', 1)
+    // Validate the cached venue against the live Venue entity. A stale entry
+    // (deleted/renamed/sandbox venue) self-heals, but a legitimately selected
+    // venue is KEPT — multi-venue operators switch via the VenueSwitcher.
+    base44.entities.Venue.filter({ status: 'active' }, '-created_date', 50)
       .then(venues => {
-        if (venues?.length > 0) {
-          const v = venues[0];
-          if (!venue || venue.id !== v.id || venue.name !== v.name) {
-            saveActiveVenue(v);
-            setVenue(v);
-          }
+        if (!venues?.length) return;
+        const match = venue && venues.find(v => v.id === venue.id);
+        if (match) {
+          if (match.name !== venue.name) { saveActiveVenue(match); setVenue(match); }
+        } else {
+          saveActiveVenue(venues[0]);
+          setVenue(venues[0]);
         }
       })
       .catch(() => {});

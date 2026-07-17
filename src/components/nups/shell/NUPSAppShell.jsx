@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import GlobalSearchDrawer from "./GlobalSearchDrawer";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
+import VenueSwitcher from "./VenueSwitcher";
 import ModeToggle from "./ModeToggle";
 import { base44 } from "@/api/base44Client";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
@@ -384,12 +385,8 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               {/* MODE TOGGLE — F-7: always visible, color-distinct, before venue.
                   Click to switch LIVE/DEMO/SANDBOX, seed or clear demo data. */}
               <ModeToggle />
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5">
-                <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-[11px] font-medium text-slate-200 truncate max-w-[140px]">
-                  {activeVenue?.name || activeVenue?.venue_name || "—"}
-                </span>
-              </div>
+              {/* Multi-venue separation — tap to switch the active venue */}
+              <VenueSwitcher activeVenue={activeVenue} />
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5 font-mono">
                 <span className="text-[11px] font-bold text-emerald-300">{timeStr}</span>
                 <span className="text-[10px] text-slate-500">·</span>
