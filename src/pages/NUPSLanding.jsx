@@ -22,7 +22,7 @@ export default function NUPSLanding() {
     if (!isAuthenticated || !user?.email) return;
     const email = String(user.email).trim().toLowerCase();
     if (BYPASS_EMAILS.includes(email)) {
-      navigate("/NUPSGateway", { replace: true });
+      navigate("/NUPSKiosk", { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -1228,7 +1228,7 @@ export default function NUPSLanding() {
         <div className="container">
           <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
             <button
-              onClick={() => navigate('/NUPSGateway')}
+              onClick={() => navigate('/NUPSKiosk')}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -1327,7 +1327,7 @@ export default function NUPSLanding() {
               <b>The operating system that records, verifies, and defends every transaction inside the venue.</b> Built-in Dispute Shield — every transaction arrives pre-packaged with verifiable evidence. NUPS defines a new merchant class: <b>High-Verification Commerce</b> — a transaction model where identity, consent, payment, and evidence are captured and linked at the moment of transaction.
             </p>
             <div className="enter-wrap" style={{ gap: 16, flexWrap: 'wrap' }}>
-              <button className="enter-btn" onClick={() => navigate('/NUPSGateway')}>
+              <button className="enter-btn" onClick={() => navigate('/NUPSKiosk')}>
                 <span className="pulse-dot" />
                 Enter N.U.P.S.
               </button>

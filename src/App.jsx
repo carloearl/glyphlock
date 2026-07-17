@@ -5,7 +5,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -18,9 +18,7 @@ import NUPSPostLogin from './pages/NUPSPostLogin';
 import SystemAudit from './pages/SystemAudit';
 import OfficialChecks from './pages/OfficialChecks';
 import NUPSLanding from './pages/NUPSLanding';
-import NUPSGateway from './pages/NUPSGateway';
 import NUPSSandbox from './pages/NUPSSandbox';
-import NUPSLogin from './pages/NUPSLogin';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSStaff from './pages/NUPSStaff';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
@@ -177,12 +175,15 @@ const AuthenticatedApp = () => {
         <Route path="/nupslanding" element={<NUPSLanding />} />
         <Route path="/landing" element={<NUPSLanding />} />
         <Route path="/Landing" element={<NUPSLanding />} />
-        <Route path="/NUPSGateway" element={<NUPSGateway />} />
-        <Route path="/nupsgateway" element={<NUPSGateway />} />
+        {/* DACO-NUPS-ROLE-VIP-BUILD §3 — the kiosk is the ONLY operational
+            entry. Legacy Gateway and Login routes redirect there so no old
+            bookmark or link resurrects the fragmented login surfaces. */}
+        <Route path="/NUPSGateway" element={<Navigate to="/NUPSKiosk" replace />} />
+        <Route path="/nupsgateway" element={<Navigate to="/NUPSKiosk" replace />} />
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/nupssandbox" element={<NUPSSandbox />} />
-        <Route path="/NUPSLogin" element={<NUPSLogin />} />
-        <Route path="/nupslogin" element={<NUPSLogin />} />
+        <Route path="/NUPSLogin" element={<Navigate to="/NUPSKiosk?panel=clockIn" replace />} />
+        <Route path="/nupslogin" element={<Navigate to="/NUPSKiosk?panel=clockIn" replace />} />
         {/* NUPSOwner restored — hosts all legacy operator tabs
             (Analytics, GlyphBucks, Staff, VIP, Reports, Payroll, Audit Log,
             Admin, Demo Keys, etc.). Sidebar deep-links via ?tab=.
