@@ -1,7 +1,7 @@
 {
   "name": "GlyphBucksSale",
   "type": "object",
-  "description": "DACO GlyphBucks Stored-Value Contract-Receipt System \u2014 one row per stored-value voucher sale. Instrument sale ONLY (never performance/service framing). Issuance is a LIABILITY, never revenue \u2014 excluded from total_sales.",
+  "description": "DACO GlyphBucks Stored-Value Contract-Receipt System \u2014 one row per stored-value voucher sale. Instrument sale ONLY (never performance/service framing). Issuance is a LIABILITY, never revenue \u2014 excluded from total_sales. RLS: admin-only direct access; all operational writes go through the server-side seal function.",
   "properties": {
     "sale_id": {
       "type": "string",
@@ -114,5 +114,17 @@
     "verify_ref",
     "venue_id",
     "mode"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

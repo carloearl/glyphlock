@@ -1,7 +1,7 @@
 {
   "name": "GlyphBucksLedger",
   "type": "object",
-  "description": "DACO GlyphBucks \u2014 stored-value LIABILITY ledger. Issuance posts as a liability delta, NEVER revenue. INVARIANT (preserved from NUPS): total_sales = cash_sales + card_sales only \u2014 GlyphBucks issuance must NOT appear in that sum.",
+  "description": "DACO GlyphBucks \u2014 stored-value LIABILITY ledger. Issuance posts as a liability delta, NEVER revenue. INVARIANT (preserved from NUPS): total_sales = cash_sales + card_sales only \u2014 GlyphBucks issuance must NOT appear in that sum. RLS: admin-only direct access; all postings are server-side only.",
   "properties": {
     "entry_id": {
       "type": "string"
@@ -55,5 +55,17 @@
     "entry_type",
     "liability_delta_cents",
     "mode"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
