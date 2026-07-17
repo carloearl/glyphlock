@@ -283,10 +283,11 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
     }))
     .filter(section => section.items.length > 0);
 
-  // Role-aware home target for the header Home button.
-  const isOperatorClass = roleClass === ROLE_CLASS.ADMIN || roleClass === ROLE_CLASS.MANAGER;
-  const homeTo = isOperatorClass ? "/NUPSHub" : homeForRoleClass(roleClass);
-  const homeLabel = isOperatorClass ? "Dashboard" : "My Home";
+  // Role-aware home target for the header Home button. Owner directive
+  // 2026-07-17: ONLY back office (ADMIN) homes to the Dashboard. Managers
+  // manage — their home is the Manager Console, per HOME_BY_CLASS §2.
+  const homeTo = roleClass === ROLE_CLASS.ADMIN ? "/NUPSHub" : homeForRoleClass(roleClass);
+  const homeLabel = roleClass === ROLE_CLASS.ADMIN ? "Dashboard" : "My Home";
   const atHome = location.pathname.toLowerCase().startsWith(homeTo.split("?")[0].toLowerCase());
 
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
