@@ -139,7 +139,14 @@ Deno.serve(async (req) => {
         const grants = (await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' })) || [];
         authorized = grants.length > 0;
       }
-      if (!authorized) return Response.json({ error: 'NUPS owner/administrator authorization required.' }, { status: 403 });
+      if (!authorized) {
+        // DACO-NUPS-ROLE-VIP-BUILD §9 — Manager Console PIN provisioning:
+        // an ACTIVE venue manager bound to this platform email may issue/rotate
+        // staff PINs. Suspension/termination revokes this instantly.
+        const mgrs = (await E.NUPSUser.filter({ platform_email: email, role: 'VENUE_MANAGER', status: 'active' })) || [];
+        authorized = mgrs.length > 0;
+      }
+      if (!authorized) return Response.json({ error: 'NUPS owner/manager authorization required.' }, { status: 403 });
       const { nups_user_id } = body;
       const cleanNew = String(body.pin || '').trim();
       if (!nups_user_id || !/^\d{4,6}$/.test(cleanNew)) {

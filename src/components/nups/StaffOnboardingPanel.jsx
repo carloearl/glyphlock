@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Users, Eye, EyeOff, Pencil, Check, X, ToggleLeft, ToggleRight } from "lucide-react";
 import { snapshotPerson } from "@/lib/nups/personArchive";
+import { toast } from "sonner";
 
 const ROLES = [
-  "VENUE_MANAGER", "BARTENDER", "FLOOR_HOST", "SECURITY", "DJ", "HOSTESS", "DOOR_GIRL"
+  "VENUE_MANAGER", "BARTENDER", "FLOOR_HOST", "SECURITY", "DJ", "HOSTESS", "DOOR_GIRL", "DOORMAN", "DRIVER"
 ];
 
 import { DEFAULT_VENUE_ID, DEFAULT_VENUE_NAME, resolveVenueId } from "@/lib/venueDefaults";
@@ -30,18 +31,36 @@ export default function StaffOnboardingPanel() {
     queryFn: () => base44.entities.NUPSUser.list("-created_date", 100),
   });
 
+  // Server-side PIN provisioning — DACO-NUPS-RBAC-CORRECTION §2: PINs are
+  // PBKDF2-hashed with a server pepper via nupsClockIn adminSetPin. A raw
+  // `pin` field on the record is NEVER read by clock-in, so writing it
+  // client-side would produce accounts that can never authenticate.
+  const provisionPin = async (nupsUserId, pin) => {
+    const clean = String(pin || "").trim();
+    if (!/^\d{4,6}$/.test(clean)) throw new Error("PIN must be 4–6 digits.");
+    try {
+      const res = await base44.functions.invoke("nupsClockIn", {
+        action: "adminSetPin", nups_user_id: nupsUserId, pin: clean,
+      });
+      if (res.data?.error) throw new Error(res.data.error);
+    } catch (e) {
+      throw new Error(e?.response?.data?.error || e.message || "PIN provisioning failed.");
+    }
+  };
+
   const createStaff = useMutation({
     mutationFn: async (data) => {
+      const { pin, ...rest } = data;
       const payload = {
-        ...data,
+        ...rest,
         // Always route live-system onboards to Dream Palace DB when no venue is specified
         venue_id: resolveVenueId(data.venue_id),
         full_name: data.display_name || data.username,
         status: "active",
-        is_active: true,
         created_by_manager: true,
       };
       const result = await base44.entities.NUPSUser.create(payload);
+      await provisionPin(result.id, pin);
       // Permanent archive snapshot
       await snapshotPerson({
         type: "staff",
@@ -54,13 +73,28 @@ export default function StaffOnboardingPanel() {
       qc.invalidateQueries(["nups-users"]);
       setForm(EMPTY_FORM);
       setShowForm(false);
+      toast.success("Staff account created — PIN is live for clock-in.");
     },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const changePin = useMutation({
+    mutationFn: async ({ id, pin }) => {
+      await provisionPin(id, pin);
+      return id;
+    },
+    onSuccess: () => {
+      setEditingId(null);
+      setEditPin("");
+      toast.success("PIN updated.");
+    },
+    onError: (e) => toast.error(e.message),
   });
 
   const updateStaff = useMutation({
     mutationFn: async ({ id, data }) => {
       const result = await base44.entities.NUPSUser.update(id, data);
-      const eventType = "is_active" in data ? "status_change" : "updated";
+      const eventType = "status" in data ? "status_change" : "updated";
       await snapshotPerson({
         type: "staff",
         event: eventType,
@@ -73,6 +107,7 @@ export default function StaffOnboardingPanel() {
       setEditingId(null);
       setEditPin("");
     },
+    onError: (e) => toast.error(e.message || "Update failed."),
   });
 
   const roleColor = (role) => {
@@ -136,7 +171,7 @@ export default function StaffOnboardingPanel() {
                 <div className="relative">
                   <Input
                     type={showPin ? "text" : "password"}
-                    placeholder="4–8 digits"
+                    placeholder="4–6 digits"
                     value={form.pin}
                     onChange={e => setForm(v => ({ ...v, pin: e.target.value }))}
                     className="bg-black/50 border-gray-700 text-white pr-10"
@@ -208,7 +243,8 @@ export default function StaffOnboardingPanel() {
                     <div className="flex items-center gap-2">
                       <span className="text-white font-semibold text-sm">{staff.display_name || staff.username}</span>
                       <Badge className={`text-[10px] ${roleColor(staff.role)}`}>{staff.role?.replace(/_/g, ' ')}</Badge>
-                      {!staff.is_active && <Badge className="bg-red-500/20 text-red-400 border-red-500/40 text-[10px]">Inactive</Badge>}
+                      {staff.status !== "active" && <Badge className="bg-red-500/20 text-red-400 border-red-500/40 text-[10px]">{staff.status === "terminated" ? "Terminated" : "Suspended"}</Badge>}
+                      {!staff.pin_lookup && <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-[10px]">No PIN</Badge>}
                     </div>
                     <p className="text-xs text-gray-500">@{staff.username}</p>
                   </div>
@@ -228,8 +264,8 @@ export default function StaffOnboardingPanel() {
                           {showEditPin ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                         </button>
                       </div>
-                      <Button size="sm" onClick={() => updateStaff.mutate({ id: staff.id, data: { pin: editPin } })}
-                        disabled={!editPin} className="bg-green-700 hover:bg-green-600 text-white h-8 px-2">
+                      <Button size="sm" onClick={() => changePin.mutate({ id: staff.id, pin: editPin })}
+                        disabled={!editPin || changePin.isPending} className="bg-green-700 hover:bg-green-600 text-white h-8 px-2">
                         <Check className="w-3 h-3" />
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); setEditPin(""); }}
@@ -241,11 +277,12 @@ export default function StaffOnboardingPanel() {
                         className="text-gray-400 hover:text-white h-8 px-2" title="Change PIN">
                         <Pencil className="w-3 h-3" />
                       </Button>
+                      {/* status (not is_active) is what the clock-in backend enforces */}
                       <Button size="sm" variant="ghost"
-                        onClick={() => updateStaff.mutate({ id: staff.id, data: { is_active: !staff.is_active } })}
-                        className={`h-8 px-2 ${staff.is_active ? 'text-green-400 hover:text-red-400' : 'text-gray-600 hover:text-green-400'}`}
-                        title={staff.is_active ? "Deactivate" : "Activate"}>
-                        {staff.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                        onClick={() => updateStaff.mutate({ id: staff.id, data: { status: staff.status === "active" ? "suspended" : "active" } })}
+                        className={`h-8 px-2 ${staff.status === "active" ? 'text-green-400 hover:text-red-400' : 'text-gray-600 hover:text-green-400'}`}
+                        title={staff.status === "active" ? "Suspend (blocks clock-in immediately)" : "Reactivate"}>
+                        {staff.status === "active" ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </Button>
                     </>
                   )}
