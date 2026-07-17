@@ -90,7 +90,7 @@ function FrontDoorContent() {
     if (typeof window !== "undefined" &&
         !window.confirm("Sign out of Front Door? Any unsaved work will be lost.")) return;
     sessionStorage.removeItem("nups_session");
-    navigate("/NUPSLogin");
+    navigate("/NUPSKiosk");
   };
 
   const role = (user?.role || "").toUpperCase();

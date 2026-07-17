@@ -46,7 +46,7 @@ export default function VIPSale() {
           <h1 className="text-lg font-bold leading-tight">VIP Contract Sale</h1>
           {operator && <p className="text-xs text-slate-400">{operator.name} · {operator.role}</p>}
         </div>
-        <Badge className="bg-purple-800 text-white">Dream Palace</Badge>
+        <Badge className="bg-purple-800 text-white">{state?.config?.venue_name || "VIP"}</Badge>
         <button
           onClick={() => navigate("/NUPSKiosk?panel=clockOut")}
           className="ml-auto flex items-center gap-2 h-11 px-4 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-semibold"

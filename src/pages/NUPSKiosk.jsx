@@ -4,6 +4,7 @@ import KioskPinPad from "@/components/nups/kiosk/KioskPinPad";
 import OwnerAdminSignIn from "@/components/nups/kiosk/OwnerAdminSignIn";
 import AccessRequestForm from "@/components/nups/kiosk/AccessRequestForm";
 import { Clock, LogOut, ShieldCheck, UserPlus, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §3 — Public kiosk entry.
 // Shows ONLY: Staff Clock In, Staff Clock Out, Owner/Admin Sign In, Request Owner/Admin Access.
@@ -18,6 +19,7 @@ const PANELS = [
 
 export default function NUPSKiosk() {
   const navigate = useNavigate();
+  const activeVenue = useActiveVenue();
   const [panel, setPanel] = useState(null);
   const [result, setResult] = useState(null);
 
@@ -54,7 +56,8 @@ export default function NUPSKiosk() {
         <div className="text-center mb-8">
           <img src="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
             alt="NUPS" className="w-16 h-16 mx-auto mb-3 object-contain" />
-          <h1 className="text-2xl font-bold tracking-wide">DREAM PALACE</h1>
+          {/* Venue-tenant separation — kiosk always shows the ACTIVE venue */}
+          <h1 className="text-2xl font-bold tracking-wide uppercase">{activeVenue?.name || "NUPS Venue"}</h1>
           <p className="text-slate-500 text-sm mt-1">Staff Entry & Clock Station</p>
         </div>
 

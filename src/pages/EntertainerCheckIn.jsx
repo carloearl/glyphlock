@@ -26,10 +26,10 @@ export default function EntertainerCheckInPage() {
       <header className="border-b border-white/10 px-4 py-3 bg-black/95 sticky top-0 z-40">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
-            onClick={() => navigate("/NUPSGateway")}
+            onClick={() => navigate("/NUPSKiosk")}
             className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300"
           >
-            <ArrowLeft className="w-4 h-4" /> Gateway
+            <ArrowLeft className="w-4 h-4" /> Kiosk
           </button>
           <div className="flex items-center gap-2">
             <Music className="w-5 h-5 text-pink-400" />
