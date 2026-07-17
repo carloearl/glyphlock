@@ -76,6 +76,7 @@ import VIPShowVerify from './pages/VIPShowVerify';
 import OfflineVerify from './pages/OfflineVerify';
 import VerifyDispatch from './pages/VerifyDispatch';
 import VIPShowContracts from './pages/VIPShowContracts';
+import VIPCommandCenter from './pages/VIPCommandCenter';
 import KioskShell from './components/nups/KioskShell';
 import RoleClassGuard from './components/nups/RoleClassGuard';
 import RoleClassBadge from './components/nups/RoleClassBadge';
@@ -136,7 +137,7 @@ const AuthenticatedApp = () => {
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
-    '/v/', '/vipshowcontracts', '/offlineverify',
+    '/v/', '/vipshowcontracts', '/offlineverify', '/vipcommand',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
 
@@ -157,7 +158,7 @@ const AuthenticatedApp = () => {
     '/admin/registry', '/registryadmin',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
-    '/vipshowcontracts',
+    '/vipshowcontracts', '/vipcommand',
   ];
   const isNupsKioskRoute = nupsKioskRoots.some(p => currentPathLower.startsWith(p));
 
@@ -264,6 +265,8 @@ const AuthenticatedApp = () => {
         <Route path="/v/:ref" element={<VerifyDispatch />} />
         <Route path="/OfflineVerify" element={<OfflineVerify />} />
         <Route path="/offlineverify" element={<OfflineVerify />} />
+        <Route path="/VIPCommand" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPCommandCenter /></RoleClassGuard>} />
+        <Route path="/vipcommand" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPCommandCenter /></RoleClassGuard>} />
         <Route path="/VIPShowContracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
         <Route path="/vipshowcontracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPShowContracts /></RoleClassGuard>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
