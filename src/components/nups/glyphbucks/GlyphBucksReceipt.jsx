@@ -78,9 +78,13 @@ export default function GlyphBucksReceipt({ doc }) {
 
         {/* ── HEADER ─────────────────────────────────────────────── */}
         <table style={{ borderCollapse: "collapse", width: "100%" }}><tbody><tr>
+          <td style={{ borderBottom: "3px solid #16181d", paddingBottom: 9, width: 158, verticalAlign: "top" }}>
+            <div style={{ fontFamily: "Georgia,serif", fontSize: 30, letterSpacing: 2, color: NAVY, fontWeight: 700, lineHeight: 1 }}>NUPS<span style={{ fontSize: 13, verticalAlign: "super" }}>®</span></div>
+            <div style={{ fontSize: 8.5, letterSpacing: 1.5, color: MUTE, marginTop: 3, textTransform: "uppercase" }}>Nexus Unified POS</div>
+          </td>
           <td style={{ borderBottom: "3px solid #16181d", paddingBottom: 9, textAlign: "center", verticalAlign: "top" }}>
-            <h1 style={{ fontFamily: "Georgia,serif", fontSize: 23, letterSpacing: 1.2, color: NAVY, lineHeight: 1, margin: 0 }}>NUPS®</h1>
-            <div style={{ letterSpacing: 4, fontSize: 10, fontWeight: 700, marginTop: 3 }}>{doc.venue_id || ""}</div>
+            <h1 style={{ fontFamily: "Georgia,serif", fontSize: 23, letterSpacing: 1.2, color: NAVY, lineHeight: 1, margin: 0 }}>{doc.issuer_name || "LIBERTY HOLDINGS LLC"}</h1>
+            <div style={{ letterSpacing: 4, fontSize: 10, fontWeight: 700, marginTop: 3 }}>{doc.issuer_city || "TEMPE, ARIZONA"}</div>
             <div style={{ fontSize: 10.5, marginTop: 5, color: MUTE }}>Issuer of record · AZ stored-value program</div>
             <div style={{ fontSize: 10.5, marginTop: 5, color: MUTE }}>GlyphBucks™ issued on <b>NUPS®</b> by <b style={{ color: "#2456d6" }}>GlyphLock</b> LLC</div>
           </td>
@@ -92,6 +96,7 @@ export default function GlyphBucksReceipt({ doc }) {
             <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 11.5 }}><tbody>
               <K k="MODE:"><span style={{ color: doc.mode === "REAL" ? OK : AMBER, fontWeight: 700 }}>{doc.mode}{doc.mode === "REAL" ? " · LIVE" : ""}</span></K>
               <K k="TERMS VER:">{GB_TERMS_VERSION}</K>
+              <K k="TERMINAL:">{doc.terminal_id || "CG01-T1"}</K>
               <K k="VENUE ID:">{doc.venue_id || "—"}</K>
             </tbody></table>
           </td>
@@ -109,7 +114,8 @@ export default function GlyphBucksReceipt({ doc }) {
             </td>
             <td style={{ width: "27%", paddingRight: 18, padding: "7px 18px 7px 0" }}>
               <table style={{ fontSize: 11.5 }}><tbody>
-                <K k="VERIFY REF:">{doc.verify_ref}</K>
+                <K k="SHIFT ID:">{doc.shift_id || "—"}</K>
+                <K k="LEDGER SEQ:">{doc.ledger_seq || doc.verify_ref}</K>
                 <K k="GB ACCOUNT:">···· {doc.gb_account_last4 || "————"}</K>
               </tbody></table>
             </td>
@@ -117,6 +123,7 @@ export default function GlyphBucksReceipt({ doc }) {
               <table style={{ fontSize: 11.5 }}><tbody>
                 <K k="PURCHASER:"><b>{(doc.purchaser_name || "—").toUpperCase()}</b></K>
                 <K k="MEMBER #:">{doc.purchaser_member_id || "—"}</K>
+                <K k="TIER:"><span style={{ display: "inline-block", background: "#2b2f3a", color: "#e8ddc0", fontWeight: 700, fontSize: 10, letterSpacing: 1, padding: "2px 7px", border: "1px solid #b9a15c" }}>{(doc.member_tier || "MEMBER").toUpperCase()}</span></K>
               </tbody></table>
             </td>
           </tr></tbody></table>
@@ -146,12 +153,13 @@ export default function GlyphBucksReceipt({ doc }) {
             </tr>
             <tr><td colSpan={4} style={{ padding: "10px 8px 3.5px", fontWeight: 700, textAlign: "right" }}>STORED VALUE ISSUED</td><td style={{ padding: "10px 8px 3.5px", textAlign: "right", fontWeight: 700, whiteSpace: "nowrap" }}>{usd(doc.face_cents)}</td></tr>
             <tr><td colSpan={4} style={{ padding: "3.5px 8px", fontWeight: 700, textAlign: "right" }}>TAX <span style={{ fontWeight: 400, color: MUTE, fontSize: 11 }}>($0.00 — stored-value issuance is not a retail sale; A.R.S. § 42-5061; see Term 6)</span></td><td style={{ padding: "3.5px 8px", textAlign: "right", whiteSpace: "nowrap" }}>$0.00</td></tr>
-            <tr><td colSpan={4} style={{ padding: "3.5px 8px", fontWeight: 700, textAlign: "right" }}>CARD PROCESSING FEE</td><td style={{ padding: "3.5px 8px", textAlign: "right", whiteSpace: "nowrap" }}>{usd(doc.card_fee_cents)}</td></tr>
+            <tr><td colSpan={4} style={{ padding: "3.5px 8px", fontWeight: 700, textAlign: "right" }}>CARD PROCESSING FEE <span style={{ fontWeight: 400, color: MUTE, fontSize: 11 }}>({doc.face_cents > 0 ? `${((Number(doc.card_fee_cents || 0) / Number(doc.face_cents)) * 100).toFixed(2)}% of ${usd(doc.face_cents)}` : "flat"})</span></td><td style={{ padding: "3.5px 8px", textAlign: "right", whiteSpace: "nowrap" }}>{usd(doc.card_fee_cents)}</td></tr>
+            <tr><td colSpan={5} style={{ padding: "0 8px 4px", textAlign: "right", color: MUTE, fontSize: 10.5, fontStyle: "italic" }}>Credit cards only (Visa, MC, Discover); rounded to nearest cent. Not applied to cash, debit, or prepaid.</td></tr>
             <tr><td colSpan={4} style={{ background: NAVY, color: "#fff", padding: "9px 13px", fontSize: 14, fontWeight: 700, textAlign: "right" }}>TOTAL AMOUNT DUE</td><td style={{ background: NAVY, color: "#fff", padding: "9px 13px", fontSize: 19, fontWeight: 700, textAlign: "right", whiteSpace: "nowrap" }}>{usd(doc.amount_cents)}</td></tr>
             <tr><td colSpan={5} style={{ padding: "2px 8px 6px", textAlign: "right", fontSize: 10.5, fontStyle: "italic" }}>Total in words: {amountInWords(Number(doc.amount_cents || 0)).replace(/^./, (c) => c.toUpperCase())}</td></tr>
             {doc.card_last4 && (
               <tr><td colSpan={4} style={{ border: `1px solid ${OK}`, borderTop: "none", borderRight: "none", color: OK, fontWeight: 700, padding: "5px 13px", textAlign: "right" }}>
-                PAID — CARD •••• {doc.card_last4} ({a.card_entry || doc.card_entry || "CHIP"}){(a.card_auth_code || doc.card_auth_code) ? ` · AUTH ${a.card_auth_code || doc.card_auth_code}` : ""}
+                PAID — {(doc.card_brand || "CARD").toUpperCase()} •••• {doc.card_last4} ({a.card_entry || doc.card_entry || "CHIP"}){(a.card_auth_code || doc.card_auth_code) ? ` · AUTH ${a.card_auth_code || doc.card_auth_code}` : ""}
               </td><td style={{ border: `1px solid ${OK}`, borderTop: "none", borderLeft: "none", color: OK, fontWeight: 700, padding: "5px 13px", textAlign: "right", whiteSpace: "nowrap" }}>{usd(doc.amount_cents)}</td></tr>
             )}
           </tbody>
@@ -222,12 +230,13 @@ export default function GlyphBucksReceipt({ doc }) {
               </tbody></table>
             </div>
             <div style={{ display: "table-cell", width: "33.33%", verticalAlign: "top" }}>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 0.4, color: MUTE, marginBottom: 3 }}>BLOCKCHAIN &amp; CHAIN</div>
+              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: 0.4, color: MUTE, marginBottom: 3 }}>DELIVERY &amp; CHAIN</div>
               <table style={{ fontSize: 10 }}><tbody>
+                <K k="PRINTED:"><span style={{ color: OK, fontWeight: 700 }}>DELIVERED {fmtTime(a.delivery_printed_at || doc.sealed_at)}</span></K>
+                <K k="EMAILED:">{a.delivery_emailed_at ? <span style={{ color: OK, fontWeight: 700 }}>DELIVERED {fmtTime(a.delivery_emailed_at)}</span> : "—"}</K>
                 <K k="ANCHOR:"><span style={{ color: anchorLive ? OK : AMBER, fontWeight: 700 }}>{anchor.status === "BITCOIN_ATTESTED" ? "BITCOIN ATTESTED" : anchor.status === "ANCHOR_SUBMITTED" ? "SUBMITTED → BITCOIN" : "PENDING RETRY"}</span></K>
-                <K k="PROTOCOL:">{anchor.protocol || "OpenTimestamps→Bitcoin"}</K>
-                <K k="SUBMITTED:">{fmtTime(anchor.submitted_at)}</K>
                 <K k="PRIOR BLOCK:"><span style={{ fontFamily: "'Courier New',monospace", fontSize: 8.5 }}>{String(doc.prev_block_hash || "").slice(0, 12)}…</span></K>
+                <K k="THIS BLOCK:"><span style={{ fontFamily: "'Courier New',monospace", fontSize: 8.5 }}>{String(doc.chain_hash || "").slice(0, 12)}…</span></K>
                 <K k="RETENTION:">7 years</K>
               </tbody></table>
             </div>
@@ -258,6 +267,7 @@ export default function GlyphBucksReceipt({ doc }) {
               <K k="SIGNATURE:"><span style={{ color: OK, fontWeight: 700 }}>SELF-VERIFYING (offline)</span></K>
               <K k="BLOCKCHAIN:"><span style={{ color: anchorLive ? OK : AMBER, fontWeight: 700 }}>{anchorLive ? "ANCHORED — OpenTimestamps → Bitcoin" : "ANCHOR RETRY PENDING"}</span></K>
               <K k="SEALED AT:">{doc.sealed_at}</K>
+              <K k="TIMESTAMP:">RFC 3161 · trusted timestamp authority</K>
               <K k="SERIAL RANGE:">{serialTxt}</K>
               <K k="VERIFY URL:"><span style={{ fontFamily: "'Courier New',monospace", fontSize: 9, wordBreak: "break-all" }}>{verifyUrl}</span></K>
             </tbody></table>
