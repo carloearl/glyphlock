@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import QRCode from "qrcode";
 import { Plus, Trash2, Stamp, FlaskConical, Printer } from "lucide-react";
 import VIPShowReprint from "@/components/nups/vip/VIPShowReprint";
+import { VIP_TERMS, VIP_TERMS_TEXT, VIP_TERMS_VERSION } from "@/constants/vipShowTerms";
 
 /**
  * DACO VIP SHOW CONTRACT — FULL IN-APP GENERATOR
@@ -12,8 +13,8 @@ import VIPShowReprint from "@/components/nups/vip/VIPShowReprint";
  * The printed slip QR resolves to /v/:ref for public verification.
  */
 
-const TERMS_TEXT =
-  "VIP Suite & Performance Contract — GlyphLock LLC / NUPS®. Stored-value (GlyphBucks) is a liability, never revenue. Cardholder dispute rights under 15 U.S.C. § 1666 (FCBA) are not waived. All charges itemized and sealed at execution.";
+// Canonical 14-clause terms — imported from @/constants/vipShowTerms and hashed as terms_hash.
+const TERMS_TEXT = VIP_TERMS_TEXT;
 
 const enc = new TextEncoder();
 async function sha256Hex(s) {
@@ -121,7 +122,7 @@ export default function VIPShowGenerator() {
           glyphbucks_tendered: Number(glyphbucks) || 0,
           treatment: treatment.trim() || null,
           statute: "15 U.S.C. § 1666 — FCBA rights not waived",
-          clickwrap: { accepted: true, accepted_at: now.toISOString() },
+          clickwrap: { accepted: true, accepted_at: now.toISOString(), terms_version: VIP_TERMS_VERSION, clause_count: VIP_TERMS.length },
         },
         terms_hash: termsHash,
       };
@@ -260,15 +261,22 @@ export default function VIPShowGenerator() {
         <label className="block mt-3"><span className={lbl}>Treatment / notes</span><input className={inp} value={treatment} onChange={(e) => setTreatment(e.target.value)} /></label>
       </div>
 
-      {/* Clickwrap — guest reviews and accepts terms before sealing */}
+      {/* Clickwrap — guest reviews the full 14-clause terms and accepts before sealing */}
       <div className="rounded-xl border border-[#33405f] bg-[#171e33] p-4">
-        <h3 className="text-sm font-bold text-purple-300 mb-2">Contract Terms — Clickwrap</h3>
-        <p className="text-[11px] text-neutral-400 leading-relaxed mb-3">{TERMS_TEXT}</p>
+        <h3 className="text-sm font-bold text-purple-300 mb-1">Contract Terms — Clickwrap ({VIP_TERMS_VERSION} · {VIP_TERMS.length} clauses)</h3>
+        <p className="text-[10px] text-neutral-500 mb-2">VIP Suite & Performance Contract — the guest must review all clauses. The exact terms text is hashed into the sealed record (terms_hash).</p>
+        <div className="max-h-56 overflow-y-auto rounded-lg border border-[#33405f] bg-[#0f1526] p-3 mb-3 space-y-2">
+          {VIP_TERMS.map((t, i) => (
+            <p key={i} className="text-[11px] text-neutral-300 leading-relaxed">
+              <span className="font-bold text-purple-300 mr-1">{i + 1}.</span>{t}
+            </p>
+          ))}
+        </div>
         <label className="flex items-start gap-3 cursor-pointer min-h-[44px]">
           <input type="checkbox" checked={clickwrap} onChange={(e) => setClickwrap(e.target.checked)}
             className="mt-0.5 w-5 h-5 accent-emerald-500" />
           <span className="text-sm font-semibold text-neutral-200">
-            Guest has reviewed and accepts the contract terms above (recorded with timestamp in the sealed record)
+            Guest has reviewed and accepts all {VIP_TERMS.length} contract clauses above — including that GlyphLock LLC is the software provider only and is held harmless, and that FCBA cardholder rights are not waived (recorded with timestamp in the sealed record)
           </span>
         </label>
       </div>
