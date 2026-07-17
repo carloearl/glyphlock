@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, DoorOpen, ShoppingCart, Moon, Calculator, FileText,
   ShieldCheck, Banknote, ScrollText, Settings, Building2,
-  Menu, ChevronRight, ReceiptText, Truck, ArrowLeft,
+  Menu, ChevronRight, ReceiptText, Truck, Home,
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
   TrendingUp, BarChart3, Users, Package, Heart, DollarSign, Music,
   Star, Sparkles, KeyRound, ClipboardList, Megaphone,
@@ -283,6 +283,12 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
     }))
     .filter(section => section.items.length > 0);
 
+  // Role-aware home target for the header Home button.
+  const isOperatorClass = roleClass === ROLE_CLASS.ADMIN || roleClass === ROLE_CLASS.MANAGER;
+  const homeTo = isOperatorClass ? "/NUPSHub" : homeForRoleClass(roleClass);
+  const homeLabel = isOperatorClass ? "Dashboard" : "My Home";
+  const atHome = location.pathname.toLowerCase().startsWith(homeTo.split("?")[0].toLowerCase());
+
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const dateStr = now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
 
@@ -372,18 +378,22 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               <Menu className="w-6 h-6" />
             </button>
 
-            {/* Back inside NUPS = go to the NUPS Hub (always a valid
-                surface). Browser history can land on unmounted routes
-                and produce a white screen, so we route to a known page. */}
-            <button
-              onClick={() => navigate("/NUPSHub")}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] text-slate-300 hover:text-white text-[12px] font-semibold transition-colors"
-              aria-label="Go back"
-              title="Back"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Back</span>
-            </button>
+            {/* HOME — role-aware, honest label. Staff/entertainers go to
+                THEIR home (never the admin dashboard); everyone else goes
+                to the Dashboard. Hidden when already there — a "Back"
+                button that always pointed at the Hub confused every role
+                (nav audit 2026-07-17). */}
+            {!atHome && (
+              <button
+                onClick={() => navigate(homeTo)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] text-slate-300 hover:text-white text-[12px] font-semibold transition-colors"
+                aria-label="Go to home screen"
+                title={homeLabel}
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{homeLabel}</span>
+              </button>
+            )}
 
             <div className="flex-1 min-w-0">
               <h1 className="text-lg lg:text-xl font-black tracking-tight text-white truncate">{title}</h1>
