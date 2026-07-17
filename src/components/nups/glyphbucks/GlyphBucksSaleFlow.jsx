@@ -5,7 +5,7 @@ import GlyphBucksReceipt from "./GlyphBucksReceipt";
 import IDScannerCamera from "@/components/nups/IDScannerCamera";
 import ThumbprintScanner from "./ThumbprintScanner";
 import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
-import { Stamp, Printer, ShieldCheck, Coins, Fingerprint, CreditCard, PenLine, CheckCircle2 } from "lucide-react";
+import { Stamp, Printer, ShieldCheck, Coins, Fingerprint, CreditCard, PenLine, CheckCircle2, FlaskConical } from "lucide-react";
 
 /**
  * DACO §7 — GlyphBucks stored-value sale flow (LIVE).
@@ -54,6 +54,44 @@ export default function GlyphBucksSaleFlow({ onShared, prefill }) {
 
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
   const faceCents = Number(f.denom_cents) * Number(f.qty || 0);
+
+  const BLANK_F = {
+    purchaser_name: "", purchaser_member_id: "", gb_account_last4: "",
+    denom_cents: 2000, qty: 5, card_fee_cents: 500,
+    card_last4: "", card_auth_code: "", card_entry: "CHIP",
+    id_scan_ref: "", age_verified: false, face_id_match_pct: "", thumb_match_pct: "",
+    esig_purchaser: "", esig_issuer_rep: "", esig_manager: "",
+    member_tier: "MEMBER", card_brand: "VISA", terminal_id: "CG01-T1",
+  };
+
+  // One-click DEMO seed — fills EVERY field in this section with consistent
+  // mock data. State-only: never stored, wiped on refresh or New Sale, and
+  // forces DEMO mode so it can never mix with the live ledger.
+  const fillDemo = () => {
+    const now = new Date().toISOString();
+    setMode("DEMO");
+    setVenueId("DP-TEMPE-001");
+    setAssent({
+      clickwrap_accepted: true, terms_shown_at: now, scroll_depth_pct: 100,
+      dwell_seconds: 45, accepted_at: now, initials_term1: "R.S.", initials_term3: "R.S.",
+    });
+    setF({
+      ...BLANK_F,
+      purchaser_name: "Robert Spender", purchaser_member_id: "MBR-0001", gb_account_last4: "4471",
+      denom_cents: 2000, qty: 5, card_fee_cents: 500,
+      card_last4: "9921", card_auth_code: "AUTH88231", card_entry: "CHIP",
+      id_scan_ref: "IDS-AZ-0001", age_verified: true, face_id_match_pct: "98.2", thumb_match_pct: "98.7",
+      esig_purchaser: "Robert Spender", esig_issuer_rep: "Amber Cole", esig_manager: "M. Reyes",
+      member_tier: "PLATINUM ELITE", card_brand: "VISA", terminal_id: "CG01-T1",
+    });
+    setError("");
+  };
+
+  const resetForm = () => {
+    setMode("REAL");
+    setF(BLANK_F);
+    setAssent(null); setIdData(null); setCardData(null); setError("");
+  };
 
   // Shared data bridge — pushes identity/card/purchaser data to a parallel
   // contract flow (e.g. VIP contract auto-fill on the unified desk).
@@ -177,7 +215,7 @@ export default function GlyphBucksSaleFlow({ onShared, prefill }) {
             <Printer className="w-4 h-4" /> Print (Legal 8.5×14)
           </button>
           <a href={`/v/${result.verify_ref}`} target="_blank" rel="noreferrer" className="rounded-xl btn-glow-blue font-bold px-5 py-2.5 min-h-[44px] flex items-center">Open Verify Page</a>
-          <button onClick={() => { setResult(null); setAssent(null); setIdData(null); setCardData(null); }} className="rounded-xl border border-white/20 px-5 py-2.5 font-semibold min-h-[44px] hover:bg-white/5 transition-all">New Sale</button>
+          <button onClick={() => { setResult(null); resetForm(); }} className="rounded-xl border border-white/20 px-5 py-2.5 font-semibold min-h-[44px] hover:bg-white/5 transition-all">New Sale</button>
         </div>
       </div>
     );
@@ -185,6 +223,12 @@ export default function GlyphBucksSaleFlow({ onShared, prefill }) {
 
   return (
     <div className="space-y-4">
+      {/* Demo seed — state-only, wiped on refresh/New Sale, never touches live data */}
+      <button onClick={fillDemo}
+        className="flex items-center gap-2 rounded-lg bg-amber-500/15 border-2 border-amber-500/40 hover:bg-amber-500/25 text-amber-300 text-xs font-bold px-4 py-2.5 min-h-[44px] transition-all">
+        <FlaskConical className="w-4 h-4" /> Fill Demo Data (DEMO mode — wiped on refresh, never stored)
+      </button>
+
       {/* Header */}
       <div className="rounded-2xl border border-[#e8c86a]/30 bg-gradient-to-r from-[rgba(87,61,255,0.15)] via-[rgba(20,26,48,0.7)] to-[rgba(168,60,255,0.10)] backdrop-blur-xl px-4 py-3 shadow-[0_0_35px_rgba(87,61,255,0.25)]">
         <div className="flex items-center gap-3 flex-wrap">
@@ -240,6 +284,11 @@ export default function GlyphBucksSaleFlow({ onShared, prefill }) {
         <div className="mt-3">
           <ThumbprintScanner venueId={venueId} onCapture={(c) => set("thumb_match_pct", String(c.match_pct))} />
         </div>
+        {mode === "REAL" && f.thumb_match_pct === "" && (
+          <div className="mt-2 rounded-lg bg-emerald-500/10 border border-emerald-400/40 px-3 py-2 text-[11px] text-emerald-300 font-semibold">
+            ✓ LIVE mode — thumbprint auto-accepts at seal if the reader did not capture (score recorded as not captured, sale proceeds)
+          </div>
+        )}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
           <label><span className={lbl}>ID scan ref</span><input className={inp} value={f.id_scan_ref} onChange={(e) => set("id_scan_ref", e.target.value)} /></label>
           <label><span className={lbl}>Face match %</span><input className={inp} type="number" value={f.face_id_match_pct} onChange={(e) => set("face_id_match_pct", e.target.value)} /></label>
