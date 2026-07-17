@@ -4,7 +4,6 @@ import KioskPinPad from "@/components/nups/kiosk/KioskPinPad";
 import OwnerAdminSignIn from "@/components/nups/kiosk/OwnerAdminSignIn";
 import AccessRequestForm from "@/components/nups/kiosk/AccessRequestForm";
 import { Clock, LogOut, ShieldCheck, UserPlus, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §3 — Public kiosk entry.
 // Shows ONLY: Staff Clock In, Staff Clock Out, Owner/Admin Sign In, Request Owner/Admin Access.
@@ -19,7 +18,6 @@ const PANELS = [
 
 export default function NUPSKiosk() {
   const navigate = useNavigate();
-  const activeVenue = useActiveVenue();
   const [panel, setPanel] = useState(null);
   const [result, setResult] = useState(null);
 
@@ -51,14 +49,20 @@ export default function NUPSKiosk() {
   const active = PANELS.find((p) => p.key === panel);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <img src="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
-            alt="NUPS" className="w-16 h-16 mx-auto mb-3 object-contain" />
-          {/* Venue-tenant separation — kiosk always shows the ACTIVE venue */}
-          <h1 className="text-2xl font-bold tracking-wide uppercase">{activeVenue?.name || "NUPS Venue"}</h1>
-          <p className="text-slate-500 text-sm mt-1">Staff Entry & Clock Station</p>
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center px-4 py-10 relative overflow-hidden">
+      {/* Ambient glow backdrop */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute bottom-0 left-1/4 w-[400px] h-[300px] rounded-full bg-cyan-500/10 blur-[100px]" />
+      </div>
+      <div className="w-full max-w-md relative">
+        <div className="text-center mb-10">
+          <div className="w-32 h-32 mx-auto mb-5 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_60px_-15px_rgba(139,92,246,0.5)] flex items-center justify-center">
+            <img src="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
+              alt="NUPS" className="w-24 h-24 object-contain" />
+          </div>
+          <h1 className="text-4xl font-black tracking-[0.3em] bg-gradient-to-r from-cyan-300 via-white to-violet-300 bg-clip-text text-transparent">NUPS</h1>
+          <p className="text-slate-500 text-sm mt-2 tracking-wide">Staff Entry & Clock Station</p>
         </div>
 
         {result ? (
@@ -79,14 +83,16 @@ export default function NUPSKiosk() {
           <div className="grid gap-4">
             {PANELS.map((p) => (
               <button key={p.key} onClick={() => setPanel(p.key)}
-                className={`h-20 rounded-2xl bg-gradient-to-br ${p.color} border border-white/10 flex items-center gap-4 px-6 text-left shadow-lg active:scale-[0.99]`}>
-                <p.icon className="w-7 h-7 shrink-0" />
+                className={`h-20 rounded-2xl bg-gradient-to-br ${p.color} backdrop-blur-xl bg-opacity-40 border border-white/15 flex items-center gap-4 px-6 text-left shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)] hover:border-white/30 transition-all active:scale-[0.99]`}>
+                <span className="w-12 h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
+                  <p.icon className="w-6 h-6" />
+                </span>
                 <span className="text-lg font-semibold">{p.label}</span>
               </button>
             ))}
           </div>
         ) : (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)]">
             <div className="flex items-center gap-3 mb-6">
               <button onClick={() => setPanel(null)} className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
                 <ArrowLeft className="w-5 h-5" />
