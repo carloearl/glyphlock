@@ -152,11 +152,17 @@ Deno.serve(async (req) => {
 
     // Voucher serials — registered range for this sale.
     let serialLo = 1;
+    let ledgerSeq = 1;
     try {
       const lastSale = await base44.asServiceRole.entities.GlyphBucksSale.filter({ venue_id: body.venue_id }, '-created_date', 1);
       if (lastSale?.[0]?.serial_hi) serialLo = Number(lastSale[0].serial_hi) + 1;
+      if (lastSale?.[0]) ledgerSeq = Number(lastSale[0].ledger_seq || 0) + 1;
     } catch (_) { /* genesis */ }
     const serialHi = serialLo + qty - 1;
+    const terminalId = String(body.terminal_id || 'CG01-T1');
+    const shiftId = body.shift_id ? String(body.shift_id) : null;
+    const memberTier = body.member_tier ? String(body.member_tier) : null;
+    const cardBrand = body.card_brand ? String(body.card_brand) : null;
 
     // Hash chain (append-only; per-venue).
     const termsHash = await sha256Hex(GB_TERMS_TEXT);
@@ -221,7 +227,7 @@ Deno.serve(async (req) => {
         card_last4: body.card_last4 || null,
         card_entry: body.card_entry || 'CHIP',
         esig_purchaser_ref: esigs.purchaser, esig_issuer_rep_ref: esigs.issuer_rep, esig_manager_ref: esigs.manager,
-        delivery_printed_at: null, delivery_emailed_at: null, delivery_sms_at: null,
+        delivery_printed_at: now.toISOString(), delivery_emailed_at: null, delivery_sms_at: null,
         mode,
       });
 
@@ -234,6 +240,8 @@ Deno.serve(async (req) => {
         denom_cents: denom, qty, face_cents: faceCents, card_fee_cents: cardFee, amount_cents: amountCents,
         currency: body.currency || 'USD', serial_lo: serialLo, serial_hi: serialHi,
         mcc: body.mcc || 'stored_value', mode, status: 'SEALED', sealed_at: now.toISOString(),
+        terminal_id: terminalId, shift_id: shiftId, ledger_seq: ledgerSeq,
+        member_tier: memberTier, card_brand: cardBrand,
       });
 
       // Liability ledger — NEVER revenue, excluded from total_sales.
@@ -277,6 +285,9 @@ Deno.serve(async (req) => {
       terms_hash: termsHash, prev_block_hash: prevBlockHash,
       chain_hash: chainHash, public_key_hex: publicHex, signed_token: signedToken,
       anchor, sealed_at: now.toISOString(), mode,
+      terminal_id: terminalId, shift_id: shiftId, ledger_seq: ledgerSeq,
+      member_tier: memberTier, card_brand: cardBrand,
+      delivery_printed_at: now.toISOString(),
     });
   } catch (error) {
     return Response.json({ ok: false, error: (error as Error).message }, { status: 500 });

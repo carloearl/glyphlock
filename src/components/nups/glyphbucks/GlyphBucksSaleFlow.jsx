@@ -46,6 +46,7 @@ export default function GlyphBucksSaleFlow() {
     card_last4: "", card_auth_code: "", card_entry: "CHIP",
     id_scan_ref: "", age_verified: false, face_id_match_pct: "", thumb_match_pct: "",
     esig_purchaser: "", esig_issuer_rep: "", esig_manager: "",
+    member_tier: "MEMBER", card_brand: "VISA", terminal_id: "CG01-T1",
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -76,6 +77,7 @@ export default function GlyphBucksSaleFlow() {
       card_last4: String(c.last_six || "").slice(-4),
       card_auth_code: c.approval_code || p.card_auth_code,
       card_entry: c.type === "MANUAL" ? "MANUAL" : "SWIPE",
+      card_brand: c.brand || p.card_brand,
     }));
   };
 
@@ -96,6 +98,8 @@ export default function GlyphBucksSaleFlow() {
         gb_account_last4: f.gb_account_last4.trim(),
         denom_cents: Number(f.denom_cents), qty: Number(f.qty), card_fee_cents: Number(f.card_fee_cents) || 0,
         card_last4: f.card_last4.trim(), card_auth_code: f.card_auth_code.trim(), card_entry: f.card_entry,
+        card_brand: f.card_brand, member_tier: f.member_tier, terminal_id: f.terminal_id.trim(),
+        shift_id: (() => { try { return JSON.parse(sessionStorage.getItem("nups_kiosk_operator") || "{}").shift_id || null; } catch { return null; } })(),
         assent,
         identity: {
           id_scan_ref: f.id_scan_ref.trim(), age_verified: f.age_verified,
@@ -124,8 +128,11 @@ export default function GlyphBucksSaleFlow() {
       face_cents: result.face_cents, card_fee_cents: Number(f.card_fee_cents) || 0,
       amount_cents: result.amount_cents, serial_lo: result.serial_lo, serial_hi: result.serial_hi,
       card_last4: f.card_last4, card_auth_code: f.card_auth_code, card_entry: f.card_entry,
+      card_brand: f.card_brand, member_tier: f.member_tier,
+      terminal_id: result.terminal_id || f.terminal_id, shift_id: result.shift_id,
+      ledger_seq: result.ledger_seq,
       esigs: { purchaser: f.esig_purchaser, issuer_rep: f.esig_issuer_rep, manager: f.esig_manager },
-      assent,
+      assent: { ...assent, delivery_printed_at: result.delivery_printed_at || result.sealed_at },
       identity: { id_scan_ref: f.id_scan_ref, age_verified: f.age_verified, face_id_match_pct: f.face_id_match_pct, thumb_match_pct: f.thumb_match_pct },
       terms_hash: result.terms_hash, prev_block_hash: result.prev_block_hash,
       chain_hash: result.chain_hash, public_key_hex: result.public_key_hex,
@@ -188,6 +195,12 @@ export default function GlyphBucksSaleFlow() {
           <label className="col-span-2"><span className={lbl}>Purchaser name (autofills from ID scan)</span><input className={inp} value={f.purchaser_name} onChange={(e) => set("purchaser_name", e.target.value)} /></label>
           <label><span className={lbl}>Member ID</span><input className={inp} value={f.purchaser_member_id} onChange={(e) => set("purchaser_member_id", e.target.value)} /></label>
           <label><span className={lbl}>GB acct last 4</span><input className={inp} maxLength={4} value={f.gb_account_last4} onChange={(e) => set("gb_account_last4", e.target.value.replace(/\D/g, ""))} /></label>
+          <label><span className={lbl}>Member tier</span>
+            <select className={inp} value={f.member_tier} onChange={(e) => set("member_tier", e.target.value)}>
+              <option>MEMBER</option><option>SILVER</option><option>GOLD</option><option>PLATINUM ELITE</option>
+            </select>
+          </label>
+          <label><span className={lbl}>Terminal</span><input className={inp} value={f.terminal_id} onChange={(e) => set("terminal_id", e.target.value)} /></label>
         </div>
       </Section>
 
@@ -212,7 +225,12 @@ export default function GlyphBucksSaleFlow() {
 
       <Section n="4" icon={CreditCard} title="Payment — Swipe · Insert · Tap" sub="Terminal capture binds auth code + last 4 to the sealed record" done={!!f.card_last4 && !!f.card_auth_code}>
         <CardReaderPanel activeVenue={{ venue_id: venueId }} onCardRead={handleCardRead} />
-        <div className="grid grid-cols-3 gap-3 mt-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+          <label><span className={lbl}>Card brand</span>
+            <select className={inp} value={f.card_brand} onChange={(e) => set("card_brand", e.target.value)}>
+              <option>VISA</option><option>MASTERCARD</option><option>DISCOVER</option><option>AMEX</option>
+            </select>
+          </label>
           <label><span className={lbl}>Card last 4</span><input className={inp} maxLength={4} value={f.card_last4} onChange={(e) => set("card_last4", e.target.value.replace(/\D/g, ""))} /></label>
           <label><span className={lbl}>Auth code</span><input className={inp} value={f.card_auth_code} onChange={(e) => set("card_auth_code", e.target.value)} /></label>
           <label><span className={lbl}>Entry</span>

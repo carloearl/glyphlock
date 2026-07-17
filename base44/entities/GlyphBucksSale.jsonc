@@ -29,8 +29,28 @@
     "purchaser_member_id": {
       "type": "string"
     },
+    "member_tier": {
+      "type": "string",
+      "description": "Membership tier printed on the agreement (MEMBER, SILVER, GOLD, PLATINUM ELITE)."
+    },
     "gb_account_last4": {
       "type": "string"
+    },
+    "terminal_id": {
+      "type": "string",
+      "description": "POS terminal that executed the sale (e.g. CG01-T1)."
+    },
+    "shift_id": {
+      "type": "string",
+      "description": "Operator shift reference at time of sale."
+    },
+    "ledger_seq": {
+      "type": "number",
+      "description": "Monotonic per-venue ledger sequence number printed on the agreement."
+    },
+    "card_brand": {
+      "type": "string",
+      "description": "Card network for the tender (VISA, MASTERCARD, DISCOVER, AMEX)."
     },
     "denom_cents": {
       "type": "number",
