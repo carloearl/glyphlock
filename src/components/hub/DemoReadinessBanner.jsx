@@ -110,7 +110,7 @@ export default function DemoReadinessBanner() {
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-violet-300" />
           <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-            Live Demo Readiness
+            Live System Integrity
           </h3>
           {allGreen ? (
             <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40">

@@ -49,8 +49,12 @@ const KPI = ({ label, value, delta, Icon, tone = "emerald" }) => {
         </div>
         {delta != null && (
           <div className="mt-4 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-md px-1.5 py-0.5">
-              <TrendingUp className="w-3 h-3" /> +{delta}%
+            <span className={`inline-flex items-center gap-1 text-[11px] font-mono font-bold rounded-md px-1.5 py-0.5 border ${
+              delta >= 0
+                ? "text-emerald-300 bg-emerald-500/10 border-emerald-500/30"
+                : "text-red-300 bg-red-500/10 border-red-500/30"
+            }`}>
+              <TrendingUp className={`w-3 h-3 ${delta < 0 ? "rotate-180" : ""}`} /> {delta >= 0 ? "+" : ""}{delta}%
             </span>
             <span className="text-[10px] text-slate-500">vs yesterday</span>
           </div>
@@ -60,7 +64,9 @@ const KPI = ({ label, value, delta, Icon, tone = "emerald" }) => {
   );
 };
 
-export default function TodaysSummary({ grossSales = 0, netRevenue = 0, transactions = 0, cashPct = 0 }) {
+// deltas: real computed vs-yesterday percentages, or null when there is no
+// yesterday baseline. NEVER hardcode trend numbers — compliance requirement.
+export default function TodaysSummary({ grossSales = 0, netRevenue = 0, transactions = 0, cashPct = 0, deltas = {} }) {
   return (
     <div>
       <div className="flex items-end justify-between mb-4">
@@ -73,10 +79,10 @@ export default function TodaysSummary({ grossSales = 0, netRevenue = 0, transact
         </span>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPI label="Gross Sales"  value={fmtMoney(grossSales)}  delta={18.7} Icon={DollarSign} tone="emerald" />
-        <KPI label="Net Revenue"  value={fmtMoney(netRevenue)}  delta={16.3} Icon={Banknote}   tone="violet" />
-        <KPI label="Transactions" value={fmtNum(transactions)}  delta={14.4} Icon={Receipt}    tone="cyan" />
-        <KPI label="Cash %"       value={`${cashPct}%`}         delta={4.2}  Icon={CreditCard} tone="amber" />
+        <KPI label="Gross Sales"  value={fmtMoney(grossSales)}  delta={deltas.gross ?? null} Icon={DollarSign} tone="emerald" />
+        <KPI label="Net Revenue"  value={fmtMoney(netRevenue)}  delta={deltas.net ?? null}   Icon={Banknote}   tone="violet" />
+        <KPI label="Transactions" value={fmtNum(transactions)}  delta={deltas.txns ?? null}  Icon={Receipt}    tone="cyan" />
+        <KPI label="Cash %"       value={`${cashPct}%`}         delta={deltas.cash ?? null}  Icon={CreditCard} tone="amber" />
       </div>
     </div>
   );

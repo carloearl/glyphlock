@@ -100,12 +100,15 @@ export default function ManagerConsole() {
 
   const today = todayISO();
 
+  // REAL-mode records only — TEST/DEMO/SANDBOX shifts must never surface
+  // on the live manager console (DACO mode separation).
+  const isReal = (r) => !r.mode || r.mode === "REAL";
   const activeStaff = useMemo(
-    () => staffShifts.filter(s => s.status === "checked_in"),
+    () => staffShifts.filter(s => s.status === "checked_in" && isReal(s)),
     [staffShifts]
   );
   const activeEntertainers = useMemo(
-    () => entShifts.filter(s => !s.check_out_time),
+    () => entShifts.filter(s => !s.check_out_time && isReal(s)),
     [entShifts]
   );
   const todaysTxns = useMemo(

@@ -64,7 +64,25 @@ function aggregateTransactions(txns = []) {
     .sort((a, b) => b.sales - a.sales)
     .slice(0, 5);
 
-  return { grossSales, netRevenue, transactions, cashPct, hourly, topProducts };
+  // Real vs-yesterday deltas — computed from actual data, null when no
+  // yesterday baseline exists. No fabricated trend numbers (compliance).
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const ydays = txns.filter((t) =>
+    !t.validation_run && (t.created_date || "").slice(0, 10) === yesterday && t.status === "completed"
+  );
+  const yGross = ydays.reduce((s, t) => s + (Number(t.total) || 0), 0);
+  const yNet   = ydays.reduce((s, t) => s + (Number(t.cash_sales) || 0) + (Number(t.card_sales) || 0), 0);
+  const yCash  = ydays.reduce((s, t) => s + (Number(t.cash_sales) || 0), 0);
+  const yCashPct = yNet > 0 ? Math.round((yCash / yNet) * 100) : 0;
+  const pctChange = (cur, prev) => (prev > 0 ? Math.round(((cur - prev) / prev) * 1000) / 10 : null);
+  const deltas = {
+    gross: pctChange(grossSales, yGross),
+    net:   pctChange(netRevenue, yNet),
+    txns:  pctChange(transactions, ydays.length),
+    cash:  yCashPct > 0 ? Math.round((cashPct - yCashPct) * 10) / 10 : null,
+  };
+
+  return { grossSales, netRevenue, transactions, cashPct, hourly, topProducts, deltas };
 }
 
 export default function NUPSHub() {
@@ -121,20 +139,25 @@ export default function NUPSHub() {
           />
         )}
 
-        <div className="flex items-center justify-end">
-          <DemoSeedControl
-            sectionName="Venue Performance"
-            onSeed={seedVenuePerformance}
-            onClear={clearVenuePerformance}
-            onAfter={() => qc.invalidateQueries({ queryKey: ["pos-today"] })}
-          />
-        </div>
+        {/* Demo seeding is an ADMIN-class tool only — never rendered for
+            operational roles (compliance: no demo controls on live surfaces). */}
+        {["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"].includes(role) && (
+          <div className="flex items-center justify-end">
+            <DemoSeedControl
+              sectionName="Venue Performance"
+              onSeed={seedVenuePerformance}
+              onClear={clearVenuePerformance}
+              onAfter={() => qc.invalidateQueries({ queryKey: ["pos-today"] })}
+            />
+          </div>
+        )}
 
         <TodaysSummary
           grossSales={agg.grossSales}
           netRevenue={agg.netRevenue}
           transactions={agg.transactions}
           cashPct={agg.cashPct}
+          deltas={agg.deltas}
         />
 
         {/* Cash + card split, driver payouts, and net deposit for today */}
