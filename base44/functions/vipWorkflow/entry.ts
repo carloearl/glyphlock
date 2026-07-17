@@ -11,11 +11,68 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const E = base44.asServiceRole.entities;
     const body = await req.json();
     const action = body.action;
+
+    // ── DACO-NUPS-RBAC-CORRECTION-20260717 §3–5 — authorization guard ──────
+    // Two accepted identities, nothing else:
+    //  1. Signed kiosk session (NKS1) issued by nupsClockIn — role-gated per action,
+    //     revalidated against the live shift + account on every call.
+    //  2. Platform-authenticated user holding an explicit NUPS back-office grant
+    //     (Carlo's Owner identity or an APPROVED NUPSAccessRequest).
+    //     Platform role 'admin' alone grants NOTHING.
+    const OWNER_EMAIL = 'carloearl@glyphlock.com';
+    const PEPPER = Deno.env.get('KEY_PEPPER') || '';
+    const te = new TextEncoder();
+    const b64uToBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    const verifyKiosk = async (token) => {
+      try {
+        const [v, p, s] = String(token || '').split('.');
+        if (v !== 'NKS1' || !p || !s || !PEPPER) return null;
+        const key = await crypto.subtle.importKey('raw', te.encode(PEPPER), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+        const ok = await crypto.subtle.verify('HMAC', key, b64uToBytes(s), te.encode(p));
+        if (!ok) return null;
+        const payload = JSON.parse(new TextDecoder().decode(b64uToBytes(p)));
+        if (!payload.exp || Date.now() > payload.exp) return null;
+        const nu = await E.NUPSUser.get(payload.uid).catch(() => null);
+        if (!nu || nu.status !== 'active' || nu.role !== payload.role) return null;
+        const shift = await E.StaffShift.get(payload.shift_id).catch(() => null);
+        if (!shift || shift.status !== 'checked_in') return null;
+        return payload;
+      } catch { return null; }
+    };
+
+    let user = null, backOffice = false, operator = null;
+    if (body.kiosk_session) {
+      operator = await verifyKiosk(body.kiosk_session);
+      if (!operator) return Response.json({ error: 'Kiosk session invalid, expired, or revoked.' }, { status: 401 });
+      user = { id: operator.uid, email: `kiosk:${operator.uid}`, full_name: operator.name, role: `kiosk:${operator.role}` };
+    } else {
+      const platformUser = await base44.auth.me().catch(() => null);
+      if (!platformUser) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      const email = String(platformUser.email || '').toLowerCase();
+      if (email === OWNER_EMAIL) backOffice = true;
+      else {
+        const grants = (await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' })) || [];
+        backOffice = grants.length > 0;
+      }
+      if (!backOffice) return Response.json({ error: 'NUPS back-office authorization required.' }, { status: 403 });
+      user = platformUser;
+    }
+
+    // §4 role enforcement — hostess: VIP contract workflow only; manager adds
+    // room/people ops; every other kiosk role is denied all VIP operations.
+    const HOSTESS_ACTIONS = ['getState', 'guestIntake', 'createContract', 'applyAdjustment', 'sign', 'pay', 'activate', 'extend', 'closeSession', 'cancelContract', 'search', 'getChain'];
+    const MANAGER_ACTIONS = [...HOSTESS_ACTIONS, 'createRoom', 'setRoomStatus', 'onboardEntertainer', 'correctGuest'];
+    if (operator) {
+      const allowed = ['HOSTESS', 'FLOOR_HOST'].includes(operator.role) ? HOSTESS_ACTIONS
+        : operator.role === 'VENUE_MANAGER' ? MANAGER_ACTIONS : [];
+      if (!allowed.includes(action)) {
+        return Response.json({ error: `Role ${operator.role} is not authorized for '${action}'.` }, { status: 403 });
+      }
+    }
+
     const VENUE = body.venue_id || 'dream_palace';
     const now = () => new Date().toISOString();
     const ref = (p) => `${p}-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -202,14 +259,14 @@ Deno.serve(async (req) => {
       if (c.terms_locked) return err('Terms are locked after signing — use a correction amendment');
       if ((config.approval_rules || {})[type]) {
         if (!manager_name || !reason) return err(`${type} requires approving manager name and reason`);
-        if (manager_name.trim().toLowerCase() === (user.full_name || user.email).trim().toLowerCase() && user.role !== 'admin') {
+        if (manager_name.trim().toLowerCase() === (user.full_name || user.email).trim().toLowerCase() && !backOffice) {
           return err('Staff may not self-approve a restricted override', 403);
         }
       }
       let discount = c.discount_amount || 0;
       if (type === 'discount') {
         const pct = (Number(amount) / (c.base_amount || 1)) * 100;
-        if (pct > (config.max_discount_pct_without_owner || 25) && user.role !== 'admin') return err(`Discount exceeds ${config.max_discount_pct_without_owner}% limit — owner approval required`, 403);
+        if (pct > (config.max_discount_pct_without_owner || 25) && !backOffice) return err(`Discount exceeds ${config.max_discount_pct_without_owner}% limit — owner approval required`, 403);
         discount += Number(amount);
       } else if (type === 'comp') {
         discount = (c.base_amount || 0) + (c.fees_amount || 0) + (c.tax_amount || 0) + (c.extensions_amount || 0);
@@ -404,7 +461,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'cleanupTest') {
-      if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+      if (!backOffice) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const out = {};
       out.contracts = await E.VIPContract.deleteMany({ mode: 'TEST' });
       out.sessions = await E.VIPSession.deleteMany({ mode: 'TEST' });

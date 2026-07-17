@@ -85,7 +85,9 @@ Deno.serve(async (req) => {
 
     // ─── CHECK BACK-OFFICE ACCESS (§6–7) ────────────────────────────────────
     if (action === 'checkAccess') {
-      if (email === OWNER_EMAIL || user.role === 'admin') {
+      // DACO-NUPS-RBAC-CORRECTION-20260717 §5 — no implicit platform-admin ownership.
+      // Back office requires Carlo's protected Owner identity or an explicit APPROVED grant.
+      if (email === OWNER_EMAIL) {
         return Response.json({ authorized: true, granted_role: 'OWNER', destination: '/NUPSAdminPortal', full_name: user.full_name });
       }
       const mine = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 5);

@@ -10,13 +10,17 @@
       "type": "string",
       "description": "Venue this user belongs to"
     },
-    "pin": {
-      "type": "string",
-      "description": "LEGACY plaintext PIN \u2014 being migrated to pin_hash. New accounts must use pin_hash."
-    },
     "pin_hash": {
       "type": "string",
-      "description": "DACO-NUPS-ROLE-VIP-BUILD-20260717 \u00a710 \u2014 SHA-256 hex of the assigned PIN. Never returned to clients, never logged."
+      "description": "DACO-NUPS-RBAC-CORRECTION-20260717 \u00a72 \u2014 PBKDF2-SHA256 (100k iterations) hex of the PIN, keyed with a unique per-account salt and the server-held KEY_PEPPER. Never returned to clients, never logged. No plaintext PIN storage exists."
+    },
+    "pin_salt": {
+      "type": "string",
+      "description": "Unique random 16-byte salt (hex) for this account's PBKDF2 PIN hash."
+    },
+    "pin_lookup": {
+      "type": "string",
+      "description": "HMAC-SHA256(pin, KEY_PEPPER) hex \u2014 deterministic peppered lookup index so PIN auth is an indexed query, not a table scan. Useless without the server secret."
     },
     "full_name": {
       "type": "string",

@@ -4,16 +4,18 @@
   "properties": {
     "resource_id": {
       "type": "string",
-      "description": "Resource being rate-limited (serial_number, payment_intent_id, etc.)"
+      "description": "Resource being rate-limited (serial_number, payment_intent_id, pin_auth:<ip>, etc.)"
     },
     "resource_type": {
       "type": "string",
       "enum": [
         "bill_redemption",
         "payment_processing",
-        "qr_scan"
+        "qr_scan",
+        "pin_auth",
+        "kiosk_session"
       ],
-      "description": "Type of resource"
+      "description": "Type of resource. pin_auth / kiosk_session added by DACO-NUPS-RBAC-CORRECTION-20260717 for server-side PIN throttling and denied-session logging (never records the PIN)."
     },
     "venue_id": {
       "type": "string",

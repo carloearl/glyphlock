@@ -32,6 +32,7 @@ export default function NUPSKiosk() {
         name: data.user.full_name, role: data.user.role, workspace: data.workspace, shift_id: data.shift_id,
       }));
     }
+    if (data?.kiosk_session) sessionStorage.setItem("nups_kiosk_session", data.kiosk_session);
     if (data?.destination && data.destination !== "/NUPSKiosk") {
       navigate(data.destination);
     } else {
@@ -41,6 +42,7 @@ export default function NUPSKiosk() {
 
   const onClockOut = (data) => {
     sessionStorage.removeItem("nups_kiosk_operator");
+    sessionStorage.removeItem("nups_kiosk_session");
     setResult({ type: "out", name: data?.user?.full_name });
   };
 

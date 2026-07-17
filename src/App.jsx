@@ -81,6 +81,7 @@ import NUPSKiosk from './pages/NUPSKiosk';
 import VIPSale from './pages/VIPSale';
 import AccessRequests from './pages/AccessRequests';
 import KioskShell from './components/nups/KioskShell';
+import KioskSessionGuard from './components/nups/KioskSessionGuard';
 import RoleClassGuard from './components/nups/RoleClassGuard';
 import RoleClassBadge from './components/nups/RoleClassBadge';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -110,7 +111,7 @@ const AuthenticatedApp = () => {
 
   const currentPath = location.pathname;
   const currentPathLower = currentPath.toLowerCase();
-  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk'];
+  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk', '/vipsale', '/managerconsole'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
@@ -192,8 +193,8 @@ const AuthenticatedApp = () => {
         <Route path="/nupsowner" element={<RoleClassGuard allow={["ADMIN"]}><NUPSOwner /></RoleClassGuard>} />
         <Route path="/NUPSStaff" element={<NUPSStaff />} />
         <Route path="/nupsstaff" element={<NUPSStaff />} />
-        <Route path="/FrontDoor" element={<FrontDoor />} />
-        <Route path="/frontdoor" element={<FrontDoor />} />
+        <Route path="/FrontDoor" element={<KioskSessionGuard roles={["DOOR_GIRL","DOORMAN"]}><FrontDoor /></KioskSessionGuard>} />
+        <Route path="/frontdoor" element={<KioskSessionGuard roles={["DOOR_GIRL","DOORMAN"]}><FrontDoor /></KioskSessionGuard>} />
         <Route path="/EntertainerCheckIn" element={<EntertainerCheckIn />} />
         <Route path="/entertainercheckin" element={<EntertainerCheckIn />} />
         {/* DACO 003 §2 — dedicated class homes. Guards allow the class itself
@@ -223,8 +224,8 @@ const AuthenticatedApp = () => {
         <Route path="/nupshub" element={<NUPSHub />} />
         <Route path="/Hub" element={<NUPSHub />} />
         {/* DACO 003 §2: MANAGER + ADMIN only. */}
-        <Route path="/ManagerConsole" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ManagerConsole /></RoleClassGuard>} />
-        <Route path="/managerconsole" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ManagerConsole /></RoleClassGuard>} />
+        <Route path="/ManagerConsole" element={<KioskSessionGuard roles={["VENUE_MANAGER"]}><ManagerConsole /></KioskSessionGuard>} />
+        <Route path="/managerconsole" element={<KioskSessionGuard roles={["VENUE_MANAGER"]}><ManagerConsole /></KioskSessionGuard>} />
         <Route path="/PeopleArchive" element={<PeopleArchive />} />
         <Route path="/peoplearchive" element={<PeopleArchive />} />
         {/* DACO 003 §2: ADMIN-only accounting surfaces. */}
@@ -277,8 +278,8 @@ const AuthenticatedApp = () => {
         {/* DACO-NUPS-ROLE-VIP-BUILD-20260717 — role-gated kiosk system */}
         <Route path="/NUPSKiosk" element={<NUPSKiosk />} />
         <Route path="/nupskiosk" element={<NUPSKiosk />} />
-        <Route path="/VIPSale" element={<VIPSale />} />
-        <Route path="/vipsale" element={<VIPSale />} />
+        <Route path="/VIPSale" element={<KioskSessionGuard roles={["HOSTESS","FLOOR_HOST"]}><VIPSale /></KioskSessionGuard>} />
+        <Route path="/vipsale" element={<KioskSessionGuard roles={["HOSTESS","FLOOR_HOST"]}><VIPSale /></KioskSessionGuard>} />
         <Route path="/AccessRequests" element={<RoleClassGuard allow={["ADMIN"]}><AccessRequests /></RoleClassGuard>} />
         <Route path="/accessrequests" element={<RoleClassGuard allow={["ADMIN"]}><AccessRequests /></RoleClassGuard>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
