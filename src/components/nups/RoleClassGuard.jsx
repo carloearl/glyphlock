@@ -75,8 +75,10 @@ export default function RoleClassGuard({ allow = [], children }) {
         <div className="max-w-sm w-full bg-gray-900/80 border border-yellow-500/20 rounded-2xl p-8 text-center space-y-5">
           <Lock className="w-12 h-12 text-yellow-400 mx-auto" />
           <h2 className="text-xl font-bold">Sign in required</h2>
-          <Button onClick={() => navigate("/NUPSGateway")} className="w-full bg-gradient-to-r from-violet-600 to-blue-600">
-            Go to Access Gateway
+          {/* Nav audit 2026-07-17: /NUPSGateway is a legacy redirect —
+              route straight to the kiosk, the ONLY operational entry. */}
+          <Button onClick={() => navigate("/NUPSKiosk")} className="w-full bg-gradient-to-r from-violet-600 to-blue-600">
+            Go to Kiosk Sign-In
           </Button>
         </div>
       </div>
