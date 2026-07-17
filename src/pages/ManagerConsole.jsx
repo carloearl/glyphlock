@@ -22,7 +22,8 @@ import { base44 } from "@/api/base44Client";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import StaffOnboardingPanel from "@/components/nups/StaffOnboardingPanel";
 import StaffManagement from "@/components/nups/StaffManagement";
-import ContractManager from "@/components/nups/ContractManager";
+import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
+import VIPShowContracts from "@/pages/VIPShowContracts";
 import OnboardingPacket from "@/components/nups/OnboardingPacket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -93,9 +94,11 @@ export default function ManagerConsole() {
     queryFn: () => base44.entities.POSTransaction.list("-created_date", 500),
     refetchInterval: 30000,
   });
+  // Sealed VIP Show contracts — THE authoritative contract record.
+  // Legacy VenueContract quick-create is retired from this console.
   const { data: contracts = [] } = useQuery({
-    queryKey: ["mgr-contracts-today"],
-    queryFn: () => base44.entities.VenueContract.list("-created_date", 200),
+    queryKey: ["mgr-sealed-contracts"],
+    queryFn: () => base44.entities.VIPShowContract.list("-executed_at", 200),
   });
 
   const today = todayISO();
@@ -116,11 +119,16 @@ export default function ManagerConsole() {
     [txns, today]
   );
   const tonightGross = todaysTxns.reduce((s, t) => s + (Number(t.total) || 0), 0);
-  const todaysContracts = useMemo(
-    () => contracts.filter(c => (c.created_date || "").slice(0, 10) === today),
-    [contracts, today]
+  // REAL-mode sealed records only; every sealed record is executed/signed.
+  const realContracts = useMemo(
+    () => contracts.filter(c => !c.mode || c.mode === "REAL"),
+    [contracts]
   );
-  const signedToday = todaysContracts.filter(c => c.is_signed).length;
+  const todaysContracts = useMemo(
+    () => realContracts.filter(c => (c.executed_at || c.created_date || "").slice(0, 10) === today),
+    [realContracts, today]
+  );
+  const signedToday = todaysContracts.length;
 
   // ── Tab bodies ─────────────────────────────────────────────────────
   const renderTonight = () => (
@@ -190,14 +198,12 @@ export default function ManagerConsole() {
               {todaysContracts.slice(0, 5).map(c => (
                 <div key={c.id} className="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2">
                   <div>
-                    <div className="text-white text-sm font-bold">{c.customer_name || "Unknown"}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">{c.contract_id || c.id}</div>
+                    <div className="text-white text-sm font-bold">{c.guest?.name || "Guest"}</div>
+                    <div className="text-[10px] text-slate-500 font-mono">{c.contract_ref} · {c.verify_ref}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-emerald-300 text-xs font-bold">{fmtMoney(c.grand_total || c.contract_amount)}</span>
-                    <Badge className={c.is_signed ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px]" : "bg-amber-500/15 text-amber-300 border-amber-500/30 text-[10px]"}>
-                      {c.is_signed ? "SIGNED" : c.status?.toUpperCase() || "DRAFT"}
-                    </Badge>
+                    <span className="text-emerald-300 text-xs font-bold">{fmtMoney(c.total)}</span>
+                    <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px]">SEALED</Badge>
                   </div>
                 </div>
               ))}
@@ -297,11 +303,44 @@ export default function ManagerConsole() {
   const renderContracts = () => (
     <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <StatTile label="Created Today" value={todaysContracts.length} Icon={FileText} tone="amber" />
-        <StatTile label="Signed Today" value={signedToday} Icon={ShieldCheck} tone="emerald" />
-        <StatTile label="All Contracts" value={contracts.length} Icon={Activity} tone="violet" />
+        <StatTile label="Sealed Today" value={todaysContracts.length} Icon={FileText} tone="amber" />
+        <StatTile label="Contract Value Today" value={fmtMoney(todaysContracts.reduce((s, c) => s + (Number(c.total) || 0), 0))} Icon={ShieldCheck} tone="emerald" />
+        <StatTile label="All Sealed Contracts" value={realContracts.length} Icon={Activity} tone="violet" />
       </div>
-      <ContractManager user={user} />
+
+      {/* Sealed VIP contract system — the ONLY contract creation path.
+          Legacy quick-create (ContractManager) is retired: it bypassed
+          clickwrap, signatures, and the hash-chain seal. */}
+      <Card className="bg-slate-900/60 border-emerald-500/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-emerald-400" /> New Sealed Contract
+            <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px]">Hash-Chained · Clickwrap</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <VIPShowGenerator />
+        </CardContent>
+      </Card>
+
+      <Card className="bg-slate-900/60 border-slate-800">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <Activity className="w-4 h-4 text-violet-400" /> Search · Membership · Reprint
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <VIPShowContracts />
+        </CardContent>
+      </Card>
+
+      <Button
+        variant="ghost"
+        className="w-full text-cyan-400 hover:text-cyan-300 text-xs"
+        onClick={() => navigate("/Contracts")}
+      >
+        Open full Contracts Hub (GlyphBucks · Big Spender · Entertainer · Archive) <ChevronRight className="w-3 h-3 ml-1" />
+      </Button>
     </div>
   );
 
