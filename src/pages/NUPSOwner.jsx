@@ -297,9 +297,9 @@ export default function NUPSOwner() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/NUPSGateway')}
+                onClick={() => navigate('/NUPSHub')}
                 className="text-gray-400 hover:text-white p-2 mr-1"
-                aria-label="Back to gateway"
+                aria-label="Back to dashboard"
               >
                 ←
               </Button>
@@ -385,7 +385,7 @@ export default function NUPSOwner() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/NUPSGateway')}
+                onClick={() => navigate('/NUPSHub')}
                 className="text-gray-400 hover:text-red-400 p-2 min-h-[44px]"
                 aria-label="Close dashboard"
               >

@@ -284,10 +284,15 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
     .filter(section => section.items.length > 0);
 
   // Role-aware home target for the header Home button. Owner directive
-  // 2026-07-17: ONLY back office (ADMIN) homes to the Dashboard. Managers
-  // manage — their home is the Manager Console, per HOME_BY_CLASS §2.
-  const homeTo = roleClass === ROLE_CLASS.ADMIN ? "/NUPSHub" : homeForRoleClass(roleClass);
-  const homeLabel = roleClass === ROLE_CLASS.ADMIN ? "Dashboard" : "My Home";
+  // 2026-07-17: ONLY back office homes to the Dashboard — and an admin in
+  // default staff-parity view is NOT back office until Admin Override is ON.
+  // Parity admins and managers home to the Manager Console (§2).
+  const homeTo = effectiveAdmin
+    ? "/NUPSHub"
+    : (roleClass === ROLE_CLASS.ADMIN || roleClass === ROLE_CLASS.MANAGER)
+      ? "/ManagerConsole"
+      : homeForRoleClass(roleClass);
+  const homeLabel = effectiveAdmin ? "Dashboard" : roleClass === ROLE_CLASS.MANAGER || roleClass === ROLE_CLASS.ADMIN ? "Console" : "My Home";
   const atHome = location.pathname.toLowerCase().startsWith(homeTo.split("?")[0].toLowerCase());
 
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
