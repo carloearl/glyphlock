@@ -255,8 +255,13 @@ export default function UnifiedContractFlow({ memberFill }) {
         <style>{`@media print {
           @page { size: 8.5in 14in; margin: 0.4in; }
           body * { visibility: hidden; }
-          .unified-contract-print, .unified-contract-print * { visibility: visible; }
-          .unified-contract-print { position: absolute; left: 0; top: 0; width: 100%; }
+          .unified-contract-print, .unified-contract-print * { visibility: visible !important; }
+          .unified-contract-print { position: absolute !important; left: 0; top: 0; width: 100% !important; }
+          /* Neutralize the GB receipt's standalone print positioning so both
+             documents flow in sequence instead of overlaying each other. */
+          .unified-contract-print .gb-print-area { position: static !important; width: 100% !important; max-width: none !important; }
+          .unified-contract-print .unified-doc { page-break-after: always; break-after: page; }
+          .unified-contract-print .unified-doc:last-child { page-break-after: auto; break-after: auto; }
         }`}</style>
         <div className="max-w-md mx-auto text-center rounded-2xl border border-emerald-500 bg-emerald-950/30 p-5 print:hidden">
           <Stamp className="w-8 h-8 text-emerald-300 mx-auto mb-2" />
@@ -273,8 +278,8 @@ export default function UnifiedContractFlow({ memberFill }) {
           <button onClick={() => { setDone(null); resetForm(); }} className="rounded-lg border border-neutral-500 px-5 py-2.5 font-semibold min-h-[44px]">New Contract</button>
         </div>
         <div className="unified-contract-print space-y-6 overflow-x-auto">
-          {done.gbDoc && <GlyphBucksReceipt doc={done.gbDoc} />}
-          {done.vipRecord && <VIPShowReprint record={done.vipRecord} anchor={{ status: done.vipAnchor }} />}
+          {done.gbDoc && <div className="unified-doc"><GlyphBucksReceipt doc={done.gbDoc} /></div>}
+          {done.vipRecord && <div className="unified-doc"><VIPShowReprint record={done.vipRecord} anchor={{ status: done.vipAnchor }} /></div>}
         </div>
       </div>
     );

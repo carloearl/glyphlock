@@ -15,6 +15,7 @@ import {
 import { GLYPHLOCK_DISCLAIMER } from "@/constants/legalDisclaimer";
 
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
+import RoleHomeButton from "@/components/nups/RoleHomeButton";
 import GlyphBucksContract from "@/components/nups/GlyphBucksContract";
 import EntertainerContract from "@/components/nups/EntertainerContract";
 import ContractLookup from "@/pages/ContractLookup";
@@ -93,6 +94,8 @@ export default function ContractsHub() {
       role="MANAGER"
     >
       <div className="max-w-[1400px] mx-auto space-y-6">
+        <RoleHomeButton />
+
         {/* Demo seeding is an ADMIN-OVERRIDE control only — never shown in
             the day-to-day staff/manager view (owner directive 2026-07-17). */}
         {adminOverride && <DemoContractSeeder />}
