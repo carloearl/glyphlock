@@ -27,6 +27,7 @@ import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
 import VIPShowVerifyPanel from "@/components/nups/vip/VIPShowVerifyPanel";
 import GlyphBucksSaleFlow from "@/components/nups/glyphbucks/GlyphBucksSaleFlow";
 import DemoContractSeeder from "@/components/nups/contracts/DemoContractSeeder";
+import { useAdminOverride } from "@/lib/nups/adminView";
 
 /**
  * Master Covenant & Contracts Hub
@@ -76,6 +77,7 @@ export default function ContractsHub() {
 
   const [activeTab, setActiveTab] = useState(initial);
   const [bigSpenderView, setBigSpenderView] = useState("letter");
+  const adminOverride = useAdminOverride();
 
   // Sync with sidebar deep-links
   useEffect(() => {
@@ -91,9 +93,9 @@ export default function ContractsHub() {
       role="MANAGER"
     >
       <div className="max-w-[1400px] mx-auto space-y-6">
-        {/* Module tab rail — every contract surface, one click away */}
-        {/* Demo mode — one-click mock data for the new sealed contract systems */}
-        <DemoContractSeeder />
+        {/* Demo seeding is an ADMIN-OVERRIDE control only — never shown in
+            the day-to-day staff/manager view (owner directive 2026-07-17). */}
+        {adminOverride && <DemoContractSeeder />}
 
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           {TABS.map(({ key, label, Icon }) => (

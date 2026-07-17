@@ -19,6 +19,7 @@ import DemoReadinessBanner from "@/components/hub/DemoReadinessBanner";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
 import DemoSeedControl from "@/components/nups/DemoSeedControl";
 import { seedVenuePerformance, clearVenuePerformance } from "@/lib/nups/demoSeeders";
+import { useAdminOverride } from "@/lib/nups/adminView";
 
 // Roles that actually punch a clock at the door. Owners / platform admins
 // don't see the clock-in card.
@@ -87,6 +88,7 @@ function aggregateTransactions(txns = []) {
 
 export default function NUPSHub() {
   const qc = useQueryClient();
+  const adminOverride = useAdminOverride();
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
   // NUPSUser schema key is `username` (mapped to email) — not `email`.
   const { data: nupsUsers = [] } = useQuery({
@@ -141,7 +143,7 @@ export default function NUPSHub() {
 
         {/* Demo seeding is an ADMIN-class tool only — never rendered for
             operational roles (compliance: no demo controls on live surfaces). */}
-        {["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"].includes(role) && (
+        {["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"].includes(role) && adminOverride && (
           <div className="flex items-center justify-end">
             <DemoSeedControl
               sectionName="Venue Performance"
