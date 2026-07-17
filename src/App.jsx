@@ -84,6 +84,7 @@ import KioskShell from './components/nups/KioskShell';
 import KioskSessionGuard from './components/nups/KioskSessionGuard';
 import RoleClassGuard from './components/nups/RoleClassGuard';
 import RoleClassBadge from './components/nups/RoleClassBadge';
+import GlobalBackButton from './components/nups/GlobalBackButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
@@ -172,7 +173,7 @@ const AuthenticatedApp = () => {
     // Lazily-imported NUPS operator pages — already imported elsewhere via the
     // pagesConfig loop. Re-import inline so they render under KioskShell here.
     const inner = (
-      <><RoleClassBadge /><Routes>
+      <><RoleClassBadge /><GlobalBackButton /><Routes>
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/nupslanding" element={<NUPSLanding />} />
         <Route path="/landing" element={<NUPSLanding />} />
@@ -302,6 +303,7 @@ const AuthenticatedApp = () => {
 
   return (
     <LayoutWrapper currentPageName={mainPageKey}>
+      <GlobalBackButton />
       <Routes>
         <Route path="/" element={<MainPage />} />
         {Object.entries(Pages).map(([path, Page]) => (
