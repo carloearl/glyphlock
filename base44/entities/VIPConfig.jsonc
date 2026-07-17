@@ -1,0 +1,118 @@
+{
+  "name": "VIPConfig",
+  "type": "object",
+  "description": "DACO-VIP-FIRST-BUILD-20260717 \u2014 Venue-scoped VIP workflow configuration. One record per venue. All VIP contract creation resolves through this record; contract creation is rejected if the venue has no active VIPConfig.",
+  "properties": {
+    "venue_id": {
+      "type": "string",
+      "description": "Venue key (e.g. dream_palace). One config per venue."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "live_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Live-launch gate. While false, REAL-mode contracts are rejected; only TEST mode is permitted."
+    },
+    "services": {
+      "type": "array",
+      "description": "VIP service types with duration/rate matrix.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "minutes": {
+                  "type": "number"
+                },
+                "amount": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "extension_block_minutes": {
+            "type": "number",
+            "default": 15
+          },
+          "extension_block_amount": {
+            "type": "number"
+          },
+          "minimum_charge": {
+            "type": "number",
+            "default": 0
+          }
+        }
+      }
+    },
+    "payment_methods": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Permitted tender types, e.g. Cash, Credit Card, Comp."
+    },
+    "card_fee_pct": {
+      "type": "number",
+      "default": 5,
+      "description": "Card processing fee percent applied on card tenders."
+    },
+    "tax_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "approval_rules": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Events requiring manager approval: discount, comp, manual_price, free_extension, room_transfer, post_signature_correction, cancel_after_signing, outstanding_balance_closeout. Values true = approval required."
+    },
+    "max_discount_pct_without_owner": {
+      "type": "number",
+      "default": 25
+    },
+    "signature_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Required signature roles before activation: guest, entertainer, staff (manager added when approval used)."
+    },
+    "session_warning_minutes": {
+      "type": "number",
+      "default": 5,
+      "description": "Minutes-remaining threshold for session warning."
+    },
+    "contract_terms": {
+      "type": "string",
+      "description": "Venue contract terms text shown before signatures."
+    },
+    "receipt_footer": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "TEST",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "Config records are REAL \u2014 they govern both live and test contracts."
+    }
+  },
+  "required": [
+    "venue_id"
+  ]
+}

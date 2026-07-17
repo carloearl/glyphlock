@@ -1,0 +1,96 @@
+{
+  "name": "VIPSession",
+  "type": "object",
+  "description": "DACO-VIP-FIRST-BUILD-20260717 \u2014 One authoritative active/completed VIP session per activated contract. Room and entertainer availability update through session events only.",
+  "properties": {
+    "session_ref": {
+      "type": "string",
+      "description": "SES-YYMMDD-NNNN"
+    },
+    "contract_id": {
+      "type": "string",
+      "description": "VIPContract record id (immutable link)."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "TEST",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "TEST"
+    },
+    "guest_id": {
+      "type": "string"
+    },
+    "entertainer_id": {
+      "type": "string"
+    },
+    "room_id": {
+      "type": "string"
+    },
+    "actual_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "planned_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actual_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "ON_HOLD",
+        "COMPLETED",
+        "CANCELED"
+      ],
+      "default": "ACTIVE"
+    },
+    "extensions_count": {
+      "type": "number",
+      "default": 0
+    },
+    "room_transfers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from_room_id": {
+            "type": "string"
+          },
+          "to_room_id": {
+            "type": "string"
+          },
+          "approved_by": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "closed_by": {
+      "type": "string"
+    },
+    "close_note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_id",
+    "venue_id",
+    "mode",
+    "room_id"
+  ]
+}

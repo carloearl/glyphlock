@@ -1,0 +1,253 @@
+{
+  "name": "VIPContract",
+  "type": "object",
+  "description": "DACO-VIP-FIRST-BUILD-20260717 \u2014 Authoritative VIP contract record. Central record of the chain Venue \u2192 Guest \u2192 Entertainer \u2192 Room \u2192 Contract \u2192 Approval \u2192 Signatures \u2192 Payment \u2192 POSTransaction \u2192 Receipt \u2192 Session \u2192 Audit. All relationships use immutable record IDs, never names. Material commercial terms lock after signing; later changes append amendments/audit events.",
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "description": "Unique human ref VIP-YYMMDD-NNNN."
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "TEST",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "TEST",
+      "description": "TEST until live launch authorization. REAL rejected while VIPConfig.live_enabled=false."
+    },
+    "client_request_id": {
+      "type": "string",
+      "description": "Idempotency key from the submitting client \u2014 blocks duplicate submission."
+    },
+    "guest_id": {
+      "type": "string",
+      "description": "VIPGuest record id."
+    },
+    "guest_name": {
+      "type": "string",
+      "description": "Display snapshot only \u2014 never used as a relationship."
+    },
+    "entertainer_id": {
+      "type": "string",
+      "description": "Entertainer record id."
+    },
+    "entertainer_stage_name": {
+      "type": "string"
+    },
+    "room_id": {
+      "type": "string",
+      "description": "VIPRoom record id."
+    },
+    "room_number": {
+      "type": "string"
+    },
+    "staff_id": {
+      "type": "string",
+      "description": "Initiating staff (NUPSUser id or auth email)."
+    },
+    "staff_email": {
+      "type": "string"
+    },
+    "approving_manager": {
+      "type": "string",
+      "description": "Manager identity when approval was required."
+    },
+    "service_code": {
+      "type": "string"
+    },
+    "service_name": {
+      "type": "string"
+    },
+    "rate_source": {
+      "type": "string",
+      "description": "VIPConfig record id + service code that produced the rate."
+    },
+    "duration_minutes": {
+      "type": "number"
+    },
+    "planned_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "planned_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "base_amount": {
+      "type": "number"
+    },
+    "extensions_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "adjustments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "discount | comp | manual_price | extension | correction"
+          },
+          "description": {
+            "type": "string"
+          },
+          "original_value": {
+            "type": "number"
+          },
+          "approved_value": {
+            "type": "number"
+          },
+          "amount_delta": {
+            "type": "number"
+          },
+          "approved_by": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "discount_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "fees_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "final_amount": {
+      "type": "number"
+    },
+    "amount_collected": {
+      "type": "number",
+      "default": 0
+    },
+    "outstanding_balance": {
+      "type": "number",
+      "default": 0
+    },
+    "payment_method": {
+      "type": "string"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "UNPAID",
+        "PENDING",
+        "PAID",
+        "FAILED",
+        "REFUNDED",
+        "VOIDED",
+        "COMP"
+      ],
+      "default": "UNPAID"
+    },
+    "payment_id": {
+      "type": "string",
+      "description": "PaymentRecord id."
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "POSTransaction id."
+    },
+    "receipt_id": {
+      "type": "string",
+      "description": "Receipt reference RCPT-\u2026"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "VIPSession id."
+    },
+    "signatures": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "role \u2192 { name, signed_at, ref }. Roles: guest, entertainer, staff, manager."
+    },
+    "terms_locked": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once first signature captured \u2014 material terms immutable after."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "PENDING_SIGNATURES",
+        "SIGNED",
+        "PAID",
+        "ACTIVE",
+        "COMPLETED",
+        "CANCELED"
+      ],
+      "default": "DRAFT"
+    },
+    "cancel_reason": {
+      "type": "string"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "activated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audit_events": {
+      "type": "array",
+      "description": "Append-only in-record audit trail. Every critical action appends { action, actor, detail, timestamp }.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "contract_id",
+    "venue_id",
+    "mode",
+    "guest_id",
+    "entertainer_id",
+    "room_id",
+    "service_code",
+    "duration_minutes"
+  ]
+}
