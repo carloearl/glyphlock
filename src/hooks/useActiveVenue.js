@@ -10,18 +10,20 @@ export const useActiveVenue = () => {
   });
 
   useEffect(() => {
-    // If nothing in localStorage, auto-seed from Venue entity (first active venue)
-    if (!venue) {
-      base44.entities.Venue.filter({ status: 'active' }, '-created_date', 1)
-        .then(venues => {
-          if (venues?.length > 0) {
-            const v = venues[0];
+    // Always validate the cached venue against the live Venue entity.
+    // A stale localStorage entry (e.g. an old SANDBOX venue) must never
+    // survive — the DB's active venue is the source of truth.
+    base44.entities.Venue.filter({ status: 'active' }, '-created_date', 1)
+      .then(venues => {
+        if (venues?.length > 0) {
+          const v = venues[0];
+          if (!venue || venue.id !== v.id || venue.name !== v.name) {
             saveActiveVenue(v);
             setVenue(v);
           }
-        })
-        .catch(() => {});
-    }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   return venue;

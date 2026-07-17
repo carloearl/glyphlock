@@ -58,6 +58,9 @@ const NAV_SECTIONS = [
     items: [
       // VIP Rooms merged with the Contracts VIP surface — the live room board
       // lives at /Contracts?tab=vip; the legacy NUPSOwner?tab=vip duplicate is retired.
+      // VIP Command Center — the authoritative VIP contract workflow
+      // (rooms, guests, contracts, signatures, sessions) per DACO-VIP-FIRST-BUILD.
+      { id: "vipcommand",  label: "VIP Command",     icon: Star,      to: "/VIPCommand" },
       { id: "viprooms",    label: "VIP Rooms",       icon: Crown,     to: "/Contracts?tab=vip" },
       { id: "glyphbucks",  label: "GlyphBucks Hub",  icon: Coins,     to: "/GlyphBucksHub" },
       { id: "staff",       label: "Staff",           icon: Users,     to: "/NUPSOwner?tab=staff" },
@@ -114,6 +117,8 @@ const NAV_SECTIONS = [
         ],
       },
       { id: "rbac",      label: "Admin Console",   icon: KeyRound,      to: "/NUPSOwner?tab=admin" },
+      // Owner/Administrator access request approvals — DACO-NUPS-FINAL-LAUNCH-GATE.
+      { id: "access",    label: "Access Requests", icon: ShieldAlert,   to: "/AccessRequests" },
       { id: "recon",     label: "Reconciliation",  icon: Banknote,      to: "/admin/payment-reconciliation" },
       { id: "resolution",label: "Resolutions",     icon: ClipboardCheck,to: "/admin/financial-resolution" },
       { id: "registry",  label: "Feature Registry",icon: BookOpen,      to: "/admin/registry" },
