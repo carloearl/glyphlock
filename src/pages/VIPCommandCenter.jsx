@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { vip } from '@/components/vip2/vipApi';
 import RoomManager from '@/components/vip2/RoomManager';
 import PeoplePanel from '@/components/vip2/PeoplePanel';
-import ContractWizard from '@/components/vip2/ContractWizard';
 import ContractDesk from '@/components/vip2/ContractDesk';
+import UnifiedContractDesk from '@/components/nups/contracts/UnifiedContractDesk';
 import ContractSearch from '@/components/vip2/ContractSearch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -63,7 +63,7 @@ export default function VIPCommandCenter() {
           </nav>
           <main className="p-4">
             {tab === 'Desk' && <ContractDesk state={state} refresh={refresh} />}
-            {tab === 'New Contract' && <ContractWizard state={state} refresh={refresh} onCreated={() => setTab('Desk')} />}
+            {tab === 'New Contract' && <UnifiedContractDesk />}
             {tab === 'Rooms' && <RoomManager state={state} refresh={refresh} />}
             {tab === 'People' && <PeoplePanel state={state} refresh={refresh} />}
             {tab === 'Search' && <ContractSearch />}
