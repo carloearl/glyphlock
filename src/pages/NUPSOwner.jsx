@@ -16,21 +16,11 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-import EntertainerContract from "../components/nups/EntertainerContract.jsx";
-import EntertainerCheckIn from "../components/nups/EntertainerCheckIn.jsx";
-import VIPRoomBoard from "../components/nups/VIPRoomBoard.jsx";
-import GuestCheckIn from "../components/nups/GuestCheckIn.jsx";
 import GuestTracking from "../components/nups/GuestTracking.jsx";
 import VIPRoomManagement from "../components/nups/VIPRoomManagement.jsx";
 import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
-import POSCashRegister from "../components/nups/POSCashRegister.jsx";
-import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView";
-import GlyphBucksContract from "../components/nups/GlyphBucksContract.jsx";
 import StaffManagement from "../components/nups/StaffManagement.jsx";
 import ZReportGenerator from "../components/nups/ZReportGenerator.jsx";
-import BatchManagement from "../components/nups/BatchManagement.jsx";
-import TransactionHistory from "../components/nups/TransactionHistory.jsx";
-import TimeClock from "../components/nups/TimeClock.jsx";
 import LiveFloorView from "../components/nups/LiveFloorView.jsx";
 import OwnerAnalytics from "../components/nups/OwnerAnalytics.jsx";
 import ProductManagement from "../components/nups/ProductManagement.jsx";
@@ -49,17 +39,12 @@ import NUPSUserManager from "../components/nups/NUPSUserManager.jsx";
 import EmployeeManagement from "../components/nups/EmployeeManagement.jsx";
 import PayrollReport from "../components/nups/PayrollReport.jsx";
 import SEOHead from "@/components/SEOHead";
-import GlyphBuckInventory from "../components/nups/GlyphBuckInventory.jsx";
 import EntertainerDashboard from "../components/nups/EntertainerDashboard.jsx";
 import EntertainerPayrollEngine from "../components/nups/EntertainerPayrollEngine.jsx";
 import ContractorTaxFormsList from "../components/nups/payroll/ContractorTaxFormsList.jsx";
 import AuditLogDashboard from "../components/nups/AuditLogDashboard.jsx";
 import ActivityAuditPanel from "../components/admin/ActivityAuditPanel.jsx";
-import POSBarRegister from "../components/nups/POSBarRegister.jsx";
 import StaffOnboardingPanel from "../components/nups/StaffOnboardingPanel.jsx";
-import UnifiedGlyphBucksTab from "../components/nups/glyphbucks/UnifiedGlyphBucksTab.jsx";
-import ContractManager from "../components/nups/ContractManager.jsx";
-import UnifiedMusicConsole from "../components/mixer/UnifiedMusicConsole.jsx";
 import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
 import VenueSettings from "../components/nups/VenueSettings.jsx";
 import OfficialChecks from "./OfficialChecks.jsx";
@@ -256,12 +241,10 @@ export default function NUPSOwner() {
     { key: 'dashboard',  label: 'Dashboard',      icon: BarChart3 },
     { key: 'vip',        label: 'VIP Rooms',      icon: Star },
     { key: 'staff',      label: 'Staff',          icon: Users },
-    { key: 'dj',         label: 'DJ',             icon: Music },
     { key: 'customers',  label: 'Customers',      icon: Heart },
     { key: 'marketing',  label: 'Marketing',      icon: Megaphone },
     { key: 'payroll',    label: 'Payroll',        icon: DollarSign },
     { key: 'reports',    label: 'Reports',        icon: FileText },
-    { key: 'analytics',  label: 'Analytics',      icon: TrendingUp },
     { key: 'inventory',  label: 'Inventory',      icon: Package },
     { key: 'audit',      label: 'Audit Log',      icon: Shield },
     { key: 'admin',      label: 'Admin',          icon: KeyRound },
@@ -274,7 +257,7 @@ export default function NUPSOwner() {
     door_girl: new Set(['pos','door']),
     hostess:   new Set(['vip']),
     security:  new Set(['door']),
-    dj:        new Set(['staff','dj']),
+    dj:        new Set(['staff']),
   };
   const allowedModuleSet = isAdminUser
     ? new Set(NAV_MODULES.map(m => m.key))
@@ -498,13 +481,8 @@ export default function NUPSOwner() {
             />
           )}
           {activeModule === 'vip' && (
-            <div className="space-y-4">
-              <VIPRoomBoard user={user} />
-              <VIPRoomManagement user={user} />
-              <GuestCheckIn />
-            </div>
+            <VIPRoomManagement user={user} />
           )}
-          {activeModule === 'dj' && <UnifiedMusicConsole />}
           {activeModule === 'payroll' && (
             <div className="space-y-6">
               {/* 1099 contractor tax forms — must be on file before any payout */}
@@ -528,23 +506,14 @@ export default function NUPSOwner() {
               <DailySummary transactions={realTransactions} />
             </div>
           )}
-          {activeModule === 'analytics' && (
-            <OwnerAnalytics user={user} transactions={realTransactions} />
-          )}
-          {activeModule === 'contracts' && (
-            <div className="space-y-4">
-              <ContractManager user={user} venue_id={venueId} />
-            </div>
-          )}
           {activeModule === 'staff' && (
             <div className="space-y-4">
+              {/* Check-in, time clock and contracts live on the Register /
+                  Contracts consoles — this tab is roster + user management only. */}
               <StaffOnboardingPanel />
-              <EntertainerContract onContractSigned={handleRefreshAll} />
               <StaffManagement />
-              <EntertainerCheckIn user={user} />
               {canManageStaff && <EmployeeManagement />}
               {canManageStaff && <NUPSUserManager currentUser={user} />}
-              <TimeClock user={user} role={user?._highestRole || "VENUE_OWNER"} />
               <EntertainerDashboard user={user} />
             </div>
           )}
@@ -573,7 +542,6 @@ export default function NUPSOwner() {
               {/* Unified Activity + Audit browser with role/action filters */}
               {canAudit && <ActivityAuditPanel />}
               {canAudit && <AuditLogDashboard user={user} />}
-              <TransactionHistory transactions={realTransactions} showReceipt={true} />
             </div>
           )}
           {activeModule === 'admin' && (
