@@ -174,7 +174,9 @@ const AuthenticatedApp = () => {
     // Lazily-imported NUPS operator pages — already imported elsewhere via the
     // pagesConfig loop. Re-import inline so they render under KioskShell here.
     const inner = (
-      <><RoleClassBadge /><GlobalBackButton /><Routes>
+      // Kiosk routes get the Back button inside the kiosk strip (KioskShell);
+      // a second floating one stacked/overlaid content (overlay audit 2026-07-17).
+      <><RoleClassBadge />{!isNupsKioskRoute && <GlobalBackButton />}<Routes>
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/nupslanding" element={<NUPSLanding />} />
         <Route path="/landing" element={<NUPSLanding />} />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { LogOut, Shield } from "lucide-react";
 import KioskExitModal from "@/components/nups/KioskExitModal";
+import GlobalBackButton from "@/components/nups/GlobalBackButton";
 import { enterKioskMode, exitKioskMode, isKioskMode } from "@/lib/nups/kioskMode";
 
 /**
@@ -44,9 +45,13 @@ export default function KioskShell({ children }) {
     <div className="min-h-screen bg-black text-white">
       {kiosk && (
         <div className="sticky top-0 z-50 flex items-center justify-between gap-2 px-4 py-2 bg-gradient-to-r from-slate-950 via-blue-950/40 to-slate-950 border-b border-cyan-500/20 backdrop-blur">
-          <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-cyan-300/80 uppercase">
-            <Shield className="w-3.5 h-3.5" />
-            NUPS · Kiosk Mode
+          <div className="flex items-center gap-3">
+            {/* Back lives IN the strip — never floating over page content */}
+            <GlobalBackButton inline />
+            <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-cyan-300/80 uppercase">
+              <Shield className="w-3.5 h-3.5" />
+              NUPS · Kiosk Mode
+            </div>
           </div>
           <button
             onClick={() => setShowExit(true)}
@@ -58,7 +63,8 @@ export default function KioskShell({ children }) {
         </div>
       )}
 
-      {children}
+      {/* pb-16 — clearance so the fixed role badge never covers inputs/buttons */}
+      <div className="pb-16">{children}</div>
 
       {showExit && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">

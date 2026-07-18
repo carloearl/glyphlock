@@ -52,7 +52,11 @@ export default function VIPCommandCenter() {
       <header className="border-b border-purple-900/50 bg-slate-900/80 px-4 py-3 flex flex-wrap items-center gap-3">
         <Crown className="w-6 h-6 text-purple-400" />
         <h1 className="text-lg font-bold">VIP Command Center — Dream Palace</h1>
-        <Badge className="bg-amber-600 text-white">TEST MODE — live launch not authorized</Badge>
+        {state?.config?.live_enabled ? (
+          <Badge className="bg-emerald-600 text-white">LIVE</Badge>
+        ) : (
+          <Badge className="bg-amber-600 text-white">TEST MODE — live launch not authorized</Badge>
+        )}
         <div className="ml-auto flex gap-2">
           {configMissing && <Button size="sm" onClick={seedConfig} className="bg-purple-700 hover:bg-purple-600 min-h-[44px]">Initialize VIP Config</Button>}
           <Button size="sm" variant="outline" onClick={refresh} className="border-purple-700 text-purple-300 min-h-[44px]">Refresh</Button>
