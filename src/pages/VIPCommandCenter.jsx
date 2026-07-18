@@ -5,7 +5,7 @@ import PeoplePanel from '@/components/vip2/PeoplePanel';
 import ContractDesk from '@/components/vip2/ContractDesk';
 import UnifiedContractDesk from '@/components/nups/contracts/UnifiedContractDesk';
 import ContractSearch from '@/components/vip2/ContractSearch';
-import VIPRoomBoard from '@/components/nups/VIPRoomBoard';
+import VIPLiveBoard from '@/components/vip2/VIPLiveBoard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Crown } from 'lucide-react';
@@ -78,13 +78,20 @@ export default function VIPCommandCenter() {
             {tab === 'New Contract' && <UnifiedContractDesk />}
             {tab === 'Rooms' && (
               <div className="space-y-6">
-                {/* Live room board — best/latest: timers, in-building guest
-                    picker, age & contract gates, auto-print triggers. */}
-                <VIPRoomBoard />
-                <div className="rounded-xl border border-purple-900/50 bg-slate-900/60 p-4">
-                  <h3 className="text-sm font-bold text-purple-300 mb-3">Room Setup & Status Maintenance</h3>
-                  <RoomManager state={state || { rooms: [] }} refresh={refresh} />
+                <div className="mb-2">
+                  <h2 className="text-xl font-semibold text-white tracking-tight">VIP Floor</h2>
+                  <p className="text-xs text-slate-500">Who's in VIP right now — visible to DJ, Manager, Hostess & Owner</p>
                 </div>
+                {/* Read-only live record: room · entertainer · guest · start · time left */}
+                <VIPLiveBoard />
+                <details className="group">
+                  <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300 select-none list-none inline-flex items-center gap-1">
+                    <span className="transition-transform group-open:rotate-90">›</span> Room setup & maintenance
+                  </summary>
+                  <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-4">
+                    <RoomManager state={state || { rooms: [] }} refresh={refresh} />
+                  </div>
+                </details>
               </div>
             )}
             {tab === 'People' && <PeoplePanel state={state} refresh={refresh} />}
