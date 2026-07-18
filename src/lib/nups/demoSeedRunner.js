@@ -25,6 +25,9 @@ export const WIPE_ORDER = [
   "PayrollRecord",
   "DailySettlement",
   "DriverPayout",
+  "StaffShift",
+  "GuestProfile",
+  "DriverProfile",
   "EntertainerShift",
   "VIPGuest",
   "GlyphBucksBill",
@@ -264,6 +267,29 @@ export async function seedDemoVenue(onLog) {
     { pay_period_start: payStart, pay_period_end: today, stage_name: "Nova",    legal_name: "Nova Demo",    gross_commissions: 900,  gross_tips: 250, gross_total: 1150, venue_fee: 172, venue_fee_rate: 0.15, tax_withholding: 287, tax_rate: 0.25, other_deductions: 0, net_payout: 691,  vip_sessions: 2, shift_hours: 20, status: "approved", is_demo: true, venue_id: DEMO_VENUE_ID },
   ];
   for (const p of payroll) await create("PayrollRecord", p, `PayrollRecord ${p.stage_name}`);
+
+  // Staff shifts — populate Staff Check-In / Time Clock surfaces.
+  // StaffShift has no is_demo flag; scoped by venue_id + mode DEMO.
+  const staffShifts = [
+    { shift_id: ID("SHIFT"), user_email: "door@demo.test", user_full_name: "Demo Door Girl",  role: "DOOR_GIRL", station: "door",     check_in_time: NOW(), status: "checked_in", identity_verified: true, mode: "DEMO", venue_id: DEMO_VENUE_ID },
+    { shift_id: ID("SHIFT"), user_email: "bar@demo.test",  user_full_name: "Demo Bartender",  role: "BARTENDER", station: "bar",      check_in_time: NOW(), status: "checked_in", identity_verified: true, mode: "DEMO", venue_id: DEMO_VENUE_ID },
+    { shift_id: ID("SHIFT"), user_email: "sec@demo.test",  user_full_name: "Demo Security",   role: "SECURITY",  station: "security", check_in_time: NOW(), status: "checked_in", identity_verified: true, mode: "DEMO", venue_id: DEMO_VENUE_ID },
+  ];
+  for (const s of staffShifts) await create("StaffShift", s, `StaffShift ${s.user_full_name}`);
+
+  // Guest profiles — populate door guest check-in / guest tracking.
+  const guestProfiles = [
+    { guest_id: ID("GST"), first_name: "Alex",   last_name: "Demo", dob: "1988-04-12", license_state: "AZ", age_verified: true, visit_count: 3, first_visit_at: NOW(), last_visit_at: NOW(), status: "active", mode: "DEMO", venue_id: DEMO_VENUE_ID },
+    { guest_id: ID("GST"), first_name: "Jordan", last_name: "Demo", dob: "1992-09-30", license_state: "CA", age_verified: true, visit_count: 1, first_visit_at: NOW(), last_visit_at: NOW(), status: "vip",    mode: "DEMO", venue_id: DEMO_VENUE_ID },
+  ];
+  for (const g of guestProfiles) await create("GuestProfile", g, `GuestProfile ${g.first_name}`);
+
+  // Driver profiles — populate driver onboarding / drop-off surfaces.
+  const drivers = [
+    { driver_id: ID("DRV"), name: "Demo Driver Mike",  phone: "555-3001", affiliated: true,  status: "active", lifetime_drops: 12, lifetime_guests: 34, ytd_payout_total: 480, ytd_year: new Date().getFullYear(), last_active_at: NOW(), mode: "DEMO", venue_id: DEMO_VENUE_ID },
+    { driver_id: ID("DRV"), name: "Demo Driver Tina",  phone: "555-3002", affiliated: false, status: "active", lifetime_drops: 5,  lifetime_guests: 11, ytd_payout_total: 150, ytd_year: new Date().getFullYear(), last_active_at: NOW(), mode: "DEMO", venue_id: DEMO_VENUE_ID },
+  ];
+  for (const d of drivers) await create("DriverProfile", d, `DriverProfile ${d.name}`);
 
   log("✅ Seed complete", "success");
   return { ok: true };
