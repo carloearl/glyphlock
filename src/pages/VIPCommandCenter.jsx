@@ -6,6 +6,7 @@ import ContractDesk from '@/components/vip2/ContractDesk';
 import UnifiedContractDesk from '@/components/nups/contracts/UnifiedContractDesk';
 import ContractSearch from '@/components/vip2/ContractSearch';
 import VIPLiveBoard from '@/components/vip2/VIPLiveBoard';
+import GlyphBucksWorkspace from '@/components/nups/glyphbucks/GlyphBucksWorkspace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Crown } from 'lucide-react';
@@ -17,13 +18,15 @@ import { Loader2, Crown } from 'lucide-react';
  * is the primary Rooms view; the vip2 RoomManager remains below it for
  * room creation and status maintenance.
  */
-const TABS = ['Desk', 'New Contract', 'Rooms', 'People', 'Search'];
+const TABS = ['Desk', 'New Contract', 'Rooms', 'People', 'GlyphBucks', 'Search'];
 // Tabs that require an initialized VIPConfig; Rooms/People/Search work without it.
 const CONFIG_GATED = ['Desk', 'New Contract'];
 
 export default function VIPCommandCenter() {
   const [state, setState] = useState(null);
-  const [tab, setTab] = useState('Rooms');
+  // Deep-link support: /VIPCommand?tab=GlyphBucks (old GlyphBucks Hub redirects here)
+  const urlTab = new URLSearchParams(window.location.search).get('tab');
+  const [tab, setTab] = useState(TABS.includes(urlTab) ? urlTab : 'Rooms');
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -99,6 +102,7 @@ export default function VIPCommandCenter() {
               </div>
             )}
             {tab === 'People' && <PeoplePanel state={state} refresh={refresh} />}
+            {tab === 'GlyphBucks' && <GlyphBucksWorkspace />}
             {tab === 'Search' && <ContractSearch />}
           </>
         )}

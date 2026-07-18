@@ -28,7 +28,6 @@ import NUPSStateDiff from './pages/NUPSStateDiff';
 import DailyPerformanceReport from './pages/DailyPerformanceReport';
 import NUPSMISReport from './pages/NUPSMISReport';
 import ImageShare from './pages/ImageShare';
-import GlyphBucksHub from './pages/GlyphBucksHub';
 import ContractLookup from './pages/ContractLookup';
 import Unauthorized from './pages/Unauthorized';
 import NUPSInfrastructurePage from './pages/NUPSInfrastructurePage';
@@ -252,10 +251,10 @@ const AuthenticatedApp = () => {
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/DriverPayouts" element={<DriverPayouts />} />
         <Route path="/driverpayouts" element={<DriverPayouts />} />
-        {/* GlyphBucks Hub = stored-value sales/redemption/fraud — financial
-            surface, MANAGER/ADMIN only (audit fix 2026-07-17). */}
-        <Route path="/GlyphBucksHub" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><GlyphBucksHub /></RoleClassGuard>} />
-        <Route path="/glyphbuckshub" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><GlyphBucksHub /></RoleClassGuard>} />
+        {/* GlyphBucks merged into the VIP Command Center (merge directive
+            2026-07-17) — old hub links land on the GlyphBucks tab. */}
+        <Route path="/GlyphBucksHub" element={<Navigate to="/VIPCommand?tab=GlyphBucks" replace />} />
+        <Route path="/glyphbuckshub" element={<Navigate to="/VIPCommand?tab=GlyphBucks" replace />} />
         <Route path="/Accounting" element={<Accounting />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/Tonight" element={<Tonight />} />
