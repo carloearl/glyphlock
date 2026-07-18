@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Fingerprint, Usb, TabletSmartphone, CheckCircle2, RotateCcw, Loader2 } from "lucide-react";
+import { Fingerprint, Usb, TabletSmartphone, CheckCircle2, RotateCcw, Loader2, AlertTriangle } from "lucide-react";
 
 /**
  * PLUM biometric thumbprint capture — GlyphLock glass aesthetic.
@@ -32,23 +32,40 @@ export default function ThumbprintScanner({ venueId, onCapture }) {
     enabled: !!venueId,
   });
 
-  const finish = (method, device) => {
-    const match_pct = Math.round((96 + Math.random() * 3.9) * 10) / 10;
-    const cap = { match_pct, method, device, at: new Date().toISOString() };
+  // INTEGRITY FIX — match scores are NEVER fabricated. A score is only
+  // emitted when real sensor hardware returns one. Any other input (mouse
+  // click, on-screen hold, no reader response) is recorded as NOT CAPTURED
+  // (match_pct: null) and flagged on screen. Live-mode policy: the sale
+  // proceeds with the event logged as "not captured".
+  const finish = (method, device, { not_captured = false, reason = "" } = {}) => {
+    const cap = { match_pct: null, not_captured, reason, method, device, at: new Date().toISOString() };
     setCaptured(cap);
     onCapture?.(cap);
   };
 
   // ── Tablet press-and-hold pad ──
-  const startHold = () => {
+  const startHold = (e) => {
     if (captured) return;
+    // A mouse click is not a thumb — flag immediately, no fake read.
+    if (e?.pointerType === "mouse") {
+      finish("TABLET_PAD", "On-screen pad (mouse input)", {
+        not_captured: true,
+        reason: "MOUSE INPUT DETECTED — a mouse click is not a biometric scan. No ridge data was read.",
+      });
+      return;
+    }
     const t0 = Date.now();
     holdRef.current = setInterval(() => {
       const p = Math.min(100, Math.round(((Date.now() - t0) / 2200) * 100));
       setProgress(p);
       if (p >= 100) {
         clearInterval(holdRef.current);
-        finish("TABLET_PAD", "On-screen capacitive sensor");
+        // Touch hold completed, but this screen has no fingerprint sensor —
+        // presence recorded, no match score exists.
+        finish("TABLET_PAD", "On-screen pad (touch)", {
+          not_captured: true,
+          reason: "NO BIOMETRIC SENSOR — this screen cannot read ridge data. Presence hold recorded, no match score generated.",
+        });
       }
     }, 40);
   };
@@ -62,7 +79,13 @@ export default function ThumbprintScanner({ venueId, onCapture }) {
     setUsbScanning(true);
     setTimeout(() => {
       setUsbScanning(false);
-      finish("USB_READER", usbDevice?.device_label || "Adesso AFPR-200 (USB)");
+      // No reader returned ridge data — never fabricate a score.
+      finish("USB_READER", usbDevice?.device_label || "Adesso AFPR-200 (USB)", {
+        not_captured: true,
+        reason: usbDevice
+          ? "NO SENSOR RESPONSE — the USB reader did not return a biometric read. No match score generated."
+          : "NO READER REGISTERED — no active fingerprint reader is registered for this venue.",
+      });
     }, 2400);
   };
 
@@ -90,16 +113,30 @@ export default function ThumbprintScanner({ venueId, onCapture }) {
 
       <div className="p-4">
         {captured ? (
-          <div className="rounded-xl border border-emerald-400/40 bg-emerald-500/10 p-4 flex items-center gap-4">
-            <CheckCircle2 className="w-8 h-8 text-emerald-400 shrink-0" />
-            <div className="flex-1">
-              <div className="text-sm font-extrabold text-emerald-300">THUMBPRINT MATCH {captured.match_pct}%</div>
-              <div className="text-[11px] text-white/50 font-mono">{captured.device} · {new Date(captured.at).toLocaleTimeString()} · score retained, image discarded</div>
+          captured.not_captured ? (
+            <div className="rounded-xl border-2 border-red-500/60 bg-red-950/40 p-4 flex items-center gap-4">
+              <AlertTriangle className="w-8 h-8 text-red-400 shrink-0" />
+              <div className="flex-1">
+                <div className="text-sm font-extrabold text-red-300">⚠ NO BIOMETRIC CAPTURED — NO MATCH SCORE</div>
+                <div className="text-[11px] text-red-200/80 font-semibold mt-0.5">{captured.reason}</div>
+                <div className="text-[11px] text-white/50 font-mono mt-1">{captured.device} · {new Date(captured.at).toLocaleTimeString()} · event logged as NOT CAPTURED (sale may proceed per live-mode policy)</div>
+              </div>
+              <button onClick={reset} className="rounded-lg border border-white/20 px-3 py-2 text-xs font-bold hover:bg-white/5 flex items-center gap-1.5 min-h-[40px]">
+                <RotateCcw className="w-3.5 h-3.5" /> Rescan
+              </button>
             </div>
-            <button onClick={reset} className="rounded-lg border border-white/20 px-3 py-2 text-xs font-bold hover:bg-white/5 flex items-center gap-1.5 min-h-[40px]">
-              <RotateCcw className="w-3.5 h-3.5" /> Rescan
-            </button>
-          </div>
+          ) : (
+            <div className="rounded-xl border border-emerald-400/40 bg-emerald-500/10 p-4 flex items-center gap-4">
+              <CheckCircle2 className="w-8 h-8 text-emerald-400 shrink-0" />
+              <div className="flex-1">
+                <div className="text-sm font-extrabold text-emerald-300">THUMBPRINT MATCH {captured.match_pct}%</div>
+                <div className="text-[11px] text-white/50 font-mono">{captured.device} · {new Date(captured.at).toLocaleTimeString()} · score retained, image discarded</div>
+              </div>
+              <button onClick={reset} className="rounded-lg border border-white/20 px-3 py-2 text-xs font-bold hover:bg-white/5 flex items-center gap-1.5 min-h-[40px]">
+                <RotateCcw className="w-3.5 h-3.5" /> Rescan
+              </button>
+            </div>
+          )
         ) : tab === "tablet" ? (
           <div className="flex flex-col items-center gap-3">
             <button

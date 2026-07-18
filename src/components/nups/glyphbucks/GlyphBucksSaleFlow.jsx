@@ -293,7 +293,7 @@ export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrin
       <Section n="3" icon={Fingerprint} title="Identity Binding — Camera ID Scan" sub="Scores + masked refs only, never raw biometrics" done={!!f.age_verified && !!f.id_scan_ref}>
         <IDScannerCamera venue_id={venueId} onDataExtracted={handleIdExtracted} />
         <div className="mt-3">
-          <ThumbprintScanner venueId={venueId} onCapture={(c) => set("thumb_match_pct", String(c.match_pct))} />
+          <ThumbprintScanner venueId={venueId} onCapture={(c) => set("thumb_match_pct", c.match_pct == null ? "" : String(c.match_pct))} />
         </div>
         {mode === "REAL" && f.thumb_match_pct === "" && (
           <div className="mt-2 rounded-lg bg-emerald-500/10 border border-emerald-400/40 px-3 py-2 text-[11px] text-emerald-300 font-semibold">
