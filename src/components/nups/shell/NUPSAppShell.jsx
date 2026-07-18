@@ -113,6 +113,8 @@ const NAV_SECTIONS = [
     items: [
       // Admin/Owner role-view switcher — open any role's live workspace.
       { id: "roleviews", label: "Role Views",      icon: Users,         to: "/RoleViews" },
+      // §6 daily back-office checklist — same back office, guided order.
+      { id: "backoffice",label: "Back Office Workflow", icon: ClipboardList, to: "/NUPSAdminPortal" },
       {
         id: "audit",       label: "Audit",            icon: ShieldCheck, to: "/admin/audit-integrity",
         children: [

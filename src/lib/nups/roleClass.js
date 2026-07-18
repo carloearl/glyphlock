@@ -27,8 +27,10 @@ export const HOME_BY_CLASS = {
   ENTERTAINER: "/EntertainerHome",
   // DACO-NUPS-ROLE-VIP-BUILD-20260717 §9 — managers get the Approval Console, never the operator hub.
   MANAGER:     "/ManagerConsole",
-  // §6 — back office has its own portal, separate from live floor ops.
-  ADMIN:       "/NUPSAdminPortal",
+  // Owner directive 2026-07-17: ONE back office. Admin clock-in lands on
+  // the familiar Dashboard; the §6 workflow portal is a sidebar entry
+  // (Admin → Back Office Workflow), not a surprise landing page.
+  ADMIN:       "/NUPSHub",
 };
 
 /**

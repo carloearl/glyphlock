@@ -31,6 +31,7 @@ import {
   AlertTriangle, ArrowRight, LogOut, Loader2, Building2, CalendarClock,
 } from "lucide-react";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
+import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const MODE_STYLES = {
@@ -118,36 +119,16 @@ function AdminPortalContent() {
 
   const firstName = (user?.full_name || user?.email || "").split(/[ @]/)[0];
 
+  // Rendered inside the standard NUPS shell (owner directive 2026-07-17) —
+  // this is the SAME back office as the sidebar, presented as the §6
+  // guided daily workflow, not a separate mystery surface.
   return (
-    <div className="min-h-screen bg-[#05070d] text-white">
+    <NUPSAppShell
+      title={firstName ? `Back Office — ${firstName}` : "Back Office Workflow"}
+      subtitle="§6 daily checklist — reports, ledger, liability, payroll, rates, audit"
+      role="ADMIN"
+    >
       <ModeBanner mode={mode} />
-
-      <header className="border-b border-white/5 bg-black/40">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-500">
-              NUPS · Back Office
-            </div>
-            <h1 className="text-xl font-black text-white">
-              {firstName ? `Welcome, ${firstName}` : "Admin Portal"}
-            </h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
-              <Building2 className="w-3.5 h-3.5" />
-              {activeVenue?.name || activeVenue?.venue_name || "—"}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => base44.auth.logout("/NUPSLanding")}
-              className="text-slate-400 hover:text-white"
-            >
-              <LogOut className="w-4 h-4 mr-1.5" /> Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
         {/* §6 Step 1 — Last night's signed reports */}
@@ -269,7 +250,7 @@ function AdminPortalContent() {
           </CardContent>
         </Card>
       </main>
-    </div>
+    </NUPSAppShell>
   );
 }
 
