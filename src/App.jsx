@@ -46,6 +46,7 @@ import ActivityLogViewer from './pages/ActivityLogViewer';
 import DailySettlementDashboard from './pages/DailySettlementDashboard';
 import DriverPayoutHistory from './pages/DriverPayoutHistory';
 import FrontDoor from './pages/FrontDoor';
+import BarRegister from './pages/BarRegister';
 import Accounting from './pages/Accounting';
 import AuditIntegrity from './pages/AuditIntegrity';
 import PaymentReconciliation from './pages/PaymentReconciliation';
@@ -132,7 +133,7 @@ const AuthenticatedApp = () => {
     '/frontdoor', '/entertainercheckin', '/staffhome', '/entertainerhome', '/glyphlockfinancialpage',
     '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
     // NUPS operator surface — kiosk-wrapped
-    '/nupshub', '/hub', '/register', '/registerconsole',
+    '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub',
     '/accounting', '/tonight', '/contracts', '/contractshub',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
@@ -154,7 +155,7 @@ const AuthenticatedApp = () => {
     '/nupslanding', '/landing', '/nupsgateway',
     '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
     '/staffhome', '/entertainerhome',
-    '/nupshub', '/hub', '/register', '/registerconsole',
+    '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub',
     '/accounting', '/tonight', '/contracts', '/contractshub',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
@@ -242,6 +243,9 @@ const AuthenticatedApp = () => {
         <Route path="/Register" element={<RegisterConsole />} />
         <Route path="/register" element={<RegisterConsole />} />
         <Route path="/RegisterConsole" element={<RegisterConsole />} />
+        {/* Bar Register — BARTENDER's dedicated station (rev 3). */}
+        <Route path="/BarRegister" element={<KioskSessionGuard roles={["BARTENDER"]}><BarRegister /></KioskSessionGuard>} />
+        <Route path="/barregister" element={<KioskSessionGuard roles={["BARTENDER"]}><BarRegister /></KioskSessionGuard>} />
         <Route path="/Receipts" element={<Receipts />} />
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/DriverPayouts" element={<DriverPayouts />} />

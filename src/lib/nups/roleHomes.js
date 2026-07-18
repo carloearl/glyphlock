@@ -6,7 +6,7 @@ export const ROLE_HOME = {
   DOOR_GIRL: { path: "/FrontDoor", label: "Front Door" },
   DOORMAN: { path: "/FrontDoor", label: "Front Door" },
   PERFORMER: { path: "/EntertainerHome", label: "Entertainer Home" },
-  BARTENDER: { path: "/StaffHome", label: "Staff Home" },
+  BARTENDER: { path: "/BarRegister", label: "Bar Register" },
   SECURITY: { path: "/StaffHome", label: "Staff Home" },
   DRIVER: { path: "/NUPSKiosk", label: "Kiosk" },
   VENUE_MANAGER: { path: "/ManagerConsole", label: "Manager Console" },

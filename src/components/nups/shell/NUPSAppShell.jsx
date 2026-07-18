@@ -28,12 +28,11 @@ import { useAdminOverride, setAdminOverride } from "@/lib/nups/adminView";
 const SECTIONS_BY_CLASS = {
   ADMIN:       ["Operations · Tonight's Flow", "Floor & Staff", "Accounting", "Admin", "Legacy"],
   MANAGER:     ["Operations · Tonight's Flow", "Floor & Staff", "Accounting"],
-  // Owner directive 2026-07-17 (rev 2): staff SEE the full operational nav —
-  // the same cards everyone works from. Access is gated at the route level
-  // (RoleClassGuard / KioskSessionGuard show "no permission"), never by
-  // hiding the cards.
-  STAFF:       ["Operations · Tonight's Flow", "Floor & Staff", "Accounting", "Admin"],
-  ENTERTAINER: ["Operations · Tonight's Flow", "Floor & Staff"],
+  // Owner directive 2026-07-17 (rev 3): a PIN-clocked-in staff member sees
+  // ONLY their own station — NO sidebar, no cross-role surface. The door
+  // girl sees the Front Door, the bartender sees the Bar Register, period.
+  STAFF:       [],
+  ENTERTAINER: [],
 };
 
 /**
