@@ -28,6 +28,20 @@ export default function RoleClassGuard({ allow = [], children }) {
 
   useEffect(() => {
     let cancelled = false;
+    // Kiosk operator session wins over the platform login. An admin who is
+    // PIN-clocked-in as staff gets NO admin bypass — they're gated exactly
+    // like that staff member until clock-out or a workspace switch to admin.
+    try {
+      const op = JSON.parse(sessionStorage.getItem("nups_kiosk_operator") || "null");
+      if (op?.role) {
+        const opCls = resolveRoleClass({ nupsUser: op });
+        if (opCls !== ROLE_CLASS.ADMIN) {
+          setRoleClass(opCls);
+          setStatus(allow.includes(opCls) ? "granted" : "denied");
+          return () => { cancelled = true; };
+        }
+      }
+    } catch { /* no operator context */ }
     (async () => {
       try {
         const isAuth = await base44.auth.isAuthenticated();
@@ -92,10 +106,11 @@ export default function RoleClassGuard({ allow = [], children }) {
         <div className="max-w-sm w-full bg-gray-900/80 border border-red-500/20 rounded-2xl p-8 text-center space-y-5">
           <Lock className="w-12 h-12 text-red-400 mx-auto" />
           <div>
-            <h2 className="text-xl font-bold">Not your workflow</h2>
+            <h2 className="text-xl font-bold">You do not have permission to access this module</h2>
             <p className="text-gray-500 text-sm mt-2">
-              This screen belongs to another role. Your role class is{" "}
+              Your current role class is{" "}
               <span className="text-cyan-400 font-mono">{roleClass}</span>.
+              Ask a manager if you need access, or clock out to restore your own role.
             </p>
           </div>
           <Button

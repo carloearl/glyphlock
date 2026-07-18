@@ -28,8 +28,12 @@ import { useAdminOverride, setAdminOverride } from "@/lib/nups/adminView";
 const SECTIONS_BY_CLASS = {
   ADMIN:       ["Operations · Tonight's Flow", "Floor & Staff", "Accounting", "Admin", "Legacy"],
   MANAGER:     ["Operations · Tonight's Flow", "Floor & Staff", "Accounting"],
-  STAFF:       [],
-  ENTERTAINER: [],
+  // Owner directive 2026-07-17 (rev 2): staff SEE the full operational nav —
+  // the same cards everyone works from. Access is gated at the route level
+  // (RoleClassGuard / KioskSessionGuard show "no permission"), never by
+  // hiding the cards.
+  STAFF:       ["Operations · Tonight's Flow", "Floor & Staff", "Accounting", "Admin"],
+  ENTERTAINER: ["Operations · Tonight's Flow", "Floor & Staff"],
 };
 
 /**
@@ -226,6 +230,12 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [roleClass, setRoleClass] = useState(ROLE_CLASS.ADMIN);
+  // True while a PIN-clocked-in operator session scopes the shell.
+  const [operatorMode, setOperatorMode] = useState(false);
+  // True when the underlying PLATFORM login is an admin (Carlo). Controls
+  // whether the Workspace Switcher offers the admin-tier workspaces even
+  // while clocked in as staff — the only way back to admin besides clock-out.
+  const [platformAdmin, setPlatformAdmin] = useState(false);
 
   // Resolve role class once — drives which sidebar sections render (DACO 003 §2).
   // If STAFF or ENTERTAINER lands on an app-shell page, kick them back to their
@@ -246,13 +256,17 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
           const opCls = resolveRoleClass({ nupsUser: op });
           if (opCls !== ROLE_CLASS.ADMIN) {
             setRoleClass(opCls);
+            setOperatorMode(true);
             return true;
           }
         }
       } catch { /* no operator context */ }
+      setOperatorMode(false);
       return false;
     };
-    const resolvePlatform = async () => {
+    // Always resolves the PLATFORM login (for the platformAdmin flag).
+    // Only scopes roleClass when no operator session is active.
+    const resolvePlatform = async (scopeRole) => {
       try {
         const u = await base44.auth.me();
         let nu = null, sov = false;
@@ -263,20 +277,16 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
         } catch { /* fall through */ }
         if (cancelled) return;
         const cls = resolveRoleClass({ user: u, nupsUser: nu, sovereign: sov });
+        setPlatformAdmin(cls === ROLE_CLASS.ADMIN);
+        if (!scopeRole) return;
         setRoleClass(cls);
-        // Bounce STAFF / ENTERTAINER off the operator shell — they never
-        // belong here. FrontDoor / EntertainerCheckIn opt out explicitly by
-        // rendering their own chrome (see StaffHome, EntertainerHome).
-        if ((cls === ROLE_CLASS.STAFF || cls === ROLE_CLASS.ENTERTAINER)
-            && !location.pathname.toLowerCase().startsWith("/frontdoor")
-            && !location.pathname.toLowerCase().startsWith("/entertainercheckin")) {
-          navigate(homeForRoleClass(cls), { replace: true });
-        }
       } catch { /* leave default */ }
     };
-    if (!applyOperator()) resolvePlatform();
+    const opActive = applyOperator();
+    resolvePlatform(!opActive);
     const onOperatorChanged = () => {
-      if (!applyOperator()) resolvePlatform();
+      const active = applyOperator();
+      resolvePlatform(!active);
     };
     window.addEventListener("nups:operator-changed", onOperatorChanged);
     return () => {
@@ -291,23 +301,19 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   // Legacy sections and adminOnly items. State is session-scoped and shared
   // across every NUPS surface via useAdminOverride().
   const adminOverride = useAdminOverride();
-  const isAdmin = roleClass === ROLE_CLASS.ADMIN;
+  // Operator mode strips ALL admin benefits — the clocked-in role is the
+  // whole identity until clock-out or a workspace switch back to admin.
+  const isAdmin = roleClass === ROLE_CLASS.ADMIN && !operatorMode;
   const effectiveAdmin = isAdmin && adminOverride;
   const visibleSectionLabels = effectiveAdmin
     ? SECTIONS_BY_CLASS.ADMIN
     : isAdmin
       ? SECTIONS_BY_CLASS.MANAGER
       : (SECTIONS_BY_CLASS[roleClass] || []);
+  // Owner directive rev 2: adminOnly items stay VISIBLE — the route guards
+  // show "you do not have permission" instead of the card disappearing.
   const visibleSections = NAV_SECTIONS
     .filter(s => visibleSectionLabels.includes(s.label))
-    .map(section => ({
-      ...section,
-      items: section.items
-        .filter(i => !i.adminOnly || effectiveAdmin)
-        .map(i => (i.children
-          ? { ...i, children: i.children.filter(c => !c.adminOnly || effectiveAdmin) }
-          : i)),
-    }))
     .filter(section => section.items.length > 0);
 
   // Role-aware home target for the header Home button. Owner directive
@@ -466,7 +472,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
                   {adminOverride ? "Admin Override" : "Staff View"}
                 </button>
               )}
-              <WorkspaceSwitcher roleClass={roleClass} />
+              <WorkspaceSwitcher roleClass={roleClass} platformAdmin={platformAdmin} />
               {/* MODE TOGGLE — F-7: always visible, color-distinct, before venue.
                   Click to switch LIVE/DEMO/SANDBOX, seed or clear demo data. */}
               <ModeToggle />

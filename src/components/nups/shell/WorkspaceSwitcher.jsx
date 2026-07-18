@@ -23,15 +23,19 @@ const COLOR_CLASSES = {
   slate:    { text: "text-slate-300",   bg: "bg-slate-500/10",   border: "border-slate-500/30",   dot: "bg-slate-400" },
 };
 
-export default function WorkspaceSwitcher({ roleClass = ROLE_CLASS.ADMIN }) {
+export default function WorkspaceSwitcher({ roleClass = ROLE_CLASS.ADMIN, platformAdmin = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
+  // A platform-admin ACCOUNT always sees the full workspace list — even
+  // while PIN-clocked-in as staff. This dropdown is the only path back to
+  // admin besides clocking out. Everyone else sees only their class's
+  // workspaces.
   const availableWorkspaces = useMemo(
-    () => getWorkspacesForClass(roleClass),
-    [roleClass]
+    () => getWorkspacesForClass(platformAdmin ? ROLE_CLASS.ADMIN : roleClass),
+    [roleClass, platformAdmin]
   );
 
   const activeWorkspaceId = useMemo(
@@ -54,6 +58,14 @@ export default function WorkspaceSwitcher({ roleClass = ROLE_CLASS.ADMIN }) {
 
   const handleSelect = (ws) => {
     setOpen(false);
+    // Platform admin picking a workspace ABOVE the clocked-in operator's
+    // class = deliberately leaving staff mode. Clear the operator session
+    // so full admin scope is restored before navigating.
+    if (platformAdmin && !ws.allowedClasses.includes(roleClass)) {
+      sessionStorage.removeItem("nups_kiosk_operator");
+      sessionStorage.removeItem("nups_kiosk_session");
+      window.dispatchEvent(new Event("nups:operator-changed"));
+    }
     navigate(ws.home);
   };
 
