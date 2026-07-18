@@ -29,6 +29,7 @@ export default function OpenBatchControl({ cashierName }) {
         transaction_count: 0,
       });
       await queryClient.invalidateQueries({ queryKey: ["active-pos-batch"] });
+      await queryClient.invalidateQueries({ queryKey: ["active-batch"] });
     } finally {
       setBusy(false);
     }

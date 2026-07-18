@@ -87,12 +87,15 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     queryFn: () => base44.entities.POSCustomer.list()
   });
 
+  // Tonight's batch is opened by the MANAGER and shared venue-wide — the
+  // door girl / bartender rings against it, they never open their own.
   const { data: activeBatch } = useQuery({
-    queryKey: ['active-batch'],
+    queryKey: ['active-batch', activeVenue?.id],
     queryFn: async () => {
-      const batches = await base44.entities.POSBatch.filter({ status: 'open', cashier: user?.email });
-      return batches[0];
-    }
+      const batches = await base44.entities.POSBatch.filter({ status: 'open' }, '-created_date', 10);
+      return batches.find(b => !b.venue_id || !activeVenue?.id || b.venue_id === activeVenue.id) || batches[0];
+    },
+    refetchInterval: 30000,
   });
 
   // Load the venue's rate sheet. Drives processing fee + service fee lines on
@@ -436,7 +439,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
 
   const handleCheckout = () => {
     if (!activeBatch) {
-      toast.error("Please open a batch before processing transactions.");
+      toast.error("No open batch — ask a manager to open tonight's batch.");
       return;
     }
     if (cart.length === 0) return;
@@ -465,7 +468,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   const completePayment = async (details = {}) => {
     if (isSubmitting) return;
     if (!activeBatch) {
-      toast.error('Cannot process transaction: no open batch. Please open a batch first.');
+      toast.error("Cannot process transaction: no open batch. Ask a manager to open tonight's batch.");
       return;
     }
     setIsSubmitting(true);
