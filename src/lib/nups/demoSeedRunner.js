@@ -191,13 +191,15 @@ export async function seedDemoVenue(onLog) {
 
   log("▶ Seeding DEMO_VENUE_001…", "info");
 
-  // POSBatch (open shift)
+  // POSBatch (open shift) — opened by manager AND door-confirmed so the
+  // demo register can ring transactions immediately (two-step batch flow).
   await create("POSBatch", {
-    opening_cash: 500, cashier: "Demo Manager", status: "open",
-    start_time: NOW(), total_sales: 0, transaction_count: 0,
+    opening_cash: 500, cashier: "Demo Manager", opened_by: "Demo Manager",
+    door_confirmed: true, door_confirmed_by: "Demo Door Girl", door_confirmed_at: NOW(),
+    status: "open", start_time: NOW(), total_sales: 0, transaction_count: 0,
     notes: "DEMO shift batch", venue_id: DEMO_VENUE_ID,
     is_demo: true,
-  }, "POSBatch (open)");
+  }, "POSBatch (open + door-confirmed)");
 
   // POS Transactions — subtotal added so writeEntity financial validation
   // (total === subtotal + tax + tip) passes.
@@ -288,8 +290,30 @@ export async function seedDemoVenue(onLog) {
   const drivers = [
     { driver_id: ID("DRV"), name: "Demo Driver Mike",  phone: "555-3001", affiliated: true,  status: "active", lifetime_drops: 12, lifetime_guests: 34, ytd_payout_total: 480, ytd_year: new Date().getFullYear(), last_active_at: NOW(), mode: "DEMO", venue_id: DEMO_VENUE_ID },
     { driver_id: ID("DRV"), name: "Demo Driver Tina",  phone: "555-3002", affiliated: false, status: "active", lifetime_drops: 5,  lifetime_guests: 11, ytd_payout_total: 150, ytd_year: new Date().getFullYear(), last_active_at: NOW(), mode: "DEMO", venue_id: DEMO_VENUE_ID },
+    { driver_id: ID("DRV"), name: "Demo Driver Rosa",  phone: "555-3003", affiliated: true,  status: "active", lifetime_drops: 21, lifetime_guests: 58, ytd_payout_total: 720, ytd_year: new Date().getFullYear(), last_active_at: NOW(), mode: "DEMO", venue_id: DEMO_VENUE_ID },
   ];
-  for (const d of drivers) await create("DriverProfile", d, `DriverProfile ${d.name}`);
+  const createdDrivers = [];
+  for (const d of drivers) {
+    const rec = await create("DriverProfile", d, `DriverProfile ${d.name}`);
+    createdDrivers.push(rec || d);
+  }
+
+  // Driver drop-off / payout sessions — the full register-flow demo:
+  // Mike has a PENDING session (drop-off logged, headcount confirmed, waiting
+  // to be paid from the drawer on the Register's Driver Payouts tab), Rosa
+  // was already PAID tonight. Matches exactly what DriverQuickAdd writes.
+  const payoutMeta = (guests, promo, waived) => JSON.stringify({
+    source: "driver_quick_add", affiliated: true,
+    guests, promo_guests: promo, waived_guests: waived,
+    headcount_confirmed: true,
+    confirmed_by: "door@demo.test", confirmed_at: NOW(),
+  });
+  const [mike, , rosa] = createdDrivers;
+  const payouts = [
+    { payout_id: ID("DPO"), contractor_id: mike?.driver_id, contractor_name: mike?.name || "Demo Driver Mike", payout_date: today, payout_type: "shift_earnings", bills_redeemed: [], total_face_value: 0, redemption_rate: 0, total_payout: 60, payment_method: "cash", status: "pending", tax_year: new Date().getFullYear(), notes: payoutMeta(6, 1, 0), is_demo: true, venue_id: DEMO_VENUE_ID },
+    { payout_id: ID("DPO"), contractor_id: rosa?.driver_id, contractor_name: rosa?.name || "Demo Driver Rosa", payout_date: today, payout_type: "shift_earnings", bills_redeemed: [], total_face_value: 0, redemption_rate: 0, total_payout: 40, payment_method: "cash", status: "paid",    tax_year: new Date().getFullYear(), notes: payoutMeta(4, 0, 1), is_demo: true, venue_id: DEMO_VENUE_ID },
+  ];
+  for (const p of payouts) await create("DriverPayout", p, `DriverPayout ${p.contractor_name} (${p.status})`);
 
   log("✅ Seed complete", "success");
   return { ok: true };

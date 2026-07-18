@@ -179,7 +179,7 @@ function RegisterConsoleInner() {
       actions={
         <div className="flex items-center gap-2">
           <BatchStatusBadge batch={activeBatch} />
-          {isManagerOrAdmin && adminOverride && (
+          {(isManagerOrAdmin || ["MANAGER", "VENUE_MANAGER"].includes(opRole)) && (
           <Button
             onClick={() => setShowSeedDialog(true)}
             size="sm"
