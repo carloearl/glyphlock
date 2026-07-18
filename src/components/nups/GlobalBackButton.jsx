@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { getOperatorHome } from "@/lib/nups/roleHomes";
 
 const KEY = "gl_nav_stack";
 
@@ -17,6 +18,8 @@ export default function GlobalBackButton() {
   const location = useLocation();
   const navigate = useNavigate();
   const [canGoBack, setCanGoBack] = useState(false);
+  const home = getOperatorHome();
+  const onHomePage = home && location.pathname.toLowerCase() === home.path.toLowerCase();
 
   useEffect(() => {
     const path = location.pathname + location.search;
@@ -33,13 +36,18 @@ export default function GlobalBackButton() {
 
   const goBack = () => {
     const stack = readStack();
-    if (stack.length < 2) return;
-    stack.pop();
-    sessionStorage.setItem(KEY, JSON.stringify(stack));
-    navigate(stack[stack.length - 1]);
+    if (stack.length >= 2) {
+      stack.pop();
+      sessionStorage.setItem(KEY, JSON.stringify(stack));
+      navigate(stack[stack.length - 1]);
+    } else if (home && !onHomePage) {
+      // No previous page — fall back to the operator's own dashboard
+      navigate(home.path);
+    }
   };
 
-  if (!canGoBack) return null;
+  // Nothing to go back to AND no role dashboard to fall back to (or already there)
+  if (!canGoBack && (!home || onHomePage)) return null;
 
   return (
     <button
@@ -47,7 +55,7 @@ export default function GlobalBackButton() {
       aria-label="Go back to previous page"
       className="fixed bottom-5 left-5 z-[9999] flex items-center gap-2 rounded-full bg-slate-900/90 border-2 border-purple-500/40 text-purple-200 text-sm font-bold px-5 py-3 min-h-[44px] shadow-lg shadow-purple-900/40 backdrop-blur hover:border-purple-400 hover:text-white transition-all print:hidden"
     >
-      <ArrowLeft className="w-4 h-4" /> Back
+      <ArrowLeft className="w-4 h-4" /> {canGoBack ? "Back" : `Back to ${home.label}`}
     </button>
   );
 }

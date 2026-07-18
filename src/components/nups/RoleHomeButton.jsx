@@ -1,23 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-
-// Role → dedicated workspace landing (destination-based, never history-based).
-const ROLE_HOME = {
-  HOSTESS: { path: "/VIPSale", label: "VIP Sale" },
-  FLOOR_HOST: { path: "/VIPSale", label: "VIP Sale" },
-  DJ: { path: "/DJHome", label: "DJ Booth" },
-  DOOR_GIRL: { path: "/FrontDoor", label: "Front Door" },
-  DOORMAN: { path: "/FrontDoor", label: "Front Door" },
-  PERFORMER: { path: "/EntertainerHome", label: "Entertainer Home" },
-  BARTENDER: { path: "/StaffHome", label: "Staff Home" },
-  SECURITY: { path: "/StaffHome", label: "Staff Home" },
-  DRIVER: { path: "/NUPSKiosk", label: "Kiosk" },
-  VENUE_MANAGER: { path: "/ManagerConsole", label: "Manager Console" },
-  VENUE_OWNER: { path: "/NUPSHub", label: "NUPS Hub" },
-  PLATFORM_ADMIN: { path: "/NUPSHub", label: "NUPS Hub" },
-  SOVEREIGN: { path: "/NUPSHub", label: "NUPS Hub" },
-};
+import { getOperatorHome } from "@/lib/nups/roleHomes";
 
 /**
  * Role-aware back button — returns the signed-in kiosk operator to THEIR
@@ -26,9 +10,7 @@ const ROLE_HOME = {
  */
 export default function RoleHomeButton({ className = "" }) {
   const navigate = useNavigate();
-  let operator = null;
-  try { operator = JSON.parse(sessionStorage.getItem("nups_kiosk_operator") || "null"); } catch { /* none */ }
-  const home = operator?.role ? ROLE_HOME[operator.role] : null;
+  const home = getOperatorHome();
   if (!home) return null;
 
   return (
