@@ -5,7 +5,7 @@ import GlyphBucksReceipt from "./GlyphBucksReceipt";
 import IDScannerCamera from "@/components/nups/IDScannerCamera";
 import ThumbprintScanner from "./ThumbprintScanner";
 import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
-import { Stamp, Printer, ShieldCheck, Coins, Fingerprint, CreditCard, PenLine, CheckCircle2, FlaskConical } from "lucide-react";
+import { Stamp, Printer, ShieldCheck, Coins, Fingerprint, CreditCard, PenLine, CheckCircle2, FlaskConical, Banknote } from "lucide-react";
 
 /**
  * DACO §7 — GlyphBucks stored-value sale flow (LIVE).
@@ -34,7 +34,7 @@ const Section = ({ n, icon: Icon, title, sub, done, children }) => (
   </div>
 );
 
-export default function GlyphBucksSaleFlow({ onShared, prefill }) {
+export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrintBills }) {
   const [mode, setMode] = useState("REAL");
   const [venueId, setVenueId] = useState("DP-TEMPE-001");
   const [assent, setAssent] = useState(null);
@@ -179,6 +179,7 @@ export default function GlyphBucksSaleFlow({ onShared, prefill }) {
       });
       if (!res.data?.ok) throw new Error(res.data?.error || "Seal rejected.");
       setResult(res.data);
+      onSealed?.(res.data);
     } catch (e) {
       setError(e?.response?.data?.error || e.message || "Sealing failed.");
     } finally {
@@ -214,6 +215,16 @@ export default function GlyphBucksSaleFlow({ onShared, prefill }) {
           <button onClick={() => window.print()} className="rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 font-bold px-5 py-2.5 min-h-[44px] flex items-center gap-2 transition-all">
             <Printer className="w-4 h-4" /> Print (Legal 8.5×14)
           </button>
+          {onPrintBills && (
+            <button onClick={() => onPrintBills({
+              denom_cents: Number(f.denom_cents), qty: Number(f.qty),
+              face_cents: result.face_cents, agreement_no: result.agreement_no,
+              verify_ref: result.verify_ref, serial_lo: result.serial_lo, serial_hi: result.serial_hi,
+              purchaser_name: f.purchaser_name, mode,
+            })} className="rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 font-bold px-5 py-2.5 min-h-[44px] flex items-center gap-2 transition-all">
+              <Banknote className="w-4 h-4" /> Print Bills (auto-filled)
+            </button>
+          )}
           <a href={`/v/${result.verify_ref}`} target="_blank" rel="noreferrer" className="rounded-xl btn-glow-blue font-bold px-5 py-2.5 min-h-[44px] flex items-center">Open Verify Page</a>
           <button onClick={() => { setResult(null); resetForm(); }} className="rounded-xl border border-white/20 px-5 py-2.5 font-semibold min-h-[44px] hover:bg-white/5 transition-all">New Sale</button>
         </div>

@@ -21,7 +21,7 @@ import EntertainerContract from "@/components/nups/EntertainerContract";
 import ContractLookup from "@/pages/ContractLookup";
 import BigSpenderQuestionnaire from "@/components/nups/contracts/BigSpenderQuestionnaire";
 import BigSpenderLetter from "@/components/nups/contracts/BigSpenderLetter";
-import VIPRoomBoard from "@/components/nups/VIPRoomBoard";
+import { Link } from "react-router-dom";
 import VIPContractLifecycle from "@/components/nups/VIPContractLifecycle";
 import VIPShowContracts from "@/pages/VIPShowContracts";
 import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
@@ -167,17 +167,20 @@ export default function ContractsHub() {
               </CardContent>
             </Card>
 
-            {/* Live room board — open/close rooms, assign guests & entertainers */}
-            <Card className="bg-white/[0.02] border-purple-500/20">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center gap-2 mb-4">
+            {/* Room board MERGED into the VIP Command Center — one home for
+                rooms, people, desk, and contracts (owner directive 2026-07-17). */}
+            <Link to="/VIPCommand" className="block">
+              <Card className="bg-white/[0.02] border-purple-500/20 hover:border-purple-500/50 transition-colors">
+                <CardContent className="p-4 sm:p-6 flex items-center gap-3">
                   <Crown className="w-5 h-5 text-purple-400" />
-                  <h2 className="text-lg font-bold">VIP Room Board</h2>
-                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-xs">Live</Badge>
-                </div>
-                <VIPRoomBoard />
-              </CardContent>
-            </Card>
+                  <div>
+                    <h2 className="text-lg font-bold">VIP Room Board → VIP Command Center</h2>
+                    <p className="text-xs text-gray-500">Live rooms, guests, entertainers, and the contract desk now live on one merged surface. Tap to open.</p>
+                  </div>
+                  <Badge className="ml-auto bg-purple-500/20 text-purple-300 border-purple-500/40 text-xs">Merged</Badge>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         )}
 

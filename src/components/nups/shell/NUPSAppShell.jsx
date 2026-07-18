@@ -66,8 +66,9 @@ const NAV_SECTIONS = [
       // lives at /Contracts?tab=vip; the legacy NUPSOwner?tab=vip duplicate is retired.
       // VIP Command Center — the authoritative VIP contract workflow
       // (rooms, guests, contracts, signatures, sessions) per DACO-VIP-FIRST-BUILD.
-      { id: "vipcommand",  label: "VIP Command",     icon: Star,      to: "/VIPCommand" },
-      { id: "viprooms",    label: "VIP Rooms",       icon: Crown,     to: "/Contracts?tab=vip" },
+      // VIP Command + VIP Rooms MERGED — one surface for rooms, people,
+      // desk, and contracts (owner directive 2026-07-17).
+      { id: "vipcommand",  label: "VIP Command · Rooms", icon: Crown, to: "/VIPCommand" },
       { id: "glyphbucks",  label: "GlyphBucks Hub",  icon: Coins,     to: "/GlyphBucksHub" },
       // Legacy NUPSOwner tabs moved to the dedicated Legacy section below —
       // one way in, no duplicates (owner directive 2026-07-17).

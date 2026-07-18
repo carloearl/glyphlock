@@ -3,13 +3,12 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useActiveVenue } from '@/hooks/useActiveVenue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DollarSign, Scan, Search, Shield, FileText, Settings, Camera } from 'lucide-react';
+import { DollarSign, Scan, Search, Shield, Settings, Camera } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
 
-import GlyphBucksPOS from '@/components/nups/glyphbucks/GlyphBucksPOS';
+import GlyphBucksSaleFlow from '@/components/nups/glyphbucks/GlyphBucksSaleFlow';
 import BillRedemptionScanner from '@/components/nups/glyphbucks/BillRedemptionScanner';
 import TransactionSearch from '@/components/nups/glyphbucks/TransactionSearch';
-import GlyphBucksReceiptEngine from '@/components/nups/pos/GlyphBucksReceiptEngine';
 import DemoModeController from '@/components/nups/pos/DemoModeController';
 import FraudAnalyticsDashboard from '@/components/nups/FraudAnalyticsDashboard';
 import IDScannerCamera from '@/components/nups/IDScannerCamera';
@@ -26,7 +25,8 @@ export default function GlyphBucksHub() {
   const [demoMode, setDemoMode] = useState(false);
   const [activeTab, setActiveTab] = useState('sales');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [selectedBatch, setSelectedBatch] = useState(null);
+  // Sealed sale → Press handoff: bill order auto-fills and auto-logs on print.
+  const [billOrder, setBillOrder] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -51,11 +51,7 @@ export default function GlyphBucksHub() {
     enabled: !!venueId
   });
 
-  const handleSaleComplete = (saleData) => {
-    setSelectedTransaction(saleData.batch?.transaction_id);
-    setSelectedBatch(saleData.batch);
-    setActiveTab('receipt');
-  };
+
 
   const handleDemoModeChange = (enabled) => {
     setDemoMode(enabled);
@@ -114,14 +110,10 @@ export default function GlyphBucksHub() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-2">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 gap-2">
             <TabsTrigger value="sales" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
               <span className="hidden sm:inline">Sales</span>
-            </TabsTrigger>
-            <TabsTrigger value="receipt" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">Receipt</span>
             </TabsTrigger>
             <TabsTrigger value="press" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -150,30 +142,17 @@ export default function GlyphBucksHub() {
           </TabsList>
 
           <TabsContent value="sales" className="space-y-4">
-            <GlyphBucksPOS
-              venue_id={venueId}
-              onSaleComplete={handleSaleComplete}
+            {/* MERGED: the sealed Ed25519 sale flow (latest system) IS the
+                hub sale. Sealing prints the contract-receipt; "Print Bills"
+                hands the order to the Press auto-filled and auto-logged. */}
+            <GlyphBucksSaleFlow
+              onSealed={(r) => setSelectedTransaction(r.verify_ref)}
+              onPrintBills={(order) => { setBillOrder(order); setActiveTab('press'); }}
             />
           </TabsContent>
 
-          <TabsContent value="receipt">
-            {selectedTransaction && selectedBatch ? (
-              <GlyphBucksReceiptEngine
-                transaction={{ order_number: selectedBatch.batch_id, ...selectedBatch }}
-                batch={selectedBatch}
-                onPrint={() => console.log('Receipt printed')}
-              />
-            ) : (
-              <div className="text-center py-12 text-gray-400">
-                <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p>No transaction selected</p>
-                <p className="text-sm mt-2">Complete a sale to generate receipt</p>
-              </div>
-            )}
-          </TabsContent>
-
           <TabsContent value="press">
-            <ClubCurrencyPressView />
+            <ClubCurrencyPressView saleOrder={billOrder} />
           </TabsContent>
 
           <TabsContent value="id-scan">

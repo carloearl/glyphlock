@@ -25,7 +25,7 @@ import {
   emitPressTelemetry,
 } from "@/components/nups/press/services/pressStorage";
 
-export default function ClubCurrencyPressView() {
+export default function ClubCurrencyPressView({ saleOrder = null }) {
   const [config, setConfig] = useState(() => loadPressConfig());
   const [frontImages, setFrontImages] = useState(() => loadFrontImages());
   const [backImage, setBackImage] = useState(() => loadBackImage());
@@ -59,6 +59,30 @@ export default function ClubCurrencyPressView() {
       }
     })();
   }, []);
+
+  // Sealed-sale handoff — a completed GlyphBucks sale auto-fills the press
+  // (denomination, bill count, order number) and auto-logs the order. Works
+  // with dedicated pre-perforated/uploaded bill templates or generated
+  // designs — the bills always follow the flow of the sale.
+  useEffect(() => {
+    if (!saleOrder) return;
+    const amount = (saleOrder.face_cents ?? (saleOrder.denom_cents || 0) * (saleOrder.qty || 0)) / 100;
+    setCurrencyAmount(amount);
+    setCurrencyOrderNumber(saleOrder.agreement_no || saleOrder.verify_ref || "");
+    setConfig((prev) => ({
+      ...prev,
+      denomination: String((saleOrder.denom_cents || 0) / 100),
+      batchCount: saleOrder.qty || prev.batchCount,
+    }));
+    setActiveTab("press");
+    emitPressTelemetry("VOUCHER_ORDER_AUTOFILLED", {
+      agreement_no: saleOrder.agreement_no, verify_ref: saleOrder.verify_ref,
+      qty: saleOrder.qty, denom_cents: saleOrder.denom_cents,
+      serial_lo: saleOrder.serial_lo, serial_hi: saleOrder.serial_hi, mode: saleOrder.mode,
+    });
+    toast.success(`Sealed sale ${saleOrder.agreement_no || ""} loaded — ${saleOrder.qty} × $${((saleOrder.denom_cents || 0) / 100).toFixed(0)} bills prefilled`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saleOrder]);
 
   // FIX-D — lock layout for 150ms whenever layoutMode changes
   useEffect(() => {
