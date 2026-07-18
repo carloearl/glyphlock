@@ -1,6 +1,7 @@
 /**
- * OpenBatchControl — manager-only control to open tonight's POS batch
- * directly from the Register console (no back-office trip required).
+ * OpenBatchControl — manager-only control to open tonight's POS batch.
+ * Lives on the MANAGER CONSOLE only (two-step open: manager opens here,
+ * Front Door confirms via BatchConfirmControl before the first ring-up).
  */
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
@@ -23,6 +24,8 @@ export default function OpenBatchControl({ cashierName }) {
         venue_id: getActiveVenueId() || "dream_palace",
         opening_cash: parseFloat(openingCash) || 0,
         cashier: cashierName || "Manager",
+        opened_by: cashierName || "Manager",
+        door_confirmed: false,
         status: "open",
         start_time: new Date().toISOString(),
         total_sales: 0,

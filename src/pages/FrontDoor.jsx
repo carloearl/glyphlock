@@ -11,6 +11,7 @@ import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
 import POSCashRegister from "@/components/nups/POSCashRegister";
+import BatchConfirmControl from "@/components/nups/register/BatchConfirmControl";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
 import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
 import FundsOffDrawerPanel from "@/components/nups/frontdoor/FundsOffDrawerPanel";
@@ -203,7 +204,12 @@ function FrontDoorContent() {
             <div className="min-w-0 rounded-xl border border-white/5 bg-slate-950/40 p-4">
               {activeTab === "drivers" && <DriverQuickAdd user={user} />}
               {activeTab === "guests" && <GuestCheckIn />}
-              {activeTab === "register" && <POSCashRegister station="door" user={user} venueId={venueId} />}
+              {activeTab === "register" && (
+                <div className="space-y-3">
+                  <BatchConfirmControl operatorName={user?.full_name || user?.username} />
+                  <POSCashRegister station="door" user={user} venueId={venueId} />
+                </div>
+              )}
               {activeTab === "dancers" && <EntertainerCheckIn user={user} />}
               {activeTab === "staff" && <StaffClockInOut user={user} venueId={venueId} station="door" />}
             </div>

@@ -439,7 +439,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
 
   const handleCheckout = () => {
     if (!activeBatch) {
-      toast.error("No open batch — ask a manager to open tonight's batch.");
+      toast.error("No open batch — a manager must open tonight's batch from the Manager Console.");
+      return;
+    }
+    if (!activeBatch.door_confirmed) {
+      toast.error("Batch not confirmed yet — confirm tonight's batch at the register before the first transaction.");
       return;
     }
     if (cart.length === 0) return;
@@ -468,7 +472,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   const completePayment = async (details = {}) => {
     if (isSubmitting) return;
     if (!activeBatch) {
-      toast.error("Cannot process transaction: no open batch. Ask a manager to open tonight's batch.");
+      toast.error("Cannot process transaction: no open batch. A manager must open tonight's batch.");
+      return;
+    }
+    if (!activeBatch.door_confirmed) {
+      toast.error("Cannot process transaction: tonight's batch hasn't been confirmed at the door yet.");
       return;
     }
     setIsSubmitting(true);

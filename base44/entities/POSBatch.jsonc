@@ -33,6 +33,23 @@
     "cashier": {
       "type": "string"
     },
+    "opened_by": {
+      "type": "string",
+      "description": "Manager who opened the batch (Manager Console only)."
+    },
+    "door_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Two-step open: manager opens the batch, then the Front Door operator confirms it before the first transaction of the shift can post."
+    },
+    "door_confirmed_by": {
+      "type": "string",
+      "description": "Door operator who confirmed the batch."
+    },
+    "door_confirmed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "status": {
       "type": "string",
       "enum": [

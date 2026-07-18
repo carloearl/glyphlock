@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import StaffOnboardingPanel from "@/components/nups/StaffOnboardingPanel";
+import OpenBatchControl from "@/components/nups/register/OpenBatchControl";
 import StaffManagement from "@/components/nups/StaffManagement";
 import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
 import VIPShowContracts from "@/pages/VIPShowContracts";
@@ -100,6 +101,17 @@ export default function ManagerConsole() {
     queryKey: ["mgr-sealed-contracts"],
     queryFn: () => base44.entities.VIPShowContract.list("-executed_at", 200),
   });
+  // Tonight's POS batch — opened HERE (manager-only), then confirmed at the
+  // Front Door register before the first transaction of the shift.
+  const { data: openBatches = [] } = useQuery({
+    queryKey: ["active-pos-batch"],
+    queryFn: async () => {
+      const all = await base44.entities.POSBatch.list("-created_date", 5);
+      return all.filter((b) => (b.status || "open").toLowerCase() === "open");
+    },
+    refetchInterval: 30000,
+  });
+  const activeBatch = openBatches[0];
 
   const today = todayISO();
 
@@ -133,6 +145,30 @@ export default function ManagerConsole() {
   // ── Tab bodies ─────────────────────────────────────────────────────
   const renderTonight = () => (
     <div className="space-y-5">
+      {/* Batch control — managers open tonight's batch here. The Front Door
+          then confirms it at the register before the first ring-up. */}
+      {!activeBatch ? (
+        <OpenBatchControl cashierName={user?.full_name || user?.email || "Manager"} />
+      ) : (
+        <div className={`flex items-center gap-3 rounded-xl border p-3 ${
+          activeBatch.door_confirmed
+            ? "border-emerald-500/30 bg-emerald-500/5"
+            : "border-amber-500/40 bg-amber-500/10"
+        }`}>
+          <DollarSign className={`w-5 h-5 shrink-0 ${activeBatch.door_confirmed ? "text-emerald-400" : "text-amber-400"}`} />
+          <div className="text-sm">
+            <span className={`font-bold ${activeBatch.door_confirmed ? "text-emerald-300" : "text-amber-300"}`}>
+              Batch {(activeBatch.batch_id || activeBatch.id || "").toString().slice(-6).toUpperCase()}
+              {activeBatch.door_confirmed ? " · Active" : " · Awaiting Front Door confirmation"}
+            </span>
+            <span className="text-slate-400 ml-2 text-xs">
+              {activeBatch.door_confirmed
+                ? `Confirmed by ${activeBatch.door_confirmed_by || "door"}`
+                : "The door operator must confirm before the first transaction posts."}
+            </span>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatTile label="Staff on Clock"        value={activeStaff.length}        Icon={Clock}      tone="cyan" />
         <StatTile label="Entertainers on Floor" value={activeEntertainers.length} Icon={Music}      tone="violet" />

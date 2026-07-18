@@ -38,7 +38,7 @@ import TimeClock from "@/components/nups/TimeClock";
 import AuditLogDashboard from "@/components/nups/AuditLogDashboard";
 import OneClickSeedSwitch from "@/components/nups/OneClickSeedSwitch";
 import NoBatchBanner from "@/components/nups/register/NoBatchBanner";
-import OpenBatchControl from "@/components/nups/register/OpenBatchControl";
+import BatchConfirmControl from "@/components/nups/register/BatchConfirmControl";
 import RegisterStatusHeader from "@/components/nups/register/RegisterStatusHeader";
 import RecentTransactionsStrip from "@/components/nups/register/RecentTransactionsStrip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -239,10 +239,10 @@ function RegisterConsoleInner() {
           {activeTab === "register" && (
             <div className="flex flex-col gap-3 sm:gap-4">
               <NoBatchBanner batch={activeBatch} />
-              {/* Managers open tonight's batch right here — no back-office trip. */}
-              {!activeBatch && (isManagerOrAdmin || ["MANAGER", "VENUE_MANAGER"].includes(opRole)) && (
-                <OpenBatchControl cashierName={operator?.full_name || user?.full_name} />
-              )}
+              {/* Two-step batch open: the MANAGER opens tonight's batch on the
+                  Manager Console; the door operator confirms it here before
+                  the first transaction. No register-side batch opening. */}
+              <BatchConfirmControl operatorName={operator?.full_name || user?.full_name} />
               <POSCashRegister showDriverPanel={false} user={user} station="door" />
               <RecentTransactionsStrip onViewAll={() => setActiveTab("receipts")} />
             </div>
