@@ -237,17 +237,22 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
     // scopes the shell, NOT the tablet's platform login (often the owner).
     // A staff/entertainer operator gets no sidebar; no bounce because
     // KioskSessionGuard already authorized this station for them.
-    try {
-      const op = JSON.parse(sessionStorage.getItem("nups_kiosk_operator") || sessionStorage.getItem("nups_session") || "null");
-      if (op?.role) {
-        const opCls = resolveRoleClass({ nupsUser: op });
-        if (opCls !== ROLE_CLASS.ADMIN) {
-          setRoleClass(opCls);
-          return () => { cancelled = true; };
+    // Re-checked live on "nups:operator-changed" so clocking in/out from an
+    // in-page time clock rescopes the chrome without a reload.
+    const applyOperator = () => {
+      try {
+        const op = JSON.parse(sessionStorage.getItem("nups_kiosk_operator") || sessionStorage.getItem("nups_session") || "null");
+        if (op?.role) {
+          const opCls = resolveRoleClass({ nupsUser: op });
+          if (opCls !== ROLE_CLASS.ADMIN) {
+            setRoleClass(opCls);
+            return true;
+          }
         }
-      }
-    } catch { /* no operator context */ }
-    (async () => {
+      } catch { /* no operator context */ }
+      return false;
+    };
+    const resolvePlatform = async () => {
       try {
         const u = await base44.auth.me();
         let nu = null, sov = false;
@@ -268,8 +273,16 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
           navigate(homeForRoleClass(cls), { replace: true });
         }
       } catch { /* leave default */ }
-    })();
-    return () => { cancelled = true; };
+    };
+    if (!applyOperator()) resolvePlatform();
+    const onOperatorChanged = () => {
+      if (!applyOperator()) resolvePlatform();
+    };
+    window.addEventListener("nups:operator-changed", onOperatorChanged);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("nups:operator-changed", onOperatorChanged);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

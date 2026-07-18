@@ -215,14 +215,36 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
         action: action === "in" ? "clockIn" : "clockOut",
         pin,
       });
-      setConfirmedEmployee({ stage_name: res.data?.user?.full_name || "Staff" });
+      // Persist the kiosk operator session (same contract as NUPSKiosk) so
+      // the shell scopes chrome to the clocked-in staff member's role —
+      // not the tablet's platform login.
+      const data = res.data;
+      if (action === "in" && data?.user) {
+        sessionStorage.setItem("nups_kiosk_operator", JSON.stringify({
+          name: data.user.full_name, role: data.user.role, workspace: data.workspace, shift_id: data.shift_id,
+        }));
+        if (data.kiosk_session) sessionStorage.setItem("nups_kiosk_session", data.kiosk_session);
+      } else if (action === "out") {
+        sessionStorage.removeItem("nups_kiosk_operator");
+        sessionStorage.removeItem("nups_kiosk_session");
+      }
+      window.dispatchEvent(new Event("nups:operator-changed"));
+      setConfirmedEmployee({ stage_name: data?.user?.full_name || "Staff" });
       queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
       if (onClockStatusChange) onClockStatusChange(action === "in");
       setStep("success");
     } catch (e) {
       const data = e?.response?.data;
       if (data?.already_clocked_in) {
-        // Already on the clock — treat as success and show who.
+        // Already on the clock — treat as success, and rebind the operator
+        // session so the shell scopes to them.
+        if (data.user) {
+          sessionStorage.setItem("nups_kiosk_operator", JSON.stringify({
+            name: data.user.full_name, role: data.user.role, workspace: data.workspace, shift_id: data.shift_id,
+          }));
+          if (data.kiosk_session) sessionStorage.setItem("nups_kiosk_session", data.kiosk_session);
+          window.dispatchEvent(new Event("nups:operator-changed"));
+        }
         setConfirmedEmployee({ stage_name: data.user?.full_name || "Staff" });
         queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
         setStep("success");
