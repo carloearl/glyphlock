@@ -233,6 +233,20 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   // sidebar is a UX dead-end, not a valid state.
   useEffect(() => {
     let cancelled = false;
+    // Kiosk operator session wins — the PIN-clocked-in staff member's role
+    // scopes the shell, NOT the tablet's platform login (often the owner).
+    // A staff/entertainer operator gets no sidebar; no bounce because
+    // KioskSessionGuard already authorized this station for them.
+    try {
+      const op = JSON.parse(sessionStorage.getItem("nups_kiosk_operator") || sessionStorage.getItem("nups_session") || "null");
+      if (op?.role) {
+        const opCls = resolveRoleClass({ nupsUser: op });
+        if (opCls !== ROLE_CLASS.ADMIN) {
+          setRoleClass(opCls);
+          return () => { cancelled = true; };
+        }
+      }
+    } catch { /* no operator context */ }
     (async () => {
       try {
         const u = await base44.auth.me();
@@ -364,9 +378,9 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
 
   return (
     <div className="min-h-screen bg-[#05070d] text-white flex">
-      <div className="hidden lg:flex">{SideRail}</div>
+      {visibleSections.length > 0 && <div className="hidden lg:flex">{SideRail}</div>}
 
-      {open && (
+      {open && visibleSections.length > 0 && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/70 backdrop-blur" onClick={() => setOpen(false)} />
           <div className="relative h-full flex">{SideRail}</div>
@@ -376,6 +390,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
       <main className="flex-1 min-w-0 flex flex-col">
         <header className="sticky top-0 z-40 bg-[#05070d]/85 backdrop-blur-xl border-b border-white/5">
           <div className="flex items-center gap-3 px-4 lg:px-8 h-16">
+            {visibleSections.length > 0 && (
             <button
               onClick={() => setOpen(true)}
               className="lg:hidden min-w-[44px] min-h-[44px] -ml-2 rounded-lg hover:bg-white/5 active:bg-white/10 text-slate-200 flex items-center justify-center"
@@ -383,6 +398,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
             >
               <Menu className="w-6 h-6" />
             </button>
+            )}
 
             {/* HOME — role-aware, honest label. Staff/entertainers go to
                 THEIR home (never the admin dashboard); everyone else goes
