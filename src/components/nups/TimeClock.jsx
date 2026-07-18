@@ -173,95 +173,66 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
     return () => clearInterval(t);
   }, []);
 
-  // Always fetch all shifts — filtering by created_by breaks clock-out since
-  // shifts may be created by admin. We scope the "today's log" display per user below.
+  // Staff punch clock reads StaffShift (the canonical record written by the
+  // secure nupsClockIn service). Rows are mapped to the display shape
+  // (stage_name) the log/payroll views expect.
   const { data: shifts = [] } = useQuery({
     queryKey: ['time-clock-shifts'],
-    queryFn: () => base44.entities.EntertainerShift.list('-created_date', 500),
-    enabled: !!user
-  });
-
-  const { data: entertainers = [] } = useQuery({
-    queryKey: ['entertainers-list'],
-    queryFn: () => base44.entities.Entertainer.list(),
-    enabled: !!user
-  });
-
-  const { data: nupsUsers = [] } = useQuery({
-    queryKey: ['nups-users-for-pin'],
-    queryFn: () => base44.entities.NUPSUser.list(),
+    queryFn: async () => {
+      const rows = await base44.entities.StaffShift.list('-created_date', 500);
+      return rows.map(s => ({ ...s, stage_name: s.user_full_name || s.user_email }));
+    },
     enabled: !!user
   });
 
   const activeShifts = shifts.filter(s => !s.check_out_time);
   const todayShifts = shifts.filter(s => new Date(s.check_in_time).toDateString() === now.toDateString());
 
-  const clockIn = useMutation({
-    mutationFn: (emp) => base44.entities.EntertainerShift.create({
-      entertainer_id: emp.id || user?.email,
-      stage_name: emp.stage_name || emp.full_name,
-      check_in_time: new Date().toISOString(),
-      location: 'Main Floor',
-      status: 'checked_in'
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
-      if (onClockStatusChange) onClockStatusChange(true);
-      setStep("success");
-    }
-  });
-
+  // Admin quick clock-out from the "On Clock Now" list.
   const clockOut = useMutation({
-    mutationFn: (shiftId) => base44.entities.EntertainerShift.update(shiftId, {
+    mutationFn: (shiftId) => base44.entities.StaffShift.update(shiftId, {
       check_out_time: new Date().toISOString(),
       status: 'checked_out'
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
       if (onClockStatusChange) onClockStatusChange(false);
-      setStep("success");
     }
   });
 
-  const handlePin = useCallback((pin) => {
+  const [pinBusy, setPinBusy] = useState(false);
+
+  // PIN verification + clock action run SERVER-SIDE via nupsClockIn —
+  // PBKDF2-hashed PINs, throttling, email binding. No client-side PIN
+  // comparison exists anymore (plaintext u.pin was removed by the
+  // RBAC correction, which is why the old check always failed).
+  const handlePin = useCallback(async (pin) => {
+    if (pinBusy) return;
     setPinError("");
-    const nupsUser = nupsUsers.find(u => u.pin === pin && u.status === "active");
-    if (!nupsUser) {
-      setPinError("Invalid PIN. Please try again.");
-      return;
-    }
-
-    const ent = entertainers.find(e =>
-      e.stage_name === nupsUser.full_name ||
-      e.legal_name === nupsUser.full_name ||
-      e.stage_name?.toLowerCase() === nupsUser.username?.toLowerCase()
-    ) || { id: nupsUser.id, stage_name: nupsUser.full_name, full_name: nupsUser.full_name };
-
-    setConfirmedEmployee(ent);
-    setStep("confirm");
-  }, [entertainers, nupsUsers]);
-
-  const handleConfirm = () => {
-    if (action === "in") {
-      clockIn.mutate(confirmedEmployee);
-    } else {
-      // Match by nupsUser.id, entertainer id, stage_name, or full_name — broad match
-      const name = (confirmedEmployee.stage_name || confirmedEmployee.full_name || "").toLowerCase().trim();
-      const shift = activeShifts.find(s => {
-        if (confirmedEmployee.id && (s.entertainer_id === confirmedEmployee.id)) return true;
-        if (s.stage_name && s.stage_name.toLowerCase().trim() === name) return true;
-        return false;
+    setPinBusy(true);
+    try {
+      const res = await base44.functions.invoke("nupsClockIn", {
+        action: action === "in" ? "clockIn" : "clockOut",
+        pin,
       });
-      if (shift) {
-        clockOut.mutate(shift.id);
-      } else {
-        // Show helpful debug: list who IS on the clock
-        const onClock = activeShifts.map(s => s.stage_name).join(", ") || "nobody";
-        setStep("error");
-        setPinError(`No active clock-in found for "${confirmedEmployee.stage_name}". Currently on clock: ${onClock}.`);
+      setConfirmedEmployee({ stage_name: res.data?.user?.full_name || "Staff" });
+      queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
+      if (onClockStatusChange) onClockStatusChange(action === "in");
+      setStep("success");
+    } catch (e) {
+      const data = e?.response?.data;
+      if (data?.already_clocked_in) {
+        // Already on the clock — treat as success and show who.
+        setConfirmedEmployee({ stage_name: data.user?.full_name || "Staff" });
+        queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
+        setStep("success");
+        return;
       }
+      setPinError(data?.error || "Unable to verify PIN. Please try again.");
+    } finally {
+      setPinBusy(false);
     }
-  };
+  }, [action, pinBusy, queryClient, onClockStatusChange]);
 
   const reset = () => {
     setStep("idle");
@@ -296,48 +267,13 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
         <div className={`text-center py-2 px-4 rounded-xl font-bold text-sm ${action === 'in' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
           {action === 'in' ? '🟢 Clocking IN' : '🔴 Clocking OUT'}
         </div>
-        <PinPad onSubmit={handlePin} label="Enter your employee PIN" />
+        <PinPad onSubmit={handlePin} label={pinBusy ? "Verifying…" : "Enter your employee PIN"} />
         {pinError && (
           <div className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             {pinError}
           </div>
         )}
-      </div>
-    );
-  }
-
-  // ── STEP: Confirm Identity ───────────────────────────────────────────────
-  if (step === "confirm") {
-    return (
-      <div className="max-w-sm mx-auto space-y-4">
-        <button onClick={() => setStep("pin")} className="flex items-center gap-1 text-sm text-gray-400 hover:text-white transition-colors">
-          <ChevronLeft className="w-4 h-4" /> Back
-        </button>
-        <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center mx-auto">
-            <UserCheck className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <p className="text-white/50 text-sm">PIN verified — confirm identity</p>
-            <p className="text-2xl font-black text-white mt-1">{confirmedEmployee?.stage_name}</p>
-          </div>
-          <div className={`text-sm font-bold py-2 px-4 rounded-lg ${action === 'in' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-            {action === 'in' ? 'Clocking IN at ' : 'Clocking OUT at '}{format(now, 'h:mm:ss a')}
-          </div>
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <Button variant="outline" onClick={reset} className="border-white/10 text-gray-400">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              disabled={clockIn.isPending || clockOut.isPending}
-              className={action === 'in' ? 'bg-green-600 hover:bg-green-500' : 'bg-red-600 hover:bg-red-500'}
-            >
-              {clockIn.isPending || clockOut.isPending ? 'Saving…' : 'Confirm'}
-            </Button>
-          </div>
-        </div>
       </div>
     );
   }
