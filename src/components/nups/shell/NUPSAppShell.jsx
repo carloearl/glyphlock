@@ -307,6 +307,10 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   // whole identity until clock-out or a workspace switch back to admin.
   const isAdmin = roleClass === ROLE_CLASS.ADMIN && !operatorMode;
   const effectiveAdmin = isAdmin && adminOverride;
+  // Staff/entertainer operator sessions get a bare station — no workspace
+  // switcher, mode toggle, venue switcher, or global search (§2 rev 3).
+  const kioskOperator = operatorMode &&
+    (roleClass === ROLE_CLASS.STAFF || roleClass === ROLE_CLASS.ENTERTAINER);
   const visibleSectionLabels = effectiveAdmin
     ? SECTIONS_BY_CLASS.ADMIN
     : isAdmin
@@ -445,7 +449,8 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               )}
             </div>
 
-            {/* Global search trigger — always visible (§4 discoverability). */}
+            {/* Global search trigger — hidden for kiosk staff stations (§2 rev 3). */}
+            {!kioskOperator && (
             <button
               onClick={() => setSearchOpen(true)}
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] text-slate-400 hover:text-white text-[12px] transition-colors"
@@ -456,6 +461,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               <span className="hidden md:inline">Search…</span>
               <kbd className="hidden lg:inline text-[9px] font-mono px-1 py-0.5 rounded bg-white/[0.05] border border-white/10 ml-1">⌘K</kbd>
             </button>
+            )}
 
             <div className="hidden md:flex items-center gap-2">
               {/* W3-012A — Workspace Switcher: lets users switch between
@@ -474,12 +480,10 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
                   {adminOverride ? "Admin Override" : "Staff View"}
                 </button>
               )}
-              <WorkspaceSwitcher roleClass={roleClass} platformAdmin={platformAdmin} />
-              {/* MODE TOGGLE — F-7: always visible, color-distinct, before venue.
-                  Click to switch LIVE/DEMO/SANDBOX, seed or clear demo data. */}
-              <ModeToggle />
-              {/* Multi-venue separation — tap to switch the active venue */}
-              <VenueSwitcher activeVenue={activeVenue} />
+              {/* Cross-role controls suppressed on staff/entertainer stations (§2 rev 3) */}
+              {!kioskOperator && <WorkspaceSwitcher roleClass={roleClass} platformAdmin={platformAdmin} />}
+              {!kioskOperator && <ModeToggle />}
+              {!kioskOperator && <VenueSwitcher activeVenue={activeVenue} />}
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5 font-mono">
                 <span className="text-[11px] font-bold text-emerald-300">{timeStr}</span>
                 <span className="text-[10px] text-slate-500">·</span>

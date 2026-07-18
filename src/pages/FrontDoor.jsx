@@ -95,9 +95,11 @@ function FrontDoorContent() {
   }, []);
 
   // Default to step 1 — the first thing that happens at the door.
+  // "register" is a permanent in-place step (not in the config's tab list) —
+  // it must never be snapped back to step 1 (Ring Up bug, 2026-07-17).
   useEffect(() => {
     if (enabledIds.length === 0) return;
-    if (!activeTab || !enabledIds.includes(activeTab)) {
+    if (!activeTab || (activeTab !== "register" && !enabledIds.includes(activeTab))) {
       setActiveTab(enabledIds[0]);
     }
   }, [enabledIds, activeTab]);

@@ -133,6 +133,13 @@ export default function StaffClockInOut({ user, venueId, station = 'door' }) {
       });
       if (!result.ok) { setErr(result.block_reason || 'rejected'); return; }
       setActiveShift(result.value);
+      // Bind the kiosk operator session so the shell rescopes to THIS role
+      // immediately (sidebar/admin chrome suppressed for staff). This was
+      // missing — in-page punch-in never rescoped the chrome (fix 2026-07-17).
+      sessionStorage.setItem('nups_kiosk_operator', JSON.stringify({
+        name: user?.full_name || verifiedEmail, role, shift_id: result.value?.id,
+      }));
+      window.dispatchEvent(new Event('nups:operator-changed'));
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -158,6 +165,9 @@ export default function StaffClockInOut({ user, venueId, station = 'door' }) {
       });
       if (!result.ok) { setErr(result.block_reason || 'rejected'); return; }
       setActiveShift(null);
+      // Release the operator session — chrome rescopes back to the platform login.
+      sessionStorage.removeItem('nups_kiosk_operator');
+      window.dispatchEvent(new Event('nups:operator-changed'));
     } catch (e) {
       setErr(e.message);
     } finally {
