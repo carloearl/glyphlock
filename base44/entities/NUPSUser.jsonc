@@ -22,6 +22,15 @@
       "type": "string",
       "description": "HMAC-SHA256(pin, KEY_PEPPER) hex \u2014 deterministic peppered lookup index so PIN auth is an indexed query, not a table scan. Useless without the server secret."
     },
+    "pin_hint": {
+      "type": "string",
+      "description": "Optional staff-set reminder phrase shown by the kiosk Hint button. Never contains the PIN itself \u2014 server rejects hints containing digit runs."
+    },
+    "require_platform_login": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, PIN clock-in only succeeds while the bound platform_email is actively signed in to the platform on the device. Second factor binding."
+    },
     "full_name": {
       "type": "string",
       "description": "Full name of staff member"

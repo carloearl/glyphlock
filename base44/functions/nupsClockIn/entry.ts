@@ -163,6 +163,31 @@ Deno.serve(async (req) => {
       return Response.json({ success: true });
     }
 
+    // ─── PIN HINT (staff-set reminder, resolved via live platform login) ─────
+    // Identity for hint read/write comes ONLY from the authenticated platform
+    // session — the hint is bound to the NUPSUser whose platform_email matches.
+    if (action === 'getPinHint' || action === 'setPinHint') {
+      const live = await base44.auth.me().catch(() => null);
+      if (!live?.email) {
+        return Response.json({ error: 'Sign in to your account to use PIN hints.' }, { status: 401 });
+      }
+      const email = String(live.email).toLowerCase();
+      const bound = ((await E.NUPSUser.filter({ platform_email: email, status: 'active' })) || [])[0];
+      if (!bound) {
+        return Response.json({ error: 'No staff account is linked to this login.' }, { status: 404 });
+      }
+      if (action === 'getPinHint') {
+        return Response.json({ has_hint: !!bound.pin_hint, hint: bound.pin_hint || '' });
+      }
+      const hint = String(body.hint || '').trim().slice(0, 80);
+      if (!hint) return Response.json({ error: 'Hint text is required.' }, { status: 400 });
+      if (/\d{3,}/.test(hint)) {
+        return Response.json({ error: 'Hint cannot contain number sequences — never store your PIN in the hint.' }, { status: 400 });
+      }
+      await E.NUPSUser.update(bound.id, { pin_hint: hint });
+      return Response.json({ success: true, hint });
+    }
+
     // ─── PIN CLOCK IN / OUT ──────────────────────────────────────────────────
     if (action !== 'clockIn' && action !== 'clockOut') {
       return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
@@ -189,6 +214,17 @@ Deno.serve(async (req) => {
 
     if (nupsUser.status !== 'active') {
       return Response.json({ error: 'Account is suspended or terminated.' }, { status: 403 });
+    }
+    // Email-bound PIN: the account owner must be actively signed in to the
+    // platform on this device with the bound email. PIN alone is not enough.
+    if (nupsUser.require_platform_login) {
+      const live = await base44.auth.me().catch(() => null);
+      const liveEmail = String(live?.email || '').toLowerCase();
+      const boundEmail = String(nupsUser.platform_email || '').toLowerCase();
+      if (!boundEmail || liveEmail !== boundEmail) {
+        await logAttempt('pin_auth', false, 'platform_login_binding_failed');
+        return Response.json({ error: 'This PIN only works while its owner is signed in on this device.' }, { status: 403 });
+      }
     }
     if (nupsUser.venue_id && nupsUser.venue_id !== VENUE_ID) {
       return Response.json({ error: 'No access to this venue.' }, { status: 403 });
