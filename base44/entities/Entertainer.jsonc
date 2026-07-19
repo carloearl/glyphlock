@@ -71,7 +71,12 @@
     },
     "nups_pin": {
       "type": "string",
-      "description": "4-digit PIN the entertainer enters at the door check-in kiosk. Captured during signup; required to check in."
+      "description": "ID-01: 4-digit PIN the entertainer enters at the door check-in kiosk. Links to NUPSUser.pin for exact identity resolution at Time Clock. Captured during signup; required to check in."
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false,
+      "description": "ID-01: Set true for demo seed records to isolate from production queries"
     },
     "status": {
       "type": "string",

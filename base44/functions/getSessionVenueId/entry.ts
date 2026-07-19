@@ -16,6 +16,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
  */
 
 const ALLOWED_VENUES = [
+  'dream_palace',
   'dream-palace-tempe',
   'bones-cabaret-scottsdale',
   'skin-cabaret-scottsdale'
@@ -33,10 +34,17 @@ Deno.serve(async (req) => {
       }, { status: 401 });
     }
 
-    // Fetch NUPSUser record to get venue assignment
-    const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
-      username: user.email
+    // ID-01 FIX-7: platform_email is the canonical auth binding — username
+    // stores login names, not emails. Fallback: email prefix as username.
+    let nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+      platform_email: user.email
     }, null, 1);
+    if (nupsUsers.length === 0) {
+      const emailPrefix = user.email.split('@')[0].toLowerCase();
+      nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+        username: emailPrefix
+      }, null, 1);
+    }
 
     if (nupsUsers.length === 0) {
       // User not in NUPS system — deny access

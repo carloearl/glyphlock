@@ -51,9 +51,9 @@ export default function EntertainerCheckIn({ user }) {
   const { data: entertainers = [] } = useQuery({
     queryKey: ['entertainers', venueId],
     queryFn: async () => {
-      const list = await base44.entities.Entertainer.filter({ venue_id: venueId }, '-vip_room_count', 200);
-      // Fallback: if no venue-scoped records yet, show the global list so check-in still works.
-      return list.length ? list : base44.entities.Entertainer.list('-vip_room_count', 200);
+      // ID-01: venue-scoped, active-only, demo records excluded. No global fallback.
+      const list = await base44.entities.Entertainer.filter({ venue_id: venueId, status: 'active' }, '-vip_room_count', 200);
+      return list.filter(e => e.is_demo !== true);
     },
     staleTime: 0,
     gcTime: 0,
@@ -82,7 +82,8 @@ export default function EntertainerCheckIn({ user }) {
       const response = await base44.functions.invoke('createEntertainerShift', {
         entertainer_id: ent.id,
         location: 'Main Floor',
-        venue_id: venueId
+        venue_id: venueId,
+        entertainer_type: 'entertainer'
       });
       if (response.data?.error) throw new Error(response.data.error);
       return { shift: response.data?.shift, entertainer: ent };

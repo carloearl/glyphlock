@@ -125,6 +125,8 @@ Deno.serve(async (req) => {
     // ALL GATES PASSED — create shift
     const shift = await base44.asServiceRole.entities.EntertainerShift.create({
       entertainer_id,
+      // ID-01: entertainer_id always resolves against the Entertainer entity here.
+      entertainer_type: 'entertainer',
       stage_name: entertainer.stage_name,
       check_in_time: new Date().toISOString(),
       location: location || 'Main Floor',

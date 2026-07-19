@@ -6,6 +6,17 @@
       "type": "string",
       "description": "Foreign key reference to Entertainer entity"
     },
+    "entertainer_type": {
+      "type": "string",
+      "enum": [
+        "entertainer",
+        "nups_user",
+        "demo_seed",
+        "orphaned"
+      ],
+      "default": "entertainer",
+      "description": "ID-01: Identifies which entity type the entertainer_id field resolves against"
+    },
     "venue_id": {
       "type": "string",
       "description": "Venue where this shift is worked"
@@ -47,6 +58,10 @@
     "vip_sessions": {
       "type": "number",
       "default": 0
+    },
+    "notes": {
+      "type": "string",
+      "description": "Audit/remediation notes (e.g. DACO directive closures)"
     },
     "mode": {
       "type": "string",

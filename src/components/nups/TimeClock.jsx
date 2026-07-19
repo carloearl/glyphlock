@@ -176,10 +176,16 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
   // Staff punch clock reads StaffShift (the canonical record written by the
   // secure nupsClockIn service). Rows are mapped to the display shape
   // (stage_name) the log/payroll views expect.
+  // ID-01 FIX-2: venue-scoped read — never a global list.
+  const session = JSON.parse(sessionStorage.getItem('nups_session') || '{}');
+  const sessionVenueId = session.venue_id || user?.venue_id || null;
+
   const { data: shifts = [] } = useQuery({
-    queryKey: ['time-clock-shifts'],
+    queryKey: ['time-clock-shifts', sessionVenueId],
     queryFn: async () => {
-      const rows = await base44.entities.StaffShift.list('-created_date', 500);
+      const rows = sessionVenueId
+        ? await base44.entities.StaffShift.filter({ venue_id: sessionVenueId }, '-created_date', 500)
+        : await base44.entities.StaffShift.list('-created_date', 500);
       return rows.map(s => ({ ...s, stage_name: s.user_full_name || s.user_email }));
     },
     enabled: !!user
