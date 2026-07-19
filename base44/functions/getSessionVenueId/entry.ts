@@ -17,6 +17,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const ALLOWED_VENUES = [
   'dream_palace',
+  'DEMO_VENUE_001', // Full-platform demo sandbox venue
   'dream-palace-tempe',
   'bones-cabaret-scottsdale',
   'skin-cabaret-scottsdale'
