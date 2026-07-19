@@ -85,15 +85,24 @@ export default function OnboardingPacket({ currentUser }) {
   const pendingOnboarding = entertainers.filter(e => !e.contract_signed);
   const completedOnboarding = entertainers.filter(e => e.contract_signed);
 
+  // ID-01: venue comes from the active session, never hardcoded.
+  const sessionVenueId = activeVenue?.venue_id || activeVenue?.id || null;
+
   const createProfile = useMutation({
-    mutationFn: () => base44.entities.Entertainer.create({
-      stage_name: newHire.stage_name,
-      legal_name: newHire.legal_name,
-      phone: newHire.phone,
-      email: newHire.email,
-      status: "inactive", // blocked until onboarding complete
-      contract_signed: false,
-    }),
+    mutationFn: async () => {
+      if (!sessionVenueId) throw new Error("No active venue in session — cannot create profile.");
+      return base44.entities.Entertainer.create({
+        stage_name: newHire.stage_name,
+        legal_name: newHire.legal_name,
+        phone: newHire.phone,
+        email: newHire.email,
+        venue_id: sessionVenueId,
+        is_demo: false,
+        status: "inactive", // blocked until onboarding complete
+        contract_signed: false,
+      });
+    },
+    onError: (e) => toast.error(e.message),
     onSuccess: async (result) => {
       setCreatedEntertainer(result);
       // Permanent archive snapshot — survives demo wipes and entity deletion
@@ -123,7 +132,7 @@ export default function OnboardingPacket({ currentUser }) {
       await base44.entities.UserRoleAssignment.create({
         user_email: userEmail,
         role_key: newHire.role,
-        venue_id: activeVenue?.venue_id,
+        venue_id: sessionVenueId,
         assigned_by: currentUser?.email || "system",
         assigned_at: new Date().toISOString(),
         is_active: false, // blocked until activation step completes
@@ -161,16 +170,24 @@ export default function OnboardingPacket({ currentUser }) {
       if (existing?.length > 0) {
         await base44.entities.UserRoleAssignment.update(existing[0].id, { is_active: true }).catch(() => {});
       }
+      // ID-01 FIX: resolve the approver's real name — never "undefined".
+      let approver = currentUser?.full_name || currentUser?.email;
+      if (!approver) {
+        const me = await base44.auth.me().catch(() => null);
+        approver = me?.full_name || me?.email || "manager";
+      }
       const updated = await base44.entities.Entertainer.update(createdEntertainer.id, {
         status: "active",
         contract_status: "VALID",
-        contract_signature: `Activated by ${currentUser?.email} on ${new Date().toLocaleDateString()}`,
+        contract_signature: `Activated by ${approver} on ${new Date().toLocaleDateString()}`,
       });
       // Contractor convention: signing IS the check-in. Open a shift so the
       // contractor appears on the active floor roster immediately — same as Lucky.
       try {
         await base44.entities.EntertainerShift.create({
           entertainer_id: createdEntertainer.id,
+          entertainer_type: "entertainer",
+          venue_id: sessionVenueId,
           check_in_time: new Date().toISOString(),
           location: "Main Floor",
           status: "checked_in",
