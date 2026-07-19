@@ -14,7 +14,6 @@ Deno.serve(async (req) => {
   const KEEP_NUPS_USER_ID = '6a5ac8e9cd05dc26888f8eab';
   const KEEP_USER_EMAIL = 'carloearl@glyphlock.com';
 
-  // === FULL WIPE ENTITIES (delete ALL records) ===
   const fullWipeEntities = [
     'Entertainer', 'EntertainerShift', 'POSTransaction', 'StaffShift',
     'GlyphBucksBill', 'VenueContract', 'PayrollRecord', 'DailySettlement',
@@ -26,16 +25,13 @@ Deno.serve(async (req) => {
     try {
       let deleted = 0;
       let failed = 0;
-      let hasMore = true;
-      let skip = 0;
+      let totalFound = 0;
 
-      while (hasMore && skip < 5000) {
-        const records = await base44.asServiceRole.entities[entityName].list({
-          limit: 500,
-          skip: skip
-        });
+      // Use filter({}) which is confirmed to work in asServiceRole
+      let records = await base44.asServiceRole.entities[entityName].filter({});
 
-        if (!records || records.length === 0) break;
+      if (records && records.length > 0) {
+        totalFound = records.length;
 
         for (const record of records) {
           try {
@@ -45,34 +41,39 @@ Deno.serve(async (req) => {
             failed++;
           }
         }
+      }
 
-        if (records.length < 500) {
-          hasMore = false;
-        } else {
-          skip += 500;
+      // Try a second pass for any that returned more than expected
+      if (totalFound >= 100) {
+        let secondPass = await base44.asServiceRole.entities[entityName].filter({});
+        if (secondPass && secondPass.length > 0) {
+          for (const record of secondPass) {
+            try {
+              await base44.asServiceRole.entities[entityName].delete(record.id);
+              deleted++;
+            } catch (e) {
+              failed++;
+            }
+          }
         }
       }
 
-      results[entityName] = { deleted, failed };
+      results[entityName] = { found: totalFound, deleted, failed };
     } catch (e) {
       results[entityName] = { error: e.message };
     }
   }
 
-  // === PARTIAL WIPE: NUPSUser (keep Carlo only) ===
+  // PARTIAL WIPE: NUPSUser (keep Carlo only)
   try {
     let deleted = 0;
     let failed = 0;
-    let hasMore = true;
-    let skip = 0;
+    let found = 0;
 
-    while (hasMore && skip < 5000) {
-      const records = await base44.asServiceRole.entities.NUPSUser.list({
-        limit: 500,
-        skip: skip
-      });
+    const records = await base44.asServiceRole.entities.NUPSUser.filter({});
 
-      if (!records || records.length === 0) break;
+    if (records && records.length > 0) {
+      found = records.length;
 
       for (const record of records) {
         if (record.id === KEEP_NUPS_USER_ID) continue;
@@ -83,29 +84,24 @@ Deno.serve(async (req) => {
           failed++;
         }
       }
-
-      if (records.length < 500) {
-        hasMore = false;
-      } else {
-        skip += 500;
-      }
     }
 
-    results['NUPSUser'] = { deleted, failed, kept: 'Carlo' };
+    results['NUPSUser'] = { found, deleted, failed, kept: 'Carlo' };
   } catch (e) {
     results['NUPSUser'] = { error: e.message };
   }
 
-  // === PARTIAL WIPE: UserRoleAssignment (keep Carlo's) ===
+  // PARTIAL WIPE: UserRoleAssignment (keep Carlo's)
   try {
     let deleted = 0;
     let failed = 0;
+    let found = 0;
 
-    const records = await base44.asServiceRole.entities.UserRoleAssignment.list({
-      limit: 500
-    });
+    const records = await base44.asServiceRole.entities.UserRoleAssignment.filter({});
 
     if (records && records.length > 0) {
+      found = records.length;
+
       for (const record of records) {
         if (record.user_email === KEEP_USER_EMAIL) continue;
         try {
@@ -117,12 +113,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    results['UserRoleAssignment'] = { deleted, failed, kept: KEEP_USER_EMAIL };
+    results['UserRoleAssignment'] = { found, deleted, failed, kept: KEEP_USER_EMAIL };
   } catch (e) {
     results['UserRoleAssignment'] = { error: e.message };
   }
 
-  // === DO NOT TOUCH: Venue, VenueRateConfig, VenuePaymentConfig, DailyChecklistConfig ===
   results['_preserved'] = ['Venue', 'VenueRateConfig', 'VenuePaymentConfig', 'DailyChecklistConfig'];
 
   return Response.json({ success: true, purge: 'complete', results });
