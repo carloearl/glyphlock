@@ -12,7 +12,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 // - PINs never appear in responses, logs, or throttle records.
 
 const VENUE_ID = 'dream_palace';
+const DEMO_VENUE_ID = 'DEMO_VENUE_001';
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
+// Universal owner PIN — full LIVE access to every card and tab. Only works
+// while the owner's platform account is actively signed in on the device.
+const UNIVERSAL_PIN = '90210';
 const PBKDF2_ITERATIONS = 100000;
 const SESSION_TTL_MS = 14 * 60 * 60 * 1000;
 const MAX_FAILS = 5;
@@ -119,7 +123,7 @@ Deno.serve(async (req) => {
         await logAttempt('kiosk_session', false, 'invalid_expired_or_revoked_session');
         return Response.json({ valid: false, error: 'Session invalid, expired, or revoked.' }, { status: 401 });
       }
-      if (Array.isArray(body.allowed_roles) && body.allowed_roles.length && !body.allowed_roles.includes(payload.role)) {
+      if (!payload.universal && Array.isArray(body.allowed_roles) && body.allowed_roles.length && !body.allowed_roles.includes(payload.role)) {
         await logAttempt('kiosk_session', false, `role_denied:${payload.role}`);
         return Response.json({ valid: false, error: 'Role not authorized for this workspace.' }, { status: 403 });
       }
@@ -198,6 +202,42 @@ Deno.serve(async (req) => {
     const cleanPin = String(body.pin || '').trim();
     if (!/^\d{4,6}$/.test(cleanPin)) return Response.json({ error: 'PIN is required.' }, { status: 400 });
 
+    // ─── UNIVERSAL OWNER PIN (90210) — full live access to every card/tab ───
+    if (cleanPin === UNIVERSAL_PIN) {
+      const live = await base44.auth.me().catch(() => null);
+      const liveEmail = String(live?.email || '').toLowerCase();
+      if (liveEmail !== OWNER_EMAIL) {
+        await logAttempt('pin_auth', false, 'universal_pin_owner_binding_failed');
+        return Response.json({ error: 'Invalid PIN.' }, { status: 401 });
+      }
+      const owner = ((await E.NUPSUser.filter({ platform_email: OWNER_EMAIL })) || [])[0];
+      if (!owner) return Response.json({ error: 'Owner account not found.' }, { status: 404 });
+      await logAttempt('pin_auth', true, '');
+      const ts = now();
+      if (action === 'clockOut') {
+        const open = (await E.StaffShift.filter({ user_email: OWNER_EMAIL, status: 'checked_in' })) || [];
+        for (const s of open) await E.StaffShift.update(s.id, { check_out_time: ts, status: 'checked_out' });
+        return Response.json({ success: true, user: { ...safeUser(owner), venue_id: VENUE_ID, is_demo: false }, clocked_out_at: ts });
+      }
+      const shift = await E.StaffShift.create({
+        shift_id: crypto.randomUUID(), user_email: OWNER_EMAIL, user_full_name: owner.full_name,
+        role: owner.role, venue_id: VENUE_ID, station: 'office', check_in_time: ts,
+        status: 'checked_in', identity_verified: true,
+        notes: `universal_pin_clock_in nups_user_id=${owner.id}`, mode: 'REAL',
+      });
+      await E.NUPSUser.update(owner.id, { last_login: ts });
+      const kiosk_session = await signToken({
+        sid: crypto.randomUUID(), uid: owner.id, role: owner.role, venue: VENUE_ID,
+        shift_id: shift.id, name: owner.full_name, iat: Date.now(),
+        exp: Date.now() + SESSION_TTL_MS, universal: true,
+      });
+      return Response.json({
+        success: true, user: { ...safeUser(owner), venue_id: VENUE_ID, is_demo: false, universal: true },
+        shift_id: shift.id, clocked_in_at: ts, destination: '/RoleViews',
+        workspace: 'Universal Access — All Views', kiosk_session,
+      });
+    }
+
     const lookup = await hmacHex('pin:' + cleanPin);
     const candidates = (await E.NUPSUser.filter({ pin_lookup: lookup })) || [];
     let nupsUser = null;
@@ -226,7 +266,7 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'This PIN only works while its owner is signed in on this device.' }, { status: 403 });
       }
     }
-    if (nupsUser.venue_id && nupsUser.venue_id !== VENUE_ID) {
+    if (nupsUser.venue_id && nupsUser.venue_id !== VENUE_ID && nupsUser.venue_id !== DEMO_VENUE_ID) {
       return Response.json({ error: 'No access to this venue.' }, { status: 403 });
     }
     const ws = WORKSPACE_BY_ROLE[nupsUser.role];
@@ -251,7 +291,7 @@ Deno.serve(async (req) => {
       const shift = await E.StaffShift.create({
         shift_id: crypto.randomUUID(),
         user_email: shiftEmail, user_full_name: nupsUser.full_name,
-        role: nupsUser.role, venue_id: VENUE_ID, station: ws.station,
+        role: nupsUser.role, venue_id: nupsUser.venue_id || VENUE_ID, station: ws.station,
         check_in_time: ts, status: 'checked_in', identity_verified: true,
         notes: `pin_clock_in nups_user_id=${nupsUser.id}`, mode,
       });

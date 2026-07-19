@@ -11,6 +11,19 @@
 import { base44 } from "@/api/base44Client";
 import { getCurrentSovereign } from "./sovereign";
 import { writeEntity } from "./writeEntity";
+import { getActiveMode } from "./modeResolver";
+
+// Demo seeding/wiping is ONLY permitted while the demo venue resolves to
+// DEMO mode — never in live/REAL mode. Prevents demo rows from ever being
+// stamped into the live books again.
+async function requireDemoMode(onLog) {
+  const mode = await getActiveMode(DEMO_VENUE_ID);
+  if (mode !== "DEMO") {
+    onLog?.({ msg: `❌ DEMO_MODE_REQUIRED: demo seeding is disabled in ${mode} mode`, type: "error" });
+    return false;
+  }
+  return true;
+}
 
 export const DEMO_VENUE_ID = "DEMO_VENUE_001";
 
@@ -128,6 +141,9 @@ export async function wipeDemoVenue(onLog) {
     log("❌ SOVEREIGN_REQUIRED: demo wipe blocked", "error");
     return { totalDeleted: 0, totalProtected: 0, perEntity: {}, blocked: true, reason: "SOVEREIGN_REQUIRED" };
   }
+  if (!(await requireDemoMode(onLog))) {
+    return { totalDeleted: 0, totalProtected: 0, perEntity: {}, blocked: true, reason: "DEMO_MODE_REQUIRED" };
+  }
 
   const actor = buildActor(sovereign);
 
@@ -182,6 +198,9 @@ export async function seedDemoVenue(onLog) {
   if (!sovereign) {
     log("❌ SOVEREIGN_REQUIRED: demo seed blocked", "error");
     return { ok: false, blocked: true, reason: "SOVEREIGN_REQUIRED" };
+  }
+  if (!(await requireDemoMode(onLog))) {
+    return { ok: false, blocked: true, reason: "DEMO_MODE_REQUIRED" };
   }
 
   const actor = buildActor(sovereign);
