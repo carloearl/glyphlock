@@ -187,9 +187,15 @@ export default function DriverQuickAdd({ user }) {
   // Onboard a brand new driver — name only, defaults to affiliated.
   // After save, immediately open the payout panel so the door girl can set
   // guests + promo + waived for that driver.
+  // Duplicate-safe: a same-name (case-insensitive) active driver for this
+  // venue opens the EXISTING profile instead of creating a copy — a fast
+  // double-tap or double-Enter can never mint duplicate records again.
   const onboardDriver = useMutation({
     mutationFn: async (name) => {
       if (!venueId) throw new Error("No active venue");
+      const trimmed = name.trim().toLowerCase();
+      const existing = profiles.find(p => (p.name || "").trim().toLowerCase() === trimmed);
+      if (existing) return existing;
       const profile = await base44.entities.DriverProfile.create({
         driver_id: makeDriverId(venueId),
         venue_id: venueId,
@@ -241,6 +247,19 @@ export default function DriverQuickAdd({ user }) {
         </Button>
       </div>
 
+      {/* Batch status — surfaced at the TOP so the operator sees it before
+          logging drivers, not buried in the footnote. Non-blocking: headcounts
+          can be logged early, but payouts need an open batch. */}
+      {!batchRef && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-950/40 border border-red-500/40 text-sm text-red-300">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>
+            <strong>No open batch.</strong> You can log driver headcounts now, but open the batch at the{" "}
+            <strong className="text-white">Register (step 3)</strong> before paying anyone out.
+          </span>
+        </div>
+      )}
+
       <p className="text-xs text-gray-400 bg-gray-900/40 border border-gray-800 rounded-lg p-3">
         <strong className="text-amber-300">Vinnie principle:</strong> ring up cover at the register first,
         then tap a driver to set how many guests they brought, how many had promo cards, and how many
@@ -256,7 +275,7 @@ export default function DriverQuickAdd({ user }) {
               placeholder="Driver name"
               value={newName}
               onChange={e => setNewName(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && newName.trim() && onboardDriver.mutate(newName)}
+              onKeyDown={e => e.key === "Enter" && newName.trim() && !onboardDriver.isPending && onboardDriver.mutate(newName)}
               className="bg-black/40 border-gray-700 text-white"
             />
             <Button
