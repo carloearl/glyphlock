@@ -163,7 +163,7 @@ function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExp
   );
 }
 
-export default function DriverPayoutHistory() {
+export default function DriverPayoutHistory({ embedded = false }) {
   const today = new Date().toISOString().slice(0, 10);
   const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
 
@@ -179,7 +179,7 @@ export default function DriverPayoutHistory() {
   const [exporting, setExporting] = useState(false);
   const [exportErr, setExportErr] = useState(null);
 
-  const { data: user } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
+  const { data: user, isError: meError } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me(), retry: false });
   const role = user?._highestRole || user?.role || 'External';
   const isManager = user && MANAGER_ROLES.includes(role);
 
@@ -268,9 +268,21 @@ export default function DriverPayoutHistory() {
     }
   };
 
-  if (!user) return <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">Loading…</div>;
+  if (!user) {
+    // Kiosk operators have no platform login — hide the manager-only
+    // history section instead of spinning forever.
+    if (embedded && meError) return null;
+    return (
+      <div className={`${embedded ? "py-10" : "min-h-screen p-6"} bg-slate-950 text-white flex items-center justify-center`}>
+        <RefreshCw className="w-5 h-5 text-slate-500 animate-spin mr-2" /> Loading history…
+      </div>
+    );
+  }
 
   if (!isManager) {
+    // Embedded on a page the operator can already see — hide silently
+    // instead of stacking a second full-screen access wall.
+    if (embedded) return null;
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
         <Card className="max-w-md bg-slate-900 border-red-500/30">
@@ -285,7 +297,7 @@ export default function DriverPayoutHistory() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6">
+    <div className={`${embedded ? "" : "min-h-screen p-6"} bg-slate-950 text-white`}>
       <div className="max-w-7xl mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between flex-wrap gap-3">
@@ -457,8 +469,9 @@ export default function DriverPayoutHistory() {
         </p>
       </div>
 
-      {/* Pinned bottom summary — disbursement totals always visible */}
-      <div className="sticky bottom-0 z-30 border-t border-slate-800 bg-slate-950/95 backdrop-blur-md px-6 py-3">
+      {/* Pinned bottom summary — disbursement totals always visible.
+          Not sticky when embedded — a floating bar inside another page overlaps content. */}
+      <div className={`${embedded ? "" : "sticky bottom-0 z-30 backdrop-blur-md"} border-t border-slate-800 bg-slate-950/95 px-6 py-3`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-6 text-sm">
             <div>

@@ -52,8 +52,8 @@ function DriverPayoutsInner() {
         {/* Unified driver workflow — onboarding, sessions, instant guest add */}
         <DriverDropOffTracker user={me} />
 
-        {/* Settled history */}
-        <DriverPayoutHistory />
+        {/* Settled history — embedded mode: no full-page frame, no sticky overlay */}
+        <DriverPayoutHistory embedded />
       </div>
     </NUPSAppShell>
   );

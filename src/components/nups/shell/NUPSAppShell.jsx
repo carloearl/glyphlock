@@ -414,7 +414,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
 
       <main className="flex-1 min-w-0 flex flex-col">
         <header className="sticky top-0 z-40 bg-[#05070d]/85 backdrop-blur-xl border-b border-white/5">
-          <div className="flex items-center gap-3 px-4 lg:px-8 h-16">
+          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 px-4 lg:px-8 min-h-16 py-2">
             {visibleSections.length > 0 && (
             <button
               onClick={() => setOpen(true)}
@@ -494,7 +494,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               </Badge>
             </div>
 
-            {actions && <div className="flex items-center gap-2">{actions}</div>}
+            {actions && <div className="flex items-center gap-2 flex-wrap justify-end">{actions}</div>}
           </div>
         </header>
 
