@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import {
   UserCheck, AlertTriangle, CheckCircle2, Loader2, LogOut, Users,
-  CreditCard, Star, RotateCcw, History, Crown, ScanLine, Camera,
+  CreditCard, Star, RotateCcw, History, Crown, ScanLine, Camera, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import SeedDoorGuestsButton from "@/components/nups/SeedDoorGuestsButton";
 import IDScannerCamera from "@/components/nups/IDScannerCamera";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { getActiveMode } from "@/lib/nups/modeResolver";
 import { snapshotPerson } from "@/lib/nups/personArchive";
 
 const MIN_AGE = 21;
@@ -81,7 +82,7 @@ const TIER_CONFIG = {
   whale:       { label: "Whale VIP",   color: "bg-purple-500/20 text-purple-300 border-purple-500/40" },
 };
 
-function GuestProfileCard({ guest, onCheckOut }) {
+function GuestProfileCard({ guest, onCheckOut, onDelete, canDelete }) {
   const tier = TIER_CONFIG[guest.tier] || TIER_CONFIG.standard;
   return (
     <div className="flex items-center justify-between p-3 rounded-lg bg-black/40 border border-white/10">
@@ -95,6 +96,9 @@ function GuestProfileCard({ guest, onCheckOut }) {
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="font-bold text-white text-sm truncate">{guest.full_name}</span>
             <Badge className={`text-[10px] ${tier.color}`}>{tier.label}</Badge>
+            {guest.is_demo && (
+              <Badge className="text-[10px] bg-amber-500/20 text-amber-300 border-amber-500/40">DEMO</Badge>
+            )}
             {guest.visit_count > 1 && (
               <Badge className="text-[10px] bg-cyan-500/15 text-cyan-300 border-cyan-500/30">
                 <History className="w-2.5 h-2.5 mr-0.5" />{guest.visit_count}x
@@ -120,10 +124,22 @@ function GuestProfileCard({ guest, onCheckOut }) {
           size="sm"
           variant="outline"
           onClick={() => onCheckOut(guest.id)}
+          title="Check out"
           className="border-red-500/40 text-red-400 hover:bg-red-500/10 h-7 text-xs px-2"
         >
           <LogOut className="w-3 h-3" />
         </Button>
+        {canDelete && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onDelete(guest)}
+            title="Delete guest record (admin)"
+            className="border-red-500/40 text-red-500 hover:bg-red-500/20 h-7 text-xs px-2"
+          >
+            <Trash2 className="w-3 h-3" />
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -154,14 +170,46 @@ export default function GuestCheckIn() {
   const scanTimer = useRef(null);
   const activeVenue = useActiveVenue();
 
+  // Mode separation — demo guest records NEVER appear in REAL mode. On any
+  // refresh in live mode the list snaps back to real guests only; demo seeds
+  // stay visible only while the venue is in DEMO/SANDBOX mode.
+  const { data: activeMode = "REAL" } = useQuery({
+    queryKey: ["active-mode", activeVenue?.id],
+    queryFn: () => getActiveMode(activeVenue?.id),
+    staleTime: 30000,
+  });
+  const isDemoMode = activeMode !== "REAL";
+
+  // Admin check — gates hard-delete of guest records
+  const { data: me } = useQuery({
+    queryKey: ["auth-me"],
+    queryFn: () => base44.auth.me().catch(() => null),
+    staleTime: 300000,
+  });
+  const isAdmin = me?.role === "admin";
+
   const { data: guests = [], isLoading } = useQuery({
-    queryKey: ["vip-guests-active"],
+    queryKey: ["vip-guests-active", isDemoMode],
     queryFn: async () => {
       const all = await base44.entities.VIPGuest.list("-created_date", 200);
-      return all.filter((g) => g.status === "in_building");
+      return all.filter((g) => g.status === "in_building" && (isDemoMode || !g.is_demo));
     },
     refetchInterval: 30000,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.VIPGuest.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["vip-guests-active"]);
+      queryClient.invalidateQueries(["vip-guests"]);
+      toast.success("Guest record deleted");
+    },
+  });
+
+  const handleDelete = (guest) => {
+    if (!window.confirm(`Permanently delete ${guest.full_name}'s guest record? This cannot be undone.`)) return;
+    deleteMutation.mutate(guest.id);
+  };
 
   const checkOutMutation = useMutation({
     mutationFn: async (id) => {
@@ -287,6 +335,10 @@ export default function GuestCheckIn() {
         // CREATE new guest profile
         const created = await base44.entities.VIPGuest.create({
           guest_id: guestId,
+          venue_id: activeVenue?.id,
+          // Mode stamp — a guest checked in while the venue is in DEMO/SANDBOX
+          // is demo data and will never surface in REAL mode.
+          is_demo: isDemoMode,
           full_name: form.full_name.trim(),
           date_of_birth: new Date(form.date_of_birth).toISOString(),
           id_type: form.id_type,
@@ -523,8 +575,16 @@ export default function GuestCheckIn() {
             <span className="flex items-center gap-2">
               <Users className="w-5 h-5 text-purple-400" />
               In Building ({guests.length})
+              {isDemoMode && (
+                <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-[10px]">DEMO MODE</Badge>
+              )}
             </span>
-            <SeedDoorGuestsButton variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 h-8 text-xs" />
+            {/* Demo seeding is only offered while the venue is in DEMO/SANDBOX
+                mode — live venues never see the seed button, and seeded
+                records never surface in REAL mode. */}
+            {isDemoMode && (
+              <SeedDoorGuestsButton variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 h-8 text-xs" />
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -535,7 +595,13 @@ export default function GuestCheckIn() {
           ) : (
             <div className="space-y-2">
               {guests.map((g) => (
-                <GuestProfileCard key={g.id} guest={g} onCheckOut={(id) => checkOutMutation.mutate(id)} />
+                <GuestProfileCard
+                  key={g.id}
+                  guest={g}
+                  onCheckOut={(id) => checkOutMutation.mutate(id)}
+                  onDelete={handleDelete}
+                  canDelete={isAdmin}
+                />
               ))}
             </div>
           )}
