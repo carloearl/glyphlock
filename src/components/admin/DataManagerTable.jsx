@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2, Loader2, RefreshCw, Search, AlertTriangle } from "lucide-react";
+import { Trash2, Loader2, RefreshCw, Search, AlertTriangle, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import RecordEditDialog from "@/components/admin/RecordEditDialog";
 
 /**
  * DataManagerTable — admin record browser + delete for one entity.
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 export default function DataManagerTable({ entityName, fields }) {
   const [search, setSearch] = useState("");
   const [confirmId, setConfirmId] = useState(null);
+  const [editRecord, setEditRecord] = useState(null);
   const qc = useQueryClient();
 
   const { data: records = [], isLoading, refetch, isFetching } = useQuery({
@@ -169,15 +171,26 @@ export default function DataManagerTable({ entityName, fields }) {
                         </Button>
                       </span>
                     ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setConfirmId(r.id)}
-                        title="Delete record"
-                        className="border-red-500/40 text-red-400 hover:bg-red-500/10 h-7 px-2"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditRecord(r)}
+                          title="Edit record"
+                          className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 h-7 px-2"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setConfirmId(r.id)}
+                          title="Delete record"
+                          className="border-red-500/40 text-red-400 hover:bg-red-500/10 h-7 px-2"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -185,6 +198,16 @@ export default function DataManagerTable({ entityName, fields }) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {editRecord && (
+        <RecordEditDialog
+          entityName={entityName}
+          record={editRecord}
+          fields={fields}
+          open={!!editRecord}
+          onClose={() => setEditRecord(null)}
+        />
       )}
     </div>
   );
