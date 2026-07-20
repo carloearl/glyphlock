@@ -19,6 +19,7 @@ import {
   Truck, Filter, Download, RefreshCw, ChevronRight, ChevronDown,
   ShieldAlert, CheckCircle2, Clock, FileText, AlertTriangle,
 } from 'lucide-react';
+import { hasOwnerPreview } from '@/lib/nups/previewBypass';
 import DriverPayoutStatusToggle from '@/components/nups/DriverPayoutStatusToggle';
 import BulkPayoutProcessor from '@/components/nups/BulkPayoutProcessor';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -181,7 +182,10 @@ export default function DriverPayoutHistory({ embedded = false }) {
 
   const { data: user, isError: meError } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me(), retry: false });
   const role = user?._highestRole || user?.role || 'External';
-  const isManager = user && MANAGER_ROLES.includes(role);
+  // Honor the same owner preview the route guards honor — otherwise the
+  // history panel silently vanished for preview sessions (audit 2026-07-20).
+  const preview = hasOwnerPreview();
+  const isManager = preview || (user && MANAGER_ROLES.includes(role));
 
   const { data: payouts = [], isLoading, refetch } = useQuery({
     queryKey: ['payout-history'],
@@ -268,7 +272,7 @@ export default function DriverPayoutHistory({ embedded = false }) {
     }
   };
 
-  if (!user) {
+  if (!user && !preview) {
     // Kiosk operators have no platform login — hide the manager-only
     // history section instead of spinning forever.
     if (embedded && meError) return null;
