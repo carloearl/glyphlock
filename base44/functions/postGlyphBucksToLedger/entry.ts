@@ -33,6 +33,15 @@ function toCents(dollars) {
   return Math.round(n * 100);
 }
 
+// Definitions for the accounts this poster touches — auto-seeded when a
+// venue/mode has no COA yet, so a GB sale never 500s on a fresh venue.
+const ACCT_DEFS = {
+  '1000': { name: 'Cash on Hand', type: 'ASSET', normal_side: 'DEBIT' },
+  '1010': { name: 'Card Clearing', type: 'ASSET', normal_side: 'DEBIT' },
+  '2000': { name: 'GlyphBucks Outstanding', type: 'LIABILITY', normal_side: 'CREDIT' },
+  '4200': { name: 'VIP Revenue', type: 'REVENUE', normal_side: 'CREDIT' },
+};
+
 async function ensureAccounts(base44, venue_id, mode, codes) {
   const accounts = await base44.asServiceRole.entities.LedgerAccount.filter(
     { venue_id, mode }, null, 200,
@@ -40,7 +49,20 @@ async function ensureAccounts(base44, venue_id, mode, codes) {
   const have = new Set(accounts.map(a => a.code));
   for (const c of codes) {
     if (!have.has(c)) {
-      throw new Error(`missing_account:${c} — seed default COA at /admin/ledger`);
+      const def = ACCT_DEFS[c];
+      if (!def) {
+        throw new Error(`missing_account:${c} — seed default COA at /admin/ledger`);
+      }
+      await base44.asServiceRole.entities.LedgerAccount.create({
+        venue_id,
+        mode,
+        code: c,
+        ...def,
+        active: true,
+        seeded_by_default: true,
+        description: 'Auto-seeded by postGlyphBucksToLedger (COA missing at posting time)',
+      });
+      have.add(c);
     }
   }
 }
