@@ -7,26 +7,34 @@ import UnifiedContractDesk from '@/components/nups/contracts/UnifiedContractDesk
 import ContractSearch from '@/components/vip2/ContractSearch';
 import VIPLiveBoard from '@/components/vip2/VIPLiveBoard';
 import GlyphBucksWorkspace from '@/components/nups/glyphbucks/GlyphBucksWorkspace';
+import CommandCenterMenu from '@/components/vip2/CommandCenterMenu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Crown } from 'lucide-react';
+import { Loader2, Crown, ArrowLeft } from 'lucide-react';
 
 /**
- * VIP Command Center — MERGED surface (owner directive 2026-07-17).
- * Absorbs the VIP Room Board (formerly duplicated on Contracts?tab=vip):
- * the live board (timers, guest picker, age/contract gates, auto-print)
- * is the primary Rooms view; the vip2 RoomManager remains below it for
- * room creation and status maintenance.
+ * VIP Command Center — glass card-grid home screen (owner directive 2026-07-20).
+ * The tab bar is replaced by glassmorphic launcher cards; "New Contract" and
+ * "GlyphBucks" are merged into one "Contracts & GlyphBucks" card.
  */
-const TABS = ['Desk', 'New Contract', 'Rooms', 'People', 'GlyphBucks', 'Search'];
-// Tabs that require an initialized VIPConfig; Rooms/People/Search work without it.
-const CONFIG_GATED = ['Desk', 'New Contract'];
+const VIEW_TITLES = {
+  Desk: 'Contract Desk',
+  Contracts: 'Contracts & GlyphBucks',
+  Rooms: 'Rooms & Floor',
+  People: 'People',
+  Search: 'Contract Search',
+};
+const CONFIG_GATED = ['Desk', 'Contracts'];
+// Legacy deep-links (?tab=GlyphBucks from the old GlyphBucks Hub, ?tab=New Contract)
+const LEGACY_TAB_MAP = {
+  GlyphBucks: 'Contracts', 'New Contract': 'Contracts',
+  Desk: 'Desk', Rooms: 'Rooms', People: 'People', Search: 'Search',
+};
 
 export default function VIPCommandCenter() {
   const [state, setState] = useState(null);
-  // Deep-link support: /VIPCommand?tab=GlyphBucks (old GlyphBucks Hub redirects here)
   const urlTab = new URLSearchParams(window.location.search).get('tab');
-  const [tab, setTab] = useState(TABS.includes(urlTab) ? urlTab : 'Rooms');
+  const [view, setView] = useState(LEGACY_TAB_MAP[urlTab] || null); // null = card-grid home
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -53,8 +61,14 @@ export default function VIPCommandCenter() {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <header className="border-b border-purple-900/50 bg-slate-900/80 px-4 py-3 flex flex-wrap items-center gap-3">
+        {view && (
+          <button onClick={() => setView(null)} aria-label="Back to menu"
+            className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.05] backdrop-blur px-3 py-2 text-sm text-slate-300 hover:text-white hover:border-white/30 min-h-[44px]">
+            <ArrowLeft className="w-4 h-4" /> Menu
+          </button>
+        )}
         <Crown className="w-6 h-6 text-purple-400" />
-        <h1 className="text-lg font-bold">VIP Command Center — Dream Palace</h1>
+        <h1 className="text-lg font-bold">{view ? VIEW_TITLES[view] : 'VIP Command Center — Dream Palace'}</h1>
         {state?.config?.live_enabled ? (
           <Badge className="bg-emerald-600 text-white">LIVE</Badge>
         ) : (
@@ -66,34 +80,39 @@ export default function VIPCommandCenter() {
         </div>
       </header>
 
-      <nav className="flex gap-1 px-4 pt-3 flex-wrap">
-        {TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-t-lg text-sm font-medium min-h-[44px] ${tab === t ? 'bg-purple-800 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
-            {t}
-          </button>
-        ))}
-      </nav>
       <main className="p-4">
-        {configMissing && CONFIG_GATED.includes(tab) ? (
+        {!view ? (
+          <CommandCenterMenu onSelect={setView} />
+        ) : configMissing && CONFIG_GATED.includes(view) ? (
           <div className="p-10 text-center text-slate-400">
             No VIP configuration exists for Dream Palace. Contract creation is blocked until the venue configuration is initialized.
           </div>
         ) : (
           <>
-            {tab === 'Desk' && <ContractDesk state={state} refresh={refresh} />}
-            {tab === 'New Contract' && <UnifiedContractDesk />}
-            {tab === 'Rooms' && (
+            {view === 'Desk' && <ContractDesk state={state} refresh={refresh} />}
+            {view === 'Contracts' && (
+              <div className="space-y-6">
+                <UnifiedContractDesk />
+                <details className="group">
+                  <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300 select-none list-none inline-flex items-center gap-1 min-h-[44px]">
+                    <span className="transition-transform group-open:rotate-90">›</span> GlyphBucks tools — redemption, ledger &amp; search
+                  </summary>
+                  <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-4">
+                    <GlyphBucksWorkspace />
+                  </div>
+                </details>
+              </div>
+            )}
+            {view === 'Rooms' && (
               <div className="space-y-6">
                 <div className="mb-2">
                   <h2 className="text-xl font-semibold text-white tracking-tight">VIP Floor</h2>
-                  <p className="text-xs text-slate-500">Who's in VIP right now — visible to DJ, Manager, Hostess & Owner</p>
+                  <p className="text-xs text-slate-500">Tap a room card to edit session timing &amp; status (managers)</p>
                 </div>
-                {/* Read-only live record: room · entertainer · guest · start · time left */}
                 <VIPLiveBoard />
                 <details className="group">
                   <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300 select-none list-none inline-flex items-center gap-1">
-                    <span className="transition-transform group-open:rotate-90">›</span> Room setup & maintenance
+                    <span className="transition-transform group-open:rotate-90">›</span> Room setup &amp; maintenance
                   </summary>
                   <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-4">
                     <RoomManager state={state || { rooms: [] }} refresh={refresh} />
@@ -101,9 +120,8 @@ export default function VIPCommandCenter() {
                 </details>
               </div>
             )}
-            {tab === 'People' && <PeoplePanel state={state} refresh={refresh} />}
-            {tab === 'GlyphBucks' && <GlyphBucksWorkspace />}
-            {tab === 'Search' && <ContractSearch />}
+            {view === 'People' && <PeoplePanel state={state} refresh={refresh} />}
+            {view === 'Search' && <ContractSearch />}
           </>
         )}
       </main>

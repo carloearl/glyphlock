@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import { Sparkles, User, Clock, DoorOpen, Wrench, Droplets } from "lucide-react";
+import RoomTimingModal from "@/components/vip2/RoomTimingModal";
 
 /**
  * VIPLiveBoard — read-only glass board of who's in VIP right now.
@@ -11,6 +12,8 @@ import { Sparkles, User, Clock, DoorOpen, Wrench, Droplets } from "lucide-react"
  */
 export default function VIPLiveBoard() {
   const [now, setNow] = useState(Date.now());
+  const [selected, setSelected] = useState(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -31,9 +34,16 @@ export default function VIPLiveBoard() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-      {rooms.map((room) => <RoomGlassCard key={room.id} room={room} now={now} />)}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {rooms.map((room) => <RoomGlassCard key={room.id} room={room} now={now} onOpen={() => setSelected(room)} />)}
+      </div>
+      <RoomTimingModal
+        room={selected}
+        onClose={() => setSelected(null)}
+        onSaved={() => { setSelected(null); queryClient.invalidateQueries({ queryKey: ["vip-live-board-rooms"] }); }}
+      />
+    </>
   );
 }
 
@@ -43,7 +53,7 @@ const STATUS_META = {
   maintenance: { label: "Maintenance", icon: Wrench,   chip: "text-amber-300 border-amber-400/30 bg-amber-400/10" },
 };
 
-function RoomGlassCard({ room, now }) {
+function RoomGlassCard({ room, now, onOpen }) {
   const occupied = room.status === "occupied";
   const meta = STATUS_META[room.status] || STATUS_META.available;
 
@@ -59,7 +69,11 @@ function RoomGlassCard({ room, now }) {
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl p-5 transition-all ${
+      onClick={onOpen}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter") onOpen?.(); }}
+      className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl p-5 transition-all cursor-pointer hover:border-purple-300/40 ${
         occupied
           ? overtime
             ? "bg-rose-500/[0.06] border-rose-400/25 shadow-[0_8px_40px_-12px_rgba(244,63,94,0.35)]"

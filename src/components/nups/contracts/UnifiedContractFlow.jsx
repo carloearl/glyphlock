@@ -55,7 +55,7 @@ const Toggle = ({ on, onChange, label }) => (
 const BLANK = {
   guest: { name: "", member_id: "", tier: "MEMBER", gb_account_last4: "", id_scan_ref: "", age_verified: false, face_pct: "", thumb_pct: "" },
   gb: { denom_cents: 2000, qty: 5, card_fee_cents: 500, terminal_id: "CG01-T1" },
-  vip: { suite: "", hostess: "", duty_manager: "", lines: [{ description: "", qty: 1, amount: 0 }], card_fee_pct: 5, cash: 0, card: 0, glyphbucks: 0, treatment: "", tip_pct: null, tip_custom: "" },
+  vip: { suite: "", hostess: "", duty_manager: "", session_start: "", session_minutes: 60, lines: [{ description: "", qty: 1, amount: 0 }], card_fee_pct: 5, cash: 0, card: 0, glyphbucks: 0, treatment: "", tip_pct: null, tip_custom: "" },
   card: { last4: "", auth_code: "", entry: "CHIP", brand: "VISA" },
   esigs: { purchaser: "", issuer_rep: "", manager: "" },
 };
@@ -108,7 +108,7 @@ export default function UnifiedContractFlow({ memberFill }) {
     setAssent({ clickwrap_accepted: true, terms_shown_at: now, scroll_depth_pct: 100, dwell_seconds: 45, accepted_at: now, initials_term1: "R.S.", initials_term3: "R.S." });
     setGuest({ name: "Robert Spender", member_id: "MBR-0001", tier: "PLATINUM ELITE", gb_account_last4: "4471", id_scan_ref: "IDS-AZ-0001", age_verified: true, face_pct: "98.2", thumb_pct: "98.7" });
     setGb({ denom_cents: 2000, qty: 5, card_fee_cents: 500, terminal_id: "CG01-T1" });
-    setVip({ suite: "Skyline Suite", hostess: "Amber", duty_manager: "M. Reyes", lines: [{ description: "VIP Suite — 60 min", qty: 1, amount: 300 }, { description: "Performance — Crystal", qty: 2, amount: 150 }], card_fee_pct: 5, cash: 200, card: 550, glyphbucks: 0, treatment: "DEMO walkthrough — training scenario", tip_pct: 20, tip_custom: "" });
+    setVip({ suite: "Skyline Suite", hostess: "Amber", duty_manager: "M. Reyes", session_start: "", session_minutes: 60, lines: [{ description: "VIP Suite — 60 min", qty: 1, amount: 300 }, { description: "Performance — Crystal", qty: 2, amount: 150 }], card_fee_pct: 5, cash: 200, card: 550, glyphbucks: 0, treatment: "DEMO walkthrough — training scenario", tip_pct: 20, tip_custom: "" });
     setCard({ last4: "9921", auth_code: "AUTH88231", entry: "CHIP", brand: "VISA" });
     setEsigs({ purchaser: "Robert Spender", issuer_rep: "Amber Cole", manager: "M. Reyes" });
     setError("");
@@ -219,6 +219,12 @@ export default function UnifiedContractFlow({ memberFill }) {
               initials_term3: assent.initials_term3 || null, scroll_depth_pct: assent.scroll_depth_pct ?? null,
             },
             linked_glyphbucks_seal: gbDoc?.verify_ref || null,
+            session: (() => {
+              const mins = Number(vip.session_minutes) || 0;
+              if (!mins) return null;
+              const start = vip.session_start ? new Date(vip.session_start) : now;
+              return { start: start.toISOString(), duration_minutes: mins, end: new Date(start.getTime() + mins * 60000).toISOString() };
+            })(),
           },
           terms_hash: termsHash,
         };
@@ -385,6 +391,10 @@ export default function UnifiedContractFlow({ memberFill }) {
               <label><span className={lbl}>Suite *</span><input className={inp} value={vip.suite} onChange={(e) => setVip({ ...vip, suite: e.target.value })} placeholder="Suite 3" /></label>
               <label><span className={lbl}>Hostess</span><input className={inp} value={vip.hostess} onChange={(e) => setVip({ ...vip, hostess: e.target.value })} /></label>
               <label><span className={lbl}>Duty manager</span><input className={inp} value={vip.duty_manager} onChange={(e) => setVip({ ...vip, duty_manager: e.target.value })} /></label>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label><span className={lbl}>Session start (blank = at seal)</span><input className={inp} type="datetime-local" value={vip.session_start} onChange={(e) => setVip({ ...vip, session_start: e.target.value })} /></label>
+              <label><span className={lbl}>Session duration (min)</span><input className={inp} type="number" min="0" value={vip.session_minutes} onChange={(e) => setVip({ ...vip, session_minutes: e.target.value })} /></label>
             </div>
             {vip.lines.map((l, i) => (
               <div key={i} className="flex gap-2">

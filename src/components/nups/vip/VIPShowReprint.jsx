@@ -44,6 +44,13 @@ export default function VIPShowReprint({ record, anchor }) {
           <KV k="Duty manager" v={record.staff?.duty_manager} />
           <KV k="Suite" v={record.staff?.suite} />
           <KV k="Executed" v={record.executed_at ? new Date(record.executed_at).toLocaleString() : "—"} />
+          {record.notes?.session && (
+            <>
+              <KV k="Session start" v={new Date(record.notes.session.start).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} />
+              <KV k="Session length" v={`${record.notes.session.duration_minutes} min`} />
+              <KV k="Session ends" v={new Date(record.notes.session.end).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} />
+            </>
+          )}
         </div>
       </div>
 
