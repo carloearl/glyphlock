@@ -18,7 +18,6 @@ import FundsOffDrawerPanel from "@/components/nups/frontdoor/FundsOffDrawerPanel
 import FrontDoorConfigPanel from "@/components/nups/frontdoor/FrontDoorConfigPanel";
 import EmergencyOverrideButton from "@/components/nups/frontdoor/EmergencyOverrideButton";
 import OperatorStatusBar from "@/components/nups/frontdoor/OperatorStatusBar";
-import FrontDoorSideNav from "@/components/nups/frontdoor/FrontDoorSideNav";
 import { base44 } from "@/api/base44Client";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useFrontDoorConfig, DEFAULT_FRONT_DOOR_CONFIG } from "@/hooks/useFrontDoorConfig";
@@ -55,6 +54,40 @@ export default function FrontDoor() {
 
 // Workflow order — ID verification is ALWAYS first at the door.
 const STEP_ORDER = ["guests", "drivers", "dancers", "staff"];
+
+// Full flow including the permanent Register step — this is the vertical
+// scroll order of the page (top → bottom = the order of every guest's night).
+const FLOW_META = {
+  guests:   { step: 1, title: "Guest Check-In",       hint: "Scan ID — verify age first" },
+  drivers:  { step: 2, title: "Driver Drop-Off",      hint: "Tap a driver, +1 per guest" },
+  register: { step: 3, title: "Ring Up",              hint: "Cover, drinks, payouts" },
+  dancers:  { step: 4, title: "Entertainer Check-In", hint: "Acknowledgments + clock in" },
+  staff:    { step: 5, title: "Staff Clock In/Out",   hint: "Punch in for shift" },
+};
+
+// One full-screen section per workflow step — vertical flow directive
+// 2026-07-20: each section covers the screen for phones, tablets, desktops.
+function FlowSection({ id, meta, children }) {
+  return (
+    <section
+      id={`fd-${id}`}
+      className="min-h-[100svh] w-full flex flex-col py-5 scroll-mt-20"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-full bg-cyan-500/15 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-black shrink-0">
+          {meta.step}
+        </div>
+        <div>
+          <h2 className="text-lg font-black text-white leading-tight">{meta.title}</h2>
+          <p className="text-xs text-slate-400">{meta.hint}</p>
+        </div>
+      </div>
+      <div className="flex-1 rounded-xl border border-white/5 bg-slate-950/40 p-4">
+        {children}
+      </div>
+    </section>
+  );
+}
 
 function FrontDoorContent() {
   const navigate = useNavigate();
@@ -186,59 +219,87 @@ function FrontDoorContent() {
             )}
           </div>
         ) : (
-          // ─── 3-PANEL FRONT DOOR ──────────────────────────────────────────
-          // ┌─────────────┬──────────────────────┬──────────────────────────┐
-          // │ ① Workflow  │  ② Active Step       │  ③ Live Pulse            │
-          // │   Rail      │     (Driver / Guest  │     (Stats · Settlement  │
-          // │             │      / Dancer /Staff)│      · Funds-Off Drawer) │
-          // └─────────────┴──────────────────────┴──────────────────────────┘
-          <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_320px] gap-5">
-            {/* Panel 1 — Workflow rail */}
-            <div>
-              <FrontDoorSideNav
-                activeId={activeTab}
-                onSelect={setActiveTab}
-                enabledIds={enabledIds}
-              />
-            </div>
-
-            {/* Panel 2 — Active workflow content */}
-            <div className="min-w-0 rounded-xl border border-white/5 bg-slate-950/40 p-4">
-              {activeTab === "drivers" && <DriverQuickAdd user={user} />}
-              {activeTab === "guests" && <GuestCheckIn />}
-              {activeTab === "register" && (
-                <div className="space-y-3">
-                  <BatchConfirmControl operatorName={user?.full_name || user?.username} />
-                  <POSCashRegister station="door" user={user} venueId={venueId} />
+          // ─── VERTICAL FLOW FRONT DOOR ────────────────────────────────────
+          // One full-screen section per step, stacked top → bottom in the
+          // order of every guest's night. Sticky jump bar for fast hops.
+          (() => {
+            const flowIds = ["guests", "drivers", "register", "dancers", "staff"]
+              .filter(id => id === "register" || enabledIds.includes(id));
+            const jumpTo = (id) => {
+              setActiveTab(id);
+              document.getElementById(`fd-${id}`)?.scrollIntoView({ behavior: "smooth" });
+            };
+            return (
+              <div className="w-full">
+                {/* Sticky step jump bar */}
+                <div className="sticky top-0 z-40 -mx-1 px-1 py-2 bg-[#0a0f1a]/90 backdrop-blur border-b border-white/5 flex gap-1.5 overflow-x-auto scrollbar-hide">
+                  {flowIds.map(id => (
+                    <button
+                      key={id}
+                      onClick={() => jumpTo(id)}
+                      className="shrink-0 min-h-[44px] px-3 rounded-lg text-xs font-bold bg-slate-900/70 border border-slate-700 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300 transition-colors"
+                    >
+                      {FLOW_META[id].step}. {FLOW_META[id].title}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => document.getElementById("fd-pulse")?.scrollIntoView({ behavior: "smooth" })}
+                    className="shrink-0 min-h-[44px] px-3 rounded-lg text-xs font-bold bg-slate-900/70 border border-slate-700 text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300 transition-colors"
+                  >
+                    Live Pulse
+                  </button>
                 </div>
-              )}
-              {activeTab === "dancers" && <EntertainerCheckIn user={user} />}
-              {activeTab === "staff" && <StaffClockInOut user={user} venueId={venueId} station="door" />}
-            </div>
 
-            {/* Panel 3 — Live pulse */}
-            <div className="space-y-4">
-              {effective.show_stats && (
-                <div className="rounded-xl border border-white/5 bg-slate-950/40 p-3">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-2">Live Floor</div>
-                  <FrontDoorStats venueId={venueId} />
-                </div>
-              )}
-              {effective.show_settlement_ticker && (
-                <div className="rounded-xl border border-white/5 bg-slate-950/40 p-3">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-2">Settlement</div>
-                  <SettlementTicker
+                {/* Full-screen sections, in night order */}
+                {flowIds.map(id => (
+                  <FlowSection key={id} id={id} meta={FLOW_META[id]}>
+                    {id === "guests" && <GuestCheckIn />}
+                    {id === "drivers" && <DriverQuickAdd user={user} />}
+                    {id === "register" && (
+                      <div className="space-y-3">
+                        <BatchConfirmControl operatorName={user?.full_name || user?.username} />
+                        <POSCashRegister station="door" user={user} venueId={venueId} />
+                      </div>
+                    )}
+                    {id === "dancers" && <EntertainerCheckIn user={user} />}
+                    {id === "staff" && <StaffClockInOut user={user} venueId={venueId} station="door" />}
+                  </FlowSection>
+                ))}
+
+                {/* Live Pulse — final section */}
+                <section id="fd-pulse" className="min-h-[100svh] w-full py-5 scroll-mt-20 space-y-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-300 font-black shrink-0">
+                      ⚡
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black text-white leading-tight">Live Pulse</h2>
+                      <p className="text-xs text-slate-400">Stats · Settlement · Funds-Off Drawer</p>
+                    </div>
+                  </div>
+                  {effective.show_stats && (
+                    <div className="rounded-xl border border-white/5 bg-slate-950/40 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-2">Live Floor</div>
+                      <FrontDoorStats venueId={venueId} />
+                    </div>
+                  )}
+                  {effective.show_settlement_ticker && (
+                    <div className="rounded-xl border border-white/5 bg-slate-950/40 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-2">Settlement</div>
+                      <SettlementTicker
+                        venueId={venueId}
+                        businessDate={new Date().toISOString().split("T")[0]}
+                      />
+                    </div>
+                  )}
+                  <FundsOffDrawerPanel
                     venueId={venueId}
                     businessDate={new Date().toISOString().split("T")[0]}
                   />
-                </div>
-              )}
-              <FundsOffDrawerPanel
-                venueId={venueId}
-                businessDate={new Date().toISOString().split("T")[0]}
-              />
-            </div>
-          </div>
+                </section>
+              </div>
+            );
+          })()
         )}
       </div>
 
