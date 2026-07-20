@@ -6,9 +6,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
  * ADMIN ONLY
  */
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
   try {
-    return Response.json({ error: 'OMEGA directive active: devAnalyzeFile is disabled. Report-only mode.' }, { status: 403 });
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
@@ -23,10 +22,6 @@ Deno.serve(async () => {
       return Response.json({ error: 'Blocked: explicit user trigger required for file analysis.' }, { status: 403 });
     }
 
-    if (String(filePath).toLowerCase().includes('audit') || String(filePath).toLowerCase().includes('scan') || String(filePath).toLowerCase().includes('report') || String(filePath).toLowerCase().includes('sitemap') || String(filePath).toLowerCase().includes('index')) {
-      return Response.json({ error: 'Audit/scan/report/index generation and analysis are blocked in dev engine context.' }, { status: 403 });
-    }
-    
     if (!filePath || !fileContent) {
       return Response.json({ error: 'filePath and fileContent required' }, { status: 400 });
     }

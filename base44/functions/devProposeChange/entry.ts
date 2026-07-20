@@ -6,9 +6,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
  * ADMIN ONLY
  */
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
   try {
-    return Response.json({ error: 'OMEGA directive active: devProposeChange is disabled. Report-only mode.' }, { status: 403 });
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
@@ -23,11 +22,6 @@ Deno.serve(async () => {
       return Response.json({ error: 'Blocked: explicit user trigger required for change proposals.' }, { status: 403 });
     }
 
-    const blockedText = `${filePath} ${changeDescription}`.toLowerCase();
-    if (blockedText.includes('audit') || blockedText.includes('scan') || blockedText.includes('report') || blockedText.includes('sitemap') || blockedText.includes('index') || blockedText.includes('file analysis')) {
-      return Response.json({ error: 'Audit/scan/report/index generation is blocked in dev engine context.' }, { status: 403 });
-    }
-    
     if (!filePath || !fileContent || !changeDescription) {
       return Response.json({ 
         error: 'filePath, fileContent, and changeDescription required' 

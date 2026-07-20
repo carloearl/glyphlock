@@ -5,6 +5,7 @@ export default function AIConsole(props) {
     selectedFile,
     analysis,
     proposal,
+    proposalMeta,
     onAnalyze,
     onPropose,
     busy
@@ -61,17 +62,41 @@ export default function AIConsole(props) {
 
       {analysis && (
         <div className="mt-2 p-2 bg-slate-900 border border-slate-800 rounded text-[11px] text-slate-200 max-h-40 overflow-auto">
-          <div className="font-semibold text-emerald-300 mb-1">✓ Analysis Complete</div>
-          <pre className="whitespace-pre-wrap break-words font-mono">
-            {typeof analysis === 'string' ? analysis : JSON.stringify(analysis, null, 2)}
-          </pre>
+          <div className="font-semibold text-emerald-300 mb-1">
+            ✓ Analysis Complete{typeof analysis?.quality_score === 'number' ? ` — Quality ${analysis.quality_score}/100` : ''}
+          </div>
+          {analysis?.summary ? (
+            <div className="space-y-1">
+              <p>{analysis.summary}</p>
+              {Array.isArray(analysis.issues) && analysis.issues.length > 0 && (
+                <ul className="list-disc pl-4">
+                  {analysis.issues.map((iss, i) => (
+                    <li key={i}>
+                      <span className="text-amber-300">[{iss.severity || 'issue'}]</span> {iss.description}{iss.line ? ` (line ${iss.line})` : ''}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {Array.isArray(analysis.suggestions) && analysis.suggestions.length > 0 && (
+                <ul className="list-disc pl-4 text-cyan-200">
+                  {analysis.suggestions.map((s, i) => <li key={i}>{s}</li>)}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <pre className="whitespace-pre-wrap break-words font-mono">
+              {typeof analysis === 'string' ? analysis : JSON.stringify(analysis, null, 2)}
+            </pre>
+          )}
         </div>
       )}
 
       {proposal && (
         <div className="mt-2 p-2 bg-slate-900 border border-slate-800 rounded text-[11px] text-slate-200 max-h-32 overflow-auto">
-          <div className="font-semibold text-emerald-300 mb-1">Proposal Summary</div>
-          <p>This file has a proposed change ready. Review the diff and approve or reject below.</p>
+          <div className="font-semibold text-emerald-300 mb-1">
+            Proposal Ready{proposalMeta?.risk ? ` — Risk: ${proposalMeta.risk}` : ''}
+          </div>
+          <p>{proposalMeta?.explanation || 'Review the diff and approve or reject below.'}</p>
         </div>
       )}
     </div>

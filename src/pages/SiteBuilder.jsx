@@ -131,9 +131,9 @@ export default function SiteBuilder() {
             <div className="flex items-center gap-2 flex-wrap">
               {isAdmin && (
                 <div className="flex gap-1 bg-white/5 rounded-lg p-1">
-                  {[['visual','VISUAL',Sparkles,'blue'],['dev','DEV ENGINE',Code,'indigo'],['brain','AGENT BRAIN',Zap,'violet'],['deploy','DEPLOY',Sparkles,'green']].map(([vm, label, Icon, color]) => (
+                  {[['visual','VISUAL',Sparkles,'bg-blue-500'],['dev','DEV ENGINE',Code,'bg-indigo-500'],['brain','AGENT BRAIN',Zap,'bg-violet-500'],['deploy','DEPLOY',Sparkles,'bg-green-500']].map(([vm, label, Icon, activeCls]) => (
                     <button key={vm} onClick={() => setViewMode(vm)}
-                      className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${viewMode === vm ? `bg-${color}-500 text-white` : 'text-gray-400 hover:text-white'}`}>
+                      className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${viewMode === vm ? `${activeCls} text-white` : 'text-gray-400 hover:text-white'}`}>
                       <Icon className="w-3.5 h-3.5" />{label}
                     </button>
                   ))}
@@ -176,12 +176,17 @@ export default function SiteBuilder() {
         <div className="container mx-auto px-4 pt-6 pb-6">
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            {[[FileCode,'blue','Components','Create & Modify'],[LayoutIcon,'indigo','Pages','Full Page Builder'],[Database,'violet','Entities','Schema Design'],[Terminal,'fuchsia','Functions','Backend APIs']].map(([Icon, color, title, sub]) => (
-              <Card key={title} className={`bg-white/5 border-${color}-500/20`}>
+            {[
+              [FileCode, 'border-blue-500/20', 'text-blue-400', 'text-blue-300', 'Site Audits', 'Security · Perf · SEO · UX'],
+              [LayoutIcon, 'border-indigo-500/20', 'text-indigo-400', 'text-indigo-300', 'Integrity Scans', 'Nav · Routes · Sitemaps'],
+              [Database, 'border-violet-500/20', 'text-violet-400', 'text-violet-300', 'Scan History', 'Trends & Comparisons'],
+              [Terminal, 'border-fuchsia-500/20', 'text-fuchsia-400', 'text-fuchsia-300', 'Fix Plans', 'Prioritized by Severity'],
+            ].map(([Icon, borderCls, iconCls, titleCls, title, sub]) => (
+              <Card key={title} className={`bg-white/5 ${borderCls}`}>
                 <CardContent className="p-3 flex items-center gap-3">
-                  <Icon className={`w-5 h-5 text-${color}-400 flex-shrink-0`} />
+                  <Icon className={`w-5 h-5 ${iconCls} flex-shrink-0`} />
                   <div>
-                    <p className={`text-xs text-${color}-300 font-bold`}>{title}</p>
+                    <p className={`text-xs ${titleCls} font-bold`}>{title}</p>
                     <p className="text-xs text-white hidden md:block">{sub}</p>
                   </div>
                 </CardContent>
@@ -202,20 +207,20 @@ export default function SiteBuilder() {
                 {safeMessages.length === 0 ? (
                   <div className="text-center py-12">
                     <Sparkles className="w-12 h-12 text-blue-400 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-xl font-bold text-white mb-2">Manual-Only Mode</h3>
-                    <p className="text-blue-300 mb-6">Describe the issue or request and the system will report it without executing changes</p>
+                    <h3 className="text-xl font-bold text-white mb-2">Site Builder Agent Ready</h3>
+                    <p className="text-blue-300 mb-6">Runs real site audits and integrity scans, reads past results, and delivers prioritized fix plans</p>
                     <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
                       {[
-                        [Code,'blue','Report Issue','Report only','Describe a problem without auto-fixing it'],
-                        [Database,'indigo','Review State','No execution','Inspect current state without changing files'],
-                        [Zap,'violet','Debug Report','Report only','Explain an error without repair execution'],
-                        [RefreshCw,'fuchsia','Manual Mode','Execution locked','Manual-only mode is active'],
-                      ].map(([Icon, color, title, sub, prompt]) => (
+                        [Code, 'border-blue-500/20 hover:border-blue-500/40', 'text-blue-400', 'text-blue-300', 'Run Site Audit', 'Full AI audit', 'Run a full site audit and give me the top issues by severity'],
+                        [Database, 'border-indigo-500/20 hover:border-indigo-500/40', 'text-indigo-400', 'text-indigo-300', 'Integrity Scan', 'Live health check', 'Run a live integrity scan of navigation, routes, and sitemaps'],
+                        [Zap, 'border-violet-500/20 hover:border-violet-500/40', 'text-violet-400', 'text-violet-300', 'Latest Findings', 'Nightly Guardian', 'Summarize the latest nightly Site Guardian results and any critical findings'],
+                        [RefreshCw, 'border-fuchsia-500/20 hover:border-fuchsia-500/40', 'text-fuchsia-400', 'text-fuchsia-300', 'Fix Plan', 'Prioritized actions', 'Build a prioritized fix plan from the most recent audit findings'],
+                      ].map(([Icon, borderCls, iconCls, subCls, title, sub, prompt]) => (
                         <button key={title} onClick={() => setInput(prompt)}
-                          className={`p-4 rounded-xl bg-white/5 border border-${color}-500/20 hover:border-${color}-500/40 transition-all text-left`}>
-                          <Icon className={`w-5 h-5 text-${color}-400 mb-2`} />
+                          className={`p-4 rounded-xl bg-white/5 border ${borderCls} transition-all text-left`}>
+                          <Icon className={`w-5 h-5 ${iconCls} mb-2`} />
                           <p className="text-sm text-white font-semibold">{title}</p>
-                          <p className={`text-xs text-${color}-300`}>{sub}</p>
+                          <p className={`text-xs ${subCls}`}>{sub}</p>
                         </button>
                       ))}
                     </div>
@@ -236,7 +241,7 @@ export default function SiteBuilder() {
                   <Textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     placeholder={mode === 'chat' ? 'Ask a question or discuss...' : mode === 'plan' ? 'Describe what to plan...' : 'Describe the code changes to execute...'}
                     className="flex-1 bg-white/5 border-blue-500/20 text-white placeholder:text-blue-300/50 min-h-[60px]"
                     disabled={sending}
@@ -246,7 +251,7 @@ export default function SiteBuilder() {
                     {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                   </Button>
                 </div>
-                <p className="text-xs text-blue-300 mt-2">Manual-only mode active • no auto-repair or background execution</p>
+                <p className="text-xs text-blue-300 mt-2">Scans & reports run live • code changes always require your explicit approval</p>
               </div>
             </CardContent>
           </Card>

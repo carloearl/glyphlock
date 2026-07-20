@@ -10,9 +10,19 @@ import MonacoViewer from './MonacoViewer';
 import VirtualTerminal from './VirtualTerminal';
 import DiffViewer from './DiffViewer';
 import ApprovalPanel from './ApprovalPanel';
+import StatusBar from './StatusBar';
 
-async function callAgent() {
-  return { error: 'Automatic Site Builder execution is disabled. Use explicit agent actions only.' };
+function buildDiffRows(diffText, original, proposed) {
+  if (diffText && typeof diffText === 'string') {
+    return diffText.split('\n').slice(0, 400).map(line =>
+      line.startsWith('+') ? { type: 'add', text: line.slice(1) }
+        : line.startsWith('-') ? { type: 'remove', text: line.slice(1) }
+        : { type: 'context', text: line });
+  }
+  return [
+    { type: 'remove', text: `Original (${(original || '').split('\n').length} lines)` },
+    { type: 'add', text: `Proposed (${(proposed || '').split('\n').length} lines)` }
+  ];
 }
 
 export default function DevModeLayout() {
@@ -21,6 +31,7 @@ export default function DevModeLayout() {
   const [fileContent, setFileContent] = useState('');
   const [analysis, setAnalysis] = useState(null);
   const [proposal, setProposal] = useState(null);
+  const [proposalMeta, setProposalMeta] = useState(null);
   const [diff, setDiff] = useState(null);
   const [backups, setBackups] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
@@ -28,38 +39,29 @@ export default function DevModeLayout() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = useRef(null);
 
-  useEffect(function loadTreeOnMount() {
-    let cancelled = false;
-
-    async function loadTree() {
-      setStatus('Loading file tree...');
-      try {
-        const { data } = await base44.functions.invoke('devGetFileTree', {});
-        if (cancelled) return;
-        
-        if (data.success && data.tree) {
-          setFileTree(data.tree);
-          setStatus(`Loaded ${data.total_files} files`);
-        } else {
-          setStatus('Failed to load file tree');
-        }
-      } catch (error) {
-        console.error('File tree error:', error);
-        setStatus('Error loading files');
+  async function loadTree() {
+    setStatus('Loading file tree...');
+    try {
+      const { data } = await base44.functions.invoke('devGetFileTree', {});
+      if (data.success && data.tree) {
+        setFileTree(data.tree);
+        setStatus(`Loaded ${data.total_files} files`);
+      } else {
+        setStatus('Failed to load file tree');
       }
+    } catch (error) {
+      console.error('File tree error:', error);
+      setStatus('Error loading files');
     }
+  }
 
-    loadTree();
-
-    return function cleanup() {
-      cancelled = true;
-    };
-  }, []);
+  useEffect(() => { loadTree(); }, []);
 
   async function handleSelectFile(path) {
     setSelectedFile(path);
     setAnalysis(null);
     setProposal(null);
+    setProposalMeta(null);
     setDiff(null);
     setStatus('Loading file...');
     setIsBusy(true);
@@ -84,65 +86,85 @@ export default function DevModeLayout() {
   }
 
   async function handleAnalyzeFile() {
-    if (!selectedFile) return;
+    if (!selectedFile || !fileContent) return;
     setIsBusy(true);
-    setStatus('Automatic agent analysis is disabled');
-    
-    const result = await callAgent(`[EXPLAIN MODE] Analyze the file ${selectedFile} and explain its purpose, structure, and any issues`);
-    setIsBusy(false);
-
-    if (result && result.content) {
-      setAnalysis(result.content);
-      setStatus('Analysis complete');
-    } else {
-      setStatus('Analysis failed');
+    setStatus('AI analyzing file...');
+    try {
+      const { data } = await base44.functions.invoke('devAnalyzeFile', {
+        filePath: selectedFile,
+        fileContent,
+        explicitUserTrigger: true
+      });
+      if (data.success) {
+        setAnalysis(data.analysis);
+        setStatus('Analysis complete');
+      } else {
+        setStatus('Analysis failed: ' + (data.error || 'unknown'));
+      }
+    } catch (error) {
+      setStatus('Analysis failed: ' + (error?.response?.data?.error || error.message));
     }
+    setIsBusy(false);
   }
 
   async function handleProposeChange(instructions) {
     if (!selectedFile || !fileContent) return;
     setIsBusy(true);
-    setStatus('Automatic agent proposal is disabled');
-
-    const result = await callAgent(`[BUILD MODE] For file ${selectedFile}, propose changes: ${instructions}\n\nShow the complete updated code.`);
-    setIsBusy(false);
-
-    if (result && result.content) {
-      const codeMatch = result.content.match(/```[\w]*\n([\s\S]*?)\n```/);
-      const proposed = codeMatch ? codeMatch[1] : result.content;
-      setProposal(proposed);
-      setDiff([
-        { type: 'remove', text: 'Original version' },
-        { type: 'add', text: 'Proposed changes ready' }
-      ]);
-      setStatus('Proposal ready');
-    } else {
-      setStatus('Proposal failed');
+    setStatus('AI generating proposal...');
+    try {
+      const { data } = await base44.functions.invoke('devProposeChange', {
+        filePath: selectedFile,
+        fileContent,
+        changeDescription: instructions,
+        explicitUserTrigger: true
+      });
+      if (data.success && data.proposal?.modifiedCode) {
+        setProposal(data.proposal.modifiedCode);
+        setProposalMeta({ id: data.proposalId, explanation: data.proposal.explanation, risk: data.proposal.risk });
+        setDiff(buildDiffRows(data.proposal.diff, fileContent, data.proposal.modifiedCode));
+        setStatus(`Proposal ready — risk: ${data.proposal.risk || 'unknown'}`);
+      } else {
+        setStatus('Proposal failed: ' + (data.error || 'no code returned'));
+      }
+    } catch (error) {
+      setStatus('Proposal failed: ' + (error?.response?.data?.error || error.message));
     }
+    setIsBusy(false);
   }
 
   async function handleApplyChange() {
-    if (!selectedFile || !proposal) return;
+    if (!selectedFile || !proposal || !proposalMeta?.id) return;
     setIsBusy(true);
-    setStatus('Automatic agent apply is disabled');
-
-    const result = await callAgent(`[BUILD MODE] Write the following code to ${selectedFile}:\n\n\`\`\`\n${proposal}\n\`\`\``);
-    setIsBusy(false);
-
-    if (result && !result.error) {
-      setFileContent(proposal);
-      setStatus('Change applied successfully');
-      toast.success('File updated by agent');
-      setProposal(null);
-      setDiff(null);
-    } else {
-      setStatus('Apply failed: ' + (result?.error || 'Unknown error'));
+    setStatus('Approving & logging change...');
+    try {
+      const { data } = await base44.functions.invoke('devApplyDiff', {
+        proposalId: proposalMeta.id,
+        filePath: selectedFile,
+        modifiedCode: proposal,
+        originalContent: fileContent,
+        approved: true
+      });
+      if (data.success) {
+        setFileContent(proposal);
+        setStatus('Approved — backup saved, change logged');
+        toast.success('Proposal approved and logged with backup');
+        setProposal(null);
+        setProposalMeta(null);
+        setDiff(null);
+      } else {
+        setStatus('Apply failed: ' + (data.error || 'Unknown error'));
+        toast.error('Failed to apply changes');
+      }
+    } catch (error) {
+      setStatus('Apply failed: ' + (error?.response?.data?.error || error.message));
       toast.error('Failed to apply changes');
     }
+    setIsBusy(false);
   }
 
   function handleRejectChange() {
     setProposal(null);
+    setProposalMeta(null);
     setDiff(null);
     setStatus('Proposal discarded');
   }
@@ -169,9 +191,6 @@ export default function DevModeLayout() {
     e.target.value = null;
   }
 
-  // Import StatusBar
-  const StatusBar = React.lazy(() => import('./StatusBar'));
-
   return (
     <div className="flex flex-col h-full bg-slate-950 text-slate-50">
       <input
@@ -192,7 +211,7 @@ export default function DevModeLayout() {
           <div className="flex gap-1">
             <HoverTooltip content="Refresh file tree">
               <Button
-                onClick={() => window.location.reload()}
+                onClick={loadTree}
                 size="sm"
                 variant="ghost"
                 className="h-6 w-6 p-0"
@@ -237,6 +256,7 @@ export default function DevModeLayout() {
             selectedFile={selectedFile}
             analysis={analysis}
             proposal={proposal}
+            proposalMeta={proposalMeta}
             onAnalyze={handleAnalyzeFile}
             onPropose={handleProposeChange}
             busy={isBusy}
@@ -364,9 +384,7 @@ export default function DevModeLayout() {
       </div>
 
       {/* Status Bar */}
-      <React.Suspense fallback={<div className="h-8 bg-slate-900" />}>
       <StatusBar status={status} busy={isBusy} selectedFile={selectedFile} />
-      </React.Suspense>
       </div>
       );
       }

@@ -7,16 +7,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
  */
 
 Deno.serve(async (req) => {
+  let base44 = null;
+  let user = null;
+  let filePath = null;
   try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    base44 = createClientFromRequest(req);
+    user = await base44.auth.me();
 
     // Admin check
     if (!user || user.role !== 'admin') {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { proposalId, filePath, modifiedCode, approved } = await req.json();
+    const body = await req.json();
+    const { proposalId, modifiedCode, approved, originalContent } = body;
+    filePath = body.filePath;
     
     if (!proposalId || !filePath || !modifiedCode) {
       return Response.json({ 
@@ -52,7 +57,7 @@ Deno.serve(async (req) => {
     // Step 1: Create backup
     const backupResponse = await base44.functions.invoke('devCreateBackup', {
       filePath: filePath,
-      fileContent: '/* Original content would be here */'
+      fileContent: originalContent || '/* original content unavailable */'
     });
 
     if (!backupResponse.data.success) {
@@ -117,7 +122,7 @@ Deno.serve(async (req) => {
     try {
       const errorLog = {
         timestamp: new Date().toISOString(),
-        actor: user.email,
+        actor: user?.email || 'unknown',
         action: 'modify',
         filePath: filePath || 'unknown',
         diffSummary: 'Failed to apply change',
