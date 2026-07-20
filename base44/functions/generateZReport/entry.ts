@@ -14,23 +14,35 @@ const CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Car
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+
+    // Automation scheduler runs with no user session — auth.me() may throw.
+    let user = null;
+    try {
+      user = await base44.auth.me();
+    } catch (_) { /* automation path — no user */ }
+    const isAutomation = !user;
 
     // Allow automation scheduler (no user) or admin users only
     if (user && user?.role !== 'admin') {
       return Response.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { opening_cash, closing_cash, reconciliation_notes, venue_id } = await req.json();
+    // Scheduler may send an empty/non-JSON body
+    const body = await req.json().catch(() => ({}));
+    const { opening_cash, closing_cash, reconciliation_notes, venue_id } = body;
 
-    // Role check
-    const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({ email: user.email });
-    const nupsUser = nupsUsers[0];
-    const userRole = nupsUser?.role || (user?.role === 'admin' ? 'PLATFORM_ADMIN' : null);
+    // Role check (interactive calls only — automation runs as PLATFORM_ADMIN)
+    if (!isAutomation) {
+      const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({ email: user.email });
+      const nupsUser = nupsUsers[0];
+      const userRole = nupsUser?.role || (user?.role === 'admin' ? 'PLATFORM_ADMIN' : null);
 
-    if (!ALLOWED_ROLES.includes(userRole)) {
-      return Response.json({ error: 'Forbidden: insufficient role' }, { status: 403 });
+      if (!ALLOWED_ROLES.includes(userRole)) {
+        return Response.json({ error: 'Forbidden: insufficient role' }, { status: 403 });
+      }
     }
+
+    const actorEmail = user?.email || 'automation@system';
 
     // Fetch today's transactions
     const allTxns = await base44.asServiceRole.entities.POSTransaction.list('-created_date', 500);
@@ -44,6 +56,10 @@ Deno.serve(async (req) => {
     const demoTxns = todayTxns.filter(t => t.mode === 'DEMO' || t.mode === 'TEST');
 
     if (realTxns.length === 0) {
+      // Automation: a quiet day is not a failure — skip cleanly.
+      if (isAutomation) {
+        return Response.json({ ok: true, skipped: 'no_real_transactions_today' });
+      }
       return Response.json({ error: 'No REAL transactions found for today. Cannot generate an empty Z-Report.' }, { status: 422 });
     }
 
@@ -104,7 +120,7 @@ Deno.serve(async (req) => {
     const gbIssued = todayGB.filter(t => t.transaction_type === 'Issue').reduce((s, t) => s + (t.amount || 0), 0);
     const gbRedeemed = todayGB.filter(t => t.transaction_type === 'Redeem').reduce((s, t) => s + Math.abs(t.amount || 0), 0);
 
-    const cashierDisplay = user.full_name || user.email;
+    const cashierDisplay = user?.full_name || user?.email || 'Automated Settlement';
     const barRevenue = realTxns
       .filter(t => t.items?.some(item => item.product_name?.includes('Drink')))
       .reduce((s, t) => s + (t.total || 0), 0);
@@ -135,7 +151,7 @@ Deno.serve(async (req) => {
       batch_discrepancy_total: cashOverShort,
       requires_review: requiresReview,
       reconciliation_notes: reconciliation_notes?.trim() || null,
-      reconciled_by: user.email,
+      reconciled_by: actorEmail,
       reconciled_at: new Date().toISOString(),
       discrepancy: cashOverShort,
       products_sold,
@@ -155,8 +171,8 @@ Deno.serve(async (req) => {
     // Audit log — OMEGA-A
     await base44.asServiceRole.entities.SystemAuditLog.create({
       event_type: 'Z_REPORT_GENERATED',
-      description: `Z-Report ${report.report_id} closed by ${user.email}. Total Sales: $${totalSales.toFixed(2)}. Cash Over/Short: $${cashOverShort.toFixed(2)}.`,
-      actor_email: user.email,
+      description: `Z-Report ${report.report_id} closed by ${actorEmail}. Total Sales: $${totalSales.toFixed(2)}. Cash Over/Short: $${cashOverShort.toFixed(2)}.`,
+      actor_email: actorEmail,
       status: requiresReview ? 'alert' : 'success',
       severity: requiresReview ? 'high' : 'low',
       resource_id: report.report_id,
