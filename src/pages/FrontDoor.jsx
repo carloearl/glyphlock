@@ -232,7 +232,7 @@ function FrontDoorContent() {
             return (
               <div className="w-full">
                 {/* Sticky step jump bar */}
-                <div className="sticky top-0 z-40 -mx-1 px-1 py-2 bg-[#0a0f1a]/90 backdrop-blur border-b border-white/5 flex gap-1.5 overflow-x-auto scrollbar-hide">
+                <div className="sticky top-12 z-30 -mx-1 px-1 py-2 bg-[#0a0f1a]/90 backdrop-blur border-b border-white/5 flex gap-1.5 overflow-x-auto scrollbar-hide rounded-b-xl">
                   {flowIds.map(id => (
                     <button
                       key={id}
@@ -258,7 +258,7 @@ function FrontDoorContent() {
                     {id === "register" && (
                       <div className="space-y-3">
                         <BatchConfirmControl operatorName={user?.full_name || user?.username} />
-                        <POSCashRegister station="door" user={user} venueId={venueId} />
+                        <POSCashRegister station="door" user={user} venueId={venueId} showGuestIntake={false} />
                       </div>
                     )}
                     {id === "dancers" && <EntertainerCheckIn user={user} />}

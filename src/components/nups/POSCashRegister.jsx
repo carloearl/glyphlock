@@ -32,7 +32,7 @@ import { computeReceiptHash } from "@/lib/nups/receiptHash";
 import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
 import { fromPOSTransaction } from "@/lib/nups/audit/financialContext";
 
-export default function POSCashRegister({ user, station = 'door', showDriverPanel = true }) {
+export default function POSCashRegister({ user, station = 'door', showDriverPanel = true, showGuestIntake = true }) {
   // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
   const [ageBlocked, setAgeBlocked] = useState(false);
   useEffect(() => {
@@ -1234,7 +1234,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       {/* ID Scanner + Guest Check-In — DOOR ONLY. Moved BELOW the cart so
           the flow reads: Quick Charges → Cart/Charge → guest intake tools.
           Full-width row under the two register columns on lg+. */}
-      {station === 'door' && (
+      {station === 'door' && showGuestIntake && (
         <div className="w-full p-4 grid grid-cols-1 md:grid-cols-2 gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <IDScannerCamera venue_id={activeVenue?.id} onDataExtracted={handleIDScan} />
           <GuestCheckIn />

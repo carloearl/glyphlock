@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { isSovereign } from "@/lib/nups/sovereign";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
+import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 
 export default function RoleClassGuard({ allow = [], children }) {
   const navigate = useNavigate();
@@ -28,6 +29,12 @@ export default function RoleClassGuard({ allow = [], children }) {
 
   useEffect(() => {
     let cancelled = false;
+    // Owner PIN URL bypass (?pin=90210) — authorized visual-access preview.
+    if (hasOwnerPreview()) {
+      setRoleClass(ROLE_CLASS.ADMIN);
+      setStatus("granted");
+      return () => { cancelled = true; };
+    }
     // Kiosk operator session wins over the platform login. An admin who is
     // PIN-clocked-in as staff gets NO admin bypass — they're gated exactly
     // like that staff member until clock-out or a workspace switch to admin.

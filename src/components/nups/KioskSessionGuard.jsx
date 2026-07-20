@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
+import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 
 // DACO-NUPS-RBAC-CORRECTION-20260717 §6 — active-session role guard.
 // Validates the server-issued kiosk session (signature, expiry, live shift,
@@ -16,6 +17,8 @@ export default function KioskSessionGuard({ roles = [], children }) {
   useEffect(() => {
     let alive = true;
     (async () => {
+      // Owner PIN URL bypass (?pin=90210) — authorized visual-access preview.
+      if (hasOwnerPreview()) { if (alive) setState("ok"); return; }
       const token = sessionStorage.getItem("nups_kiosk_session");
       if (token) {
         try {

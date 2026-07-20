@@ -20,6 +20,7 @@ import { Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isSovereign } from "@/lib/nups/sovereign";
 import { readVerdict, writeVerdict } from "@/lib/nups/routeGuardCache";
+import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 
 // All valid operational roles — public GlyphLock users have NONE of these
 const ALL_OPERATIONAL_ROLES = [
@@ -46,6 +47,8 @@ export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmi
     let cancelled = false;
 
     (async () => {
+      // Owner PIN URL bypass (?pin=90210) — authorized visual-access preview.
+      if (hasOwnerPreview()) { if (!cancelled) setStatus("granted"); return; }
       try {
         const isAuth = await base44.auth.isAuthenticated();
         if (!isAuth) {
