@@ -53,8 +53,8 @@ export default function FrontDoor() {
   );
 }
 
-// Workflow order — what comes first in real life at the door.
-const STEP_ORDER = ["drivers", "guests", "dancers", "staff"];
+// Workflow order — ID verification is ALWAYS first at the door.
+const STEP_ORDER = ["guests", "drivers", "dancers", "staff"];
 
 function FrontDoorContent() {
   const navigate = useNavigate();

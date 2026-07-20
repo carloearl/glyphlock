@@ -8,28 +8,28 @@ import { Car, UserCheck, ShoppingCart, Sparkles, Clock } from "lucide-react";
  * an operator brand new to NUPS can read the screen top-to-bottom and know
  * exactly what to do next. NO repeated styling, NO grid of identical tabs.
  *
- *   1. DRIVER     (yellow)  — Driver drops guests off
- *   2. GUEST      (cyan)    — Check ID, age-verify
+ *   1. GUEST      (cyan)    — Scan ID, age-verify (ALWAYS first)
+ *   2. DRIVER     (yellow)  — Driver drops guests off
  *   3. REGISTER   (emerald) — Ring up cover + drinks (open in new tab)
  *   4. ENTERTAIN. (pink)    — Dancer check-in / acknowledgments
  *   5. STAFF      (violet)  — Staff clock in/out
  */
 const STEPS = [
   {
-    id: "drivers",
+    id: "guests",
     n: 1,
+    icon: UserCheck,
+    label: "Guest Check-In",
+    hint: "Scan ID — verify age first",
+    color: "cyan",
+  },
+  {
+    id: "drivers",
+    n: 2,
     icon: Car,
     label: "Driver Drop-Off",
     hint: "Tap a driver, +1 per guest",
     color: "yellow",
-  },
-  {
-    id: "guests",
-    n: 2,
-    icon: UserCheck,
-    label: "Guest Check-In",
-    hint: "Verify ID & age",
-    color: "cyan",
   },
   {
     id: "register",

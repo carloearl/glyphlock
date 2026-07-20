@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import {
   UserCheck, AlertTriangle, CheckCircle2, Loader2, LogOut, Users,
-  CreditCard, Star, RotateCcw, History, Crown, ScanLine,
+  CreditCard, Star, RotateCcw, History, Crown, ScanLine, Camera,
 } from "lucide-react";
 import { toast } from "sonner";
 import SeedDoorGuestsButton from "@/components/nups/SeedDoorGuestsButton";
+import IDScannerCamera from "@/components/nups/IDScannerCamera";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { snapshotPerson } from "@/lib/nups/personArchive";
 
 const MIN_AGE = 21;
@@ -35,6 +37,42 @@ async function hashIdNumber(idNum) {
     for (let i = 0; i < idNum.length; i++) h = ((h << 5) - h + idNum.charCodeAt(i)) | 0;
     return "fallback-" + Math.abs(h).toString(16).padStart(16, "0");
   }
+}
+
+/**
+ * Parse a raw AAMVA PDF417 payload from a 2D barcode scanner (HID keyboard
+ * wedge). Every US/Canada license back encodes this. Returns null if the
+ * input doesn't look like an AAMVA payload — plain typed ID numbers fall
+ * through to the normal lookup.
+ */
+function parseAAMVA(raw) {
+  if (!raw || raw.length < 40) return null;
+  if (!/ANSI |AAMVA|DAQ/.test(raw)) return null;
+  const get = (code) => {
+    const m = raw.match(new RegExp(code + "([^\\n\\r]*)"));
+    return m ? m[1].trim() : "";
+  };
+  const idNumber = get("DAQ");
+  if (!idNumber) return null;
+  const last = get("DCS");
+  const first = get("DAC") || get("DCT");
+  const middle = get("DAD");
+  const dobRaw = get("DBB");
+  let dob = "";
+  if (/^\d{8}$/.test(dobRaw)) {
+    // US = MMDDCCYY, Canada = CCYYMMDD
+    dob = Number(dobRaw.slice(0, 2)) <= 12 && Number(dobRaw.slice(4, 8)) > 1900
+      ? `${dobRaw.slice(4, 8)}-${dobRaw.slice(0, 2)}-${dobRaw.slice(2, 4)}`
+      : `${dobRaw.slice(0, 4)}-${dobRaw.slice(4, 6)}-${dobRaw.slice(6, 8)}`;
+  }
+  const fullName = [first, middle, last].filter(Boolean).join(" ").replace(/,/g, "").trim();
+  return {
+    id_number: idNumber,
+    full_name: fullName || undefined,
+    date_of_birth: dob || undefined,
+    id_state: get("DAJ") || undefined,
+    id_type: "Drivers License",
+  };
 }
 
 const TIER_CONFIG = {
@@ -112,6 +150,9 @@ export default function GuestCheckIn() {
   const [returningGuest, setReturningGuest] = useState(null); // profile found by ID scan
   const [lookingUp, setLookingUp] = useState(false);
   const [showCardFields, setShowCardFields] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const scanTimer = useRef(null);
+  const activeVenue = useActiveVenue();
 
   const { data: guests = [], isLoading } = useQuery({
     queryKey: ["vip-guests-active"],
@@ -144,6 +185,41 @@ export default function GuestCheckIn() {
   });
 
   const age = calcAge(form.date_of_birth);
+
+  // Apply data extracted from a 2D scanner payload or camera OCR scan
+  const applyScanData = async (d) => {
+    const idTypeMap = {
+      drivers_license: "Drivers License",
+      state_id: "State ID",
+      passport: "Passport",
+      military_id: "Military ID",
+    };
+    setAgeBlocked(false);
+    setForm((f) => ({
+      ...f,
+      full_name: d.full_name || f.full_name,
+      date_of_birth: (d.date_of_birth || "").split("T")[0] || f.date_of_birth,
+      id_type: idTypeMap[d.id_type] || d.id_type || "Drivers License",
+      id_state: (d.id_state || f.id_state || "").toUpperCase(),
+    }));
+    setShowCamera(false);
+    toast.success("ID scanned — check the age gate, then check in");
+    if (d.id_number) await handleIdLookup(d.id_number);
+  };
+
+  // Unified scan/type handler for the ID field. A 2D scanner (keyboard
+  // wedge) floods the full AAMVA payload into this input — debounce, then
+  // parse & autofill everything. Plain typed numbers fall through to lookup.
+  const handleScanInput = (val) => {
+    set("id_number", val);
+    setReturningGuest(null);
+    clearTimeout(scanTimer.current);
+    scanTimer.current = setTimeout(() => {
+      const parsed = parseAAMVA(val);
+      if (parsed) applyScanData(parsed);
+      else if (val.length >= 5) handleIdLookup(val);
+    }, 250);
+  };
 
   // When ID number changes: attempt to find returning guest
   const handleIdLookup = async (idNum) => {
@@ -269,23 +345,48 @@ export default function GuestCheckIn() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* ID Number (scan first — triggers profile lookup) */}
+          {/* ID scan (scan first — autofills form + triggers profile lookup) */}
           <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-3">
             <Label className="text-cyan-300 text-xs font-bold uppercase tracking-wider flex items-center gap-2 mb-2">
-              <ScanLine className="w-3 h-3" /> Step 1 — Scan or Enter ID Number
+              <ScanLine className="w-3 h-3" /> Step 1 — Scan ID
             </Label>
-            <div className="relative">
-              <Input
-                value={form.id_number}
-                onChange={(e) => handleIdLookup(e.target.value)}
-                placeholder="Swipe ID or type license number..."
-                className="bg-gray-800 border-gray-700 text-white font-mono pr-8"
-                autoComplete="off"
-              />
-              {lookingUp && (
-                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 animate-spin" />
-              )}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Input
+                  autoFocus
+                  value={form.id_number}
+                  onChange={(e) => handleScanInput(e.target.value)}
+                  placeholder="Scan license barcode with 2D scanner — or type ID number..."
+                  className="bg-gray-800 border-gray-700 text-white font-mono pr-8"
+                  autoComplete="off"
+                />
+                {lookingUp && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 animate-spin" />
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCamera((v) => !v)}
+                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 shrink-0"
+                title="Scan ID with phone or tablet camera"
+              >
+                <Camera className="w-4 h-4 sm:mr-1.5" />
+                <span className="hidden sm:inline">{showCamera ? "Close Camera" : "Camera"}</span>
+              </Button>
             </div>
+            <p className="text-[10px] text-gray-500 mt-1.5">
+              2D scanner reads the barcode on the back of the license and autofills everything.
+              On the club phone or tablet, tap <strong className="text-cyan-400">Camera</strong> to photograph the ID instead.
+            </p>
+            {showCamera && (
+              <div className="mt-3">
+                <IDScannerCamera
+                  venue_id={activeVenue?.id}
+                  onDataExtracted={applyScanData}
+                />
+              </div>
+            )}
             {returningGuest && (
               <div className="mt-2 p-2 rounded bg-purple-500/10 border border-purple-500/30 text-xs text-purple-300 flex items-center gap-2">
                 <Crown className="w-3 h-3" />
