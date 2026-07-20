@@ -1,0 +1,41 @@
+{
+  "name": "Daily Payout Safety Audit",
+  "description": "Scans prior day's DriverPayout records against PayoutSafetyLimit thresholds. Creates SecurityAlerts, logs ActivityLog events, and emails configured recipients for any breach.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 10 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_payout_safety_audit",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "dailyPayoutSafetyAudit",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "ACCT \u00b7 Driver Payout PROCESSED \u2192 Ledger",
+  "description": "BPAA-NUPS-ACCT-001 P4 \u2014 Posts when payout_status flips to PROCESSED. BLOCKED with FLAGGED ReconciliationRecord if VenueRateConfig.driver_payout_treatment=UNSET (DACO ruling required \u00a77).",
+  "trigger": {
+    "condition": "${ ((.trigger.changed_fields | index(\"payout_status\") != null) and (.trigger.data.payout_status == \"PROCESSED\")) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "DriverPayout"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "acct_driver_payout_processed_ledger",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "postDriverPayoutToLedger",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

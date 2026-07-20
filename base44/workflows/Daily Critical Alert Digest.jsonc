@@ -1,0 +1,47 @@
+{
+  "name": "Daily Critical Alert Digest",
+  "description": "Send daily summary of critical events to venue managers",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 15 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_critical_alert_digest",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateZReport",
+            "args": {
+              "recipient_email": "manager@dreampalace.com",
+              "subject": "Daily Critical Events Summary",
+              "message": "Review fraud alerts and system warnings",
+              "priority": "HIGH",
+              "notification_type": "daily_digest"
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

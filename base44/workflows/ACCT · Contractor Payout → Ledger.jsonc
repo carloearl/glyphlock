@@ -1,0 +1,34 @@
+{
+  "name": "ACCT \u00b7 Contractor Payout \u2192 Ledger",
+  "description": "BPAA-NUPS-ACCT-001 P3 \u2014 Entertainer payouts post to 6200 Contractor Expense (I-7). NEVER wages, NEVER tip pool.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "ContractorPayout"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "acct_contractor_payout_ledger",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "postContractorPayoutToLedger",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "ACCT \u00b7 GlyphBucks Bill REDEEM \u2192 Ledger",
+  "description": "BPAA-NUPS-ACCT-001 P2 \u2014 GlyphBucks REDEMPTION leg. Debits 2000 (liability cleared), credits 4200 VIP Revenue (recognized at redemption per ASC 606).",
+  "trigger": {
+    "condition": "${ ((.trigger.changed_fields | index(\"status\") != null) and (.trigger.data.status == \"redeemed\")) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "GlyphBucksBill"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "acct_glyphbucks_bill_redeem_ledger",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "postGlyphBucksToLedger",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

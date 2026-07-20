@@ -1,0 +1,41 @@
+{
+  "name": "Nightly Payment Reconciliation",
+  "description": "W3-009 \u2014 Runs paymentReconciliationEngine nightly at 2 AM to detect discrepancies across the payment chain (PaymentRecord \u2192 GlyphBucksOrder \u2192 GlyphBucksBatch \u2192 GlyphBucksBill) and produce exception queue for managers.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "nightly_payment_reconciliation",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "paymentReconciliationEngine",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

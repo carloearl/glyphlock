@@ -1,0 +1,41 @@
+{
+  "name": "VIP Show Contract Anchor Retry",
+  "description": "DACO VIP v2 \u00a73.3 \u2014 retries blockchain anchoring for contracts stuck in ANCHOR_PENDING_SERVER or ANCHOR_FAILED_RETRY every 15 minutes.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 15,
+      "interval_unit": "minutes",
+      "interval_anchor": "2026-07-16T08:57:38.807000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "vip_show_contract_anchor_retry",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "vipShowContractAnchorRetry",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "ACCT \u00b7 POSTransaction \u2192 Ledger",
+  "description": "BPAA-NUPS-ACCT-001 P1 \u2014 Auto-post revenue from POSTransaction creates. Skips validation_run, Comp, GlyphBucks (handled by GB autoposter), and voided/refunded/held. Idempotent via key POSTransaction:{id}.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "POSTransaction"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "acct_postransaction_ledger",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "postPOSTransactionToLedger",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

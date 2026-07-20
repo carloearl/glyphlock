@@ -1,0 +1,43 @@
+{
+  "name": "Nightly QuickBooks Sync to Drive",
+  "description": "Builds yesterday's QB Desktop IIF and QB Online CSV journal entries, uploads both to Google Drive as link-shareable files, and emails the bookkeeper list configured in PayoutSafetyLimit.compliance_digest_emails. Runs nightly at 4:00 AM Phoenix time (after club close).",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 15 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "nightly_quickbooks_sync_to_drive",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "quickbooksNightlySync",
+            "args": {
+              "auto_lookup_emails": true
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}
