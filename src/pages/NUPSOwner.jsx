@@ -17,7 +17,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import GuestTracking from "../components/nups/GuestTracking.jsx";
-import VIPRoomManagement from "../components/nups/VIPRoomManagement.jsx";
 import NUPSManagerDashboard from "../components/nups/NUPSManagerDashboard.jsx";
 import StaffManagement from "../components/nups/StaffManagement.jsx";
 import ZReportGenerator from "../components/nups/ZReportGenerator.jsx";
@@ -60,8 +59,12 @@ export default function NUPSOwner() {
   const location = useLocation();
   // Sidebar deep-links via /NUPSOwner?tab=staff. Read it on every render so
   // navigation between sidebar items lands on the right module.
+  // Retired/renamed tab keys alias to their real module — an unknown key
+  // used to render a BLANK content pane (audit 2026-07-20).
+  const TAB_ALIASES = { vip: 'dashboard', analytics: 'reports', dj: 'staff' };
+  const resolveTab = (t) => TAB_ALIASES[t] || t;
   const initialTab = (() => {
-    try { return new URLSearchParams(location.search).get('tab') || 'dashboard'; }
+    try { return resolveTab(new URLSearchParams(location.search).get('tab') || 'dashboard'); }
     catch { return 'dashboard'; }
   })();
   const [user, setUser] = useState(null);
@@ -72,7 +75,7 @@ export default function NUPSOwner() {
   // Keep active module in sync if the URL changes (sidebar click while page mounted)
   useEffect(() => {
     try {
-      const next = new URLSearchParams(location.search).get('tab');
+      const next = resolveTab(new URLSearchParams(location.search).get('tab'));
       if (next && next !== activeModule) setActiveModule(next);
     } catch { /* ignore */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -239,7 +242,9 @@ export default function NUPSOwner() {
   // GlyphBucks → /Contracts?tab=glyphbucks. Those are NOT listed here.
   const NAV_MODULES = [
     { key: 'dashboard',  label: 'Dashboard',      icon: BarChart3 },
-    { key: 'vip',        label: 'VIP Rooms',      icon: Star },
+    // VIP Rooms — the authoritative board is the VIP Command Center;
+    // the legacy duplicate board is retired (owner directive: one way in).
+    { key: 'vip',        label: 'VIP Rooms',      icon: Star, route: '/VIPCommand' },
     { key: 'staff',      label: 'Staff',          icon: Users },
     { key: 'customers',  label: 'Customers',      icon: Heart },
     { key: 'marketing',  label: 'Marketing',      icon: Megaphone },
@@ -248,7 +253,10 @@ export default function NUPSOwner() {
     { key: 'inventory',  label: 'Inventory',      icon: Package },
     { key: 'audit',      label: 'Audit Log',      icon: Shield },
     { key: 'admin',      label: 'Admin',          icon: KeyRound },
-    { key: 'venue',      label: 'Venue Settings', icon: Building2 },
+    // Renamed to distinguish from Admin → Venue Settings (rates/receipts/
+    // checklist/contracts/CoA editors) — this legacy pane edits the venue
+    // profile record only.
+    { key: 'venue',      label: 'Venue Profile (Legacy)', icon: Building2 },
     { key: 'demo',       label: 'Demo Keys',      icon: KeyRound },
   ];
   const ROLE_MODULE_ACCESS = {
@@ -480,9 +488,7 @@ export default function NUPSOwner() {
               activeGuestsCount={activeGuestsCount}
             />
           )}
-          {activeModule === 'vip' && (
-            <VIPRoomManagement user={user} />
-          )}
+          {/* 'vip' retired — the tab routes to /VIPCommand (no duplicate board). */}
           {activeModule === 'payroll' && (
             <div className="space-y-6">
               {/* 1099 contractor tax forms — must be on file before any payout */}

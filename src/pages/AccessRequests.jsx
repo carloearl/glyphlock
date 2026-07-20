@@ -63,8 +63,10 @@ export default function AccessRequests() {
         </div>
       </header>
 
+      {/* One state at a time — an error and an empty-list message shown
+          together read as contradictory (audit 2026-07-20). */}
       {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
-      {requests.length === 0 && <p className="text-slate-500">No access requests.</p>}
+      {!error && requests.length === 0 && <p className="text-slate-500">No access requests.</p>}
 
       <div className="space-y-3 max-w-3xl">
         {requests.map((r) => (

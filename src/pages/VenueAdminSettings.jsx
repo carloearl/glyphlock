@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Lock, Settings, ClipboardCheck, FileText, DollarSign, Database, BookOpen, Receipt } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { hasOwnerPreview } from '@/lib/nups/previewBypass';
 import RateFeeEditor from '@/components/admin/RateFeeEditor';
 import DailyChecklistEditor from '@/components/admin/DailyChecklistEditor';
 import ContractTermsEditor from '@/components/admin/ContractTermsEditor';
@@ -43,10 +44,12 @@ export default function VenueAdminSettings() {
     }
   }, [venues, selectedVenue]);
 
-  const isAdmin = user && (
+  // Route is already ADMIN-guarded (App.jsx). Honor the same owner preview
+  // the route guard honors — no stacked second access wall.
+  const isAdmin = hasOwnerPreview() || (user && (
     user.role === 'admin' ||
     ['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER'].includes(user._highestRole)
-  );
+  ));
 
   if (userLoading) {
     return <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">Loading…</div>;

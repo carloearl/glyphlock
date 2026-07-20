@@ -137,11 +137,14 @@ const NAV_SECTIONS = [
     label: "Legacy",
     items: [
       { id: "lg-staff",     label: "Staff",         icon: Users,         to: "/NUPSOwner?tab=staff" },
-      { id: "lg-dj",        label: "DJ Console",    icon: Music,         to: "/NUPSOwner?tab=dj" },
+      // DJ Console → the real DJ station; NUPSOwner never had a "dj" tab
+      // (the old link landed on a blank pane — audit 2026-07-20).
+      { id: "lg-dj",        label: "DJ Console",    icon: Music,         to: "/DJHome" },
       { id: "lg-customers", label: "Customers",     icon: Heart,         to: "/NUPSOwner?tab=customers" },
       { id: "lg-marketing", label: "Marketing",     icon: Megaphone,     to: "/NUPSOwner?tab=marketing" },
-      { id: "lg-analytics", label: "Analytics",     icon: TrendingUp,    to: "/NUPSOwner?tab=analytics" },
-      { id: "lg-reports",   label: "Reports",       icon: BarChart3,     to: "/NUPSOwner?tab=reports" },
+      // Analytics & Reports = ONE tab. Reports opens with OwnerAnalytics —
+      // the "analytics" link pointed at a tab that doesn't exist (blank pane).
+      { id: "lg-reports",   label: "Reports & Analytics", icon: BarChart3, to: "/NUPSOwner?tab=reports" },
       { id: "lg-payroll",   label: "Payroll",       icon: DollarSign,    to: "/NUPSOwner?tab=payroll" },
       { id: "lg-inventory", label: "Inventory",     icon: Package,       to: "/NUPSOwner?tab=inventory" },
       { id: "lg-audit",     label: "Audit Log",     icon: ClipboardList, to: "/NUPSOwner?tab=audit" },

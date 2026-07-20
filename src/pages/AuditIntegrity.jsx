@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -30,9 +31,11 @@ export default function AuditIntegrity() {
     (async () => {
       try {
         const u = await base44.auth.me();
-        setIsAdmin(u?.role === "admin");
+        // Route is already ADMIN-guarded (App.jsx). Honor the same owner
+        // preview the route guard honors — no stacked second access wall.
+        setIsAdmin(u?.role === "admin" || hasOwnerPreview());
       } catch {
-        setIsAdmin(false);
+        setIsAdmin(hasOwnerPreview());
       }
       setAuthChecked(true);
     })();
