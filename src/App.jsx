@@ -68,6 +68,7 @@ import PeopleArchive from './pages/PeopleArchive';
 import LedgerTrialBalance from './pages/LedgerTrialBalance';
 import AccountingHub from './pages/AccountingHub';
 import RegistryAdmin from './pages/RegistryAdmin';
+import AdminDataManager from './pages/AdminDataManager';
 import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
 import NUPSAdminPortal from './pages/NUPSAdminPortal';
 import VIPShowVerify from './pages/VIPShowVerify';
@@ -139,7 +140,7 @@ const AuthenticatedApp = () => {
     '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/payment-reconciliation', '/admin/financial-resolution', '/admin/venue-settings',
-    '/admin/registry', '/registryadmin',
+    '/admin/registry', '/registryadmin', '/admin/data', '/admindatamanager',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
     '/v/', '/vipshowcontracts', '/offlineverify', '/vipcommand',
@@ -161,7 +162,7 @@ const AuthenticatedApp = () => {
     '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
     '/admin/audit-integrity', '/admin/payment-reconciliation', '/admin/financial-resolution', '/admin/venue-settings',
-    '/admin/registry', '/registryadmin',
+    '/admin/registry', '/registryadmin', '/admin/data', '/admindatamanager',
     '/admin/adr', '/architecturaldecisionregister',
     '/nupsadminportal', '/NUPSAdminPortal',
     '/vipshowcontracts', '/vipcommand',
@@ -273,6 +274,9 @@ const AuthenticatedApp = () => {
         <Route path="/admin/financial-resolution" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><FinancialResolution /></RoleClassGuard>} />
         <Route path="/FinancialResolution" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><FinancialResolution /></RoleClassGuard>} />
         <Route path="/admin/venue-settings" element={<RoleClassGuard allow={["ADMIN"]}><VenueAdminSettings /></RoleClassGuard>} />
+        <Route path="/admin/data" element={<RoleClassGuard allow={["ADMIN"]}><AdminDataManager /></RoleClassGuard>} />
+        <Route path="/AdminDataManager" element={<RoleClassGuard allow={["ADMIN"]}><AdminDataManager /></RoleClassGuard>} />
+        <Route path="/admindatamanager" element={<RoleClassGuard allow={["ADMIN"]}><AdminDataManager /></RoleClassGuard>} />
         <Route path="/admin/registry" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />
         <Route path="/RegistryAdmin" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />
         <Route path="/registryadmin" element={<RoleClassGuard allow={["ADMIN"]}><RegistryAdmin /></RoleClassGuard>} />

@@ -28,7 +28,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText, BookOpen, Coins, DollarSign, Settings, ShieldCheck,
-  AlertTriangle, ArrowRight, LogOut, Loader2, Building2, CalendarClock,
+  AlertTriangle, ArrowRight, LogOut, Loader2, Building2, CalendarClock, Database,
 } from "lucide-react";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
@@ -229,6 +229,15 @@ function AdminPortalContent() {
             icon={ShieldCheck}
             route="/admin/audit-integrity"
             tone="slate"
+          />
+
+          <PortalCard
+            step={7}
+            title="Data Manager — Full Record Control"
+            desc="Browse, search, and delete records across every NUPS entity. Purge demo data. No Base44 dashboard needed."
+            icon={Database}
+            route="/admin/data"
+            tone="cyan"
           />
         </section>
 
