@@ -1,11 +1,12 @@
 /**
  * DriverPayouts — standalone page.
  * Hosts:
- *   1. QuickDriverGuestAdd  — tap driver → enter guests → manager PIN approval
- *   2. DriverDropOffTracker — full driver onboarding + session controls
- *   3. DriverPayoutHistory  — settled / paid records
- * Split out of /Register so the operator has a single screen for the
- * driver workflow.
+ *   1. DriverDropOffTracker — unified driver workflow: onboarding, sessions,
+ *      AND instant guest logging (quick +N buttons live directly on each
+ *      driver's session row — logged the moment the guest walks in)
+ *   2. DriverPayoutHistory  — settled / paid records
+ * Merge directive 2026-07-20: the separate Quick Add card was folded into
+ * the drivers section so guest entry is one tap on the driver row.
  */
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
@@ -13,7 +14,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Truck } from "lucide-react";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
-import QuickDriverGuestAdd from "@/components/nups/QuickDriverGuestAdd";
 import DriverDropOffTracker from "@/components/nups/DriverDropOffTracker";
 import DriverPayoutHistory from "@/pages/DriverPayoutHistory";
 import ShiftAuditExportButton from "@/components/nups/ShiftAuditExportButton";
@@ -49,10 +49,7 @@ function DriverPayoutsInner() {
           </CardContent>
         </Card>
 
-        {/* The simple, daily-use workflow at the top */}
-        <QuickDriverGuestAdd user={me} />
-
-        {/* Power-user / detail workflow underneath */}
+        {/* Unified driver workflow — onboarding, sessions, instant guest add */}
         <DriverDropOffTracker user={me} />
 
         {/* Settled history */}

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, DollarSign, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle, Zap, QrCode, ShieldCheck, Lock, Clock } from "lucide-react";
+import { Car, Plus, DollarSign, Users, CheckCircle, ChevronDown, ChevronUp, Banknote, AlertCircle, Zap, QrCode, ShieldCheck, Lock, Clock, Trash2 } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates, computeDriverPayoutAmount } from "@/lib/nups/venueRateConfig";
 import DriverQRDeliveryModal from "@/components/nups/frontdoor/DriverQRDeliveryModal";
@@ -43,6 +43,9 @@ export default function DriverDropOffTracker({ user }) {
   const role = (user?.role || "").toUpperCase();
   const isDoorGirl = ["FLOOR_HOST", "VENUE_MANAGER", "VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN"].includes(role);
   const isDoorman = role === "SECURITY";
+  // Full admin control in-app — platform admins can delete driver records
+  // and sessions right here, no Base44 dashboard required.
+  const isAdmin = role === "ADMIN" || ["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"].includes(role);
 
   const [rates, setRates] = useState(null);
   const [expanded, setExpanded] = useState(null);
@@ -264,6 +267,24 @@ export default function DriverDropOffTracker({ user }) {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
+
+  // ─── Admin delete — sessions and profiles, confirm-gated ─────────────────
+  const deleteSession = useMutation({
+    mutationFn: (id) => base44.entities.DriverPayout.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
+  });
+  const deleteProfile = useMutation({
+    mutationFn: (id) => base44.entities.DriverProfile.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-profiles"] }),
+  });
+  const requestDeleteSession = (session) => {
+    if (!window.confirm(`Delete ${session.contractor_name}'s session record? This cannot be undone.`)) return;
+    deleteSession.mutate(session.id);
+  };
+  const requestDeleteProfile = (profile) => {
+    if (!window.confirm(`Permanently delete driver ${profile.name}'s profile and QR? This cannot be undone.`)) return;
+    deleteProfile.mutate(profile.id);
+  };
 
   // Confirm prompt before settling — disbursing cash from the drawer is the
   // single riskiest action on this screen, so we make the operator say yes
@@ -500,14 +521,26 @@ export default function DriverDropOffTracker({ user }) {
                             YTD ${(p.ytd_payout_total || 0).toFixed(0)} · {p.lifetime_drops || 0} drops
                           </div>
                         </button>
-                        <button
-                          onClick={() => openSession.mutate(p)}
-                          disabled={openSession.isPending}
-                          className="w-full text-[10px] uppercase tracking-wider font-bold py-1.5 bg-yellow-500/10 hover:bg-yellow-500/25 text-yellow-300 border-t border-gray-800 transition-all disabled:opacity-50"
-                          title="Open tonight's session for this driver"
-                        >
-                          + Open Session
-                        </button>
+                        <div className="flex border-t border-gray-800">
+                          <button
+                            onClick={() => openSession.mutate(p)}
+                            disabled={openSession.isPending}
+                            className="flex-1 text-[10px] uppercase tracking-wider font-bold py-1.5 bg-yellow-500/10 hover:bg-yellow-500/25 text-yellow-300 transition-all disabled:opacity-50"
+                            title="Open tonight's session for this driver"
+                          >
+                            + Open Session
+                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={() => requestDeleteProfile(p)}
+                              disabled={deleteProfile.isPending}
+                              className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/25 text-red-400 border-l border-gray-800 transition-all disabled:opacity-50"
+                              title="Delete driver profile (admin)"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                 </div>
@@ -613,11 +646,43 @@ export default function DriverDropOffTracker({ user }) {
                     <div className="text-green-400 font-bold text-lg">${payoutAmount.toFixed(2)}</div>
                     <div className="text-[10px] text-gray-500">payout</div>
                   </div>
+                  {isAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => requestDeleteSession(session)}
+                      disabled={deleteSession.isPending}
+                      title="Delete session (admin)"
+                      className="border-red-500/40 text-red-400 hover:bg-red-500/10 h-8 px-2"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
                   <Button variant="ghost" size="sm" onClick={() => setExpanded(isOpen ? null : session.id)} className="text-gray-400">
                     {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </Button>
                 </div>
               </div>
+
+              {/* Instant guest add — merged Quick Add: log the guest the moment
+                  they walk in, one tap on the driver's row, no expansion needed */}
+              {!confirmed && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400/80 mr-1">
+                    Guest in →
+                  </span>
+                  {[1, 2, 4, 6].map(n => (
+                    <Button
+                      key={n}
+                      onClick={() => logGuests.mutate({ session, guests: n })}
+                      disabled={logGuests.isPending}
+                      className="h-9 px-3 bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-sm"
+                    >
+                      +{n}
+                    </Button>
+                  ))}
+                </div>
+              )}
 
               {isOpen && (
                 <div className="border-t border-gray-800 pt-3 space-y-3">
@@ -806,7 +871,21 @@ export default function DriverDropOffTracker({ user }) {
                 <span className="text-gray-300 text-sm">{s.contractor_name}</span>
                 <span className="text-gray-500 text-xs">{Number(safeJSON(s.notes).guests) || 0} guests</span>
               </div>
-              <span className="text-green-400 font-bold">${(Number(s.total_payout) || 0).toFixed(2)}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-green-400 font-bold">${(Number(s.total_payout) || 0).toFixed(2)}</span>
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => requestDeleteSession(s)}
+                    disabled={deleteSession.isPending}
+                    title="Delete settled record (admin)"
+                    className="border-red-500/40 text-red-400 hover:bg-red-500/10 h-7 px-2"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>
