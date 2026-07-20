@@ -11,16 +11,22 @@ Deno.serve(async (req) => {
   
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    
-    if (!user || user.role !== 'admin') {
+    // Automation scheduler runs with no user session — auth.me() may throw.
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { /* automation path */ }
+    const isAutomation = !user;
+    if (user && user.role !== 'admin') {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
+    const db = base44.asServiceRole;
 
-    const { audit_type = 'full', auto_fix = false } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const audit_type = body.audit_type || 'full';
+    // SAFETY: auto-fix is never allowed on automated (no-user) runs.
+    const auto_fix = !isAutomation && body.auto_fix === true;
 
     // Create audit record
-    const audit = await base44.entities.SiteAudit.create({
+    const audit = await db.entities.SiteAudit.create({
       audit_type,
       status: 'running',
       files_scanned: 0
@@ -127,7 +133,7 @@ ${audit_type === 'ux' || audit_type === 'full' ? `
 BEGIN COMPREHENSIVE AUDIT NOW.`;
 
     // Call AI with web search for latest security standards
-    const auditResults = await base44.integrations.Core.InvokeLLM({
+    const auditResults = await db.integrations.Core.InvokeLLM({
       prompt: auditPrompt,
       add_context_from_internet: true,
       response_json_schema: {
@@ -163,7 +169,7 @@ BEGIN COMPREHENSIVE AUDIT NOW.`;
     // Update audit with results
     const executionTime = Date.now() - startTime;
     
-    await base44.entities.SiteAudit.update(audit.id, {
+    await db.entities.SiteAudit.update(audit.id, {
       status: 'completed',
       overall_score: auditResults.overall_score,
       security_findings: auditResults.security_findings || [],
@@ -230,7 +236,7 @@ Recommendation: ${finding.recommendation}`;
       }
 
       // Update audit with fix results
-      await base44.entities.SiteAudit.update(audit.id, {
+      await db.entities.SiteAudit.update(audit.id, {
         auto_fixes_applied: fixCount,
         fix_log: fixLog
       });
@@ -247,7 +253,7 @@ Recommendation: ${finding.recommendation}`;
         ux: auditResults.ux_findings?.length || 0
       },
       execution_time_ms: executionTime,
-      auto_fixes_applied: auto_fix ? (await base44.entities.SiteAudit.filter({ id: audit.id }))[0]?.auto_fixes_applied : 0
+      auto_fixes_applied: auto_fix ? (await db.entities.SiteAudit.filter({ id: audit.id }))[0]?.auto_fixes_applied : 0
     });
 
   } catch (error) {

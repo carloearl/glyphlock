@@ -1,0 +1,80 @@
+{
+  "name": "Nightly Site Guardian",
+  "description": "Every night: runs the SIE integrity scan and the full AI site audit (security, performance, SEO, UX), then emails all admins a prioritized digest ONLY if Critical/High findings exist. Read-only \u2014 never modifies the site.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "nightly_site_guardian",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_sie_scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runFullScan",
+            "args": {}
+          },
+          "then": "run_ai_audit",
+          "x-base44": {
+            "title": "SIE Integrity Scan",
+            "description": "Nav, routes, sitemaps, backend"
+          }
+        }
+      },
+      {
+        "run_ai_audit": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runSiteAudit",
+            "args": {
+              "audit_type": "full",
+              "auto_fix": false
+            }
+          },
+          "then": "send_digest",
+          "x-base44": {
+            "title": "AI Site Audit",
+            "description": "Security \u00b7 Perf \u00b7 SEO \u00b7 UX"
+          }
+        }
+      },
+      {
+        "send_digest": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "emailAuditDigest",
+            "args": {
+              "audit_id": "${ .run_ai_audit.audit_id }",
+              "scan_status": "${ .run_sie_scan.status }",
+              "scan_id": "${ .run_sie_scan.scan_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Email Admin Digest",
+            "description": "Only if Critical/High found"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 2 * * *",
+      "one_time_date": null,
+      "timezone": "America/Phoenix",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
