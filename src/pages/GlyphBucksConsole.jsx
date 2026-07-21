@@ -4,6 +4,7 @@ import { useActiveVenue } from "@/hooks/useActiveVenue";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import RoleHomeButton from "@/components/nups/RoleHomeButton";
 import UnifiedGlyphBucksTab from "@/components/nups/glyphbucks/UnifiedGlyphBucksTab";
+import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 
 /**
  * GlyphBucksConsole — the single, directly-reachable home for the entire
@@ -30,7 +31,16 @@ export default function GlyphBucksConsole() {
       .catch(() => setEntertainers([]));
   }, []);
 
-  const isAdmin = ["admin", "PLATFORM_ADMIN", "VENUE_OWNER"].includes(user?.role);
+  // Admin/Owner unlocks the Press designer. The owner-preview PIN bypass
+  // (?pin=90210) counts as admin so the full console is viewable, and any
+  // manager/owner/platform role qualifies (case-insensitive).
+  const role = String(user?.role || "").toLowerCase();
+  const isAdmin =
+    hasOwnerPreview() ||
+    role === "admin" ||
+    role.includes("owner") ||
+    role.includes("manager") ||
+    role.includes("platform");
 
   return (
     <NUPSAppShell

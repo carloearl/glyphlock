@@ -15,18 +15,27 @@ export default function BillRedemptionScanner() {
   const [completedPayouts, setCompletedPayouts] = useState([]);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
 
+  // Never hard-redirect (a bad target 404s the whole app). Accept any
+  // admin/manager/owner/staff role; show an inline notice otherwise so this
+  // scanner can live embedded inside the GlyphBucks Console.
   useEffect(() => {
     (async () => {
       try {
         const currentUser = await base44.auth.me();
-        if (!currentUser || !['admin', 'manager', 'staff'].includes(currentUser.role)) {
-          window.location.href = '/nups-login';
-          return;
-        }
-        setUser(currentUser);
+        const role = String(currentUser?.role || "").toLowerCase();
+        const allowed =
+          !!currentUser &&
+          (role === "admin" ||
+            role.includes("manager") ||
+            role.includes("owner") ||
+            role.includes("staff") ||
+            role.includes("platform"));
+        if (!allowed) setAccessDenied(true);
+        setUser(currentUser || null);
       } catch (error) {
-        window.location.href = '/nups-login';
+        setAccessDenied(true);
       } finally {
         setAuthLoading(false);
       }
@@ -55,6 +64,18 @@ export default function BillRedemptionScanner() {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="min-h-[300px] flex items-center justify-center p-8">
+        <div className="text-center text-gray-400 max-w-sm">
+          <ScanLine className="w-10 h-10 mx-auto mb-3 text-gray-600" />
+          <h3 className="text-base font-semibold text-white mb-1">Staff access required</h3>
+          <p className="text-xs">GlyphBucks redemption is limited to Admin, Manager, Owner, and Staff roles.</p>
+        </div>
       </div>
     );
   }

@@ -79,18 +79,27 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const venueName = currentVenue?.name || 'Club';
   const currentVenueId = currentVenue?.venue_id || currentVenue?.id || null;
 
+  const [accessDenied, setAccessDenied] = useState(false);
+
+  // RBAC: never hard-redirect (a bad target 404s the whole app). Accept any
+  // admin/manager/owner/staff role and show an inline notice otherwise, so
+  // this contract can live embedded inside the GlyphBucks Console.
   useEffect(() => {
     (async () => {
       try {
         const currentUser = await base44.auth.me();
-        if (!currentUser || !['admin', 'manager', 'staff'].includes(currentUser.role)) {
-          toast.error("Unauthorized: Staff access required");
-          window.location.href = '/nups-login';
-          return;
-        }
-        setUser(currentUser);
+        const role = String(currentUser?.role || "").toLowerCase();
+        const allowed =
+          !!currentUser &&
+          (role === "admin" ||
+            role.includes("manager") ||
+            role.includes("owner") ||
+            role.includes("staff") ||
+            role.includes("platform"));
+        if (!allowed) setAccessDenied(true);
+        setUser(currentUser || null);
       } catch (error) {
-        window.location.href = '/nups-login';
+        setAccessDenied(true);
       } finally {
         setAuthLoading(false);
       }
@@ -225,6 +234,18 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="min-h-[300px] flex items-center justify-center p-8">
+        <div className="text-center text-gray-400 max-w-sm">
+          <Shield className="w-10 h-10 mx-auto mb-3 text-gray-600" />
+          <h3 className="text-base font-semibold text-white mb-1">Staff access required</h3>
+          <p className="text-xs">New GlyphBucks sales are limited to Admin, Manager, Owner, and Staff roles.</p>
+        </div>
       </div>
     );
   }

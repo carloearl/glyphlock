@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Banknote, FileText, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
+import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 
 import ControlPanel from "@/components/nups/press/ControlPanel";
 import VoucherCanvas from "@/components/nups/press/VoucherCanvas";
@@ -48,6 +49,12 @@ export default function ClubCurrencyPressView({ saleOrder = null }) {
   // Press view can live embedded inside other consoles without yanking the
   // whole page away.
   useEffect(() => {
+    // Owner-preview PIN bypass (?pin=90210) grants full view access.
+    if (hasOwnerPreview()) {
+      setUser({ role: "admin", full_name: "Owner Preview" });
+      setAuthLoading(false);
+      return;
+    }
     (async () => {
       try {
         const currentUser = await base44.auth.me();

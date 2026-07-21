@@ -28,8 +28,14 @@ const SUB_TABS = [
   { key: "fraud",       label: "Fraud",      icon: Shield,   color: "text-red-300 border-red-500/50 bg-red-500/10" },
 ];
 
+function initialTab() {
+  if (typeof window === "undefined") return "sales";
+  const t = new URLSearchParams(window.location.search).get("tab");
+  return SUB_TABS.some((s) => s.key === t) ? t : "sales";
+}
+
 export default function UnifiedGlyphBucksTab({ user, venueId, entertainers = [], isAdmin = false }) {
-  const [active, setActive] = useState("sales");
+  const [active, setActive] = useState(initialTab);
 
   return (
     <div className="space-y-4">
