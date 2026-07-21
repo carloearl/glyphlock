@@ -15,10 +15,21 @@ const STATUS_COLORS = {
 
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §5 — Owner approval console.
 // Route is ADMIN-guarded; every action is re-verified server-side (owner authority only).
+// Decision lockdown (owner directive 2026-07-21): only Carlo Earl's accounts
+// see and use the decision buttons. Server enforces the same rule.
+const DECISION_EMAILS = ["carloearl@glyphlock.com", "carloearl@gmail.com"];
+
 export default function AccessRequests() {
   const [requests, setRequests] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
+  const [canDecide, setCanDecide] = useState(false);
+
+  useEffect(() => {
+    base44.auth.me()
+      .then((me) => setCanDecide(DECISION_EMAILS.includes(String(me?.email || "").toLowerCase())))
+      .catch(() => setCanDecide(false));
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -59,7 +70,7 @@ export default function AccessRequests() {
         <ShieldCheck className="w-7 h-7 text-violet-400" />
         <div>
           <h1 className="text-xl font-bold">Owner / Admin Access Requests</h1>
-          <p className="text-sm text-slate-500">Approval authority: venue Owner only. Self-approval is blocked server-side.</p>
+          <p className="text-sm text-slate-500">Approval authority: Carlo Earl only. Self-approval is blocked server-side.</p>
         </div>
       </header>
 
@@ -85,7 +96,7 @@ export default function AccessRequests() {
               {r.decision_note && <> · "{r.decision_note}"</>}
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
-              {["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status) && (
+              {canDecide && ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status) && (
                 <>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ADMIN")} className="bg-emerald-700 hover:bg-emerald-600 min-h-[44px]">Approve as Administrator</Button>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_OWNER")} className="bg-violet-700 hover:bg-violet-600 min-h-[44px]">Approve as Owner</Button>
@@ -95,7 +106,7 @@ export default function AccessRequests() {
                   )}
                 </>
               )}
-              {r.status === "APPROVED" && (
+              {canDecide && r.status === "APPROVED" && (
                 <>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "SUSPEND")} className="bg-orange-800 hover:bg-orange-700 min-h-[44px]">Suspend</Button>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REVOKE")} variant="destructive" className="min-h-[44px]">Revoke</Button>

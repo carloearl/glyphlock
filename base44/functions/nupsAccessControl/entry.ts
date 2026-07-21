@@ -6,6 +6,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
 
+// Decision lockdown (owner directive 2026-07-21): ONLY Carlo Earl's accounts
+// may approve/reject/suspend/revoke owner-admin access requests. Approved
+// OWNERs may still VIEW the list, but cannot decide.
+const DECISION_EMAILS = ['carloearl@glyphlock.com', 'carloearl@gmail.com'];
+
 async function isAuthorizedOwner(base44, email) {
   const e = String(email || '').trim().toLowerCase();
   if (!e) return false;
@@ -120,6 +125,11 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'decide') {
+      // §5 lockdown — decision authority is Carlo Earl only, regardless of
+      // any granted OWNER role.
+      if (!DECISION_EMAILS.includes(email)) {
+        return Response.json({ error: 'Only Carlo Earl can approve or revoke owner/admin access.' }, { status: 403 });
+      }
       const { request_id, decision, note } = body;
       const valid = ['APPROVE_ADMIN', 'APPROVE_OWNER', 'REJECT', 'REQUEST_INFO', 'SUSPEND', 'REVOKE'];
       if (!request_id || !valid.includes(decision)) {
