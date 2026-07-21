@@ -71,7 +71,9 @@ const NAV_SECTIONS = [
       // search). All contract & GlyphBucks CREATION lives on /Contracts — the
       // standalone "GlyphBucks Hub" entry is retired to kill the 3-door
       // duplication (owner directive 2026-07-21).
-      { id: "vipcommand",  label: "VIP Floor · Sessions", icon: Crown, to: "/VIPCommand" },
+      // ONE VIP link — Floor · Sessions · People (staff) · Contracts all bind
+      // to this single page (owner directive 2026-07-21).
+      { id: "vipcommand",  label: "VIP Center", icon: Crown, to: "/VIPCommand" },
       // GlyphBucks Console — the ONE directly-reachable home for the full
       // GlyphBucks system (Sales · Redeem · Press 5-sheet designer · Ledger ·
       // Inventory · Contract · Search · Fraud).
@@ -105,7 +107,7 @@ const NAV_SECTIONS = [
           // ONE VIP contract for all shows — VIP, GlyphBucks, legacy, and
           // Archive collapsed into a single editable surface (owner directive
           // 2026-07-21). Only two other distinct contract types remain.
-          { id: "c-vip",    label: "VIP Contract",     icon: Stamp,          to: "/Contracts?tab=vip" },
+          { id: "c-vip",    label: "VIP Contract",     icon: Stamp,          to: "/VIPCommand?tab=Contracts" },
           { id: "c-big",    label: "Big Spender",      icon: ShieldAlert,    to: "/Contracts?tab=big_spender" },
           { id: "c-ent",    label: "Entertainer",      icon: ClipboardCheck, to: "/Contracts?tab=entertainer" },
         ],

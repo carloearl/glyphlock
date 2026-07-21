@@ -7,6 +7,8 @@ import ContractSearch from '@/components/vip2/ContractSearch';
 import VIPLiveBoard from '@/components/vip2/VIPLiveBoard';
 import CommandCenterMenu from '@/components/vip2/CommandCenterMenu';
 import UnifiedGlyphBucksTab from '@/components/nups/glyphbucks/UnifiedGlyphBucksTab';
+import UltimateVIPContract from '@/components/nups/vip/UltimateVIPContract';
+import { useAdminOverride } from '@/lib/nups/adminView';
 import { base44 } from '@/api/base44Client';
 import { useActiveVenue } from '@/hooks/useActiveVenue';
 import { Button } from '@/components/ui/button';
@@ -24,23 +26,27 @@ const VIEW_TITLES = {
   People: 'People',
   Search: 'Contract Search',
   GlyphBucks: 'GlyphBucks',
+  Contracts: 'VIP Contracts',
 };
 // VIP Command is live-ops only — no config-gated CREATION views remain here.
 const CONFIG_GATED = [];
-// Legacy deep-links: old ?tab=GlyphBucks / ?tab=New Contract / ?tab=Contracts
-// now belong on /Contracts — they resolve to the card grid (null) here so the
-// operator lands on the menu and taps through to the Contracts workspace.
+// Unified VIP workspace: VIP Floor · Sessions · People (staff) · Contracts all
+// bind to this ONE page (owner directive 2026-07-21). Legacy /Contracts?tab=…
+// deep-links resolve to the internal Contracts view here so there is a single
+// VIP link that views and binds them all.
 const LEGACY_TAB_MAP = {
   Desk: 'Desk', Rooms: 'Rooms', People: 'People', Search: 'Search',
-  GlyphBucks: 'GlyphBucks',
+  GlyphBucks: 'GlyphBucks', Contracts: 'Contracts',
+  vip: 'Contracts', contracts: 'Contracts',
 };
 
 export default function VIPCommandCenter() {
   const [state, setState] = useState(null);
   const [user, setUser] = useState(null);
   const activeVenue = useActiveVenue();
+  const adminOverride = useAdminOverride();
   const urlTab = new URLSearchParams(window.location.search).get('tab');
-  const [view, setView] = useState(LEGACY_TAB_MAP[urlTab] || null); // null = card-grid home
+  const [view, setView] = useState(LEGACY_TAB_MAP[urlTab] || LEGACY_TAB_MAP[(urlTab || '').toLowerCase()] || null); // null = card-grid home
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
@@ -112,9 +118,11 @@ export default function VIPCommandCenter() {
                 isAdmin={isAdmin}
               />
             )}
-            {/* 'Contracts' view retired — the card now navigates to /Contracts,
-                the one home for all contract & GlyphBucks CREATION. No embedded
-                duplicate here (owner directive 2026-07-21). */}
+            {/* Contracts bound INTO the VIP Command Center — one link now views
+                VIP Floor, Sessions, People (staff) AND Contracts together
+                (owner directive 2026-07-21). Renders the same UltimateVIPContract
+                the standalone Contracts page used — no duplicate logic. */}
+            {view === 'Contracts' && <UltimateVIPContract canEdit={adminOverride} />}
             {view === 'Rooms' && (
               <div className="space-y-6">
                 <div className="mb-2">
