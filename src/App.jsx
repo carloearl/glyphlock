@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'r
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { recordNavigation } from '@/lib/nups/navStack';
 import { NUPSPermissionsProvider } from '@/components/nups/hooks/useNUPSPermissions';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
@@ -102,6 +103,11 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
   const location = useLocation();
+
+  // Record EVERY route change in the central nav stack (idempotent), before
+  // children render — so the Back button works on all pages, not only pages
+  // that kept it mounted while navigating.
+  recordNavigation(location.pathname + location.search);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (

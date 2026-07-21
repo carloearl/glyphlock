@@ -1,53 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { getOperatorHome } from "@/lib/nups/roleHomes";
-
-const KEY = "gl_nav_stack";
-
-const readStack = () => {
-  try { return JSON.parse(sessionStorage.getItem(KEY) || "[]"); } catch { return []; }
-};
+import { canGoBack, popBack } from "@/lib/nups/navStack";
 
 /**
- * Universal back button — tracks the exact in-app navigation trail
- * (path + query) in session storage and returns the user to the precise
- * page they came from. Hidden when there is nowhere to go back to.
+ * Universal back button — consumes the central nav stack recorded at router
+ * level (see App.jsx + lib/nups/navStack.js), so it works on every page,
+ * not only pages that happened to keep the button mounted.
+ * Hidden when there is nowhere to go back to.
  */
 export default function GlobalBackButton({ inline = false }) {
-  const location = useLocation();
+  const location = useLocation(); // re-render on every route change
   const navigate = useNavigate();
-  const [canGoBack, setCanGoBack] = useState(false);
   const home = getOperatorHome();
   const onHomePage = home && location.pathname.toLowerCase() === home.path.toLowerCase();
-
-  useEffect(() => {
-    const path = location.pathname + location.search;
-    let stack = readStack();
-    if (stack[stack.length - 1] !== path) {
-      // Returning to the previous entry = a back move; pop instead of push
-      if (stack.length > 1 && stack[stack.length - 2] === path) stack.pop();
-      else stack.push(path);
-      if (stack.length > 50) stack = stack.slice(-50);
-      sessionStorage.setItem(KEY, JSON.stringify(stack));
-    }
-    setCanGoBack(stack.length > 1);
-  }, [location]);
+  const hasBack = canGoBack();
 
   const goBack = () => {
-    const stack = readStack();
-    if (stack.length >= 2) {
-      stack.pop();
-      sessionStorage.setItem(KEY, JSON.stringify(stack));
-      navigate(stack[stack.length - 1]);
-    } else if (home && !onHomePage) {
-      // No previous page — fall back to the operator's own dashboard
-      navigate(home.path);
-    }
+    const prev = popBack();
+    if (prev) navigate(prev);
+    else if (home && !onHomePage) navigate(home.path); // fall back to role dashboard
   };
 
   // Nothing to go back to AND no role dashboard to fall back to (or already there)
-  if (!canGoBack && (!home || onHomePage)) return null;
+  if (!hasBack && (!home || onHomePage)) return null;
 
   // Inline variant — lives inside the kiosk top strip so it never overlays
   // page content (overlay audit 2026-07-17).
@@ -57,7 +34,7 @@ export default function GlobalBackButton({ inline = false }) {
 
   return (
     <button onClick={goBack} aria-label="Go back to previous page" className={cls}>
-      <ArrowLeft className={inline ? "w-3.5 h-3.5" : "w-4 h-4"} /> {canGoBack ? "Back" : `Back to ${home.label}`}
+      <ArrowLeft className={inline ? "w-3.5 h-3.5" : "w-4 h-4"} /> {hasBack ? "Back" : `Back to ${home.label}`}
     </button>
   );
 }
