@@ -76,6 +76,17 @@ export default function ManagerConsole() {
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
+  // Auto clock-out sweep — close any shift idle > 30 min so the live counts
+  // never show phantom "on the clock" staff who left a device running.
+  // Runs on mount and every 5 minutes.
+  useEffect(() => {
+    const sweep = () =>
+      base44.functions.invoke("nupsClockIn", { action: "sweepStale" }).catch(() => {});
+    sweep();
+    const id = setInterval(sweep, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
   // ── Live data feeds (manager-relevant only) ────────────────────────
   const { data: staffShifts = [] } = useQuery({
     queryKey: ["mgr-staff-shifts"],

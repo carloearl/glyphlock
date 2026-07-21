@@ -4,6 +4,7 @@ import { LogOut, Shield } from "lucide-react";
 import KioskExitModal from "@/components/nups/KioskExitModal";
 import GlobalBackButton from "@/components/nups/GlobalBackButton";
 import { enterKioskMode, exitKioskMode, isKioskMode } from "@/lib/nups/kioskMode";
+import { base44 } from "@/api/base44Client";
 
 /**
  * KioskShell
@@ -32,6 +33,20 @@ export default function KioskShell({ children }) {
       enterKioskMode();
       setKiosk(true);
     }
+  }, []);
+
+  // Heartbeat — while a NUPS page is open, keep the operator's shift alive so
+  // the 30-min idle auto-clock-out only fires on a device that's truly left.
+  // Fires immediately and every 5 minutes.
+  useEffect(() => {
+    const beat = () => {
+      const token = sessionStorage.getItem("nups_kiosk_session");
+      if (!token) return;
+      base44.functions.invoke("nupsClockIn", { action: "heartbeat", kiosk_session: token }).catch(() => {});
+    };
+    beat();
+    const id = setInterval(beat, 5 * 60 * 1000);
+    return () => clearInterval(id);
   }, []);
 
   const handleVerified = () => {
