@@ -12,15 +12,15 @@ import ReceiptPrinter from "../ReceiptPrinter";
 export default function TransactionReceiptModal({ open, onClose, transaction }) {
   return (
     <Dialog open={open && !!transaction} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-md bg-slate-950 border-emerald-500/40 text-white">
-        <DialogHeader>
+      <DialogContent className="max-w-md bg-slate-950 border-emerald-500/40 text-white max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-4 pb-2 shrink-0 border-b border-emerald-500/20">
           <DialogTitle className="flex items-center gap-2 text-emerald-300">
             <CheckCircle2 className="w-5 h-5" />
             Transaction Complete
           </DialogTitle>
         </DialogHeader>
         {transaction && (
-          <div className="space-y-3">
+          <div className="space-y-3 overflow-y-auto p-4 pt-3 flex-1">
             <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
               <div className="text-[10px] uppercase tracking-widest text-emerald-400/70">Total Charged</div>
               <div className="text-3xl font-black text-emerald-300 font-mono">
@@ -55,6 +55,10 @@ export default function TransactionReceiptModal({ open, onClose, transaction }) 
               </div>
             </div>
             <ReceiptPrinter transaction={transaction} />
+          </div>
+        )}
+        {transaction && (
+          <div className="p-4 pt-2 shrink-0 border-t border-emerald-500/20">
             <Button
               onClick={onClose}
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-12"

@@ -5,6 +5,7 @@ import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import { computeReceiptHash } from "@/lib/nups/receiptHash";
 import { buildReceiptBreakdown, getCashierDisplay } from "@/lib/nups/receiptBreakdown";
+import { DEMO_RECEIPT_VENUE, isDemoTransaction } from "@/lib/nups/demoReceiptVenue";
 
 const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
 
@@ -50,13 +51,20 @@ export default function ReceiptPrinter({
     return () => { alive = false; };
   }, [transaction?.transaction_id, transaction?.receipt_hash, transaction?.total, transaction?.created_date]);
 
-  const VENUE_BRAND = activeVenue?.name || transaction?.venue_name || '';
-  const BIZ_LEGAL = rates?.receipt_legal_name || VENUE_BRAND || 'N.U.P.S. POS';
+  // Demo receipts render with the mock demo venue instead of a live venue —
+  // clearly labeled demonstration data, never a real venue's identity.
+  const isDemo = isDemoTransaction(transaction);
+  const dv = isDemo ? DEMO_RECEIPT_VENUE : null;
+
+  const VENUE_BRAND = dv?.name || activeVenue?.name || transaction?.venue_name || '';
+  const BIZ_LEGAL = dv?.legal_name || rates?.receipt_legal_name || VENUE_BRAND || 'N.U.P.S. POS';
   const BIZ_NAME = VENUE_BRAND || BIZ_LEGAL;
-  const BIZ_ADDRESS = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || 'Address on file';
-  const BIZ_PHONE = activeVenue?.phone || '';
-  const BIZ_TAX_ID = rates?.receipt_tax_id || '';
-  const FOOTER_TEXT = rates?.receipt_footer_text || '';
+  const BIZ_ADDRESS = dv
+    ? [dv.address, dv.city, dv.state].filter(Boolean).join(', ')
+    : ([activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || 'Address on file');
+  const BIZ_PHONE = dv?.phone || activeVenue?.phone || '';
+  const BIZ_TAX_ID = dv?.tax_id || rates?.receipt_tax_id || '';
+  const FOOTER_TEXT = dv?.footer_text || rates?.receipt_footer_text || '';
 
   // Fee toggles + rates
   const showProcFee = rates?.show_processing_fee !== false; // default true
