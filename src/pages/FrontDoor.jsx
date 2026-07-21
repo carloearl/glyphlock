@@ -10,7 +10,6 @@ import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
 import StaffClockInOut from "@/components/nups/StaffClockInOut";
-import POSCashRegister from "@/components/nups/POSCashRegister";
 import BatchConfirmControl from "@/components/nups/register/BatchConfirmControl";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
 import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
@@ -258,7 +257,22 @@ function FrontDoorContent() {
                     {id === "register" && (
                       <div className="space-y-3">
                         <BatchConfirmControl operatorName={user?.full_name || user?.username} />
-                        <POSCashRegister station="door" user={user} venueId={venueId} showGuestIntake={false} />
+                        {/* ONE register rule (owner directive 2026-07-20): the door
+                            till lives ONLY on /Register. This step launches it —
+                            no second live register embedded here. */}
+                        <button
+                          onClick={() => navigate("/Register")}
+                          className="w-full min-h-[120px] rounded-xl border border-cyan-500/40 bg-gradient-to-br from-cyan-600/15 via-blue-600/10 to-transparent hover:border-cyan-400 transition-colors flex items-center gap-5 p-6 text-left active:scale-[0.99]"
+                        >
+                          <div className="w-14 h-14 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0">
+                            <Ticket className="w-7 h-7 text-cyan-300" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-black text-white text-xl">Open the Register</div>
+                            <div className="text-sm text-slate-400 mt-0.5">Cover, drinks & payouts ring up on the POS terminal — one register, one drawer.</div>
+                          </div>
+                          <div className="text-cyan-300 font-mono text-sm shrink-0">GO →</div>
+                        </button>
                       </div>
                     )}
                     {id === "dancers" && <EntertainerCheckIn user={user} />}
