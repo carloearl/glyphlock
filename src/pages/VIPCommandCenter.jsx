@@ -6,6 +6,9 @@ import ContractDesk from '@/components/vip2/ContractDesk';
 import ContractSearch from '@/components/vip2/ContractSearch';
 import VIPLiveBoard from '@/components/vip2/VIPLiveBoard';
 import CommandCenterMenu from '@/components/vip2/CommandCenterMenu';
+import UnifiedGlyphBucksTab from '@/components/nups/glyphbucks/UnifiedGlyphBucksTab';
+import { base44 } from '@/api/base44Client';
+import { useActiveVenue } from '@/hooks/useActiveVenue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Crown, ArrowLeft } from 'lucide-react';
@@ -20,6 +23,7 @@ const VIEW_TITLES = {
   Rooms: 'Rooms & Floor',
   People: 'People',
   Search: 'Contract Search',
+  GlyphBucks: 'GlyphBucks',
 };
 // VIP Command is live-ops only — no config-gated CREATION views remain here.
 const CONFIG_GATED = [];
@@ -28,13 +32,18 @@ const CONFIG_GATED = [];
 // operator lands on the menu and taps through to the Contracts workspace.
 const LEGACY_TAB_MAP = {
   Desk: 'Desk', Rooms: 'Rooms', People: 'People', Search: 'Search',
+  GlyphBucks: 'GlyphBucks',
 };
 
 export default function VIPCommandCenter() {
   const [state, setState] = useState(null);
+  const [user, setUser] = useState(null);
+  const activeVenue = useActiveVenue();
   const urlTab = new URLSearchParams(window.location.search).get('tab');
   const [view, setView] = useState(LEGACY_TAB_MAP[urlTab] || null); // null = card-grid home
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
   const refresh = useCallback(async () => {
     const s = await vip('getState');
@@ -56,6 +65,12 @@ export default function VIPCommandCenter() {
   }
 
   const configMissing = !state?.config;
+  // Panels read state.contracts / .entertainers / .guests / .sessions directly.
+  // When getState errors (no config, session not validated) state is null —
+  // pass a safe empty shape so the live-ops panels render instead of crashing.
+  const safeState = state || { contracts: [], entertainers: [], guests: [], sessions: [], rooms: [] };
+  const isAdmin = ['admin', 'PLATFORM_ADMIN', 'VENUE_OWNER'].includes(user?.role);
+  const venueId = state?.config?.venue_id || activeVenue?.venue_id || activeVenue?.id || 'dream_palace';
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -88,7 +103,15 @@ export default function VIPCommandCenter() {
           </div>
         ) : (
           <>
-            {view === 'Desk' && <ContractDesk state={state} refresh={refresh} />}
+            {view === 'Desk' && <ContractDesk state={safeState} refresh={refresh} />}
+            {view === 'GlyphBucks' && (
+              <UnifiedGlyphBucksTab
+                user={user}
+                venueId={venueId}
+                entertainers={safeState.entertainers}
+                isAdmin={isAdmin}
+              />
+            )}
             {/* 'Contracts' view retired — the card now navigates to /Contracts,
                 the one home for all contract & GlyphBucks CREATION. No embedded
                 duplicate here (owner directive 2026-07-21). */}
@@ -109,7 +132,7 @@ export default function VIPCommandCenter() {
                 </details>
               </div>
             )}
-            {view === 'People' && <PeoplePanel state={state} refresh={refresh} />}
+            {view === 'People' && <PeoplePanel state={safeState} refresh={refresh} />}
             {view === 'Search' && <ContractSearch />}
           </>
         )}
