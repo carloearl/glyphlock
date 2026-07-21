@@ -1,11 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileSignature, DoorOpen, Users, Search, Coins } from "lucide-react";
+import { LayoutDashboard, FileSignature, DoorOpen, Users, Search, Coins, Layers } from "lucide-react";
 
 // UNIFIED VIP WORKSPACE — VIP Floor, Sessions, People (staff) AND Contracts
 // all bind to this ONE page (owner directive 2026-07-21). The Contracts card
 // now opens INSIDE the Command Center instead of navigating to a separate page.
 const CARDS = [
+  { key: "Unified", title: "VIP — All in One", desc: "Floor, active sessions, people & contracts — everything about a VIP on one screen", icon: Layers, glow: "bg-fuchsia-500/25", accent: "text-fuchsia-300" },
   { key: "Rooms", title: "Rooms & Floor", desc: "Live room timers — tap a room card to edit timing & status", icon: DoorOpen, glow: "bg-purple-500/25", accent: "text-purple-300" },
   { key: "Contracts", title: "VIP Contracts", desc: "The one editable VIP contract, the sell-&-seal desk, and sealed-record search — all here", icon: FileSignature, glow: "bg-amber-500/25", accent: "text-amber-300" },
   { key: "GlyphBucks", title: "GlyphBucks Suite", desc: "Sales, redeem, press editor, ledger, inventory, search & fraud — the full GlyphBucks console", icon: Coins, glow: "bg-yellow-500/25", accent: "text-yellow-300" },

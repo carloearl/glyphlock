@@ -5,6 +5,7 @@ import PeoplePanel from '@/components/vip2/PeoplePanel';
 import ContractDesk from '@/components/vip2/ContractDesk';
 import ContractSearch from '@/components/vip2/ContractSearch';
 import VIPLiveBoard from '@/components/vip2/VIPLiveBoard';
+import VIPUnifiedView from '@/components/vip2/VIPUnifiedView';
 import CommandCenterMenu from '@/components/vip2/CommandCenterMenu';
 import UnifiedGlyphBucksTab from '@/components/nups/glyphbucks/UnifiedGlyphBucksTab';
 import UltimateVIPContract from '@/components/nups/vip/UltimateVIPContract';
@@ -21,6 +22,7 @@ import { Loader2, Crown, ArrowLeft } from 'lucide-react';
  * "GlyphBucks" are merged into one "Contracts & GlyphBucks" card.
  */
 const VIEW_TITLES = {
+  Unified: 'VIP — All in One',
   Desk: 'Active Sessions',
   Rooms: 'Rooms & Floor',
   People: 'People',
@@ -35,6 +37,7 @@ const CONFIG_GATED = [];
 // deep-links resolve to the internal Contracts view here so there is a single
 // VIP link that views and binds them all.
 const LEGACY_TAB_MAP = {
+  Unified: 'Unified', unified: 'Unified',
   Desk: 'Desk', Rooms: 'Rooms', People: 'People', Search: 'Search',
   GlyphBucks: 'GlyphBucks', Contracts: 'Contracts',
   vip: 'Contracts', contracts: 'Contracts',
@@ -46,7 +49,8 @@ export default function VIPCommandCenter() {
   const activeVenue = useActiveVenue();
   const adminOverride = useAdminOverride();
   const urlTab = new URLSearchParams(window.location.search).get('tab');
-  const [view, setView] = useState(LEGACY_TAB_MAP[urlTab] || LEGACY_TAB_MAP[(urlTab || '').toLowerCase()] || null); // null = card-grid home
+  // Default to the single unified "everything in one place" view. null = card-grid home.
+  const [view, setView] = useState(LEGACY_TAB_MAP[urlTab] || LEGACY_TAB_MAP[(urlTab || '').toLowerCase()] || 'Unified');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
@@ -109,6 +113,10 @@ export default function VIPCommandCenter() {
           </div>
         ) : (
           <>
+            {/* THE unified surface — Floor + Active Sessions + People (staff)
+                + Contracts stacked in one scroll so everything about a VIP is
+                managed in one place (owner directive 2026-07-21). */}
+            {view === 'Unified' && <VIPUnifiedView state={safeState} refresh={refresh} canEdit={adminOverride} />}
             {view === 'Desk' && <ContractDesk state={safeState} refresh={refresh} />}
             {view === 'GlyphBucks' && (
               <UnifiedGlyphBucksTab
