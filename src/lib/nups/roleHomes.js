@@ -1,10 +1,10 @@
 // Role → dedicated workspace landing (destination-based, never history-based).
 export const ROLE_HOME = {
-  HOSTESS: { path: "/VIPSale", label: "VIP Sale" },
+  HOSTESS: { path: "/HostessHome", label: "Hostess Home" },
   FLOOR_HOST: { path: "/VIPSale", label: "VIP Sale" },
   DJ: { path: "/DJHome", label: "DJ Booth" },
   DOOR_GIRL: { path: "/FrontDoor", label: "Front Door" },
-  DOORMAN: { path: "/FrontDoor", label: "Front Door" },
+  DOORMAN: { path: "/DoormanHome", label: "Doorman Home" },
   PERFORMER: { path: "/EntertainerHome", label: "Entertainer Home" },
   BARTENDER: { path: "/BarRegister", label: "Bar Register" },
   SECURITY: { path: "/StaffHome", label: "Staff Home" },
