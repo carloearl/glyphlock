@@ -50,9 +50,24 @@ import OfficialChecks from "./OfficialChecks.jsx";
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import HardwareStatusPanel from "../components/nups/hardware/HardwareStatusPanel.jsx";
 import DemoCredentialsPanel from "../components/nups/DemoCredentialsPanel.jsx";
+import NUPSMISReport from "./NUPSMISReport.jsx";
 import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
+
+// Shown when a tab has content but the current role isn't permitted to see it —
+// prevents the "click a tab, nothing appears, looks broken" experience.
+function NoAccessNote({ label }) {
+  return (
+    <Card className="bg-gray-900/40 border-gray-700/40">
+      <CardContent className="p-8 text-center">
+        <Shield className="w-8 h-8 text-gray-600 mx-auto mb-3" />
+        <p className="text-sm text-gray-300 font-medium">{label} is restricted for your role.</p>
+        <p className="text-xs text-gray-500 mt-1">Switch to an owner/admin account to access this section.</p>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function NUPSOwner() {
   const navigate = useNavigate();
@@ -490,19 +505,21 @@ export default function NUPSOwner() {
           )}
           {/* 'vip' retired — the tab routes to /VIPCommand (no duplicate board). */}
           {activeModule === 'payroll' && (
-            <div className="space-y-6">
-              {/* 1099 contractor tax forms — must be on file before any payout */}
-              {canPayroll && <ContractorTaxFormsList currentUser={user} />}
-              <div className="border-t border-white/5 pt-6">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-3">
-                  1099 Earnings & Payouts
+            canPayroll ? (
+              <div className="space-y-6">
+                {/* 1099 contractor tax forms — must be on file before any payout */}
+                <ContractorTaxFormsList currentUser={user} />
+                <div className="border-t border-white/5 pt-6">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-3">
+                    1099 Earnings & Payouts
+                  </div>
+                  <EntertainerPayrollEngine user={user} />
                 </div>
-                <EntertainerPayrollEngine user={user} />
+                <TipBreakdown transactions={realTransactions} />
+                <PayrollReport />
+                <OfficialChecks />
               </div>
-              {canPayroll && <TipBreakdown transactions={realTransactions} />}
-              {canPayroll && <PayrollReport />}
-              {canPayroll && <OfficialChecks />}
-            </div>
+            ) : <NoAccessNote label="Payroll" />
           )}
           {activeModule === 'reports' && (
             <div className="space-y-4">
@@ -526,28 +543,44 @@ export default function NUPSOwner() {
           {activeModule === 'customers' && (
             <div className="space-y-4">
               <GuestTracking />
-              {canMarketing && <CustomerManagement />}
-              {canMarketing && <LoyaltyProgram />}
+              {canMarketing ? (
+                <>
+                  <CustomerManagement />
+                  <LoyaltyProgram />
+                </>
+              ) : <NoAccessNote label="Customer management & loyalty" />}
             </div>
           )}
           {activeModule === 'marketing' && (
             <div className="space-y-4">
-              {canMarketing && <MarketingCampaigns />}
-              {canMarketing && <AIInsights />}
+              {canMarketing ? (
+                <>
+                  <MarketingCampaigns />
+                  <AIInsights />
+                </>
+              ) : <NoAccessNote label="Marketing tools" />}
             </div>
           )}
           {activeModule === 'inventory' && (
             <div className="space-y-4">
-              {canInventory && <ProductManagement />}
-              {canInventory && <InventoryManagement products={products} />}
+              {canInventory ? (
+                <>
+                  <ProductManagement />
+                  <InventoryManagement products={products} />
+                </>
+              ) : <NoAccessNote label="Inventory management" />}
               {canBatch && <CashDrawerLog />}
             </div>
           )}
           {activeModule === 'audit' && (
             <div className="space-y-4">
               {/* Unified Activity + Audit browser with role/action filters */}
-              {canAudit && <ActivityAuditPanel />}
-              {canAudit && <AuditLogDashboard user={user} />}
+              {canAudit ? (
+                <>
+                  <ActivityAuditPanel />
+                  <AuditLogDashboard user={user} />
+                </>
+              ) : <NoAccessNote label="Audit log" />}
             </div>
           )}
           {activeModule === 'admin' && (
@@ -556,7 +589,9 @@ export default function NUPSOwner() {
               {canVoid && <RefundManager user={user} />}
               <LiveFloorView />
               {isAdminUser && (
-                <iframe src="/NUPSMISReport" className="w-full border-0 rounded-lg" style={{ height: '85vh' }} title="Q MIS Report" />
+                <div className="rounded-lg overflow-hidden border border-purple-500/20">
+                  <NUPSMISReport />
+                </div>
               )}
               <HardwareStatusPanel user={user} activeVenue={activeVenue} />
             </div>
