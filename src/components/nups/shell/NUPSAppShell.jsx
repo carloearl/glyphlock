@@ -317,11 +317,17 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   // switcher, mode toggle, venue switcher, or global search (§2 rev 3).
   const kioskOperator = operatorMode &&
     (roleClass === ROLE_CLASS.STAFF || roleClass === ROLE_CLASS.ENTERTAINER);
+  // STAFF/ENTERTAINER intentionally get NO sidebar (scoped station only).
+  // Any other role that somehow resolves to an empty set falls back to the
+  // MANAGER rail so admins/managers are never stranded without navigation
+  // (nav audit 2026-07-21 — Driver Payouts showed no tabs, no back button).
+  const scopedLabels = SECTIONS_BY_CLASS[roleClass] || [];
+  const isScopedStation = roleClass === ROLE_CLASS.STAFF || roleClass === ROLE_CLASS.ENTERTAINER;
   const visibleSectionLabels = effectiveAdmin
     ? SECTIONS_BY_CLASS.ADMIN
     : isAdmin
       ? SECTIONS_BY_CLASS.MANAGER
-      : (SECTIONS_BY_CLASS[roleClass] || []);
+      : (scopedLabels.length > 0 || isScopedStation ? scopedLabels : SECTIONS_BY_CLASS.MANAGER);
   // Owner directive rev 2: adminOnly items stay VISIBLE — the route guards
   // show "you do not have permission" instead of the card disappearing.
   const visibleSections = NAV_SECTIONS
@@ -433,10 +439,11 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
 
             {/* HOME — role-aware, honest label. Staff/entertainers go to
                 THEIR home (never the admin dashboard); everyone else goes
-                to the Dashboard. Hidden when already there — a "Back"
-                button that always pointed at the Hub confused every role
-                (nav audit 2026-07-17). */}
-            {!atHome && (
+                to the Dashboard. When already at home we still render a plain
+                Back button so NO page can ever strand the user without any
+                navigation — critical on pages where the sidebar is hidden
+                (e.g. Driver Payouts with no visible sections). */}
+            {!atHome ? (
               <button
                 onClick={() => navigate(homeTo)}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] text-slate-300 hover:text-white text-[12px] font-semibold transition-colors"
@@ -445,6 +452,16 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               >
                 <Home className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{homeLabel}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(homeTo))}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] text-slate-300 hover:text-white text-[12px] font-semibold transition-colors"
+                aria-label="Go back"
+                title="Back"
+              >
+                <ChevronRight className="w-3.5 h-3.5 rotate-180" />
+                <span className="hidden sm:inline">Back</span>
               </button>
             )}
 
