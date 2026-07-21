@@ -31,8 +31,12 @@ export default function VIPShowGenerator({ prefill }) {
   const [venue, setVenue] = useState("Diamond Palace Tempe");
   const [guest, setGuest] = useState({ name: "", membership_id: "", member_tier: "STANDARD", id_scan_ref: "", card_last4: "", face_match_pct: "", thumb_match_pct: "" });
   const [staff, setStaff] = useState({ hostess: "", duty_manager: "", suite: "" });
+  const [show, setShow] = useState({ start_time: "", duration_minutes: "" });
   const [lines, setLines] = useState([{ description: "", qty: 1, amount: 0 }]);
-  const [cardFeePct, setCardFeePct] = useState(5);
+  const [cardFeePct, setCardFeePct] = useState(15);
+  // Per-venue editable terms (ContractTermsConfig, type VIP). Falls back to the
+  // canonical 14-clause VIP_TERMS when the venue hasn't saved custom terms.
+  const [venueTerms, setVenueTerms] = useState(null); // { clauses[], text, version }
   const [cash, setCash] = useState(0);
   const [card, setCard] = useState(0);
   const [glyphbucks, setGlyphbucks] = useState(0);
@@ -65,12 +69,39 @@ export default function VIPShowGenerator({ prefill }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(prefill)]);
 
+  // Load this venue's editable VIP terms (admin-managed in ContractTermsConfig).
+  // Different venues use different contracts — whatever is shown here is hashed
+  // into terms_hash, so the seal always reflects the terms the guest accepted.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const rows = await base44.entities.ContractTermsConfig.filter({ venue_id: venueId, contract_type: "VIP", active: true });
+        const row = rows?.[0];
+        if (!alive) return;
+        if (row?.terms_text?.trim()) {
+          const clauses = row.terms_text.split(/\n{2,}|\n(?=\s*\d+[.)])/).map((c) => c.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean);
+          setVenueTerms({ clauses: clauses.length ? clauses : [row.terms_text.trim()], text: row.terms_text.trim(), version: row.version || "venue-custom" });
+        } else {
+          setVenueTerms(null); // fall back to canonical
+        }
+      } catch (_) { if (alive) setVenueTerms(null); }
+    })();
+    return () => { alive = false; };
+  }, [venueId]);
+
+  // Active terms — venue-custom when present, otherwise the canonical VIP_TERMS.
+  const activeClauses = venueTerms?.clauses || VIP_TERMS;
+  const activeTermsText = venueTerms?.text || VIP_TERMS_TEXT;
+  const activeTermsVersion = venueTerms?.version || VIP_TERMS_VERSION;
+
   // Wipe all form data (incl. demo-seeded data) — used when the flow completes
   // through to the receipt and a new contract is started.
   const resetForm = () => {
     setMode("REAL");
     setGuest({ name: "", membership_id: "", member_tier: "STANDARD", id_scan_ref: "", card_last4: "", face_match_pct: "", thumb_match_pct: "" });
     setStaff((s) => ({ hostess: "", duty_manager: "", suite: "" }));
+    setShow({ start_time: "", duration_minutes: "" });
     setLines([{ description: "", qty: 1, amount: 0 }]);
     setCash(0); setCard(0); setGlyphbucks(0);
     setTreatment(""); setClickwrap(false); setError("");
@@ -91,14 +122,15 @@ export default function VIPShowGenerator({ prefill }) {
     setVenue("Diamond Palace Tempe");
     setGuest({ name: "Robert Spender", membership_id: "MBR-0001", member_tier: "PLATINUM", id_scan_ref: "DEMO-ID-001", card_last4: "9921", face_match_pct: "98.2", thumb_match_pct: "97.1" });
     setStaff({ hostess: "Amber", duty_manager: "M. Reyes", suite: "Skyline Suite" });
+    setShow({ start_time: "22:30", duration_minutes: "60" });
     setLines([
       { description: "VIP Suite — 60 min", qty: 1, amount: 300 },
-      { description: "Performance — Crystal", qty: 2, amount: 150 },
+      { description: "Performance — Crystal (show price incl. gratuity)", qty: 2, amount: 150 },
     ]);
-    setCardFeePct(5);
-    // subtotal 600 + 5% card fee 30 = 630 → cash 200 + card 430 settles exactly
+    setCardFeePct(15);
+    // subtotal 600 + 15% card fee 90 = 690 → cash 200 + card 490 settles exactly
     setCash(200);
-    setCard(430);
+    setCard(490);
     setGlyphbucks(0);
     setTreatment("DEMO walkthrough — training scenario");
     setClickwrap(true);
@@ -125,7 +157,20 @@ export default function VIPShowGenerator({ prefill }) {
       const now = new Date();
       const ymd = now.toISOString().slice(2, 10).replace(/-/g, "");
       const contractRef = `VIP-${ymd}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
-      const termsHash = await sha256Hex(TERMS_TEXT);
+      // Hash the terms actually shown to the guest (venue-custom or canonical).
+      const termsHash = await sha256Hex(activeTermsText);
+
+      // Show session — start time + duration → computed end, sealed into notes.
+      let sessionNote = null;
+      if (show.start_time && Number(show.duration_minutes) > 0) {
+        const start = new Date(now);
+        const [hh, mm] = show.start_time.split(":").map(Number);
+        if (!Number.isNaN(hh) && !Number.isNaN(mm)) {
+          start.setHours(hh, mm, 0, 0);
+          const end = new Date(start.getTime() + Number(show.duration_minutes) * 60000);
+          sessionNote = { start: start.toISOString(), duration_minutes: Number(show.duration_minutes), end: end.toISOString() };
+        }
+      }
 
       // Canonical record — verify_ref present as null at hash time (key order is hash-significant)
       const record = {
@@ -156,8 +201,9 @@ export default function VIPShowGenerator({ prefill }) {
           glyphbucks_tendered: Number(glyphbucks) || 0,
           treatment: treatment.trim() || null,
           statute: "15 U.S.C. § 1666 — FCBA rights not waived",
+          session: sessionNote,
           clickwrap: {
-            accepted: true, accepted_at: now.toISOString(), terms_version: VIP_TERMS_VERSION, clause_count: VIP_TERMS.length,
+            accepted: true, accepted_at: now.toISOString(), terms_version: activeTermsVersion, clause_count: activeClauses.length,
             ...(prefill?.assent?.clickwrap_accepted ? {
               shared_from: "GLYPHBUCKS_CLICKWRAP",
               initials_term1: prefill.assent.initials_term1 || null,
@@ -266,10 +312,12 @@ export default function VIPShowGenerator({ prefill }) {
         </div>
       </div>
 
-      {/* Staff */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Staff + show times */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <label><span className={lbl}>Hostess</span><input className={inp} value={staff.hostess} onChange={(e) => setStaff({ ...staff, hostess: e.target.value })} /></label>
         <label><span className={lbl}>Duty manager</span><input className={inp} value={staff.duty_manager} onChange={(e) => setStaff({ ...staff, duty_manager: e.target.value })} /></label>
+        <label><span className={lbl}>Show start</span><input className={inp} type="time" value={show.start_time} onChange={(e) => setShow({ ...show, start_time: e.target.value })} /></label>
+        <label><span className={lbl}>Duration (min)</span><input className={inp} type="number" min="0" value={show.duration_minutes} onChange={(e) => setShow({ ...show, duration_minutes: e.target.value })} placeholder="60" /></label>
       </div>
 
       {/* Line items */}
@@ -298,17 +346,23 @@ export default function VIPShowGenerator({ prefill }) {
           <label><span className={lbl}>Cash $</span><input className={inp} type="number" value={cash} onChange={(e) => setCash(e.target.value)} /></label>
           <label><span className={lbl}>Card $</span><input className={inp} type="number" value={card} onChange={(e) => setCard(e.target.value)} /></label>
           <label><span className={lbl}>GlyphBucks $ (liability)</span><input className={inp} type="number" value={glyphbucks} onChange={(e) => setGlyphbucks(e.target.value)} /></label>
-          <label><span className={lbl}>Card fee %</span><input className={inp} type="number" value={cardFeePct} onChange={(e) => setCardFeePct(e.target.value)} /></label>
+          <label><span className={lbl}>Card processing fee %</span><input className={inp} type="number" value={cardFeePct} onChange={(e) => setCardFeePct(e.target.value)} /></label>
         </div>
+        <p className="text-[10px] text-neutral-500 mt-1.5">Gratuity is included in the show price — there is no separate tip line. The processing fee applies to card tenders only.</p>
         <label className="block mt-3"><span className={lbl}>Treatment / notes</span><input className={inp} value={treatment} onChange={(e) => setTreatment(e.target.value)} /></label>
       </div>
 
       {/* Clickwrap — guest reviews the full 14-clause terms and accepts before sealing */}
       <div className="rounded-xl border border-[#33405f] bg-[#171e33] p-4">
-        <h3 className="text-sm font-bold text-purple-300 mb-1">Contract Terms — Clickwrap ({VIP_TERMS_VERSION} · {VIP_TERMS.length} clauses)</h3>
-        <p className="text-[10px] text-neutral-500 mb-2">VIP Suite & Performance Contract — the guest must review all clauses. The exact terms text is hashed into the sealed record (terms_hash).</p>
+        <h3 className="text-sm font-bold text-purple-300 mb-1">Contract Terms — Clickwrap ({activeTermsVersion} · {activeClauses.length} clauses)</h3>
+        <p className="text-[10px] text-neutral-500 mb-2">
+          {venueTerms
+            ? `Using ${venue}'s custom VIP contract (edit it in Admin → Contract Terms). `
+            : "Canonical VIP Suite & Performance Contract — venues can set their own terms in Admin → Contract Terms. "}
+          The exact terms text is hashed into the sealed record (terms_hash).
+        </p>
         <div className="max-h-56 overflow-y-auto rounded-lg border border-[#33405f] bg-[#0f1526] p-3 mb-3 space-y-2">
-          {VIP_TERMS.map((t, i) => (
+          {activeClauses.map((t, i) => (
             <p key={i} className="text-[11px] text-neutral-300 leading-relaxed">
               <span className="font-bold text-purple-300 mr-1">{i + 1}.</span>{t}
             </p>
@@ -323,7 +377,7 @@ export default function VIPShowGenerator({ prefill }) {
           <input type="checkbox" checked={clickwrap} onChange={(e) => setClickwrap(e.target.checked)}
             className="mt-0.5 w-5 h-5 accent-emerald-500" />
           <span className="text-sm font-semibold text-neutral-200">
-            Guest has reviewed and accepts all {VIP_TERMS.length} contract clauses above — including that GlyphLock LLC is the software provider only and is held harmless, and that FCBA cardholder rights are not waived (recorded with timestamp in the sealed record)
+            Guest has reviewed and accepts all {activeClauses.length} contract clauses above — including that GlyphLock LLC is the software provider only and is held harmless, and that FCBA cardholder rights are not waived (recorded with timestamp in the sealed record)
           </span>
         </label>
       </div>
