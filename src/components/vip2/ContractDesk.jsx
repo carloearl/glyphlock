@@ -50,7 +50,7 @@ export default function ContractDesk({ state, refresh }) {
   return (
     <div className="space-y-3">
       {msg && <p className="text-red-400 text-sm bg-red-950/50 rounded p-2">{msg}</p>}
-      {!open.length && <p className="text-slate-500">No open contracts. Create one in the New Contract tab.</p>}
+      {!open.length && <p className="text-slate-500">No open contracts. Create one from the Contracts &amp; GlyphBucks card.</p>}
       {open.map(c => {
         const session = sessionByContract[c.id];
         const sigs = c.signatures || {};

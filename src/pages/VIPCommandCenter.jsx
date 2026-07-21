@@ -18,13 +18,15 @@ import { Loader2, Crown, ArrowLeft } from 'lucide-react';
  * "GlyphBucks" are merged into one "Contracts & GlyphBucks" card.
  */
 const VIEW_TITLES = {
-  Desk: 'Contract Desk',
+  Desk: 'Active Sessions',
   Contracts: 'Contracts & GlyphBucks',
   Rooms: 'Rooms & Floor',
   People: 'People',
   Search: 'Contract Search',
 };
-const CONFIG_GATED = ['Desk', 'Contracts'];
+// Only contract CREATION is gated on config. Active-session control (Desk)
+// works regardless — it acts on contracts that already exist.
+const CONFIG_GATED = ['Contracts'];
 // Legacy deep-links (?tab=GlyphBucks from the old GlyphBucks Hub, ?tab=New Contract)
 const LEGACY_TAB_MAP = {
   GlyphBucks: 'Contracts', 'New Contract': 'Contracts',

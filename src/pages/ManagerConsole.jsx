@@ -23,8 +23,6 @@ import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import StaffOnboardingPanel from "@/components/nups/StaffOnboardingPanel";
 import OpenBatchControl from "@/components/nups/register/OpenBatchControl";
 import StaffManagement from "@/components/nups/StaffManagement";
-import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
-import VIPShowContracts from "@/pages/VIPShowContracts";
 import OnboardingPacket from "@/components/nups/OnboardingPacket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +37,6 @@ const TABS = [
   { key: "tonight",      label: "Tonight",      icon: Activity },
   { key: "staff",        label: "Staff & PINs", icon: UserPlus },
   { key: "entertainers", label: "Entertainers", icon: Music },
-  { key: "floor",        label: "Live Floor",   icon: Users },
   { key: "contracts",    label: "Contracts",    icon: FileText },
 ];
 
@@ -285,57 +282,6 @@ export default function ManagerConsole() {
     </div>
   );
 
-  const renderFloor = () => (
-    <div className="space-y-5">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <Card className="bg-slate-900/60 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <Users className="w-4 h-4 text-cyan-400" /> All Staff On Clock ({activeStaff.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {activeStaff.length === 0
-              ? <p className="text-slate-500 text-xs">Nobody clocked in.</p>
-              : activeStaff.map(s => (
-                <div key={s.id} className="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2">
-                  <div>
-                    <div className="text-white text-sm font-bold">{s.user_full_name || s.user_email}</div>
-                    <div className="text-[10px] text-slate-500">
-                      {s.role} · in at {new Date(s.check_in_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </div>
-                  </div>
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                </div>
-              ))}
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-900/60 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <Music className="w-4 h-4 text-pink-400" /> All Entertainers Checked In ({activeEntertainers.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {activeEntertainers.length === 0
-              ? <p className="text-slate-500 text-xs">Nobody on the floor.</p>
-              : activeEntertainers.map(s => (
-                <div key={s.id} className="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2">
-                  <div>
-                    <div className="text-white text-sm font-bold">{s.stage_name || s.entertainer_id}</div>
-                    <div className="text-[10px] text-slate-500">
-                      {s.location} · in at {new Date(s.check_in_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </div>
-                  </div>
-                  <Badge className="bg-pink-500/15 text-pink-300 border-pink-500/30 text-[10px]">{s.status}</Badge>
-                </div>
-              ))}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-
   const renderContracts = () => (
     <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -344,39 +290,33 @@ export default function ManagerConsole() {
         <StatTile label="All Sealed Contracts" value={realContracts.length} Icon={Activity} tone="violet" />
       </div>
 
-      {/* Sealed VIP contract system — the ONLY contract creation path.
-          Legacy quick-create (ContractManager) is retired: it bypassed
-          clickwrap, signatures, and the hash-chain seal. */}
-      <Card className="bg-slate-900/60 border-emerald-500/20">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-emerald-400" /> New Sealed Contract
-            <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px]">Hash-Chained · Clickwrap</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <VIPShowGenerator />
-        </CardContent>
-      </Card>
+      {/* One-home rule: contract creation and search live on their canonical
+          pages. This tab jumps there instead of re-embedding them. */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button
+          onClick={() => navigate("/Contracts")}
+          className="text-left rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] p-5 min-h-[120px] transition-all hover:border-emerald-500/50 hover:bg-emerald-500/[0.1]"
+        >
+          <FileText className="w-6 h-6 text-emerald-300 mb-2" />
+          <div className="flex items-center gap-2">
+            <h3 className="text-white font-bold">New Sealed Contract</h3>
+            <ChevronRight className="w-4 h-4 text-emerald-300" />
+          </div>
+          <p className="text-xs text-slate-400 mt-1">GlyphBucks · Big Spender · Entertainer — the full Contracts Hub with clickwrap & hash-chain seal.</p>
+        </button>
 
-      <Card className="bg-slate-900/60 border-slate-800">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-violet-400" /> Search · Membership · Reprint
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <VIPShowContracts />
-        </CardContent>
-      </Card>
-
-      <Button
-        variant="ghost"
-        className="w-full text-cyan-400 hover:text-cyan-300 text-xs"
-        onClick={() => navigate("/Contracts")}
-      >
-        Open full Contracts Hub (GlyphBucks · Big Spender · Entertainer · Archive) <ChevronRight className="w-3 h-3 ml-1" />
-      </Button>
+        <button
+          onClick={() => navigate("/VIPShowContracts")}
+          className="text-left rounded-2xl border border-violet-500/25 bg-violet-500/[0.06] p-5 min-h-[120px] transition-all hover:border-violet-500/50 hover:bg-violet-500/[0.1]"
+        >
+          <Activity className="w-6 h-6 text-violet-300 mb-2" />
+          <div className="flex items-center gap-2">
+            <h3 className="text-white font-bold">Search · Membership · Reprint</h3>
+            <ChevronRight className="w-4 h-4 text-violet-300" />
+          </div>
+          <p className="text-xs text-slate-400 mt-1">Find, verify and reprint any sealed VIP contract.</p>
+        </button>
+      </div>
     </div>
   );
 
@@ -385,7 +325,6 @@ export default function ManagerConsole() {
       case "tonight":      return renderTonight();
       case "staff":        return renderStaff();
       case "entertainers": return <OnboardingPacket />;
-      case "floor":        return renderFloor();
       case "contracts":    return renderContracts();
       default:             return renderTonight();
     }
