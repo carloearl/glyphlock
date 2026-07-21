@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, Users, CheckCircle, Banknote, AlertCircle, Ticket, Edit3 } from "lucide-react";
+import { Car, Plus, Users, CheckCircle, Banknote, AlertCircle, Ticket, Edit3, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import DriverPayoutPanel from "@/components/nups/frontdoor/DriverPayoutPanel";
@@ -51,6 +52,14 @@ export default function DriverQuickAdd({ user }) {
   useEffect(() => {
     if (venueId) loadVenueRates(venueId).then(setRates);
   }, [venueId]);
+
+  // Admin check — gates hard-delete of driver records (admin only)
+  const { data: me } = useQuery({
+    queryKey: ["auth-me"],
+    queryFn: () => base44.auth.me().catch(() => null),
+    staleTime: 300000,
+  });
+  const isAdmin = me?.role === "admin";
 
   // All saved drivers for this venue
   const { data: profiles = [] } = useQuery({
@@ -219,6 +228,26 @@ export default function DriverQuickAdd({ user }) {
     },
   });
 
+  // Admin-only: hard-delete a driver profile + tonight's pending session
+  const deleteDriver = useMutation({
+    mutationFn: async (profile) => {
+      const session = sessionByDriver.get(profile.driver_id);
+      if (session) await base44.entities.DriverPayout.delete(session.id);
+      await base44.entities.DriverProfile.delete(profile.id);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["driver-profiles"] });
+      qc.invalidateQueries({ queryKey: ["driver-sessions"] });
+      toast.success("Driver deleted");
+    },
+    onError: (err) => toast.error(err.message || "Delete failed"),
+  });
+
+  const handleDeleteDriver = (profile) => {
+    if (!window.confirm(`Permanently delete driver "${profile.name}" and tonight's pending session? This cannot be undone.`)) return;
+    deleteDriver.mutate(profile);
+  };
+
   if (!venueId) {
     return (
       <div className="text-amber-400 text-sm p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg">
@@ -325,10 +354,10 @@ export default function DriverQuickAdd({ user }) {
             const owed = session ? (Number(session.total_payout) || 0) : 0;
             const active = guests > 0;
             return (
-              <button
+              <div
                 key={p.id}
                 onClick={() => setEditingDriver(p)}
-                className={`text-left rounded-lg border p-3 transition-all active:scale-[0.98] ${
+                className={`text-left rounded-lg border p-3 transition-all active:scale-[0.98] cursor-pointer ${
                   active
                     ? "bg-emerald-950/40 border-emerald-500/50 hover:border-emerald-400"
                     : "bg-gray-900/40 border-gray-700 hover:border-yellow-500/50"
@@ -342,7 +371,18 @@ export default function DriverQuickAdd({ user }) {
                       <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/40 text-[9px]">Outside</Badge>
                     )}
                   </div>
-                  <Edit3 className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                  <span className="flex items-center gap-1 shrink-0">
+                    {isAdmin && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteDriver(p); }}
+                        title="Delete driver (admin)"
+                        className="p-1.5 rounded border border-red-500/40 text-red-400 hover:bg-red-500/20"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <Edit3 className="w-3.5 h-3.5 text-gray-500" />
+                  </span>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-gray-400 flex items-center gap-2 flex-wrap">
@@ -360,7 +400,7 @@ export default function DriverQuickAdd({ user }) {
                     <span className="text-[10px] text-gray-500 uppercase tracking-wide">Tap to log</span>
                   )}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

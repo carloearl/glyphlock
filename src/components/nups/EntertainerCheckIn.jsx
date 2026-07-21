@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, LogIn, LogOut, MapPin, Clock, DollarSign, Check, CheckCircle2 } from "lucide-react";
+import { Users, LogIn, LogOut, MapPin, Clock, DollarSign, Check, CheckCircle2, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -45,6 +45,14 @@ export default function EntertainerCheckIn({ user }) {
 
   const activeVenue = useActiveVenue();
   const venueId = resolveVenueId(activeVenue?.id || activeVenue?.venue_id || user?.venue_id);
+
+  // Admin check — gates hard-delete of entertainer records (admin only)
+  const { data: me } = useQuery({
+    queryKey: ["auth-me"],
+    queryFn: () => base44.auth.me().catch(() => null),
+    staleTime: 300000,
+  });
+  const isAdmin = me?.role === "admin";
 
   // Entertainer roster scoped to the active venue (Dream Palace by default),
   // sorted by most recent VIP activity so the most-active performers surface first.
@@ -126,6 +134,26 @@ export default function EntertainerCheckIn({ user }) {
       toast.success('Checked out!');
     }
   });
+
+  // Admin-only: hard-delete an entertainer + their open shift
+  const deleteEntertainer = useMutation({
+    mutationFn: async (shift) => {
+      await base44.entities.EntertainerShift.delete(shift.id);
+      const ent = entertainers.find(e => e.id === shift.entertainer_id);
+      if (ent) await base44.entities.Entertainer.delete(ent.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
+      queryClient.invalidateQueries({ queryKey: ['entertainers'] });
+      toast.success('Entertainer deleted');
+    },
+    onError: (err) => toast.error(err.message || 'Delete failed'),
+  });
+
+  const handleDeleteEntertainer = (shift) => {
+    if (!window.confirm(`Permanently delete ${shift.stage_name || 'this entertainer'} and their shift record? This cannot be undone.`)) return;
+    deleteEntertainer.mutate(shift);
+  };
 
   const handlePinInput = (digit) => {
     if (pin.length < 4) setPin(prev => prev + digit);
@@ -334,6 +362,17 @@ export default function EntertainerCheckIn({ user }) {
                   >
                     <LogOut className="w-3 h-3" />
                   </Button>
+                  {isAdmin && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDeleteEntertainer(shift)}
+                      title="Delete entertainer (admin)"
+                      className="border-red-500/50 text-red-500 hover:bg-red-500/20"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
