@@ -16,6 +16,7 @@
  * inside the page so operators don't lose batch context when switching.
  */
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -29,12 +30,8 @@ import {
 import POSCashRegister from "@/components/nups/POSCashRegister";
 import POSBarRegister from "@/components/nups/POSBarRegister";
 import TransactionHistory from "@/components/nups/TransactionHistory";
-import DriverDropOffTracker from "@/components/nups/DriverDropOffTracker";
-import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
 import UnifiedMusicConsole from "@/components/mixer/UnifiedMusicConsole";
-import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import StaffOnboardingPanel from "@/components/nups/StaffOnboardingPanel";
-import TimeClock from "@/components/nups/TimeClock";
 import AuditLogDashboard from "@/components/nups/AuditLogDashboard";
 import OneClickSeedSwitch from "@/components/nups/OneClickSeedSwitch";
 import NoBatchBanner from "@/components/nups/register/NoBatchBanner";
@@ -47,19 +44,24 @@ import { useAdminOverride } from "@/lib/nups/adminView";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 
-// Driver Drop-offs intentionally REMOVED from tabs — it now lives on the
-// Register tab itself so the operator never has to switch context while
-// running cover charges and paying out drivers in the same shift.
+// One home per feature (Section 1 audit, 2026-07-21): the Register console
+// is the TILL only. Drivers, Receipts, Talent Check-In and Staff Clock each
+// have their own canonical page — the strip below LINKS there instead of
+// embedding duplicate copies of those surfaces.
 const TABS = [
   { key: "register",   label: "Register · Door",    icon: ShoppingCart },
-  { key: "drivers",    label: "Drivers",            icon: Truck },
-  { key: "receipts",   label: "Receipts",           icon: Receipt },
   { key: "bar",        label: "Bar",                icon: Beer },
   { key: "dj",         label: "DJ",                 icon: Music },
   { key: "onboarding", label: "Entertainer Onboard",icon: UserPlus },
-  { key: "checkin",    label: "Talent Check-In",    icon: UserCheck },
-  { key: "staff",      label: "Staff Check-In",     icon: Clock },
   { key: "audit",      label: "Audit Trail",        icon: Shield },
+];
+
+// Station links — canonical pages, opened instead of embedded duplicates.
+const STATION_LINKS = [
+  { label: "Drivers",          icon: Truck,     path: "/DriverPayouts" },
+  { label: "Receipts",         icon: Receipt,   path: "/Receipts" },
+  { label: "Talent Check-In",  icon: UserCheck, path: "/EntertainerCheckIn" },
+  { label: "Staff Clock",      icon: Clock,     path: "/NUPSKiosk?panel=clockIn" },
 ];
 
 function BatchStatusBadge({ batch }) {
@@ -91,16 +93,17 @@ function BatchStatusBadge({ batch }) {
 // Managers/admins see everything (onboarding, PINs, audit stay exclusive
 // to them because no staff role lists those keys).
 const STAFF_TAB_ACCESS = {
-  DOOR_GIRL:  ["register", "drivers", "checkin", "receipts", "staff"],
-  DOORMAN:    ["register", "drivers", "checkin", "receipts", "staff"],
-  FLOOR_HOST: ["register", "drivers", "checkin", "receipts", "staff"],
-  HOSTESS:    ["register", "drivers", "checkin", "receipts", "staff"],
-  BARTENDER:  ["bar", "receipts", "staff"],
-  DJ:         ["dj", "staff"],
-  SECURITY:   ["staff"],
+  DOOR_GIRL:  ["register"],
+  DOORMAN:    ["register"],
+  FLOOR_HOST: ["register"],
+  HOSTESS:    ["register"],
+  BARTENDER:  ["bar"],
+  DJ:         ["dj"],
+  SECURITY:   ["register"],
 };
 
 function RegisterConsoleInner() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("register");
   const [user, setUser] = useState(null);
   const [operator, setOperator] = useState(null);
@@ -140,11 +143,11 @@ function RegisterConsoleInner() {
     STAFF_TAB_ACCESS[rawRole] ||
     (isManagerOrAdmin
       ? (isManagerRole
-          ? ["register", "drivers", "checkin", "receipts", "staff", "bar", "dj", "onboarding"]
+          ? ["register", "bar", "dj", "onboarding"]
           : adminOverride
             ? TABS.map((t) => t.key)
-            : ["register", "drivers", "checkin", "receipts", "staff"])
-      : (user ? ["register", "receipts", "staff"] : ["register"]));
+            : ["register"])
+      : ["register"]);
   const visibleTabs = TABS.filter((t) => allowedKeys.includes(t.key));
 
   // If the current tab isn't permitted for this role, snap to the first allowed.
@@ -164,11 +167,11 @@ function RegisterConsoleInner() {
   });
   const activeBatch = batches[0];
 
-  // Receipts feed — only fetched when Receipts tab is active.
+  // Transactions feed — only fetched for the Audit tab.
   const { data: transactions = [] } = useQuery({
     queryKey: ["pos-transactions-receipts"],
     queryFn: () => base44.entities.POSTransaction.list("-created_date", 100),
-    enabled: activeTab === "receipts" || activeTab === "audit",
+    enabled: activeTab === "audit",
     staleTime: 30000,
   });
 
@@ -228,6 +231,20 @@ function RegisterConsoleInner() {
                 <span className="whitespace-nowrap">{label}</span>
               </Button>
             ))}
+            {/* Station links — jump to the canonical page, no duplicate embeds */}
+            <div className="w-px bg-slate-800 mx-1 hidden md:block" />
+            {STATION_LINKS.map(({ label, icon: Icon, path }) => (
+              <Button
+                key={path}
+                onClick={() => navigate(path)}
+                variant="outline"
+                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm gap-1.5 sm:gap-2 flex-shrink-0 border-dashed border-slate-700 text-slate-400 hover:border-emerald-500/50 hover:text-emerald-300 bg-transparent"
+                title={`Open ${label} page`}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="whitespace-nowrap">{label} ↗</span>
+              </Button>
+            ))}
           </div>
         </div>
 
@@ -248,26 +265,11 @@ function RegisterConsoleInner() {
               <RecentTransactionsStrip onViewAll={() => setActiveTab("receipts")} />
             </div>
           )}
-          {activeTab === "drivers" && (
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <div className="rounded-xl border border-yellow-500/20 bg-slate-950/60 p-3 sm:p-4">
-                <DriverQuickAdd user={user} />
-              </div>
-              <DriverDropOffTracker user={user} />
-            </div>
-          )}
-          {activeTab === "receipts" && (
-            <TransactionHistory transactions={transactions} showReceipt={true} />
-          )}
           {activeTab === "bar" && <POSBarRegister user={user} />}
           {activeTab === "dj" && <UnifiedMusicConsole />}
           {/* Manager/Admin ONLY — permission-gated render, never reachable by
               door/bar/DJ staff even if tab state is forced. */}
           {activeTab === "onboarding" && isManagerOrAdmin && <StaffOnboardingPanel />}
-          {activeTab === "checkin" && <EntertainerCheckIn user={user} />}
-          {activeTab === "staff" && (
-            <TimeClock user={user} role={user?._highestRole || user?.role || "STAFF"} />
-          )}
           {activeTab === "audit" && isManagerOrAdmin && (
             <div className="space-y-4">
               <AuditLogDashboard user={user} />

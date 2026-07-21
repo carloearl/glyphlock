@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, AlertCircle, Ticket } from "lucide-react";
+import { LogOut, Settings, AlertCircle, Ticket, Music, Clock } from "lucide-react";
 import { hasPermission } from "@/config/roles";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import GuestCheckIn from "@/components/nups/GuestCheckIn";
-import EntertainerCheckIn from "@/components/nups/EntertainerCheckIn";
 import DriverQuickAdd from "@/components/nups/frontdoor/DriverQuickAdd";
-import StaffClockInOut from "@/components/nups/StaffClockInOut";
 import BatchConfirmControl from "@/components/nups/register/BatchConfirmControl";
 import FrontDoorStats from "@/components/nups/frontdoor/FrontDoorStats";
 import SettlementTicker from "@/components/nups/frontdoor/SettlementTicker";
@@ -85,6 +83,35 @@ function FlowSection({ id, meta, children }) {
         {children}
       </div>
     </section>
+  );
+}
+
+// Launch card — same pattern as the Ring Up step: one big button that jumps
+// to the feature's canonical page instead of embedding a duplicate copy.
+function LaunchCard({ icon: Icon, tone, title, subtitle, onClick }) {
+  const tones = {
+    pink:    "border-pink-500/40 from-pink-600/15 via-fuchsia-600/10 hover:border-pink-400",
+    emerald: "border-emerald-500/40 from-emerald-600/15 via-teal-600/10 hover:border-emerald-400",
+  };
+  const iconTones = {
+    pink:    "bg-pink-500/20 border-pink-500/40 text-pink-300",
+    emerald: "bg-emerald-500/20 border-emerald-500/40 text-emerald-300",
+  };
+  const goTones = { pink: "text-pink-300", emerald: "text-emerald-300" };
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full min-h-[120px] rounded-xl border bg-gradient-to-br to-transparent transition-colors flex items-center gap-5 p-6 text-left active:scale-[0.99] ${tones[tone]}`}
+    >
+      <div className={`w-14 h-14 rounded-xl border flex items-center justify-center shrink-0 ${iconTones[tone]}`}>
+        <Icon className="w-7 h-7" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="font-black text-white text-xl">{title}</div>
+        <div className="text-sm text-slate-400 mt-0.5">{subtitle}</div>
+      </div>
+      <div className={`font-mono text-sm shrink-0 ${goTones[tone]}`}>GO →</div>
+    </button>
   );
 }
 
@@ -275,8 +302,27 @@ function FrontDoorContent() {
                         </button>
                       </div>
                     )}
-                    {id === "dancers" && <EntertainerCheckIn user={user} />}
-                    {id === "staff" && <StaffClockInOut user={user} venueId={venueId} station="door" />}
+                    {/* ONE home per feature (Section 1 fix, 2026-07-21): talent
+                        check-in and staff clock live on their own pages — these
+                        steps LAUNCH them, no duplicate embedded forms. */}
+                    {id === "dancers" && (
+                      <LaunchCard
+                        icon={Music}
+                        tone="pink"
+                        title="Open Entertainer Check-In"
+                        subtitle="Acknowledgments + PIN clock-in on the dedicated door station."
+                        onClick={() => navigate("/EntertainerCheckIn")}
+                      />
+                    )}
+                    {id === "staff" && (
+                      <LaunchCard
+                        icon={Clock}
+                        tone="emerald"
+                        title="Open Staff Clock In/Out"
+                        subtitle="Punch in for shift at the kiosk time clock."
+                        onClick={() => navigate("/NUPSKiosk?panel=clockIn")}
+                      />
+                    )}
                   </FlowSection>
                 ))}
 
