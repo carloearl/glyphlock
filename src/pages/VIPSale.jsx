@@ -4,12 +4,13 @@ import { vip } from "@/components/vip2/vipApi";
 import UnifiedContractDesk from "@/components/nups/contracts/UnifiedContractDesk";
 import ContractDesk from "@/components/vip2/ContractDesk";
 import ContractSearch from "@/components/vip2/ContractSearch";
+import ClubCurrencyPressView from "@/components/nups/press/ClubCurrencyPressView";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Crown, LogOut } from "lucide-react";
 
-// DACO-NUPS-ROLE-VIP-BUILD-20260717 §13 — Hostess workspace: VIP Contract Sale ONLY.
-// No dashboard, no admin, no accounting, no back-office navigation.
-const TABS = ["New Contract", "Active Contracts", "Search"];
+// DACO-NUPS-ROLE-VIP-BUILD-20260717 §13 — Hostess workspace: VIP Contract Sale
+// plus GlyphBucks bill printing (uploaded templates → barcode/serial/denom → print).
+const TABS = ["New Contract", "Active Contracts", "Print Bills", "Search"];
 
 export default function VIPSale() {
   const navigate = useNavigate();
@@ -55,29 +56,36 @@ export default function VIPSale() {
         </button>
       </header>
 
-      {!state?.config ? (
-        <div className="p-10 text-center text-slate-400">
-          VIP sales are not available — the venue VIP configuration has not been initialized. Contact a manager.
-        </div>
-      ) : (
-        <>
-          <nav className="flex gap-1 px-4 pt-3 flex-wrap">
-            {TABS.map((t) => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`px-4 py-2 rounded-t-lg text-sm font-medium min-h-[44px] ${tab === t ? "bg-purple-800 text-white" : "bg-slate-800 text-slate-400 hover:text-white"}`}>
-                {t}
-              </button>
-            ))}
-          </nav>
-          <main className="p-4">
-            {/* Sealed in-depth contract system — contract IS the receipt:
-                biometrics, clickwrap, chain seal, Bitcoin anchor, legal 8.5×14 print */}
-            {tab === "New Contract" && <UnifiedContractDesk />}
-            {tab === "Active Contracts" && <ContractDesk state={state} refresh={refresh} />}
-            {tab === "Search" && <ContractSearch />}
-          </main>
-        </>
-      )}
+      <>
+        <nav className="flex gap-1 px-4 pt-3 flex-wrap">
+          {TABS.map((t) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-4 py-2 rounded-t-lg text-sm font-medium min-h-[44px] ${tab === t ? "bg-purple-800 text-white" : "bg-slate-800 text-slate-400 hover:text-white"}`}>
+              {t}
+            </button>
+          ))}
+        </nav>
+        <main className="p-4">
+          {/* GlyphBucks Press — prints uploaded bill templates with the correct
+              barcode, serial number, and denomination overlays on each bill.
+              Independent of VIP config so the Hostess can always print bills. */}
+          {tab === "Print Bills" ? (
+            <ClubCurrencyPressView />
+          ) : !state?.config ? (
+            <div className="p-10 text-center text-slate-400">
+              VIP sales are not available — the venue VIP configuration has not been initialized. Contact a manager.
+            </div>
+          ) : (
+            <>
+              {/* Sealed in-depth contract system — contract IS the receipt:
+                  biometrics, clickwrap, chain seal, Bitcoin anchor, legal 8.5×14 print */}
+              {tab === "New Contract" && <UnifiedContractDesk />}
+              {tab === "Active Contracts" && <ContractDesk state={state} refresh={refresh} />}
+              {tab === "Search" && <ContractSearch />}
+            </>
+          )}
+        </main>
+      </>
     </div>
   );
 }
