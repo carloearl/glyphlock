@@ -57,6 +57,7 @@ import VenueAdminSettings from './pages/VenueAdminSettings';
 import MobileScanner from './pages/MobileScanner';
 import ContractsHub from './pages/ContractsHub';
 import VIPBillPrinter from './pages/VIPBillPrinter';
+import GlyphBucksConsole from './pages/GlyphBucksConsole';
 import RegisterConsole from './pages/RegisterConsole';
 import Receipts from './pages/Receipts';
 import DriverPayouts from './pages/DriverPayouts';
@@ -143,7 +144,7 @@ const AuthenticatedApp = () => {
     '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
     // NUPS operator surface — kiosk-wrapped
     '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
-    '/receipts', '/driverpayouts', '/glyphbuckshub',
+    '/receipts', '/driverpayouts', '/glyphbuckshub', '/glyphbucks',
     '/accounting', '/tonight', '/contracts', '/contractshub', '/vipbillprinter',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
@@ -165,7 +166,7 @@ const AuthenticatedApp = () => {
     '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
     '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome',
     '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
-    '/receipts', '/driverpayouts', '/glyphbuckshub',
+    '/receipts', '/driverpayouts', '/glyphbuckshub', '/glyphbucks',
     '/accounting', '/tonight', '/contracts', '/contractshub', '/vipbillprinter',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
@@ -267,10 +268,14 @@ const AuthenticatedApp = () => {
         <Route path="/driverpayouts" element={<DriverPayouts />} />
         {/* GlyphBucks merged into the VIP Command Center (merge directive
             2026-07-17) — old hub links land on the GlyphBucks tab. */}
-        {/* GlyphBucks Hub retired — the ONE home for GlyphBucks issuance is the
-            Contracts workspace (owner directive 2026-07-21). */}
-        <Route path="/GlyphBucksHub" element={<Navigate to="/Contracts?tab=glyphbucks" replace />} />
-        <Route path="/glyphbuckshub" element={<Navigate to="/Contracts?tab=glyphbucks" replace />} />
+        {/* GlyphBucks Console — the ONE directly-reachable home for the full
+            GlyphBucks system (Sales · Redeem · Press · Ledger · Inventory ·
+            Contract · Search · Fraud). Not kiosk-gated. */}
+        <Route path="/GlyphBucks" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><GlyphBucksConsole /></RoleClassGuard>} />
+        <Route path="/glyphbucks" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><GlyphBucksConsole /></RoleClassGuard>} />
+        {/* Old GlyphBucksHub links land on the full console now. */}
+        <Route path="/GlyphBucksHub" element={<Navigate to="/GlyphBucks" replace />} />
+        <Route path="/glyphbuckshub" element={<Navigate to="/GlyphBucks" replace />} />
         <Route path="/Accounting" element={<Accounting />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/Tonight" element={<Tonight />} />

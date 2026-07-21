@@ -72,6 +72,10 @@ const NAV_SECTIONS = [
       // standalone "GlyphBucks Hub" entry is retired to kill the 3-door
       // duplication (owner directive 2026-07-21).
       { id: "vipcommand",  label: "VIP Floor · Sessions", icon: Crown, to: "/VIPCommand" },
+      // GlyphBucks Console — the ONE directly-reachable home for the full
+      // GlyphBucks system (Sales · Redeem · Press 5-sheet designer · Ledger ·
+      // Inventory · Contract · Search · Fraud).
+      { id: "glyphbucks",  label: "GlyphBucks Console", icon: Coins,  to: "/GlyphBucks" },
       // Legacy NUPSOwner tabs moved to the dedicated Legacy section below —
       // one way in, no duplicates (owner directive 2026-07-17).
       { id: "people",      label: "People Archive",  icon: Archive,   to: "/PeopleArchive" },

@@ -40,20 +40,32 @@ export default function ClubCurrencyPressView({ saleOrder = null }) {
   // FIX-D — layout lock prevents print before DOM stabilizes after toggle
   const [layoutReady, setLayoutReady] = useState(true);
 
-  // RBAC: Check user permissions on mount
+  const [accessDenied, setAccessDenied] = useState(false);
+
+  // RBAC: Check user permissions on mount. NUPS roles are uppercase
+  // (PLATFORM_ADMIN, VENUE_MANAGER, ...) and the platform role is 'admin' —
+  // accept any of those. Never hard-redirect; show an inline notice so the
+  // Press view can live embedded inside other consoles without yanking the
+  // whole page away.
   useEffect(() => {
     (async () => {
       try {
         const currentUser = await base44.auth.me();
-        if (!currentUser || !['admin', 'manager', 'staff'].includes(currentUser.role)) {
-          toast.error("Unauthorized: Staff access required");
-          window.location.href = '/nups-login';
-          return;
+        const role = String(currentUser?.role || "").toLowerCase();
+        const allowed =
+          !!currentUser &&
+          (role === "admin" ||
+            role.includes("manager") ||
+            role.includes("owner") ||
+            role.includes("staff") ||
+            role.includes("platform"));
+        if (!allowed) {
+          setAccessDenied(true);
         }
-        setUser(currentUser);
+        setUser(currentUser || null);
       } catch (error) {
         console.error("Auth check failed:", error);
-        window.location.href = '/nups-login';
+        setAccessDenied(true);
       } finally {
         setAuthLoading(false);
       }
@@ -160,8 +172,16 @@ export default function ClubCurrencyPressView({ saleOrder = null }) {
     );
   }
 
-  if (!user) {
-    return null; // Redirecting
+  if (accessDenied) {
+    return (
+      <div className="min-h-[300px] flex items-center justify-center p-8">
+        <div className="text-center text-gray-400 max-w-sm">
+          <Banknote className="w-10 h-10 mx-auto mb-3 text-gray-600" />
+          <h3 className="text-base font-semibold text-white mb-1">Staff access required</h3>
+          <p className="text-xs">The GlyphBucks Press is limited to Admin, Manager, Owner, and Staff roles.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
