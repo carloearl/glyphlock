@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ScrollText, Printer, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
+import { ScrollText, Printer, CheckCircle2, Loader2, AlertTriangle, Wand2 } from "lucide-react";
 
 /**
  * Big Spender Letter of Intent — printable, signature-gated declaration
@@ -29,6 +29,26 @@ export default function BigSpenderLetter({ onComplete }) {
   const [savedId, setSavedId] = useState(null);
 
   const serial = `BSLOI-${Date.now().toString(36).toUpperCase()}`;
+
+  // Demo seed — fills the letter with realistic sample data and pre-matches all
+  // three signatures so the printable output renders immediately for preview.
+  const seedDemo = () => {
+    const guestName = "Andrew Whitmore";
+    const managerName = "Carlo Earl";
+    const hostessName = "Sofia Delgado";
+    setGuest({
+      legal_name: guestName,
+      night_date: new Date().toISOString().split("T")[0],
+      intended_spend: "14500",
+      purpose: "Business celebration — closed a major deal",
+      card_last_four: "4417",
+    });
+    setStaff({ manager: managerName, hostess: hostessName });
+    setGuestSignature(guestName);
+    setManagerSignature(managerName);
+    setHostessSignature(hostessName);
+    setError(null);
+  };
 
   const canFinalize =
     guest.legal_name.trim() &&
@@ -140,6 +160,16 @@ Hostess on duty: ${staff.hostess || "[HOSTESS]"}`;
         <p className="text-xs text-gray-400 mt-1">
           Signed declaration for any guest intending to spend $10,000+ in one night.
         </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={seedDemo}
+          className="mt-2 w-fit border-violet-500/40 text-violet-300 hover:bg-violet-500/10"
+          title="Fill every field with sample data so the letter renders for preview"
+        >
+          <Wand2 className="w-3.5 h-3.5 mr-1.5" /> Fill Demo Data
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {error && (

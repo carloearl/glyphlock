@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Crown, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
+import { Crown, CheckCircle2, Loader2, AlertTriangle, Wand2 } from "lucide-react";
 import FlowSteps from "@/components/nups/pos/FlowSteps";
 
 /**
@@ -46,6 +46,39 @@ export default function BigSpenderQuestionnaire({ onComplete }) {
   const [dancerSignature, setDancerSignature] = useState("");
 
   const STEPS = ["Dancer", "Guest", "Behavior", "Notes", "Sign"];
+
+  // Demo seed — fills every field with realistic sample data and jumps to the
+  // signing step so you can preview exactly what the protocol produces without
+  // typing through all 5 steps. Signature is pre-matched to the legal name.
+  const seedDemo = () => {
+    const legal = "Jasmine Rivera";
+    setDancer({ stage_name: "Diamond", legal_name: legal });
+    setGuest({
+      display_name: "Mr. A. Whitmore",
+      estimated_spend: "14500",
+      payment_method: "Card",
+      card_last_four: "4417",
+      night_date: new Date().toISOString().split("T")[0],
+    });
+    setBehavior({
+      sober_at_signing: true,
+      no_pressure: true,
+      no_solicitation: true,
+      treated_respectfully: true,
+      aware_50pct_redemption: true,
+    });
+    setNotes({
+      how_introduced: "Regular — arrived with driver Marcus",
+      party_size: "3",
+      rooms_used: "VIP 2, VIP 4",
+      bottles_ordered: "2x Dom Pérignon, 1x Clase Azul",
+      red_flags: "None — smooth night",
+      additional_notes: "Guest tipped generously and stayed until close.",
+    });
+    setDancerSignature(legal);
+    setError(null);
+    setStep(4);
+  };
 
   const allBehaviorChecked = Object.values(behavior).every(Boolean);
   const canFinalize =
@@ -113,6 +146,16 @@ export default function BigSpenderQuestionnaire({ onComplete }) {
         <p className="text-xs text-gray-400 mt-1">
           Mandatory for any entertainer earning from a guest spending $10,000+ in a single night.
         </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={seedDemo}
+          className="mt-2 w-fit border-violet-500/40 text-violet-300 hover:bg-violet-500/10"
+          title="Fill every field with sample data and jump to the output preview"
+        >
+          <Wand2 className="w-3.5 h-3.5 mr-1.5" /> Fill Demo Data
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         <FlowSteps steps={STEPS} current={step} />
