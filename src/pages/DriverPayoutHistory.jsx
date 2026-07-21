@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import {
   Truck, Filter, Download, RefreshCw, ChevronRight, ChevronDown,
-  ShieldAlert, CheckCircle2, Clock, FileText, AlertTriangle,
+  ShieldAlert, CheckCircle2, Clock, FileText, AlertTriangle, Trash2,
 } from 'lucide-react';
 import { hasOwnerPreview } from '@/lib/nups/previewBypass';
 import DriverPayoutStatusToggle from '@/components/nups/DriverPayoutStatusToggle';
@@ -44,7 +44,7 @@ function fmtShort(ts) {
   } catch { return '—'; }
 }
 
-function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExpand, isSelected, onToggleSelect, runningTotal }) {
+function PayoutRow({ payout, logs, currentUser, onUpdated, onDelete, deleting, expanded, onToggleExpand, isSelected, onToggleSelect, runningTotal }) {
   const status = payout.payout_status || 'PENDING';
   const linked = logs.filter(l => l.entity_affected === `DriverPayout:${payout.id}`);
   const isPending = status === 'PENDING';
@@ -93,10 +93,20 @@ function PayoutRow({ payout, logs, currentUser, onUpdated, expanded, onToggleExp
         <td className="p-3 text-xs text-slate-500">
           {linked.length > 0 ? <Badge variant="outline" className="text-[10px] border-slate-600 text-slate-400">{linked.length} event{linked.length !== 1 ? 's' : ''}</Badge> : '—'}
         </td>
+        <td className="p-3">
+          <button
+            onClick={() => onDelete(payout)}
+            disabled={deleting}
+            title="Delete this payout record"
+            className="text-slate-600 hover:text-red-400 disabled:opacity-40 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </td>
       </tr>
       {expanded && (
         <tr className="bg-slate-900/50">
-          <td colSpan={14} className="p-4 border-t border-slate-800">
+          <td colSpan={15} className="p-4 border-t border-slate-800">
             {/* Handshake block — Doorman headcount lock → Door Girl cash disbursement */}
             <div className="mb-4 grid sm:grid-cols-3 gap-3 text-xs">
               <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
@@ -179,6 +189,7 @@ export default function DriverPayoutHistory({ embedded = false }) {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [exporting, setExporting] = useState(false);
   const [exportErr, setExportErr] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const { data: user, isError: meError } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me(), retry: false });
   const role = user?._highestRole || user?.role || 'External';
@@ -245,6 +256,19 @@ export default function DriverPayoutHistory({ embedded = false }) {
     asc.forEach(p => { run += Number(p.total_payout) || 0; map[p.id] = run; });
     return map;
   }, [filtered]);
+
+  const handleDelete = async (payout) => {
+    const label = `${payout.driver_name || 'this driver'} · ${money(payout.total_payout)} · ${payout.session_date || 'no date'}`;
+    if (!window.confirm(`Permanently delete this payout record?\n\n${label}\n\nThis cannot be undone.`)) return;
+    setDeletingId(payout.id);
+    try {
+      await base44.entities.DriverPayout.delete(payout.id);
+      setSelectedIds(prev => { const next = new Set(prev); next.delete(payout.id); return next; });
+      await refetch();
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handleExportPdf = async () => {
     setExporting(true);
@@ -436,12 +460,13 @@ export default function DriverPayoutHistory({ embedded = false }) {
                   <th className="text-left p-3" title="POS Batch the payout is reconciled against">Batch</th>
                   <th className="text-left p-3">Status</th>
                   <th className="text-left p-3">Audit</th>
+                  <th className="w-8 p-3"></th>
                 </tr>
               </thead>
               <tbody>
-                {isLoading && <tr><td colSpan={14} className="p-8 text-center text-slate-500">Loading…</td></tr>}
+                {isLoading && <tr><td colSpan={15} className="p-8 text-center text-slate-500">Loading…</td></tr>}
                 {!isLoading && filtered.length === 0 && (
-                  <tr><td colSpan={14} className="p-8 text-center text-slate-500">No matching records.</td></tr>
+                  <tr><td colSpan={15} className="p-8 text-center text-slate-500">No matching records.</td></tr>
                 )}
                 {filtered.map(p => (
                   <PayoutRow
@@ -452,6 +477,8 @@ export default function DriverPayoutHistory({ embedded = false }) {
                     expanded={!!expanded[p.id]}
                     onToggleExpand={() => setExpanded(e => ({ ...e, [p.id]: !e[p.id] }))}
                     onUpdated={() => refetch()}
+                    onDelete={handleDelete}
+                    deleting={deletingId === p.id}
                     runningTotal={runningById[p.id] || 0}
                     isSelected={selectedIds.has(p.id)}
                     onToggleSelect={(checked) => {
