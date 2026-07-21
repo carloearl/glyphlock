@@ -8,24 +8,23 @@ import {
   Stamp, FileText, Save, CheckCircle2, AlertCircle, RotateCcw,
   Pencil, ChevronDown, ChevronUp,
 } from "lucide-react";
-import VIPShowGenerator from "@/components/nups/vip/VIPShowGenerator";
+import UnifiedContractDesk from "@/components/nups/contracts/UnifiedContractDesk";
 import VIPShowVerifyPanel from "@/components/nups/vip/VIPShowVerifyPanel";
 import VIPShowContracts from "@/pages/VIPShowContracts";
 import { VIP_TERMS_TEXT } from "@/constants/vipShowTerms";
 
 /**
- * UltimateVIPContract — ONE editable contract for every VIP show.
- * ───────────────────────────────────────────────────────────────
+ * UltimateVIPContract — ONE editable contract + the full sealing desk.
+ * ───────────────────────────────────────────────────────────────────
  * Merges the former "VIP Contracts", "GlyphBucks", legacy VIP/GlyphBucks,
  * and Archive surfaces into a single workspace:
  *   1. Edit the venue's ONE VIP contract template (ContractTermsConfig, type VIP).
- *      Saving stamps a new version. The template is what every sealed show uses.
- *   2. Generate & seal a VIP show from that exact contract (VIPShowGenerator
- *      re-reads the saved terms and hashes them into terms_hash).
+ *      Saving stamps a new version — the template every sealed show hashes in.
+ *   2. Run the FULL unified sale flow (UnifiedContractDesk): terms clickwrap,
+ *      camera ID scan + thumbprint bioscan, card reader, GlyphBucks vouchers +
+ *      VIP suite line items + gratuity, and three e-signatures — sealing the
+ *      GlyphBucks and VIP records together.
  *   3. Verify / search / reprint sealed records.
- *
- * Editing the template here immediately flows into every new sealed show —
- * there is no second contract to keep in sync.
  */
 
 function stampVersion() {
@@ -168,26 +167,28 @@ export default function UltimateVIPContract({ canEdit = false }) {
         </CardContent>
       </Card>
 
-      {/* ── Seal a VIP show from that contract ── */}
+      {/* ── The FULL sale flow: bioscan + GlyphBucks + VIP, sealed together ── */}
       <Card className="bg-white/[0.02] border-emerald-500/20">
         <CardContent className="p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-2 flex-wrap">
             <Stamp className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold">Generate & Seal VIP Show</h2>
+            <h2 className="text-lg font-bold">Sell & Seal — ID Bioscan · GlyphBucks · VIP Suite</h2>
             <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-xs">
-              Hash-Chained · Bitcoin Anchored
+              Ed25519 Sealed · Bitcoin Anchored
             </Badge>
           </div>
+          <p className="text-xs text-gray-500">
+            One flow: clickwrap terms → camera ID scan + thumbprint → card reader →
+            GlyphBucks vouchers and VIP suite line items → three e-signatures. Seals the
+            GlyphBucks and VIP records together.
+          </p>
 
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-            <div className="xl:col-span-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-              {/* key on termsRev → remounts so the generator re-reads freshly saved terms */}
-              <VIPShowGenerator key={termsRev} />
-            </div>
-            <div className="xl:col-span-2 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-              <h3 className="text-sm font-bold text-emerald-300 mb-3">QR Verify</h3>
-              <VIPShowVerifyPanel />
-            </div>
+          {/* key on termsRev → remounts so it re-reads freshly saved terms */}
+          <UnifiedContractDesk key={termsRev} />
+
+          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+            <h3 className="text-sm font-bold text-emerald-300 mb-3">QR Verify</h3>
+            <VIPShowVerifyPanel />
           </div>
         </CardContent>
       </Card>
