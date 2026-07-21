@@ -98,13 +98,12 @@ const NAV_SECTIONS = [
       {
         id: "contracts",  label: "Contracts",   icon: FileText,   to: "/Contracts",
         children: [
-          // Active contract surfaces only — legacy Venue Terms + Lookup
-          // merged into the single Archive entry (sidebar cleanup 2026-07-16).
-          { id: "c-vip",    label: "VIP Contracts",    icon: Stamp,          to: "/Contracts?tab=vip" },
-          { id: "c-glyph",  label: "GlyphBucks",       icon: Coins,          to: "/Contracts?tab=glyphbucks" },
+          // ONE VIP contract for all shows — VIP, GlyphBucks, legacy, and
+          // Archive collapsed into a single editable surface (owner directive
+          // 2026-07-21). Only two other distinct contract types remain.
+          { id: "c-vip",    label: "VIP Contract",     icon: Stamp,          to: "/Contracts?tab=vip" },
           { id: "c-big",    label: "Big Spender",      icon: ShieldAlert,    to: "/Contracts?tab=big_spender" },
           { id: "c-ent",    label: "Entertainer",      icon: ClipboardCheck, to: "/Contracts?tab=entertainer" },
-          { id: "c-archive",label: "Archive",          icon: Archive,        to: "/Contracts?tab=archive" },
         ],
       },
     ],
