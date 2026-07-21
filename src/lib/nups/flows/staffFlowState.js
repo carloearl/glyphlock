@@ -29,21 +29,21 @@ export const STAFF_STEP = {
 export const ROLE_TASK_ROUTE = {
   DOOR_GIRL:  "/FrontDoor",
   DOORMAN:    "/FrontDoor",
-  FLOOR_HOST: "/FrontDoor",
+  FLOOR_HOST: "/VIPSale",
   SECURITY:   "/FrontDoor",
-  BARTENDER:  "/Register",
-  DJ:         "/NUPSOwner?tab=dj",
-  HOSTESS:    "/Contracts?tab=vip",
+  BARTENDER:  "/BarRegister",
+  DJ:         "/DJHome",
+  HOSTESS:    "/VIPSale",
 };
 
 export const ROLE_TASK_LABEL = {
   DOOR_GIRL:  "Work the Door",
   DOORMAN:    "Work the Door",
-  FLOOR_HOST: "Work the Door",
+  FLOOR_HOST: "VIP Sale Desk",
   SECURITY:   "Front Door · Incidents",
   BARTENDER:  "Bar Register",
-  DJ:         "DJ Console",
-  HOSTESS:    "VIP / Seating",
+  DJ:         "DJ Booth",
+  HOSTESS:    "VIP Sale Desk",
 };
 
 /**

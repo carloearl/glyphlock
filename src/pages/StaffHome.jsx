@@ -85,7 +85,7 @@ export default function StaffHome() {
             employee can find Front Door, Check-In, Register, Driver
             Payouts, and Receipts without hunting. Navigation only —
             each destination keeps its own route guard. */}
-        <StaffQuickActions />
+        <StaffQuickActions role={user?.role} />
       </main>
     </div>
   );
