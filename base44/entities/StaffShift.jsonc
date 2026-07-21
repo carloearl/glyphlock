@@ -41,6 +41,16 @@
       "type": "string",
       "format": "date-time"
     },
+    "last_activity_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last heartbeat/activity timestamp. Used to auto clock-out shifts idle > 30 minutes (device left while clocked in)."
+    },
+    "auto_clock_out": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the shift was closed by the 30-minute inactivity sweep rather than an explicit clock-out."
+    },
     "status": {
       "type": "string",
       "enum": [

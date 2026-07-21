@@ -21,6 +21,9 @@ const PBKDF2_ITERATIONS = 100000;
 const SESSION_TTL_MS = 14 * 60 * 60 * 1000;
 const MAX_FAILS = 5;
 const FAIL_WINDOW_MS = 10 * 60 * 1000;
+// Auto clock-out: a device left clocked-in with no activity for this long is
+// closed automatically. Enforces "never more than one open shift left running".
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
 // §12 role → workspace matrix. One class = one landing. Nothing else is returned.
 const WORKSPACE_BY_ROLE = {
@@ -102,6 +105,26 @@ Deno.serve(async (req) => {
         attempt_timestamp: now(), ip_address: ip, success, failure_reason: reason || '',
       }).catch(() => null);
     };
+    // Auto clock-out sweep — closes any REAL open shift whose last activity
+    // (or check-in, if no heartbeat yet) is older than the idle timeout.
+    const sweepStaleShifts = async () => {
+      const open = (await E.StaffShift.filter({ status: 'checked_in' })) || [];
+      const cutoff = Date.now() - IDLE_TIMEOUT_MS;
+      const ts = now();
+      let closed = 0;
+      for (const s of open) {
+        const last = new Date(s.last_activity_at || s.check_in_time || 0).getTime();
+        if (last && last < cutoff) {
+          await E.StaffShift.update(s.id, {
+            check_out_time: ts, status: 'checked_out', auto_clock_out: true,
+            notes: `${s.notes || ''} | auto_clock_out_idle_30m`.trim(),
+          }).catch(() => null);
+          closed++;
+        }
+      }
+      return closed;
+    };
+
     const throttled = async () => {
       const recent = (await E.RateLimitAttempt.filter(
         { resource_id: `pin_auth:${ip}`, resource_type: 'pin_auth', success: false }, '-attempt_timestamp', MAX_FAILS)) || [];
@@ -131,6 +154,22 @@ Deno.serve(async (req) => {
         valid: true,
         operator: { name: payload.name, role: payload.role, venue_id: payload.venue, shift_id: payload.shift_id, expires_at: payload.exp },
       });
+    }
+
+    // ─── HEARTBEAT — keep a shift alive; resets the 30-min idle timer ────────
+    // Called periodically by the operator's device while the page is open.
+    if (action === 'heartbeat') {
+      const payload = await verifyToken(body.kiosk_session);
+      if (!payload) return Response.json({ valid: false }, { status: 401 });
+      await E.StaffShift.update(payload.shift_id, { last_activity_at: now() }).catch(() => null);
+      return Response.json({ valid: true });
+    }
+
+    // ─── SWEEP STALE SHIFTS — auto clock-out anyone idle > 30 min ────────────
+    // Safe to call from any dashboard poll; only closes truly-idle shifts.
+    if (action === 'sweepStale') {
+      const closed = await sweepStaleShifts();
+      return Response.json({ success: true, closed });
     }
 
     // ─── ADMIN SET PIN (owner/approved-admin only — provisioning path) ───────
@@ -214,15 +253,17 @@ Deno.serve(async (req) => {
       if (!owner) return Response.json({ error: 'Owner account not found.' }, { status: 404 });
       await logAttempt('pin_auth', true, '');
       const ts = now();
+      // Close ALL existing open owner shifts first — there is only ever ONE
+      // clocked-in session per user. This clears any duplicates left running.
+      const ownerOpen = (await E.StaffShift.filter({ user_email: OWNER_EMAIL, status: 'checked_in' })) || [];
+      for (const s of ownerOpen) await E.StaffShift.update(s.id, { check_out_time: ts, status: 'checked_out' });
       if (action === 'clockOut') {
-        const open = (await E.StaffShift.filter({ user_email: OWNER_EMAIL, status: 'checked_in' })) || [];
-        for (const s of open) await E.StaffShift.update(s.id, { check_out_time: ts, status: 'checked_out' });
         return Response.json({ success: true, user: { ...safeUser(owner), venue_id: VENUE_ID, is_demo: false }, clocked_out_at: ts });
       }
       const shift = await E.StaffShift.create({
         shift_id: crypto.randomUUID(), user_email: OWNER_EMAIL, user_full_name: owner.full_name,
         role: owner.role, venue_id: VENUE_ID, station: 'office', check_in_time: ts,
-        status: 'checked_in', identity_verified: true,
+        last_activity_at: ts, status: 'checked_in', identity_verified: true,
         notes: `universal_pin_clock_in nups_user_id=${owner.id}`, mode: 'REAL',
       });
       await E.NUPSUser.update(owner.id, { last_login: ts });
@@ -292,7 +333,7 @@ Deno.serve(async (req) => {
         shift_id: crypto.randomUUID(),
         user_email: shiftEmail, user_full_name: nupsUser.full_name,
         role: nupsUser.role, venue_id: nupsUser.venue_id || VENUE_ID, station: ws.station,
-        check_in_time: ts, status: 'checked_in', identity_verified: true,
+        check_in_time: ts, last_activity_at: ts, status: 'checked_in', identity_verified: true,
         notes: `pin_clock_in nups_user_id=${nupsUser.id}`, mode,
       });
       await E.NUPSUser.update(nupsUser.id, { last_login: ts });
