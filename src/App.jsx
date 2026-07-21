@@ -56,6 +56,7 @@ import Tonight from './pages/Tonight';
 import VenueAdminSettings from './pages/VenueAdminSettings';
 import MobileScanner from './pages/MobileScanner';
 import ContractsHub from './pages/ContractsHub';
+import VIPBillPrinter from './pages/VIPBillPrinter';
 import RegisterConsole from './pages/RegisterConsole';
 import Receipts from './pages/Receipts';
 import DriverPayouts from './pages/DriverPayouts';
@@ -143,7 +144,7 @@ const AuthenticatedApp = () => {
     // NUPS operator surface — kiosk-wrapped
     '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub',
-    '/accounting', '/tonight', '/contracts', '/contractshub',
+    '/accounting', '/tonight', '/contracts', '/contractshub', '/vipbillprinter',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
@@ -165,7 +166,7 @@ const AuthenticatedApp = () => {
     '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome',
     '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub',
-    '/accounting', '/tonight', '/contracts', '/contractshub',
+    '/accounting', '/tonight', '/contracts', '/contractshub', '/vipbillprinter',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
@@ -279,6 +280,9 @@ const AuthenticatedApp = () => {
         <Route path="/Contracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ContractsHub /></RoleClassGuard>} />
         <Route path="/contracts" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ContractsHub /></RoleClassGuard>} />
         <Route path="/ContractsHub" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><ContractsHub /></RoleClassGuard>} />
+        {/* Dream Palace VIP GlyphBucks — physical bill printer */}
+        <Route path="/VIPBillPrinter" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPBillPrinter /></RoleClassGuard>} />
+        <Route path="/vipbillprinter" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPBillPrinter /></RoleClassGuard>} />
         {/* DACO 003 §2: ADMIN-only admin/audit/registry surfaces. */}
         <Route path="/admin/settlement" element={<RoleClassGuard allow={["ADMIN"]}><DailySettlementDashboard /></RoleClassGuard>} />
         <Route path="/admin/payout-history" element={<RoleClassGuard allow={["ADMIN"]}><DriverPayoutHistory /></RoleClassGuard>} />
