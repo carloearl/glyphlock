@@ -2,70 +2,10 @@
  * DraggableBillElement — Click-and-drag to move + resize + rotate elements on the bill canvas.
  * Supports text, images, and shapes.
  */
-import React, { useState, useRef, useCallback, useMemo } from "react";
-import { Trash2, Move, Maximize2, RotateCw } from "lucide-react";
-
-// ─── Barcode mini-renderer (Code 128-ish visual) ───
-function MiniBarcode({ data, height = 30, fontSize = 8 }) {
-  const stripes = useMemo(() => {
-    if (!data) return [];
-    const bars = [];
-    let seed = 0;
-    for (let i = 0; i < data.length; i++) seed += data.charCodeAt(i) * (i + 1);
-    for (let i = 0; i < 60; i++) {
-      seed = (seed * 1103515245 + 12345) & 0x7FFFFFFF;
-      bars.push(seed % 3 === 0 ? 4 : 2);
-    }
-    return bars;
-  }, [data]);
-  return (
-    <div className="flex flex-col items-center justify-center w-full h-full">
-      <div className="flex items-end" style={{ height: `calc(100% - ${fontSize + 2}px)` }}>
-        {stripes.map((w, i) => (
-          <div key={i} style={{ width: w, height: "100%", backgroundColor: i % 2 === 0 ? "#000" : "#fff" }} />
-        ))}
-      </div>
-      <span style={{ fontSize, fontFamily: "monospace", color: "#000" }}>{data}</span>
-    </div>
-  );
-}
-
-// ─── QR Code mini-renderer (pattern, not scannable — placeholder) ───
-function MiniQR({ data }) {
-  const matrix = useMemo(() => {
-    const size = 21;
-    let seed = 0;
-    for (let i = 0; i < (data || "").length; i++) seed += data.charCodeAt(i) * (i + 3);
-    const grid = [];
-    for (let r = 0; r < size; r++) {
-      const row = [];
-      for (let c = 0; c < size; c++) {
-        seed = (seed * 1103515245 + 12345) & 0x7FFFFFFF;
-        row.push(seed % 2);
-      }
-      grid.push(row);
-    }
-    // Corner finders
-    const fill = (rs, cs) => {
-      for (let r = rs; r < rs + 7; r++) for (let c = cs; c < cs + 7; c++) {
-        const border = r === rs || r === rs + 6 || c === cs || c === cs + 6;
-        const center = r >= rs + 2 && r <= rs + 4 && c >= cs + 2 && c <= cs + 4;
-        grid[r][c] = border || center ? 1 : 0;
-      }
-    };
-    fill(0, 0); fill(0, size - 7); fill(size - 7, 0);
-    return grid;
-  }, [data]);
-  return (
-    <div className="w-full h-full bg-white p-1">
-      <svg viewBox="0 0 21 21" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
-        {matrix.map((row, r) =>
-          row.map((v, c) => v ? <rect key={`${r}-${c}`} x={c} y={r} width={1} height={1} fill="#000" /> : null)
-        )}
-      </svg>
-    </div>
-  );
-}
+import React, { useState, useRef, useCallback } from "react";
+import { Trash2, Maximize2, RotateCw } from "lucide-react";
+import Code128 from "@/components/nups/glyphbucks/Code128";
+import RealQR from "@/components/nups/glyphbucks/RealQR";
 
 export default function DraggableBillElement({ element, billWidth, billHeight, onUpdate, onRemove, isInteractive }) {
   const elRef = useRef(null);
@@ -78,18 +18,18 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
 
   const handleDragStart = useCallback((e) => {
     if (!isInteractive) return;
+    // Pointer Events unify mouse + touch + pen, so a single code path drives
+    // dragging on desktop AND tablet (fixes mouse-only-broken bug).
     e.preventDefault();
     e.stopPropagation();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    startRef.current = { x: clientX, y: clientY, elX: element.x, elY: element.y, elW: element.width, elH: element.height };
+    const target = e.currentTarget;
+    try { target.setPointerCapture?.(e.pointerId); } catch { /* noop */ }
+    startRef.current = { x: e.clientX, y: e.clientY, elX: element.x, elY: element.y, elW: element.width, elH: element.height };
     setDragging(true);
 
     const onMove = (ev) => {
-      const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
-      const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
-      const dx = cx - startRef.current.x;
-      const dy = cy - startRef.current.y;
+      const dx = ev.clientX - startRef.current.x;
+      const dy = ev.clientY - startRef.current.y;
       const newX = clamp(startRef.current.elX + dx, 0, billWidth - element.width);
       const newY = clamp(startRef.current.elY + dy, 0, billHeight - element.height);
       onUpdate({ ...element, x: newX, y: newY });
@@ -97,16 +37,14 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
 
     const onUp = () => {
       setDragging(false);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend", onUp);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     };
 
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onMove, { passive: false });
-    window.addEventListener("touchend", onUp);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }, [element, billWidth, billHeight, onUpdate, isInteractive]);
 
   const handleRotate = useCallback(() => {
@@ -119,16 +57,14 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
     if (!isInteractive) return;
     e.preventDefault();
     e.stopPropagation();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    startRef.current = { x: clientX, y: clientY, elX: element.x, elY: element.y, elW: element.width, elH: element.height };
+    const target = e.currentTarget;
+    try { target.setPointerCapture?.(e.pointerId); } catch { /* noop */ }
+    startRef.current = { x: e.clientX, y: e.clientY, elX: element.x, elY: element.y, elW: element.width, elH: element.height };
     setResizing(true);
 
     const onMove = (ev) => {
-      const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
-      const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
-      const dx = cx - startRef.current.x;
-      const dy = cy - startRef.current.y;
+      const dx = ev.clientX - startRef.current.x;
+      const dy = ev.clientY - startRef.current.y;
       const newW = clamp(startRef.current.elW + dx, 20, billWidth - element.x);
       const newH = clamp(startRef.current.elH + dy, 20, billHeight - element.y);
       onUpdate({ ...element, width: newW, height: newH });
@@ -136,16 +72,14 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
 
     const onUp = () => {
       setResizing(false);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend", onUp);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     };
 
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onMove, { passive: false });
-    window.addEventListener("touchend", onUp);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }, [element, billWidth, billHeight, onUpdate, isInteractive]);
 
   return (
@@ -161,9 +95,9 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
         transformOrigin: 'center',
         zIndex: dragging || resizing ? 50 : 20,
         outline: isInteractive ? "1px dashed rgba(6,182,212,0.4)" : "none",
+        touchAction: isInteractive ? "none" : "auto",
       }}
-      onMouseDown={handleDragStart}
-      onTouchStart={handleDragStart}
+      onPointerDown={handleDragStart}
     >
       {/* Content */}
       {element.type === "image" && element.src && (
@@ -202,10 +136,14 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
         </div>
       )}
       {element.type === "barcode" && (
-        <MiniBarcode data={element.content || "CC-000000"} fontSize={Math.max(6, (element.height || 30) * 0.15)} />
+        <div className="w-full h-full flex items-center justify-center bg-white pointer-events-none">
+          <Code128 value={element.content || "000000000000"} height={Math.max(20, (element.height || 30) * 0.7)} barWidth={1} displayValue style={{ maxWidth: "100%", maxHeight: "100%" }} />
+        </div>
       )}
       {element.type === "qr" && (
-        <MiniQR data={element.content || "https://dream-palace.com"} />
+        <div className="w-full h-full flex items-center justify-center bg-white p-1 pointer-events-none">
+          <RealQR value={element.content || "https://dream-palace.com"} size={Math.max(48, Math.min(element.width, element.height))} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+        </div>
       )}
       {element.type === "watermark" && (
         <div
@@ -228,8 +166,8 @@ export default function DraggableBillElement({ element, billWidth, billHeight, o
         <>
           <div
             className="absolute bottom-0 right-0 w-4 h-4 bg-cyan-500 rounded-tl cursor-se-resize opacity-0 group-hover/el:opacity-100 transition-opacity flex items-center justify-center print-hide"
-            onMouseDown={handleResizeStart}
-            onTouchStart={handleResizeStart}
+            style={{ touchAction: "none" }}
+            onPointerDown={handleResizeStart}
           >
             <Maximize2 className="w-2.5 h-2.5 text-white" />
           </div>
