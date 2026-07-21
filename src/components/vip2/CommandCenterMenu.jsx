@@ -1,21 +1,26 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { LayoutDashboard, FileSignature, DoorOpen, Users, Search } from "lucide-react";
 
+// VIP Command Center = LIVE OPS ONLY. Contract & GlyphBucks CREATION lives on
+// the /Contracts page — this card is a signpost (external=true) that navigates
+// there instead of embedding a duplicate creation flow (owner directive 2026-07-21).
 const CARDS = [
   { key: "Rooms", title: "Rooms & Floor", desc: "Live room timers — tap a room card to edit timing & status", icon: DoorOpen, glow: "bg-purple-500/25", accent: "text-purple-300" },
-  { key: "Contracts", title: "Contracts & GlyphBucks", desc: "One unified flow — GlyphBucks issuance + VIP suite contract, sealed together", icon: FileSignature, glow: "bg-amber-500/25", accent: "text-amber-300" },
-  { key: "Desk", title: "Active Sessions", desc: "Live VIP contracts & session control — create new contracts from the Contracts & GlyphBucks card", icon: LayoutDashboard, glow: "bg-indigo-500/25", accent: "text-indigo-300" },
+  { key: "Contracts", to: "/Contracts", title: "Contracts & GlyphBucks →", desc: "Create VIP contracts, issue GlyphBucks, Big Spender & entertainer forms — opens the Contracts workspace", icon: FileSignature, glow: "bg-amber-500/25", accent: "text-amber-300" },
+  { key: "Desk", title: "Active Sessions", desc: "Live VIP contracts & session control on the floor", icon: LayoutDashboard, glow: "bg-indigo-500/25", accent: "text-indigo-300" },
   { key: "People", title: "People", desc: "Guests & entertainers", icon: Users, glow: "bg-emerald-500/25", accent: "text-emerald-300" },
   { key: "Search", title: "Contract Search", desc: "Find & verify sealed contracts", icon: Search, glow: "bg-sky-500/25", accent: "text-sky-300" },
 ];
 
 export default function CommandCenterMenu({ onSelect }) {
+  const navigate = useNavigate();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto pt-4">
-      {CARDS.map(({ key, title, desc, icon: Icon, glow, accent }) => (
+      {CARDS.map(({ key, to, title, desc, icon: Icon, glow, accent }) => (
         <button
           key={key}
-          onClick={() => onSelect(key)}
+          onClick={() => (to ? navigate(to) : onSelect(key))}
           className="relative overflow-hidden text-left rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl p-6 min-h-[150px] transition-all hover:border-white/25 hover:bg-white/[0.07] hover:shadow-[0_8px_40px_-12px_rgba(168,85,247,0.4)] hover:-translate-y-0.5"
         >
           <div className={`pointer-events-none absolute -top-14 -right-14 w-36 h-36 rounded-full blur-3xl ${glow}`} />

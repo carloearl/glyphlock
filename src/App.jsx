@@ -260,8 +260,10 @@ const AuthenticatedApp = () => {
         <Route path="/driverpayouts" element={<DriverPayouts />} />
         {/* GlyphBucks merged into the VIP Command Center (merge directive
             2026-07-17) — old hub links land on the GlyphBucks tab. */}
-        <Route path="/GlyphBucksHub" element={<Navigate to="/VIPCommand?tab=GlyphBucks" replace />} />
-        <Route path="/glyphbuckshub" element={<Navigate to="/VIPCommand?tab=GlyphBucks" replace />} />
+        {/* GlyphBucks Hub retired — the ONE home for GlyphBucks issuance is the
+            Contracts workspace (owner directive 2026-07-21). */}
+        <Route path="/GlyphBucksHub" element={<Navigate to="/Contracts?tab=glyphbucks" replace />} />
+        <Route path="/glyphbuckshub" element={<Navigate to="/Contracts?tab=glyphbucks" replace />} />
         <Route path="/Accounting" element={<Accounting />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/Tonight" element={<Tonight />} />

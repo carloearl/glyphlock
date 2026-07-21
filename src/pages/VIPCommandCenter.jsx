@@ -3,10 +3,8 @@ import { vip } from '@/components/vip2/vipApi';
 import RoomManager from '@/components/vip2/RoomManager';
 import PeoplePanel from '@/components/vip2/PeoplePanel';
 import ContractDesk from '@/components/vip2/ContractDesk';
-import UnifiedContractDesk from '@/components/nups/contracts/UnifiedContractDesk';
 import ContractSearch from '@/components/vip2/ContractSearch';
 import VIPLiveBoard from '@/components/vip2/VIPLiveBoard';
-import GlyphBucksWorkspace from '@/components/nups/glyphbucks/GlyphBucksWorkspace';
 import CommandCenterMenu from '@/components/vip2/CommandCenterMenu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,17 +17,16 @@ import { Loader2, Crown, ArrowLeft } from 'lucide-react';
  */
 const VIEW_TITLES = {
   Desk: 'Active Sessions',
-  Contracts: 'Contracts & GlyphBucks',
   Rooms: 'Rooms & Floor',
   People: 'People',
   Search: 'Contract Search',
 };
-// Only contract CREATION is gated on config. Active-session control (Desk)
-// works regardless — it acts on contracts that already exist.
-const CONFIG_GATED = ['Contracts'];
-// Legacy deep-links (?tab=GlyphBucks from the old GlyphBucks Hub, ?tab=New Contract)
+// VIP Command is live-ops only — no config-gated CREATION views remain here.
+const CONFIG_GATED = [];
+// Legacy deep-links: old ?tab=GlyphBucks / ?tab=New Contract / ?tab=Contracts
+// now belong on /Contracts — they resolve to the card grid (null) here so the
+// operator lands on the menu and taps through to the Contracts workspace.
 const LEGACY_TAB_MAP = {
-  GlyphBucks: 'Contracts', 'New Contract': 'Contracts',
   Desk: 'Desk', Rooms: 'Rooms', People: 'People', Search: 'Search',
 };
 
@@ -92,19 +89,9 @@ export default function VIPCommandCenter() {
         ) : (
           <>
             {view === 'Desk' && <ContractDesk state={state} refresh={refresh} />}
-            {view === 'Contracts' && (
-              <div className="space-y-6">
-                <UnifiedContractDesk />
-                <details className="group">
-                  <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300 select-none list-none inline-flex items-center gap-1 min-h-[44px]">
-                    <span className="transition-transform group-open:rotate-90">›</span> GlyphBucks tools — redemption, ledger &amp; search
-                  </summary>
-                  <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-4">
-                    <GlyphBucksWorkspace />
-                  </div>
-                </details>
-              </div>
-            )}
+            {/* 'Contracts' view retired — the card now navigates to /Contracts,
+                the one home for all contract & GlyphBucks CREATION. No embedded
+                duplicate here (owner directive 2026-07-21). */}
             {view === 'Rooms' && (
               <div className="space-y-6">
                 <div className="mb-2">

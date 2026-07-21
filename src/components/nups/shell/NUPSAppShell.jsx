@@ -67,8 +67,11 @@ const NAV_SECTIONS = [
       // (rooms, guests, contracts, signatures, sessions) per DACO-VIP-FIRST-BUILD.
       // VIP Command + VIP Rooms MERGED — one surface for rooms, people,
       // desk, and contracts (owner directive 2026-07-17).
-      { id: "vipcommand",  label: "VIP Command · Rooms", icon: Crown, to: "/VIPCommand" },
-      { id: "glyphbucks",  label: "GlyphBucks Hub",  icon: Coins,     to: "/GlyphBucksHub" },
+      // VIP Command = LIVE OPS ONLY (rooms/floor board, active sessions, people,
+      // search). All contract & GlyphBucks CREATION lives on /Contracts — the
+      // standalone "GlyphBucks Hub" entry is retired to kill the 3-door
+      // duplication (owner directive 2026-07-21).
+      { id: "vipcommand",  label: "VIP Floor · Sessions", icon: Crown, to: "/VIPCommand" },
       // Legacy NUPSOwner tabs moved to the dedicated Legacy section below —
       // one way in, no duplicates (owner directive 2026-07-17).
       { id: "people",      label: "People Archive",  icon: Archive,   to: "/PeopleArchive" },
