@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import NUPSArchitectureSections from "@/components/nups/landing/NUPSArchitectureSections";
 import ExperienceLiveSystemCTA from "@/components/demo/ExperienceLiveSystemCTA";
+import NUPSDemoPlayer from "@/components/nups/landing/NUPSDemoPlayer";
 
 // DACO-20260626 — Landing-page bypass allow-list.
 // These emails skip the marketing landing and venue-mode gate, landing
@@ -1224,6 +1225,10 @@ export default function NUPSLanding() {
             </symbol>
           </defs>
         </svg>
+
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 1480, margin: '0 auto', padding: '32px 32px 0' }}>
+          <NUPSDemoPlayer />
+        </div>
 
         <div className="container">
           <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
