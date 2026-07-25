@@ -26,14 +26,14 @@ const ScrollSection = ({ children, className = "" }) => {
   
   if (isMobile) {
     return (
-      <div className={`w-full py-16 md:py-20 lg:py-24 ${className}`}>
+      <div className={`w-full py-8 md:py-10 ${className}`}>
         {children}
       </div>
     );
   }
   
   return (
-    <div ref={sectionRef} className={`w-full py-16 md:py-20 lg:py-24 ${className}`}>
+    <div ref={sectionRef} className={`w-full py-8 md:py-10 ${className}`}>
       <div className="transition-all duration-500 ease-out" style={{ transform: 'perspective(1000px)', opacity: 1 }}>
         {children}
       </div>

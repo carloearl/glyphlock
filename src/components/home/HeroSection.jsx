@@ -3,7 +3,8 @@ import { motion, useInView } from "framer-motion";
 
 export default function HeroSection() {
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.4 });
+  useInView(containerRef, { once: true, amount: 0.4 });
+  const isInView = true; // always render hero
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   return (
@@ -58,6 +59,8 @@ export default function HeroSection() {
             style={{ filter: 'brightness(1.1) contrast(1.1)', transform: 'translateZ(0)' }}
             onLoadedData={() => setVideoLoaded(true)}
             onCanPlay={() => setVideoLoaded(true)}
+            onLoadedMetadata={() => setVideoLoaded(true)}
+            onError={() => setVideoLoaded(true)}
             aria-label="GlyphLock security system visualization"
           >
             <source src="https://base44.app/api/apps/6902128ac3c5c94a82446585/files/public/6902128ac3c5c94a82446585/643dc9ba3_Dec_05__2220_13s_202512052257_lc8rw.mp4" type="video/mp4" />

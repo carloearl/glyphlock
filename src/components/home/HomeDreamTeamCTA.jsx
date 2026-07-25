@@ -9,7 +9,7 @@ export default function HomeDreamTeamCTA() {
   const isInView = true; // always render content
 
   return (
-    <div ref={containerRef} className="w-full flex flex-col items-center mt-20 px-4 overflow-hidden" style={{ maxWidth: '100vw' }}>
+    <div ref={containerRef} className="w-full flex flex-col items-center px-4 overflow-hidden" style={{ maxWidth: '100vw' }}>
       
       {/* HERO TEXT - ABOVE COURT */}
       <div className="text-center px-4 md:px-8 mb-8 max-w-5xl w-full">

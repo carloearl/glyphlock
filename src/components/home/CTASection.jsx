@@ -10,7 +10,8 @@ export default function CTASection() {
   const [email, setEmail] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.5 });
+  useInView(containerRef, { once: true, amount: 0.5 });
+  const isInView = true; // always render content
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
