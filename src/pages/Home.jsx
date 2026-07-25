@@ -58,6 +58,11 @@ export default function Home() {
     // Faster initial load - just check if DOM is ready
     const timer = setTimeout(() => {
       setLoading(false);
+      if (window.location.hash === '#nups-walkthrough') {
+        setTimeout(() => {
+          document.getElementById('nups-walkthrough')?.scrollIntoView({ behavior: 'smooth' });
+        }, 200);
+      }
     }, 300);
 
     return () => {

@@ -5,7 +5,7 @@ export default function DemoRecordingSection() {
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="w-full py-8">
+    <div id="nups-walkthrough" className="w-full py-8 scroll-mt-24">
       <div className="text-center mb-6 px-4">
         <p className="text-xs sm:text-sm font-black tracking-[0.3em] uppercase text-blue-300">
           Live Walkthrough
