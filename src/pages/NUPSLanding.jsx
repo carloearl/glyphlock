@@ -5,6 +5,7 @@ import NUPSArchitectureSections from "@/components/nups/landing/NUPSArchitecture
 import ExperienceLiveSystemCTA from "@/components/demo/ExperienceLiveSystemCTA";
 import NUPSDemoPlayer from "@/components/nups/landing/NUPSDemoPlayer";
 import KioskSimulator from "@/components/nups/landing/KioskSimulator";
+import CommandDeckHero from "@/components/nups/landing/CommandDeckHero";
 
 // DACO-20260626 — Landing-page bypass allow-list.
 // These emails skip the marketing landing and venue-mode gate, landing
@@ -1165,49 +1166,6 @@ export default function NUPSLanding() {
         <div className="ambient two" />
         <div className="ambient three" />
 
-        <div
-          style={{
-            position: 'fixed',
-            top: 20,
-            left: 24,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 14,
-            zIndex: 9999,
-            pointerEvents: 'none',
-          }}
-          aria-hidden="true"
-        >
-          <div
-            style={{
-              width: 52,
-              height: 52,
-              filter: 'drop-shadow(0 0 14px rgba(0,212,255,0.65)) drop-shadow(0 0 28px rgba(99,102,241,0.35))',
-            }}
-          >
-            <img
-              src="https://media.base44.com/images/public/697a087fb354faebb72df54b/77d157364_lglogo.png"
-              alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-            />
-          </div>
-          <div
-            style={{
-              fontFamily: "'Orbitron', sans-serif",
-              fontWeight: 800,
-              fontSize: 20,
-              letterSpacing: '0.12em',
-              background: 'linear-gradient(180deg, #ffffff 0%, #00d4ff 100%)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 20px rgba(0,212,255,0.25)',
-            }}
-          >
-            GLYPHLOCK
-          </div>
-        </div>
-
         <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
           <defs>
             <symbol id="gl-mark" viewBox="0 0 100 100">
@@ -1226,6 +1184,11 @@ export default function NUPSLanding() {
             </symbol>
           </defs>
         </svg>
+
+        <CommandDeckHero
+          onEnter={() => navigate('/NUPSKiosk')}
+          onExit={() => navigate('/NUPSKiosk?panel=clockIn')}
+        />
 
         <div style={{ position: 'relative', zIndex: 2, width: '100%', padding: '24px 16px 0' }}>
           <NUPSDemoPlayer />
@@ -1292,68 +1255,6 @@ export default function NUPSLanding() {
               <div className="stamp">NUPS · LIVE</div>
             </div>
           </header>
-
-          <section className="hero">
-            <div className="eyebrow">Node Universal Platform System</div>
-            <h1>
-              <span className="line-1">The operating system</span>
-              <span className="line-2">behind the venue.</span>
-            </h1>
-            <p className="lede">
-              NUPS replaces paper contracts, fragmented POS, and manual door ledgers with one <b>closed-loop hybrid infrastructure</b> — edge nodes at the venue, cloud server as the system of record. Identity, payment, payout, audit, and dispute defense — unified on a single multi-tenant platform engineered for <b>high-risk venues</b>.
-            </p>
-            <div
-              style={{
-                maxWidth: 900,
-                margin: '28px auto 0',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: 18,
-                padding: '20px 24px',
-                border: '1px solid var(--line)',
-                background: 'rgba(7,9,28,0.55)',
-                backdropFilter: 'blur(12px)',
-                textAlign: 'left',
-              }}
-            >
-              <div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.28em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: 8 }}>Who it serves</div>
-                <div style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>High-risk venues operating under processor, banking, and regulatory pressure.</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.28em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: 8 }}>What it does</div>
-                <div style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>Unifies identity, payment, contract, and audit into a single closed-loop system.</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.28em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: 8 }}>Why it wins</div>
-                <div style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>Every transaction is pre-evidenced, consented, and defensible before disputes occur.</div>
-              </div>
-            </div>
-            <p className="lede" style={{ marginTop: 28, fontSize: 18 }}>
-              <b>The operating system that records, verifies, and defends every transaction inside the venue.</b> Built-in Dispute Shield — every transaction arrives pre-packaged with verifiable evidence. NUPS defines a new merchant class: <b>High-Verification Commerce</b> — a transaction model where identity, consent, payment, and evidence are captured and linked at the moment of transaction.
-            </p>
-            <div className="enter-wrap" style={{ gap: 16, flexWrap: 'wrap' }}>
-              <button className="enter-btn" onClick={() => navigate('/NUPSKiosk')}>
-                <span className="pulse-dot" />
-                Enter N.U.P.S.
-              </button>
-              <button
-                className="enter-btn"
-                onClick={() => navigate('/NUPSInfrastructurePage')}
-                style={{ background: 'linear-gradient(135deg, var(--cyan), var(--sapphire))' }}
-              >
-                <span className="pulse-dot" />
-                Infrastructure UI
-              </button>
-            </div>
-            <div className="ticker">
-              <div className="stat"><span className="num">7</span><span className="label">Access Tiers</span></div>
-              <div className="stat"><span className="num">3</span><span className="label">Runtime Modes</span></div>
-              <div className="stat"><span className="num">1-PUSH</span><span className="label">Dispute Shield</span></div>
-              <div className="stat"><span className="num">1</span><span className="label">Signed Hardcopy</span></div>
-              <div className="stat"><span className="num">Multi-Tenant</span><span className="label">Scalable Architecture</span></div>
-            </div>
-          </section>
 
           <ExperienceLiveSystemCTA variant="nups" />
 
