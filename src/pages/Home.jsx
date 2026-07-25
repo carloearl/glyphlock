@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import HeroSection from '@/components/home/HeroSection';
-import DemoRecordingSection from '@/components/home/DemoRecordingSection';
 import HeroContent from '@/components/home/HeroContent';
 import CountdownPill from '@/components/marketing/CountdownPill';
 import SEOHead from '@/components/SEOHead';
@@ -43,6 +43,7 @@ const ScrollSection = ({ children, className = "" }) => {
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -58,11 +59,6 @@ export default function Home() {
     // Faster initial load - just check if DOM is ready
     const timer = setTimeout(() => {
       setLoading(false);
-      if (window.location.hash === '#nups-walkthrough') {
-        setTimeout(() => {
-          document.getElementById('nups-walkthrough')?.scrollIntoView({ behavior: 'smooth' });
-        }, 200);
-      }
     }, 300);
 
     return () => {
@@ -136,10 +132,24 @@ export default function Home() {
           <ScrollSection>
             <HeroSection />
           </ScrollSection>
-          
-          <DemoRecordingSection />
 
-          <div className="flex justify-center -mt-8">
+          <div className="flex justify-center py-6 px-4">
+            <button
+              onClick={() => navigate('/NUPSLanding')}
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-black uppercase tracking-[0.15em] text-white text-sm sm:text-base transition-all"
+              style={{
+                background: 'linear-gradient(135deg, #1E40AF, #3B82F6)',
+                boxShadow: '0 0 30px rgba(59,130,246,0.4)',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 0 50px rgba(59,130,246,0.7)')}
+              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 0 30px rgba(59,130,246,0.4)')}
+            >
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+              See The NUPS Walkthrough
+            </button>
+          </div>
+
+          <div className="flex justify-center -mt-2">
             <CountdownPill />
           </div>
 

@@ -6,6 +6,7 @@ import ExperienceLiveSystemCTA from "@/components/demo/ExperienceLiveSystemCTA";
 import NUPSDemoPlayer from "@/components/nups/landing/NUPSDemoPlayer";
 import KioskSimulator from "@/components/nups/landing/KioskSimulator";
 import CommandDeckHero from "@/components/nups/landing/CommandDeckHero";
+import DemoRecordingSection from "@/components/home/DemoRecordingSection";
 
 // DACO-20260626 — Landing-page bypass allow-list.
 // These emails skip the marketing landing and venue-mode gate, landing
@@ -1194,6 +1195,10 @@ export default function NUPSLanding() {
           <NUPSDemoPlayer />
         </div>
 
+        <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
+          <DemoRecordingSection />
+        </div>
+
         <div className="container">
           <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
             <button
@@ -1257,35 +1262,6 @@ export default function NUPSLanding() {
           </header>
 
           <ExperienceLiveSystemCTA variant="nups" />
-
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0 8px' }}>
-            <button
-              onClick={() => navigate('/Home#nups-walkthrough')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '14px 28px',
-                border: '1px solid rgba(0,212,255,0.5)',
-                background: 'linear-gradient(135deg, rgba(0,212,255,0.18), rgba(139,92,246,0.18))',
-                color: '#ffffff',
-                fontFamily: "'Orbitron', sans-serif",
-                fontSize: 13,
-                fontWeight: 700,
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                clipPath: 'polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%)',
-                boxShadow: '0 0 24px rgba(0,212,255,0.3)',
-                transition: 'all 0.25s',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 0 40px rgba(139,92,246,0.55)')}
-              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 0 24px rgba(0,212,255,0.3)')}
-            >
-              <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#00d4ff', boxShadow: '0 0 10px #00d4ff' }} />
-              Watch The Walkthrough
-            </button>
-          </div>
 
           <KioskSimulator />
 
