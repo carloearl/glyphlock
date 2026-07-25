@@ -2,7 +2,7 @@
  * DemoGate — /demo/gate
  * Email-capture layer gating /demo/command-center.
  */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import DemoShell from "@/components/demo/DemoShell";
@@ -11,11 +11,35 @@ import { Loader2, ArrowRight, Shield } from "lucide-react";
 
 const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Admin override — these signed-in users bypass the demo gate entirely.
+const OVERRIDE_EMAILS = ["carloearl@glyphlock.com", "carloearl@gmail.com", "santo@glyphlock.com"];
+const OVERRIDE_NAME_KEYWORDS = ["carlo earl", "santo"];
+
 export default function DemoGate() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ full_name: "", email: "", venue_name: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [checkingOverride, setCheckingOverride] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await base44.auth.me();
+        const email = (me?.email || "").toLowerCase();
+        const name = (me?.full_name || "").toLowerCase();
+        const isOverride =
+          OVERRIDE_EMAILS.includes(email) ||
+          OVERRIDE_NAME_KEYWORDS.some((kw) => name.includes(kw));
+        if (isOverride) {
+          startSession({ token: generateToken(), leadId: `override_${me.id}` });
+          navigate("/demo/command-center", { replace: true });
+          return;
+        }
+      } catch (_) { /* not signed in — show gate */ }
+      setCheckingOverride(false);
+    })();
+  }, [navigate]);
 
   const update = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -60,6 +84,17 @@ export default function DemoGate() {
       setSubmitting(false);
     }
   };
+
+  if (checkingOverride) {
+    return (
+      <DemoShell gateMode>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "calc(100vh - 50px)" }}>
+          <Loader2 style={{ width: 28, height: 28, color: "#eab308", animation: "spin 1s linear infinite" }} />
+        </div>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      </DemoShell>
+    );
+  }
 
   return (
     <DemoShell gateMode>
