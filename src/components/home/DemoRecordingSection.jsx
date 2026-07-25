@@ -16,8 +16,8 @@ export default function DemoRecordingSection() {
       </div>
 
       <div
-        className="relative w-full overflow-hidden border-y-2 border-[#3B82F6]/50 shadow-[0_0_60px_rgba(59,130,246,0.4)]"
-        style={{ height: "min(92vh, 1040px)" }}
+        className="relative w-full overflow-hidden bg-black border-y-2 border-[#3B82F6]/50 shadow-[0_0_60px_rgba(59,130,246,0.4)]"
+        style={{ height: "min(94vh, 1100px)" }}
       >
         {!loaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-950 via-indigo-950 to-blue-900 z-20">
@@ -28,8 +28,16 @@ export default function DemoRecordingSection() {
           controls
           playsInline
           preload="metadata"
-          className="absolute inset-0 w-full h-full object-cover bg-black z-0"
-          style={{ objectPosition: "center 12%" }}
+          className="absolute left-1/2 top-0 h-full object-cover bg-black z-0"
+          style={{
+            /* Zoom in and lift the frame so the phone status bar (time / 5G /
+               battery) at the very top of the recording is clipped away. */
+            width: "112%",
+            transform: "translateX(-50%) scale(1.12)",
+            transformOrigin: "center top",
+            objectPosition: "center top",
+            marginTop: "-6%",
+          }}
           onLoadedData={() => setLoaded(true)}
           aria-label="NUPS system walkthrough recording"
         >
