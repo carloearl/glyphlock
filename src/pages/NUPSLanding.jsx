@@ -30,6 +30,16 @@ export default function NUPSLanding() {
     }
   }, [isAuthenticated, user, navigate]);
 
+  // Land directly on the walkthrough video when arriving with the hash.
+  useEffect(() => {
+    if (window.location.hash === '#nups-walkthrough') {
+      const t = setTimeout(() => {
+        document.getElementById('nups-walkthrough')?.scrollIntoView({ behavior: 'smooth' });
+      }, 400);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
   return (
     <>
       <style>{`
@@ -1195,7 +1205,7 @@ export default function NUPSLanding() {
           <NUPSDemoPlayer />
         </div>
 
-        <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
+        <div id="nups-walkthrough" style={{ position: 'relative', zIndex: 2, width: '100%', scrollMarginTop: 24 }}>
           <DemoRecordingSection />
         </div>
 

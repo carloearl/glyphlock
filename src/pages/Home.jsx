@@ -135,7 +135,7 @@ export default function Home() {
 
           <div className="flex justify-center py-6 px-4">
             <button
-              onClick={() => navigate('/NUPSLanding')}
+              onClick={() => navigate('/NUPSLanding#nups-walkthrough')}
               className="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-black uppercase tracking-[0.15em] text-white text-sm sm:text-base transition-all"
               style={{
                 background: 'linear-gradient(135deg, #1E40AF, #3B82F6)',
