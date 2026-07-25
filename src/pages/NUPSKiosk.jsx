@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import KioskPinPad from "@/components/nups/kiosk/KioskPinPad";
 import OwnerAdminSignIn from "@/components/nups/kiosk/OwnerAdminSignIn";
 import AccessRequestForm from "@/components/nups/kiosk/AccessRequestForm";
-import { Clock, LogOut, ShieldCheck, UserPlus, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Clock, LogOut, ShieldCheck, UserPlus, ArrowLeft, CheckCircle2, PlayCircle } from "lucide-react";
 
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §3 — Public kiosk entry.
 // Shows ONLY: Staff Clock In, Staff Clock Out, Owner/Admin Sign In, Request Owner/Admin Access.
@@ -56,6 +56,15 @@ export default function NUPSKiosk() {
         <div className="absolute bottom-0 left-1/4 w-[400px] h-[300px] rounded-full bg-cyan-500/10 blur-[100px]" />
       </div>
       <div className="w-full max-w-md relative">
+        {/* Public interactive UI/UX demo link */}
+        <button
+          onClick={() => navigate("/demo/command-center")}
+          className="mx-auto mb-6 flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-sm font-semibold hover:bg-cyan-500/20 hover:border-cyan-400/70 transition-all"
+        >
+          <PlayCircle className="w-4 h-4" />
+          View Live Command Center Demo
+        </button>
+
         <div className="text-center mb-10">
           <div className="w-32 h-32 mx-auto mb-5 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_60px_-15px_rgba(139,92,246,0.5)] flex items-center justify-center">
             <img src="https://media.base44.com/images/public/697a087fb354faebb72df54b/ac7def988_d8c1c28f-21e9-47c1-99ac-394132e7c9ce.png"
