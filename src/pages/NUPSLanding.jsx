@@ -1196,12 +1196,12 @@ export default function NUPSLanding() {
           </defs>
         </svg>
 
-        <div id="nups-walkthrough" style={{ position: 'relative', zIndex: 2, width: '100%', scrollMarginTop: 0 }}>
-          <DemoRecordingSection />
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', padding: '8px 16px 0' }}>
+          <NUPSDemoPlayer />
         </div>
 
-        <div style={{ position: 'relative', zIndex: 2, width: '100%', padding: '24px 16px 0' }}>
-          <NUPSDemoPlayer />
+        <div id="nups-walkthrough" style={{ position: 'relative', zIndex: 2, width: '100%', scrollMarginTop: 0, marginTop: 8 }}>
+          <DemoRecordingSection />
         </div>
 
         <CommandDeckHero
@@ -1209,7 +1209,7 @@ export default function NUPSLanding() {
           onExit={() => navigate('/NUPSKiosk?panel=clockIn')}
         />
 
-        <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 1480, margin: '0 auto', padding: '32px 32px 0' }}>
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 1480, margin: '0 auto', padding: '24px 16px 0' }}>
           <ExperienceLiveSystemCTA variant="nups" />
         </div>
 

@@ -5,8 +5,8 @@ export default function DemoRecordingSection() {
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div id="nups-walkthrough" className="w-full py-8 scroll-mt-24">
-      <div className="text-center mb-6 px-4">
+    <div id="nups-walkthrough" className="w-full py-5 scroll-mt-24">
+      <div className="text-center mb-4 px-4">
         <p className="text-xs sm:text-sm font-black tracking-[0.3em] uppercase text-blue-300">
           Live Walkthrough
         </p>
@@ -17,7 +17,7 @@ export default function DemoRecordingSection() {
 
       <div
         className="relative w-full overflow-hidden bg-black border-y-2 border-[#3B82F6]/50 shadow-[0_0_60px_rgba(59,130,246,0.4)]"
-        style={{ height: "min(94vh, 1100px)" }}
+        style={{ height: "min(78vh, 900px)" }}
       >
         {!loaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-950 via-indigo-950 to-blue-900 z-20">
