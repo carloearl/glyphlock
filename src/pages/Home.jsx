@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import HeroSection from '@/components/home/HeroSection';
+import DemoRecordingSection from '@/components/home/DemoRecordingSection';
 import HeroContent from '@/components/home/HeroContent';
 import CountdownPill from '@/components/marketing/CountdownPill';
 import SEOHead from '@/components/SEOHead';
@@ -131,6 +132,8 @@ export default function Home() {
             <HeroSection />
           </ScrollSection>
           
+          <DemoRecordingSection />
+
           <div className="flex justify-center -mt-8">
             <CountdownPill />
           </div>
