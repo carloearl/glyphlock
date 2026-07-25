@@ -1226,7 +1226,7 @@ export default function NUPSLanding() {
           </defs>
         </svg>
 
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: 1480, margin: '0 auto', padding: '32px 32px 0' }}>
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', padding: '24px 16px 0' }}>
           <NUPSDemoPlayer />
         </div>
 
