@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import NUPSArchitectureSections from "@/components/nups/landing/NUPSArchitectureSections";
 import ExperienceLiveSystemCTA from "@/components/demo/ExperienceLiveSystemCTA";
 import NUPSDemoPlayer from "@/components/nups/landing/NUPSDemoPlayer";
+import KioskSimulator from "@/components/nups/landing/KioskSimulator";
 
 // DACO-20260626 — Landing-page bypass allow-list.
 // These emails skip the marketing landing and venue-mode gate, landing
@@ -1355,6 +1356,8 @@ export default function NUPSLanding() {
           </section>
 
           <ExperienceLiveSystemCTA variant="nups" />
+
+          <KioskSimulator />
 
           <div className="section-header"><h2>System <b>Architecture</b></h2><div className="index">§ 01 · Topology</div></div>
           <div className="diagram-frame">
