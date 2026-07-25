@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_nups_security_report",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_security_report": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "dailyNupsSecurityReport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run audit & email report",
+            "description": "Audits site health, emails admins"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Runs a NUPS security/site-health audit every morning and emails the digest to admins so site health can be tracked without logging in.",
+  "name": "Daily NUPS Security Report",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 7 * * *",
+      "one_time_date": null,
+      "timezone": "America/Phoenix",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
