@@ -17,7 +17,7 @@ export default function DemoRecordingSection() {
 
       <div
         className="relative w-full overflow-hidden border-y-2 border-[#3B82F6]/50 shadow-[0_0_60px_rgba(59,130,246,0.4)]"
-        style={{ height: "min(85vh, 900px)" }}
+        style={{ height: "min(92vh, 1040px)" }}
       >
         {!loaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-950 via-indigo-950 to-blue-900 z-20">
@@ -28,7 +28,7 @@ export default function DemoRecordingSection() {
           controls
           playsInline
           preload="metadata"
-          className="absolute inset-0 w-full h-full object-cover bg-black z-0"
+          className="absolute inset-0 w-full h-full object-contain bg-black z-0"
           onLoadedData={() => setLoaded(true)}
           aria-label="NUPS system walkthrough recording"
         >

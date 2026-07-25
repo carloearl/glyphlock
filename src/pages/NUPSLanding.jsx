@@ -1209,6 +1209,10 @@ export default function NUPSLanding() {
           <NUPSDemoPlayer />
         </div>
 
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 1480, margin: '0 auto', padding: '32px 32px 0' }}>
+          <ExperienceLiveSystemCTA variant="nups" />
+        </div>
+
         <div className="container">
           <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
             <button
@@ -1270,8 +1274,6 @@ export default function NUPSLanding() {
               <div className="stamp">NUPS · LIVE</div>
             </div>
           </header>
-
-          <ExperienceLiveSystemCTA variant="nups" />
 
           <KioskSimulator />
 
