@@ -28,7 +28,8 @@ export default function DemoRecordingSection() {
           controls
           playsInline
           preload="metadata"
-          className="absolute inset-0 w-full h-full object-contain bg-black z-0"
+          className="absolute inset-0 w-full h-full object-cover bg-black z-0"
+          style={{ objectPosition: "center 12%" }}
           onLoadedData={() => setLoaded(true)}
           aria-label="NUPS system walkthrough recording"
         >
