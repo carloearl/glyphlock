@@ -73,7 +73,9 @@ function NeonDrip({ left, delay, color }) {
 
 export default function HeroContent() {
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0, margin: "0px 0px -10% 0px" });
+  const inView = useInView(containerRef, { once: true, amount: 0, margin: "0px 0px -10% 0px" });
+  const isInView = true; // always render content; animate once when scrolled in
+  void inView;
   const [typedText, setTypedText] = useState("");
   const fullText = "GlyphLock = SOVEREIGN_INFRASTRUCTURE";
 

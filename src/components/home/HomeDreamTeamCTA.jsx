@@ -5,7 +5,8 @@ import { motion, useInView } from "framer-motion";
 
 export default function HomeDreamTeamCTA() {
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.4 });
+  useInView(containerRef, { once: true, amount: 0.4 });
+  const isInView = true; // always render content
 
   return (
     <div ref={containerRef} className="w-full flex flex-col items-center mt-20 px-4 overflow-hidden" style={{ maxWidth: '100vw' }}>

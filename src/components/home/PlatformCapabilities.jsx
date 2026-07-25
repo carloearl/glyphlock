@@ -157,7 +157,8 @@ function ModuleCard({ mod, index, isInView }) {
 
 export default function PlatformCapabilities() {
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.1 });
+  useInView(containerRef, { once: true, amount: 0.1 });
+  const isInView = true; // always render content
 
   return (
     <section

@@ -57,7 +57,8 @@ const services = [
 
 export default function ServicesGrid() {
   const containerRef = useRef(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.15 });
+  useInView(containerRef, { once: true, amount: 0.15 });
+  const isInView = true; // always render content
 
   // Animation directions for each card
   const cardAnimations = [
