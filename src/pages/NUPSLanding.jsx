@@ -1201,12 +1201,12 @@ export default function NUPSLanding() {
           onExit={() => navigate('/NUPSKiosk?panel=clockIn')}
         />
 
-        <div style={{ position: 'relative', zIndex: 2, width: '100%', padding: '24px 16px 0' }}>
-          <NUPSDemoPlayer />
+        <div id="nups-walkthrough" style={{ position: 'relative', zIndex: 2, width: '100%', scrollMarginTop: 0 }}>
+          <DemoRecordingSection />
         </div>
 
-        <div id="nups-walkthrough" style={{ position: 'relative', zIndex: 2, width: '100%', scrollMarginTop: 24 }}>
-          <DemoRecordingSection />
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', padding: '24px 16px 0' }}>
+          <NUPSDemoPlayer />
         </div>
 
         <div className="container">
