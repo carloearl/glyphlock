@@ -1,14 +1,10 @@
 /**
- * ExperienceLiveSystemCTA — The single surgical CTA insertion permitted on
- * landing pages. Routes to /demo/gate (email capture).
- *
- * Two visual variants so each landing page feels native:
- *  - variant="nups"  → harmonizes with NUPSLanding (cyan/sapphire/violet glow)
- *  - variant="home"  → harmonizes with Home (royal blue gradient, glass card)
+ * Landing-page CTA routed through the demo gate.
+ * NUPS uses accurate preview language while the production rebuild is active.
  */
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function ExperienceLiveSystemCTA({ variant = "home" }) {
   const navigate = useNavigate();
@@ -20,14 +16,14 @@ export default function ExperienceLiveSystemCTA({ variant = "home" }) {
         style={{
           display: "flex",
           justifyContent: "center",
-          padding: "24px 16px 48px",
+          padding: "18px 16px 44px",
           position: "relative",
           zIndex: 3,
         }}
       >
         <button
           onClick={go}
-          aria-label="Experience the Live System"
+          aria-label="Request a guided NUPS preview"
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -39,7 +35,7 @@ export default function ExperienceLiveSystemCTA({ variant = "home" }) {
             fontFamily: "'Orbitron', sans-serif",
             fontWeight: 700,
             fontSize: 14,
-            letterSpacing: "0.18em",
+            letterSpacing: "0.15em",
             textTransform: "uppercase",
             border: "1px solid rgba(0,212,255,0.4)",
             cursor: "pointer",
@@ -57,20 +53,19 @@ export default function ExperienceLiveSystemCTA({ variant = "home" }) {
             e.currentTarget.style.boxShadow = "0 0 40px rgba(30,111,255,0.4), 0 0 80px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.2)";
           }}
         >
-          <Sparkles style={{ width: 16, height: 16, color: "#6ee7f9", pointerEvents: "none" }} />
-          <span style={{ pointerEvents: "none" }}>Experience the Live System</span>
+          <ShieldCheck style={{ width: 17, height: 17, color: "#a5f3fc", pointerEvents: "none" }} />
+          <span style={{ pointerEvents: "none" }}>Request Guided NUPS Preview</span>
           <ArrowRight style={{ width: 16, height: 16, pointerEvents: "none" }} />
         </button>
       </div>
     );
   }
 
-  // Home variant — royal blue / indigo, matches Home's existing palette
   return (
     <div className="w-full flex justify-center px-4 py-8 md:py-10">
       <button
         onClick={go}
-        aria-label="Experience the Live System"
+        aria-label="Experience the system"
         className="group relative inline-flex items-center gap-3 px-8 py-4 md:px-10 md:py-5 rounded-2xl text-white font-bold tracking-wider uppercase text-sm md:text-base transition-all duration-300 hover:scale-[1.02] min-h-[56px]"
         style={{
           background: "linear-gradient(135deg, #1e40af 0%, #4f46e5 50%, #6366f1 100%)",
@@ -79,8 +74,8 @@ export default function ExperienceLiveSystemCTA({ variant = "home" }) {
           touchAction: "manipulation",
         }}
       >
-        <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-blue-200" style={{ pointerEvents: "none" }} />
-        <span style={{ pointerEvents: "none" }}>Experience the Live System</span>
+        <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-blue-200" style={{ pointerEvents: "none" }} />
+        <span style={{ pointerEvents: "none" }}>Experience the System</span>
         <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" style={{ pointerEvents: "none" }} />
       </button>
     </div>
