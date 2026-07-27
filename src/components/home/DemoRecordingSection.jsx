@@ -21,9 +21,10 @@ export default function DemoRecordingSection() {
 
         .nups-recording-video {
           position: absolute;
-          inset: 0;
+          left: 0;
+          bottom: 0;
           width: 100%;
-          height: 100%;
+          height: 112%;
           object-fit: cover;
           object-position: center bottom;
           background: #000;
@@ -37,6 +38,10 @@ export default function DemoRecordingSection() {
             border-right: 0;
             border-radius: 0;
           }
+
+          .nups-recording-video {
+            height: 113%;
+          }
         }
       `}</style>
 
@@ -48,7 +53,7 @@ export default function DemoRecordingSection() {
           See the Full NUPS Contract Process
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-slate-400">
-          The phone status and browser bars are cropped while the complete contract workflow remains visible vertically.
+          The embedded phone browser bar is cropped while the full contract workflow remains visible through the end.
         </p>
       </div>
 
