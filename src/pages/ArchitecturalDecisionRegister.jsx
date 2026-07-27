@@ -107,9 +107,14 @@ export default function ArchitecturalDecisionRegister() {
   }
 
   function openEdit(record) {
+    // Coalesce every stored field: entity records can hold null for optional
+    // string fields, which would break controlled inputs and .trim() on save.
+    const clean = {};
+    Object.keys(EMPTY_FORM).forEach((k) => {
+      clean[k] = record[k] ?? EMPTY_FORM[k];
+    });
     setForm({
-      ...EMPTY_FORM,
-      ...record,
+      ...clean,
       directive_references: (record.directive_references || []).join(", "),
       tags: (record.tags || []).join(", "),
       approval_date: record.approval_date || EMPTY_FORM.approval_date,
@@ -126,22 +131,22 @@ export default function ArchitecturalDecisionRegister() {
     setSaving(true);
     try {
       const payload = {
-        adr_number: form.adr_number.trim(),
-        title: form.title.trim(),
+        adr_number: (form.adr_number || "").trim(),
+        title: (form.title || "").trim(),
         status: form.status,
         category: form.category,
-        decision: form.decision,
-        context: form.context,
-        alternatives_considered: form.alternatives_considered,
-        rationale: form.rationale,
-        consequences: form.consequences,
-        approval_authority: form.approval_authority,
+        decision: form.decision || "",
+        context: form.context || "",
+        alternatives_considered: form.alternatives_considered || "",
+        rationale: form.rationale || "",
+        consequences: form.consequences || "",
+        approval_authority: form.approval_authority || "",
         approval_date: form.approval_date,
-        directive_references: form.directive_references
+        directive_references: (form.directive_references || "")
           .split(",").map((s) => s.trim()).filter(Boolean),
-        supersedes: form.supersedes.trim(),
-        supersession_notes: form.supersession_notes,
-        tags: form.tags.split(",").map((s) => s.trim()).filter(Boolean),
+        supersedes: (form.supersedes || "").trim(),
+        supersession_notes: form.supersession_notes || "",
+        tags: (form.tags || "").split(",").map((s) => s.trim()).filter(Boolean),
       };
 
       let saved;
