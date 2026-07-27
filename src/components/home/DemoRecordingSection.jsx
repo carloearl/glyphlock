@@ -12,29 +12,31 @@ export default function DemoRecordingSection() {
       <style>{`
         .nups-recording-section {
           position: relative;
-          width: 100vw;
-          margin-left: calc(50% - 50vw);
-          padding: clamp(28px, 4vw, 64px) 0 0;
+          width: 100%;
+          padding: clamp(28px, 4vw, 64px) clamp(12px, 2.2vw, 36px) 0;
           overflow: hidden;
           background: #020617;
+          box-sizing: border-box;
         }
 
         .nups-recording-copy {
           width: min(100%, 1100px);
           margin: 0 auto;
-          padding: 0 clamp(18px, 4vw, 64px) clamp(20px, 3vw, 36px);
+          padding: 0 clamp(6px, 2vw, 28px) clamp(20px, 3vw, 36px);
           text-align: center;
         }
 
         .nups-recording-frame {
-          --nups-recording-zoom: 1.18;
+          --nups-recording-vertical-scale: 1.16;
           position: relative;
-          width: 100vw;
+          width: 100%;
+          max-width: 1600px;
+          margin: 0 auto;
           aspect-ratio: 9 / 18.7;
           overflow: hidden;
           background: #000;
-          border-top: 1px solid rgba(59, 130, 246, 0.55);
-          border-bottom: 1px solid rgba(59, 130, 246, 0.55);
+          border: 1px solid rgba(59, 130, 246, 0.55);
+          border-radius: clamp(12px, 1.6vw, 22px);
           box-shadow: 0 0 70px rgba(59, 130, 246, 0.28);
         }
 
@@ -46,7 +48,7 @@ export default function DemoRecordingSection() {
           height: 100%;
           object-fit: cover;
           object-position: center bottom;
-          transform: scale(var(--nups-recording-zoom));
+          transform: scaleY(var(--nups-recording-vertical-scale));
           transform-origin: center bottom;
           background: #000;
         }
@@ -91,8 +93,13 @@ export default function DemoRecordingSection() {
         }
 
         @media (max-width: 1100px) {
+          .nups-recording-section {
+            padding-left: clamp(12px, 2vw, 24px);
+            padding-right: clamp(12px, 2vw, 24px);
+          }
+
           .nups-recording-frame {
-            --nups-recording-zoom: 1.16;
+            --nups-recording-vertical-scale: 1.15;
           }
 
           .nups-landing-shell .container {
@@ -107,17 +114,18 @@ export default function DemoRecordingSection() {
 
         @media (max-width: 720px) {
           .nups-recording-section {
-            padding-top: 24px;
+            padding: 24px 10px 0;
           }
 
           .nups-recording-frame {
-            --nups-recording-zoom: 1.14;
+            --nups-recording-vertical-scale: 1.14;
             aspect-ratio: 9 / 18.7;
+            border-radius: 12px;
           }
 
           .nups-recording-copy {
-            padding-left: 18px;
-            padding-right: 18px;
+            padding-left: 8px;
+            padding-right: 8px;
           }
 
           .nups-landing-shell .container {
@@ -151,7 +159,7 @@ export default function DemoRecordingSection() {
           See the Full NUPS Contract Process
         </h2>
         <p className="mx-auto mt-2 max-w-3xl text-sm sm:text-base text-slate-400">
-          The real contract workflow is presented at full width. The embedded phone browser chrome is cropped while the recording remains tall and readable on desktop, tablet, and mobile.
+          The real contract workflow is presented nearly full width with a clean responsive margin. The embedded phone browser chrome is cropped vertically while the complete left and right sides remain visible.
         </p>
       </div>
 
