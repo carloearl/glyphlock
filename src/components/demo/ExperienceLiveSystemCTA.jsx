@@ -1,65 +1,18 @@
-/**
- * Landing-page CTA routed through the demo gate.
- * NUPS uses accurate preview language while the production rebuild is active.
- */
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 
+/**
+ * The NUPS landing variant is intentionally hidden. The public page now
+ * prioritizes the real recorded contract workflow instead of routing visitors
+ * into a generic demo gate that does not represent the production experience.
+ * The home-page variant remains available where it is still used.
+ */
 export default function ExperienceLiveSystemCTA({ variant = "home" }) {
   const navigate = useNavigate();
   const go = () => navigate("/demo/gate");
 
-  if (variant === "nups") {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          padding: "18px 16px 44px",
-          position: "relative",
-          zIndex: 3,
-        }}
-      >
-        <button
-          onClick={go}
-          aria-label="Request a guided NUPS preview"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "18px 32px",
-            minHeight: 56,
-            background: "linear-gradient(135deg, #1e6fff, #8b5cf6)",
-            color: "#ffffff",
-            fontFamily: "'Orbitron', sans-serif",
-            fontWeight: 700,
-            fontSize: 14,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            border: "1px solid rgba(0,212,255,0.4)",
-            cursor: "pointer",
-            clipPath: "polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%)",
-            boxShadow: "0 0 40px rgba(30,111,255,0.4), 0 0 80px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
-            transition: "all 0.3s",
-            touchAction: "manipulation",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 10px 50px rgba(139,92,246,0.55), 0 0 80px rgba(0,212,255,0.3), inset 0 1px 0 rgba(255,255,255,0.25)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 0 40px rgba(30,111,255,0.4), 0 0 80px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.2)";
-          }}
-        >
-          <ShieldCheck style={{ width: 17, height: 17, color: "#a5f3fc", pointerEvents: "none" }} />
-          <span style={{ pointerEvents: "none" }}>Request Guided NUPS Preview</span>
-          <ArrowRight style={{ width: 16, height: 16, pointerEvents: "none" }} />
-        </button>
-      </div>
-    );
-  }
+  if (variant === "nups") return null;
 
   return (
     <div className="w-full flex justify-center px-4 py-8 md:py-10">
