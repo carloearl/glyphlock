@@ -9,9 +9,8 @@ export default function DemoRecordingSection() {
       <style>{`
         .nups-recording-frame {
           position: relative;
-          width: min(100%, 920px);
-          height: min(94svh, 1120px);
-          min-height: 720px;
+          width: min(100%, 560px);
+          aspect-ratio: 9 / 18.7;
           margin: 0 auto;
           overflow: hidden;
           background: #000;
@@ -22,28 +21,21 @@ export default function DemoRecordingSection() {
 
         .nups-recording-video {
           position: absolute;
-          left: 0;
-          top: -42px;
+          inset: 0;
           width: 100%;
-          height: calc(100% + 42px);
-          object-fit: contain;
-          object-position: center top;
+          height: 100%;
+          object-fit: cover;
+          object-position: center bottom;
           background: #000;
         }
 
         @media (max-width: 700px) {
           .nups-recording-frame {
             width: 100%;
-            height: min(92svh, 1040px);
-            min-height: 640px;
+            aspect-ratio: 9 / 18.7;
             border-left: 0;
             border-right: 0;
             border-radius: 0;
-          }
-
-          .nups-recording-video {
-            top: -34px;
-            height: calc(100% + 34px);
           }
         }
       `}</style>
@@ -56,7 +48,7 @@ export default function DemoRecordingSection() {
           See the Full NUPS Contract Process
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-slate-400">
-          The recording is shown at its full vertical ratio so the complete contract workflow remains visible.
+          The phone status and browser bars are cropped while the complete contract workflow remains visible vertically.
         </p>
       </div>
 
