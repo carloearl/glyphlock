@@ -1,346 +1,544 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Play, RotateCcw, Pause, ShieldCheck, Fingerprint, FileText, QrCode, Clock, AlertTriangle, CheckCircle2, Lock, Building2, CreditCard, Home, User, Send, Zap, Radio } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  Database,
+  FileText,
+  Fingerprint,
+  Home,
+  Layers,
+  ListChecks,
+  Lock,
+  Network,
+  Pause,
+  Play,
+  QrCode,
+  Radio,
+  ReceiptText,
+  RotateCcw,
+  ScanLine,
+  Send,
+  ShieldCheck,
+  User,
+  Users,
+  Zap,
+} from "lucide-react";
 
 const VOICEOVER = "https://media.base44.com/files/public/6a63d9f0475091afaaa1e124/de5d2b294_speech.mp3";
+const FALLBACK_DURATION = 52;
+const VISUAL_LEAD_SECONDS = 0.28;
 
-const STEPS = [
-  { label: "Venue Operations", caption: "NUPS venue operations — every transaction tracked", ms: 6000 },
-  { label: "Transaction Sealed", caption: "Guest scan → contract sealed in real time", ms: 6000 },
-  { label: "Dispute Incoming", caption: "A chargeback dispute lands", ms: 5500 },
-  { label: "One-Push Assembly", caption: "One push — assemble the evidence package", ms: 6500 },
-  { label: "Dispute Defended", caption: "Dispute defended — sealed and routed", ms: 6500 },
-  { label: "Routed", caption: "Routed to your banking partner — good standing", ms: 6000 },
-  { label: "Stakeholders Protected", caption: "Bank · Processor · Venue · Guest — all protected", ms: 6500 },
-  { label: "High-Verification Commerce", caption: "This is High-Verification Commerce. This is Glyphlock.", ms: 9000 }
+const CUES = [
+  {
+    start: 0,
+    label: "Venue Operations",
+    caption: "NUPS venue operations — every transaction tracked",
+    detail: "Identity, role, contract, payment, and receipt activity share one operational timeline.",
+    audit: "Venue runtime opened with role-scoped activity tracking.",
+  },
+  {
+    start: 5.8,
+    label: "Transaction Sealed",
+    caption: "Guest scan → contract sealed in real time",
+    detail: "The verified guest identity follows the transaction through consent, payment, contract generation, and receipt.",
+    audit: "Identity-bound transaction record created and sealed.",
+  },
+  {
+    start: 11.7,
+    label: "Dispute Incoming",
+    caption: "A chargeback dispute lands",
+    detail: "NUPS locates the original transaction and its linked consent, contract, payment, and verification records.",
+    audit: "Dispute alert matched to the originating transaction.",
+  },
+  {
+    start: 17.1,
+    label: "One-Push Assembly",
+    caption: "One push — assemble the evidence package",
+    detail: "The system gathers the signed agreement, identity proof, receipt, consent log, and audit timestamps into one package.",
+    audit: "Evidence package assembled from linked source records.",
+  },
+  {
+    start: 23.4,
+    label: "Dispute Defended",
+    caption: "Dispute defended — sealed and routed",
+    detail: "The completed package preserves source references and chain-of-custody details instead of relying on screenshots and memory.",
+    audit: "Evidence package sealed with source references intact.",
+  },
+  {
+    start: 29.8,
+    label: "Routed",
+    caption: "Routed to your banking partner — good standing",
+    detail: "The venue can deliver a consistent, reviewable package to the processor or banking partner from the same system of record.",
+    audit: "Defence package prepared for external review and routing.",
+  },
+  {
+    start: 35.9,
+    label: "Stakeholders Protected",
+    caption: "Bank · Processor · Venue · Guest — all protected",
+    detail: "Each party receives clearer transaction provenance, consent evidence, and an auditable explanation of what occurred.",
+    audit: "Stakeholder views linked to the same verified transaction.",
+  },
+  {
+    start: 42.3,
+    label: "High-Verification Commerce",
+    caption: "This is High-Verification Commerce. This is GlyphLock.",
+    detail: "NUPS turns venue operations into structured, reviewable evidence without forcing the buyer to reconstruct events after the fact.",
+    audit: "High-verification transaction lifecycle completed.",
+  },
+];
+
+const MODULES = [
+  { icon: Activity, label: "Operations", step: 0 },
+  { icon: Fingerprint, label: "Identity", step: 1 },
+  { icon: AlertTriangle, label: "Disputes", step: 2 },
+  { icon: Layers, label: "Evidence", step: 3 },
+  { icon: Network, label: "Routing", step: 5 },
+  { icon: Users, label: "Stakeholders", step: 6 },
 ];
 
 const EVIDENCE_ITEMS = [
-  { icon: FileText, label: "Signed contract" },
-  { icon: Play, label: "30-sec video attestation" },
-  { icon: Fingerprint, label: "Biometric match" },
-  { icon: QrCode, label: "POS receipt + GlyphBucks QR" },
-  { icon: Clock, label: "Blockchain timestamp" },
-  { icon: CheckCircle2, label: "Click-wrap consent log" }
+  { icon: FileText, label: "Signed agreement" },
+  { icon: Fingerprint, label: "Verified identity reference" },
+  { icon: ReceiptText, label: "Payment receipt" },
+  { icon: QrCode, label: "QR / transaction reference" },
+  { icon: Clock, label: "Audit timestamps" },
+  { icon: CheckCircle2, label: "Consent and approval log" },
 ];
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.09, delayChildren: 0.12 } } };
-const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } } };
+const TRANSACTION_STAGES = [
+  { icon: ScanLine, label: "Identify", sub: "Guest profile or ID" },
+  { icon: FileText, label: "Consent", sub: "Terms and signatures" },
+  { icon: CreditCard, label: "Transact", sub: "Payment and services" },
+  { icon: ReceiptText, label: "Document", sub: "Contract and receipt" },
+];
 
-function Card({ className = "", children }) {
-  return (
-    <motion.div variants={item} whileHover={{ scale: 1.015 }} className={`rounded-xl border border-cyan-400/20 bg-slate-900/70 backdrop-blur-sm shadow-lg shadow-cyan-500/5 ${className}`}>
-      {children}
-    </motion.div>
-  );
+function clamp(value, min = 0, max = 1) {
+  return Math.min(Math.max(value, min), max);
 }
 
-function Sealed({ show }) {
-  return (
-    <span className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[9px] font-bold transition-all duration-500 ${show ? "border-cyan-400/50 bg-cyan-400/10 text-cyan-300 opacity-100" : "border-white/10 text-slate-600 opacity-40"}`}>
-      <Lock className="h-2.5 w-2.5" /> SEALED
-    </span>
-  );
+function resolveStep(time) {
+  let resolved = 0;
+  for (let index = 0; index < CUES.length; index += 1) {
+    if (time >= CUES[index].start) resolved = index;
+    else break;
+  }
+  return resolved;
 }
 
-function LiveDot() {
-  return (
-    <span className="relative flex h-2 w-2">
-      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-    </span>
-  );
+function formatTime(seconds) {
+  const safe = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
+  const minutes = Math.floor(safe / 60);
+  const remainder = Math.floor(safe % 60);
+  return `${minutes}:${String(remainder).padStart(2, "0")}`;
 }
 
-function StepContent({ step }) {
-  switch (step) {
-    case 0:
-      return (
-        <motion.div variants={container} initial="hidden" animate="show" className="grid h-full grid-cols-3 gap-3">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 text-cyan-400"><CreditCard className="h-4 w-4" /><span className="text-[10px] uppercase tracking-wider text-slate-400">Transactions</span></div>
-            <div className="mt-2 text-2xl font-bold text-white">1,284</div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-2 text-cyan-400"><AlertTriangle className="h-4 w-4" /><span className="text-[10px] uppercase tracking-wider text-slate-400">Chargeback Rate</span></div>
-            <div className="mt-2 text-2xl font-bold text-emerald-400">0.4%</div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-2 text-cyan-400"><ShieldCheck className="h-4 w-4" /><span className="text-[10px] uppercase tracking-wider text-slate-400">Dispute Shield</span></div>
-            <div className="mt-2 flex items-center gap-2 text-2xl font-bold text-cyan-400">ACTIVE <LiveDot /></div>
-          </Card>
-          <Card className="col-span-3 p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] uppercase tracking-wider text-slate-400">Venue Runtime</div>
-              <span className="flex items-center gap-1 text-[9px] text-emerald-400"><Radio className="h-3 w-3" /> LIVE</span>
-            </div>
-            <div className="mt-1 text-sm text-white">NEXUS UNIFIED PORTAL · venue_id → tenant</div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {["Guest", "Driver", "Staff", "Entertainer", "VIP"].map((r) => (
-                <motion.span variants={item} key={r} className="rounded-md border border-cyan-400/20 bg-cyan-400/5 px-2 py-1 text-[10px] text-cyan-200">{r}</motion.span>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-      );
-    case 1:
-      return (
-        <motion.div variants={container} initial="hidden" animate="show" className="flex h-full flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-wider text-cyan-400">New Transaction · TX-9F2A4C</span>
-            <span className="flex items-center gap-1 text-[9px] text-emerald-400"><LiveDot /> ACCRUING</span>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="p-3">
-              <div className="flex items-center gap-2"><Fingerprint className="h-4 w-4 text-cyan-400" /><span className="text-xs text-slate-300">Guest scan</span></div>
-              <div className="mt-1 text-sm text-white">Mag-swipe → Account</div>
-            </Card>
-            <Card className="p-3">
-              <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-cyan-400" /><span className="text-xs text-slate-300">Contract</span></div>
-              <div className="mt-1 flex items-center justify-between"><span className="text-sm text-white">Signed</span><Sealed show /></div>
-            </Card>
-            <Card className="p-3">
-              <div className="flex items-center gap-2"><Fingerprint className="h-4 w-4 text-cyan-400" /><span className="text-xs text-slate-300">Biometric</span></div>
-              <div className="mt-1 flex items-center justify-between"><span className="text-sm text-white">Match</span><Sealed show /></div>
-            </Card>
-            <Card className="p-3">
-              <div className="flex items-center gap-2"><QrCode className="h-4 w-4 text-cyan-400" /><span className="text-xs text-slate-300">GlyphBucks QR</span></div>
-              <div className="mt-1 flex items-center justify-between"><span className="text-sm text-white">Issued</span><Sealed show /></div>
-            </Card>
-          </div>
-        </motion.div>
-      );
-    case 2:
-      return (
-        <div className="flex h-full items-center justify-center">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 220, damping: 18 }} className="w-full max-w-sm rounded-xl border border-amber-500/50 bg-amber-500/10 p-5 shadow-xl shadow-amber-500/10">
-            <div className="flex items-center gap-2 text-amber-400">
-              <motion.span animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 1.2, repeat: Infinity }}><AlertTriangle className="h-5 w-5" /></motion.span>
-              <span className="text-sm font-bold">CHARGEBACK ALERT</span>
-            </div>
-            <div className="mt-3 text-xs text-slate-300">Dispute filed for transaction</div>
-            <div className="mt-1 font-mono text-lg text-white">TX-9F2A4C</div>
-            <div className="mt-3 text-[11px] text-amber-300/80">Cardholder claims: transaction not recognized</div>
+function StatusPill({ children, active = false, success = false }) {
+  const className = success
+    ? "border-emerald-400/35 bg-emerald-400/10 text-emerald-200"
+    : active
+      ? "border-cyan-400/45 bg-cyan-400/10 text-cyan-200"
+      : "border-white/10 bg-white/[0.03] text-slate-500";
+
+  return <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] ${className}`}>{children}</span>;
+}
+
+function Panel({ children, className = "" }) {
+  return <div className={`rounded-2xl border border-cyan-300/15 bg-slate-950/72 shadow-[0_20px_70px_rgba(2,6,23,0.34)] backdrop-blur ${className}`}>{children}</div>;
+}
+
+function VenueOperationsScene({ progress }) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {[
+          { icon: Radio, label: "Runtime", value: "TRACKING", tone: "text-emerald-300" },
+          { icon: ShieldCheck, label: "Evidence", value: "LINKED", tone: "text-cyan-300" },
+          { icon: Lock, label: "Role Access", value: "SCOPED", tone: "text-indigo-300" },
+        ].map(({ icon: Icon, label, value, tone }, index) => (
+          <motion.div
+            key={label}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.08 }}
+            className="rounded-xl border border-white/10 bg-white/[0.035] p-3"
+          >
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-slate-500"><Icon className="h-3.5 w-3.5 text-cyan-300" />{label}</div>
+            <div className={`mt-2 text-sm font-black tracking-wide ${tone}`}>{value}</div>
           </motion.div>
+        ))}
+      </div>
+
+      <Panel className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-300">Nexus Unified POS System</div>
+            <div className="mt-1 text-sm font-bold text-white">Venue operations timeline</div>
+          </div>
+          <StatusPill active><span className="relative flex h-2 w-2"><span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" /><span className="relative h-2 w-2 rounded-full bg-emerald-400" /></span>Active session</StatusPill>
         </div>
-      );
-    case 3:
-      return (
-        <motion.div variants={container} initial="hidden" animate="show" className="flex h-full flex-col items-center justify-center gap-4">
-          <motion.div variants={item} className="text-[10px] uppercase tracking-wider text-slate-400">Evidence Package · PKG-TX_9F2A4C</motion.div>
-          <motion.button variants={item} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-300 px-6 py-3 font-bold text-slate-900 shadow-lg shadow-cyan-500/40">
-            <ShieldCheck className="h-5 w-5" /> Assemble Evidence Package
-          </motion.button>
-          <motion.div variants={item} className="flex items-center gap-2 text-cyan-400">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-cyan-400/30 border-t-cyan-400" />
-            <span className="text-xs">Sealing chain of custody…</span>
-          </motion.div>
-          <div className="mt-1 grid w-full max-w-md grid-cols-1 gap-1.5">
-            {EVIDENCE_ITEMS.slice(0, 3).map((it) => (
-              <Card key={it.label} className="flex items-center justify-between px-3 py-1.5">
-                <span className="flex items-center gap-2 text-[11px] text-slate-300"><it.icon className="h-3.5 w-3.5 text-cyan-400" />{it.label}</span>
-                <Sealed show />
-              </Card>
-            ))}
-          </div>
-        </motion.div>
-      );
-    case 4:
-      return (
-        <motion.div variants={container} initial="hidden" animate="show" className="flex h-full flex-col gap-3">
-          <motion.div variants={item} className="flex items-center justify-between rounded-xl border border-cyan-400/40 bg-cyan-400/10 px-4 py-2.5 shadow-lg shadow-cyan-500/15">
-            <span className="flex items-center gap-2 text-sm font-bold text-cyan-300"><CheckCircle2 className="h-5 w-5" /> DISPUTE DEFENDED</span>
-            <span className="text-[10px] text-cyan-400">1-PUSH COMPLETE</span>
-          </motion.div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {EVIDENCE_ITEMS.map((it) => (
-              <Card key={it.label} className="flex items-center justify-between px-2.5 py-1.5">
-                <span className="flex items-center gap-1.5 text-[10px] text-slate-300"><it.icon className="h-3 w-3 text-cyan-400" />{it.label}</span>
-                <Sealed show />
-              </Card>
-            ))}
-          </div>
-        </motion.div>
-      );
-    case 5:
-      return (
-        <motion.div variants={container} initial="hidden" animate="show" className="flex h-full flex-col items-center justify-center gap-4">
-          <motion.div variants={item} whileHover={{ scale: 1.05 }}><Building2 className="h-10 w-10 text-cyan-400" /></motion.div>
-          <motion.div variants={item} className="text-sm font-bold text-white">Routed to Banking Partner</motion.div>
-          <motion.div variants={item} className="flex items-center gap-2 text-[11px] text-cyan-300"><Send className="h-4 w-4" /> Package delivered to processor API</motion.div>
-          <motion.div variants={item} className="mt-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-bold text-emerald-400 shadow-lg shadow-emerald-500/15">
-            MERCHANT STANDING: GOOD
-          </motion.div>
-        </motion.div>
-      );
-    case 6:
-      return (
-        <motion.div variants={container} initial="hidden" animate="show" className="grid h-full grid-cols-2 gap-3">
-          {[
-            { icon: Building2, name: "The Bank", benefit: "Pre-sealed evidence · lower reserves" },
-            { icon: CreditCard, name: "The Processor", benefit: "Disputes pre-empted · fee ratio drops" },
-            { icon: Home, name: "The Venue", benefit: "Closed-loop ledger · every dollar attributed" },
-            { icon: User, name: "The Guest", benefit: "Signed contract + receipt · consent documented" }
-          ].map((p) => (
-            <Card key={p.name} className="p-3">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-cyan-400" />
-                <span className="text-xs font-bold text-white">{p.name}</span>
-              </div>
-              <div className="mt-1.5 text-[10px] text-slate-400">{p.benefit}</div>
-            </Card>
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {["Guest", "Staff", "Entertainer", "VIP", "Manager"].map((role, index) => (
+            <motion.div
+              key={role}
+              initial={{ opacity: 0.3 }}
+              animate={{ opacity: progress > index * 0.12 ? 1 : 0.35 }}
+              className="rounded-lg border border-cyan-300/15 bg-cyan-300/[0.04] px-3 py-2 text-center text-[10px] font-bold text-cyan-100"
+            >
+              {role}
+            </motion.div>
           ))}
-          <motion.div variants={item} className="col-span-2 rounded-xl border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 text-center text-sm font-bold tracking-wider text-cyan-300 shadow-lg shadow-cyan-500/15">
-            HIGH-VERIFICATION COMMERCE
-          </motion.div>
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function TransactionScene({ progress }) {
+  const activeIndex = Math.min(TRANSACTION_STAGES.length - 1, Math.floor(progress * TRANSACTION_STAGES.length));
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div><div className="text-[10px] uppercase tracking-[0.18em] text-cyan-300">Transaction lifecycle</div><div className="mt-1 font-mono text-sm text-white">TX-9F2A4C</div></div>
+        <StatusPill success><Lock className="h-3 w-3" />Identity bound</StatusPill>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+        {TRANSACTION_STAGES.map(({ icon: Icon, label, sub }, index) => {
+          const complete = index < activeIndex || progress > 0.9;
+          const active = index === activeIndex && !complete;
+          return (
+            <motion.div key={label} animate={{ y: active ? -3 : 0 }} className={`relative rounded-xl border p-3 ${complete ? "border-emerald-400/35 bg-emerald-400/8" : active ? "border-cyan-400/50 bg-cyan-400/10" : "border-white/10 bg-white/[0.03]"}`}>
+              <div className="flex items-center justify-between"><Icon className={`h-4 w-4 ${complete ? "text-emerald-300" : active ? "text-cyan-300" : "text-slate-600"}`} />{complete && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />}</div>
+              <div className="mt-3 text-xs font-bold text-white">{label}</div>
+              <div className="mt-1 text-[10px] leading-4 text-slate-500">{sub}</div>
+              {index < TRANSACTION_STAGES.length - 1 && <ArrowRight className="absolute -right-3 top-1/2 z-10 hidden h-4 w-4 -translate-y-1/2 text-cyan-300/40 sm:block" />}
+            </motion.div>
+          );
+        })}
+      </div>
+      <Panel className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <div><div className="text-[10px] uppercase tracking-wider text-slate-500">Verified purchaser</div><div className="mt-1 text-sm font-bold text-white">Same identity on form, signature, contract, and receipt</div></div>
+        <StatusPill success><Database className="h-3 w-3" />Single record</StatusPill>
+      </Panel>
+    </div>
+  );
+}
+
+function DisputeScene() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-[1fr_0.9fr]">
+      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-amber-400/45 bg-amber-400/10 p-5 shadow-[0_20px_60px_rgba(245,158,11,0.08)]">
+        <div className="flex items-center gap-2 text-amber-300"><AlertTriangle className="h-5 w-5" /><span className="text-sm font-black">CHARGEBACK ALERT</span></div>
+        <div className="mt-5 text-[10px] uppercase tracking-wider text-slate-500">Matched transaction</div>
+        <div className="mt-1 font-mono text-xl text-white">TX-9F2A4C</div>
+        <div className="mt-4 rounded-lg border border-amber-300/20 bg-black/15 px-3 py-2 text-xs text-amber-100/80">Claim: transaction not recognized</div>
+      </motion.div>
+      <Panel className="p-4">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-cyan-300">Linked records found</div>
+        <div className="mt-3 space-y-2">
+          {["Verified identity", "Signed agreement", "Payment receipt", "Consent log"].map((label, index) => (
+            <motion.div key={label} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.08 }} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-300"><span>{label}</span><CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" /></motion.div>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function EvidenceScene({ progress, defended = false }) {
+  const visibleCount = defended ? EVIDENCE_ITEMS.length : Math.max(1, Math.ceil(progress * EVIDENCE_ITEMS.length));
+  return (
+    <div className="space-y-4">
+      <div className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 ${defended ? "border-emerald-400/40 bg-emerald-400/10" : "border-cyan-400/35 bg-cyan-400/8"}`}>
+        <div className="flex items-center gap-2"><ShieldCheck className={`h-5 w-5 ${defended ? "text-emerald-300" : "text-cyan-300"}`} /><span className="text-sm font-black text-white">{defended ? "DISPUTE DEFENCE PACKAGE" : "ASSEMBLING EVIDENCE PACKAGE"}</span></div>
+        <StatusPill success={defended} active={!defended}>{defended ? "Ready for review" : `${visibleCount} / ${EVIDENCE_ITEMS.length} linked`}</StatusPill>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {EVIDENCE_ITEMS.map(({ icon: Icon, label }, index) => {
+          const visible = index < visibleCount;
+          return (
+            <motion.div key={label} animate={{ opacity: visible ? 1 : 0.25, scale: visible ? 1 : 0.98 }} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3">
+              <span className="flex items-center gap-2 text-xs text-slate-300"><Icon className={`h-4 w-4 ${visible ? "text-cyan-300" : "text-slate-700"}`} />{label}</span>
+              {visible ? <CheckCircle2 className="h-4 w-4 text-emerald-300" /> : <Clock className="h-4 w-4 text-slate-700" />}
+            </motion.div>
+          );
+        })}
+      </div>
+      {defended && <Panel className="flex items-center justify-between gap-3 p-4"><div><div className="text-[10px] uppercase tracking-wider text-slate-500">Chain of custody</div><div className="mt-1 text-sm font-bold text-white">Source references preserved from transaction to package</div></div><StatusPill success><Lock className="h-3 w-3" />Sealed</StatusPill></Panel>}
+    </div>
+  );
+}
+
+function RoutingScene({ progress }) {
+  return (
+    <div className="flex h-full flex-col justify-center">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <Panel className="p-4 text-center"><Home className="mx-auto h-8 w-8 text-cyan-300" /><div className="mt-3 text-sm font-black text-white">Venue</div><div className="mt-1 text-[10px] text-slate-500">Verified source records</div></Panel>
+        <div className="relative w-20 sm:w-32"><div className="h-px bg-gradient-to-r from-cyan-300/30 via-cyan-300 to-indigo-300/30" /><motion.div className="absolute -top-2 h-4 w-4 rounded-full border border-cyan-200 bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.8)]" style={{ left: `${clamp(progress) * 85}%` }} /></div>
+        <Panel className="p-4 text-center"><Building2 className="mx-auto h-8 w-8 text-indigo-300" /><div className="mt-3 text-sm font-black text-white">Bank / Processor</div><div className="mt-1 text-[10px] text-slate-500">Reviewable defence package</div></Panel>
+      </div>
+      <div className="mx-auto mt-5 flex items-center gap-2 text-xs text-cyan-200"><Send className="h-4 w-4" />Evidence package routed with transaction references</div>
+    </div>
+  );
+}
+
+function StakeholderScene() {
+  const stakeholders = [
+    { icon: Building2, name: "Bank", benefit: "Structured evidence and clearer provenance" },
+    { icon: CreditCard, name: "Processor", benefit: "Consistent dispute documentation" },
+    { icon: Home, name: "Venue", benefit: "Operational records tied to each transaction" },
+    { icon: User, name: "Guest", benefit: "Identity, consent, contract, and receipt aligned" },
+  ];
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {stakeholders.map(({ icon: Icon, name, benefit }, index) => (
+        <motion.div key={name} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.08 }} className="rounded-xl border border-cyan-300/18 bg-gradient-to-br from-cyan-300/[0.07] to-indigo-300/[0.04] p-4">
+          <div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-300/20 bg-cyan-300/[0.06]"><Icon className="h-4 w-4 text-cyan-300" /></span><span className="text-sm font-black text-white">{name}</span></div>
+          <div className="mt-3 text-xs leading-5 text-slate-400">{benefit}</div>
         </motion.div>
-      );
-    case 7:
-      return (
-        <motion.div initial="hidden" animate="show" className="flex h-full flex-col items-center justify-center gap-3">
-          <motion.div initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 180, damping: 14, delay: 0.1 }} className="relative">
-            <div className="absolute inset-0 animate-ping rounded-full bg-cyan-400/20" />
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-400/10">
-              <Lock className="h-8 w-8 text-cyan-400" />
-            </div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="text-center">
-            <div className="text-[10px] uppercase tracking-[0.35em] text-cyan-400">GLYPHLOCK</div>
-            <div className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-white">High-Verification Commerce</div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[10px] text-cyan-300">
-            <Zap className="h-3 w-3" /> 1-PUSH DISPUTE SHIELD
-          </motion.div>
-        </motion.div>
-      );
-    default:
-      return null;
+      ))}
+    </div>
+  );
+}
+
+function FinalScene() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center text-center">
+      <motion.div initial={{ scale: 0, rotate: -18 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 180, damping: 14 }} className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_70px_rgba(34,211,238,0.22)]"><div className="absolute inset-0 animate-ping rounded-3xl bg-cyan-300/10" /><Lock className="relative h-10 w-10 text-cyan-300" /></motion.div>
+      <div className="mt-6 text-[10px] font-black uppercase tracking-[0.42em] text-cyan-300">GlyphLock</div>
+      <div className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">High-Verification Commerce</div>
+      <div className="mt-4 max-w-xl text-sm leading-6 text-slate-400">One operating record connecting identity, consent, transaction activity, contracts, receipts, and dispute evidence.</div>
+      <div className="mt-5 flex flex-wrap justify-center gap-2"><StatusPill success><Fingerprint className="h-3 w-3" />Identity</StatusPill><StatusPill success><FileText className="h-3 w-3" />Contract</StatusPill><StatusPill success><CreditCard className="h-3 w-3" />Transaction</StatusPill><StatusPill success><ShieldCheck className="h-3 w-3" />Evidence</StatusPill></div>
+    </div>
+  );
+}
+
+function Scene({ step, progress }) {
+  switch (step) {
+    case 0: return <VenueOperationsScene progress={progress} />;
+    case 1: return <TransactionScene progress={progress} />;
+    case 2: return <DisputeScene />;
+    case 3: return <EvidenceScene progress={progress} />;
+    case 4: return <EvidenceScene progress={1} defended />;
+    case 5: return <RoutingScene progress={progress} />;
+    case 6: return <StakeholderScene />;
+    case 7: return <FinalScene />;
+    default: return null;
   }
 }
 
+function AuditTrail({ step }) {
+  return (
+    <div className="space-y-2">
+      {CUES.map((cue, index) => {
+        const completed = index < step;
+        const active = index === step;
+        return (
+          <motion.div key={cue.label} animate={{ opacity: index <= step ? 1 : 0.28 }} className={`relative rounded-xl border px-3 py-2.5 ${active ? "border-cyan-400/40 bg-cyan-400/10" : completed ? "border-emerald-400/18 bg-emerald-400/[0.035]" : "border-white/8 bg-white/[0.02]"}`}>
+            <div className="flex items-start gap-2">
+              <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${completed ? "border-emerald-400/40 bg-emerald-400/10" : active ? "border-cyan-400/50 bg-cyan-400/10" : "border-white/10"}`}>{completed ? <CheckCircle2 className="h-3 w-3 text-emerald-300" /> : active ? <Activity className="h-3 w-3 text-cyan-300" /> : <span className="h-1.5 w-1.5 rounded-full bg-slate-700" />}</span>
+              <div className="min-w-0"><div className={`text-[10px] font-bold ${active ? "text-cyan-200" : completed ? "text-slate-300" : "text-slate-600"}`}>{cue.label}</div>{active && <div className="mt-1 text-[9px] leading-4 text-slate-400">{cue.audit}</div>}</div>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function NUPSDemoPlayer() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(FALLBACK_DURATION);
   const audioRef = useRef(null);
   const rafRef = useRef(null);
-  const stepStartRef = useRef(0);
-  const stepMsRef = useRef(STEPS[0].ms);
 
-  const tick = useCallback(() => {
-    const elapsed = Date.now() - stepStartRef.current;
-    const p = Math.min(elapsed / stepMsRef.current, 1);
-    setProgress(p);
-    if (p >= 1) {
-      setStep((prev) => {
-        if (prev + 1 >= STEPS.length) {
-          setPlaying(false);
-          setFinished(true);
-          if (audioRef.current) audioRef.current.pause();
-          return prev;
-        }
-        const next = prev + 1;
-        stepMsRef.current = STEPS[next].ms;
-        return next;
-      });
-      stepStartRef.current = Date.now();
-      setProgress(0);
-    }
-    rafRef.current = requestAnimationFrame(tick);
+  const syncFrame = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const safeDuration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : FALLBACK_DURATION;
+    const visualTime = Math.min(audio.currentTime + VISUAL_LEAD_SECONDS, safeDuration);
+    setCurrentTime(audio.currentTime);
+    setDuration(safeDuration);
+    setStep(resolveStep(visualTime));
+    if (!audio.paused && !audio.ended) rafRef.current = requestAnimationFrame(syncFrame);
   }, []);
 
-  useEffect(() => {
-    if (playing) {
-      stepStartRef.current = Date.now();
-      rafRef.current = requestAnimationFrame(tick);
-    }
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); rafRef.current = null; };
-  }, [playing, tick]);
+  const stopLoop = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+  }, []);
 
-  const start = useCallback(() => {
-    if (finished) {
+  const startLoop = useCallback(() => {
+    stopLoop();
+    rafRef.current = requestAnimationFrame(syncFrame);
+  }, [stopLoop, syncFrame]);
+
+  useEffect(() => () => stopLoop(), [stopLoop]);
+
+  const togglePlayback = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.ended || finished) {
+      audio.currentTime = 0;
+      setCurrentTime(0);
       setStep(0);
-      setProgress(0);
       setFinished(false);
-      stepMsRef.current = STEPS[0].ms;
-      const a = audioRef.current;
-      if (a) { a.currentTime = 0; a.play().catch(() => {}); }
-      setPlaying(true);
-      return;
     }
-    setPlaying((p) => {
-      const np = !p;
-      const a = audioRef.current;
-      if (a) { np ? a.play().catch(() => {}) : a.pause(); }
-      return np;
-    });
-  }, [finished]);
+    if (audio.paused) {
+      try {
+        await audio.play();
+        setPlaying(true);
+        startLoop();
+      } catch {
+        setPlaying(false);
+      }
+    } else {
+      audio.pause();
+      setPlaying(false);
+      stopLoop();
+      syncFrame();
+    }
+  }, [finished, startLoop, stopLoop, syncFrame]);
+
+  const replay = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = 0;
+    setCurrentTime(0);
+    setStep(0);
+    setFinished(false);
+    try {
+      await audio.play();
+      setPlaying(true);
+      startLoop();
+    } catch {
+      setPlaying(false);
+    }
+  }, [startLoop]);
+
+  const cueEnd = step + 1 < CUES.length ? CUES[step + 1].start : duration;
+  const visualTime = Math.min(currentTime + VISUAL_LEAD_SECONDS, duration);
+  const stepProgress = clamp((visualTime - CUES[step].start) / Math.max(cueEnd - CUES[step].start, 0.1));
+  const globalProgress = clamp(currentTime / Math.max(duration, 0.1));
+  const activeModule = MODULES.reduce((resolved, module) => (module.step <= step ? module.label : resolved), MODULES[0].label);
+  const cue = CUES[step];
+
+  const timelineMarkers = useMemo(() => CUES.map((item) => ({ ...item, percent: clamp(item.start / duration) * 100 })), [duration]);
 
   return (
-    <div className="w-full">
-      <div className="relative w-full overflow-hidden rounded-2xl border border-cyan-400/25 bg-slate-950 shadow-2xl shadow-cyan-500/10">
-        <div className="flex items-center justify-between border-b border-cyan-400/15 bg-slate-900/40 px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <Lock className="h-4 w-4 text-cyan-400" />
-            <span className="text-xs font-bold tracking-[0.2em] text-white">GLYPHLOCK</span>
-            <span className="rounded border border-cyan-400/40 px-1 py-0.5 text-[9px] text-cyan-300">NUPS</span>
+    <section className="w-full" aria-label="Narrated NUPS operations demonstration">
+      <div className="overflow-hidden rounded-3xl border border-cyan-300/22 bg-[#030816] shadow-[0_30px_100px_rgba(2,6,23,0.7),0_0_60px_rgba(34,211,238,0.08)]">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-300/12 bg-slate-950/80 px-4 py-3 sm:px-5">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/28 bg-cyan-300/8"><Lock className="h-4 w-4 text-cyan-300" /></span>
+            <div><div className="text-xs font-black tracking-[0.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[0.16em] text-slate-500">Narrated operations walkthrough</div></div>
           </div>
-          <span className="font-mono text-[10px] text-slate-500">§ 0{step + 1} · {STEPS[step].label.toUpperCase()}</span>
+          <div className="flex items-center gap-2"><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Audio synchronized" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
+        </header>
+
+        <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[190px_minmax(0,1fr)_270px]">
+          <aside className="border-b border-cyan-300/10 bg-slate-950/55 p-3 lg:border-b-0 lg:border-r">
+            <div className="mb-3 px-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600">System modules</div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1">
+              {MODULES.map(({ icon: Icon, label, step: moduleStep }) => {
+                const active = activeModule === label;
+                const complete = step > moduleStep;
+                return (
+                  <div key={label} className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 ${active ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-100" : complete ? "border-emerald-400/15 bg-emerald-400/[0.035] text-slate-300" : "border-white/7 bg-white/[0.02] text-slate-600"}`}>
+                    <Icon className={`h-4 w-4 ${active ? "text-cyan-300" : complete ? "text-emerald-300" : "text-slate-700"}`} />
+                    <span className="text-[10px] font-bold">{label}</span>
+                    {complete && <CheckCircle2 className="ml-auto h-3 w-3 text-emerald-300" />}
+                  </div>
+                );
+              })}
+            </div>
+            <Panel className="mt-3 hidden p-3 lg:block"><div className="text-[9px] uppercase tracking-wider text-slate-600">Current section</div><div className="mt-2 font-mono text-xs text-cyan-200">§ 0{step + 1} / 0{CUES.length}</div><div className="mt-1 text-xs font-bold text-white">{cue.label}</div></Panel>
+          </aside>
+
+          <main className="relative min-w-0 overflow-hidden bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.11),transparent_48%)] p-4 pb-44 sm:p-6 sm:pb-44">
+            <div className="pointer-events-none absolute inset-0 opacity-[0.12]" style={{ backgroundImage: "linear-gradient(rgba(34,211,238,0.45) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.45) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+            <motion.div className="pointer-events-none absolute inset-x-0 h-24 bg-gradient-to-b from-transparent via-cyan-300/[0.04] to-transparent" animate={{ y: ["-20%", "720%"] }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} />
+
+            <div className="relative z-10 mx-auto flex h-full max-w-4xl flex-col">
+              <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+                <div><div className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-300">{cue.label}</div><div className="mt-1 text-xl font-black text-white sm:text-2xl">{cue.caption}</div></div>
+                <StatusPill active><Zap className="h-3 w-3" />Visual cue {Math.round(stepProgress * 100)}%</StatusPill>
+              </div>
+              <div className="flex-1">
+                <AnimatePresence mode="wait">
+                  <motion.div key={step} initial={{ opacity: 0, y: 10, scale: 0.99 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.24 }} className="h-full">
+                    <Scene step={step} progress={stepProgress} />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <div className="absolute inset-x-0 bottom-0 z-20 border-t border-cyan-300/12 bg-slate-950/92 p-4 backdrop-blur sm:p-5">
+              <div className="mx-auto max-w-4xl">
+                <div className="flex items-start gap-3"><span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-cyan-300/25 bg-cyan-300/8"><ListChecks className="h-4 w-4 text-cyan-300" /></span><div><div className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-300">What NUPS is showing</div><p className="mt-1 text-sm leading-5 text-slate-300">{cue.detail}</p></div></div>
+              </div>
+            </div>
+
+            {!playing && !finished && (
+              <button type="button" onClick={togglePlayback} className="absolute inset-0 z-30 flex items-center justify-center bg-black/42 transition hover:bg-black/50" aria-label="Play narrated NUPS demonstration">
+                <span className="flex h-20 w-20 items-center justify-center rounded-full border border-cyan-100/30 bg-cyan-300 text-slate-950 shadow-[0_0_70px_rgba(34,211,238,0.42)]"><Play className="ml-1 h-9 w-9" fill="currentColor" /></span>
+              </button>
+            )}
+            {finished && (
+              <button type="button" onClick={replay} className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/55 transition hover:bg-black/62" aria-label="Replay narrated NUPS demonstration">
+                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-slate-950 shadow-xl"><RotateCcw className="h-8 w-8" /></span><span className="text-xs font-black uppercase tracking-[0.18em] text-white">Replay walkthrough</span>
+              </button>
+            )}
+          </main>
+
+          <aside className="border-t border-cyan-300/10 bg-slate-950/62 p-3 lg:border-l lg:border-t-0">
+            <div className="mb-3 flex items-center justify-between px-1"><div><div className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-600">Audit trail</div><div className="mt-1 text-xs font-bold text-white">Narration-linked events</div></div><Activity className="h-4 w-4 text-cyan-300" /></div>
+            <AuditTrail step={step} />
+          </aside>
         </div>
 
-        <div className="relative aspect-video overflow-hidden bg-slate-950 font-mono">
-          <motion.div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(circle at 50% 0%, rgba(34,211,238,0.12), transparent 55%)" }} animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 4, repeat: Infinity }} />
-          <div className="pointer-events-none absolute inset-0 opacity-[0.16]" style={{ backgroundImage: "linear-gradient(rgba(34,211,238,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.5) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-          <motion.div className="pointer-events-none absolute inset-x-0 h-24 bg-gradient-to-b from-transparent via-cyan-400/5 to-transparent" animate={{ y: ["-20%", "440%"] }} transition={{ duration: 6.5, repeat: Infinity, ease: "linear" }} />
-
-          <div className="relative h-full p-5">
-            <AnimatePresence mode="wait">
-              <motion.div key={step} initial={{ opacity: 0, scale: 0.99 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.28 }} className="h-full">
-                <StepContent step={step} />
-              </motion.div>
-            </AnimatePresence>
+        <div className="border-t border-cyan-300/12 bg-slate-950/82 px-4 py-4 sm:px-5">
+          <div className="relative h-2 rounded-full bg-white/8">
+            <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 shadow-[0_0_16px_rgba(34,211,238,0.5)]" style={{ width: `${globalProgress * 100}%` }} />
+            {timelineMarkers.map((marker, index) => <span key={marker.label} title={marker.label} className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border ${index <= step ? "border-cyan-200 bg-cyan-400" : "border-white/20 bg-slate-800"}`} style={{ left: `${marker.percent}%` }} />)}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : togglePlayback} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-cyan-300/28 bg-cyan-300/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-300/14">{finished ? <RotateCcw className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}{finished ? "Replay" : playing ? "Pause" : "Play"}</button><span className="hidden text-[10px] text-slate-500 sm:inline">Visuals follow the audio clock with a slight lead to prevent perceived lag.</span></div>
+            <button type="button" onClick={() => navigate("/NUPSKiosk")} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-black text-white shadow-[0_0_28px_rgba(59,130,246,0.24)] transition hover:scale-[1.015]">Enter NUPS <ArrowRight className="h-4 w-4" /></button>
           </div>
         </div>
-
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/55 to-transparent p-5 sm:p-7">
-          <p className="text-base sm:text-xl font-bold text-white tracking-tight">
-            {STEPS[step].caption}
-          </p>
-        </div>
-
-        <div className="absolute top-2.5 left-4 flex gap-1.5">
-          {STEPS.map((_, i) => (
-            <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? "w-6 bg-cyan-400" : i < step ? "w-1.5 bg-cyan-400/50" : "w-1.5 bg-white/30"}`} />
-          ))}
-        </div>
-        <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-400 to-teal-300" style={{ width: `${progress * 100}%` }} />
-
-        {!playing && !finished && (
-          <button onClick={start} className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 transition hover:bg-black/50" aria-label="Play demo">
-            <span className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-cyan-400 text-black shadow-xl shadow-cyan-500/30">
-              <Play className="h-7 w-7 sm:h-9 sm:w-9 ml-1" fill="currentColor" />
-            </span>
-          </button>
-        )}
-        {finished && (
-          <button onClick={start} className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 transition hover:bg-black/60" aria-label="Replay demo">
-            <span className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-xl">
-              <RotateCcw className="h-7 w-7 sm:h-9 sm:w-9" />
-            </span>
-          </button>
-        )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between font-mono">
-        <span className="text-xs text-slate-400 uppercase tracking-wider">§ 0{step + 1} / 0{STEPS.length}</span>
-        <button onClick={start} className="inline-flex items-center gap-2 rounded-md border border-cyan-400/30 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10">
-          {finished ? <RotateCcw className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          {finished ? "Replay" : playing ? "Pause" : "Play"}
-        </button>
-      </div>
-
-      <audio ref={audioRef} src={VOICEOVER} preload="auto" />
-    </div>
+      <audio
+        ref={audioRef}
+        src={VOICEOVER}
+        preload="auto"
+        onLoadedMetadata={() => {
+          const audio = audioRef.current;
+          if (audio && Number.isFinite(audio.duration) && audio.duration > 0) setDuration(audio.duration);
+          syncFrame();
+        }}
+        onPlay={() => { setPlaying(true); setFinished(false); startLoop(); }}
+        onPause={() => { setPlaying(false); stopLoop(); syncFrame(); }}
+        onSeeked={syncFrame}
+        onEnded={() => {
+          stopLoop();
+          setPlaying(false);
+          setFinished(true);
+          setCurrentTime(duration);
+          setStep(CUES.length - 1);
+        }}
+      />
+    </section>
   );
 }
