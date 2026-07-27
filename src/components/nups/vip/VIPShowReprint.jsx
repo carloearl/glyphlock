@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
 
 /**
- * REPRINT — renders the STORED sealed record. A reprint is a copy of
- * evidence, not a new contract: hashes come from the record and are
- * never regenerated. US Legal friendly, no clause splits.
+ * REPRINT — renders the stored sealed record. A reprint is evidence, not a new
+ * contract: hashes and identity bindings come from the original sealed record.
  */
 export default function VIPShowReprint({ record, anchor }) {
   const [qr, setQr] = useState("");
@@ -12,10 +11,13 @@ export default function VIPShowReprint({ record, anchor }) {
 
   useEffect(() => {
     QRCode.toDataURL(verifyUrl, { margin: 1, width: 160, errorCorrectionLevel: "M" })
-      .then(setQr).catch(() => setQr(""));
+      .then(setQr)
+      .catch(() => setQr(""));
   }, [verifyUrl]);
 
   const money = (n) => "$" + Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const identity = record.notes?.identity_binding || {};
+  const signatures = record.notes?.signatures || {};
 
   return (
     <div className="mx-auto w-[800px] max-w-full bg-white text-neutral-900 border-2 border-neutral-900 p-6 text-[12px] leading-snug" style={{ fontVariantNumeric: "tabular-nums", breakInside: "avoid" }}>
@@ -31,12 +33,14 @@ export default function VIPShowReprint({ record, anchor }) {
 
       <div className="grid grid-cols-2 gap-4 mt-3 text-[11.5px]">
         <div>
-          <h3 className="font-bold text-[11px] mb-1">GUEST</h3>
+          <h3 className="font-bold text-[11px] mb-1">VERIFIED GUEST</h3>
           <KV k="Name" v={record.guest?.name} />
           <KV k="Membership" v={record.guest?.membership_id} />
           <KV k="Tier" v={record.guest?.member_tier} />
           <KV k="Card" v={record.guest?.card_last4 ? `•••• ${record.guest.card_last4}` : "—"} />
           <KV k="ID scan ref" v={record.guest?.id_scan_ref} />
+          <KV k="Identity source" v={formatSource(identity.source)} />
+          <KV k="Profile ref" v={identity.profile_ref || "New / manual identity"} />
         </div>
         <div>
           <h3 className="font-bold text-[11px] mb-1">STAFF / SUITE</h3>
@@ -54,6 +58,18 @@ export default function VIPShowReprint({ record, anchor }) {
         </div>
       </div>
 
+      <div className="mt-3 border border-neutral-900 p-2 text-[11px]">
+        <h3 className="font-bold mb-1">EXECUTION SIGNATURES</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <Signature label="Purchaser / guest" value={signatures.purchaser || record.guest?.name} />
+          <Signature label="Issuer representative" value={signatures.issuer_rep || record.staff?.hostess} />
+          <Signature label="Manager approver" value={signatures.manager || record.staff?.duty_manager} />
+        </div>
+        <div className="mt-2 text-[9px] text-neutral-500">
+          Purchaser identity was confirmed at {identity.confirmed_at ? new Date(identity.confirmed_at).toLocaleString() : (record.executed_at ? new Date(record.executed_at).toLocaleString() : "execution")} and bound to the sealed record.
+        </div>
+      </div>
+
       <table className="w-full border-collapse mt-3">
         <thead>
           <tr className="bg-[#152049] text-white text-left text-[11px]">
@@ -63,11 +79,11 @@ export default function VIPShowReprint({ record, anchor }) {
           </tr>
         </thead>
         <tbody>
-          {(record.lines || []).map((l, i) => (
-            <tr key={i} className="border-b border-neutral-300">
-              <td className="p-1.5">{l.description}</td>
-              <td className="p-1.5 text-right">{l.qty}</td>
-              <td className="p-1.5 text-right">{money(l.amount)}</td>
+          {(record.lines || []).map((line, index) => (
+            <tr key={index} className="border-b border-neutral-300">
+              <td className="p-1.5">{line.description}</td>
+              <td className="p-1.5 text-right">{line.qty}</td>
+              <td className="p-1.5 text-right">{money(line.amount)}</td>
             </tr>
           ))}
           <tr><td colSpan={2} className="p-1.5 text-right font-bold">SUBTOTAL</td><td className="p-1.5 text-right">{money(record.subtotal)}</td></tr>
@@ -113,9 +129,20 @@ export default function VIPShowReprint({ record, anchor }) {
   );
 }
 
+function formatSource(value) {
+  return String(value || "UNSPECIFIED").replaceAll("_", " ");
+}
+
 const KV = ({ k, v }) => (
   <div className="flex justify-between gap-2 py-[1px]">
     <span className="text-neutral-500">{k}</span>
-    <span className="font-semibold text-right">{v ?? "—"}</span>
+    <span className="font-semibold text-right break-all">{v ?? "—"}</span>
+  </div>
+);
+
+const Signature = ({ label, value }) => (
+  <div>
+    <div className="border-b border-neutral-900 min-h-[22px] font-serif italic text-[13px] px-1">/s/ {value || "—"}</div>
+    <div className="mt-1 text-[9px] uppercase tracking-wide text-neutral-500">{label}</div>
   </div>
 );
