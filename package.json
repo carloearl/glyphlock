@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "typecheck": "tsc -p ./jsconfig.json",
+    "audit:entities": "node scripts/audit-entity-model.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
