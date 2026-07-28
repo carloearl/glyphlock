@@ -3,9 +3,12 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldCheck, ShieldX } from "lucide-react";
+import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §6 — Owner/Admin sign-in.
 // Platform authentication first, then server-side approval check before the back office opens.
+// Carlo's owner emails (carloearl@glyphlock.com / carloearl@gmail.com) bypass
+// the backend approval check — they are sovereign authority.
 export default function OwnerAdminSignIn() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -18,6 +21,12 @@ export default function OwnerAdminSignIn() {
       const authed = await base44.auth.isAuthenticated();
       if (!authed) {
         base44.auth.redirectToLogin("/NUPSKiosk?panel=admin");
+        return;
+      }
+      const me = await base44.auth.me();
+      // Carlo's owner emails — sovereign bypass, no backend call needed.
+      if (isOwnerEmail(me?.email)) {
+        navigate("/RoleViews");
         return;
       }
       const res = await base44.functions.invoke("nupsAccessControl", { action: "checkAccess" });
