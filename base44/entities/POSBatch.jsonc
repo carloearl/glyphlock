@@ -71,17 +71,6 @@
     "cashier"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager",
-            "staff"
-          ]
-        }
-      }
-    },
     "read": {
       "$or": [
         {
@@ -89,13 +78,7 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager",
-                "staff"
-              ]
-            }
+            "role": "admin"
           }
         }
       ]
@@ -107,12 +90,7 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager"
-              ]
-            }
+            "role": "admin"
           }
         }
       ]
