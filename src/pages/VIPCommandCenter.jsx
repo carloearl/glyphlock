@@ -12,9 +12,11 @@ import UltimateVIPContract from '@/components/nups/vip/UltimateVIPContract';
 import { useAdminOverride } from '@/lib/nups/adminView';
 import { base44 } from '@/api/base44Client';
 import { useActiveVenue } from '@/hooks/useActiveVenue';
+import { isOwnerEmail } from '@/lib/nups/ownerEmails';
+import { seedDemoContracts, frontendGetState } from '@/lib/nups/frontendDemoSeeder';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Crown, ArrowLeft } from 'lucide-react';
+import { Loader2, Crown, ArrowLeft, FlaskConical } from 'lucide-react';
 
 /**
  * VIP Command Center — glass card-grid home screen (owner directive 2026-07-20).
@@ -57,7 +59,14 @@ export default function VIPCommandCenter() {
 
   const refresh = useCallback(async () => {
     const s = await vip('getState');
-    if (!s.error) setState(s);
+    if (s.error) {
+      // Backend unavailable (402 on non-Builder+ plans) — fall back to
+      // direct entity reads so the VIP Command Center still renders.
+      const fallback = await frontendGetState();
+      setState(fallback);
+    } else {
+      setState(s);
+    }
     setLoading(false);
     return s;
   }, []);
@@ -68,6 +77,28 @@ export default function VIPCommandCenter() {
     setLoading(true);
     await vip('seedConfig');
     await refresh();
+  };
+
+  const [seeding, setSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState(null);
+
+  const seedDemoData = async () => {
+    setSeeding(true);
+    setSeedResult(null);
+    try {
+      const me = await base44.auth.me();
+      if (!isOwnerEmail(me?.email)) {
+        setSeedResult({ error: 'Access denied — demo seeding is restricted to the venue owner.' });
+        return;
+      }
+      const results = await seedDemoContracts(me.email);
+      setSeedResult({ success: true, results });
+      await refresh();
+    } catch (e) {
+      setSeedResult({ error: e.message || 'Seeding failed.' });
+    } finally {
+      setSeeding(false);
+    }
   };
 
   if (loading && !state) {
@@ -81,6 +112,7 @@ export default function VIPCommandCenter() {
   const safeState = state || { contracts: [], entertainers: [], guests: [], sessions: [], rooms: [] };
   const isAdmin = ['admin', 'PLATFORM_ADMIN', 'VENUE_OWNER'].includes(user?.role);
   const venueId = state?.config?.venue_id || activeVenue?.venue_id || activeVenue?.id || 'dream_palace';
+  const isOwner = isOwnerEmail(user?.email);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -98,11 +130,40 @@ export default function VIPCommandCenter() {
         ) : (
           <Badge className="bg-amber-600 text-white">TEST MODE — live launch not authorized</Badge>
         )}
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex gap-2 flex-wrap">
+          {isOwner && (
+            <Button
+              size="sm"
+              onClick={seedDemoData}
+              disabled={seeding}
+              className="bg-cyan-700 hover:bg-cyan-600 min-h-[44px] flex items-center gap-1.5"
+              title="Seed all demo contract data (owner only)"
+            >
+              {seeding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FlaskConical className="w-3.5 h-3.5" />}
+              {seeding ? 'Seeding…' : 'Seed Demo Data'}
+            </Button>
+          )}
           {configMissing && <Button size="sm" onClick={seedConfig} className="bg-purple-700 hover:bg-purple-600 min-h-[44px]">Initialize VIP Config</Button>}
           <Button size="sm" variant="outline" onClick={refresh} className="border-purple-700 text-purple-300 min-h-[44px]">Refresh</Button>
         </div>
       </header>
+
+      {seedResult && (
+        <div className={`mx-4 mt-3 rounded-xl border p-4 text-sm ${seedResult.error ? 'border-red-700 bg-red-950/40 text-red-300' : 'border-emerald-700 bg-emerald-950/40 text-emerald-300'}`}>
+          {seedResult.error ? (
+            <p>{seedResult.error}</p>
+          ) : (
+            <div>
+              <p className="font-semibold mb-2">Demo data seeded successfully:</p>
+              <ul className="space-y-0.5 text-xs">
+                {Object.entries(seedResult.results).map(([entity, count]) => (
+                  <li key={entity}><span className="text-emerald-400">●</span> {entity}: {String(count)}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       <main className="p-4">
         {!view ? (
