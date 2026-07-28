@@ -47,7 +47,7 @@
     },
     "card_token": {
       "type": "string",
-      "description": "Processor-issued token only. Raw card data never stored. Tokenization happens at processor level."
+      "description": "Processor-issued token only. Raw card data never stored."
     },
     "approval_code": {
       "type": "string"
@@ -167,17 +167,6 @@
     "customer_name"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager",
-            "staff"
-          ]
-        }
-      }
-    },
     "read": {
       "$or": [
         {
@@ -185,35 +174,26 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager",
-                "staff"
-              ]
-            }
+            "role": "admin"
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
+      "$or": [
+        {
+          "data.venue_id": "{{user.data.venue_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
-      }
+      ]
     },
     "delete": {
       "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
-        }
+        "role": "admin"
       }
     }
   }
