@@ -67,11 +67,11 @@
         "REVOKED"
       ],
       "default": "INVALID",
-      "description": "Contract validation status. Must be VALID for check-in. Set to VALID only after all contract fields are verified."
+      "description": "Contract validation status. Must be VALID for check-in."
     },
     "nups_pin": {
       "type": "string",
-      "description": "ID-01: 4-digit PIN the entertainer enters at the door check-in kiosk. Links to NUPSUser.pin for exact identity resolution at Time Clock. Captured during signup; required to check in."
+      "description": "ID-01: 4-digit PIN the entertainer enters at the door check-in kiosk."
     },
     "is_demo": {
       "type": "boolean",
@@ -125,7 +125,7 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "DACO WAVE 1 \u2014 Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
+      "description": "DACO WAVE 1 \u2014 Ledger mode."
     }
   },
   "required": [
@@ -134,16 +134,6 @@
     "contract_signed"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
-        }
-      }
-    },
     "read": {
       "$or": [
         {
@@ -154,35 +144,26 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager",
-                "floor_host"
-              ]
-            }
+            "role": "admin"
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
+      "$or": [
+        {
+          "data.venue_id": "{{user.data.venue_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
-      }
+      ]
     },
     "delete": {
       "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
-        }
+        "role": "admin"
       }
     }
   }
