@@ -27,11 +27,30 @@
     "payload"
   ],
   "rls": {
-    "read": {
-      "created_by": "auth.uid"
-    },
     "create": {
-      "created_by": "auth.uid"
+      "created_by": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }

@@ -73,7 +73,59 @@
   ],
   "rls": {
     "create": {
-      "created_by": "{{user.email}}"
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "marketing"
+          ]
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.partner_tier_access": {
+            "$in": [
+              "{{user.data.partner_tier}}"
+            ]
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "marketing",
+                "partner"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "marketing"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "marketing"
+          ]
+        }
+      }
     }
   }
 }

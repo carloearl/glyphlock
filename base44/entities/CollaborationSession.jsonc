@@ -27,22 +27,52 @@
     "hostId"
   ],
   "rls": {
-    "read": {
-      "activeUsers": {
-        "$in": [
-          "auth.uid"
-        ]
-      }
-    },
     "create": {
-      "hostId": "auth.uid"
+      "data.hostId": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.activeUsers": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "activeUsers": {
-        "$in": [
-          "auth.uid"
-        ]
-      }
+      "$or": [
+        {
+          "data.activeUsers": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.hostId": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

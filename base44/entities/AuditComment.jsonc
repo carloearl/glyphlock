@@ -102,16 +102,36 @@
   ],
   "rls": {
     "create": {
-      "authorEmail": "{{user.email}}"
+      "data.authorEmail": "{{user.email}}"
     },
     "read": {
-      "authorEmail": "{{user.email}}"
+      "$or": [
+        {
+          "data.authorEmail": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "authorEmail": "{{user.email}}"
+      "$or": [
+        {
+          "data.authorEmail": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "authorEmail": "{{user.email}}"
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }

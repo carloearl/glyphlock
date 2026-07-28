@@ -108,8 +108,26 @@
     "session_token"
   ],
   "rls": {
+    "create": true,
     "read": {
-      "created_by": "{{user.email}}"
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "sales_manager"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }

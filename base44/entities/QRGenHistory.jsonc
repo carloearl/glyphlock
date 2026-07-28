@@ -91,5 +91,32 @@
     "code_id",
     "payload",
     "creator_id"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "data.creator_id": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.creator_id": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
