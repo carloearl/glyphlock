@@ -71,14 +71,33 @@
     "total_tips"
   ],
   "rls": {
-    "create": {
-      "created_by": "{{user.role}}"
-    },
+    "create": true,
     "read": {
-      "created_by": "{{user.email}}|"
+      "$or": [
+        {
+          "data.venue_id": "{{user.data.venue_id}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "manager"
+              ]
+            }
+          }
+        }
+      ]
     },
     "update": {
-      "created_by": "{{user.email}}|"
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "manager"
+          ]
+        }
+      }
     },
     "delete": {
       "user_condition": {
