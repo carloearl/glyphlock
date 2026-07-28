@@ -1,0 +1,9 @@
+{
+  "application": "Glyphlock",
+  "production_domain": "https://glyphlock.io",
+  "built_in_domain": "https://glyphlock.base44.app",
+  "repository": "carloearl/glyphlock",
+  "branch": "main",
+  "restore_marker": "2026-07-28-domain-reconnect",
+  "purpose": "Public, non-secret deployment verification marker"
+}
