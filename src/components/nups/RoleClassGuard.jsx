@@ -19,6 +19,7 @@ import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { isSovereign } from "@/lib/nups/sovereign";
+import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
 import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 
@@ -54,6 +55,12 @@ export default function RoleClassGuard({ allow = [], children }) {
         const isAuth = await base44.auth.isAuthenticated();
         if (!isAuth) { if (!cancelled) setStatus("unauth"); return; }
         const u = await base44.auth.me();
+
+        // Carlo's owner emails bypass every role gate as ADMIN.
+        if (isOwnerEmail(u.email)) {
+          if (!cancelled) { setRoleClass(ROLE_CLASS.ADMIN); setStatus("granted"); }
+          return;
+        }
 
         let nu = null, sov = false;
         try {

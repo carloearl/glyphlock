@@ -19,6 +19,7 @@ import { base44 } from "@/api/base44Client";
 import { Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isSovereign } from "@/lib/nups/sovereign";
+import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 import { readVerdict, writeVerdict } from "@/lib/nups/routeGuardCache";
 import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 
@@ -58,8 +59,17 @@ export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmi
 
         const user = await base44.auth.me();
 
-        // SOVEREIGN BYPASS — Carlo (Vinnie) + AI skip every gate.
-        // Resolved by NUPSUser.sovereign_flag === true OR role === "SOVEREIGN",
+        // OWNER-EMAIL BYPASS — Carlo's two accounts (carloearl@glyphlock.com /
+        // carloearl@gmail.com) skip every gate as SOVEREIGN / ADMIN.
+        if (isOwnerEmail(user.email)) {
+          if (!cancelled) {
+            writeVerdict({ status: "granted", email: user.email, why: "owner_email" });
+            setStatus("granted");
+          }
+          return;
+        }
+
+        // SOVEREIGN BYPASS — NUPSUser.sovereign_flag === true OR role === "SOVEREIGN",
         // looked up by created_by === auth email.
         try {
           const sovMatches = await base44.entities.NUPSUser.filter({ created_by: user.email });

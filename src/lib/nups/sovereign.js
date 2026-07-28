@@ -5,6 +5,7 @@
 // in docs/HANDOFF.md.
 
 import { base44 } from '@/api/base44Client';
+import { isOwnerEmail } from '@/lib/nups/ownerEmails';
 
 /**
  * Returns true if the given NUPSUser-shaped object has SOVEREIGN authority.
@@ -13,6 +14,16 @@ import { base44 } from '@/api/base44Client';
 export function isSovereign(nupsUser) {
   if (!nupsUser) return false;
   return nupsUser.sovereign_flag === true || nupsUser.role === 'SOVEREIGN';
+}
+
+/**
+ * Returns true if the given platform email is one of Carlo's owner-admin
+ * accounts (carloearl@glyphlock.com / carloearl@gmail.com). These bypass
+ * every RBAC gate as SOVEREIGN / ADMIN — frontend mirror of the backend
+ * owner authority.
+ */
+export function isOwnerSovereign(email) {
+  return isOwnerEmail(email);
 }
 
 /**
@@ -26,6 +37,18 @@ export async function getCurrentSovereign() {
     if (!authed) return null;
     const me = await base44.auth.me();
     if (!me?.email) return null;
+    // Carlo's owner emails bypass without requiring a NUPSUser record.
+    if (isOwnerEmail(me.email)) {
+      return {
+        username: me.email,
+        full_name: me.full_name || 'Carlo Earl',
+        role: 'SOVEREIGN',
+        sovereign_flag: true,
+        platform_email: me.email,
+        status: 'active',
+        _source: 'owner_email_bypass',
+      };
+    }
     const matches = await base44.entities.NUPSUser.filter({ created_by: me.email });
     const sovereign = (matches || []).find((u) => u?.sovereign_flag === true || u?.role === 'SOVEREIGN');
     return sovereign || null;

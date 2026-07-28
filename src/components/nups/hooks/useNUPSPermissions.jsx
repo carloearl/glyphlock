@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { base44 } from "@/api/base44Client";
+import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 
 /**
  * PHASE 4 — Frontend RBAC Permission Hook
@@ -57,14 +58,26 @@ export function NUPSPermissionsProvider({ children }) {
           // Fallback: try basic auth
           try {
             const user = await base44.auth.me();
+            // Carlo's owner emails get a full owner-tier bypass.
+            const ownerBypass = isOwnerEmail(user.email);
             setUserPermissions({
               user_id: user.id,
               email: user.email,
               full_name: user.full_name,
               base44_role: user.role,
-              highest_role: user.role === 'admin' ? 'VENUE_OWNER' : null,
-              venue_access: [],
-              _meta: { source: 'fallback' }
+              highest_role: (ownerBypass || user.role === 'admin') ? 'VENUE_OWNER' : null,
+              venue_access: ownerBypass ? [{
+                venue_id: null,
+                role_key: 'PLATFORM_ADMIN',
+                display_name: 'Owner (Carlo Earl)',
+                allowed_actions: ['*'],
+                is_cross_venue: true,
+                session_timeout_minutes: 480,
+                can_escalate_to: [],
+                assignment_id: 'owner_email_bypass',
+                is_primary: true,
+              }] : [],
+              _meta: { source: ownerBypass ? 'owner_email_bypass' : 'fallback' }
             });
           } catch (e2) {
             setUserPermissions(null);

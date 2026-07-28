@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
 import { hasOwnerPreview } from "@/lib/nups/previewBypass";
+import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 
 // DACO-NUPS-RBAC-CORRECTION-20260717 §6 — active-session role guard.
 // Validates the server-issued kiosk session (signature, expiry, live shift,
@@ -33,6 +34,9 @@ export default function KioskSessionGuard({ roles = [], children }) {
       // Back-office fallback — explicit NUPS grant only (never platform role alone).
       try {
         if (await base44.auth.isAuthenticated()) {
+          const me = await base44.auth.me();
+          // Carlo's owner emails bypass the back-office grant check.
+          if (isOwnerEmail(me?.email)) { if (alive) setState("ok"); return; }
           const res = await base44.functions.invoke("nupsAccessControl", { action: "checkAccess" });
           if (res.data?.authorized) { if (alive) setState("ok"); return; }
         }
