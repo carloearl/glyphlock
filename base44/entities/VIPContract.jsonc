@@ -1,7 +1,7 @@
 {
   "name": "VIPContract",
   "type": "object",
-  "description": "DACO-VIP-FIRST-BUILD-20260717 \u2014 Authoritative VIP contract record. Central record of the chain Venue \u2192 Guest \u2192 Entertainer \u2192 Room \u2192 Contract \u2192 Approval \u2192 Signatures \u2192 Payment \u2192 POSTransaction \u2192 Receipt \u2192 Session \u2192 Audit. All relationships use immutable record IDs, never names. Material commercial terms lock after signing; later changes append amendments/audit events.",
+  "description": "DACO-VIP-FIRST-BUILD-20260717 \u2014 Authoritative VIP contract record.",
   "properties": {
     "contract_id": {
       "type": "string",
@@ -19,11 +19,11 @@
         "SANDBOX"
       ],
       "default": "TEST",
-      "description": "TEST until live launch authorization. REAL rejected while VIPConfig.live_enabled=false."
+      "description": "TEST until live launch authorization."
     },
     "client_request_id": {
       "type": "string",
-      "description": "Idempotency key from the submitting client \u2014 blocks duplicate submission."
+      "description": "Idempotency key from the submitting client."
     },
     "guest_id": {
       "type": "string",
@@ -31,7 +31,7 @@
     },
     "guest_name": {
       "type": "string",
-      "description": "Display snapshot only \u2014 never used as a relationship."
+      "description": "Display snapshot only."
     },
     "entertainer_id": {
       "type": "string",
@@ -92,8 +92,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": "string",
-            "description": "discount | comp | manual_price | extension | correction"
+            "type": "string"
           },
           "description": {
             "type": "string"
@@ -178,12 +177,12 @@
     "signatures": {
       "type": "object",
       "additionalProperties": true,
-      "description": "role \u2192 { name, signed_at, ref }. Roles: guest, entertainer, staff, manager."
+      "description": "role \u2192 { name, signed_at, ref }."
     },
     "terms_locked": {
       "type": "boolean",
       "default": false,
-      "description": "True once first signature captured \u2014 material terms immutable after."
+      "description": "True once first signature captured."
     },
     "status": {
       "type": "string",
@@ -219,7 +218,7 @@
     },
     "audit_events": {
       "type": "array",
-      "description": "Append-only in-record audit trail. Every critical action appends { action, actor, detail, timestamp }.",
+      "description": "Append-only in-record audit trail.",
       "items": {
         "type": "object",
         "properties": {
@@ -251,17 +250,6 @@
     "duration_minutes"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager",
-            "staff"
-          ]
-        }
-      }
-    },
     "read": {
       "$or": [
         {
@@ -269,26 +257,22 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager",
-                "staff"
-              ]
-            }
+            "role": "admin"
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
+      "$or": [
+        {
+          "data.venue_id": "{{user.data.venue_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
-      }
+      ]
     },
     "delete": {
       "user_condition": {
