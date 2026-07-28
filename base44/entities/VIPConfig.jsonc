@@ -75,7 +75,7 @@
     "approval_rules": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Events requiring manager approval: discount, comp, manual_price, free_extension, room_transfer, post_signature_correction, cancel_after_signing, outstanding_balance_closeout. Values true = approval required."
+      "description": "Events requiring manager approval."
     },
     "max_discount_pct_without_owner": {
       "type": "number",
@@ -86,7 +86,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Required signature roles before activation: guest, entertainer, staff (manager added when approval used)."
+      "description": "Required signature roles before activation."
     },
     "session_warning_minutes": {
       "type": "number",
@@ -116,16 +116,6 @@
     "venue_id"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
-        }
-      }
-    },
     "read": {
       "$or": [
         {
@@ -133,34 +123,26 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager"
-              ]
-            }
+            "role": "admin"
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
+      "$or": [
+        {
+          "data.venue_id": "{{user.data.venue_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
-      }
+      ]
     },
     "delete": {
       "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
-        }
+        "role": "admin"
       }
     }
   }
