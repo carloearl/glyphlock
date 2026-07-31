@@ -14,7 +14,7 @@
     "cover_charge": {
       "type": "number",
       "default": 20,
-      "description": "Standard cover charge in USD. Read by door POS Cover \u2014 Cash / Cover \u2014 Card buttons."
+      "description": "Standard cover charge in USD."
     },
     "reentry_charge": {
       "type": "number",
@@ -88,7 +88,7 @@
     "cc_processing_fee_rate": {
       "type": "number",
       "default": 0.05,
-      "description": "Credit card processing fee rate (0.05 = 5%). Applied at the door register when guest pays by card. Door cover charges are sales-tax-exempt; this rate is the pass-through processor fee."
+      "description": "Credit card processing fee rate (0.05 = 5%). Applied at the door register when guest pays by card."
     },
     "service_fee_pct": {
       "type": "number",
@@ -103,7 +103,7 @@
     "show_processing_fee": {
       "type": "boolean",
       "default": true,
-      "description": "When true, receipts print a Processing Fee line (rate + amount). Turn off if the fee is absorbed by the house."
+      "description": "When true, receipts print a Processing Fee line (rate + amount)."
     },
     "show_service_fee": {
       "type": "boolean",
@@ -113,22 +113,22 @@
     "receipt_legal_name": {
       "type": "string",
       "default": "",
-      "description": "Legal entity name printed as the main header on every receipt (e.g. 'RAS Liberty Holding LLC'). When empty, falls back to venue name. This is the DBA / legal entity \u2014 NOT the venue brand name \u2014 for tax and compliance."
+      "description": "Legal entity name printed as the main header on every receipt."
     },
     "receipt_footer_text": {
       "type": "string",
       "default": "",
-      "description": "Custom footer paragraph printed at the bottom of every receipt (return policy, event, promotion). Empty falls back to the default 'Thank you for your patronage' block."
+      "description": "Custom footer paragraph printed at the bottom of every receipt."
     },
     "receipt_tax_id": {
       "type": "string",
       "default": "",
-      "description": "Legal / tax id printed on the receipt header (EIN, resale, business license #). Empty = hidden."
+      "description": "Legal / tax id printed on the receipt header. Empty = hidden."
     },
     "promo_card_amount": {
       "type": "number",
       "default": 5,
-      "description": "Dollar value of the one-tap door promo card button (e.g. $5 OFF). Each use posts a negative line item with is_promo:true so accounting can count usage."
+      "description": "Dollar value of the one-tap door promo card button (e.g. $5 OFF)."
     },
     "house_commission_rate": {
       "type": "number",
@@ -143,7 +143,7 @@
         "GUEST_DISCOUNT"
       ],
       "default": "UNSET",
-      "description": "BPAA-NUPS-ACCT-001 \u00a77 \u2014 DACO ruling required. UNSET blocks all driver payout posting. HOUSE_ABSORBED = revenue gross, payout is 6000 Driver Payout Expense. GUEST_DISCOUNT = revenue net of payout; no expense line."
+      "description": "BPAA-NUPS-ACCT-001 \u00a77 \u2014 DACO ruling required. UNSET blocks all driver payout posting."
     },
     "tax_mode": {
       "type": "string",
@@ -153,22 +153,22 @@
         "INCLUSIVE"
       ],
       "default": "NONE",
-      "description": "BPAA-NUPS-ACCT-001 \u2014 tax treatment for non-door revenue. NONE = no tax line. EXCLUSIVE = tax added on top. INCLUSIVE = tax embedded; gross split into net + tax for posting."
+      "description": "BPAA-NUPS-ACCT-001 \u2014 tax treatment for non-door revenue."
     },
     "tax_rate_bps": {
       "type": "number",
       "default": 0,
-      "description": "BPAA-NUPS-ACCT-001 \u2014 tax rate in basis points (integer). 800 = 8.00%. Replaces float tax_rate for ledger math (I-2)."
+      "description": "BPAA-NUPS-ACCT-001 \u2014 tax rate in basis points (integer). 800 = 8.00%."
     },
     "track_cogs": {
       "type": "boolean",
       "default": false,
-      "description": "BPAA-NUPS-ACCT-001 \u2014 when true, every sale posts a COGS leg (5000 COGS / 1200 Inventory). Defer until cost data is reliable."
+      "description": "BPAA-NUPS-ACCT-001 \u2014 when true, every sale posts a COGS leg."
     },
     "processing_fee_account": {
       "type": "string",
       "default": "6100",
-      "description": "BPAA-NUPS-ACCT-001 \u2014 account code for card processing fees. Default 6100."
+      "description": "BPAA-NUPS-ACCT-001 \u2014 account code for card processing fees."
     },
     "breakage_policy": {
       "type": "string",
@@ -178,7 +178,7 @@
         "PERIODIC"
       ],
       "default": "NONE",
-      "description": "BPAA-NUPS-ACCT-001 \u00a76 \u2014 GlyphBucks breakage recognition policy. Leave NONE until DACO sets policy."
+      "description": "BPAA-NUPS-ACCT-001 \u00a76 \u2014 GlyphBucks breakage recognition policy."
     },
     "mode": {
       "type": "string",
@@ -188,7 +188,7 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "Ledger mode. REAL writes to live books; DEMO is sandbox; SANDBOX is dev-only. Door + driver writes must honor this."
+      "description": "Ledger mode. REAL writes to live books; DEMO is sandbox; SANDBOX is dev-only."
     },
     "active": {
       "type": "boolean",
@@ -209,16 +209,6 @@
     "venue_id"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
-        }
-      }
-    },
     "read": {
       "$or": [
         {
@@ -226,35 +216,26 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager",
-                "staff"
-              ]
-            }
+            "role": "admin"
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
+      "$or": [
+        {
+          "data.venue_id": "{{user.data.venue_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
-      }
+      ]
     },
     "delete": {
       "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
-        }
+        "role": "admin"
       }
     }
   }
