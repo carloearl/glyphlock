@@ -57,20 +57,41 @@ export default function KioskShell({ children }) {
   }, [preview]);
 
   // Heartbeat keeps an authenticated operator shift alive while NUPS is open.
+  // DACO-SIP-001 NUPS-HIGH-004 remediation (2026-07-31): a rejected heartbeat
+  // (revoked / expired / force-clocked-out session) now clears the local
+  // session and bounces the operator back to the kiosk sign-in instead of
+  // being silently swallowed — a dead session no longer appears alive.
   useEffect(() => {
     if (!kiosk) return undefined;
-    const beat = () => {
+    let stopped = false;
+    const beat = async () => {
       const token = sessionStorage.getItem("nups_kiosk_session");
       if (!token) return;
-      base44.functions.invoke("nupsClockIn", {
-        action: "heartbeat",
-        kiosk_session: token,
-      }).catch(() => {});
+      try {
+        const res = await base44.functions.invoke("nupsClockIn", {
+          action: "heartbeat",
+          kiosk_session: token,
+        });
+        if (!stopped && res?.data && res.data.valid === false) {
+          sessionStorage.removeItem("nups_kiosk_session");
+          sessionStorage.removeItem("nups_kiosk_operator");
+          navigate("/NUPSKiosk");
+        }
+      } catch (err) {
+        // Only treat an authorization rejection as a dead session; transient
+        // network errors are ignored so a flaky connection doesn't clock out.
+        const status = err?.response?.status ?? err?.status;
+        if (!stopped && (status === 401 || status === 403)) {
+          sessionStorage.removeItem("nups_kiosk_session");
+          sessionStorage.removeItem("nups_kiosk_operator");
+          navigate("/NUPSKiosk");
+        }
+      }
     };
     beat();
     const id = setInterval(beat, 5 * 60 * 1000);
-    return () => clearInterval(id);
-  }, [kiosk]);
+    return () => { stopped = true; clearInterval(id); };
+  }, [kiosk, navigate]);
 
   const resumeSecureDisplay = async () => {
     setResuming(true);
@@ -107,7 +128,13 @@ export default function KioskShell({ children }) {
         </div>
       )}
 
-      <div className={showOperationalChrome ? "pb-16" : ""}>{children}</div>
+      {/* DACO-SIP-001 NUPS-MED-001 remediation (2026-07-31): when the secure
+          display is paused, operational children are UNMOUNTED (not just
+          covered) so no operational data remains in the DOM behind the
+          overlay. */}
+      <div className={showOperationalChrome ? "pb-16" : ""}>
+        {displayPaused ? null : children}
+      </div>
 
       {displayPaused && (
         <div className="fixed inset-0 z-[95] bg-slate-950 flex items-center justify-center p-6">

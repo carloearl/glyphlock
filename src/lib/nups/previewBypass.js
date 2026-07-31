@@ -1,33 +1,14 @@
 /**
- * Owner visual-access bypass — authorized by Carlo (2026-07-20).
+ * DACO-SIP-001 NUPS-CRIT-001 remediation (2026-07-31).
  *
- * Appending ?pin=90210 to any NUPS URL grants a view-only owner preview
- * session for this browser tab. Mirrors the standing Owner PIN convention
- * ("Owner PIN 90210 bypasses all role-based view restrictions").
- * The flag lives in sessionStorage — closing the tab ends the preview.
+ * The former ?pin=90210 URL bypass was removed. A static PIN literal in the
+ * client bundle granted full owner/admin view to anyone who read the shipped
+ * JS. Identity authority must never come from a URL parameter. Owner/admin
+ * access now flows exclusively through the authenticated owner-email check
+ * (isOwnerEmail) and the server-validated kiosk session — no client-side PIN.
+ *
+ * This shim is retained so existing callers keep compiling; it always denies.
  */
-const OWNER_PIN = "90210";
-const FLAG = "nups_owner_preview";
-
 export function hasOwnerPreview() {
-  if (typeof window === "undefined") return false;
-  try {
-    const pin = new URLSearchParams(window.location.search).get("pin");
-    if (pin === OWNER_PIN) {
-      sessionStorage.setItem(FLAG, "1");
-      // Seed an operator identity so pages that read the kiosk session render fully.
-      if (!sessionStorage.getItem("nups_session")) {
-        sessionStorage.setItem("nups_session", JSON.stringify({
-          full_name: "Owner Preview",
-          username: "owner-preview",
-          role: "VENUE_OWNER",
-          venue_id: "dream_palace",
-          preview: true,
-        }));
-      }
-    }
-    return sessionStorage.getItem(FLAG) === "1";
-  } catch {
-    return false;
-  }
+  return false;
 }

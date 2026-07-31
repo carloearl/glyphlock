@@ -14,8 +14,12 @@
 const SESSION_KEY = "nups.routeGuard.session";
 const PERSIST_KEY = "nups.routeGuard.persist";
 
+// DACO-SIP-001 NUPS-HIGH-002 remediation (2026-07-31): the persistent grant
+// cache was shortened from 30 days to 30 minutes so a revoked/suspended admin
+// cannot retain access on a shared device for weeks. Both tiers now expire in
+// one operational session window; a fresh server verdict is required after.
 const SESSION_TTL_MS = 30 * 60 * 1000;        // 30 minutes
-const PERSIST_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const PERSIST_TTL_MS = 30 * 60 * 1000;        // 30 minutes (was 30 days)
 
 function safeParse(raw) {
   try { return raw ? JSON.parse(raw) : null; } catch { return null; }

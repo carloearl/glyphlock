@@ -21,7 +21,6 @@ import { base44 } from "@/api/base44Client";
 import { isSovereign } from "@/lib/nups/sovereign";
 import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
-import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 
 export default function RoleClassGuard({ allow = [], children }) {
   const navigate = useNavigate();
@@ -30,27 +29,37 @@ export default function RoleClassGuard({ allow = [], children }) {
 
   useEffect(() => {
     let cancelled = false;
-    // Owner PIN URL bypass (?pin=90210) — authorized visual-access preview.
-    if (hasOwnerPreview()) {
-      setRoleClass(ROLE_CLASS.ADMIN);
-      setStatus("granted");
-      return () => { cancelled = true; };
-    }
-    // Kiosk operator session wins over the platform login. An admin who is
-    // PIN-clocked-in as staff gets NO admin bypass — they're gated exactly
-    // like that staff member until clock-out or a workspace switch to admin.
-    try {
-      const op = JSON.parse(sessionStorage.getItem("nups_kiosk_operator") || "null");
-      if (op?.role) {
-        const opCls = resolveRoleClass({ nupsUser: op });
-        if (opCls !== ROLE_CLASS.ADMIN) {
-          setRoleClass(opCls);
-          setStatus(allow.includes(opCls) ? "granted" : "denied");
-          return () => { cancelled = true; };
-        }
-      }
-    } catch { /* no operator context */ }
     (async () => {
+      // DACO-SIP-001 NUPS-HIGH-003 remediation (2026-07-31): the kiosk operator
+      // role is no longer trusted straight from sessionStorage (client-writable).
+      // When an operator session token is present we validate it server-side via
+      // nupsClockIn/validateSession and gate on the SERVER-returned role. A
+      // clocked-in operator (even an admin PIN-clocked as staff) is scoped to
+      // that role until clock-out.
+      const token = sessionStorage.getItem("nups_kiosk_session");
+      if (token) {
+        try {
+          const res = await base44.functions.invoke("nupsClockIn", {
+            action: "validateSession", kiosk_session: token,
+          });
+          if (cancelled) return;
+          if (res.data?.valid && res.data?.role) {
+            const opCls = resolveRoleClass({ nupsUser: { role: res.data.role } });
+            if (opCls !== ROLE_CLASS.ADMIN) {
+              setRoleClass(opCls);
+              setStatus(allow.includes(opCls) ? "granted" : "denied");
+              return;
+            }
+            // Server-verified ADMIN operator → fall through to superset grant.
+            setRoleClass(ROLE_CLASS.ADMIN);
+            setStatus("granted");
+            return;
+          }
+          // Invalid/expired/revoked session → drop it and fall to platform auth.
+          sessionStorage.removeItem("nups_kiosk_session");
+          sessionStorage.removeItem("nups_kiosk_operator");
+        } catch { /* validation failed — fall through to platform auth */ }
+      }
       try {
         const isAuth = await base44.auth.isAuthenticated();
         if (!isAuth) { if (!cancelled) setStatus("unauth"); return; }
