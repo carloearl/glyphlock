@@ -6,6 +6,7 @@ import CountdownPill from '@/components/marketing/CountdownPill';
 import SEOHead from '@/components/SEOHead';
 import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
 import ServicesGrid from '@/components/home/ServicesGrid';
+import OnSiteServices from '@/components/home/OnSiteServices';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
 import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
@@ -150,6 +151,11 @@ export default function Home() {
         {/* Services Overview */}
         <ScrollSection className="container-responsive">
           <ServicesGrid />
+        </ScrollSection>
+
+        {/* On-Site Services — We Come To You */}
+        <ScrollSection className="container-responsive">
+          <OnSiteServices />
         </ScrollSection>
 
         {/* Technology Partners */}
