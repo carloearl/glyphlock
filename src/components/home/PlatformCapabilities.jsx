@@ -36,15 +36,6 @@ const modules = [
     link: 'GlyphBot'
   },
   {
-    title: 'N.U.P.S. Infrastructure',
-    desc: 'Venue-grade POS with staff RBAC, entertainer scheduling, VIP tracking, Z-reports, and GlyphBucks™ issuance with biometric verification.',
-    icon: Building2,
-    color: '#06b6d4',
-    border: 'rgba(6,182,212,0.35)',
-    glow: 'rgba(6,182,212,0.5)',
-    link: 'NUPSLogin'
-  },
-  {
     title: 'GlyphLock Financial',
     desc: 'Underwriting dossier generation, deterministic risk scoring, and qualification frameworks for institutional compliance review.',
     icon: DollarSign,
@@ -249,17 +240,17 @@ export default function PlatformCapabilities() {
               <div className="flex items-center gap-2 mb-3">
                 <Shield className="w-5 h-5 text-purple-400" style={{ filter: 'drop-shadow(0 0 6px rgba(168,85,247,0.8))' }} />
                 <h3 className="text-sm font-black uppercase tracking-widest text-purple-400">
-                  Intellectual Property — GlyphBucks™
+                  Intellectual Property
                 </h3>
               </div>
               <p className="text-white/70 text-sm leading-relaxed mb-3">
-                GlyphBucks™ is a proprietary legal instrument and registered trademark of GlyphLock Financial LLC.
-                The system — including its physical bill design, digital contract architecture, redemption protocol,
-                and biometric verification workflow — constitutes original copyrighted works owned exclusively by GlyphLock Financial LLC.
+                The GlyphLock platform — including its cryptographic verification architecture, QR provenance system,
+                blockchain anchoring protocols, and AI orchestration frameworks — constitutes original copyrighted
+                works and proprietary technology owned exclusively by GlyphLock LLC.
               </p>
               <p className="text-white/60 text-xs leading-relaxed">
-                Venue operators are licensed users only. Unauthorized reproduction or fraudulent issuance may constitute
-                counterfeiting and will be prosecuted to the fullest extent of applicable law.
+                All trademarks, system designs, and protocol specifications are protected. Unauthorized reproduction
+                or derivative use is prohibited and will be enforced to the fullest extent of applicable law.
               </p>
             </div>
             <div>

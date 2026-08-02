@@ -12,13 +12,6 @@ import { motion, useInView } from "framer-motion";
 
 const services = [
   {
-    title: "NEXUS N.U.P.S.",
-    description: "Commerce infrastructure with covenant-backed transactions and verified ownership trails",
-    link: "NUPSLogin",
-    image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/9184b512b_Whisk_b9fd7532ee1e87a9152439bac427f256dr.jpg",
-    icon: Zap
-  },
-  {
     title: "Master Covenant",
     description: "Authorship protocol – cryptographic proof of origin for creative work at ecosystem scale",
     link: "MasterCovenant",

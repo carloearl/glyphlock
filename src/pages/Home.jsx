@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import HeroSection from '@/components/home/HeroSection';
 import HeroContent from '@/components/home/HeroContent';
@@ -10,7 +9,6 @@ import ServicesGrid from '@/components/home/ServicesGrid';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
 import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
-import ExperienceLiveSystemCTA from '@/components/demo/ExperienceLiveSystemCTA';
 import WordOfTheDay from '@/components/home/WordOfTheDay';
 
 const SectionLoader = () => (
@@ -43,7 +41,6 @@ const ScrollSection = ({ children, className = "" }) => {
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -110,14 +107,14 @@ export default function Home() {
   return (
     <>
       <SEOHead 
-        title="NUPS — Nexus Unified Portal System | GlyphLock"
-        description="NUPS is live — the Nexus Unified Portal System for venue operations, POS, double-entry accounting, and BPAAA v3.0 compliance. Built by GlyphLock."
-        keywords="NUPS, Nexus Unified Portal System, venue management, POS, point of sale, double-entry accounting, 1099 contractor payroll, driver payouts, BPAAA compliance, GlyphLock, venue operations"
+        title="GlyphLock — Quantum-Resistant Cybersecurity & Secure Application Platform"
+        description="GlyphLock delivers quantum-resistant cybersecurity: secure QR verification, AI-powered security auditing, blockchain proof, interactive image protection, and enterprise application security."
+        keywords="GlyphLock, cybersecurity, quantum-resistant security, secure QR codes, security audit, blockchain verification, AI security, enterprise security platform"
         url="/"
       />
       
       {/* SEO H1 - Hidden but crawlable */}
-      <h1 className="sr-only">NUPS — Nexus Unified Portal System. Live venue operations, POS, accounting & compliance by GlyphLock.</h1>
+      <h1 className="sr-only">GlyphLock — Quantum-Resistant Cybersecurity & Secure Application Platform.</h1>
 
       <main className="w-full relative" style={{ background: 'transparent', position: 'relative' }}>
         
@@ -125,7 +122,7 @@ export default function Home() {
         <section className="w-full">
           <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
             <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-3xl mx-auto text-white/90 uppercase tracking-[3px]">
-              NUPS — Nexus Unified Portal System. Live venue operations, POS, accounting & compliance — now active.
+              GlyphLock — Quantum-Resistant Security. Protecting data, identity & digital assets.
             </p>
           </div>
 
@@ -133,29 +130,11 @@ export default function Home() {
             <HeroSection />
           </ScrollSection>
 
-          <div className="flex justify-center py-6 px-4">
-            <button
-              onClick={() => navigate('/NUPSLanding#nups-walkthrough')}
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-black uppercase tracking-[0.15em] text-white text-sm sm:text-base transition-all"
-              style={{
-                background: 'linear-gradient(135deg, #1E40AF, #3B82F6)',
-                boxShadow: '0 0 30px rgba(59,130,246,0.4)',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 0 50px rgba(59,130,246,0.7)')}
-              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 0 30px rgba(59,130,246,0.4)')}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
-              See The NUPS Walkthrough
-            </button>
-          </div>
-
-          <div className="flex justify-center -mt-2">
+          <div className="flex justify-center py-4">
             <CountdownPill />
           </div>
 
           <WordOfTheDay />
-
-          <ExperienceLiveSystemCTA variant="home" />
         </section>
 
         {/* Value Proposition */}
