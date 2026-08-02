@@ -420,8 +420,8 @@ export default function CountdownPill() {
             {/* Status bar */}
             <div className="flex flex-col gap-1.5 mb-4 items-center lg:items-start">
               {[
-                { color: '#10b981', text: 'NUPS ONLINE' },
-                { color: '#06b6d4', text: 'GATEWAY OPEN' },
+                { color: '#10b981', text: 'PLATFORM ONLINE' },
+                { color: '#06b6d4', text: 'ZERO-TRUST ACTIVE' },
                 { color: '#7c3aed', text: uptime },
               ].map((s, i) => (
                 <div key={i} className="flex items-center gap-2 text-[9px] sm:text-[10px] uppercase tracking-[0.1em] text-white/50">
@@ -441,7 +441,7 @@ export default function CountdownPill() {
               }}
             >
               <span style={{ display: 'inline-block', animation: 'liveBadgeSpin 3s linear infinite' }}>◆</span>
-              NUPS LIVE
+              SYSTEMS LIVE
             </div>
 
             {/* Title */}
@@ -457,7 +457,7 @@ export default function CountdownPill() {
                   animation: 'gradShift 4s linear infinite',
                   filter: 'drop-shadow(0 0 15px rgba(6,182,212,0.4))',
                 }}
-              >NEXUS UNIFIED</span>
+              >GLYPHLOCK</span>
               <span className="block text-xl sm:text-2xl md:text-3xl font-black uppercase"
                 style={{
                   fontFamily: "'Orbitron', sans-serif",
@@ -469,7 +469,7 @@ export default function CountdownPill() {
                   animation: 'shimmerText 3s ease-in-out infinite',
                   filter: 'drop-shadow(0 0 15px rgba(124,58,237,0.4))',
                 }}
-              >PORTAL SYSTEM</span>
+              >SECURITY PLATFORM</span>
             </div>
 
             <p className="text-[11px] sm:text-xs font-semibold text-white/80 mb-2">
@@ -477,9 +477,9 @@ export default function CountdownPill() {
             </p>
 
             <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.05em] text-violet-400 leading-relaxed font-mono">
-              VENUE OPERATIONS<br />
-              POS · ACCOUNTING · COMPLIANCE<br />
-              BPAAA v3.0 CERTIFIED
+              QUANTUM-RESISTANT SECURITY<br />
+              QR PROVENANCE · BLOCKCHAIN PROOF · AI DEFENSE<br />
+              ZERO-TRUST ARCHITECTURE
             </p>
           </div>
 
@@ -533,15 +533,15 @@ export default function CountdownPill() {
           {/* RIGHT */}
           <div className="text-center lg:text-right">
             <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-5">
-              <StatMini value="POS" label="REGISTER" />
-              <StatMini value="GL" label="LEDGER" />
-              <StatMini value="1099" label="PAYROLL" />
-              <StatMini value="0" label="VARIANCE" />
+              <StatMini value="QR" label="VERIFICATION" />
+              <StatMini value="AI" label="DEFENSE" />
+              <StatMini value="256" label="SHA HASHING" />
+              <StatMini value="24/7" label="MONITORING" />
             </div>
 
             <div className="flex gap-3 justify-center lg:justify-end mb-3">
               <Link
-                to="/NUPSLanding"
+                to={createPageUrl('SecurityTools')}
                 className="inline-block px-5 py-2.5 text-[10px] sm:text-xs font-black uppercase tracking-[0.1em] text-black no-underline relative overflow-hidden"
                 style={{
                   background: 'linear-gradient(135deg, #06b6d4, #7c3aed)',
@@ -550,23 +550,23 @@ export default function CountdownPill() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                <span className="relative z-10">◆ ENTER NUPS ◆</span>
+                <span className="relative z-10">◆ SECURITY TOOLS ◆</span>
               </Link>
               <Link
-                to="/NUPSGateway"
+                to={createPageUrl('CommandCenter')}
                 className="inline-block px-4 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-cyan-400 border-2 border-cyan-400/60 no-underline"
                 style={{
                   clipPath: 'polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%)',
                   transition: 'all 0.3s ease',
                 }}
               >
-                <span className="relative z-10">GATEWAY</span>
+                <span className="relative z-10">COMMAND CENTER</span>
               </Link>
             </div>
 
             <div className="text-[8px] sm:text-[9px] text-white/25 font-mono">
               OPERATIONAL SINCE <span className="text-cyan-400/60">JAN 1, 2026</span><br />
-              BPAAA v3.0 COMPLIANT
+              QUANTUM-RESISTANT · ZERO-TRUST
             </div>
           </div>
         </div>
