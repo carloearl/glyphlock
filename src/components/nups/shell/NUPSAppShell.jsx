@@ -19,6 +19,7 @@ import { base44 } from "@/api/base44Client";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
 import { isSovereign } from "@/lib/nups/sovereign";
 import { useAdminOverride, setAdminOverride } from "@/lib/nups/adminView";
+import { readNUPSSession } from "@/lib/nups/persistentSession";
 
 
 // DACO 003 §2 — which sections each role class may see.
@@ -264,7 +265,8 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
     // in-page time clock rescopes the chrome without a reload.
     const applyOperator = () => {
       try {
-        const op = JSON.parse(sessionStorage.getItem("nups_kiosk_operator") || sessionStorage.getItem("nups_session") || "null");
+        const kioskRaw = sessionStorage.getItem("nups_kiosk_operator");
+        const op = kioskRaw ? JSON.parse(kioskRaw) : readNUPSSession();
         if (op?.role) {
           const opCls = resolveRoleClass({ nupsUser: op });
           if (opCls !== ROLE_CLASS.ADMIN) {
