@@ -18,7 +18,7 @@ export default function BarRegister() {
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
     try {
-      const op = sessionStorage.getItem("nups_kiosk_operator") || sessionStorage.getItem("nups_session");
+      const op = sessionStorage.getItem("nups_kiosk_operator") || localStorage.getItem("nups_session") || sessionStorage.getItem("nups_session");
       if (op) setOperator(JSON.parse(op));
     } catch { /* no operator context */ }
   }, []);
