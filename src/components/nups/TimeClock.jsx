@@ -177,7 +177,7 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
   // secure nupsClockIn service). Rows are mapped to the display shape
   // (stage_name) the log/payroll views expect.
   // ID-01 FIX-2: venue-scoped read — never a global list.
-  const session = JSON.parse(sessionStorage.getItem('nups_session') || '{}');
+  const session = JSON.parse(localStorage.getItem('nups_session') || sessionStorage.getItem('nups_session') || '{}');
   const sessionVenueId = session.venue_id || user?.venue_id || null;
 
   const { data: shifts = [] } = useQuery({
