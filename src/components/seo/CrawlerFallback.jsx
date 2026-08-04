@@ -108,19 +108,20 @@ const MASTER_COVENANT_CONTENT = {
 };
 
 const HOME_CONTENT = {
-  title: 'GlyphLock — Open Source Creation Layer | Stop Getting Robbed, Start Creating',
-  h1: 'Stop Getting Robbed. Start Creating.',
-  tagline: 'The Creation Layer — Own Your Code, Own Your Future',
-  description: `Most tech companies give you a locked box: "Here's our software. Pay monthly. Can't change it. Trust us." GlyphLock gives you THE CREATION LAYER. Full framework access — modify anything. Build custom features yourself — no permission needed. Hire ANY developer — it's open source. Extend the platform — your business, your rules. No vendor lock-in — you own the code. This is what enterprise companies have. Now you have it too. Open source framework proves it works. Master Covenant framework protects your rights.`,
+  title: 'GlyphLock — Quantum-Resistant Security & Technology Services',
+  h1: 'GlyphLock — Quantum-Resistant Security',
+  tagline: 'Protecting data, identity & digital assets',
+  description: `GlyphLock delivers quantum-resistant security for data, identity and digital assets — secure QR verification, AI-powered security auditing, blockchain proof and interactive image protection. Alongside the platform, GlyphLock provides technology services built around your operations: computer and hardware builds, security hardening, DevOps, systems integration, and implementation of the GlyphLock and NUPS venue operating system.`,
   services: [
-    'Full Framework Access — Modify Anything',
-    'Open Source Code — No Black Boxes',
-    'No Vendor Lock-In — Own Your Code',
-    'Master Covenant Legal Protection',
-    'QR Studio — Secure QR Code Generation',
-    'Image Lab — AI Image Generation & Hotspots',
-    'GlyphBot — AI Security Assistant',
-    'Blockchain Verification & Cryptographic Proofing'
+    'Quantum-Resistant Security Architecture',
+    'QR Studio — Secure, Verifiable QR Code Generation',
+    'Image Lab — AI Image Generation & Interactive Hotspots',
+    'GlyphBot — AI Security Assistant & Site Auditing',
+    'Blockchain Verification & Cryptographic Proofing',
+    'Custom Computer & Hardware Builds, On-Site Installation',
+    'DevOps, Automation & Systems Integration',
+    'GlyphLock & NUPS Platform Implementation and Training',
+    'Master Covenant Legal Protection Framework'
   ],
   team: [
     { name: 'Carlo Rene Earl', title: 'Founder & Owner, DACO¹' },

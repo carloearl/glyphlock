@@ -13,9 +13,11 @@
     <meta name="apple-mobile-web-app-title" content="NUPS" />
     <meta name="application-name" content="GlyphLock" />
     <meta property="og:site_name" content="GlyphLock" />
-    <meta property="og:title" content="NUPS by GlyphLock" />
+    <meta property="og:title" content="GlyphLock — Quantum-Resistant Security & Technology Services" />
     <meta property="og:url" content="https://glyphlock.io/" />
-    <title>NUPS by GlyphLock</title>
+    <meta property="og:description" content="GlyphLock delivers quantum-resistant security for data, identity and digital assets — secure QR verification, AI security auditing, blockchain proof, plus on-site technology services and the NUPS venue operating system." />
+    <meta name="description" content="GlyphLock delivers quantum-resistant security for data, identity and digital assets — secure QR verification, AI security auditing, blockchain proof, plus on-site technology services and the NUPS venue operating system." />
+    <title>GlyphLock — Quantum-Resistant Security & Technology Services</title>
     <script>
       // Visible crash catcher — surfaces module-load + uncaught errors instead of white screen
       (function () {
@@ -47,7 +49,40 @@
   </head>
   <body>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static crawler/LLM shell. React replaces this on mount; crawlers that
+           don't execute JS still receive the real headings, copy and links. -->
+      <div style="max-width:900px;margin:0 auto;padding:32px;font-family:system-ui,sans-serif;color:#e2e8f0;background:#020617;">
+        <h1>GlyphLock — Quantum-Resistant Security. Protecting data, identity &amp; digital assets.</h1>
+        <p>Technology services built around your operations — computer systems, security, DevOps, systems integration, and implementation of the GlyphLock and NUPS platforms.</p>
+        <h2>Platform Modules</h2>
+        <ul>
+          <li><a href="/qr">QR Studio — secure, verifiable QR code generation</a></li>
+          <li><a href="/imagelab">Image Lab — AI image generation &amp; interactive hotspots</a></li>
+          <li><a href="/glyphbot">GlyphBot — AI security assistant and site auditing</a></li>
+          <li><a href="/blockchain">Blockchain verification &amp; cryptographic proof</a></li>
+          <li><a href="/securitytools">Security Tools &amp; Operations Center</a></li>
+          <li><a href="/mastercovenant">Master Covenant — AI governance framework</a></li>
+        </ul>
+        <h2>Technology Services</h2>
+        <ul>
+          <li>Custom computer &amp; hardware builds, on-site installation</li>
+          <li>Security hardening, monitoring and compliance support</li>
+          <li>DevOps, automation and systems integration</li>
+          <li>GlyphLock and NUPS platform implementation and training</li>
+        </ul>
+        <h2>Company</h2>
+        <p>GlyphLock Security LLC — El Mirage, Arizona, USA. Contact: <a href="mailto:glyphlock@gmail.com">glyphlock@gmail.com</a></p>
+        <p><a href="/services">Services</a> · <a href="/pricing">Pricing</a> · <a href="/about">About</a> · <a href="/contact">Contact</a> · <a href="/casestudies">Case Studies</a> · <a href="/sitemap">Sitemap</a></p>
+      </div>
+    </div>
+    <noscript>
+      <div style="max-width:900px;margin:0 auto;padding:32px;font-family:system-ui,sans-serif;">
+        <h1>GlyphLock — Quantum-Resistant Security</h1>
+        <p>Protecting data, identity and digital assets. Technology services built around your operations: computer systems, security, DevOps, systems integration, and implementation of the GlyphLock and NUPS platforms.</p>
+        <p>Contact: <a href="mailto:glyphlock@gmail.com">glyphlock@gmail.com</a> — GlyphLock Security LLC, El Mirage, Arizona, USA.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
