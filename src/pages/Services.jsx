@@ -8,6 +8,7 @@ import {
   ShoppingCart, Brain, Globe, AlertCircle, CheckCircle2
 } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import TechnologyServicesSection from "@/components/services/TechnologyServicesSection";
 import { motion, useInView } from "framer-motion";
 
 export default function Services() {
@@ -219,6 +220,9 @@ export default function Services() {
               </motion.div>
             ))}
           </div>
+
+          {/* Technology Services — professional on-site & implementation services */}
+          <TechnologyServicesSection />
 
           {/* Industries Served */}
           <div ref={industriesRef} className="mb-16">
