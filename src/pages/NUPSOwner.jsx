@@ -54,6 +54,7 @@ import NUPSMISReport from "./NUPSMISReport.jsx";
 import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
+import { readNUPSSession, writeNUPSSession, clearNUPSSession } from '@/lib/nups/persistentSession';
 
 // Shown when a tab has content but the current role isn't permitted to see it —
 // prevents the "click a tab, nothing appears, looks broken" experience.
@@ -109,9 +110,8 @@ export default function NUPSOwner() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const nupsSession = sessionStorage.getItem("nups_session");
-        if (nupsSession) {
-          const sessionUser = JSON.parse(nupsSession);
+        const sessionUser = readNUPSSession();
+        if (sessionUser) {
           setUser(sessionUser);
           const mapped = mapNUPSRoleToRBAC(sessionUser._highestRole || sessionUser.role);
           setRbacRole(mapped);
@@ -142,7 +142,7 @@ export default function NUPSOwner() {
         currentUser._highestRole = permissionsData?.highest_role || (currentUser.role === "admin" ? "VENUE_OWNER" : null);
         const mapped = mapNUPSRoleToRBAC(currentUser._highestRole || currentUser.role);
         setRbacRole(mapped);
-        sessionStorage.setItem("nups_session", JSON.stringify(currentUser));
+        writeNUPSSession(currentUser);
         setUser(currentUser);
       } catch (error) {
         navigate('/NUPSLogin');
@@ -347,7 +347,7 @@ export default function NUPSOwner() {
                       className="cursor-pointer hover:bg-gray-800 text-sm"
                       onClick={() => {
                         const staffSession = { ...user, _highestRole: role, _viewAsRole: role };
-                        sessionStorage.setItem('nups_session', JSON.stringify(staffSession));
+                        writeNUPSSession(staffSession);
                         navigate('/NUPSStaff');
                       }}
                     >
@@ -361,7 +361,7 @@ export default function NUPSOwner() {
                       setActiveModule('dashboard');
                       const adminSession = { ...user, _highestRole: user?._highestRole || 'PLATFORM_ADMIN' };
                       delete adminSession._viewAsRole;
-                      sessionStorage.setItem('nups_session', JSON.stringify(adminSession));
+                      writeNUPSSession(adminSession);
                       queryClient.clear();
                       window.location.reload();
                     }}
@@ -382,7 +382,10 @@ export default function NUPSOwner() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => base44.auth.logout()}
+                onClick={() => {
+                  clearNUPSSession();
+                  base44.auth.logout();
+                }}
                 className="border-red-500/50 text-red-400 hover:bg-red-500/10 min-h-[44px]"
                 aria-label="Sign out of owner dashboard"
               >
