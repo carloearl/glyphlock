@@ -116,7 +116,7 @@ function RegisterConsoleInner() {
     // working this station. When present, THEIR role scopes the console,
     // not the tablet's platform login (which is often the owner account).
     try {
-      const op = sessionStorage.getItem("nups_kiosk_operator") || sessionStorage.getItem("nups_session");
+      const op = sessionStorage.getItem("nups_kiosk_operator") || localStorage.getItem("nups_session") || sessionStorage.getItem("nups_session");
       if (op) setOperator(JSON.parse(op));
     } catch { /* no operator context */ }
   }, []);
