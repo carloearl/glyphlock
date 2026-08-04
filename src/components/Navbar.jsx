@@ -70,82 +70,22 @@ const NavItem = ({ section, isOpen, onToggle, index, user }) => {
       onMouseLeave={() => { setIsHovered(false); onToggle(null); }}
     >
       <motion.button
-        className="group relative flex items-center gap-1.5 text-blue-100 hover:text-white transition-all duration-300 py-2.5 px-5 text-sm font-semibold uppercase tracking-wider rounded-xl overflow-hidden"
-        whileHover={{ scale: 1.05, y: -2 }}
-        whileTap={{ scale: 0.95 }}
+        className={`group relative flex items-center gap-2 h-10 px-4 whitespace-nowrap text-[13px] font-semibold uppercase tracking-wide rounded-lg transition-colors duration-200 ${
+          isOpen || isHovered ? 'text-white bg-white/[0.08]' : 'text-blue-100/90 hover:text-white hover:bg-white/[0.06]'
+        }`}
+        whileTap={{ scale: 0.97 }}
       >
-        {/* Animated gradient border - always visible, intensifies on hover */}
-        <motion.div
-          className="absolute inset-0 rounded-xl p-[1.5px]"
-          style={{
-            background: 'linear-gradient(135deg, #00E4FF, #3B82F6, #8B5CF6, #A855F7, #00E4FF)',
-            backgroundSize: '400% 100%'
-          }}
-          animate={{
-            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-            opacity: isHovered ? 1 : 0.6
-          }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-        >
-          <div className="absolute inset-[1.5px] rounded-xl bg-slate-950/95 backdrop-blur-md" />
-        </motion.div>
-
-        {/* Inner glow layer */}
-        <motion.div
-          className="absolute inset-[2px] rounded-xl"
-          animate={{
-            boxShadow: isHovered 
-              ? 'inset 0 0 20px rgba(139,92,246,0.4), inset 0 1px 0 rgba(255,255,255,0.15)' 
-              : 'inset 0 0 10px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'
-          }}
-          transition={{ duration: 0.3 }}
-        />
-
-        {/* Glassmorphism background */}
-        <motion.div
-          className="absolute inset-[2px] rounded-xl"
-          initial={{ opacity: 0.4 }}
-          animate={{ opacity: isHovered ? 0.8 : 0.4 }}
-          transition={{ duration: 0.3 }}
-          style={{
-            background: 'linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(139,92,246,0.15) 50%, rgba(6,182,212,0.12) 100%)',
-            backdropFilter: 'blur(12px)'
-          }}
-        />
-
-        {/* Shimmer sweep effect */}
-        <motion.div
-          className="absolute inset-0 rounded-xl"
-          style={{
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)',
-            backgroundSize: '200% 100%'
-          }}
-          animate={{
-            backgroundPosition: ['200% 0', '-200% 0'],
-            opacity: isHovered ? 1 : 0
-          }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        />
-
-        {/* Outer glow on hover */}
-        <motion.div
-          className="absolute -inset-1 rounded-xl blur-md -z-10"
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.5), rgba(139,92,246,0.5))' }}
-          animate={{ opacity: isHovered ? 0.6 : 0 }}
-          transition={{ duration: 0.3 }}
-        />
-        
-        {/* Glowing dot indicator */}
+        {/* Subtle border + active underline */}
+        <span className={`pointer-events-none absolute inset-0 rounded-lg border transition-colors duration-200 ${
+          isOpen || isHovered ? 'border-cyan-400/40' : 'border-white/10'
+        }`} />
         <motion.span
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
-          style={{ 
-            background: 'linear-gradient(135deg, #00E4FF, #8B5CF6)',
-            boxShadow: '0 0 12px #00E4FF, 0 0 24px #8B5CF6' 
-          }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: isOpen ? 1 : 0, opacity: isOpen ? 1 : 0 }}
+          className="pointer-events-none absolute bottom-0 left-1/2 h-[2px] rounded-full"
+          style={{ background: 'linear-gradient(90deg, #00E4FF, #8B5CF6)', translateX: '-50%' }}
+          animate={{ width: isOpen ? '60%' : '0%' }}
+          transition={{ duration: 0.25 }}
         />
-        
+
         <span className="relative z-10 flex items-center gap-1.5">
           {section.label}
           <motion.div
@@ -421,7 +361,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
         }}
       />
 
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-3 flex items-center justify-between">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-10 py-4 flex items-center justify-between gap-6">
         {/* Logo with hover effects */}
         <Link to={createPageUrl("Home")} className="flex items-center gap-3 group">
           <MagneticButton>
@@ -456,7 +396,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-2 flex-1 justify-center">
           {NAV && NAV.map((section, idx) => (
             <NavItem
               key={section.label}
@@ -475,7 +415,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
           <Link to={createPageUrl("Consultation")}>
             <MagneticButton>
               <motion.button
-                className="group relative px-6 py-2.5 rounded-full overflow-hidden"
+                className="group relative h-10 px-6 rounded-full overflow-hidden whitespace-nowrap"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -497,7 +437,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
                 {/* Hover glow */}
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500/0 via-blue-500/20 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 
-                <span className="relative z-10 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-cyan-300 group-hover:text-white transition-colors">
+                <span className="relative z-10 flex items-center justify-center gap-2 text-[13px] font-bold uppercase tracking-wide text-cyan-300 group-hover:text-white transition-colors whitespace-nowrap">
                   <Zap size={14} className="group-hover:animate-pulse" />
                   Get Started
                 </span>
@@ -511,7 +451,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/30 transition-all backdrop-blur-sm"
+                className="flex items-center gap-2 h-10 px-3 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-all backdrop-blur-sm"
                 aria-label={`User menu for ${user.full_name || user.email}`}
               >
                   <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-500 flex items-center justify-center text-xs font-bold text-white">
