@@ -108,20 +108,20 @@ const MASTER_COVENANT_CONTENT = {
 };
 
 const HOME_CONTENT = {
-  title: 'GlyphLock — Quantum-Resistant Security & Technology Services',
-  h1: 'GlyphLock — Quantum-Resistant Security',
-  tagline: 'Protecting data, identity & digital assets',
-  description: `GlyphLock delivers quantum-resistant security for data, identity and digital assets — secure QR verification, AI-powered security auditing, blockchain proof and interactive image protection. Alongside the platform, GlyphLock provides technology services built around your operations: computer and hardware builds, security hardening, DevOps, systems integration, and implementation of the GlyphLock and NUPS venue operating system.`,
+  title: 'GlyphLock — Secure Creative Technology | Protect What You Create. Power What You Operate.',
+  h1: 'GlyphLock — Secure Creative Technology',
+  tagline: 'Protect What You Create. Power What You Operate.',
+  description: `GlyphLock builds secure technology for creators, artists, studios and venues. We protect identity, intellectual property, music, artwork and digital assets with authentication, AI governance and enforceable digital controls — and we power the systems you run on: websites, apps, software platforms, automated DJ systems, studio technology, venue operations and the NUPS platform.`,
   services: [
-    'Quantum-Resistant Security Architecture',
-    'QR Studio — Secure, Verifiable QR Code Generation',
+    'Creative IP Protection — Music, Artwork & Digital Assets',
+    'QR Studio — Secure, Verifiable Identity & Authentication',
     'Image Lab — AI Image Generation & Interactive Hotspots',
     'GlyphBot — AI Security Assistant & Site Auditing',
-    'Blockchain Verification & Cryptographic Proofing',
-    'Custom Computer & Hardware Builds, On-Site Installation',
-    'DevOps, Automation & Systems Integration',
-    'GlyphLock & NUPS Platform Implementation and Training',
-    'Master Covenant Legal Protection Framework'
+    'Blockchain Verification & Cryptographic Proof of Authorship',
+    'Websites, Apps & Software Platforms Built Secure by Default',
+    'Automated DJ Systems & Studio Technology',
+    'Venue Operations & NUPS Platform Implementation',
+    'Master Covenant — AI Governance & Enforceable Digital Controls'
   ],
   team: [
     { name: 'Carlo Rene Earl', title: 'Founder & Owner, DACO¹' },
@@ -356,11 +356,12 @@ function generateCovenantContent() {
 function generateDefaultContent() {
   return `
     <article>
-      <h1>GlyphLock — The Creation Layer</h1>
-      <p><strong>Stop Getting Robbed. Start Creating.</strong></p>
-      <p>GlyphLock is an open source creation layer for building, owning, and protecting your digital ecosystem. 
-      Full framework access, no vendor lock-in, and legal protection under the Master Covenant. 
-      This is what enterprise companies have — now you have it too.</p>
+      <h1>GlyphLock — Secure Creative Technology</h1>
+      <p><strong>Protect What You Create. Power What You Operate.</strong></p>
+      <p>GlyphLock builds secure technology for creators, artists, studios and venues — protecting identity,
+      intellectual property, music, artwork and digital assets with authentication, AI governance and
+      enforceable digital controls, and powering the websites, apps, software platforms, DJ systems,
+      studio technology and venue operations you run on.</p>
       
       <nav>
         <h2>Quick Links</h2>
