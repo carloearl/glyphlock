@@ -476,10 +476,15 @@ export default function CountdownPill() {
               <span className="text-emerald-400 font-black" style={{ textShadow: '0 0 15px rgba(16,185,129,0.6)' }}>NOW ACTIVE</span>
             </p>
 
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.05em] text-violet-400 leading-relaxed font-mono">
-              QUANTUM-RESISTANT SECURITY<br />
-              QR PROVENANCE · BLOCKCHAIN PROOF · AI DEFENSE<br />
-              ZERO-TRUST ARCHITECTURE
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.05em] text-violet-400 leading-relaxed font-mono mb-3">
+              QUANTUM-RESISTANT SECURITY · PROTECTING DATA, IDENTITY & DIGITAL ASSETS<br />
+              TECHNOLOGY SERVICES BUILT AROUND YOUR OPERATIONS
+            </p>
+
+            <p className="text-[10px] sm:text-[11px] text-white/60 leading-relaxed max-w-md mx-auto lg:mx-0">
+              GlyphLock provides custom technology services for venues, studios, and business
+              operators — combining computer systems, security, DevOps, systems integration, and
+              implementation of the GlyphLock and NUPS platforms.
             </p>
           </div>
 

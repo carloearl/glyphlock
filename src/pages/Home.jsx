@@ -122,12 +122,6 @@ export default function Home() {
         
         {/* Bootstrap Quote + Hero Section */}
         <section className="w-full">
-          <div className="w-full text-center pt-6 sm:pt-8 pb-2 px-4 relative overflow-hidden">
-            <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-3xl mx-auto text-white/90 uppercase tracking-[3px]">
-              GlyphLock — Quantum-Resistant Security. Protecting data, identity & digital assets.
-            </p>
-          </div>
-
           <ScrollSection>
             <HeroSection />
           </ScrollSection>
