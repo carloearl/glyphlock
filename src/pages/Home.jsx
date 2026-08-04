@@ -13,6 +13,7 @@ import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
 import WordOfTheDay from '@/components/home/WordOfTheDay';
 import IntroHeader from '@/components/home/IntroHeader';
+import IntroStatement from '@/components/home/IntroStatement';
 
 const SectionLoader = () => (
   <div className="w-full py-20 flex items-center justify-center">
@@ -129,6 +130,11 @@ export default function Home() {
           <ScrollSection>
             <HeroSection />
           </ScrollSection>
+
+          {/* Statement + CTAs — below the video */}
+          <div className="pt-2 pb-6">
+            <IntroStatement />
+          </div>
 
           <div className="flex justify-center py-4">
             <CountdownPill />
