@@ -18,6 +18,7 @@ import OperatorStatusBar from "@/components/nups/frontdoor/OperatorStatusBar";
 import { base44 } from "@/api/base44Client";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useFrontDoorConfig, DEFAULT_FRONT_DOOR_CONFIG } from "@/hooks/useFrontDoorConfig";
+import { readNUPSSession, clearNUPSSession } from "@/lib/nups/persistentSession";
 
 /**
  * FrontDoor — Unified onboarding console for the door operator.
@@ -134,8 +135,8 @@ function FrontDoorContent() {
     (async () => {
       // 1) Kiosk PIN session (staff clocked in at the door)
       try {
-        const raw = sessionStorage.getItem("nups_session");
-        if (raw) { setUser(JSON.parse(raw)); return; }
+        const savedSession = readNUPSSession();
+        if (savedSession) { setUser(savedSession); return; }
       } catch { /* fall through */ }
       // 2) Platform sign-in (owner/admin/manager back-office identity)
       try {
@@ -166,7 +167,7 @@ function FrontDoorContent() {
   const handleSignOut = () => {
     if (typeof window !== "undefined" &&
         !window.confirm("Sign out of Front Door? Any unsaved work will be lost.")) return;
-    sessionStorage.removeItem("nups_session");
+    clearNUPSSession();
     navigate("/NUPSKiosk");
   };
 
