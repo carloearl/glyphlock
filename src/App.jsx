@@ -56,6 +56,7 @@ import Tonight from './pages/Tonight';
 import VenueAdminSettings from './pages/VenueAdminSettings';
 import MobileScanner from './pages/MobileScanner';
 import ContractsHub from './pages/ContractsHub';
+import DanceDollarsContract from './pages/DanceDollarsContract';
 import VIPBillPrinter from './pages/VIPBillPrinter';
 import GlyphBucksConsole from './pages/GlyphBucksConsole';
 import RegisterConsole from './pages/RegisterConsole';
@@ -145,7 +146,7 @@ const AuthenticatedApp = () => {
     // NUPS operator surface — kiosk-wrapped
     '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub', '/glyphbucks',
-    '/accounting', '/tonight', '/contracts', '/contractshub', '/vipbillprinter',
+    '/accounting', '/tonight', '/contracts', '/contractshub', '/vipbillprinter', '/dancedollarscontract',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
     '/accountinghub', '/admin/accounting-reports',
     '/admin/settlement', '/admin/payout-history', '/admin/activity-log',
@@ -288,6 +289,9 @@ const AuthenticatedApp = () => {
         {/* Dream Palace VIP GlyphBucks — physical bill printer */}
         <Route path="/VIPBillPrinter" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPBillPrinter /></RoleClassGuard>} />
         <Route path="/vipbillprinter" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPBillPrinter /></RoleClassGuard>} />
+        {/* Legacy Dance Dollars Agreement / Invoice — separate instrument */}
+        <Route path="/DanceDollarsContract" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><DanceDollarsContract /></RoleClassGuard>} />
+        <Route path="/dancedollarscontract" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><DanceDollarsContract /></RoleClassGuard>} />
         {/* DACO 003 §2: ADMIN-only admin/audit/registry surfaces. */}
         <Route path="/admin/settlement" element={<RoleClassGuard allow={["ADMIN"]}><DailySettlementDashboard /></RoleClassGuard>} />
         <Route path="/admin/payout-history" element={<RoleClassGuard allow={["ADMIN"]}><DriverPayoutHistory /></RoleClassGuard>} />
