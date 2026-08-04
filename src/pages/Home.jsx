@@ -120,6 +120,17 @@ export default function Home() {
 
       <main className="w-full relative" style={{ background: 'transparent', position: 'relative' }}>
         
+        {/* Introduction tagline — very top, below the nav bar */}
+        <div className="w-full text-center pt-6 sm:pt-8 pb-4 px-4">
+          <p className="text-sm sm:text-base md:text-lg font-semibold leading-relaxed max-w-4xl mx-auto text-white/90 uppercase tracking-[3px]">
+            GlyphLock — Quantum-Resistant Security. Protecting data, identity &amp; digital assets.
+          </p>
+          <p className="mt-3 text-xs sm:text-sm md:text-base text-white/60 max-w-3xl mx-auto">
+            Technology services built around your operations — computer systems, security, DevOps,
+            systems integration, and implementation of the GlyphLock and NUPS platforms.
+          </p>
+        </div>
+
         {/* Bootstrap Quote + Hero Section */}
         <section className="w-full">
           <ScrollSection>
