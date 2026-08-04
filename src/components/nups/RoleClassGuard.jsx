@@ -43,8 +43,9 @@ export default function RoleClassGuard({ allow = [], children }) {
             action: "validateSession", kiosk_session: token,
           });
           if (cancelled) return;
-          if (res.data?.valid && res.data?.role) {
-            const opCls = resolveRoleClass({ nupsUser: { role: res.data.role } });
+          const serverRole = res.data?.operator?.role || res.data?.role;
+          if (res.data?.valid && serverRole) {
+            const opCls = resolveRoleClass({ nupsUser: { role: serverRole } });
             if (opCls !== ROLE_CLASS.ADMIN) {
               setRoleClass(opCls);
               setStatus(allow.includes(opCls) ? "granted" : "denied");
