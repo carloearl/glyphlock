@@ -56,8 +56,10 @@ export default function KioskPinPad({ mode, onSuccess }) {
       const res = await base44.functions.invoke("nupsClockIn", { action: mode, pin });
       onSuccess(res.data);
     } catch (e) {
-      const msg = e?.response?.data?.error || "Unable to process. Try again.";
-      const data = e?.response?.data;
+      // The SDK surfaces non-2xx bodies differently across transports — check
+      // every shape so a 409 "already clocked in" still routes the operator.
+      const data = e?.response?.data || e?.data || e?.body || e;
+      const msg = data?.error || "Unable to process. Try again.";
       if (data?.already_clocked_in) {
         // Already clocked in — still route to the authorized workspace.
         onSuccess(data);
