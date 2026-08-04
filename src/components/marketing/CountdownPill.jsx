@@ -444,6 +444,12 @@ export default function CountdownPill() {
               SYSTEMS LIVE
             </div>
 
+            {/* Header tagline — above the GlyphLock banner */}
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.05em] text-violet-400 leading-relaxed font-mono mb-3">
+              QUANTUM-RESISTANT SECURITY · PROTECTING DATA, IDENTITY &amp; DIGITAL ASSETS<br />
+              TECHNOLOGY SERVICES BUILT AROUND YOUR OPERATIONS
+            </p>
+
             {/* Title */}
             <div className="mb-2">
               <span className="block text-base sm:text-lg md:text-xl font-black uppercase"
@@ -474,11 +480,6 @@ export default function CountdownPill() {
 
             <p className="text-[11px] sm:text-xs font-semibold text-white/80 mb-2">
               <span className="text-emerald-400 font-black" style={{ textShadow: '0 0 15px rgba(16,185,129,0.6)' }}>NOW ACTIVE</span>
-            </p>
-
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.05em] text-violet-400 leading-relaxed font-mono mb-3">
-              QUANTUM-RESISTANT SECURITY · PROTECTING DATA, IDENTITY & DIGITAL ASSETS<br />
-              TECHNOLOGY SERVICES BUILT AROUND YOUR OPERATIONS
             </p>
 
             <p className="text-[10px] sm:text-[11px] text-white/60 leading-relaxed max-w-md mx-auto lg:mx-0">
