@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
 import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
 import { saveActiveVenue } from '@/hooks/useActiveVenue';
+import { writeNUPSSession } from '@/lib/nups/persistentSession';
 
 // Role → destination page mapping
 // Every operator lands on NUPSHub — the new unified operator dashboard.
@@ -35,7 +36,7 @@ export default function NUPSLogin() {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState("");
 
-  // Store authenticated NUPS session in sessionStorage
+  // Keep the authenticated NUPS context until the user explicitly signs out.
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -52,7 +53,7 @@ export default function NUPSLogin() {
       }
 
       // Store NUPS session (not the platform session)
-      sessionStorage.setItem("nups_session", JSON.stringify(user));
+      writeNUPSSession(user);
 
       // TASK 2 — Activate venue after authenticated login
       try {
