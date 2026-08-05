@@ -107,10 +107,10 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
 
   const createTransaction = useMutation({
     mutationFn: (data) => base44.entities.POSTransaction.create(data),
-    onSuccess: (result) => {
+    onSuccess: (result, variables) => {
       queryClient.invalidateQueries(['pos-transactions']);
       queryClient.invalidateQueries(['active-batch']);
-      setLastTransaction(result);
+      setLastTransaction(result || variables);
       setShowReceiptModal(true);
       setCart([]);
       setSelectedCustomer(null);
@@ -573,7 +573,9 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
             retention_class: 'financial',
           });
         } catch (_) { /* observational — never block the door write */ }
-        setLastTransaction(gateResult.value);
+        // The gateway may acknowledge the write without echoing the record —
+        // fall back to the local payload so the digital receipt always shows.
+        setLastTransaction(gateResult.value || gateResult.record || transactionData);
         setShowReceiptModal(true);
         setCart([]);
         setSelectedCustomer(null);
