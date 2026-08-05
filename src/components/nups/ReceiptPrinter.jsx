@@ -6,6 +6,7 @@ import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import { computeReceiptHash } from "@/lib/nups/receiptHash";
 import { buildReceiptBreakdown, getCashierDisplay } from "@/lib/nups/receiptBreakdown";
 import { DEMO_RECEIPT_VENUE, isDemoTransaction } from "@/lib/nups/demoReceiptVenue";
+import { printHtml } from "@/lib/nups/printHtml";
 
 const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
 
@@ -230,11 +231,7 @@ export default function ReceiptPrinter({
       </html>
     `;
 
-    const printWindow = window.open('', '_blank', 'width=380,height=700,scrollbars=yes');
-    printWindow.document.write(receiptHtml);
-    printWindow.document.close();
-    printWindow.onload = () => { setTimeout(() => { printWindow.print(); }, 400); };
-    setTimeout(() => { printWindow.print(); }, 800);
+    printHtml(receiptHtml, { title: `Receipt - ${transaction.transaction_id}` });
   };
 
   if (!transaction) {
