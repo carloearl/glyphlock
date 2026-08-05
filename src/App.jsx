@@ -56,7 +56,6 @@ import Tonight from './pages/Tonight';
 import VenueAdminSettings from './pages/VenueAdminSettings';
 import MobileScanner from './pages/MobileScanner';
 import ContractsHub from './pages/ContractsHub';
-import DanceDollarsContract from './pages/DanceDollarsContract';
 import VIPBillPrinter from './pages/VIPBillPrinter';
 import GlyphBucksConsole from './pages/GlyphBucksConsole';
 import RegisterConsole from './pages/RegisterConsole';
@@ -290,8 +289,8 @@ const AuthenticatedApp = () => {
         <Route path="/VIPBillPrinter" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPBillPrinter /></RoleClassGuard>} />
         <Route path="/vipbillprinter" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><VIPBillPrinter /></RoleClassGuard>} />
         {/* Legacy Dance Dollars Agreement / Invoice — separate instrument */}
-        <Route path="/DanceDollarsContract" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><DanceDollarsContract /></RoleClassGuard>} />
-        <Route path="/dancedollarscontract" element={<RoleClassGuard allow={["MANAGER","ADMIN"]}><DanceDollarsContract /></RoleClassGuard>} />
+        <Route path="/DanceDollarsContract" element={<Navigate to="/Contracts?tab=dance_dollars" replace />} />
+        <Route path="/dancedollarscontract" element={<Navigate to="/Contracts?tab=dance_dollars" replace />} />
         {/* DACO 003 §2: ADMIN-only admin/audit/registry surfaces. */}
         <Route path="/admin/settlement" element={<RoleClassGuard allow={["ADMIN"]}><DailySettlementDashboard /></RoleClassGuard>} />
         <Route path="/admin/payout-history" element={<RoleClassGuard allow={["ADMIN"]}><DriverPayoutHistory /></RoleClassGuard>} />

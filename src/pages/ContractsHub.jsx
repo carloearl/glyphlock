@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, ScrollText, ClipboardCheck, Stamp } from "lucide-react";
+import { ShieldAlert, ScrollText, ClipboardCheck, Stamp, Coins, Printer } from "lucide-react";
 import { GLYPHLOCK_DISCLAIMER } from "@/constants/legalDisclaimer";
 
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
@@ -11,7 +11,7 @@ import EntertainerContract from "@/components/nups/EntertainerContract";
 import BigSpenderQuestionnaire from "@/components/nups/contracts/BigSpenderQuestionnaire";
 import BigSpenderLetter from "@/components/nups/contracts/BigSpenderLetter";
 import UltimateVIPContract from "@/components/nups/vip/UltimateVIPContract";
-import DemoContractSeeder from "@/components/nups/contracts/DemoContractSeeder";
+import DanceDollarsAgreement from "@/components/nups/contracts/DanceDollarsAgreement";
 import { useAdminOverride } from "@/lib/nups/adminView";
 
 /**
@@ -40,18 +40,23 @@ const TAB_ALIASES = {
   sealed: "vip",
   vipshow: "vip",
   archive: "vip",
+  dancedollars: "dance_dollars",
+  "dance-dollars": "dance_dollars",
+  dance_dollars: "dance_dollars",
 };
 
 const TABS = [
   { key: "vip", label: "VIP Contract", Icon: Stamp },
   { key: "big_spender", label: "Big Spender", Icon: ShieldAlert },
   { key: "entertainer", label: "Entertainer", Icon: ClipboardCheck },
+  { key: "dance_dollars", label: "Dance Dollars", Icon: Coins },
 ];
 
 const TAB_TITLES = {
   vip: "Contracts · VIP (One Contract for All Shows)",
   big_spender: "Contracts · Big Spender Protocol",
   entertainer: "Contracts · Entertainer",
+  dance_dollars: "Contracts · Dance Dollars Agreement / Invoice",
 };
 
 export default function ContractsHub() {
@@ -78,10 +83,6 @@ export default function ContractsHub() {
     >
       <div className="max-w-[1400px] mx-auto space-y-6">
         <RoleHomeButton />
-
-        {/* Demo seeding is an ADMIN-OVERRIDE control only — never shown in
-            the day-to-day staff/manager view (owner directive 2026-07-17). */}
-        {adminOverride && <DemoContractSeeder />}
 
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           {TABS.map(({ key, label, Icon }) => (
@@ -161,6 +162,27 @@ export default function ContractsHub() {
                 contractor agreement.
               </p>
               <EntertainerContract />
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "dance_dollars" && (
+          <Card className="bg-white/[0.02] border-cyan-500/20">
+            <CardContent className="p-4 sm:p-6 space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Coins className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-lg font-bold">Dance Dollars Agreement / Invoice</h2>
+                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-xs">
+                  Legacy Instrument
+                </Badge>
+                <button
+                  onClick={() => window.print()}
+                  className="ml-auto inline-flex items-center gap-2 min-h-[44px] px-4 rounded-lg bg-cyan-600 text-white font-bold print:hidden"
+                >
+                  <Printer className="w-4 h-4" /> Print
+                </button>
+              </div>
+              <DanceDollarsAgreement />
             </CardContent>
           </Card>
         )}
