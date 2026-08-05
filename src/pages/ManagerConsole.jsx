@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import {
   Users, Music, Clock, DollarSign, FileText, Activity, UserPlus, ChevronRight, ShieldCheck,
 } from "lucide-react";
+import UnifiedContractRegister from "@/components/nups/contracts/UnifiedContractRegister";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
 
@@ -300,6 +301,18 @@ export default function ManagerConsole() {
         <StatTile label="Contract Value Today" value={fmtMoney(todaysContracts.reduce((s, c) => s + (Number(c.total) || 0), 0))} Icon={ShieldCheck} tone="emerald" />
         <StatTile label="All Sealed Contracts" value={realContracts.length} Icon={Activity} tone="violet" />
       </div>
+
+      {/* Every agreement — VIP Show, VIP, Venue and Entertainer — in one register. */}
+      <Card className="bg-slate-900/60 border-slate-800">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-amber-400" /> All Contract Records
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <UnifiedContractRegister />
+        </CardContent>
+      </Card>
 
       {/* One-home rule: contract creation and search live on their canonical
           pages. This tab jumps there instead of re-embedding them. */}
