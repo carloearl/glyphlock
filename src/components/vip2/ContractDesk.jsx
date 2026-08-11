@@ -19,13 +19,20 @@ function Countdown({ end }) {
   return <span className={neg ? 'text-red-400 font-bold' : m < 5 ? 'text-amber-400 font-bold' : 'text-emerald-400'}>{neg ? 'OVER ' : ''}{m}:{String(s).padStart(2, '0')}</span>;
 }
 
-function Prompt({ fields, onSubmit, onCancel, label }) {
+function Prompt({ fields, onSubmit, onCancel, label, clickwrap }) {
   const [v, setV] = useState({});
+  const [agreed, setAgreed] = useState(!clickwrap);
   return (
     <div className="mt-2 p-2 bg-slate-800 rounded-lg space-y-2">
       {fields.map(f => <Input key={f.key} placeholder={f.label} value={v[f.key] || ''} onChange={e => setV({ ...v, [f.key]: e.target.value })} className="bg-slate-900 border-slate-700" />)}
+      {clickwrap && (
+        <label className="flex items-start gap-2 text-xs text-slate-300 cursor-pointer">
+          <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="mt-0.5 accent-amber-400" />
+          <span>{clickwrap}</span>
+        </label>
+      )}
       <div className="flex gap-2">
-        <Button size="sm" onClick={() => onSubmit(v)} className="bg-purple-700 min-h-[44px]">{label}</Button>
+        <Button size="sm" disabled={!agreed} onClick={() => onSubmit(v)} className="bg-purple-700 min-h-[44px] disabled:opacity-40">{label}</Button>
         <Button size="sm" variant="outline" onClick={onCancel} className="border-slate-700 text-slate-300 min-h-[44px]">Cancel</Button>
       </div>
     </div>
@@ -95,7 +102,9 @@ export default function ContractDesk({ state, refresh }) {
             </div>
 
             {prompt?.id === id && prompt.kind.startsWith('sign-') && (
-              <Prompt label="Capture signature" fields={[{ key: 'name', label: 'Signer full name' }]}
+              <Prompt label="Capture signature"
+                clickwrap="Clickwrap acceptance: by signing electronically, the signer agrees to the VIP contract terms. Acceptance is timestamped and logged."
+                fields={[{ key: 'name', label: 'Signer full name' }]}
                 onSubmit={v => act('sign', { contract_record_id: id, role: prompt.kind.slice(5), name: v.name })}
                 onCancel={() => setPrompt(null)} />
             )}

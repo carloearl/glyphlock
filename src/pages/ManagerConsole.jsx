@@ -28,8 +28,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Users, Music, Clock, DollarSign, FileText, Activity, UserPlus, ChevronRight, ShieldCheck,
+  Users, Music, Clock, DollarSign, FileText, Activity, UserPlus, ChevronRight, ShieldCheck, Banknote,
 } from "lucide-react";
+import LegacyPressPanel from "@/components/nups/LegacyPressPanel";
 import UnifiedContractRegister from "@/components/nups/contracts/UnifiedContractRegister";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
@@ -39,6 +40,7 @@ const TABS = [
   { key: "staff",        label: "Staff & PINs", icon: UserPlus },
   { key: "entertainers", label: "Entertainers", icon: Music },
   { key: "contracts",    label: "Contracts",    icon: FileText },
+  { key: "legacy",       label: "Legacy & Press", icon: Banknote },
 ];
 
 function fmtMoney(n) {
@@ -350,6 +352,7 @@ export default function ManagerConsole() {
       case "staff":        return renderStaff();
       case "entertainers": return <OnboardingPacket />;
       case "contracts":    return renderContracts();
+      case "legacy":       return <LegacyPressPanel />;
       default:             return renderTonight();
     }
   };

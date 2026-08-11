@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
-import { Sparkles, User, Clock, DoorOpen, Wrench, Droplets } from "lucide-react";
+import { Clock } from "lucide-react";
 import RoomTimingModal from "@/components/vip2/RoomTimingModal";
 
 /**
- * VIPLiveBoard — read-only glass board of who's in VIP right now.
- * For DJ / Manager / Hostess / Owner eyes: room · entertainer · guest ·
- * show start · duration · live time remaining. Nothing else.
+ * VIPLiveBoard — compact table rows (owner directive 2026-08-11: cards removed).
+ * room · entertainer · guest · started · duration · live remaining timer.
+ * Tap a row to open the timing modal (start / adjust / extend / receipt).
  */
 export default function VIPLiveBoard() {
   const [now, setNow] = useState(Date.now());
@@ -35,8 +35,15 @@ export default function VIPLiveBoard() {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {rooms.map((room) => <RoomGlassCard key={room.id} room={room} now={now} onOpen={() => setSelected(room)} />)}
+      <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden">
+        {/* header row */}
+        <div className="hidden md:grid grid-cols-[110px_1fr_1fr_90px_80px_110px] gap-3 px-4 py-2 border-b border-white/10 text-[10px] uppercase tracking-widest text-slate-500">
+          <span>Room</span><span>Entertainer</span><span>Guest</span><span>Started</span><span>Duration</span>
+          <span className="text-right flex items-center justify-end gap-1"><Clock className="w-3 h-3" /> Remaining</span>
+        </div>
+        {rooms.map((room) => (
+          <RoomRow key={room.id} room={room} now={now} onOpen={() => setSelected(room)} />
+        ))}
       </div>
       <RoomTimingModal
         room={selected}
@@ -47,25 +54,19 @@ export default function VIPLiveBoard() {
   );
 }
 
-const STATUS_META = {
-  available:   { label: "Available",   icon: DoorOpen, chip: "text-emerald-300 border-emerald-400/30 bg-emerald-400/10" },
-  cleaning:    { label: "Cleaning",    icon: Droplets, chip: "text-sky-300 border-sky-400/30 bg-sky-400/10" },
-  maintenance: { label: "Maintenance", icon: Wrench,   chip: "text-amber-300 border-amber-400/30 bg-amber-400/10" },
+const STATUS_CHIP = {
+  available:   "text-emerald-300 border-emerald-400/30 bg-emerald-400/10",
+  cleaning:    "text-sky-300 border-sky-400/30 bg-sky-400/10",
+  maintenance: "text-amber-300 border-amber-400/30 bg-amber-400/10",
 };
 
-function RoomGlassCard({ room, now, onOpen }) {
+function RoomRow({ room, now, onOpen }) {
   const occupied = room.status === "occupied";
-  const meta = STATUS_META[room.status] || STATUS_META.available;
-
-  // Live countdown
   const start = room.start_time ? new Date(room.start_time).getTime() : null;
   const end = room.end_time ? new Date(room.end_time).getTime() : null;
-  const msLeft = end ? end - now : null;
-  const overtime = occupied && msLeft !== null && msLeft < 0;
-  const warning = occupied && msLeft !== null && msLeft >= 0 && msLeft < 5 * 60 * 1000;
-  const pct = occupied && start && end && end > start
-    ? Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
-    : 0;
+  const msLeft = occupied && end ? end - now : null;
+  const overtime = msLeft !== null && msLeft < 0;
+  const warning = msLeft !== null && msLeft >= 0 && msLeft < 5 * 60 * 1000;
 
   return (
     <div
@@ -73,93 +74,32 @@ function RoomGlassCard({ room, now, onOpen }) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter") onOpen?.(); }}
-      className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl p-5 transition-all cursor-pointer hover:border-purple-300/40 ${
-        occupied
-          ? overtime
-            ? "bg-rose-500/[0.06] border-rose-400/25 shadow-[0_8px_40px_-12px_rgba(244,63,94,0.35)]"
-            : "bg-white/[0.05] border-purple-300/20 shadow-[0_8px_40px_-12px_rgba(168,85,247,0.35)]"
-          : "bg-white/[0.03] border-white/10"
+      className={`grid grid-cols-2 md:grid-cols-[110px_1fr_1fr_90px_80px_110px] gap-x-3 gap-y-1 px-4 py-3 min-h-[44px] items-center cursor-pointer border-b border-white/5 last:border-0 transition-colors hover:bg-white/[0.05] ${
+        occupied ? (overtime ? "bg-rose-500/[0.07]" : "bg-purple-500/[0.05]") : ""
       }`}
     >
-      {/* soft glow accent */}
-      <div className={`pointer-events-none absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl ${
-        occupied ? (overtime ? "bg-rose-500/20" : "bg-purple-500/20") : "bg-white/5"
-      }`} />
-
-      {/* header */}
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-500">{room.room_number}</p>
-          <h3 className="text-lg font-semibold text-white tracking-tight">{room.room_name || `Room ${room.room_number}`}</h3>
-        </div>
-        {occupied ? (
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border ${
-            overtime ? "text-rose-300 border-rose-400/30 bg-rose-400/10" : "text-purple-200 border-purple-300/30 bg-purple-400/10"
-          }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${overtime ? "bg-rose-400" : "bg-purple-300 animate-pulse"}`} />
-            {overtime ? "Overtime" : "In Session"}
-          </span>
-        ) : (
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border ${meta.chip}`}>
-            <meta.icon className="w-3 h-3" /> {meta.label}
-          </span>
-        )}
+      <div>
+        <span className="text-white font-semibold text-sm">{room.room_name || `Room ${room.room_number}`}</span>
+        <span className="text-slate-500 font-mono text-[10px] ml-1.5">{room.room_number}</span>
       </div>
-
       {occupied ? (
         <>
-          {/* entertainer + guest */}
-          <div className="space-y-2.5 mb-4">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-purple-300/70 shrink-0" />
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500">Entertainer</p>
-                <p className="text-base font-semibold text-white truncate">{room.entertainer_name || "—"}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <User className="w-4 h-4 text-slate-400/70 shrink-0" />
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500">Guest</p>
-                <p className="text-sm text-slate-200 truncate">{room.guest_name || "—"}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* times */}
-          <div className="flex items-end justify-between gap-3 mb-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500">Started</p>
-              <p className="text-sm text-slate-200">{start ? format(start, "h:mm a") : "—"}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500">Duration</p>
-              <p className="text-sm text-slate-200">{room.duration_minutes ? `${room.duration_minutes} min` : "—"}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 flex items-center justify-end gap-1">
-                <Clock className="w-3 h-3" /> Remaining
-              </p>
-              <p className={`text-xl font-mono font-semibold tabular-nums ${
-                overtime ? "text-rose-300" : warning ? "text-amber-300" : "text-white"
-              }`}>
-                {msLeft !== null ? formatRemaining(msLeft) : "—"}
-              </p>
-            </div>
-          </div>
-
-          {/* progress */}
-          <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-1000 ${
-                overtime ? "bg-rose-400" : warning ? "bg-amber-400" : "bg-purple-400"
-              }`}
-              style={{ width: `${overtime ? 100 : pct}%` }}
-            />
-          </div>
+          <span className="text-sm text-purple-200 font-medium truncate">{room.entertainer_name || "—"}</span>
+          <span className="text-sm text-slate-300 truncate">{room.guest_name || "—"}</span>
+          <span className="text-xs text-slate-400">{start ? format(start, "h:mm a") : "—"}</span>
+          <span className="text-xs text-slate-400">{room.duration_minutes ? `${room.duration_minutes}m` : "—"}</span>
+          <span className={`md:text-right font-mono font-semibold tabular-nums text-base ${
+            overtime ? "text-rose-300" : warning ? "text-amber-300" : "text-white"
+          }`}>
+            {msLeft !== null ? formatRemaining(msLeft) : "—"}
+          </span>
         </>
       ) : (
-        <p className="text-sm text-slate-500 py-4">No active session</p>
+        <div className="md:col-span-5 flex md:justify-start justify-end">
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border capitalize ${STATUS_CHIP[room.status] || STATUS_CHIP.available}`}>
+            {room.status || "available"}
+          </span>
+        </div>
       )}
     </div>
   );

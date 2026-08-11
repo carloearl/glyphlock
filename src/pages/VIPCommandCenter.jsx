@@ -9,6 +9,7 @@ import VIPUnifiedView from '@/components/vip2/VIPUnifiedView';
 import CommandCenterMenu from '@/components/vip2/CommandCenterMenu';
 import UnifiedGlyphBucksTab from '@/components/nups/glyphbucks/UnifiedGlyphBucksTab';
 import UltimateVIPContract from '@/components/nups/vip/UltimateVIPContract';
+import LegacyPressPanel from '@/components/nups/LegacyPressPanel';
 import { useAdminOverride } from '@/lib/nups/adminView';
 import { base44 } from '@/api/base44Client';
 import { useActiveVenue } from '@/hooks/useActiveVenue';
@@ -31,6 +32,7 @@ const VIEW_TITLES = {
   Search: 'Contract Search',
   GlyphBucks: 'GlyphBucks',
   Contracts: 'VIP Contracts',
+  Press: 'Legacy Contract & GlyphBucks Press',
 };
 // VIP Command is live-ops only — no config-gated CREATION views remain here.
 const CONFIG_GATED = [];
@@ -43,6 +45,7 @@ const LEGACY_TAB_MAP = {
   Desk: 'Desk', Rooms: 'Rooms', People: 'People', Search: 'Search',
   GlyphBucks: 'GlyphBucks', Contracts: 'Contracts',
   vip: 'Contracts', contracts: 'Contracts',
+  Press: 'Press', press: 'Press',
 };
 
 export default function VIPCommandCenter() {
@@ -209,6 +212,7 @@ export default function VIPCommandCenter() {
                 </details>
               </div>
             )}
+            {view === 'Press' && <LegacyPressPanel />}
             {view === 'People' && <PeoplePanel state={safeState} refresh={refresh} />}
             {view === 'Search' && <ContractSearch />}
           </>
