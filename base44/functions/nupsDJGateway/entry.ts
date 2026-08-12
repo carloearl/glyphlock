@@ -187,15 +187,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: `Unsupported DJ gateway action: ${action}` }, { status: 400 });
     }
 
-    const [trackRows, pendingRequests, personas, crowdRows, analytics, entertainers] = await Promise.all([
+    const [trackRows, pendingRequests, personas, crowdRows, analytics, entertainers, entertainerShifts] = await Promise.all([
       E.Track.list("-created_date", 500).catch(() => []),
       E.JukeboxRequest.filter({ status: "pending" }, "-created_date", 100).catch(() => []),
       E.AIDJPersona.list("-created_date", 100).catch(() => []),
       E.CrowdMetrics.list("-created_date", 50).catch(() => []),
       E.PerformanceAnalytics.list("-last_played", 500).catch(() => []),
       E.Entertainer.list("-created_date", 500).catch(() => []),
+      E.EntertainerShift.list("-check_in_time", 200).catch(() => []),
     ]);
 
+    const activeStatuses = new Set(["checked_in", "on_floor", "in_vip", "on_break"]);
+    const activeEntertainerShifts = (entertainerShifts || []).filter((shift) =>
+      activeStatuses.has(shift.status) && (!venueId || !shift.venue_id || shift.venue_id === venueId)
+    );
     const { tracks, duplicates } = dedupeTracks(trackRows || []);
 
     return Response.json({
@@ -210,6 +215,7 @@ Deno.serve(async (req) => {
       crowd_metrics: crowdRows || [],
       performance_analytics: analytics || [],
       entertainers: entertainers || [],
+      active_entertainer_shifts: activeEntertainerShifts,
       quality: {
         raw_track_count: (trackRows || []).length,
         unique_track_count: tracks.length,
