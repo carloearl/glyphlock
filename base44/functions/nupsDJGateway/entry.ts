@@ -76,6 +76,37 @@ Deno.serve(async (req) => {
       return Response.json({ error: "DJ session or NUPS administrator authorization required." }, { status: 403 });
     }
 
+    const venueId = operator?.venue_id || body.venue_id || null;
+
+    if (action === "savePlaylist") {
+      const playlist = body.playlist || {};
+      if (!playlist.entertainer_id) {
+        return Response.json({ error: "entertainer_id is required to save a playlist." }, { status: 400 });
+      }
+      const status = ["active", "completed", "archived"].includes(playlist.status) ? playlist.status : "active";
+      const created = await E.Playlist.create({
+        name: String(playlist.name || `Auto-DJ ${new Date().toISOString()}`).slice(0, 160),
+        entertainer_id: String(playlist.entertainer_id).slice(0, 160),
+        persona_id: playlist.persona_id ? String(playlist.persona_id).slice(0, 160) : undefined,
+        session_id: playlist.session_id ? String(playlist.session_id).slice(0, 160) : (operator?.shift_id || undefined),
+        ordered_tracks: Array.isArray(playlist.ordered_tracks) ? playlist.ordered_tracks.slice(0, 200) : [],
+        crowd_energy_score: Number.isFinite(Number(playlist.crowd_energy_score)) ? Number(playlist.crowd_energy_score) : 5,
+        generation_timestamp: playlist.generation_timestamp || new Date().toISOString(),
+        status,
+      });
+      return Response.json({ success: true, playlist: created });
+    }
+
+    if (action === "setJukeboxStatus") {
+      const requestId = String(body.request_id || "");
+      const status = String(body.status || "");
+      if (!requestId || !["pending", "played", "rejected"].includes(status)) {
+        return Response.json({ error: "Valid request_id and Jukebox status are required." }, { status: 400 });
+      }
+      const updated = await E.JukeboxRequest.update(requestId, { status });
+      return Response.json({ success: true, request: updated });
+    }
+
     if (action !== "snapshot") {
       return Response.json({ error: `Unsupported DJ gateway action: ${action}` }, { status: 400 });
     }
@@ -89,7 +120,6 @@ Deno.serve(async (req) => {
     ]);
 
     const { tracks, duplicates } = dedupeTracks(trackRows || []);
-    const venueId = operator?.venue_id || body.venue_id || null;
 
     return Response.json({
       success: true,
