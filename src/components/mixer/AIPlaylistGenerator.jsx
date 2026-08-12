@@ -11,15 +11,16 @@ import { Sparkles, Loader2, Plus, Music, CheckCircle2, XCircle } from "lucide-re
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { VIBE_META } from "@/components/mixer/types/mixerTypes";
-import { searchYouTubeMusic } from "@/lib/youtubeMusic";
+import { providerLabel, searchMusicSources } from "@/lib/musicDiscovery";
 import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 
-// Resolve AI-suggested track → real playable YouTube video ID (client-side).
-// Returns null on failure (track is still added, just without a playable link).
-async function resolveToYouTube(query) {
+// Resolve an AI suggestion through the multi-source NUPS music discovery chain.
+// YouTube is preferred when available; Jamendo/direct audio and the local NUPS
+// library keep the booth playable when Google credentials are unavailable.
+async function resolvePlayableSource(query) {
   try {
-    const items = await searchYouTubeMusic(query, { maxResults: 1 });
-    return items[0]?.id || null;
+    const { results } = await searchMusicSources(query, { limit: 3 });
+    return results.find((item) => item.playable !== false && (item.source === "youtube" || item.audio_url || item.youtube_video_id || item.embed_url)) || null;
   } catch (_) {
     return null;
   }
@@ -82,19 +83,19 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
         const resolved = await Promise.all(
           data.playlist.map(async (s, i) => {
             const q = s.youtubeSearchQuery || `${s.title} ${s.artist}`;
-            const videoId = await resolveToYouTube(q);
+            const media = await resolvePlayableSource(q);
             setResolveProgress(p => ({ ...p, done: p.done + 1 }));
-            return { ...s, resolvedVideoId: videoId };
+            return { ...s, resolvedMedia: media };
           })
         );
         setResolving(false);
-        const okCount = resolved.filter(r => r.resolvedVideoId).length;
+        const okCount = resolved.filter(r => r.resolvedMedia).length;
         if (okCount < resolved.length) {
-          toast.info(`Resolved ${okCount}/${resolved.length} tracks to YouTube`);
+          toast.info(`Resolved ${okCount}/${resolved.length} tracks across available music sources`);
         }
         setResults({ ...data, playlist: resolved });
-        // Only select tracks that resolved (those will actually play)
-        setSelected(new Set(resolved.map((r, i) => r.resolvedVideoId ? i : null).filter(i => i !== null)));
+        // Only select tracks with a playable source.
+        setSelected(new Set(resolved.map((r, i) => r.resolvedMedia ? i : null).filter(i => i !== null)));
       } else {
         toast.error("AI returned empty playlist");
       }
@@ -117,16 +118,18 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
   const handleAddSelected = async () => {
     if (!results?.playlist) return;
     const selectedSongs = results.playlist.filter((_, i) => selected.has(i));
-    const songs = selectedSongs.map(s => ({
-      title: s.title,
-      artist: s.artist,
-      vibeTag: s.vibeTag,
-      energyLevel: s.energyLevel,
-      // Real, playable YouTube URL — not a search results page
-      youtubeUrl: s.resolvedVideoId
-        ? `https://www.youtube.com/watch?v=${s.resolvedVideoId}`
-        : "",
-    }));
+    const songs = selectedSongs.map(s => {
+      const media = s.resolvedMedia || {};
+      const videoId = media.source === "youtube" ? (media.source_id || media.youtube_video_id || String(media.id || "").replace(/^yt-/, "")) : "";
+      return {
+        title: s.title,
+        artist: s.artist,
+        vibeTag: s.vibeTag,
+        energyLevel: s.energyLevel,
+        youtubeUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : "",
+        uploadUrl: media.source !== "youtube" ? (media.audio_url || "") : "",
+      };
+    });
 
     // Persist resolved AI picks into the authoritative Track Library as well as
     // the local performance deck. The gateway de-duplicates by YouTube ID.
@@ -139,21 +142,29 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
       cooldown: "chill",
     };
     await Promise.all(selectedSongs
-      .filter((song) => song.resolvedVideoId)
-      .map((song) => invokeDJGateway("createTrack", {
-        track: {
-          title: song.title,
-          artist: song.artist,
-          source: "youtube",
-          source_id: song.resolvedVideoId,
-          embed_url: `https://www.youtube.com/embed/${song.resolvedVideoId}`,
-          mood: moodByVibe[song.vibeTag] || "neutral",
-          active: true,
-        },
-      }).catch(() => null)));
+      .filter((song) => song.resolvedMedia)
+      .map((song) => {
+        const media = song.resolvedMedia || {};
+        const videoId = media.source === "youtube" ? (media.source_id || media.youtube_video_id || String(media.id || "").replace(/^yt-/, "")) : "";
+        return invokeDJGateway("createTrack", {
+          track: {
+            title: song.title,
+            artist: song.artist,
+            source: videoId ? "youtube" : "manual",
+            source_id: videoId || `${media.source || "source"}:${media.source_id || media.id || crypto.randomUUID()}`,
+            embed_url: videoId ? `https://www.youtube.com/embed/${videoId}` : undefined,
+            file_url: videoId ? undefined : (media.audio_url || undefined),
+            genre: media.genre || undefined,
+            duration: media.duration || undefined,
+            thumbnail_url: media.thumbnail || undefined,
+            mood: moodByVibe[song.vibeTag] || "neutral",
+            active: true,
+          },
+        }).catch(() => null);
+      }));
 
     onAddSongs(songs);
-    toast.success(`Added ${songs.length} playable songs to deck + NUPS library`);
+    toast.success(`Added ${songs.length} playable songs from available sources to deck + NUPS library`);
     setResults(null);
     onClose();
   };
@@ -198,11 +209,11 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
               {generating
                 ? "Generating…"
                 : resolving
-                ? `Resolving tracks to YouTube… ${resolveProgress.done}/${resolveProgress.total}`
+                ? `Resolving playable sources… ${resolveProgress.done}/${resolveProgress.total}`
                 : "Generate Playlist"}
             </Button>
             <p className="text-[10px] text-slate-500 text-center">
-              Each track is resolved to a real YouTube video so it actually plays on the mixer.
+              NUPS resolves each track through available providers: YouTube, Jamendo/direct audio, then the local Track Library.
             </p>
           </div>
         )}
@@ -234,10 +245,10 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-white truncate flex items-center gap-1.5">
                         {song.title}
-                        {song.resolvedVideoId ? (
-                          <CheckCircle2 className="w-3 h-3 text-green-400 flex-shrink-0" title="Playable on mixer" />
+                        {song.resolvedMedia ? (
+                          <CheckCircle2 className="w-3 h-3 text-green-400 flex-shrink-0" title={`Playable via ${providerLabel(song.resolvedMedia.source)}`} />
                         ) : (
-                          <XCircle className="w-3 h-3 text-red-400/70 flex-shrink-0" title="Not found on YouTube" />
+                          <XCircle className="w-3 h-3 text-red-400/70 flex-shrink-0" title="No playable source found" />
                         )}
                       </p>
                       <p className="text-[10px] text-slate-500 truncate">{song.artist}</p>
