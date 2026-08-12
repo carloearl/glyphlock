@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
 import { Search, Youtube, Plus, Loader2, GripVertical, Disc } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,14 +52,16 @@ export default function MusicSearchTab() {
   }
 
   async function importTrack(r) {
-    await base44.entities.Track.create({
-      title: r.title,
-      artist: r.artist,
-      source: 'youtube',
-      source_id: r.id,
-      thumbnail_url: r.thumbnail,
-      embed_url: r.embed_url,
-      active: true,
+    await invokeDJGateway('createTrack', {
+      track: {
+        title: r.title,
+        artist: r.artist,
+        source: 'youtube',
+        source_id: r.id,
+        thumbnail_url: r.thumbnail,
+        embed_url: r.embed_url,
+        active: true,
+      },
     });
     setImported(prev => new Set([...prev, r.id]));
     toast.success(`Imported "${r.title.slice(0, 40)}…"`);
