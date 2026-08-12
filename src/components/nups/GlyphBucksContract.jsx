@@ -262,39 +262,42 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     setPaymentProcessing(true);
     
     try {
-      const paymentResponse = await base44.functions.invoke('processGlyphBucksPayment', {
+      // NUPS overlays the venue's existing processor by default. The venue's
+      // terminal has already moved/authorized the money; NUPS captures the
+      // processor evidence and binds it to this contract. Native processor APIs
+      // are optional integrations, not a requirement for this workflow.
+      const paymentResponse = await base44.functions.invoke('createPaymentRecord', {
+        provider_code: 'external_terminal',
+        processor_reference: processorReference.trim(),
+        approval_code: approvalCode.trim(),
         amount: grandTotal,
+        payment_method: 'Credit Card',
+        card_last_four: String(cardLastSix).replace(/\D/g, '').slice(-4),
         order_number: orderNumber,
         customer_name: customerName,
-        customer_email: null,
-        description: `${venueName} Order ${orderNumber} - GlyphBucks $${glyphbucksValue}`
+        create_linked_order: false,
+        metadata: {
+          processor_name: processorName.trim() || 'Venue existing processor',
+          capture_mode: 'existing_processor_overlay',
+          venue_name: venueName
+        }
       });
 
       if (!paymentResponse.data.success) {
-        throw new Error(paymentResponse.data.error || "Payment processing failed");
+        throw new Error(paymentResponse.data.message || paymentResponse.data.error || "Processor evidence capture failed");
       }
 
-      const { client_secret, payment_intent_id } = paymentResponse.data;
-
-      const confirmResponse = await base44.functions.invoke('confirmGlyphBucksPayment', {
-        payment_intent_id,
-        order_number: orderNumber
-      });
-
-      if (!confirmResponse.data.success) {
-        throw new Error(confirmResponse.data.error || "Payment confirmation failed");
-      }
-
-      const { approval_code, processor_reference, card_last_four } = confirmResponse.data;
+      const confirmedApprovalCode = paymentResponse.data.approval_code || approvalCode.trim();
+      const confirmedCardLastFour = paymentResponse.data.card_last_four || String(cardLastSix).replace(/\D/g, '').slice(-4);
       setPaymentConfirmed(true);
       setPaymentProcessing(false);
+      setApprovalCode(confirmedApprovalCode);
 
-      setApprovalCode(approval_code);
-      if (card_last_four && !cardLastSix) {
-        setCardLastSix(card_last_four);
+      if (confirmedCardLastFour && !cardLastSix) {
+        setCardLastSix(confirmedCardLastFour);
       }
 
-      toast.success(`Payment approved: ${approval_code}`);
+      toast.success(`Existing processor transaction linked: ${confirmedApprovalCode}`);
 
       const order = await base44.entities.GlyphBucksOrder.create({
       order_number: orderNumber,
