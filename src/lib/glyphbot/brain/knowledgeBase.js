@@ -37,8 +37,8 @@ export const GLYPHLOCK_KNOWLEDGE = {
     'Hash generation and blockchain proof verification',
   ],
   contact: {
-    email: 'glyphlock@gmail.com',
-    phone: '+1-424-246-6499',
+    email: 'carloearl@glyphlock.com',
+    phone: '+1-480-886-5588',
     support: 'GlyphBot Jr (on-site chat) is the fastest support channel; email for billing, technical, or partnership inquiries.',
   },
   explicitly_unknown: [
