@@ -6,10 +6,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // client payment data. Stripe is an adapter, not the throne.
 //
 // Adapter routing:
-//   stripe         → Stripe PaymentIntent API retrieval (lazy import)
-//   manual_external → Manager enters approval code, PIN-verified
-//   cash            → Simple confirmation, no processor
-//   clover/godaddy/elavon/tsys → route to external_manual for now
+//   external_terminal → Existing venue processor/terminal; NUPS records verified receipt evidence
+//   stripe            → Optional native Stripe PaymentIntent API retrieval (lazy import)
+//   manual_external   → Manager-entered exception/override path, PIN-verified
+//   cash              → Simple confirmation, no processor
+//   legacy named provider codes remain accepted only for backward-compatible records
 //
 // CRITICAL: No literal STRIPE_SECRET_KEY string in source — the secret name
 // is read dynamically from PaymentProvider.secret_name so non-Stripe paths
@@ -129,7 +130,8 @@ Deno.serve(async (req) => {
       denominations,
       customer_name,
       manager_pin,
-      metadata
+      metadata,
+      create_linked_order = true
     } = payload;
 
     const venueConfig = await resolveVenueConfig(base44, venue_id);
@@ -247,24 +249,42 @@ Deno.serve(async (req) => {
         confirmedStatus = 'FAILED';
       }
 
+    } else if (resolvedProvider === 'external_terminal') {
+      // ── Existing Processor Overlay ──
+      // NUPS does NOT move the money on this path. The venue's existing terminal
+      // already authorized/captured the transaction; NUPS records the processor
+      // reference + approval code as evidence and binds it to the NUPS record.
+      verificationMethod = 'terminal_scan';
+      confirmedStatus = 'EXTERNAL_CONFIRMED';
+      if (!approval_code) {
+        verificationError = 'Approval code required from the existing processor/terminal';
+        confirmedStatus = 'FAILED';
+      }
+      if (!processor_reference) {
+        verificationError = 'Processor or terminal reference required';
+        confirmedStatus = 'FAILED';
+      }
+      if (!amount || amount <= 0) {
+        verificationError = 'Amount required for external payment';
+        confirmedStatus = 'FAILED';
+      }
+
     } else if (resolvedProvider === 'manual_external' || resolvedProvider === 'clover' || resolvedProvider === 'godaddy' || resolvedProvider === 'elavon' || resolvedProvider === 'tsys') {
-      // ── External/Manual Adapter ──
+      // ── Legacy External / Manager Override Adapter ──
       if (venueConfig.external_approval_required || resolvedProvider === 'manual_external') {
         if (!manager_pin) {
-          verificationError = 'Manager PIN required for external payment';
+          verificationError = 'Manager PIN required for manual external payment';
+          confirmedStatus = 'FAILED';
+        } else if (user.role === 'staff') {
+          verificationError = 'Staff cannot confirm a manual external override without manager authorization';
           confirmedStatus = 'FAILED';
         } else {
-          if (user.role === 'staff') {
-            verificationError = 'Staff cannot confirm external payments without manager authorization';
-            confirmedStatus = 'FAILED';
-          } else {
-            verificationMethod = 'manager_manual';
-            confirmedStatus = 'EXTERNAL_CONFIRMED';
-          }
+          verificationMethod = 'manager_manual';
+          confirmedStatus = 'EXTERNAL_CONFIRMED';
         }
       } else {
         verificationMethod = 'terminal_scan';
-        confirmedStatus = 'CONFIRMED';
+        confirmedStatus = 'EXTERNAL_CONFIRMED';
       }
 
       if (!approval_code && confirmedStatus !== 'FAILED') {
@@ -328,40 +348,45 @@ Deno.serve(async (req) => {
 
     await logVerificationStep(base44, record_id, venue_id, 'record_confirmed', resolvedProvider, 'PENDING', confirmedStatus, user.email, user.role, mode, null, rawResponseHash);
 
-    // ── CREATE / UPDATE GlyphBucksOrder ─────────────────────────
+    // ── OPTIONAL CREATE / UPDATE GlyphBucksOrder ────────────────
+    // Some full contract flows create their richer order record themselves.
+    // They pass create_linked_order=false so PaymentRecord remains the proof
+    // layer without creating a duplicate lightweight order.
     let linkedOrder = null;
-    try {
-      const existingOrders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
-        card_token: processor_reference, venue_id
-      }, null, 1);
+    if (create_linked_order) {
+      try {
+        const existingOrders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
+          card_token: processor_reference, venue_id
+        }, null, 1);
 
-      if (existingOrders && existingOrders.length > 0) {
-        linkedOrder = existingOrders[0];
-        await base44.asServiceRole.entities.GlyphBucksOrder.update(linkedOrder.id, {
-          status: 'COMPLETE',
-          grand_total: verifiedAmount,
-          approval_code: verifiedApprovalCode,
-          card_last_four: verifiedCardLast4,
-          payment_type: resolvedProvider.toUpperCase()
-        });
-      } else {
-        linkedOrder = await base44.asServiceRole.entities.GlyphBucksOrder.create({
-          order_number: order_number || processor_reference,
-          venue_id,
-          status: 'COMPLETE',
-          card_token: processor_reference,
-          approval_code: verifiedApprovalCode,
-          card_last_four: verifiedCardLast4,
-          grand_total: verifiedAmount,
-          payment_type: resolvedProvider.toUpperCase(),
-          created_by: user.email,
-          created_at: new Date().toISOString(),
-          denomination: denominations?.[0]?.denomination || null,
-          quantity: denominations?.[0]?.quantity || null
-        });
+        if (existingOrders && existingOrders.length > 0) {
+          linkedOrder = existingOrders[0];
+          await base44.asServiceRole.entities.GlyphBucksOrder.update(linkedOrder.id, {
+            status: 'COMPLETE',
+            grand_total: verifiedAmount,
+            approval_code: verifiedApprovalCode,
+            card_last_four: verifiedCardLast4,
+            payment_type: resolvedProvider.toUpperCase()
+          });
+        } else {
+          linkedOrder = await base44.asServiceRole.entities.GlyphBucksOrder.create({
+            order_number: order_number || processor_reference,
+            venue_id,
+            status: 'COMPLETE',
+            card_token: processor_reference,
+            approval_code: verifiedApprovalCode,
+            card_last_four: verifiedCardLast4,
+            grand_total: verifiedAmount,
+            payment_type: resolvedProvider.toUpperCase(),
+            created_by: user.email,
+            created_at: new Date().toISOString(),
+            denomination: denominations?.[0]?.denomination || null,
+            quantity: denominations?.[0]?.quantity || null
+          });
+        }
+      } catch (orderErr) {
+        await logVerificationStep(base44, record_id, venue_id, 'record_failed', resolvedProvider, confirmedStatus, confirmedStatus, user.email, user.role, mode, `Order link failed: ${orderErr.message}`, null);
       }
-    } catch (orderErr) {
-      await logVerificationStep(base44, record_id, venue_id, 'record_failed', resolvedProvider, confirmedStatus, confirmedStatus, user.email, user.role, mode, `Order link failed: ${orderErr.message}`, null);
     }
 
     if (linkedOrder) {
