@@ -6,9 +6,9 @@ export default function StructuredDataOrg() {
     const orgSchema = {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "GlyphLock Security LLC",
+      "name": "GlyphLock LLC",
       "alternateName": "GlyphLock",
-      "legalName": "GlyphLock Security LLC",
+      "legalName": "GlyphLock LLC",
       "url": "https://glyphlock.io",
       "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
       "description": "Enterprise-grade quantum-resistant cybersecurity architecture combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant AI governance framework. Built for high-security environments and structured compliance readiness.",
@@ -48,7 +48,7 @@ export default function StructuredDataOrg() {
           "@type": "ContactPoint",
           "telephone": "+1-424-246-6499",
           "contactType": "customer service",
-          "email": "glyphlock@gmail.com",
+          "email": "carloearl@glyphlock.com",
           "availableLanguage": ["en"],
           "areaServed": "Worldwide"
         },
@@ -132,7 +132,7 @@ export default function StructuredDataOrg() {
       "creator": {
         "@type": "Person",
         "name": "Carlo Rene Earl",
-        "affiliation": "GlyphLock Security LLC"
+        "affiliation": "GlyphLock LLC"
       },
       "dateCreated": "2025-07-01",
       "url": "https://glyphlock.io/master-covenant",
