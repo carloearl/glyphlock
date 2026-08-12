@@ -60,8 +60,9 @@ export default function NUPSArchitectureSections() {
   ];
 
   const configurable = [
-    "Bring-your-own processor / existing terminal overlay",
-    "Optional native API / webhook processor integrations",
+    "Stripe-native processing path for GlyphLock/NUPS-controlled transactions",
+    "Bring-your-own processor / existing terminal evidence overlay",
+    "Optional native API / webhook integrations for external processors",
     "Rate card (cover · payouts · bonuses)",
     "Tip pool split configuration",
     "GlyphBucks denominations + expiry",
@@ -109,7 +110,7 @@ export default function NUPSArchitectureSections() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--line)", border: "1px solid var(--line)", marginBottom: 96 }}>
         <StatusColumn color="#10b981" title="Implemented Core" sub="Verified in the current build; production use still depends on venue configuration and live transaction history" items={live} />
         <StatusColumn color="#fbbf24" title="Deployment / Expansion" sub="Built or partially built — being completed and validated per venue" items={expansion} />
-        <StatusColumn color="#8b5cf6" title="Processor Overlay / Integration" sub="Keep the venue's existing merchant processing by default; add native API/webhook integrations only where useful" items={configurable} />
+        <StatusColumn color="#8b5cf6" title="Payment Adapters / Integration" sub="One NUPS transaction model with two payment paths: Stripe-native processing or an external-processor evidence overlay" items={configurable} />
       </div>
     </>
   );
