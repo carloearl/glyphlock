@@ -80,7 +80,7 @@ export default function Qr() {
       ],
       "provider": {
         "@type": "Organization",
-        "name": "GlyphLock Security LLC"
+        "name": "GlyphLock LLC"
       }
     });
     document.head.appendChild(script);
