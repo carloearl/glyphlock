@@ -13,7 +13,7 @@
  *
  * Mounted inside NUPS Owner → DJ tab and NUPS Staff → DJ tab.
  */
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Disc3, Music, Youtube, Disc, Zap, Activity, Radio, Sparkles, Power,
 } from "lucide-react";
@@ -26,6 +26,9 @@ import PlaylistGenTab from "@/components/mixer/suite/PlaylistGenTab";
 import CrowdTab from "@/components/mixer/suite/CrowdTab";
 import JukeboxTab from "@/components/mixer/suite/JukeboxTab";
 import SuiteErrorBoundary from "@/components/mixer/suite/SuiteErrorBoundary";
+import DJAutomationDeck from "@/components/mixer/automation/DJAutomationDeck";
+import useDJOperationalState from "@/components/mixer/automation/useDJOperationalState";
+import { buildAutoDJPlan } from "@/lib/djAutoEngine";
 
 const NAV = [
   { key: "mixer",    label: "Auto-DJ Mixer",  icon: Disc3,    accent: "from-purple-500 to-fuchsia-500", ring: "border-purple-500/60 bg-purple-500/15 text-purple-200" },
@@ -40,8 +43,26 @@ const NAV = [
 export default function UnifiedMusicConsole() {
   const [active, setActive] = useState("mixer");
   const [autoDj, setAutoDj] = useState(true);
+  const [playHistory, setPlayHistory] = useState([]);
+  const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
 
   const activeNav = NAV.find((n) => n.key === active) || NAV[0];
+  const activePersona = snapshot?.personas?.[0] || null;
+  const activeCrowd = snapshot?.crowd_metrics?.[0] || { energy_score: 5 };
+  const automationPlan = useMemo(() => buildAutoDJPlan({
+    tracks: snapshot?.tracks || [],
+    persona: activePersona,
+    crowd: activeCrowd,
+    jukeboxRequests: snapshot?.jukebox_requests || [],
+    performanceAnalytics: snapshot?.performance_analytics || [],
+    history: playHistory,
+    limit: 5,
+  }), [snapshot, activePersona, activeCrowd, playHistory]);
+
+  const handlePlaybackEvent = (event) => {
+    if (!event) return;
+    setPlayHistory((previous) => [...previous, event].slice(-20));
+  };
 
   return (
     <div className="space-y-4">
@@ -81,6 +102,18 @@ export default function UnifiedMusicConsole() {
         </div>
       </div>
 
+      <DJAutomationDeck
+        autoDj={autoDj}
+        loading={loading}
+        error={error}
+        snapshot={snapshot}
+        plan={automationPlan}
+        activePersona={activePersona}
+        activeCrowd={activeCrowd}
+        lastUpdated={lastUpdated}
+        onRefresh={refresh}
+      />
+
       {/* ── Module Rail ── */}
       <div className="flex flex-wrap gap-2 border-b border-slate-700/50 pb-3 overflow-x-auto">
         {NAV.map(({ key, label, icon: Icon, ring }) => {
@@ -104,7 +137,13 @@ export default function UnifiedMusicConsole() {
 
       {/* ── Active Panel ── */}
       <SuiteErrorBoundary key={active}>
-        {active === "mixer"    && <MixerModuleView />}
+        {active === "mixer"    && (
+          <MixerModuleView
+            autoDj={autoDj}
+            automationPlan={automationPlan}
+            onPlaybackEvent={handlePlaybackEvent}
+          />
+        )}
         {active === "tracks"   && <TracksTab />}
         {active === "search"   && <MusicSearchTab />}
         {active === "personas" && <PersonasTab />}
