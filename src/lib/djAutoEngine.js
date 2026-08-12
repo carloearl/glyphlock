@@ -48,9 +48,10 @@ export function buildAutoDJPlan({
     const isExact = entertainerId && row.entertainer_id === entertainerId;
     const isFloor = row.entertainer_id === "venue_floor";
     const currentExact = entertainerId && current?.entertainer_id === entertainerId;
+    const currentFloor = current?.entertainer_id === "venue_floor";
     // Performer-specific history wins. Venue-floor history is the next-best
     // fallback, then the most recent generic row returned by the gateway.
-    if (!current || (isExact && !currentExact) || (!currentExact && isFloor)) {
+    if (!current || (isExact && !currentExact) || (!currentExact && isFloor && !currentFloor)) {
       analyticsByTrack.set(row.track_id, row);
     }
   }
@@ -60,7 +61,7 @@ export function buildAutoDJPlan({
     .map((track) => {
       const base = scoreTrack(track, persona, crowdState);
       const matchingRequests = (jukeboxRequests || []).filter((request) => {
-        if (entertainerId && request?.entertainer_id && request.entertainer_id !== entertainerId) return false;
+        if (entertainerId && request?.entertainer_id && request.entertainer_id !== "venue_floor" && request.entertainer_id !== entertainerId) return false;
         return requestMatchesTrack(request, track);
       });
       const requestPriority = matchingRequests.reduce((sum, request) => sum + computeJukeboxPriority(request), 0);
