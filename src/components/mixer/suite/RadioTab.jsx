@@ -8,7 +8,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
-import { Radio, Plus, Loader2, Trash2, Disc, ShieldAlert } from 'lucide-react';
+import { Radio, Plus, Loader2, Trash2, Disc, ShieldAlert, GripVertical } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { getClubTVSender } from '@/components/mixer/ClubBroadcastChannel';
 import AudioEngine from '@/components/mixer/AudioEngine';
+import { trackEntityToMixerSong } from '@/lib/djTrackAdapter';
 
 const RADIO_PREFIX = 'radio:';
 
@@ -66,6 +67,15 @@ export default function RadioTab() {
     if (!confirm('Remove this station?')) return;
     await invokeDJGateway('deleteTrack', { track_id: id });
     load();
+  }
+
+  function handleDragStart(e, station) {
+    const song = trackEntityToMixerSong(station);
+    if (!song) return;
+    e.dataTransfer.setData('application/mixer-song', JSON.stringify(song));
+    e.dataTransfer.setData('application/mixer-song-id', song.id);
+    e.dataTransfer.setData('text/plain', station.file_url || '');
+    e.dataTransfer.effectAllowed = 'copy';
   }
 
   function sendToDeck(station, deck) {
@@ -140,9 +150,15 @@ export default function RadioTab() {
       ) : (
         <div className="grid gap-2">
           {stations.map(s => (
-            <Card key={s.id} className="bg-slate-900/50 border-slate-700/50">
+            <Card
+              key={s.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, s)}
+              className="bg-slate-900/50 border-slate-700/50 hover:border-amber-500/50 cursor-grab active:cursor-grabbing transition"
+            >
               <CardContent className="p-3 space-y-2">
                 <div className="flex items-center gap-3">
+                  <GripVertical className="w-4 h-4 text-slate-600 flex-shrink-0" />
                   <Radio className="w-5 h-5 text-amber-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-white truncate">{s.title}</div>
