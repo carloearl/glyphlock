@@ -42,9 +42,9 @@ export default function PasteLinkPanel({ onImport, onSendDeck }) {
       return;
     }
 
-    if (/^https?:\/\/.+\.(mp3|wav|ogg|m4a|flac)(\?.*)?$/i.test(raw)) {
+    if (/^https?:\/\/\S+$/i.test(raw)) {
       if (!title.trim()) {
-        toast.error('Add a title for direct audio links.');
+        toast.error('Add a title for direct media links.');
         return;
       }
       setTrack({
@@ -59,7 +59,7 @@ export default function PasteLinkPanel({ onImport, onSendDeck }) {
       return;
     }
 
-    toast.error('Paste a YouTube link or a direct .mp3/.wav/.ogg URL.');
+    toast.error('Paste a YouTube link or a direct media URL (http/https).');
   }
 
   function reset() {
@@ -82,7 +82,7 @@ export default function PasteLinkPanel({ onImport, onSendDeck }) {
           <Input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste YouTube share link or direct .mp3 URL"
+            placeholder="Paste YouTube link or direct audio/video URL (.mp3, .mp4, .m3u8…)"
           />
           <div className="grid grid-cols-2 gap-2">
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (optional)" />
