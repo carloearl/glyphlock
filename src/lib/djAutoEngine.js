@@ -29,6 +29,55 @@ function artistPenalty(track, history = []) {
   return recentArtists.includes(artist) ? 14 : 0;
 }
 
+const MOOD_ENERGY = {
+  chill: 2,
+  sensual: 4,
+  neutral: 5,
+  "high-energy": 8,
+  aggressive: 9,
+};
+
+function equivalentBpmDelta(a, b) {
+  const bpmA = Number(a) || 0;
+  const bpmB = Number(b) || 0;
+  if (!bpmA || !bpmB) return null;
+  return Math.min(
+    Math.abs(bpmA - bpmB),
+    Math.abs(bpmA * 2 - bpmB),
+    Math.abs(bpmA - bpmB * 2),
+  );
+}
+
+function transitionCompatibility(currentTrack, nextTrack, persona) {
+  if (!currentTrack || !nextTrack) {
+    return { penalty: 0, bpm_delta: null, energy_delta: null, fade_seconds: 6, label: "open" };
+  }
+  const bpmDelta = equivalentBpmDelta(currentTrack.bpm, nextTrack.bpm);
+  const allowedBpmDelta = Math.max(4, Number(persona?.transition_style_rules?.bpm_range) || 12);
+  const currentEnergy = MOOD_ENERGY[currentTrack.mood] ?? 5;
+  const nextEnergy = MOOD_ENERGY[nextTrack.mood] ?? 5;
+  const energyDelta = Math.abs(currentEnergy - nextEnergy);
+  const risk = persona?.risk_tolerance || "balanced";
+  const riskMultiplier = risk === "experimental" ? 0.65 : risk === "conservative" ? 1.2 : 1;
+  const ramp = persona?.transition_style_rules?.energy_ramp || "linear";
+  const energyAllowance = ramp === "step" ? 5 : ramp === "exponential" ? 4 : 3;
+  const bpmPenalty = bpmDelta === null ? 0 : clamp((bpmDelta - allowedBpmDelta) * 1.15, 0, 24);
+  const energyPenalty = clamp((energyDelta - energyAllowance) * 3, 0, 15);
+  const penalty = Number(((bpmPenalty + energyPenalty) * riskMultiplier).toFixed(2));
+  const fadeSeconds = Number(clamp(
+    4 + (bpmDelta === null ? 1 : Math.min(bpmDelta, 30) / 10) + energyDelta * 0.35 + (risk === "conservative" ? 1 : risk === "experimental" ? -0.5 : 0),
+    3.5,
+    10,
+  ).toFixed(1));
+  return {
+    penalty,
+    bpm_delta: bpmDelta === null ? null : Number(bpmDelta.toFixed(1)),
+    energy_delta: energyDelta,
+    fade_seconds: fadeSeconds,
+    label: penalty <= 3 ? "smooth" : penalty <= 10 ? "workable" : "hard",
+  };
+}
+
 export function buildAutoDJPlan({
   tracks = [],
   persona = null,
@@ -41,6 +90,7 @@ export function buildAutoDJPlan({
   limit = 5,
 } = {}) {
   const crowdState = crowd || { energy_score: 5 };
+  const currentTrack = currentTrackId ? (tracks || []).find((track) => track.id === currentTrackId) || null : null;
   const analyticsByTrack = new Map();
   for (const row of performanceAnalytics || []) {
     if (!row?.track_id) continue;
@@ -79,15 +129,17 @@ export function buildAutoDJPlan({
       const repeatPenalty = recentPenalty(track, history);
       const sameArtistPenalty = artistPenalty(track, history);
       const currentPenalty = currentTrackId === track.id ? 1000 : 0;
+      const transition = transitionCompatibility(currentTrack, track, persona);
       const playable = isEntityTrackPlayable(track);
       const sourcePenalty = playable ? 0 : 45;
-      const total = Math.round((base.total + jukeboxBoost + performanceBoost - repeatPenalty - sameArtistPenalty - sourcePenalty - currentPenalty) * 100) / 100;
+      const total = Math.round((base.total + jukeboxBoost + performanceBoost - repeatPenalty - sameArtistPenalty - transition.penalty - sourcePenalty - currentPenalty) * 100) / 100;
 
       const reasons = [base.reason];
       if (jukeboxBoost > 0) reasons.push(`Jukebox +${jukeboxBoost.toFixed(1)}`);
       if (performanceBoost !== 0) reasons.push(`History ${performanceBoost > 0 ? "+" : ""}${performanceBoost.toFixed(1)}`);
       if (repeatPenalty > 0) reasons.push(`Repeat -${repeatPenalty}`);
       if (sameArtistPenalty > 0) reasons.push(`Artist cooldown -${sameArtistPenalty}`);
+      if (transition.penalty > 0) reasons.push(`Transition ${transition.label} -${transition.penalty}`);
       if (!playable) reasons.push("No playable source");
 
       return {
@@ -98,6 +150,8 @@ export function buildAutoDJPlan({
         jukebox_boost: jukeboxBoost,
         performance_boost: performanceBoost,
         repeat_penalty: repeatPenalty,
+        transition_penalty: transition.penalty,
+        transition,
         request_count: matchingRequests.length,
         reason: reasons.filter(Boolean).join(" · "),
       };
@@ -111,6 +165,7 @@ export function buildAutoDJPlan({
 
   return {
     next,
+    transition: next?.transition || { penalty: 0, bpm_delta: null, energy_delta: null, fade_seconds: 6, label: "open" },
     queue,
     ranked: ranked.slice(0, Math.max(limit, 10)),
     confidence,
