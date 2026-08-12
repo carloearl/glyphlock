@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { computeCrowdEnergyScore } from '@/lib/playlistEngine';
+import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
 import { Activity, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -14,6 +15,7 @@ export default function CrowdTab() {
   const [manual, setManual] = useState(5);
   const [useManual, setUseManual] = useState(true);
   const [history, setHistory] = useState([]);
+  const [syncState, setSyncState] = useState('idle');
   const intervalRef = useRef(null);
 
   const currentScore = computeCrowdEnergyScore({
@@ -22,6 +24,27 @@ export default function CrowdTab() {
     playthrough,
     manual: useManual ? manual : null,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      setSyncState('syncing');
+      try {
+        await invokeDJGateway('recordCrowdMetrics', {
+          metrics: {
+            energy_score: currentScore,
+            tips_last_30min: tips,
+            votes_last_30min: votes,
+            playthrough_rate: playthrough,
+            manual_slider: useManual ? manual : null,
+          },
+        });
+        setSyncState('synced');
+      } catch (_) {
+        setSyncState('error');
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [currentScore, tips, votes, playthrough, manual, useManual]);
 
   useEffect(() => {
     intervalRef.current = setInterval(() => {
@@ -43,8 +66,13 @@ export default function CrowdTab() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-gray-400">Current Energy Score</div>
-            <div className="text-4xl font-black text-green-400 flex items-center gap-2">
-              <Zap className="w-8 h-8" /> {currentScore}/10
+            <div className="text-right">
+              <div className="text-4xl font-black text-green-400 flex items-center gap-2">
+                <Zap className="w-8 h-8" /> {currentScore}/10
+              </div>
+              <div className={`text-[10px] font-mono ${syncState === 'error' ? 'text-red-400' : syncState === 'syncing' ? 'text-amber-400' : 'text-slate-500'}`}>
+                {syncState === 'syncing' ? 'syncing to Auto-DJ…' : syncState === 'synced' ? 'Auto-DJ synced' : syncState === 'error' ? 'sync failed' : 'awaiting signal'}
+              </div>
             </div>
           </div>
 
