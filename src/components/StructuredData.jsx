@@ -5,7 +5,7 @@ export default function StructuredData({ type = "Organization", data = {} }) {
     const defaultOrgData = {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "GlyphLock Security LLC",
+      "name": "GlyphLock LLC",
       "description": "AI-powered cybersecurity platform with quantum-resistant encryption, visual cryptography, blockchain security, and enterprise POS systems",
       "url": window.location.origin,
       "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
@@ -23,8 +23,8 @@ export default function StructuredData({ type = "Organization", data = {} }) {
       },
       "contactPoint": [{
         "@type": "ContactPoint",
-        "telephone": "+1-424-246-6499",
-        "email": "glyphlock@gmail.com",
+        "telephone": "+1-480-886-5588",
+        "email": "carloearl@glyphlock.com",
         "contactType": "customer support",
         "areaServed": "US"
       }],
