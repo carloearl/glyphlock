@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileCode, ExternalLink, CheckCircle2 } from 'lucide-react';
 
-const ROBOTS_CONTENT = `# GlyphLock Security LLC - robots.txt
+const ROBOTS_CONTENT = `# GlyphLock LLC - robots.txt
 # https://glyphlock.io
 
 User-agent: *
