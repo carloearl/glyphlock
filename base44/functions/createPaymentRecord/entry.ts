@@ -41,7 +41,7 @@ async function resolveVenueConfig(base44, venue_id) {
     return configs[0];
   }
   return {
-    primary_provider_code: 'stripe',
+    primary_provider_code: 'external_terminal',
     fallback_provider_code: 'manual_external',
     external_approval_required: false,
     manager_pin_required_for_external: true
@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
     } = payload;
 
     const venueConfig = await resolveVenueConfig(base44, venue_id);
-    const resolvedProvider = provider_code || venueConfig.primary_provider_code || 'stripe';
+    const resolvedProvider = provider_code || venueConfig.primary_provider_code || 'external_terminal';
     const mode = await resolveMode(base44, venue_id);
 
     if (!processor_reference) {
