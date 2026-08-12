@@ -6,9 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { getClubTVSender } from '@/components/mixer/ClubBroadcastChannel';
-
-// Public embed API key - safe for frontend (per user instruction; restricted key)
-const YOUTUBE_API_KEY = 'AIzaSyDKesmHJytX_1MjfbVdcysMsTOa-GVcFjs';
+import { buildYouTubeMusicSearchUrl } from '@/lib/youtubeMusic';
 
 export default function MusicSearchTab() {
   const [query, setQuery] = useState('');
@@ -22,7 +20,7 @@ export default function MusicSearchTab() {
     setLoading(true);
     setResults([]);
     try {
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=12&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
+      const url = buildYouTubeMusicSearchUrl(query, { maxResults: 12 });
       const res = await fetch(url);
       if (!res.ok) {
         const errText = await res.text();
