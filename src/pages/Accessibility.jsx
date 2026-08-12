@@ -214,8 +214,8 @@ export default function AccessibilityPage() {
               <a href="mailto:support@glyphlock.io?subject=Accessibility%20Issue" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-colors">
                 <Mail className="w-4 h-4" /> Email Accessibility Team
               </a>
-              <a href="tel:+14242466499" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 font-bold transition-colors">
-                <Phone className="w-4 h-4" /> (424) 246-6499
+              <a href="tel:+14808865588" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 font-bold transition-colors">
+                <Phone className="w-4 h-4" /> (480) 886-5588
               </a>
             </div>
           </section>
