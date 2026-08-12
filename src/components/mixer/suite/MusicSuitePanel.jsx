@@ -4,7 +4,7 @@
  * Minimum viable: Tracks, YouTube Search, Personas, Playlist Gen, Crowd, Jukebox.
  */
 import React, { useState } from 'react';
-import { Music, Search, Disc, Zap, Activity, Radio } from 'lucide-react';
+import { Music, Search, Disc, Zap, Activity, Radio, Stethoscope } from 'lucide-react';
 
 import TracksTab from './TracksTab';
 import MusicSearchTab from './MusicSearchTab';
@@ -12,6 +12,7 @@ import PersonasTab from './PersonasTab';
 import PlaylistGenTab from './PlaylistGenTab';
 import CrowdTab from './CrowdTab';
 import JukeboxTab from './JukeboxTab';
+import TrackHealthTab from './TrackHealthTab';
 import SuiteErrorBoundary from './SuiteErrorBoundary';
 
 const TABS = [
@@ -21,6 +22,7 @@ const TABS = [
   { key: 'playlist', label: 'Playlist', icon: Zap, active: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50' },
   { key: 'crowd', label: 'Crowd', icon: Activity, active: 'bg-green-500/20 text-green-300 border-green-500/50' },
   { key: 'jukebox', label: 'Jukebox', icon: Radio, active: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50' },
+  { key: 'health', label: 'Diagnostics', icon: Stethoscope, active: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50' },
 ];
 
 export default function MusicSuitePanel() {
@@ -50,6 +52,7 @@ export default function MusicSuitePanel() {
           {active === 'playlist' && <PlaylistGenTab />}
           {active === 'crowd' && <CrowdTab />}
           {active === 'jukebox' && <JukeboxTab />}
+          {active === 'health' && <TrackHealthTab />}
         </SuiteErrorBoundary>
       </div>
     </div>
