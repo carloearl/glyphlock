@@ -192,10 +192,10 @@ export default function Cookies() {
               <h2 className="text-3xl font-bold text-white mb-4 font-space">Questions About Cookies?</h2>
               <p className="text-gray-300 mb-6">Contact our privacy team for any cookie-related questions</p>
               <a 
-                href="mailto:glyphlock@gmail.com" 
+                href="mailto:carloearl@glyphlock.com" 
                 className="inline-flex items-center justify-center bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold uppercase tracking-wide px-8 py-4 rounded-xl transition-all shadow-lg glyph-glow min-h-[52px]"
               >
-                glyphlock@gmail.com
+                carloearl@glyphlock.com
               </a>
             </section>
           </div>
