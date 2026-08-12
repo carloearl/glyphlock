@@ -51,6 +51,31 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     return activeProfile.songIds.map((id) => songs.find((s) => s.id === id)).filter((s) => s && !s.archivedFlag);
   }, [activeProfile, songs]);
 
+  // Playable library tracks mapped to mixer songs. This is the fallback cue
+  // pool so the crossfader always has a next track to blend into even when the
+  // active profile playlist is empty or has a single song.
+  const libraryCuePool = useMemo(
+    () => (libraryTracks || [])
+      .map((track) => trackEntityToMixerSong(track))
+      .filter((song) => song?.id && (song.youtubeUrl || song.uploadUrl)),
+    [libraryTracks],
+  );
+
+  const cuePool = useMemo(
+    () => (profileSongs.length > 1 ? profileSongs : libraryCuePool),
+    [profileSongs, libraryCuePool],
+  );
+
+  // Library-sourced cue tracks must be resolvable by id inside the decks.
+  useEffect(() => {
+    if (!libraryCuePool.length) return;
+    setSongs((previous) => {
+      const have = new Set(previous.map((song) => song.id));
+      const missing = libraryCuePool.filter((song) => !have.has(song.id));
+      return missing.length ? [...previous, ...missing] : previous;
+    });
+  }, [libraryCuePool]);
+
   const archivedSongs = useMemo(() => songs.filter((s) => s.archivedFlag), [songs]);
   const selectedSong = useMemo(() => songs.find((s) => s.id === selectedSongId), [songs, selectedSongId]);
   const automationNextSong = useMemo(() => {
@@ -599,7 +624,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
       <DJPlayerSection
         playingSongId={playingSongId}
         songs={songs}
-        profileSongs={profileSongs}
+        profileSongs={cuePool}
         onSkip={handleSkip}
         collapsed={playerCollapsed}
         onToggleCollapse={() => setPlayerCollapsed((c) => !c)}

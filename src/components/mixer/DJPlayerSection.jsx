@@ -47,6 +47,10 @@ export default function DJPlayerSection({
   const [deckBMuted, setDeckBMuted] = useState(false);
   const [deckABaseVol, setDeckABaseVol] = useState(1);
   const [deckBBaseVol, setDeckBBaseVol] = useState(1);
+  // Auto Blend runs the smoothstep crossfade at track end even when AUTO-DJ is
+  // disarmed, so the crossfader never has to be ridden by hand.
+  const [autoBlend, setAutoBlend] = useState(true);
+  const blending = autoDj || autoBlend;
 
   const deckARef = useRef(null);
   const deckBRef = useRef(null);
@@ -87,11 +91,15 @@ export default function DJPlayerSection({
     // Only auto-fill an EMPTY cue deck. Once a track is on Deck B (dropped,
     // cued, or promoted) it stays put until the operator changes it — otherwise
     // this effect re-ran and clobbered every manual Deck B load.
-    if (autoDj || !playingSongId || !profileSongs.length || activeDeck !== "A" || deckBSongId) return;
-    const idx = profileSongs.findIndex((song) => song.id === playingSongId);
+    // Fill whichever deck is currently the CUE deck (not just Deck B) so a blend
+    // target always exists regardless of which deck went live last.
+    if (autoDj || !playingSongId || !profileSongs.length || inactiveSongId) return;
+    const idx = profileSongs.findIndex((song) => song.id === activeSongId);
     const next = profileSongs[idx + 1] || profileSongs[0];
-    if (next && next.id !== playingSongId) setDeckBSongId(next.id);
-  }, [autoDj, playingSongId, profileSongs, deckBSongId, activeDeck]);
+    if (!next || next.id === activeSongId) return;
+    if (activeDeck === "A") setDeckBSongId(next.id);
+    else setDeckASongId(next.id);
+  }, [autoDj, playingSongId, profileSongs, inactiveSongId, activeSongId, activeDeck]);
 
   // Broadcast both physical decks to Club TV.
   useEffect(() => {
@@ -205,7 +213,7 @@ export default function DJPlayerSection({
   // Auto transition begins when the active track enters the configured fade
   // window. Duration=0 simply means metadata is not ready yet, so we wait.
   useEffect(() => {
-    if (!autoDj) return undefined;
+    if (!blending) return undefined;
     const timer = setInterval(() => {
       if (transitionRef.current) return;
       const targetDeck = activeDeck === "A" ? "B" : "A";
@@ -225,7 +233,7 @@ export default function DJPlayerSection({
       }
     }, 400);
     return () => clearInterval(timer);
-  }, [autoDj, activeDeck, deckASongId, deckBSongId, transitionSeconds, performTransition]);
+  }, [blending, activeDeck, deckASongId, deckBSongId, transitionSeconds, performTransition]);
 
   useEffect(() => () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -235,12 +243,12 @@ export default function DJPlayerSection({
     if (deck !== activeDeck || transitionRef.current) return;
     const targetDeck = deck === "A" ? "B" : "A";
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
-    if (autoDj && targetId) {
+    if (blending && targetId) {
       performTransition(targetDeck, { immediate: true, reason: "natural_end" });
       return;
     }
     onSkip?.(activeSongId, "ended");
-  }, [activeDeck, autoDj, deckASongId, deckBSongId, performTransition, onSkip, activeSongId]);
+  }, [activeDeck, blending, deckASongId, deckBSongId, performTransition, onSkip, activeSongId]);
 
   const handleCueNext = useCallback(() => {
     if (!profileSongs.length || !activeSongId) return;
@@ -299,6 +307,17 @@ export default function DJPlayerSection({
           )}
         </div>
         <div className="flex items-center gap-1">
+          <Button
+            size="sm"
+            variant="outline"
+            className={`h-7 text-[10px] gap-1 ${autoBlend
+              ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
+              : "border-slate-600 text-slate-400"}`}
+            onClick={() => setAutoBlend((value) => !value)}
+            title="Automatically crossfade into the cue deck as each track ends"
+          >
+            <WandSparkles className="w-3 h-3" /> Auto Blend {autoBlend ? "ON" : "OFF"}
+          </Button>
           <Button
             size="sm"
             variant="outline"
