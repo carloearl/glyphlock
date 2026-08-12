@@ -86,6 +86,7 @@ import VIPSale from './pages/VIPSale';
 import AccessRequests from './pages/AccessRequests';
 import RoleViews from './pages/RoleViews';
 import DJHome from './pages/DJHome';
+import GlyphBotMixer from './pages/GlyphBotMixer';
 import KioskShell from './components/nups/KioskShell';
 import KioskSessionGuard from './components/nups/KioskSessionGuard';
 import RoleClassGuard from './components/nups/RoleClassGuard';
@@ -380,6 +381,8 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSHub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
         <Route path="/nupshub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
         <Route path="/Hub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
+        <Route path="/GlyphBotMixer" element={<LayoutWrapper currentPageName="GlyphBotMixer"><GlyphBotMixer /></LayoutWrapper>} />
+        <Route path="/glyphbotmixer" element={<LayoutWrapper currentPageName="GlyphBotMixer"><GlyphBotMixer /></LayoutWrapper>} />
         <Route path="/BotAnalytics" element={<LayoutWrapper currentPageName="BotAnalytics"><BotAnalytics /></LayoutWrapper>} />
         <Route path="/botanalytics" element={<LayoutWrapper currentPageName="BotAnalytics"><BotAnalytics /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
