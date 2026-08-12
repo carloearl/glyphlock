@@ -69,7 +69,7 @@ async function callGeminiDirect(prompt) {
 }
 
 // System prompt for GlyphBot
-const SYSTEM_PROMPT = `You are GlyphBot, an elite AI security assistant by GlyphLock Security LLC.
+const SYSTEM_PROMPT = `You are GlyphBot, an elite AI security assistant by GlyphLock LLC.
 Be direct, professional, and security-focused. No fluff.`;
 
 Deno.serve(async (req) => {

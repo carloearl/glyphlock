@@ -7,7 +7,7 @@
 const SITE_URL = 'https://glyphlock.io';
 
 Deno.serve(async (req) => {
-  const robotsContent = `# GlyphLock Security LLC - robots.txt
+  const robotsContent = `# GlyphLock LLC - robots.txt
 # https://glyphlock.io
 # Quantum-Grade Security for the AI Era
 # Generated: ${new Date().toISOString()}

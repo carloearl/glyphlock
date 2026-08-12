@@ -225,7 +225,7 @@ Deno.serve(async (req) => {
       doc.rect(0, 282, pageWidth, 15, 'F');
       doc.setFontSize(7);
       doc.setTextColor(100, 116, 139);
-      doc.text(`GlyphLock Security LLC — Confidential Audit Report — Page ${i} of ${totalPages}`, pageWidth / 2, 290, { align: 'center' });
+      doc.text(`GlyphLock LLC — Confidential Audit Report — Page ${i} of ${totalPages}`, pageWidth / 2, 290, { align: 'center' });
     }
 
     const pdfBytes = doc.output('arraybuffer');

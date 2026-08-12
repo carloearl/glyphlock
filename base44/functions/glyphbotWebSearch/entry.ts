@@ -72,7 +72,7 @@ async function pubFetch(url, { timeout = 6000, ...opts } = {}) {
       ...opts,
       signal: ctrl.signal,
       headers: {
-        'User-Agent': 'GlyphLock-Audit/1.0 (public-records crawler; glyphlock@gmail.com)',
+        'User-Agent': 'GlyphLock-Audit/1.0 (public-records crawler; carloearl@glyphlock.com)',
         'Accept': 'application/json',
         ...(opts.headers || {}),
       },
