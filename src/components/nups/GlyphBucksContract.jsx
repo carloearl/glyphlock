@@ -125,6 +125,8 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const [purchaserCardName, setPurchaserCardName] = useState("");
   const [cardLastSix, setCardLastSix] = useState("");
   const [cardExp, setCardExp] = useState("");
+  const [processorName, setProcessorName] = useState("");
+  const [processorReference, setProcessorReference] = useState("");
   const [approvalCode, setApprovalCode] = useState("");
   const [managerName, setManagerName] = useState("");
   const [hostessName, setHostessName] = useState("");
@@ -226,7 +228,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     });
   };
 
-  const canProceedToSign = customerName.trim() && cardLastSix.length >= 4 && lineItemsTotal > 0;
+  const canProceedToSign = customerName.trim() && cardLastSix.length >= 4 && processorReference.trim() && approvalCode.trim() && lineItemsTotal > 0;
   const canSign = allAcked && signature.trim() && thumbprintUrl && guestPhotoUrl && idPhotoUrl;
   const canStaffSign = managerSignature.trim() && hostessSignature.trim();
 

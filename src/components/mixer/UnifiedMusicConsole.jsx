@@ -15,7 +15,7 @@
  */
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Disc3, Music, Youtube, Disc, Zap, Activity, Radio, Sparkles, Power,
+  Disc3, Music, Youtube, Disc, Zap, Activity, Radio, RadioTower, Sparkles, Power,
 } from "lucide-react";
 
 import MixerModuleView from "@/components/mixer/MixerModuleView";
@@ -25,6 +25,7 @@ import PersonasTab from "@/components/mixer/suite/PersonasTab";
 import PlaylistGenTab from "@/components/mixer/suite/PlaylistGenTab";
 import CrowdTab from "@/components/mixer/suite/CrowdTab";
 import JukeboxTab from "@/components/mixer/suite/JukeboxTab";
+import RadioTab from "@/components/mixer/suite/RadioTab";
 import SuiteErrorBoundary from "@/components/mixer/suite/SuiteErrorBoundary";
 import DJAutomationDeck from "@/components/mixer/automation/DJAutomationDeck";
 import useDJOperationalState from "@/components/mixer/automation/useDJOperationalState";
@@ -34,6 +35,7 @@ import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 const NAV = [
   { key: "mixer",    label: "Auto-DJ Mixer",  icon: Disc3,    accent: "from-purple-500 to-fuchsia-500", ring: "border-purple-500/60 bg-purple-500/15 text-purple-200" },
   { key: "tracks",   label: "Track Library",  icon: Music,    accent: "from-indigo-500 to-purple-500",  ring: "border-indigo-500/60 bg-indigo-500/15 text-indigo-200" },
+  { key: "radio",    label: "Live Radio",     icon: RadioTower, accent: "from-amber-500 to-orange-500", ring: "border-amber-500/60 bg-amber-500/15 text-amber-200" },
   { key: "search",   label: "YT Search",      icon: Youtube,  accent: "from-red-500 to-rose-500",       ring: "border-red-500/60 bg-red-500/15 text-red-200" },
   { key: "personas", label: "AI Personas",    icon: Disc,     accent: "from-pink-500 to-rose-500",      ring: "border-pink-500/60 bg-pink-500/15 text-pink-200" },
   { key: "playlist", label: "AI Playlist",    icon: Zap,      accent: "from-cyan-500 to-sky-500",       ring: "border-cyan-500/60 bg-cyan-500/15 text-cyan-200" },
@@ -208,6 +210,7 @@ export default function UnifiedMusicConsole() {
           />
         )}
         {active === "tracks"   && <TracksTab />}
+        {active === "radio"    && <RadioTab />}
         {active === "search"   && <MusicSearchTab />}
         {active === "personas" && <PersonasTab />}
         {active === "playlist" && <PlaylistGenTab />}
