@@ -13,7 +13,7 @@
  *
  * Mounted inside NUPS Owner → DJ tab and NUPS Staff → DJ tab.
  */
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Disc3, Music, Youtube, Disc, Zap, Activity, Radio, Sparkles, Power,
 } from "lucide-react";
@@ -29,6 +29,7 @@ import SuiteErrorBoundary from "@/components/mixer/suite/SuiteErrorBoundary";
 import DJAutomationDeck from "@/components/mixer/automation/DJAutomationDeck";
 import useDJOperationalState from "@/components/mixer/automation/useDJOperationalState";
 import { buildAutoDJPlan } from "@/lib/djAutoEngine";
+import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 
 const NAV = [
   { key: "mixer",    label: "Auto-DJ Mixer",  icon: Disc3,    accent: "from-purple-500 to-fuchsia-500", ring: "border-purple-500/60 bg-purple-500/15 text-purple-200" },
@@ -63,14 +64,31 @@ export default function UnifiedMusicConsole() {
     crowd: activeCrowd,
     jukeboxRequests: snapshot?.jukebox_requests || [],
     performanceAnalytics: snapshot?.performance_analytics || [],
+    entertainerId: activeEntertainer?.id || null,
     history: playHistory,
     limit: 5,
-  }), [snapshot, activePersona, activeCrowd, playHistory]);
+  }), [snapshot, activePersona, activeCrowd, activeEntertainer?.id, playHistory]);
 
-  const handlePlaybackEvent = (event) => {
+  const handlePlaybackEvent = useCallback((event) => {
     if (!event) return;
     setPlayHistory((previous) => [...previous, event].slice(-20));
-  };
+
+    // Only entity-backed tracks enter persistent learning analytics. Local-only
+    // scratch tracks still work in the mixer but cannot poison Track analytics
+    // with browser-generated IDs.
+    const entityTrackId = event.entityTrackId || null;
+    if (!entityTrackId) return;
+    const analyticsEvent = event.type === "complete" ? "complete" : event.type === "skip" ? "skip" : "play";
+    invokeDJGateway("recordPlayback", {
+      playback: {
+        track_id: entityTrackId,
+        event: analyticsEvent,
+        entertainer_id: activeEntertainer?.id || "venue_floor",
+        crowd_energy: activeCrowd?.energy_score ?? 5,
+        tips: activeCrowd?.tips_last_30min ?? 0,
+      },
+    }).catch((err) => console.debug("[AutoDJ analytics]", err?.message || err));
+  }, [activeEntertainer?.id, activeCrowd?.energy_score, activeCrowd?.tips_last_30min]);
 
   return (
     <div className="space-y-4">
@@ -157,7 +175,7 @@ export default function UnifiedMusicConsole() {
         {active === "search"   && <MusicSearchTab />}
         {active === "personas" && <PersonasTab />}
         {active === "playlist" && <PlaylistGenTab />}
-        {active === "crowd"    && <CrowdTab />}
+        {active === "crowd"    && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
         {active === "jukebox"  && <JukeboxTab />}
       </SuiteErrorBoundary>
     </div>
