@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-export default function CrowdTab() {
+export default function CrowdTab({ entertainerId = null }) {
   const [tips, setTips] = useState(0);
   const [votes, setVotes] = useState(0);
   const [playthrough, setPlaythrough] = useState(0.7);
@@ -31,6 +31,7 @@ export default function CrowdTab() {
       try {
         await invokeDJGateway('recordCrowdMetrics', {
           metrics: {
+            entertainer_id: entertainerId || 'venue_floor',
             energy_score: currentScore,
             tips_last_30min: tips,
             votes_last_30min: votes,
@@ -44,7 +45,7 @@ export default function CrowdTab() {
       }
     }, 1200);
     return () => clearTimeout(timer);
-  }, [currentScore, tips, votes, playthrough, manual, useManual]);
+  }, [currentScore, tips, votes, playthrough, manual, useManual, entertainerId]);
 
   useEffect(() => {
     intervalRef.current = setInterval(() => {
@@ -60,6 +61,7 @@ export default function CrowdTab() {
     <div className="space-y-4">
       <h3 className="text-lg font-bold text-white flex items-center gap-2">
         <Activity className="w-5 h-5 text-green-400" /> Live Crowd Metrics
+        <span className="text-[10px] font-mono font-normal text-slate-500">{entertainerId ? 'performer-linked' : 'venue floor'}</span>
       </h3>
 
       <Card className="bg-slate-900/70 border-green-500/30">
