@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
 import { Plus, Music, Loader2, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,23 +21,25 @@ export default function TracksTab() {
 
   async function load() {
     setLoading(true);
-    const list = await base44.entities.Track.list('-created_date');
-    setTracks(list);
+    const data = await invokeDJGateway('snapshot');
+    setTracks(data.tracks || []);
     setLoading(false);
   }
 
   async function handleAdd(e) {
     e.preventDefault();
     if (!form.title) return;
-    await base44.entities.Track.create({
-      title: form.title,
-      artist: form.artist,
-      genre: form.genre || undefined,
-      bpm: form.bpm ? Number(form.bpm) : undefined,
-      mood: form.mood || undefined,
-      duration: form.duration ? Number(form.duration) : undefined,
-      source: 'manual',
-      active: true,
+    await invokeDJGateway('createTrack', {
+      track: {
+        title: form.title,
+        artist: form.artist,
+        genre: form.genre || undefined,
+        bpm: form.bpm ? Number(form.bpm) : undefined,
+        mood: form.mood || undefined,
+        duration: form.duration ? Number(form.duration) : undefined,
+        source: 'manual',
+        active: true,
+      },
     });
     setForm({ title: '', artist: '', genre: '', bpm: '', mood: '', duration: '' });
     setShowForm(false);
@@ -46,7 +48,7 @@ export default function TracksTab() {
 
   async function handleDelete(id) {
     if (!confirm('Delete this track?')) return;
-    await base44.entities.Track.delete(id);
+    await invokeDJGateway('deleteTrack', { track_id: id });
     load();
   }
 
