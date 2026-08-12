@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
 import { generatePlaylist } from '@/lib/playlistEngine';
 import { Zap, Loader2, Save } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,14 +25,10 @@ export default function PlaylistGenTab() {
 
   async function load() {
     setLoading(true);
-    const [t, p, e] = await Promise.all([
-      base44.entities.Track.list('-created_date', 500),
-      base44.entities.AIDJPersona.list(),
-      base44.entities.Entertainer.list(),
-    ]);
-    setTracks(t);
-    setPersonas(p);
-    setEntertainers(e);
+    const data = await invokeDJGateway('snapshot');
+    setTracks(data.tracks || []);
+    setPersonas(data.personas || []);
+    setEntertainers(data.entertainers || []);
     setLoading(false);
   }
 
@@ -52,14 +48,16 @@ export default function PlaylistGenTab() {
     if (!generated.length) return;
     setSaving(true);
     try {
-      await base44.entities.Playlist.create({
-        name: `Playlist ${new Date().toLocaleString()}`,
-        entertainer_id: selectedEntertainer || 'unassigned',
-        persona_id: selectedPersona || undefined,
-        ordered_tracks: generated,
-        crowd_energy_score: energy,
-        generation_timestamp: new Date().toISOString(),
-        status: 'active',
+      await invokeDJGateway('savePlaylist', {
+        playlist: {
+          name: `Playlist ${new Date().toLocaleString()}`,
+          entertainer_id: selectedEntertainer || 'unassigned',
+          persona_id: selectedPersona || undefined,
+          ordered_tracks: generated,
+          crowd_energy_score: energy,
+          generation_timestamp: new Date().toISOString(),
+          status: 'active',
+        },
       });
       toast.success('Playlist saved');
     } catch (error) {
