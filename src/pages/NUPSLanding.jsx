@@ -1932,7 +1932,13 @@ export default function NUPSLanding() {
               </div>
             </div>
 
-            <div className="stamp">GlyphLock LLC · Arizona · Multiple Patents Pending · Est. 2025 · All Rights Reserved</div>
+            <div className="stamp">
+              GlyphLock LLC · Arizona Entity #23831258 · Est. 2025 · All Rights Reserved
+              <br />
+              <a href="mailto:carloearl@glyphlock.com" style={{ color: 'var(--cyan-soft)' }}>carloearl@glyphlock.com</a>
+              {' · '}
+              <a href="tel:+14808865588" style={{ color: 'var(--cyan-soft)' }}>+1 480-886-5588</a>
+            </div>
           </section>
         </div>
       </div>
