@@ -24,6 +24,8 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, 
   const [dragOver, setDragOver] = useState(false);
   const [audioEl, setAudioEl] = useState(null);
   const youtubeRef = useRef(null);
+  const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null;
+  const isUpload = song?.uploadUrl && !videoId;
 
   useImperativeHandle(ref, () => ({
     play: () => {
@@ -51,9 +53,6 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, 
       window.localStorage.setItem("mixer.visualizer", visualizerOn ? "on" : "off");
     }
   }, [visualizerOn]);
-
-  const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null;
-  const isUpload = song?.uploadUrl && !videoId;
 
   // Reset audio element reference when source changes
   useEffect(() => {
