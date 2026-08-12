@@ -140,7 +140,7 @@ injectArticleSchema('Title', 'Description', '/url', '2025-01-15');
 +     <>
 +       <SEOHead
 +         title="About GlyphLock | Arizona AI Cybersecurity Company"
-+         description="Learn about GlyphLock Security LLC's mission to revolutionize digital identity with AI, blockchain, and quantum-resistant cryptography. Based in El Mirage, Arizona."
++         description="Learn about GlyphLock LLC's mission to revolutionize digital identity with AI, blockchain, and quantum-resistant cryptography. Based in El Mirage, Arizona."
 +         url="/about"
 +       />
         <div>
