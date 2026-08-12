@@ -42,7 +42,7 @@ export default function Consultation() {
           {/* Hero Header — Preserved */}
           <div className="text-center mb-16 md:mb-24">
             <p className="text-[10px] uppercase tracking-[5px] text-amber-500/70 mb-6 font-medium">
-              GlyphLock Security LLC
+              GlyphLock LLC
             </p>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight leading-tight px-2">
               Independent Protocol Verification
