@@ -321,7 +321,7 @@ export default function TrustSecurity() {
                 For infrastructure questions, audit requests, or compliance documentation, contact the GlyphLock team. Certification docs provided under NDA once formal audits complete. We're here to protect your creative sovereignty with transparency.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-slate-400 mb-8">
-                <span><strong className="text-white">Contact:</strong> glyphlock@gmail.com</span>
+                <span><strong className="text-white">Contact:</strong> carloearl@glyphlock.com</span>
                 <span className="hidden sm:block text-white/20">·</span>
                 <span><strong className="text-white">Entity:</strong> GlyphLock LLC</span>
                 <span className="hidden sm:block text-white/20">·</span>
