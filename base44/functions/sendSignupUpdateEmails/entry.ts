@@ -30,7 +30,7 @@ What's new on the platform:
 
 Your account is active and ready to explore. Simply log in at https://glyphlock.com and head to the Command Center to get started.
 
-If you have any questions, reply to this email or message our support team at glyphlock@gmail.com.
+If you have any questions, reply to this email or message our support team at carloearl@glyphlock.com.
 
 Thanks again for being part of GlyphLock.
 
