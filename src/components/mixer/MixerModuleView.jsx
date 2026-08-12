@@ -161,7 +161,20 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   }, [songs, uiState.activeProfileId, onPlaybackEvent]);
 
   const handleAutomationTransition = useCallback((songId) => {
+    const previousSong = songs.find((item) => item.id === playingSongId);
     const song = songs.find((item) => item.id === songId);
+    if (previousSong && previousSong.id !== songId) {
+      onPlaybackEvent?.({
+        type: "complete",
+        source: "auto_dj_transition",
+        track_id: previousSong._entityTrackId || previousSong.id,
+        entityTrackId: previousSong._entityTrackId || null,
+        songId: previousSong.id,
+        title: previousSong.title,
+        artist: previousSong.artist,
+        at: Date.now(),
+      });
+    }
     setPlayingSongId(songId);
     if (!song) return;
     setSongs((previous) => previous.map((item) => item.id === songId ? { ...item, lastPlayed: Date.now() } : item));
@@ -180,15 +193,16 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
       artist: song.artist,
       at: Date.now(),
     });
-  }, [songs, onPlaybackEvent]);
+  }, [songs, playingSongId, onPlaybackEvent]);
 
-  const handleSkip = useCallback((songId) => {
+  const handleSkip = useCallback((songId, reason = "manual") => {
     const song = songs.find((item) => item.id === songId);
-    emitTelemetry("SONG_SKIP", { songId, playDuration: 0, reason: autoDj ? "auto_dj_transition" : "manual" });
+    const completed = reason === "ended";
+    emitTelemetry(completed ? "SONG_COMPLETE" : "SONG_SKIP", { songId, playDuration: 0, reason: completed ? "natural_end" : (autoDj ? "auto_dj_transition" : reason) });
     if (song) {
       onPlaybackEvent?.({
-        type: "skip",
-        source: autoDj ? "auto_dj" : "manual",
+        type: completed ? "complete" : "skip",
+        source: completed ? "natural_end" : (autoDj ? "auto_dj" : "manual"),
         track_id: song._entityTrackId || songId,
         entityTrackId: song._entityTrackId || null,
         songId,
