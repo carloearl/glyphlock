@@ -43,7 +43,9 @@ const NAV = [
 
 export default function UnifiedMusicConsole() {
   const [active, setActive] = useState("mixer");
-  const [autoDj, setAutoDj] = useState(true);
+  // Deliberately disarmed on page load. The operator's explicit click both
+  // authorizes autonomous playback and satisfies browser media gesture rules.
+  const [autoDj, setAutoDj] = useState(false);
   const [playHistory, setPlayHistory] = useState([]);
   const [performerOverrideId, setPerformerOverrideId] = useState("");
   const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
@@ -144,7 +146,7 @@ export default function UnifiedMusicConsole() {
             }`}
           >
             <Power className={`w-4 h-4 ${autoDj ? "animate-pulse" : ""}`} />
-            {autoDj ? "AUTO-DJ: ENGAGED" : "AUTO-DJ: STANDBY"}
+            {autoDj ? "AUTO-DJ: ENGAGED" : "AUTO-DJ: ARM"}
           </button>
         </div>
       </div>
