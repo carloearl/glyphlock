@@ -20,6 +20,7 @@ export async function searchMusicSources(query, { limit = 12 } = {}) {
 export function providerLabel(source) {
   if (source === "youtube") return "YouTube";
   if (source === "jamendo") return "Jamendo";
+  if (source === "internet_archive") return "Internet Archive";
   if (source === "nups_library") return "NUPS Library";
   return String(source || "Source");
 }
