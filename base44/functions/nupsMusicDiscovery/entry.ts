@@ -1,6 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk";
 
-const JAMENDO_CLIENT_ID = "2c9a11b4";
+const JAMENDO_CLIENT_ID = String(Deno.env.get("JAMENDO_CLIENT_ID") || "").trim();
 
 function normalize(value = "") {
   return String(value || "").trim().toLowerCase();
@@ -98,8 +98,8 @@ Deno.serve(async (req) => {
       providers.push({ provider: "youtube", status: "error", detail: error?.message || String(error) });
     }
 
-    // 2) Jamendo: public/royalty-free discovery with direct playable MP3 URLs.
-    try {
+    // 2) Jamendo: optional royalty-free provider. No dead hardcoded client ID.
+    if (JAMENDO_CLIENT_ID) try {
       const params = new URLSearchParams({
         client_id: JAMENDO_CLIENT_ID,
         format: "json",
@@ -134,6 +134,8 @@ Deno.serve(async (req) => {
       }
     } catch (error) {
       providers.push({ provider: "jamendo", status: "error", detail: error?.message || String(error) });
+    } else {
+      providers.push({ provider: "jamendo", status: "not_configured" });
     }
 
     // 3) Internet Archive: keyless public-domain / Creative Commons audio.
