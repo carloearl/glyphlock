@@ -39,8 +39,8 @@ const CUES = [
   {
     start: 0,
     label: "Venue Operations",
-    caption: "NUPS venue operations — every transaction tracked",
-    detail: "Identity, role, contract, payment, and receipt activity share one operational timeline.",
+    caption: "NUPS live core — venue operations tracked in one system",
+    detail: "Live core modules connect identity, role, contract, payment, and receipt activity on one operational timeline. Expansion scenes are labeled as preview capabilities.",
     audit: "Venue runtime opened with role-scoped activity tracking.",
   },
   {
@@ -59,29 +59,29 @@ const CUES = [
   },
   {
     start: 17.1,
-    label: "One-Push Assembly",
-    caption: "One push — assemble the evidence package",
-    detail: "The system gathers the signed agreement, identity proof, receipt, consent log, and audit timestamps into one package.",
-    audit: "Evidence package assembled from linked source records.",
+    label: "Evidence Assembly Preview",
+    caption: "Built evidence assembly — final packaging is expanding",
+    detail: "NUPS already gathers linked agreement, identity, receipt, consent, and audit references. Automated final-PDF packaging is still rolling out.",
+    audit: "Evidence source records gathered for package generation.",
   },
   {
     start: 23.4,
-    label: "Dispute Defended",
-    caption: "Dispute defended — sealed and routed",
-    detail: "The completed package preserves source references and chain-of-custody details instead of relying on screenshots and memory.",
-    audit: "Evidence package sealed with source references intact.",
+    label: "Package Review",
+    caption: "Evidence package ready for operator review",
+    detail: "The current build preserves source references and chain-of-custody details. Final signed-PDF automation remains an expansion item.",
+    audit: "Evidence package record prepared with source references intact.",
   },
   {
     start: 29.8,
-    label: "Routed",
-    caption: "Routed to your banking partner — good standing",
-    detail: "The venue can deliver a consistent, reviewable package to the processor or banking partner from the same system of record.",
-    audit: "Defence package prepared for external review and routing.",
+    label: "External Delivery",
+    caption: "Prepared for processor or banking-partner delivery",
+    detail: "The venue can export a consistent, reviewable evidence record from NUPS. Direct processor dispute-API submission is still being built.",
+    audit: "Evidence package marked ready for external delivery.",
   },
   {
     start: 35.9,
     label: "Stakeholders Protected",
-    caption: "Bank · Processor · Venue · Guest — all protected",
+    caption: "Bank · Processor · Venue · Guest — one clearer record",
     detail: "Each party receives clearer transaction provenance, consent evidence, and an auditable explanation of what occurred.",
     audit: "Stakeholder views linked to the same verified transaction.",
   },
@@ -89,7 +89,7 @@ const CUES = [
     start: 42.3,
     label: "High-Verification Commerce",
     caption: "This is High-Verification Commerce. This is GlyphLock.",
-    detail: "NUPS turns venue operations into structured, reviewable evidence without forcing the buyer to reconstruct events after the fact.",
+    detail: "NUPS turns venue operations into structured, reviewable evidence. The live core is implemented now; selected automation shown here is still expanding.",
     audit: "High-verification transaction lifecycle completed.",
   },
 ];
@@ -256,8 +256,8 @@ function EvidenceScene({ progress, defended = false }) {
   return (
     <div className="space-y-4">
       <div className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 ${defended ? "border-emerald-400/40 bg-emerald-400/10" : "border-cyan-400/35 bg-cyan-400/8"}`}>
-        <div className="flex items-center gap-2"><ShieldCheck className={`h-5 w-5 ${defended ? "text-emerald-300" : "text-cyan-300"}`} /><span className="text-sm font-black text-white">{defended ? "DISPUTE DEFENCE PACKAGE" : "ASSEMBLING EVIDENCE PACKAGE"}</span></div>
-        <StatusPill success={defended} active={!defended}>{defended ? "Ready for review" : `${visibleCount} / ${EVIDENCE_ITEMS.length} linked`}</StatusPill>
+        <div className="flex items-center gap-2"><ShieldCheck className={`h-5 w-5 ${defended ? "text-emerald-300" : "text-cyan-300"}`} /><span className="text-sm font-black text-white">{defended ? "EVIDENCE PACKAGE REVIEW" : "ASSEMBLING EVIDENCE PACKAGE"}</span></div>
+        <StatusPill success={defended} active={!defended}>{defended ? "Operator review" : `${visibleCount} / ${EVIDENCE_ITEMS.length} linked`}</StatusPill>
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {EVIDENCE_ITEMS.map(({ icon: Icon, label }, index) => {
@@ -283,7 +283,7 @@ function RoutingScene({ progress }) {
         <div className="relative w-20 sm:w-32"><div className="h-px bg-gradient-to-r from-cyan-300/30 via-cyan-300 to-indigo-300/30" /><motion.div className="absolute -top-2 h-4 w-4 rounded-full border border-cyan-200 bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.8)]" style={{ left: `${clamp(progress) * 85}%` }} /></div>
         <Panel className="p-4 text-center"><Building2 className="mx-auto h-8 w-8 text-indigo-300" /><div className="mt-3 text-sm font-black text-white">Bank / Processor</div><div className="mt-1 text-[10px] text-slate-500">Reviewable defence package</div></Panel>
       </div>
-      <div className="mx-auto mt-5 flex items-center gap-2 text-xs text-cyan-200"><Send className="h-4 w-4" />Evidence package routed with transaction references</div>
+      <div className="mx-auto mt-5 flex items-center gap-2 text-xs text-cyan-200"><Send className="h-4 w-4" />Prepared for processor delivery · direct dispute API submission expanding</div>
     </div>
   );
 }
@@ -314,7 +314,7 @@ function FinalScene() {
       <div className="mt-6 text-[10px] font-black uppercase tracking-[0.42em] text-cyan-300">GlyphLock</div>
       <div className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">High-Verification Commerce</div>
       <div className="mt-4 max-w-xl text-sm leading-6 text-slate-400">One operating record connecting identity, consent, transaction activity, contracts, receipts, and dispute evidence.</div>
-      <div className="mt-5 flex flex-wrap justify-center gap-2"><StatusPill success><Fingerprint className="h-3 w-3" />Identity</StatusPill><StatusPill success><FileText className="h-3 w-3" />Contract</StatusPill><StatusPill success><CreditCard className="h-3 w-3" />Transaction</StatusPill><StatusPill success><ShieldCheck className="h-3 w-3" />Evidence</StatusPill></div>
+      <div className="mt-5 flex flex-wrap justify-center gap-2"><StatusPill success><Fingerprint className="h-3 w-3" />Identity core</StatusPill><StatusPill success><FileText className="h-3 w-3" />Contract core</StatusPill><StatusPill success><CreditCard className="h-3 w-3" />Transaction core</StatusPill><StatusPill active><ShieldCheck className="h-3 w-3" />Evidence automation expanding</StatusPill></div>
     </div>
   );
 }
@@ -436,15 +436,17 @@ export default function NUPSDemoPlayer() {
   const timelineMarkers = useMemo(() => CUES.map((item) => ({ ...item, percent: clamp(item.start / duration) * 100 })), [duration]);
 
   return (
-    <section className="w-full" aria-label="Narrated NUPS operations demonstration">
+    <section className="w-full" aria-label="Narrated NUPS live-core and expansion demonstration">
       <div className="overflow-hidden rounded-3xl border border-cyan-300/22 bg-[#030816] shadow-[0_30px_100px_rgba(2,6,23,0.7),0_0_60px_rgba(34,211,238,0.08)]">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-300/12 bg-slate-950/80 px-4 py-3 sm:px-5">
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/28 bg-cyan-300/8"><Lock className="h-4 w-4 text-cyan-300" /></span>
-            <div><div className="text-xs font-black tracking-[0.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[0.16em] text-slate-500">Narrated operations walkthrough</div></div>
+            <div><div className="text-xs font-black tracking-[0.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[0.16em] text-slate-500">Live core + expansion preview</div></div>
           </div>
-          <div className="flex items-center gap-2"><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Audio synchronized" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
+          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Audio synchronized" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
         </header>
+
+        <div className="border-b border-amber-300/20 bg-amber-300/[0.06] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100 sm:px-5">Capability signal: green = implemented core · blue = expansion preview · direct dispute-API submission is not yet live</div>
 
         <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[190px_minmax(0,1fr)_270px]">
           <aside className="border-b border-cyan-300/10 bg-slate-950/55 p-3 lg:border-b-0 lg:border-r">
