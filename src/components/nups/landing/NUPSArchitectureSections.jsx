@@ -12,8 +12,8 @@ export default function NUPSArchitectureSections() {
       k: "Edge · Client Layer",
       c: "#00d4ff",
       body:
-        "Raspberry Pi nodes and Samsung tablets at the venue. Handles identity capture, POS transactions, biometric verification, and real-time floor operations. Must function offline.",
-      tag: "LOCAL · REAL-TIME",
+        "Raspberry Pi nodes and Samsung tablets are supported venue surfaces for identity capture, POS activity, hardware-assisted verification, and floor operations. Supported writes can queue locally when connectivity drops; some validation still requires the server.",
+      tag: "LIVE CORE · OFFLINE-ASSISTED",
     },
     {
       k: "Server · Cloud Layer",
@@ -26,47 +26,47 @@ export default function NUPSArchitectureSections() {
       k: "Sync Behavior",
       c: "#10b981",
       body:
-        "Edge syncs to server in real time when online, and on reconnect when offline. Idempotent writes. No data loss. Once synced, records become auditable and permanent.",
-      tag: "REAL-TIME · RESILIENT",
+        "Supported offline transactions queue in IndexedDB and sync on reconnect. Server-side records become the canonical audit source after sync. Full offline coverage and recovery certification are still expanding.",
+      tag: "IMPLEMENTED QUEUE · EXPANDING COVERAGE",
     },
   ];
 
   const failsafe = [
-    { k: "Offline Operation", v: "Edge nodes continue full venue ops — POS, ID, contracts, payouts — without internet.", c: "#00d4ff" },
-    { k: "Sync on Reconnect", v: "Buffered transactions flush to the server on reconnect. Idempotent · conflict-resolved.", c: "#1e6fff" },
-    { k: "Dual-Network", v: "Venue Wi-Fi primary + AT&T LTE failover. Automatic switchover on loss.", c: "#8b5cf6" },
-    { k: "Zero Data Loss", v: "Local append-only journal persists every event until server-confirmed.", c: "#10b981" },
+    { k: "Offline-Assisted Operation", v: "Supported transaction writes can queue locally during an outage; server-required validation is clearly blocked rather than faked.", c: "#00d4ff" },
+    { k: "Sync on Reconnect", v: "Queued IndexedDB transactions are retried when connectivity returns and successful sync is surfaced to the operator.", c: "#1e6fff" },
+    { k: "Dual-Network", v: "Venue Wi-Fi plus LTE failover is a deployment option; automatic network failover must be validated per installed venue.", c: "#8b5cf6" },
+    { k: "Recovery Roadmap", v: "Durable local queuing exists now; full end-to-end recovery certification across every NUPS workflow remains in expansion.", c: "#10b981" },
   ];
 
   const live = [
-    "Multi-tenant platform + 7-tier RBAC",
-    "Identity capture (ID · mag-stripe · QR)",
+    "Multi-tenant platform + role-scoped access controls",
+    "Identity capture workflows (ID · mag-stripe · QR)",
     "POS + cash drawer reconciliation",
-    "VIP contract: print → sign → rescan",
-    "GlyphBucks SVC issuance",
-    "Stripe + GoDaddy payment routing",
-    "Driver payout engine",
-    "SystemAuditLog + AuditEvent dual-ledger",
+    "GlyphBucks issuance, redemption, ledger + QR verification",
+    "Stripe API payment verification + webhook infrastructure",
+    "Driver QR / payout infrastructure",
+    "SystemAuditLog + AuditEvent audit layers",
+    "Ed25519 sealing + OpenTimestamps submission for supported sealed flows",
   ];
 
   const expansion = [
-    "Biometric shift tracking",
-    "One-push Dispute Shield packaging",
-    "Blockchain timestamp anchoring",
-    "DJ rotation engine",
-    "QR marketing + social automation",
-    "Additional processor integrations",
+    "VIP contract workflow — venue-by-venue production validation",
+    "Physical biometric hardware validation + shift tracking rollout",
+    "Dispute evidence final-PDF compiler + one-push operator workflow",
+    "Direct processor dispute-API submission",
+    "DJ rotation integration into the primary NUPS operating surface",
+    "Expanded offline coverage + recovery certification",
     "Multi-venue cross-reporting",
   ];
 
   const configurable = [
+    "GoDaddy / Clover / Elavon / TSYS external-terminal confirmation adapters",
     "Rate card (cover · payouts · bonuses)",
     "Tip pool split configuration",
     "GlyphBucks denominations + expiry",
     "Role matrix customization",
     "Video attestation capture",
     "SMS / email campaign templates",
-    "Processor selection per venue",
   ];
 
   const panelBg = { background: "linear-gradient(180deg, var(--abyss), var(--deep))", padding: "32px 26px", position: "relative" };
@@ -106,9 +106,9 @@ export default function NUPSArchitectureSections() {
       {/* § 13 · IMPLEMENTATION STATUS */}
       <div className="section-header"><h2>Implementation <b>Status</b></h2><div className="index">§ 13 · Honest Capability Map</div></div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--line)", border: "1px solid var(--line)", marginBottom: 96 }}>
-        <StatusColumn color="#10b981" title="Live" sub="Currently functioning in production" items={live} />
-        <StatusColumn color="#fbbf24" title="Deployment / Expansion" sub="Built — rolling out per venue" items={expansion} />
-        <StatusColumn color="#8b5cf6" title="Configurable / Optional" sub="Available — enabled per venue" items={configurable} />
+        <StatusColumn color="#10b981" title="Implemented Core" sub="Verified in the current build; production use still depends on venue configuration and live transaction history" items={live} />
+        <StatusColumn color="#fbbf24" title="Deployment / Expansion" sub="Built or partially built — being completed and validated per venue" items={expansion} />
+        <StatusColumn color="#8b5cf6" title="Configurable / Adapter" sub="Available configuration paths or external/manual adapters; not equivalent to native API integration" items={configurable} />
       </div>
     </>
   );
