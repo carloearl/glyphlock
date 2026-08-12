@@ -167,6 +167,15 @@ Deno.serve(async (req) => {
       const crowdEnergy = Math.max(0, Math.min(10, Number(playback.crowd_energy) || 0));
       const tips = Math.max(0, Number(playback.tips) || 0);
       const now = new Date().toISOString();
+      let fulfilledRequests = 0;
+      if (event === "play") {
+        const matchingRequests = await E.JukeboxRequest.filter({ track_id: trackId, status: "pending" }, "-created_date", 100).catch(() => []);
+        const relevantRequests = (matchingRequests || []).filter((request) =>
+          !request.entertainer_id || request.entertainer_id === "venue_floor" || request.entertainer_id === entertainerId
+        );
+        await Promise.all(relevantRequests.map((request) => E.JukeboxRequest.update(request.id, { status: "played" }).catch(() => null)));
+        fulfilledRequests = relevantRequests.length;
+      }
 
       if (!existing) {
         const created = await E.PerformanceAnalytics.create({
@@ -178,7 +187,7 @@ Deno.serve(async (req) => {
           playthrough_rate: event === "complete" ? 1 : event === "skip" ? 0 : 0.5,
           last_played: now,
         });
-        return Response.json({ success: true, analytics: created });
+        return Response.json({ success: true, analytics: created, fulfilled_requests: fulfilledRequests });
       }
 
       const currentCount = Math.max(0, Number(existing.play_count) || 0);
@@ -195,7 +204,7 @@ Deno.serve(async (req) => {
         patch.playthrough_rate = Number((previousRate * 0.8 + observation * 0.2).toFixed(3));
       }
       const updated = await E.PerformanceAnalytics.update(existing.id, patch);
-      return Response.json({ success: true, analytics: updated });
+      return Response.json({ success: true, analytics: updated, fulfilled_requests: fulfilledRequests });
     }
 
     if (action === "savePlaylist") {
