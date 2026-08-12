@@ -436,14 +436,14 @@ export default function NUPSDemoPlayer() {
   const timelineMarkers = useMemo(() => CUES.map((item) => ({ ...item, percent: clamp(item.start / duration) * 100 })), [duration]);
 
   return (
-    <section className="w-full" aria-label="Narrated NUPS live-core and expansion demonstration">
+    <section className="w-full" aria-label="NUPS live-core and expansion capability preview">
       <div className="overflow-hidden rounded-3xl border border-cyan-300/22 bg-[#030816] shadow-[0_30px_100px_rgba(2,6,23,0.7),0_0_60px_rgba(34,211,238,0.08)]">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-300/12 bg-slate-950/80 px-4 py-3 sm:px-5">
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/28 bg-cyan-300/8"><Lock className="h-4 w-4 text-cyan-300" /></span>
             <div><div className="text-xs font-black tracking-[0.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[0.16em] text-slate-500">Live core + expansion preview</div></div>
           </div>
-          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Audio synchronized" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
+          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Timeline running" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
         </header>
 
         <div className="border-b border-amber-300/20 bg-amber-300/[0.06] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100 sm:px-5">Capability signal: green = implemented core · blue = expansion preview · direct dispute-API submission is not yet live</div>
@@ -492,7 +492,7 @@ export default function NUPSDemoPlayer() {
             </div>
 
             {!playing && !finished && (
-              <button type="button" onClick={togglePlayback} className="absolute inset-0 z-30 flex items-center justify-center bg-black/42 transition hover:bg-black/50" aria-label="Play narrated NUPS demonstration">
+              <button type="button" onClick={togglePlayback} className="absolute inset-0 z-30 flex items-center justify-center bg-black/42 transition hover:bg-black/50" aria-label="Play NUPS capability preview">
                 <span className="flex h-20 w-20 items-center justify-center rounded-full border border-cyan-100/30 bg-cyan-300 text-slate-950 shadow-[0_0_70px_rgba(34,211,238,0.42)]"><Play className="ml-1 h-9 w-9" fill="currentColor" /></span>
               </button>
             )}
@@ -515,7 +515,7 @@ export default function NUPSDemoPlayer() {
             {timelineMarkers.map((marker, index) => <span key={marker.label} title={marker.label} className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border ${index <= step ? "border-cyan-200 bg-cyan-400" : "border-white/20 bg-slate-800"}`} style={{ left: `${marker.percent}%` }} />)}
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : togglePlayback} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-cyan-300/28 bg-cyan-300/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-300/14">{finished ? <RotateCcw className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}{finished ? "Replay" : playing ? "Pause" : "Play"}</button><span className="hidden text-[10px] text-slate-500 sm:inline">Visuals follow the audio clock with a slight lead to prevent perceived lag.</span></div>
+            <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : togglePlayback} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-cyan-300/28 bg-cyan-300/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-300/14">{finished ? <RotateCcw className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}{finished ? "Replay" : playing ? "Pause" : "Play"}</button><span className="hidden text-[10px] text-slate-500 sm:inline">On-screen status is the current capability source of truth while the updated narration is being recorded.</span></div>
             <button type="button" onClick={() => navigate("/NUPSKiosk")} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-black text-white shadow-[0_0_28px_rgba(59,130,246,0.24)] transition hover:scale-[1.015]">Enter NUPS <ArrowRight className="h-4 w-4" /></button>
           </div>
         </div>
@@ -525,6 +525,7 @@ export default function NUPSDemoPlayer() {
         ref={audioRef}
         src={VOICEOVER}
         preload="auto"
+        muted
         onLoadedMetadata={() => {
           const audio = audioRef.current;
           if (audio && Number.isFinite(audio.duration) && audio.duration > 0) setDuration(audio.duration);
