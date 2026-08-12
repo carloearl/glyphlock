@@ -34,6 +34,7 @@ export default function DJPlayerSection({
   autoDj = false,
   automationNextSongId = null,
   onActiveSongChange,
+  onPlaybackError,
   transitionSeconds = 6,
 }) {
   const [crossfade, setCrossfade] = useState(0);
@@ -120,15 +121,15 @@ export default function DJPlayerSection({
     return deckBMuted ? 0 : deckBBaseVol * gain;
   }, [crossfade, deckBMuted, deckBBaseVol]);
 
-  const finishPromotion = useCallback((targetDeck) => {
+  const finishPromotion = useCallback((targetDeck, reason = "auto_transition") => {
     const promotedId = targetDeck === "A" ? deckASongId : deckBSongId;
     setActiveDeck(targetDeck);
     setTransitioning(false);
     transitionRef.current = false;
-    if (promotedId) onActiveSongChange?.(promotedId);
+    if (promotedId) onActiveSongChange?.(promotedId, { reason });
   }, [deckASongId, deckBSongId, onActiveSongChange]);
 
-  const performTransition = useCallback((targetDeck, { immediate = false } = {}) => {
+  const performTransition = useCallback((targetDeck, { immediate = false, reason = "auto_transition" } = {}) => {
     if (transitionRef.current || targetDeck === activeDeck) return;
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
     if (!targetId) return;
@@ -144,7 +145,7 @@ export default function DJPlayerSection({
     if (immediate) {
       setCrossfade(targetCrossfade);
       fromRef.current?.pause?.();
-      finishPromotion(targetDeck);
+      finishPromotion(targetDeck, reason);
       return;
     }
 
@@ -161,7 +162,7 @@ export default function DJPlayerSection({
         return;
       }
       fromRef.current?.pause?.();
-      finishPromotion(targetDeck);
+      finishPromotion(targetDeck, reason);
     };
     rafRef.current = requestAnimationFrame(tick);
   }, [activeDeck, deckASongId, deckBSongId, crossfade, transitionSeconds, finishPromotion]);
@@ -200,7 +201,7 @@ export default function DJPlayerSection({
     const targetDeck = deck === "A" ? "B" : "A";
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
     if (autoDj && targetId) {
-      performTransition(targetDeck, { immediate: true });
+      performTransition(targetDeck, { immediate: true, reason: "natural_end" });
       return;
     }
     onSkip?.(activeSongId, "ended");
@@ -218,7 +219,7 @@ export default function DJPlayerSection({
   const handleSwap = useCallback(() => {
     const targetDeck = activeDeck === "A" ? "B" : "A";
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
-    if (targetId) performTransition(targetDeck, { immediate: true });
+    if (targetId) performTransition(targetDeck, { immediate: true, reason: "manual_swap" });
   }, [activeDeck, deckASongId, deckBSongId, performTransition]);
 
   if (collapsed) {
