@@ -20,7 +20,7 @@ function extractVideoId(url) {
 }
 
 export default function DJPlayerSection({ playingSongId, songs, profileSongs, onSkip, collapsed, onToggleCollapse, onPlay }) {
-  const [crossfade, setCrossfade] = useState(50);
+  const [crossfade, setCrossfade] = useState(0);
   const [deckBSongId, setDeckBSongId] = useState(null);
   const [deckAMuted, setDeckAMuted] = useState(false);
   const [deckBMuted, setDeckBMuted] = useState(false);
@@ -147,6 +147,7 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
         <PlayerDeck
           song={deckASong}
           label="Deck A"
+          autoPlay={true}
           volume={deckAVolume}
           muted={deckAMuted}
           onVolumeChange={(v, m) => { setDeckABaseVol(v); setDeckAMuted(m); }}
@@ -156,6 +157,7 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
         <PlayerDeck
           song={deckBSong}
           label="Deck B"
+          autoPlay={false}
           volume={deckBVolume}
           muted={deckBMuted}
           onVolumeChange={(v, m) => { setDeckBBaseVol(v); setDeckBMuted(m); }}
