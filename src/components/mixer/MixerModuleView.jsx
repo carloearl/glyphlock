@@ -52,6 +52,21 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
 
   const archivedSongs = useMemo(() => songs.filter((s) => s.archivedFlag), [songs]);
   const selectedSong = useMemo(() => songs.find((s) => s.id === selectedSongId), [songs, selectedSongId]);
+  const automationNextSong = useMemo(() => {
+    if (!autoDj || !playingSongId) return null;
+    const candidate = automationPlan?.next;
+    if (!candidate?.playable || !candidate?.track || candidate.repeat_penalty >= 40) return null;
+    const current = songs.find((song) => song.id === playingSongId);
+    if (current?._entityTrackId && current._entityTrackId === candidate.track.id) return null;
+    return trackEntityToMixerSong(candidate.track);
+  }, [autoDj, playingSongId, automationPlan, songs]);
+
+  useEffect(() => {
+    if (!automationNextSong?.id) return;
+    setSongs((previous) => previous.some((song) => song.id === automationNextSong.id)
+      ? previous
+      : [...previous, automationNextSong]);
+  }, [automationNextSong?.id]);
 
   // ─── Auto-save on mutations ───
   useEffect(() => { saveSongs(songs); }, [songs]);
@@ -144,6 +159,28 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
       });
     }
   }, [songs, uiState.activeProfileId, onPlaybackEvent]);
+
+  const handleAutomationTransition = useCallback((songId) => {
+    const song = songs.find((item) => item.id === songId);
+    setPlayingSongId(songId);
+    if (!song) return;
+    setSongs((previous) => previous.map((item) => item.id === songId ? { ...item, lastPlayed: Date.now() } : item));
+    emitTelemetry("AUTO_DJ_TRANSITION", {
+      songId,
+      trackId: song._entityTrackId || null,
+      timestamp: Date.now(),
+    });
+    onPlaybackEvent?.({
+      type: "play",
+      source: "auto_dj_transition",
+      track_id: song._entityTrackId || songId,
+      entityTrackId: song._entityTrackId || null,
+      songId,
+      title: song.title,
+      artist: song.artist,
+      at: Date.now(),
+    });
+  }, [songs, onPlaybackEvent]);
 
   const handleSkip = useCallback((songId) => {
     const song = songs.find((item) => item.id === songId);
@@ -457,6 +494,10 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         collapsed={playerCollapsed}
         onToggleCollapse={() => setPlayerCollapsed((c) => !c)}
         onPlay={handlePlay}
+        autoDj={autoDj}
+        automationNextSongId={automationNextSong?.id || null}
+        onActiveSongChange={handleAutomationTransition}
+        transitionSeconds={6}
       />
 
       {/* Mobile profiles */}
