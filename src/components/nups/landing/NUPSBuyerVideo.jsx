@@ -20,11 +20,33 @@ import {
   Signature,
   UserCheck,
   Volume2,
-  VolumeX,
 } from "lucide-react";
 
-const APP_ID = "697a087fb354faebb72df54b";
-const VOICE_ENDPOINT = `https://app.base44.com/api/apps/${APP_ID}/nupsLandingVoiceover`;
+const MALE_VOICE_HINTS = [
+  "guy", "christopher", "david", "mark", "brian", "james", "george", "ryan", "eric",
+  "andrew", "daniel", "matthew", "liam", "thomas", "arthur", "oliver", "joey", "male",
+];
+const FEMALE_VOICE_HINTS = [
+  "aria", "jenny", "samantha", "zira", "eva", "susan", "hazel", "victoria", "ava",
+  "allison", "karen", "moira", "tessa", "serena", "female",
+];
+
+function pickMaleVoice(voices = []) {
+  const english = voices.filter((voice) => /^en([-_]|$)/i.test(voice.lang || ""));
+  const pool = english.length ? english : voices;
+  if (!pool.length) return null;
+
+  const score = (voice) => {
+    const name = String(voice.name || "").toLowerCase();
+    let points = /^en-US/i.test(voice.lang || "") ? 24 : /^en/i.test(voice.lang || "") ? 12 : 0;
+    if (/natural|neural|premium|enhanced|online/.test(name)) points += 12;
+    if (MALE_VOICE_HINTS.some((hint) => name.includes(hint))) points += 120;
+    if (FEMALE_VOICE_HINTS.some((hint) => name.includes(hint))) points -= 180;
+    return points;
+  };
+
+  return [...pool].sort((a, b) => score(b) - score(a))[0] || null;
+}
 
 const SCENES = [
   {
