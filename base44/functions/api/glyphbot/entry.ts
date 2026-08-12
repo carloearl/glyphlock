@@ -340,7 +340,7 @@ async function synthesizeTTS(text, voice = 'nova', speed = 1.0) {
 // =====================================================
 // PROMPT CONSTRUCTION
 // =====================================================
-const SYSTEM_DIRECTIVE = `You are GlyphBot, an elite AI security assistant by GlyphLock Security LLC.
+const SYSTEM_DIRECTIVE = `You are GlyphBot, an elite AI security assistant by GlyphLock LLC.
 
 Be direct, professional, security-focused. No fluff.
 - Respond concisely without preamble
