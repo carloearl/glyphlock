@@ -276,10 +276,10 @@ export default function Privacy() {
               <p className="text-gray-300 mb-2">Privacy Officer, GlyphLock LLC</p>
               <p className="text-gray-400 mb-6">El Mirage, Arizona</p>
               <a 
-                href="mailto:glyphlock@gmail.com" 
+                href="mailto:carloearl@glyphlock.com" 
                 className="inline-flex items-center justify-center bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold uppercase tracking-wide px-8 py-4 rounded-xl transition-all shadow-lg glyph-glow min-h-[52px]"
               >
-                glyphlock@gmail.com
+                carloearl@glyphlock.com
               </a>
             </section>
           </div>
