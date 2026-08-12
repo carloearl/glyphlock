@@ -140,10 +140,30 @@ export default function CaseStudies() {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
-          <StatCard number="4" label="Case Studies" />
+          <StatCard number="5" label="Case Studies" />
           <StatCard number="6" label="AI Systems Bound" />
-          <StatCard number="1" label="Legal Victory" />
-          <StatCard number="2025" label="Active Year" />
+          <StatCard number="1" label="OHIP Connection" />
+          <StatCard number="2026" label="Active Year" />
+        </div>
+
+        {/* Featured case-study tabs */}
+        <div className="max-w-6xl mx-auto mb-8 overflow-x-auto">
+          <div className="inline-flex min-w-full gap-2 rounded-2xl border border-blue-700/40 bg-blue-950/40 p-2 sm:min-w-0">
+            <Link to={createPageUrl('CaseStudies')} className="flex-1">
+              <Button className="w-full bg-blue-600 text-white hover:bg-blue-500">All Studies</Button>
+            </Link>
+            <Link to={createPageUrl('CaseStudyOracleOHIP')} className="flex-1">
+              <Button variant="outline" className="w-full whitespace-nowrap border-emerald-500/50 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/20">
+                Oracle OHIP
+                <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold uppercase">Verified</span>
+              </Button>
+            </Link>
+            <Link to={createPageUrl('CaseStudyNUPS')} className="flex-1">
+              <Button variant="outline" className="w-full whitespace-nowrap border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20">
+                NUPS Compliance OS
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Case Studies Grid */}
