@@ -30,7 +30,7 @@ function loadYouTubeAPI() {
 }
 
 const YouTubePlayer = forwardRef(function YouTubePlayer(
-  { videoId, autoPlay = true, volume = 1, muted = false, onEnded, onReady, onStateChange },
+  { videoId, autoPlay = true, volume = 1, muted = false, onEnded, onReady, onStateChange, onError },
   ref
 ) {
   const containerRef = useRef(null);
@@ -79,6 +79,9 @@ const YouTubePlayer = forwardRef(function YouTubePlayer(
             onStateChange && onStateChange(e.data);
             // 0 = ended
             if (e.data === 0 && onEnded) onEnded();
+          },
+          onError: (e) => {
+            onError?.({ source: "youtube", code: e.data, message: `YouTube playback error ${e.data}` });
           },
         },
       });
