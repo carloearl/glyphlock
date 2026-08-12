@@ -63,7 +63,8 @@ export default function UnifiedMusicConsole() {
       return true;
     });
   }, [snapshot]);
-  const autoShift = (snapshot?.active_entertainer_shifts || []).find((shift) => shift.location === "Stage")
+  const autoShift = (snapshot?.active_entertainer_shifts || []).find((shift) => shift.location === "Stage" && shift.status !== "on_break")
+    || (snapshot?.active_entertainer_shifts || []).find((shift) => shift.status !== "on_break")
     || snapshot?.active_entertainer_shifts?.[0]
     || null;
   const overrideValid = performerOverrideId && performerChoices.some((choice) => choice.entertainer.id === performerOverrideId);
@@ -78,8 +79,8 @@ export default function UnifiedMusicConsole() {
     ? snapshot?.crowd_metrics?.find((metric) => metric.entertainer_id === activeEntertainerId)
     : null) || snapshot?.crowd_metrics?.find((metric) => metric.entertainer_id === "venue_floor") || snapshot?.crowd_metrics?.[0] || { energy_score: 5 };
   const currentEntityTrackId = useMemo(() => {
-    const latestPlay = [...playHistory].reverse().find((event) => event?.type === "play" && event?.entityTrackId);
-    return latestPlay?.entityTrackId || null;
+    const latestEntityEvent = [...playHistory].reverse().find((event) => event?.entityTrackId);
+    return latestEntityEvent?.type === "play" ? latestEntityEvent.entityTrackId : null;
   }, [playHistory]);
   const automationPlan = useMemo(() => buildAutoDJPlan({
     tracks: snapshot?.tracks || [],
@@ -116,8 +117,8 @@ export default function UnifiedMusicConsole() {
         crowd_energy: activeCrowd?.energy_score ?? 5,
         tips: activeCrowd?.tips_last_30min ?? 0,
       },
-    }).catch((err) => console.debug("[AutoDJ analytics]", err?.message || err));
-  }, [activeEntertainer?.id, activeCrowd?.energy_score, activeCrowd?.tips_last_30min]);
+    }).then(() => refresh()).catch((err) => console.debug("[AutoDJ analytics]", err?.message || err));
+  }, [activeEntertainer?.id, activeCrowd?.energy_score, activeCrowd?.tips_last_30min, refresh]);
 
   return (
     <div className="space-y-4">
