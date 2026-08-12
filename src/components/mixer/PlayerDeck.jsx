@@ -20,7 +20,7 @@ function extractVideoId(url) {
   return m ? m[1] : null;
 }
 
-export default function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded, onDropSong }) {
+export default function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded, onDropSong, autoPlay = true }) {
   const [dragOver, setDragOver] = useState(false);
   const [audioEl, setAudioEl] = useState(null);
   // Visualizer preference persisted per browser
@@ -109,7 +109,7 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
       {videoId ? (
         <YouTubePlayer
           videoId={videoId}
-          autoPlay
+          autoPlay={autoPlay}
           volume={volume}
           muted={muted}
           onEnded={onEnded}
@@ -136,7 +136,7 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
               src={song.uploadUrl}
               title={song.title}
               artist={song.artist}
-              autoPlay={true}
+              autoPlay={autoPlay}
               externalVolume={volume}
               onEnded={onEnded}
               onAudioElement={setAudioEl}
