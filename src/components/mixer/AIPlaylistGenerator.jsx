@@ -11,16 +11,13 @@ import { Sparkles, Loader2, Plus, Music, CheckCircle2, XCircle } from "lucide-re
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { VIBE_META } from "@/components/mixer/types/mixerTypes";
-
-// Same public, domain-restricted YouTube Data API key as MusicSearchTab.
-// Called from the browser so the domain referer matches the key's restrictions.
-const YOUTUBE_API_KEY = "AIzaSyDKesmHJytX_1MjfbVdcysMsTOa-GVcFjs";
+import { buildYouTubeMusicSearchUrl } from "@/lib/youtubeMusic";
 
 // Resolve AI-suggested track → real playable YouTube video ID (client-side).
 // Returns null on failure (track is still added, just without a playable link).
 async function resolveToYouTube(query) {
   try {
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=1&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
+    const url = buildYouTubeMusicSearchUrl(query, { maxResults: 1 });
     const res = await fetch(url);
     if (!res.ok) return null;
     const data = await res.json();
