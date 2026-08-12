@@ -199,7 +199,7 @@ export default function SitemapHub() {
 
           {/* Footer */}
           <footer className="text-center text-gray-500 text-sm pt-8 border-t border-gray-800">
-            <p>GlyphLock Security LLC — Autonomous Discovery Protocol v2.1</p>
+            <p>GlyphLock LLC — Autonomous Discovery Protocol v2.1</p>
             <p className="mt-2">Last Updated: {new Date().toLocaleDateString()}</p>
           </footer>
         </div>
