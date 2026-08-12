@@ -73,8 +73,8 @@ export default function Terms() {
             <h3 className="text-xl font-bold text-white mb-4">Contact Us</h3>
             <p className="text-gray-300">
               For questions about these terms, contact us at{" "}
-              <a href="mailto:glyphlock@gmail.com" className="text-[#00E4FF] hover:text-white font-bold transition-colors">
-                glyphlock@gmail.com
+              <a href="mailto:carloearl@glyphlock.com" className="text-[#00E4FF] hover:text-white font-bold transition-colors">
+                carloearl@glyphlock.com
               </a>
             </p>
           </div>
