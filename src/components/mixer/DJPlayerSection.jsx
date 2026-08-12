@@ -111,13 +111,17 @@ export default function DJPlayerSection({
     });
   }, [deckASong, deckBSong, crossfade, activeDeck, transitioning]);
 
+  // Equal-power crossfade avoids the +6 dB-ish perceived bump of two linear
+  // full-volume decks meeting at center. 0 = full A, 100 = full B.
   const deckAVolume = useMemo(() => {
-    const gain = Math.min(1, (100 - crossfade) / 50);
+    const angle = (Math.max(0, Math.min(100, crossfade)) / 100) * (Math.PI / 2);
+    const gain = Math.cos(angle);
     return deckAMuted ? 0 : deckABaseVol * gain;
   }, [crossfade, deckAMuted, deckABaseVol]);
 
   const deckBVolume = useMemo(() => {
-    const gain = Math.min(1, crossfade / 50);
+    const angle = (Math.max(0, Math.min(100, crossfade)) / 100) * (Math.PI / 2);
+    const gain = Math.sin(angle);
     return deckBMuted ? 0 : deckBBaseVol * gain;
   }, [crossfade, deckBMuted, deckBBaseVol]);
 
