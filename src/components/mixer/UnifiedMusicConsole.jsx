@@ -47,6 +47,7 @@ export default function UnifiedMusicConsole() {
   // authorizes autonomous playback and satisfies browser media gesture rules.
   const [autoDj, setAutoDj] = useState(false);
   const [playHistory, setPlayHistory] = useState([]);
+  const [runtimeBlockedTrackIds, setRuntimeBlockedTrackIds] = useState([]);
   const [performerOverrideId, setPerformerOverrideId] = useState("");
   const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
 
@@ -89,8 +90,9 @@ export default function UnifiedMusicConsole() {
     entertainerId: activeEntertainer?.id || null,
     history: playHistory,
     currentTrackId: currentEntityTrackId,
+    blockedTrackIds: runtimeBlockedTrackIds,
     limit: 5,
-  }), [snapshot, activePersona, activeCrowd, activeEntertainer?.id, playHistory, currentEntityTrackId]);
+  }), [snapshot, activePersona, activeCrowd, activeEntertainer?.id, playHistory, currentEntityTrackId, runtimeBlockedTrackIds]);
 
   const handlePlaybackEvent = useCallback((event) => {
     if (!event) return;
@@ -101,6 +103,10 @@ export default function UnifiedMusicConsole() {
     // with browser-generated IDs.
     const entityTrackId = event.entityTrackId || null;
     if (!entityTrackId) return;
+    if (event.type === "source_error") {
+      setRuntimeBlockedTrackIds((previous) => previous.includes(entityTrackId) ? previous : [...previous, entityTrackId]);
+      return;
+    }
     const analyticsEvent = event.type === "complete" ? "complete" : event.type === "skip" ? "skip" : "play";
     invokeDJGateway("recordPlayback", {
       playback: {
@@ -163,6 +169,8 @@ export default function UnifiedMusicConsole() {
         performerChoices={performerChoices}
         performerOverrideId={performerOverrideId}
         onPerformerOverride={setPerformerOverrideId}
+        runtimeBlockedCount={runtimeBlockedTrackIds.length}
+        onClearRuntimeBlocks={() => setRuntimeBlockedTrackIds([])}
         lastUpdated={lastUpdated}
         onRefresh={refresh}
       />
