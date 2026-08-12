@@ -1,11 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// W3-008B — Payment Provider Abstraction Layer
-// This function confirms a Stripe payment intent and delegates to
-// createPaymentRecord for provider-agnostic verification.
-//
-// Non-Stripe providers (cash, manual_external, clover, etc.) do NOT call
-// this function — they go directly to createPaymentRecord.
+// W3-008B — Optional Native Payment Integration
+// This function confirms a Stripe payment intent only when a venue explicitly
+// enables Stripe integration, then delegates to createPaymentRecord.
+// Existing venue processors/terminals bypass this function and are recorded
+// through the external_terminal overlay in createPaymentRecord.
 //
 // Stripe is lazily imported. The secret name is resolved dynamically from
 // the PaymentProvider entity — no literal STRIPE_SECRET_KEY in source.
@@ -17,7 +16,7 @@ async function resolveVenueConfig(base44, venue_id) {
     { venue_id, active: true }, null, 1
   );
   if (configs && configs.length > 0) return configs[0];
-  return { primary_provider_code: 'stripe' };
+  return { primary_provider_code: 'external_terminal' };
 }
 
 async function resolveProviderConfig(base44, providerCode) {
@@ -88,7 +87,7 @@ Deno.serve(async (req) => {
 
     // ── PROVIDER ROUTING ────────────────────────────────────────
     const venueConfig = await resolveVenueConfig(base44, venue_id);
-    const providerCode = venueConfig.primary_provider_code || 'stripe';
+    const providerCode = venueConfig.primary_provider_code || 'external_terminal';
 
     // Non-Stripe providers don't confirm via Stripe — they use createPaymentRecord
     if (providerCode !== 'stripe') {
@@ -109,7 +108,7 @@ Deno.serve(async (req) => {
       return Response.json({
         success: false,
         error: 'STRIPE_NOT_CONFIGURED',
-        message: 'Stripe is not configured. Use a manual_external or cash provider via createPaymentRecord instead.',
+        message: 'Stripe integration is not configured. Keep using the venue existing processor and capture its terminal reference through createPaymentRecord, or explicitly configure Stripe integration.',
         provider_code: providerCode
       }, { status: 503 });
     }
