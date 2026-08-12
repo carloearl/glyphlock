@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Activity, CheckCircle2, ChevronUp, ClipboardCopy, Loader2, RefreshCw, XCircle } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import { buildYouTubeMusicSearchUrl } from "@/lib/youtubeMusic";
 import { computeCrowdEnergyScore, generatePlaylist } from "@/lib/playlistEngine";
+import { buildAutoDJPlan } from "@/lib/djAutoEngine";
 import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 
 const nowMs = () => (typeof performance !== "undefined" && performance.now ? performance.now() : Date.now());
@@ -22,8 +22,10 @@ async function checkDJGateway() {
 }
 
 async function checkTrackLibrary() {
-  const rows = await base44.entities.Track.list("-created_date", 500);
-  return `${rows.length} live track record${rows.length === 1 ? "" : "s"}`;
+  const data = await invokeDJGateway("snapshot");
+  const unique = data.quality?.unique_track_count ?? data.tracks?.length ?? 0;
+  const raw = data.quality?.raw_track_count ?? unique;
+  return `${unique} unique track${unique === 1 ? "" : "s"} · ${raw} raw rows`;
 }
 
 async function checkYouTube() {
@@ -39,41 +41,20 @@ async function checkYouTube() {
 }
 
 async function checkJukeboxQueue() {
-  const rows = await base44.entities.JukeboxRequest.filter({ status: "pending" }, "-created_date", 500);
+  const data = await invokeDJGateway("snapshot");
+  const rows = data.jukebox_requests || [];
   return `${rows.length} pending request${rows.length === 1 ? "" : "s"}`;
 }
 
 async function checkPersonas() {
-  const rows = await base44.entities.AIDJPersona.list("-created_date", 500);
+  const data = await invokeDJGateway("snapshot");
+  const rows = data.personas || [];
   return `${rows.length} AI persona${rows.length === 1 ? "" : "s"}`;
 }
 
 async function checkPlaylistPermission() {
-  let created = null;
-  try {
-    created = await base44.entities.Playlist.create({
-      name: `NUPS diagnostic probe ${new Date().toISOString()}`,
-      entertainer_id: "diagnostic-probe",
-      ordered_tracks: [],
-      crowd_energy_score: 0,
-      generation_timestamp: new Date().toISOString(),
-      status: "archived",
-    });
-    if (!created?.id) throw new Error("Playlist.create succeeded but returned no record id");
-    await base44.entities.Playlist.delete(created.id);
-    created = null;
-    return "create + immediate delete permitted";
-  } catch (error) {
-    if (created?.id) {
-      try {
-        await base44.entities.Playlist.delete(created.id);
-        created = null;
-      } catch (cleanupError) {
-        throw new Error(`${errorMessage(error)} · cleanup failed: ${errorMessage(cleanupError)}`);
-      }
-    }
-    throw error;
-  }
+  const data = await invokeDJGateway("probePlaylistPermission");
+  return data.detail || "secure create + immediate delete permitted";
 }
 
 async function checkPlaylistEngine() {
@@ -89,14 +70,31 @@ async function checkCrowdScore() {
   return "0/10 with zero inputs (expected)";
 }
 
+async function checkAutoDJEngine() {
+  const plan = buildAutoDJPlan({
+    tracks: [
+      { id: "diag-a", title: "Diagnostic A", artist: "NUPS", active: true, mood: "neutral", bpm: 100, source: "youtube", source_id: "abcdefghijk" },
+      { id: "diag-b", title: "Diagnostic B", artist: "NUPS", active: true, mood: "sensual", bpm: 104, source: "youtube", source_id: "lmnopqrstuv" },
+    ],
+    currentTrackId: "diag-a",
+    blockedTrackIds: [],
+    limit: 1,
+  });
+  if (plan.status !== "READY" || plan.next?.track?.id !== "diag-b") {
+    throw new Error(`Unexpected plan: ${plan.status} · next ${plan.next?.track?.id || "none"}`);
+  }
+  return `READY · next diag-b · ${plan.transition?.label || "open"} · ${plan.transition?.fade_seconds || 6}s fade`;
+}
+
 const CHECKS = [
   { id: "gateway", label: "DJ Secure Gateway", run: checkDJGateway },
   { id: "tracks", label: "Track Library", run: checkTrackLibrary },
   { id: "youtube", label: "YouTube API", run: checkYouTube },
   { id: "jukebox", label: "Jukebox Queue", run: checkJukeboxQueue },
   { id: "personas", label: "AI Personas", run: checkPersonas },
-  { id: "playlist-permission", label: "Playlist Raw RLS", run: checkPlaylistPermission },
+  { id: "playlist-permission", label: "Playlist Save Path", run: checkPlaylistPermission },
   { id: "playlist-engine", label: "Playlist Engine", run: checkPlaylistEngine },
+  { id: "auto-dj-engine", label: "Auto-DJ Brain", run: checkAutoDJEngine },
   { id: "crowd-score", label: "Crowd Pulse", run: checkCrowdScore },
 ];
 
