@@ -246,7 +246,7 @@ export default function BillingAndPayments({ user: propUser }) {
               </div>
 
               <p className="text-slate-500 text-xs pt-4">
-                Already credentialed? Contact <a href="mailto:glyphlock@gmail.com" className="text-cyan-400 hover:underline">glyphlock@gmail.com</a> for account verification.
+                Already credentialed? Contact <a href="mailto:carloearl@glyphlock.com" className="text-cyan-400 hover:underline">carloearl@glyphlock.com</a> for account verification.
               </p>
             </CardContent>
           </Card>
