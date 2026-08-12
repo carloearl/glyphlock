@@ -3,7 +3,7 @@
  * Uses AudioEngine for uploaded/direct audio with full transport controls.
  * Falls back to YouTube iframe for YouTube URLs.
  */
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Volume2, VolumeX, Waves, WavesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -20,9 +20,27 @@ function extractVideoId(url) {
   return m ? m[1] : null;
 }
 
-export default function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded, onDropSong, autoPlay = true }) {
+const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded, onDropSong, autoPlay = true }, ref) {
   const [dragOver, setDragOver] = useState(false);
   const [audioEl, setAudioEl] = useState(null);
+  const youtubeRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      if (videoId) return youtubeRef.current?.play?.();
+      return audioEl?.play?.().catch?.(() => {});
+    },
+    pause: () => {
+      if (videoId) return youtubeRef.current?.pause?.();
+      return audioEl?.pause?.();
+    },
+    seekTo: (seconds) => {
+      if (videoId) return youtubeRef.current?.seekTo?.(seconds);
+      if (audioEl) audioEl.currentTime = Number(seconds) || 0;
+    },
+    getCurrentTime: () => videoId ? (youtubeRef.current?.getCurrentTime?.() ?? 0) : (audioEl?.currentTime ?? 0),
+    getDuration: () => videoId ? (youtubeRef.current?.getDuration?.() ?? 0) : (audioEl?.duration ?? 0),
+  }), [videoId, audioEl]);
   // Visualizer preference persisted per browser
   const [visualizerOn, setVisualizerOn] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -108,6 +126,7 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
       {/* Player area */}
       {videoId ? (
         <YouTubePlayer
+          ref={youtubeRef}
           videoId={videoId}
           autoPlay={autoPlay}
           volume={volume}
@@ -159,4 +178,6 @@ export default function PlayerDeck({ song, label, volume, muted, onVolumeChange,
       )}
     </div>
   );
-}
+});
+
+export default PlayerDeck;
