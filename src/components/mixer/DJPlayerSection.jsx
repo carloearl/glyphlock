@@ -322,6 +322,7 @@ export default function DJPlayerSection({
           muted={deckAMuted}
           onVolumeChange={(value, isMuted) => { setDeckABaseVol(value); setDeckAMuted(isMuted); }}
           onEnded={() => handleDeckEnded("A")}
+          onPlaybackError={(error) => handleDeckPlaybackError("A", error)}
           onDropSong={(songId) => {
             setDeckASongId(songId);
             if (activeDeck === "A") onPlay?.(songId);
@@ -336,6 +337,7 @@ export default function DJPlayerSection({
           muted={deckBMuted}
           onVolumeChange={(value, isMuted) => { setDeckBBaseVol(value); setDeckBMuted(isMuted); }}
           onEnded={() => handleDeckEnded("B")}
+          onPlaybackError={(error) => handleDeckPlaybackError("B", error)}
           onDropSong={(songId) => setDeckBSongId(songId)}
         />
       </div>
