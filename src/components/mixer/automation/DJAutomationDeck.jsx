@@ -37,6 +37,7 @@ export default function DJAutomationDeck({
   const duplicateCount = snapshot?.quality?.duplicate_track_count || 0;
   const pending = snapshot?.jukebox_requests?.length || 0;
   const energy = activeCrowd?.energy_score ?? 5;
+  const transition = plan?.transition || {};
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-gradient-to-br from-slate-950 via-violet-950/20 to-slate-950 p-3">
@@ -95,6 +96,12 @@ export default function DJAutomationDeck({
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-black text-white truncate">{next.track?.title || "Unknown"}</div>
                     <div className="text-xs text-slate-400 truncate">{next.track?.artist || "Unknown artist"} · score {next.score}</div>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      <span className="rounded border border-cyan-500/20 bg-cyan-500/5 px-1.5 py-0.5 text-[9px] font-mono text-cyan-300">fade {transition.fade_seconds || 6}s</span>
+                      <span className="rounded border border-violet-500/20 bg-violet-500/5 px-1.5 py-0.5 text-[9px] font-mono text-violet-300">BPM Δ {transition.bpm_delta ?? 'n/a'}</span>
+                      <span className="rounded border border-slate-700 px-1.5 py-0.5 text-[9px] font-mono text-slate-400">energy Δ {transition.energy_delta ?? 'n/a'}</span>
+                      <span className={`rounded border px-1.5 py-0.5 text-[9px] font-black uppercase ${transition.label === 'smooth' ? 'border-emerald-500/25 text-emerald-300' : transition.label === 'hard' ? 'border-amber-500/25 text-amber-300' : 'border-slate-700 text-slate-400'}`}>{transition.label || 'open'}</span>
+                    </div>
                     <div className="text-[10px] font-mono text-slate-500 mt-1 line-clamp-2">{next.reason}</div>
                   </div>
                 </div>
