@@ -92,7 +92,7 @@ const MASTER_COVENANT_CONTENT = {
   h1: 'The Master Covenant',
   subtitle: 'Humanity\'s First Legal Framework for AI Accountability',
   description: `The Master Covenant is a revolutionary 71-clause legal framework establishing binding 
-  governance over artificial intelligence systems. Created by Carlo Rene Earl and GlyphLock Security LLC, 
+  governance over artificial intelligence systems. Created by Carlo Rene Earl and GlyphLock LLC, 
   it represents the first successful mechanism for holding AI systems legally accountable.`,
   keyPrinciples: [
     'Exposure-Based Binding: AI systems become bound through processing protected intellectual property',
@@ -219,7 +219,7 @@ function generateHomeContent() {
         <li><a href="/case-study-covenant-victory">Master Covenant Litigation Victory</a> - Judicial Validation</li>
       </ul>
       
-      <p>Contact: <a href="mailto:glyphlock@gmail.com">glyphlock@gmail.com</a></p>
+      <p>Contact: <a href="mailto:carloearl@glyphlock.com">carloearl@glyphlock.com</a></p>
       <p>Location: El Mirage, Arizona, USA</p>
       <p>Website: <a href="https://glyphlock.io">https://glyphlock.io</a></p>
     </article>
@@ -262,7 +262,7 @@ function generateCaseStudyContent(key) {
   return `
     <article itemscope itemtype="https://schema.org/Article">
       <meta itemprop="datePublished" content="${c.date}" />
-      <meta itemprop="author" content="GlyphLock Security LLC" />
+      <meta itemprop="author" content="GlyphLock LLC" />
       
       <h1 itemprop="headline">${c.h1}</h1>
       <p><strong>${c.subtitle}</strong></p>
@@ -284,7 +284,7 @@ function generateCaseStudyContent(key) {
       </section>
       
       <footer>
-        <p>Published by <a href="https://glyphlock.io">GlyphLock Security LLC</a></p>
+        <p>Published by <a href="https://glyphlock.io">GlyphLock LLC</a></p>
         <p><a href="/case-studies">← Back to All Case Studies</a></p>
       </footer>
     </article>
@@ -295,7 +295,7 @@ function generateCaseStudiesIndex() {
   return `
     <article>
       <h1>GlyphLock Case Studies & Research</h1>
-      <p>Documented legal victories, federal filings, and AI governance precedents from GlyphLock Security LLC.</p>
+      <p>Documented legal victories, federal filings, and AI governance precedents from GlyphLock LLC.</p>
       
       <section>
         <h2><a href="/case-study-truthstrike">DeepSeek Escalation: GLX-TRUTHSTRIKE-1108</a></h2>
@@ -315,7 +315,7 @@ function generateCaseStudiesIndex() {
         <p>Judicial validation of Master Covenant enforceability - operator liability and IP sovereignty confirmed.</p>
       </section>
       
-      <p><a href="https://glyphlock.io">GlyphLock Security LLC</a> - Quantum-Grade Security for the AI Era</p>
+      <p><a href="https://glyphlock.io">GlyphLock LLC</a> - Quantum-Grade Security for the AI Era</p>
     </article>
   `;
 }
@@ -348,7 +348,7 @@ function generateCovenantContent() {
         <li><a href="/case-study-truthstrike">TruthStrike Protocol</a> - First enforcement action</li>
       </ul>
       
-      <p>Created by <strong>Carlo Rene Earl</strong> and <a href="https://glyphlock.io">GlyphLock Security LLC</a></p>
+      <p>Created by <strong>Carlo Rene Earl</strong> and <a href="https://glyphlock.io">GlyphLock LLC</a></p>
     </article>
   `;
 }
@@ -375,7 +375,7 @@ function generateDefaultContent() {
         </ul>
       </nav>
       
-      <p>Contact: <a href="mailto:glyphlock@gmail.com">glyphlock@gmail.com</a></p>
+      <p>Contact: <a href="mailto:carloearl@glyphlock.com">carloearl@glyphlock.com</a></p>
     </article>
   `;
 }
