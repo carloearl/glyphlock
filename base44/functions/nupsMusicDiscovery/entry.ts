@@ -136,7 +136,56 @@ Deno.serve(async (req) => {
       providers.push({ provider: "jamendo", status: "error", detail: error?.message || String(error) });
     }
 
-    // 3) NUPS local Track Library: always available when the app database is healthy.
+    // 3) Internet Archive: keyless public-domain / Creative Commons audio.
+    try {
+      const searchParams = new URLSearchParams({
+        q: `${query} AND mediatype:(audio)`,
+        rows: String(Math.min(limit, 8)),
+        page: "1",
+        output: "json",
+      });
+      searchParams.append("fl[]", "identifier");
+      searchParams.append("fl[]", "title");
+      searchParams.append("fl[]", "creator");
+      const archiveRes = await fetch(`https://archive.org/advancedsearch.php?${searchParams.toString()}`, { signal: AbortSignal.timeout(10000) });
+      const archiveData = await archiveRes.json().catch(() => null);
+      if (archiveRes.ok) {
+        const docs = archiveData?.response?.docs || [];
+        const resolved = await Promise.all(docs.map(async (doc) => {
+          const identifier = doc?.identifier;
+          if (!identifier) return null;
+          try {
+            const metaRes = await fetch(`https://archive.org/metadata/${identifier}`, { signal: AbortSignal.timeout(7000) });
+            if (!metaRes.ok) return null;
+            const meta = await metaRes.json();
+            const audio = (meta?.files || []).find((file) => /\.(mp3|ogg|m4a)$/i.test(String(file?.name || "")));
+            if (!audio) return null;
+            return {
+              id: `archive-${identifier}-${audio.name}`,
+              source: "internet_archive",
+              source_id: `${identifier}/${audio.name}`,
+              title: String(doc.title || identifier).slice(0, 160),
+              artist: Array.isArray(doc.creator) ? String(doc.creator[0] || "Internet Archive") : String(doc.creator || "Internet Archive"),
+              audio_url: `https://archive.org/download/${identifier}/${encodeURIComponent(audio.name)}`,
+              watch_url: `https://archive.org/details/${identifier}`,
+              license: "Internet Archive",
+              playable: true,
+            };
+          } catch (_) {
+            return null;
+          }
+        }));
+        const playableArchive = resolved.filter(Boolean);
+        providers.push({ provider: "internet_archive", status: "ok", count: playableArchive.length });
+        playableArchive.forEach(add);
+      } else {
+        providers.push({ provider: "internet_archive", status: "unavailable", detail: `HTTP ${archiveRes.status}` });
+      }
+    } catch (error) {
+      providers.push({ provider: "internet_archive", status: "error", detail: error?.message || String(error) });
+    }
+
+    // 4) NUPS local Track Library: always available when the app database is healthy.
     try {
       const localRows = await E.Track.list("-created_date", 500).catch(() => []);
       const matching = (localRows || []).filter((track) => track?.active !== false && localMatches(track, query)).slice(0, limit);
