@@ -49,7 +49,12 @@ Deno.serve(async (req) => {
 
     const config = settings();
     const missing = REQUIRED_SETTINGS.filter((name) => !config[name]);
-    const authScheme = config.OHIP_AUTH_SCHEME || null;
+    const configuredAuthScheme = config.OHIP_AUTH_SCHEME || null;
+    // Early onboarding stored the Oracle OAuth scope in OHIP_AUTH_SCHEME.
+    // This function only implements Oracle's OCIM client-credentials flow, so
+    // normalize that legacy value without exposing or rewriting any secret.
+    const usesLegacyScopeAlias = configuredAuthScheme === SCOPE;
+    const authScheme = usesLegacyScopeAlias ? 'OCIM' : configuredAuthScheme;
     const baseResult = {
       integration: 'Oracle Hospitality Integration Platform',
       application: 'GlyphLock NUPS',
