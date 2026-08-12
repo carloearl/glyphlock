@@ -87,9 +87,11 @@ export function buildAutoDJPlan({
   entertainerId = null,
   history = [],
   currentTrackId = null,
+  blockedTrackIds = [],
   limit = 5,
 } = {}) {
   const crowdState = crowd || { energy_score: 5 };
+  const runtimeBlocked = new Set(blockedTrackIds || []);
   const currentTrack = currentTrackId ? (tracks || []).find((track) => track.id === currentTrackId) || null : null;
   const analyticsByTrack = new Map();
   for (const row of performanceAnalytics || []) {
@@ -130,8 +132,9 @@ export function buildAutoDJPlan({
       const sameArtistPenalty = artistPenalty(track, history);
       const currentPenalty = currentTrackId === track.id ? 1000 : 0;
       const transition = transitionCompatibility(currentTrack, track, persona);
-      const playable = isEntityTrackPlayable(track);
-      const sourcePenalty = playable ? 0 : 45;
+      const runtimeSourceFailure = runtimeBlocked.has(track.id);
+      const playable = isEntityTrackPlayable(track) && !runtimeSourceFailure;
+      const sourcePenalty = playable ? 0 : runtimeSourceFailure ? 100 : 45;
       const total = Math.round((base.total + jukeboxBoost + performanceBoost - repeatPenalty - sameArtistPenalty - transition.penalty - sourcePenalty - currentPenalty) * 100) / 100;
 
       const reasons = [base.reason];
@@ -140,7 +143,8 @@ export function buildAutoDJPlan({
       if (repeatPenalty > 0) reasons.push(`Repeat -${repeatPenalty}`);
       if (sameArtistPenalty > 0) reasons.push(`Artist cooldown -${sameArtistPenalty}`);
       if (transition.penalty > 0) reasons.push(`Transition ${transition.label} -${transition.penalty}`);
-      if (!playable) reasons.push("No playable source");
+      if (runtimeSourceFailure) reasons.push("Source failed this session");
+      else if (!playable) reasons.push("No playable source");
 
       return {
         track,
@@ -152,6 +156,7 @@ export function buildAutoDJPlan({
         repeat_penalty: repeatPenalty,
         transition_penalty: transition.penalty,
         transition,
+        runtime_source_failure: runtimeSourceFailure,
         request_count: matchingRequests.length,
         reason: reasons.filter(Boolean).join(" · "),
       };
@@ -171,6 +176,7 @@ export function buildAutoDJPlan({
     confidence,
     playable_count: playable.length,
     blocked_count: ranked.length - playable.length,
+    runtime_blocked_count: ranked.filter((candidate) => candidate.runtime_source_failure).length,
     status: !ranked.length ? "EMPTY_CATALOG" : playable.length ? "READY" : "NO_PLAYABLE_SOURCE",
   };
 }
