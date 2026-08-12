@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { getClubTVSender } from '@/components/mixer/ClubBroadcastChannel';
-import { searchYouTubeMusic } from '@/lib/youtubeMusic';
+import { providerLabel, searchMusicSources } from '@/lib/musicDiscovery';
 import PasteLinkPanel from '@/components/mixer/suite/PasteLinkPanel';
 import ArchiveSearchPanel from '@/components/mixer/suite/ArchiveSearchPanel';
 
@@ -15,6 +15,7 @@ export default function MusicSearchTab() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [imported, setImported] = useState(new Set());
+  const [providers, setProviders] = useState([]);
 
   async function handleSearch(e) {
     e?.preventDefault?.();
@@ -22,11 +23,14 @@ export default function MusicSearchTab() {
     setLoading(true);
     setResults([]);
     try {
-      const items = await searchYouTubeMusic(query, { maxResults: 12 });
-      setResults(items.map(item => ({ source: 'youtube', ...item })));
+      const discovery = await searchMusicSources(query, { limit: 12 });
+      setResults(discovery.results);
+      setProviders(discovery.providers);
+      const healthy = discovery.providers.filter(p => p.status === 'ok').map(p => providerLabel(p.provider));
+      if (healthy.length) toast.success(`Music sources: ${healthy.join(' + ')}`);
     } catch (err) {
       console.error('[MusicSearch] search failed', err);
-      toast.error(`YouTube search failed: ${err.message}`);
+      toast.error(`Music search failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -37,13 +41,13 @@ export default function MusicSearchTab() {
       track: {
         title: r.title,
         artist: r.artist,
-        source: r.source || 'youtube',
-        source_id: r.id,
+        source: r.source === 'youtube' ? 'youtube' : 'manual',
+        source_id: r.source === 'youtube' ? r.source_id : `${r.source || 'source'}:${r.source_id || r.id}`,
         thumbnail_url: r.thumbnail,
-        embed_url: r.embed_url,
-        // Direct media links must land in file_url — that's the field the
-        // player/automix reads for non-YouTube audio.
-        file_url: (r.source && r.source !== 'youtube') ? r.embed_url : undefined,
+        embed_url: r.source === 'youtube' ? r.embed_url : undefined,
+        file_url: r.source !== 'youtube' ? (r.audio_url || '') : undefined,
+        genre: r.genre || undefined,
+        duration: r.duration || undefined,
         active: true,
       },
     });
@@ -58,7 +62,8 @@ export default function MusicSearchTab() {
       [deck === 'A' ? 'deckA' : 'deckB']: {
         title: r.title,
         artist: r.artist,
-        videoId: r.id,
+        videoId: r.source === 'youtube' ? (r.source_id || r.id.replace(/^yt-/, '')) : undefined,
+        audioUrl: r.source !== 'youtube' ? r.audio_url : undefined,
       },
     };
     getClubTVSender().publish(payload);
@@ -69,9 +74,11 @@ export default function MusicSearchTab() {
     // Match PlayerDeck's existing drop protocol but also include a direct
     // YouTube payload fallback for TV broadcasting.
     try {
-      const yt = JSON.stringify({ videoId: r.id, title: r.title, artist: r.artist });
-      e.dataTransfer.setData('application/mixer-youtube', yt);
-      e.dataTransfer.setData('text/plain', r.watch_url);
+      if (r.source === 'youtube') {
+        const yt = JSON.stringify({ videoId: r.source_id || r.id.replace(/^yt-/, ''), title: r.title, artist: r.artist });
+        e.dataTransfer.setData('application/mixer-youtube', yt);
+      }
+      e.dataTransfer.setData('text/plain', r.watch_url || r.audio_url || '');
       e.dataTransfer.effectAllowed = 'copy';
     } catch (_) { /* noop */ }
   }
@@ -80,7 +87,7 @@ export default function MusicSearchTab() {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Youtube className="w-5 h-5 text-red-400" />
-        <h3 className="text-lg font-bold text-white">YouTube Music Search</h3>
+        <h3 className="text-lg font-bold text-white">Multi-Source Music Search</h3>
       </div>
       <PasteLinkPanel onImport={importTrack} onSendDeck={loadToDeck} />
 
@@ -100,14 +107,23 @@ export default function MusicSearchTab() {
 
       {results.length === 0 && !loading && (
         <div className="text-center py-8 text-gray-500 text-sm border border-dashed border-gray-800 rounded-lg">
-          Enter a search query to find tracks from YouTube.
+          Search YouTube, Jamendo, and the NUPS Track Library from one place.
+        </div>
+      )}
+
+      {providers.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {providers.map((p) => (
+            <span key={p.provider} className={`text-[10px] font-mono px-2 py-1 rounded border ${p.status === 'ok' ? 'border-emerald-500/30 text-emerald-300 bg-emerald-500/5' : p.status === 'not_configured' ? 'border-amber-500/30 text-amber-300 bg-amber-500/5' : 'border-rose-500/30 text-rose-300 bg-rose-500/5'}`}>
+              {providerLabel(p.provider)} · {p.status}
+            </span>
+          ))}
         </div>
       )}
 
       {results.length > 0 && (
         <div className="text-[11px] text-slate-500 -mt-1 mb-1">
-          <span className="text-fuchsia-300 font-semibold">Drag</span> a result onto Deck A/B in the mixer — or use the
-          <span className="text-purple-300 font-semibold"> A</span> / <span className="text-cyan-300 font-semibold">B</span> buttons to send it straight to the Club TV.
+          Results can come from multiple providers. Import any playable source into the NUPS Track Library; YouTube and direct-audio sources both feed Auto-DJ.
         </div>
       )}
 
@@ -125,6 +141,7 @@ export default function MusicSearchTab() {
               <div className="flex-1 min-w-0 pointer-events-none">
                 <div className="text-sm font-semibold text-white truncate">{r.title}</div>
                 <div className="text-xs text-gray-400 truncate">{r.artist}</div>
+                <div className="text-[10px] font-mono text-slate-600">{providerLabel(r.source)}{r.license ? ` · ${r.license}` : ''}</div>
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <Button
