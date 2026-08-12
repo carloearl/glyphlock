@@ -108,7 +108,7 @@ function IdentityScene() {
     [Lock, "Transaction record", "One controlled operating record"],
   ];
   return (
-    <div className="grid h-full gap-4 md:grid-cols-3 md:items-center">
+    <div className="grid h-full gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
       {items.map(([Icon, title, text], index) => (
         <React.Fragment key={title}>
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .12 }}>
@@ -413,7 +413,7 @@ export default function NUPSBuyerVideo() {
           <div className="border-t border-white/8 bg-slate-950/88 px-4 py-4 sm:px-5">
             <div className="h-1.5 overflow-hidden rounded-full bg-white/7"><div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-[width] duration-150" style={{ width: `${progress}%` }} /></div>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : toggle} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/12 bg-white/[.04] px-4 py-2 text-sm font-black text-white">{playing ? <Pause className="h-4 w-4" /> : finished ? <RotateCcw className="h-4 w-4" /> : <Play className="h-4 w-4" />}{playing ? "Pause" : finished ? "Replay" : "Play"}</button><span className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/10 bg-white/[.025] px-3 py-2 text-[10px] font-bold text-slate-400"><Volume2 className="h-4 w-4 text-cyan-300" />{voiceLabel}</span></div>
+              <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : toggle} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/12 bg-white/[.04] px-4 py-2 text-sm font-black text-white">{playing ? <Pause className="h-4 w-4" /> : finished ? <RotateCcw className="h-4 w-4" /> : <Play className="h-4 w-4" />}{playing ? "Pause" : finished ? "Replay" : "Play"}</button><span title={voiceLabel} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/10 bg-white/[.025] px-3 py-2 text-[10px] font-bold text-slate-400"><Volume2 className="h-4 w-4 text-cyan-300" />Male narration</span></div>
               <div className="text-[10px] font-bold uppercase tracking-[.15em] text-slate-600">Each scene changes only after its narration finishes</div>
             </div>
           </div>
