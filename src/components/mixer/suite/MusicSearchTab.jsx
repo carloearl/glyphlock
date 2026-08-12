@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { getClubTVSender } from '@/components/mixer/ClubBroadcastChannel';
 import { searchYouTubeMusic } from '@/lib/youtubeMusic';
+import PasteLinkPanel from '@/components/mixer/suite/PasteLinkPanel';
 
 export default function MusicSearchTab() {
   const [query, setQuery] = useState('');
@@ -35,7 +36,7 @@ export default function MusicSearchTab() {
       track: {
         title: r.title,
         artist: r.artist,
-        source: 'youtube',
+        source: r.source || 'youtube',
         source_id: r.id,
         thumbnail_url: r.thumbnail,
         embed_url: r.embed_url,
@@ -77,6 +78,8 @@ export default function MusicSearchTab() {
         <Youtube className="w-5 h-5 text-red-400" />
         <h3 className="text-lg font-bold text-white">YouTube Music Search</h3>
       </div>
+      <PasteLinkPanel onImport={importTrack} onSendDeck={loadToDeck} />
+
       <form onSubmit={handleSearch} className="flex gap-2">
         <Input
           value={query}
