@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
 import { Disc, Plus, Trash2, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,8 +21,8 @@ export default function PersonasTab() {
 
   async function load() {
     setLoading(true);
-    const list = await base44.entities.AIDJPersona.list('-created_date');
-    setPersonas(list);
+    const data = await invokeDJGateway('snapshot');
+    setPersonas(data.personas || []);
     setLoading(false);
   }
 
@@ -30,12 +30,14 @@ export default function PersonasTab() {
     e.preventDefault();
     if (!form.name) return;
     const primary = form.primary_genres.split(',').map(s => s.trim()).filter(Boolean);
-    await base44.entities.AIDJPersona.create({
-      name: form.name,
-      risk_tolerance: form.risk_tolerance,
-      weighting_model: { crowd_weight: 0.4, entertainer_weight: 0.4, revenue_weight: 0.2 },
-      transition_style_rules: { bpm_range: 10, mood_compatibility: [], energy_ramp: 'linear' },
-      genre_bias_logic: { primary_genres: primary, secondary_genres: [], excluded_genres: [] },
+    await invokeDJGateway('createPersona', {
+      persona: {
+        name: form.name,
+        risk_tolerance: form.risk_tolerance,
+        weighting_model: { crowd_weight: 0.4, entertainer_weight: 0.4, revenue_weight: 0.2 },
+        transition_style_rules: { bpm_range: 10, mood_compatibility: [], energy_ramp: 'linear' },
+        genre_bias_logic: { primary_genres: primary, secondary_genres: [], excluded_genres: [] },
+      },
     });
     setForm({ name: '', risk_tolerance: 'balanced', primary_genres: '' });
     setShowForm(false);
@@ -44,7 +46,7 @@ export default function PersonasTab() {
 
   async function handleDelete(id) {
     if (!confirm('Delete this persona?')) return;
-    await base44.entities.AIDJPersona.delete(id);
+    await invokeDJGateway('deletePersona', { persona_id: id });
     load();
   }
 
