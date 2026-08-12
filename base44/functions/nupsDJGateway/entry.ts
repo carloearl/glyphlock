@@ -207,6 +207,26 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, analytics: updated, fulfilled_requests: fulfilledRequests });
     }
 
+    if (action === "probePlaylistPermission") {
+      let created = null;
+      try {
+        created = await E.Playlist.create({
+          name: `NUPS DJ gateway diagnostic ${new Date().toISOString()}`,
+          entertainer_id: "diagnostic-probe",
+          ordered_tracks: [],
+          crowd_energy_score: 0,
+          generation_timestamp: new Date().toISOString(),
+          status: "archived",
+        });
+        if (!created?.id) throw new Error("Playlist probe created no record id.");
+        await E.Playlist.delete(created.id);
+        return Response.json({ success: true, detail: "secure create + immediate delete permitted" });
+      } catch (error) {
+        if (created?.id) await E.Playlist.delete(created.id).catch(() => null);
+        throw error;
+      }
+    }
+
     if (action === "savePlaylist") {
       const playlist = body.playlist || {};
       if (!playlist.entertainer_id) {
