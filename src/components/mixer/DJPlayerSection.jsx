@@ -323,6 +323,7 @@ export default function DJPlayerSection({
           label={`Deck A${activeDeck === "A" ? " · LIVE" : " · CUE"}`}
           autoPlay={activeDeck === "A"}
           volume={deckAVolume}
+          baseVolume={deckABaseVol}
           muted={deckAMuted}
           onVolumeChange={(value, isMuted) => { setDeckABaseVol(value); setDeckAMuted(isMuted); }}
           onEnded={() => handleDeckEnded("A")}
@@ -338,6 +339,7 @@ export default function DJPlayerSection({
           label={`Deck B${activeDeck === "B" ? " · LIVE" : " · CUE"}`}
           autoPlay={activeDeck === "B"}
           volume={deckBVolume}
+          baseVolume={deckBBaseVol}
           muted={deckBMuted}
           onVolumeChange={(value, isMuted) => { setDeckBBaseVol(value); setDeckBMuted(isMuted); }}
           onEnded={() => handleDeckEnded("B")}

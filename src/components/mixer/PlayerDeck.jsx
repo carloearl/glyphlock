@@ -20,7 +20,12 @@ function extractVideoId(url) {
   return m ? m[1] : null;
 }
 
-const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded, onDropSong, onPlaybackError, autoPlay = true }, ref) {
+// `volume` = final playback gain (base volume × crossfader curve) — sent to the
+// audio/video engine. `baseVolume` = the operator's own fader setting, which is
+// what the on-screen slider shows and what mute/unmute must preserve. Mixing the
+// two silences the deck: writing the crossfaded value back as the base volume
+// collapses to 0 as soon as the crossfader moves or mute is toggled.
+const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVolume = 1, muted, onVolumeChange, onEnded, onDropSong, onPlaybackError, autoPlay = true }, ref) {
   const [dragOver, setDragOver] = useState(false);
   const [audioEl, setAudioEl] = useState(null);
   const youtubeRef = useRef(null);
@@ -110,11 +115,11 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, 
               <Waves className="w-3 h-3" />
             </Button>
           )}
-          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onVolumeChange(muted ? volume : 0, !muted)}>
+          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onVolumeChange(baseVolume || 1, !muted)}>
             {muted ? <VolumeX className="w-3 h-3 text-red-400" /> : <Volume2 className="w-3 h-3 text-slate-400" />}
           </Button>
           <Slider
-            value={[muted ? 0 : volume * 100]}
+            value={[muted ? 0 : baseVolume * 100]}
             onValueChange={([v]) => onVolumeChange(v / 100, false)}
             min={0} max={100} step={1}
             className="w-16"
