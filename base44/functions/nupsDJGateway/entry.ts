@@ -154,6 +154,50 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, crowd_metrics: created });
     }
 
+    if (action === "recordPlayback") {
+      const playback = body.playback || {};
+      const trackId = String(playback.track_id || "");
+      const event = String(playback.event || "play");
+      if (!trackId || !["play", "complete", "skip"].includes(event)) {
+        return Response.json({ error: "track_id and a valid playback event are required." }, { status: 400 });
+      }
+      const entertainerId = String(playback.entertainer_id || "venue_floor").slice(0, 160);
+      const existingRows = await E.PerformanceAnalytics.filter({ track_id: trackId, entertainer_id: entertainerId }, "-last_played", 1).catch(() => []);
+      const existing = existingRows?.[0] || null;
+      const crowdEnergy = Math.max(0, Math.min(10, Number(playback.crowd_energy) || 0));
+      const tips = Math.max(0, Number(playback.tips) || 0);
+      const now = new Date().toISOString();
+
+      if (!existing) {
+        const created = await E.PerformanceAnalytics.create({
+          track_id: trackId,
+          entertainer_id: entertainerId,
+          play_count: event === "play" ? 1 : 0,
+          avg_crowd_energy: event === "play" ? crowdEnergy : 0,
+          avg_tips: event === "play" ? tips : 0,
+          playthrough_rate: event === "complete" ? 1 : event === "skip" ? 0 : 0.5,
+          last_played: now,
+        });
+        return Response.json({ success: true, analytics: created });
+      }
+
+      const currentCount = Math.max(0, Number(existing.play_count) || 0);
+      const patch = { last_played: now };
+      if (event === "play") {
+        const nextCount = currentCount + 1;
+        patch.play_count = nextCount;
+        patch.avg_crowd_energy = Number((((Number(existing.avg_crowd_energy) || 0) * currentCount + crowdEnergy) / nextCount).toFixed(2));
+        patch.avg_tips = Number((((Number(existing.avg_tips) || 0) * currentCount + tips) / nextCount).toFixed(2));
+      } else {
+        const observation = event === "complete" ? 1 : 0;
+        const previousRate = Number.isFinite(Number(existing.playthrough_rate)) ? Number(existing.playthrough_rate) : 0.5;
+        // EWMA reacts to new floor behavior without letting one skip erase history.
+        patch.playthrough_rate = Number((previousRate * 0.8 + observation * 0.2).toFixed(3));
+      }
+      const updated = await E.PerformanceAnalytics.update(existing.id, patch);
+      return Response.json({ success: true, analytics: updated });
+    }
+
     if (action === "savePlaylist") {
       const playlist = body.playlist || {};
       if (!playlist.entertainer_id) {
