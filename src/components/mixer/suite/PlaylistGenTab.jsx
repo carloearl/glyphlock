@@ -51,17 +51,23 @@ export default function PlaylistGenTab() {
   async function handleSave() {
     if (!generated.length) return;
     setSaving(true);
-    await base44.entities.Playlist.create({
-      name: `Playlist ${new Date().toLocaleString()}`,
-      entertainer_id: selectedEntertainer || 'unassigned',
-      persona_id: selectedPersona || undefined,
-      ordered_tracks: generated,
-      crowd_energy_score: energy,
-      generation_timestamp: new Date().toISOString(),
-      status: 'active',
-    });
-    toast.success('Playlist saved');
-    setSaving(false);
+    try {
+      await base44.entities.Playlist.create({
+        name: `Playlist ${new Date().toLocaleString()}`,
+        entertainer_id: selectedEntertainer || 'unassigned',
+        persona_id: selectedPersona || undefined,
+        ordered_tracks: generated,
+        crowd_energy_score: energy,
+        generation_timestamp: new Date().toISOString(),
+        status: 'active',
+      });
+      toast.success('Playlist saved');
+    } catch (error) {
+      console.error('[PlaylistGen] save failed', error);
+      toast.error(`Playlist save failed: ${error?.response?.data?.message || error?.message || 'permission or network error'}`);
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loading) return <div className="flex items-center justify-center py-10"><Loader2 className="w-6 h-6 text-cyan-400 animate-spin" /></div>;
