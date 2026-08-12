@@ -24,11 +24,11 @@ export default function SEOHead({
       autoData = getSeoData(key);
   }
 
-  const resolvedTitle = title || autoData.title || "Quantum-Resistant Enterprise Security Platform | GlyphLock Security LLC";
-  const resolvedDescription = description || autoData.description || "GlyphLock Security LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework. Designed for high-security environments and structured compliance alignment.";
+  const resolvedTitle = title || autoData.title || "Quantum-Resistant Enterprise Security Platform | GlyphLock LLC";
+  const resolvedDescription = description || autoData.description || "GlyphLock LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework. Designed for high-security environments and structured compliance alignment.";
   
   // Combine and deduplicate keywords
-  const defaultKeywords = "GlyphLock Security LLC, quantum-resistant encryption, post-quantum cryptography, AI cybersecurity, enterprise security platform, visual cryptography, secure QR codes, blockchain security, AI governance framework, Master Covenant, GlyphLock Security, threat detection AI, zero-trust architecture, identity verification, fraud prevention, steganography tools, secure QR code generator, image encryption, NIST post-quantum standards, AI binding protocol, security operations center";
+  const defaultKeywords = "GlyphLock LLC, quantum-resistant encryption, post-quantum cryptography, AI cybersecurity, enterprise security platform, visual cryptography, secure QR codes, blockchain security, AI governance framework, Master Covenant, GlyphLock Security, threat detection AI, zero-trust architecture, identity verification, fraud prevention, steganography tools, secure QR code generator, image encryption, NIST post-quantum standards, AI binding protocol, security operations center";
   const autoKeywords = autoData.keywords ? autoData.keywords.join(", ") : "";
   const propKeywords = Array.isArray(keywords) ? keywords.join(", ") : (keywords || "");
   
@@ -115,7 +115,7 @@ export default function SEOHead({
     updateMetaTag('robots', robotsContent);
     updateMetaTag('googlebot', robotsContent);
     updateMetaTag('bingbot', robotsContent);
-    updateMetaTag('author', 'GlyphLock Security LLC');
+    updateMetaTag('author', 'GlyphLock LLC');
     updateMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=5.0');
     updateMetaTag('theme-color', '#000000');
     updateMetaTag('format-detection', 'telephone=no');
@@ -223,7 +223,7 @@ export default function SEOHead({
     script.textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "GlyphLock Security LLC",
+      "name": "GlyphLock LLC",
       "alternateName": "GlyphLock",
       "url": siteUrl,
       "logo": image,
@@ -258,7 +258,7 @@ export default function SEOHead({
           "@type": "ContactPoint",
           "telephone": "+1-424-246-6499",
           "contactType": "customer service",
-          "email": "glyphlock@gmail.com",
+          "email": "carloearl@glyphlock.com",
           "availableLanguage": ["en"]
         },
         {
@@ -301,7 +301,7 @@ export default function SEOHead({
               "description": "Visual Cryptography Tools, Blockchain Security Suite, GlyphBot AI Assistant, up to 1,000 QR codes/month",
               "provider": {
                 "@type": "Organization",
-                "name": "GlyphLock Security LLC"
+                "name": "GlyphLock LLC"
               }
             }
           },
@@ -313,7 +313,7 @@ export default function SEOHead({
               "description": "Unlimited QR Generation, Priority AI Processing, Security Operations Center, N.U.P.S. POS System, 24/7 Premium Support",
               "provider": {
                 "@type": "Organization",
-                "name": "GlyphLock Security LLC"
+                "name": "GlyphLock LLC"
               }
             }
           },
@@ -325,7 +325,7 @@ export default function SEOHead({
               "description": "AI-powered cybersecurity assistant for threat detection, code analysis, and security auditing",
               "provider": {
                 "@type": "Organization",
-                "name": "GlyphLock Security LLC"
+                "name": "GlyphLock LLC"
               }
             }
           },
@@ -337,7 +337,7 @@ export default function SEOHead({
               "description": "Generate secure, quantum-resistant QR codes with AI-powered threat detection",
               "provider": {
                 "@type": "Organization",
-                "name": "GlyphLock Security LLC"
+                "name": "GlyphLock LLC"
               }
             }
           },
@@ -349,7 +349,7 @@ export default function SEOHead({
               "description": "Hide sensitive data within images using advanced cryptographic techniques",
               "provider": {
                 "@type": "Organization",
-                "name": "GlyphLock Security LLC"
+                "name": "GlyphLock LLC"
               }
             }
           },
@@ -361,7 +361,7 @@ export default function SEOHead({
               "description": "60-minute expert cybersecurity analysis and custom solution recommendations",
               "provider": {
                 "@type": "Organization",
-                "name": "GlyphLock Security LLC"
+                "name": "GlyphLock LLC"
               }
             }
           }
@@ -385,7 +385,7 @@ export default function SEOHead({
       "description": resolvedDescription,
       "publisher": {
         "@type": "Organization",
-        "name": "GlyphLock Security LLC"
+        "name": "GlyphLock LLC"
       },
       "potentialAction": {
         "@type": "SearchAction",
@@ -415,7 +415,7 @@ export default function SEOHead({
             "mainEntityOfPage": fullUrl,
             "provider": {
                  "@type": "Organization",
-                 "name": "GlyphLock Security LLC"
+                 "name": "GlyphLock LLC"
             }
         });
     } else {
