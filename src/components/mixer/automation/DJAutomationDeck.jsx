@@ -28,6 +28,7 @@ export default function DJAutomationDeck({
   snapshot,
   plan,
   activePersona,
+  activeEntertainer,
   activeCrowd,
   lastUpdated,
   onRefresh,
@@ -68,11 +69,12 @@ export default function DJAutomationDeck({
             Gateway: {error}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-2">
             <Stat label="Unique Tracks" value={snapshot?.quality?.unique_track_count ?? snapshot?.tracks?.length ?? 0} sub={duplicateCount ? `${duplicateCount} duplicate rows ignored` : "catalog clean"} />
             <Stat label="Playable" value={plan?.playable_count || 0} sub={`${plan?.blocked_count || 0} source-blocked`} />
             <Stat label="Crowd" value={`${energy}/10`} sub="live energy input" />
             <Stat label="Jukebox" value={pending} sub="pending requests" />
+            <Stat label="Performer" value={activeEntertainer?.stage_name || "Floor"} sub={activeEntertainer ? "active NUPS shift" : "no performer shift linked"} />
             <Stat label="Persona" value={activePersona?.name || "Default"} sub={activePersona?.risk_tolerance || "balanced fallback"} />
             <Stat label="Confidence" value={`${plan?.confidence || 0}%`} sub={lastUpdated ? `updated ${new Date(lastUpdated).toLocaleTimeString()}` : "awaiting snapshot"} />
           </div>
