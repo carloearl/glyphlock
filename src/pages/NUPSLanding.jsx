@@ -1271,7 +1271,7 @@ export default function NUPSLanding() {
               <div>Multiple <span className="pat">Patents Pending</span></div>
               <div>AZ Entity <span className="pat">#23831258</span></div>
               <div>DACO · Master Covenant</div>
-              <div className="stamp">NUPS · LIVE</div>
+              <div className="stamp">NUPS · LIVE CORE · EXPANDING</div>
             </div>
           </header>
 
