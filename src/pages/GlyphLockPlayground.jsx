@@ -396,7 +396,7 @@ console.log("Cost: $" + result.cost);`;
           </div>
 
           <div className="mt-8 text-center text-slate-400 text-sm">
-            <p>GlyphLock Security LLC • Built by Carlo René Earl • Arizona Entity ID: 23831258</p>
+            <p>GlyphLock LLC • Built by Carlo René Earl • Arizona Entity ID: 23831258</p>
             <p className="mt-1">Multi-AI orchestration platform with automatic failover</p>
           </div>
         </div>
