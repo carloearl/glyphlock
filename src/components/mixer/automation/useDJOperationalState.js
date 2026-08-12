@@ -7,6 +7,7 @@ const EMPTY = {
   personas: [],
   crowd_metrics: [],
   performance_analytics: [],
+  entertainers: [],
   quality: { raw_track_count: 0, unique_track_count: 0, duplicate_track_count: 0 },
 };
 
