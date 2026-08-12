@@ -47,10 +47,19 @@
     },
     "card_token": {
       "type": "string",
-      "description": "Processor-issued token only. Raw card data never stored."
+      "description": "Optional processor-issued token for native integrations only. Raw card data never stored."
+    },
+    "processor_name": {
+      "type": "string",
+      "description": "Name of the venue's existing processor or integrated gateway. Informational only; NUPS does not require the merchant account to be held by GlyphLock."
+    },
+    "processor_reference": {
+      "type": "string",
+      "description": "External terminal receipt, authorization, batch, order, or processor reference linked to this NUPS transaction."
     },
     "approval_code": {
-      "type": "string"
+      "type": "string",
+      "description": "Approval/auth code produced by the venue's existing processor or optional native integration."
     },
     "manager_name": {
       "type": "string"

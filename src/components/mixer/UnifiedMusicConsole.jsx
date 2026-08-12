@@ -15,7 +15,7 @@
  */
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Disc3, Music, Youtube, Disc, Zap, Activity, Radio, RadioTower, Sparkles, Power,
+  Disc3, Music, Youtube, Disc, Zap, Activity, Radio, RadioTower, Stethoscope, Sparkles, Power,
 } from "lucide-react";
 
 import MixerModuleView from "@/components/mixer/MixerModuleView";
@@ -26,6 +26,7 @@ import PlaylistGenTab from "@/components/mixer/suite/PlaylistGenTab";
 import CrowdTab from "@/components/mixer/suite/CrowdTab";
 import JukeboxTab from "@/components/mixer/suite/JukeboxTab";
 import RadioTab from "@/components/mixer/suite/RadioTab";
+import TrackHealthTab from "@/components/mixer/suite/TrackHealthTab";
 import SuiteErrorBoundary from "@/components/mixer/suite/SuiteErrorBoundary";
 import DJAutomationDeck from "@/components/mixer/automation/DJAutomationDeck";
 import useDJOperationalState from "@/components/mixer/automation/useDJOperationalState";
@@ -41,6 +42,7 @@ const NAV = [
   { key: "playlist", label: "AI Playlist",    icon: Zap,      accent: "from-cyan-500 to-sky-500",       ring: "border-cyan-500/60 bg-cyan-500/15 text-cyan-200" },
   { key: "crowd",    label: "Crowd Pulse",    icon: Activity, accent: "from-emerald-500 to-green-500",  ring: "border-emerald-500/60 bg-emerald-500/15 text-emerald-200" },
   { key: "jukebox",  label: "Jukebox Queue",  icon: Radio,    accent: "from-amber-500 to-yellow-500",   ring: "border-amber-500/60 bg-amber-500/15 text-amber-200" },
+  { key: "health",   label: "Diagnostics",    icon: Stethoscope, accent: "from-slate-500 to-slate-400", ring: "border-cyan-500/60 bg-cyan-500/15 text-cyan-200" },
 ];
 
 export default function UnifiedMusicConsole() {
@@ -216,6 +218,7 @@ export default function UnifiedMusicConsole() {
         {active === "playlist" && <PlaylistGenTab />}
         {active === "crowd"    && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
         {active === "jukebox"  && <JukeboxTab />}
+        {active === "health"   && <TrackHealthTab />}
       </SuiteErrorBoundary>
     </div>
   );
