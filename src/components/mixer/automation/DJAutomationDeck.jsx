@@ -33,6 +33,8 @@ export default function DJAutomationDeck({
   performerChoices = [],
   performerOverrideId = "",
   onPerformerOverride,
+  runtimeBlockedCount = 0,
+  onClearRuntimeBlocks,
   lastUpdated,
   onRefresh,
 }) {
@@ -73,6 +75,16 @@ export default function DJAutomationDeck({
               ))}
             </select>
           </label>
+          {runtimeBlockedCount > 0 && (
+            <button
+              type="button"
+              onClick={onClearRuntimeBlocks}
+              className="h-8 rounded-lg border border-amber-500/35 bg-amber-500/10 px-2.5 text-[10px] font-bold text-amber-300 hover:bg-amber-500/15"
+              title="Retry tracks that failed to play during this booth session"
+            >
+              Retry {runtimeBlockedCount} source{runtimeBlockedCount === 1 ? "" : "s"}
+            </button>
+          )}
           <button
             type="button"
             onClick={onRefresh}
@@ -90,7 +102,7 @@ export default function DJAutomationDeck({
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-2">
             <Stat label="Unique Tracks" value={snapshot?.quality?.unique_track_count ?? snapshot?.tracks?.length ?? 0} sub={duplicateCount ? `${duplicateCount} duplicate rows ignored` : "catalog clean"} />
-            <Stat label="Playable" value={plan?.playable_count || 0} sub={`${plan?.blocked_count || 0} source-blocked`} />
+            <Stat label="Playable" value={plan?.playable_count || 0} sub={`${plan?.blocked_count || 0} blocked · ${plan?.runtime_blocked_count || 0} runtime`} />
             <Stat label="Crowd" value={`${energy}/10`} sub="live energy input" />
             <Stat label="Jukebox" value={pending} sub="pending requests" />
             <Stat label="Performer" value={activeEntertainer?.stage_name || "Floor"} sub={activeEntertainer ? "active NUPS shift" : "no performer shift linked"} />
