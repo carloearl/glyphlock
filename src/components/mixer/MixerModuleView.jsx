@@ -511,7 +511,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         autoDj={autoDj}
         automationNextSongId={automationNextSong?.id || null}
         onActiveSongChange={handleAutomationTransition}
-        transitionSeconds={6}
+        transitionSeconds={automationPlan?.transition?.fade_seconds || 6}
       />
 
       {/* Mobile profiles */}
