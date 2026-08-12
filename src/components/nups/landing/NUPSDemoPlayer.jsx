@@ -392,40 +392,52 @@ export default function NUPSDemoPlayer() {
   const [playing, setPlaying] = useState(false);
   const [finished, setFinished] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(FALLBACK_DURATION);
-  const audioRef = useRef(null);
+  const duration = FALLBACK_DURATION;
   const rafRef = useRef(null);
+  const clockStartRef = useRef(0);
+  const playingRef = useRef(false);
+  const spokenStepRef = useRef(-1);
+  const [voiceLabel, setVoiceLabel] = useState("male-preferred");
 
   const stopNarration = useCallback(() => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
+    spokenStepRef.current = -1;
   }, []);
 
   const speakCue = useCallback((cueIndex) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
     const cueToSpeak = CUES[cueIndex];
     if (!cueToSpeak) return;
-    window.speechSynthesis.cancel();
+
+    const synth = window.speechSynthesis;
+    const voices = synth.getVoices?.() || [];
+    const preferred = pickNarrationVoice(voices);
     const utterance = new SpeechSynthesisUtterance(cueToSpeak.spoken || cueToSpeak.caption);
-    utterance.rate = 1.08;
-    utterance.pitch = 0.94;
+    utterance.rate = 1.12;
+    utterance.pitch = 0.88;
     utterance.volume = 1;
-    const voices = window.speechSynthesis.getVoices?.() || [];
-    const preferred = voices.find((voice) => /en-US/i.test(voice.lang) && /natural|premium|enhanced|male/i.test(voice.name)) || voices.find((voice) => /en-US/i.test(voice.lang));
-    if (preferred) utterance.voice = preferred;
-    window.speechSynthesis.speak(utterance);
+    if (preferred) {
+      utterance.voice = preferred;
+      setVoiceLabel(preferred.name);
+    }
+
+    synth.cancel();
+    synth.speak(utterance);
+    spokenStepRef.current = cueIndex;
   }, []);
 
-  const syncFrame = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const safeDuration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : FALLBACK_DURATION;
-    const visualTime = Math.min(audio.currentTime + VISUAL_LEAD_SECONDS, safeDuration);
-    setCurrentTime(audio.currentTime);
-    setDuration(safeDuration);
-    setStep(resolveStep(visualTime));
-    if (!audio.paused && !audio.ended) rafRef.current = requestAnimationFrame(syncFrame);
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return undefined;
+    const synth = window.speechSynthesis;
+    const hydrateVoice = () => {
+      const preferred = pickNarrationVoice(synth.getVoices?.() || []);
+      if (preferred) setVoiceLabel(preferred.name);
+    };
+    hydrateVoice();
+    synth.addEventListener?.("voiceschanged", hydrateVoice);
+    return () => synth.removeEventListener?.("voiceschanged", hydrateVoice);
   }, []);
 
   const stopLoop = useCallback(() => {
@@ -433,65 +445,83 @@ export default function NUPSDemoPlayer() {
     rafRef.current = null;
   }, []);
 
-  const startLoop = useCallback(() => {
+  const syncFrame = useCallback(() => {
+    if (!playingRef.current) return;
+    const elapsed = Math.min(Math.max((performance.now() - clockStartRef.current) / 1000, 0), FALLBACK_DURATION);
+    const visualTime = Math.min(elapsed + VISUAL_LEAD_SECONDS, FALLBACK_DURATION);
+    setCurrentTime(elapsed);
+    setStep(resolveStep(visualTime));
+
+    if (elapsed >= FALLBACK_DURATION) {
+      playingRef.current = false;
+      setPlaying(false);
+      setFinished(true);
+      setCurrentTime(FALLBACK_DURATION);
+      setStep(CUES.length - 1);
+      stopLoop();
+      if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+      return;
+    }
+
+    rafRef.current = requestAnimationFrame(syncFrame);
+  }, [stopLoop]);
+
+  const startLoop = useCallback((fromTime = 0) => {
     stopLoop();
+    clockStartRef.current = performance.now() - fromTime * 1000;
+    playingRef.current = true;
     rafRef.current = requestAnimationFrame(syncFrame);
   }, [stopLoop, syncFrame]);
 
   useEffect(() => () => {
+    playingRef.current = false;
     stopLoop();
     stopNarration();
   }, [stopLoop, stopNarration]);
 
   useEffect(() => {
-    if (!playing) {
-      stopNarration();
+    if (!playing) return;
+    if (typeof window !== "undefined" && "speechSynthesis" in window && window.speechSynthesis.paused && spokenStepRef.current === step) {
+      window.speechSynthesis.resume();
       return;
     }
-    speakCue(step);
-    return () => stopNarration();
-  }, [playing, step, speakCue, stopNarration]);
+    if (spokenStepRef.current !== step) speakCue(step);
+  }, [playing, step, speakCue]);
 
-  const togglePlayback = useCallback(async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (audio.ended || finished) {
-      audio.currentTime = 0;
+  const togglePlayback = useCallback(() => {
+    if (playingRef.current) {
+      const elapsed = Math.min(Math.max((performance.now() - clockStartRef.current) / 1000, 0), FALLBACK_DURATION);
+      playingRef.current = false;
+      setCurrentTime(elapsed);
+      setPlaying(false);
+      stopLoop();
+      if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.pause();
+      return;
+    }
+
+    const restart = finished || currentTime >= FALLBACK_DURATION;
+    const fromTime = restart ? 0 : currentTime;
+    if (restart) {
       setCurrentTime(0);
       setStep(0);
       setFinished(false);
+      spokenStepRef.current = -1;
+      if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
     }
-    if (audio.paused) {
-      try {
-        await audio.play();
-        setPlaying(true);
-        startLoop();
-      } catch {
-        setPlaying(false);
-      }
-    } else {
-      audio.pause();
-      setPlaying(false);
-      stopLoop();
-      syncFrame();
-    }
-  }, [finished, startLoop, stopLoop, syncFrame]);
+    setPlaying(true);
+    startLoop(fromTime);
+  }, [currentTime, finished, startLoop, stopLoop]);
 
-  const replay = useCallback(async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = 0;
+  const replay = useCallback(() => {
+    playingRef.current = false;
+    stopLoop();
+    stopNarration();
     setCurrentTime(0);
     setStep(0);
     setFinished(false);
-    try {
-      await audio.play();
-      setPlaying(true);
-      startLoop();
-    } catch {
-      setPlaying(false);
-    }
-  }, [startLoop]);
+    setPlaying(true);
+    startLoop(0);
+  }, [startLoop, stopLoop, stopNarration]);
 
   const cueEnd = step + 1 < CUES.length ? CUES[step + 1].start : duration;
   const visualTime = Math.min(currentTime + VISUAL_LEAD_SECONDS, duration);
