@@ -8,6 +8,7 @@ const EMPTY = {
   crowd_metrics: [],
   performance_analytics: [],
   entertainers: [],
+  active_entertainer_shifts: [],
   quality: { raw_track_count: 0, unique_track_count: 0, duplicate_track_count: 0 },
 };
 
