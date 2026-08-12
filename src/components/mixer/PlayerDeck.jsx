@@ -20,7 +20,7 @@ function extractVideoId(url) {
   return m ? m[1] : null;
 }
 
-const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded, onDropSong, autoPlay = true }, ref) {
+const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, onVolumeChange, onEnded, onDropSong, onPlaybackError, autoPlay = true }, ref) {
   const [dragOver, setDragOver] = useState(false);
   const [audioEl, setAudioEl] = useState(null);
   const youtubeRef = useRef(null);
@@ -131,6 +131,7 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, 
           volume={volume}
           muted={muted}
           onEnded={onEnded}
+          onError={onPlaybackError}
         />
       ) : isUpload ? (
         <div className="flex flex-col">
@@ -158,6 +159,7 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, muted, 
               externalVolume={volume}
               onEnded={onEnded}
               onAudioElement={setAudioEl}
+              onError={onPlaybackError}
             />
           </div>
         </div>
