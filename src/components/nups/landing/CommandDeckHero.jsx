@@ -117,7 +117,7 @@ export default function CommandDeckHero({ onEnter }) {
             </p>
             <div className="cd-actions">
               <button className="cd-btn primary" type="button" onClick={onEnter}>Open NUPS Gateway <ArrowRight size={16} aria-hidden="true" /></button>
-              <button className="cd-btn secondary" type="button" onClick={() => document.getElementById('nups-walkthrough')?.scrollIntoView({ behavior: 'smooth' })}>View walkthrough <ReceiptText size={16} aria-hidden="true" /></button>
+              <button className="cd-btn secondary" type="button" onClick={() => document.getElementById('nups-video')?.scrollIntoView({ behavior: 'smooth' })}>Watch capability demo <ReceiptText size={16} aria-hidden="true" /></button>
             </div>
             <div className="cd-note"><LockKeyhole size={15} aria-hidden="true" /><span>NUPS is not presented as the merchant processor. It records and verifies the commercial event around the venue’s existing processing, with deeper integrations enabled only when supported and useful.</span></div>
           </div>
