@@ -51,7 +51,7 @@ export const injectSoftwareSchema = (name, description, url, features = []) => {
     "featureList": features,
     "provider": {
       "@type": "Organization",
-      "name": "GlyphLock Security LLC"
+      "name": "GlyphLock LLC"
     },
     "softwareVersion": "2.0",
     "releaseNotes": "Enterprise-grade security features with AI-powered threat detection"
@@ -89,7 +89,7 @@ export const injectServiceSchema = (name, description, url) => {
     "url": `https://glyphlock.io${url}`,
     "provider": {
       "@type": "Organization",
-      "name": "GlyphLock Security LLC"
+      "name": "GlyphLock LLC"
     },
     "areaServed": "Worldwide",
     "serviceType": "Cybersecurity Consulting"
@@ -115,7 +115,7 @@ export const injectServiceSchema = (name, description, url) => {
 /**
  * Inject Article schema for content pages
  */
-export const injectArticleSchema = (title, description, url, datePublished, author = "GlyphLock Security LLC") => {
+export const injectArticleSchema = (title, description, url, datePublished, author = "GlyphLock LLC") => {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -129,7 +129,7 @@ export const injectArticleSchema = (title, description, url, datePublished, auth
     },
     "publisher": {
       "@type": "Organization",
-      "name": "GlyphLock Security LLC",
+      "name": "GlyphLock LLC",
       "logo": {
         "@type": "ImageObject",
         "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png"
