@@ -48,27 +48,53 @@ Deno.serve(async (req) => {
     const maxResults = Math.min(Math.max(parseInt(body?.maxResults) || 12, 1), 25);
     const key = String(Deno.env.get('YOUTUBE_API_KEY') || '').trim();
 
-    if (!key) {
-      return Response.json({
-        error: 'YOUTUBE_API_KEY is not configured in Base44 secrets.',
-        code: 'YOUTUBE_SECRET_MISSING',
-      }, { status: 503 });
+    async function getGoogleOAuthToken() {
+      try {
+        const connection = await base44.asServiceRole.connectors.getConnection('googledrive');
+        return String(connection?.accessToken || '').trim();
+      } catch (_) {
+        return '';
+      }
     }
 
-    const params = new URLSearchParams({
-      part: 'snippet',
-      type: 'video',
-      videoCategoryId: '10',
-      maxResults: String(maxResults),
-      q: query,
-      key,
-    });
+    async function runYouTubeSearch({ apiKey = '', accessToken = '' } = {}) {
+      const params = new URLSearchParams({
+        part: 'snippet',
+        type: 'video',
+        videoCategoryId: '10',
+        maxResults: String(maxResults),
+        q: query,
+      });
+      if (apiKey) params.set('key', apiKey);
 
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`, {
-      signal: AbortSignal.timeout(10000),
-    });
+      const headers = accessToken
+        ? { Authorization: `Bearer ${accessToken}` }
+        : undefined;
+      const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`, {
+        headers,
+        signal: AbortSignal.timeout(10000),
+      });
+      const payload = await response.json().catch(() => null);
+      return { response, payload };
+    }
 
-    const data = await res.json().catch(() => null);
+    let credential = key ? 'server_api_key' : 'base44_google_oauth';
+    let { response: res, payload: data } = key
+      ? await runYouTubeSearch({ apiKey: key })
+      : await runYouTubeSearch({ accessToken: await getGoogleOAuthToken() });
+
+    // A server key remains the preferred production credential. If it is
+    // missing, disabled, or restricted incorrectly, transparently retry with
+    // the app-scoped Google OAuth connection authorized for youtube.readonly.
+    if ((!res.ok || data?.error) && key) {
+      const accessToken = await getGoogleOAuthToken();
+      if (accessToken) {
+        const retry = await runYouTubeSearch({ accessToken });
+        res = retry.response;
+        data = retry.payload;
+        credential = 'base44_google_oauth';
+      }
+    }
 
     if (!res.ok || data?.error) {
       const message = data?.error?.message || `YouTube API HTTP ${res.status}`;
@@ -77,7 +103,8 @@ Deno.serve(async (req) => {
         error: message,
         status: res.status,
         reason,
-        code: 'YOUTUBE_API_ERROR',
+        code: key ? 'YOUTUBE_API_ERROR' : 'YOUTUBE_OAUTH_NOT_READY',
+        credential,
       }, { status: 502 });
     }
 
@@ -92,7 +119,7 @@ Deno.serve(async (req) => {
         watch_url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
       }));
 
-    return Response.json({ items, count: items.length });
+    return Response.json({ items, count: items.length, credential });
   } catch (error) {
     return Response.json({ error: error?.message || 'Unknown error' }, { status: 500 });
   }
