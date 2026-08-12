@@ -126,7 +126,7 @@ export const FAQ_MASTER_DATA = [
     icon: "MessageCircle",
     q: "How do I get support?",
     a: [
-      "Security inquiries: glyphlock@gmail.com",
+      "Security inquiries: carloearl@glyphlock.com",
       "Enterprise clients: 24/7 priority support with dedicated account management.",
       "All support operates under protocol governance with credentialed access verification."
     ]
