@@ -3,31 +3,35 @@
 ## Current position
 
 - Oracle Store order: **49372025**
+- Oracle onboarding order ID: **49372025-ONBOARDING-107857124-1786521969045**
 - Subscription: **107857124**
 - Service: **Oracle Hospitality Integration Cloud Service — 10,000 Transactions**
 - Permanent Oracle Cloud account: **glyphlocknups**
 - Region: **US East (Ashburn)**
+- Developer Portal: **https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/**
+- Oracle Customer Support Identifier (CSI): **133374457**
 - Base44 production app: **Glyphlock** (`697a087fb354faebb72df54b`)
-- Status: subscription attached and activated; waiting only for Oracle's follow-up onboarding email containing the Partner Developer Portal URL.
+- Status: **Setup complete** email received from Oracle; Developer Portal access is available. The next action is to create/assign the portal user role, sign in, and register the non-production NUPS application.
 - Do not attach or copy this subscription into the separate Free Tier account `glyphlockdev`.
 
 ## Immediate portal registration
 
 In the OHIP Partner Developer Portal:
 
-1. Open **Applications** → **Register Application**.
-2. Application name: **GlyphLock NUPS**
-3. Description:
+1. Open **https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/** and sign in with the user assigned the appropriate OHIP Developer Portal role.
+2. Open **Applications** → **Register Application**.
+3. Application name: **GlyphLock NUPS**
+4. Description:
    > High-verification venue-operations platform connecting identity and age verification, role-based workflows, transaction records, VIP operations, contract execution, and auditable venue activity.
-4. Environment: **Non Production**
-5. Contact:
+5. Environment: **Non Production**
+6. Contact:
    - First name: Carlo
    - Last name: Earl
    - Email: carloearl@glyphlock.com
    - Phone: 480-886-5588
    - Company: GlyphLock LLC
-6. Subscribe only to the Hospitality API groups required for the first NUPS workflow. Do **not** select **API Catalog** unless using the Oracle Integration Cloud Hospitality Adapter.
-7. Register and securely copy the application key. Never place it in browser code, a Base44 entity, chat, or source control.
+7. Subscribe only to the Hospitality API groups required for the first NUPS workflow. Do **not** select **API Catalog** unless using the Oracle Integration Cloud Hospitality Adapter.
+8. Register and securely copy the application key. Never place it in browser code, a Base44 entity, chat, or source control.
 
 ## Partner Sandbox sequence
 
