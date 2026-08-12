@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
 import { generatePlaylist } from '@/lib/playlistEngine';
+import { isEntityTrackPlayable } from '@/lib/djTrackAdapter';
 import { Zap, Loader2, Save } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ export default function PlaylistGenTab() {
   const [selectedPersona, setSelectedPersona] = useState('');
   const [selectedEntertainer, setSelectedEntertainer] = useState('');
   const [energy, setEnergy] = useState(5);
+  const [playableOnly, setPlayableOnly] = useState(true);
   const [generated, setGenerated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,10 +34,19 @@ export default function PlaylistGenTab() {
     setLoading(false);
   }
 
+  // Tracks the automix can actually play: uploaded audio, direct media URLs
+  // or resolved YouTube sources.
+  const playableTracks = tracks.filter(isEntityTrackPlayable);
+  const poolTracks = playableOnly ? playableTracks : tracks;
+
   function handleGenerate() {
+    if (poolTracks.length === 0) {
+      toast.error('No playable tracks yet — upload audio or add a direct media link.');
+      return;
+    }
     const persona = personas.find(p => p.id === selectedPersona);
     const ordered = generatePlaylist({
-      tracks,
+      tracks: poolTracks,
       persona,
       crowd: { energy_score: energy },
       limit: 20,
@@ -104,9 +115,20 @@ export default function PlaylistGenTab() {
             <Slider value={[energy]} onValueChange={v => setEnergy(v[0])} min={0} max={10} step={1} className="mt-2" />
           </div>
 
+          <label className="flex items-center gap-2 text-xs text-slate-300">
+            <input
+              type="checkbox"
+              checked={playableOnly}
+              onChange={(e) => setPlayableOnly(e.target.checked)}
+              className="w-4 h-4 accent-cyan-500"
+            />
+            Automix-ready only — use downloaded / uploaded / linked audio
+            <span className="text-slate-500">({playableTracks.length} of {tracks.length})</span>
+          </label>
+
           <div className="flex gap-2">
-            <Button onClick={handleGenerate} disabled={tracks.length === 0} className="bg-cyan-600 hover:bg-cyan-500 flex-1">
-              <Zap className="w-4 h-4 mr-1" /> Generate ({tracks.length} tracks available)
+            <Button onClick={handleGenerate} disabled={poolTracks.length === 0} className="bg-cyan-600 hover:bg-cyan-500 flex-1">
+              <Zap className="w-4 h-4 mr-1" /> Generate ({poolTracks.length} tracks available)
             </Button>
             {generated.length > 0 && (
               <Button onClick={handleSave} disabled={saving} variant="outline" className="border-green-500/50 text-green-400">
