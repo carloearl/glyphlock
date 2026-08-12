@@ -84,10 +84,13 @@ export default function DJPlayerSection({
   // Manual mode retains the old profile-based "cue next" behavior, but the
   // cue deck is now genuinely paused instead of autoplaying over the live deck.
   useEffect(() => {
-    if (autoDj || !playingSongId || !profileSongs.length || activeDeck !== "A") return;
+    // Only auto-fill an EMPTY cue deck. Once a track is on Deck B (dropped,
+    // cued, or promoted) it stays put until the operator changes it — otherwise
+    // this effect re-ran and clobbered every manual Deck B load.
+    if (autoDj || !playingSongId || !profileSongs.length || activeDeck !== "A" || deckBSongId) return;
     const idx = profileSongs.findIndex((song) => song.id === playingSongId);
     const next = profileSongs[idx + 1] || profileSongs[0];
-    if (next && next.id !== playingSongId && next.id !== deckBSongId) setDeckBSongId(next.id);
+    if (next && next.id !== playingSongId) setDeckBSongId(next.id);
   }, [autoDj, playingSongId, profileSongs, deckBSongId, activeDeck]);
 
   // Broadcast both physical decks to Club TV.
