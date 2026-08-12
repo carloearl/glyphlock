@@ -66,8 +66,8 @@ const CUES = [
     start: 0,
     label: "Venue Operations",
     caption: "NUPS live core — venue operations tracked in one system",
-    detail: "Live core modules connect identity, role, contract, processor evidence, and receipt activity on one operational timeline. The venue can keep its existing merchant processor; native integrations are optional. Expansion scenes are labeled as preview capabilities.",
-    spoken: "NUPS live core connects venue operations while the venue keeps its existing processor. Native integrations are optional.",
+    detail: "Live core modules connect identity, role, contract, payment evidence, and receipt activity on one operational timeline. NUPS supports two payment paths: Stripe-native processing when GlyphLock/NUPS runs the transaction, or an evidence overlay when a venue keeps its existing merchant processor. Expansion scenes are labeled as preview capabilities.",
+    spoken: "NUPS supports two payment paths: Stripe-native processing when GlyphLock runs the transaction, or an evidence overlay when a venue keeps its existing processor.",
     audit: "Venue runtime opened with role-scoped activity tracking.",
   },
   {
@@ -123,7 +123,7 @@ const CUES = [
     label: "High-Verification Commerce",
     caption: "This is High-Verification Commerce. This is GlyphLock.",
     detail: "NUPS turns venue operations into structured, reviewable evidence. The live core is implemented now; selected automation shown here is still expanding.",
-    spoken: "NUPS is live core plus clearly labeled expansion. Keep your processor. Put NUPS above it.",
+    spoken: "NUPS is live core plus clearly labeled expansion. Use Stripe natively or keep your processor. NUPS keeps the operating and evidence layer consistent.",
     audit: "High-verification transaction lifecycle completed.",
   },
 ];
@@ -540,10 +540,10 @@ export default function NUPSDemoPlayer() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/28 bg-cyan-300/8"><Lock className="h-4 w-4 text-cyan-300" /></span>
             <div><div className="text-xs font-black tracking-[0.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[0.16em] text-slate-500">Live core + expansion preview</div></div>
           </div>
-          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill success><CreditCard className="h-3 w-3" />BYO processor overlay</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Corrected narration" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
+          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill success><CreditCard className="h-3 w-3" />Stripe native + BYO overlay</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Male narration" : "Narration ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
         </header>
 
-        <div className="border-b border-amber-300/20 bg-amber-300/[0.06] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100 sm:px-5">Payment model: keep the venue's existing processor by default · NUPS binds approval/reference evidence · native API/webhook integrations are optional · direct dispute-API submission is not yet live</div>
+        <div className="border-b border-amber-300/20 bg-amber-300/[0.06] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100 sm:px-5">Payment model: Stripe-native when GlyphLock/NUPS runs processing · existing venue processors can remain in place · NUPS binds approval/reference evidence across both paths · direct dispute-API submission is not yet live</div>
 
         <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[190px_minmax(0,1fr)_270px]">
           <aside className="border-b border-cyan-300/10 bg-slate-950/55 p-3 lg:border-b-0 lg:border-r">
@@ -612,33 +612,12 @@ export default function NUPSDemoPlayer() {
             {timelineMarkers.map((marker, index) => <span key={marker.label} title={marker.label} className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border ${index <= step ? "border-cyan-200 bg-cyan-400" : "border-white/20 bg-slate-800"}`} style={{ left: `${marker.percent}%` }} />)}
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : togglePlayback} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-cyan-300/28 bg-cyan-300/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-300/14">{finished ? <RotateCcw className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}{finished ? "Replay" : playing ? "Pause" : "Play"}</button><span className="hidden text-[10px] text-slate-500 sm:inline">Corrected narration follows the capability timeline. The legacy audio remains muted and is used only as the timing track.</span></div>
+            <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : togglePlayback} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-cyan-300/28 bg-cyan-300/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-300/14">{finished ? <RotateCcw className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}{finished ? "Replay" : playing ? "Pause" : "Play"}</button><span className="hidden text-[10px] text-slate-500 sm:inline">Narration uses the browser's best available male English voice and a single local playback clock. Voice: {voiceLabel}.</span></div>
             <button type="button" onClick={() => navigate("/NUPSKiosk")} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-black text-white shadow-[0_0_28px_rgba(59,130,246,0.24)] transition hover:scale-[1.015]">Enter NUPS <ArrowRight className="h-4 w-4" /></button>
           </div>
         </div>
       </div>
 
-      <audio
-        ref={audioRef}
-        src={VOICEOVER}
-        preload="auto"
-        muted
-        onLoadedMetadata={() => {
-          const audio = audioRef.current;
-          if (audio && Number.isFinite(audio.duration) && audio.duration > 0) setDuration(audio.duration);
-          syncFrame();
-        }}
-        onPlay={() => { setPlaying(true); setFinished(false); startLoop(); }}
-        onPause={() => { setPlaying(false); stopLoop(); syncFrame(); }}
-        onSeeked={syncFrame}
-        onEnded={() => {
-          stopLoop();
-          setPlaying(false);
-          setFinished(true);
-          setCurrentTime(duration);
-          setStep(CUES.length - 1);
-        }}
-      />
     </section>
   );
 }
