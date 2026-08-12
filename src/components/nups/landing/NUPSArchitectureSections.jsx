@@ -60,7 +60,8 @@ export default function NUPSArchitectureSections() {
   ];
 
   const configurable = [
-    "GoDaddy / Clover / Elavon / TSYS external-terminal confirmation adapters",
+    "Bring-your-own processor / existing terminal overlay",
+    "Optional native API / webhook processor integrations",
     "Rate card (cover · payouts · bonuses)",
     "Tip pool split configuration",
     "GlyphBucks denominations + expiry",
@@ -108,7 +109,7 @@ export default function NUPSArchitectureSections() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--line)", border: "1px solid var(--line)", marginBottom: 96 }}>
         <StatusColumn color="#10b981" title="Implemented Core" sub="Verified in the current build; production use still depends on venue configuration and live transaction history" items={live} />
         <StatusColumn color="#fbbf24" title="Deployment / Expansion" sub="Built or partially built — being completed and validated per venue" items={expansion} />
-        <StatusColumn color="#8b5cf6" title="Configurable / Adapter" sub="Available configuration paths or external/manual adapters; not equivalent to native API integration" items={configurable} />
+        <StatusColumn color="#8b5cf6" title="Processor Overlay / Integration" sub="Keep the venue's existing merchant processing by default; add native API/webhook integrations only where useful" items={configurable} />
       </div>
     </>
   );

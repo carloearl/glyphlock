@@ -262,42 +262,42 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     setPaymentProcessing(true);
     
     try {
-      // NUPS overlays the venue's existing processor by default. The venue's
-      // terminal has already moved/authorized the money; NUPS captures the
-      // processor evidence and binds it to this contract. Native processor APIs
-      // are optional integrations, not a requirement for this workflow.
-      const paymentResponse = await base44.functions.invoke('createPaymentRecord', {
-        provider_code: 'external_terminal',
-        processor_reference: processorReference.trim(),
-        approval_code: approvalCode.trim(),
+      const paymentResponse = await base44.functions.invoke('processGlyphBucksPayment', {
         amount: grandTotal,
-        payment_method: 'Credit Card',
-        card_last_four: String(cardLastSix).replace(/\D/g, '').slice(-4),
         order_number: orderNumber,
         customer_name: customerName,
-        create_linked_order: false,
-        metadata: {
-          processor_name: processorName.trim() || 'Venue existing processor',
-          capture_mode: 'existing_processor_overlay',
-          venue_name: venueName
-        }
+        customer_email: null,
+        description: `${venueName} Order ${orderNumber} - GlyphBucks $${glyphbucksValue}`
       });
 
       if (!paymentResponse.data.success) {
-        throw new Error(paymentResponse.data.message || paymentResponse.data.error || "Processor evidence capture failed");
+        throw new Error(paymentResponse.data.error || "Payment processing failed");
       }
 
-      const confirmedApprovalCode = paymentResponse.data.approval_code || approvalCode.trim();
-      const confirmedCardLastFour = paymentResponse.data.card_last_four || String(cardLastSix).replace(/\D/g, '').slice(-4);
+      const { client_secret, payment_intent_id } = paymentResponse.data;
+
+      const confirmResponse = await base44.functions.invoke('confirmGlyphBucksPayment', {
+        payment_intent_id,
+        order_number: orderNumber
+      });
+
+      if (!confirmResponse.data.success) {
+        throw new Error(confirmResponse.data.error || "Payment confirmation failed");
+      }
+
+      const confirmedApprovalCode = confirmResponse.data.approval_code || approvalCode;
+      const confirmedProcessorRef = confirmResponse.data.processor_reference || processorReference;
+      const confirmedCardLastFour = confirmResponse.data.card_last_four;
       setPaymentConfirmed(true);
       setPaymentProcessing(false);
-      setApprovalCode(confirmedApprovalCode);
 
+      setApprovalCode(confirmedApprovalCode);
+      if (confirmedProcessorRef) setProcessorReference(confirmedProcessorRef);
       if (confirmedCardLastFour && !cardLastSix) {
         setCardLastSix(confirmedCardLastFour);
       }
 
-      toast.success(`Existing processor transaction linked: ${confirmedApprovalCode}`);
+      toast.success(`Payment approved: ${confirmedApprovalCode}`);
 
       const order = await base44.entities.GlyphBucksOrder.create({
       order_number: orderNumber,
@@ -308,11 +308,10 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       customer_state: customerState,
       customer_zip: customerZip,
       purchaser_card_name: purchaserCardName,
-      card_last_four: '****' + confirmedCardLastFour,
+      card_last_four: '****' + String(cardLastSix).replace(/\D/g,'').slice(-4),
+      card_token: 'token_' + crypto.randomUUID(),
       card_exp: cardExp,
       approval_code: confirmedApprovalCode,
-      processor_name: processorName.trim() || 'Venue existing processor',
-      processor_reference: processorReference.trim(),
       manager_name: managerName,
       hostess_name: hostessName,
       line_items: lineItems.filter(li => li.room_number || li.entertainer || li.amount > 0),
@@ -344,7 +343,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
         guest_photo_url: guestPhotoUrl,
         id_scan_front_url: idPhotoUrl,
         id_scan_back_url: idPhotoBackUrl,
-        payment_approval_code: approval_code,
+        payment_approval_code: confirmedApprovalCode,
       });
       setSavedContractId(contract.id);
 
@@ -354,8 +353,8 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           customer_identity_id: customerId || null,
           denominations: buildDenominationsArray(glyphbucksValue),
           surcharge_rate: 0.30,
-          approval_code: approval_code,
-          processor_reference: processor_reference,
+          approval_code: confirmedApprovalCode,
+          processor_reference: confirmedProcessorRef,
           payment_method: "card",
           card_last_four: cardLastSix.slice(-4)
         });
@@ -605,18 +604,13 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           </Card>
 
           <Card className="bg-gray-900/60 border-gray-700">
-            <CardHeader className="pb-2"><CardTitle className="text-sm text-yellow-400">Existing Processor / Terminal Evidence</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm text-yellow-400">Purchaser Card Info.</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <div className="rounded-lg border border-cyan-500/25 bg-cyan-500/5 p-2 text-[11px] leading-4 text-cyan-100/80">
-                Process the card on the venue's normal terminal first. NUPS does not replace the merchant account; it binds the processor's approval and reference to the contract. Native API integrations are optional.
-              </div>
-              <div><Label className="text-xs">Processor / Terminal Name <span className="text-gray-500">(optional)</span></Label><Input value={processorName} onChange={e => setProcessorName(e.target.value)} placeholder="Venue's current processor" className="bg-gray-800 border-gray-700" /></div>
-              <div><Label className="text-xs text-red-400">Processor / Receipt Reference: *</Label><Input value={processorReference} onChange={e => setProcessorReference(e.target.value)} placeholder="Receipt, transaction, batch, or processor ref" className="bg-gray-800 border-gray-700" /></div>
-              <div><Label className="text-xs text-red-400">Cardholder Name:</Label><Input value={purchaserCardName} onChange={e => setPurchaserCardName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
+              <div><Label className="text-xs text-red-400">Name:</Label><Input value={purchaserCardName} onChange={e => setPurchaserCardName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
               <div><Label className="text-xs text-red-400">Card Number (Last 6 #s): *</Label><Input value={cardLastSix} onChange={e => setCardLastSix(e.target.value.replace(/\D/g,'').slice(0,6))} maxLength={6} className="bg-gray-800 border-gray-700" /></div>
               <div className="grid grid-cols-2 gap-2">
-                <div><Label className="text-xs">EXP:</Label><Input value={cardExp} onChange={e => setCardExp(e.target.value)} placeholder="MM/YY" className="bg-gray-800 border-gray-700" /></div>
-                <div><Label className="text-xs text-red-400">Approval Code: *</Label><Input value={approvalCode} onChange={e => setApprovalCode(e.target.value)} placeholder="From terminal receipt" className="bg-gray-800 border-gray-700" /></div>
+                <div><Label className="text-xs text-red-400">EXP:</Label><Input value={cardExp} onChange={e => setCardExp(e.target.value)} placeholder="MM/YY" className="bg-gray-800 border-gray-700" /></div>
+                <div><Label className="text-xs">Approval Code:</Label><Input value={approvalCode} onChange={e => setApprovalCode(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div><Label className="text-xs">Manager:</Label><Input value={managerName} onChange={e => setManagerName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
