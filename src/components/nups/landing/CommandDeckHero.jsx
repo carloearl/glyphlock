@@ -19,8 +19,14 @@ const CYAN = "#00F0FF";
 const WORKFLOWS = [
   [Fingerprint, "Verify", "Identity, age, account, venue, and role checks"],
   [ClipboardCheck, "Document", "Contracts, consent, events, and audit records"],
-  [WalletCards, "Transact", "POS activity, receipts, payouts, and reconciliation"],
+  [WalletCards, "Overlay", "Keep the venue processor; bind approval and receipt evidence in NUPS"],
   [ShieldCheck, "Defend", "Evidence retrieval and dispute-ready transaction history"],
+];
+
+const CAPABILITY_BANDS = [
+  { label: "LIVE CORE", value: "Identity · POS · contracts · GlyphBucks · audit", tone: "#10b981" },
+  { label: "PROCESSING", value: "Keep existing merchant account / terminal", tone: "#00d4ff" },
+  { label: "EXPANDING", value: "Final dispute PDF · direct processor APIs · full offline coverage", tone: "#fbbf24" },
 ];
 
 export default function CommandDeckHero({ onEnter }) {
@@ -53,7 +59,12 @@ export default function CommandDeckHero({ onEnter }) {
         .cd-topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:52px; }
         .cd-brand { display:flex; align-items:center; gap:12px; color:#fff; font-family:'Orbitron',sans-serif; font-weight:800; letter-spacing:.14em; }
         .cd-brand img { width:34px; height:34px; filter:drop-shadow(0 0 12px rgba(0,240,255,.6)); }
-        .cd-status { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid rgba(251,191,36,.34); background:rgba(251,191,36,.09); color:#fde68a; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+        .cd-status { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid rgba(16,185,129,.4); background:rgba(16,185,129,.1); color:#a7f3d0; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+        .cd-bands { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 34px; }
+        .cd-band { position:relative; overflow:hidden; min-height:84px; border:1px solid rgba(255,255,255,.1); background:rgba(3,6,20,.76); border-radius:14px; padding:15px 16px; }
+        .cd-band::before { content:''; position:absolute; inset:0 auto 0 0; width:3px; background:var(--band); box-shadow:0 0 18px var(--band); }
+        .cd-band__label { font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:900; letter-spacing:.2em; color:var(--band); }
+        .cd-band__value { margin-top:8px; color:#e2e8f0; font-size:12px; line-height:1.4; font-weight:650; }
         .cd-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:60px; align-items:center; }
         .cd-eyebrow { display:inline-flex; align-items:center; gap:10px; color:${CYAN}; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:800; letter-spacing:.28em; text-transform:uppercase; }
         .cd-copy h2 { margin:18px 0 20px; font-family:'Orbitron',sans-serif; font-size:clamp(34px,5vw,66px); line-height:1.02; letter-spacing:-.025em; color:#fff; }
@@ -74,7 +85,7 @@ export default function CommandDeckHero({ onEnter }) {
         .cd-workflow h3 { margin:0; color:#fff; font-size:14px; }
         .cd-workflow p { margin:4px 0 0; color:#94a3b8; font-size:12px; line-height:1.45; }
         .cd-audience { margin-top:16px; display:flex; align-items:center; gap:8px; color:#c4b5fd; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase; }
-        @media (max-width: 900px) { .cd-grid { grid-template-columns:1fr; gap:34px; } .cd-topbar { margin-bottom:36px; } }
+        @media (max-width: 900px) { .cd-grid { grid-template-columns:1fr; gap:34px; } .cd-topbar { margin-bottom:30px; } .cd-bands { grid-template-columns:1fr; } }
         @media (max-width: 640px) { .cd-hero { min-height:auto; padding:20px 14px 44px; } .cd-copy p { font-size:16px; } .cd-actions { flex-direction:column; } .cd-btn { width:100%; } }
       `}</style>
 
@@ -85,21 +96,30 @@ export default function CommandDeckHero({ onEnter }) {
             <img src="https://media.base44.com/images/public/697a087fb354faebb72df54b/77d157364_lglogo.png" alt="" />
             GLYPHLOCK
           </div>
-          <div className="cd-status"><BadgeCheck size={13} aria-hidden="true" /> Guided preview · mock data only</div>
+          <div className="cd-status"><BadgeCheck size={13} aria-hidden="true" /> Live core · expansion clearly labeled</div>
+        </div>
+
+        <div className="cd-bands" aria-label="Current NUPS capability status">
+          {CAPABILITY_BANDS.map((band) => (
+            <div className="cd-band" key={band.label} style={{ '--band': band.tone }}>
+              <div className="cd-band__label">{band.label}</div>
+              <div className="cd-band__value">{band.value}</div>
+            </div>
+          ))}
         </div>
 
         <div className="cd-grid">
           <div className="cd-copy">
-            <div className="cd-eyebrow"><Building2 size={15} aria-hidden="true" /> Venue operations, unified</div>
-            <h2 id="command-deck-title">From front door to closeout.<span>One connected record.</span></h2>
+            <div className="cd-eyebrow"><Building2 size={15} aria-hidden="true" /> Processor-neutral venue infrastructure</div>
+            <h2 id="command-deck-title">Keep your processor.<span>Put NUPS above it.</span></h2>
             <p>
-              NUPS brings the venue’s daily workflows into one controlled environment, so <strong>staff actions, guest transactions, contracts, receipts, payouts, and supporting evidence</strong> remain connected instead of scattered across disconnected tools.
+              The venue keeps its merchant account, terminal, settlement, and processor relationship. NUPS adds the controlled operating and evidence layer above it, linking <strong>identity, approvals, contracts, receipts, payouts, and audit records</strong>. Native API or webhook integrations are optional, not a migration requirement.
             </p>
             <div className="cd-actions">
               <button className="cd-btn primary" type="button" onClick={onEnter}>Open NUPS Gateway <ArrowRight size={16} aria-hidden="true" /></button>
               <button className="cd-btn secondary" type="button" onClick={() => document.getElementById('nups-walkthrough')?.scrollIntoView({ behavior: 'smooth' })}>View walkthrough <ReceiptText size={16} aria-hidden="true" /></button>
             </div>
-            <div className="cd-note"><LockKeyhole size={15} aria-hidden="true" /><span>The gateway applies NUPS-specific venue, account, and role verification. This public page is orientation, not an operator dashboard.</span></div>
+            <div className="cd-note"><LockKeyhole size={15} aria-hidden="true" /><span>NUPS is not presented as the merchant processor. It records and verifies the commercial event around the venue’s existing processing, with deeper integrations enabled only when supported and useful.</span></div>
           </div>
 
           <aside className="cd-panel" aria-label="NUPS workflow summary">
