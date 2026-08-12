@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import NUPSArchitectureSections from "@/components/nups/landing/NUPSArchitectureSections";
 import ExperienceLiveSystemCTA from "@/components/demo/ExperienceLiveSystemCTA";
-import NUPSDemoPlayer from "@/components/nups/landing/NUPSDemoPlayer";
+import NUPSBuyerVideo from "@/components/nups/landing/NUPSBuyerVideo";
 import KioskSimulator from "@/components/nups/landing/KioskSimulator";
 import CommandDeckHero from "@/components/nups/landing/CommandDeckHero";
 import DemoRecordingSection from "@/components/home/DemoRecordingSection";
@@ -1197,7 +1197,7 @@ export default function NUPSLanding() {
         </svg>
 
         <div id="nups-video" style={{ position: 'relative', zIndex: 2, width: '100%', padding: '0 16px 18px', scrollMarginTop: 0 }}>
-          <NUPSDemoPlayer />
+          <NUPSBuyerVideo />
         </div>
 
         <CommandDeckHero
