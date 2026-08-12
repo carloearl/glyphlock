@@ -45,19 +45,35 @@ export default function UnifiedMusicConsole() {
   const [active, setActive] = useState("mixer");
   const [autoDj, setAutoDj] = useState(true);
   const [playHistory, setPlayHistory] = useState([]);
+  const [performerOverrideId, setPerformerOverrideId] = useState("");
   const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
 
   const activeNav = NAV.find((n) => n.key === active) || NAV[0];
-  const activeShift = snapshot?.active_entertainer_shifts?.[0] || null;
-  const activeEntertainer = activeShift
-    ? snapshot?.entertainers?.find((entertainer) => entertainer.id === activeShift.entertainer_id) || null
+  const performerChoices = useMemo(() => {
+    const seen = new Set();
+    return (snapshot?.active_entertainer_shifts || []).map((shift) => {
+      const entertainer = snapshot?.entertainers?.find((item) => item.id === shift.entertainer_id);
+      return entertainer ? { entertainer, shift } : null;
+    }).filter((choice) => {
+      if (!choice || seen.has(choice.entertainer.id)) return false;
+      seen.add(choice.entertainer.id);
+      return true;
+    });
+  }, [snapshot]);
+  const autoShift = (snapshot?.active_entertainer_shifts || []).find((shift) => shift.location === "Stage")
+    || snapshot?.active_entertainer_shifts?.[0]
+    || null;
+  const overrideValid = performerOverrideId && performerChoices.some((choice) => choice.entertainer.id === performerOverrideId);
+  const activeEntertainerId = overrideValid ? performerOverrideId : autoShift?.entertainer_id || null;
+  const activeEntertainer = activeEntertainerId
+    ? snapshot?.entertainers?.find((entertainer) => entertainer.id === activeEntertainerId) || null
     : null;
-  const activePersona = (activeShift
-    ? snapshot?.personas?.find((persona) => persona.entertainer_id === activeShift.entertainer_id)
+  const activePersona = (activeEntertainerId
+    ? snapshot?.personas?.find((persona) => persona.entertainer_id === activeEntertainerId)
     : null) || snapshot?.personas?.[0] || null;
-  const activeCrowd = (activeShift
-    ? snapshot?.crowd_metrics?.find((metric) => metric.entertainer_id === activeShift.entertainer_id)
-    : null) || snapshot?.crowd_metrics?.[0] || { energy_score: 5 };
+  const activeCrowd = (activeEntertainerId
+    ? snapshot?.crowd_metrics?.find((metric) => metric.entertainer_id === activeEntertainerId)
+    : null) || snapshot?.crowd_metrics?.find((metric) => metric.entertainer_id === "venue_floor") || snapshot?.crowd_metrics?.[0] || { energy_score: 5 };
   const currentEntityTrackId = useMemo(() => {
     const latestPlay = [...playHistory].reverse().find((event) => event?.type === "play" && event?.entityTrackId);
     return latestPlay?.entityTrackId || null;
@@ -142,6 +158,9 @@ export default function UnifiedMusicConsole() {
         activePersona={activePersona}
         activeEntertainer={activeEntertainer}
         activeCrowd={activeCrowd}
+        performerChoices={performerChoices}
+        performerOverrideId={performerOverrideId}
+        onPerformerOverride={setPerformerOverrideId}
         lastUpdated={lastUpdated}
         onRefresh={refresh}
       />
