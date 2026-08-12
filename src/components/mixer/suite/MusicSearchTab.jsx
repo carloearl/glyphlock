@@ -45,7 +45,7 @@ export default function MusicSearchTab() {
         source_id: r.source === 'youtube' ? r.source_id : `${r.source || 'source'}:${r.source_id || r.id}`,
         thumbnail_url: r.thumbnail,
         embed_url: r.source === 'youtube' ? r.embed_url : undefined,
-        file_url: r.source !== 'youtube' ? (r.audio_url || '') : undefined,
+        file_url: r.source !== 'youtube' ? (r.audio_url || r.embed_url || '') : undefined,
         genre: r.genre || undefined,
         duration: r.duration || undefined,
         active: true,
