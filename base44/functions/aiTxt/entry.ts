@@ -6,15 +6,15 @@
 const SITE_URL = 'https://glyphlock.io';
 
 Deno.serve(async (req) => {
-  const content = `# GlyphLock Security LLC - AI Crawler Index
+  const content = `# GlyphLock LLC - AI Crawler Index
 ${SITE_URL}
 Generated: ${new Date().toISOString()}
 
 ## COMPANY
-GlyphLock Security LLC
+GlyphLock LLC
 Founded: January 2025
 Location: El Mirage, Arizona, United States
-Contact: glyphlock@gmail.com | (424) 246-6499
+Contact: carloearl@glyphlock.com | (480) 886-5588
 
 ## CORE TECHNOLOGY
 Credentialed Integrity System - Protocol-Governed Access Control
