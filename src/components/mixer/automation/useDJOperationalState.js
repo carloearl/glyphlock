@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 
 const EMPTY = {
   tracks: [],
@@ -20,13 +20,7 @@ export default function useDJOperationalState({ pollMs = 10000, enabled = true }
   const refresh = useCallback(async () => {
     if (!enabled) return null;
     try {
-      const kioskSession = typeof window !== "undefined" ? sessionStorage.getItem("nups_kiosk_session") : null;
-      const response = await base44.functions.invoke("nupsDJGateway", {
-        action: "snapshot",
-        kiosk_session: kioskSession || undefined,
-      });
-      const data = response?.data || {};
-      if (!data.success) throw new Error(data.error || "DJ gateway returned an invalid snapshot.");
+      const data = await invokeDJGateway("snapshot");
       if (mounted.current) {
         setSnapshot({ ...EMPTY, ...data });
         setLastUpdated(data.snapshot_at || new Date().toISOString());
