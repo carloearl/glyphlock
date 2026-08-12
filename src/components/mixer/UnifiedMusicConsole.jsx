@@ -47,8 +47,16 @@ export default function UnifiedMusicConsole() {
   const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
 
   const activeNav = NAV.find((n) => n.key === active) || NAV[0];
-  const activePersona = snapshot?.personas?.[0] || null;
-  const activeCrowd = snapshot?.crowd_metrics?.[0] || { energy_score: 5 };
+  const activeShift = snapshot?.active_entertainer_shifts?.[0] || null;
+  const activeEntertainer = activeShift
+    ? snapshot?.entertainers?.find((entertainer) => entertainer.id === activeShift.entertainer_id) || null
+    : null;
+  const activePersona = (activeShift
+    ? snapshot?.personas?.find((persona) => persona.entertainer_id === activeShift.entertainer_id)
+    : null) || snapshot?.personas?.[0] || null;
+  const activeCrowd = (activeShift
+    ? snapshot?.crowd_metrics?.find((metric) => metric.entertainer_id === activeShift.entertainer_id)
+    : null) || snapshot?.crowd_metrics?.[0] || { energy_score: 5 };
   const automationPlan = useMemo(() => buildAutoDJPlan({
     tracks: snapshot?.tracks || [],
     persona: activePersona,
@@ -109,6 +117,7 @@ export default function UnifiedMusicConsole() {
         snapshot={snapshot}
         plan={automationPlan}
         activePersona={activePersona}
+        activeEntertainer={activeEntertainer}
         activeCrowd={activeCrowd}
         lastUpdated={lastUpdated}
         onRefresh={refresh}
