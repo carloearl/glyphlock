@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TrackCsvImport from '@/components/mixer/suite/TrackCsvImport';
+import BulkAudioUpload from '@/components/mixer/suite/BulkAudioUpload';
 
 const MOODS = ['high-energy', 'sensual', 'chill', 'aggressive', 'neutral'];
 const GENRES = ['hip-hop', 'edm', 'r&b', 'pop', 'latin', 'trap', 'house', 'reggaeton', 'top-40'];
@@ -61,6 +62,7 @@ export default function TracksTab() {
           <Music className="w-5 h-5 text-purple-400" /> Track Library ({tracks.length})
         </h3>
         <div className="flex items-center gap-2">
+          <BulkAudioUpload onImported={load} />
           <TrackCsvImport onImported={load} />
           <Button size="sm" onClick={() => setShowForm(!showForm)} className="bg-purple-600 hover:bg-purple-500">
             <Plus className="w-4 h-4 mr-1" /> Add Track
