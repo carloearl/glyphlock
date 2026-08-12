@@ -3,6 +3,7 @@ import { Activity, CheckCircle2, ChevronUp, ClipboardCopy, Loader2, RefreshCw, X
 import { base44 } from "@/api/base44Client";
 import { buildYouTubeMusicSearchUrl } from "@/lib/youtubeMusic";
 import { computeCrowdEnergyScore, generatePlaylist } from "@/lib/playlistEngine";
+import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 
 const nowMs = () => (typeof performance !== "undefined" && performance.now ? performance.now() : Date.now());
 
@@ -13,6 +14,11 @@ function errorMessage(error) {
     : responseData?.message || responseData?.error || responseData?.detail;
   const raw = responseMessage || error?.message || String(error || "Unknown error");
   return raw.replace(/\s+/g, " ").trim().slice(0, 180);
+}
+
+async function checkDJGateway() {
+  const data = await invokeDJGateway("snapshot");
+  return `secure snapshot · ${data.quality?.unique_track_count ?? data.tracks?.length ?? 0} unique tracks · ${data.jukebox_requests?.length || 0} pending`;
 }
 
 async function checkTrackLibrary() {
@@ -84,11 +90,12 @@ async function checkCrowdScore() {
 }
 
 const CHECKS = [
+  { id: "gateway", label: "DJ Secure Gateway", run: checkDJGateway },
   { id: "tracks", label: "Track Library", run: checkTrackLibrary },
   { id: "youtube", label: "YouTube API", run: checkYouTube },
   { id: "jukebox", label: "Jukebox Queue", run: checkJukeboxQueue },
   { id: "personas", label: "AI Personas", run: checkPersonas },
-  { id: "playlist-permission", label: "Playlist Save", run: checkPlaylistPermission },
+  { id: "playlist-permission", label: "Playlist Raw RLS", run: checkPlaylistPermission },
   { id: "playlist-engine", label: "Playlist Engine", run: checkPlaylistEngine },
   { id: "crowd-score", label: "Crowd Pulse", run: checkCrowdScore },
 ];
