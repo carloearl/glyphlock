@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { VIBE_META } from "@/components/mixer/types/mixerTypes";
 import { buildYouTubeMusicSearchUrl } from "@/lib/youtubeMusic";
+import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 
 // Resolve AI-suggested track → real playable YouTube video ID (client-side).
 // Returns null on failure (track is still added, just without a playable link).
@@ -116,22 +117,46 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
     });
   };
 
-  const handleAddSelected = () => {
+  const handleAddSelected = async () => {
     if (!results?.playlist) return;
-    const songs = results.playlist
-      .filter((_, i) => selected.has(i))
-      .map(s => ({
-        title: s.title,
-        artist: s.artist,
-        vibeTag: s.vibeTag,
-        energyLevel: s.energyLevel,
-        // Real, playable YouTube URL — not a search results page
-        youtubeUrl: s.resolvedVideoId
-          ? `https://www.youtube.com/watch?v=${s.resolvedVideoId}`
-          : "",
-      }));
+    const selectedSongs = results.playlist.filter((_, i) => selected.has(i));
+    const songs = selectedSongs.map(s => ({
+      title: s.title,
+      artist: s.artist,
+      vibeTag: s.vibeTag,
+      energyLevel: s.energyLevel,
+      // Real, playable YouTube URL — not a search results page
+      youtubeUrl: s.resolvedVideoId
+        ? `https://www.youtube.com/watch?v=${s.resolvedVideoId}`
+        : "",
+    }));
+
+    // Persist resolved AI picks into the authoritative Track Library as well as
+    // the local performance deck. The gateway de-duplicates by YouTube ID.
+    const moodByVibe = {
+      slow: "chill",
+      seductive: "sensual",
+      highEnergy: "high-energy",
+      experimental: "neutral",
+      crowdControl: "neutral",
+      cooldown: "chill",
+    };
+    await Promise.all(selectedSongs
+      .filter((song) => song.resolvedVideoId)
+      .map((song) => invokeDJGateway("createTrack", {
+        track: {
+          title: song.title,
+          artist: song.artist,
+          source: "youtube",
+          source_id: song.resolvedVideoId,
+          embed_url: `https://www.youtube.com/embed/${song.resolvedVideoId}`,
+          mood: moodByVibe[song.vibeTag] || "neutral",
+          active: true,
+        },
+      }).catch(() => null)));
+
     onAddSongs(songs);
-    toast.success(`Added ${songs.length} playable songs to deck`);
+    toast.success(`Added ${songs.length} playable songs to deck + NUPS library`);
     setResults(null);
     onClose();
   };
