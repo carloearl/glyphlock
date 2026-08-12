@@ -97,7 +97,7 @@ export default function Contact() {
     <>
       <SEOHead 
         title="Contact GlyphLock - Creative Infrastructure & Partnership Inquiries"
-        description="Contact GlyphLock for ecosystem architecture, partnership opportunities, creator protection infrastructure, and enterprise consultations. El Mirage, AZ | (424) 246-6499 | support@glyphlock.io"
+        description="Contact GlyphLock for ecosystem architecture, partnership opportunities, creator protection infrastructure, and enterprise consultations. El Mirage, AZ | (480) 886-5588 | support@glyphlock.io"
         keywords="contact GlyphLock, creative infrastructure, ecosystem partnership, creator protection, licensing inquiry, enterprise consultation, GlyphLock support, El Mirage Arizona"
         url="/contact"
       />
@@ -131,7 +131,7 @@ export default function Contact() {
           <div ref={cardsRef} className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-8 mb-12 md:mb-16">
             {[
               { icon: Mail, title: "Email", content: "support@glyphlock.io", href: "mailto:support@glyphlock.io", color: "text-[#3B82F6]" },
-              { icon: Phone, title: "Phone", content: "(424) 246-6499", href: "tel:+14242466499", color: "text-[#8B5CF6]" },
+              { icon: Phone, title: "Phone", content: "(480) 886-5588", href: "tel:+14808865588", color: "text-[#8B5CF6]" },
               { icon: MapPin, title: "Location", content: "El Mirage, Arizona", color: "text-white" }
             ].map((item, idx) => (
               <motion.div 
