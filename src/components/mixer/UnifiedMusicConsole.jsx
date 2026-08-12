@@ -58,6 +58,10 @@ export default function UnifiedMusicConsole() {
   const activeCrowd = (activeShift
     ? snapshot?.crowd_metrics?.find((metric) => metric.entertainer_id === activeShift.entertainer_id)
     : null) || snapshot?.crowd_metrics?.[0] || { energy_score: 5 };
+  const currentEntityTrackId = useMemo(() => {
+    const latestPlay = [...playHistory].reverse().find((event) => event?.type === "play" && event?.entityTrackId);
+    return latestPlay?.entityTrackId || null;
+  }, [playHistory]);
   const automationPlan = useMemo(() => buildAutoDJPlan({
     tracks: snapshot?.tracks || [],
     persona: activePersona,
@@ -66,8 +70,9 @@ export default function UnifiedMusicConsole() {
     performanceAnalytics: snapshot?.performance_analytics || [],
     entertainerId: activeEntertainer?.id || null,
     history: playHistory,
+    currentTrackId: currentEntityTrackId,
     limit: 5,
-  }), [snapshot, activePersona, activeCrowd, activeEntertainer?.id, playHistory]);
+  }), [snapshot, activePersona, activeCrowd, activeEntertainer?.id, playHistory, currentEntityTrackId]);
 
   const handlePlaybackEvent = useCallback((event) => {
     if (!event) return;
