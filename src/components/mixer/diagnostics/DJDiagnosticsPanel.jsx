@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Activity, CheckCircle2, ChevronUp, ClipboardCopy, Loader2, RefreshCw, XCircle } from "lucide-react";
 import { searchYouTubeMusic } from "@/lib/youtubeMusic";
+import { providerLabel, searchMusicSources } from "@/lib/musicDiscovery";
 import { computeCrowdEnergyScore, generatePlaylist } from "@/lib/playlistEngine";
 import { buildAutoDJPlan } from "@/lib/djAutoEngine";
 import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
@@ -32,6 +33,15 @@ async function checkYouTube() {
   const items = await searchYouTubeMusic("test", { maxResults: 1 });
   const title = items[0]?.title || "no result title";
   return `secure proxy · ${title}`;
+}
+
+async function checkMusicDiscoveryFallback() {
+  const { results, providers } = await searchMusicSources("dance", { limit: 3 });
+  const healthy = providers.filter((provider) => provider.status === "ok");
+  if (!healthy.length) throw new Error("No healthy music discovery provider");
+  const playable = results.filter((item) => item.playable !== false);
+  if (!playable.length) throw new Error(`Healthy providers but 0 playable results · ${healthy.map((p) => providerLabel(p.provider)).join(", ")}`);
+  return `${healthy.map((p) => providerLabel(p.provider)).join(" + ")} · ${playable.length} playable result${playable.length === 1 ? "" : "s"}`;
 }
 
 async function checkJukeboxQueue() {
@@ -84,6 +94,7 @@ const CHECKS = [
   { id: "gateway", label: "DJ Secure Gateway", run: checkDJGateway },
   { id: "tracks", label: "Track Library", run: checkTrackLibrary },
   { id: "youtube", label: "YouTube Search Proxy", run: checkYouTube },
+  { id: "music-fallback", label: "Music Discovery Fallback", run: checkMusicDiscoveryFallback },
   { id: "jukebox", label: "Jukebox Queue", run: checkJukeboxQueue },
   { id: "personas", label: "AI Personas", run: checkPersonas },
   { id: "playlist-permission", label: "Playlist Save Path", run: checkPlaylistPermission },
