@@ -101,6 +101,19 @@ export default function NUPSDemoManager() {
     }
   };
 
+  const tryCreateUnique = async (label, entityName, data, uniqueQuery) => {
+    try {
+      const existing = await base44.entities[entityName].filter(uniqueQuery, "-created_date", 1);
+      if (existing?.length) {
+        push("↷ " + label + " already exists — skipped", "info");
+        return true;
+      }
+    } catch (e) {
+      push("⚠ " + label + " uniqueness preflight failed — attempting create", "warn");
+    }
+    return tryCreate(label, entityName, data);
+  };
+
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   const doSeed = async () => {
@@ -299,7 +312,14 @@ export default function NUPSDemoManager() {
       { name: "Pulse",   entertainer_id: ENT_ID.Nova,    risk_tolerance: "experimental", weighting_model: { crowd_weight: 0.5, entertainer_weight: 0.3, revenue_weight: 0.2 }, transition_style_rules: { bpm_range: 15, mood_compatibility: ["high-energy","aggressive"],energy_ramp: "exponential" }, genre_bias_logic: { primary_genres: ["EDM","House"], secondary_genres: ["Trap"],   excluded_genres: ["Classical"] } },
       { name: "Velvet",  entertainer_id: ENT_ID.Jade,    risk_tolerance: "conservative", weighting_model: { crowd_weight: 0.3, entertainer_weight: 0.5, revenue_weight: 0.2 }, transition_style_rules: { bpm_range: 8,  mood_compatibility: ["sensual","neutral"],     energy_ramp: "linear" },      genre_bias_logic: { primary_genres: ["R&B","Soul"],  secondary_genres: ["Jazz"],   excluded_genres: ["Metal"] } },
     ];
-    for (const d of djs) await tryCreate("AIDJPersona: " + d.name, "AIDJPersona", d);
+    for (const d of djs) {
+      await tryCreateUnique(
+        "AIDJPersona: " + d.name,
+        "AIDJPersona",
+        d,
+        { name: d.name, entertainer_id: d.entertainer_id }
+      );
+    }
 
     const tracks = [
       { title: "Demo Midnight Groove",  artist: "DJ Demo",     genre: "R&B",      bpm: 92,  mood: "sensual",     duration: 215, source: "manual", active: true },
@@ -309,7 +329,14 @@ export default function NUPSDemoManager() {
       { title: "Demo House Classic",    artist: "House Demo",  genre: "House",    bpm: 124, mood: "high-energy", duration: 312, source: "manual", active: true },
       { title: "Demo Lounge Vibes",     artist: "Lounge Demo", genre: "Jazz",     bpm: 85,  mood: "neutral",     duration: 265, source: "manual", active: true },
     ];
-    for (const t of tracks) await tryCreate("Track: " + t.title, "Track", t);
+    for (const t of tracks) {
+      await tryCreateUnique(
+        "Track: " + t.title,
+        "Track",
+        t,
+        { title: t.title, artist: t.artist }
+      );
+    }
 
     await tryCreate("SystemAuditLog: DEMO_SEED", "SystemAuditLog", {
       event_type: "DEMO_SEED",
