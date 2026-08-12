@@ -527,6 +527,12 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       // role scope and stamps cashier_role for audit.
       if (station === 'door') {
         const doorRole = user?._highestRole || user?.role || 'External';
+        // The register runs in kiosk mode — the operator on screen is a NUPS
+        // kiosk session, not the browser's authenticated account. The gateway
+        // rebinds against the live session, so the actor must be the live
+        // account; the kiosk operator stays on the record as the cashier.
+        let liveActor = null;
+        try { liveActor = await base44.auth.me(); } catch (_) { /* no live session */ }
         const gateResult = await writeEntity({
           entity: 'POSTransaction',
           operation: 'create',
@@ -537,12 +543,16 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
             funds_settled: false,
             cashier_role: doorRole,
           },
-          actor: { email: user?.email, role: doorRole, id: user?.id },
+          actor: {
+            email: liveActor?.email || user?.email,
+            role: doorRole,
+            id: liveActor?.id || user?.id,
+          },
           venue_id: activeVenue?.id || null,
           intent: 'DOOR_COVER_VALIDATION_RUN',
         });
-        if (!gateResult.ok) {
-          toast.error(gateResult.block_reason || 'Door write rejected by gateway');
+        if (!gateResult?.ok) {
+          toast.error(gateResult?.block_reason || 'Door write rejected by gateway');
           setIsSubmitting(false);
           return;
         }
