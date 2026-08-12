@@ -225,7 +225,7 @@ export default function Footer() {
               />
             </div>
             <div className="text-center space-y-1.5">
-              <p className="text-sm font-black text-white uppercase tracking-[0.25em]">GlyphLock Security LLC</p>
+              <p className="text-sm font-black text-white uppercase tracking-[0.25em]">GlyphLock LLC</p>
               <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Post-Quantum Cybersecurity Architecture</p>
               <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">AI Governance · Zero-Trust · Enterprise Defense</p>
             </div>
@@ -242,7 +242,7 @@ export default function Footer() {
         {/* ─── BOTTOM BAR ─── */}
         <div className="border-t border-white/[0.06] pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[11px] text-slate-600 text-center md:text-left">
-            © {new Date().getFullYear()} GlyphLock Security LLC. All rights reserved.
+            © {new Date().getFullYear()} GlyphLock LLC. All rights reserved.
           </p>
           <div className="flex items-center gap-5 flex-wrap justify-center">
             {CLEAN_FOOTER_LINKS.legal && CLEAN_FOOTER_LINKS.legal.map((link) => (
