@@ -24,8 +24,9 @@ import DJPlayerSection from "@/components/mixer/DJPlayerSection";
 import SongUploadDialog from "@/components/mixer/SongUploadDialog";
 import AIPlaylistGenerator from "@/components/mixer/AIPlaylistGenerator";
 import MusicSearchPanel from "@/components/mixer/MusicSearchPanel";
+import TrackLibraryDock from "@/components/mixer/TrackLibraryDock";
 
-export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent }) {
+export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent, libraryTracks = [] }) {
   // ─── State hydration ───
   const [songs, setSongs] = useState(() => loadSongs());
   const [profiles, setProfiles] = useState(() => loadProfiles());
@@ -41,7 +42,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   const [playerCollapsed, setPlayerCollapsed] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showAIPlaylist, setShowAIPlaylist] = useState(false);
-  const [showMusicSearch, setShowMusicSearch] = useState(false);
+  const [rightTab, setRightTab] = useState("library"); // "library" | "ai" | "search"
 
   const activeProfile = useMemo(() => profiles.find((p) => p.id === uiState.activeProfileId), [profiles, uiState.activeProfileId]);
 
@@ -147,6 +148,50 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     setPlayerCollapsed(false);
     return dropped.id;
   }, []);
+
+  // Play a library track immediately on the live deck.
+  const handleLibraryPlay = useCallback((song) => {
+    if (!song?.id) return;
+    setSongs((previous) => previous.some((s) => s.id === song.id) ? previous : [...previous, song]);
+    setPlayerCollapsed(false);
+    setPlayingSongId(song.id);
+    emitTelemetry("SONG_PLAY", { songId: song.id, source: "library_dock", timestamp: Date.now() });
+    onPlaybackEvent?.({
+      type: "play",
+      source: "manual",
+      track_id: song._entityTrackId || song.id,
+      entityTrackId: song._entityTrackId || null,
+      songId: song.id,
+      title: song.title,
+      artist: song.artist,
+      at: Date.now(),
+    });
+  }, [onPlaybackEvent]);
+
+  // Queue one or many library tracks into the active playlist (profile).
+  // With no profile yet, a "House Playlist" is created automatically so
+  // cue-next / automix has a real queue to walk.
+  const handleQueueSongs = useCallback((list) => {
+    const items = (Array.isArray(list) ? list : [list]).filter((s) => s?.id);
+    if (!items.length) return;
+    setSongs((previous) => {
+      const have = new Set(previous.map((s) => s.id));
+      return [...previous, ...items.filter((s) => !have.has(s.id))];
+    });
+    const ids = items.map((s) => s.id);
+    if (activeProfile) {
+      setProfiles((previous) => previous.map((p) =>
+        p.id === activeProfile.id
+          ? { ...p, songIds: [...p.songIds, ...ids.filter((id) => !p.songIds.includes(id))] }
+          : p
+      ));
+    } else {
+      const prof = createDancerProfile({ name: "House Playlist", colorTheme: "#8b5cf6", songIds: ids, tags: ["library"] });
+      setProfiles((previous) => [...previous, prof]);
+      setUiState((s) => ({ ...s, activeProfileId: prof.id }));
+    }
+    toast.success(`${items.length} track${items.length > 1 ? "s" : ""} added to playlist`);
+  }, [activeProfile]);
 
   const handlePlay = useCallback((songId) => {
     setPlayingSongId((prev) => (prev === songId ? null : songId));
@@ -485,26 +530,32 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         {/* Right: AI panel OR Music Search (desktop only) */}
         {!isMobile && (
           <div className={`${isDesktop ? "w-[320px]" : "w-[260px]"} flex-shrink-0 flex flex-col border-l border-slate-700/30`}>
-            {/* Tab toggle between AI and Search */}
+            {/* Tab toggle between Library, AI and Search */}
             <div className="flex border-b border-slate-700/30 bg-slate-900/80">
-              <button
-                onClick={() => setShowMusicSearch(false)}
-                className={`flex-1 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition-colors ${
-                  !showMusicSearch ? 'text-purple-400 border-b-2 border-purple-400' : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                AI Assistant
-              </button>
-              <button
-                onClick={() => setShowMusicSearch(true)}
-                className={`flex-1 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition-colors ${
-                  showMusicSearch ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                🔍 Music API
-              </button>
+              {[
+                { key: "library", label: "🎵 Library", color: "text-emerald-400 border-emerald-400" },
+                { key: "ai", label: "AI Assistant", color: "text-purple-400 border-purple-400" },
+                { key: "search", label: "🔍 Music API", color: "text-cyan-400 border-cyan-400" },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setRightTab(tab.key)}
+                  className={`flex-1 px-2 py-2 text-[10px] uppercase tracking-wider font-bold transition-colors ${
+                    rightTab === tab.key ? `${tab.color} border-b-2` : 'text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-            {showMusicSearch ? (
+            {rightTab === "library" ? (
+              <TrackLibraryDock
+                tracks={libraryTracks}
+                onPlay={handleLibraryPlay}
+                onQueue={handleQueueSongs}
+                onQueueAll={handleQueueSongs}
+              />
+            ) : rightTab === "search" ? (
               <MusicSearchPanel
                 onAddTrack={(trackData) => handleUploadedSong(trackData)}
                 onPreviewTrack={(track) => {

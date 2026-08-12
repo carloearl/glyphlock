@@ -204,6 +204,7 @@ export default function UnifiedMusicConsole() {
             autoDj={autoDj}
             automationPlan={automationPlan}
             onPlaybackEvent={handlePlaybackEvent}
+            libraryTracks={snapshot?.tracks || []}
           />
         )}
         {active === "tracks"   && <TracksTab />}
