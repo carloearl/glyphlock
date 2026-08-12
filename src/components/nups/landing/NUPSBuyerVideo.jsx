@@ -236,84 +236,133 @@ function SceneVisual({ type }) {
 
 export default function NUPSBuyerVideo() {
   const navigate = useNavigate();
-  const audioRef = useRef(null);
+  const utteranceRef = useRef(null);
+  const sequenceRef = useRef(0);
+  const sceneRef = useRef(0);
   const [scene, setScene] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(1);
+  const [sceneProgress, setSceneProgress] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [audioError, setAudioError] = useState(false);
+  const [voiceError, setVoiceError] = useState(false);
+  const [voiceLabel, setVoiceLabel] = useState("Loading male voice…");
 
   const cue = SCENES[scene];
-  const src = `${VOICE_ENDPOINT}?scene=${scene}&v=20260812b`;
 
-  useEffect(() => {
-    if (scene >= SCENES.length - 1) return undefined;
-    const preload = new Audio(`${VOICE_ENDPOINT}?scene=${scene + 1}&v=20260812b`);
-    preload.preload = "auto";
-    return () => { preload.src = ""; };
-  }, [scene]);
-
-  const playCurrent = useCallback(async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    try {
-      setAudioError(false);
-      await audio.play();
-      setPlaying(true);
-    } catch (error) {
-      console.error("[NUPSBuyerVideo] playback blocked", error);
-      setPlaying(false);
-      setAudioError(true);
-    }
+  const resolveVoice = useCallback(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
+    const voice = pickMaleVoice(window.speechSynthesis.getVoices?.() || []);
+    if (voice) setVoiceLabel(voice.name);
+    return voice;
   }, []);
 
   useEffect(() => {
-    if (!playing || finished) return;
-    const id = window.setTimeout(() => { playCurrent(); }, 30);
-    return () => window.clearTimeout(id);
-  }, [scene]); // intentionally only scene-driven during active playback
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setVoiceError(true);
+      setVoiceLabel("Narration unavailable");
+      return undefined;
+    }
+    const synth = window.speechSynthesis;
+    const hydrate = () => resolveVoice();
+    hydrate();
+    synth.addEventListener?.("voiceschanged", hydrate);
+    return () => {
+      sequenceRef.current += 1;
+      synth.cancel();
+      synth.removeEventListener?.("voiceschanged", hydrate);
+    };
+  }, [resolveVoice]);
 
-  const toggle = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (finished) {
-      setFinished(false);
-      setScene(0);
-      setCurrent(0);
-      setPlaying(true);
+  const speakScene = useCallback((sceneIndex, sequenceId) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
+      setVoiceError(true);
+      setPlaying(false);
       return;
     }
-    if (audio.paused) playCurrent();
-    else {
-      audio.pause();
-      setPlaying(false);
-    }
-  }, [finished, playCurrent]);
+    if (sequenceId !== sequenceRef.current) return;
 
-  const replay = useCallback(() => {
-    const audio = audioRef.current;
-    if (audio) audio.pause();
-    setScene(0);
-    setCurrent(0);
+    const synth = window.speechSynthesis;
+    const sceneData = SCENES[sceneIndex];
+    const voice = resolveVoice();
+    const utterance = new SpeechSynthesisUtterance(sceneData.caption);
+    utteranceRef.current = utterance;
+    sceneRef.current = sceneIndex;
+    setScene(sceneIndex);
+    setSceneProgress(0);
+    setVoiceError(false);
+
+    if (voice) utterance.voice = voice;
+    utterance.rate = 1.01;
+    utterance.pitch = voice ? 0.9 : 0.78;
+    utterance.volume = 1;
+
+    utterance.onboundary = (event) => {
+      if (sequenceId !== sequenceRef.current || sceneRef.current !== sceneIndex) return;
+      const length = Math.max(sceneData.caption.length, 1);
+      setSceneProgress(Math.min(Math.max((event.charIndex || 0) / length, 0), 0.96));
+    };
+
+    utterance.onend = () => {
+      if (sequenceId !== sequenceRef.current) return;
+      setSceneProgress(1);
+      if (sceneIndex < SCENES.length - 1) {
+        window.setTimeout(() => speakScene(sceneIndex + 1, sequenceId), 180);
+      } else {
+        setPlaying(false);
+        setFinished(true);
+      }
+    };
+
+    utterance.onerror = (event) => {
+      if (sequenceId !== sequenceRef.current || event.error === "canceled" || event.error === "interrupted") return;
+      console.error("[NUPSBuyerVideo] narration error", event.error);
+      setVoiceError(true);
+      setPlaying(false);
+    };
+
+    synth.speak(utterance);
+  }, [resolveVoice]);
+
+  const startFrom = useCallback((sceneIndex = 0) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setVoiceError(true);
+      return;
+    }
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    sequenceRef.current += 1;
+    const id = sequenceRef.current;
+    sceneRef.current = sceneIndex;
     setFinished(false);
     setPlaying(true);
-  }, []);
+    setScene(sceneIndex);
+    setSceneProgress(0);
+    window.setTimeout(() => speakScene(sceneIndex, id), 80);
+  }, [speakScene]);
 
-  const handleEnded = useCallback(() => {
-    setCurrent(0);
-    setDuration(1);
-    if (scene < SCENES.length - 1) {
-      setScene((value) => value + 1);
+  const toggle = useCallback(() => {
+    if (finished) {
+      startFrom(0);
+      return;
+    }
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setVoiceError(true);
+      return;
+    }
+    const synth = window.speechSynthesis;
+    if (playing) {
+      synth.pause();
+      setPlaying(false);
+    } else if (synth.paused) {
+      synth.resume();
       setPlaying(true);
     } else {
-      setPlaying(false);
-      setFinished(true);
+      startFrom(sceneRef.current || 0);
     }
-  }, [scene]);
+  }, [finished, playing, startFrom]);
 
-  const progress = useMemo(() => ((scene + Math.min(current / Math.max(duration, 0.1), 1)) / SCENES.length) * 100, [scene, current, duration]);
+  const replay = useCallback(() => startFrom(0), [startFrom]);
+
+  const progress = useMemo(() => ((scene + sceneProgress) / SCENES.length) * 100, [scene, sceneProgress]);
 
   return (
     <section className="relative w-full overflow-hidden bg-[#020617]" aria-label="NUPS buyer demonstration video">
