@@ -1,9 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// W3-008B — Payment Provider Abstraction Layer
-// This function creates a payment intent for the Stripe adapter ONLY.
-// Non-Stripe providers (cash, manual_external, clover, etc.) do NOT call
-// this function — they go directly to createPaymentRecord.
+// W3-008B — Optional Native Payment Integration
+// This function creates a payment intent for the Stripe adapter ONLY when a
+// venue explicitly chooses Stripe integration. NUPS otherwise runs on top of
+// the venue's existing processor/terminal via createPaymentRecord.
 //
 // Stripe is lazily imported. The secret name is resolved dynamically from
 // the PaymentProvider entity — no literal STRIPE_SECRET_KEY in source.
@@ -19,7 +19,7 @@ async function resolveVenueConfig(base44, venue_id) {
   );
   if (configs && configs.length > 0) return configs[0];
   return {
-    primary_provider_code: 'stripe',
+    primary_provider_code: 'external_terminal',
     fallback_provider_code: 'manual_external',
     external_approval_required: false,
     manager_pin_required_for_external: true
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
 
     // ── PROVIDER ROUTING ────────────────────────────────────────
     const venueConfig = await resolveVenueConfig(base44, venue_id);
-    const providerCode = venueConfig.primary_provider_code || 'stripe';
+    const providerCode = venueConfig.primary_provider_code || 'external_terminal';
 
     // Non-Stripe providers don't create payment intents — they go to createPaymentRecord
     if (providerCode !== 'stripe') {
@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
       return Response.json({
         success: false,
         error: 'STRIPE_NOT_CONFIGURED',
-        message: 'Stripe is not configured for this venue. Use a manual_external or cash provider via createPaymentRecord instead.',
+        message: 'Stripe integration is not configured for this venue. Keep using the venue existing processor and record its terminal reference through createPaymentRecord, or configure Stripe as an optional native integration.',
         provider_code: providerCode
       }, { status: 503 });
     }
