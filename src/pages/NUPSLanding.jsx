@@ -1196,18 +1196,18 @@ export default function NUPSLanding() {
           </defs>
         </svg>
 
-        <div style={{ position: 'relative', zIndex: 2, width: '100%', padding: '8px 16px 0' }}>
+        <CommandDeckHero
+          onEnter={() => navigate('/NUPSKiosk')}
+          onExit={() => navigate('/NUPSKiosk?panel=clockIn')}
+        />
+
+        <div id="nups-video" style={{ position: 'relative', zIndex: 2, width: '100%', padding: '18px 16px 0', scrollMarginTop: 12 }}>
           <NUPSDemoPlayer />
         </div>
 
         <div id="nups-walkthrough" style={{ position: 'relative', zIndex: 2, width: '100%', scrollMarginTop: 0, marginTop: 8 }}>
           <DemoRecordingSection />
         </div>
-
-        <CommandDeckHero
-          onEnter={() => navigate('/NUPSKiosk')}
-          onExit={() => navigate('/NUPSKiosk?panel=clockIn')}
-        />
 
         <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 1480, margin: '0 auto', padding: '24px 16px 0' }}>
           <ExperienceLiveSystemCTA variant="nups" />
