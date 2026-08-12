@@ -2,7 +2,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 import { sendTransactionalEmail } from './helpers/sendgridClient.js';
 
-const ENTERPRISE_EMAIL = Deno.env.get('GLYPHLOCK_ENTERPRISE_REQUESTS_EMAIL') || 'glyphlock@gmail.com';
+const ENTERPRISE_EMAIL = Deno.env.get('GLYPHLOCK_ENTERPRISE_REQUESTS_EMAIL') || 'carloearl@glyphlock.com';
 
 Deno.serve(async (req) => {
   try {
