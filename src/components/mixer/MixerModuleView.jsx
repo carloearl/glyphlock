@@ -160,13 +160,22 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     }
   }, [songs, uiState.activeProfileId, onPlaybackEvent]);
 
-  const handleAutomationTransition = useCallback((songId) => {
+  const handleAutomationTransition = useCallback((songId, meta = {}) => {
+    if (!songId) {
+      setPlayingSongId(null);
+      return;
+    }
     const previousSong = songs.find((item) => item.id === playingSongId);
     const song = songs.find((item) => item.id === songId);
-    if (previousSong && previousSong.id !== songId) {
+    const previousEventType = meta.reason === "source_failover"
+      ? null
+      : meta.reason === "manual_swap"
+        ? "skip"
+        : "complete";
+    if (previousSong && previousSong.id !== songId && previousEventType) {
       onPlaybackEvent?.({
-        type: "complete",
-        source: "auto_dj_transition",
+        type: previousEventType,
+        source: meta.reason || "auto_dj_transition",
         track_id: previousSong._entityTrackId || previousSong.id,
         entityTrackId: previousSong._entityTrackId || null,
         songId: previousSong.id,
@@ -194,6 +203,33 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
       at: Date.now(),
     });
   }, [songs, playingSongId, onPlaybackEvent]);
+
+  const handlePlaybackError = useCallback(({ songId, deck, active, fallbackReady, error }) => {
+    const song = songs.find((item) => item.id === songId);
+    emitTelemetry("SOURCE_ERROR", {
+      songId,
+      trackId: song?._entityTrackId || null,
+      deck,
+      active,
+      fallbackReady,
+      message: error?.message || String(error || "playback error"),
+    });
+    if (!song) return;
+    onPlaybackEvent?.({
+      type: "source_error",
+      source: error?.source || "player",
+      track_id: song._entityTrackId || song.id,
+      entityTrackId: song._entityTrackId || null,
+      songId: song.id,
+      title: song.title,
+      artist: song.artist,
+      deck,
+      active,
+      fallbackReady,
+      error: error?.message || String(error || "playback error"),
+      at: Date.now(),
+    });
+  }, [songs, onPlaybackEvent]);
 
   const handleSkip = useCallback((songId, reason = "manual") => {
     const song = songs.find((item) => item.id === songId);
@@ -511,6 +547,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         autoDj={autoDj}
         automationNextSongId={automationNextSong?.id || null}
         onActiveSongChange={handleAutomationTransition}
+        onPlaybackError={handlePlaybackError}
         transitionSeconds={automationPlan?.transition?.fade_seconds || 6}
       />
 
