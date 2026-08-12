@@ -398,7 +398,7 @@ GlyphLock QR Studio is an advanced QR code generation platform with military-gra
 
 **Documentation:** /security-docs
 **FAQ:** /faq
-**Contact:** glyphlock@gmail.com
+**Contact:** carloearl@glyphlock.com
 **Phone:** (424) 246-6499
 
 ## Glossary
