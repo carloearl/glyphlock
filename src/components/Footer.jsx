@@ -167,8 +167,8 @@ export default function Footer() {
             <Mail size={14} /> support@glyphlock.io
           </a>
           <span className="hidden sm:block text-white/10">|</span>
-          <a href="tel:+14242466499" className="flex items-center gap-2 hover:text-blue-400 transition-colors" aria-label="Call GlyphLock support">
-            <Phone size={14} /> (424) 246-6499
+          <a href="tel:+14808865588" className="flex items-center gap-2 hover:text-blue-400 transition-colors" aria-label="Call GlyphLock support">
+            <Phone size={14} /> (480) 886-5588
           </a>
           <span className="hidden sm:block text-white/10">|</span>
           <span className="flex items-center gap-2">
