@@ -9,10 +9,28 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, FileText, Scale, Shield, Trophy, AlertTriangle, Cpu } from 'lucide-react';
+import { ArrowRight, FileText, Scale, Shield, Trophy, AlertTriangle, Cpu, Network } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
 
 const CASE_STUDIES = [
+  {
+    id: 'nups-oracle-ohip',
+    title: 'NUPS × Oracle Hospitality: Verified OHIP Connection',
+    date: 'August 12, 2026',
+    category: 'Hospitality Integration',
+    icon: Network,
+    badge: 'Live Sandbox Proof',
+    badgeColor: 'bg-emerald-600',
+    summary: 'How GlyphLock NUPS established an owner-controlled, server-to-server connection to the Oracle Hospitality Integration Platform Partner Sandbox without exposing credentials or moving protected data into the browser.',
+    keyPoints: [
+      'Seven server-side integration settings verified',
+      'Oracle OCIM OAuth exchange accepted',
+      'Read-only OHIP Property API call completed',
+      'Traceable request finished in 921 milliseconds'
+    ],
+    outcome: 'Sandbox Connection Verified',
+    url: 'CaseStudyOracleOHIP'
+  },
   {
     id: 'deepseek-truthstrike',
     title: 'DeepSeek Escalation: GLX-TRUTHSTRIKE-1108',

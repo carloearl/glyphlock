@@ -174,7 +174,7 @@ export default function MusicSearchTab() {
                   onClick={(e) => { e.stopPropagation(); importTrack(r); }}
                   disabled={r.source === 'nups_library' || imported.has(r.id)}
                   className={`min-h-[36px] ${(r.source === 'nups_library' || imported.has(r.id)) ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'}`}
-                  title={r.source === 'nups_library' ? 'Already in Track Library' : 'Import into Track Library'
+                  title={r.source === 'nups_library' ? 'Already in Track Library' : 'Import into Track Library'}
                   style={{ touchAction: 'manipulation' }}
                 >
                   {(r.source === 'nups_library' || imported.has(r.id)) ? '✓' : <Plus className="w-4 h-4 pointer-events-none" />}
