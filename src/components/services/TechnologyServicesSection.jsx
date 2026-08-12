@@ -108,7 +108,7 @@ export default function TechnologyServicesSection() {
         </Link>
         <div className="flex items-center justify-center gap-2 mt-6 text-xs text-white/50">
           <Globe className="w-4 h-4 text-blue-400" />
-          <span>Domains and payment processing powered by GoDaddy — our primary domain and processing platform.</span>
+          <span>Payment architecture is processor-neutral: clients may keep their existing merchant processing or add a supported API/webhook integration.</span>
         </div>
       </motion.div>
     </section>
