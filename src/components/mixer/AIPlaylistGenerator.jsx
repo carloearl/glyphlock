@@ -11,18 +11,15 @@ import { Sparkles, Loader2, Plus, Music, CheckCircle2, XCircle } from "lucide-re
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { VIBE_META } from "@/components/mixer/types/mixerTypes";
-import { buildYouTubeMusicSearchUrl } from "@/lib/youtubeMusic";
+import { searchYouTubeMusic } from "@/lib/youtubeMusic";
 import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 
 // Resolve AI-suggested track → real playable YouTube video ID (client-side).
 // Returns null on failure (track is still added, just without a playable link).
 async function resolveToYouTube(query) {
   try {
-    const url = buildYouTubeMusicSearchUrl(query, { maxResults: 1 });
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.items?.[0]?.id?.videoId || null;
+    const items = await searchYouTubeMusic(query, { maxResults: 1 });
+    return items[0]?.id || null;
   } catch (_) {
     return null;
   }

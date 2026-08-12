@@ -1,18 +1,17 @@
-// Shared YouTube Music search configuration for the NUPS DJ Booth.
-// This is the existing browser/domain-restricted public key already used by
-// MusicSearchTab and AIPlaylistGenerator. Keeping it in one module prevents
-// the DJ features and diagnostics from drifting onto different credentials.
-export const YOUTUBE_API_KEY = "AIzaSyDKesmHJytX_1MjfbVdcysMsTOa-GVcFjs";
-export const YOUTUBE_SEARCH_ENDPOINT = "https://www.googleapis.com/youtube/v3/search";
+// Shared YouTube Music search path for the NUPS DJ Booth.
+//
+// The YouTube key is HTTP-referrer restricted, so direct browser calls from the
+// preview/app domains are rejected with HTTP 403. Every DJ surface now searches
+// through the `youtubeMusicSearch` backend proxy instead — one server-side path,
+// no key in the browser, no referrer blocking.
+import { base44 } from "@/api/base44Client";
 
-export function buildYouTubeMusicSearchUrl(query, { maxResults = 12 } = {}) {
-  const params = new URLSearchParams({
-    part: "snippet",
-    type: "video",
-    videoCategoryId: "10",
-    maxResults: String(maxResults),
-    q: String(query || ""),
-    key: YOUTUBE_API_KEY,
+export async function searchYouTubeMusic(query, { maxResults = 12 } = {}) {
+  const response = await base44.functions.invoke("youtubeMusicSearch", {
+    query: String(query || ""),
+    maxResults,
   });
-  return `${YOUTUBE_SEARCH_ENDPOINT}?${params.toString()}`;
+  const data = response?.data || {};
+  if (data.error) throw new Error(data.error);
+  return Array.isArray(data.items) ? data.items : [];
 }

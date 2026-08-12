@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { getClubTVSender } from '@/components/mixer/ClubBroadcastChannel';
-import { buildYouTubeMusicSearchUrl } from '@/lib/youtubeMusic';
+import { searchYouTubeMusic } from '@/lib/youtubeMusic';
 
 export default function MusicSearchTab() {
   const [query, setQuery] = useState('');
@@ -20,32 +20,11 @@ export default function MusicSearchTab() {
     setLoading(true);
     setResults([]);
     try {
-      const url = buildYouTubeMusicSearchUrl(query, { maxResults: 12 });
-      const res = await fetch(url);
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error('[MusicSearch] HTTP', res.status, errText);
-        toast.error(`YouTube API HTTP ${res.status} — check API key restrictions`);
-        return;
-      }
-      const data = await res.json();
-      if (data.error) {
-        console.error('[MusicSearch] API error', data.error);
-        toast.error(`YouTube: ${data.error.message}`);
-        return;
-      }
-      setResults((data.items || []).map(item => ({
-        source: 'youtube',
-        id: item.id.videoId,
-        title: item.snippet.title,
-        artist: item.snippet.channelTitle,
-        thumbnail: item.snippet.thumbnails?.medium?.url || '',
-        embed_url: `https://www.youtube.com/embed/${item.id.videoId}`,
-        watch_url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-      })));
+      const items = await searchYouTubeMusic(query, { maxResults: 12 });
+      setResults(items.map(item => ({ source: 'youtube', ...item })));
     } catch (err) {
-      console.error('[MusicSearch] fetch failed', err);
-      toast.error(`Network error: ${err.message}`);
+      console.error('[MusicSearch] search failed', err);
+      toast.error(`YouTube search failed: ${err.message}`);
     } finally {
       setLoading(false);
     }

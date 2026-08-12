@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Activity, CheckCircle2, ChevronUp, ClipboardCopy, Loader2, RefreshCw, XCircle } from "lucide-react";
-import { buildYouTubeMusicSearchUrl } from "@/lib/youtubeMusic";
+import { searchYouTubeMusic } from "@/lib/youtubeMusic";
 import { computeCrowdEnergyScore, generatePlaylist } from "@/lib/playlistEngine";
 import { buildAutoDJPlan } from "@/lib/djAutoEngine";
 import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
@@ -29,15 +29,9 @@ async function checkTrackLibrary() {
 }
 
 async function checkYouTube() {
-  const response = await fetch(buildYouTubeMusicSearchUrl("test", { maxResults: 1 }));
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`HTTP ${response.status} · ${body.slice(0, 120)}`);
-  }
-  const data = await response.json();
-  if (data?.error) throw new Error(`HTTP ${response.status} · ${data.error.message || "YouTube API error"}`);
-  const title = data?.items?.[0]?.snippet?.title || "no result title";
-  return `HTTP ${response.status} · ${title}`;
+  const items = await searchYouTubeMusic("test", { maxResults: 1 });
+  const title = items[0]?.title || "no result title";
+  return `secure proxy · ${title}`;
 }
 
 async function checkJukeboxQueue() {
@@ -89,7 +83,7 @@ async function checkAutoDJEngine() {
 const CHECKS = [
   { id: "gateway", label: "DJ Secure Gateway", run: checkDJGateway },
   { id: "tracks", label: "Track Library", run: checkTrackLibrary },
-  { id: "youtube", label: "YouTube API", run: checkYouTube },
+  { id: "youtube", label: "YouTube Search Proxy", run: checkYouTube },
   { id: "jukebox", label: "Jukebox Queue", run: checkJukeboxQueue },
   { id: "personas", label: "AI Personas", run: checkPersonas },
   { id: "playlist-permission", label: "Playlist Save Path", run: checkPlaylistPermission },
