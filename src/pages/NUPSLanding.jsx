@@ -1535,9 +1535,9 @@ export default function NUPSLanding() {
             </div>
             <div className="stakeholders">
               <div className="stakeholder" style={{ ['--sh-color']: '#00d4ff', ['--sh-glow']: 'rgba(0,212,255,0.2)' }}><div className="label">Protecting</div><h4>The Bank</h4><div className="risk"><em>Without NUPS</em>Underwrites blind. High reserves, MATCH-list exposure, surprise reversals.</div><div className="benefit"><em>With NUPS</em>Pre-sealed evidence on every tx. Lower reserves, lower MATCH risk, clean KYC/AML trail.</div></div>
-              <div className="stakeholder" style={{ ['--sh-color']: '#1e6fff', ['--sh-glow']: 'rgba(30,111,255,0.2)' }}><div className="label">Protecting</div><h4>The Processor</h4><div className="risk"><em>Without NUPS</em>Absorbs chargeback losses. Pays fee arbitration, rep costs, scheme fines.</div><div className="benefit"><em>With NUPS</em>Disputes pre-empted before the chargeback cycle. Fee ratio drops. Merchant stays in good standing.</div></div>
-              <div className="stakeholder" style={{ ['--sh-color']: '#8b5cf6', ['--sh-glow']: 'rgba(139,92,246,0.2)' }}><div className="label">Protecting</div><h4>The Venue</h4><div className="risk"><em>Without NUPS</em>Cash shrinkage, tip-pool disputes, contract claims, regulatory exposure.</div><div className="benefit"><em>With NUPS</em>Closed-loop ledger. Every dollar attributed. Every contract sealed. Every claim defended.</div></div>
-              <div className="stakeholder" style={{ ['--sh-color']: '#a855f7', ['--sh-glow']: 'rgba(168,85,247,0.2)' }}><div className="label">Protecting</div><h4>The Guest</h4><div className="risk"><em>Without NUPS</em>No receipt, no recourse. Informal agreements, ambiguous terms, zero privacy control.</div><div className="benefit"><em>With NUPS</em>Signed contract + video + receipt = guest has full record. Consent is documented and revocable.</div></div>
+              <div className="stakeholder" style={{ ['--sh-color']: '#1e6fff', ['--sh-glow']: 'rgba(30,111,255,0.2)' }}><div className="label">Protecting</div><h4>The Processor</h4><div className="risk"><em>Without NUPS</em>Evidence may be scattered across receipts, cameras, contracts, and staff recollection.</div><div className="benefit"><em>With NUPS</em>Linked source records can produce more consistent dispute documentation. Outcomes still depend on the processor, issuer, network rules, and underlying facts.</div></div>
+              <div className="stakeholder" style={{ ['--sh-color']: '#8b5cf6', ['--sh-glow']: 'rgba(139,92,246,0.2)' }}><div className="label">Protecting</div><h4>The Venue</h4><div className="risk"><em>Without NUPS</em>Cash shrinkage, tip-pool disputes, contract claims, and fragmented operational records.</div><div className="benefit"><em>With NUPS</em>Recorded transactions, contracts, approvals, and audit references stay linked. The system strengthens evidence quality; it does not guarantee a dispute result.</div></div>
+              <div className="stakeholder" style={{ ['--sh-color']: '#a855f7', ['--sh-glow']: 'rgba(168,85,247,0.2)' }}><div className="label">Protecting</div><h4>The Guest</h4><div className="risk"><em>Without NUPS</em>Receipts, terms, and identity records may be fragmented or difficult to retrieve.</div><div className="benefit"><em>With NUPS</em>Where enabled, the guest's contract, receipt, consent record, and optional verification media are linked to the same transaction reference.</div></div>
             </div>
           </div>
 
@@ -1554,16 +1554,16 @@ export default function NUPSLanding() {
             </div>
           </div>
 
-          <div className="section-header"><h2>Dispute <b>Shield</b> — One-Push Package</h2><div className="index">§ 04 · Chargeback Defense</div></div>
+          <div className="section-header"><h2>Dispute <b>Shield</b> — Evidence Assembly</h2><div className="index">§ 04 · Chargeback Defense · Expansion</div></div>
           <div className="shield-section">
             <div className="shield-copy">
-              <span className="eyebrow">Pre-Empts the Chargeback Cycle</span>
-              <h3>Stop the dispute <span className="glow">before it starts.</span></h3>
-              <p>NUPS builds the evidence packet in real-time. Every transaction accrues its own <b>chain of custody</b> as it happens — contract, video attestation, biometrics, still frames, receipt, ledger entry, blockchain timestamp. <b>Designed for audit and dispute defense.</b></p>
-              <p>When a claim lands, one button assembles the package and routes it directly to the venue's banking partner. The processor sees a fully attested transaction with consented, biometrically-verified proof before the dispute cycle ever engages — the difference between <b>operating in good standing</b> and losing the merchant account.</p>
+              <span className="eyebrow">Build Evidence Before a Claim</span>
+              <h3>Make the transaction <span className="glow">reviewable from the start.</span></h3>
+              <p>NUPS links available source evidence as the transaction develops — contracts, consent, receipts, audit records, identity references, and optional configured media or hardware-verification results. <b>The evidence-source layer is implemented; final automated package generation is still expanding.</b></p>
+              <p>When a claim lands, the current system can gather linked source records into a reviewable evidence record. Automated signed-PDF compilation and direct processor dispute-API submission are <b>deployment / expansion items</b>, not currently represented as live production integrations.</p>
             </div>
             <div className="shield-package">
-              <div className="pkg-header"><span className="name">Evidence Package</span><span className="id">PKG-<span style={{ color: 'var(--cyan)' }}>TX_9F2A4C</span></span></div>
+              <div className="pkg-header"><span className="name">Illustrative Evidence Package</span><span className="id">PKG-<span style={{ color: 'var(--cyan)' }}>TX_9F2A4C</span></span></div>
               <ul className="contents">
                 <li><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M 14 2 H 6 a 2 2 0 0 0 -2 2 v 16 a 2 2 0 0 0 2 2 h 12 a 2 2 0 0 0 2 -2 V 8 z" /><path d="M 14 2 v 6 h 6" /></svg></span><span className="txt">Signed contract (PDF + SHA-256 hash)</span><span className="status">✓ SEALED</span></li>
                 <li><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg></span><span className="txt">30-sec video attestation</span><span className="status">✓ SEALED</span></li>
@@ -1608,14 +1608,14 @@ export default function NUPSLanding() {
             <div className="tech-tabs">
               <div className="tech-tab" style={{ ['--tab-color']: '#00d4ff' }}>
                 <div className="tab-head"><div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M 6 8 L 10 8 M 6 12 L 10 12 M 6 16 L 10 16 M 14 8 L 18 8 M 14 12 L 18 12 M 14 16 L 18 16" /></svg></div><div className="num">01</div></div>
-                <h4>Hardware<em>Resilient, edge-based infrastructure for zero-downtime venue operations.</em></h4>
+                <h4>Hardware<em>Resilient venue infrastructure with offline-assisted workflows.</em></h4>
                 <ul>
                   <li><span className="k">COMPUTE</span><span className="v"><b>Raspberry Pi 500+</b> — BCM2712, quad A76 @ 2.4GHz, 16GB LPDDR4X, 256GB NVMe. Wi-Fi 6, BT 5.2, dual 4K micro-HDMI. <em>~$200 per node</em></span></li>
                   <li><span className="k">DISPLAY</span><span className="v"><b>15&quot; portable touch</b> — 1080p IPS, 10-point capacitive, USB-C powered. Guest-facing for click-wrap signing. <em>Swappable per station</em></span></li>
                   <li><span className="k">MOBILE · OVERSIGHT</span><span className="v"><b>Samsung tablets</b> with AT&amp;T SIM — manager oversight, roaming door/floor staff terminal, LTE fallback for outages. <em>DeX + HDMI bridge</em></span></li>
                   <li><span className="k">CAPTURE</span><span className="v"><b>Adesso biometric</b> + USB mag-stripe + chip reader + barcode/QR scanner + webcam. Full edge identity capture. <em>Plug-and-play USB</em></span></li>
                   <li><span className="k">PRINT · SIGN</span><span className="v"><b>Epson ET-5850</b> prints contract → manual wet signature → <b>Epson WiFi PDF scanner</b> rescans signed hardcopy back into the record. Thermal receipt printer for POS. <b>SVC machine</b> for GlyphBucks issuance. <em>Print → Sign → Rescan → Sealed</em></span></li>
-                  <li><span className="k">NETWORK</span><span className="v">Dual-path: venue Wi-Fi primary + AT&amp;T LTE failover. Offline mode buffers to MongoDB fallback until reconnect. <em>Zero-downtime spec</em></span></li>
+                  <li><span className="k">NETWORK</span><span className="v">Venue Wi-Fi plus LTE can be deployed as redundant connectivity. Supported offline writes use a local IndexedDB queue and retry on reconnect; automatic network failover is validated per venue. <em>Offline-assisted · not zero-downtime guaranteed</em></span></li>
                 </ul>
               </div>
               <div className="tech-tab" style={{ ['--tab-color']: '#8b5cf6' }}>
@@ -1627,9 +1627,9 @@ export default function NUPSLanding() {
                   <li><span className="k">COMMS</span><span className="v"><b>SendGrid</b> (email: contracts, receipts, 1099s, marketing blasts) + <b>Twilio</b> (SMS: OTP, driver alerts, shift notifications, guest re-engagement). <em>Templated · tracked · GDPR opt-in</em></span></li>
                   <li><span className="k">DJ · BOOTH</span><span className="v"><b>Entertainer DJ system</b> — self-serve login: upload songs, build sets, save preferences, generate auto-playlists, and see <b>live rotation position</b> in real-time. <em>Better than club standard · zero DJ dependency</em></span></li>
                   <li><span className="k">MARKETING</span><span className="v"><b>QR marketing + social automation</b> — track-and-trace QR campaigns, automated IG/TikTok/X posts, event-driven SMS/email blasts, guest re-engagement triggers. <em>Campaign → scan → profile match</em></span></li>
-                  <li><span className="k">PAYMENTS</span><span className="v"><b>Processor-agnostic architecture</b> — currently integrated with <b>Stripe and GoDaddy</b>; additional processors onboardable via the same adapter interface. Card whitelist enforced server-side. <em>Swap without redeployment</em></span></li>
+                  <li><span className="k">PAYMENTS</span><span className="v"><b>Processor-agnostic architecture</b> — Stripe has native API verification/payment infrastructure. GoDaddy, Clover, Elavon, and TSYS currently route through external-terminal/manual confirmation adapters. <em>Native adapters expand without rewriting the transaction model</em></span></li>
                   <li><span className="k">CURRENCY</span><span className="v"><b>GlyphBucks SVC engine</b> — a closed-loop stored-value system tied directly to verified transactions and contracts. Denominations $10–$1000 (customizable), each note carries a steganographic QR. <em>QR = tx_id = contract_id</em></span></li>
-                  <li><span className="k">SHIELD</span><span className="v"><b>Dispute evidence compiler</b> — bundles contract, video, biometric, receipt, blockchain hash into a single signed PDF package on demand. <em>One button · full chain</em></span></li>
+                  <li><span className="k">SHIELD</span><span className="v"><b>Dispute evidence source compiler</b> — gathers linked contract, identity, receipt, verification-media, approval, and processor references. Final signed-PDF compilation and direct processor submission remain in expansion. <em>Source assembly live · delivery automation expanding</em></span></li>
                   <li><span className="k">GOVERNANCE</span><span className="v"><b>DACO enforcement layer</b> — immutable rules (total_sales = cash + card ONLY, 1099 isolation, tip pass-through). <em>Code-level guards · not config</em></span></li>
                 </ul>
               </div>
@@ -1637,14 +1637,14 @@ export default function NUPSLanding() {
                 <div className="tab-head"><div className="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M 3 5 v 14 a 9 3 0 0 0 18 0 V 5" /><path d="M 3 12 a 9 3 0 0 0 18 0" /></svg></div><div className="num">03</div></div>
                 <h4>Data<em>Storage · Audit · Chain</em></h4>
                 <ul>
-                  <li><span className="k">PRIMARY</span><span className="v"><b>Supabase Postgres</b> with row-level security. Tables: GlyphBucksOrder, VIPContract, Shift, Payout, TipPool, DJQueue, PlaylistSet, MarketingCampaign, AuditLog. <em>Realtime subscriptions + edge functions</em></span></li>
-                  <li><span className="k">FALLBACK</span><span className="v"><b>MongoDB</b> — offline document store for network outages. Idempotent sync-on-reconnect with conflict resolution. <em>Never lose a transaction</em></span></li>
+                  <li><span className="k">PRIMARY</span><span className="v"><b>Base44 entity store</b> is the active application data layer for NUPS entities and venue-scoped records; Supabase services and functions are present for selected external/credential and edge workloads. <em>Authoritative model depends on the specific module</em></span></li>
+                  <li><span className="k">OFFLINE QUEUE</span><span className="v"><b>IndexedDB</b> — local browser queue for supported transactions during connectivity loss. Records retry on reconnect and surface sync status to the operator. <em>Coverage is expanding across workflows</em></span></li>
                   <li><span className="k">MEDIA</span><span className="v"><b>Supabase Storage + CDN</b> for DJ audio tracks, VIP video attestations, still frames, ID scans. Signed URL access only. <em>Per-venue bucket isolation</em></span></li>
                   <li><span className="k">AUDIT · OPS</span><span className="v"><b>SystemAuditLog</b> — financial + operational events. <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>venue_id REQUIRED</code>. Immutable append-only. <em>Venue-scoped tenant separation</em></span></li>
                   <li><span className="k">AUDIT · PLAT</span><span className="v"><b>AuditEvent</b> — platform + security telemetry. <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>venue_id optional</code>. <em>For GlyphLock internal forensics</em></span></li>
-                  <li><span className="k">CHAIN</span><span className="v"><b>Blockchain timestamping</b> — every contract signature, video attestation, and tx hash anchored to a public chain. <em>Designed for audit and dispute defense</em></span></li>
-                  <li><span className="k">RETENTION</span><span className="v">Financial records <b>7 years</b>, consent records <b>statutory max</b>, video attestations <b>encrypted at rest, purged on statutory expiry or guest request</b>. <em>GDPR/CCPA compliant</em></span></li>
-                  <li><span className="k">ENCRYPTION</span><span className="v">AES-256 at rest, TLS 1.3 in transit, per-venue encryption keys, biometrics hashed (never stored raw). <em>SOC-2 ready</em></span></li>
+                  <li><span className="k">CHAIN</span><span className="v"><b>OpenTimestamps → Bitcoin anchoring</b> is implemented for supported sealed GlyphBucks / contract flows. Production rollout and attestation completion are tracked per record; unsupported records are not represented as anchored. <em>Cryptographic evidence with explicit status</em></span></li>
+                  <li><span className="k">RETENTION</span><span className="v">Retention fields and policy hooks exist across financial, consent, identity, and media records. Venue production policy must be configured to the applicable legal and processor requirements. <em>Policy-driven retention · compliance validated separately</em></span></li>
+                  <li><span className="k">SECURITY</span><span className="v">Signing keys stay server-side, sensitive reads are role-scoped, and newer biometric evidence models favor match scores / references over raw templates. Legacy media fields still require cleanup and policy validation. <em>Security controls implemented · formal certification separate</em></span></li>
                   <li><span className="k">OWNERSHIP</span><span className="v">All venue data remains <b>tenant-scoped and encrypted</b>. Platform-level access is limited to audit and compliance enforcement. <em>No cross-venue reads · no platform data mining</em></span></li>
                 </ul>
               </div>
@@ -1656,7 +1656,7 @@ export default function NUPSLanding() {
             <div className="flow-track">
               <div className="flow-step"><span className="num">01</span><h4>Driver Scan</h4><p>Driver arrives with guests, scans personal QR. System logs guest count, runs venue rate card, computes net payout.</p><span className="trigger">→ BARCODE SCANNER</span></div>
               <div className="flow-step"><span className="num">02</span><h4>ID Swipe</h4><p>Guest swipes ID at door. NUPS creates or retrieves profile — searchable by card, name, address, QR.</p><span className="trigger">→ MAG-STRIPE READER</span></div>
-              <div className="flow-step"><span className="num">03</span><h4>Cover + Card</h4><p>Door economics auto-calculated from venue rate card. Payout netted at source before cash drawer updates.</p><span className="trigger">→ STRIPE / GODADDY</span></div>
+              <div className="flow-step"><span className="num">03</span><h4>Cover + Card</h4><p>Door economics auto-calculated from venue rate card. Payout netted at source before cash drawer updates.</p><span className="trigger">→ STRIPE API / EXTERNAL TERMINAL</span></div>
               <div className="flow-step"><span className="num">04</span><h4>Bar &amp; Bottles</h4><p>POS handles drinks and bottle service. Card whitelist enforced; totals balance cash + card only.</p><span className="trigger">→ POS TERMINAL</span></div>
               <div className="flow-step"><span className="num">05</span><h4>Contract Print &amp; Sign</h4><p>ET-5850 prints the VIP contract. Guest + entertainer wet-sign the hardcopy. Epson WiFi PDF scanner rescans the signed document back into the record. Blockchain-timestamped.</p><span className="trigger">→ PRINT → SIGN → RESCAN</span></div>
               <div className="flow-step"><span className="num">06</span><h4>GlyphBucks Issue</h4><p>Once the signed contract is scanned and sealed, SVC issues denominated GlyphBucks. QR on each note links back to tx + contract + profile.</p><span className="trigger">→ SVC PRINTER</span></div>
@@ -1731,7 +1731,7 @@ export default function NUPSLanding() {
               <span className="tag">Clock</span>
               <h4>Biometric shift tracking.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> punch cards, When I Work, Homebase.</p>
-              <p>Biometric clock-in/out per shift. Hours, breaks, and OT calculated automatically. Payroll export ready.</p>
+              <p>Biometric-aware shift tracking and payroll calculations are implemented in software. Production biometric matching still depends on a registered physical reader and venue-by-venue hardware validation.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><circle cx="12" cy="11" r="3" /><path d="M 12 14 v 4" /></svg>
@@ -1743,16 +1743,16 @@ export default function NUPSLanding() {
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M 6 8 L 10 8 M 6 12 L 10 12 M 6 16 L 10 16 M 14 8 L 18 8 M 14 12 L 18 12 M 14 16 L 18 16" /></svg>
               <span className="tag">Hardware</span>
-              <h4>Turnkey certified stack.</h4>
+              <h4>Configured hardware stack.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> piecemeal peripherals from five vendors.</p>
-              <p>Raspberry Pi edge nodes, Samsung oversight tablets, Ambir ID scanner, Adesso mag-stripe and biometric readers, smart card machine, Epson contract printer, thermal receipt printer, GoDaddy POS terminal. Certified, integrated, and supported as one system.</p>
+              <p>Raspberry Pi edge nodes, Samsung oversight tablets, ID / mag-stripe / biometric readers, Epson contract printing, thermal receipts, and external card terminals are supported deployment components. Physical-device interoperability is validated per installed venue rather than claimed universally certified.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="6" width="20" height="14" rx="2" /><path d="M 6 10 L 10 10 M 6 14 L 14 14" /><circle cx="18" cy="13" r="2" /></svg>
               <span className="tag">Payments</span>
               <h4>Processor-agnostic routing.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> locked-in merchant contracts.</p>
-              <p>Processor-agnostic architecture — currently integrated with Stripe and GoDaddy. Additional processors and venue-owned merchant accounts onboardable via the same adapter interface. Swipe, chip, or tap.</p>
+              <p>Processor-agnostic transaction model with a native Stripe API path. GoDaddy, Clover, Elavon, and TSYS currently use external-terminal confirmation adapters; native integrations can be added behind the same payment-record abstraction.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 12 22" /><path d="M 17 6 H 9 a 3 3 0 0 0 0 6 h 6 a 3 3 0 0 1 0 6 H 7" /></svg>
@@ -1773,7 +1773,7 @@ export default function NUPSLanding() {
               <span className="tag">DJ Booth</span>
               <h4>Entertainer-run rotation.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> DJ-controlled rotation, paper request slips, song bribes.</p>
-              <p>Entertainers self-login, upload songs, build sets, save preferences, auto-generate playlists, and see live queue position. No DJ gatekeeping.</p>
+              <p>The DJ subsystem supports entertainer login, tracks, sets, preferences, playlist generation, queue data, personas, and crowd metrics. Integration into the primary NUPS operating surface is still expanding.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg>
@@ -1785,9 +1785,9 @@ export default function NUPSLanding() {
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 4 6 L 12 2 L 20 6 V 14 C 20 18 16 21 12 22 C 8 21 4 18 4 14 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg>
               <span className="tag">Defense</span>
-              <h4>One-push dispute shield.</h4>
+              <h4>Evidence-first dispute workflow.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> scrambling for evidence after a chargeback hits.</p>
-              <p>Evidence packet — signed contract, timestamped video, transaction trail — assembled in real time and submitted directly through the processor's dispute API.</p>
+              <p>Linked evidence-source collection is implemented now. Automated final-PDF assembly and direct processor dispute-API submission are expansion work and are not represented as live today.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 14 2 H 6 a 2 2 0 0 0 -2 2 v 16 a 2 2 0 0 0 2 2 h 12 a 2 2 0 0 0 2 -2 V 8 z" /><path d="M 14 2 v 6 h 6" /><path d="M 9 13 h 6 M 9 17 h 6" /></svg>
