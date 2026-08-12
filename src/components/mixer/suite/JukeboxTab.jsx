@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
 import { Radio, Loader2, Check, X, DollarSign, Crown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,8 +21,8 @@ export default function JukeboxTab() {
   }, []);
 
   async function load() {
-    const list = await base44.entities.JukeboxRequest.filter({ status: 'pending' }, '-created_date', 100);
-    const sorted = list
+    const data = await invokeDJGateway('snapshot');
+    const sorted = (data.jukebox_requests || [])
       .map(r => ({ ...r, priority_score: computePriority(r) }))
       .sort((a, b) => b.priority_score - a.priority_score);
     setRequests(sorted);
@@ -30,7 +30,7 @@ export default function JukeboxTab() {
   }
 
   async function updateStatus(id, status) {
-    await base44.entities.JukeboxRequest.update(id, { status });
+    await invokeDJGateway('setJukeboxStatus', { request_id: id, status });
     load();
   }
 
