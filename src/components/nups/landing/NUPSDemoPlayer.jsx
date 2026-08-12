@@ -40,7 +40,7 @@ const CUES = [
     start: 0,
     label: "Venue Operations",
     caption: "NUPS live core — venue operations tracked in one system",
-    detail: "Live core modules connect identity, role, contract, payment, and receipt activity on one operational timeline. Expansion scenes are labeled as preview capabilities.",
+    detail: "Live core modules connect identity, role, contract, processor evidence, and receipt activity on one operational timeline. The venue can keep its existing merchant processor; native integrations are optional. Expansion scenes are labeled as preview capabilities.",
     audit: "Venue runtime opened with role-scoped activity tracking.",
   },
   {
@@ -443,10 +443,10 @@ export default function NUPSDemoPlayer() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/28 bg-cyan-300/8"><Lock className="h-4 w-4 text-cyan-300" /></span>
             <div><div className="text-xs font-black tracking-[0.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[0.16em] text-slate-500">Live core + expansion preview</div></div>
           </div>
-          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Timeline running" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
+          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill success><CreditCard className="h-3 w-3" />BYO processor overlay</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Timeline running" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
         </header>
 
-        <div className="border-b border-amber-300/20 bg-amber-300/[0.06] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100 sm:px-5">Capability signal: green = implemented core · blue = expansion preview · direct dispute-API submission is not yet live</div>
+        <div className="border-b border-amber-300/20 bg-amber-300/[0.06] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100 sm:px-5">Payment model: keep the venue's existing processor by default · NUPS binds approval/reference evidence · native API/webhook integrations are optional · direct dispute-API submission is not yet live</div>
 
         <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[190px_minmax(0,1fr)_270px]">
           <aside className="border-b border-cyan-300/10 bg-slate-950/55 p-3 lg:border-b-0 lg:border-r">
