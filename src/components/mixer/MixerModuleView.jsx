@@ -11,6 +11,7 @@ import { createSongEntry, createDancerProfile, DialogMode, ViewMode } from "@/co
 import { loadSongs, saveSongs, loadProfiles, saveProfiles, loadState, saveState } from "@/components/mixer/services/storageService";
 import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
+import { trackEntityToMixerSong } from "@/lib/djTrackAdapter";
 
 import ProfilePanel from "@/components/mixer/ProfilePanel";
 import SongDeck from "@/components/mixer/SongDeck";
@@ -24,7 +25,7 @@ import SongUploadDialog from "@/components/mixer/SongUploadDialog";
 import AIPlaylistGenerator from "@/components/mixer/AIPlaylistGenerator";
 import MusicSearchPanel from "@/components/mixer/MusicSearchPanel";
 
-export default function MixerModuleView() {
+export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent }) {
   // ─── State hydration ───
   const [songs, setSongs] = useState(() => loadSongs());
   const [profiles, setProfiles] = useState(() => loadProfiles());
@@ -57,6 +58,59 @@ export default function MixerModuleView() {
   useEffect(() => { saveProfiles(profiles); }, [profiles]);
   useEffect(() => { saveState(uiState); }, [uiState]);
 
+  // ─── Autonomous idle-start ───
+  // The decision engine may only take the deck when AUTO-DJ is armed, nothing
+  // is currently playing, the recommendation has a real playable source, and
+  // repeat protection says it is safe. Manual play always wins immediately.
+  useEffect(() => {
+    if (!autoDj || playingSongId) return;
+    const candidate = automationPlan?.next;
+    if (!candidate?.playable || !candidate?.track || candidate.repeat_penalty >= 40) return;
+
+    const mapped = trackEntityToMixerSong(candidate.track);
+    if (!mapped?.id || (!mapped.youtubeUrl && !mapped.uploadUrl)) return;
+
+    setSongs((previous) => previous.some((song) => song.id === mapped.id) ? previous : [...previous, mapped]);
+
+    const existingProfile = profiles.find((profile) => profile.id === uiState.activeProfileId);
+    if (existingProfile) {
+      if (!existingProfile.songIds.includes(mapped.id)) {
+        setProfiles((previous) => previous.map((profile) =>
+          profile.id === existingProfile.id ? { ...profile, songIds: [...profile.songIds, mapped.id] } : profile
+        ));
+      }
+    } else {
+      const autoProfile = createDancerProfile({
+        name: "NUPS Auto-DJ",
+        colorTheme: "#8b5cf6",
+        songIds: [mapped.id],
+        tags: ["nups", "auto-dj"],
+      });
+      setProfiles((previous) => [...previous, autoProfile]);
+      setUiState((state) => ({ ...state, activeProfileId: autoProfile.id }));
+    }
+
+    setPlayerCollapsed(false);
+    setPlayingSongId(mapped.id);
+    emitTelemetry("AUTO_DJ_PLAY", {
+      songId: mapped.id,
+      trackId: mapped._entityTrackId,
+      confidence: automationPlan?.confidence || 0,
+      score: candidate.score,
+    });
+    onPlaybackEvent?.({
+      type: "play",
+      source: "auto_dj",
+      track_id: mapped._entityTrackId,
+      entityTrackId: mapped._entityTrackId,
+      songId: mapped.id,
+      title: mapped.title,
+      artist: mapped.artist,
+      score: candidate.score,
+      at: Date.now(),
+    });
+  }, [autoDj, playingSongId, automationPlan, profiles, uiState.activeProfileId, onPlaybackEvent]);
+
   // ─── Song operations ───
   const handleSaveSong = useCallback((song, isEdit) => {
     if (isEdit) {
@@ -78,11 +132,38 @@ export default function MixerModuleView() {
       setPlayerCollapsed(false);
       setSongs((prev) => prev.map((s) => (s.id === songId ? { ...s, lastPlayed: Date.now() } : s)));
       emitTelemetry("SONG_PLAY", { songId, profileId: uiState.activeProfileId, timestamp: Date.now() });
+      onPlaybackEvent?.({
+        type: "play",
+        source: "manual",
+        track_id: song._entityTrackId || songId,
+        entityTrackId: song._entityTrackId || null,
+        songId,
+        title: song.title,
+        artist: song.artist,
+        at: Date.now(),
+      });
     }
-  }, [songs, uiState.activeProfileId]);
+  }, [songs, uiState.activeProfileId, onPlaybackEvent]);
 
   const handleSkip = useCallback((songId) => {
-    emitTelemetry("SONG_SKIP", { songId, playDuration: 0, reason: "manual" });
+    const song = songs.find((item) => item.id === songId);
+    emitTelemetry("SONG_SKIP", { songId, playDuration: 0, reason: autoDj ? "auto_dj_transition" : "manual" });
+    if (song) {
+      onPlaybackEvent?.({
+        type: "skip",
+        source: autoDj ? "auto_dj" : "manual",
+        track_id: song._entityTrackId || songId,
+        entityTrackId: song._entityTrackId || null,
+        songId,
+        title: song.title,
+        artist: song.artist,
+        at: Date.now(),
+      });
+    }
+    if (autoDj) {
+      setPlayingSongId(null);
+      return;
+    }
     if (!activeProfile) return;
     const currentIdx = profileSongs.findIndex((s) => s.id === songId);
     if (currentIdx >= 0 && currentIdx < profileSongs.length - 1) {
@@ -90,7 +171,7 @@ export default function MixerModuleView() {
     } else {
       setPlayingSongId(null);
     }
-  }, [activeProfile, profileSongs, handlePlay]);
+  }, [songs, autoDj, onPlaybackEvent, activeProfile, profileSongs, handlePlay]);
 
   const handleFavorite = useCallback((songId) => {
     setSongs((prev) => prev.map((s) => (s.id === songId ? { ...s, favoriteFlag: !s.favoriteFlag } : s)));
