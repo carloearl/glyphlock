@@ -28,6 +28,7 @@ export default function AudioEngine({
   onPrev,
   onPlayStateChange,
   onAudioElement, // called with the <audio> DOM element (for visualizer tap)
+  onError,
 }) {
   const audioRef = useRef(null);
   const progressRef = useRef(null);
@@ -57,7 +58,7 @@ export default function AudioEngine({
     setDuration(0);
     setBuffered(0);
     if (autoPlay) {
-      audio.play().then(() => setPlaying(true)).catch(() => {});
+      audio.play().then(() => setPlaying(true)).catch((error) => onError?.({ source: "audio", message: error?.message || "Audio autoplay failed" }));
     } else {
       setPlaying(false);
     }
@@ -115,25 +116,31 @@ export default function AudioEngine({
       onPlayStateChange?.(false);
       onEnded?.();
     };
+    const onMediaError = () => {
+      const mediaError = audio.error;
+      onError?.({ source: "audio", code: mediaError?.code, message: mediaError?.message || `Audio media error ${mediaError?.code || "unknown"}` });
+    };
 
     audio.addEventListener("loadedmetadata", onLoadedMeta);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
     audio.addEventListener("ended", onEnd);
+    audio.addEventListener("error", onMediaError);
 
     return () => {
       audio.removeEventListener("loadedmetadata", onLoadedMeta);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
       audio.removeEventListener("ended", onEnd);
+      audio.removeEventListener("error", onMediaError);
     };
-  }, [onEnded, onPlayStateChange]);
+  }, [onEnded, onPlayStateChange, onError]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio || !src) return;
     if (audio.paused) {
-      audio.play().catch(() => {});
+      audio.play().catch((error) => onError?.({ source: "audio", message: error?.message || "Audio play failed" }));
     } else {
       audio.pause();
     }
