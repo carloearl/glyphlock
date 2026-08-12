@@ -299,7 +299,7 @@ export default function DJPlayerSection({
           ref={deckBRef}
           song={deckBSong}
           label={`Deck B${activeDeck === "B" ? " · LIVE" : " · CUE"}`}
-          autoPlay={false}
+          autoPlay={activeDeck === "B"}
           volume={deckBVolume}
           muted={deckBMuted}
           onVolumeChange={(value, isMuted) => { setDeckBBaseVol(value); setDeckBMuted(isMuted); }}
