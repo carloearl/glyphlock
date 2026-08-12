@@ -41,6 +41,7 @@ const CUES = [
     label: "Venue Operations",
     caption: "NUPS live core — venue operations tracked in one system",
     detail: "Live core modules connect identity, role, contract, processor evidence, and receipt activity on one operational timeline. The venue can keep its existing merchant processor; native integrations are optional. Expansion scenes are labeled as preview capabilities.",
+    spoken: "NUPS live core connects venue operations while the venue keeps its existing processor. Native integrations are optional.",
     audit: "Venue runtime opened with role-scoped activity tracking.",
   },
   {
@@ -48,6 +49,7 @@ const CUES = [
     label: "Transaction Sealed",
     caption: "Guest scan → contract sealed in real time",
     detail: "The verified guest identity follows the transaction through consent, payment, contract generation, and receipt.",
+    spoken: "Identity, consent, processor evidence, contract, and receipt stay linked to one transaction record.",
     audit: "Identity-bound transaction record created and sealed.",
   },
   {
@@ -55,6 +57,7 @@ const CUES = [
     label: "Dispute Incoming",
     caption: "A chargeback dispute lands",
     detail: "NUPS locates the original transaction and its linked consent, contract, payment, and verification records.",
+    spoken: "When a dispute arrives, NUPS finds the originating transaction and its linked evidence.",
     audit: "Dispute alert matched to the originating transaction.",
   },
   {
@@ -62,6 +65,7 @@ const CUES = [
     label: "Evidence Assembly Preview",
     caption: "Built evidence assembly — final packaging is expanding",
     detail: "NUPS already gathers linked agreement, identity, receipt, consent, and audit references. Automated final-PDF packaging is still rolling out.",
+    spoken: "Evidence source assembly is built. Final automated PDF packaging is still expanding.",
     audit: "Evidence source records gathered for package generation.",
   },
   {
@@ -69,6 +73,7 @@ const CUES = [
     label: "Package Review",
     caption: "Evidence package ready for operator review",
     detail: "The current build preserves source references and chain-of-custody details. Final signed-PDF automation remains an expansion item.",
+    spoken: "The evidence record is prepared for operator review. Final signed PDF automation remains an expansion item.",
     audit: "Evidence package record prepared with source references intact.",
   },
   {
@@ -76,6 +81,7 @@ const CUES = [
     label: "External Delivery",
     caption: "Prepared for processor or banking-partner delivery",
     detail: "The venue can export a consistent, reviewable evidence record from NUPS. Direct processor dispute-API submission is still being built.",
+    spoken: "The venue can deliver evidence through its existing processor workflow. Direct dispute API submission is not live yet.",
     audit: "Evidence package marked ready for external delivery.",
   },
   {
@@ -83,6 +89,7 @@ const CUES = [
     label: "Stakeholders Protected",
     caption: "Bank · Processor · Venue · Guest — one clearer record",
     detail: "Each party receives clearer transaction provenance, consent evidence, and an auditable explanation of what occurred.",
+    spoken: "Bank, processor, venue, and guest can review clearer provenance from the same transaction record.",
     audit: "Stakeholder views linked to the same verified transaction.",
   },
   {
@@ -90,6 +97,7 @@ const CUES = [
     label: "High-Verification Commerce",
     caption: "This is High-Verification Commerce. This is GlyphLock.",
     detail: "NUPS turns venue operations into structured, reviewable evidence. The live core is implemented now; selected automation shown here is still expanding.",
+    spoken: "NUPS is live core plus clearly labeled expansion. Keep your processor. Put NUPS above it.",
     audit: "High-verification transaction lifecycle completed.",
   },
 ];
@@ -362,6 +370,27 @@ export default function NUPSDemoPlayer() {
   const audioRef = useRef(null);
   const rafRef = useRef(null);
 
+  const stopNarration = useCallback(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  }, []);
+
+  const speakCue = useCallback((cueIndex) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
+    const cueToSpeak = CUES[cueIndex];
+    if (!cueToSpeak) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(cueToSpeak.spoken || cueToSpeak.caption);
+    utterance.rate = 1.08;
+    utterance.pitch = 0.94;
+    utterance.volume = 1;
+    const voices = window.speechSynthesis.getVoices?.() || [];
+    const preferred = voices.find((voice) => /en-US/i.test(voice.lang) && /natural|premium|enhanced|male/i.test(voice.name)) || voices.find((voice) => /en-US/i.test(voice.lang));
+    if (preferred) utterance.voice = preferred;
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
   const syncFrame = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -383,7 +412,19 @@ export default function NUPSDemoPlayer() {
     rafRef.current = requestAnimationFrame(syncFrame);
   }, [stopLoop, syncFrame]);
 
-  useEffect(() => () => stopLoop(), [stopLoop]);
+  useEffect(() => () => {
+    stopLoop();
+    stopNarration();
+  }, [stopLoop, stopNarration]);
+
+  useEffect(() => {
+    if (!playing) {
+      stopNarration();
+      return;
+    }
+    speakCue(step);
+    return () => stopNarration();
+  }, [playing, step, speakCue, stopNarration]);
 
   const togglePlayback = useCallback(async () => {
     const audio = audioRef.current;
@@ -443,7 +484,7 @@ export default function NUPSDemoPlayer() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/28 bg-cyan-300/8"><Lock className="h-4 w-4 text-cyan-300" /></span>
             <div><div className="text-xs font-black tracking-[0.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[0.16em] text-slate-500">Live core + expansion preview</div></div>
           </div>
-          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill success><CreditCard className="h-3 w-3" />BYO processor overlay</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Timeline running" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
+          <div className="flex flex-wrap items-center gap-2"><StatusPill success><CheckCircle2 className="h-3 w-3" />Live core</StatusPill><StatusPill success><CreditCard className="h-3 w-3" />BYO processor overlay</StatusPill><StatusPill active><Layers className="h-3 w-3" />Expansion preview</StatusPill><StatusPill active={playing}><Radio className="h-3 w-3" />{playing ? "Corrected narration" : "Ready"}</StatusPill><span className="font-mono text-[10px] text-slate-500">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
         </header>
 
         <div className="border-b border-amber-300/20 bg-amber-300/[0.06] px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100 sm:px-5">Payment model: keep the venue's existing processor by default · NUPS binds approval/reference evidence · native API/webhook integrations are optional · direct dispute-API submission is not yet live</div>
@@ -515,7 +556,7 @@ export default function NUPSDemoPlayer() {
             {timelineMarkers.map((marker, index) => <span key={marker.label} title={marker.label} className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border ${index <= step ? "border-cyan-200 bg-cyan-400" : "border-white/20 bg-slate-800"}`} style={{ left: `${marker.percent}%` }} />)}
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : togglePlayback} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-cyan-300/28 bg-cyan-300/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-300/14">{finished ? <RotateCcw className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}{finished ? "Replay" : playing ? "Pause" : "Play"}</button><span className="hidden text-[10px] text-slate-500 sm:inline">On-screen status is the current capability source of truth while the updated narration is being recorded.</span></div>
+            <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : togglePlayback} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-cyan-300/28 bg-cyan-300/8 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-300/14">{finished ? <RotateCcw className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}{finished ? "Replay" : playing ? "Pause" : "Play"}</button><span className="hidden text-[10px] text-slate-500 sm:inline">Corrected narration follows the capability timeline. The legacy audio remains muted and is used only as the timing track.</span></div>
             <button type="button" onClick={() => navigate("/NUPSKiosk")} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-black text-white shadow-[0_0_28px_rgba(59,130,246,0.24)] transition hover:scale-[1.015]">Enter NUPS <ArrowRight className="h-4 w-4" /></button>
           </div>
         </div>
