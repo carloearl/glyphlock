@@ -19,13 +19,13 @@ const CYAN = "#00F0FF";
 const WORKFLOWS = [
   [Fingerprint, "Verify", "Identity, age, account, venue, and role checks"],
   [ClipboardCheck, "Document", "Contracts, consent, events, and audit records"],
-  [WalletCards, "Overlay", "Keep the venue processor; bind approval and receipt evidence in NUPS"],
+  [WalletCards, "Process / Overlay", "Use Stripe natively through GlyphLock/NUPS or keep the venue processor and bind its approval evidence"],
   [ShieldCheck, "Defend", "Evidence retrieval and dispute-ready transaction history"],
 ];
 
 const CAPABILITY_BANDS = [
   { label: "LIVE CORE", value: "Identity · POS · contracts · GlyphBucks · audit", tone: "#10b981" },
-  { label: "PROCESSING", value: "Keep existing merchant account / terminal", tone: "#00d4ff" },
+  { label: "PROCESSING", value: "Stripe-native path + existing-processor overlay", tone: "#00d4ff" },
   { label: "EXPANDING", value: "Final dispute PDF · direct processor APIs · full offline coverage", tone: "#fbbf24" },
 ];
 
@@ -110,16 +110,16 @@ export default function CommandDeckHero({ onEnter }) {
 
         <div className="cd-grid">
           <div className="cd-copy">
-            <div className="cd-eyebrow"><Building2 size={15} aria-hidden="true" /> Processor-neutral venue infrastructure</div>
-            <h2 id="command-deck-title">Keep your processor.<span>Put NUPS above it.</span></h2>
+            <div className="cd-eyebrow"><Building2 size={15} aria-hidden="true" /> Hybrid payment + evidence infrastructure</div>
+            <h2 id="command-deck-title">Process with Stripe.<span>Or keep your processor.</span></h2>
             <p>
-              The venue keeps its merchant account, terminal, settlement, and processor relationship. NUPS adds the controlled operating and evidence layer above it, linking <strong>identity, approvals, contracts, receipts, payouts, and audit records</strong>. Native API or webhook integrations are optional, not a migration requirement.
+              NUPS supports both models without splitting the operating system in two. When GlyphLock/NUPS owns the payment path, <strong>Stripe is the native processing rail</strong>. When a venue keeps its merchant account, terminal, settlement, or processor relationship, NUPS operates as the verification and evidence layer above that transaction. Identity, approvals, contracts, receipts, payouts, and audit records remain linked either way.
             </p>
             <div className="cd-actions">
               <button className="cd-btn primary" type="button" onClick={onEnter}>Open NUPS Gateway <ArrowRight size={16} aria-hidden="true" /></button>
               <button className="cd-btn secondary" type="button" onClick={() => document.getElementById('nups-video')?.scrollIntoView({ behavior: 'smooth' })}>Watch capability demo <ReceiptText size={16} aria-hidden="true" /></button>
             </div>
-            <div className="cd-note"><LockKeyhole size={15} aria-hidden="true" /><span>NUPS is not presented as the merchant processor. It records and verifies the commercial event around the venue’s existing processing, with deeper integrations enabled only when supported and useful.</span></div>
+            <div className="cd-note"><LockKeyhole size={15} aria-hidden="true" /><span>Architecture rule: one NUPS transaction model, two payment adapters. Stripe-native is used for GlyphLock-controlled processing; external processors remain supported through approval/reference capture and optional integrations.</span></div>
           </div>
 
           <aside className="cd-panel" aria-label="NUPS workflow summary">
