@@ -46,7 +46,7 @@ export default function StructuredDataOrg() {
       "contactPoint": [
         {
           "@type": "ContactPoint",
-          "telephone": "+1-424-246-6499",
+          "telephone": "+1-480-886-5588",
           "contactType": "customer service",
           "email": "carloearl@glyphlock.com",
           "availableLanguage": ["en"],
