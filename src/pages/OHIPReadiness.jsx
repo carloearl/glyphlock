@@ -1,0 +1,211 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ExternalLink,
+  RefreshCw,
+  ServerCog,
+  ShieldCheck,
+} from 'lucide-react';
+
+const PORTAL_URL =
+  'https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/';
+
+export default function OHIPReadiness() {
+  const [status, setStatus] = useState(null);
+  const [error, setError] = useState('');
+  const [checking, setChecking] = useState(true);
+
+  const checkReadiness = useCallback(async () => {
+    setChecking(true);
+    setError('');
+
+    try {
+      const response = await base44.functions.invoke('ohipReadiness', {
+        action: 'status',
+      });
+      setStatus(response?.data ?? response);
+    } catch (err) {
+      setStatus(null);
+      setError(
+        err?.response?.data?.error ||
+          err?.message ||
+          'Unable to run the secure OHIP readiness check.',
+      );
+    } finally {
+      setChecking(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkReadiness();
+  }, [checkReadiness]);
+
+  const configured = status?.configured === true;
+  const missing = Array.isArray(status?.missing_settings)
+    ? status.missing_settings
+    : [];
+
+  return (
+    <main className="min-h-screen bg-slate-950 px-4 pb-16 pt-24 text-slate-100">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div>
+          <div className="mb-3 flex items-center gap-2 text-cyan-300">
+            <ShieldCheck className="h-5 w-5" />
+            <span className="text-sm font-semibold uppercase tracking-[0.18em]">
+              Owner/Admin Integration Control
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Oracle Hospitality Readiness
+          </h1>
+          <p className="mt-2 max-w-2xl text-slate-400">
+            Secure configuration preflight for GlyphLock NUPS and the OHIP
+            Partner Sandbox. This check never displays credentials and never
+            calls Oracle.
+          </p>
+        </div>
+
+        {error && (
+          <Alert className="border-red-500/50 bg-red-950/40 text-red-100">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <Card className="border-slate-700 bg-slate-900 text-slate-100">
+          <CardHeader>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <ServerCog className="h-5 w-5 text-cyan-300" />
+                  Partner Sandbox Preflight
+                </CardTitle>
+                <CardDescription className="mt-2 text-slate-400">
+                  Cloud account: glyphlocknups · Subscription: 107857124
+                </CardDescription>
+              </div>
+              <Badge
+                className={
+                  checking
+                    ? 'bg-slate-700 text-slate-100'
+                    : configured
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-amber-500 text-slate-950'
+                }
+              >
+                {checking
+                  ? 'Checking'
+                  : configured
+                    ? 'Configured'
+                    : 'Action Required'}
+              </Badge>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-5">
+            {checking ? (
+              <div className="flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-950/60 p-4">
+                <RefreshCw className="h-5 w-5 animate-spin text-cyan-300" />
+                <span>Checking server-side OHIP settings…</span>
+              </div>
+            ) : configured ? (
+              <div className="flex items-start gap-3 rounded-lg border border-emerald-500/40 bg-emerald-950/30 p-4">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-400" />
+                <div>
+                  <p className="font-semibold text-emerald-200">
+                    All required OHIP settings are present.
+                  </p>
+                  <p className="mt-1 text-sm text-emerald-100/70">
+                    Next gate: request one sandbox OAuth token, then make one
+                    read-only Property API call and verify HTTP 200 in OHIP
+                    Analytics.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-400" />
+                  <div>
+                    <p className="font-semibold text-amber-100">
+                      Complete the missing server settings.
+                    </p>
+                    <p className="mt-1 text-sm text-amber-100/70">
+                      Secret values are intentionally never shown here.
+                    </p>
+                  </div>
+                </div>
+                {missing.length > 0 && (
+                  <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                    {missing.map((name) => (
+                      <li
+                        key={name}
+                        className="rounded border border-amber-500/20 bg-slate-950/50 px-3 py-2 font-mono text-xs text-amber-100"
+                      >
+                        {name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            {status?.auth_scheme && (
+              <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
+                <span className="text-slate-500">Authentication scheme:</span>
+                <Badge variant="outline" className="border-cyan-500/50 text-cyan-200">
+                  {status.auth_scheme}
+                </Badge>
+                <span className="text-slate-500">Mode:</span>
+                <Badge variant="outline" className="border-slate-600 text-slate-300">
+                  {status.mode || 'onboarding'}
+                </Badge>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={checkReadiness}
+                disabled={checking}
+                className="bg-cyan-600 text-white hover:bg-cyan-500"
+              >
+                <RefreshCw
+                  className={`mr-2 h-4 w-4 ${checking ? 'animate-spin' : ''}`}
+                />
+                Run Secure Check
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-slate-600 bg-transparent text-slate-100 hover:bg-slate-800"
+              >
+                <a href={PORTAL_URL} target="_blank" rel="noreferrer">
+                  Open OHIP Portal
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+
+            <p className="text-xs leading-5 text-slate-500">
+              Outbound Oracle calls remain disabled during onboarding. No
+              Client Secret, Application Key, OAuth token, or guest information
+              is returned to this page.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  );
+}
