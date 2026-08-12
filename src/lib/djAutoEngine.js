@@ -35,23 +35,45 @@ export function buildAutoDJPlan({
   crowd = null,
   jukeboxRequests = [],
   performanceAnalytics = [],
+  entertainerId = null,
   history = [],
   currentTrackId = null,
   limit = 5,
 } = {}) {
   const crowdState = crowd || { energy_score: 5 };
-  const analyticsByTrack = new Map((performanceAnalytics || []).map((row) => [row.track_id, row]));
+  const analyticsByTrack = new Map();
+  for (const row of performanceAnalytics || []) {
+    if (!row?.track_id) continue;
+    const current = analyticsByTrack.get(row.track_id);
+    const isExact = entertainerId && row.entertainer_id === entertainerId;
+    const isFloor = row.entertainer_id === "venue_floor";
+    const currentExact = entertainerId && current?.entertainer_id === entertainerId;
+    // Performer-specific history wins. Venue-floor history is the next-best
+    // fallback, then the most recent generic row returned by the gateway.
+    if (!current || (isExact && !currentExact) || (!currentExact && isFloor)) {
+      analyticsByTrack.set(row.track_id, row);
+    }
+  }
 
   const ranked = (tracks || [])
     .filter((track) => track && track.active !== false)
     .map((track) => {
       const base = scoreTrack(track, persona, crowdState);
-      const matchingRequests = (jukeboxRequests || []).filter((request) => requestMatchesTrack(request, track));
+      const matchingRequests = (jukeboxRequests || []).filter((request) => {
+        if (entertainerId && request?.entertainer_id && request.entertainer_id !== entertainerId) return false;
+        return requestMatchesTrack(request, track);
+      });
       const requestPriority = matchingRequests.reduce((sum, request) => sum + computeJukeboxPriority(request), 0);
       const jukeboxBoost = clamp(requestPriority / 4, 0, 35);
       const analytics = analyticsByTrack.get(track.id);
       const performanceBoost = analytics
-        ? clamp(((Number(analytics.avg_crowd_energy) || 0) - 5) * 2 + ((Number(analytics.playthrough_rate) || 0) - 0.5) * 12, -12, 18)
+        ? clamp(
+            ((Number(analytics.avg_crowd_energy) || 0) - 5) * 2
+              + ((Number(analytics.playthrough_rate) || 0) - 0.5) * 12
+              + clamp(Math.log1p(Math.max(0, Number(analytics.avg_tips) || 0)) * 1.5, 0, 8),
+            -12,
+            22,
+          )
         : 0;
       const repeatPenalty = recentPenalty(track, history);
       const sameArtistPenalty = artistPenalty(track, history);
