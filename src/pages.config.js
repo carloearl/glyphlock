@@ -91,6 +91,7 @@ import NUPSAudit from './pages/NUPSAudit';
 import NUPSDemoManager from './pages/NUPSDemoManager';
 import NUPSGateway from './pages/NUPSGateway';
 import NUPSInfrastructurePage from './pages/NUPSInfrastructurePage';
+import OHIPReadiness from './pages/OHIPReadiness';
 import NUPSLanding from './pages/NUPSLanding';
 import NUPSLogin from './pages/NUPSLogin';
 import NUPSOwner from './pages/NUPSOwner';
@@ -184,6 +185,7 @@ export const PAGES = {
     "NUPSDemoManager": NUPSDemoManager,
     "NUPSGateway": NUPSGateway,
     "NUPSInfrastructurePage": NUPSInfrastructurePage,
+    "OHIPReadiness": OHIPReadiness,
     "NUPSLanding": NUPSLanding,
     "NUPSLogin": NUPSLogin,
     "NUPSOwner": NUPSOwner,
