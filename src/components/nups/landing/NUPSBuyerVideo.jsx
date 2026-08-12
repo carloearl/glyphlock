@@ -370,7 +370,7 @@ export default function NUPSBuyerVideo() {
       <div className="relative mx-auto w-full max-w-[1500px] px-3 pb-4 pt-3 sm:px-5 sm:pt-5">
         <div className="overflow-hidden rounded-3xl border border-cyan-300/20 bg-[#030816] shadow-[0_34px_120px_rgba(0,0,0,.58),0_0_80px_rgba(34,211,238,.07)]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 bg-slate-950/88 px-4 py-3 sm:px-5">
-            <div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/25 bg-cyan-300/[.07]"><Lock className="h-4 w-4 text-cyan-300" /></span><div><div className="text-xs font-black tracking-[.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[.16em] text-slate-500">Buyer demonstration · studio male narration</div></div></div>
+            <div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/25 bg-cyan-300/[.07]"><Lock className="h-4 w-4 text-cyan-300" /></span><div><div className="text-xs font-black tracking-[.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[.16em] text-slate-500">Buyer demonstration · scene-locked male narration</div></div></div>
             <div className="flex flex-wrap items-center gap-2"><Pill tone="green"><BadgeCheck className="h-3 w-3" />Live core</Pill><Pill tone="violet"><CreditCard className="h-3 w-3" />Stripe native</Pill><Pill tone="amber"><Building2 className="h-3 w-3" />Processor overlay</Pill></div>
           </div>
 
@@ -392,7 +392,7 @@ export default function NUPSBuyerVideo() {
 
             <div className="absolute inset-x-0 bottom-0 z-20 border-t border-white/8 bg-slate-950/94 p-4 backdrop-blur sm:p-5">
               <div className="mx-auto max-w-5xl text-center text-sm leading-6 text-slate-200 sm:text-base">{cue.caption}</div>
-              {audioError && <div className="mt-2 text-center text-xs font-bold text-amber-300">Narration could not start automatically. Press Play again to continue with sound.</div>}
+              {voiceError && <div className="mt-2 text-center text-xs font-bold text-amber-300">Narration is unavailable in this browser. The exact narration remains visible as captions.</div>}
             </div>
 
             {!playing && !finished && (
@@ -413,27 +413,13 @@ export default function NUPSBuyerVideo() {
           <div className="border-t border-white/8 bg-slate-950/88 px-4 py-4 sm:px-5">
             <div className="h-1.5 overflow-hidden rounded-full bg-white/7"><div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-[width] duration-150" style={{ width: `${progress}%` }} /></div>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : toggle} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/12 bg-white/[.04] px-4 py-2 text-sm font-black text-white">{playing ? <Pause className="h-4 w-4" /> : finished ? <RotateCcw className="h-4 w-4" /> : <Play className="h-4 w-4" />}{playing ? "Pause" : finished ? "Replay" : "Play"}</button><button type="button" onClick={() => setMuted((value) => !value)} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/12 bg-white/[.04] px-3 py-2 text-xs font-bold text-slate-300" aria-label={muted ? "Unmute narration" : "Mute narration"}>{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}{muted ? "Muted" : "Sound"}</button></div>
-              <div className="text-[10px] font-bold uppercase tracking-[.15em] text-slate-600">Visuals advance only after narration completes</div>
+              <div className="flex items-center gap-2"><button type="button" onClick={finished ? replay : toggle} className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/12 bg-white/[.04] px-4 py-2 text-sm font-black text-white">{playing ? <Pause className="h-4 w-4" /> : finished ? <RotateCcw className="h-4 w-4" /> : <Play className="h-4 w-4" />}{playing ? "Pause" : finished ? "Replay" : "Play"}</button><span className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/10 bg-white/[.025] px-3 py-2 text-[10px] font-bold text-slate-400"><Volume2 className="h-4 w-4 text-cyan-300" />{voiceLabel}</span></div>
+              <div className="text-[10px] font-bold uppercase tracking-[.15em] text-slate-600">Each scene changes only after its narration finishes</div>
             </div>
           </div>
         </div>
       </div>
 
-      <audio
-        key={src}
-        ref={audioRef}
-        src={src}
-        muted={muted}
-        preload="auto"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime || 0)}
-        onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 1)}
-        onCanPlay={() => { if (playing) playCurrent(); }}
-        onEnded={handleEnded}
-        onError={() => { setAudioError(true); setPlaying(false); }}
-      />
     </section>
   );
 }
