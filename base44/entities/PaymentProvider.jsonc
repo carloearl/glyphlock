@@ -1,11 +1,11 @@
 {
   "name": "PaymentProvider",
   "type": "object",
-  "description": "W3-008B \u2014 Registered payment processor adapters. System-level catalog; venues select from these via VenuePaymentConfig. Each provider has an adapter_type that routes verification logic in createPaymentRecord. Stripe, Clover, GoDaddy, Elavon, TSYS, manual external, and cash are the built-in adapters.",
+  "description": "W3-008B \u2014 Payment evidence and optional integration adapters. NUPS is not the merchant processor by default: venues may keep their existing processor/terminal and use the external_terminal overlay, or enable a native API adapter such as Stripe when desired.",
   "properties": {
     "provider_code": {
       "type": "string",
-      "description": "Stable unique slug (e.g. 'stripe', 'clover', 'godaddy', 'elavon', 'tsys', 'manual_external', 'cash')."
+      "description": "Stable unique slug. Preferred values: 'external_terminal' for bring-your-own processing, 'stripe' for optional native API integration, 'manual_external' for manager override, and 'cash'. Legacy named processor codes may remain only for backward compatibility."
     },
     "display_name": {
       "type": "string",
@@ -19,7 +19,7 @@
         "cash",
         "api_create_and_verify"
       ],
-      "description": "api_verify = verify existing processor reference via API (Stripe PI retrieval). api_create_and_verify = create intent then verify (Stripe full flow). external_manual = manager enters approval code, no API call. cash = no processor, simple confirmation."
+      "description": "api_verify = verify an existing processor reference via API. api_create_and_verify = create and verify through a native integration. external_manual = capture an existing processor/terminal approval or manager override without moving funds in NUPS. cash = no processor."
     },
     "required_fields": {
       "type": "array",
