@@ -568,7 +568,7 @@ export default function AboutCarloPage() {
             "jobTitle": "Founder & CEO",
             "worksFor": {
               "@type": "Organization",
-              "name": "GlyphLock Security LLC",
+              "name": "GlyphLock LLC",
               "url": "https://glyphlock.io"
             },
             "description": "Creator and architect of GlyphLock, turning pressure into systems and pain into design for quantum-resistant cybersecurity.",
