@@ -1,33 +1,59 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 
 /**
- * youtubeMusicSearch — server-side proxy for YouTube Data API v3 search.
+ * youtubeMusicSearch — server-side YouTube Data API v3 search for NUPS DJ Booth.
  *
- * The public API key is HTTP-referrer restricted, so direct browser calls from
- * preview/custom domains are rejected with HTTP 403 ("Requests from referer …
- * are blocked"). Proxying server-side lets us send an allowed Referer header,
- * keeps the key out of new client surfaces, and gives every DJ feature one
- * consistent search path.
+ * Credential requirements:
+ *   • Base44 secret: YOUTUBE_API_KEY
+ *   • Google Cloud project has YouTube Data API v3 enabled
+ *   • key must NOT use HTTP-referrer restrictions (server-side request)
+ *   • recommended: restrict the key to the YouTube Data API v3 API only
  *
- * POST { query: string, maxResults?: number }
+ * POST { query: string, maxResults?: number, kiosk_session?: string }
  * → { items: [...], count: number }
  */
-
-const FALLBACK_KEY = 'AIzaSyDKesmHJytX_1MjfbVdcysMsTOa-GVcFjs';
-const ALLOWED_REFERER = 'https://glyphlock.base44.app/';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
     const body = await req.json().catch(() => ({}));
+
+    // Accept either a normal authenticated Base44 operator or the signed NUPS
+    // kiosk DJ session used by /DJHome. No anonymous search proxy.
+    let authorized = false;
+    const user = await base44.auth.me().catch(() => null);
+    if (user) authorized = true;
+
+    if (!authorized && body?.kiosk_session) {
+      try {
+        const validationResponse = await base44.functions.invoke('nupsClockIn', {
+          action: 'validateSession',
+          kiosk_session: body.kiosk_session,
+          allowed_roles: ['DJ'],
+        });
+        const validation = validationResponse?.data || validationResponse || {};
+        authorized = validation.valid === true;
+      } catch (_) {
+        authorized = false;
+      }
+    }
+
+    if (!authorized) {
+      return Response.json({ error: 'NUPS DJ session or Base44 login required.' }, { status: 401 });
+    }
+
     const query = String(body?.query || '').trim();
     if (!query) return Response.json({ error: 'Query is required' }, { status: 400 });
 
     const maxResults = Math.min(Math.max(parseInt(body?.maxResults) || 12, 1), 25);
-    const key = FALLBACK_KEY;
+    const key = String(Deno.env.get('YOUTUBE_API_KEY') || '').trim();
+
+    if (!key) {
+      return Response.json({
+        error: 'YOUTUBE_API_KEY is not configured in Base44 secrets.',
+        code: 'YOUTUBE_SECRET_MISSING',
+      }, { status: 503 });
+    }
 
     const params = new URLSearchParams({
       part: 'snippet',
@@ -39,10 +65,6 @@ Deno.serve(async (req) => {
     });
 
     const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`, {
-      headers: {
-        Referer: ALLOWED_REFERER,
-        Origin: ALLOWED_REFERER.replace(/\/$/, ''),
-      },
       signal: AbortSignal.timeout(10000),
     });
 
@@ -50,7 +72,13 @@ Deno.serve(async (req) => {
 
     if (!res.ok || data?.error) {
       const message = data?.error?.message || `YouTube API HTTP ${res.status}`;
-      return Response.json({ error: message, status: res.status }, { status: 502 });
+      const reason = data?.error?.errors?.[0]?.reason || null;
+      return Response.json({
+        error: message,
+        status: res.status,
+        reason,
+        code: 'YOUTUBE_API_ERROR',
+      }, { status: 502 });
     }
 
     const items = (data?.items || [])
