@@ -41,6 +41,9 @@ export default function MusicSearchTab() {
         source_id: r.id,
         thumbnail_url: r.thumbnail,
         embed_url: r.embed_url,
+        // Direct media links must land in file_url — that's the field the
+        // player/automix reads for non-YouTube audio.
+        file_url: (r.source && r.source !== 'youtube') ? r.embed_url : undefined,
         active: true,
       },
     });
