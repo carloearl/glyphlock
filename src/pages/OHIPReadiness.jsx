@@ -26,6 +26,8 @@ export default function OHIPReadiness() {
   const [status, setStatus] = useState(null);
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(true);
+  const [testing, setTesting] = useState(false);
+  const [connectionResult, setConnectionResult] = useState(null);
 
   const checkReadiness = useCallback(async () => {
     setChecking(true);
@@ -45,6 +47,30 @@ export default function OHIPReadiness() {
       );
     } finally {
       setChecking(false);
+    }
+  }, []);
+
+  const testConnection = useCallback(async () => {
+    setTesting(true);
+    setConnectionResult(null);
+    setError('');
+
+    try {
+      const response = await base44.functions.invoke('ohipReadiness', {
+        action: 'test',
+      });
+      setConnectionResult(response?.data ?? response);
+    } catch (err) {
+      setConnectionResult({
+        ok: false,
+        stage: 'invocation',
+        message:
+          err?.response?.data?.error ||
+          err?.message ||
+          'Unable to run the live OHIP connection test.',
+      });
+    } finally {
+      setTesting(false);
     }
   }, []);
 
@@ -175,6 +201,31 @@ export default function OHIPReadiness() {
               </div>
             )}
 
+            {connectionResult && (
+              <Alert
+                className={
+                  connectionResult.ok
+                    ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-100'
+                    : 'border-red-500/50 bg-red-950/40 text-red-100'
+                }
+              >
+                {connectionResult.ok ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4" />
+                )}
+                <AlertDescription>
+                  <span className="font-semibold">
+                    {connectionResult.ok ? 'OHIP connected.' : `Stopped at ${connectionResult.stage || 'test'}.`}
+                  </span>{' '}
+                  {connectionResult.message}
+                  {connectionResult.http_status ? ` HTTP ${connectionResult.http_status}.` : ''}
+                  {connectionResult.request_id ? ` Request ID: ${connectionResult.request_id}` : ''}
+                  {connectionResult.latency_ms != null ? ` ${connectionResult.latency_ms} ms.` : ''}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="flex flex-wrap gap-3">
               <Button
                 onClick={checkReadiness}
@@ -185,6 +236,14 @@ export default function OHIPReadiness() {
                   className={`mr-2 h-4 w-4 ${checking ? 'animate-spin' : ''}`}
                 />
                 Run Secure Check
+              </Button>
+              <Button
+                onClick={testConnection}
+                disabled={checking || testing || !configured}
+                className="bg-emerald-600 text-white hover:bg-emerald-500"
+              >
+                <ServerCog className={`mr-2 h-4 w-4 ${testing ? 'animate-pulse' : ''}`} />
+                {testing ? 'Testing Oracle…' : 'Test Live Connection'}
               </Button>
               <Button
                 asChild
@@ -199,9 +258,10 @@ export default function OHIPReadiness() {
             </div>
 
             <p className="text-xs leading-5 text-slate-500">
-              Outbound Oracle calls remain disabled during onboarding. No
-              Client Secret, Application Key, OAuth token, or guest information
-              is returned to this page.
+              The live button makes exactly one OAuth request and one read-only
+              Partner Sandbox API request. No Client Secret, Application Key,
+              OAuth token, guest information, or response payload is returned
+              to this page.
             </p>
           </CardContent>
         </Card>
