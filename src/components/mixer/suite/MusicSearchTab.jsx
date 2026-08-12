@@ -62,7 +62,9 @@ export default function MusicSearchTab() {
       [deck === 'A' ? 'deckA' : 'deckB']: {
         title: r.title,
         artist: r.artist,
-        videoId: r.source === 'youtube' ? (r.source_id || r.id.replace(/^yt-/, '')) : undefined,
+        videoId: r.source === 'youtube'
+          ? (r.source_id || r.id.replace(/^yt-/, ''))
+          : (r.youtube_video_id || undefined),
         audioUrl: r.source !== 'youtube' ? r.audio_url : undefined,
       },
     };
@@ -170,12 +172,12 @@ export default function MusicSearchTab() {
                   type="button"
                   size="sm"
                   onClick={(e) => { e.stopPropagation(); importTrack(r); }}
-                  disabled={imported.has(r.id)}
-                  className={`min-h-[36px] ${imported.has(r.id) ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'}`}
-                  title="Import into Track Library"
+                  disabled={r.source === 'nups_library' || imported.has(r.id)}
+                  className={`min-h-[36px] ${(r.source === 'nups_library' || imported.has(r.id)) ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+                  title={r.source === 'nups_library' ? 'Already in Track Library' : 'Import into Track Library'
                   style={{ touchAction: 'manipulation' }}
                 >
-                  {imported.has(r.id) ? '✓' : <Plus className="w-4 h-4 pointer-events-none" />}
+                  {(r.source === 'nups_library' || imported.has(r.id)) ? '✓' : <Plus className="w-4 h-4 pointer-events-none" />}
                 </Button>
               </div>
             </CardContent>
