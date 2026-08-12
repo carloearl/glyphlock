@@ -24,6 +24,7 @@ import NUPSOwner from './pages/NUPSOwner';
 import NUPSStaff from './pages/NUPSStaff';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
 import CaseStudyNUPS from './pages/CaseStudyNUPS';
+import CaseStudyOracleOHIP from './pages/CaseStudyOracleOHIP';
 import NUPSDemoManager from './pages/NUPSDemoManager';
 import NUPSStateDiff from './pages/NUPSStateDiff';
 import DailyPerformanceReport from './pages/DailyPerformanceReport';
@@ -357,6 +358,7 @@ const AuthenticatedApp = () => {
         <Route path="/dailyperformancereport" element={<DailyPerformanceReport />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
+        <Route path="/CaseStudyOracleOHIP" element={<CaseStudyOracleOHIP />} />
         <Route path="/admin/activity-log" element={<LayoutWrapper currentPageName="ActivityLogViewer"><ActivityLogViewer /></LayoutWrapper>} />
         <Route path="/admin/settlement" element={<LayoutWrapper currentPageName="DailySettlementDashboard"><DailySettlementDashboard /></LayoutWrapper>} />
         <Route path="/admin/payout-history" element={<LayoutWrapper currentPageName="DriverPayoutHistory"><DriverPayoutHistory /></LayoutWrapper>} />
