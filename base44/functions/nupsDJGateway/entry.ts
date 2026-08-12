@@ -78,6 +78,82 @@ Deno.serve(async (req) => {
 
     const venueId = operator?.venue_id || body.venue_id || null;
 
+    if (action === "createTrack") {
+      const track = body.track || {};
+      const title = String(track.title || "").trim().slice(0, 200);
+      if (!title) return Response.json({ error: "Track title is required." }, { status: 400 });
+      const artist = String(track.artist || "").trim().slice(0, 200);
+      const source = ["upload", "youtube", "spotify", "manual"].includes(track.source) ? track.source : "manual";
+      let existing = [];
+      if (track.source_id) {
+        existing = await E.Track.filter({ source, source_id: String(track.source_id) }, "-created_date", 1).catch(() => []);
+      } else if (artist) {
+        existing = await E.Track.filter({ title, artist }, "-created_date", 1).catch(() => []);
+      }
+      if (existing?.length) return Response.json({ success: true, created: false, track: existing[0] });
+      const created = await E.Track.create({
+        title,
+        artist,
+        genre: track.genre ? String(track.genre).slice(0, 100) : undefined,
+        bpm: Number.isFinite(Number(track.bpm)) ? Number(track.bpm) : undefined,
+        mood: ["high-energy", "sensual", "chill", "aggressive", "neutral"].includes(track.mood) ? track.mood : undefined,
+        duration: Number.isFinite(Number(track.duration)) ? Number(track.duration) : undefined,
+        file_url: track.file_url || undefined,
+        source,
+        source_id: track.source_id ? String(track.source_id).slice(0, 200) : undefined,
+        thumbnail_url: track.thumbnail_url || undefined,
+        embed_url: track.embed_url || undefined,
+        uploader_id: operator?.name || operator?.role || "nups-dj",
+        active: track.active !== false,
+      });
+      return Response.json({ success: true, created: true, track: created });
+    }
+
+    if (action === "deleteTrack") {
+      const trackId = String(body.track_id || "");
+      if (!trackId) return Response.json({ error: "track_id is required." }, { status: 400 });
+      await E.Track.delete(trackId);
+      return Response.json({ success: true, deleted: trackId });
+    }
+
+    if (action === "createPersona") {
+      const persona = body.persona || {};
+      const name = String(persona.name || "").trim().slice(0, 160);
+      if (!name) return Response.json({ error: "Persona name is required." }, { status: 400 });
+      const created = await E.AIDJPersona.create({
+        name,
+        entertainer_id: persona.entertainer_id ? String(persona.entertainer_id).slice(0, 160) : undefined,
+        weighting_model: persona.weighting_model || { crowd_weight: 0.4, entertainer_weight: 0.4, revenue_weight: 0.2 },
+        transition_style_rules: persona.transition_style_rules || { bpm_range: 10, mood_compatibility: [], energy_ramp: "linear" },
+        genre_bias_logic: persona.genre_bias_logic || { primary_genres: [], secondary_genres: [], excluded_genres: [] },
+        risk_tolerance: ["conservative", "balanced", "experimental"].includes(persona.risk_tolerance) ? persona.risk_tolerance : "balanced",
+      });
+      return Response.json({ success: true, persona: created });
+    }
+
+    if (action === "deletePersona") {
+      const personaId = String(body.persona_id || "");
+      if (!personaId) return Response.json({ error: "persona_id is required." }, { status: 400 });
+      await E.AIDJPersona.delete(personaId);
+      return Response.json({ success: true, deleted: personaId });
+    }
+
+    if (action === "recordCrowdMetrics") {
+      const metrics = body.metrics || {};
+      const created = await E.CrowdMetrics.create({
+        entertainer_id: String(metrics.entertainer_id || "venue_floor").slice(0, 160),
+        session_id: String(metrics.session_id || operator?.shift_id || "dj-session").slice(0, 160),
+        energy_score: Math.max(0, Math.min(10, Number(metrics.energy_score) || 0)),
+        tips_last_30min: Math.max(0, Number(metrics.tips_last_30min) || 0),
+        votes_last_30min: Math.max(0, Number(metrics.votes_last_30min) || 0),
+        playthrough_rate: Math.max(0, Math.min(1, Number(metrics.playthrough_rate) || 0)),
+        manual_slider: metrics.manual_slider === null || metrics.manual_slider === undefined ? undefined : Math.max(0, Math.min(10, Number(metrics.manual_slider) || 0)),
+        current_bpm: Number.isFinite(Number(metrics.current_bpm)) ? Number(metrics.current_bpm) : undefined,
+        mood_votes: metrics.mood_votes || {},
+      });
+      return Response.json({ success: true, crowd_metrics: created });
+    }
+
     if (action === "savePlaylist") {
       const playlist = body.playlist || {};
       if (!playlist.entertainer_id) {
@@ -111,12 +187,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: `Unsupported DJ gateway action: ${action}` }, { status: 400 });
     }
 
-    const [trackRows, pendingRequests, personas, crowdRows, analytics] = await Promise.all([
+    const [trackRows, pendingRequests, personas, crowdRows, analytics, entertainers] = await Promise.all([
       E.Track.list("-created_date", 500).catch(() => []),
       E.JukeboxRequest.filter({ status: "pending" }, "-created_date", 100).catch(() => []),
       E.AIDJPersona.list("-created_date", 100).catch(() => []),
       E.CrowdMetrics.list("-created_date", 50).catch(() => []),
       E.PerformanceAnalytics.list("-last_played", 500).catch(() => []),
+      E.Entertainer.list("-created_date", 500).catch(() => []),
     ]);
 
     const { tracks, duplicates } = dedupeTracks(trackRows || []);
@@ -132,6 +209,7 @@ Deno.serve(async (req) => {
       personas: personas || [],
       crowd_metrics: crowdRows || [],
       performance_analytics: analytics || [],
+      entertainers: entertainers || [],
       quality: {
         raw_track_count: (trackRows || []).length,
         unique_track_count: tracks.length,
