@@ -186,9 +186,15 @@ function validateFinancialRules(entity, data) {
       const sub = Number(data.subtotal) || 0;
       const tax = Number(data.tax) || 0;
       const tip = Number(data.tip) || 0;
+      // Fees and discounts are real receipt lines — the invariant must account
+      // for them or every card / promo sale is rejected before the receipt.
+      const procFee = Number(data.processing_fee) || 0;
+      const svcFee = Number(data.service_fee) || 0;
+      const disc = Number(data.discount) || 0;
+      const expected = sub + tax + tip + procFee + svcFee - disc;
       const total = Number(data.total);
-      if (!approxEqual(total, sub + tax + tip)) {
-        return `pos_total_must_equal_subtotal_plus_tax_plus_tip: expected ${sub + tax + tip}, got ${total}`;
+      if (!approxEqual(total, expected)) {
+        return `pos_total_must_equal_subtotal_plus_tax_fees_tip_minus_discount: expected ${expected}, got ${total}`;
       }
     }
   }
