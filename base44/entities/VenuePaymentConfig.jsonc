@@ -1,7 +1,7 @@
 {
   "name": "VenuePaymentConfig",
   "type": "object",
-  "description": "W3-008B \u2014 Per-venue payment processor configuration. Venues select a primary provider and optional fallback. When no config exists, Stripe is the default fallback. This is the switchboard that createPaymentRecord reads to route verification to the correct adapter.",
+  "description": "W3-008B \u2014 Per-venue payment evidence / integration configuration. NUPS defaults to the venue's existing processor or terminal and records processor references as evidence. A venue may optionally enable a native API integration. This is the switchboard that createPaymentRecord reads to select overlay versus integrated verification.",
   "properties": {
     "venue_id": {
       "type": "string",
@@ -9,16 +9,16 @@
     },
     "primary_provider_code": {
       "type": "string",
-      "default": "stripe",
-      "description": "Provider code from PaymentProvider. Default 'stripe' for backward compatibility."
+      "default": "external_terminal",
+      "description": "Provider code from PaymentProvider. Default 'external_terminal': keep the venue's existing merchant processor and capture its approval/reference into NUPS. Native API adapters are opt-in."
     },
     "fallback_provider_code": {
       "type": "string",
-      "description": "Fallback provider when primary is unavailable. Common: 'manual_external'."
+      "description": "Fallback evidence path when a native integration is unavailable. Common: 'external_terminal' or 'manual_external'."
     },
     "merchant_id": {
       "type": "string",
-      "description": "Processor merchant account ID."
+      "description": "Optional existing processor merchant account ID. NUPS does not require ownership of the merchant account."
     },
     "terminal_id": {
       "type": "string",
