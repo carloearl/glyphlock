@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UnifiedMusicConsole from "@/components/mixer/UnifiedMusicConsole";
+import DJDiagnosticsPanel from "@/components/mixer/diagnostics/DJDiagnosticsPanel";
 import { Badge } from "@/components/ui/badge";
-import { Disc3, LogOut, Tv } from "lucide-react";
+import { Activity, Disc3, LogOut, Tv } from "lucide-react";
 
 // DACO-NUPS-ROLE-SELECTION — DJ workspace: the Auto-DJ console ONLY.
 // No dashboard, no accounting, no contracts, no back-office navigation.
 export default function DJHome() {
   const navigate = useNavigate();
   const [operator, setOperator] = useState(null);
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [diagnosticsRunId, setDiagnosticsRunId] = useState(0);
 
   useEffect(() => {
     try {
@@ -28,6 +31,15 @@ export default function DJHome() {
         <Badge className="bg-violet-800 text-white">AUTO-DJ</Badge>
         <div className="ml-auto flex items-center gap-2">
           <button
+            onClick={() => {
+              setDiagnosticsOpen(true);
+              setDiagnosticsRunId((value) => value + 1);
+            }}
+            className="flex items-center gap-2 h-11 px-4 rounded-xl bg-violet-950/70 border border-violet-500/40 text-violet-200 text-sm font-semibold hover:bg-violet-900/70 transition-colors"
+          >
+            <Activity className="w-4 h-4" /> Run Diagnostics
+          </button>
+          <button
             onClick={() => navigate("/ClubTV")}
             className="flex items-center gap-2 h-11 px-4 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-semibold"
           >
@@ -41,6 +53,12 @@ export default function DJHome() {
           </button>
         </div>
       </header>
+
+      <DJDiagnosticsPanel
+        open={diagnosticsOpen}
+        onOpenChange={setDiagnosticsOpen}
+        runId={diagnosticsRunId}
+      />
 
       <main className="p-4 max-w-[1600px] mx-auto">
         <UnifiedMusicConsole />
