@@ -176,9 +176,13 @@ export default function DJPlayerSection({
       const targetId = activeDeck === "A" ? deckBSongId : deckASongId;
       if (!targetId) return;
       const ref = activeDeck === "A" ? deckARef.current : deckBRef.current;
+      const cueRef = targetDeck === "A" ? deckARef.current : deckBRef.current;
       const duration = Number(ref?.getDuration?.() || 0);
       const current = Number(ref?.getCurrentTime?.() || 0);
-      if (!duration || current < 1) return;
+      const cueDuration = Number(cueRef?.getDuration?.() || 0);
+      // Never fade toward a cue source whose media metadata has not loaded.
+      // A late/broken source stays cued while the live deck continues safely.
+      if (!duration || current < 1 || !cueDuration) return;
       const remaining = duration - current;
       if (remaining > 0 && remaining <= Math.max(2, Number(transitionSeconds || 6))) {
         performTransition(targetDeck);
@@ -199,7 +203,7 @@ export default function DJPlayerSection({
       performTransition(targetDeck, { immediate: true });
       return;
     }
-    onSkip?.(activeSongId);
+    onSkip?.(activeSongId, "ended");
   }, [activeDeck, autoDj, deckASongId, deckBSongId, performTransition, onSkip, activeSongId]);
 
   const handleCueNext = useCallback(() => {
