@@ -20,7 +20,7 @@ function fmt(n) { return "$" + Number(n || 0).toLocaleString("en-US", { minimumF
 function fmtDate(d) { return new Date(d).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }); }
 
 // ─── GLYPHLOCK DATA ───────────────────────────────────────────────────────────
-const GL = { name:"GlyphLock LLC", addr1:"12721 N 121st Dr", addr2:"El Mirage, AZ 85335", phone:"(480) 886-5588", ein:"23831258", routing:"122105155", account:"251717492408" };
+const GL = { name:"GlyphLock LLC", addr1:"12721 N 121st Dr", addr2:"El Mirage, AZ 85335", phone:"(480) 886-5588", entityNumber:"23831258" };
 
 // ─── TAX CALC ─────────────────────────────────────────────────────────────────
 function calcTaxes(gross) {
@@ -103,7 +103,7 @@ function CheckFace({ ck }) {
   const net = taxes.net;
   const words = amountToWords(net);
   const pLabel = `${ck.startStr} – ${ck.endStr}`;
-  const micr = `⑆${GL.routing}⑆  ${GL.account}  ⑈${ck.num}⑈`;
+  const micr = "BANK DETAILS ARE NOT STORED IN THE CLIENT APPLICATION";
 
   return (
     <div style={{position:"relative",background:"#dce8f5",overflow:"hidden",fontFamily:"Arial,Helvetica,sans-serif"}}>
@@ -114,7 +114,7 @@ function CheckFace({ ck }) {
 
       <div style={{position:"relative",zIndex:3,background:"#1a2a4a",height:16,display:"flex",alignItems:"center",justifyContent:"center"}}>
         <div style={{fontSize:6.5,color:"#8ab0d0",letterSpacing:"0.2em",fontWeight:700,textTransform:"uppercase",fontFamily:"Arial,sans-serif"}}>
-          VOID · NOT VALID WITHOUT AUTHORIZED SIGNATURE · GLYPHLOCK LLC PAYROLL · EIN {GL.ein}
+          VOID · NOT VALID WITHOUT AUTHORIZED SIGNATURE · GLYPHLOCK LLC PAYROLL · AZ ENTITY #{GL.entityNumber}
         </div>
       </div>
 
@@ -134,15 +134,14 @@ function CheckFace({ ck }) {
 
           <div style={{flex:1,display:"flex",justifyContent:"center",alignItems:"flex-start",paddingTop:2}}>
             <div style={{background:"#fff",border:"1px solid #b0b8cc",padding:"6px 16px 5px",textAlign:"center"}}>
-              <div style={{fontFamily:"Arial,sans-serif",fontWeight:700,fontSize:13,color:"#0d1a3a",letterSpacing:"0.01em",lineHeight:1}}>US Bank, N.A.</div>
-              <div style={{fontSize:7.5,color:"#334455",marginTop:3,fontFamily:"Arial,sans-serif"}}>El Mirage, AZ 85335</div>
-              <div style={{fontSize:7,color:"#445566",marginTop:1,fontFamily:"Arial,sans-serif"}}>ABA Routing: {GL.routing}</div>
+              <div style={{fontFamily:"Arial,sans-serif",fontWeight:700,fontSize:13,color:"#0d1a3a",letterSpacing:"0.01em",lineHeight:1}}>BANK DETAILS WITHHELD</div>
+              <div style={{fontSize:7.5,color:"#334455",marginTop:3,fontFamily:"Arial,sans-serif"}}>Supply securely at authorized print time</div>
             </div>
           </div>
 
           <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
             <div style={{textAlign:"right"}}>
-              <div style={{fontFamily:"Arial,sans-serif",fontWeight:700,fontSize:10,color:"#556"}}>EIN: {GL.ein}</div>
+              <div style={{fontFamily:"Arial,sans-serif",fontWeight:700,fontSize:10,color:"#556"}}>AZ Entity #: {GL.entityNumber}</div>
             </div>
             <div style={{border:"1.5px solid #334466",background:"#fff",padding:"3px 10px",textAlign:"center",minWidth:52}}>
               <div style={{fontSize:7,color:"#556",fontWeight:700,letterSpacing:"0.08em"}}>CHECK NO.</div>
@@ -186,8 +185,7 @@ function CheckFace({ ck }) {
         <div style={{display:"flex",alignItems:"flex-end",gap:14}}>
           <div style={{flexShrink:0,minWidth:90}}>
             <div style={{fontFamily:"Arial,sans-serif",fontSize:8,color:"#778",marginBottom:2}}>Financial Institution</div>
-            <div style={{fontFamily:"Arial,sans-serif",fontWeight:700,fontSize:11,color:"#0d1a3a",lineHeight:1}}>US Bank, N.A.</div>
-            <div style={{fontFamily:"Arial,sans-serif",fontSize:7,color:"#556",marginTop:1}}>Acct: ••••{GL.account.slice(-4)}</div>
+            <div style={{fontFamily:"Arial,sans-serif",fontWeight:700,fontSize:11,color:"#0d1a3a",lineHeight:1}}>Configured securely at print time</div>
           </div>
           <div style={{flex:1.6}}>
             <div style={{display:"flex",alignItems:"flex-end",gap:6}}>
@@ -304,7 +302,7 @@ function PayStub({ ck }) {
       </div>
 
       <div style={{padding:"4px 16px",display:"flex",justifyContent:"space-between",background:"#f4f4f8",borderTop:"1px solid #ccc"}}>
-        <div style={{fontSize:7.5,color:"#aaa",fontFamily:"Arial,sans-serif"}}>RETAIN THIS PORTION FOR YOUR RECORDS · NOT NEGOTIABLE · {GL.name} · EIN {GL.ein}</div>
+        <div style={{fontSize:7.5,color:"#aaa",fontFamily:"Arial,sans-serif"}}>RETAIN THIS PORTION FOR YOUR RECORDS · NOT NEGOTIABLE · {GL.name} · AZ ENTITY #{GL.entityNumber}</div>
         <div style={{fontSize:7.5,color:"#aaa"}}>CHECK #{ck.num} · PAY DATE: {ck.payDate}</div>
       </div>
     </div>
