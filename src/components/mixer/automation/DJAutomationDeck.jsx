@@ -30,6 +30,9 @@ export default function DJAutomationDeck({
   activePersona,
   activeEntertainer,
   activeCrowd,
+  performerChoices = [],
+  performerOverrideId = "",
+  onPerformerOverride,
   lastUpdated,
   onRefresh,
 }) {
@@ -55,6 +58,21 @@ export default function DJAutomationDeck({
           <span className={`px-2 py-1 rounded-full border text-[10px] font-black ${autoDj ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-slate-700 text-slate-400"}`}>
             {autoDj ? "AUTOMATION ARMED" : "MANUAL CONTROL"}
           </span>
+          <label className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-950/70 px-2 py-1 text-[9px] uppercase tracking-wider text-slate-500">
+            Stage
+            <select
+              value={performerOverrideId}
+              onChange={(event) => onPerformerOverride?.(event.target.value)}
+              className="max-w-[170px] bg-transparent text-[10px] font-semibold normal-case tracking-normal text-slate-200 outline-none"
+            >
+              <option value="">Auto · Stage shift</option>
+              {performerChoices.map(({ entertainer, shift }) => (
+                <option key={entertainer.id} value={entertainer.id}>
+                  {entertainer.stage_name} · {shift.location || shift.status}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="button"
             onClick={onRefresh}
