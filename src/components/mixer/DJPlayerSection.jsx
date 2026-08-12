@@ -167,6 +167,33 @@ export default function DJPlayerSection({
     rafRef.current = requestAnimationFrame(tick);
   }, [activeDeck, deckASongId, deckBSongId, crossfade, transitionSeconds, finishPromotion]);
 
+  const handleDeckPlaybackError = useCallback((deck, error) => {
+    const songId = deck === "A" ? deckASongId : deckBSongId;
+    if (!songId) return;
+    const isActive = deck === activeDeck;
+    const targetDeck = deck === "A" ? "B" : "A";
+    const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
+    const targetRef = targetDeck === "A" ? deckARef.current : deckBRef.current;
+    const fallbackReady = Boolean(autoDj && isActive && targetId && Number(targetRef?.getDuration?.() || 0) > 0);
+
+    onPlaybackError?.({ songId, deck, active: isActive, fallbackReady, error });
+
+    if (!isActive) {
+      if (deck === "A") setDeckASongId(null);
+      else setDeckBSongId(null);
+      return;
+    }
+
+    if (fallbackReady) {
+      performTransition(targetDeck, { immediate: true, reason: "source_failover" });
+      return;
+    }
+
+    if (deck === "A") setDeckASongId(null);
+    else setDeckBSongId(null);
+    onActiveSongChange?.(null, { reason: "source_failure", failedSongId: songId });
+  }, [activeDeck, autoDj, deckASongId, deckBSongId, onPlaybackError, onActiveSongChange, performTransition]);
+
   // Auto transition begins when the active track enters the configured fade
   // window. Duration=0 simply means metadata is not ready yet, so we wait.
   useEffect(() => {
