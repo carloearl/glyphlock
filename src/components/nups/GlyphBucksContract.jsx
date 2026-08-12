@@ -605,13 +605,18 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           </Card>
 
           <Card className="bg-gray-900/60 border-gray-700">
-            <CardHeader className="pb-2"><CardTitle className="text-sm text-yellow-400">Purchaser Card Info.</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm text-yellow-400">Existing Processor / Terminal Evidence</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <div><Label className="text-xs text-red-400">Name:</Label><Input value={purchaserCardName} onChange={e => setPurchaserCardName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
+              <div className="rounded-lg border border-cyan-500/25 bg-cyan-500/5 p-2 text-[11px] leading-4 text-cyan-100/80">
+                Process the card on the venue's normal terminal first. NUPS does not replace the merchant account; it binds the processor's approval and reference to the contract. Native API integrations are optional.
+              </div>
+              <div><Label className="text-xs">Processor / Terminal Name <span className="text-gray-500">(optional)</span></Label><Input value={processorName} onChange={e => setProcessorName(e.target.value)} placeholder="Venue's current processor" className="bg-gray-800 border-gray-700" /></div>
+              <div><Label className="text-xs text-red-400">Processor / Receipt Reference: *</Label><Input value={processorReference} onChange={e => setProcessorReference(e.target.value)} placeholder="Receipt, transaction, batch, or processor ref" className="bg-gray-800 border-gray-700" /></div>
+              <div><Label className="text-xs text-red-400">Cardholder Name:</Label><Input value={purchaserCardName} onChange={e => setPurchaserCardName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
               <div><Label className="text-xs text-red-400">Card Number (Last 6 #s): *</Label><Input value={cardLastSix} onChange={e => setCardLastSix(e.target.value.replace(/\D/g,'').slice(0,6))} maxLength={6} className="bg-gray-800 border-gray-700" /></div>
               <div className="grid grid-cols-2 gap-2">
-                <div><Label className="text-xs text-red-400">EXP:</Label><Input value={cardExp} onChange={e => setCardExp(e.target.value)} placeholder="MM/YY" className="bg-gray-800 border-gray-700" /></div>
-                <div><Label className="text-xs">Approval Code:</Label><Input value={approvalCode} onChange={e => setApprovalCode(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
+                <div><Label className="text-xs">EXP:</Label><Input value={cardExp} onChange={e => setCardExp(e.target.value)} placeholder="MM/YY" className="bg-gray-800 border-gray-700" /></div>
+                <div><Label className="text-xs text-red-400">Approval Code: *</Label><Input value={approvalCode} onChange={e => setApprovalCode(e.target.value)} placeholder="From terminal receipt" className="bg-gray-800 border-gray-700" /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div><Label className="text-xs">Manager:</Label><Input value={managerName} onChange={e => setManagerName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
