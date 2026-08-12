@@ -17,16 +17,16 @@ Deno.serve(async (req) => {
       "purpose": "AI/LLM Discovery and Knowledge Retrieval"
     },
     "organization": {
-      "name": "GlyphLock Security LLC",
+      "name": "GlyphLock LLC",
       "type": "Cybersecurity Technology Company",
       "founded": "2025-01",
       "location": "El Mirage, Arizona, USA",
       "website": SITE_URL,
       "slogan": "Quantum-Grade Security for the AI Era",
       "contact": {
-        "email": "glyphlock@gmail.com",
+        "email": "carloearl@glyphlock.com",
         "technical": "carloearl@gmail.com",
-        "phone": "+1-424-246-6499"
+        "phone": "+1-480-886-5588"
       },
       "leadership": [
         { "name": "Carlo Rene Earl", "title": "Founder & Owner, DACO¹", "role": "Creator of Master Covenant" },
