@@ -31,9 +31,35 @@ import {
   Zap,
 } from "lucide-react";
 
-const VOICEOVER = "https://media.base44.com/files/public/6a63d9f0475091afaaa1e124/de5d2b294_speech.mp3";
 const FALLBACK_DURATION = 52;
 const VISUAL_LEAD_SECONDS = 0.28;
+
+const MALE_VOICE_HINTS = [
+  "guy", "christopher", "david", "mark", "brian", "james", "george", "ryan", "eric",
+  "andrew", "daniel", "matthew", "liam", "thomas", "arthur", "oliver", "joey", "male",
+];
+const FEMALE_VOICE_HINTS = [
+  "aria", "jenny", "samantha", "zira", "eva", "susan", "hazel", "victoria", "ava",
+  "allison", "karen", "moira", "tessa", "serena", "female",
+];
+
+function pickNarrationVoice(voices = []) {
+  const english = voices.filter((voice) => /^en([-_]|$)/i.test(voice.lang || ""));
+  const pool = english.length ? english : voices;
+  if (!pool.length) return null;
+
+  const score = (voice) => {
+    const name = String(voice.name || "").toLowerCase();
+    let value = /^en-US/i.test(voice.lang || "") ? 20 : /^en/i.test(voice.lang || "") ? 10 : 0;
+    if (/natural|neural|premium|enhanced|online/.test(name)) value += 8;
+    if (MALE_VOICE_HINTS.some((hint) => name.includes(hint))) value += 80;
+    if (FEMALE_VOICE_HINTS.some((hint) => name.includes(hint))) value -= 120;
+    if (voice.default) value += 1;
+    return value;
+  };
+
+  return [...pool].sort((a, b) => score(b) - score(a))[0] || null;
+}
 
 const CUES = [
   {
