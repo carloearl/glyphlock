@@ -25,7 +25,7 @@ function extractVideoId(url) {
 // what the on-screen slider shows and what mute/unmute must preserve. Mixing the
 // two silences the deck: writing the crossfaded value back as the base volume
 // collapses to 0 as soon as the crossfader moves or mute is toggled.
-const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVolume = 1, muted, onVolumeChange, onEnded, onDropSong, onPlaybackError, autoPlay = true }, ref) {
+const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVolume = 1, muted, onVolumeChange, onEnded, onDropSong, onDropExternalSong, onPlaybackError, autoPlay = true }, ref) {
   const [dragOver, setDragOver] = useState(false);
   const [audioEl, setAudioEl] = useState(null);
   const youtubeRef = useRef(null);
@@ -69,6 +69,11 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVol
   const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
+    // Library/search drags carry the full song object (not yet in mixer state).
+    const raw = e.dataTransfer.getData("application/mixer-song");
+    if (raw && onDropExternalSong) {
+      try { onDropExternalSong(JSON.parse(raw)); return; } catch (_) { /* fall through */ }
+    }
     const songId = e.dataTransfer.getData("application/mixer-song-id");
     if (songId && onDropSong) onDropSong(songId);
   };

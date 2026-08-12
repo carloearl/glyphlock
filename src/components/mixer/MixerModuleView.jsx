@@ -139,6 +139,15 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     }
   }, [activeProfile]);
 
+  // Registers a song dragged in from the Track Library / search panels so the
+  // decks can resolve it by id. Returns the id to load.
+  const handleRegisterSong = useCallback((dropped) => {
+    if (!dropped?.id) return null;
+    setSongs((previous) => previous.some((s) => s.id === dropped.id) ? previous : [...previous, dropped]);
+    setPlayerCollapsed(false);
+    return dropped.id;
+  }, []);
+
   const handlePlay = useCallback((songId) => {
     setPlayingSongId((prev) => (prev === songId ? null : songId));
     const song = songs.find((s) => s.id === songId);
@@ -548,6 +557,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         automationNextSongId={automationNextSong?.id || null}
         onActiveSongChange={handleAutomationTransition}
         onPlaybackError={handlePlaybackError}
+        onRegisterSong={handleRegisterSong}
         transitionSeconds={automationPlan?.transition?.fade_seconds || 6}
       />
 

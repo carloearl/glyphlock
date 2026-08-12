@@ -35,6 +35,7 @@ export default function DJPlayerSection({
   automationNextSongId = null,
   onActiveSongChange,
   onPlaybackError,
+  onRegisterSong,
   transitionSeconds = 6,
 }) {
   const [crossfade, setCrossfade] = useState(0);
@@ -332,6 +333,12 @@ export default function DJPlayerSection({
             setDeckASongId(songId);
             if (activeDeck === "A") onPlay?.(songId);
           }}
+          onDropExternalSong={(dropped) => {
+            const id = onRegisterSong?.(dropped) || dropped?.id;
+            if (!id) return;
+            setDeckASongId(id);
+            if (activeDeck === "A") onPlay?.(id);
+          }}
         />
         <PlayerDeck
           ref={deckBRef}
@@ -345,6 +352,10 @@ export default function DJPlayerSection({
           onEnded={() => handleDeckEnded("B")}
           onPlaybackError={(error) => handleDeckPlaybackError("B", error)}
           onDropSong={(songId) => setDeckBSongId(songId)}
+          onDropExternalSong={(dropped) => {
+            const id = onRegisterSong?.(dropped) || dropped?.id;
+            if (id) setDeckBSongId(id);
+          }}
         />
       </div>
 

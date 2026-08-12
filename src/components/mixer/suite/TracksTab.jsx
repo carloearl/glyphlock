@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
-import { Plus, Music, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Music, Loader2 } from 'lucide-react';
+import TrackLibraryRow from '@/components/mixer/suite/TrackLibraryRow';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,32 +106,17 @@ export default function TracksTab() {
           No tracks yet. Add one above or import from Music Search.
         </div>
       ) : (
-        <div className="grid gap-2">
-          {tracks.map(t => (
-            <Card key={t.id} className="bg-slate-900/50 border-slate-700/50 hover:border-purple-500/50 transition">
-              <CardContent className="p-3 flex items-center gap-3">
-                {t.thumbnail_url ? (
-                  <img src={t.thumbnail_url} alt="" className="w-12 h-12 rounded object-cover" />
-                ) : (
-                  <div className="w-12 h-12 rounded bg-slate-800 flex items-center justify-center"><Music className="w-5 h-5 text-slate-500" /></div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-white truncate">{t.title}</div>
-                  <div className="text-xs text-gray-400 truncate">{t.artist || '—'}</div>
-                </div>
-                <div className="hidden sm:flex gap-1 flex-wrap">
-                  {t.genre && <Badge variant="outline" className="text-xs">{t.genre}</Badge>}
-                  {t.mood && <Badge variant="outline" className="text-xs border-purple-500/50 text-purple-300">{t.mood}</Badge>}
-                  {t.bpm && <Badge variant="outline" className="text-xs">{t.bpm} BPM</Badge>}
-                  {t.source && t.source !== 'manual' && <Badge variant="outline" className="text-xs border-cyan-500/50 text-cyan-300">{t.source}</Badge>}
-                </div>
-                <Button size="icon" variant="ghost" onClick={() => handleDelete(t.id)} className="text-red-400 hover:bg-red-500/10">
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className="text-[11px] text-slate-500">
+            <span className="text-fuchsia-300 font-semibold">Drag</span> any track onto Deck A/B in the player below to load it.
+            Tracks marked <span className="text-amber-300 font-semibold">No audio</span> have no playable source and can't be loaded.
+          </div>
+          <div className="grid gap-2">
+            {tracks.map(t => (
+              <TrackLibraryRow key={t.id} track={t} onDelete={handleDelete} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
