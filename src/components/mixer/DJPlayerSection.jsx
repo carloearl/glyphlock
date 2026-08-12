@@ -1,13 +1,17 @@
 /**
- * DJPlayerSection — Dual-deck player with crossfader
- * Manages Deck A / Deck B state, volume derived from crossfader position,
- * and next-track auto-load.
+ * DJPlayerSection — dual-deck transport + NUPS Auto-DJ transition controller.
+ *
+ * Deck semantics are explicit:
+ *   • active deck may autoplay
+ *   • inactive deck is a true paused cue deck
+ *   • Auto-DJ starts the cue deck near track end, crossfades, then promotes it
+ *   • the newly inactive deck can be replaced with the next recommendation
  */
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PlayerDeck from "@/components/mixer/PlayerDeck";
 import Crossfader from "@/components/mixer/Crossfader";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftRight, ChevronUp, ChevronDown, Tv } from "lucide-react";
+import { ArrowLeftRight, ChevronUp, ChevronDown, Tv, WandSparkles } from "lucide-react";
 import { getClubTVSender, openClubTVWindow } from "@/components/mixer/ClubBroadcastChannel";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 
@@ -19,72 +23,199 @@ function extractVideoId(url) {
   return m ? m[1] : null;
 }
 
-export default function DJPlayerSection({ playingSongId, songs, profileSongs, onSkip, collapsed, onToggleCollapse, onPlay }) {
+export default function DJPlayerSection({
+  playingSongId,
+  songs,
+  profileSongs,
+  onSkip,
+  collapsed,
+  onToggleCollapse,
+  onPlay,
+  autoDj = false,
+  automationNextSongId = null,
+  onActiveSongChange,
+  transitionSeconds = 6,
+}) {
   const [crossfade, setCrossfade] = useState(0);
+  const [deckASongId, setDeckASongId] = useState(playingSongId || null);
   const [deckBSongId, setDeckBSongId] = useState(null);
+  const [activeDeck, setActiveDeck] = useState("A");
+  const [transitioning, setTransitioning] = useState(false);
   const [deckAMuted, setDeckAMuted] = useState(false);
   const [deckBMuted, setDeckBMuted] = useState(false);
   const [deckABaseVol, setDeckABaseVol] = useState(1);
   const [deckBBaseVol, setDeckBBaseVol] = useState(1);
 
-  const deckASong = useMemo(() => songs.find(s => s.id === playingSongId), [songs, playingSongId]);
-  const deckBSong = useMemo(() => songs.find(s => s.id === deckBSongId), [songs, deckBSongId]);
+  const deckARef = useRef(null);
+  const deckBRef = useRef(null);
+  const transitionRef = useRef(false);
+  const rafRef = useRef(null);
 
-  // ── Broadcast deck state to Club TV window(s) ──
+  const deckASong = useMemo(() => songs.find((song) => song.id === deckASongId), [songs, deckASongId]);
+  const deckBSong = useMemo(() => songs.find((song) => song.id === deckBSongId), [songs, deckBSongId]);
+  const activeSongId = activeDeck === "A" ? deckASongId : deckBSongId;
+  const activeSong = activeDeck === "A" ? deckASong : deckBSong;
+  const inactiveSongId = activeDeck === "A" ? deckBSongId : deckASongId;
+
+  // External/manual song selections load onto the active deck. If the requested
+  // song is already resident on either deck (e.g. after an Auto-DJ promotion),
+  // do not remount it and accidentally restart playback.
+  useEffect(() => {
+    if (!playingSongId || playingSongId === deckASongId || playingSongId === deckBSongId) return;
+    if (activeDeck === "A") {
+      setDeckASongId(playingSongId);
+      setCrossfade(0);
+    } else {
+      setDeckBSongId(playingSongId);
+      setCrossfade(100);
+    }
+  }, [playingSongId, deckASongId, deckBSongId, activeDeck]);
+
+  // Auto-DJ recommendation always occupies the inactive cue deck and remains
+  // paused until the transition controller explicitly starts it.
+  useEffect(() => {
+    if (!autoDj || !automationNextSongId || automationNextSongId === activeSongId) return;
+    if (activeDeck === "A") setDeckBSongId(automationNextSongId);
+    else setDeckASongId(automationNextSongId);
+  }, [autoDj, automationNextSongId, activeSongId, activeDeck]);
+
+  // Manual mode retains the old profile-based "cue next" behavior, but the
+  // cue deck is now genuinely paused instead of autoplaying over the live deck.
+  useEffect(() => {
+    if (autoDj || !playingSongId || !profileSongs.length || activeDeck !== "A") return;
+    const idx = profileSongs.findIndex((song) => song.id === playingSongId);
+    const next = profileSongs[idx + 1] || profileSongs[0];
+    if (next && next.id !== playingSongId && next.id !== deckBSongId) setDeckBSongId(next.id);
+  }, [autoDj, playingSongId, profileSongs, deckBSongId, activeDeck]);
+
+  // Broadcast both physical decks to Club TV.
   useEffect(() => {
     const sender = getClubTVSender();
     sender.publish({
       crossfade,
+      activeDeck,
+      transitioning,
       deckA: deckASong ? {
-        title: deckASong.title, artist: deckASong.artist,
+        title: deckASong.title,
+        artist: deckASong.artist,
         videoId: extractVideoId(deckASong.youtubeUrl),
         audioUrl: deckASong.uploadUrl || null,
       } : null,
       deckB: deckBSong ? {
-        title: deckBSong.title, artist: deckBSong.artist,
+        title: deckBSong.title,
+        artist: deckBSong.artist,
         videoId: extractVideoId(deckBSong.youtubeUrl),
         audioUrl: deckBSong.uploadUrl || null,
       } : null,
     });
-  }, [deckASong, deckBSong, crossfade]);
+  }, [deckASong, deckBSong, crossfade, activeDeck, transitioning]);
 
-  // Auto-cue next when deck A loads a new song
-  useEffect(() => {
-    if (!playingSongId || !profileSongs.length) return;
-    const idx = profileSongs.findIndex(s => s.id === playingSongId);
-    const next = profileSongs[idx + 1] || profileSongs[0];
-    if (next && next.id !== playingSongId && next.id !== deckBSongId) {
-      setDeckBSongId(next.id);
-    }
-  }, [playingSongId]);
-
-  // Derive actual volumes from crossfader
   const deckAVolume = useMemo(() => {
-    const cf = Math.min(1, (100 - crossfade) / 50);
-    return deckAMuted ? 0 : deckABaseVol * cf;
+    const gain = Math.min(1, (100 - crossfade) / 50);
+    return deckAMuted ? 0 : deckABaseVol * gain;
   }, [crossfade, deckAMuted, deckABaseVol]);
 
   const deckBVolume = useMemo(() => {
-    const cf = Math.min(1, crossfade / 50);
-    return deckBMuted ? 0 : deckBBaseVol * cf;
+    const gain = Math.min(1, crossfade / 50);
+    return deckBMuted ? 0 : deckBBaseVol * gain;
   }, [crossfade, deckBMuted, deckBBaseVol]);
 
-  // Auto-cue next track to Deck B
+  const finishPromotion = useCallback((targetDeck) => {
+    const promotedId = targetDeck === "A" ? deckASongId : deckBSongId;
+    setActiveDeck(targetDeck);
+    setTransitioning(false);
+    transitionRef.current = false;
+    if (promotedId) onActiveSongChange?.(promotedId);
+  }, [deckASongId, deckBSongId, onActiveSongChange]);
+
+  const performTransition = useCallback((targetDeck, { immediate = false } = {}) => {
+    if (transitionRef.current || targetDeck === activeDeck) return;
+    const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
+    if (!targetId) return;
+
+    transitionRef.current = true;
+    setTransitioning(true);
+    const fromRef = activeDeck === "A" ? deckARef : deckBRef;
+    const toRef = targetDeck === "A" ? deckARef : deckBRef;
+    const targetCrossfade = targetDeck === "A" ? 0 : 100;
+
+    Promise.resolve(toRef.current?.play?.()).catch(() => {});
+
+    if (immediate) {
+      setCrossfade(targetCrossfade);
+      fromRef.current?.pause?.();
+      finishPromotion(targetDeck);
+      return;
+    }
+
+    const startCrossfade = crossfade;
+    const startedAt = performance.now();
+    const durationMs = Math.max(1000, Number(transitionSeconds || 6) * 1000);
+    const tick = (timestamp) => {
+      const progress = Math.min(1, (timestamp - startedAt) / durationMs);
+      // Smoothstep gives a gentler club-style fade than a hard linear ramp.
+      const eased = progress * progress * (3 - 2 * progress);
+      setCrossfade(startCrossfade + (targetCrossfade - startCrossfade) * eased);
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+      fromRef.current?.pause?.();
+      finishPromotion(targetDeck);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  }, [activeDeck, deckASongId, deckBSongId, crossfade, transitionSeconds, finishPromotion]);
+
+  // Auto transition begins when the active track enters the configured fade
+  // window. Duration=0 simply means metadata is not ready yet, so we wait.
+  useEffect(() => {
+    if (!autoDj) return undefined;
+    const timer = setInterval(() => {
+      if (transitionRef.current) return;
+      const targetDeck = activeDeck === "A" ? "B" : "A";
+      const targetId = activeDeck === "A" ? deckBSongId : deckASongId;
+      if (!targetId) return;
+      const ref = activeDeck === "A" ? deckARef.current : deckBRef.current;
+      const duration = Number(ref?.getDuration?.() || 0);
+      const current = Number(ref?.getCurrentTime?.() || 0);
+      if (!duration || current < 1) return;
+      const remaining = duration - current;
+      if (remaining > 0 && remaining <= Math.max(2, Number(transitionSeconds || 6))) {
+        performTransition(targetDeck);
+      }
+    }, 400);
+    return () => clearInterval(timer);
+  }, [autoDj, activeDeck, deckASongId, deckBSongId, transitionSeconds, performTransition]);
+
+  useEffect(() => () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const handleDeckEnded = useCallback((deck) => {
+    if (deck !== activeDeck || transitionRef.current) return;
+    const targetDeck = deck === "A" ? "B" : "A";
+    const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
+    if (autoDj && targetId) {
+      performTransition(targetDeck, { immediate: true });
+      return;
+    }
+    onSkip?.(activeSongId);
+  }, [activeDeck, autoDj, deckASongId, deckBSongId, performTransition, onSkip, activeSongId]);
+
   const handleCueNext = useCallback(() => {
-    if (!profileSongs.length || !playingSongId) return;
-    const idx = profileSongs.findIndex(s => s.id === playingSongId);
+    if (!profileSongs.length || !activeSongId) return;
+    const idx = profileSongs.findIndex((song) => song.id === activeSongId);
     const next = profileSongs[idx + 1] || profileSongs[0];
-    if (next) setDeckBSongId(next.id);
-  }, [profileSongs, playingSongId]);
+    if (!next) return;
+    if (activeDeck === "A") setDeckBSongId(next.id);
+    else setDeckASongId(next.id);
+  }, [profileSongs, activeSongId, activeDeck]);
 
-  // Swap decks
   const handleSwap = useCallback(() => {
-    const tempId = deckBSongId;
-    setDeckBSongId(playingSongId);
-    if (tempId && onSkip) onSkip(playingSongId); // advances deck A
-  }, [deckBSongId, playingSongId, onSkip]);
-
-  const hasAnySong = deckASong || deckBSong;
+    const targetDeck = activeDeck === "A" ? "B" : "A";
+    const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
+    if (targetId) performTransition(targetDeck, { immediate: true });
+  }, [activeDeck, deckASongId, deckBSongId, performTransition]);
 
   if (collapsed) {
     return (
@@ -98,17 +229,18 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
           if (songId) { onPlay?.(songId); onToggleCollapse?.(); }
         }}
       >
-        <div className="flex items-center gap-2">
-          {deckASong && (
+        <div className="flex items-center gap-2 min-w-0">
+          {activeSong && (
             <div className="flex gap-0.5">
               <span className="w-1.5 h-3 bg-purple-400 rounded-full animate-pulse" />
-              <span className="w-1.5 h-4 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+              <span className="w-1.5 h-4 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
             </div>
           )}
-          <span className="text-xs text-white font-medium truncate max-w-[200px]">
-            {deckASong ? `${deckASong.title} — ${deckASong.artist}` : 'No track loaded'}
+          <span className="text-xs text-white font-medium truncate max-w-[300px]">
+            {activeSong ? `${activeSong.title} — ${activeSong.artist}` : "No track loaded"}
           </span>
+          {autoDj && <span className="text-[9px] font-mono text-emerald-400">AUTO · {activeDeck}</span>}
         </div>
         <ChevronUp className="w-4 h-4 text-slate-500" />
       </div>
@@ -117,9 +249,15 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
 
   return (
     <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/60">
-      {/* Collapse toggle */}
       <div className="flex items-center justify-between px-4 py-1 border-b border-slate-700/30">
-        <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">DJ Player</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">DJ Player</span>
+          {autoDj && (
+            <span className={`text-[9px] font-mono flex items-center gap-1 ${transitioning ? "text-amber-300" : "text-emerald-400"}`}>
+              <WandSparkles className="w-3 h-3" /> {transitioning ? `CROSSFADING → ${activeDeck === "A" ? "B" : "A"}` : `LIVE DECK ${activeDeck}`}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1">
           <Button
             size="sm"
@@ -131,9 +269,9 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
             <Tv className="w-3 h-3" /> Open Club TV
           </Button>
           <Button size="sm" variant="ghost" className="h-6 text-[10px] gap-1 text-slate-400" onClick={handleCueNext}>
-            Cue Next to B
+            Cue Next
           </Button>
-          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSwap} title="Swap decks">
+          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSwap} title="Promote cue deck">
             <ArrowLeftRight className="w-3 h-3 text-slate-400" />
           </Button>
           <Button size="icon" variant="ghost" className="h-6 w-6" onClick={onToggleCollapse}>
@@ -142,31 +280,34 @@ export default function DJPlayerSection({ playingSongId, songs, profileSongs, on
         </div>
       </div>
 
-      {/* Dual decks */}
       <div className="flex gap-2 p-2">
         <PlayerDeck
+          ref={deckARef}
           song={deckASong}
-          label="Deck A"
-          autoPlay={true}
+          label={`Deck A${activeDeck === "A" ? " · LIVE" : " · CUE"}`}
+          autoPlay={activeDeck === "A"}
           volume={deckAVolume}
           muted={deckAMuted}
-          onVolumeChange={(v, m) => { setDeckABaseVol(v); setDeckAMuted(m); }}
-          onEnded={() => onSkip?.(playingSongId)}
-          onDropSong={(songId) => onPlay?.(songId)}
+          onVolumeChange={(value, isMuted) => { setDeckABaseVol(value); setDeckAMuted(isMuted); }}
+          onEnded={() => handleDeckEnded("A")}
+          onDropSong={(songId) => {
+            setDeckASongId(songId);
+            if (activeDeck === "A") onPlay?.(songId);
+          }}
         />
         <PlayerDeck
+          ref={deckBRef}
           song={deckBSong}
-          label="Deck B"
+          label={`Deck B${activeDeck === "B" ? " · LIVE" : " · CUE"}`}
           autoPlay={false}
           volume={deckBVolume}
           muted={deckBMuted}
-          onVolumeChange={(v, m) => { setDeckBBaseVol(v); setDeckBMuted(m); }}
-          onEnded={() => setDeckBSongId(null)}
+          onVolumeChange={(value, isMuted) => { setDeckBBaseVol(value); setDeckBMuted(isMuted); }}
+          onEnded={() => handleDeckEnded("B")}
           onDropSong={(songId) => setDeckBSongId(songId)}
         />
       </div>
 
-      {/* Crossfader */}
       <Crossfader value={crossfade} onChange={setCrossfade} />
     </div>
   );
