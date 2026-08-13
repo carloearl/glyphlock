@@ -183,6 +183,181 @@ export default function NUPSLanding() {
           z-index: 2;
         }
 
+        .nups-section-nav {
+          position: sticky;
+          top: 72px;
+          z-index: 80;
+          width: 100%;
+          padding: 10px 16px;
+          border-top: 1px solid rgba(0, 212, 255, 0.18);
+          border-bottom: 1px solid rgba(0, 212, 255, 0.28);
+          background: rgba(3, 6, 20, 0.9);
+          backdrop-filter: blur(18px);
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
+        }
+        .nups-section-nav-inner {
+          max-width: 1480px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .nups-section-nav-inner::-webkit-scrollbar { display: none; }
+        .nups-section-nav button {
+          flex: 0 0 auto;
+          min-height: 38px;
+          padding: 8px 13px;
+          border: 1px solid rgba(124, 141, 184, 0.28);
+          border-radius: 8px;
+          background: rgba(18, 27, 66, 0.62);
+          color: var(--ink-dim);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .nups-section-nav button:hover,
+        .nups-section-nav button:focus-visible {
+          color: #fff;
+          border-color: rgba(0, 212, 255, 0.7);
+          background: rgba(0, 212, 255, 0.12);
+          box-shadow: 0 0 18px rgba(0, 212, 255, 0.18);
+          outline: none;
+        }
+        .nups-section-nav .oracle-tab {
+          color: #d8b4fe;
+          border-color: rgba(168, 85, 247, 0.62);
+          background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.16));
+        }
+        .nups-section-nav .enter-tab {
+          margin-left: auto;
+          color: #fff;
+          border-color: rgba(16, 185, 129, 0.72);
+          background: rgba(16, 185, 129, 0.18);
+        }
+
+        .integration-proof {
+          margin: 0 0 96px;
+          padding: 42px;
+          border: 1px solid rgba(139, 92, 246, 0.46);
+          border-radius: 18px;
+          background:
+            radial-gradient(circle at 88% 14%, rgba(168, 85, 247, 0.2), transparent 32%),
+            linear-gradient(135deg, rgba(15, 26, 61, 0.96), rgba(7, 9, 28, 0.98));
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.46), 0 0 40px rgba(99, 102, 241, 0.1);
+          scroll-margin-top: 150px;
+        }
+        .integration-topline {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          flex-wrap: wrap;
+          margin-bottom: 28px;
+        }
+        .integration-status {
+          display: inline-flex;
+          align-items: center;
+          gap: 9px;
+          padding: 7px 12px;
+          border: 1px solid rgba(16, 185, 129, 0.55);
+          border-radius: 999px;
+          color: #a7f3d0;
+          background: rgba(16, 185, 129, 0.1);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+        .integration-status::before {
+          content: '';
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--pass);
+          box-shadow: 0 0 12px var(--pass);
+        }
+        .integration-proof h3 {
+          margin: 0;
+          color: #fff;
+          font-family: 'Orbitron', sans-serif;
+          font-size: clamp(28px, 4vw, 48px);
+          line-height: 1.08;
+        }
+        .integration-proof h3 span { color: #c084fc; }
+        .integration-lead {
+          max-width: 980px;
+          margin: 18px 0 28px;
+          color: var(--ink);
+          font-size: 18px;
+        }
+        .integration-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+          margin-bottom: 26px;
+        }
+        .integration-proof-card {
+          min-height: 124px;
+          padding: 18px;
+          border: 1px solid rgba(124, 141, 184, 0.24);
+          border-radius: 12px;
+          background: rgba(3, 6, 20, 0.52);
+        }
+        .integration-proof-card .kicker {
+          color: #a78bfa;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+        .integration-proof-card strong {
+          display: block;
+          margin: 8px 0 5px;
+          color: #fff;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 14px;
+        }
+        .integration-proof-card p {
+          margin: 0;
+          color: var(--ink-dim);
+          font-size: 13px;
+        }
+        .integration-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .integration-actions button {
+          min-height: 44px;
+          padding: 11px 18px;
+          border-radius: 9px;
+          border: 1px solid rgba(139, 92, 246, 0.66);
+          background: rgba(139, 92, 246, 0.18);
+          color: #fff;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+        .integration-actions button.primary {
+          border-color: rgba(0, 212, 255, 0.68);
+          background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(99, 102, 241, 0.22));
+        }
+        .integration-actions button:hover { filter: brightness(1.24); }
+        .integration-disclaimer {
+          margin-top: 18px;
+          color: var(--ink-dim);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          line-height: 1.7;
+        }
+
         .brand-bar {
           display: flex;
           align-items: center;
