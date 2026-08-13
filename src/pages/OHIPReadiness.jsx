@@ -251,17 +251,19 @@ export default function OHIPReadiness() {
                 className="border-slate-600 bg-transparent text-slate-100 hover:bg-slate-800"
               >
                 <a href={PORTAL_URL} target="_blank" rel="noreferrer">
-                  Open OHIP Portal
+                  Oracle Portal — external setup only
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </div>
 
             <p className="text-xs leading-5 text-slate-500">
-              The live button makes exactly one OAuth request and one read-only
-              Partner Sandbox API request. No Client Secret, Application Key,
-              OAuth token, guest information, or response payload is returned
-              to this page.
+              Run Secure Check and Test Live Connection stay inside NUPS. The
+              Oracle Portal button is only for managing Oracle applications,
+              environments, subscriptions, and credentials. The live test makes
+              exactly one OAuth request and one read-only Partner Sandbox API
+              request; no secret, token, guest information, or response payload
+              is returned to this page.
             </p>
           </CardContent>
         </Card>
