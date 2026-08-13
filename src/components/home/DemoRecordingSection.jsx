@@ -228,13 +228,13 @@ export default function DemoRecordingSection() {
           transition={{ duration: 0.45 }}
         >
           <p className="text-xs sm:text-sm font-black tracking-[0.3em] uppercase text-blue-300">
-            Identity-Bound Contract Workflow
+            Identity-Bound Commerce Workflow
           </p>
           <h2 id="nups-process-title" className="mt-3 text-3xl sm:text-4xl md:text-5xl font-black text-white">
-            One verified identity from check-in to receipt
+            One verified identity. One transaction record. Every downstream action linked.
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-sm sm:text-base md:text-lg leading-relaxed text-slate-300">
-            The outdated walkthrough has been removed while the updated version is being recorded. This is the current NUPS contract process now implemented in the app.
+            NUPS carries the verified guest context through consent, service selection, payment evidence, approvals, contract generation, receipt creation, and verification references. The result is a transaction lifecycle built around continuity instead of disconnected tools.
           </p>
         </motion.div>
 
@@ -264,8 +264,8 @@ export default function DemoRecordingSection() {
           transition={{ duration: 0.45 }}
         >
           <div className="max-w-3xl">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-blue-300">Current build access</p>
-            <h3 className="mt-2 text-2xl sm:text-3xl font-black text-white">Enter through the NUPS access gateway</h3>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-blue-300">Unified role-based access</p>
+            <h3 className="mt-2 text-2xl sm:text-3xl font-black text-white">One gateway routes the venue by verified role</h3>
             <p className="mt-2 text-sm sm:text-base text-slate-300">
               Staff, entertainers, managers, and owners continue through the same entry point and are routed by their verified role.
             </p>
