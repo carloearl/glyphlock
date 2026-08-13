@@ -16,6 +16,8 @@ import {
   Building2,
   DoorOpen,
   ExternalLink,
+  LockKeyhole,
+  MapPinned,
   RefreshCw,
   ServerCog,
   ShieldCheck,
@@ -34,6 +36,7 @@ export default function OHIPReadiness() {
   const [connectionResult, setConnectionResult] = useState(null);
   const [propertySnapshot, setPropertySnapshot] = useState(null);
   const [roomSnapshot, setRoomSnapshot] = useState(null);
+  const [mappingPreview, setMappingPreview] = useState(null);
 
   const checkReadiness = useCallback(async () => {
     setChecking(true);
@@ -107,6 +110,7 @@ export default function OHIPReadiness() {
   const loadRoomConfiguration = useCallback(async () => {
     setLoadingRooms(true);
     setRoomSnapshot(null);
+    setMappingPreview(null);
     setError('');
 
     try {
@@ -127,6 +131,43 @@ export default function OHIPReadiness() {
       setLoadingRooms(false);
     }
   }, []);
+
+  const generateMappingPreview = useCallback(() => {
+    const rooms = Array.isArray(roomSnapshot?.room_configuration?.rooms)
+      ? roomSnapshot.room_configuration.rooms
+      : [];
+
+    const reviewed = rooms.map((room) => {
+      const roomNumber = typeof room?.room_number === 'string'
+        ? room.room_number
+        : '';
+      const reasons = [];
+
+      if (!roomNumber) reasons.push('Missing room number');
+      if (roomNumber && !/^[A-Za-z0-9]/.test(roomNumber)) {
+        reasons.push('Starts with a symbol or negative prefix');
+      }
+      if (roomNumber && /[^A-Za-z0-9._-]/.test(roomNumber)) {
+        reasons.push('Contains unusual characters');
+      }
+      if (roomNumber.length > 32) reasons.push('Room number exceeds 32 characters');
+      if (!room?.room_type_code) reasons.push('Missing room-type code');
+      if (room?.active === false) reasons.push('Inactive in Oracle');
+
+      return { ...room, reasons, format_clean: reasons.length === 0 };
+    });
+
+    setMappingPreview({
+      hotel_id: roomSnapshot?.room_configuration?.hotel_id || null,
+      scanned_count: reviewed.length,
+      format_clean_count: reviewed.filter((room) => room.format_clean).length,
+      review_required_count: reviewed.filter((room) => !room.format_clean).length,
+      inactive_count: reviewed.filter((room) => room.active === false).length,
+      review_required: reviewed.filter((room) => !room.format_clean),
+      generated_at: new Date().toISOString(),
+      write_enabled: false,
+    });
+  }, [roomSnapshot]);
 
   useEffect(() => {
     checkReadiness();
