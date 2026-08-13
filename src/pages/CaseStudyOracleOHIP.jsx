@@ -350,9 +350,9 @@ export default function CaseStudyOracleOHIP() {
                 All case studies
               </Button>
             </Link>
-            <Link to={createPageUrl('OHIPReadiness')}>
+            <Link to="/NUPSLanding#nups-integrations">
               <Button className="bg-cyan-600 text-white hover:bg-cyan-500">
-                Run NUPS secure OHIP test
+                View public integration overview
                 <ShieldCheck className="ml-2 h-4 w-4" />
               </Button>
             </Link>
