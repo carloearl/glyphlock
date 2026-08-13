@@ -4,7 +4,7 @@
  */
 import { createClientFromRequest } from 'npm:@base44/sdk';
 
-const ALLOWED_ROLES = new Set(['admin', 'PLATFORM_ADMIN', 'SOVEREIGN', 'VENUE_OWNER']);
+const INTEGRATION_OWNER_EMAIL = 'carloearl@glyphlock.com';
 const REQUIRED_SETTINGS = [
   'OHIP_GATEWAY_URL',
   'OHIP_AUTH_SCHEME',
@@ -176,9 +176,12 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const role = user.role || user.nups_role;
-    if (!ALLOWED_ROLES.has(role)) {
-      return Response.json({ error: 'Forbidden — owner/admin only' }, { status: 403 });
+    const authenticatedEmail = String(user.email || '').trim().toLowerCase();
+    if (authenticatedEmail !== INTEGRATION_OWNER_EMAIL) {
+      return Response.json(
+        { error: 'Forbidden — GlyphLock integration owner only' },
+        { status: 403 },
+      );
     }
 
     const body = await req.json().catch(() => ({}));
