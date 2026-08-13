@@ -13,7 +13,7 @@ export default function NUPSArchitectureSections() {
       c: "#00d4ff",
       body:
         "Raspberry Pi nodes and Samsung tablets are supported venue surfaces for identity capture, POS activity, hardware-assisted verification, and floor operations. Supported writes can queue locally when connectivity drops; some validation still requires the server.",
-      tag: "LIVE CORE · OFFLINE-ASSISTED",
+      tag: "OPERATING LAYER · OFFLINE-ASSISTED",
     },
     {
       k: "Server · Cloud Layer",
@@ -27,7 +27,7 @@ export default function NUPSArchitectureSections() {
       c: "#10b981",
       body:
         "Supported offline transactions queue in IndexedDB and sync on reconnect. Server-side records become the canonical audit source after sync. Full offline coverage and recovery certification are still expanding.",
-      tag: "IMPLEMENTED QUEUE · EXPANDING COVERAGE",
+      tag: "DURABLE QUEUE · COVERAGE GROWING BY WORKFLOW",
     },
   ];
 
@@ -105,12 +105,15 @@ export default function NUPSArchitectureSections() {
         ))}
       </div>
 
-      {/* § 13 · IMPLEMENTATION STATUS */}
-      <div className="section-header"><h2>Implementation <b>Status</b></h2><div className="index">§ 13 · Honest Capability Map</div></div>
+      {/* § 13 · DEPLOYMENT READINESS */}
+      <div className="section-header"><h2>Platform <b>Readiness</b></h2><div className="index">§ 13 · Capability + Deployment Map</div></div>
+      <div style={{ margin: "-58px 0 28px", maxWidth: 900, color: "var(--ink)", fontSize: 15, lineHeight: 1.65 }}>
+        NUPS is a broad operating platform, not a single feature pretending to be a suite. This map separates the <b style={{ color: "var(--cyan-soft)" }}>implemented operating foundation</b>, deployment-specific modules that require venue or hardware validation, and the payment/integration layer that can be activated without changing the underlying transaction model.
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--line)", border: "1px solid var(--line)", marginBottom: 96 }}>
-        <StatusColumn color="#10b981" title="Implemented Core" sub="Verified in the current build; production use still depends on venue configuration and live transaction history" items={live} />
-        <StatusColumn color="#fbbf24" title="Deployment / Expansion" sub="Built or partially built — being completed and validated per venue" items={expansion} />
-        <StatusColumn color="#8b5cf6" title="Payment Adapters / Integration" sub="One NUPS transaction model with two payment paths: Stripe-native processing or an external-processor evidence overlay" items={configurable} />
+        <StatusColumn color="#10b981" title="Operating Platform" sub="Implemented in the current build; venue configuration activates the applicable workflows" items={live} />
+        <StatusColumn color="#fbbf24" title="Deployment-Specific + Advanced Automation" sub="Functional modules and automation layers completed or being validated for specific hardware, venue, or processor environments" items={expansion} />
+        <StatusColumn color="#8b5cf6" title="Payment + Integration Layer" sub="One NUPS transaction model supports Stripe-native processing, external processor evidence capture, and deeper API/webhook adapters" items={configurable} />
       </div>
     </>
   );
