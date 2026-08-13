@@ -26,7 +26,7 @@ export default function NUPSArchitectureSections() {
       k: "Sync Behavior",
       c: "#10b981",
       body:
-        "Supported offline transactions queue in IndexedDB and sync on reconnect. Server-side records become the canonical audit source after sync. Full offline coverage and recovery certification are still expanding.",
+        "Supported offline transactions queue in IndexedDB and sync on reconnect. Server-side records become the canonical audit source after sync. The durable queue is implemented now, with additional NUPS workflows being brought under the same recovery pattern.",
       tag: "DURABLE QUEUE · COVERAGE GROWING BY WORKFLOW",
     },
   ];
