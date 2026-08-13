@@ -147,7 +147,7 @@ function IdentityScene({ progress }) {
   const operator = reached(progress, .78);
   const opened = reached(progress, .9);
   return (
-    <div className="relative h-full overflow-hidden rounded-[28px] border border-cyan-300/10 bg-slate-950/35 p-4 sm:p-5">
+    <div className="relative h-full overflow-hidden rounded-[28px] border border-cyan-300/10 bg-slate-950/35 p-2.5 sm:p-5">
       <AmbientSceneFx />
       <div className="relative z-10 grid h-full items-center gap-4 lg:grid-cols-[1.05fr_.95fr]">
         <Glass className="relative overflow-hidden p-4">
@@ -195,7 +195,7 @@ function IdentityScene({ progress }) {
 function StripeScene({ progress }) {
   const paymentState = progress < .34 ? "BUILDING ORDER" : progress < .58 ? "CREATING PAYMENT" : progress < .76 ? "AWAITING APPROVAL" : "AUTHORIZED";
   return (
-    <div className="relative h-full overflow-hidden rounded-[28px] border border-violet-300/10 bg-slate-950/35 p-4 sm:p-5">
+    <div className="relative h-full overflow-hidden rounded-[28px] border border-violet-300/10 bg-slate-950/35 p-2.5 sm:p-5">
       <AmbientSceneFx accent="violet" />
       <div className="relative z-10 grid h-full items-center gap-4 lg:grid-cols-[.9fr_1.1fr]">
         <Glass className="p-4">
@@ -239,7 +239,7 @@ function OverlayScene({ progress }) {
   const amountMatched = reached(progress, .66);
   const bound = reached(progress, .88);
   return (
-    <div className="relative h-full overflow-hidden rounded-[28px] border border-amber-300/10 bg-slate-950/35 p-4 sm:p-5">
+    <div className="relative h-full overflow-hidden rounded-[28px] border border-amber-300/10 bg-slate-950/35 p-2.5 sm:p-5">
       <AmbientSceneFx accent="amber" />
       <div className="relative z-10 grid h-full items-center gap-4 lg:grid-cols-[.82fr_.2fr_.98fr]">
         <Glass className="p-4">
@@ -279,7 +279,7 @@ function RecordScene({ progress }) {
   const receipt = reached(progress, .82);
   const unified = reached(progress, .92);
   return (
-    <div className="relative h-full overflow-hidden rounded-[28px] border border-cyan-300/10 bg-slate-950/35 p-4 sm:p-5">
+    <div className="relative h-full overflow-hidden rounded-[28px] border border-cyan-300/10 bg-slate-950/35 p-2.5 sm:p-5">
       <AmbientSceneFx />
       <div className="relative z-10 grid h-full items-center gap-4 lg:grid-cols-[1.05fr_.95fr]">
         <Glass className="relative overflow-hidden p-4">
@@ -317,7 +317,7 @@ function DisputeScene({ progress }) {
   ];
   const ready = reached(progress, .92);
   return (
-    <div className="relative h-full overflow-hidden rounded-[28px] border border-amber-300/10 bg-slate-950/35 p-4 sm:p-5">
+    <div className="relative h-full overflow-hidden rounded-[28px] border border-amber-300/10 bg-slate-950/35 p-2.5 sm:p-5">
       <AmbientSceneFx accent="amber" />
       <div className="relative z-10 grid h-full items-center gap-4 lg:grid-cols-[.8fr_1.2fr]">
         <Glass className="p-4">
@@ -510,39 +510,39 @@ export default function NUPSBuyerVideo() {
             <div className="flex flex-wrap items-center gap-2"><Pill tone="green"><BadgeCheck className="h-3 w-3" />Operating platform</Pill><Pill tone="violet"><CreditCard className="h-3 w-3" />Stripe native</Pill><Pill tone="amber"><Building2 className="h-3 w-3" />Processor overlay</Pill></div>
           </div>
 
-          <div className="relative aspect-[16/9] min-h-[580px] overflow-hidden bg-[#020713]">
+          <div className="relative h-[620px] overflow-hidden bg-[#020713] sm:aspect-[16/9] sm:h-auto sm:min-h-[580px]">
             <motion.div className="absolute -left-24 top-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" animate={{ x: [0, 100, 20, 0], y: [0, -30, 35, 0] }} transition={{ duration: 12, repeat: Infinity }} />
             <motion.div className="absolute -right-24 bottom-24 h-80 w-80 rounded-full bg-violet-500/10 blur-3xl" animate={{ x: [0, -90, -20, 0], y: [0, 35, -20, 0] }} transition={{ duration: 14, repeat: Infinity }} />
 
-            <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-4 p-5 sm:p-7">
-              <div><div className="text-[10px] font-black uppercase tracking-[.24em] text-cyan-300">{cue.eyebrow}</div><div className="mt-2 max-w-4xl text-2xl font-black leading-tight text-white sm:text-4xl">{cue.title}</div></div>
-              <div className="text-right"><span className="font-mono text-[10px] text-slate-600">{String(scene + 1).padStart(2, "0")} / {String(SCENES.length).padStart(2, "0")}</span><div className="mt-2 text-[8px] font-black uppercase tracking-[.14em] text-emerald-300">Live workflow simulation</div></div>
+            <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 p-3.5 sm:p-7">
+              <div><div className="text-[9px] font-black uppercase tracking-[.24em] text-cyan-300 sm:text-[10px]">{cue.eyebrow}</div><div className="mt-1.5 max-w-4xl text-lg font-black leading-tight text-white sm:mt-2 sm:text-4xl">{cue.title}</div></div>
+              <div className="shrink-0 text-right"><span className="font-mono text-[10px] text-slate-600">{String(scene + 1).padStart(2, "0")} / {String(SCENES.length).padStart(2, "0")}</span><div className="mt-2 hidden text-[8px] font-black uppercase tracking-[.14em] text-emerald-300 sm:block">Live workflow simulation</div></div>
             </div>
 
-            <div className="absolute inset-x-0 bottom-[148px] top-[116px] z-10 px-4 sm:px-6">
+            <div className="absolute inset-x-0 bottom-[142px] top-[86px] z-10 overflow-y-auto px-2.5 sm:bottom-[148px] sm:top-[116px] sm:px-6 sm:overflow-hidden">
               <AnimatePresence mode="wait">
-                <motion.div key={scene} initial={{ opacity: 0, scale: .985, filter: "blur(8px)" }} animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }} exit={{ opacity: 0, scale: 1.015, filter: "blur(8px)" }} transition={{ duration: .38 }} className="h-full">
+                <motion.div key={scene} initial={{ opacity: 0, scale: .985, filter: "blur(8px)" }} animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }} exit={{ opacity: 0, scale: 1.015, filter: "blur(8px)" }} transition={{ duration: .38 }} className="min-h-full">
                   <SceneVisual type={cue.visual} progress={sceneProgress} />
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            <div className="absolute inset-x-0 bottom-0 z-20 border-t border-white/8 bg-slate-950/94 p-4 backdrop-blur sm:p-5">
-              <div className="mx-auto max-w-5xl text-center text-sm leading-6 text-slate-200 sm:text-base">{cue.caption}</div>
+            <div className="absolute inset-x-0 bottom-0 z-20 border-t border-white/8 bg-slate-950/94 p-3 backdrop-blur sm:p-5">
+              <div className="mx-auto max-w-5xl text-center text-[12px] leading-5 text-slate-200 sm:text-base sm:leading-6">{cue.caption}</div>
               {voiceError && <div className="mt-2 text-center text-xs font-bold text-amber-300">Narration is unavailable in this browser. The exact narration remains visible as captions.</div>}
             </div>
 
             {!playing && !finished && (
               <button type="button" onClick={toggle} className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/48 transition hover:bg-black/55" aria-label="Play NUPS buyer demo">
-                <motion.span className="flex h-24 w-24 items-center justify-center rounded-full border border-cyan-100/30 bg-cyan-300 text-slate-950 shadow-[0_0_90px_rgba(34,211,238,.38)]" animate={{ boxShadow: ["0 0 50px rgba(34,211,238,.18)", "0 0 110px rgba(34,211,238,.48)", "0 0 50px rgba(34,211,238,.18)"] }} transition={{ duration: 2, repeat: Infinity }}><Play className="ml-1 h-10 w-10" fill="currentColor" /></motion.span>
-                <span className="text-xs font-black uppercase tracking-[.22em] text-white">Play NUPS workflow demo</span>
-                <span className="max-w-md text-center text-[10px] leading-5 text-slate-400">Watch identity, payment, contract and evidence states change as the narration explains the workflow.</span>
+                <motion.span className="flex h-16 w-16 items-center justify-center rounded-full border border-cyan-100/30 bg-cyan-300 text-slate-950 shadow-[0_0_90px_rgba(34,211,238,.38)] sm:h-24 sm:w-24" animate={{ boxShadow: ["0 0 50px rgba(34,211,238,.18)", "0 0 110px rgba(34,211,238,.48)", "0 0 50px rgba(34,211,238,.18)"] }} transition={{ duration: 2, repeat: Infinity }}><Play className="ml-1 h-7 w-7 sm:h-10 sm:w-10" fill="currentColor" /></motion.span>
+                <span className="px-4 text-center text-[11px] font-black uppercase tracking-[.22em] text-white sm:text-xs">Play NUPS workflow demo</span>
+                <span className="max-w-md px-6 text-center text-[10px] leading-5 text-slate-400">Watch identity, payment, contract and evidence states change as the narration explains the workflow.</span>
               </button>
             )}
 
             {finished && (
               <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5 bg-slate-950/84 backdrop-blur-md">
-                <div className="text-center"><div className="text-[10px] font-black uppercase tracking-[.35em] text-cyan-300">GlyphLock</div><div className="mt-3 text-6xl font-black tracking-[-.05em] text-white">NUPS</div><div className="mt-3 text-lg font-bold text-slate-300">Two payment paths. One defensible record.</div></div>
+                <div className="px-5 text-center"><div className="text-[10px] font-black uppercase tracking-[.35em] text-cyan-300">GlyphLock</div><div className="mt-3 text-4xl font-black tracking-[-.05em] text-white sm:text-6xl">NUPS</div><div className="mt-3 text-sm font-bold text-slate-300 sm:text-lg">Two payment paths. One defensible record.</div></div>
                 <div className="flex flex-wrap justify-center gap-3"><button type="button" onClick={replay} className="inline-flex min-h-[48px] items-center gap-2 rounded-xl border border-cyan-300/25 bg-cyan-300/[.08] px-5 py-3 text-sm font-black text-white"><RotateCcw className="h-4 w-4" />Replay</button><button type="button" onClick={() => navigate("/NUPSKiosk")} className="inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-sm font-black text-white shadow-[0_0_50px_rgba(79,70,229,.22)]">Enter NUPS <ArrowRight className="h-4 w-4" /></button></div>
               </div>
             )}
