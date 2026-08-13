@@ -1,6 +1,6 @@
 /**
- * Master Covenant Litigation Victory - Full Case Study
- * Federal-grade legal documentation
+ * Master Covenant Litigation Simulation - Full Case Study
+ * Internal research / simulation documentation
  */
 
 import React, { useState } from 'react';
@@ -18,9 +18,9 @@ import { toast } from 'sonner';
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
-  { id: 'findings', label: 'Court Findings' },
+  { id: 'findings', label: 'Simulation Findings' },
   { id: 'timeline', label: 'Proceedings' },
-  { id: 'verdict', label: 'Final Verdict' },
+  { id: 'verdict', label: 'Simulation Result' },
   { id: 'implications', label: 'Implications' }
 ];
 
@@ -28,7 +28,7 @@ export default function CaseStudyCovenantVictory() {
   const [activeTab, setActiveTab] = useState('overview');
 
   const handleDownload = () => {
-    const content = `FOR IMMEDIATE RELEASE\n\nGlyphLock LLC Secures Major Legal Victory in Landmark Covenant Litigation\n\nEl Mirage, AZ — December 3, 2025\n\nThe Judicial Review Panel has issued its final ruling in the matter concerning the GlyphLock Master Covenant of Sovereign IP & Constructive Binding (CAB), delivering a decisive victory for GlyphLock LLC.\n\nCOURT'S FINDINGS:\n✓ Covenant is legally enforceable as internal governance charter\n✓ Enforceable when incorporated into signed agreements\n✓ Operator liability framework is valid\n✓ Admissible as evidentiary notice in IP disputes\n\nVERDICT: JUDGMENT FOR THE DEFENDANT - GlyphLock LLC\n\nFor full details, visit glyphlock.io`;
+    const content = `GLYPHLOCK RESEARCH NOTE\n\nMaster Covenant Litigation Simulation\n\nEl Mirage, AZ — December 3, 2025\n\nThis case study documents an internal multi-round courtroom simulation used to stress-test the GlyphLock Master Covenant of Sovereign IP & Constructive Binding (CAB). It is not a court judgment, judicial opinion, or representation that a court validated the framework.\n\nSIMULATION FINDINGS:\n✓ Internal governance charter theory tested\n✓ Conventional incorporation into signed agreements analyzed\n✓ Operator-liability theories stress-tested\n✓ Evidentiary-notice concepts evaluated\n\nRESULT: INTERNAL SIMULATION COMPLETED\n\nFor current details, visit glyphlock.io`;
     
     const blob = new Blob([content], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
