@@ -1271,7 +1271,7 @@ export default function NUPSLanding() {
               <div>Multiple <span className="pat">Patents Pending</span></div>
               <div>AZ Entity <span className="pat">#23831258</span></div>
               <div>DACO · Master Covenant</div>
-              <div className="stamp">NUPS · LIVE CORE · EXPANDING</div>
+              <div className="stamp">NUPS · FULL-STACK VENUE OPERATING PLATFORM</div>
             </div>
           </header>
 
@@ -1528,16 +1528,16 @@ export default function NUPSLanding() {
             <div className="protection-intro">
               <span className="eyebrow">Evidence-Driven Infrastructure</span>
               <h3>Bad business becomes <span className="glow">self-evident.</span></h3>
-              <p>Rising chargebacks, processor scrutiny, and regulatory pressure make fragmented records especially costly in high-risk environments. <b>NUPS is designed to keep the available identity, consent, processor evidence, contract, receipt, and audit references connected to the same transaction.</b> Supported sealed flows can add cryptographic verification, while optional media, biometric hardware, and processor integrations are enabled and validated separately.</p>
+              <p>High-risk commerce becomes expensive when identity, payment approvals, contracts, receipts, payouts, staff actions, and dispute evidence live in different systems. <b>NUPS turns those fragments into one transaction-centered operating record.</b> Stripe can serve as the native payment rail when GlyphLock/NUPS controls processing; when a venue retains another processor, NUPS preserves the same identity, consent, contract, receipt, approval, and audit continuity around that payment.</p>
               <p style={{ marginTop: 14, fontSize: 15, color: 'var(--ink)', borderLeft: '3px solid var(--violet)', paddingLeft: 16, background: 'rgba(139,92,246,0.06)' }}>
-                <b style={{ color: 'var(--violet)' }}>Moat:</b> NUPS does not need to replace the processor. It controls the <b>proof, identity, and evidence continuity layer</b> around the transaction.
+                <b style={{ color: 'var(--violet)' }}>Moat:</b> the payment rail is only one layer. NUPS controls the <b>operational context, identity continuity, transaction evidence, venue workflow, and audit history</b> that surround the money movement.
               </p>
             </div>
             <div className="stakeholders">
-              <div className="stakeholder" style={{ ['--sh-color']: '#00d4ff', ['--sh-glow']: 'rgba(0,212,255,0.2)' }}><div className="label">Protecting</div><h4>The Bank</h4><div className="risk"><em>Without NUPS</em>Underwriting and review may rely on fragmented merchant records with limited transaction provenance.</div><div className="benefit"><em>With NUPS</em>Structured identity, consent, payment, contract, and audit references can improve reviewability. Reserve levels, MATCH decisions, and underwriting outcomes remain the bank's or processor's decision.</div></div>
-              <div className="stakeholder" style={{ ['--sh-color']: '#1e6fff', ['--sh-glow']: 'rgba(30,111,255,0.2)' }}><div className="label">Protecting</div><h4>The Processor</h4><div className="risk"><em>Without NUPS</em>Evidence may be scattered across receipts, cameras, contracts, and staff recollection.</div><div className="benefit"><em>With NUPS</em>Linked source records can produce more consistent dispute documentation. Outcomes still depend on the processor, issuer, network rules, and underlying facts.</div></div>
-              <div className="stakeholder" style={{ ['--sh-color']: '#8b5cf6', ['--sh-glow']: 'rgba(139,92,246,0.2)' }}><div className="label">Protecting</div><h4>The Venue</h4><div className="risk"><em>Without NUPS</em>Cash shrinkage, tip-pool disputes, contract claims, and fragmented operational records.</div><div className="benefit"><em>With NUPS</em>Recorded transactions, contracts, approvals, and audit references stay linked. The system strengthens evidence quality; it does not guarantee a dispute result.</div></div>
-              <div className="stakeholder" style={{ ['--sh-color']: '#a855f7', ['--sh-glow']: 'rgba(168,85,247,0.2)' }}><div className="label">Protecting</div><h4>The Guest</h4><div className="risk"><em>Without NUPS</em>Receipts, terms, and identity records may be fragmented or difficult to retrieve.</div><div className="benefit"><em>With NUPS</em>Where enabled, the guest's contract, receipt, consent record, and optional verification media are linked to the same transaction reference.</div></div>
+              <div className="stakeholder" style={{ ['--sh-color']: '#00d4ff', ['--sh-glow']: 'rgba(0,212,255,0.2)' }}><div className="label">Protecting</div><h4>The Bank</h4><div className="risk"><em>Without NUPS</em>Underwriting and review may rely on fragmented merchant records with limited transaction provenance.</div><div className="benefit"><em>With NUPS</em>Structured transaction provenance gives underwriting and review teams a coherent identity, consent, payment, contract, and audit trail instead of merchant-supplied fragments. Final reserve, MATCH, and underwriting decisions remain with the bank or processor.</div></div>
+              <div className="stakeholder" style={{ ['--sh-color']: '#1e6fff', ['--sh-glow']: 'rgba(30,111,255,0.2)' }}><div className="label">Protecting</div><h4>The Processor</h4><div className="risk"><em>Without NUPS</em>Evidence may be scattered across receipts, cameras, contracts, and staff recollection.</div><div className="benefit"><em>With NUPS</em>Processor references, receipts, identity, contracts, approvals, and audit events stay transaction-linked, giving dispute teams a structured evidence source instead of a reconstruction exercise. Outcomes still depend on network rules and case facts.</div></div>
+              <div className="stakeholder" style={{ ['--sh-color']: '#8b5cf6', ['--sh-glow']: 'rgba(139,92,246,0.2)' }}><div className="label">Protecting</div><h4>The Venue</h4><div className="risk"><em>Without NUPS</em>Cash shrinkage, tip-pool disputes, contract claims, and fragmented operational records.</div><div className="benefit"><em>With NUPS</em>The venue operates from a shared transaction record spanning commerce, contracts, payouts, staff actions, reconciliation, and evidence. That reduces operational fragmentation while strengthening the quality of records available when something is challenged.</div></div>
+              <div className="stakeholder" style={{ ['--sh-color']: '#a855f7', ['--sh-glow']: 'rgba(168,85,247,0.2)' }}><div className="label">Protecting</div><h4>The Guest</h4><div className="risk"><em>Without NUPS</em>Receipts, terms, and identity records may be fragmented or difficult to retrieve.</div><div className="benefit"><em>With NUPS</em>The guest can be tied to a consistent contract, receipt, consent, transaction, and verification reference, making the commercial record easier to retrieve and understand.</div></div>
             </div>
           </div>
 
@@ -1554,13 +1554,13 @@ export default function NUPSLanding() {
             </div>
           </div>
 
-          <div className="section-header"><h2>Dispute <b>Shield</b> — Evidence Assembly</h2><div className="index">§ 04 · Chargeback Defense · Expansion</div></div>
+          <div className="section-header"><h2>Dispute <b>Shield</b> — Evidence Continuity</h2><div className="index">§ 04 · Chargeback Defense + Automation</div></div>
           <div className="shield-section">
             <div className="shield-copy">
               <span className="eyebrow">Build Evidence Before a Claim</span>
               <h3>Make the transaction <span className="glow">reviewable from the start.</span></h3>
-              <p>NUPS links available source evidence as the transaction develops — contracts, consent, receipts, audit records, identity references, and optional configured media or hardware-verification results. <b>The evidence-source layer is implemented; final automated package generation is still expanding.</b></p>
-              <p>When a claim lands, the current system can gather linked source records into a reviewable evidence record. Automated signed-PDF compilation and direct processor dispute-API submission are <b>deployment / expansion items</b>, not currently represented as live production integrations.</p>
+              <p>NUPS does not wait for a chargeback to begin organizing the record. As the transaction develops, it links contracts, consent, receipts, audit events, identity references, processor approvals, and configured verification evidence into the transaction context. <b>The evidence-source compiler and retrieval layer are implemented now.</b></p>
+              <p>When a claim lands, NUPS can retrieve those linked sources into a reviewable evidence record. Automated signed-PDF packaging and direct processor dispute-API submission are the <b>next automation layer</b> on top of an evidence foundation that already exists.</p>
             </div>
             <div className="shield-package">
               <div className="pkg-header"><span className="name">Illustrative Evidence Package</span><span className="id">PKG-<span style={{ color: 'var(--cyan)' }}>TX_9F2A4C</span></span></div>
@@ -1627,9 +1627,9 @@ export default function NUPSLanding() {
                   <li><span className="k">COMMS</span><span className="v"><b>SendGrid</b> (email: contracts, receipts, 1099s, marketing blasts) + <b>Twilio</b> (SMS: OTP, driver alerts, shift notifications, guest re-engagement). <em>Templated · tracked · GDPR opt-in</em></span></li>
                   <li><span className="k">DJ · BOOTH</span><span className="v"><b>Entertainer DJ system</b> — self-serve login: upload songs, build sets, save preferences, generate auto-playlists, and see <b>live rotation position</b> in real-time. <em>Better than club standard · zero DJ dependency</em></span></li>
                   <li><span className="k">MARKETING</span><span className="v"><b>QR marketing + social automation</b> — track-and-trace QR campaigns, automated IG/TikTok/X posts, event-driven SMS/email blasts, guest re-engagement triggers. <em>Campaign → scan → profile match</em></span></li>
-                  <li><span className="k">PAYMENTS</span><span className="v"><b>Processor overlay by default</b> — the venue keeps its existing merchant account and terminal. NUPS captures the processor reference, approval code, amount, and payment evidence without touching settlement. Where useful, a processor can be integrated natively through API/webhooks behind the same PaymentRecord abstraction. <em>Keep processing · add verification</em></span></li>
+                  <li><span className="k">PAYMENTS</span><span className="v"><b>Hybrid payment architecture</b> — Stripe is the native rail for GlyphLock/NUPS-controlled processing, while venues can retain an existing merchant account or terminal and bind its processor reference, approval code, amount, receipt, and evidence to the same PaymentRecord model. External processors can also be integrated more deeply through API/webhooks. <em>Process native · overlay · integrate</em></span></li>
                   <li><span className="k">CURRENCY</span><span className="v"><b>GlyphBucks SVC engine</b> — a closed-loop stored-value system tied directly to verified transactions and contracts. Denominations $10–$1000 (customizable), each note carries a steganographic QR. <em>QR = tx_id = contract_id</em></span></li>
-                  <li><span className="k">SHIELD</span><span className="v"><b>Dispute evidence source compiler</b> — gathers linked contract, identity, receipt, verification-media, approval, and processor references. Final signed-PDF compilation and direct processor submission remain in expansion. <em>Source assembly live · delivery automation expanding</em></span></li>
+                  <li><span className="k">SHIELD</span><span className="v"><b>Dispute evidence continuity engine</b> — gathers linked contract, identity, receipt, verification-media, approval, processor, consent, and audit references from the same transaction context. Automated signed-PDF compilation and direct processor submission extend that existing source layer. <em>Evidence foundation live · automation layer advancing</em></span></li>
                   <li><span className="k">GOVERNANCE</span><span className="v"><b>DACO enforcement layer</b> — immutable rules (total_sales = cash + card ONLY, 1099 isolation, tip pass-through). <em>Code-level guards · not config</em></span></li>
                 </ul>
               </div>
@@ -1704,10 +1704,10 @@ export default function NUPSLanding() {
             }}
           >
             {[
-              { k: 'SaaS License', v: 'Per-venue monthly platform fee', c: '#00d4ff' },
-              { k: 'Transaction Fee', v: 'Per-transaction charge on verified commerce', c: '#1e6fff' },
-              { k: 'GlyphBucks Margin', v: 'Closed-loop stored-value issuance spread', c: '#8b5cf6' },
-              { k: 'Enterprise', v: 'Underwriting and compliance partnerships', c: '#14b8a6' },
+              { k: 'Platform License', v: 'Per-venue access to the NUPS operating, identity, commerce, audit, and reporting stack', c: '#00d4ff' },
+              { k: 'Verified Commerce', v: 'NUPS transaction / verification economics distinct from the underlying card-acquiring fee', c: '#1e6fff' },
+              { k: 'GlyphBucks Program', v: 'Closed-loop issuance, redemption, reconciliation, verification, and configurable program economics', c: '#8b5cf6' },
+              { k: 'Enterprise + Integration', v: 'Multi-venue, API, processor, underwriting, compliance, and strategic integration opportunities', c: '#14b8a6' },
             ].map((r) => (
               <div key={r.k} style={{ background: 'linear-gradient(180deg, var(--abyss), var(--deep))', padding: '32px 26px', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: r.c, boxShadow: `0 0 12px ${r.c}` }} />
@@ -1717,7 +1717,10 @@ export default function NUPSLanding() {
             ))}
           </div>
 
-          <div className="section-header"><h2>What <b>NUPS</b> Replaces</h2><div className="index">§ 10 · Capabilities</div></div>
+          <div className="section-header"><h2>NUPS <b>Functional Value Stack</b></h2><div className="index">§ 10 · 19 Operational Domains</div></div>
+          <div style={{ maxWidth: 980, margin: '-56px 0 34px', padding: '20px 22px', borderLeft: '3px solid var(--cyan)', background: 'rgba(0,212,255,0.045)', color: 'var(--ink)', fontSize: 15, lineHeight: 1.65 }}>
+            NUPS is valuable because it consolidates functions that venues normally buy, build, reconcile, or operate separately. The stack below spans <b style={{ color: 'var(--cyan-soft)' }}>identity, workforce, access control, hardware, payments, stored value, entertainer operations, DJ, contracts, dispute defense, audit, security, multi-venue control, reporting, inventory, data, continuity, messaging, and marketing</b> while keeping those functions attached to the same venue and transaction context.
+          </div>
           <div className="capabilities">
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M 3 10 L 21 10" /><circle cx="7" cy="15" r="1" fill="currentColor" /></svg>
@@ -1750,9 +1753,9 @@ export default function NUPSLanding() {
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="6" width="20" height="14" rx="2" /><path d="M 6 10 L 10 10 M 6 14 L 14 14" /><circle cx="18" cy="13" r="2" /></svg>
               <span className="tag">Payments</span>
-              <h4>Bring your own processor.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> POS software that forces a merchant-account migration.</p>
-              <p>NUPS sits above the venue's existing processor. The terminal keeps authorizing and settling funds while NUPS binds the receipt/reference, approval code, contract, identity, and audit evidence together. Native API or webhook integrations can be added when deeper automation is worth it.</p>
+              <h4>Process natively or integrate the processor already in place.</h4>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> payment software that forces a merchant-account migration or leaves processor evidence detached from the operating record.</p>
+              <p>Stripe is the native payment rail for GlyphLock/NUPS-controlled transactions. For venue-owned processing, NUPS can capture the approval code, processor reference, amount, receipt, contract, identity, and audit evidence without taking over settlement. The same adapter model also supports deeper API/webhook integrations.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 12 22" /><path d="M 17 6 H 9 a 3 3 0 0 0 0 6 h 6 a 3 3 0 0 1 0 6 H 7" /></svg>
@@ -1773,7 +1776,7 @@ export default function NUPSLanding() {
               <span className="tag">DJ Booth</span>
               <h4>Entertainer-run rotation.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> DJ-controlled rotation, paper request slips, song bribes.</p>
-              <p>The DJ subsystem supports entertainer login, tracks, sets, preferences, playlist generation, queue data, personas, and crowd metrics. Integration into the primary NUPS operating surface is still expanding.</p>
+              <p>The DJ subsystem already supports entertainer login, track libraries, sets, preferences, playlist generation, queue data, personas, crowd metrics, and diagnostic tooling. The current consolidation step is bringing that specialist subsystem more deeply into the primary NUPS operating surface.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg>
@@ -1787,7 +1790,7 @@ export default function NUPSLanding() {
               <span className="tag">Defense</span>
               <h4>Evidence-first dispute workflow.</h4>
               <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> scrambling for evidence after a chargeback hits.</p>
-              <p>Linked evidence-source collection is implemented now. Automated final-PDF assembly and direct processor dispute-API submission are expansion work and are not represented as live today.</p>
+              <p>Linked evidence-source collection and transaction retrieval are implemented now. Automated final-PDF assembly and direct processor dispute-API submission extend that foundation into a more automated delivery workflow.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 14 2 H 6 a 2 2 0 0 0 -2 2 v 16 a 2 2 0 0 0 2 2 h 12 a 2 2 0 0 0 2 -2 V 8 z" /><path d="M 14 2 v 6 h 6" /><path d="M 9 13 h 6 M 9 17 h 6" /></svg>
@@ -1858,7 +1861,7 @@ export default function NUPSLanding() {
 
           <section className="footer-cta">
             <h3>The venue is the <span className="glow">network.</span><br />NUPS is the <span className="glow">protocol.</span></h3>
-            <p>Infrastructure-grade platform for high-verification commerce. Live deployments across the Phoenix metro. Sandbox access available for qualified operators, investors, and underwriting partners.</p>
+            <p>Infrastructure-grade operating platform for high-verification commerce, built to consolidate venue operations, payment evidence, identity, contracts, stored value, payouts, reporting, and audit into one governed system. Sandbox access is available for qualified operators, investors, integration partners, and underwriting teams.</p>
             <p style={{ marginTop: 14, fontSize: 15 }}>
               <b style={{ color: 'var(--cyan-soft)' }}>Applicable beyond nightlife</b> — hospitality, events, private security, and other high-risk commerce environments.
             </p>
