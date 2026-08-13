@@ -250,6 +250,9 @@ export default function NUPSOwner() {
   const canVoid = hasPermission(rbacRole, 'VOID_TRANSACTIONS');
 
   const isAdminUser = user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin';
+  const isOracleIntegrationOwner =
+    String(user?.email || '').trim().toLowerCase() ===
+    'carloearl@glyphlock.com';
 
   // NUPSOwner tabs = ONLY modules that don't have a dedicated standalone page.
   // Front Door → /FrontDoor, Register → /Register, VIP → /Contracts?tab=vip,
@@ -266,7 +269,7 @@ export default function NUPSOwner() {
     { key: 'reports',    label: 'Reports',        icon: FileText },
     { key: 'inventory',  label: 'Inventory',      icon: Package },
     { key: 'audit',      label: 'Audit Log',      icon: Shield },
-    { key: 'oracle',     label: 'Oracle OHIP',    icon: ShieldCheck, route: '/OHIPReadiness', adminOnly: true },
+    { key: 'oracle',     label: 'Oracle OHIP',    icon: ShieldCheck, route: '/OHIPReadiness', ownerEmailOnly: true },
     { key: 'admin',      label: 'Admin',          icon: KeyRound },
     // Renamed to distinguish from Admin → Venue Settings (rates/receipts/
     // checklist/contracts/CoA editors) — this legacy pane edits the venue
@@ -285,7 +288,9 @@ export default function NUPSOwner() {
     ? new Set(NAV_MODULES.map(m => m.key))
     : (ROLE_MODULE_ACCESS[rbacRole] || new Set(['dashboard']));
   const visibleModules = NAV_MODULES.filter(
-    m => allowedModuleSet.has(m.key) && (!m.adminOnly || isAdminUser),
+    m =>
+      allowedModuleSet.has(m.key) &&
+      (!m.ownerEmailOnly || isOracleIntegrationOwner),
   );
 
   return (
