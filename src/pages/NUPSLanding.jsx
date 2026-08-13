@@ -30,13 +30,10 @@ export default function NUPSLanding() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  const ohipRole = user?._highestRole || user?.nups_role || user?.role;
-  const canManageOhip = isAuthenticated && [
-    'admin',
-    'PLATFORM_ADMIN',
-    'SOVEREIGN',
-    'VENUE_OWNER',
-  ].includes(ohipRole);
+  const canManageOhip =
+    isAuthenticated &&
+    String(user?.email || '').trim().toLowerCase() ===
+      'carloearl@glyphlock.com';
 
   const scrollToSection = (id) => {
     window.history.replaceState(null, '', `#${id}`);
