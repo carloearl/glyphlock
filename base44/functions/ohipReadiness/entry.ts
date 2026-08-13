@@ -38,7 +38,7 @@ function gatewayUrl(raw: string) {
   return url.toString().replace(/\/$/, '');
 }
 
-function safeResortChains(payload: unknown) {
+function safeResortProperties(payload: unknown) {
   const items = (payload as any)?.listOfValues?.items;
   if (!Array.isArray(items)) return [];
 
@@ -53,11 +53,52 @@ function safeResortChains(payload: unknown) {
     );
 
     return {
+      hotel_id: typeof item?.code === 'string' ? item.code : null,
+      hotel_name: typeof item?.name === 'string' ? item.name : null,
+      hotel_description: typeof item?.description === 'string' ? item.description : null,
+      active: typeof item?.active === 'boolean' ? item.active : null,
       chain_code: fields.ChainCode || null,
       chain_name: fields.ChainName || null,
       chain_description: fields.ChainDesc || null,
     };
-  }).filter((chain: any) => chain.chain_code || chain.chain_name);
+  }).filter((property: any) => property.hotel_id || property.chain_code);
+}
+
+function safeRoomConfiguration(payload: unknown) {
+  const listOfValues = (payload as any)?.listOfValues;
+  const items = listOfValues?.items;
+  if (!Array.isArray(items)) {
+    return { reported_count: 0, returned_count: 0, truncated: false, rooms: [] };
+  }
+
+  const rooms = items.slice(0, 250).map((item: any) => {
+    const fields = Object.fromEntries(
+      (Array.isArray(item?.flexfields) ? item.flexfields : [])
+        .filter((field: any) =>
+          typeof field?.parameterName === 'string' &&
+          typeof field?.parameterValue === 'string'
+        )
+        .map((field: any) => [field.parameterName, field.parameterValue]),
+    );
+
+    return {
+      room_number: typeof item?.code === 'string' ? item.code : null,
+      room_name: typeof item?.name === 'string' ? item.name : null,
+      room_description: typeof item?.description === 'string' ? item.description : null,
+      active: typeof item?.active === 'boolean' ? item.active : null,
+      room_type_code: fields.Label || null,
+      room_type_description: fields.ShortDescription || null,
+    };
+  }).filter((room: any) => room.room_number);
+
+  const reportedCount = Number(listOfValues?.itemCount);
+  const safeReportedCount = Number.isFinite(reportedCount) ? reportedCount : items.length;
+  return {
+    reported_count: safeReportedCount,
+    returned_count: rooms.length,
+    truncated: items.length > rooms.length || safeReportedCount > rooms.length,
+    rooms,
+  };
 }
 
 async function getOAuthToken(config: OhipConfig, gateway: string) {
@@ -142,7 +183,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const action = body.action || 'status';
-    if (!['status', 'test', 'snapshot'].includes(action)) {
+    if (!['status', 'test', 'snapshot', 'rooms'].includes(action)) {
       return Response.json({ error: 'Unsupported OHIP action.' }, { status: 400 });
     }
 
@@ -226,7 +267,9 @@ Deno.serve(async (req) => {
     try {
       const url = action === 'snapshot'
         ? new URL('/lov/v1/listOfValues/ResortChains', gateway)
-        : new URL('/lov/v1/listOfValues/Titles', gateway);
+        : action === 'rooms'
+          ? new URL(`/lov/v1/listOfValues/hotels/${encodeURIComponent(config.OHIP_HOTEL_ID)}/resortRoomNumbers`, gateway)
+          : new URL('/lov/v1/listOfValues/Titles', gateway);
       if (action === 'test') {
         url.searchParams.set('parameterName', 'LanguageCode');
         url.searchParams.set('includeInactiveFlag', 'false');
@@ -266,7 +309,7 @@ Deno.serve(async (req) => {
 
     if (action === 'snapshot') {
       const apiPayload = await apiResponse.json().catch(() => ({}));
-      const chains = safeResortChains(apiPayload);
+      const properties = safeResortProperties(apiPayload);
       return Response.json({
         ok: true,
         ...baseResult,
@@ -279,11 +322,34 @@ Deno.serve(async (req) => {
         request_id: apiRequestId,
         token_expires_in: oauthResult.expiresIn || null,
         property_configuration: {
-          hotel_id: config.OHIP_HOTEL_ID,
-          chain_count: chains.length,
-          chains,
+          configured_hotel_id: config.OHIP_HOTEL_ID,
+          property_count: properties.length,
+          properties,
         },
-        message: 'Loaded a sanitized OHIP resort-chain configuration snapshot. No guest or reservation data was requested.',
+        message: 'Loaded a sanitized OHIP chain/property configuration snapshot. No guest or reservation data was requested.',
+        latency_ms: Math.round(performance.now() - startedAt),
+      });
+    }
+
+    if (action === 'rooms') {
+      const apiPayload = await apiResponse.json().catch(() => ({}));
+      const roomConfiguration = safeRoomConfiguration(apiPayload);
+      return Response.json({
+        ok: true,
+        ...baseResult,
+        stage: 'complete',
+        oauth_ok: true,
+        property_api_ok: true,
+        oauth_http_status: oauthResult.httpStatus,
+        oauth_cache_hit: oauthResult.cacheHit,
+        property_api_http_status: apiResponse.status,
+        request_id: apiRequestId,
+        token_expires_in: oauthResult.expiresIn || null,
+        room_configuration: {
+          hotel_id: config.OHIP_HOTEL_ID,
+          ...roomConfiguration,
+        },
+        message: 'Loaded a sanitized read-only OHIP room configuration snapshot. No guest or reservation data was requested.',
         latency_ms: Math.round(performance.now() - startedAt),
       });
     }
