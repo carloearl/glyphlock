@@ -408,6 +408,15 @@ export default function OHIPReadiness() {
                 <CardContent>
                   {roomSnapshot.ok ? (
                     <div className="space-y-3">
+                      <Alert className="border-amber-500/60 bg-amber-950/40 text-amber-100">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                          <span className="font-semibold">Shared Oracle sandbox data.</span>{' '}
+                          These room records may include test values created by other partners or
+                          developers. They prove API access, but they must not be imported into a
+                          NUPS venue or treated as production hotel inventory.
+                        </AlertDescription>
+                      </Alert>
                       <div className="flex flex-wrap gap-2 text-sm">
                         <Badge variant="outline" className="border-violet-500/50 text-violet-200">
                           Hotel {roomSnapshot.room_configuration?.hotel_id || 'configured'}
@@ -464,6 +473,120 @@ export default function OHIPReadiness() {
                       </AlertDescription>
                     </Alert>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {roomSnapshot?.ok && (
+              <Card className="border-amber-500/35 bg-slate-950/80 text-slate-100">
+                <CardHeader>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <MapPinned className="h-5 w-5 text-amber-300" />
+                        Oracle → NUPS Mapping Readiness
+                      </CardTitle>
+                      <CardDescription className="mt-2 text-slate-400">
+                        Analyze Oracle room formats without creating or updating any NUPS record.
+                      </CardDescription>
+                    </div>
+                    <Badge className="bg-amber-500 text-slate-950">Preview Only</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Alert className="border-slate-600 bg-slate-900 text-slate-200">
+                    <LockKeyhole className="h-4 w-4 text-amber-300" />
+                    <AlertDescription>
+                      Import is locked because <span className="font-semibold">OHIPSB02 is a shared Partner Sandbox</span>.
+                      A format-clean row is only a technical candidate—not an approved production room.
+                    </AlertDescription>
+                  </Alert>
+
+                  {mappingPreview ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="rounded-lg border border-slate-700 bg-slate-900 p-3">
+                          <p className="text-xs uppercase tracking-wide text-slate-500">Scanned</p>
+                          <p className="mt-1 text-2xl font-bold text-white">{mappingPreview.scanned_count}</p>
+                        </div>
+                        <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3">
+                          <p className="text-xs uppercase tracking-wide text-emerald-300/70">Format-clean</p>
+                          <p className="mt-1 text-2xl font-bold text-emerald-300">{mappingPreview.format_clean_count}</p>
+                        </div>
+                        <div className="rounded-lg border border-amber-500/30 bg-amber-950/20 p-3">
+                          <p className="text-xs uppercase tracking-wide text-amber-300/70">Needs review</p>
+                          <p className="mt-1 text-2xl font-bold text-amber-300">{mappingPreview.review_required_count}</p>
+                        </div>
+                        <div className="rounded-lg border border-slate-700 bg-slate-900 p-3">
+                          <p className="text-xs uppercase tracking-wide text-slate-500">Inactive</p>
+                          <p className="mt-1 text-2xl font-bold text-slate-300">{mappingPreview.inactive_count}</p>
+                        </div>
+                      </div>
+
+                      {mappingPreview.review_required.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-sm font-semibold text-amber-200">
+                            Review sample ({Math.min(mappingPreview.review_required.length, 12)} shown)
+                          </p>
+                          <div className="grid max-h-64 gap-2 overflow-y-auto sm:grid-cols-2">
+                            {mappingPreview.review_required.slice(0, 12).map((room, index) => (
+                              <div
+                                key={`${room.room_number || 'missing'}-${index}`}
+                                className="rounded-lg border border-amber-500/20 bg-slate-900 p-3"
+                              >
+                                <p className="font-mono text-sm text-amber-100">
+                                  {room.room_number || 'Missing room number'}
+                                </p>
+                                <p className="mt-1 text-xs text-slate-400">
+                                  {room.reasons.join(' · ')}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <p className="text-xs text-slate-500">
+                        Preview generated {new Date(mappingPreview.generated_at).toLocaleString()}.
+                        Nothing was written to Base44 or Oracle.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-400">
+                      Generate a local preview to identify unusual room numbers, missing room types,
+                      and inactive records before designing the production mapping.
+                    </p>
+                  )}
+
+                  <div className="rounded-lg border border-cyan-500/25 bg-cyan-950/20 p-4">
+                    <p className="font-semibold text-cyan-100">Production unlock requirements</p>
+                    <ul className="mt-2 grid gap-1 text-sm text-cyan-100/70 sm:grid-cols-2">
+                      <li>• Hotel authorizes GlyphLock/NUPS</li>
+                      <li>• Customer environment added in OHIP</li>
+                      <li>• Production application and application key</li>
+                      <li>• Production client credentials and gateway</li>
+                      <li>• Verified production Hotel ID</li>
+                      <li>• Read-only validation rerun before writes</li>
+                    </ul>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      onClick={generateMappingPreview}
+                      className="bg-amber-500 text-slate-950 hover:bg-amber-400"
+                    >
+                      <MapPinned className="mr-2 h-4 w-4" />
+                      {mappingPreview ? 'Regenerate Mapping Preview' : 'Generate Mapping Preview'}
+                    </Button>
+                    <Button
+                      disabled
+                      variant="outline"
+                      className="border-slate-700 bg-slate-900 text-slate-500"
+                    >
+                      <LockKeyhole className="mr-2 h-4 w-4" />
+                      Import to NUPS — Locked
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
