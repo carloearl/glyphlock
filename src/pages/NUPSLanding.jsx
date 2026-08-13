@@ -1337,7 +1337,10 @@ export default function NUPSLanding() {
         @keyframes spin-slow { to { transform: rotate(360deg); } }
         @keyframes spin-reverse { to { transform: rotate(-360deg); } }
 
+        .section-header[id] { scroll-margin-top: 150px; }
+
         @media (max-width: 1200px) {
+          .integration-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .tier-grid { grid-template-columns: repeat(4, 1fr); }
           .flow-track { grid-template-columns: repeat(3, 1fr); }
           .capabilities { grid-template-columns: repeat(2, 1fr); }
@@ -1350,6 +1353,11 @@ export default function NUPSLanding() {
         }
         @media (max-width: 700px) {
           .container { padding: 24px 16px; }
+          .nups-section-nav { top: 64px; padding: 8px 10px; }
+          .nups-section-nav button { min-height: 36px; padding: 7px 10px; font-size: 9px; }
+          .nups-section-nav .enter-tab { margin-left: 0; }
+          .integration-proof { padding: 28px 20px; margin-bottom: 72px; }
+          .integration-grid { grid-template-columns: 1fr; }
           .brand-bar { flex-direction: column; gap: 20px; align-items: flex-start; }
           .brand-meta { text-align: left; }
           .hero { padding: 20px 0 48px; }
@@ -1394,7 +1402,19 @@ export default function NUPSLanding() {
           </defs>
         </svg>
 
-        <div id="nups-video" style={{ position: 'relative', zIndex: 2, width: '100%', padding: '0 16px 18px', scrollMarginTop: 0 }}>
+        <nav className="nups-section-nav" aria-label="NUPS landing sections">
+          <div className="nups-section-nav-inner">
+            <button type="button" onClick={() => scrollToSection('nups-video')}>Overview</button>
+            <button type="button" onClick={() => scrollToSection('nups-walkthrough')}>Demo</button>
+            <button type="button" onClick={() => scrollToSection('nups-architecture')}>Architecture</button>
+            <button type="button" className="oracle-tab" onClick={() => scrollToSection('nups-integrations')}>Oracle OHIP</button>
+            <button type="button" onClick={() => scrollToSection('nups-protection')}>Protection</button>
+            <button type="button" onClick={() => scrollToSection('nups-revenue')}>Revenue</button>
+            <button type="button" className="enter-tab" onClick={() => navigate('/NUPSKiosk')}>Enter NUPS →</button>
+          </div>
+        </nav>
+
+        <div id="nups-video" style={{ position: 'relative', zIndex: 2, width: '100%', padding: '0 16px 18px', scrollMarginTop: 150 }}>
           <NUPSBuyerVideo />
         </div>
 
@@ -1475,7 +1495,7 @@ export default function NUPSLanding() {
 
           <KioskSimulator />
 
-          <div className="section-header"><h2>System <b>Architecture</b></h2><div className="index">§ 01 · Topology</div></div>
+          <div id="nups-architecture" className="section-header"><h2>System <b>Architecture</b></h2><div className="index">§ 01 · Topology</div></div>
           <div className="diagram-frame">
             <div className="diagram-wrap" style={{ aspectRatio: '1600 / 1500' }}>
               <svg className="diagram" viewBox="0 0 1600 1500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
@@ -1721,7 +1741,7 @@ export default function NUPSLanding() {
             </div>
           </div>
 
-          <div className="section-header"><h2>Stakeholder <b>Protection</b></h2><div className="index">§ 02 · High-Risk Mitigation</div></div>
+          <div id="nups-protection" className="section-header"><h2>Stakeholder <b>Protection</b></h2><div className="index">§ 02 · High-Risk Mitigation</div></div>
           <div className="protection-section">
             <div className="protection-intro">
               <span className="eyebrow">Evidence-Driven Infrastructure</span>
@@ -1890,7 +1910,7 @@ export default function NUPSLanding() {
             </div>
           </div>
 
-          <div className="section-header"><h2>Revenue <b>Model</b></h2><div className="index">§ 09 · Commercialization</div></div>
+          <div id="nups-revenue" className="section-header"><h2>Revenue <b>Model</b></h2><div className="index">§ 09 · Commercialization</div></div>
           <div
             style={{
               display: 'grid',
