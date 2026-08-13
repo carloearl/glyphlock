@@ -1319,10 +1319,10 @@ export default function NUPSLanding() {
                 <g>
                   <rect x="80" y="240" width="1440" height="100" fill="url(#platform-grad)" stroke="#4f46e5" strokeWidth="1" strokeDasharray="6 4" rx="4" opacity="0.7" />
                   <text className="svg-tag" x="110" y="260" fontSize="10" fill="#a855f7">◆ PLATFORM SERVICES · MULTI-TENANT · OFFERED TO ALL VENUES ◆</text>
-                  <g transform="translate(110, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#a855f7" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#a855f7" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#a855f7">⬢ DISPUTE SHIELD</text><text className="svg-serif" x="14" y="36" fontSize="12">Evidence Assembly</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#c4b5fd">source links live · PDF/API expanding</text></g>
+                  <g transform="translate(110, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#a855f7" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#a855f7" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#a855f7">⬢ DISPUTE SHIELD</text><text className="svg-serif" x="14" y="36" fontSize="12">Evidence Continuity</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#c4b5fd">evidence engine live · automation advancing</text></g>
                   <g transform="translate(390, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#fbbf24" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#fbbf24">⬢ SANDBOX MODES</text><text className="svg-serif" x="14" y="36" fontSize="12">REAL · DEMO · DEV</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">sk_live · sk_test · isolated tiers</text></g>
                   <g transform="translate(670, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#fbbf24" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#fbbf24">⬢ MARKETING ENGINE</text><text className="svg-serif" x="14" y="36" fontSize="12">QR · SMS · Social</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">scheduler · platform-managed</text></g>
-                  <g transform="translate(950, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#1e6fff" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#1e6fff" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#1e6fff">⬢ PROCESSOR OVERLAY</text><text className="svg-serif" x="14" y="36" fontSize="12">Bring Your Processor</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">existing terminal · optional API integration</text></g>
+                  <g transform="translate(950, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#1e6fff" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#1e6fff" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#1e6fff">⬢ PAYMENT ORCHESTRATION</text><text className="svg-serif" x="14" y="36" fontSize="12">Stripe Native · External</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">process · overlay · API integration</text></g>
                   <g transform="translate(1230, 270)"><rect width="260" height="60" fill="url(#panel-grad)" stroke="#8b5cf6" strokeWidth="1.5" /><rect x="0" y="0" width="4" height="60" fill="#8b5cf6" /><text className="svg-tag" x="14" y="20" fontSize="9" fill="#8b5cf6">⬢ STEGANO ENGINE</text><text className="svg-serif" x="14" y="36" fontSize="12">QR issuance</text><text className="svg-mono" x="14" y="50" fontSize="8" fill="#7c8db8">per-venue · IP-protected</text></g>
                 </g>
 
@@ -1446,7 +1446,7 @@ export default function NUPSLanding() {
                   <g transform="translate(110, 980)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#fbbf24" strokeWidth="1.5" /><rect x="0" y="0" width="3" height="70" fill="#fbbf24" /><text className="svg-tag" x="16" y="22" fontSize="9" fill="#fbbf24">⬢ CAMPAIGN CONFIG</text><text className="svg-serif" x="16" y="42" fontSize="13">Venue-side scheduling</text><text className="svg-mono" x="16" y="58" fontSize="8" fill="#fbbf24">QR · SMS targeting</text></g>
 
                   {/* RIGHT FLANK — 7 boxes */}
-                  <g transform="translate(1210, 470)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYMENT EVIDENCE LAYER</text><text className="svg-serif" x="16" y="42" fontSize="13">Existing Processor · API</text><text className="svg-mono" x="16" y="58" fontSize="8" fill="#1e6fff">NUPS binds processor proof to transaction</text></g>
+                  <g transform="translate(1210, 470)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYMENT EVIDENCE LAYER</text><text className="svg-serif" x="16" y="42" fontSize="13">Stripe · Terminal · API</text><text className="svg-mono" x="16" y="58" fontSize="8" fill="#1e6fff">one PaymentRecord · unified transaction proof</text></g>
                   <g transform="translate(1210, 555)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#1e6fff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ POS CATALOG</text><text className="svg-serif" x="16" y="42" fontSize="13">Drinks · Bottles · Cover</text><text className="svg-mono" x="16" y="58" fontSize="8" fill="#7c8db8">cash + card only · voids logged</text></g>
                   <g transform="translate(1210, 640)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#00d4ff" strokeWidth="1.5" /><rect x="277" y="0" width="3" height="70" fill="#00d4ff" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ GLYPHBUCKS · SVC</text><text className="svg-serif" x="16" y="42" fontSize="13">Closed-Loop Currency</text><text className="svg-mono" x="16" y="58" fontSize="8" fill="#00d4ff">QR = tx_id = contract_id</text></g>
                   <g transform="translate(1210, 725)"><rect width="280" height="70" fill="url(#panel-grad)" stroke="#1e2a5c" /><rect x="277" y="0" width="3" height="70" fill="#6366f1" /><text className="svg-tag" x="16" y="22" fontSize="9">⬢ PAYOUT ENGINE</text><text className="svg-serif" x="16" y="42" fontSize="13">Driver · Staff · Tip Pool</text><text className="svg-mono" x="16" y="58" fontSize="8" fill="#10b981">parametric · entertainer excluded</text></g>
@@ -1625,7 +1625,7 @@ export default function NUPSLanding() {
                   <li><span className="k">PLATFORM</span><span className="v"><b>Base44</b> app shell — App ID <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>697a087fb354faebb72df54b</code>. Multi-tenant by venue_id. <em>REAL · DEMO · SANDBOX modes</em></span></li>
                   <li><span className="k">AUTH</span><span className="v"><b>Auth0 + JWT</b> — 7-tier RBAC, MFA-enforced for Tier 00–02, venue-scoped tokens. <em>Role expires at shift end</em></span></li>
                   <li><span className="k">COMMS</span><span className="v"><b>SendGrid</b> (email: contracts, receipts, 1099s, marketing blasts) + <b>Twilio</b> (SMS: OTP, driver alerts, shift notifications, guest re-engagement). <em>Templated · tracked · GDPR opt-in</em></span></li>
-                  <li><span className="k">DJ · BOOTH</span><span className="v"><b>Entertainer DJ system</b> — self-serve login: upload songs, build sets, save preferences, generate auto-playlists, and see <b>live rotation position</b> in real-time. <em>Better than club standard · zero DJ dependency</em></span></li>
+                  <li><span className="k">DJ · BOOTH</span><span className="v"><b>Entertainer DJ subsystem</b> — self-serve login, track library, set building, saved preferences, playlist generation, queue data, personas, crowd metrics, and diagnostics. <em>Specialist subsystem · primary-surface integration advancing</em></span></li>
                   <li><span className="k">MARKETING</span><span className="v"><b>QR marketing + social automation</b> — track-and-trace QR campaigns, automated IG/TikTok/X posts, event-driven SMS/email blasts, guest re-engagement triggers. <em>Campaign → scan → profile match</em></span></li>
                   <li><span className="k">PAYMENTS</span><span className="v"><b>Hybrid payment architecture</b> — Stripe is the native rail for GlyphLock/NUPS-controlled processing, while venues can retain an existing merchant account or terminal and bind its processor reference, approval code, amount, receipt, and evidence to the same PaymentRecord model. External processors can also be integrated more deeply through API/webhooks. <em>Process native · overlay · integrate</em></span></li>
                   <li><span className="k">CURRENCY</span><span className="v"><b>GlyphBucks SVC engine</b> — a closed-loop stored-value system tied directly to verified transactions and contracts. Denominations $10–$1000 (customizable), each note carries a steganographic QR. <em>QR = tx_id = contract_id</em></span></li>
@@ -1638,7 +1638,7 @@ export default function NUPSLanding() {
                 <h4>Data<em>Storage · Audit · Chain</em></h4>
                 <ul>
                   <li><span className="k">PRIMARY</span><span className="v"><b>Base44 entity store</b> is the active application data layer for NUPS entities and venue-scoped records; Supabase services and functions are present for selected external/credential and edge workloads. <em>Authoritative model depends on the specific module</em></span></li>
-                  <li><span className="k">OFFLINE QUEUE</span><span className="v"><b>IndexedDB</b> — local browser queue for supported transactions during connectivity loss. Records retry on reconnect and surface sync status to the operator. <em>Coverage is expanding across workflows</em></span></li>
+                  <li><span className="k">OFFLINE QUEUE</span><span className="v"><b>IndexedDB</b> — local browser queue for supported transactions during connectivity loss. Records retry on reconnect and surface sync status to the operator. <em>Durable queue implemented · workflow coverage growing</em></span></li>
                   <li><span className="k">MEDIA</span><span className="v"><b>Supabase Storage + CDN</b> for DJ audio tracks, VIP video attestations, still frames, ID scans. Signed URL access only. <em>Per-venue bucket isolation</em></span></li>
                   <li><span className="k">AUDIT · OPS</span><span className="v"><b>SystemAuditLog</b> — financial + operational events. <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>venue_id REQUIRED</code>. Immutable append-only. <em>Venue-scoped tenant separation</em></span></li>
                   <li><span className="k">AUDIT · PLAT</span><span className="v"><b>AuditEvent</b> — platform + security telemetry. <code style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--cyan)' }}>venue_id optional</code>. <em>For GlyphLock internal forensics</em></span></li>
@@ -1726,28 +1726,28 @@ export default function NUPSLanding() {
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M 3 10 L 21 10" /><circle cx="7" cy="15" r="1" fill="currentColor" /></svg>
               <span className="tag">Identity</span>
               <h4>Searchable guest profiles.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> paper ID logs, manual dancer files, sign-in clipboards.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> paper ID logs, manual dancer files, sign-in clipboards.</p>
               <p>Mag-stripe swipe creates a searchable profile instantly. Drivers and entertainers onboard once — scan QR forever.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               <span className="tag">Clock</span>
               <h4>Biometric shift tracking.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> punch cards, When I Work, Homebase.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> punch cards, When I Work, Homebase.</p>
               <p>Biometric-aware shift tracking and payroll calculations are implemented in software. Production biometric matching still depends on a registered physical reader and venue-by-venue hardware validation.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><circle cx="12" cy="11" r="3" /><path d="M 12 14 v 4" /></svg>
               <span className="tag">Roles &amp; Access</span>
               <h4>Scoped session permissions.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> shared logins, manager-only POS terminals.</p>
-              <p>Six role tiers — Manager, Bartender, Door Girl, Hostess, Security, DJ — each with scoped permissions. JWT-signed sessions carry role and venue scope on every request. Admin actions require multi-factor reset.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> shared logins, manager-only POS terminals.</p>
+              <p>Seven top-level access tiers span Admin, Owner, Venue Manager, Staff, Entertainer, Driver, and Guest, with venue-specific operational roles such as bartender, door, hostess, security, and DJ scoped underneath the operating model. Sessions carry role and venue context so one gateway can route each user into the controls relevant to that responsibility.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M 6 8 L 10 8 M 6 12 L 10 12 M 6 16 L 10 16 M 14 8 L 18 8 M 14 12 L 18 12 M 14 16 L 18 16" /></svg>
               <span className="tag">Hardware</span>
               <h4>Configured hardware stack.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> piecemeal peripherals from five vendors.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> piecemeal peripherals from five vendors.</p>
               <p>Raspberry Pi edge nodes, Samsung oversight tablets, ID / mag-stripe / biometric readers, Epson contract printing, thermal receipts, and external card terminals are supported deployment components. Physical-device interoperability is validated per installed venue rather than claimed universally certified.</p>
             </div>
             <div className="cap">
@@ -1761,98 +1761,98 @@ export default function NUPSLanding() {
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 12 22" /><path d="M 17 6 H 9 a 3 3 0 0 0 0 6 h 6 a 3 3 0 0 1 0 6 H 7" /></svg>
               <span className="tag">Currency</span>
               <h4>GlyphBucks closed-loop SVC.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> hand-stamped funny money, paper scrip, IOU systems.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> hand-stamped funny money, paper scrip, IOU systems.</p>
               <p>GlyphBucks issues denominated notes ($10–$1000, customizable). QR on each note ties to contract, transaction, and user. Tracked as a liability — never commingled with sales.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4" /><path d="M 4 21 C 4 16 8 14 12 14 C 16 14 20 16 20 21" /></svg>
               <span className="tag">Entertainer</span>
               <h4>Self-serve earnings visibility.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> paper count sheets, "ask the manager" earnings questions.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> paper count sheets, "ask the manager" earnings questions.</p>
               <p>Nightly, weekly, monthly earnings + hours. 1099-ready earnings export. Fully isolated from staff tip pool — independent contractor by design.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 9 18 V 5 l 12 -2 v 13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
               <span className="tag">DJ Booth</span>
               <h4>Entertainer-run rotation.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> DJ-controlled rotation, paper request slips, song bribes.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> DJ-controlled rotation, paper request slips, song bribes.</p>
               <p>The DJ subsystem already supports entertainer login, track libraries, sets, preferences, playlist generation, queue data, personas, crowd metrics, and diagnostic tooling. The current consolidation step is bringing that specialist subsystem more deeply into the primary NUPS operating surface.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg>
               <span className="tag">Compliance</span>
               <h4>Print. Sign. Rescan.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> paper waivers, scattered consent forms.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> paper waivers, scattered consent forms.</p>
               <p>ET-5850 prints the contract. Guest and entertainer wet-sign the hardcopy. Epson WiFi PDF scanner rescans the signed document back into the record. Chain of custody sealed end to end.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 4 6 L 12 2 L 20 6 V 14 C 20 18 16 21 12 22 C 8 21 4 18 4 14 Z" /><path d="M 9 12 L 11 14 L 15 10" /></svg>
               <span className="tag">Defense</span>
               <h4>Evidence-first dispute workflow.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> scrambling for evidence after a chargeback hits.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> scrambling for evidence after a chargeback hits.</p>
               <p>Linked evidence-source collection and transaction retrieval are implemented now. Automated final-PDF assembly and direct processor dispute-API submission extend that foundation into a more automated delivery workflow.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 14 2 H 6 a 2 2 0 0 0 -2 2 v 16 a 2 2 0 0 0 2 2 h 12 a 2 2 0 0 0 2 -2 V 8 z" /><path d="M 14 2 v 6 h 6" /><path d="M 9 13 h 6 M 9 17 h 6" /></svg>
               <span className="tag">Audit</span>
               <h4>Dual-track immutable ledger.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> spreadsheet logs, "trust me" reconciliation.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> spreadsheet logs, "trust me" reconciliation.</p>
               <p>Every financial event logged to <code style={{ color: 'var(--cyan)' }}>SystemAuditLog</code> with venue scope; every platform and security event logged to <code style={{ color: 'var(--cyan)' }}>AuditEvent</code>. Regulator-ready export.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M 7 11 V 7 a 5 5 0 0 1 10 0 v 4" /></svg>
               <span className="tag">Security</span>
               <h4>MFA on every privileged action.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> a sticky note under the keyboard.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> a sticky note under the keyboard.</p>
               <p>Platform-wide MFA, JWT-signed sessions with role and tenant claims, device attestation, and session controls. Refunds, voids, role changes, and data wipes require multi-factor confirmation.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="1" /><path d="M 3 9 H 21 M 9 3 V 21" /></svg>
               <span className="tag">Multi-Venue</span>
               <h4>One platform, many rooms.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> separate systems per location.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> separate systems per location.</p>
               <p>Every venue is a <code style={{ color: 'var(--cyan)' }}>venue_id</code> tenant. Separate data, separate tax, separate payouts — one pane of glass.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 3 3 v 18 h 18" /><path d="M 7 17 l 4 -4 l 4 4 l 5 -6" /></svg>
               <span className="tag">Reporting</span>
               <h4>End-of-night, automated.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> end-of-night Excel templates, manual deposit slips.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> end-of-night Excel templates, manual deposit slips.</p>
               <p>Shift close, cash drawer reconciliation, daily deposit summary, and weekly P&amp;L generated automatically. Total sales = cash + card. GlyphBucks tracked separately as liability.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 3 7 h 18 M 3 12 h 18 M 3 17 h 18" /><circle cx="6" cy="7" r="1.5" fill="currentColor" stroke="none" /><circle cx="14" cy="12" r="1.5" fill="currentColor" stroke="none" /><circle cx="9" cy="17" r="1.5" fill="currentColor" stroke="none" /></svg>
               <span className="tag">Inventory</span>
               <h4>Par levels &amp; pour tracking.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> clipboard counts, eyeballed reorders.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> clipboard counts, eyeballed reorders.</p>
               <p>POS product catalog with cost basis, par levels, and pour tracking. Bartender voids and comps logged to audit trail.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M 3 5 v 14 a 9 3 0 0 0 18 0 V 5" /><path d="M 3 12 a 9 3 0 0 0 18 0" /></svg>
               <span className="tag">Data</span>
               <h4>Row-scoped tenant isolation.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> single-vendor lock-in, opaque entity models.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> single-vendor lock-in, opaque entity models.</p>
               <p>Primary entity store with row-scoped isolation by <code style={{ color: 'var(--cyan)' }}>venue_id</code>. Over 150 backend functions and 100+ entities under platform governance. Every write traceable, every read scoped.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 4 4 v 16 h 16" /><path d="M 8 16 l 4 -4 l 4 4" /><path d="M 12 12 v -6" /></svg>
               <span className="tag">Continuity</span>
               <h4>Decoupled credential layer.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> single-vendor lock-in on user authentication.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> single-vendor lock-in on user authentication.</p>
               <p>External Supabase credential layer holds user and client identity independently of the core platform. Credential storage and platform logic are decoupled — a foundational layer for the failover and resilience roadmap.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 22 11.5 a 8.38 8.38 0 0 1 -.9 3.8 a 8.5 8.5 0 0 1 -7.6 4.7 a 8.38 8.38 0 0 1 -3.8 -.9 L 3 21 l 1.9 -5.7 a 8.38 8.38 0 0 1 -.9 -3.8 a 8.5 8.5 0 0 1 4.7 -7.6 a 8.38 8.38 0 0 1 3.8 -.9 h .5 a 8.48 8.48 0 0 1 8 8 v .5 z" /></svg>
               <span className="tag">Messaging</span>
               <h4>Twilio + SendGrid pipeline.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> personal cell phones for staff coordination.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> personal cell phones for staff coordination.</p>
               <p>OTP login, driver alerts, shift push notifications, 1099 delivery, and transactional sends via Twilio + SendGrid. Opt-in, audited, and templated at the platform layer.</p>
             </div>
             <div className="cap">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 3 12 h 4 l 3 -9 l 4 18 l 3 -9 h 4" /></svg>
               <span className="tag">Marketing</span>
               <h4>Scan-to-profile attribution.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces:</b> tabletop QR codes that go nowhere, generic Mailchimp blasts.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> tabletop QR codes that go nowhere, generic Mailchimp blasts.</p>
               <p>Every QR scan ties back to a real guest record. Scheduled social posts across Instagram, TikTok, and X. Event-driven SMS re-engagement triggers based on visit history.</p>
             </div>
           </div>
