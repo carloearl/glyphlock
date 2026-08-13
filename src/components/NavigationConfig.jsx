@@ -60,6 +60,7 @@ export const NAV_SECTIONS = [
     visibility: "public",
     items: [
       { label: "Open NUPS Portal", page: "NUPSLanding", visibility: "public" },
+      { label: "Oracle OHIP Integration", page: "NUPSLanding#nups-integrations", visibility: "public" },
     ]
   },
   {
@@ -124,6 +125,7 @@ export const FOOTER_LINKS = {
     // Receipts, Driver Payouts, Front Door, Tonight, Accounting,
     // Contracts) lives inside the NUPS sidebar after authentication.
     { label: "Open NUPS Portal", page: "NUPSLanding", visibility: "public" },
+    { label: "Oracle OHIP Integration", page: "NUPSLanding#nups-integrations", visibility: "public" },
   ],
   protocols: [
     { label: "Master Covenant", page: "GovernanceHub", visibility: "public" },
