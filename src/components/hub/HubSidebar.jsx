@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Building2, DoorOpen, ShoppingCart, Crown, Package,
-  Truck, Wallet, Banknote, BarChart3, ShieldCheck, Settings,
+  Truck, Wallet, Banknote, BarChart3, ShieldCheck, Settings, ServerCog,
 } from "lucide-react";
 
 const NAV = [
@@ -17,6 +17,7 @@ const NAV = [
   { id: "settlements", label: "Settlements", icon: Banknote,         to: "/admin/settlement" },
   { id: "reports",     label: "Reports",     icon: BarChart3,        to: "/Accounting" },
   { id: "compliance",  label: "Compliance",  icon: ShieldCheck,      to: "/admin/audit-integrity" },
+  { id: "oracle-ohip", label: "Oracle OHIP", icon: ServerCog,        to: "/OHIPReadiness" },
   { id: "settings",    label: "Settings",    icon: Settings,         to: "/admin/venue-settings" },
 ];
 
