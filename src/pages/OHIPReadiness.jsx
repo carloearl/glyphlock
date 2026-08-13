@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Building2,
+  DoorOpen,
   ExternalLink,
   RefreshCw,
   ServerCog,
@@ -29,8 +30,10 @@ export default function OHIPReadiness() {
   const [checking, setChecking] = useState(true);
   const [testing, setTesting] = useState(false);
   const [snapshotting, setSnapshotting] = useState(false);
+  const [loadingRooms, setLoadingRooms] = useState(false);
   const [connectionResult, setConnectionResult] = useState(null);
   const [propertySnapshot, setPropertySnapshot] = useState(null);
+  const [roomSnapshot, setRoomSnapshot] = useState(null);
 
   const checkReadiness = useCallback(async () => {
     setChecking(true);
@@ -101,6 +104,30 @@ export default function OHIPReadiness() {
     }
   }, []);
 
+  const loadRoomConfiguration = useCallback(async () => {
+    setLoadingRooms(true);
+    setRoomSnapshot(null);
+    setError('');
+
+    try {
+      const response = await base44.functions.invoke('ohipReadiness', {
+        action: 'rooms',
+      });
+      setRoomSnapshot(response?.data ?? response);
+    } catch (err) {
+      setRoomSnapshot({
+        ok: false,
+        stage: 'invocation',
+        message:
+          err?.response?.data?.error ||
+          err?.message ||
+          'Unable to load the OHIP room configuration.',
+      });
+    } finally {
+      setLoadingRooms(false);
+    }
+  }, []);
+
   useEffect(() => {
     checkReadiness();
   }, [checkReadiness]);
@@ -124,9 +151,9 @@ export default function OHIPReadiness() {
             Oracle Hospitality Readiness
           </h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Secure configuration preflight for GlyphLock NUPS and the OHIP
-            Partner Sandbox. This check never displays credentials and never
-            calls Oracle.
+            Secure configuration and controlled read-only validation for
+            GlyphLock NUPS and the OHIP Partner Sandbox. Credentials never
+            leave the server, and Oracle calls run only when you press a button.
           </p>
         </div>
 
@@ -181,9 +208,8 @@ export default function OHIPReadiness() {
                     All required OHIP settings are present.
                   </p>
                   <p className="mt-1 text-sm text-emerald-100/70">
-                    Next gate: request one sandbox OAuth token, then make one
-                    read-only Property API call and verify HTTP 200 in OHIP
-                    Analytics.
+                    Connection gate passed. You can now load sanitized
+                    property and room configuration for the Partner Sandbox.
                   </p>
                 </div>
               </div>
@@ -269,27 +295,41 @@ export default function OHIPReadiness() {
                     <div className="space-y-3">
                       <div className="flex flex-wrap gap-2 text-sm">
                         <Badge variant="outline" className="border-cyan-500/50 text-cyan-200">
-                          Hotel {propertySnapshot.property_configuration?.hotel_id || 'configured'}
+                          Configured hotel {propertySnapshot.property_configuration?.configured_hotel_id || 'present'}
                         </Badge>
                         <Badge variant="outline" className="border-slate-600 text-slate-300">
-                          {propertySnapshot.property_configuration?.chain_count || 0} chain record(s)
+                          {propertySnapshot.property_configuration?.property_count || 0} property record(s)
                         </Badge>
                       </div>
-                      {(propertySnapshot.property_configuration?.chains || []).length > 0 ? (
+                      {(propertySnapshot.property_configuration?.properties || []).length > 0 ? (
                         <div className="grid gap-2 sm:grid-cols-2">
-                          {propertySnapshot.property_configuration.chains.map((chain, index) => (
-                            <div
-                              key={`${chain.chain_code || 'chain'}-${index}`}
-                              className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-3"
-                            >
-                              <p className="font-mono text-sm text-cyan-200">
-                                {chain.chain_code || 'No chain code'}
-                              </p>
-                              <p className="mt-1 text-xs text-slate-400">
-                                {chain.chain_name || chain.chain_description || 'Oracle resort chain'}
-                              </p>
-                            </div>
-                          ))}
+                          {propertySnapshot.property_configuration.properties.map((property) => {
+                            const selected =
+                              property.hotel_id === propertySnapshot.property_configuration?.configured_hotel_id;
+                            return (
+                              <div
+                                key={property.hotel_id || `${property.chain_code}-${property.hotel_name}`}
+                                className={`rounded-lg border bg-slate-900 px-3 py-3 ${
+                                  selected ? 'border-emerald-500/60' : 'border-slate-700'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="font-mono text-sm text-cyan-200">
+                                    {property.hotel_id || 'No hotel code'}
+                                  </p>
+                                  {selected && (
+                                    <Badge className="bg-emerald-600 text-white">Configured</Badge>
+                                  )}
+                                </div>
+                                <p className="mt-1 text-sm text-slate-300">
+                                  {property.hotel_name || property.hotel_description || 'Oracle property'}
+                                </p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                  Chain {property.chain_code || property.chain_name || 'not returned'}
+                                </p>
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <p className="text-sm text-slate-400">
@@ -306,6 +346,80 @@ export default function OHIPReadiness() {
                       <AlertDescription>
                         {propertySnapshot.message || 'Oracle property snapshot failed.'}
                         {propertySnapshot.http_status ? ` HTTP ${propertySnapshot.http_status}.` : ''}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {roomSnapshot && (
+              <Card className="border-violet-500/30 bg-slate-950/70 text-slate-100">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <DoorOpen className="h-5 w-5 text-violet-300" />
+                    Read-Only Room Configuration
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Sanitized room numbers and room-type labels for the configured sandbox hotel.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {roomSnapshot.ok ? (
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap gap-2 text-sm">
+                        <Badge variant="outline" className="border-violet-500/50 text-violet-200">
+                          Hotel {roomSnapshot.room_configuration?.hotel_id || 'configured'}
+                        </Badge>
+                        <Badge variant="outline" className="border-slate-600 text-slate-300">
+                          {roomSnapshot.room_configuration?.returned_count || 0} room(s)
+                        </Badge>
+                        {roomSnapshot.room_configuration?.truncated && (
+                          <Badge className="bg-amber-500 text-slate-950">Preview limited</Badge>
+                        )}
+                      </div>
+                      {(roomSnapshot.room_configuration?.rooms || []).length > 0 ? (
+                        <div className="grid max-h-80 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                          {roomSnapshot.room_configuration.rooms.map((room) => (
+                            <div
+                              key={room.room_number}
+                              className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-3"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="font-mono text-sm font-semibold text-violet-200">
+                                  Room {room.room_number}
+                                </p>
+                                {room.active === false && (
+                                  <Badge variant="outline" className="border-amber-500/50 text-amber-200">
+                                    Inactive
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="mt-1 text-xs text-slate-300">
+                                {room.room_type_code || 'Type not returned'}
+                                {room.room_type_description ? ` · ${room.room_type_description}` : ''}
+                              </p>
+                              {room.room_name && (
+                                <p className="mt-1 text-xs text-slate-500">{room.room_name}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-slate-400">
+                          Oracle returned HTTP 200 but no room rows were exposed for this hotel.
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500">
+                        Request ID: {roomSnapshot.request_id || 'not returned'} · {roomSnapshot.latency_ms ?? 0} ms
+                      </p>
+                    </div>
+                  ) : (
+                    <Alert className="border-red-500/50 bg-red-950/40 text-red-100">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        {roomSnapshot.message || 'Oracle room configuration failed.'}
+                        {roomSnapshot.http_status ? ` HTTP ${roomSnapshot.http_status}.` : ''}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -341,6 +455,14 @@ export default function OHIPReadiness() {
                 {snapshotting ? 'Loading Configuration…' : 'Load Property Snapshot'}
               </Button>
               <Button
+                onClick={loadRoomConfiguration}
+                disabled={checking || testing || snapshotting || loadingRooms || !configured}
+                className="bg-indigo-600 text-white hover:bg-indigo-500"
+              >
+                <DoorOpen className={`mr-2 h-4 w-4 ${loadingRooms ? 'animate-pulse' : ''}`} />
+                {loadingRooms ? 'Loading Rooms…' : 'Load Room Configuration'}
+              </Button>
+              <Button
                 asChild
                 variant="outline"
                 className="border-slate-600 bg-transparent text-slate-100 hover:bg-slate-800"
@@ -356,11 +478,12 @@ export default function OHIPReadiness() {
               Run Secure Check and Test Live Connection stay inside NUPS. The
               Oracle Portal button is only for managing Oracle applications,
               environments, subscriptions, and credentials. The live test makes
-              one read-only Partner Sandbox API request. The property snapshot
-              requests only resort-chain configuration and returns a sanitized
-              subset. OAuth tokens are cached server-side until two minutes before
-              expiry to avoid unnecessary billable token calls. No secret, token,
-              guest, reservation, or raw Oracle payload reaches this page.
+              one read-only Partner Sandbox API request. Property and room
+              actions return only sanitized configuration fields; room numbers
+              remain strings so leading zeroes are preserved. OAuth tokens are
+              cached server-side until two minutes before expiry to avoid
+              unnecessary billable token calls. No secret, token, guest,
+              reservation, or raw Oracle payload reaches this page.
             </p>
           </CardContent>
         </Card>
