@@ -30,14 +30,37 @@ export default function NUPSLanding() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Land directly on the walkthrough video when arriving with the hash.
+  const ohipRole = user?._highestRole || user?.nups_role || user?.role;
+  const canManageOhip = isAuthenticated && [
+    'admin',
+    'PLATFORM_ADMIN',
+    'SOVEREIGN',
+    'VENUE_OWNER',
+  ].includes(ohipRole);
+
+  const scrollToSection = (id) => {
+    window.history.replaceState(null, '', `#${id}`);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Honor every NUPS section deep-link, including navigation from the global
+  // NUPS dropdown while this page is already mounted.
   useEffect(() => {
-    if (window.location.hash === '#nups-walkthrough') {
-      const t = setTimeout(() => {
-        document.getElementById('nups-walkthrough')?.scrollIntoView({ behavior: 'smooth' });
-      }, 400);
-      return () => clearTimeout(t);
-    }
+    let timer;
+    const scrollToHash = () => {
+      const id = window.location.hash.replace(/^#/, '');
+      if (!id) return;
+      timer = setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 350);
+    };
+
+    scrollToHash();
+    window.addEventListener('hashchange', scrollToHash);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('hashchange', scrollToHash);
+    };
   }, []);
 
   return (
