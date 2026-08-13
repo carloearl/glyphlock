@@ -1741,6 +1741,70 @@ export default function NUPSLanding() {
             </div>
           </div>
 
+          <section id="nups-integrations" className="integration-proof" aria-labelledby="oracle-ohip-heading">
+            <div className="integration-topline">
+              <div>
+                <div className="section-header" style={{ marginBottom: 16 }}>
+                  <h2>Hospitality <b>Integrations</b></h2>
+                  <div className="index">§ INT · Oracle OHIP</div>
+                </div>
+                <h3 id="oracle-ohip-heading">Oracle Hospitality <span>via OHIP</span></h3>
+              </div>
+              <div className="integration-status">Partner Sandbox Connected</div>
+            </div>
+
+            <p className="integration-lead">
+              NUPS has completed authenticated, controlled read-only calls against the Oracle
+              Hospitality Integration Platform Partner Sandbox. This establishes the technical
+              path for connecting verified NUPS venue operations with OPERA Cloud property
+              configuration while keeping Oracle credentials and tokens server-side.
+            </p>
+
+            <div className="integration-grid">
+              <div className="integration-proof-card">
+                <span className="kicker">Authentication</span>
+                <strong>OCIM OAuth Verified</strong>
+                <p>Client-credentials authentication completes through the configured OHIP gateway.</p>
+              </div>
+              <div className="integration-proof-card">
+                <span className="kicker">Sandbox Property</span>
+                <strong>OHIPSB02 Configured</strong>
+                <p>NUPS can identify the configured hotel and distinguish properties within the OHIPLAB chain.</p>
+              </div>
+              <div className="integration-proof-card">
+                <span className="kicker">Read-Only APIs</span>
+                <strong>Property + Room Discovery</strong>
+                <p>Sanitized chain, property, room-number, and room-type configuration can be validated before mapping.</p>
+              </div>
+              <div className="integration-proof-card">
+                <span className="kicker">Security Boundary</span>
+                <strong>Server-Side Secrets</strong>
+                <p>No Oracle secret, OAuth token, guest record, reservation, or raw response is exposed publicly.</p>
+              </div>
+            </div>
+
+            <div className="integration-actions">
+              <button type="button" className="primary" onClick={() => navigate('/Consultation')}>
+                Request Integration Demo
+              </button>
+              <button type="button" onClick={() => navigate('/NUPSKiosk')}>
+                Explore NUPS
+              </button>
+              {canManageOhip && (
+                <button type="button" onClick={() => navigate('/OHIPReadiness')}>
+                  Open Secure OHIP Console
+                </button>
+              )}
+            </div>
+
+            <p className="integration-disclaimer">
+              Current status: technical validation in Oracle's shared Partner Sandbox. This does
+              not represent Oracle certification, endorsement, a production customer connection,
+              or an executed commercial partnership. Production access requires the applicable
+              Oracle application, environment, subscription, hotel authorization, and credentials.
+            </p>
+          </section>
+
           <div id="nups-protection" className="section-header"><h2>Stakeholder <b>Protection</b></h2><div className="index">§ 02 · High-Risk Mitigation</div></div>
           <div className="protection-section">
             <div className="protection-intro">
