@@ -96,7 +96,7 @@ export default function CommandDeckHero({ onEnter }) {
             <img src="https://media.base44.com/images/public/697a087fb354faebb72df54b/77d157364_lglogo.png" alt="" />
             GLYPHLOCK
           </div>
-          <div className="cd-status"><BadgeCheck size={13} aria-hidden="true" /> Full-stack venue operating platform · 19 functional domains</div>
+          <div className="cd-status"><BadgeCheck size={13} aria-hidden="true" /> 19 functional domains · 250+ backend functions · 160+ entity schemas</div>
         </div>
 
         <div className="cd-bands" aria-label="Current NUPS capability status">
