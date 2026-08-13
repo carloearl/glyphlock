@@ -1765,8 +1765,8 @@ export default function NUPSLanding() {
               </div>
               <div className="integration-proof-card">
                 <span className="kicker">Sandbox Property</span>
-                <strong>OHIPSB02 Configured</strong>
-                <p>NUPS can identify the configured hotel and distinguish properties within the OHIPLAB chain.</p>
+                <strong>Sandbox Property Configured</strong>
+                <p>NUPS can identify the authorized sandbox hotel and distinguish properties without exposing environment identifiers.</p>
               </div>
               <div className="integration-proof-card">
                 <span className="kicker">Read-Only APIs</span>
