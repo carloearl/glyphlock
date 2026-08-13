@@ -507,7 +507,7 @@ export default function NUPSBuyerVideo() {
         <div className="overflow-hidden rounded-3xl border border-cyan-300/20 bg-[#030816] shadow-[0_34px_120px_rgba(0,0,0,.58),0_0_80px_rgba(34,211,238,.07)]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 bg-slate-950/88 px-4 py-3 sm:px-5">
             <div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/25 bg-cyan-300/[.07]"><Lock className="h-4 w-4 text-cyan-300" /></span><div><div className="text-xs font-black tracking-[.22em] text-white">GLYPHLOCK · NUPS</div><div className="mt-0.5 text-[9px] uppercase tracking-[.16em] text-slate-500">Workflow buyer demonstration · scene-locked male narration</div></div></div>
-            <div className="flex flex-wrap items-center gap-2"><Pill tone="green"><BadgeCheck className="h-3 w-3" />Live core</Pill><Pill tone="violet"><CreditCard className="h-3 w-3" />Stripe native</Pill><Pill tone="amber"><Building2 className="h-3 w-3" />Processor overlay</Pill></div>
+            <div className="flex flex-wrap items-center gap-2"><Pill tone="green"><BadgeCheck className="h-3 w-3" />Operating platform</Pill><Pill tone="violet"><CreditCard className="h-3 w-3" />Stripe native</Pill><Pill tone="amber"><Building2 className="h-3 w-3" />Processor overlay</Pill></div>
           </div>
 
           <div className="relative aspect-[16/9] min-h-[580px] overflow-hidden bg-[#020713]">
