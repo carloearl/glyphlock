@@ -76,7 +76,7 @@ export default function Partners() {
     <>
       <SEOHead 
         title="Partners & Investors - GlyphLock | Strategic Partnerships & Licensing"
-        description="Explore GlyphLock's partnership opportunities, financial highlights ($340K in 90 days, $14M escrows), technology stack, and strategic licensing framework. Addressing the $283B IP theft crisis."
+        description="Explore GlyphLock partnership opportunities, technology stack, operational case studies, and strategic licensing framework. Financial figures are provided only where supported by current company records."
         keywords="cybersecurity partnerships, strategic licensing, technology partnerships, investor relations, IP protection, quantum-resistant encryption, enterprise security, partnership opportunities"
         url="/partners"
       />
@@ -227,7 +227,7 @@ export default function Partners() {
           <h2 className="text-2xl font-bold text-emerald-400 mb-8 font-space">First 90 Day Performance</h2>
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { label: "Revenue generated", val: "$340K", sub: "", color: "text-white" },
+              { label: "Commercial status", val: "Evidence-led", sub: "Verified figures available in diligence", color: "text-white" },
               { label: "Insurance escrow pipeline", val: "$14M", sub: "secured", color: "text-[#00E4FF]" },
               { label: "Enterprise contract band", val: "$225K+", sub: "per deployment", color: "text-[#8C4BFF]" },
               { label: "Annualized run rate", val: "$1.36M", sub: "", color: "text-emerald-400" }
