@@ -33,8 +33,8 @@ const STEPS = [
   {
     number: "04",
     icon: CreditCard,
-    title: "Build the transaction",
-    text: "Select the suite and services, calculate gratuity, capture the payment method, and confirm that tender matches the total.",
+    title: "Build and route the transaction",
+    text: "Select the suite and services, calculate the total, then use Stripe natively or bind an existing processor approval/reference to the same NUPS transaction record.",
   },
   {
     number: "05",
