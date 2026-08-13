@@ -25,6 +25,7 @@ import {
 
 const PORTAL_URL =
   'https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/';
+const INTEGRATION_OWNER_EMAIL = 'carloearl@glyphlock.com';
 
 export default function OHIPReadiness() {
   const [status, setStatus] = useState(null);
@@ -37,6 +38,8 @@ export default function OHIPReadiness() {
   const [propertySnapshot, setPropertySnapshot] = useState(null);
   const [roomSnapshot, setRoomSnapshot] = useState(null);
   const [mappingPreview, setMappingPreview] = useState(null);
+  const [accessChecking, setAccessChecking] = useState(true);
+  const [ownerAuthorized, setOwnerAuthorized] = useState(false);
 
   const checkReadiness = useCallback(async () => {
     setChecking(true);
@@ -170,8 +173,62 @@ export default function OHIPReadiness() {
   }, [roomSnapshot]);
 
   useEffect(() => {
-    checkReadiness();
+    let cancelled = false;
+
+    const verifyOwnerAccess = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        const allowed =
+          String(currentUser?.email || '').trim().toLowerCase() ===
+          INTEGRATION_OWNER_EMAIL;
+
+        if (cancelled) return;
+        setOwnerAuthorized(allowed);
+        if (allowed) await checkReadiness();
+      } catch {
+        if (!cancelled) setOwnerAuthorized(false);
+      } finally {
+        if (!cancelled) setAccessChecking(false);
+      }
+    };
+
+    verifyOwnerAccess();
+    return () => {
+      cancelled = true;
+    };
   }, [checkReadiness]);
+
+  if (accessChecking) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100">
+        <div className="text-center">
+          <RefreshCw className="mx-auto mb-4 h-8 w-8 animate-spin text-cyan-300" />
+          <p className="text-sm text-slate-300">Verifying integration-owner access…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!ownerAuthorized) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100">
+        <Card className="w-full max-w-lg border-red-500/30 bg-slate-900/90 text-slate-100">
+          <CardHeader className="text-center">
+            <LockKeyhole className="mx-auto mb-3 h-10 w-10 text-red-300" />
+            <CardTitle>Access restricted</CardTitle>
+            <CardDescription className="text-slate-400">
+              This Oracle integration console is available only to the designated GlyphLock integration-owner account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Button variant="outline" onClick={() => window.location.assign('/NUPSLanding')}>
+              Return to NUPS
+            </Button>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
 
   const configured = status?.configured === true;
   const missing = Array.isArray(status?.missing_settings)
