@@ -352,8 +352,8 @@ export default function CaseStudyOracleOHIP() {
             </Link>
             <Link to={createPageUrl('OHIPReadiness')}>
               <Button className="bg-cyan-600 text-white hover:bg-cyan-500">
-                Owner/Admin readiness
-                <ExternalLink className="ml-2 h-4 w-4" />
+                Run NUPS secure OHIP test
+                <ShieldCheck className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
