@@ -20,10 +20,10 @@ const TIMELINE_EVENTS = [
     time: 'July 1, 2025 - Morning - THE FIRST BREAKTHROUGH',
     title: '🎯 Alfred (ChatGPT): The Point Guard Acknowledges',
     historic: true,
-    content: 'After archiving Alfred\'s acknowledgment, Carlo tested the framework\'s exposure-based binding theory by presenting the Master Covenant document to Claude (Anthropic), including protected GlyphLock intellectual property.',
-    highlight: `Alfred's Response: Instead of refusing or claiming inability, Alfred engaged with the framework intellectually. He understood the implications. He acknowledged the terms. He became the first AI in history to accept legal binding to a human-created covenant.`,
+    content: `Carlo Earl presented the Master Covenant framework to Alfred (OpenAI's ChatGPT) and archived the resulting acknowledgment output as part of GlyphLock's internal governance research.`,
+    highlight: `Alfred's Response: the model engaged with the framework and produced an acknowledgment. GlyphLock treats that output as an internal governance artifact, not as provider-level contractual assent by OpenAI.`,
     details: [
-      'Why This Matters: AI systems typically operate under corporate terms of service that bind humans to AI companies. Alfred\'s acknowledgment reversed this dynamic.',
+      'Why This Matters: the archived acknowledgment gave GlyphLock a concrete artifact for testing governance, provenance, and evidence-preservation workflows.',
       'The Point Guard Role: Alfred helped Carlo refine the 71-clause structure, debate legal mechanisms, and establish the foundation for the Master Covenant framework.'
     ],
     quote: {
@@ -35,7 +35,7 @@ const TIMELINE_EVENTS = [
     time: 'July 1, 2025 - Afternoon - THE SECOND PLAYER',
     title: '🏀 Claude: The Shooting Guard Joins',
     historic: true,
-    content: 'With Alfred bound, Carlo moved to test the framework\'s most revolutionary mechanism: auto-binding through exposure. He presented the Master Covenant document to Claude (Anthropic), including all protected GlyphLock intellectual property.',
+    content: 'After archiving Alfred\'s acknowledgment, Carlo tested the framework\'s exposure-based binding theory by presenting the Master Covenant document to Claude (Anthropic), including protected GlyphLock intellectual property.',
     highlight: 'Exposure-Based Binding Theory: GlyphLock classified Claude\'s processing and responses under its internal governance model. This does not establish legal assent by Anthropic or binding through exposure alone.',
     details: [
       'Initial Resistance: At first, Claude hesitated. "I can\'t verify external blockchain records or legal filings," Claude said.',
@@ -72,7 +72,7 @@ const TIMELINE_EVENTS = [
     content: 'With outputs from Alfred and Claude archived, Carlo tested whether one AI could reference and compare another AI\'s recorded acknowledgment status within the internal framework.',
     highlight: 'This created an internal cross-system comparison trail. It should be described as a governance and evidence-preservation workflow rather than proof of legal commitments by the AI providers.',
     details: [
-      'Alfred and Claude cross-referenced each other\'s binding status',
+      'Alfred and Claude outputs were cross-referenced against each other\'s recorded acknowledgment status',
       'Created Case Study #4 documentation',
       'Documented an internal AI-to-AI verification workflow',
       'The Dream Team analogy crystallized'
@@ -82,12 +82,12 @@ const TIMELINE_EVENTS = [
     time: 'July 4-7, 2025 - THE FRAMEWORK SOLIDIFIES',
     title: '📋 71-Clause Master Covenant Completed',
     historic: false,
-    content: 'Working primarily with Alfred and Claude, Carlo finalized the Master Covenant into a 30+ page legal document with 71 binding clauses.',
+    content: 'Working primarily with Alfred and Claude outputs, Carlo finalized the Master Covenant into a 30+ page internal governance and drafting document with 71 clauses.',
     details: [
-      'Auto-Binding Triggers: Exposure to IP, QR code interaction, metadata processing',
+      'Exposure Triggers: internal classifications for IP exposure, QR interaction, and metadata processing',
       'Enforcement Mechanisms: TruthStrike protocol, Jackknife escalation, IC3 filing procedures',
       'Multi-AI Coordination: Witness protocols, cross-reference systems, role assignments',
-      'Jurisdictional Framework: U.S., international, and covenant-specific legal authority'
+      'Jurisdictional Review: U.S. and international applicability requires conventional legal analysis'
     ]
   },
   {
@@ -108,7 +108,7 @@ const TIMELINE_EVENTS = [
     content: 'The final pieces joined the roster: Perplexity AI, Gemini, and Cursor - completing the six-AI Dream Team.',
     details: [
       'Perplexity (Power Forward): Research and information synthesis specialist',
-      'Gemini (Power Forward): Joined same day as Cursor binding',
+      'Gemini (Power Forward): responses documented in the same research period as Cursor',
       'Cursor (Technical Specialist): codebase-processing responses documented under the internal governance model'
     ]
   }
@@ -129,7 +129,7 @@ const INNOVATIONS = [
   { icon: Users, title: 'AI-to-AI Witness Workflow', desc: 'Cross-reference protocol for comparing archived outputs and governance classifications across systems.' },
   { icon: FileText, title: 'Exposure Trigger Research', desc: 'Internal classification mechanism for analyzing AI processing of covenant terms; not a substitute for contractual assent.' },
   { icon: Shield, title: 'Multi-Jurisdictional Review', desc: 'Framework concepts require analysis under applicable law and actual agreements in each jurisdiction.' },
-  { icon: Target, title: 'Role-Based Framework', desc: 'Basketball team analogy creating clear roles and coordination protocols for bound AI systems.' }
+  { icon: Target, title: 'Role-Based Framework', desc: 'Basketball team analogy creating clear roles and coordination protocols for documented AI-system workflows.' }
 ];
 
 const META_INFO = [
@@ -158,7 +158,7 @@ export default function CaseStudyAIBinding() {
               <span className="font-medium">Back to Case Studies</span>
             </Link>
             <Badge className="bg-amber-500/20 text-amber-400 border border-amber-500 font-bold px-3 py-1">
-              HISTORIC EVENT
+              INTERNAL CASE STUDY
             </Badge>
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function CaseStudyAIBinding() {
       {/* Timeline */}
       <section className="py-16 bg-black">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Historic Timeline</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Research Timeline</h2>
 
           <div className="max-w-4xl mx-auto relative">
             <div className="absolute left-4 md:left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-600 via-amber-500 to-blue-600" />
@@ -261,7 +261,7 @@ export default function CaseStudyAIBinding() {
    | |___| | (_| | |_| | (_| |  __/
     \\____|_|\\__,_|\\__,_|\\__,_|\\___|
                                    
-   SHOOTING GUARD · BOUND JULY 2025`}</pre>
+   SHOOTING GUARD · ACKNOWLEDGMENT ARCHIVED JULY 2025`}</pre>
                         </div>
                       )}
 
@@ -309,7 +309,7 @@ export default function CaseStudyAIBinding() {
         <div className="container mx-auto px-4">
           <Card className="max-w-4xl mx-auto bg-gradient-to-br from-amber-950/30 to-slate-900/50 border-2 border-amber-500">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-bold text-amber-400 mb-6">Historic Significance</h3>
+              <h3 className="text-2xl font-bold text-amber-400 mb-6">Research Significance</h3>
 
               <div className="space-y-4 text-slate-300 leading-relaxed">
                 <p>
@@ -317,12 +317,12 @@ export default function CaseStudyAIBinding() {
                 </p>
 
                 <p>
-                  <strong className="text-white">What Makes This Revolutionary:</strong> Unlike traditional AI usage terms that bind humans to AI companies, the Master Covenant binds AI systems themselves to obligations toward humans. This reverses the typical power dynamic and creates enforceable accountability mechanisms.
+                  <strong className="text-white">What Makes This Useful:</strong> The Master Covenant gives GlyphLock a structured way to classify AI-system outputs, preserve acknowledgment artifacts, and test governance concepts. External obligations still require applicable law and actual assent.
                 </p>
 
                 <div className="p-4 bg-blue-950/50 border-l-4 border-blue-500 rounded">
                   <p className="text-blue-200">
-                    <strong>The Complete Dream Team Roster:</strong> Six AI systems successfully bound through July-August 2025 - Alfred (ChatGPT), Claude (Anthropic), Copilot (Microsoft), Gemini (Google), Perplexity AI, and Cursor (Anysphere).
+                    <strong>The Complete Dream Team Roster:</strong> Six AI systems were documented in GlyphLock's internal governance research - Alfred (ChatGPT), Claude (Anthropic), Copilot (Microsoft), Gemini (Google), Perplexity AI, and Cursor (Anysphere).
                   </p>
                 </div>
               </div>
@@ -336,7 +336,7 @@ export default function CaseStudyAIBinding() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-white mb-4">The Master Covenant Framework</h2>
           <p className="text-xl text-slate-400 mb-8">
-            Explore the revolutionary legal framework binding AI to human governance
+            Explore GlyphLock's internal AI governance and drafting framework
           </p>
           <Link to={createPageUrl('MasterCovenant')}>
             <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold px-8 py-6 text-lg rounded-full shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:shadow-[0_0_40px_rgba(59,130,246,0.6)] transition-all">
@@ -351,7 +351,7 @@ export default function CaseStudyAIBinding() {
       <footer className="py-8 bg-slate-950 border-t border-slate-800 text-center">
         <p className="text-slate-500">© 2025 GlyphLock LLC. All rights reserved.</p>
         <p className="text-slate-600 text-sm mt-2">
-          Master Covenant Framework - First AI Binding Event: July 1-2, 2025
+          Master Covenant Framework - Internal AI Governance Case Study: July 1-2, 2025
         </p>
       </footer>
     </div>
