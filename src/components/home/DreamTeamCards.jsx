@@ -214,7 +214,7 @@ export default function DreamTeamCards() {
               className="flex items-center gap-1.5 text-xs text-slate-400"
             >
               <Shield className="w-3 h-3 text-cyan-400" />
-              <span>BPAA Certified</span>
+              <span>BPAAA v3.0 Governed</span>
             </motion.div>
           </motion.div>
           <p className="text-sm text-gray-500 mt-4 hidden md:block">Hover over cards to reveal binding details</p>
