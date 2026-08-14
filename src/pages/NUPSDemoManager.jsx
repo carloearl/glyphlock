@@ -573,7 +573,7 @@ export default function NUPSDemoManager() {
       </div>
 
       <div style={{ marginTop: 16, textAlign: "center", fontSize: 9, color: "#1a1f2e" }}>
-        BPAAA v3.0 · DACO Governed · GlyphLock LLC · USPTO #18/584,961 · DEMO SAFE RESET v1 · Alfred-Compliant
+        BPAAA v3.0 · DACO Governed · GlyphLock LLC · IP filing details under verification · DEMO SAFE RESET v1 · Alfred-Compliant
       </div>
     </div>
   );
