@@ -11,36 +11,38 @@
 - Developer Portal: **https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/**
 - Oracle Customer Support Identifier (CSI): **133374457**
 - Base44 production app: **Glyphlock** (`697a087fb354faebb72df54b`)
-- Status: **Setup complete** email received from Oracle; Developer Portal access is available. The next action is to create/assign the portal user role, sign in, and register the non-production NUPS application.
+- Status: **Partner Sandbox technical validation complete.** The non-production NUPS application is registered, required server settings are present, Oracle OAuth succeeds, and controlled read-only OHIP requests return successfully.
+- Partner Sandbox hotel: **OHIPSB02** (shared Oracle sandbox; never treat its data as production inventory).
+- OPN status: **verification required**. Do not mark OPN complete until an Oracle PartnerNetwork membership page, approval notice, or membership confirmation explicitly shows GlyphLock LLC as active/approved/member.
+- Oracle Marketplace listing: **pending OPN verification**.
+- Production OHIP application/customer environment: **not yet authorized**.
 - Do not attach or copy this subscription into the separate Free Tier account `glyphlockdev`.
 
-## Immediate portal registration
+## Completed non-production registration
 
-In the OHIP Partner Developer Portal:
+The following onboarding steps are complete and must not be repeated unless Oracle explicitly requires re-registration:
 
-1. Open **https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/** and sign in with the user assigned the appropriate OHIP Developer Portal role.
-2. Open **Applications** → **Register Application**.
-3. Application name: **GlyphLock NUPS**
-4. Description:
-   > High-verification venue-operations platform connecting identity and age verification, role-based workflows, transaction records, VIP operations, contract execution, and auditable venue activity.
-5. Environment: **Non Production**
-6. Contact:
-   - First name: Carlo
-   - Last name: Earl
-   - Email: carloearl@glyphlock.com
-   - Phone: 480-886-5588
-   - Company: GlyphLock LLC
-7. Subscribe only to the Hospitality API groups required for the first NUPS workflow. Do **not** select **API Catalog** unless using the Oracle Integration Cloud Hospitality Adapter.
-8. Register and securely copy the application key. Never place it in browser code, a Base44 entity, chat, or source control.
+1. Permanent Cloud Account `glyphlocknups` created in the supported Ashburn region.
+2. OHIP Partner Developer Portal access established.
+3. **GlyphLock NUPS** non-production application registered.
+4. Application key and sandbox credentials stored only as Base44 server secrets.
+5. Sandbox Hotel ID configured as `OHIPSB02`.
+6. `ohipReadiness` reports the required configuration present.
+7. Oracle OAuth exchange succeeds.
+8. Controlled read-only OHIP property/configuration request succeeds and returns sanitized data to the owner-only console.
 
-## Partner Sandbox sequence
+Do not create a duplicate non-production application or duplicate OHIP subscription merely to advance the production process.
 
-1. Open **Environments** and record the sandbox authentication scheme.
-2. Record the Gateway URL, Client ID, Client Secret, Enterprise ID, Scope, and sandbox Hotel ID.
-   - OCIM sandbox Hotel ID documented by Oracle: `OHIPSB02`
-   - SSD sandbox Hotel ID documented by Oracle: `SAND01`
-   - Use the value shown for the assigned environment; do not guess.
-3. Add the values as Base44 server secrets:
+## Partner Sandbox sequence — completed baseline
+
+The sequence below documents the completed baseline and remains the checklist for credential rotation or recovery. Do not repeat it during normal operation.
+
+1. Confirm the assigned environment authentication scheme in **Environments**.
+2. Confirm the Gateway URL, Client ID, Client Secret, Enterprise ID, Scope, and sandbox Hotel ID.
+   - Current configured Partner Sandbox Hotel ID: `OHIPSB02`
+   - SSD reference Hotel ID documented by Oracle: `SAND01`
+   - Always use the value shown for the assigned environment; never infer a production Hotel ID from sandbox values.
+3. Store the values only as Base44 server secrets:
    - `OHIP_GATEWAY_URL`
    - `OHIP_AUTH_SCHEME` (`OCIM` or `SSD`)
    - `OHIP_CLIENT_ID`
@@ -48,14 +50,14 @@ In the OHIP Partner Developer Portal:
    - `OHIP_APP_KEY`
    - `OHIP_ENTERPRISE_ID`
    - `OHIP_HOTEL_ID`
-4. Invoke `ohipReadiness` with `{ "action": "status" }`. It must report `configured: true`.
-5. Use Oracle's current Postman collection to obtain one OAuth token.
-6. Make one read-only, low-volume sandbox call and confirm:
-   - HTTP 200
-   - request visible in OHIP Analytics
-   - `X-Request-Id` logged
-   - no secret or token present in application logs
-7. Only after that test, enable the NUPS backend-for-frontend adapter.
+4. Invoke `ohipReadiness` with `{ "action": "status" }`; current baseline is `configured: true`.
+5. Obtain OAuth through the server-side client-credentials implementation; never expose tokens to the browser.
+6. Run one read-only, low-volume sandbox call and confirm:
+   - successful Oracle response
+   - request/correlation ID captured when returned
+   - latency/status telemetry recorded without payload PII
+   - no secret or token present in application logs or frontend state
+7. The NUPS backend-for-frontend adapter is enabled for controlled owner-initiated read-only validation.
 
 ## Architecture rules
 
@@ -91,14 +93,16 @@ Build the lowest-risk proof first:
 
 ## Production path
 
-Partner sandbox access is not production authorization. For production OPERA Cloud environments:
+Partner Sandbox validation proves transport/authentication only; it is not Oracle certification, endorsement, Marketplace approval, or production customer authorization.
 
-1. Join Oracle PartnerNetwork at Member Level.
-2. Publish NUPS in Oracle Cloud Marketplace under the OHIP product category.
-3. Send the Marketplace listing ID / OPN reference to `hospitality-integrations_ww@oracle.com`.
-4. Create a separate **Production** application and application key.
-5. Connect only after the OPERA Cloud customer approves the environment.
-6. Keep production credentials separate from sandbox credentials.
+1. **Verify Oracle PartnerNetwork membership status.** Do not assume that the OHIP Store order, Cloud subscription, Support account, or OPERA Digital Learning activation proves OPN membership.
+2. Once OPN is explicitly verified, prepare and publish the NUPS Oracle Cloud Marketplace listing under the applicable OHIP/Hospitality category.
+3. Provide the Marketplace listing ID and OPN reference to `hospitality-integrations_ww@oracle.com` when Oracle's process calls for them.
+4. Register a separate **Production** OHIP application and application key.
+5. Add/connect only an authorized OPERA Cloud customer environment after customer approval.
+6. Store production credentials separately from Partner Sandbox credentials.
+7. Re-run read-only validation against the authorized production Hotel ID before enabling any production write workflow.
+8. Keep production writes locked until idempotency, audit, retry, authorization, and rollback controls are reviewed.
 
 ## Separate Simphony track
 
