@@ -27,7 +27,7 @@ export default function TechnicalCredentials() {
             <CredentialCard
               icon={<Award className="w-8 h-8 text-purple-600" />}
               title="USPTO Patent"
-              subtitle="#18/584,961"
+              subtitle="Filing details under verification"
               badge="Pending"
             />
             <CredentialCard
