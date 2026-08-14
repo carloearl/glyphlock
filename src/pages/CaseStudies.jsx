@@ -85,8 +85,8 @@ const CASE_STUDIES = [
     keyPoints: [
       'Governance architecture stress-tested in simulation',
       'Operator-liability theories analyzed under conventional agreement models',
-      'IP sovereignty mechanisms confirmed enforceable',
-      'Internal governance charter validated'
+      'IP-notice and evidentiary concepts evaluated',
+      'Internal governance charter theory analyzed'
     ],
     outcome: 'Judgment for Defendant',
     url: 'CaseStudyCovenantVictory'
