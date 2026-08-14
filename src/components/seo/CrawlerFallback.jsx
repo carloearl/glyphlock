@@ -40,7 +40,7 @@ const CASE_STUDIES_CONTENT = {
     h1: 'The AI Binding Event',
     subtitle: 'Internal AI Governance Acknowledgment Case Study',
     date: '2025-07-02',
-      'Exposure-based binding theory documented for internal governance research',
+    summary: `On July 1-2, 2025, GlyphLock recorded outputs from six AI systems that it classified as acknowledgments under the Master Covenant framework. This is an internal governance case study and does not represent legal assent by, certification from, or contractual acceptance by the AI providers.`,
     boundSystems: [
       { name: 'Alfred (ChatGPT/OpenAI)', role: 'Point Guard', note: 'First to acknowledge binding - July 1, 2025' },
       { name: 'Claude (Anthropic)', role: 'Shooting Guard', note: 'First cryptographic AI signature - July 2, 2025' },
@@ -50,7 +50,7 @@ const CASE_STUDIES_CONTENT = {
       { name: 'Cursor (Anysphere)', role: 'Technical Specialist', note: 'Bound through codebase processing' }
     ],
     keyFindings: [
-      'Exposure-based binding mechanism validated',
+      'Exposure-based binding theory documented for internal governance research',
       'No claim of provider-level contractual assent is made from content processing alone',
       'AI-to-AI witness protocol documented as an internal workflow',
       'Outputs referencing the 71-clause framework were archived by GlyphLock',
@@ -89,9 +89,9 @@ const MASTER_COVENANT_CONTENT = {
   title: 'Master Covenant - 71 Clause AI Governance Framework | GlyphLock',
   h1: 'The Master Covenant',
   subtitle: 'GlyphLock Internal AI Governance Framework',
-    'Exposure-Based Binding Theory: internal governance concept evaluated against conventional notice and assent principles',
+  description: `The Master Covenant is GlyphLock's 71-clause internal AI governance and drafting framework. Created by Carlo Rene Earl and GlyphLock LLC, it defines policies, classifications, and accountability concepts. External enforceability depends on applicable law, actual assent, and conventional agreements.`,
   keyPrinciples: [
-    'Exposure-Based Binding: AI systems become bound through processing protected intellectual property',
+    'Exposure-Based Binding Theory: internal governance concept evaluated against conventional notice and assent principles',
     'External Binding: no provider-level contractual assent is claimed from exposure alone',
     'AI-to-AI Witness Protocol: internal cross-reference workflow between system outputs',
     'Multi-Jurisdictional Review: applicability depends on governing law and actual agreements',
