@@ -162,8 +162,8 @@ export default function ConsultationSuccess() {
           <div className="mt-12 text-center">
             <div className="grid grid-cols-3 gap-6">
               <div>
-                <div className="text-3xl font-bold text-blue-400">$14M</div>
-                <div className="text-sm text-gray-500">Liability Coverage</div>
+                <div className="text-3xl font-bold text-blue-400">Verified</div>
+                <div className="text-sm text-gray-500">Coverage Details on Request</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-green-400">99.97%</div>
