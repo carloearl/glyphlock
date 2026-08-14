@@ -29,7 +29,7 @@ const COMPARISON_DATA = [
     feature: 'Patent-Pending Methodology',
     typical: false,
     glyphlock: true,
-    description: 'USPTO #18/584,961 validated approach'
+    description: 'IP approach documented; filing details under verification'
   },
   {
     feature: 'Dual-Layer Verification',
