@@ -28,7 +28,7 @@ const slideRight = (delay = 0) => ({
 
 const currentMeasures = [
   { title: "Battle-Tested Infrastructure", icon: Shield, color: "blue", description: "Enterprise-grade resilience engineered for creators under pressure. Encrypted communications (TLS 1.3), DDoS protection, and regular hardening updates ensure your work cannot be quietly erased." },
-  { title: "Creator IP Protection", icon: Key, color: "indigo", description: "Patent pending (USPTO App. No. 18/584,961). Legal frameworks protecting independent authorship with cryptographic proof, blockchain timestamping, and Master Covenant governance — leveling the field against larger hostile forces." },
+  { title: "Creator IP Protection", icon: Key, color: "indigo", description: "Legal frameworks supporting independent authorship with cryptographic proof, timestamping, and Master Covenant governance. Patent status is not represented here pending verification of the applicable GlyphLock filing." },
   { title: "Audit-Ready Transparency", icon: Eye, color: "cyan", description: "Every action logged. Every change traceable. Minimal data collection with user consent. AI behavior and system operations recorded on tamper-resistant ledgers for long-term trust and accountability." },
   { title: "Human-Overseen AI Safety", icon: Bot, color: "purple", description: "AI operates inside accountable guardrails. Secure development lifecycle with mandatory human review. Machine intelligence paired with structural oversight to prevent runaway automation." }
 ];
@@ -325,7 +325,7 @@ export default function TrustSecurity() {
                 <span className="hidden sm:block text-white/20">·</span>
                 <span><strong className="text-white">Entity:</strong> GlyphLock LLC</span>
                 <span className="hidden sm:block text-white/20">·</span>
-                <span><strong className="text-white">Status:</strong> Patent Pending (USPTO App. No. 18/584,961)</span>
+                <span><strong className="text-white">Status:</strong> IP filing details withheld pending verification</span>
               </div>
               <Link to={createPageUrl("Contact")}>
                 <motion.button
