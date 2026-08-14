@@ -165,7 +165,7 @@ export default function DreamTeamHero() {
             </div>
             <div className="flex items-center gap-2 text-sm text-indigo-200">
               <Shield className="w-4 h-4 text-indigo-400 drop-shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
-              <span>BPAA Certified</span>
+              <span>BPAAA v3.0 Governed</span>
             </div>
           </div>
         </div>
