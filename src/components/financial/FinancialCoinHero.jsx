@@ -188,7 +188,7 @@ export default function FinancialCoinHero() {
           </defs>
           <g className="glf-orbit-outer">
             <text fontFamily="Cinzel,serif" fontSize="11" fill="rgba(218,165,32,0.8)" letterSpacing="3">
-              <textPath href="#glfOuterPath">GLYPHLOCK FINANCIAL LLC &nbsp;◆&nbsp; LEGAL ENTITY: AZ #23831258 &nbsp;◆&nbsp; IP DOCUMENTATION ON FILE &nbsp;◆&nbsp; ENTERTAINMENT VENUE SOLUTIONS &nbsp;◆&nbsp; PCI DSS LEVEL 1 ALIGNED &nbsp;◆&nbsp; SOC 2 TYPE II ALIGNED &nbsp;◆&nbsp; INDEPENDENTLY AUDITED &nbsp;◆&nbsp;</textPath>
+              <textPath href="#glfOuterPath">GLYPHLOCK FINANCIAL LLC &nbsp;◆&nbsp; LEGAL ENTITY: AZ #23831258 &nbsp;◆&nbsp; IP DOCUMENTATION ON FILE &nbsp;◆&nbsp; ENTERTAINMENT VENUE SOLUTIONS &nbsp;◆&nbsp; SECURITY CONTROLS PROGRAM &nbsp;◆&nbsp; AUDIT-READY DOCUMENTATION &nbsp;◆&nbsp;</textPath>
             </text>
           </g>
           <g className="glf-orbit-inner">
