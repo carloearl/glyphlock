@@ -48,7 +48,7 @@ export default function Solutions() {
       icon: Lock,
       description: "PCI DSS verification module – protocol-enforced transaction integrity with credentialed access control.",
       features: [
-        "PCI DSS Level 1 compliance",
+        "PCI DSS-aligned transaction controls",
         "Real-time fraud detection",
         "Blockchain transaction verification",
         "Multi-signature authentication",
@@ -114,7 +114,7 @@ export default function Solutions() {
     "AI-powered threat detection with real-time monitoring",
     "Blockchain verification for transaction immutability",
     "Multi-layer security combining cryptography and legal frameworks",
-    "Compliance with SOC 2, GDPR, ISO 27001, PCI DSS, HIPAA",
+    "Control mapping for SOC 2, GDPR, ISO 27001, PCI DSS, and HIPAA readiness",
     "24/7 enterprise support with dedicated account managers"
   ];
 
