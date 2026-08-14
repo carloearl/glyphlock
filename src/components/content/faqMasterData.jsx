@@ -115,7 +115,7 @@ export const FAQ_MASTER_DATA = [
     icon: "Award",
     q: "What is GlyphLock's intellectual property status?",
     a: [
-      "Patent Pending: USPTO Application No. 18/584,961.",
+      "IP filing status: public patent details withheld pending verification of the applicable GlyphLock filing.",
       "Covers cryptographic protocols, steganographic methods, and visual authentication frameworks.",
       "All protocols and methods protected under Master Covenant legal framework."
     ]
