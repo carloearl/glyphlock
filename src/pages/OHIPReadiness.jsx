@@ -27,6 +27,39 @@ const PORTAL_URL =
   'https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/';
 const INTEGRATION_OWNER_EMAIL = 'carloearl@glyphlock.com';
 
+const PRODUCTION_STAGES = [
+  {
+    label: 'Partner Sandbox',
+    status: 'complete',
+    detail: 'OAuth and controlled read-only OHIP validation verified.',
+  },
+  {
+    label: 'Oracle PartnerNetwork',
+    status: 'verify',
+    detail: 'Membership must be explicitly confirmed by Oracle before this is marked complete.',
+  },
+  {
+    label: 'Marketplace Listing',
+    status: 'pending',
+    detail: 'Prepare and submit after OPN membership is verified.',
+  },
+  {
+    label: 'Production Application',
+    status: 'locked',
+    detail: 'Separate production application and application key required.',
+  },
+  {
+    label: 'Customer Environment',
+    status: 'locked',
+    detail: 'Requires an authorized OPERA Cloud customer environment.',
+  },
+  {
+    label: 'Production Validation',
+    status: 'locked',
+    detail: 'Read-only validation must pass before any production write workflow.',
+  },
+];
+
 export default function OHIPReadiness() {
   const [status, setStatus] = useState(null);
   const [error, setError] = useState('');
@@ -261,6 +294,72 @@ export default function OHIPReadiness() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
+
+        <Card className="border-cyan-500/30 bg-slate-900 text-slate-100">
+          <CardHeader>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-cyan-300" />
+                  Oracle Production Readiness
+                </CardTitle>
+                <CardDescription className="mt-2 text-slate-400">
+                  Evidence-based progression. A stage is never marked complete from a related Oracle order or account alone.
+                </CardDescription>
+              </div>
+              <Badge className="bg-amber-500 text-slate-950">OPN Verification Required</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {PRODUCTION_STAGES.map((stage, index) => {
+              const isComplete = stage.status === 'complete';
+              const isVerify = stage.status === 'verify';
+              return (
+                <div
+                  key={stage.label}
+                  className={`flex gap-3 rounded-lg border p-3 ${
+                    isComplete
+                      ? 'border-emerald-500/35 bg-emerald-950/20'
+                      : isVerify
+                        ? 'border-amber-500/45 bg-amber-950/20'
+                        : 'border-slate-700 bg-slate-950/50'
+                  }`}
+                >
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current text-xs font-bold">
+                    {isComplete ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                    ) : isVerify ? (
+                      <AlertTriangle className="h-4 w-4 text-amber-300" />
+                    ) : (
+                      <span className="text-slate-500">{index + 1}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-slate-100">{stage.label}</p>
+                      <Badge
+                        variant="outline"
+                        className={
+                          isComplete
+                            ? 'border-emerald-500/50 text-emerald-200'
+                            : isVerify
+                              ? 'border-amber-500/50 text-amber-200'
+                              : 'border-slate-600 text-slate-400'
+                        }
+                      >
+                        {isComplete ? 'Verified' : isVerify ? 'Verify Now' : stage.status === 'pending' ? 'Pending' : 'Locked'}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-400">{stage.detail}</p>
+                  </div>
+                </div>
+              );
+            })}
+            <p className="text-xs leading-5 text-slate-500">
+              Current evidence confirms the Partner Sandbox connection only. OPN, Marketplace, production application, and customer authorization remain separate gates.
+            </p>
+          </CardContent>
+        </Card>
 
         <Card className="border-slate-700 bg-slate-900 text-slate-100">
           <CardHeader>
