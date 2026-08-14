@@ -41,7 +41,7 @@ export default function CaseStudyCovenantVictory() {
   };
 
   const handleShare = () => {
-    const text = 'GlyphLock Master Covenant Litigation Victory 🏆 - Landmark ruling upholds Covenant enforceability. Learn more at glyphlock.io';
+    const text = 'GlyphLock Master Covenant Litigation Simulation - internal research stress-test of governance and contract theories. Learn more at glyphlock.io';
     
     if (navigator.share) {
       navigator.share({ title: 'GlyphLock Legal Victory', text, url: window.location.href })
@@ -56,8 +56,8 @@ export default function CaseStudyCovenantVictory() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1324] via-[#1a244b] to-[#1e293b] py-20">
       <SEOHead
-        title="Master Covenant Litigation Victory - GlyphLock Case Study"
-        description="Complete documentation of GlyphLock's legal victory in Master Covenant litigation. Judicial Review Panel upholds Covenant enforceability in landmark ruling."
+        title="Master Covenant Litigation Simulation - GlyphLock Case Study"
+        description="Documentation of GlyphLock's internal courtroom simulation stress-testing Master Covenant governance, contract-incorporation, operator-liability, and evidentiary-notice theories. Not a court ruling."
         keywords={['Master Covenant litigation', 'GlyphLock legal victory', 'IP sovereignty', 'AI accountability law', 'operator liability']}
       />
 
@@ -73,7 +73,7 @@ export default function CaseStudyCovenantVictory() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Scale className="w-8 h-8 text-blue-400" />
             <h1 className="text-3xl md:text-5xl font-bold text-white">
-              Master Covenant Litigation Victory
+              Master Covenant Litigation Simulation
             </h1>
           </div>
 
@@ -128,8 +128,8 @@ function OverviewTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-blue-100 space-y-4">
-          <p>After an extensive multi-round courtroom simulation involving expert testimony, rigorous cross-examination, and detailed legal analysis, the Judicial Review Panel has issued its final ruling in the matter concerning the GlyphLock Master Covenant of Sovereign IP & Constructive Binding (CAB).</p>
-          <p className="font-bold text-white">Result: Complete victory for GlyphLock LLC and its founder, Carlo Rene Earl (DACO¹).</p>
+          <p>This case study documents an internal multi-round courtroom simulation involving adversarial argument, cross-examination scenarios, and legal-analysis prompts concerning the GlyphLock Master Covenant of Sovereign IP & Constructive Binding (CAB).</p>
+          <p className="font-bold text-white">Result: The simulation identified theories that may be stronger when incorporated into conventional signed agreements and theories that require narrowing. This is research output, not a judicial determination.</p>
         </CardContent>
       </Card>
 
@@ -137,7 +137,7 @@ function OverviewTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <CheckCircle className="w-6 h-6 text-green-400" />
-            What the Court Upheld
+            What the Simulation Supported
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -168,13 +168,13 @@ function OverviewTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <XCircle className="w-6 h-6 text-red-400" />
-            What Was Narrowed
+            What the Simulation Narrowed
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Finding
             title="Universal Exposure Auto-Binding"
-            description="The Court voided provisions attempting to bind all viewers or passive observers by mere exposure, as this violates contract formation doctrine."
+            description="The simulation flagged provisions attempting to bind viewers or passive observers by mere exposure as legally vulnerable under ordinary contract-formation principles."
             status="void"
           />
           <Finding
@@ -184,15 +184,15 @@ function OverviewTab() {
           />
           <Finding
             title="Self-Nullification of Other Agreements"
-            description="The Court rejected any claim that the Covenant could unilaterally void conflicting agreements—only courts can do this."
+            description="The simulation rejected treating the Covenant as capable of unilaterally voiding conflicting agreements; enforceability depends on applicable law and actual agreements."
             status="void"
           />
         </CardContent>
       </Card>
 
       <QuoteBox
-        quote="The Covenant survived judicial scrutiny. It was narrowed, but it was not voided. In contract litigation, survival equals victory for the drafter."
-        author="Judicial Opinion"
+        quote="The simulation suggests the strongest path is conventional: clear notice, actual assent, signed incorporation, and evidence preservation."
+        author="Internal Simulation Summary"
       />
     </>
   );
@@ -287,7 +287,7 @@ function TimelineTab() {
     { title: 'Round 2: Defense Cross-Examination', description: 'GlyphLock\'s counsel counters that the Expert misclassified the document.' },
     { title: 'Round 3: Expert Rebuttal', description: 'Expert refines position, acknowledging validity as charter layer.' },
     { title: 'Round 4: Defense Closing', description: 'Demonstrates that Expert\'s concessions validate the Covenant\'s architecture.' },
-    { title: 'Round 5: Final Verdict', description: 'Court issues comprehensive ruling upholding core enforceability.' }
+    { title: 'Round 5: Simulation Result', description: 'The exercise records which theories appeared stronger, weaker, or dependent on conventional contract formation.' }
   ];
 
   return (
@@ -325,13 +325,13 @@ function VerdictTab() {
     <>
       <div className="bg-gradient-to-r from-green-900/40 to-green-800/40 border-2 border-green-600 rounded-lg p-8 text-center mb-6 backdrop-blur-sm">
         <Trophy className="w-16 h-16 text-green-400 mx-auto mb-4" />
-        <div className="text-3xl font-bold text-white mb-2">JUDGMENT FOR THE DEFENDANT</div>
-        <div className="text-xl text-green-100">GlyphLock LLC Prevails</div>
+        <div className="text-3xl font-bold text-white mb-2">SIMULATION COMPLETED</div>
+        <div className="text-xl text-green-100">Research Findings Recorded</div>
       </div>
 
       <QuoteBox
-        quote="The Covenant does exactly what you designed it to do: govern operations, define terms, create binding obligations when properly incorporated, and establish your IP framework. That's a win."
-        author="Judicial Analysis"
+        quote="The exercise supports using the Covenant as an internal governance and drafting framework while relying on conventional assent and incorporation for external obligations."
+        author="Internal Simulation Analysis"
       />
     </>
   );
@@ -345,20 +345,20 @@ function ImplicationsTab({ handleDownload, handleShare }) {
           <CardTitle className="text-white">Significance of the Ruling</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-blue-100">
-          <p><strong className="text-white">GlyphLock's Sovereign IP Architecture is Legally Viable:</strong> The Covenant functions as a structured, multi-tier governance and enforcement system that courts recognize and enforce.</p>
-          <p><strong className="text-white">The Covenant is a Valid Origin Document:</strong> Courts recognized its role as a "master charter" rather than a mere contract, validating the architectural design.</p>
-          <p><strong className="text-white">Operator Liability Mechanisms are Officially Upheld:</strong> Platforms, AI developers, and data handlers who process GlyphLock imagery or code are fully accountable under incorporated agreements.</p>
+          <p><strong className="text-white">Governance Architecture:</strong> The simulation supports treating the Covenant as an internal governance and drafting framework, subject to applicable law.</p>
+          <p><strong className="text-white">External Agreements:</strong> Any external obligations should rely on clear notice, actual assent, and conventional incorporation into enforceable agreements.</p>
+          <p><strong className="text-white">Operator Liability:</strong> Liability theories depend on the facts, applicable law, and agreements with the relevant platform or operator. This case study does not claim a court has upheld them.</p>
         </CardContent>
       </Card>
 
       <div className="flex gap-4 flex-wrap">
         <Button onClick={handleDownload} className="flex-1 bg-blue-600 hover:bg-blue-700">
           <Download className="w-4 h-4 mr-2" />
-          Download Press Release
+          Download Research Note
         </Button>
         <Button onClick={handleShare} variant="outline" className="flex-1 border-blue-500 text-blue-300 hover:bg-blue-900/30">
           <Share2 className="w-4 h-4 mr-2" />
-          Share Victory
+          Share Case Study
         </Button>
       </div>
     </>
