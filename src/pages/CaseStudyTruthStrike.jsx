@@ -278,7 +278,7 @@ export default function CaseStudyTruthStrike() {
       <footer className="py-8 bg-slate-950 border-t border-slate-800 text-center">
         <p className="text-slate-500">© 2025 GlyphLock LLC. All rights reserved.</p>
         <p className="text-slate-600 text-sm mt-2">
-          Master Covenant Framework - USPTO Patent Application #18/584,961
+          Master Covenant Framework - IP filing details under verification
         </p>
       </footer>
     </div>
