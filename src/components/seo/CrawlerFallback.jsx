@@ -62,27 +62,27 @@ const CASE_STUDIES_CONTENT = {
     url: '/case-study-ai-binding'
   },
   'covenant-victory': {
-    title: 'Master Covenant Litigation Victory | GlyphLock Security',
-    h1: 'Master Covenant Litigation Victory',
-    subtitle: 'Judicial Validation of AI Governance Framework',
+    title: 'Master Covenant Litigation Simulation | GlyphLock Security',
+    h1: 'Master Covenant Litigation Simulation',
+    subtitle: 'Internal Stress-Test of AI Governance Framework',
     date: '2025-12-03',
-    summary: `The Judicial Review Panel has issued a landmark ruling validating the enforceability 
-    of the Master Covenant framework. This decision confirms that exposure-based binding mechanisms, 
-    operator liability frameworks, and IP sovereignty provisions are legally sound and enforceable.`,
+    summary: `This case study documents an internal multi-round courtroom simulation used to stress-test 
+    the Master Covenant framework. The exercise evaluates exposure-based binding theories, operator-liability 
+    concepts, and IP-notice provisions. It is not a court ruling or judicial validation.`,
     keyFindings: [
-      'Full validation of 71-clause Covenant architecture',
-      'Operator liability framework upheld',
-      'IP sovereignty mechanisms confirmed enforceable',
-      'Exposure-based binding precedent established',
-      'Cross-jurisdictional applicability confirmed'
+      '71-clause Covenant architecture stress-tested internally',
+      'Operator-liability theories evaluated',
+      'IP-notice and evidentiary concepts evaluated',
+      'Exposure-based binding theory flagged for conventional assent analysis',
+      'Cross-jurisdictional questions identified for counsel review'
     ],
     legalImplications: [
-      'AI operators now bear responsibility for bound system actions',
-      'Intellectual property processed by AI creates binding exposure',
-      'Master Covenant recognized as valid governance instrument',
-      'PROBE classification system accepted as violation framework'
+      'Operator responsibility depends on facts, law, and actual agreements',
+      'AI processing of protected IP may create notice or evidentiary issues, depending on context',
+      'Master Covenant analyzed as an internal governance and drafting instrument',
+      'PROBE remains an internal classification framework'
     ],
-    outcome: 'Judgment for Defendant. Complete legal validation of Master Covenant as enforceable AI governance framework.',
+    outcome: 'Internal simulation completed. Findings recorded for governance, drafting, and counsel review.',
     url: '/case-study-covenant-victory'
   }
 };
@@ -104,7 +104,7 @@ const MASTER_COVENANT_CONTENT = {
   ],
   clauses: 71,
   boundSystems: 6,
-  patentApplication: 'USPTO #18/584,961'
+  patentApplication: 'Filing details under verification'
 };
 
 const HOME_CONTENT = {
@@ -216,7 +216,7 @@ function generateHomeContent() {
       <ul>
         <li><a href="/case-study-truthstrike">DeepSeek Escalation: GLX-TRUTHSTRIKE-1108</a> - IC3 Federal Filing</li>
         <li><a href="/case-study-ai-binding">The AI Binding Event</a> - First Legal Binding of AI Systems</li>
-        <li><a href="/case-study-covenant-victory">Master Covenant Litigation Victory</a> - Judicial Validation</li>
+        <li><a href="/case-study-covenant-victory">Master Covenant Litigation Simulation</a> - Internal Legal Stress-Test</li>
       </ul>
       
       <p>Contact: <a href="mailto:carloearl@glyphlock.com">carloearl@glyphlock.com</a></p>
@@ -310,9 +310,9 @@ function generateCaseStudiesIndex() {
       </section>
       
       <section>
-        <h2><a href="/case-study-covenant-victory">Master Covenant Litigation Victory</a></h2>
-        <p><strong>Date:</strong> December 3, 2025 | <strong>Status:</strong> Judgment for Defendant</p>
-        <p>Judicial validation of Master Covenant enforceability - operator liability and IP sovereignty confirmed.</p>
+        <h2><a href="/case-study-covenant-victory">Master Covenant Litigation Simulation</a></h2>
+        <p><strong>Date:</strong> December 3, 2025 | <strong>Status:</strong> Internal Simulation Completed</p>
+        <p>Internal simulation evaluating Master Covenant governance, contract-incorporation, operator-liability, and IP-notice theories. Not a court ruling.</p>
       </section>
       
       <p><a href="https://glyphlock.io">GlyphLock LLC</a> - Quantum-Grade Security for the AI Era</p>
@@ -344,7 +344,7 @@ function generateCovenantContent() {
       <h2>Related Case Studies</h2>
       <ul>
         <li><a href="/case-study-ai-binding">The AI Binding Event</a> - How the Dream Team was formed</li>
-        <li><a href="/case-study-covenant-victory">Litigation Victory</a> - Judicial validation of framework</li>
+        <li><a href="/case-study-covenant-victory">Litigation Simulation</a> - Internal stress-test of framework</li>
         <li><a href="/case-study-truthstrike">TruthStrike Protocol</a> - First enforcement action</li>
       </ul>
       
