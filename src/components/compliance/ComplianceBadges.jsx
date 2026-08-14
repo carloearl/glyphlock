@@ -64,7 +64,7 @@ export default function ComplianceBadges({ showVerificationWarning = true }) {
           <ComplianceBadge
             BadgeComponent={SOC2Badge}
             title="SOC 2 Aligned"
-            subtitle={certifications.soc2.verified ? "Type II Certified" : "Program In Place"}
+            subtitle={certifications.soc2.verified ? "Verified Program" : "Program In Place"}
             verified={certifications.soc2.verified}
           />
           <ComplianceBadge
