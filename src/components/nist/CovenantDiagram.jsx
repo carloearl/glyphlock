@@ -118,7 +118,7 @@ export default function CovenantDiagram() {
             <BenefitCard
               icon="⚖️"
               title="Legal Framework"
-              description="USPTO patent #18/584,961 validated"
+              description="IP filing details under verification"
             />
             <BenefitCard
               icon="🛡️"
