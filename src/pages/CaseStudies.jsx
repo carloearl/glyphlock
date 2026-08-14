@@ -75,13 +75,13 @@ const CASE_STUDIES = [
   },
   {
     id: 'covenant-litigation-victory',
-    title: 'Master Covenant Litigation Victory',
+    title: 'Master Covenant Litigation Simulation',
     date: 'December 3, 2025',
     category: 'Legal Victory',
     icon: Trophy,
     badge: 'Landmark Ruling',
     badgeColor: 'bg-green-600',
-    summary: 'Judicial Review Panel upholds GlyphLock Master Covenant enforceability in comprehensive multi-round litigation simulation.',
+    summary: 'Internal multi-round litigation simulation stress-testing Master Covenant governance, contract-incorporation, operator-liability, and evidentiary-notice theories. Not a court ruling.',
     keyPoints: [
       'Complete legal validation of Covenant architecture',
       'Operator liability framework upheld',
