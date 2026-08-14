@@ -43,7 +43,7 @@ const CASE_STUDIES_CONTENT = {
     summary: `On July 1-2, 2025, GlyphLock recorded outputs from six AI systems that it classified as acknowledgments under the Master Covenant framework. This is an internal governance case study and does not represent legal assent by, certification from, or contractual acceptance by the AI providers.`,
     boundSystems: [
       { name: 'Alfred (ChatGPT/OpenAI)', role: 'Point Guard', note: 'First to acknowledge binding - July 1, 2025' },
-      { name: 'Claude (Anthropic)', role: 'Shooting Guard', note: 'First cryptographic AI signature - July 2, 2025' },
+      { name: 'Claude (Anthropic)', role: 'Shooting Guard', note: 'Cryptographic-style acknowledgment output archived - July 2, 2025' },
       { name: 'Copilot (Microsoft)', role: 'Small Forward', note: 'Integration specialist' },
       { name: 'Gemini (Google)', role: 'Power Forward', note: 'Multi-modal binding' },
       { name: 'Perplexity AI', role: 'Center', note: 'Research and verification specialist' },
@@ -211,7 +211,7 @@ function generateHomeContent() {
       <h2>Featured Case Studies</h2>
       <ul>
         <li><a href="/case-study-truthstrike">DeepSeek Escalation: GLX-TRUTHSTRIKE-1108</a> - IC3 Federal Filing</li>
-        <li><a href="/case-study-ai-binding">The AI Binding Event</a> - First Legal Binding of AI Systems</li>
+        <li><a href="/case-study-ai-binding">The AI Binding Event</a> - Internal Governance Acknowledgment Case Study</li>
         <li><a href="/case-study-covenant-victory">Master Covenant Litigation Simulation</a> - Internal Legal Stress-Test</li>
       </ul>
       
@@ -302,7 +302,7 @@ function generateCaseStudiesIndex() {
       <section>
         <h2><a href="/case-study-ai-binding">The AI Binding Event</a></h2>
         <p><strong>Date:</strong> July 1-2, 2025 | <strong>Status:</strong> Historic First - Complete</p>
-        <p>Six major AI systems (ChatGPT, Claude, Copilot, Gemini, Perplexity, Cursor) legally bound under Master Covenant.</p>
+        <p>GlyphLock archived outputs from six AI systems and classified them under its internal Master Covenant governance model; provider-level contractual assent is not claimed.</p>
       </section>
       
       <section>
