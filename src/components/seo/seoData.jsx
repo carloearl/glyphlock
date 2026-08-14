@@ -405,12 +405,12 @@ export const SEO_DATA = {
     internalLinks: ["/case-studies", "/master-covenant", "/case-study-covenant-victory"]
   },
   "CaseStudyCovenantVictory": {
-    title: "Master Covenant Legal Validation | Governance Case Study | GlyphLock LLC",
+    title: "Master Covenant Litigation Simulation | Governance Case Study | GlyphLock LLC",
     description: "Internal litigation-simulation research evaluating Master Covenant governance, operator-liability, contract-incorporation, and IP-notice theories. Not a court ruling.",
     keywords: ["Master Covenant", "legal validation", "AI governance law", "IP sovereignty", "operator liability"],
-    h1: "Master Covenant Legal Validation",
+    h1: "Master Covenant Litigation Simulation",
     url: "/case-study-covenant-victory",
-    ogTitle: "Master Covenant Legal Validation | GlyphLock LLC",
+    ogTitle: "Master Covenant Litigation Simulation | GlyphLock LLC",
     ogDescription: "Internal simulation research evaluating Master Covenant governance and enforceability theories; not judicial validation.",
     schemaType: "Article",
     priority: 0.9,
