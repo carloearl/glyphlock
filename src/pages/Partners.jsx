@@ -224,13 +224,13 @@ export default function Partners() {
 
         {/* Financial Highlights */}
         <section className="mb-24 glass-card rounded-2xl border border-emerald-500/30 p-8 bg-emerald-900/5">
-          <h2 className="text-2xl font-bold text-emerald-400 mb-8 font-space">First 90 Day Performance</h2>
+          <h2 className="text-2xl font-bold text-emerald-400 mb-8 font-space">Commercial Readiness</h2>
           <div className="grid md:grid-cols-4 gap-6">
             {[
               { label: "Commercial status", val: "Evidence-led", sub: "Verified figures available in diligence", color: "text-white" },
-              { label: "Insurance escrow pipeline", val: "$14M", sub: "secured", color: "text-[#00E4FF]" },
-              { label: "Enterprise contract band", val: "$225K+", sub: "per deployment", color: "text-[#8C4BFF]" },
-              { label: "Annualized run rate", val: "$1.36M", sub: "", color: "text-emerald-400" }
+              { label: "Insurance pipeline", val: "Diligence only", sub: "Figures available when verified", color: "text-[#00E4FF]" },
+              { label: "Enterprise pricing", val: "Custom", sub: "Scoped per deployment", color: "text-[#8C4BFF]" },
+              { label: "Financial reporting", val: "Evidence-led", sub: "Verified data on request", color: "text-emerald-400" }
             ].map((item, i) => (
               <div key={i} className="bg-black/40 p-6 rounded-xl border border-white/10">
                 <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">{item.label}</p>
