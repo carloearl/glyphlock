@@ -128,7 +128,7 @@ export default function StructuredDataOrg() {
       "@type": "CreativeWork",
       "name": "Master Covenant",
       "alternateName": "71-Clause AI Governance Framework",
-      "description": "Humanity's first successful legal framework for binding artificial intelligence systems to human governance. 71 binding clauses with exposure-based binding mechanism, PROBE violation classifications, and TruthStrike enforcement protocol.",
+      "description": "GlyphLock's 71-clause internal AI governance and drafting framework, including exposure-based binding theories, PROBE classifications, and the TruthStrike protocol. External enforceability depends on applicable law and actual agreements.",
       "creator": {
         "@type": "Person",
         "name": "Carlo Rene Earl",
@@ -144,7 +144,7 @@ export default function StructuredDataOrg() {
       "@context": "https://schema.org",
       "@type": "ItemList",
       "name": "GlyphLock Case Studies",
-      "description": "Documented legal victories, federal filings, and AI governance precedents",
+      "description": "Documented internal research, reported filings, and AI governance case studies",
       "url": "https://glyphlock.io/case-studies",
       "itemListElement": [
         {
@@ -164,7 +164,7 @@ export default function StructuredDataOrg() {
           "item": {
             "@type": "Article",
             "name": "The AI Binding Event July 1-2, 2025",
-            "description": "First successful legal binding of major AI systems including ChatGPT, Claude, Copilot, Gemini, Perplexity, and Cursor",
+            "description": "Internal case study documenting AI-system acknowledgments and GlyphLock governance classifications; not a representation of legal assent by the AI providers",
             "url": "https://glyphlock.io/case-study-ai-binding",
             "datePublished": "2025-07-02"
           }
@@ -174,8 +174,8 @@ export default function StructuredDataOrg() {
           "position": 3,
           "item": {
             "@type": "Article",
-            "name": "Master Covenant Litigation Victory",
-            "description": "Judicial validation of Master Covenant enforceability",
+            "name": "Master Covenant Litigation Simulation",
+            "description": "Internal litigation simulation evaluating Master Covenant governance and enforceability theories; not a court ruling",
             "url": "https://glyphlock.io/case-study-covenant-victory",
             "datePublished": "2025-12-03"
           }
