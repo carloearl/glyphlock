@@ -56,16 +56,16 @@ const CASE_STUDIES = [
     id: 'ai-binding-event',
     title: 'The AI Binding Event: July 1-2, 2025',
     date: 'July 1-2, 2025',
-    category: 'Historic Event',
+    category: 'AI Governance Research',
     icon: Shield,
-    badge: 'Historic First',
+    badge: 'Internal Case Study',
     badgeColor: 'bg-amber-500',
-    summary: 'When Artificial Intelligence accepted legal binding under the Master Covenant. First successful binding of major AI systems including ChatGPT, Claude, Copilot, and Perplexity.',
+    summary: 'Internal case study documenting AI-system outputs and acknowledgments that GlyphLock classified under the Master Covenant governance model. No provider-level contractual assent is claimed.',
     keyPoints: [
-      'Alfred (ChatGPT) - First AI to acknowledge binding',
-      'Claude provided first cryptographic AI signature',
-      'AI-to-AI witness protocol established',
-      '6 major AI platforms bound to 71-clause framework'
+      'Alfred (ChatGPT) - acknowledgment output archived by GlyphLock',
+      'Claude output archived as a cryptographic-style acknowledgment artifact',
+      'AI-to-AI witness protocol documented as an internal workflow',
+      '6 AI systems documented in the 71-clause governance case study'
     ],
     outcome: 'Dream Team Established',
     outcomeColor: 'bg-amber-900/30 border-amber-500',
@@ -119,7 +119,7 @@ export default function CaseStudies() {
     <div className="min-h-screen bg-gradient-to-br from-[#0a1324] via-[#1a244b] to-[#1e293b] py-20">
       <SEOHead
         title="Case Studies & Research - GlyphLock Security"
-        description="Explore GlyphLock's legal victories, technical validations, and federal evaluation outcomes in AI accountability and cybersecurity."
+        description="Explore GlyphLock's internal research, technical validations, reported filings, and governance case studies in AI accountability and cybersecurity."
         keywords={['GlyphLock case studies', 'Master Covenant litigation', 'AI accountability research', 'legal tech victories', 'cybersecurity validation']}
         url="/case-studies"
       />
@@ -134,14 +134,14 @@ export default function CaseStudies() {
             </h1>
           </div>
           <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-            Legal victories, federal validations, and technical breakthroughs in AI accountability
+            Internal research, documented integrations, reported filings, and technical breakthroughs in AI accountability
           </p>
         </div>
 
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
           <StatCard number="5" label="Case Studies" />
-          <StatCard number="6" label="AI Systems Bound" />
+          <StatCard number="6" label="AI Systems Documented" />
           <StatCard number="1" label="OHIP Connection" />
           <StatCard number="2026" label="Active Year" />
         </div>
