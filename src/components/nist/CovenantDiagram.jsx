@@ -18,7 +18,7 @@ export default function CovenantDiagram() {
               What Makes GlyphLock Different?
             </h2>
             <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">
-              The Master Covenant: 71-clause legal framework binding AI to accountability standards
+              The Master Covenant: 71-clause internal governance and drafting framework for AI accountability
             </p>
           </div>
 
@@ -92,7 +92,7 @@ export default function CovenantDiagram() {
                   </p>
                   <p className="text-sm text-gray-700 flex items-center gap-2">
                     <Scale className="w-4 h-4 text-green-500" />
-                    Patent-pending methodology
+                    IP methodology documented; filing details under verification
                   </p>
                   <p className="text-sm text-gray-700 flex items-center gap-2">
                     <FileCheck className="w-4 h-4 text-green-500" />
@@ -107,8 +107,8 @@ export default function CovenantDiagram() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <BenefitCard
               icon="📋"
-              title="Contractual Binding"
-              description="AI systems legally bound to output standards"
+              title="Governance Controls"
+              description="AI-system outputs evaluated against defined internal standards"
             />
             <BenefitCard
               icon="🔍"
@@ -123,7 +123,7 @@ export default function CovenantDiagram() {
             <BenefitCard
               icon="🛡️"
               title="Enterprise Ready"
-              description="Federal evaluation provides third-party credibility"
+              description="Evidence packages designed for external evaluation and diligence"
             />
           </div>
         </div>
