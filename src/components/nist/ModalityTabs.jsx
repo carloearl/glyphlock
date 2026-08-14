@@ -28,7 +28,7 @@ const MODALITIES = {
       {
         title: 'Master Covenant Compliance',
         details: [
-          '71-clause legal framework (USPTO #18/584,961)',
+          '71-clause legal framework (IP filing details under verification)',
           'Accountability verification markers',
           'Attribution requirement checking',
           'Factual accuracy standards'
