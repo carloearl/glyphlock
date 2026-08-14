@@ -205,7 +205,7 @@ export default function DreamTeamFlipCard({ card }) {
                 <span className="text-xs text-indigo-200 uppercase tracking-wider font-medium">GlyphLock</span>
               </div>
               <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/50 text-xs px-2 py-1 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
-                BPAA CERTIFIED
+                BPAAA v3.0 GOVERNED
               </Badge>
             </div>
           </div>
