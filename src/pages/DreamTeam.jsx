@@ -671,7 +671,7 @@ export default function DreamTeamPage() {
                   </div>
                 </div>
                 <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/50 text-xs px-2 py-1 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-                  BPAA CERTIFIED
+                  BPAAA v3.0 GOVERNED
                 </Badge>
               </div>
               </div>
