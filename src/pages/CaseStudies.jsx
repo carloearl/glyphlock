@@ -88,7 +88,7 @@ const CASE_STUDIES = [
       'IP-notice and evidentiary concepts evaluated',
       'Internal governance charter theory analyzed'
     ],
-    outcome: 'Judgment for Defendant',
+    outcome: 'Simulation Completed',
     url: 'CaseStudyCovenantVictory'
   },
   {
