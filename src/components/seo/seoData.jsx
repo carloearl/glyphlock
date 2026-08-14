@@ -392,13 +392,13 @@ export const SEO_DATA = {
     internalLinks: ["/case-studies", "/master-covenant", "/case-study-ai-binding"]
   },
   "CaseStudyAIBinding": {
-    title: "AI Governance Binding Event | Master Covenant Deployment | GlyphLock LLC",
-    description: "Documentation of the first structured AI governance binding under the Master Covenant framework. 71-clause enforcement with multi-system deployment.",
+    title: "AI Governance Acknowledgment Case Study | Master Covenant | GlyphLock LLC",
+    description: "Internal case study documenting AI-system outputs and acknowledgments classified under GlyphLock's 71-clause Master Covenant governance framework. No provider-level contractual assent is claimed.",
     keywords: ["AI governance", "AI binding protocol", "Master Covenant", "AI governance framework", "enterprise AI governance"],
-    h1: "AI Governance Binding Under the Master Covenant",
+    h1: "AI Governance Acknowledgments Under the Master Covenant",
     url: "/case-study-ai-binding",
-    ogTitle: "AI Governance Binding Event | GlyphLock LLC",
-    ogDescription: "First structured AI governance binding under the 71-clause Master Covenant framework.",
+    ogTitle: "AI Governance Acknowledgment Case Study | GlyphLock LLC",
+    ogDescription: "Internal governance case study documenting AI-system acknowledgments and provenance artifacts under the Master Covenant framework.",
     schemaType: "Article",
     priority: 0.9,
     changefreq: "monthly",
