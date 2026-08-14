@@ -108,7 +108,7 @@ export default function TechnicalFooter() {
                 <ComplianceItem checked label="NIST AI Risk Management Framework (AI RMF)" />
                 <ComplianceItem checked label="IEEE P7001 Transparency Standards" />
                 <ComplianceItem checked label="ISO/IEC 23894 AI Risk Management" />
-                <ComplianceItem checked label="USPTO Patent Documentation (#18/584,961)" />
+                <ComplianceItem checked label="IP Documentation (filing details under verification)" />
                 <ComplianceItem checked label="WCAG 2.1 AA Accessibility" />
                 <ComplianceItem pending label="Final NIST Evaluation (Pending)" />
               </div>
