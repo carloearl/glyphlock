@@ -237,7 +237,7 @@ export default function TechnologyMarquee() {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-2xl md:text-4xl font-bold text-white mb-3"
         >
-          Built on World-Class Infrastructure
+          Built with Proven Technologies
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 16 }}
@@ -281,7 +281,7 @@ export default function TechnologyMarquee() {
         className="mt-12 flex items-center justify-center gap-3"
       >
         <div className="h-px flex-1 max-w-[120px]" style={{ background: "linear-gradient(to right, transparent, rgba(56,189,248,0.3))" }} />
-        <span className="text-xs text-white/30 tracking-widest uppercase">100+ Integrated Technologies</span>
+        <span className="text-xs text-white/30 tracking-widest uppercase">Broad Integration Ecosystem</span>
         <div className="h-px flex-1 max-w-[120px]" style={{ background: "linear-gradient(to left, transparent, rgba(56,189,248,0.3))" }} />
       </motion.div>
     </div>
