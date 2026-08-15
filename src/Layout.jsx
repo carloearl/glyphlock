@@ -126,14 +126,14 @@ export default function Layout({ children, currentPageName }) {
       <div 
         className="fixed inset-0"
         style={{ 
-          zIndex: 30, 
+          zIndex: 0, 
           pointerEvents: 'none',
           userSelect: 'none',
           opacity: 1
         }}
         aria-hidden="true"
       >
-        <NebulaLayer intensity={2.15} />
+        <NebulaLayer intensity={1.45} />
         <CursorOrb />
       </div>
 
