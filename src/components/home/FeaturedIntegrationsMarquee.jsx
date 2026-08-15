@@ -1,7 +1,7 @@
 import React from "react";
 
 const TOKEN = "live_6a1a28fd-6420-4492-aeb0-b297461d9de2";
-const logo = (domain) => `https://img.logo.dev/${domain}?token=${TOKEN}&size=128&format=png&theme=dark`;
+const logo = (domain) => `https://img.logo.dev/${domain}?token=${TOKEN}&size=256&format=png&retina=true&theme=dark`;
 
 const FEATURED = [
   { name: "Oracle", subtitle: "Enterprise Platform", src: logo("oracle.com") },
@@ -29,10 +29,10 @@ export default function FeaturedIntegrationsMarquee() {
         .featured-int-card {
           display: flex;
           align-items: center;
-          gap: 18px;
+          gap: 14px;
           flex-shrink: 0;
-          padding: 22px 32px;
-          border-radius: 20px;
+          padding: 16px 24px;
+          border-radius: 16px;
           background: rgba(255,255,255,0.05);
           border: 1px solid rgba(255,255,255,0.12);
           box-shadow: 0 0 30px rgba(59,130,246,0.15);
@@ -42,6 +42,30 @@ export default function FeaturedIntegrationsMarquee() {
           border-color: rgba(56,189,248,0.5);
           box-shadow: 0 0 40px rgba(56,189,248,0.35);
           transform: translateY(-4px);
+        }
+        .featured-int-logo {
+          width: 42px;
+          height: 42px;
+          object-fit: contain;
+          image-rendering: -webkit-optimize-contrast;
+          filter: grayscale(1) brightness(1.35) contrast(1.05)
+                  drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+          opacity: 0.75;
+          transition: filter .3s ease, opacity .3s ease, transform .3s ease;
+        }
+        .featured-int-card:hover .featured-int-logo {
+          filter: grayscale(0) contrast(1.08) saturate(1.15)
+                  drop-shadow(0 4px 8px rgba(0,0,0,0.65))
+                  drop-shadow(0 0 12px rgba(56,189,248,0.4));
+          opacity: 1;
+          transform: translateY(-2px) scale(1.08);
+        }
+        .featured-int-card .featured-int-name {
+          color: rgba(255,255,255,0.72);
+          transition: color .3s ease;
+        }
+        .featured-int-card:hover .featured-int-name {
+          color: #ffffff;
         }
       `}</style>
 
@@ -79,7 +103,7 @@ export default function FeaturedIntegrationsMarquee() {
                   src={item.src}
                   alt={item.name}
                   loading="lazy"
-                  style={{ width: 56, height: 56, objectFit: "contain" }}
+                  className="featured-int-logo"
                   onError={(e) => { e.target.style.opacity = 0.2; }}
                 />
               ) : (
@@ -99,7 +123,7 @@ export default function FeaturedIntegrationsMarquee() {
                 </div>
               )}
               <div className="text-left">
-                <p className="text-xl md:text-2xl font-black text-white leading-tight whitespace-nowrap">{item.name}</p>
+                <p className="featured-int-name text-base md:text-lg font-black leading-tight whitespace-nowrap">{item.name}</p>
                 <p className="text-[11px] md:text-xs text-white/50 uppercase tracking-wider whitespace-nowrap">{item.subtitle}</p>
               </div>
             </div>
