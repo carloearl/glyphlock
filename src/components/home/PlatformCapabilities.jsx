@@ -285,12 +285,12 @@ export default function PlatformCapabilities() {
         >
           <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-3">
             From cryptographic timestamping and QR verification to AI imaging and venue operations —
-            one platform, built and maintained by one team, with every feature listed here live today.
+            one platform, built and maintained by one team. Availability varies by module, account permissions, integration status, and deployment.
           </p>
           <p className="text-white font-bold text-lg md:text-xl mb-10">
-            No vaporware. No inflated claims.<br />
+            Built features, documented capabilities, and clearly labeled development work.<br />
             <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-              What you see on this page is what actually ships.
+              Production availability is stated at the module level so you can distinguish deployed features from demos, integrations, and work in progress.
             </span>
           </p>
 
