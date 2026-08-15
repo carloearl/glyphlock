@@ -1,0 +1,9 @@
+{
+  "integration": "base44-github-two-way-sync",
+  "base44_app_id": "697a087fb354faebb72df54b",
+  "repository": "carloearl/glyphlock",
+  "branch": "main",
+  "purpose": "End-to-end sync marker created from GitHub to verify propagation into Base44.",
+  "created_by": "ChatGPT integration setup",
+  "status": "pending-base44-observation"
+}
