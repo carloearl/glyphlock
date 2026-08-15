@@ -89,7 +89,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-[13px] text-slate-400 leading-relaxed max-w-xs">
-              Quantum-resistant encryption, AI-powered threat detection, and the Master Covenant governance framework.
+              Secure software, cryptographic verification, AI-assisted tooling, and the Master Covenant governance framework.
             </p>
             
             {/* Social icons */}
@@ -226,7 +226,7 @@ export default function Footer() {
             </div>
             <div className="text-center space-y-1.5">
               <p className="text-sm font-black text-white uppercase tracking-[0.25em]">GlyphLock LLC</p>
-              <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Post-Quantum Cybersecurity Architecture</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Secure Creative Technology Architecture</p>
               <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">AI Governance · Zero-Trust · Enterprise Defense</p>
             </div>
             <div className="flex items-center gap-2 mt-1">
