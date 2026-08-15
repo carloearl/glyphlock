@@ -40,7 +40,7 @@ function CapabilityGrid() {
       <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">THE GLYPHLOCK<br/><span className="text-cyan-400 drop-shadow-[0_0_22px_rgba(34,211,238,.7)]">SYSTEM UNIVERSE.</span></h2>
     </div>
     <div className="grid md:grid-cols-2 gap-px bg-cyan-400/20 border border-cyan-400/20">
-      {capabilities.map(([title,text],i)=><motion.div key={title} initial={{opacity:0,y:25}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.08}} className="bg-[#050817] p-7 md:p-9 group hover:bg-[#071126] transition-colors">
+      {capabilities.map(([title,text],i)=><motion.div key={title} initial={{opacity:0,y:25}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.08}} className="relative overflow-hidden bg-[#050817]/80 backdrop-blur-xl p-7 md:p-9 group border border-transparent hover:border-cyan-300/35 hover:bg-[#071126]/90 hover:-translate-y-1 transition-all duration-300 shadow-[inset_0_0_35px_rgba(59,130,246,.08)] hover:shadow-[0_0_36px_rgba(34,211,238,.22),inset_0_0_45px_rgba(124,58,237,.10)]">
         <div className="font-mono text-[10px] text-cyan-400/60 mb-5">0{i+1} / CAPABILITY</div>
         <h3 className="text-xl font-black text-white mb-3 group-hover:text-cyan-300 transition-colors">{title}</h3>
         <p className="text-slate-400 leading-relaxed">{text}</p>
@@ -109,7 +109,7 @@ export default function Home() {
         <div className="relative z-10 mt-4"><HeroSection/></div>
         <FlagshipNUPSShowcase />
         <div className="relative z-10 max-w-7xl mx-auto px-5 w-full grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 border-y border-white/10">
-          {[['01','DESIGN'],['02','BUILD'],['03','INTEGRATE'],['04','OPERATE']].map(([n,t])=><div key={n} className="bg-[#030611]/80 px-5 py-4"><span className="font-mono text-cyan-400 text-xs mr-3">{n}</span><span className="font-black tracking-widest text-xs">{t}</span></div>)}
+          {[['01','DESIGN'],['02','BUILD'],['03','INTEGRATE'],['04','OPERATE']].map(([n,t])=><div key={n} className="bg-[#030611]/65 backdrop-blur-xl px-5 py-4 border-x border-cyan-300/10 shadow-[inset_0_0_24px_rgba(34,211,238,.08)] hover:shadow-[inset_0_0_34px_rgba(34,211,238,.18),0_0_28px_rgba(34,211,238,.14)] hover:text-cyan-100 transition-all"><span className="font-mono text-cyan-400 text-xs mr-3">{n}</span><span className="font-black tracking-widest text-xs">{t}</span></div>)}
         </div>
       </section>
 
@@ -124,7 +124,7 @@ export default function Home() {
       <section className="py-8"><OnSiteServices/></section>
 
       <section className="max-w-7xl mx-auto px-5 py-16">
-        <div className="rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-blue-950/60 to-violet-950/40 p-8 md:p-12 relative">
+        <div className="rounded-[32px] overflow-hidden border border-cyan-300/30 bg-gradient-to-br from-blue-950/55 via-slate-950/70 to-violet-950/50 backdrop-blur-xl p-8 md:p-12 relative shadow-[0_0_45px_rgba(34,211,238,.16),0_0_100px_rgba(124,58,237,.14),inset_0_0_50px_rgba(59,130,246,.08)]">
           <div className="absolute right-0 top-0 w-72 h-72 bg-violet-500/15 blur-[90px] rounded-full"/>
           <div className="relative"><div className="flex items-center gap-2 text-cyan-300 font-mono text-xs tracking-[.25em] mb-5"><Workflow size={16}/> ENGINEERING MODEL</div><h2 className="text-4xl md:text-6xl font-black max-w-4xl">AI IS IN THE WORKFLOW.<br/><span className="text-violet-400">PEOPLE OWN THE OUTCOME.</span></h2><p className="text-slate-300 text-lg max-w-3xl mt-6">We use multiple AI providers as tools for research, coding, analysis, review, and automation. Roles are defined by workflow—not by claims of endorsement, partnership, or legal binding by third-party model providers.</p><Link to={createPageUrl('DreamTeam')} className="inline-flex items-center gap-2 mt-7 text-cyan-300 font-black">EXPLORE THE AI WORKFLOW <ArrowRight size={18}/></Link></div>
         </div>
