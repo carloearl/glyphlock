@@ -90,23 +90,9 @@ export default function Home() {
   if(loading)return <div className="fixed inset-0 z-[99999] bg-[#02040d] flex items-center justify-center"><div className="relative"><div className="w-20 h-20 rounded-full border border-cyan-400/30 animate-ping"/><div className="absolute inset-5 rounded-full bg-cyan-400 shadow-[0_0_50px_#22d3ee]"/></div></div>;
   return <>
     <SEOHead title="GlyphLock — Custom Software, AI & Operations Systems" description="GlyphLock designs, builds, integrates, and operates custom software, AI-assisted workflows, websites, apps, and business systems. Explore NUPS and GlyphLock's working platform modules." keywords="GlyphLock, custom software, NUPS, software development, AI workflows, integrations, POS, QR verification" url="/"/>
-    <main className="min-h-screen text-white overflow-hidden" style={{background:'radial-gradient(circle at 50% 0%,#0d1f47 0,#050817 28%,#02040d 70%)'}}>
-      <section className="relative min-h-[92vh] flex flex-col justify-center pt-10">
-        <div className="absolute inset-0 pointer-events-none opacity-30" style={{backgroundImage:'linear-gradient(rgba(56,189,248,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.08) 1px,transparent 1px)',backgroundSize:'55px 55px',maskImage:'linear-gradient(to bottom,black,transparent 90%)'}}/>
-        <div className="absolute left-1/2 top-20 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none"/>
-        <div className="relative z-10 max-w-7xl mx-auto px-5 w-full">
-          <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} className="flex items-center gap-2 font-mono text-[11px] tracking-[.24em] text-cyan-300 mb-6"><span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_12px_#34d399]"/> GLYPHLOCK // SYSTEMS ONLINE</motion.div>
-          <motion.h1 initial={{opacity:0,y:35}} animate={{opacity:1,y:0}} transition={{delay:.08}} className="text-[clamp(3.3rem,9vw,8.4rem)] font-black leading-[.82] tracking-[-.06em] max-w-6xl">WE BUILD<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-500">SYSTEMS THAT RUN.</span></motion.h1>
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:.25}} className="grid lg:grid-cols-[1fr_auto] gap-8 items-end mt-8 mb-5">
-            <p className="text-lg md:text-2xl text-slate-300 max-w-3xl leading-relaxed">Custom software, AI-assisted workflows, integrations, and operations platforms engineered around how the business actually moves.</p>
-            <div className="flex flex-wrap gap-3">
-              <Link to={createPageUrl('Consultation')} className="group relative overflow-hidden px-7 py-4 rounded-xl bg-cyan-300 text-slate-950 font-black flex items-center gap-2 border border-cyan-100 shadow-[0_0_24px_rgba(34,211,238,.55),0_0_65px_rgba(34,211,238,.25)] hover:scale-[1.04] hover:bg-white hover:shadow-[0_0_38px_rgba(255,255,255,.7),0_0_90px_rgba(34,211,238,.35)] transition-all duration-300">BUILD WITH US <ArrowRight size={18}/></Link>
-              <Link to={createPageUrl('NUPSLanding')} className="group px-7 py-4 rounded-xl border border-violet-400/60 bg-violet-500/10 text-violet-100 font-black flex items-center gap-2 shadow-[0_0_24px_rgba(139,92,246,.28)] hover:scale-[1.04] hover:bg-violet-400/20 hover:border-violet-300 hover:shadow-[0_0_48px_rgba(139,92,246,.5)] transition-all duration-300"><Play size={17}/> VIEW NUPS</Link>
-              <a href="https://github.com/carloearl/glyphlock" target="_blank" rel="noreferrer" className="px-5 py-4 rounded-xl border border-white/10 text-slate-300 flex items-center gap-2 hover:text-white hover:border-white/30"><Github size={18}/> SOURCE</a>
-            </div>
-          </motion.div>
-        </div>
-        <div className="relative z-10 mt-4"><HeroSection/></div>
+    <main className="min-h-screen text-white overflow-hidden bg-transparent">
+      <section className="relative">
+        <div className="relative z-10"><HeroSection/></div>
         <FlagshipNUPSShowcase />
         <div className="relative z-10 max-w-7xl mx-auto px-5 w-full grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 border-y border-white/10">
           {[['01','DESIGN'],['02','BUILD'],['03','INTEGRATE'],['04','OPERATE']].map(([n,t])=><div key={n} className="bg-[#030611]/65 backdrop-blur-xl px-5 py-4 border-x border-cyan-300/10 shadow-[inset_0_0_24px_rgba(34,211,238,.08)] hover:shadow-[inset_0_0_34px_rgba(34,211,238,.18),0_0_28px_rgba(34,211,238,.14)] hover:text-cyan-100 transition-all"><span className="font-mono text-cyan-400 text-xs mr-3">{n}</span><span className="font-black tracking-widest text-xs">{t}</span></div>)}
