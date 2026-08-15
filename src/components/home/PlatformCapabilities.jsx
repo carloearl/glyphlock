@@ -10,7 +10,7 @@ import { createPageUrl } from '@/utils';
 const modules = [
   {
     title: 'QR Verification Studio',
-    desc: 'Cryptographically signed QR codes with scan logging, AI risk scoring, and steganographic payload embedding.',
+    desc: 'QR codes with cryptographic signing options, scan logging, configurable payload checks, and steganographic payload tools.',
     icon: QrCode,
     color: '#06b6d4',
     border: 'rgba(6,182,212,0.35)',
@@ -28,7 +28,7 @@ const modules = [
   },
   {
     title: 'GlyphBot Intelligence',
-    desc: 'Multi-provider AI assistant for site auditing, vulnerability scanning, code analysis, and natural language threat assessment.',
+    desc: 'Multi-provider AI assistant for site review, code analysis, configuration checks, and natural-language security assistance.',
     icon: Bot,
     color: '#4f46e5',
     border: 'rgba(79,70,229,0.35)',
@@ -244,13 +244,13 @@ export default function PlatformCapabilities() {
                 </h3>
               </div>
               <p className="text-white/70 text-sm leading-relaxed mb-3">
-                The GlyphLock platform — including its cryptographic verification architecture, QR provenance system,
-                blockchain anchoring protocols, and AI orchestration frameworks — constitutes original copyrighted
-                works and proprietary technology owned exclusively by GlyphLock LLC.
+                GlyphLock includes original software, interface designs, documentation, workflows, cryptographic verification components,
+                QR provenance tools, timestamping methods, and AI workflow configurations. GlyphLock-created material may be
+                protected under applicable intellectual-property law and governing agreements.
               </p>
               <p className="text-white/60 text-xs leading-relaxed">
-                All trademarks, system designs, and protocol specifications are protected. Unauthorized reproduction
-                or derivative use is prohibited and will be enforced to the fullest extent of applicable law.
+                GlyphLock names, marks, original designs, documentation, and protocol specifications may be subject to trademark,
+                copyright, contract, or other protections. Third-party technologies and marks remain the property of their respective owners.
               </p>
             </div>
             <div>
@@ -269,8 +269,8 @@ export default function PlatformCapabilities() {
                 ))}
               </div>
               <p className="text-white/60 text-xs leading-relaxed">
-                GlyphLock is architected for alignment with these frameworks. Designations represent architectural
-                compatibility and do not constitute formal certification unless explicitly stated in a written agreement.
+                These labels identify frameworks considered during architecture and control mapping. They do not represent certification,
+                audit completion, regulatory approval, or legal compliance unless separately documented for the applicable system and scope.
               </p>
             </div>
           </div>
