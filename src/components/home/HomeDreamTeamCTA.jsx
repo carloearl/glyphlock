@@ -30,7 +30,7 @@ export default function HomeDreamTeamCTA() {
           transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="text-xl md:text-2xl leading-relaxed font-black drop-shadow-[0_4px_12px_rgba(0,0,0,1)] space-y-4"
         >
-          <p className="text-white">Other platforms run single models with guardrails.<br />GlyphLock orchestrates a full roster — <span className="text-blue-400">six specialized AI agents executing coordinated plays.</span></p>
+          <p className="text-white">GlyphLock uses a six-role AI workflow model across multiple providers, with each role assigned a defined purpose in research, analysis, coding, and review.</p>
         </motion.div>
       </div>
 
