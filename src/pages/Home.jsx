@@ -53,7 +53,7 @@ function ProductProof() {
       <Link to={createPageUrl('NUPSLanding')} className="text-cyan-200 font-black flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 shadow-[0_0_22px_rgba(34,211,238,.2)] hover:text-white hover:shadow-[0_0_38px_rgba(34,211,238,.45)] transition-all">ENTER THE FLAGSHIP <ArrowRight size={18}/></Link>
     </div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {proof.map((p,i)=>{const Icon=p.icon;return <Link key={p.title} to={createPageUrl(p.link)} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] backdrop-blur-xl p-6 min-h-[260px] group hover:-translate-y-2 hover:scale-[1.015] hover:border-cyan-300/50 transition-all duration-300 shadow-[0_0_24px_rgba(59,130,246,.10)] hover:shadow-[0_0_38px_rgba(34,211,238,.28),0_0_80px_rgba(124,58,237,.16)]" style={{boxShadow:`inset 0 0 50px ${p.c}08`}}>
+      {proof.map((p,i)=>{const Icon=p.icon;return <Link key={p.title} to={createPageUrl(p.link)} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] backdrop-blur-xl p-6 min-h-[260px] group hover:-translate-y-2 hover:scale-[1.015] hover:border-cyan-300/50 transition-all duration-300" style={{boxShadow:`0 0 24px ${p.c}22, inset 0 0 55px ${p.c}12`}}>
         <div className="absolute -right-12 -top-12 w-40 h-40 rounded-full blur-3xl opacity-20" style={{background:p.c}}/>
         <Icon className="w-9 h-9 mb-12" style={{color:p.c}}/>
         <div className="font-mono text-[10px] text-white/35 mb-2">MODULE_0{i+1}</div>
