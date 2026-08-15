@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, ShieldCheck, Code2, Workflow, QrCode, Bot, Building2, Sparkles, Github } from 'lucide-react';
+import { ArrowRight, Play, ShieldCheck, Code2, Workflow, QrCode, Bot, Building2, Sparkles, Github, Image, DollarSign, Radio, Music2 } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
 import { createPageUrl } from '@/utils';
 import HeroSection from '@/components/home/HeroSection';
@@ -13,10 +13,14 @@ import TechnologyMarquee from '@/components/TechnologyMarquee';
 import CTASection from '@/components/home/CTASection';
 
 const proof = [
-  { icon: Building2, title: 'NUPS', text: 'Venue operations: POS, contracts, receipts, reporting, payouts, and audit trails.', link: 'NUPSLanding', c: '#38bdf8' },
-  { icon: QrCode, title: 'QR Studio', text: 'Custom QR payloads, scan logging, signing options, and verification workflows.', link: 'Qr', c: '#22d3ee' },
-  { icon: ShieldCheck, title: 'Governance Hub', text: 'Published operating standards for how GlyphLock scopes, documents, reviews, and governs systems.', link: 'GovernanceHub', c: '#8b5cf6' },
-  { icon: Bot, title: 'GlyphBot', text: 'Multi-provider AI assistance for research, review, audits, and natural-language workflows.', link: 'GlyphBot', c: '#818cf8' },
+  { icon: Building2, title: 'NUPS', text: 'Flagship venue operating platform: POS, contracts, receipts, reporting, payouts, staff workflows and audit trails.', link: 'NUPSLanding', c: '#38bdf8' },
+  { icon: QrCode, title: 'QR Studio', text: 'Custom QR payloads, scan logging, signing options, verification workflows and QR vault tooling.', link: 'Qr', c: '#22d3ee' },
+  { icon: ShieldCheck, title: 'Governance Hub', text: 'Master Covenant and published operating standards for how GlyphLock scopes, documents, reviews and governs systems.', link: 'GovernanceHub', c: '#8b5cf6' },
+  { icon: Bot, title: 'GlyphBot', text: 'Multi-provider AI assistance for research, code analysis, site audits, support and natural-language workflows.', link: 'GlyphBot', c: '#818cf8' },
+  { icon: Image, title: 'Image Lab', text: 'AI image generation, visual analysis and interactive hotspot experiences built into the platform.', link: 'ImageLab', c: '#d946ef' },
+  { icon: DollarSign, title: 'GlyphLock Financial', text: 'Operational ledgers, settlement views, payout workflows and financial reporting surfaces.', link: 'GlyphLockFinancial', c: '#10b981' },
+  { icon: Radio, title: 'Security Operations', text: 'Access controls, activity monitoring, audit visibility and operational security tooling.', link: 'SecurityOperationsCenter', c: '#f43f5e' },
+  { icon: Music2, title: 'DJ Pro Mixer', text: 'GlyphLock creative tooling for DJ, audio and venue workflows alongside the operations stack.', link: 'GlyphBotMixer', c: '#f59e0b' },
 ];
 
 const capabilities = [
