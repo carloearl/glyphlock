@@ -10,6 +10,10 @@ const FEATURED = [
   { name: "Stripe", subtitle: "Payments & Payouts", src: logo("stripe.com") },
   { name: "Claude", subtitle: "AI Assistant", src: logo("anthropic.com") },
   { name: "ChatGPT", subtitle: "AI Assistant", src: logo("openai.com") },
+  { name: "Gemini", subtitle: "AI Assistant", src: logo("gemini.google.com") },
+  { name: "Qwen", subtitle: "AI Assistant", src: logo("qwen.ai") },
+  { name: "Copilot", subtitle: "AI Assistant", src: logo("copilot.microsoft.com") },
+  { name: "Perplexity", subtitle: "AI Search", src: logo("perplexity.ai") },
 ];
 
 export default function FeaturedIntegrationsMarquee() {
