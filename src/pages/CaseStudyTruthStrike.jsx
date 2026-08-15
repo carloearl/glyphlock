@@ -233,7 +233,7 @@ export default function CaseStudyTruthStrike() {
 
           <Card className="max-w-4xl mx-auto bg-gradient-to-br from-blue-950/50 to-slate-900/50 border-2 border-blue-600">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-bold text-blue-400 mb-6">Case Status: Active Investigation</h3>
+              <h3 className="text-2xl font-bold text-blue-400 mb-6">Case Status: IC3 Complaint Reported Filed</h3>
 
               <div className="space-y-6 text-slate-300 leading-relaxed">
                 <p>
