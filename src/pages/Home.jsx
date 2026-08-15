@@ -5,6 +5,7 @@ import { ArrowRight, Play, ShieldCheck, Code2, Workflow, QrCode, Bot, Building2,
 import SEOHead from '@/components/SEOHead';
 import { createPageUrl } from '@/utils';
 import HeroSection from '@/components/home/HeroSection';
+import FlagshipNUPSShowcase from '@/components/home/FlagshipNUPSShowcase';
 import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsMarquee';
 import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
 import ServicesGrid from '@/components/home/ServicesGrid';
@@ -99,6 +100,7 @@ export default function Home() {
           </motion.div>
         </div>
         <div className="relative z-10 mt-4"><HeroSection/></div>
+        <FlagshipNUPSShowcase />
         <div className="relative z-10 max-w-7xl mx-auto px-5 w-full grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 border-y border-white/10">
           {[['01','DESIGN'],['02','BUILD'],['03','INTEGRATE'],['04','OPERATE']].map(([n,t])=><div key={n} className="bg-[#030611]/80 px-5 py-4"><span className="font-mono text-cyan-400 text-xs mr-3">{n}</span><span className="font-black tracking-widest text-xs">{t}</span></div>)}
         </div>
