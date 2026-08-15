@@ -83,7 +83,7 @@ export default function HeroSection() {
             </motion.span>
             <img
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
-              alt="GlyphLock Security Logo - Quantum-Resistant Cybersecurity Platform"
+              alt="GlyphLock Secure Creative Technology Logo"
               width="120"
               height="120"
               fetchpriority="high"
