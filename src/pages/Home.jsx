@@ -15,6 +15,7 @@ import WordOfTheDay from '@/components/home/WordOfTheDay';
 import IntroHeader from '@/components/home/IntroHeader';
 import IntroStatement from '@/components/home/IntroStatement';
 import AdminNupsBypass from '@/components/home/AdminNupsBypass';
+import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsMarquee';
 
 const SectionLoader = () => (
   <div className="w-full py-20 flex items-center justify-center">
@@ -125,6 +126,9 @@ export default function Home() {
         
         {/* Introduction header — very top, below the nav bar */}
         <IntroHeader />
+
+        {/* Featured integrations — large scrolling marquee */}
+        <FeaturedIntegrationsMarquee />
 
         {/* Admin-only NUPS bypass entry */}
         <AdminNupsBypass />
