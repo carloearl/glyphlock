@@ -10,7 +10,7 @@ import { createPageUrl } from '@/utils';
 const modules = [
   {
     title: 'QR Verification Studio',
-    desc: 'Tamper-resistant QR codes with blockchain-anchored provenance chains, AI risk scoring, and steganographic payload embedding.',
+    desc: 'Cryptographically signed QR codes with scan logging, AI risk scoring, and steganographic payload embedding.',
     icon: QrCode,
     color: '#06b6d4',
     border: 'rgba(6,182,212,0.35)',
@@ -37,7 +37,7 @@ const modules = [
   },
   {
     title: 'GlyphLock Financial',
-    desc: 'Underwriting dossier generation, deterministic risk scoring, and qualification frameworks for institutional compliance review.',
+    desc: 'Documentation tooling that organizes operational records into structured dossiers for underwriting and compliance review.',
     icon: DollarSign,
     color: '#10b981',
     border: 'rgba(16,185,129,0.35)',
@@ -45,8 +45,8 @@ const modules = [
     link: 'GlyphLockFinancial'
   },
   {
-    title: 'Blockchain Verification',
-    desc: 'Timestamped cryptographic proofs exportable as evidentiary records for transactions, media assets, and operational events.',
+    title: 'Timestamp Verification',
+    desc: 'SHA-256 hashing with exportable, timestamped proofs for transactions, media assets, and operational records.',
     icon: Link2,
     color: '#f59e0b',
     border: 'rgba(245,158,11,0.35)',
@@ -55,7 +55,7 @@ const modules = [
   },
   {
     title: 'Master Covenant Governance',
-    desc: 'Structured governance architecture defining accountability standards and compliance alignment across multi-provider AI systems.',
+    desc: 'Our published governance framework defining the accountability standards our multi-provider AI tools are built against.',
     icon: FileText,
     color: '#7c3aed',
     border: 'rgba(124,58,237,0.35)',
@@ -64,7 +64,7 @@ const modules = [
   },
   {
     title: 'Security Operations Center',
-    desc: 'Continuous monitoring with alert thresholds and live threat intelligence across the full GlyphLock infrastructure surface.',
+    desc: 'A security dashboard with activity monitoring, configurable alert thresholds, and account security controls.',
     icon: Eye,
     color: '#ef4444',
     border: 'rgba(239,68,68,0.35)',
@@ -204,9 +204,9 @@ export default function PlatformCapabilities() {
             transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-white/70 text-base md:text-lg max-w-3xl mx-auto leading-relaxed"
           >
-            A unified cybersecurity and digital infrastructure platform spanning quantum-resistant encryption,
-            AI-driven threat detection, and visual cryptography — architected for zero-trust environments
-            where verification and accountability are essential.
+            A working platform built on standard, proven security: encrypted connections, authenticated access,
+            cryptographic hashing and signing, AI-assisted tooling, and audit logging — for operations
+            where verification and accountability matter.
           </motion.p>
         </div>
 
@@ -284,13 +284,13 @@ export default function PlatformCapabilities() {
           className="text-center"
         >
           <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-3">
-            From post-quantum cryptography and blockchain verification to real-time media interaction and financial infrastructure —
-            a unified environment where physical systems and digital networks operate under verifiable trust.
+            From cryptographic timestamping and QR verification to AI imaging and venue operations —
+            one platform, built and maintained by one team, with every feature listed here live today.
           </p>
           <p className="text-white font-bold text-lg md:text-xl mb-10">
-            GlyphLock is not simply a security platform.<br />
+            No vaporware. No inflated claims.<br />
             <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-              It is infrastructure for the next generation of digital systems.
+              What you see on this page is what actually ships.
             </span>
           </p>
 

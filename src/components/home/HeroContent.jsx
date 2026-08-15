@@ -77,7 +77,7 @@ export default function HeroContent() {
   const isInView = true; // always render content; animate once when scrolled in
   void inView;
   const [typedText, setTypedText] = useState("");
-  const fullText = "GlyphLock = SOVEREIGN_INFRASTRUCTURE";
+  const fullText = "GlyphLock = SECURE_CREATIVE_TECHNOLOGY";
 
   useEffect(() => {
     if (!isInView) return;
@@ -91,17 +91,17 @@ export default function HeroContent() {
   }, [isInView]);
 
   const features = [
-    { highlight: "BUILD SOVEREIGN", text: "— your architecture, your keys" },
-    { highlight: "PROVE ORIGIN", text: "— blockchain-anchored authorship" },
-    { highlight: "AI ORCHESTRATION", text: "— multi-model intelligence" },
-    { highlight: "ZERO TRUST", text: "— post-quantum by default" },
-    { highlight: "OWN EVERYTHING", text: "— covenant-verified, forever" }
+    { highlight: "CUSTOM BUILDS", text: "— websites, apps, and software platforms" },
+    { highlight: "PROOF OF ORIGIN", text: "— SHA-256 hashing and timestamped records" },
+    { highlight: "AI TOOLING", text: "— assistants built on multiple AI providers" },
+    { highlight: "SIGNED QR CODES", text: "— verifiable, scan-logged QR assets" },
+    { highlight: "VENUE OPERATIONS", text: "— the NUPS point-of-sale and audit platform" }
   ];
 
   const cards = [
     {
-      title: "SOVEREIGN STACK",
-      desc: "Your infrastructure. Your keys. No middlemen, no gatekeepers — full operational control.",
+      title: "CUSTOM SOFTWARE",
+      desc: "Websites, apps, and business systems designed and built around how you actually operate.",
       color: "#06b6d4",
       borderClass: "border-cyan-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(6,182,212,0.5)]",
@@ -109,8 +109,8 @@ export default function HeroContent() {
       icon: <Code2 className="w-10 h-10" style={{ color: '#06b6d4', filter: 'drop-shadow(0 0 15px #06b6d4)' }} />
     },
     {
-      title: "VERIFIABLE ORIGIN",
-      desc: "Blockchain-anchored proof of authorship. Transparent, auditable, immutable — no hidden layers.",
+      title: "VERIFIABLE RECORDS",
+      desc: "SHA-256 hashing and cryptographic timestamping so documents and assets can be verified later.",
       color: "#4f46e5",
       borderClass: "border-indigo-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(79,70,229,0.5)]",
@@ -118,8 +118,8 @@ export default function HeroContent() {
       icon: <Eye className="w-10 h-10" style={{ color: '#4f46e5', filter: 'drop-shadow(0 0 15px #4f46e5)' }} />
     },
     {
-      title: "COVENANT PROTOCOL",
-      desc: "Cryptographic governance that binds your rights to the chain. What you build stays yours. Permanently.",
+      title: "OPERATIONS PLATFORM",
+      desc: "NUPS — a working venue platform with point of sale, contracts, receipts, and audit trails.",
       color: "#7c3aed",
       borderClass: "border-purple-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(124,58,237,0.5)]",
@@ -300,7 +300,7 @@ export default function HeroContent() {
               }}
             >
               <span className="text-purple-400" style={{ animation: 'heroBlink 1s infinite' }}>&gt; </span>
-              SOVEREIGN PROTOCOL v3.0 ACTIVE
+              GLYPHLOCK PLATFORM · LIVE
             </motion.div>
 
             {/* Headline */}
@@ -313,8 +313,8 @@ export default function HeroContent() {
                 <span className="text-white block">BUILD</span>
                 <span className="text-white block">WHAT'S</span>
                 <span className="hero-word-robbed block">YOURS.</span>
-                <span className="text-white block text-[0.7em]">PROVE IT</span>
-                <span className="hero-word-creating block">FOREVER.</span>
+                <span className="text-white block text-[0.7em]">PROVE IT'S</span>
+                <span className="hero-word-creating block">YOURS.</span>
               </h1>
               <div className="bg-black/80 border-2 border-cyan-500 p-3 font-mono text-xs text-cyan-400 relative" style={{ boxShadow: '0 0 20px rgba(6,182,212,0.2)', textShadow: '0 0 10px #06b6d4' }}>
                 <div className="opacity-50 text-[10px] mb-1">$ glyphlock --mode=sovereign --verify</div>
@@ -324,8 +324,8 @@ export default function HeroContent() {
 
             {/* Side panels */}
             <div className="flex flex-col gap-3">
-              <GlassShard title="⚡ QUANTUM-GRADE DEFENSE" text="Post-quantum encryption and AI threat detection — institutional security for sovereign builders." color="cyan" delay={0.4} isInView={isInView} />
-              <GlassShard title="🔓 COVENANT GOVERNANCE" text="Every asset anchored. Every origin provable. Cryptographic rights management at protocol level." color="violet" delay={0.5} isInView={isInView} />
+              <GlassShard title="⚡ SECURITY BASICS DONE RIGHT" text="Encrypted connections, authenticated access, role-based permissions, and audit logging across the platform." color="cyan" delay={0.4} isInView={isInView} />
+              <GlassShard title="🔓 CRYPTOGRAPHIC TIMESTAMPING" text="SHA-256 hashing and timestamped seals so you can prove a record existed and hasn't been altered." color="violet" delay={0.5} isInView={isInView} />
             </div>
 
             {/* Features */}
@@ -369,7 +369,7 @@ export default function HeroContent() {
                 }}
               >
                 <span className="text-purple-400" style={{ animation: 'heroBlink 1s infinite' }}>&gt; </span>
-                SOVEREIGN PROTOCOL v3.0 ACTIVE
+                GLYPHLOCK PLATFORM · LIVE
               </motion.div>
             </div>
 
@@ -383,8 +383,8 @@ export default function HeroContent() {
                 <span className="text-white block">BUILD</span>
                 <span className="text-white block">WHAT'S</span>
                 <span className="hero-word-robbed block">YOURS.</span>
-                <span className="text-white block text-[0.7em]">PROVE IT</span>
-                <span className="hero-word-creating block">FOREVER.</span>
+                <span className="text-white block text-[0.7em]">PROVE IT'S</span>
+                <span className="hero-word-creating block">YOURS.</span>
               </h1>
               <div className="bg-black/80 border-2 border-cyan-500 p-3 font-mono text-xs text-cyan-400 relative mt-3" style={{ boxShadow: '0 0 20px rgba(6,182,212,0.2)', textShadow: '0 0 10px #06b6d4' }}>
                 <div className="opacity-50 text-[10px] mb-1">$ glyphlock --mode=sovereign --verify</div>
@@ -393,8 +393,8 @@ export default function HeroContent() {
             </motion.div>
 
             <div className="flex flex-col gap-3">
-              <GlassShard title="⚡ QUANTUM-GRADE DEFENSE" text="Post-quantum encryption and AI threat detection — institutional security for sovereign builders." color="cyan" delay={0.4} isInView={isInView} />
-              <GlassShard title="🔓 COVENANT GOVERNANCE" text="Every asset anchored. Every origin provable. Cryptographic rights management at protocol level." color="violet" delay={0.5} isInView={isInView} />
+              <GlassShard title="⚡ SECURITY BASICS DONE RIGHT" text="Encrypted connections, authenticated access, role-based permissions, and audit logging across the platform." color="cyan" delay={0.4} isInView={isInView} />
+              <GlassShard title="🔓 CRYPTOGRAPHIC TIMESTAMPING" text="SHA-256 hashing and timestamped seals so you can prove a record existed and hasn't been altered." color="violet" delay={0.5} isInView={isInView} />
             </div>
 
             {/* Row 3: Features + CTAs */}
@@ -491,7 +491,7 @@ function CTAButtons({ isInView }) {
             }}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              ⚡ BEGIN SOVEREIGN BUILD
+              ⚡ REQUEST A CONSULTATION
             </span>
           </div>
         </Link>

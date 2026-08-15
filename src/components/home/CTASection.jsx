@@ -32,10 +32,10 @@ export default function CTASection() {
   };
 
   const benefits = [
-    { text: "QR identity anchored to every asset", icon: Shield },
-    { text: "AI-orchestrated multi-model defense", icon: Zap },
-    { text: "Master Covenant authorship protocol", icon: CheckCircle2 },
-    { text: "Post-quantum sovereign architecture", icon: Sparkles }
+    { text: "Signed, verifiable QR codes", icon: Shield },
+    { text: "AI tools on multiple providers", icon: Zap },
+    { text: "SHA-256 timestamped proofs", icon: CheckCircle2 },
+    { text: "Custom builds and on-site service", icon: Sparkles }
   ];
 
   // Stagger animation variants
@@ -194,7 +194,7 @@ export default function CTASection() {
                 >
                   <Sparkles size={14} className="text-blue-400" />
                 </motion.div>
-                <span className="text-blue-300 text-sm font-medium tracking-wide">Sovereign Builder Infrastructure</span>
+                <span className="text-blue-300 text-sm font-medium tracking-wide">GlyphLock — Secure Creative Technology</span>
               </motion.div>
 
               {/* Title - Slide from LEFT */}
@@ -226,7 +226,7 @@ export default function CTASection() {
                 transition={{ duration: 1.1, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
                 className="text-base md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto font-medium"
               >
-                Covenant-verified infrastructure for builders who refuse to rent what they create.
+                Tell us what you're building or running — we'll reply with a real plan and a real quote.
               </motion.p>
 
               {/* Email form - Scale up with bounce */}
@@ -268,7 +268,7 @@ export default function CTASection() {
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                     />
                     <span className="relative flex items-center gap-2 text-sm md:text-base">
-                      CLAIM YOUR STACK
+                      GET STARTED
                       <motion.span
                         animate={{ x: [0, 4, 0] }}
                         transition={{ duration: 1.5, repeat: Infinity }}

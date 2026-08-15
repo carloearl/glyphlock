@@ -13,35 +13,35 @@ import { motion, useInView } from "framer-motion";
 const services = [
   {
     title: "Master Covenant",
-    description: "Authorship protocol – cryptographic proof of origin for creative work at ecosystem scale",
+    description: "Our published governance framework – the standards and accountability rules our AI systems are built to follow",
     link: "MasterCovenant",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/8f4e28351_Whisk_05f17d65a57cf59bf1a4fdd31ffd7d8edr.jpg",
     icon: FileCode
   },
   {
-    title: "QR Identity Studio",
-    description: "Visual identity layer – embed verified metadata into scannable assets across your ecosystem",
+    title: "QR Studio",
+    description: "Generate custom QR codes with cryptographic signing, scan logging, and AI risk scoring",
     link: "Qr",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ef8ed5e35_ee8d4930-e046-49b0-8beb-87745181d506.jpg",
     icon: Eye
   },
   {
-    title: "Blockchain Anchoring",
-    description: "Immutable timestamping – lock creative assets to verifiable on-chain records",
+    title: "Timestamp Proofs",
+    description: "SHA-256 hashing with exportable timestamped proofs that a record existed and hasn't changed",
     link: "Blockchain",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/b91660fea_Whisk_8fdb6d2b015dc9e846648880fcd03ca1dr.jpg",
     icon: Lock
   },
   {
     title: "Image Lab",
-    description: "AI generation + interactive hotspots – turn static visuals into verified, linkable ecosystems",
+    description: "AI image generation plus interactive hotspots – make images clickable and shareable",
     link: "ImageLab",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/9167e5df2_08f33231-115f-4c95-9719-682f4e9679cc.jpg",
     icon: Image
   },
   {
-    title: "GlyphBot Intelligence",
-    description: "AI builder assistant – site audits, architecture analysis, and knowledge synthesis for your ecosystem",
+    title: "GlyphBot",
+    description: "AI assistant built on multiple AI providers – chat, site audits, and code analysis",
     link: "GlyphBot",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0e2155dc3_Whisk_df925aca34d95e09a3b4274e0bd16f08dr.jpg",
     icon: Brain
@@ -73,7 +73,7 @@ export default function ServicesGrid() {
           transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-3xl md:text-5xl font-black text-white mb-4 drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]"
         >
-          Sovereign Security <span className="bg-gradient-to-r from-[#1E40AF] via-[#3B82F6] to-[#60A5FA] bg-clip-text text-transparent">Modules</span>
+          Platform <span className="bg-gradient-to-r from-[#1E40AF] via-[#3B82F6] to-[#60A5FA] bg-clip-text text-transparent">Modules</span>
         </motion.h2>
         
         {/* Subtitle - Slide from right */}
@@ -83,7 +83,7 @@ export default function ServicesGrid() {
           transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="text-lg text-white/90"
         >
-          Build, anchor, and defend your digital ecosystem — powered by covenant-verified infrastructure
+          Working tools you can use today — QR verification, timestamping, AI imaging, and an AI assistant
         </motion.p>
       </div>
 
