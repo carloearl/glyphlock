@@ -351,8 +351,8 @@ function CommandCTA() {
       <div className="relative overflow-hidden rounded-[32px] border border-cyan-200/35 bg-[#030714]/50 backdrop-blur-2xl px-6 py-12 md:px-12 md:py-16 shadow-[0_0_50px_rgba(34,211,238,.16),0_0_120px_rgba(124,58,237,.14),inset_0_0_70px_rgba(59,130,246,.07)]">
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(rgba(34,211,238,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.09) 1px,transparent 1px)', backgroundSize: '38px 38px' }} />
         <motion.div animate={{ x: ['-30%', '130%'] }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }} className="absolute top-0 h-px w-[30%] bg-gradient-to-r from-transparent via-cyan-200 to-transparent shadow-[0_0_20px_#22d3ee]" />
-        <div className="absolute -top-32 right-0 h-96 w-96 rounded-full bg-blue-600/18 blur-[110px]" />
-        <div className="absolute -bottom-40 left-[20%] h-80 w-80 rounded-full bg-violet-600/16 blur-[110px]" />
+        <div className="absolute -top-32 right-0 h-96 w-96 rounded-full bg-blue-600/[.18] blur-[110px]" />
+        <div className="absolute -bottom-40 left-[20%] h-80 w-80 rounded-full bg-violet-600/[.16] blur-[110px]" />
         <div className="relative grid lg:grid-cols-[1fr_auto] gap-10 items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/35 bg-emerald-400/[.08] px-4 py-2 font-mono text-[9px] md:text-[10px] tracking-[.22em] text-emerald-200 mb-5">
@@ -374,7 +374,7 @@ function CommandCTA() {
             <Link to={createPageUrl('Services')} className="gl-energy-button inline-flex items-center justify-center gap-2 rounded-xl border border-blue-300/45 bg-blue-500/12 px-7 py-4 font-black text-blue-100 shadow-[0_0_25px_rgba(59,130,246,.22)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:border-blue-200/70 hover:bg-blue-400/20 hover:shadow-[0_0_48px_rgba(59,130,246,.48)]">
               <Code2 className="h-4 w-4" /> EXPLORE SERVICES
             </Link>
-            <Link to={createPageUrl('NUPSLanding')} className="gl-energy-button inline-flex items-center justify-center gap-2 rounded-xl border border-violet-300/50 bg-violet-500/14 px-7 py-4 font-black text-violet-100 shadow-[0_0_25px_rgba(139,92,246,.24)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:border-violet-200/75 hover:bg-violet-400/22 hover:shadow-[0_0_50px_rgba(139,92,246,.50)]">
+            <Link to={createPageUrl('NUPSLanding')} className="gl-energy-button inline-flex items-center justify-center gap-2 rounded-xl border border-violet-300/50 bg-violet-500/[.14] px-7 py-4 font-black text-violet-100 shadow-[0_0_25px_rgba(139,92,246,.24)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:border-violet-200/75 hover:bg-violet-400/[.22] hover:shadow-[0_0_50px_rgba(139,92,246,.50)]">
               <Play className="h-4 w-4" /> EXPERIENCE NUPS
             </Link>
           </div>
