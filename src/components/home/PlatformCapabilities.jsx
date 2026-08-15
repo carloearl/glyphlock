@@ -257,7 +257,7 @@ export default function PlatformCapabilities() {
               <div className="flex items-center gap-2 mb-3">
                 <Cpu className="w-5 h-5 text-cyan-400" style={{ filter: 'drop-shadow(0 0 6px rgba(6,182,212,0.8))' }} />
                 <h3 className="text-sm font-black uppercase tracking-widest text-cyan-400">
-                  Compliance Alignment
+                  Framework Mapping
                 </h3>
               </div>
               <div className="flex flex-wrap gap-2 mb-3">
