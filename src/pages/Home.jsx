@@ -10,6 +10,9 @@ import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsM
 import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
 import ServicesGrid from '@/components/home/ServicesGrid';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
+import TechServicesPreview from '@/components/home/TechServicesPreview';
+import OnSiteServices from '@/components/home/OnSiteServices';
+import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
 
 const proof = [
@@ -116,6 +119,9 @@ export default function Home() {
 
       <section className="py-10"><HomeDreamTeamCTA/></section>
       <section className="py-8"><ServicesGrid/></section>
+      <section className="py-4"><PlatformCapabilities/></section>
+      <section className="py-8"><TechServicesPreview/></section>
+      <section className="py-8"><OnSiteServices/></section>
 
       <section className="max-w-7xl mx-auto px-5 py-16">
         <div className="rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-blue-950/60 to-violet-950/40 p-8 md:p-12 relative">
