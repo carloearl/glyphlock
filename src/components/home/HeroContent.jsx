@@ -300,7 +300,7 @@ export default function HeroContent() {
               }}
             >
               <span className="text-purple-400" style={{ animation: 'heroBlink 1s infinite' }}>&gt; </span>
-              GLYPHLOCK PLATFORM · LIVE
+              GLYPHLOCK PLATFORM · ACTIVE BUILD
             </motion.div>
 
             {/* Headline */}
@@ -369,7 +369,7 @@ export default function HeroContent() {
                 }}
               >
                 <span className="text-purple-400" style={{ animation: 'heroBlink 1s infinite' }}>&gt; </span>
-                GLYPHLOCK PLATFORM · LIVE
+                GLYPHLOCK PLATFORM · ACTIVE BUILD
               </motion.div>
             </div>
 
