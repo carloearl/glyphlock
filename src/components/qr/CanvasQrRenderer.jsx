@@ -90,13 +90,15 @@ export default function CanvasQrRenderer({
         break;
 
       case 'pixel':
-        // Slightly smaller square with gaps
+      {        // Slightly smaller square with gaps
         const pixelPadding = cellSize * 0.15;
         ctx.fillRect(x + pixelPadding, y + pixelPadding, cellSize - pixelPadding * 2, cellSize - pixelPadding * 2);
         break;
 
+      }
+
       case 'mosaic':
-        // Multiple small tiles
+      {        // Multiple small tiles
         const tileSize = size / 2;
         const gap = 1;
         ctx.fillRect(x + padding, y + padding, tileSize - gap, tileSize - gap);
@@ -104,6 +106,8 @@ export default function CanvasQrRenderer({
         ctx.fillRect(x + padding, y + padding + tileSize, tileSize - gap, tileSize - gap);
         ctx.fillRect(x + padding + tileSize, y + padding + tileSize, tileSize - gap, tileSize - gap);
         break;
+
+      }
 
       case 'microdots':
         // Smaller centered dot

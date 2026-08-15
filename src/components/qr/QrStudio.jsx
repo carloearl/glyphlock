@@ -213,6 +213,7 @@ export default function QrStudio({ initialTab = 'create' }) {
         const startDateTime = `${qrData.eventStartDate}T${qrData.eventStartTime}:00`;
         const endDateTime = `${qrData.eventEndDate}T${qrData.eventEndTime}:00`;
         return `BEGIN:VEVENT\nSUMMARY:${qrData.eventTitle}\nLOCATION:${qrData.eventLocation}\nDTSTART:${startDateTime.replace(/[-:]/g, '')}\nDTEND:${endDateTime.replace(/[-:]/g, '')}\nDESCRIPTION:${qrData.eventDescription}\nEND:VEVENT`;
+      }
       default: return "";
       }
     }
