@@ -9,8 +9,8 @@ import { createPageUrl } from '@/utils';
 
 const modules = [
   {
-    title: 'QR Verification Studio',
-    desc: 'QR codes with cryptographic signing options, scan logging, configurable payload checks, and steganographic payload tools.',
+    title: 'QR & Scanning',
+    desc: 'Generate, brand, and track QR codes — with scan logging and signed payloads when a build calls for it.',
     icon: QrCode,
     color: '#06b6d4',
     border: 'rgba(6,182,212,0.35)',
@@ -19,7 +19,7 @@ const modules = [
   },
   {
     title: 'Image Lab',
-    desc: 'AI image generation, interactive hotspot editing, and multimodal visual analysis secured through SHA-256 hash verification.',
+    desc: 'AI image generation, interactive hotspot editing, and visual analysis you can drop into a product.',
     icon: Image,
     color: '#a855f7',
     border: 'rgba(168,85,247,0.35)',
@@ -27,8 +27,8 @@ const modules = [
     link: 'ImageLab'
   },
   {
-    title: 'GlyphBot Intelligence',
-    desc: 'Multi-provider AI assistant for site review, code analysis, configuration checks, and natural-language security assistance.',
+    title: 'GlyphBot Assistants',
+    desc: 'Multi-provider AI assistants we embed into apps for support, review, and natural-language workflows.',
     icon: Bot,
     color: '#4f46e5',
     border: 'rgba(79,70,229,0.35)',
@@ -36,8 +36,8 @@ const modules = [
     link: 'GlyphBot'
   },
   {
-    title: 'GlyphLock Financial',
-    desc: 'Documentation tooling that organizes operational records into structured dossiers for underwriting and compliance review.',
+    title: 'Accounting & Payouts',
+    desc: 'Ledgers, settlements, payout runs, and exports that turn day-to-day operations into clean books.',
     icon: DollarSign,
     color: '#10b981',
     border: 'rgba(16,185,129,0.35)',
@@ -45,8 +45,8 @@ const modules = [
     link: 'GlyphLockFinancial'
   },
   {
-    title: 'Timestamp Verification',
-    desc: 'SHA-256 hashing with exportable, timestamped proofs for transactions, media assets, and operational records.',
+    title: 'Receipts & Records',
+    desc: 'Timestamped, exportable records for transactions and documents — so nothing gets disputed later.',
     icon: Link2,
     color: '#f59e0b',
     border: 'rgba(245,158,11,0.35)',
@@ -54,8 +54,8 @@ const modules = [
     link: 'Blockchain'
   },
   {
-    title: 'Master Covenant Governance',
-    desc: 'Our published governance framework defining the accountability standards our multi-provider AI tools are built against.',
+    title: 'How We Work',
+    desc: 'Our published standard for how we scope, build, document, and hand off every engagement.',
     icon: FileText,
     color: '#7c3aed',
     border: 'rgba(124,58,237,0.35)',
@@ -63,8 +63,8 @@ const modules = [
     link: 'MasterCovenant'
   },
   {
-    title: 'Security Operations Center',
-    desc: 'A security dashboard with activity monitoring, configurable alert thresholds, and account security controls.',
+    title: 'Access & Monitoring',
+    desc: 'Logins, roles, permissions, activity logs, and alerting — the plumbing every serious build needs.',
     icon: Eye,
     color: '#ef4444',
     border: 'rgba(239,68,68,0.35)',
@@ -183,7 +183,7 @@ export default function PlatformCapabilities() {
             className="inline-block mb-4 px-4 py-1 text-xs font-mono uppercase tracking-[0.2em] border border-cyan-500/40 text-cyan-400"
             style={{ background: 'rgba(6,182,212,0.05)', boxShadow: '0 0 15px rgba(6,182,212,0.2)' }}
           >
-            GLYPHLOCK SECURITY PLATFORM
+WHAT WE BUILD WITH
           </motion.div>
 
           <motion.h2
@@ -192,9 +192,9 @@ export default function PlatformCapabilities() {
             transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="text-3xl md:text-5xl font-black text-white mb-5 drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]"
           >
-            Platform{' '}
+Our{' '}
             <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
-              Capabilities
+              Toolkit
             </span>
           </motion.h2>
 
@@ -204,9 +204,9 @@ export default function PlatformCapabilities() {
             transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-white/70 text-base md:text-lg max-w-3xl mx-auto leading-relaxed"
           >
-            A working platform built on standard, proven security: encrypted connections, authenticated access,
-            cryptographic hashing and signing, AI-assisted tooling, and audit logging — for operations
-            where verification and accountability matter.
+These are the components we've already built and run in production. When we take on a project,
+            we assemble from proven parts instead of starting from zero — which is why our builds ship faster
+            and hold up under real use.
           </motion.p>
         </div>
 
@@ -244,9 +244,9 @@ export default function PlatformCapabilities() {
                 </h3>
               </div>
               <p className="text-white/70 text-sm leading-relaxed mb-3">
-                GlyphLock includes original software, interface designs, documentation, workflows, cryptographic verification components,
-                QR provenance tools, timestamping methods, and AI workflow configurations. GlyphLock-created material may be
-                protected under applicable intellectual-property law and governing agreements.
+GlyphLock includes original software, interface designs, documentation, workflows, verification components,
+                QR tooling, record-keeping methods, and AI workflow configurations. GlyphLock-created material may be
+                protected under applicable intellectual-property law and governing agreements. Client work and ownership terms are set per engagement.
               </p>
               <p className="text-white/60 text-xs leading-relaxed">
                 GlyphLock names, marks, original designs, documentation, and protocol specifications may be subject to trademark,
@@ -257,7 +257,7 @@ export default function PlatformCapabilities() {
               <div className="flex items-center gap-2 mb-3">
                 <Cpu className="w-5 h-5 text-cyan-400" style={{ filter: 'drop-shadow(0 0 6px rgba(6,182,212,0.8))' }} />
                 <h3 className="text-sm font-black uppercase tracking-widest text-cyan-400">
-                  Framework Mapping
+  Standards We Build Against
                 </h3>
               </div>
               <div className="flex flex-wrap gap-2 mb-3">
@@ -269,7 +269,7 @@ export default function PlatformCapabilities() {
                 ))}
               </div>
               <p className="text-white/60 text-xs leading-relaxed">
-                These labels identify frameworks considered during architecture and control mapping. They do not represent certification,
+These labels identify frameworks we consider when architecting a build. They do not represent certification,
                 audit completion, regulatory approval, or legal compliance unless separately documented for the applicable system and scope.
               </p>
             </div>
@@ -284,20 +284,20 @@ export default function PlatformCapabilities() {
           className="text-center"
         >
           <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-3">
-            From cryptographic timestamping and QR verification to AI imaging and venue operations —
-            one platform, built and maintained by one team. Availability varies by module, account permissions, integration status, and deployment.
+From point of sale and payouts to AI features and QR tooling — built and maintained by one team.
+            Availability varies by module, account permissions, integration status, and deployment.
           </p>
           <p className="text-white font-bold text-lg md:text-xl mb-10">
-            Built features, documented capabilities, and clearly labeled development work.<br />
+            Tell us what you need built. We'll tell you what it takes.<br />
             <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-              Production availability is stated at the module level so you can distinguish deployed features from demos, integrations, and work in progress.
+              Every capability above is labeled honestly, so you can tell shipped features from demos and work in progress.
             </span>
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
               <Link
-                to={createPageUrl('CommandCenter')}
+                to={createPageUrl('Consultation')}
                 className="inline-flex items-center gap-2 px-8 py-4 font-black text-sm uppercase tracking-wide text-black transition-all duration-300"
                 style={{
                   background: 'linear-gradient(135deg, #06b6d4, #4f46e5)',
@@ -305,7 +305,7 @@ export default function PlatformCapabilities() {
                   clipPath: 'polygon(6% 0%, 100% 0%, 94% 100%, 0% 100%)'
                 }}
               >
-                ⚡ ENTER THE GLYPHLOCK SYSTEM
+⚡ START A PROJECT
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
@@ -317,7 +317,7 @@ export default function PlatformCapabilities() {
                   clipPath: 'polygon(0% 6%, 94% 0%, 100% 94%, 6% 100%)'
                 }}
               >
-                👁 REVIEW PLATFORM CAPABILITIES
+👁 SEE WHAT WE BUILD
               </Link>
             </motion.div>
           </div>

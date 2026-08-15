@@ -285,9 +285,9 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         id="nebula-layer-stars"
         className="fixed inset-0 nebula-layer-container"
         style={{ 
-          zIndex: 0,
+          zIndex: 30,
           mixBlendMode: 'screen',
-          opacity: 0.6,
+          opacity: 0.9,
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
@@ -301,9 +301,9 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         id="nebula-layer"
         className="fixed inset-0 nebula-layer-container"
         style={{ 
-          zIndex: 1,
+          zIndex: 31,
           mixBlendMode: 'screen',
-          opacity: 0.8,
+          opacity: 1,
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',

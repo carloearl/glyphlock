@@ -74,10 +74,15 @@ export default function TechServicesPreview() {
         ))}
       </div>
 
-      <div className="text-center">
-        <Link to={createPageUrl("Services")}>
-          <Button size="lg" className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white">
-            View All Services
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <Link to={createPageUrl("Consultation")} className="w-full sm:w-auto">
+          <Button size="lg" className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white font-bold">
+            Start a Project
+          </Button>
+        </Link>
+        <Link to={createPageUrl("Services")} className="w-full sm:w-auto">
+          <Button size="lg" variant="outline" className="w-full border-2 border-cyan-400/60 text-cyan-300 bg-transparent hover:bg-cyan-400/10 font-bold">
+            See What We Build
           </Button>
         </Link>
       </div>

@@ -32,10 +32,10 @@ export default function CTASection() {
   };
 
   const benefits = [
-    { text: "Signed, verifiable QR codes", icon: Shield },
-    { text: "AI tools on multiple providers", icon: Zap },
-    { text: "SHA-256 timestamped proofs", icon: CheckCircle2 },
-    { text: "Custom builds and on-site service", icon: Sparkles }
+    { text: "Free scoping call, no obligation", icon: CheckCircle2 },
+    { text: "Fixed quote before we start", icon: Shield },
+    { text: "You talk to the people building it", icon: Zap },
+    { text: "Support and updates after launch", icon: Sparkles }
   ];
 
   // Stagger animation variants
@@ -115,7 +115,7 @@ export default function CTASection() {
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Main card with animated border */}
-        <div className="relative rounded-3xl overflow-hidden">
+        <div className="relative rounded-[34px] overflow-hidden shadow-[0_0_55px_rgba(59,130,246,.24),0_0_120px_rgba(124,58,237,.20)]">
           {/* VIVID Royal Blue Glow - Behind everything - Mobile Safe */}
           <motion.div
             className="absolute -inset-2 md:-inset-4 rounded-3xl blur-2xl md:blur-3xl"
@@ -147,7 +147,7 @@ export default function CTASection() {
           <motion.div
             className="absolute inset-0 rounded-3xl p-[2px]"
             style={{
-              background: 'linear-gradient(90deg, #3B82F6, #2563EB, #1D4ED8, #3B82F6)',
+              background: 'linear-gradient(90deg, #22d3ee, #3B82F6, #8b5cf6, #d946ef, #22d3ee)',
               backgroundSize: '300% 100%'
             }}
             animate={{
@@ -159,7 +159,7 @@ export default function CTASection() {
           </motion.div>
           
           {/* Content container - Deep Royal Blue glassmorphism */}
-          <div className="relative bg-gradient-to-br from-blue-900/30 via-slate-900/40 to-indigo-900/30 backdrop-blur-2xl rounded-3xl p-8 md:p-14 overflow-hidden border-2 border-blue-500/40 shadow-[inset_0_1px_0_rgba(59,130,246,0.3)]">
+          <div className="relative bg-gradient-to-br from-blue-950/45 via-slate-950/55 to-violet-950/45 backdrop-blur-2xl rounded-[34px] p-8 md:p-14 overflow-hidden border-2 border-cyan-300/35 shadow-[inset_0_1px_0_rgba(103,232,249,.35),inset_0_0_70px_rgba(99,102,241,.10)]">
             {/* Grid pattern overlay - Purple/Violet */}
             <div className="absolute inset-0 opacity-20" style={{
               backgroundImage: `
@@ -194,7 +194,7 @@ export default function CTASection() {
                 >
                   <Sparkles size={14} className="text-blue-400" />
                 </motion.div>
-                <span className="text-blue-300 text-sm font-medium tracking-wide">GlyphLock — Secure Creative Technology</span>
+                <span className="text-blue-300 text-sm font-medium tracking-wide">GlyphLock — Custom Software Studio</span>
               </motion.div>
 
               {/* Title - Slide from LEFT */}
@@ -204,7 +204,7 @@ export default function CTASection() {
                 transition={{ duration: 1.1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]"
               >
-                READY TO{' '}
+READY TO{' '}
                 <motion.span 
                   className="bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6] bg-clip-text text-transparent"
                   animate={{
@@ -215,7 +215,7 @@ export default function CTASection() {
                   }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  OWN YOUR STACK?
+BUILD IT?
                 </motion.span>
               </motion.h2>
 
@@ -241,7 +241,7 @@ export default function CTASection() {
                   <Input
                     type="email"
                     required
-                    placeholder="Enter your email"
+                    placeholder="Your work email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="bg-white/8 backdrop-blur-md border-2 border-white/20 text-white placeholder:text-white/60 focus:border-indigo-400 focus:shadow-[0_0_30px_rgba(87,61,255,0.5)] transition-all h-14 md:h-16 rounded-xl text-base px-5"
@@ -268,7 +268,7 @@ export default function CTASection() {
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                     />
                     <span className="relative flex items-center gap-2 text-sm md:text-base">
-                      GET STARTED
+START MY PROJECT
                       <motion.span
                         animate={{ x: [0, 4, 0] }}
                         transition={{ duration: 1.5, repeat: Infinity }}

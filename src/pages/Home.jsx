@@ -1,194 +1,125 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import HeroSection from '@/components/home/HeroSection';
-import HeroContent from '@/components/home/HeroContent';
-import CountdownPill from '@/components/marketing/CountdownPill';
+import { ArrowRight, Play, ShieldCheck, Code2, Workflow, QrCode, Bot, Building2, Sparkles, Github, Image, DollarSign, Radio, Music2 } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
+import { createPageUrl } from '@/utils';
+import HeroSection from '@/components/home/HeroSection';
+import FlagshipNUPSShowcase from '@/components/home/FlagshipNUPSShowcase';
+import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsMarquee';
 import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
 import ServicesGrid from '@/components/home/ServicesGrid';
-import OnSiteServices from '@/components/home/OnSiteServices';
-import TechServicesPreview from '@/components/home/TechServicesPreview';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
+import TechServicesPreview from '@/components/home/TechServicesPreview';
+import OnSiteServices from '@/components/home/OnSiteServices';
 import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
-import WordOfTheDay from '@/components/home/WordOfTheDay';
-import IntroHeader from '@/components/home/IntroHeader';
-import IntroStatement from '@/components/home/IntroStatement';
-import AdminNupsBypass from '@/components/home/AdminNupsBypass';
-import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsMarquee';
 
-const SectionLoader = () => (
-  <div className="w-full py-20 flex items-center justify-center">
-    <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-400 rounded-full animate-spin" />
-  </div>
-);
+const proof = [
+  { icon: Building2, title: 'NUPS', text: 'Flagship venue operating platform: POS, contracts, receipts, reporting, payouts, staff workflows and audit trails.', link: 'NUPSLanding', c: '#38bdf8' },
+  { icon: QrCode, title: 'QR Studio', text: 'Custom QR payloads, scan logging, signing options, verification workflows and QR vault tooling.', link: 'Qr', c: '#22d3ee' },
+  { icon: ShieldCheck, title: 'Governance Hub', text: 'Master Covenant and published operating standards for how GlyphLock scopes, documents, reviews and governs systems.', link: 'GovernanceHub', c: '#8b5cf6' },
+  { icon: Bot, title: 'GlyphBot', text: 'Multi-provider AI assistance for research, code analysis, site audits, support and natural-language workflows.', link: 'GlyphBot', c: '#818cf8' },
+  { icon: Image, title: 'Image Lab', text: 'AI image generation, visual analysis and interactive hotspot experiences built into the platform.', link: 'ImageLab', c: '#d946ef' },
+  { icon: DollarSign, title: 'GlyphLock Financial', text: 'Operational ledgers, settlement views, payout workflows and financial reporting surfaces.', link: 'GlyphLockFinancial', c: '#10b981' },
+  { icon: Radio, title: 'Security Operations', text: 'Access controls, activity monitoring, audit visibility and operational security tooling.', link: 'SecurityOperationsCenter', c: '#f43f5e' },
+  { icon: Music2, title: 'DJ Pro Mixer', text: 'GlyphLock creative tooling for DJ, audio and venue workflows alongside the operations stack.', link: 'GlyphBotMixer', c: '#f59e0b' },
+];
 
+const capabilities = [
+  ['CUSTOM SOFTWARE', 'Web apps, internal tools, dashboards, portals, workflow systems, and purpose-built interfaces.'],
+  ['SYSTEM INTEGRATION', 'APIs, payments, data, identity, automation, and third-party platforms connected into one operating flow.'],
+  ['AI ENGINEERING', 'Multi-model workflows for research, coding, analysis, review, assistance, and automation.'],
+  ['OPERATIONS SOFTWARE', 'POS, contracts, reporting, scheduling, payouts, access controls, audit logs, and venue workflows.'],
+];
 
-const ScrollSection = ({ children, className = "" }) => {
-  const sectionRef = useRef(null);
-  const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    return (
-      <div className={`w-full py-8 md:py-10 ${className}`}>
-        {children}
-      </div>
-    );
-  }
-  
-  return (
-    <div ref={sectionRef} className={`w-full py-8 md:py-10 ${className}`}>
-      <div className="transition-all duration-500 ease-out" style={{ transform: 'perspective(1000px)', opacity: 1 }}>
-        {children}
-      </div>
+function CapabilityGrid() {
+  return <section className="max-w-7xl mx-auto px-5 py-20">
+    <div className="mb-10">
+      <div className="font-mono text-cyan-400 text-xs tracking-[.28em] mb-3">// GLYPHLOCK CAPABILITIES</div>
+      <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">THE GLYPHLOCK<br/><span className="text-cyan-400 drop-shadow-[0_0_22px_rgba(34,211,238,.7)]">SYSTEM UNIVERSE.</span></h2>
     </div>
-  );
-};
+    <div className="grid md:grid-cols-2 gap-px bg-cyan-400/20 border border-cyan-400/20">
+      {capabilities.map(([title,text],i)=><motion.div key={title} initial={{opacity:0,y:25}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.08}} className="relative overflow-hidden bg-[#050817]/80 backdrop-blur-xl p-7 md:p-9 group border border-transparent hover:border-cyan-300/35 hover:bg-[#071126]/90 hover:-translate-y-1 transition-all duration-300 shadow-[inset_0_0_35px_rgba(59,130,246,.08)] hover:shadow-[0_0_36px_rgba(34,211,238,.22),inset_0_0_45px_rgba(124,58,237,.10)]">
+        <div className="font-mono text-[10px] text-cyan-400/60 mb-5">0{i+1} / CAPABILITY</div>
+        <h3 className="text-xl font-black text-white mb-3 group-hover:text-cyan-300 transition-colors">{title}</h3>
+        <p className="text-slate-400 leading-relaxed">{text}</p>
+      </motion.div>)}
+    </div>
+  </section>
+}
 
-export default function Home() {
-  const [loading, setLoading] = useState(true);
+function ProductProof() {
+  return <section className="max-w-7xl mx-auto px-5 py-20">
+    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+      <div><div className="font-mono text-violet-400 text-xs tracking-[.28em] mb-3">// PROOF OF WORK</div><h2 className="text-4xl md:text-6xl font-black text-white">DON'T TAKE OUR<br/><span className="text-violet-400">WORD FOR IT.</span></h2></div>
+      <Link to={createPageUrl('NUPSLanding')} className="text-cyan-200 font-black flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 shadow-[0_0_22px_rgba(34,211,238,.2)] hover:text-white hover:shadow-[0_0_38px_rgba(34,211,238,.45)] transition-all">ENTER THE FLAGSHIP <ArrowRight size={18}/></Link>
+    </div>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {proof.map((p,i)=>{const Icon=p.icon;return <Link key={p.title} to={createPageUrl(p.link)} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] backdrop-blur-xl p-6 min-h-[260px] group hover:-translate-y-2 hover:scale-[1.015] hover:border-cyan-300/50 transition-all duration-300" style={{boxShadow:`0 0 24px ${p.c}22, inset 0 0 55px ${p.c}12`}}>
+        <div className="absolute -right-12 -top-12 w-40 h-40 rounded-full blur-3xl opacity-20" style={{background:p.c}}/>
+        <Icon className="w-9 h-9 mb-12" style={{color:p.c}}/>
+        <div className="font-mono text-[10px] text-white/35 mb-2">MODULE_0{i+1}</div>
+        <h3 className="text-xl font-black text-white mb-3">{p.title}</h3><p className="text-sm text-slate-400 leading-relaxed">{p.text}</p>
+        <ArrowRight className="absolute right-5 bottom-5 w-5 h-5 text-white/30 group-hover:text-white group-hover:translate-x-1 transition-all"/>
+      </Link>})}
+    </div>
+  </section>
+}
 
-  useEffect(() => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
-    if (!isMobile) {
-      document.documentElement.style.scrollBehavior = 'smooth';
-    } else {
-      // Disable scroll snap and perspective effects on mobile
-      document.documentElement.style.scrollBehavior = 'auto';
-      document.body.style.scrollSnapType = 'none';
-    }
-    
-    // Faster initial load - just check if DOM is ready
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 300);
-
-    return () => {
-      document.documentElement.style.scrollBehavior = '';
-      clearTimeout(timer);
-    };
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-[99999] flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, #172554, #1e1b4b, #1e3a5f)' }}>
-        <div className="text-center space-y-6">
-          <div className="relative w-20 h-20 mx-auto">
-            {/* Outer ring */}
-            <motion.div 
-              className="absolute inset-0 rounded-full"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-              style={{ boxShadow: '0 0 20px rgba(59,130,246,0.5)', border: '3px solid rgba(59,130,246,0.2)', borderTopColor: 'rgba(96,165,250,1)' }}
-            />
-            {/* Middle ring */}
-            <motion.div 
-              className="absolute inset-2 rounded-full"
-              animate={{ rotate: -360 }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
-              style={{ boxShadow: '0 0 15px rgba(99,102,241,0.5)', border: '3px solid rgba(99,102,241,0.2)', borderTopColor: 'rgba(129,140,248,1)' }}
-            />
-            {/* Inner pulse */}
-            <motion.div 
-              className="absolute inset-6 rounded-full"
-              animate={{ scale: [0.8, 1, 0.8], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              style={{ boxShadow: '0 0 25px rgba(59,130,246,0.8)', background: 'linear-gradient(to bottom right, #3b82f6, #4f46e5)' }}
-            />
-          </div>
-          <motion.h2 
-            animate={{ opacity: [0.7, 1, 0.7] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="text-xl font-black text-white tracking-wide"
-          >
-            GLYPHLOCK
-          </motion.h2>
-          <p className="text-sm text-blue-300 font-medium">Initializing Protocol...</p>
+function CommandCTA() {
+  return <section className="max-w-7xl mx-auto px-5 py-10">
+    <div className="relative overflow-hidden rounded-[28px] border border-cyan-400/30 bg-[#050817] px-6 py-12 md:px-12 md:py-16">
+      <div className="absolute inset-0 opacity-30" style={{backgroundImage:'linear-gradient(rgba(34,211,238,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.08) 1px,transparent 1px)',backgroundSize:'35px 35px'}}/>
+      <div className="absolute -top-32 right-0 w-96 h-96 rounded-full bg-blue-600/20 blur-[100px]"/>
+      <div className="relative grid lg:grid-cols-[1fr_auto] gap-8 items-center">
+        <div><div className="font-mono text-cyan-400 text-xs tracking-[.25em] mb-4">READY // BUILD QUEUE OPEN</div><h2 className="text-4xl md:text-6xl font-black text-white leading-[.95]">BRING US THE<br/>HARD PROBLEM.</h2><p className="mt-5 max-w-2xl text-slate-300 text-lg">We design the interface, wire the integrations, build the workflow, deploy it, and stay with the system after launch.</p></div>
+        <div className="flex flex-col gap-3 min-w-[230px]">
+          <Link to={createPageUrl('Consultation')} className="flex items-center justify-center gap-2 px-7 py-4 bg-cyan-300 text-slate-950 font-black rounded-xl border border-cyan-100 shadow-[0_0_28px_rgba(34,211,238,.5)] hover:bg-white hover:scale-105 hover:shadow-[0_0_55px_rgba(34,211,238,.7)] transition-all">START A PROJECT <ArrowRight size={18}/></Link>
+          <Link to={createPageUrl('Services')} className="flex items-center justify-center gap-2 px-7 py-4 border border-blue-400/50 bg-blue-500/10 text-blue-100 font-black rounded-xl shadow-[0_0_22px_rgba(59,130,246,.22)] hover:bg-blue-400/20 hover:scale-105 hover:shadow-[0_0_45px_rgba(59,130,246,.45)] transition-all">EXPLORE SERVICES</Link>
+          <Link to={createPageUrl('NUPSLanding')} className="flex items-center justify-center gap-2 px-7 py-4 border border-violet-400/60 bg-violet-500/10 text-violet-200 font-black rounded-xl shadow-[0_0_22px_rgba(139,92,246,.25)] hover:bg-violet-400/20 hover:scale-105 hover:shadow-[0_0_48px_rgba(139,92,246,.5)] transition-all"><Play size={16}/> SEE NUPS</Link>
         </div>
       </div>
-    );
-  }
+    </div>
+  </section>
+}
 
-  return (
-    <>
-      <SEOHead 
-        title="GlyphLock — Secure Creative Technology | Protect What You Create. Power What You Operate."
-        description="GlyphLock builds secure technology for creators, artists, studios and venues — protecting identity, intellectual property, music, artwork and digital assets, and powering websites, apps, software platforms, DJ and studio systems, and venue operations."
-        keywords="GlyphLock, secure creative technology, intellectual property protection, music protection, artwork protection, digital asset security, AI governance, venue operations, studio technology, NUPS"
-        url="/"
-      />
-      
-      {/* SEO H1 - Hidden but crawlable */}
-      <h1 className="sr-only">GlyphLock — Secure Creative Technology. Protect What You Create. Power What You Operate.</h1>
+export default function Home() {
+  const [loading,setLoading]=useState(true);
+  useEffect(()=>{const t=setTimeout(()=>setLoading(false),180);return()=>clearTimeout(t)},[]);
+  if(loading)return <div className="fixed inset-0 z-[99999] bg-[#02040d] flex items-center justify-center"><div className="relative"><div className="w-20 h-20 rounded-full border border-cyan-400/30 animate-ping"/><div className="absolute inset-5 rounded-full bg-cyan-400 shadow-[0_0_50px_#22d3ee]"/></div></div>;
+  return <>
+    <SEOHead title="GlyphLock — Custom Software, AI & Operations Systems" description="GlyphLock designs, builds, integrates, and operates custom software, AI-assisted workflows, websites, apps, and business systems. Explore NUPS and GlyphLock's working platform modules." keywords="GlyphLock, custom software, NUPS, software development, AI workflows, integrations, POS, QR verification" url="/"/>
+    <main className="min-h-screen text-white overflow-hidden bg-transparent">
+      <section className="relative">
+        <div className="relative z-10"><HeroSection/></div>
+        <FlagshipNUPSShowcase />
+        <div className="relative z-10 max-w-7xl mx-auto px-5 w-full grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 border-y border-white/10">
+          {[['01','DESIGN'],['02','BUILD'],['03','INTEGRATE'],['04','OPERATE']].map(([n,t])=><div key={n} className="bg-[#030611]/65 backdrop-blur-xl px-5 py-4 border-x border-cyan-300/10 shadow-[inset_0_0_24px_rgba(34,211,238,.08)] hover:shadow-[inset_0_0_34px_rgba(34,211,238,.18),0_0_28px_rgba(34,211,238,.14)] hover:text-cyan-100 transition-all"><span className="font-mono text-cyan-400 text-xs mr-3">{n}</span><span className="font-black tracking-widest text-xs">{t}</span></div>)}
+        </div>
+      </section>
 
-      <main className="w-full relative" style={{ background: 'transparent', position: 'relative' }}>
-        
-        {/* Introduction header — very top, below the nav bar */}
-        <IntroHeader />
+      <section className="border-y border-white/10 bg-black/20 py-3"><FeaturedIntegrationsMarquee/></section>
+      <CapabilityGrid/>
+      <ProductProof/>
 
-        {/* Featured integrations — large scrolling marquee */}
-        <FeaturedIntegrationsMarquee />
+      <section className="py-10"><HomeDreamTeamCTA/></section>
+      <section className="py-8"><ServicesGrid/></section>
+      <section className="py-4"><PlatformCapabilities/></section>
+      <section className="py-8"><TechServicesPreview/></section>
+      <section className="py-8"><OnSiteServices/></section>
 
-        {/* Admin-only NUPS bypass entry */}
-        <AdminNupsBypass />
+      <section className="max-w-7xl mx-auto px-5 py-16">
+        <div className="rounded-[32px] overflow-hidden border border-cyan-300/30 bg-gradient-to-br from-blue-950/55 via-slate-950/70 to-violet-950/50 backdrop-blur-xl p-8 md:p-12 relative shadow-[0_0_45px_rgba(34,211,238,.16),0_0_100px_rgba(124,58,237,.14),inset_0_0_50px_rgba(59,130,246,.08)]">
+          <div className="absolute right-0 top-0 w-72 h-72 bg-violet-500/15 blur-[90px] rounded-full"/>
+          <div className="relative"><div className="flex items-center gap-2 text-cyan-300 font-mono text-xs tracking-[.25em] mb-5"><Workflow size={16}/> ENGINEERING MODEL</div><h2 className="text-4xl md:text-6xl font-black max-w-4xl">AI IS IN THE WORKFLOW.<br/><span className="text-violet-400">PEOPLE OWN THE OUTCOME.</span></h2><p className="text-slate-300 text-lg max-w-3xl mt-6">We use multiple AI providers as tools for research, coding, analysis, review, and automation. Roles are defined by workflow—not by claims of endorsement, partnership, or legal binding by third-party model providers.</p><Link to={createPageUrl('DreamTeam')} className="inline-flex items-center gap-2 mt-7 text-cyan-300 font-black">EXPLORE THE AI WORKFLOW <ArrowRight size={18}/></Link></div>
+        </div>
+      </section>
 
-        {/* Bootstrap Quote + Hero Section */}
-        <section className="w-full">
-          <ScrollSection>
-            <HeroSection />
-          </ScrollSection>
-
-          {/* Statement + CTAs — below the video */}
-          <div className="pt-2 pb-6">
-            <IntroStatement />
-          </div>
-
-          <div className="flex justify-center py-4">
-            <CountdownPill />
-          </div>
-
-          <WordOfTheDay />
-        </section>
-
-        {/* Value Proposition */}
-        <ScrollSection className="container-responsive">
-          <HeroContent />
-        </ScrollSection>
-
-        {/* Dream Team CTA */}
-        <ScrollSection className="container-responsive">
-          <HomeDreamTeamCTA />
-        </ScrollSection>
-
-        {/* Services Overview */}
-        <ScrollSection className="container-responsive">
-          <ServicesGrid />
-        </ScrollSection>
-
-        {/* Technology Services Preview */}
-        <ScrollSection className="container-responsive">
-          <TechServicesPreview />
-        </ScrollSection>
-
-        {/* On-Site Services — We Come To You */}
-        <ScrollSection className="container-responsive">
-          <OnSiteServices />
-        </ScrollSection>
-
-        {/* Technology Partners */}
-        <section className="w-full py-8">
-          <TechnologyMarquee />
-        </section>
-
-        {/* Platform Capabilities */}
-        <PlatformCapabilities />
-
-        {/* Final Call to Action */}
-        <ScrollSection className="container-responsive">
-          <CTASection />
-        </ScrollSection>
-      </main>
-    </>
-  );
+      <section className="py-4"><TechnologyMarquee/></section>
+      <CommandCTA/>
+      <section className="pb-16"><CTASection/></section>
+      <footer className="border-t border-white/10 max-w-7xl mx-auto px-5 py-10 flex flex-col md:flex-row justify-between gap-5 text-sm text-slate-500"><div><strong className="text-white">GLYPHLOCK LLC</strong><br/>Custom software · NUPS · AI workflows · systems integration</div><div className="md:text-right">Third-party names identify technologies used, evaluated, supported, or integrated.<br/>They do not imply endorsement, certification, or partnership unless separately documented.</div></footer>
+    </main>
+  </>;
 }

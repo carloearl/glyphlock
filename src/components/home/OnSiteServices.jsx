@@ -86,14 +86,14 @@ export default function OnSiteServices() {
             clipPath: 'polygon(6% 0%, 100% 0%, 94% 100%, 0% 100%)',
           }}
         >
-          ⚡ Book An On-Site Visit
+⚡ Book An On-Site Visit
         </Link>
         <Link
           to={createPageUrl('Contact')}
           className="inline-flex items-center gap-2 px-8 py-4 font-bold text-sm uppercase tracking-wide text-purple-400 border-2 border-purple-500 transition-all duration-300 hover:bg-purple-500/10"
           style={{ clipPath: 'polygon(0% 6%, 94% 0%, 100% 94%, 6% 100%)' }}
         >
-          Get A Quote
+Get A Quote
         </Link>
       </div>
     </section>

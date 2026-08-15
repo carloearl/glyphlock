@@ -77,7 +77,7 @@ export default function HeroContent() {
   const isInView = true; // always render content; animate once when scrolled in
   void inView;
   const [typedText, setTypedText] = useState("");
-  const fullText = "GlyphLock = SECURE_CREATIVE_TECHNOLOGY";
+  const fullText = "GlyphLock = SOFTWARE_BUILT_TO_ORDER";
 
   useEffect(() => {
     if (!isInView) return;
@@ -91,16 +91,16 @@ export default function HeroContent() {
   }, [isInView]);
 
   const features = [
-    { highlight: "CUSTOM BUILDS", text: "— websites, apps, and software platforms" },
-    { highlight: "PROOF OF ORIGIN", text: "— SHA-256 hashing and timestamped records" },
-    { highlight: "AI TOOLING", text: "— assistants built on multiple AI providers" },
-    { highlight: "SIGNED QR CODES", text: "— verifiable, scan-logged QR assets" },
-    { highlight: "VENUE OPERATIONS", text: "— the NUPS point-of-sale and audit platform" }
+    { highlight: "WEB & APP BUILDS", text: "— sites, apps, and internal tools built to spec" },
+    { highlight: "OPERATIONS SYSTEMS", text: "— point of sale, scheduling, payouts, reporting" },
+    { highlight: "INTEGRATIONS", text: "— payments, accounting, and third-party APIs wired in" },
+    { highlight: "AI FEATURES", text: "— assistants and automation embedded in your product" },
+    { highlight: "ONGOING SUPPORT", text: "— we maintain and extend what we ship" }
   ];
 
   const cards = [
     {
-      title: "CUSTOM SOFTWARE",
+      title: "BUILT TO SPEC",
       desc: "Websites, apps, and business systems designed and built around how you actually operate.",
       color: "#06b6d4",
       borderClass: "border-cyan-500/40",
@@ -109,8 +109,8 @@ export default function HeroContent() {
       icon: <Code2 className="w-10 h-10" style={{ color: '#06b6d4', filter: 'drop-shadow(0 0 15px #06b6d4)' }} />
     },
     {
-      title: "VERIFIABLE RECORDS",
-      desc: "SHA-256 hashing and cryptographic timestamping so documents and assets can be verified later.",
+      title: "SHIPPED, NOT MOCKED UP",
+      desc: "Working software in production — real data, real transactions, real users, not slide decks.",
       color: "#4f46e5",
       borderClass: "border-indigo-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(79,70,229,0.5)]",
@@ -118,8 +118,8 @@ export default function HeroContent() {
       icon: <Eye className="w-10 h-10" style={{ color: '#4f46e5', filter: 'drop-shadow(0 0 15px #4f46e5)' }} />
     },
     {
-      title: "OPERATIONS PLATFORM",
-      desc: "NUPS — a working venue platform with point of sale, contracts, receipts, and audit trails.",
+      title: "PROOF OF WORK",
+      desc: "NUPS — a venue platform we built and run: point of sale, contracts, receipts, and reporting.",
       color: "#7c3aed",
       borderClass: "border-purple-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(124,58,237,0.5)]",
@@ -300,7 +300,7 @@ export default function HeroContent() {
               }}
             >
               <span className="text-purple-400" style={{ animation: 'heroBlink 1s infinite' }}>&gt; </span>
-              GLYPHLOCK PLATFORM · ACTIVE BUILD
+GLYPHLOCK · CUSTOM SOFTWARE STUDIO
             </motion.div>
 
             {/* Headline */}
@@ -310,22 +310,22 @@ export default function HeroContent() {
               transition={{ duration: 1, delay: 0.2 }}
             >
               <h1 className="font-black text-4xl sm:text-5xl leading-[0.85] uppercase tracking-tight mb-4" style={{ transform: 'skewY(-2deg)' }}>
-                <span className="text-white block">BUILD</span>
-                <span className="text-white block">WHAT'S</span>
-                <span className="hero-word-robbed block">YOURS.</span>
-                <span className="text-white block text-[0.7em]">PROVE IT'S</span>
-                <span className="hero-word-creating block">YOURS.</span>
+                <span className="text-white block">WE BUILD</span>
+                <span className="text-white block">THE</span>
+                <span className="hero-word-robbed block">SOFTWARE.</span>
+                <span className="text-white block text-[0.7em]">YOU RUN</span>
+                <span className="hero-word-creating block">THE BUSINESS.</span>
               </h1>
               <div className="bg-black/80 border-2 border-cyan-500 p-3 font-mono text-xs text-cyan-400 relative" style={{ boxShadow: '0 0 20px rgba(6,182,212,0.2)', textShadow: '0 0 10px #06b6d4' }}>
-                <div className="opacity-50 text-[10px] mb-1">$ glyphlock --mode=sovereign --verify</div>
+                <div className="opacity-50 text-[10px] mb-1">$ glyphlock build --scope=custom</div>
                 <div>{typedText}<span className="inline-block w-[6px] h-3 bg-cyan-400 ml-[3px]" style={{ animation: 'heroBlink 1s infinite', boxShadow: '0 0 8px #06b6d4' }} /></div>
               </div>
             </motion.div>
 
             {/* Side panels */}
             <div className="flex flex-col gap-3">
-              <GlassShard title="⚡ SECURITY BASICS DONE RIGHT" text="Encrypted connections, authenticated access, role-based permissions, and audit logging across the platform." color="cyan" delay={0.4} isInView={isInView} />
-              <GlassShard title="🔓 CRYPTOGRAPHIC TIMESTAMPING" text="SHA-256 hashing and timestamped seals so you can prove a record existed and hasn't been altered." color="violet" delay={0.5} isInView={isInView} />
+              <GlassShard title="⚡ ONE TEAM, START TO FINISH" text="Design, build, deploy, and maintain — you work directly with the people writing the code." color="cyan" delay={0.4} isInView={isInView} />
+              <GlassShard title="🔓 BUILT ON WHAT WE RUN" text="We use our own stack in production every night, so the tooling is proven before it reaches your project." color="violet" delay={0.5} isInView={isInView} />
             </div>
 
             {/* Features */}
@@ -369,7 +369,7 @@ export default function HeroContent() {
                 }}
               >
                 <span className="text-purple-400" style={{ animation: 'heroBlink 1s infinite' }}>&gt; </span>
-                GLYPHLOCK PLATFORM · ACTIVE BUILD
+  GLYPHLOCK · CUSTOM SOFTWARE STUDIO
               </motion.div>
             </div>
 
@@ -380,21 +380,21 @@ export default function HeroContent() {
               transition={{ duration: 1, delay: 0.2 }}
             >
               <h1 className="font-black text-5xl lg:text-6xl xl:text-7xl leading-[0.85] uppercase tracking-tight mb-4" style={{ transform: 'skewY(-2deg)' }}>
-                <span className="text-white block">BUILD</span>
-                <span className="text-white block">WHAT'S</span>
-                <span className="hero-word-robbed block">YOURS.</span>
-                <span className="text-white block text-[0.7em]">PROVE IT'S</span>
-                <span className="hero-word-creating block">YOURS.</span>
+                <span className="text-white block">WE BUILD</span>
+                <span className="text-white block">THE</span>
+                <span className="hero-word-robbed block">SOFTWARE.</span>
+                <span className="text-white block text-[0.7em]">YOU RUN</span>
+                <span className="hero-word-creating block">THE BUSINESS.</span>
               </h1>
               <div className="bg-black/80 border-2 border-cyan-500 p-3 font-mono text-xs text-cyan-400 relative mt-3" style={{ boxShadow: '0 0 20px rgba(6,182,212,0.2)', textShadow: '0 0 10px #06b6d4' }}>
-                <div className="opacity-50 text-[10px] mb-1">$ glyphlock --mode=sovereign --verify</div>
+                <div className="opacity-50 text-[10px] mb-1">$ glyphlock build --scope=custom</div>
                 <div>{typedText}<span className="inline-block w-[6px] h-3 bg-cyan-400 ml-[3px]" style={{ animation: 'heroBlink 1s infinite', boxShadow: '0 0 8px #06b6d4' }} /></div>
               </div>
             </motion.div>
 
             <div className="flex flex-col gap-3">
-              <GlassShard title="⚡ SECURITY BASICS DONE RIGHT" text="Encrypted connections, authenticated access, role-based permissions, and audit logging across the platform." color="cyan" delay={0.4} isInView={isInView} />
-              <GlassShard title="🔓 CRYPTOGRAPHIC TIMESTAMPING" text="SHA-256 hashing and timestamped seals so you can prove a record existed and hasn't been altered." color="violet" delay={0.5} isInView={isInView} />
+              <GlassShard title="⚡ ONE TEAM, START TO FINISH" text="Design, build, deploy, and maintain — you work directly with the people writing the code." color="cyan" delay={0.4} isInView={isInView} />
+              <GlassShard title="🔓 BUILT ON WHAT WE RUN" text="We use our own stack in production every night, so the tooling is proven before it reaches your project." color="violet" delay={0.5} isInView={isInView} />
             </div>
 
             {/* Row 3: Features + CTAs */}
@@ -481,7 +481,7 @@ function CTAButtons({ isInView }) {
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
       >
-        <Link to={createPageUrl("Consultation")} className="block" aria-label="Begin sovereign build - Request consultation">
+        <Link to={createPageUrl("Consultation")} className="block" aria-label="Start your project - Request a consultation">
           <div
             className="relative text-center py-4 px-6 font-black text-sm sm:text-base uppercase tracking-wide cursor-pointer text-black transition-all duration-300"
             style={{
@@ -491,7 +491,7 @@ function CTAButtons({ isInView }) {
             }}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              ⚡ REQUEST A CONSULTATION
+⚡ START YOUR PROJECT
             </span>
           </div>
         </Link>
@@ -504,7 +504,7 @@ function CTAButtons({ isInView }) {
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
       >
-        <Link to={createPageUrl("SecurityTools")} className="block" aria-label="Explore security modules - View available tools">
+        <Link to={createPageUrl("Services")} className="block" aria-label="See what we build - View services">
           <div
             className="relative text-center py-4 px-6 font-bold text-sm sm:text-base uppercase tracking-wide cursor-pointer text-purple-400 border-[3px] border-purple-500 transition-all duration-300 hover:bg-purple-500/10"
             style={{
@@ -512,7 +512,7 @@ function CTAButtons({ isInView }) {
               clipPath: 'polygon(0% 8%, 92% 0%, 100% 92%, 8% 100%)'
             }}
           >
-            👁 EXPLORE SECURITY MODULES
+👁 SEE WHAT WE BUILD
           </div>
         </Link>
       </motion.div>
