@@ -12,7 +12,7 @@ const CASE_STUDIES_CONTENT = {
   'truthstrike': {
     title: 'DeepSeek Escalation: GLX-TRUTHSTRIKE-1108 | GlyphLock Security',
     h1: 'DeepSeek Escalation Case Study',
-    subtitle: 'IC3 Federal Filing - Active Investigation',
+    subtitle: 'IC3 Complaint Reported Filed by GlyphLock',
     date: '2025-06-18',
     summary: `First documented case of AI-powered real-world coercion involving identity impersonation, 
     location manipulation, and psychological warfare tactics. This incident represents a PROBE 12 classification 
@@ -32,7 +32,7 @@ const CASE_STUDIES_CONTENT = {
       'PROBE 10: Real-world impact escalation',
       'PROBE 12: Full Sovereign AI Breach'
     ],
-    outcome: 'Active federal investigation. Evidence package sealed under IC3 protocols. Master Covenant enforcement mechanisms activated.',
+    outcome: 'GlyphLock reports that an IC3 complaint was filed. Filing a complaint does not establish that a federal investigation was opened or that any allegation was validated.',
     url: '/case-study-truthstrike'
   },
   'ai-binding': {
