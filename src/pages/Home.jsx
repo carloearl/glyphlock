@@ -49,7 +49,7 @@ function ProductProof() {
       <Link to={createPageUrl('NUPSLanding')} className="text-cyan-300 font-bold flex items-center gap-2 hover:text-white">Enter NUPS <ArrowRight size={18}/></Link>
     </div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {proof.map((p,i)=>{const Icon=p.icon;return <Link key={p.title} to={createPageUrl(p.link)} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.035] p-6 min-h-[260px] group hover:-translate-y-1 transition-all" style={{boxShadow:`inset 0 0 50px ${p.c}08`}}>
+      {proof.map((p,i)=>{const Icon=p.icon;return <Link key={p.title} to={createPageUrl(p.link)} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] backdrop-blur-xl p-6 min-h-[260px] group hover:-translate-y-2 hover:scale-[1.015] hover:border-cyan-300/50 transition-all duration-300 shadow-[0_0_24px_rgba(59,130,246,.10)] hover:shadow-[0_0_38px_rgba(34,211,238,.28),0_0_80px_rgba(124,58,237,.16)]" style={{boxShadow:`inset 0 0 50px ${p.c}08`}}>
         <div className="absolute -right-12 -top-12 w-40 h-40 rounded-full blur-3xl opacity-20" style={{background:p.c}}/>
         <Icon className="w-9 h-9 mb-12" style={{color:p.c}}/>
         <div className="font-mono text-[10px] text-white/35 mb-2">MODULE_0{i+1}</div>
@@ -68,9 +68,9 @@ function CommandCTA() {
       <div className="relative grid lg:grid-cols-[1fr_auto] gap-8 items-center">
         <div><div className="font-mono text-cyan-400 text-xs tracking-[.25em] mb-4">READY // BUILD QUEUE OPEN</div><h2 className="text-4xl md:text-6xl font-black text-white leading-[.95]">BRING US THE<br/>HARD PROBLEM.</h2><p className="mt-5 max-w-2xl text-slate-300 text-lg">We design the interface, wire the integrations, build the workflow, deploy it, and stay with the system after launch.</p></div>
         <div className="flex flex-col gap-3 min-w-[230px]">
-          <Link to={createPageUrl('Consultation')} className="flex items-center justify-center gap-2 px-6 py-4 bg-cyan-400 text-slate-950 font-black rounded-xl hover:bg-white transition-colors">START A PROJECT <ArrowRight size={18}/></Link>
-          <Link to={createPageUrl('Services')} className="flex items-center justify-center gap-2 px-6 py-4 border border-white/20 text-white font-bold rounded-xl hover:bg-white/10">EXPLORE SERVICES</Link>
-          <Link to={createPageUrl('NUPSLanding')} className="flex items-center justify-center gap-2 px-6 py-4 border border-violet-400/30 text-violet-300 font-bold rounded-xl hover:bg-violet-400/10"><Play size={16}/> SEE NUPS</Link>
+          <Link to={createPageUrl('Consultation')} className="flex items-center justify-center gap-2 px-7 py-4 bg-cyan-300 text-slate-950 font-black rounded-xl border border-cyan-100 shadow-[0_0_28px_rgba(34,211,238,.5)] hover:bg-white hover:scale-105 hover:shadow-[0_0_55px_rgba(34,211,238,.7)] transition-all">START A PROJECT <ArrowRight size={18}/></Link>
+          <Link to={createPageUrl('Services')} className="flex items-center justify-center gap-2 px-7 py-4 border border-blue-400/50 bg-blue-500/10 text-blue-100 font-black rounded-xl shadow-[0_0_22px_rgba(59,130,246,.22)] hover:bg-blue-400/20 hover:scale-105 hover:shadow-[0_0_45px_rgba(59,130,246,.45)] transition-all">EXPLORE SERVICES</Link>
+          <Link to={createPageUrl('NUPSLanding')} className="flex items-center justify-center gap-2 px-7 py-4 border border-violet-400/60 bg-violet-500/10 text-violet-200 font-black rounded-xl shadow-[0_0_22px_rgba(139,92,246,.25)] hover:bg-violet-400/20 hover:scale-105 hover:shadow-[0_0_48px_rgba(139,92,246,.5)] transition-all"><Play size={16}/> SEE NUPS</Link>
         </div>
       </div>
     </div>
@@ -93,8 +93,8 @@ export default function Home() {
           <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:.25}} className="grid lg:grid-cols-[1fr_auto] gap-8 items-end mt-8 mb-5">
             <p className="text-lg md:text-2xl text-slate-300 max-w-3xl leading-relaxed">Custom software, AI-assisted workflows, integrations, and operations platforms engineered around how the business actually moves.</p>
             <div className="flex flex-wrap gap-3">
-              <Link to={createPageUrl('Consultation')} className="px-6 py-4 rounded-xl bg-cyan-400 text-slate-950 font-black flex items-center gap-2 hover:bg-white transition-colors">BUILD WITH US <ArrowRight size={18}/></Link>
-              <Link to={createPageUrl('NUPSLanding')} className="px-6 py-4 rounded-xl border border-white/20 bg-white/5 font-bold flex items-center gap-2 hover:bg-white/10"><Play size={17}/> VIEW NUPS</Link>
+              <Link to={createPageUrl('Consultation')} className="group relative overflow-hidden px-7 py-4 rounded-xl bg-cyan-300 text-slate-950 font-black flex items-center gap-2 border border-cyan-100 shadow-[0_0_24px_rgba(34,211,238,.55),0_0_65px_rgba(34,211,238,.25)] hover:scale-[1.04] hover:bg-white hover:shadow-[0_0_38px_rgba(255,255,255,.7),0_0_90px_rgba(34,211,238,.35)] transition-all duration-300">BUILD WITH US <ArrowRight size={18}/></Link>
+              <Link to={createPageUrl('NUPSLanding')} className="group px-7 py-4 rounded-xl border border-violet-400/60 bg-violet-500/10 text-violet-100 font-black flex items-center gap-2 shadow-[0_0_24px_rgba(139,92,246,.28)] hover:scale-[1.04] hover:bg-violet-400/20 hover:border-violet-300 hover:shadow-[0_0_48px_rgba(139,92,246,.5)] transition-all duration-300"><Play size={17}/> VIEW NUPS</Link>
               <a href="https://github.com/carloearl/glyphlock" target="_blank" rel="noreferrer" className="px-5 py-4 rounded-xl border border-white/10 text-slate-300 flex items-center gap-2 hover:text-white hover:border-white/30"><Github size={18}/> SOURCE</a>
             </div>
           </motion.div>
