@@ -9,23 +9,23 @@ export default function FeaturesSection() {
   const features = [
     {
       icon: Shield,
-      title: "Post-Quantum Ready",
-      description: "Hybrid PQC key exchange with AES-256 encryption for future-proof security"
+      title: "Cryptography Roadmap",
+      description: "Current security controls use standard encryption, with post-quantum migration treated as a readiness and evaluation track."
     },
     {
       icon: Zap,
-      title: "AI-Powered",
-      description: "Machine learning algorithms detect threats in real-time"
+      title: "AI-Assisted",
+      description: "AI tools support review, analysis, and triage workflows; outputs remain subject to human validation."
     },
     {
       icon: Lock,
-      title: "Zero-Trust Security",
-      description: "Every access request is verified and authenticated"
+      title: "Access Controls",
+      description: "Authentication, role-based permissions, and account controls are used where supported by the applicable module."
     },
     {
       icon: Eye,
-      title: "24/7 Monitoring",
-      description: "Continuous surveillance with instant threat response"
+      title: "Monitoring & Logging",
+      description: "Selected modules provide activity logging, configurable alerts, and operational review tools."
     }
   ];
 
@@ -58,7 +58,7 @@ export default function FeaturesSection() {
             transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="text-xl text-white/70 max-w-3xl mx-auto"
           >
-            Military-grade security that adapts to emerging threats
+            Practical security controls, verifiable records, and clearly scoped capabilities
           </motion.p>
         </div>
 
@@ -95,8 +95,8 @@ export default function FeaturesSection() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/11242d8a3_Whisk_ecd15257dc62aafae4b457b73ff01aa9dr.jpg", alt: "Smart Contract", icon: Lock, title: "Smart Contracts", desc: "Automated, secure, and transparent agreements" },
-            { img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/fd28593b3_Whisk_938e90eff0a4d8da277467baf360248edr.jpg", alt: "Full Stack Development", icon: Shield, title: "Full Stack Security", desc: "End-to-end protection for your entire stack" },
+            { img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/11242d8a3_Whisk_ecd15257dc62aafae4b457b73ff01aa9dr.jpg", alt: "Digital Agreements", icon: Lock, title: "Digital Agreements", desc: "Electronic agreement workflows with signatures, records, and audit trails where configured" },
+            { img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/fd28593b3_Whisk_938e90eff0a4d8da277467baf360248edr.jpg", alt: "Full Stack Development", icon: Shield, title: "Security-Aware Development", desc: "Security controls considered across application, access, deployment, and operational workflows" },
             { img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/870d85755_Whisk_429a6543b81e30d9bab4065457f3b62ddr.jpg", alt: "Web Development", icon: Eye, title: "Secure Development", desc: "Build with security at the foundation" }
           ].map((card, idx) => {
             const Icon = card.icon;
