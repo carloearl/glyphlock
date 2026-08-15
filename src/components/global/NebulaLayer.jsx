@@ -160,7 +160,7 @@ export default function NebulaLayer({ intensity = 0.5 }) {
       const y = e.clientY || (e.touches && e.touches[0]?.clientY);
       if (x !== undefined && y !== undefined) {
         mouseX = x;
-        mouseY = y + window.scrollY;
+        mouseY = y;
       }
     };
 
@@ -285,9 +285,9 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         id="nebula-layer-stars"
         className="fixed inset-0 nebula-layer-container"
         style={{ 
-          zIndex: 30,
+          zIndex: 0,
           mixBlendMode: 'screen',
-          opacity: 0.9,
+          opacity: 0.82,
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
@@ -301,9 +301,9 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         id="nebula-layer"
         className="fixed inset-0 nebula-layer-container"
         style={{ 
-          zIndex: 31,
+          zIndex: 1,
           mixBlendMode: 'screen',
-          opacity: 1,
+          opacity: 0.92,
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
