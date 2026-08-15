@@ -34,7 +34,7 @@ function CapabilityGrid() {
   return <section className="max-w-7xl mx-auto px-5 py-20">
     <div className="mb-10">
       <div className="font-mono text-cyan-400 text-xs tracking-[.28em] mb-3">// GLYPHLOCK CAPABILITIES</div>
-      <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">BUILD THE SYSTEM.<br/><span className="text-cyan-400">CONNECT THE STACK.</span></h2>
+      <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">THE GLYPHLOCK<br/><span className="text-cyan-400 drop-shadow-[0_0_22px_rgba(34,211,238,.7)]">SYSTEM UNIVERSE.</span></h2>
     </div>
     <div className="grid md:grid-cols-2 gap-px bg-cyan-400/20 border border-cyan-400/20">
       {capabilities.map(([title,text],i)=><motion.div key={title} initial={{opacity:0,y:25}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.08}} className="bg-[#050817] p-7 md:p-9 group hover:bg-[#071126] transition-colors">
@@ -50,7 +50,7 @@ function ProductProof() {
   return <section className="max-w-7xl mx-auto px-5 py-20">
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
       <div><div className="font-mono text-violet-400 text-xs tracking-[.28em] mb-3">// PROOF OF WORK</div><h2 className="text-4xl md:text-6xl font-black text-white">DON'T TAKE OUR<br/><span className="text-violet-400">WORD FOR IT.</span></h2></div>
-      <Link to={createPageUrl('NUPSLanding')} className="text-cyan-300 font-bold flex items-center gap-2 hover:text-white">Enter NUPS <ArrowRight size={18}/></Link>
+      <Link to={createPageUrl('NUPSLanding')} className="text-cyan-200 font-black flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 shadow-[0_0_22px_rgba(34,211,238,.2)] hover:text-white hover:shadow-[0_0_38px_rgba(34,211,238,.45)] transition-all">ENTER THE FLAGSHIP <ArrowRight size={18}/></Link>
     </div>
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {proof.map((p,i)=>{const Icon=p.icon;return <Link key={p.title} to={createPageUrl(p.link)} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] backdrop-blur-xl p-6 min-h-[260px] group hover:-translate-y-2 hover:scale-[1.015] hover:border-cyan-300/50 transition-all duration-300 shadow-[0_0_24px_rgba(59,130,246,.10)] hover:shadow-[0_0_38px_rgba(34,211,238,.28),0_0_80px_rgba(124,58,237,.16)]" style={{boxShadow:`inset 0 0 50px ${p.c}08`}}>
