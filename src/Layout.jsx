@@ -133,7 +133,7 @@ export default function Layout({ children, currentPageName }) {
         }}
         aria-hidden="true"
       >
-        <NebulaLayer intensity={1.0} />
+        <NebulaLayer intensity={1.65} />
         <CursorOrb />
       </div>
 
