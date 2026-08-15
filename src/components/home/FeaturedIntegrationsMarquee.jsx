@@ -5,7 +5,7 @@ const logo = (domain) => `https://img.logo.dev/${domain}?token=${TOKEN}&size=128
 
 const FEATURED = [
   { name: "Oracle", subtitle: "Enterprise Platform", src: logo("oracle.com") },
-  { name: "OPERA", subtitle: "Hospitality Property System", mark: "O", markColor: "#dc2626" },
+  { name: "OPERA", subtitle: "Hospitality Property System", src: logo("opera.com") },
   { name: "Base44", subtitle: "Application Platform", src: logo("base44.com") },
   { name: "Stripe", subtitle: "Payments & Payouts", src: logo("stripe.com") },
   { name: "Claude", subtitle: "AI Assistant", src: logo("anthropic.com") },
