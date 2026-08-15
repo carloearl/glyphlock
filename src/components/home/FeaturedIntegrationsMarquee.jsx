@@ -7,12 +7,12 @@ const FEATURED = [
   { name: "Oracle", subtitle: "Enterprise Platform", src: logo("oracle.com") },
   { name: "OPERA", subtitle: "Hospitality Property System", src: logo("opera.com") },
   { name: "Base44", subtitle: "Application Platform", src: logo("base44.com") },
-  { name: "Stripe", subtitle: "Payments & Payouts", src: logo("stripe.com") },
+  { name: "Stripe", subtitle: "Payments & Payouts", src: "https://cdn.simpleicons.org/stripe/635BFF" },
   { name: "Claude", subtitle: "AI Assistant", src: logo("anthropic.com") },
   { name: "ChatGPT", subtitle: "AI Assistant", src: logo("openai.com") },
   { name: "Gemini", subtitle: "AI Assistant", src: logo("gemini.google.com") },
   { name: "Qwen", subtitle: "AI Assistant", src: logo("qwen.ai") },
-  { name: "Copilot", subtitle: "AI Assistant", src: logo("copilot.microsoft.com") },
+  { name: "Copilot", subtitle: "AI Assistant", src: "https://cdn.simpleicons.org/githubcopilot/FFFFFF" },
   { name: "Perplexity", subtitle: "AI Search", src: logo("perplexity.ai") },
 ];
 
