@@ -5,13 +5,15 @@ const logo = (domain) => `https://img.logo.dev/${domain}?token=${TOKEN}&size=128
 
 const FEATURED = [
   { name: "Oracle", subtitle: "Enterprise Platform", src: logo("oracle.com") },
-  { name: "Oracle OPERA", subtitle: "OHIP Hospitality API", src: logo("oracle.com") },
+  { name: "OPERA", subtitle: "Hospitality Property System", mark: "OP", markColor: "#dc2626" },
   { name: "Base44", subtitle: "Application Platform", src: logo("base44.com") },
   { name: "Stripe", subtitle: "Payments & Payouts", src: logo("stripe.com") },
+  { name: "Claude", subtitle: "AI Assistant", src: logo("anthropic.com") },
+  { name: "ChatGPT", subtitle: "AI Assistant", src: logo("openai.com") },
 ];
 
 export default function FeaturedIntegrationsMarquee() {
-  const items = [...FEATURED, ...FEATURED, ...FEATURED, ...FEATURED, ...FEATURED, ...FEATURED];
+  const items = [...FEATURED, ...FEATURED, ...FEATURED, ...FEATURED];
 
   return (
     <section className="w-full py-8 md:py-12">
@@ -68,13 +70,30 @@ export default function FeaturedIntegrationsMarquee() {
         >
           {items.map((item, i) => (
             <div key={i} className="featured-int-card">
-              <img
-                src={item.src}
-                alt={item.name}
-                loading="lazy"
-                style={{ width: 56, height: 56, objectFit: "contain" }}
-                onError={(e) => { e.target.style.opacity = 0.2; }}
-              />
+              {item.src ? (
+                <img
+                  src={item.src}
+                  alt={item.name}
+                  loading="lazy"
+                  style={{ width: 56, height: 56, objectFit: "contain" }}
+                  onError={(e) => { e.target.style.opacity = 0.2; }}
+                />
+              ) : (
+                <div
+                  className="flex items-center justify-center rounded-xl font-black text-white"
+                  style={{
+                    width: 56,
+                    height: 56,
+                    fontSize: 20,
+                    letterSpacing: 1,
+                    background: `linear-gradient(135deg, ${item.markColor}, rgba(0,0,0,0.6))`,
+                    boxShadow: `0 0 18px ${item.markColor}66`,
+                  }}
+                  aria-label={item.name}
+                >
+                  {item.mark}
+                </div>
+              )}
               <div className="text-left">
                 <p className="text-xl md:text-2xl font-black text-white leading-tight whitespace-nowrap">{item.name}</p>
                 <p className="text-[11px] md:text-xs text-white/50 uppercase tracking-wider whitespace-nowrap">{item.subtitle}</p>
