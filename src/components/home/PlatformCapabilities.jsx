@@ -297,7 +297,7 @@ From point of sale and payouts to AI features and QR tooling — built and maint
           <div className="flex flex-wrap justify-center gap-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
               <Link
-                to={createPageUrl('CommandCenter')}
+                to={createPageUrl('Consultation')}
                 className="inline-flex items-center gap-2 px-8 py-4 font-black text-sm uppercase tracking-wide text-black transition-all duration-300"
                 style={{
                   background: 'linear-gradient(135deg, #06b6d4, #4f46e5)',
@@ -305,7 +305,7 @@ From point of sale and payouts to AI features and QR tooling — built and maint
                   clipPath: 'polygon(6% 0%, 100% 0%, 94% 100%, 0% 100%)'
                 }}
               >
-                ⚡ ENTER THE GLYPHLOCK SYSTEM
+⚡ START A PROJECT
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
@@ -317,7 +317,7 @@ From point of sale and payouts to AI features and QR tooling — built and maint
                   clipPath: 'polygon(0% 6%, 94% 0%, 100% 94%, 6% 100%)'
                 }}
               >
-👁 REVIEW OUR SERVICES
+👁 SEE WHAT WE BUILD
               </Link>
             </motion.div>
           </div>

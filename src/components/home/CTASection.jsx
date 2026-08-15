@@ -32,10 +32,10 @@ export default function CTASection() {
   };
 
   const benefits = [
-    { text: "Signed, verifiable QR codes", icon: Shield },
-    { text: "AI tools on multiple providers", icon: Zap },
-    { text: "SHA-256 timestamped proofs", icon: CheckCircle2 },
-    { text: "Custom builds and on-site service", icon: Sparkles }
+    { text: "Free scoping call, no obligation", icon: CheckCircle2 },
+    { text: "Fixed quote before we start", icon: Shield },
+    { text: "You talk to the people building it", icon: Zap },
+    { text: "Support and updates after launch", icon: Sparkles }
   ];
 
   // Stagger animation variants
@@ -194,7 +194,7 @@ export default function CTASection() {
                 >
                   <Sparkles size={14} className="text-blue-400" />
                 </motion.div>
-                <span className="text-blue-300 text-sm font-medium tracking-wide">GlyphLock — Secure Creative Technology</span>
+                <span className="text-blue-300 text-sm font-medium tracking-wide">GlyphLock — Custom Software Studio</span>
               </motion.div>
 
               {/* Title - Slide from LEFT */}
@@ -204,7 +204,7 @@ export default function CTASection() {
                 transition={{ duration: 1.1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]"
               >
-                READY TO{' '}
+READY TO{' '}
                 <motion.span 
                   className="bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6] bg-clip-text text-transparent"
                   animate={{
@@ -215,7 +215,7 @@ export default function CTASection() {
                   }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  OWN YOUR STACK?
+BUILD IT?
                 </motion.span>
               </motion.h2>
 
@@ -241,7 +241,7 @@ export default function CTASection() {
                   <Input
                     type="email"
                     required
-                    placeholder="Enter your email"
+                    placeholder="Your work email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="bg-white/8 backdrop-blur-md border-2 border-white/20 text-white placeholder:text-white/60 focus:border-indigo-400 focus:shadow-[0_0_30px_rgba(87,61,255,0.5)] transition-all h-14 md:h-16 rounded-xl text-base px-5"
@@ -268,7 +268,7 @@ export default function CTASection() {
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                     />
                     <span className="relative flex items-center gap-2 text-sm md:text-base">
-                      GET STARTED
+START MY PROJECT
                       <motion.span
                         animate={{ x: [0, 4, 0] }}
                         transition={{ duration: 1.5, repeat: Infinity }}

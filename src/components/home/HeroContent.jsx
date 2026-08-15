@@ -481,7 +481,7 @@ function CTAButtons({ isInView }) {
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
       >
-        <Link to={createPageUrl("Consultation")} className="block" aria-label="Begin sovereign build - Request consultation">
+        <Link to={createPageUrl("Consultation")} className="block" aria-label="Start your project - Request a consultation">
           <div
             className="relative text-center py-4 px-6 font-black text-sm sm:text-base uppercase tracking-wide cursor-pointer text-black transition-all duration-300"
             style={{
@@ -491,7 +491,7 @@ function CTAButtons({ isInView }) {
             }}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              ⚡ REQUEST A CONSULTATION
+⚡ START YOUR PROJECT
             </span>
           </div>
         </Link>

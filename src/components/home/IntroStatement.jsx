@@ -16,7 +16,7 @@ export default function IntroStatement() {
 
       <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
         <Link
-          to="/Solutions"
+          to="/Consultation"
           className="w-full sm:w-auto px-7 py-3 rounded-full font-semibold text-white bg-gradient-to-r from-[#7B2CBF] to-[#00A3FF] shadow-[0_0_25px_rgba(0,240,255,0.35)] hover:shadow-[0_0_40px_rgba(0,240,255,0.55)] transition-all"
         >
 Start a Project
