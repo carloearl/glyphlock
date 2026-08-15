@@ -320,7 +320,7 @@ export const PAYLOAD_TYPES = [
     label: 'Patient Record Lookup', 
     icon: FileText, 
     category: PAYLOAD_CATEGORIES.MEDICAL,
-    description: 'HIPAA-compliant patient data access',
+    description: 'HIPAA-aligned patient data access controls',
     placeholder: 'medical://record?patient_id=xxx',
     premium: false,
   },
