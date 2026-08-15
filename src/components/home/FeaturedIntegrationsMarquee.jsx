@@ -14,6 +14,9 @@ const FEATURED = [
   { name: "Qwen", subtitle: "AI Assistant", src: logo("qwen.ai") },
   { name: "Copilot", subtitle: "AI Assistant", src: "https://cdn.simpleicons.org/githubcopilot/FFFFFF" },
   { name: "Perplexity", subtitle: "AI Search", src: logo("perplexity.ai") },
+  { name: "GitHub", subtitle: "Source Control", src: logo("github.com") },
+  { name: "J.P. Morgan", subtitle: "Banking Partner", src: logo("jpmorgan.com") },
+  { name: "Chase", subtitle: "Banking Partner", src: logo("chase.com") },
 ];
 
 export default function FeaturedIntegrationsMarquee() {
