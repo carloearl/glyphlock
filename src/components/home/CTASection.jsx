@@ -115,7 +115,7 @@ export default function CTASection() {
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Main card with animated border */}
-        <div className="relative rounded-3xl overflow-hidden">
+        <div className="relative rounded-[34px] overflow-hidden shadow-[0_0_55px_rgba(59,130,246,.24),0_0_120px_rgba(124,58,237,.20)]">
           {/* VIVID Royal Blue Glow - Behind everything - Mobile Safe */}
           <motion.div
             className="absolute -inset-2 md:-inset-4 rounded-3xl blur-2xl md:blur-3xl"
@@ -147,7 +147,7 @@ export default function CTASection() {
           <motion.div
             className="absolute inset-0 rounded-3xl p-[2px]"
             style={{
-              background: 'linear-gradient(90deg, #3B82F6, #2563EB, #1D4ED8, #3B82F6)',
+              background: 'linear-gradient(90deg, #22d3ee, #3B82F6, #8b5cf6, #d946ef, #22d3ee)',
               backgroundSize: '300% 100%'
             }}
             animate={{
@@ -159,7 +159,7 @@ export default function CTASection() {
           </motion.div>
           
           {/* Content container - Deep Royal Blue glassmorphism */}
-          <div className="relative bg-gradient-to-br from-blue-900/30 via-slate-900/40 to-indigo-900/30 backdrop-blur-2xl rounded-3xl p-8 md:p-14 overflow-hidden border-2 border-blue-500/40 shadow-[inset_0_1px_0_rgba(59,130,246,0.3)]">
+          <div className="relative bg-gradient-to-br from-blue-950/45 via-slate-950/55 to-violet-950/45 backdrop-blur-2xl rounded-[34px] p-8 md:p-14 overflow-hidden border-2 border-cyan-300/35 shadow-[inset_0_1px_0_rgba(103,232,249,.35),inset_0_0_70px_rgba(99,102,241,.10)]">
             {/* Grid pattern overlay - Purple/Violet */}
             <div className="absolute inset-0 opacity-20" style={{
               backgroundImage: `
