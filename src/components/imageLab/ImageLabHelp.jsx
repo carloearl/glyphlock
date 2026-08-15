@@ -212,7 +212,7 @@ export default function ImageLabHelp() {
         )}
       </AnimatePresence>
 
-      <style jsx global>{`
+      <style>{`
         .onboarding-highlight {
           position: relative;
           box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.3);

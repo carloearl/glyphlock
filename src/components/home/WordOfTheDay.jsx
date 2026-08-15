@@ -40,7 +40,7 @@ export default function WordOfTheDay() {
       const favs = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
       setFavorites(favs);
       setNotifyEnabled(localStorage.getItem(NOTIFY_KEY) === 'true');
-    } catch (_) {}
+    } catch (_) { /* Intentionally ignored: best-effort operation. */ }
   }, []);
 
   const toggleFavorite = (word) => {
@@ -72,7 +72,7 @@ export default function WordOfTheDay() {
     if (!word) return;
     const text = `📖 Word of the Day: ${word.word}\n${word.definition}\n\nvia GlyphLock`;
     if (navigator.share) {
-      try { await navigator.share({ title: 'Word of the Day', text }); } catch (_) {}
+      try { await navigator.share({ title: 'Word of the Day', text }); } catch (_) { /* Intentionally ignored: best-effort operation. */ }
     } else {
       navigator.clipboard.writeText(text);
       setCopiedFlash(true);
@@ -132,12 +132,12 @@ export default function WordOfTheDay() {
           setWords(cached.words);
           return;
         }
-      } catch (_) {}
+      } catch (_) { /* Intentionally ignored: best-effort operation. */ }
     }
 
     // Load recent history to avoid repeats (last 60 days)
     let history = [];
-    try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (_) {}
+    try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (_) { /* Intentionally ignored: best-effort operation. */ }
     const recentWords = history.slice(0, 60).map(h => h.word).join(', ');
 
     setLoading(true);

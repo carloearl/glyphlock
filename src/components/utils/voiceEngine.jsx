@@ -93,7 +93,7 @@ export class VoiceEngine {
     try {
       this.stop();
 
-      const cleanText = text.replace(/[#*`🦕💠🦖🌟✨]/g, '').trim();
+      const cleanText = text.replace(/[#*`🦕💠🦖🌟✨]/gu, '').trim();
       if (!cleanText) return;
 
       const finalSettings = { ...this.settings, ...customSettings };

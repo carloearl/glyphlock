@@ -222,10 +222,11 @@ Be precise with the bounding box - make it fit the detected object tightly but i
       case 'showModal':
         toast.info(`Modal content: ${hotspot.actionValue}`);
         break;
-      case 'playAudio':
+      case 'playAudio': {
         const audio = new Audio(hotspot.actionValue);
         audio.play().catch(() => toast.error('Failed to play audio'));
         break;
+      }
       default:
         window.open(hotspot.actionValue, '_blank', 'noopener,noreferrer');
     }

@@ -298,7 +298,7 @@ export default function MessageBubble({ message, autoRead = false }) {
                             isPlaying = false;
                             try {
                                 source.stop();
-                            } catch (e) {}
+                            } catch (e) { /* Intentionally ignored: best-effort operation. */ }
                             setIsSpeaking(false);
                         }
                     };

@@ -132,7 +132,7 @@ export default function AIRemediationPanel({ findings, scanType, onRemediationGe
                 desc = msgs.join('. ');
             }
         }
-    } catch(e) {}
+    } catch(e) { /* Intentionally ignored: best-effort operation. */ }
     
     return desc?.replace('[AI] ', '') || 'No description available';
   }

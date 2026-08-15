@@ -365,7 +365,7 @@ export default function OfficialChecks() {
     win.document.write(`<!DOCTYPE html><html><head>
 <title>Check #${ck.num} · GlyphLock LLC</title>
 <style>*{box-sizing:border-box;margin:0;padding:0;}body{background:#fff;display:flex;justify-content:center;padding:.3in;}@media print{body{padding:.1in;}@page{size:8.5in 9in;margin:0;}}</style>
-</head><body>${el.outerHTML}<script>window.onload=()=>{setTimeout(()=>window.print(),450);}<\/script></body></html>`);
+</head><body>${el.outerHTML}<script>window.onload=()=>{setTimeout(()=>window.print(),450);}</script></body></html>`);
     win.document.close();
   }
 
@@ -379,7 +379,7 @@ export default function OfficialChecks() {
     win.document.write(`<!DOCTYPE html><html><head>
 <title>All Checks · GlyphLock LLC</title>
 <style>*{box-sizing:border-box;margin:0;padding:0;}body{background:#fff;padding:.2in;display:flex;flex-direction:column;gap:.3in;}@media print{body{padding:.1in;gap:0;}@page{size:8.5in 11in;margin:0;}}</style>
-</head><body>${html}<script>window.onload=()=>{setTimeout(()=>window.print(),500);}<\/script></body></html>`);
+</head><body>${html}<script>window.onload=()=>{setTimeout(()=>window.print(),500);}</script></body></html>`);
     win.document.close();
   }
 

@@ -64,7 +64,7 @@ export default function BarcodeFirstCapture({
 
   const buildFilename = (type, seq) => {
     // Format: CC-Contract-{BARCODE}-{TYPE}-{SEQ:02d}
-    return `CC-Contract-${barcode.replace(/[^A-Z0-9\-]/gi, "")}-${type.toUpperCase()}-${String(seq).padStart(2, "0")}`;
+    return `CC-Contract-${barcode.replace(/[^A-Z0-9-]/gi, "")}-${type.toUpperCase()}-${String(seq).padStart(2, "0")}`;
   };
 
   const handleCapture = async (e) => {

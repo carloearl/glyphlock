@@ -91,14 +91,14 @@ export default function ChatInput({
     }
     return () => {
       if (recognitionTimeoutRef.current) clearTimeout(recognitionTimeoutRef.current);
-      try { recognitionRef.current?.stop(); } catch {}
+      try { recognitionRef.current?.stop(); } catch { /* Intentionally ignored: best-effort operation. */ }
     };
   }, [value, onChange]);
 
   const toggleVoiceInput = () => {
     if (!recognitionRef.current) { toast.error('Speech recognition not supported'); return; }
     if (isListening) {
-      try { clearTimeout(recognitionTimeoutRef.current); recognitionRef.current.stop(); restartAttemptsRef.current = 0; } catch {}
+      try { clearTimeout(recognitionTimeoutRef.current); recognitionRef.current.stop(); restartAttemptsRef.current = 0; } catch { /* Intentionally ignored: best-effort operation. */ }
       setIsListening(false);
     } else {
       try { recognitionRef.current.start(); setIsListening(true); restartAttemptsRef.current = 0; }

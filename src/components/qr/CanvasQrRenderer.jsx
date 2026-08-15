@@ -57,12 +57,13 @@ export default function CanvasQrRenderer({
         ctx.fill();
         break;
 
-      case 'rounded':
+      case 'rounded': {
         const cornerRadius = size * 0.3;
         ctx.roundRect(x + padding, y + padding, size, size, cornerRadius);
         ctx.fill();
         break;
 
+      }
       case 'diamond':
         ctx.moveTo(cx, y + padding);
         ctx.lineTo(x + cellSize - padding, cy);
@@ -89,13 +90,15 @@ export default function CanvasQrRenderer({
         break;
 
       case 'pixel':
-        // Slightly smaller square with gaps
+      {        // Slightly smaller square with gaps
         const pixelPadding = cellSize * 0.15;
         ctx.fillRect(x + pixelPadding, y + pixelPadding, cellSize - pixelPadding * 2, cellSize - pixelPadding * 2);
         break;
 
+      }
+
       case 'mosaic':
-        // Multiple small tiles
+      {        // Multiple small tiles
         const tileSize = size / 2;
         const gap = 1;
         ctx.fillRect(x + padding, y + padding, tileSize - gap, tileSize - gap);
@@ -103,6 +106,8 @@ export default function CanvasQrRenderer({
         ctx.fillRect(x + padding, y + padding + tileSize, tileSize - gap, tileSize - gap);
         ctx.fillRect(x + padding + tileSize, y + padding + tileSize, tileSize - gap, tileSize - gap);
         break;
+
+      }
 
       case 'microdots':
         // Smaller centered dot
@@ -193,7 +198,7 @@ export default function CanvasQrRenderer({
       case 'rounded':
         ctx.arc(x + totalSize / 2, y + totalSize / 2, totalSize / 2, 0, Math.PI * 2);
         break;
-      case 'diamond':
+      case 'diamond': {
         const cx = x + totalSize / 2;
         const cy = y + totalSize / 2;
         ctx.moveTo(cx, y);
@@ -202,6 +207,7 @@ export default function CanvasQrRenderer({
         ctx.lineTo(x, cy);
         ctx.closePath();
         break;
+      }
       default:
         ctx.rect(x, y, totalSize, totalSize);
     }

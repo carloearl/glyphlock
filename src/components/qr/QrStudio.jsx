@@ -209,10 +209,11 @@ export default function QrStudio({ initialTab = 'create' }) {
       case "wifi": return `WIFI:T:${qrData.wifiEncryption};S:${qrData.wifiSSID};P:${qrData.wifiPassword};H:${qrData.wifiHidden};`;
       case "vcard": return `BEGIN:VCARD\nVERSION:3.0\nN:${qrData.vcardLastName};${qrData.vcardFirstName}\nFN:${qrData.vcardFirstName} ${qrData.vcardLastName}\nORG:${qrData.vcardOrganization}\nTEL:${qrData.vcardPhone}\nEMAIL:${qrData.vcardEmail}\nURL:${qrData.vcardWebsite}\nADR:${qrData.vcardAddress}\nEND:VCARD`;
       case "location": return `geo:${qrData.latitude},${qrData.longitude}`;
-      case "event":
+      case "event": {
         const startDateTime = `${qrData.eventStartDate}T${qrData.eventStartTime}:00`;
         const endDateTime = `${qrData.eventEndDate}T${qrData.eventEndTime}:00`;
         return `BEGIN:VEVENT\nSUMMARY:${qrData.eventTitle}\nLOCATION:${qrData.eventLocation}\nDTSTART:${startDateTime.replace(/[-:]/g, '')}\nDTEND:${endDateTime.replace(/[-:]/g, '')}\nDESCRIPTION:${qrData.eventDescription}\nEND:VEVENT`;
+      }
       default: return "";
     }
   };

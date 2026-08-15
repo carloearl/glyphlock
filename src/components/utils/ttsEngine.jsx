@@ -85,7 +85,7 @@ export async function getVoicesForProvider(provider) {
 export async function generateAudio(provider, voiceId, text, settings = {}) {
   // Clean text
   const cleanText = text
-    .replace(/[#*`🦕💠🦖🌟✨]/g, '')
+    .replace(/[#*`🦕💠🦖🌟✨]/gu, '')
     .replace(/\n/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
