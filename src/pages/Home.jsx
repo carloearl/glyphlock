@@ -113,14 +113,14 @@ export default function Home() {
   return (
     <>
       <SEOHead 
-        title="GlyphLock — Secure Creative Technology | Protect What You Create. Power What You Operate."
-        description="GlyphLock builds secure technology for creators, artists, studios and venues — protecting identity, intellectual property, music, artwork and digital assets, and powering websites, apps, software platforms, DJ and studio systems, and venue operations."
-        keywords="GlyphLock, secure creative technology, intellectual property protection, music protection, artwork protection, digital asset security, AI governance, venue operations, studio technology, NUPS"
+        title="GlyphLock — Custom Software Development | Websites, Apps & Business Systems"
+        description="GlyphLock is a custom software studio. We design, build, and maintain websites, apps, and business systems — point of sale, scheduling, payouts, reporting, integrations, and AI features. Builders of the NUPS venue operations platform."
+        keywords="custom software development, custom app development, custom web development, business systems, point of sale development, software studio, API integrations, AI features, NUPS, GlyphLock"
         url="/"
       />
       
       {/* SEO H1 - Hidden but crawlable */}
-      <h1 className="sr-only">GlyphLock — Secure Creative Technology. Protect What You Create. Power What You Operate.</h1>
+      <h1 className="sr-only">GlyphLock — Custom Software Development. Websites, Apps, and Business Systems Built to Order.</h1>
 
       <main className="w-full relative" style={{ background: 'transparent', position: 'relative' }}>
         

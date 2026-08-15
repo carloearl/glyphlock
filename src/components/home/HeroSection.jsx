@@ -43,7 +43,7 @@ export default function HeroSection() {
                     transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
                   />
                 </div>
-                <p className="text-sm text-blue-300 font-semibold tracking-wide">Loading Security Feed...</p>
+                <p className="text-sm text-blue-300 font-semibold tracking-wide">Loading...</p>
               </div>
             </div>
           )}
@@ -61,7 +61,7 @@ export default function HeroSection() {
             onCanPlay={() => setVideoLoaded(true)}
             onLoadedMetadata={() => setVideoLoaded(true)}
             onError={() => setVideoLoaded(true)}
-            aria-label="GlyphLock security system visualization"
+            aria-label="GlyphLock custom software showcase"
           >
             <source src="https://base44.app/api/apps/6902128ac3c5c94a82446585/files/public/6902128ac3c5c94a82446585/643dc9ba3_Dec_05__2220_13s_202512052257_lc8rw.mp4" type="video/mp4" />
           </video>
