@@ -347,7 +347,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         severity: 'low',
         metadata: { station, cashier: user?.email }
       });
-    } catch(e) {}
+    } catch(e) { /* Intentionally ignored: best-effort operation. */ }
     toast.success('💵 Cash drawer opened — logged.');
   };
 

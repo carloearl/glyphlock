@@ -37,7 +37,7 @@ export default function QrPreviewPanel({
           const user = await base44.auth.me();
           setCurrentUser(user);
         }
-      } catch (err) {}
+      } catch (err) { /* Intentionally ignored: best-effort operation. */ }
     })();
   }, []);
 

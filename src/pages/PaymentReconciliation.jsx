@@ -44,7 +44,7 @@ export default function PaymentReconciliation() {
 
   useEffect(() => {
     (async () => {
-      try { const v = await base44.entities.Venue.list(null, 50); setVenues((v || []).map(x => x.venue_id).filter(Boolean)); } catch (_) {}
+      try { const v = await base44.entities.Venue.list(null, 50); setVenues((v || []).map(x => x.venue_id).filter(Boolean)); } catch (_) { /* Intentionally ignored: best-effort operation. */ }
     })();
     loadExceptions();
     loadMetrics();

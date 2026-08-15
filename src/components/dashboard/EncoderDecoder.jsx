@@ -47,10 +47,11 @@ const decode = (text, type) => {
         return text.match(/.{1,2}/g)?.map(h => String.fromCharCode(parseInt(h, 16))).join('') || '';
       case 'url':
         return decodeURIComponent(text);
-      case 'html':
+      case 'html': {
         const txt = document.createElement('textarea');
         txt.innerHTML = text;
         return txt.value;
+      }
       case 'binary':
         return text.split(' ').map(b => String.fromCharCode(parseInt(b, 2))).join('');
       case 'ascii':

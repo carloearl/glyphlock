@@ -57,12 +57,13 @@ export default function CanvasQrRenderer({
         ctx.fill();
         break;
 
-      case 'rounded':
+      case 'rounded': {
         const cornerRadius = size * 0.3;
         ctx.roundRect(x + padding, y + padding, size, size, cornerRadius);
         ctx.fill();
         break;
 
+      }
       case 'diamond':
         ctx.moveTo(cx, y + padding);
         ctx.lineTo(x + cellSize - padding, cy);
@@ -193,7 +194,7 @@ export default function CanvasQrRenderer({
       case 'rounded':
         ctx.arc(x + totalSize / 2, y + totalSize / 2, totalSize / 2, 0, Math.PI * 2);
         break;
-      case 'diamond':
+      case 'diamond': {
         const cx = x + totalSize / 2;
         const cy = y + totalSize / 2;
         ctx.moveTo(cx, y);
@@ -202,6 +203,7 @@ export default function CanvasQrRenderer({
         ctx.lineTo(x, cy);
         ctx.closePath();
         break;
+      }
       default:
         ctx.rect(x, y, totalSize, totalSize);
     }

@@ -26,7 +26,7 @@ export default function GlyphBotJuniorPage() {
 
   const playVoice = async (text) => {
     try {
-      const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
+      const cleanText = text.replace(/[🌟💠✨🦕#*`]/gu, '').trim();
       if (!cleanText) return;
 
       const response = await base44.functions.invoke('textToSpeechAdvanced', {

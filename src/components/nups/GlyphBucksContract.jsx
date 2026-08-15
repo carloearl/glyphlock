@@ -201,7 +201,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           if (state.lineItems) setLineItems(state.lineItems);
           toast.info("Draft order restored from session");
         }
-      } catch {}
+      } catch { /* Intentionally ignored: best-effort operation. */ }
     }
   }, []);
 
@@ -391,7 +391,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           description: `TRANSACTION FAILED: Order ${orderNumber}, error: ${errorMsg}`,
           timestamp: new Date().toISOString()
         });
-      } catch {}
+      } catch { /* Intentionally ignored: best-effort operation. */ }
       
       toast.error("Transaction failed: " + errorMsg);
     }

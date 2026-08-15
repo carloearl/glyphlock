@@ -57,7 +57,7 @@ export default function ClubTV() {
       el.src = audioUrl;
       el.play().catch(() => {});
     } else if (!audioUrl) {
-      try { el.pause(); el.removeAttribute("src"); el.load(); } catch (_) {}
+      try { el.pause(); el.removeAttribute("src"); el.load(); } catch (_) { /* Intentionally ignored: best-effort operation. */ }
     }
   }, [audioUrl]);
 

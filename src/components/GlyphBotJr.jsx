@@ -28,7 +28,7 @@ export default function GlyphBotJr() {
         audioRef.current.currentTime = 0;
       }
 
-      const cleanText = text.replace(/[🌟💠✨🦕#*`]/g, '').trim();
+      const cleanText = text.replace(/[🌟💠✨🦕#*`]/gu, '').trim();
       if (!cleanText) return;
 
       // Use browser speech synthesis as fallback (no external TTS endpoint needed)

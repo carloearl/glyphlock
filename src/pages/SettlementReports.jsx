@@ -151,7 +151,7 @@ export default function SettlementReports() {
             {/* GlyphBucks Liability — F-2: separate section, never added to revenue */}
             {(() => {
               let extra = {};
-              try { extra = JSON.parse(selectedReport.notes || '{}'); } catch {}
+              try { extra = JSON.parse(selectedReport.notes || '{}'); } catch { /* Intentionally ignored: best-effort operation. */ }
               if (!extra.gb_ledger_issued && !extra.glyph_buck_issued_value) return null;
               return (
                 <Card>

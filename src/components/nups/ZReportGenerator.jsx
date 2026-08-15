@@ -294,7 +294,7 @@ export default function ZReportGenerator({ user: userProp }) {
       return;
     }
     let extra = {};
-    try { extra = JSON.parse(report.notes || '{}'); } catch(e) {}
+    try { extra = JSON.parse(report.notes || '{}'); } catch(e) { /* Intentionally ignored: best-effort operation. */ }
 
     printWindow.document.write(`
       <html>

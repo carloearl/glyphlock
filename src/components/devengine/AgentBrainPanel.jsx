@@ -201,8 +201,8 @@ export default function AgentBrainPanel() {
     
     for (const line of lines) {
       // Match numbered lists: 1. or 1) or - or * 
-      if (/^\s*(\d+[\.)]\s+|-\s+|\*\s+)/.test(line)) {
-        const cleanLine = line.replace(/^\s*(\d+[\.)]\s+|-\s+|\*\s+)/, '').trim();
+      if (/^\s*(\d+[.)]\s+|-\s+|\*\s+)/.test(line)) {
+        const cleanLine = line.replace(/^\s*(\d+[.)]\s+|-\s+|\*\s+)/, '').trim();
         if (cleanLine.length > 0) {
           steps.push({
             id: stepNumber++,

@@ -377,7 +377,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png"
                   alt="GlyphLock Security Platform Logo"
                   className="h-10 w-auto relative z-10 group-hover:scale-110 transition-transform duration-300"
-                  fetchpriority="high"
+                  fetchPriority="high"
                   decoding="async"
                   width={40}
                   height={40}

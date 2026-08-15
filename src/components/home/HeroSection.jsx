@@ -86,7 +86,7 @@ export default function HeroSection() {
               alt="GlyphLock Secure Creative Technology Logo"
               width="120"
               height="120"
-              fetchpriority="high"
+              fetchPriority="high"
               decoding="async"
               className="h-6 sm:h-8 md:h-10 lg:h-12 w-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
               style={{ transform: 'translateZ(0)' }}

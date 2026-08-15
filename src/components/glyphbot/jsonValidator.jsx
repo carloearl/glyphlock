@@ -10,28 +10,28 @@ function extractJSON(text) {
   if (jsonBlockMatch) {
     try {
       return JSON.parse(jsonBlockMatch[1].trim());
-    } catch (e) {}
+    } catch (e) { /* Intentionally ignored: best-effort operation. */ }
   }
   
   const auditJsonMatch = text.match(/---AUDIT_JSON_START---([\s\S]*?)---AUDIT_JSON_END---/);
   if (auditJsonMatch) {
     try {
       return JSON.parse(auditJsonMatch[1].trim());
-    } catch (e) {}
+    } catch (e) { /* Intentionally ignored: best-effort operation. */ }
   }
   
   const braceMatch = text.match(/\{[\s\S]*\}/);
   if (braceMatch) {
     try {
       return JSON.parse(braceMatch[0]);
-    } catch (e) {}
+    } catch (e) { /* Intentionally ignored: best-effort operation. */ }
   }
   
   const bracketMatch = text.match(/\[[\s\S]*\]/);
   if (bracketMatch) {
     try {
       return JSON.parse(bracketMatch[0]);
-    } catch (e) {}
+    } catch (e) { /* Intentionally ignored: best-effort operation. */ }
   }
   
   try {

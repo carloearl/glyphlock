@@ -165,7 +165,7 @@ export default function ControlsPanel({ controls, setControls }) {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .slider-uv::-webkit-slider-thumb {
           appearance: none;
           width: 16px;
