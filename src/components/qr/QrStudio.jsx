@@ -215,7 +215,6 @@ export default function QrStudio({ initialTab = 'create' }) {
         return `BEGIN:VEVENT\nSUMMARY:${qrData.eventTitle}\nLOCATION:${qrData.eventLocation}\nDTSTART:${startDateTime.replace(/[-:]/g, '')}\nDTEND:${endDateTime.replace(/[-:]/g, '')}\nDESCRIPTION:${qrData.eventDescription}\nEND:VEVENT`;
       }
       default: return "";
-      }
     }
   };
 
