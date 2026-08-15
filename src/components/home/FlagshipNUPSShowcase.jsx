@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, Radio, CreditCard, FileSignature, Fingerprint, ScanLine, BarChart3, Hotel, ShieldCheck } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import NUPSBuyerVideo from '@/components/nups/landing/NUPSBuyerVideo';
 
 const features = [
   [CreditCard, 'POS + Registers', 'Cash/card workflows, catalogs, void logging and shift-close controls.'],
@@ -37,8 +36,20 @@ export default function FlagshipNUPSShowcase() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl border border-blue-400/25 bg-black/40 shadow-[0_0_55px_rgba(59,130,246,.16)] mb-8">
-          <NUPSBuyerVideo />
+        <div className="relative overflow-hidden rounded-2xl border border-cyan-400/25 bg-black/45 shadow-[0_0_55px_rgba(59,130,246,.16)] mb-8 p-5 md:p-8 min-h-[280px]">
+          <div className="absolute inset-0 opacity-30" style={{backgroundImage:'linear-gradient(rgba(34,211,238,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.12) 1px,transparent 1px)',backgroundSize:'34px 34px'}} />
+          <div className="absolute -left-16 top-12 h-48 w-48 rounded-full bg-cyan-500/20 blur-[70px] animate-pulse" />
+          <div className="absolute -right-12 bottom-0 h-56 w-56 rounded-full bg-violet-500/20 blur-[80px] animate-pulse" />
+          <div className="relative z-10 grid md:grid-cols-[1.1fr_.9fr] gap-6 items-center h-full">
+            <div>
+              <div className="font-mono text-[10px] md:text-xs tracking-[.24em] text-cyan-300 mb-3">NUPS // LIVE OPERATING SURFACE</div>
+              <h3 className="text-3xl md:text-5xl font-black text-white leading-tight">ONE COMMAND DECK.<br/><span className="text-violet-300">EVERY VENUE FLOW.</span></h3>
+              <p className="mt-4 max-w-2xl text-slate-300">Front door, guest identity, staff shifts, registers, contracts, payouts, reporting, audit evidence and integrations are organized as one connected operating system.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {['FRONT DOOR','POS / BAR','VIP CONTRACTS','STAFF SHIFTS','PAYOUTS','REPORTING','QR OPS','OHIP'].map((label,i)=><div key={label} className="rounded-xl border border-white/10 bg-white/[.05] px-3 py-4 text-center font-mono text-[10px] md:text-xs text-slate-200 shadow-[0_0_20px_rgba(59,130,246,.08)] hover:border-cyan-300/50 hover:text-cyan-200 hover:shadow-[0_0_28px_rgba(34,211,238,.24)] transition-all">{String(i+1).padStart(2,'0')} // {label}</div>)}
+            </div>
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
