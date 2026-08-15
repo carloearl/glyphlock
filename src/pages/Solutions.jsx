@@ -32,12 +32,12 @@ export default function Solutions() {
       icon: Heart,
       description: "HIPAA verification module – system-enforced data protection with cryptographic audit governance.",
       features: [
-        "HIPAA-compliant data encryption",
+        "HIPAA-aligned data-protection controls",
         "Patient data protection with steganography",
         "Secure medical record storage",
         "Audit logging and compliance reporting",
         "Multi-factor authentication",
-        "Quantum-resistant encryption"
+        "Post-quantum readiness architecture"
       ],
       cta: "Healthcare Security",
       page: "SecurityOperationsCenter",
@@ -110,7 +110,7 @@ export default function Solutions() {
   ];
 
   const benefits = [
-    "Quantum-resistant encryption protecting against future threats",
+    "Post-quantum readiness planning for future cryptographic migration",
     "AI-powered threat detection with real-time monitoring",
     "Blockchain verification for transaction immutability",
     "Multi-layer security combining cryptography and legal frameworks",
@@ -122,7 +122,7 @@ export default function Solutions() {
     <>
       <SEOHead 
         title="Industry Solutions - Cybersecurity for Every Sector | GlyphLock"
-        description="Tailored cybersecurity solutions for hospitality, healthcare, finance, retail, technology, and enterprise. Quantum-resistant protection with industry-specific compliance and features."
+        description="Tailored cybersecurity solutions for hospitality, healthcare, finance, retail, technology, and enterprise, with post-quantum readiness and industry-specific control mapping."
         keywords="industry cybersecurity solutions, healthcare HIPAA security, financial PCI DSS compliance, retail fraud prevention, technology IP protection, enterprise SOC, hospitality POS security, government classified data"
         url="/solutions"
       />
