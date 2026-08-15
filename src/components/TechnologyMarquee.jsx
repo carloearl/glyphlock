@@ -229,7 +229,7 @@ export default function TechnologyMarquee() {
           style={{ background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.25)", color: "#38bdf8" }}
         >
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#38bdf8" }} />
-          Enterprise Integration Stack
+          Technology & Integration Ecosystem
         </motion.div>
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
@@ -245,7 +245,7 @@ export default function TechnologyMarquee() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-sm md:text-base text-white/50 max-w-xl mx-auto"
         >
-          100+ enterprise technologies unified in one sovereign security stack.
+          A reference map of technologies GlyphLock uses, supports, has evaluated, or can integrate with. Logos do not imply a formal partnership or active production integration.
         </motion.p>
       </div>
 
