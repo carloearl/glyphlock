@@ -79,7 +79,7 @@ export default function HeroSection() {
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               className="text-white font-black tracking-[0.3em] text-[10px] sm:text-xs md:text-sm uppercase hidden sm:block drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]"
             >
-              SYSTEM ACTIVE
+              CURRENT BUILD
             </motion.span>
             <img
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png"
