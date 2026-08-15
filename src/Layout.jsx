@@ -126,7 +126,7 @@ export default function Layout({ children, currentPageName }) {
       <div 
         className="fixed inset-0"
         style={{ 
-          zIndex: 6, 
+          zIndex: 30, 
           pointerEvents: 'none',
           userSelect: 'none',
           opacity: 1
