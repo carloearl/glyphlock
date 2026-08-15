@@ -287,7 +287,7 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         style={{ 
           zIndex: 0,
           mixBlendMode: 'screen',
-          opacity: 0.6,
+          opacity: 0.9,
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
@@ -303,7 +303,7 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         style={{ 
           zIndex: 1,
           mixBlendMode: 'screen',
-          opacity: 0.8,
+          opacity: 1,
           pointerEvents: 'none',
           touchAction: 'none',
           userSelect: 'none',
