@@ -1405,6 +1405,7 @@ export default function NUPSLanding() {
             <button type="button" onClick={() => scrollToSection('nups-walkthrough')}>Demo</button>
             <button type="button" onClick={() => scrollToSection('nups-architecture')}>Architecture</button>
             <button type="button" className="oracle-tab" onClick={() => scrollToSection('nups-integrations')}>Oracle OHIP</button>
+            <button type="button" onClick={() => navigate('/privacy')}>Privacy</button>
             <button type="button" onClick={() => scrollToSection('nups-protection')}>Protection</button>
             <button type="button" onClick={() => scrollToSection('nups-revenue')}>Revenue</button>
             <button type="button" className="enter-tab" onClick={() => navigate('/NUPSKiosk')}>Enter NUPS →</button>
