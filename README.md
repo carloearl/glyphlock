@@ -1,50 +1,68 @@
 # GlyphLock
 
-Canonical source repository for the current GlyphLock Base44 application.
+GlyphLock is the canonical source repository for the GlyphLock platform and its Base44 application.
 
-## Source of truth
+GlyphLock builds custom software, AI-assisted workflows, verification tooling, operational systems, and the flagship **NUPS (Nexus Unified Portal System)** venue-operations platform.
 
-This repository is the active Base44-backed GlyphLock codebase. The application uses Vite/React with `@base44/sdk` and `@base44/vite-plugin`, and Base44 automation writes changes to the `main` branch.
+## Canonical project
 
-Older repositories under this account may contain historical prototypes, experiments, or unrelated earlier implementations. They should not be treated as the current production source unless a file or commit is explicitly migrated here.
+- Website: https://glyphlock.io
+- Repository: `carloearl/glyphlock`
+- Primary branch: `main`
+- App platform: Base44
 
-## Current platform surfaces
+This repository is the active codebase. Older GlyphLock repositories may contain experiments, prototypes, archived concepts, or superseded implementations and should not be treated as the current source of truth.
 
-- GlyphLock homepage and public platform experience
-- NUPS venue operations platform
-- QR Studio and verification tooling
-- Governance Hub / Master Covenant documentation
-- GlyphBot AI workflows
-- Image Lab
-- GlyphLock Financial operational tooling
-- Security Operations
-- Creative/DJ tooling
+## Major platform areas
+
+- **NUPS** — venue operations, POS/register workflows, contracts, staff workflows, payouts, reporting, audit records, and integration surfaces.
+- **QR Studio** — QR generation, payload tooling, verification, scan workflows, and related vault/record features.
+- **GlyphBot** — AI-assisted research, analysis, support, coding, and workflow tooling.
+- **Image Lab** — image-generation and interactive-image workflows.
+- **GlyphLock Financial** — operational ledger, settlement, payout, and reporting interfaces.
+- **Security Operations** — access-control, monitoring, audit, and security-operation surfaces.
+- **Governance Hub** — GlyphLock governance documentation and operating frameworks.
+- **Creative tooling** — including DJ/audio interfaces and related experimental modules.
+
+## Public-claims policy
+
+GlyphLock distinguishes between:
+
+1. features implemented in this repository;
+2. internal standards or research frameworks;
+3. integrations or interoperability work;
+4. third-party certifications, registrations, partnerships, patents, court rulings, or regulatory approvals.
+
+A third-party name appearing in code or documentation does **not** by itself mean endorsement, partnership, certification, or legal validation. External claims should be supported by independent documentation before being presented as verified fact.
+
+See [`docs/PUBLIC_CLAIMS_POLICY.md`](docs/PUBLIC_CLAIMS_POLICY.md).
 
 ## Development
 
 ```bash
-npm ci
-npm run typecheck
-npm run build
+npm install
 npm run dev
 ```
 
-## Repository policy
+Quality checks:
 
-- `main` is the canonical branch for the current Base44 application.
-- Public claims in website copy should be evidence-backed and clearly distinguish internal standards, demonstrations, pending work, third-party certifications, and independently verified facts.
-- Do not commit credentials, API keys, OAuth tokens, private customer records, or regulated personal data.
-- Historical experiments should be archived rather than mixed into the current application unless intentionally migrated.
+```bash
+npm run typecheck
+npm run build
+```
 
-## Legacy repositories
+Additional scripts are documented in `package.json`.
 
-The following repositories may represent historical/alternate projects and should not be confused with this codebase:
+## Secrets and credentials
 
-- `carloearl/GlyphlockLLC-v0-skin-cabaret-site` — older Next.js/v0 project
-- `carloearl/https-github.com-GlyphlockLLC-v0-skin-cabaret-site` — empty accidental repository
-- `carloearl/glyphlock-copy` — private duplicate/backup pending archive review
-- `carloearl/Master-Covenant-Protocol-Site` — separate Master Covenant project
+Do not commit credentials, service-role keys, API secrets, OAuth tokens, private keys, or `.env` files. Runtime secrets must be supplied through the appropriate environment or platform secret store.
 
-## Security and disclosure
+See [`SECURITY.md`](SECURITY.md).
 
-Before making this repository public, review commit history and tracked files for secrets or private data. Changing a repository from private to public exposes its full reachable Git history, not only the current working tree.
+## Repository visibility
+
+This repository is intentionally public for transparency and technical review. Public visibility does not grant rights beyond those provided by an explicit license or applicable law.
+
+## Status
+
+GlyphLock is under active development. Individual modules vary in maturity, and public documentation should accurately distinguish production functionality, sandbox functionality, prototypes, research, and planned work.
