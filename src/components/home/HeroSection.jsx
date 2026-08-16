@@ -28,7 +28,7 @@ const nodes = [
   { icon: Image, label: 'IMAGE LAB', link: 'ImageLab', pos: 'right-[-3%] top-[43%]', accent: '#d946ef' },
   { icon: DollarSign, label: 'FINANCIAL', link: 'GlyphLockFinancial', pos: 'left-[7%] bottom-[5%]', accent: '#10b981' },
   { icon: Radio, label: 'SECURITY', link: 'SecurityOperationsCenter', pos: 'right-[7%] bottom-[5%]', accent: '#f43f5e' },
-  { icon: ShieldCheck, label: 'GOVERNANCE', link: 'GovernanceHub', pos: 'left-1/[.02] -translate-x-1/[.02] bottom-[-3%]', accent: '#8b5cf6' },
+  { icon: ShieldCheck, label: 'GOVERNANCE', link: 'GovernanceHub', pos: 'left-1/2 -translate-x-1/2 bottom-[-3%]', accent: '#8b5cf6' },
 ];
 
 function PlatformMatrix() {
@@ -52,11 +52,11 @@ function PlatformMatrix() {
         className="absolute inset-[22%] rounded-full border border-dashed border-cyan-300/30"
       />
 
-      <div className="absolute left-1/[.02] top-1/[.02] h-[225px] w-[225px] -translate-x-1/[.02] -translate-y-1/[.02] rounded-full bg-cyan-400/10 blur-[60px]" />
+      <div className="absolute left-1/2 top-1/2 h-[225px] w-[225px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 blur-[60px]" />
       <motion.div
         animate={{ scale: [1, 1.045, 1], filter: ['drop-shadow(0 0 18px rgba(34,211,238,.45))', 'drop-shadow(0 0 42px rgba(139,92,246,.75))', 'drop-shadow(0 0 18px rgba(34,211,238,.45))'] }}
         transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute left-1/[.02] top-1/[.02] flex h-36 w-36 -translate-x-1/[.02] -translate-y-1/[.02] items-center justify-center rounded-full border border-cyan-100/[.45] bg-[#020713]/[.65] backdrop-blur-2xl shadow-[0_0_45px_rgba(34,211,238,.28),0_0_110px_rgba(124,58,237,.20),inset_0_0_45px_rgba(59,130,246,.12)]"
+        className="absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-100/[.45] bg-[#020713]/[.65] backdrop-blur-2xl shadow-[0_0_45px_rgba(34,211,238,.28),0_0_110px_rgba(124,58,237,.20),inset_0_0_45px_rgba(59,130,246,.12)]"
       >
         <img src={LOGO} alt="GlyphLock platform core" className="h-24 w-24 object-contain" loading="eager" decoding="async" />
       </motion.div>
@@ -112,7 +112,7 @@ function PlatformMatrix() {
         );
       })}
 
-      <div className="absolute left-1/[.02] top-[13%] -translate-x-1/[.02] rounded-full border border-cyan-300/20 bg-black/30 px-3 py-1.5 font-mono text-[8px] tracking-[.2em] text-cyan-200/70 backdrop-blur-xl">
+      <div className="absolute left-1/2 top-[13%] -translate-x-1/2 rounded-full border border-cyan-300/20 bg-black/30 px-3 py-1.5 font-mono text-[8px] tracking-[.2em] text-cyan-200/70 backdrop-blur-xl">
         PLATFORM MATRIX // LIVE
       </div>
     </motion.div>
@@ -233,7 +233,7 @@ export default function HeroSection() {
         <PlatformMatrix />
       </div>
 
-      <a href="#flagship" aria-label="Scroll to the GlyphLock flagship platform" className="absolute bottom-5 left-1/[.02] z-30 flex -translate-x-1/[.02] flex-col items-center gap-1.5 font-mono text-[8px] tracking-[.22em] text-cyan-100/[.65] transition-colors hover:text-cyan-100">
+      <a href="#flagship" aria-label="Scroll to the GlyphLock flagship platform" className="absolute bottom-5 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5 font-mono text-[8px] tracking-[.22em] text-cyan-100/[.65] transition-colors hover:text-cyan-100">
         ENTER SYSTEM
         <motion.span animate={{ y: [0, 6, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }} className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300/25 bg-black/30 backdrop-blur-xl shadow-[0_0_22px_rgba(34,211,238,.16)]">
           <ChevronDown className="h-4 w-4" />
