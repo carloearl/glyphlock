@@ -6,11 +6,11 @@ import { FOOTER_LINKS } from "@/components/NavigationConfig";
 import { filterUiArtifacts } from "@/lib/uiArtifactFilter";
 
 const certifications = [
-  { name: 'ISO 27001', subtitle: 'ARCHITECTURE', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg', page: 'TrustSecurity' },
-  { name: 'SOC 2', subtitle: 'ALIGNED', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg', page: 'TrustSecurity' },
-  { name: 'GDPR', subtitle: 'ALIGNED', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg', page: 'Privacy' },
-  { name: 'HIPAA', subtitle: 'READY', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg', page: 'TrustSecurity' },
-  { name: 'PCI DSS', subtitle: 'COMPATIBLE', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg', page: 'TrustSecurity' }
+  { name: 'ISO/IEC 27001', subtitle: 'CONTROL REFERENCE', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg', page: 'TrustSecurity' },
+  { name: 'SOC 2', subtitle: 'CONTROL ALIGNMENT', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg', page: 'TrustSecurity' },
+  { name: 'GDPR', subtitle: 'PRIVACY PROGRAM', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg', page: 'Privacy' },
+  { name: 'HIPAA', subtitle: 'WHEN APPLICABLE', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg', page: 'TrustSecurity' },
+  { name: 'PCI DSS', subtitle: 'WHEN IN SCOPE', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg', page: 'TrustSecurity' }
 ];
 
 const socials = [
@@ -89,7 +89,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-[13px] text-slate-400 leading-relaxed max-w-xs">
-              Secure software, cryptographic verification, AI-assisted tooling, and the Master Covenant governance framework.
+              Custom software, NUPS venue operations, cryptographic verification, AI-assisted tooling, and documented governance workflows.
             </p>
             
             {/* Social icons */}
@@ -145,7 +145,7 @@ export default function Footer() {
               >
                 <img 
                   src={cert.image} 
-                  alt={`${cert.name} ${cert.subtitle} certification badge`}
+                  alt={`${cert.name} ${cert.subtitle} framework reference`}
                   className="w-8 h-8 md:w-10 md:h-10 object-contain opacity-80 group-hover:opacity-100 transition-opacity" 
                   loading="lazy" 
                   decoding="async" 
@@ -226,15 +226,15 @@ export default function Footer() {
             </div>
             <div className="text-center space-y-1.5">
               <p className="text-sm font-black text-white uppercase tracking-[0.25em]">GlyphLock LLC</p>
-              <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Secure Creative Technology Architecture</p>
-              <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">AI Governance · Zero-Trust · Enterprise Defense</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Custom Software · NUPS · Verification · AI Workflows</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Operational Security · Governance · Systems Integration</p>
             </div>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-[10px] text-blue-400/60 font-bold uppercase tracking-[0.15em]">AI Governance</span>
               <span className="text-white/10">·</span>
               <span className="text-[10px] text-indigo-400/60 font-bold uppercase tracking-[0.15em]">Zero-Trust</span>
               <span className="text-white/10">·</span>
-              <span className="text-[10px] text-purple-400/60 font-bold uppercase tracking-[0.15em]">Post-Quantum</span>
+              <span className="text-[10px] text-purple-400/60 font-bold uppercase tracking-[0.15em]">Systems Integration</span>
             </div>
           </div>
         </div>
