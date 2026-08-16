@@ -89,7 +89,7 @@ export default function CTASection() {
         style={{ y: backgroundY, willChange: 'transform' }}
       >
         <motion.div
-          className="absolute top-0 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-blue-500/25 rounded-full blur-[80px] md:blur-[120px]"
+          className="absolute top-0 left-1/[.04] w-64 md:w-96 h-64 md:h-96 bg-blue-500/25 rounded-full blur-[80px] md:blur-[120px]"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3]
@@ -97,7 +97,7 @@ export default function CTASection() {
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-0 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-indigo-500/25 rounded-full blur-[80px] md:blur-[120px]"
+          className="absolute bottom-0 right-1/[.04] w-64 md:w-96 h-64 md:h-96 bg-indigo-500/25 rounded-full blur-[80px] md:blur-[120px]"
           animate={{
             scale: [1.2, 1, 1.2],
             opacity: [0.4, 0.3, 0.4]
@@ -159,7 +159,7 @@ export default function CTASection() {
           </motion.div>
           
           {/* Content container - Deep Royal Blue glassmorphism */}
-          <div className="relative bg-gradient-to-br from-blue-950/45 via-slate-950/55 to-violet-950/45 backdrop-blur-2xl rounded-[34px] p-8 md:p-14 overflow-hidden border-2 border-cyan-300/35 shadow-[inset_0_1px_0_rgba(103,232,249,.35),inset_0_0_70px_rgba(99,102,241,.10)]">
+          <div className="relative bg-gradient-to-br from-blue-950/[.45] via-slate-950/[.55] to-violet-950/[.45] backdrop-blur-2xl rounded-[34px] p-8 md:p-14 overflow-hidden border-2 border-cyan-300/[.35] shadow-[inset_0_1px_0_rgba(103,232,249,.35),inset_0_0_70px_rgba(99,102,241,.10)]">
             {/* Grid pattern overlay - Purple/Violet */}
             <div className="absolute inset-0 opacity-20" style={{
               backgroundImage: `
@@ -186,7 +186,7 @@ export default function CTASection() {
                 initial={{ opacity: 0, scale: 0.6, y: 20 }}
                 animate={isInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.6, y: 20 }}
                 transition={{ duration: 0.9, delay: 0.2, type: "spring", stiffness: 120, damping: 14 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/15 border border-blue-400/30 mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/[.15] border border-blue-400/30 mb-6"
               >
                 <motion.div
                   animate={{ rotate: 360 }}
@@ -244,7 +244,7 @@ BUILD IT?
                     placeholder="Your work email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-white/8 backdrop-blur-md border-2 border-white/20 text-white placeholder:text-white/60 focus:border-indigo-400 focus:shadow-[0_0_30px_rgba(87,61,255,0.5)] transition-all h-14 md:h-16 rounded-xl text-base px-5"
+                    className="bg-white/[.08] backdrop-blur-md border-2 border-white/20 text-white placeholder:text-white/60 focus:border-indigo-400 focus:shadow-[0_0_30px_rgba(87,61,255,0.5)] transition-all h-14 md:h-16 rounded-xl text-base px-5"
                     aria-label="Email address for getting started"
                   />
                   {/* Focus glow */}

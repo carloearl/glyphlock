@@ -17,12 +17,12 @@ export default function FlagshipNUPSShowcase() {
   return (
     <section className="relative w-full max-w-7xl mx-auto px-4 py-16 md:py-24 overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute left-[8%] top-[12%] h-72 w-72 rounded-full bg-cyan-500/15 blur-[100px] animate-pulse" />
+        <div className="absolute left-[8%] top-[12%] h-72 w-72 rounded-full bg-cyan-500/[.15] blur-[100px] animate-pulse" />
         <div className="absolute right-[5%] bottom-[8%] h-96 w-96 rounded-full bg-violet-600/20 blur-[130px] animate-pulse" />
         <div className="absolute inset-0 opacity-20" style={{backgroundImage:'linear-gradient(rgba(34,211,238,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.12) 1px,transparent 1px)',backgroundSize:'42px 42px'}} />
       </div>
 
-      <motion.div initial={{opacity:0,y:30}} whileInView={{opacity:1,y:0}} viewport={{once:true}} className="relative rounded-[30px] border border-cyan-400/30 bg-slate-950/65 backdrop-blur-xl p-5 md:p-9 shadow-[0_0_70px_rgba(6,182,212,.18),0_0_120px_rgba(124,58,237,.12)]">
+      <motion.div initial={{opacity:0,y:30}} whileInView={{opacity:1,y:0}} viewport={{once:true}} className="relative rounded-[30px] border border-cyan-400/30 bg-slate-950/[.65] backdrop-blur-xl p-5 md:p-9 shadow-[0_0_70px_rgba(6,182,212,.18),0_0_120px_rgba(124,58,237,.12)]">
         <div className="absolute -inset-px rounded-[30px] pointer-events-none bg-gradient-to-r from-cyan-400/20 via-transparent to-violet-500/20" />
         <div className="relative flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
           <div>
@@ -36,7 +36,7 @@ export default function FlagshipNUPSShowcase() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[26px] border border-cyan-300/40 bg-black/35 backdrop-blur-xl shadow-[0_0_40px_rgba(34,211,238,.18),0_0_90px_rgba(124,58,237,.16),inset_0_0_50px_rgba(59,130,246,.08)] mb-8 p-5 md:p-8 min-h-[280px]">
+        <div className="relative overflow-hidden rounded-[26px] border border-cyan-300/40 bg-black/[.35] backdrop-blur-xl shadow-[0_0_40px_rgba(34,211,238,.18),0_0_90px_rgba(124,58,237,.16),inset_0_0_50px_rgba(59,130,246,.08)] mb-8 p-5 md:p-8 min-h-[280px]">
           <div className="absolute inset-0 opacity-30" style={{backgroundImage:'linear-gradient(rgba(34,211,238,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.12) 1px,transparent 1px)',backgroundSize:'34px 34px'}} />
           <div className="absolute -left-16 top-12 h-48 w-48 rounded-full bg-cyan-500/20 blur-[70px] animate-pulse" />
           <div className="absolute -right-12 bottom-0 h-56 w-56 rounded-full bg-violet-500/20 blur-[80px] animate-pulse" />
@@ -47,14 +47,14 @@ export default function FlagshipNUPSShowcase() {
               <p className="mt-4 max-w-2xl text-slate-300">Front door, guest identity, staff shifts, registers, contracts, payouts, reporting, audit evidence and integrations are organized as one connected operating system.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {['FRONT DOOR','POS / BAR','VIP CONTRACTS','STAFF SHIFTS','PAYOUTS','REPORTING','QR OPS','OHIP'].map((label,i)=><div key={label} className="rounded-xl border border-cyan-300/15 bg-white/[.055] backdrop-blur-lg px-3 py-4 text-center font-mono text-[10px] md:text-xs text-slate-200 shadow-[0_0_20px_rgba(59,130,246,.10),inset_0_0_18px_rgba(34,211,238,.04)] hover:-translate-y-1 hover:scale-[1.03] hover:border-cyan-300/60 hover:text-cyan-100 hover:bg-cyan-300/[.07] hover:shadow-[0_0_34px_rgba(34,211,238,.34),0_0_60px_rgba(124,58,237,.16)] transition-all duration-300">{String(i+1).padStart(2,'0')} // {label}</div>)}
+              {['FRONT DOOR','POS / BAR','VIP CONTRACTS','STAFF SHIFTS','PAYOUTS','REPORTING','QR OPS','OHIP'].map((label,i)=><div key={label} className="rounded-xl border border-cyan-300/[.15] bg-white/[.055] backdrop-blur-lg px-3 py-4 text-center font-mono text-[10px] md:text-xs text-slate-200 shadow-[0_0_20px_rgba(59,130,246,.10),inset_0_0_18px_rgba(34,211,238,.04)] hover:-translate-y-1 hover:scale-[1.03] hover:border-cyan-300/60 hover:text-cyan-100 hover:bg-cyan-300/[.07] hover:shadow-[0_0_34px_rgba(34,211,238,.34),0_0_60px_rgba(124,58,237,.16)] transition-all duration-300">{String(i+1).padStart(2,'0')} // {label}</div>)}
             </div>
           </div>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map(([Icon,title,desc],i)=><motion.div key={title} initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.06}} whileHover={{y:-7,scale:1.02}} className="group relative overflow-hidden rounded-2xl border border-cyan-300/15 bg-white/[.055] backdrop-blur-xl p-5 shadow-[0_0_24px_rgba(59,130,246,.12),inset_0_0_30px_rgba(124,58,237,.05)] hover:border-cyan-300/60 hover:shadow-[0_0_42px_rgba(6,182,212,.32),0_0_85px_rgba(124,58,237,.16)] transition-all duration-300">
-            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-violet-500/10 blur-2xl group-hover:bg-cyan-400/15 transition-colors"/>
+          {features.map(([Icon,title,desc],i)=><motion.div key={title} initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.06}} whileHover={{y:-7,scale:1.02}} className="group relative overflow-hidden rounded-2xl border border-cyan-300/[.15] bg-white/[.055] backdrop-blur-xl p-5 shadow-[0_0_24px_rgba(59,130,246,.12),inset_0_0_30px_rgba(124,58,237,.05)] hover:border-cyan-300/60 hover:shadow-[0_0_42px_rgba(6,182,212,.32),0_0_85px_rgba(124,58,237,.16)] transition-all duration-300">
+            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-violet-500/10 blur-2xl group-hover:bg-cyan-400/[.15] transition-colors"/>
             <Icon className="relative w-7 h-7 text-cyan-300 mb-4 drop-shadow-[0_0_10px_rgba(34,211,238,.8)]"/><h3 className="relative text-white font-black tracking-wide mb-2">{title}</h3><p className="relative text-sm text-slate-400 leading-relaxed">{desc}</p>
           </motion.div>)}
         </div>

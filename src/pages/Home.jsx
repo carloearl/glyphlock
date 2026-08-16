@@ -151,7 +151,7 @@ function CommandRail() {
     <div className="sticky top-[68px] md:top-[76px] z-[70] px-3 md:px-5 -mt-px">
       <nav
         aria-label="Homepage sections"
-        className="max-w-6xl mx-auto flex items-center gap-1.5 overflow-x-auto rounded-b-2xl border-x border-b border-cyan-300/25 bg-[#020713]/78 backdrop-blur-2xl px-2 py-2 shadow-[0_18px_55px_rgba(0,0,0,.45),0_0_35px_rgba(34,211,238,.10)] [scrollbar-width:none]"
+        className="max-w-6xl mx-auto flex items-center gap-1.5 overflow-x-auto rounded-b-2xl border-x border-b border-cyan-300/25 bg-[#020713]/[.78] backdrop-blur-2xl px-2 py-2 shadow-[0_18px_55px_rgba(0,0,0,.45),0_0_35px_rgba(34,211,238,.10)] [scrollbar-width:none]"
       >
         <div className="hidden sm:flex items-center gap-2 px-3 mr-1 font-mono text-[9px] tracking-[.24em] text-emerald-300 whitespace-nowrap">
           <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_14px_#6ee7b7] animate-pulse" />
@@ -161,9 +161,9 @@ function CommandRail() {
           <a
             key={label}
             href={href}
-            className="group relative flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[.035] px-3.5 py-2.5 font-mono text-[9px] md:text-[10px] font-bold tracking-[.14em] text-slate-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/55 hover:text-cyan-100 hover:shadow-[0_0_26px_rgba(34,211,238,.22)]"
+            className="group relative flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[.035] px-3.5 py-2.5 font-mono text-[9px] md:text-[10px] font-bold tracking-[.14em] text-slate-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/[.55] hover:text-cyan-100 hover:shadow-[0_0_26px_rgba(34,211,238,.22)]"
           >
-            <span className="mr-2 text-cyan-400/55">0{index + 1}</span>
+            <span className="mr-2 text-cyan-400/[.55]">0{index + 1}</span>
             {label}
             <span className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 transition-transform duration-300 group-hover:scale-x-100" />
           </a>
@@ -176,17 +176,17 @@ function CommandRail() {
 function BuildStageRail() {
   return (
     <div className="relative z-20 max-w-7xl mx-auto -mt-1 px-4 md:px-5">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-2xl border border-cyan-300/20 bg-[#030611]/58 backdrop-blur-2xl p-2 shadow-[0_0_40px_rgba(34,211,238,.10),0_24px_70px_rgba(0,0,0,.38)]">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-2xl border border-cyan-300/20 bg-[#030611]/[.58] backdrop-blur-2xl p-2 shadow-[0_0_40px_rgba(34,211,238,.10),0_24px_70px_rgba(0,0,0,.38)]">
         {buildStages.map(([number, title, Icon]) => (
           <div
             key={title}
-            className="group relative overflow-hidden rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-4 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/45 hover:bg-cyan-300/[.055] hover:shadow-[0_0_28px_rgba(34,211,238,.18)]"
+            className="group relative overflow-hidden rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-4 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/[.45] hover:bg-cyan-300/[.055] hover:shadow-[0_0_28px_rgba(34,211,238,.18)]"
           >
             <div className="absolute -right-6 -top-8 h-20 w-20 rounded-full bg-cyan-400/10 blur-2xl transition-colors group-hover:bg-violet-400/20" />
             <div className="relative flex items-center gap-3">
               <Icon className="h-5 w-5 text-cyan-300 drop-shadow-[0_0_9px_rgba(34,211,238,.8)]" />
               <div>
-                <span className="font-mono text-[9px] text-cyan-400/55">{number}</span>
+                <span className="font-mono text-[9px] text-cyan-400/[.55]">{number}</span>
                 <div className="font-black tracking-[.16em] text-xs text-white">{title}</div>
               </div>
             </div>
@@ -228,7 +228,7 @@ function CapabilityGrid() {
               viewport={{ once: true, amount: 0.2 }}
               transition={{ delay: index * 0.08, duration: 0.65 }}
               whileHover={{ y: -7, scale: 1.01 }}
-              className="group gl-cyber-panel relative min-h-[245px] overflow-hidden rounded-[24px] border border-white/10 bg-[#050817]/52 backdrop-blur-2xl p-7 md:p-9 transition-all duration-300"
+              className="group gl-cyber-panel relative min-h-[245px] overflow-hidden rounded-[24px] border border-white/10 bg-[#050817]/[.52] backdrop-blur-2xl p-7 md:p-9 transition-all duration-300"
               style={{ '--gl-accent': card.accent }}
             >
               <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(34,211,238,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.08) 1px,transparent 1px)', backgroundSize: '34px 34px' }} />
@@ -238,7 +238,7 @@ function CapabilityGrid() {
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl border bg-black/30 shadow-[inset_0_0_25px_rgba(255,255,255,.03)]" style={{ borderColor: `${card.accent}55`, boxShadow: `0 0 28px ${card.accent}25, inset 0 0 24px ${card.accent}12` }}>
                     <Icon className="h-7 w-7" style={{ color: card.accent, filter: `drop-shadow(0 0 10px ${card.accent})` }} />
                   </div>
-                  <span className="font-mono text-[9px] tracking-[.2em] text-white/35">CORE_0{index + 1}</span>
+                  <span className="font-mono text-[9px] tracking-[.2em] text-white/[.35]">CORE_0{index + 1}</span>
                 </div>
                 <div className="mt-auto pt-10">
                   <h3 className="text-xl md:text-2xl font-black tracking-wide text-white transition-colors" style={{ textShadow: `0 0 20px ${card.accent}22` }}>{card.title}</h3>
@@ -256,7 +256,7 @@ function CapabilityGrid() {
 function PlatformUniverse() {
   return (
     <section id="platform-universe" className="gl-home-section relative max-w-7xl mx-auto px-5 py-20 md:py-28">
-      <div className="absolute right-[4%] top-[6%] h-80 w-80 rounded-full bg-violet-600/12 blur-[120px] pointer-events-none" />
+      <div className="absolute right-[4%] top-[6%] h-80 w-80 rounded-full bg-violet-600/[.12] blur-[120px] pointer-events-none" />
       <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-7 mb-12">
         <div>
           <div className="font-mono text-violet-300 text-[10px] md:text-xs tracking-[.28em] mb-4">// GLYPHLOCK PLATFORM UNIVERSE</div>
@@ -268,7 +268,7 @@ function PlatformUniverse() {
         </div>
         <Link
           to={createPageUrl('NUPSLanding')}
-          className="gl-energy-button group inline-flex self-start md:self-auto items-center gap-2 rounded-xl border border-cyan-200/60 bg-cyan-300/15 px-5 py-3.5 font-black text-cyan-50 shadow-[0_0_30px_rgba(34,211,238,.25)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:bg-cyan-200 hover:text-slate-950 hover:shadow-[0_0_55px_rgba(34,211,238,.58)]"
+          className="gl-energy-button group inline-flex self-start md:self-auto items-center gap-2 rounded-xl border border-cyan-200/60 bg-cyan-300/[.15] px-5 py-3.5 font-black text-cyan-50 shadow-[0_0_30px_rgba(34,211,238,.25)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:bg-cyan-200 hover:text-slate-950 hover:shadow-[0_0_55px_rgba(34,211,238,.58)]"
         >
           ENTER THE FLAGSHIP <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
@@ -288,13 +288,13 @@ function PlatformUniverse() {
             >
               <Link
                 to={createPageUrl(module.link)}
-                className="group relative block min-h-[285px] overflow-hidden rounded-[24px] border border-white/10 bg-[#040815]/52 backdrop-blur-2xl p-6 transition-all duration-300 hover:border-white/25"
+                className="group relative block min-h-[285px] overflow-hidden rounded-[24px] border border-white/10 bg-[#040815]/[.52] backdrop-blur-2xl p-6 transition-all duration-300 hover:border-white/25"
                 style={{ boxShadow: `0 0 28px ${module.accent}22, inset 0 0 60px ${module.accent}0d` }}
               >
                 <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full blur-[65px] opacity-20 transition-all duration-300 group-hover:opacity-40 group-hover:scale-125" style={{ background: module.accent }} />
                 <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent opacity-25 group-hover:opacity-80" />
                 <div className="relative flex items-center justify-between gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border bg-black/35" style={{ borderColor: `${module.accent}55`, boxShadow: `0 0 24px ${module.accent}25` }}>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border bg-black/[.35]" style={{ borderColor: `${module.accent}55`, boxShadow: `0 0 24px ${module.accent}25` }}>
                     <Icon className="h-6 w-6" style={{ color: module.accent, filter: `drop-shadow(0 0 9px ${module.accent})` }} />
                   </div>
                   <span className="rounded-full border px-2.5 py-1 font-mono text-[8px] tracking-[.18em]" style={{ color: module.accent, borderColor: `${module.accent}55`, background: `${module.accent}10` }}>{module.status}</span>
@@ -304,7 +304,7 @@ function PlatformUniverse() {
                   <h3 className="mt-2 text-xl font-black text-white transition-colors group-hover:text-cyan-100">{module.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-slate-400">{module.text}</p>
                 </div>
-                <div className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[.035] text-white/35 transition-all duration-300 group-hover:border-white/35 group-hover:text-white group-hover:shadow-[0_0_22px_rgba(255,255,255,.18)]">
+                <div className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[.035] text-white/[.35] transition-all duration-300 group-hover:border-white/[.35] group-hover:text-white group-hover:shadow-[0_0_22px_rgba(255,255,255,.18)]">
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </div>
               </Link>
@@ -319,7 +319,7 @@ function PlatformUniverse() {
 function AIWorkflowIntro() {
   return (
     <section id="ai-workflow" className="gl-home-section relative max-w-7xl mx-auto px-5 pt-20 md:pt-28">
-      <div className="relative overflow-hidden rounded-[30px] border border-violet-300/25 bg-[#06071a]/48 backdrop-blur-2xl p-8 md:p-12 shadow-[0_0_55px_rgba(124,58,237,.15),inset_0_0_70px_rgba(59,130,246,.06)]">
+      <div className="relative overflow-hidden rounded-[30px] border border-violet-300/25 bg-[#06071a]/[.48] backdrop-blur-2xl p-8 md:p-12 shadow-[0_0_55px_rgba(124,58,237,.15),inset_0_0_70px_rgba(59,130,246,.06)]">
         <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(139,92,246,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.10) 1px,transparent 1px)', backgroundSize: '38px 38px' }} />
         <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-violet-500/20 blur-[100px]" />
         <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -349,14 +349,14 @@ function AIWorkflowIntro() {
 function CommandCTA() {
   return (
     <section id="start-project" className="gl-home-section max-w-7xl mx-auto px-5 py-12 md:py-20">
-      <div className="relative overflow-hidden rounded-[32px] border border-cyan-200/35 bg-[#030714]/50 backdrop-blur-2xl px-6 py-12 md:px-12 md:py-16 shadow-[0_0_50px_rgba(34,211,238,.16),0_0_120px_rgba(124,58,237,.14),inset_0_0_70px_rgba(59,130,246,.07)]">
+      <div className="relative overflow-hidden rounded-[32px] border border-cyan-200/[.35] bg-[#030714]/50 backdrop-blur-2xl px-6 py-12 md:px-12 md:py-16 shadow-[0_0_50px_rgba(34,211,238,.16),0_0_120px_rgba(124,58,237,.14),inset_0_0_70px_rgba(59,130,246,.07)]">
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(rgba(34,211,238,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.09) 1px,transparent 1px)', backgroundSize: '38px 38px' }} />
         <motion.div animate={{ x: ['-30%', '130%'] }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }} className="absolute top-0 h-px w-[30%] bg-gradient-to-r from-transparent via-cyan-200 to-transparent shadow-[0_0_20px_#22d3ee]" />
         <div className="absolute -top-32 right-0 h-96 w-96 rounded-full bg-blue-600/[.18] blur-[110px]" />
         <div className="absolute -bottom-40 left-[20%] h-80 w-80 rounded-full bg-violet-600/[.16] blur-[110px]" />
         <div className="relative grid lg:grid-cols-[1fr_auto] gap-10 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/35 bg-emerald-400/[.08] px-4 py-2 font-mono text-[9px] md:text-[10px] tracking-[.22em] text-emerald-200 mb-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/[.35] bg-emerald-400/[.08] px-4 py-2 font-mono text-[9px] md:text-[10px] tracking-[.22em] text-emerald-200 mb-5">
               <Rocket className="h-3.5 w-3.5" /> BUILD QUEUE // OPEN
             </div>
             <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[.88] tracking-[-.045em]">
@@ -372,7 +372,7 @@ function CommandCTA() {
             <Link to={createPageUrl('Consultation')} className="gl-energy-button group inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-50/80 bg-cyan-200 px-7 py-4 font-black text-slate-950 shadow-[0_0_34px_rgba(34,211,238,.60),0_0_90px_rgba(34,211,238,.22)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] hover:bg-white hover:shadow-[0_0_60px_rgba(255,255,255,.75),0_0_130px_rgba(34,211,238,.35)]">
               <Sparkles className="h-4 w-4" /> START A PROJECT <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <Link to={createPageUrl('Services')} className="gl-energy-button inline-flex items-center justify-center gap-2 rounded-xl border border-blue-300/45 bg-blue-500/12 px-7 py-4 font-black text-blue-100 shadow-[0_0_25px_rgba(59,130,246,.22)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:border-blue-200/70 hover:bg-blue-400/20 hover:shadow-[0_0_48px_rgba(59,130,246,.48)]">
+            <Link to={createPageUrl('Services')} className="gl-energy-button inline-flex items-center justify-center gap-2 rounded-xl border border-blue-300/[.45] bg-blue-500/[.12] px-7 py-4 font-black text-blue-100 shadow-[0_0_25px_rgba(59,130,246,.22)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:border-blue-200/70 hover:bg-blue-400/20 hover:shadow-[0_0_48px_rgba(59,130,246,.48)]">
               <Code2 className="h-4 w-4" /> EXPLORE SERVICES
             </Link>
             <Link to={createPageUrl('NUPSLanding')} className="gl-energy-button inline-flex items-center justify-center gap-2 rounded-xl border border-violet-300/50 bg-violet-500/[.14] px-7 py-4 font-black text-violet-100 shadow-[0_0_25px_rgba(139,92,246,.24)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:border-violet-200/75 hover:bg-violet-400/[.22] hover:shadow-[0_0_50px_rgba(139,92,246,.50)]">
@@ -523,7 +523,7 @@ export default function Home() {
           <CTASection />
         </section>
 
-        <a href="#top" aria-label="Back to top" className="fixed bottom-5 left-5 z-[80] hidden md:flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/30 bg-[#020713]/72 backdrop-blur-xl text-cyan-200 shadow-[0_0_25px_rgba(34,211,238,.18)] transition-all hover:-translate-y-1 hover:border-cyan-200/65 hover:shadow-[0_0_38px_rgba(34,211,238,.4)]">
+        <a href="#top" aria-label="Back to top" className="fixed bottom-5 left-5 z-[80] hidden md:flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/30 bg-[#020713]/[.72] backdrop-blur-xl text-cyan-200 shadow-[0_0_25px_rgba(34,211,238,.18)] transition-all hover:-translate-y-1 hover:border-cyan-200/[.65] hover:shadow-[0_0_38px_rgba(34,211,238,.4)]">
           <ChevronDown className="h-5 w-5 rotate-180" />
         </a>
       </main>

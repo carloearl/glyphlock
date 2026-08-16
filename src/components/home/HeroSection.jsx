@@ -28,7 +28,7 @@ const nodes = [
   { icon: Image, label: 'IMAGE LAB', link: 'ImageLab', pos: 'right-[-3%] top-[43%]', accent: '#d946ef' },
   { icon: DollarSign, label: 'FINANCIAL', link: 'GlyphLockFinancial', pos: 'left-[7%] bottom-[5%]', accent: '#10b981' },
   { icon: Radio, label: 'SECURITY', link: 'SecurityOperationsCenter', pos: 'right-[7%] bottom-[5%]', accent: '#f43f5e' },
-  { icon: ShieldCheck, label: 'GOVERNANCE', link: 'GovernanceHub', pos: 'left-1/2 -translate-x-1/2 bottom-[-3%]', accent: '#8b5cf6' },
+  { icon: ShieldCheck, label: 'GOVERNANCE', link: 'GovernanceHub', pos: 'left-1/[.02] -translate-x-1/[.02] bottom-[-3%]', accent: '#8b5cf6' },
 ];
 
 function PlatformMatrix() {
@@ -44,7 +44,7 @@ function PlatformMatrix() {
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 34, repeat: Infinity, ease: 'linear' }}
-        className="absolute inset-[14%] rounded-full border border-dashed border-violet-300/28"
+        className="absolute inset-[14%] rounded-full border border-dashed border-violet-300/[.28]"
       />
       <motion.div
         animate={{ rotate: -360 }}
@@ -52,11 +52,11 @@ function PlatformMatrix() {
         className="absolute inset-[22%] rounded-full border border-dashed border-cyan-300/30"
       />
 
-      <div className="absolute left-1/2 top-1/2 h-[225px] w-[225px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 blur-[60px]" />
+      <div className="absolute left-1/[.02] top-1/[.02] h-[225px] w-[225px] -translate-x-1/[.02] -translate-y-1/[.02] rounded-full bg-cyan-400/10 blur-[60px]" />
       <motion.div
         animate={{ scale: [1, 1.045, 1], filter: ['drop-shadow(0 0 18px rgba(34,211,238,.45))', 'drop-shadow(0 0 42px rgba(139,92,246,.75))', 'drop-shadow(0 0 18px rgba(34,211,238,.45))'] }}
         transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-100/45 bg-[#020713]/65 backdrop-blur-2xl shadow-[0_0_45px_rgba(34,211,238,.28),0_0_110px_rgba(124,58,237,.20),inset_0_0_45px_rgba(59,130,246,.12)]"
+        className="absolute left-1/[.02] top-1/[.02] flex h-36 w-36 -translate-x-1/[.02] -translate-y-1/[.02] items-center justify-center rounded-full border border-cyan-100/[.45] bg-[#020713]/[.65] backdrop-blur-2xl shadow-[0_0_45px_rgba(34,211,238,.28),0_0_110px_rgba(124,58,237,.20),inset_0_0_45px_rgba(59,130,246,.12)]"
       >
         <img src={LOGO} alt="GlyphLock platform core" className="h-24 w-24 object-contain" loading="eager" decoding="async" />
       </motion.div>
@@ -100,7 +100,7 @@ function PlatformMatrix() {
           >
             <Link
               to={createPageUrl(node.link)}
-              className="group flex items-center gap-2.5 rounded-xl border bg-[#020713]/68 px-3.5 py-3 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04]"
+              className="group flex items-center gap-2.5 rounded-xl border bg-[#020713]/[.68] px-3.5 py-3 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04]"
               style={{ borderColor: `${node.accent}55`, boxShadow: `0 0 22px ${node.accent}20, inset 0 0 22px ${node.accent}0d` }}
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-lg border bg-black/25" style={{ borderColor: `${node.accent}45` }}>
@@ -112,7 +112,7 @@ function PlatformMatrix() {
         );
       })}
 
-      <div className="absolute left-1/2 top-[13%] -translate-x-1/2 rounded-full border border-cyan-300/20 bg-black/30 px-3 py-1.5 font-mono text-[8px] tracking-[.2em] text-cyan-200/70 backdrop-blur-xl">
+      <div className="absolute left-1/[.02] top-[13%] -translate-x-1/[.02] rounded-full border border-cyan-300/20 bg-black/30 px-3 py-1.5 font-mono text-[8px] tracking-[.2em] text-cyan-200/70 backdrop-blur-xl">
         PLATFORM MATRIX // LIVE
       </div>
     </motion.div>
@@ -124,7 +124,7 @@ export default function HeroSection() {
   const [videoError, setVideoError] = useState(false);
 
   return (
-    <section id="top" data-build="GLX-HOME-CINEMATIC-R3" className="relative flex min-h-[calc(100vh-64px)] w-full items-center overflow-hidden border-b border-cyan-300/15">
+    <section id="top" data-build="GLX-HOME-CINEMATIC-R3" className="relative flex min-h-[calc(100vh-64px)] w-full items-center overflow-hidden border-b border-cyan-300/[.15]">
       <div className="absolute inset-0 z-0">
         {(!ready || videoError) && (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_32%,rgba(79,70,229,.32),transparent_28%),radial-gradient(circle_at_30%_28%,rgba(6,182,212,.22),transparent_34%),linear-gradient(135deg,#02040d,#071126_48%,#050318)]" />
@@ -148,23 +148,23 @@ export default function HeroSection() {
         )}
 
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(1,4,13,.96)_0%,rgba(1,4,13,.80)_36%,rgba(1,4,13,.38)_65%,rgba(1,4,13,.70)_100%)] lg:bg-[linear-gradient(90deg,rgba(1,4,13,.96)_0%,rgba(1,4,13,.79)_36%,rgba(1,4,13,.24)_70%,rgba(1,4,13,.54)_100%)]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#02040d] via-transparent to-[#02040d]/62" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#02040d] via-transparent to-[#02040d]/[.62]" />
         <div className="absolute inset-0 opacity-25" style={{ backgroundImage: 'linear-gradient(rgba(34,211,238,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.13) 1px,transparent 1px)', backgroundSize: '50px 50px', maskImage: 'linear-gradient(to bottom,black,transparent 88%)' }} />
         <div className="absolute inset-0 opacity-[.08]" style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(255,255,255,.13) 4px)' }} />
       </div>
 
       <div className="absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-cyan-200 to-transparent shadow-[0_0_26px_#22d3ee]" />
-      <motion.div animate={{ x: ['-18%', '118%'] }} transition={{ duration: 7, repeat: Infinity, ease: 'linear' }} className="absolute top-[17%] z-10 h-px w-[30%] bg-gradient-to-r from-transparent via-cyan-200/85 to-transparent shadow-[0_0_20px_#22d3ee] pointer-events-none" />
-      <motion.div animate={{ y: ['-15%', '115%'] }} transition={{ duration: 10, repeat: Infinity, ease: 'linear' }} className="absolute left-[63%] z-10 h-[22%] w-px bg-gradient-to-b from-transparent via-violet-300/55 to-transparent shadow-[0_0_18px_#8b5cf6] pointer-events-none" />
-      <div className="absolute right-[7%] top-[11%] z-10 h-80 w-80 rounded-full bg-violet-500/16 blur-[105px] pointer-events-none" />
-      <div className="absolute left-[12%] bottom-[6%] z-10 h-64 w-64 rounded-full bg-cyan-500/12 blur-[100px] pointer-events-none" />
+      <motion.div animate={{ x: ['-18%', '118%'] }} transition={{ duration: 7, repeat: Infinity, ease: 'linear' }} className="absolute top-[17%] z-10 h-px w-[30%] bg-gradient-to-r from-transparent via-cyan-200/[.85] to-transparent shadow-[0_0_20px_#22d3ee] pointer-events-none" />
+      <motion.div animate={{ y: ['-15%', '115%'] }} transition={{ duration: 10, repeat: Infinity, ease: 'linear' }} className="absolute left-[63%] z-10 h-[22%] w-px bg-gradient-to-b from-transparent via-violet-300/[.55] to-transparent shadow-[0_0_18px_#8b5cf6] pointer-events-none" />
+      <div className="absolute right-[7%] top-[11%] z-10 h-80 w-80 rounded-full bg-violet-500/[.16] blur-[105px] pointer-events-none" />
+      <div className="absolute left-[12%] bottom-[6%] z-10 h-64 w-64 rounded-full bg-cyan-500/[.12] blur-[100px] pointer-events-none" />
 
       <div className="relative z-20 mx-auto grid w-full max-w-[1480px] items-center gap-8 px-5 py-20 md:px-8 lg:grid-cols-[1.08fr_.72fr] lg:py-24 xl:px-12">
         <div>
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/45 bg-black/35 px-4 py-2 font-mono text-[10px] tracking-[.22em] text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,.25)] backdrop-blur-xl md:text-xs"
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/[.45] bg-black/[.35] px-4 py-2 font-mono text-[10px] tracking-[.22em] text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,.25)] backdrop-blur-xl md:text-xs"
           >
             <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_14px_#6ee7b7] animate-pulse" />
             GLYPHLOCK // PLATFORM ONLINE // R3
@@ -200,19 +200,19 @@ export default function HeroSection() {
           >
             <Link
               to={createPageUrl('Consultation')}
-              className="gl-energy-button group inline-flex items-center gap-2 rounded-xl border border-white/85 bg-cyan-100 px-7 py-4 font-black text-slate-950 shadow-[0_0_34px_rgba(34,211,238,.68),0_0_100px_rgba(34,211,238,.25)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.045] hover:bg-white hover:shadow-[0_0_60px_rgba(255,255,255,.82),0_0_140px_rgba(34,211,238,.38)]"
+              className="gl-energy-button group inline-flex items-center gap-2 rounded-xl border border-white/[.85] bg-cyan-100 px-7 py-4 font-black text-slate-950 shadow-[0_0_34px_rgba(34,211,238,.68),0_0_100px_rgba(34,211,238,.25)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.045] hover:bg-white hover:shadow-[0_0_60px_rgba(255,255,255,.82),0_0_140px_rgba(34,211,238,.38)]"
             >
               <Sparkles className="h-4 w-4" /> BUILD WITH GLYPHLOCK <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               to={createPageUrl('NUPSLanding')}
-              className="gl-energy-button group inline-flex items-center gap-2 rounded-xl border border-violet-300/75 bg-violet-500/24 px-7 py-4 font-black text-violet-50 shadow-[0_0_30px_rgba(139,92,246,.48),0_0_85px_rgba(139,92,246,.18)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] hover:bg-violet-400/35 hover:shadow-[0_0_55px_rgba(139,92,246,.72)]"
+              className="gl-energy-button group inline-flex items-center gap-2 rounded-xl border border-violet-300/75 bg-violet-500/[.24] px-7 py-4 font-black text-violet-50 shadow-[0_0_30px_rgba(139,92,246,.48),0_0_85px_rgba(139,92,246,.18)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] hover:bg-violet-400/[.35] hover:shadow-[0_0_55px_rgba(139,92,246,.72)]"
             >
               <Play className="h-4 w-4" /> EXPERIENCE NUPS
             </Link>
             <a
               href="#platform-universe"
-              className="gl-energy-button group inline-flex items-center gap-2 rounded-xl border border-blue-200/35 bg-blue-400/10 px-6 py-4 font-black text-blue-100 shadow-[0_0_24px_rgba(59,130,246,.24)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.035] hover:border-blue-200/70 hover:bg-blue-400/20 hover:shadow-[0_0_48px_rgba(59,130,246,.48)]"
+              className="gl-energy-button group inline-flex items-center gap-2 rounded-xl border border-blue-200/[.35] bg-blue-400/10 px-6 py-4 font-black text-blue-100 shadow-[0_0_24px_rgba(59,130,246,.24)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.035] hover:border-blue-200/70 hover:bg-blue-400/20 hover:shadow-[0_0_48px_rgba(59,130,246,.48)]"
             >
               EXPLORE PLATFORM <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
@@ -233,7 +233,7 @@ export default function HeroSection() {
         <PlatformMatrix />
       </div>
 
-      <a href="#flagship" aria-label="Scroll to the GlyphLock flagship platform" className="absolute bottom-5 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5 font-mono text-[8px] tracking-[.22em] text-cyan-100/65 transition-colors hover:text-cyan-100">
+      <a href="#flagship" aria-label="Scroll to the GlyphLock flagship platform" className="absolute bottom-5 left-1/[.02] z-30 flex -translate-x-1/[.02] flex-col items-center gap-1.5 font-mono text-[8px] tracking-[.22em] text-cyan-100/[.65] transition-colors hover:text-cyan-100">
         ENTER SYSTEM
         <motion.span animate={{ y: [0, 6, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }} className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300/25 bg-black/30 backdrop-blur-xl shadow-[0_0_22px_rgba(34,211,238,.16)]">
           <ChevronDown className="h-4 w-4" />
