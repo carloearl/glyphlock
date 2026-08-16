@@ -47,7 +47,11 @@ function collectTextNodes(element) {
     cursor += original.length;
   }
 
-  return { nodes, length: cursor };
+  return {
+    nodes,
+    length: cursor,
+    accessibleText: nodes.map(({ original }) => original).join(' ').replace(/\s+/g, ' ').trim(),
+  };
 }
 
 export default function GlyphHoverEngine() {
