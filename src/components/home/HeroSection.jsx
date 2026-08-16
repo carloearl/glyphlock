@@ -124,7 +124,7 @@ export default function HeroSection() {
   const [videoError, setVideoError] = useState(false);
 
   return (
-    <section id="top" className="relative flex min-h-[calc(100vh-64px)] w-full items-center overflow-hidden border-b border-cyan-300/15">
+    <section id="top" data-build="GLX-HOME-CINEMATIC-R3" className="relative flex min-h-[calc(100vh-64px)] w-full items-center overflow-hidden border-b border-cyan-300/15">
       <div className="absolute inset-0 z-0">
         {(!ready || videoError) && (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_32%,rgba(79,70,229,.32),transparent_28%),radial-gradient(circle_at_30%_28%,rgba(6,182,212,.22),transparent_34%),linear-gradient(135deg,#02040d,#071126_48%,#050318)]" />
@@ -167,7 +167,7 @@ export default function HeroSection() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/45 bg-black/35 px-4 py-2 font-mono text-[10px] tracking-[.22em] text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,.25)] backdrop-blur-xl md:text-xs"
           >
             <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_14px_#6ee7b7] animate-pulse" />
-            GLYPHLOCK // PLATFORM ONLINE
+            GLYPHLOCK // PLATFORM ONLINE // R3
           </motion.div>
 
           <motion.h1
