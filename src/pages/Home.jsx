@@ -35,6 +35,7 @@ import TechServicesPreview from '@/components/home/TechServicesPreview';
 import OnSiteServices from '@/components/home/OnSiteServices';
 import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
+import GlyphHoverEngine from '@/components/home/GlyphHoverEngine';
 
 const platformModules = [
   {
@@ -395,8 +396,53 @@ export default function Home() {
       />
 
       <main className="gl-home min-h-screen overflow-hidden bg-transparent text-white">
+        <GlyphHoverEngine />
         <style>{`
           html { scroll-behavior: smooth; }
+          .gl-home {
+            --font-display: 'Oxanium', 'Orbitron', system-ui, sans-serif;
+            --font-body: 'Space Grotesk', 'Rajdhani', system-ui, sans-serif;
+            --font-code: 'JetBrains Mono', ui-monospace, monospace;
+            font-family: var(--font-body);
+            font-synthesis: none;
+            text-rendering: geometricPrecision;
+          }
+          .gl-home h1,
+          .gl-home h2,
+          .gl-home h3,
+          .gl-home .font-black {
+            font-family: var(--font-display);
+            letter-spacing: -0.025em;
+          }
+          .gl-home .font-mono { font-family: var(--font-code); }
+          .gl-home h1,
+          .gl-home h2,
+          .gl-home h3,
+          .gl-home a,
+          .gl-home button,
+          .gl-home [data-glyph-hover] {
+            position: relative;
+            transition: color .18s ease, text-shadow .18s ease, filter .18s ease;
+          }
+          .gl-home [data-glyph-active='true'] {
+            color: #e9fdff !important;
+            text-shadow: 0 0 8px rgba(103,232,249,.82), 0 0 22px rgba(59,130,246,.62), 0 0 42px rgba(139,92,246,.42) !important;
+            filter: saturate(1.18);
+          }
+          .gl-home [data-glyph-active='true']::before {
+            content: '';
+            position: absolute;
+            left: var(--glyph-focus-x, 50%);
+            top: 50%;
+            width: 4.5em;
+            height: 2.2em;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(34,211,238,.22), rgba(99,102,241,.12) 45%, transparent 72%);
+            filter: blur(10px);
+            mix-blend-mode: screen;
+          }
           .gl-home-section { scroll-margin-top: 126px; }
           .gl-home-stage { position: relative; isolation: isolate; }
           .gl-home-stage::before {
