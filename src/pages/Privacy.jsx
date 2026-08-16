@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Shield, Lock, Database, Eye, Trash2, DollarSign, Building2, UserCheck, FileText, Server, ArrowRight } from "lucide-react";
+import { Shield, ShieldCheck, Lock, Database, Eye, Trash2, DollarSign, Building2, UserCheck, FileText, Server, ArrowRight } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import { createPageUrl } from "@/utils";
 
