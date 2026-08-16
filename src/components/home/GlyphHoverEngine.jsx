@@ -12,6 +12,8 @@ const TARGET_SELECTOR = [
   '.gl-home h3',
   '.gl-home a',
   '.gl-home button',
+  '.gl-home .font-black',
+  '.gl-home .font-bold',
   '.gl-home [data-glyph-hover]',
 ].join(',');
 
