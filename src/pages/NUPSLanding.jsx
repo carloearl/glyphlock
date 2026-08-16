@@ -1458,6 +1458,31 @@ export default function NUPSLanding() {
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00d4ff', boxShadow: '0 0 8px #00d4ff' }} />
               Bypass → Enter NUPS
             </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => navigate('/privacy')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 999,
+                border: '1px solid rgba(0,212,255,0.34)',
+                background: 'rgba(0,212,255,0.07)',
+                color: '#a5f3fc',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,212,255,0.14)'; e.currentTarget.style.boxShadow = '0 0 18px rgba(0,212,255,0.22)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,212,255,0.07)'; e.currentTarget.style.boxShadow = 'none'; }}
+              title="Read GlyphLock and NUPS privacy and data handling policy"
+            >
+              Privacy & Data Handling
+            </button>
             <button
               onClick={() => navigate('/Home')}
               style={{
@@ -1481,6 +1506,7 @@ export default function NUPSLanding() {
             >
               ← Back
             </button>
+            </div>
           </div>
           <header className="brand-bar" style={{ justifyContent: 'flex-end' }}>
             <div className="brand-meta">
