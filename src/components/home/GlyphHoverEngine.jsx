@@ -81,6 +81,10 @@ export default function GlyphHoverEngine() {
       });
       element.removeAttribute('data-glyph-active');
       element.style.removeProperty('--glyph-focus-x');
+      if (element.getAttribute('data-glyph-aria-owned') === 'true') {
+        element.removeAttribute('aria-label');
+        element.removeAttribute('data-glyph-aria-owned');
+      }
     };
 
     const render = (element, center, radius = 2) => {
@@ -102,6 +106,10 @@ export default function GlyphHoverEngine() {
       });
 
       element.setAttribute('data-glyph-active', 'true');
+      if (!element.hasAttribute('aria-label') && state.accessibleText) {
+        element.setAttribute('aria-label', state.accessibleText);
+        element.setAttribute('data-glyph-aria-owned', 'true');
+      }
       const ratio = state.length > 1 ? center / (state.length - 1) : 0.5;
       element.style.setProperty('--glyph-focus-x', `${Math.max(0, Math.min(1, ratio)) * 100}%`);
     };
