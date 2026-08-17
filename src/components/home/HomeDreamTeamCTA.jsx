@@ -1,9 +1,5 @@
 import React, { useRef } from "react";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { motion, useInView } from "framer-motion";
-import NebulaNodeField from "@/components/home/NebulaNodeField";
-import BallEnergyFX from "@/components/home/BallEnergyFX";
 
 export default function HomeDreamTeamCTA() {
   const containerRef = useRef(null);
