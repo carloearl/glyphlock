@@ -68,31 +68,50 @@ export default function DriverQuickAdd({ user }) {
 
   // All saved drivers for this venue
   const { data: profiles = [] } = useQuery({
-    queryKey: ["driver-profiles", venueId],
-    queryFn: () => venueId
-      ? base44.entities.DriverProfile.filter({ venue_id: venueId, status: "active" }, "-last_active_at", 200)
-      : Promise.resolve([]),
+    queryKey: ["driver-profiles", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      if (!venueId) return [];
+      const rows = await base44.entities.DriverProfile.filter({ venue_id: venueId, status: "active" }, "-last_active_at", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     enabled: !!venueId,
     staleTime: 30000,
   });
 
   // Tonight's open driver sessions
   const { data: sessions = [] } = useQuery({
-    queryKey: ["driver-sessions", today, venueId],
-    queryFn: () => venueId
-      ? base44.entities.DriverPayout.filter({ payout_date: today, venue_id: venueId })
-      : Promise.resolve([]),
+    queryKey: ["driver-sessions", today, venueId, ...modeQueryKey],
+    queryFn: async () => {
+      if (!venueId) return [];
+      const rows = await base44.entities.DriverPayout.filter({ payout_date: today, venue_id: venueId }, "-created_date", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     enabled: !!venueId,
     refetchInterval: 30000,
   });
 
   // Active POS batch — pin disbursements to it
   const { data: activeBatch } = useQuery({
-    queryKey: ["active-pos-batch", venueId],
+    queryKey: ["active-pos-batch", venueId, ...modeQueryKey],
     queryFn: async () => {
       if (!venueId) return null;
-      const batches = await base44.entities.POSBatch.filter({ status: "open" });
-      return batches.find(b => b.venue_id === venueId) || batches[0] || null;
+      const batches = await base44.entities.POSBatch.filter({ status: "open" }, "-created_date", 100);
+      return scopeRowsToOperatingMode(batches, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      })[0] || null;
     },
     enabled: !!venueId,
     refetchInterval: 60000,
