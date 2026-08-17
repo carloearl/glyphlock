@@ -29,12 +29,15 @@ export default function HeroSection() {
             onCanPlay={() => setReady(true)}
             onLoadedData={() => setReady(true)}
             onError={() => setVideoError(true)}
-            className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute inset-0 h-full w-full scale-[1.12] object-cover object-center transition-opacity duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}
             aria-label="GlyphLock platform cinematic hero"
           >
             <source src={HERO_VIDEO} type="video/mp4" />
           </video>
         )}
+
+        {/* Covers the generator watermark in the bottom-right of the source clip */}
+        <div className="absolute bottom-0 right-0 h-24 w-56 bg-[#02040d]" />
 
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(1,4,13,.96)_0%,rgba(1,4,13,.80)_36%,rgba(1,4,13,.38)_65%,rgba(1,4,13,.70)_100%)] lg:bg-[linear-gradient(90deg,rgba(1,4,13,.96)_0%,rgba(1,4,13,.79)_36%,rgba(1,4,13,.24)_70%,rgba(1,4,13,.54)_100%)]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#02040d] via-transparent to-[#02040d]/[.62]" />

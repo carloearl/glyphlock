@@ -26,7 +26,6 @@ import {
 import SEOHead from '@/components/SEOHead';
 import { createPageUrl } from '@/utils';
 import HeroSection from '@/components/home/HeroSection';
-import HeroVideoShowcase from '@/components/home/HeroVideoShowcase';
 import FlagshipNUPSShowcase from '@/components/home/FlagshipNUPSShowcase';
 import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsMarquee';
 import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
@@ -480,7 +479,6 @@ export default function Home() {
         `}</style>
 
         <HeroSection />
-        <HeroVideoShowcase />
         <CommandRail />
 
         <section id="flagship" className="gl-home-section gl-home-stage relative pt-6 md:pt-10">
