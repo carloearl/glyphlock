@@ -152,13 +152,24 @@ export default function BatchManagement({ user, onBatchClosed }) {
   // ─── RESET (manager override required) ───────────────────────────────────────
   const handleResetConfirmed = async (manager) => {
     if (!activeBatch) return;
+    if (modeState.isLive) {
+      setOverrideAction(null);
+      setConfirmReset(false);
+      toast({
+        title: 'Live reset blocked',
+        description: 'Live financial records are append-only. Close and reconcile the batch, then issue documented refunds or corrections.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    // Get current totals before clearing
     const BATCH_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
-    const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
-    const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
-    const cardTotal = realTxns.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+    const currentTxns = batchTransactions;
+    const cashTotal = currentTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+    const cardTotal = currentTxns.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
     const batchTotal = cashTotal + cardTotal;
+    const managerName = manager.full_name || manager.username || 'manager';
+    const resetAt = new Date().toISOString();
 
     setOverrideAction(null);
     setConfirmReset(false);
@@ -166,17 +177,19 @@ export default function BatchManagement({ user, onBatchClosed }) {
     setClosingCash('');
     setNotes('');
 
-    // STEP 1: Auto-backup BEFORE reset so restore is always possible after
     await base44.entities.SystemAuditLog.create({
       event_type: 'BATCH_BACKUP',
-      description: `AUTO-BACKUP before reset by ${manager.full_name || manager.username}`,
-      actor_email: manager.username,
+      description: `AUTO-BACKUP before non-live reset by ${managerName}`,
+      actor_email: manager.username || user?.email || 'unknown',
+      venue_id: venueId,
       status: 'success',
       severity: 'medium',
       metadata: {
+        mode: modeState.ledgerMode,
+        operating_mode: modeState.operatingMode,
         batch_id: activeBatch.id,
-        backed_up_at: new Date().toISOString(),
-        backed_up_by: manager.full_name || manager.username,
+        backed_up_at: resetAt,
+        backed_up_by: managerName,
         auto_backup: true,
         snapshot: {
           opening_cash: activeBatch.opening_cash,
@@ -189,47 +202,69 @@ export default function BatchManagement({ user, onBatchClosed }) {
           notes: activeBatch.notes,
           start_time: activeBatch.start_time,
           status: activeBatch.status,
-          transaction_ids: batchTransactions.map(t => t.id)
-        }
-      }
+          transaction_ids: currentTxns.map(t => t.id),
+        },
+      },
     });
 
-    // STEP 2: DELETE all transactions (hard reset for new venue onboarding)
-    await Promise.all(
-      batchTransactions.map(t => base44.entities.POSTransaction.delete(t.id))
-    );
+    // Non-live resets preserve history. Rows are voided instead of deleted so
+    // training and demo actions remain auditable and recoverable.
+    for (const transaction of currentTxns) {
+      const result = await writeEntity({
+        entity: 'POSTransaction',
+        operation: 'update',
+        recordId: transaction.id,
+        data: {
+          ...transaction,
+          status: 'void',
+          funds_settled: false,
+          notes: `${transaction.notes || ''}${transaction.notes ? ' · ' : ''}VOIDED by ${managerName} during ${modeState.operatingMode} batch reset at ${resetAt}`,
+        },
+        actor: {
+          email: user?.email || manager.username,
+          id: user?.id || manager.id,
+          role: user?._highestRole || user?.role || manager.role || 'VENUE_MANAGER',
+        },
+        venue_id: venueId,
+        intent: `${modeState.operatingMode}_BATCH_RESET_VOID`,
+        requestContext: { mode: modeState.ledgerMode, validation_run: true, session_id: modeState.trainingSession?.id || null },
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || `Could not void ${transaction.transaction_id || transaction.id}`);
+    }
 
-    // STEP 2B: DELETE all backups for this batch
-    await Promise.all(
-      relevantBackups.map(b => base44.entities.SystemAuditLog.delete(b.id))
-    );
-
-    // STEP 3: Zero out the batch record
-    await base44.entities.POSBatch.update(activeBatch.id, {
-      total_sales: 0,
-      transaction_count: 0,
-      discrepancy: 0,
-      opening_cash: 0,
-      notes: `RESET by manager ${manager.full_name || manager.username} at ${new Date().toLocaleString()}`
+    await writeBatch({
+      operation: 'update',
+      id: activeBatch.id,
+      data: {
+        ...activeBatch,
+        total_sales: 0,
+        transaction_count: 0,
+        discrepancy: 0,
+        opening_cash: 0,
+        notes: `NON-LIVE RESET by ${managerName} at ${resetAt}`,
+      },
     });
 
-    // STEP 4: Audit log the reset
     await base44.entities.SystemAuditLog.create({
       event_type: 'BATCH_RESET',
-      description: `Batch ${activeBatch.batch_id} reset to zero. ${batchTransactions.length} transactions voided.`,
-      actor_email: manager.username,
+      description: `${modeState.operatingMode} batch ${activeBatch.batch_id} reset. ${currentTxns.length} transactions preserved as void records.`,
+      actor_email: manager.username || user?.email || 'unknown',
+      venue_id: venueId,
       status: 'security_action',
-      severity: 'high',
-      metadata: { batch_id: activeBatch.id, voided_tx_count: batchTransactions.length }
+      severity: 'medium',
+      metadata: {
+        mode: modeState.ledgerMode,
+        operating_mode: modeState.operatingMode,
+        batch_id: activeBatch.id,
+        voided_tx_count: currentTxns.length,
+      },
     });
 
-    // STEP 5: Hard-wipe query cache
-    queryClient.clear();
-
-    toast({ title: 'Batch Reset Complete', description: 'All transactions and backups deleted. Batch ready for new onboarding.' });
-    
-    // Force hard refresh of parent
-    window.location.reload();
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['active-batch'] }),
+      queryClient.invalidateQueries({ queryKey: ['batch-transactions'] }),
+    ]);
+    toast({ title: 'Non-live batch reset', description: `${currentTxns.length} transactions were voided and preserved. No live records were touched.` });
   };
 
   // ─── BACKUP ───────────────────────────────────────────────────────────────────
