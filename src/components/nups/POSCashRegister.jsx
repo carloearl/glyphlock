@@ -84,23 +84,55 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   // and after charge is posted.
   const [compAuth, setCompAuth] = useState(null);
 
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
+
   const { data: products = [] } = useQuery({
-    queryKey: ['pos-products'],
-    queryFn: () => base44.entities.POSProduct.filter({ is_active: true })
+    queryKey: ['pos-products', venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.POSProduct.filter({ is_active: true }, 'name', 1000);
+      const venueRows = rows.filter((row) => !venueId || !row.venue_id || row.venue_id === venueId);
+      const scoped = scopeRowsToOperatingMode(venueRows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: 'reference',
+      });
+      if (modeState.isLive) return scoped;
+      const nonLiveCatalog = scoped.filter((row) => row.mode === modeState.ledgerMode || row.is_demo === true);
+      // Product catalog is safe as a read-only fallback for training. Sales and
+      // inventory mutations still post to the non-live ledger boundary.
+      return nonLiveCatalog.length ? nonLiveCatalog : scoped.filter((row) => !row.mode || row.mode === 'REAL');
+    },
   });
 
   const { data: customers = [] } = useQuery({
-    queryKey: ['pos-customers'],
-    queryFn: () => base44.entities.POSCustomer.list()
+    queryKey: ['pos-customers', venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.POSCustomer.list('-created_date', 1000);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: 'transactional',
+      });
+    },
   });
 
   // Tonight's batch is opened by the MANAGER and shared venue-wide — the
-  // door girl / bartender rings against it, they never open their own.
+  // door girl / bartender rings against it, they never open their own. Live,
+  // demo, sandbox, and individual training sessions never share a batch.
   const { data: activeBatch } = useQuery({
-    queryKey: ['active-batch', activeVenue?.id],
+    queryKey: ['active-batch', venueId, ...modeQueryKey],
     queryFn: async () => {
-      const batches = await base44.entities.POSBatch.filter({ status: 'open' }, '-created_date', 10);
-      return batches.find(b => !b.venue_id || !activeVenue?.id || b.venue_id === activeVenue.id) || batches[0];
+      const batches = await base44.entities.POSBatch.filter({ status: 'open' }, '-created_date', 100);
+      const scoped = scopeRowsToOperatingMode(batches, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: 'transactional',
+      });
+      return scoped[0] || null;
     },
     refetchInterval: 30000,
   });
