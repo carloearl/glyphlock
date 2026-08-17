@@ -69,6 +69,13 @@ export default function ReceiptPrinter({
   // Demo receipts render with the mock demo venue instead of a live venue —
   // clearly labeled demonstration data, never a real venue's identity.
   const isDemo = isDemoTransaction(transaction);
+  const isTraining = Boolean(
+    transaction?.training_session_id ||
+    /\[TRAINING:/i.test(String(transaction?.notes || ''))
+  );
+  const receiptMode = isTraining
+    ? 'TRAINING'
+    : String(transaction?.mode || (isDemo ? 'DEMO' : 'REAL')).toUpperCase();
   const dv = isDemo ? DEMO_RECEIPT_VENUE : null;
 
   const VENUE_BRAND = dv?.name || activeVenue?.name || transaction?.venue_name || '';
