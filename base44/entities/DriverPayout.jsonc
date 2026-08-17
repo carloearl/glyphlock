@@ -17,6 +17,22 @@
     "venue_id": {
       "type": "string"
     },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false
+    },
+    "training_session_id": {
+      "type": "string"
+    },
     "session_date": {
       "type": "string",
       "format": "date",
