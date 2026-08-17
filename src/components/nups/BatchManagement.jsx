@@ -269,8 +269,46 @@ export default function BatchManagement({ user, onBatchClosed }) {
 
   // ─── BACKUP ───────────────────────────────────────────────────────────────────
   const handleBackupConfirmed = async (manager) => {
-    // Backups disabled during fresh onboarding
-    return;
+    setOverrideAction(null);
+    setConfirmBackup(false);
+    if (!activeBatch) return;
+    const BATCH_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
+    const cashTotal = batchTransactions.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+    const cardTotal = batchTransactions.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+    const backedUpAt = new Date().toISOString();
+    const managerName = manager.full_name || manager.username || 'manager';
+
+    await base44.entities.SystemAuditLog.create({
+      event_type: 'BATCH_BACKUP',
+      description: `${modeState.operatingMode} batch snapshot created by ${managerName}`,
+      actor_email: manager.username || user?.email || 'unknown',
+      venue_id: venueId,
+      status: 'success',
+      severity: 'low',
+      metadata: {
+        mode: modeState.ledgerMode,
+        operating_mode: modeState.operatingMode,
+        batch_id: activeBatch.id,
+        backed_up_at: backedUpAt,
+        backed_up_by: managerName,
+        auto_backup: false,
+        snapshot: {
+          opening_cash: activeBatch.opening_cash,
+          total_sales: activeBatch.total_sales,
+          transaction_count: activeBatch.transaction_count,
+          discrepancy: activeBatch.discrepancy,
+          cashTotal,
+          cardTotal,
+          batchTotal: cashTotal + cardTotal,
+          notes: activeBatch.notes,
+          start_time: activeBatch.start_time,
+          status: activeBatch.status,
+          transaction_ids: batchTransactions.map(t => t.id),
+        },
+      },
+    });
+    await refetchBackups();
+    toast({ title: 'Batch snapshot saved', description: `${batchTransactions.length} transaction references captured at ${new Date(backedUpAt).toLocaleTimeString()}.` });
   };
 
   // ─── RESTORE ─────────────────────────────────────────────────────────────────
