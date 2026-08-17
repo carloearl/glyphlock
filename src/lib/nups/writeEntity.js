@@ -48,7 +48,8 @@ const DEMO_FLAGGED_ENTITIES = new Set([
 ]);
 
 const TRAINING_SESSION_ENTITIES = new Set([
-  'POSTransaction', 'POSBatch', 'POSProduct', 'POSCustomer', 'DriverPayout',
+  'POSTransaction', 'POSBatch', 'POSProduct', 'POSCustomer',
+  'DriverProfile', 'DriverPayout',
 ]);
 
 const DEMO_PRESENCE_CHECK_ENTITIES = [
