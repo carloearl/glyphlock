@@ -63,6 +63,7 @@ import CommandCenter from './pages/CommandCenter';
 import Consultation from './pages/Consultation';
 import ConsultationSuccess from './pages/ConsultationSuccess';
 import Contact from './pages/Contact';
+import CodeOfEthics from './pages/CodeOfEthics';
 import ContentGenerator from './pages/ContentGenerator';
 import ContractArchive from './pages/ContractArchive';
 import ContractSearch from './pages/ContractSearch';
@@ -157,6 +158,7 @@ export const PAGES = {
     "Consultation": Consultation,
     "ConsultationSuccess": ConsultationSuccess,
     "Contact": Contact,
+    "CodeOfEthics": CodeOfEthics,
     "ContentGenerator": ContentGenerator,
     "ContractArchive": ContractArchive,
     "ContractSearch": ContractSearch,
