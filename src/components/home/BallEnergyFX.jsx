@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const MODELS = [
   { name: 'Alfred', logo: 'https://cdn.simpleicons.org/openai/ffffff' },
@@ -16,12 +16,14 @@ const MODELS = [
  * of the parent `group` element.
  */
 export default function BallEnergyFX() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 3 }} aria-hidden="true">
       {/* ATMOSPHERIC NEBULA ORB — drifting plumes behind the ball */}
       <motion.div
-        animate={{ scale: [1, 1.08, 1], opacity: [0.55, 0.85, 0.55] }}
-        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduceMotion ? { scale: 1, opacity: 0.65 } : { scale: [1, 1.08, 1], opacity: [0.55, 0.85, 0.55] }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 7, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute inset-[8%] rounded-full blur-[38px]"
         style={{
           background:
@@ -29,8 +31,8 @@ export default function BallEnergyFX() {
         }}
       />
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 34, repeat: Infinity, ease: 'linear' }}
+        animate={reduceMotion ? { rotate: 0 } : { rotate: 360 }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 34, repeat: Infinity, ease: 'linear' }}
         className="absolute inset-[14%] rounded-full blur-[26px] opacity-70 mix-blend-screen"
         style={{
           background:
@@ -38,8 +40,8 @@ export default function BallEnergyFX() {
         }}
       />
       <motion.div
-        animate={{ rotate: -360, scale: [1.02, 0.96, 1.02] }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
+        animate={reduceMotion ? { rotate: 0, scale: 1 } : { rotate: -360, scale: [1.02, 0.96, 1.02] }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 22, repeat: Infinity, ease: 'linear' }}
         className="absolute inset-[22%] rounded-full blur-[18px] opacity-60 mix-blend-screen"
         style={{
           background:
@@ -49,8 +51,8 @@ export default function BallEnergyFX() {
 
       {/* Electric sweep arcs */}
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+        animate={reduceMotion ? { rotate: 0 } : { rotate: 360 }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 6, repeat: Infinity, ease: 'linear' }}
         className="absolute inset-[12%] rounded-full"
         style={{
           background: 'conic-gradient(from 0deg, rgba(34,211,238,.85), transparent 18%, transparent 100%)',
@@ -60,8 +62,8 @@ export default function BallEnergyFX() {
         }}
       />
       <motion.div
-        animate={{ rotate: -360 }}
-        transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}
+        animate={reduceMotion ? { rotate: 0 } : { rotate: -360 }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 9, repeat: Infinity, ease: 'linear' }}
         className="absolute inset-[2%] rounded-full"
         style={{
           background: 'conic-gradient(from 140deg, rgba(217,70,239,.8), transparent 14%, transparent 100%)',
@@ -73,13 +75,13 @@ export default function BallEnergyFX() {
 
       {/* Breathing containment rings */}
       <motion.div
-        animate={{ scale: [1, 1.06, 1], opacity: [0.35, 0.75, 0.35] }}
-        transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduceMotion ? { scale: 1, opacity: 0.5 } : { scale: [1, 1.06, 1], opacity: [0.35, 0.75, 0.35] }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute inset-[16%] rounded-full border border-cyan-200/50 shadow-[0_0_40px_rgba(34,211,238,.35)_inset]"
       />
       <motion.div
-        animate={{ scale: [1.04, 0.98, 1.04], opacity: [0.2, 0.55, 0.2] }}
-        transition={{ duration: 4.6, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduceMotion ? { scale: 1, opacity: 0.35 } : { scale: [1.04, 0.98, 1.04], opacity: [0.2, 0.55, 0.2] }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 4.6, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute inset-[4%] rounded-full border border-dashed border-violet-200/40"
       />
 
@@ -87,14 +89,14 @@ export default function BallEnergyFX() {
       {[0, 60, 120, 180, 240, 300].map((deg, i) => (
         <motion.div
           key={deg}
-          animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
-          transition={{ duration: 7 + i, repeat: Infinity, ease: 'linear' }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: i % 2 === 0 ? 360 : -360 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 7 + i, repeat: Infinity, ease: 'linear' }}
           className="absolute inset-0"
           style={{ transform: `rotate(${deg}deg)` }}
         >
           <motion.span
-            animate={{ opacity: [0.25, 1, 0.25], scale: [0.7, 1.4, 0.7] }}
-            transition={{ duration: 1.6 + i * 0.2, repeat: Infinity, ease: 'easeInOut' }}
+            animate={reduceMotion ? { opacity: 0.65, scale: 1 } : { opacity: [0.25, 1, 0.25], scale: [0.7, 1.4, 0.7] }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 1.6 + i * 0.2, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute left-1/2 top-[9%] h-2 w-2 -translate-x-1/2 rounded-full"
             style={{
               background: i % 3 === 0 ? '#22d3ee' : i % 3 === 1 ? '#818cf8' : '#d946ef',
@@ -107,8 +109,8 @@ export default function BallEnergyFX() {
 
       {/* HIDDEN UNTIL HOVER — role ring reveals around the ball */}
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 26, repeat: Infinity, ease: 'linear' }}
+        animate={reduceMotion ? { rotate: 0 } : { rotate: 360 }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 26, repeat: Infinity, ease: 'linear' }}
         className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
       >
         {MODELS.map((m, i) => (
@@ -143,8 +145,8 @@ export default function BallEnergyFX() {
       </motion.div>
 
       {/* HOVER — expanding shockwave rings */}
-      <div className="absolute inset-[20%] rounded-full border-2 border-cyan-200/70 opacity-0 group-hover:animate-ping group-hover:opacity-100" />
-      <div className="absolute inset-[26%] rounded-full border border-fuchsia-300/70 opacity-0 [animation-delay:.35s] group-hover:animate-ping group-hover:opacity-100" />
+      <div className={`absolute inset-[20%] rounded-full border-2 border-cyan-200/70 opacity-0 ${reduceMotion ? "group-hover:opacity-70" : "group-hover:animate-ping group-hover:opacity-100"}`} />
+      <div className={`absolute inset-[26%] rounded-full border border-fuchsia-300/70 opacity-0 ${reduceMotion ? "group-hover:opacity-60" : "[animation-delay:.35s] group-hover:animate-ping group-hover:opacity-100"}`} />
 
       {/* HOVER — chromatic split halo */}
       <div className="absolute inset-[10%] rounded-full opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-90 mix-blend-screen"
