@@ -97,7 +97,7 @@ const NAV_SECTIONS = [
     label: "Accounting",
     items: [
       {
-        id: "accounting",  label: "Accounting",  icon: Calculator, to: "/Accounting",
+        id: "accounting",  label: "Accounting Home",  icon: Calculator, to: "/Accounting",
         children: [
           // All four children resolve to ADMIN-only routes (App.jsx guards).
           { id: "gl-reports", label: "GL Reports",   icon: BarChart3,  to: "/AccountingHub",          adminOnly: true },
@@ -131,7 +131,6 @@ const NAV_SECTIONS = [
       {
         id: "audit",       label: "Audit",            icon: ShieldCheck, to: "/admin/audit-integrity",
         children: [
-          { id: "audit-integrity", label: "Integrity",   icon: ShieldCheck,   to: "/admin/audit-integrity" },
           { id: "activity",        label: "Activity",    icon: ScrollText,    to: "/admin/activity-log" },
         ],
       },
