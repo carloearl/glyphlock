@@ -189,6 +189,14 @@
     "auth_code": {
       "type": "string"
     },
+    "payment_source": {
+      "type": "string",
+      "description": "How tender approval was captured (external terminal confirmation, provider integration, or training simulation)."
+    },
+    "payment_confirmed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "cash_tendered": {
       "type": "number"
     },
