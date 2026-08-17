@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.42';
 
 const CONNECTOR_ID = '6a679b363997eb3bfad605a5';
 const GRAPH = 'https://graph.microsoft.com/v1.0';
