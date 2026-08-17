@@ -681,10 +681,17 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     // it's a manager override. Use the dedicated "Manager Comp" button on the
     // register screen (opens PIN modal → on auth, finalize as $0 with comp_amount).
   ];
-  // Door register accepts cash, credit card, and tap-to-pay (Digital Wallet).
+  // Door register accepts cash, credit card, and tap-to-pay. Gift cards and
+  // room tabs appear in LIVE only when the venue has explicitly enabled the
+  // workflow; TRAINING/DEMO can practice them without affecting real balances.
+  const configuredPaymentMethods = ALL_PAYMENT_METHODS.filter((method) => {
+    if (method.key === 'Gift Card') return modeState.isNonLive || doorRates?.gift_card_enabled === true;
+    if (method.key === 'Tab') return modeState.isNonLive || doorRates?.room_tab_enabled === true;
+    return true;
+  });
   const PAYMENT_METHODS = station === 'door'
-    ? ALL_PAYMENT_METHODS.filter(m => ['Cash', 'Credit Card', 'Digital Wallet'].includes(m.key))
-    : ALL_PAYMENT_METHODS;
+    ? configuredPaymentMethods.filter(m => ['Cash', 'Credit Card', 'Digital Wallet'].includes(m.key))
+    : configuredPaymentMethods;
 
   const getMethodColor = (color) => ({
     green: { bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.5)', text: '#22c55e' },
