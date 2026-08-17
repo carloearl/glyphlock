@@ -205,7 +205,6 @@ const AuthenticatedApp = () => {
         <Route path="/NUPSGateway" element={<Navigate to="/NUPSKiosk" replace />} />
         <Route path="/nupsgateway" element={<Navigate to="/NUPSKiosk" replace />} />
         <Route path="/NUPSTraining" element={<LayoutWrapper currentPageName="NUPSTraining"><NUPSTraining /></LayoutWrapper>} />
-        <Route path="/nupstraining" element={<LayoutWrapper currentPageName="NUPSTraining"><NUPSTraining /></LayoutWrapper>} />
 
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/nupssandbox" element={<NUPSSandbox />} />
