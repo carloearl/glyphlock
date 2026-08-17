@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Beaker, ShieldCheck, FlaskConical, ChevronDown, Loader2, Sparkles, Trash2, AlertTriangle, Lock, X } from "lucide-react";
+import { Beaker, ShieldCheck, FlaskConical, GraduationCap, ChevronDown, Loader2, Sparkles, Trash2, AlertTriangle, Lock, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates, invalidateRateCache } from "@/lib/nups/venueRateConfig";
+import { invalidateModeCache } from "@/lib/nups/modeResolver";
+import {
+  OPERATING_MODE,
+  getOperatingMode,
+  ledgerModeForOperatingMode,
+  startTrainingSession,
+  stopTrainingSession,
+  emitModeChange,
+} from "@/lib/nups/operatingMode";
 import { seedDemoVenue, wipeDemoVenue } from "@/lib/nups/demoSeedRunner";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -19,13 +28,21 @@ import { useToast } from "@/components/ui/use-toast";
  * the rate cache so every subsequent posting honors the switch.
  */
 const STYLES = {
-  REAL: {
+  LIVE: {
     label: "LIVE",
     icon: ShieldCheck,
     color: "#10b981",
     bg: "rgba(16,185,129,0.12)",
     border: "rgba(16,185,129,0.45)",
     tip: "Live books — every write hits the real ledger.",
+  },
+  TRAINING: {
+    label: "TRAINING",
+    icon: GraduationCap,
+    color: "#38bdf8",
+    bg: "rgba(56,189,248,0.12)",
+    border: "rgba(56,189,248,0.5)",
+    tip: "Guided practice — DEMO ledger, funds off, session-scoped training records.",
   },
   DEMO: {
     label: "DEMO",
@@ -50,19 +67,23 @@ export default function ModeToggle() {
   const venueId = venue?.id;
   const { toast } = useToast();
 
-  const [mode, setMode] = useState("REAL");
+  const [mode, setMode] = useState(OPERATING_MODE.LIVE);
+  const [ledgerMode, setLedgerMode] = useState("REAL");
   const [rateRowId, setRateRowId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [working, setWorking] = useState(null); // 'switch' | 'seed' | 'wipe' | null
   const [confirmWipe, setConfirmWipe] = useState(false);
+  const [confirmLive, setConfirmLive] = useState(false);
 
   // Load current mode from VenueRateConfig (single source of truth)
   const refresh = async () => {
     if (!venueId) { setLoading(false); return; }
     invalidateRateCache(venueId);
     const rates = await loadVenueRates(venueId);
-    setMode(String(rates?.mode || "REAL").toUpperCase());
+    const nextLedgerMode = String(rates?.mode || "REAL").toUpperCase();
+    setLedgerMode(nextLedgerMode);
+    setMode(getOperatingMode(nextLedgerMode, venueId));
     setRateRowId(rates?.id || null);
     setLoading(false);
   };
