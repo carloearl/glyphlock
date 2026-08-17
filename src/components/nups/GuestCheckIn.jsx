@@ -158,7 +158,7 @@ const EMPTY_FORM = {
   card_type: "Visa",
 };
 
-export default function GuestCheckIn() {
+export default function GuestCheckIn({ initialCameraOpen = false }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -166,7 +166,7 @@ export default function GuestCheckIn() {
   const [returningGuest, setReturningGuest] = useState(null); // profile found by ID scan
   const [lookingUp, setLookingUp] = useState(false);
   const [showCardFields, setShowCardFields] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
+  const [showCamera, setShowCamera] = useState(initialCameraOpen);
   const scanTimer = useRef(null);
   const activeVenue = useActiveVenue();
 
