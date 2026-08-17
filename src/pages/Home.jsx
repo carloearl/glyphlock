@@ -132,17 +132,20 @@ const capabilityCards = [
 ];
 
 const buildStages = [
-  ['01', 'DESIGN', PanelsTopLeft],
-  ['02', 'BUILD', Code2],
-  ['03', 'INTEGRATE', ScanLine],
+  ['01', 'CREATE', Sparkles],
+  ['02', 'INTELLIGENCE', Bot],
+  ['03', 'VERIFY', QrCode],
   ['04', 'OPERATE', Gauge],
+  ['05', 'PROTECT', ShieldCheck],
+  ['06', 'GOVERN', FileSignature],
+  ['07', 'CONNECT', Workflow],
 ];
 
 function CommandRail() {
   const items = [
     ['FLAGSHIP', '#flagship'],
-    ['PLATFORM', '#platform-universe'],
-    ['AI WORKFLOW', '#ai-workflow'],
+    ['SYSTEM MAP', '#platform-universe'],
+    ['INTELLIGENCE', '#ai-workflow'],
     ['SERVICES', '#services'],
     ['START PROJECT', '#start-project'],
   ];
@@ -176,7 +179,7 @@ function CommandRail() {
 function BuildStageRail() {
   return (
     <div className="relative z-20 max-w-7xl mx-auto -mt-1 px-4 md:px-5">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-2xl border border-cyan-300/20 bg-[#030611]/[.58] backdrop-blur-2xl p-2 shadow-[0_0_40px_rgba(34,211,238,.10),0_24px_70px_rgba(0,0,0,.38)]">
+      <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-2 rounded-2xl border border-cyan-300/20 bg-[#030611]/[.58] backdrop-blur-2xl p-2 shadow-[0_0_40px_rgba(34,211,238,.10),0_24px_70px_rgba(0,0,0,.38)]">
         {buildStages.map(([number, title, Icon]) => (
           <div
             key={title}
