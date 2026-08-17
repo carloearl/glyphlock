@@ -47,6 +47,10 @@ const DEMO_FLAGGED_ENTITIES = new Set([
   'GlyphBucksBill', 'GlyphBucksTransaction', 'DailySettlement',
 ]);
 
+const TRAINING_SESSION_ENTITIES = new Set([
+  'POSTransaction', 'POSBatch', 'POSProduct', 'POSCustomer', 'DriverPayout',
+]);
+
 const DEMO_PRESENCE_CHECK_ENTITIES = [
   'NUPSUser',
   'POSTransaction',
@@ -215,6 +219,7 @@ function stampGatewayRecord(entity, record, mode, venue_id, requestContext = {})
     operatingMode: getOperatingMode(mode, venue_id),
     venueId: venue_id,
     supportsDemoFlag: DEMO_FLAGGED_ENTITIES.has(entity),
+    supportsTrainingSession: TRAINING_SESSION_ENTITIES.has(entity),
     transactional,
   });
 
