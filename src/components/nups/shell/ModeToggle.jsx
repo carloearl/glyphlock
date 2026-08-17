@@ -106,35 +106,60 @@ export default function ModeToggle() {
       return;
     }
     if (next === mode) { setOpen(false); return; }
+    const nextLedgerMode = ledgerModeForOperatingMode(next);
     setWorking("switch");
     try {
-      if (rateRowId) {
-        await base44.entities.VenueRateConfig.update(rateRowId, {
-          mode: next,
-          last_edited_at: new Date().toISOString(),
-        });
-      } else {
-        await base44.entities.VenueRateConfig.create({
-          venue_id: venueId,
-          venue_name: venue?.name || venue?.venue_name || "",
-          mode: next,
-          last_edited_at: new Date().toISOString(),
-          notes: "Created by ModeToggle on first mode switch.",
-        });
+      if (nextLedgerMode !== ledgerMode || !rateRowId) {
+        if (rateRowId) {
+          await base44.entities.VenueRateConfig.update(rateRowId, {
+            mode: nextLedgerMode,
+            last_edited_at: new Date().toISOString(),
+          });
+        } else {
+          await base44.entities.VenueRateConfig.create({
+            venue_id: venueId,
+            venue_name: venue?.name || venue?.venue_name || "",
+            mode: nextLedgerMode,
+            active: true,
+            last_edited_at: new Date().toISOString(),
+            notes: "Created by ModeToggle on first mode switch.",
+          });
+        }
       }
+
+      // Compatibility mirror: older helpers still read SystemConfig. Keep it
+      // aligned while VenueRateConfig remains the authoritative UI/ledger row.
+      try {
+        const configRows = await base44.entities.SystemConfig.filter({ venue_id: venueId, config_key: "venue" });
+        if (configRows?.[0]) await base44.entities.SystemConfig.update(configRows[0].id, { mode: nextLedgerMode });
+        else await base44.entities.SystemConfig.create({ venue_id: venueId, config_key: "venue", mode: nextLedgerMode });
+      } catch (_) { /* best-effort compatibility mirror */ }
+
+      if (next === OPERATING_MODE.TRAINING) {
+        startTrainingSession(venueId, venue?.name || venue?.venue_name || null);
+      } else {
+        stopTrainingSession(venueId);
+      }
+
       invalidateRateCache(venueId);
+      invalidateModeCache(venueId);
+      setLedgerMode(nextLedgerMode);
       setMode(next);
+      emitModeChange({ venue_id: venueId, ledger_mode: nextLedgerMode, operating_mode: next });
       toast({
         title: `Mode → ${STYLES[next].label}`,
-        description: next === "REAL"
-          ? "Writes now post to live books."
-          : "Writes flagged as demo — safe for training.",
+        description: next === OPERATING_MODE.LIVE
+          ? "Live books enabled. Real tender and settlements are active."
+          : next === OPERATING_MODE.TRAINING
+            ? "Training started. Funds are off and records stay inside this practice session."
+            : "Non-live mode active. Records are excluded from live books.",
       });
       await refresh();
     } catch (e) {
       toast({ title: "Mode switch failed", description: e?.message || String(e), variant: "destructive" });
     } finally {
       setWorking(null);
+      setConfirmLive(false);
       setOpen(false);
     }
   };
