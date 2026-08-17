@@ -315,19 +315,35 @@ export default function BatchManagement({ user, onBatchClosed }) {
   const handleRestoreConfirmed = async (manager) => {
     setOverrideAction(null);
     if (!pendingRestore || !activeBatch) return;
+    if (modeState.isLive) {
+      setPendingRestore(null);
+      toast({
+        title: 'Live restore blocked',
+        description: 'Live books cannot be rolled backward from a UI snapshot. Use documented correcting entries.',
+        variant: 'destructive',
+      });
+      return;
+    }
     const snap = pendingRestore.metadata?.snapshot || {};
-    await base44.entities.POSBatch.update(activeBatch.id, {
-      opening_cash: snap.opening_cash ?? activeBatch.opening_cash,
-      total_sales: snap.total_sales ?? 0,
-      transaction_count: snap.transaction_count ?? 0,
-      discrepancy: snap.discrepancy ?? 0,
-      notes: `RESTORED from backup ${new Date(pendingRestore.created_date).toLocaleString()} by ${manager.full_name || manager.username}`
+    await writeBatch({
+      operation: 'update',
+      id: activeBatch.id,
+      data: {
+        ...activeBatch,
+        opening_cash: snap.opening_cash ?? activeBatch.opening_cash,
+        total_sales: snap.total_sales ?? 0,
+        transaction_count: snap.transaction_count ?? 0,
+        discrepancy: snap.discrepancy ?? 0,
+        notes: `RESTORED from non-live snapshot ${new Date(pendingRestore.created_date).toLocaleString()} by ${manager.full_name || manager.username}`,
+      },
     });
-    queryClient.invalidateQueries(['active-batch']);
-    queryClient.invalidateQueries(['batch-transactions']);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['active-batch'] }),
+      queryClient.invalidateQueries({ queryKey: ['batch-transactions'] }),
+    ]);
     setPendingRestore(null);
     setShowRestoreList(false);
-    toast({ title: 'Batch Restored', description: `Snapshot from ${new Date(pendingRestore.created_date).toLocaleString()} restored.` });
+    toast({ title: 'Batch Restored', description: `Non-live snapshot from ${new Date(pendingRestore.created_date).toLocaleString()} restored.` });
   };
 
   const handleOpenBatch = async () => {
