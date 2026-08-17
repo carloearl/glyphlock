@@ -327,9 +327,14 @@ function PlatformUniverse() {
                   <span className="rounded-full border px-2.5 py-1 font-mono text-[8px] tracking-[.18em]" style={{ color: module.accent, borderColor: `${module.accent}55`, background: `${module.accent}10` }}>{module.status}</span>
                 </div>
                 <div className="relative mt-12">
-                  <div className="font-mono text-[9px] tracking-[.18em] text-white/30">MODULE_{String(index + 1).padStart(2, '0')}</div>
+                  <div className="flex items-center gap-2 font-mono text-[9px] tracking-[.18em] text-white/30"><span>MODULE_{String(index + 1).padStart(2, '0')}</span><span className="text-white/15">//</span><span style={{color:module.accent}}>{module.layer}</span></div>
                   <h3 className="mt-2 text-xl font-black text-white transition-colors group-hover:text-cyan-100">{module.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-400">{module.text}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">{module.text}</p>
+                  <div className="mt-5 rounded-xl border border-white/[.07] bg-black/20 p-3">
+                    <div className="font-mono text-[8px] tracking-[.16em] text-white/35">EVIDENCE</div>
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-slate-400">{module.evidence}</p>
+                  </div>
+                  <div className="mt-5 inline-flex items-center gap-2 font-mono text-[9px] font-bold tracking-[.14em]" style={{color:module.accent}}>{module.cta}<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" /></div>
                 </div>
                 <div className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[.035] text-white/[.35] transition-all duration-300 group-hover:border-white/[.35] group-hover:text-white group-hover:shadow-[0_0_22px_rgba(255,255,255,.18)]">
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
