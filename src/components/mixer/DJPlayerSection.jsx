@@ -223,7 +223,6 @@ export default function DJPlayerSection({
       const cueRef = targetDeck === "A" ? deckARef.current : deckBRef.current;
       const duration = Number(ref?.getDuration?.() || 0);
       const current = Number(ref?.getCurrentTime?.() || 0);
-      const cueDuration = Number(cueRef?.getDuration?.() || 0);
       if (!duration || current < 1) return;
       const remaining = duration - current;
       if (remaining > 0 && remaining <= Math.max(2, Number(transitionSeconds || 6))) {
