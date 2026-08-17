@@ -60,7 +60,9 @@
     "scannedAt"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "created_by": "{{user.email}}"
+    },
     "read": {
       "user_condition": {
         "role": "admin"

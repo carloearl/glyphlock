@@ -222,33 +222,38 @@
     "detected_at"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "read": {
       "$or": [
         {
-          "data.venue_id": "{{user.data.venue_id}}"
+          "user_condition": {
+            "role": "admin"
+          }
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager"
-              ]
-            }
+            "role": "manager"
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
         }
-      }
+      ]
     },
     "delete": {
       "user_condition": {

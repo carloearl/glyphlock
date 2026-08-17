@@ -71,33 +71,47 @@
     "total_tips"
   ],
   "rls": {
-    "create": true,
-    "read": {
+    "create": {
       "$or": [
         {
-          "data.venue_id": "{{user.data.venue_id}}"
+          "user_condition": {
+            "role": "admin"
+          }
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager"
-              ]
-            }
+            "role": "manager"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
         }
-      }
+      ]
     },
     "delete": {
       "user_condition": {

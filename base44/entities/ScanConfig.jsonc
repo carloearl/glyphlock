@@ -31,14 +31,25 @@
     }
   },
   "rls": {
-    "read": {
-      "role": "admin"
-    },
     "create": {
-      "role": "admin"
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "update": {
-      "role": "admin"
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
     }
   },
   "required": []

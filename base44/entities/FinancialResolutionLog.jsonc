@@ -93,16 +93,24 @@
     "timestamp"
   ],
   "rls": {
-    "create": true,
-    "read": {
+    "create": {
       "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
-        }
+        "role": "admin"
       }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
+        }
+      ]
     },
     "update": {
       "user_condition": {

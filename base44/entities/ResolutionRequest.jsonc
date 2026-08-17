@@ -337,7 +337,20 @@
     "business_justification"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {
@@ -345,12 +358,12 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager"
-              ]
-            }
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
           }
         }
       ]
@@ -362,12 +375,12 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager"
-              ]
-            }
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
           }
         }
       ]

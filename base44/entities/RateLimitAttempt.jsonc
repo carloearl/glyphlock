@@ -49,7 +49,18 @@
     "attempt_timestamp"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "user_condition": {
         "role": "admin"
