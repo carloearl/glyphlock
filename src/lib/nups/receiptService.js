@@ -1,4 +1,4 @@
-import { getNupsEnvironment, getNupsEnvironmentPolicy } from '@/lib/nups/operatingEnvironment';
+import { getCurrentOperatingMode, getOperatingModePolicy } from '@/lib/nups/operatingMode';
 
 const LAST_RECEIPT_KEY = 'nups:last-printable-receipt';
 const RECEIPT_EVENT = 'nups:receipt-ready';
@@ -45,7 +45,7 @@ export function normalizeReceipt(receipt = {}) {
   const fees = Number(receipt.fee_cents ?? receipt.fees_cents ?? receipt.feeCents ?? 0) || 0;
   const discount = Number(receipt.discount_cents ?? receipt.discountCents ?? 0) || 0;
   const total = Number(receipt.total_cents ?? receipt.totalCents ?? subtotal + tax + fees - discount) || 0;
-  const environment = String(receipt.environment || getNupsEnvironment()).toUpperCase();
+  const environment = String(receipt.environment || getCurrentOperatingMode()).toUpperCase();
 
   return {
     id: receipt.id || receipt.transaction_id || receipt.receipt_number || `receipt-${Date.now()}`,
@@ -104,7 +104,7 @@ export function subscribeToReceiptReady(callback) {
 
 function receiptDocument(receipt, { autoPrint = true } = {}) {
   const r = normalizeReceipt(receipt);
-  const policy = getNupsEnvironmentPolicy(r.environment);
+  const policy = getOperatingModePolicy(r.environment);
   const watermark = policy.watermark || r.environment !== 'LIVE'
     ? `<div class="watermark">${escapeHtml(r.environment)} · NOT A LIVE FINANCIAL RECORD</div>`
     : '';
@@ -222,7 +222,7 @@ export function printCurrentNupsView({ title = document?.title || 'NUPS', select
     return { ok: false, fallback: 'browser-print', reason: 'Pop-up blocked; using browser print.' };
   }
 
-  const environment = getNupsEnvironment();
+  const environment = getCurrentOperatingMode();
   const cloned = element.cloneNode(true);
   cloned.querySelectorAll('button, input, select, textarea, [data-no-print]').forEach((node) => node.remove());
   popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>body{font-family:Inter,Arial,sans-serif;margin:24px;color:#111;background:white}img{max-width:100%}.nups-print-watermark{padding:10px;border:2px solid #111;text-align:center;font-weight:900;margin-bottom:16px}@media print{button{display:none}}</style></head><body>${environment !== 'LIVE' ? `<div class="nups-print-watermark">${escapeHtml(environment)} · NOT A LIVE RECORD</div>` : ''}${cloned.outerHTML}<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));</script></body></html>`);
