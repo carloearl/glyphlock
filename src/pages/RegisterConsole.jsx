@@ -259,7 +259,12 @@ function RegisterConsoleInner() {
               {/* Two-step batch open: the MANAGER opens tonight's batch on the
                   Manager Console; the door operator confirms it here before
                   the first transaction. No register-side batch opening. */}
-              <BatchConfirmControl operatorName={operator?.full_name || user?.full_name} />
+              <BatchConfirmControl
+                operatorName={operator?.full_name || user?.full_name || user?.email}
+                operatorRole={operator?.role || user?._highestRole || user?.role}
+                operatorEmail={operator?.email || user?.email}
+                operatorId={operator?.id || user?.id}
+              />
               {/* Till ONLY — guest ID intake lives on 1 · Open Night (no duplicate screens). */}
               <POSCashRegister showDriverPanel={false} showGuestIntake={false} user={user} station="door" />
               <RecentTransactionsStrip onViewAll={() => setActiveTab("receipts")} />
