@@ -20,8 +20,16 @@ export const OPERATING_MODE = Object.freeze({
 
 const TRAINING_KEY_PREFIX = 'nups_training_session:';
 const TRAINING_PROGRESS_PREFIX = 'nups_training_progress:';
+const CURRENT_OPERATING_MODE_KEY = 'nups_current_operating_mode';
 export const MODE_CHANGE_EVENT = 'nups:mode-changed';
 export const TRAINING_PROGRESS_EVENT = 'nups:training-progress';
+
+export const OPERATING_MODE_POLICIES = Object.freeze({
+  LIVE: Object.freeze({ label: 'Live', backendWrites: true, externalFunds: true, watermark: false }),
+  TRAINING: Object.freeze({ label: 'Training', backendWrites: true, externalFunds: false, watermark: true }),
+  DEMO: Object.freeze({ label: 'Demo', backendWrites: true, externalFunds: false, watermark: true }),
+  SANDBOX: Object.freeze({ label: 'Sandbox', backendWrites: true, externalFunds: false, watermark: true }),
+});
 
 function storageAvailable() {
   return typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined';
@@ -39,6 +47,44 @@ function randomId() {
 export function normalizeLedgerMode(value) {
   const mode = String(value || '').toUpperCase();
   return Object.values(LEDGER_MODE).includes(mode) ? mode : LEDGER_MODE.REAL;
+}
+
+export function normalizeOperatingMode(value, fallback = OPERATING_MODE.LIVE) {
+  const mode = String(value || '').toUpperCase();
+  return Object.values(OPERATING_MODE).includes(mode) ? mode : fallback;
+}
+
+export function setCurrentOperatingModeSnapshot(value, detail = {}) {
+  const mode = normalizeOperatingMode(value);
+  if (typeof window !== 'undefined') {
+    try {
+      window.sessionStorage.setItem(CURRENT_OPERATING_MODE_KEY, mode);
+    } catch { /* storage may be unavailable in private/kiosk contexts */ }
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.nupsOperatingMode = mode;
+      if (detail?.ledger_mode) document.documentElement.dataset.nupsLedgerMode = String(detail.ledger_mode).toUpperCase();
+    }
+  }
+  return mode;
+}
+
+export function getCurrentOperatingMode(fallback = OPERATING_MODE.LIVE) {
+  if (typeof document !== 'undefined') {
+    const fromDom = normalizeOperatingMode(document.documentElement.dataset.nupsOperatingMode, null);
+    if (fromDom) return fromDom;
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const fromSession = normalizeOperatingMode(window.sessionStorage.getItem(CURRENT_OPERATING_MODE_KEY), null);
+      if (fromSession) return fromSession;
+    } catch { /* use fallback */ }
+  }
+  return normalizeOperatingMode(fallback);
+}
+
+export function getOperatingModePolicy(value = getCurrentOperatingMode()) {
+  const mode = normalizeOperatingMode(value);
+  return OPERATING_MODE_POLICIES[mode] || OPERATING_MODE_POLICIES.LIVE;
 }
 
 export function ledgerModeForOperatingMode(value) {
@@ -97,7 +143,13 @@ export function getOperatingMode(ledgerMode, venueId) {
 
 export function emitModeChange(detail = {}) {
   if (typeof window === 'undefined') return;
-  window.dispatchEvent(new CustomEvent(MODE_CHANGE_EVENT, { detail }));
+  const operatingMode = normalizeOperatingMode(
+    detail.operating_mode || (detail.ledger_mode ? getOperatingMode(detail.ledger_mode, detail.venue_id) : getCurrentOperatingMode()),
+  );
+  setCurrentOperatingModeSnapshot(operatingMode, detail);
+  window.dispatchEvent(new CustomEvent(MODE_CHANGE_EVENT, {
+    detail: { ...detail, operating_mode: operatingMode },
+  }));
 }
 
 export function isLiveMode(value) {
