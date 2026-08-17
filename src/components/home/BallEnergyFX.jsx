@@ -85,26 +85,32 @@ export default function BallEnergyFX() {
         className="absolute inset-[4%] rounded-full border border-dashed border-violet-200/40"
       />
 
-      {/* Orbiting sparks */}
+      {/* Orbiting sparks. The outer wrapper owns each fixed angular offset,
+          while Framer only owns the inner orbit. This preserves the six-point
+          distribution when reduced motion freezes the animation. */}
       {[0, 60, 120, 180, 240, 300].map((deg, i) => (
-        <motion.div
+        <div
           key={deg}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: i % 2 === 0 ? 360 : -360 }}
-          transition={reduceMotion ? { duration: 0 } : { duration: 7 + i, repeat: Infinity, ease: 'linear' }}
           className="absolute inset-0"
           style={{ transform: `rotate(${deg}deg)` }}
         >
-          <motion.span
-            animate={reduceMotion ? { opacity: 0.65, scale: 1 } : { opacity: [0.25, 1, 0.25], scale: [0.7, 1.4, 0.7] }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 1.6 + i * 0.2, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute left-1/2 top-[9%] h-2 w-2 -translate-x-1/2 rounded-full"
-            style={{
-              background: i % 3 === 0 ? '#22d3ee' : i % 3 === 1 ? '#818cf8' : '#d946ef',
-              boxShadow: '0 0 16px currentColor',
-              color: i % 3 === 0 ? '#22d3ee' : i % 3 === 1 ? '#818cf8' : '#d946ef',
-            }}
-          />
-        </motion.div>
+          <motion.div
+            animate={reduceMotion ? { rotate: 0 } : { rotate: i % 2 === 0 ? 360 : -360 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 7 + i, repeat: Infinity, ease: 'linear' }}
+            className="absolute inset-0"
+          >
+            <motion.span
+              animate={reduceMotion ? { opacity: 0.65, scale: 1 } : { opacity: [0.25, 1, 0.25], scale: [0.7, 1.4, 0.7] }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 1.6 + i * 0.2, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute left-1/2 top-[9%] h-2 w-2 -translate-x-1/2 rounded-full"
+              style={{
+                background: i % 3 === 0 ? '#22d3ee' : i % 3 === 1 ? '#818cf8' : '#d946ef',
+                boxShadow: '0 0 16px currentColor',
+                color: i % 3 === 0 ? '#22d3ee' : i % 3 === 1 ? '#818cf8' : '#d946ef',
+              }}
+            />
+          </motion.div>
+        </div>
       ))}
 
       {/* HIDDEN UNTIL HOVER — role ring reveals around the ball */}
