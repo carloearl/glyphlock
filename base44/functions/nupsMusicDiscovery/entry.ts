@@ -62,6 +62,8 @@ Deno.serve(async (req) => {
           part: "snippet",
           type: "video",
           videoCategoryId: "10",
+          videoEmbeddable: "true",
+          videoSyndicated: "true",
           maxResults: String(limit),
           q: query,
         });
