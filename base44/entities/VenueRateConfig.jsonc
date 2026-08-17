@@ -16,6 +16,17 @@
       "default": 20,
       "description": "Standard cover charge in USD."
     },
+    "house_fee": {
+      "type": "number",
+      "default": 20,
+      "minimum": 0,
+      "description": "Entertainer house fee in USD. Kept separate from guest cover charge."
+    },
+    "glyphbucks_tender_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allows LIVE house-fee/POS payment using a verified GlyphBucks liability-ledger workflow."
+    },
     "reentry_charge": {
       "type": "number",
       "default": 10,
