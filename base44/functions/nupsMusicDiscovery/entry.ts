@@ -1,6 +1,4 @@
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.38";
-
-const JAMENDO_CLIENT_ID = String(Deno.env.get("JAMENDO_CLIENT_ID") || "").trim();
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 
 function normalize(value = "") {
   return String(value || "").trim().toLowerCase();
@@ -14,6 +12,7 @@ function localMatches(track, query) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const JAMENDO_CLIENT_ID = String(Deno.env.get("JAMENDO_CLIENT_ID") || "").trim();
     const body = await req.json().catch(() => ({}));
     const query = String(body?.query || "").trim();
     const limit = Math.min(Math.max(parseInt(body?.limit) || 12, 1), 25);

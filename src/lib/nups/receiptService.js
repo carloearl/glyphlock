@@ -182,12 +182,13 @@ export function printNupsReceipt(receipt, options = {}) {
   const normalized = saveLastReceipt(receipt);
   if (typeof window === 'undefined') return { ok: false, reason: 'Printing requires a browser.' };
 
-  const popup = window.open('', '_blank', 'noopener,noreferrer,width=480,height=760');
+  const popup = window.open('', '_blank', 'width=480,height=760');
   if (!popup) {
     downloadReceiptHtml(normalized);
     return { ok: false, fallback: 'download', reason: 'Pop-up blocked. A printable receipt file was downloaded instead.' };
   }
 
+  try { popup.opener = null; } catch { /* browser-controlled */ }
   popup.document.open();
   popup.document.write(receiptDocument(normalized, options));
   popup.document.close();
@@ -216,12 +217,13 @@ export function printCurrentNupsView({ title = document?.title || 'NUPS', select
     : document.querySelector('[data-nups-receipt], [data-receipt], .nups-receipt, main') || document.body;
   if (!element) return { ok: false, reason: 'No printable content was found.' };
 
-  const popup = window.open('', '_blank', 'noopener,noreferrer,width=900,height=760');
+  const popup = window.open('', '_blank', 'width=900,height=760');
   if (!popup) {
     window.print();
     return { ok: false, fallback: 'browser-print', reason: 'Pop-up blocked; using browser print.' };
   }
 
+  try { popup.opener = null; } catch { /* browser-controlled */ }
   const environment = getCurrentOperatingMode();
   const cloned = element.cloneNode(true);
   cloned.querySelectorAll('button, input, select, textarea, [data-no-print]').forEach((node) => node.remove());

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 /**
  * archiveAudioSearch — keyless music search via the Internet Archive.
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
         });
         if (!metaRes.ok) continue;
         const meta = await metaRes.json();
-        const audio = (meta?.files || []).find((f: any) =>
+        const audio = (meta?.files || []).find((f) =>
           /\.(mp3|ogg|m4a)$/i.test(String(f?.name || ''))
         );
         if (!audio) continue;

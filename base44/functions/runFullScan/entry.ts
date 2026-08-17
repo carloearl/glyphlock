@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 const SITE_URL = "https://glyphlock.io";
 
@@ -195,11 +195,10 @@ async function runBackendScan(scan_id, adminBase44) {
 // --- MAIN HANDLER ---
 
 Deno.serve(async (req) => {
-    // 1. Setup Client
-    const base44 = createClientFromRequest(req);
-    const adminBase44 = base44.asServiceRole;
-
     try {
+        // 1. Setup Client
+        const base44 = createClientFromRequest(req);
+        const adminBase44 = base44.asServiceRole;
         const scan_id = crypto.randomUUID();
         const started_at = new Date().toISOString();
 
