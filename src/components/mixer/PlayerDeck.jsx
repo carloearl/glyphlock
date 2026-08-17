@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 import AudioEngine from "@/components/mixer/AudioEngine";
 import YouTubePlayer from "@/components/mixer/YouTubePlayer";
-import AudioVisualizer from "@/components/mixer/AudioVisualizer";
+import AudioVisualizer, { setDeckAudioFx } from "@/components/mixer/AudioVisualizer";
 
 function extractVideoId(url) {
   if (!url) return null;
@@ -28,6 +28,8 @@ function extractVideoId(url) {
 const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVolume = 1, muted, onVolumeChange, onEnded, onDropSong, onDropExternalSong, onPlaybackError, autoPlay = true }, ref) {
   const [dragOver, setDragOver] = useState(false);
   const [audioEl, setAudioEl] = useState(null);
+  const [fxOpen, setFxOpen] = useState(false);
+  const [fx, setFx] = useState({ low: 0, mid: 0, high: 0, filter: 100, echo: 0, delay: 0.28 });
   const youtubeRef = useRef(null);
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null;
   const isUpload = song?.uploadUrl && !videoId;
@@ -63,6 +65,11 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVol
   useEffect(() => {
     if (!isUpload) setAudioEl(null);
   }, [isUpload, song?.uploadUrl]);
+
+  useEffect(() => {
+    if (!audioEl || !isUpload) return;
+    setDeckAudioFx(audioEl, fx);
+  }, [audioEl, isUpload, fx]);
 
   const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; setDragOver(true); };
   const handleDragLeave = () => setDragOver(false);
@@ -110,15 +117,26 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVol
         <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">{label}</span>
         <div className="flex items-center gap-1">
           {isUpload && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className={`h-6 w-6 ${visualizerOn ? "text-cyan-400" : "text-slate-600"}`}
-              onClick={() => setVisualizerOn(v => !v)}
-              title={visualizerOn ? "Hide visualizer" : "Show visualizer"}
-            >
-              <Waves className="w-3 h-3" />
-            </Button>
+            <>
+              <Button
+                size="sm"
+                variant="ghost"
+                className={`h-6 px-2 text-[9px] ${fxOpen ? "text-fuchsia-300 bg-fuchsia-500/10" : "text-slate-500"}`}
+                onClick={() => setFxOpen(v => !v)}
+                title="Open real-time deck effects"
+              >
+                FX
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className={`h-6 w-6 ${visualizerOn ? "text-cyan-400" : "text-slate-600"}`}
+                onClick={() => setVisualizerOn(v => !v)}
+                title={visualizerOn ? "Hide visualizer" : "Show visualizer"}
+              >
+                <Waves className="w-3 h-3" />
+              </Button>
+            </>
           )}
           <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onVolumeChange(baseVolume || 1, !muted)}>
             {muted ? <VolumeX className="w-3 h-3 text-red-400" /> : <Volume2 className="w-3 h-3 text-slate-400" />}
@@ -157,6 +175,25 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVol
               <div className="absolute bottom-2 left-2 right-2 text-white pointer-events-none">
                 <div className="text-xs font-bold drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] truncate">{song.title}</div>
                 <div className="text-[10px] text-white/70 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] truncate">{song.artist}</div>
+              </div>
+            </div>
+          )}
+          {fxOpen && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 p-2 border-b border-fuchsia-500/20 bg-black/35">
+              {[
+                ['LOW', 'low', -12, 12, 1], ['MID', 'mid', -12, 12, 1], ['HIGH', 'high', -12, 12, 1],
+                ['FILTER', 'filter', 0, 100, 1], ['ECHO', 'echo', 0, 100, 1],
+              ].map(([name, key, min, max, step]) => (
+                <label key={key} className="text-[8px] font-mono text-slate-500">
+                  <span className="flex justify-between mb-1"><b className="text-slate-300">{name}</b><span>{fx[key]}</span></span>
+                  <input type="range" min={min} max={max} step={step} value={fx[key]} onChange={(e) => setFx(v => ({ ...v, [key]: Number(e.target.value) }))} className="w-full accent-fuchsia-500" />
+                </label>
+              ))}
+              <div className="col-span-2 md:col-span-5 flex gap-1 pt-1">
+                <button onClick={() => setFx({ low: 0, mid: 0, high: 0, filter: 100, echo: 0, delay: 0.28 })} className="px-2 py-1 rounded border border-slate-700 text-[9px] text-slate-400">RESET</button>
+                <button onClick={() => setFx({ low: 5, mid: -2, high: 3, filter: 100, echo: 8, delay: 0.22 })} className="px-2 py-1 rounded border border-purple-500/40 text-[9px] text-purple-300">CLUB</button>
+                <button onClick={() => setFx(v => ({ ...v, filter: 38, echo: 0 }))} className="px-2 py-1 rounded border border-cyan-500/40 text-[9px] text-cyan-300">LOW PASS</button>
+                <button onClick={() => setFx(v => ({ ...v, echo: 58, delay: 0.31 }))} className="px-2 py-1 rounded border border-fuchsia-500/40 text-[9px] text-fuchsia-300">ECHO</button>
               </div>
             </div>
           )}
