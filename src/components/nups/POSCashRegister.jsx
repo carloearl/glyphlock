@@ -343,7 +343,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     }
 
     const bootstrapPins = ['1234', '0000'];
-    if (bootstrapPins.includes(managerPin)) {
+    if (modeState.isNonLive && bootstrapPins.includes(managerPin)) {
       performClearPOS('manager (bootstrap)');
       return;
     }
@@ -366,7 +366,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       const validRoles = ['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'admin', 'manager'];
       const manager = matches.find(m => validRoles.includes(m.role));
       const authName = manager?.full_name || manager?.username
-        || (['1234', '0000'].includes(discountPin) ? 'manager (bootstrap)' : null);
+        || (modeState.isNonLive && ['1234', '0000'].includes(discountPin) ? 'manager (training bootstrap)' : null);
       if (!authName) {
         toast.error('Invalid manager PIN');
         setDiscountPin('');
