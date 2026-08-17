@@ -15,7 +15,7 @@ const NAV_CONFIG = [
     { label: "Partners", path: "/Partners", visibility: "public" },
     { label: "Contact", path: "/Contact", visibility: "public" },
     { label: "Accessibility", path: "/Accessibility", visibility: "public" },
-    { label: "QR Verification", path: "/Qr", visibility: "public" },
+    { label: "QR Verification", path: "/SecureQRStudio", visibility: "public" },
     { label: "Image Processing", path: "/ImageLab", visibility: "public" },
     { label: "NUPS Transaction Verification", path: "/NUPSLogin", visibility: "public" },
     { label: "Security Modules", path: "/SecurityTools", visibility: "public" },

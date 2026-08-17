@@ -5,7 +5,7 @@ const SITE_URL = "https://glyphlock.io";
 const SITEMAPS = {
     xml: ["/", "/About", "/Contact"], // Main
     app: ["/Dashboard", "/Login"], // App
-    qr: ["/Qr", "/Qr?tab=create"], // Qr
+    qr: ["/SecureQRStudio", "/SecureQRStudio?tab=create"], // Secure QR Studio
     images: ["/ImageLab"],
     interactive: ["/Interactive"],
     dynamic: ["/Dynamic"]

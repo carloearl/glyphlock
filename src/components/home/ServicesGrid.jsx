@@ -6,7 +6,7 @@ import { motion, useInView } from "framer-motion";
 
 /**
  * PHASE 3B SERVICES GRID
- * QR Studio is the ONLY QR link - points to /Qr
+ * QR Studio is the ONLY QR link - points to /SecureQRStudio
  * Hotzone Mapper REMOVED (it's an Image Suite tool, not a security product)
  */
 

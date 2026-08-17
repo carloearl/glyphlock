@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
           { name: 'Home.js', path: 'pages/Home.js', type: 'file', size: '12.4 KB' },
           { name: 'SiteBuilder.js', path: 'pages/SiteBuilder.js', type: 'file', size: '18.2 KB' },
           { name: 'SiteAudit.js', path: 'pages/SiteAudit.js', type: 'file', size: '16.3 KB' },
-          { name: 'Qr.js', path: 'pages/Qr.js', type: 'file', size: '8.1 KB' },
+          { name: 'SecureQRStudio.js', path: 'pages/SecureQRStudio.js', type: 'file', size: '8.1 KB' },
           { name: 'Dashboard.js', path: 'pages/Dashboard.js', type: 'file', size: '14.7 KB' }
         ]
       },

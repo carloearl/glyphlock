@@ -5,15 +5,15 @@ import { createPageUrl } from '@/utils';
 import { ExternalLink, FileCode } from 'lucide-react';
 
 const QR_ROUTES = [
-  { path: '/Qr', title: 'QR Studio - Main', priority: '1.0' },
-  { path: '/Qr?tab=create', title: 'QR Studio - Create', priority: '0.9' },
-  { path: '/Qr?tab=preview', title: 'QR Studio - Preview', priority: '0.8' },
-  { path: '/Qr?tab=customize', title: 'QR Studio - Customize', priority: '0.8' },
-  { path: '/Qr?tab=hotzones', title: 'QR Studio - Hot Zones', priority: '0.8' },
-  { path: '/Qr?tab=stego', title: 'QR Studio - Steganography', priority: '0.8' },
-  { path: '/Qr?tab=security', title: 'QR Studio - Security', priority: '0.9' },
-  { path: '/Qr?tab=analytics', title: 'QR Studio - Analytics', priority: '0.7' },
-  { path: '/Qr?tab=bulk', title: 'QR Studio - Bulk Upload', priority: '0.7' }
+  { path: '/SecureQRStudio', title: 'QR Studio - Main', priority: '1.0' },
+  { path: '/SecureQRStudio?tab=create', title: 'QR Studio - Create', priority: '0.9' },
+  { path: '/SecureQRStudio?tab=preview', title: 'QR Studio - Preview', priority: '0.8' },
+  { path: '/SecureQRStudio?tab=customize', title: 'QR Studio - Customize', priority: '0.8' },
+  { path: '/SecureQRStudio?tab=hotzones', title: 'QR Studio - Hot Zones', priority: '0.8' },
+  { path: '/SecureQRStudio?tab=stego', title: 'QR Studio - Steganography', priority: '0.8' },
+  { path: '/SecureQRStudio?tab=security', title: 'QR Studio - Security', priority: '0.9' },
+  { path: '/SecureQRStudio?tab=analytics', title: 'QR Studio - Analytics', priority: '0.7' },
+  { path: '/SecureQRStudio?tab=bulk', title: 'QR Studio - Bulk Upload', priority: '0.7' }
 ];
 
 export default function SitemapQr() {

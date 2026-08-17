@@ -8,7 +8,7 @@ export const SYSTEM_INDEX = {
   // Core Platform Routes
   routes: [
     { id: 'home', path: '/', name: 'Home', public: true },
-    { id: 'qr', path: '/qr', name: 'QR Studio', public: false },
+    { id: 'qr', path: '/SecureQRStudio', name: 'QR Studio', public: false },
     { id: 'glyphbot', path: '/glyphbot', name: 'GlyphBot', public: false },
     { id: 'pricing', path: '/pricing', name: 'Pricing', public: true },
     { id: 'about', path: '/about', name: 'About', public: true },

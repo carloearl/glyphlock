@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   const PAGES = {
     'Home.jsx': `PLACEHOLDER_HOME`,
     'GlyphBot.jsx': `PLACEHOLDER_GLYPHBOT`,
-    'Qr.jsx': `PLACEHOLDER_QR`,
+    'SecureQRStudio.jsx': `PLACEHOLDER_QR`,
     'ImageLab.jsx': `PLACEHOLDER_IMAGELAB`,
     'CommandCenter.jsx': `PLACEHOLDER_COMMANDCENTER`,
     'SiteBuilder.jsx': `PLACEHOLDER_SITEBUILDER`,
