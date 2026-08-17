@@ -27,7 +27,7 @@ const slideRight = (delay = 0) => ({
 });
 
 const currentMeasures = [
-  { title: "Battle-Tested Infrastructure", icon: Shield, color: "blue", description: "Enterprise-grade resilience engineered for creators under pressure. Encrypted communications (TLS 1.3), DDoS protection, and regular hardening updates ensure your work cannot be quietly erased." },
+  { title: "Security Foundation", icon: Shield, color: "blue", description: "Hosted security controls, transport encryption, access controls, logging, and ongoing hardening support the platform. Specific guarantees depend on the deployed service and configuration." },
   { title: "Creator IP Protection", icon: Key, color: "indigo", description: "Legal frameworks supporting independent authorship with cryptographic proof, timestamping, and Master Covenant governance. Patent status is not represented here pending verification of the applicable GlyphLock filing." },
   { title: "Audit-Ready Transparency", icon: Eye, color: "cyan", description: "Every action logged. Every change traceable. Minimal data collection with user consent. AI behavior and system operations recorded on tamper-resistant ledgers for long-term trust and accountability." },
   { title: "Human-Overseen AI Safety", icon: Bot, color: "purple", description: "AI operates inside accountable guardrails. Secure development lifecycle with mandatory human review. Machine intelligence paired with structural oversight to prevent runaway automation." }
@@ -127,7 +127,7 @@ export default function TrustSecurity() {
             <div className="p-8 md:p-12">
               <h2 className="text-2xl font-bold text-white mb-4">Infrastructure Foundation</h2>
               <p className="text-slate-300 leading-relaxed text-lg">
-                Protection is engineered into every layer of the GlyphLock ecosystem. Independent creators deserve infrastructure that cannot be quietly erased or overridden — our architecture and operational controls are designed for audit-ready transparency and long-term resilience, with roadmap toward formal certification.
+                GlyphLock is building security controls, evidence practices, and operational safeguards into the platform. The current goal is traceability, clear access boundaries, recoverability, and documented hardening. Formal certification is a separate future process and is not implied by this architecture.
               </p>
             </div>
           </motion.div>
