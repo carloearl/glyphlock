@@ -284,7 +284,12 @@ function FrontDoorContent() {
                     {id === "drivers" && <DriverQuickAdd user={user} />}
                     {id === "register" && (
                       <div className="space-y-3">
-                        <BatchConfirmControl operatorName={user?.full_name || user?.username} />
+                        <BatchConfirmControl
+                          operatorName={user?.full_name || user?.username || user?.email}
+                          operatorRole={user?._highestRole || user?.role}
+                          operatorEmail={user?.email}
+                          operatorId={user?.id}
+                        />
                         {/* ONE register rule (owner directive 2026-07-20): the door
                             till lives ONLY on /Register. This step launches it —
                             no second live register embedded here. */}
