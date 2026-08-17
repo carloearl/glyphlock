@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { invokeDJGateway } from '@/components/mixer/automation/djGatewayClient';
 import { generatePlaylist } from '@/lib/playlistEngine';
 import { isEntityTrackPlayable } from '@/lib/djTrackAdapter';
-import { Zap, Loader2, Save } from 'lucide-react';
+import { Zap, Loader2, Save, LibraryBig, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { base44 } from '@/api/base44Client';
+import { searchMusicSources } from '@/lib/musicDiscovery';
 
 export default function PlaylistGenTab() {
   const [tracks, setTracks] = useState([]);
@@ -22,6 +24,8 @@ export default function PlaylistGenTab() {
   const [generated, setGenerated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [buildingCrate, setBuildingCrate] = useState(false);
+  const [crateProgress, setCrateProgress] = useState('');
 
   useEffect(() => { load(); }, []);
 
@@ -53,6 +57,77 @@ export default function PlaylistGenTab() {
     });
     setGenerated(ordered);
     toast.success(`Generated playlist with ${ordered.length} tracks`);
+  }
+
+  async function buildClubCrate() {
+    if (buildingCrate) return;
+    setBuildingCrate(true);
+    setCrateProgress('Curating respected club records…');
+    try {
+      const data = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a veteran open-format nightclub DJ and music director. Build a 24-track crate of real, widely recognized club records that a professional venue DJ could reasonably know. Balance current hits and durable floor records across hip-hop, R&B, dance, pop, Latin and high-energy crossover. Avoid obscure filler. Do not invent songs.
+
+Return title, artist, genre, mood, approximate bpm if confidently known, and a youtubeSearchQuery for each track. The list is a discovery list only; playback will be resolved separately through licensed/public provider links or YouTube embeds.`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            tracks: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' }, artist: { type: 'string' }, genre: { type: 'string' },
+                  mood: { type: 'string' }, bpm: { type: 'number' }, youtubeSearchQuery: { type: 'string' },
+                },
+                required: ['title','artist','youtubeSearchQuery'],
+              },
+            },
+          },
+          required: ['tracks'],
+        },
+      });
+      const suggestions = Array.isArray(data?.tracks) ? data.tracks.slice(0, 24) : [];
+      if (!suggestions.length) throw new Error('No club records returned');
+
+      let importedCount = 0;
+      for (let i = 0; i < suggestions.length; i += 1) {
+        const song = suggestions[i];
+        setCrateProgress(`Resolving ${i + 1}/${suggestions.length}: ${song.artist} — ${song.title}`);
+        try {
+          const discovery = await searchMusicSources(song.youtubeSearchQuery || `${song.artist} ${song.title}`, { limit: 5 });
+          const media = (discovery.results || []).find((item) => item.playable !== false && (item.source === 'youtube' || item.audio_url || item.youtube_video_id || item.embed_url));
+          if (!media) continue;
+          const videoId = media.source === 'youtube' ? (media.source_id || media.youtube_video_id || String(media.id || '').replace(/^yt-/, '')) : '';
+          await invokeDJGateway('createTrack', {
+            track: {
+              title: song.title,
+              artist: song.artist,
+              genre: song.genre || media.genre || undefined,
+              mood: song.mood || 'neutral',
+              bpm: Number(song.bpm) || undefined,
+              source: videoId ? 'youtube' : 'manual',
+              source_id: videoId || `${media.source || 'source'}:${media.source_id || media.id}`,
+              embed_url: videoId ? `https://www.youtube.com/embed/${videoId}` : undefined,
+              file_url: videoId ? undefined : (media.audio_url || media.embed_url || undefined),
+              thumbnail_url: media.thumbnail || media.thumbnail_url || undefined,
+              active: true,
+            },
+          });
+          importedCount += 1;
+        } catch (error) {
+          console.debug('[ClubCrate] skipped', song?.title, error?.message || error);
+        }
+      }
+      await load();
+      if (!importedCount) throw new Error('No playable provider results were available. Fix YouTube search credentials or add direct playable sources, then run again.');
+      toast.success(`Club crate built: ${importedCount} playable records added to the Track Library`);
+      setCrateProgress(`Complete · ${importedCount} records added`);
+    } catch (error) {
+      toast.error(`Club crate build failed: ${error?.message || 'Unknown error'}`);
+      setCrateProgress(error?.message || 'Build failed');
+    } finally {
+      setBuildingCrate(false);
+    }
   }
 
   async function handleSave() {
@@ -126,9 +201,23 @@ export default function PlaylistGenTab() {
             <span className="text-slate-500">({playableTracks.length} of {tracks.length})</span>
           </label>
 
+          <div className="rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/[.06] p-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 text-sm font-bold text-white"><LibraryBig className="w-4 h-4 text-fuchsia-300"/> Build the house crate</div>
+                <p className="text-[11px] text-slate-400 mt-1">AI curates recognizable club records, resolves playable provider sources, de-duplicates them through the secure gateway, and grows the NUPS Track Library for Auto-DJ.</p>
+              </div>
+              <Button onClick={buildClubCrate} disabled={buildingCrate} className="bg-fuchsia-600 hover:bg-fuchsia-500 min-w-[190px]">
+                {buildingCrate ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : <Sparkles className="w-4 h-4 mr-2"/>}
+                {buildingCrate ? 'Building Crate…' : 'Build Club Hits Crate'}
+              </Button>
+            </div>
+            {crateProgress && <div className="mt-2 font-mono text-[10px] text-fuchsia-200/70 truncate">{crateProgress}</div>}
+          </div>
+
           <div className="flex gap-2">
             <Button onClick={handleGenerate} disabled={poolTracks.length === 0} className="bg-cyan-600 hover:bg-cyan-500 flex-1">
-              <Zap className="w-4 h-4 mr-1" /> Generate ({poolTracks.length} tracks available)
+              <Zap className="w-4 h-4 mr-1" /> Generate Mix ({poolTracks.length} tracks available)
             </Button>
             {generated.length > 0 && (
               <Button onClick={handleSave} disabled={saving} variant="outline" className="border-green-500/50 text-green-400">
