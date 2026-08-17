@@ -145,8 +145,8 @@ export default function BallEnergyFX() {
       </motion.div>
 
       {/* HOVER — expanding shockwave rings */}
-      <div className="absolute inset-[20%] rounded-full border-2 border-cyan-200/70 opacity-0 group-hover:animate-ping group-hover:opacity-100" />
-      <div className="absolute inset-[26%] rounded-full border border-fuchsia-300/70 opacity-0 [animation-delay:.35s] group-hover:animate-ping group-hover:opacity-100" />
+      <div className={`absolute inset-[20%] rounded-full border-2 border-cyan-200/70 opacity-0 ${reduceMotion ? "group-hover:opacity-70" : "group-hover:animate-ping group-hover:opacity-100"}`} />
+      <div className={`absolute inset-[26%] rounded-full border border-fuchsia-300/70 opacity-0 ${reduceMotion ? "group-hover:opacity-60" : "[animation-delay:.35s] group-hover:animate-ping group-hover:opacity-100"}`} />
 
       {/* HOVER — chromatic split halo */}
       <div className="absolute inset-[10%] rounded-full opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-90 mix-blend-screen"

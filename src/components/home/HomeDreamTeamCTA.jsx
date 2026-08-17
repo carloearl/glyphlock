@@ -1,17 +1,18 @@
 import React, { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 
 export default function HomeDreamTeamCTA() {
   const containerRef = useRef(null);
   useInView(containerRef, { once: true, amount: 0.4 });
   const isInView = true; // always render content
+  const reduceMotion = useReducedMotion();
 
   return (
     <div ref={containerRef} className="w-full flex flex-col items-center px-4 overflow-hidden" style={{ maxWidth: '100vw' }}>
       
       {/* PULSING GLOW BEHIND ENTIRE CTA */}
       <div 
-        className="absolute inset-0 -m-8 rounded-3xl animate-pulse"
+        className={`absolute inset-0 -m-8 rounded-3xl ${reduceMotion ? "" : "animate-pulse"}`}
         style={{
           background: 'radial-gradient(circle, rgba(79,70,229,0.4) 0%, rgba(65,105,225,0.2) 50%, transparent 70%)',
           filter: 'blur(80px)',
@@ -43,14 +44,14 @@ export default function HomeDreamTeamCTA() {
           return (
             <motion.div 
               key={idx} 
-              initial={{ opacity: 0, y: 50, scale: 0.85 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 50, scale: 0.85 }}
               animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{ 
+              transition={reduceMotion ? { duration: 0 } : { 
                 duration: 1, 
                 delay: 0.7 + (idx * 0.12),
                 ease: [0.16, 1, 0.3, 1]
               }}
-              whileHover={{ y: -8, scale: 1.03, boxShadow: "0 0 40px rgba(59,130,246,0.5)" }}
+              whileHover={reduceMotion ? undefined : { y: -8, scale: 1.03, boxShadow: "0 0 40px rgba(59,130,246,0.5)" }}
               className="p-6 rounded-xl bg-black/60 border-2 border-blue-500/40 backdrop-blur-md hover:border-blue-400 transition-colors duration-300"
             >
               <h3 className="text-xl font-black text-blue-400 mb-2">{player.name}</h3>
