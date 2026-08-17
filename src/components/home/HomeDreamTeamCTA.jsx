@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, useInView } from "framer-motion";
 import NebulaNodeField from "@/components/home/NebulaNodeField";
+import BallEnergyFX from "@/components/home/BallEnergyFX";
 
 export default function HomeDreamTeamCTA() {
   const containerRef = useRef(null);
@@ -97,6 +98,9 @@ export default function HomeDreamTeamCTA() {
                 }}
               ></div>
               
+              {/* ELECTRIC ENERGY RIG (role ring reveals on hover) */}
+              <BallEnergyFX />
+
               {/* LOGO - THE BALL IS THE BUTTON */}
               <motion.img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/48ca17dba_c44b0deb.png"
@@ -125,6 +129,14 @@ export default function HomeDreamTeamCTA() {
               >
                 ↑ CLICK THE BALL ↑
               </motion.p>
+
+              {/* HIDDEN UNTIL HOVER */}
+              <p
+                className="relative mt-3 translate-y-2 rounded-full border border-cyan-200/60 bg-black/70 px-4 py-1.5 font-mono text-[10px] font-black tracking-[.28em] text-cyan-100 opacity-0 shadow-[0_0_26px_rgba(34,211,238,.5)] backdrop-blur-md transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100"
+                style={{ zIndex: 100 }}
+              >
+                MEET THE DREAM TEAM →
+              </p>
             </motion.div>
           </Link>
         </div>
