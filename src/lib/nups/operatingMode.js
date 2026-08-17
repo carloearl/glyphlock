@@ -130,8 +130,10 @@ export function stampOperationalRecord(record = {}, {
   if (supportsDemoFlag) next.is_demo = nonLive;
 
   if (transactional) {
+    const isComp = String(next.payment_method || '').toLowerCase() === 'comp'
+      || Number(next.comp_amount || 0) > 0;
     next.validation_run = nonLive;
-    next.funds_settled = !nonLive;
+    next.funds_settled = nonLive ? false : !isComp;
   }
 
   if (resolvedOperating === OPERATING_MODE.TRAINING) {
