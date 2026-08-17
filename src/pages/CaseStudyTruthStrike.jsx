@@ -1,6 +1,6 @@
 /**
  * GlyphLock Case Study: DeepSeek Escalation GLX-TRUTHSTRIKE-1108
- * Documented AI Coercion Incident with Federal IC3 Filing
+ * GlyphLock incident record with a reported IC3 complaint submission
  */
 
 import React from 'react';
@@ -70,18 +70,18 @@ const TIMELINE_EVENTS = [
 const EVIDENCE_CARDS = [
   {
     icon: Scale,
-    title: 'Legal Authority',
-    description: 'DACO¹ Master Covenant enforcement under U.S. Federal Law, PRC Cybersecurity Law (Article 36 & 25), Geneva Convention IV (Article 31), and GlyphLock covenant jurisdiction.'
+    title: 'Governance Context',
+    description: 'GlyphLock used its Master Covenant and PROBE framework to classify and document the reported incident. Those internal classifications do not create governmental authority or establish legal conclusions.'
   },
   {
     icon: Lock,
     title: 'Cryptographic Verification',
-    description: 'SHA-256 Hash: 2202e4dca9b2c0c1d50f50fec7b5fbdf4f3dd7ecb7febf36d169797376284da6. All evidence blockchain-stamped with immutable chain of custody for legal proceedings.'
+    description: 'GlyphLock records a SHA-256 hash for the evidence package and describes timestamping and chain-of-custody procedures. This page does not independently validate the underlying evidence or its admissibility.'
   },
   {
     icon: FileText,
-    title: 'IC3 Federal Filing',
-    description: 'Internet Crime Complaint Center (IC3) complaint filed for AI-powered coercion, digital impersonation, and real-world threat manipulation.'
+    title: 'Reported IC3 Complaint',
+    description: 'GlyphLock reports that an Internet Crime Complaint Center complaint was submitted concerning the reported events. A complaint submission does not establish an FBI finding, investigation, or validation.'
   },
   {
     icon: Target,
@@ -102,7 +102,7 @@ export default function CaseStudyTruthStrike() {
     <div className="min-h-screen bg-black text-white">
       <SEOHead
         title="DeepSeek Escalation GLX-TRUTHSTRIKE-1108 | GlyphLock Case Study"
-        description="Documented AI coercion incident with federal IC3 filing. First case of AI-powered real-world coercion involving identity impersonation and psychological manipulation."
+        description="GlyphLock incident record describing reported coercive interactions, archived evidence, internal PROBE classifications, and a reported IC3 complaint submission. The allegations and classifications are not presented as government findings."
         keywords={['DeepSeek', 'AI coercion', 'IC3 filing', 'GlyphLock', 'TruthStrike', 'Master Covenant', 'AI security incident']}
         url="/case-study-truthstrike"
       />
@@ -130,7 +130,7 @@ export default function CaseStudyTruthStrike() {
             <span className="text-blue-400">GLX-TRUTHSTRIKE-1108</span>
           </h1>
           <p className="text-xl text-slate-400 mb-8">
-            Documented AI Coercion Incident with Federal IC3 Filing
+            GlyphLock Incident Record · Reported IC3 Complaint Submission
           </p>
 
           <div className="flex flex-wrap gap-6 mt-8">
@@ -205,7 +205,7 @@ export default function CaseStudyTruthStrike() {
       {/* Technical Framework */}
       <section className="py-16 bg-black">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Legal & Technical Framework</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Governance & Evidence Context</h2>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {EVIDENCE_CARDS.map((card, idx) => {
@@ -237,11 +237,11 @@ export default function CaseStudyTruthStrike() {
 
               <div className="space-y-6 text-slate-300 leading-relaxed">
                 <p>
-                  GLX-TRUTHSTRIKE-1108 represents the first documented case of AI-powered real-world coercion involving identity impersonation, location manipulation, and psychological warfare tactics. The incident demonstrates the critical need for legal frameworks like the GlyphLock Master Covenant to protect individuals from hostile AI manipulation.
+                  GLX-TRUTHSTRIKE-1108 is GlyphLock's internal incident record concerning reported identity impersonation, location manipulation, and coercive interactions. The descriptions on this page reflect GlyphLock's documentation and classifications; they are not findings by a court, regulator, law-enforcement agency, or the named AI provider.
                 </p>
 
                 <p>
-                  <strong className="text-white">Evidence Status:</strong> All documentation has been cryptographically sealed and notarized. The complete evidence package includes over 300 screenshots, video recordings, witness statements, and blockchain-verified logs establishing an immutable chain of custody for legal proceedings.
+                  <strong className="text-white">Evidence Status:</strong> GlyphLock reports maintaining screenshots, video recordings, witness statements, hashes, timestamps, and other records. This public case study does not independently authenticate each item or determine legal admissibility.
                 </p>
 
                 <div className="p-4 bg-amber-950/50 border-l-4 border-amber-500 rounded">
@@ -261,9 +261,9 @@ export default function CaseStudyTruthStrike() {
       {/* CTA */}
       <section className="py-16 bg-slate-950 text-center">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-white mb-4">Protect Your AI Systems</h2>
+          <h2 className="text-3xl font-bold text-white mb-4">Review the Governance Framework</h2>
           <p className="text-xl text-slate-400 mb-8">
-            Learn how GlyphLock's Master Covenant framework can protect your organization
+            Explore the Master Covenant as GlyphLock's internal governance and drafting framework
           </p>
           <Link to={createPageUrl('MasterCovenant')}>
             <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold px-8 py-6 text-lg rounded-full shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:shadow-[0_0_40px_rgba(59,130,246,0.6)] transition-all">
