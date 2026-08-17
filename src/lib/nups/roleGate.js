@@ -62,6 +62,8 @@ const POLICY = {
   DOOR_GIRL: {
     POSTransaction: { create: transactionRuleForStation('door') },
     POSBatch: { update: batchConfirmationRule },
+    DriverProfile: { create: () => null, update: () => null },
+    DriverPayout: { create: () => null, update: () => null },
     StaffShift: {
       create: (data, actor) => ownShiftCreate(data, actor, 'door_girl'),
       update: (data, actor) => ownShiftUpdate(data, actor, 'door_girl'),
