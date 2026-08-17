@@ -54,7 +54,7 @@ export default function VerificationIntakeForm() {
       }
 
       // Notify GlyphLock
-      await base44.integrations.Core.SendEmail({
+      const emailResult = await base44.integrations.Core.SendEmail({
         to: 'carloearl@glyphlock.com',
         subject: `New governance review request — ${formData.organization_name}`,
         body: [
@@ -72,6 +72,8 @@ export default function VerificationIntakeForm() {
           formData.primary_concern || '—',
         ].join('\n'),
       });
+
+      console.log('[Consultation] email result', emailResult);
 
       setSubmitted(true);
       toast.success('Request submitted successfully');
