@@ -115,6 +115,7 @@ export function stampOperationalRecord(record = {}, {
   operatingMode,
   venueId,
   supportsDemoFlag = true,
+  supportsTrainingSession = true,
   transactional = false,
 } = {}) {
   const normalizedLedger = normalizeLedgerMode(ledgerMode);
@@ -135,7 +136,7 @@ export function stampOperationalRecord(record = {}, {
 
   if (resolvedOperating === OPERATING_MODE.TRAINING) {
     const session = readTrainingSession(venueId) || startTrainingSession(venueId);
-    next.training_session_id = session.id;
+    if (supportsTrainingSession) next.training_session_id = session.id;
     const currentNotes = String(next.notes || '').trim();
     const tag = `[TRAINING:${session.id}]`;
     next.notes = currentNotes.includes(tag) ? currentNotes : `${tag}${currentNotes ? ` ${currentNotes}` : ''}`;
