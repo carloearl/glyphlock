@@ -292,7 +292,8 @@ export default function ReceiptPrinter({
   }
 
   const items = transaction.items || [];
-  const txDate = new Date(transaction.created_date);
+  const previewDate = new Date(transaction.created_date || Date.now());
+  const txDate = Number.isNaN(previewDate.getTime()) ? new Date() : previewDate;
   const cashierDisplay = getCashierDisplay(transaction);
 
   // Standardized breakdown — shared with the printable receipt.
@@ -303,6 +304,12 @@ export default function ReceiptPrinter({
     <div className="space-y-3" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
       {/* On-screen receipt preview */}
       <div className="bg-black/90 border border-cyan-500/40 rounded-xl p-4 font-mono text-xs max-w-sm mx-auto shadow-[0_0_30px_rgba(6,182,212,0.2)]">
+        {receiptMode !== 'REAL' && (
+          <div className="mb-3 rounded-lg border-2 border-amber-400/70 bg-amber-400/10 p-2 text-center text-[10px] font-black tracking-[.15em] text-amber-200">
+            {receiptMode} · SAMPLE · FUNDS OFF
+            <div className="mt-0.5 text-[8px] font-normal tracking-normal text-amber-200/65">Not a live financial receipt</div>
+          </div>
+        )}
         <div className="text-center mb-3">
           <div className="text-base font-black text-white tracking-widest">{BIZ_LEGAL}</div>
           {VENUE_BRAND && VENUE_BRAND !== BIZ_LEGAL && <div className="text-[10px] font-bold text-gray-300">{VENUE_BRAND}</div>}
@@ -418,11 +425,17 @@ export default function ReceiptPrinter({
       </div>
 
       <div className="flex justify-center">
-        <Button onClick={printReceipt} variant="outline" size="sm"
-          className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-          style={{ position: 'relative', zIndex: 31, pointerEvents: 'auto', cursor: 'pointer' }}>
-          <Printer className="w-4 h-4 mr-1" /> Print Receipt
+        <Button onClick={printReceipt} disabled={printing} variant="outline" size="sm"
+          className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)] disabled:opacity-60"
+          style={{ position: 'relative', zIndex: 31, pointerEvents: 'auto', cursor: printing ? 'wait' : 'pointer' }}>
+          {printing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Printer className="w-4 h-4 mr-1" />}
+          {printing ? 'Opening Print…' : 'Print Receipt'}
         </Button>
+        {lastPrintAt && (
+          <span className="self-center text-[10px] text-emerald-400/70">
+            Sent {new Date(lastPrintAt).toLocaleTimeString()}
+          </span>
+        )}
       </div>
     </div>
   );
