@@ -224,7 +224,7 @@ function RegisterConsoleInner() {
             clock, connection. Register type follows the active tab. */}
         {(activeTab === "register" || activeTab === "bar") && (
           <RegisterStatusHeader
-            user={user}
+            user={operator || user}
             batch={activeBatch}
             registerType={activeTab === "bar" ? "Bar" : "Door"}
           />
