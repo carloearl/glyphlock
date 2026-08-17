@@ -9,6 +9,9 @@ import { Car, Plus, Users, CheckCircle, Banknote, AlertCircle, Ticket, Edit3, Tr
 import { toast } from "sonner";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { scopeRowsToOperatingMode, stampOperationalRecord } from "@/lib/nups/operatingMode";
+import { writeEntity } from "@/lib/nups/writeEntity";
 import DriverPayoutPanel from "@/components/nups/frontdoor/DriverPayoutPanel";
 // BPAA-NUPS-AUDIT-001 §4 — driver credit is a SEPARATE house-absorbed event
 import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
@@ -40,8 +43,10 @@ function makeDriverId(venueId) {
 export default function DriverQuickAdd({ user }) {
   const qc = useQueryClient();
   const activeVenue = useActiveVenue();
-  const venueId = activeVenue?.id || null;
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeState = useNUPSOperatingMode(venueId);
   const today = todayDate();
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
 
   const [rates, setRates] = useState(null);
   const [newName, setNewName] = useState("");
