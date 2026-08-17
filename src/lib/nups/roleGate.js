@@ -20,36 +20,42 @@
 
 // Roles that are gated by this module. Any role not listed here is passed
 // through to the downstream financial check unchanged.
-const SCOPED_ROLES = new Set(['DOOR_GIRL', 'DOORMAN']);
+const SCOPED_ROLES = new Set([
+  'DOOR_GIRL', 'DOORMAN', 'BARTENDER', 'FLOOR_HOST', 'HOSTESS', 'VIP_HOSTESS',
+]);
+
+const transactionRuleForStation = (station) => (data, _actor, mode) => {
+  if (data?.station !== station) return `${station}_operator_pos_requires_station_${station}`;
+  if (mode === 'REAL') {
+    return data?.validation_run === false && data?.funds_settled === true
+      ? null
+      : `live_${station}_sale_requires_validation_run_false_and_funds_settled_true`;
+  }
+  return data?.validation_run === true && data?.funds_settled === false
+    ? null
+    : `nonlive_${station}_sale_requires_validation_run_true_and_funds_settled_false`;
+};
+
+const ownShiftCreate = (data, actor, roleName) =>
+  data?.user_email && actor?.email &&
+  String(data.user_email).toLowerCase() === String(actor.email).toLowerCase()
+    ? null
+    : `${roleName}_can_only_create_own_StaffShift`;
+
+const ownShiftUpdate = (data, actor, roleName) =>
+  data?.user_email && actor?.email &&
+  String(data.user_email).toLowerCase() === String(actor.email).toLowerCase()
+    ? null
+    : `${roleName}_can_only_update_own_StaffShift`;
 
 // Per-role policy. For each entity, list the allowed operations. An entity
 // not present in the map means the role CANNOT write to it at all.
 const POLICY = {
   DOOR_GIRL: {
-    POSTransaction: {
-      create: (data, _actor, mode) => {
-        if (data?.station !== 'door') return 'door_girl_pos_requires_station_door';
-        if (mode === 'REAL') {
-          return data?.validation_run === false && data?.funds_settled === true
-            ? null
-            : 'live_door_sale_requires_validation_run_false_and_funds_settled_true';
-        }
-        return data?.validation_run === true && data?.funds_settled === false
-          ? null
-          : 'nonlive_door_sale_requires_validation_run_true_and_funds_settled_false';
-      },
-    },
+    POSTransaction: { create: transactionRuleForStation('door') },
     StaffShift: {
-      create: (data, actor) =>
-        data?.user_email && actor?.email &&
-        String(data.user_email).toLowerCase() === String(actor.email).toLowerCase()
-          ? null
-          : 'door_girl_can_only_create_own_StaffShift',
-      update: (data, actor) =>
-        data?.user_email && actor?.email &&
-        String(data.user_email).toLowerCase() === String(actor.email).toLowerCase()
-          ? null
-          : 'door_girl_can_only_update_own_StaffShift',
+      create: (data, actor) => ownShiftCreate(data, actor, 'door_girl'),
+      update: (data, actor) => ownShiftUpdate(data, actor, 'door_girl'),
     },
     VIPGuest:    { create: () => null, update: () => null },
     ActivityLog: { create: () => null },
@@ -59,17 +65,44 @@ const POLICY = {
     DriverPayout: { create: () => null, update: () => null },
     VIPGuest:     { create: () => null, update: () => null },
     StaffShift: {
-      create: (data, actor) =>
-        data?.user_email && actor?.email &&
-        String(data.user_email).toLowerCase() === String(actor.email).toLowerCase()
-          ? null
-          : 'doorman_can_only_create_own_StaffShift',
-      update: (data, actor) =>
-        data?.user_email && actor?.email &&
-        String(data.user_email).toLowerCase() === String(actor.email).toLowerCase()
-          ? null
-          : 'doorman_can_only_update_own_StaffShift',
+      create: (data, actor) => ownShiftCreate(data, actor, 'doorman'),
+      update: (data, actor) => ownShiftUpdate(data, actor, 'doorman'),
     },
+    ActivityLog: { create: () => null },
+  },
+  BARTENDER: {
+    POSTransaction: { create: transactionRuleForStation('bar') },
+    StaffShift: {
+      create: (data, actor) => ownShiftCreate(data, actor, 'bartender'),
+      update: (data, actor) => ownShiftUpdate(data, actor, 'bartender'),
+    },
+    ActivityLog: { create: () => null },
+  },
+  FLOOR_HOST: {
+    POSTransaction: { create: transactionRuleForStation('vip') },
+    StaffShift: {
+      create: (data, actor) => ownShiftCreate(data, actor, 'floor_host'),
+      update: (data, actor) => ownShiftUpdate(data, actor, 'floor_host'),
+    },
+    VIPGuest: { create: () => null, update: () => null },
+    ActivityLog: { create: () => null },
+  },
+  HOSTESS: {
+    POSTransaction: { create: transactionRuleForStation('vip') },
+    StaffShift: {
+      create: (data, actor) => ownShiftCreate(data, actor, 'hostess'),
+      update: (data, actor) => ownShiftUpdate(data, actor, 'hostess'),
+    },
+    VIPGuest: { create: () => null, update: () => null },
+    ActivityLog: { create: () => null },
+  },
+  VIP_HOSTESS: {
+    POSTransaction: { create: transactionRuleForStation('vip') },
+    StaffShift: {
+      create: (data, actor) => ownShiftCreate(data, actor, 'vip_hostess'),
+      update: (data, actor) => ownShiftUpdate(data, actor, 'vip_hostess'),
+    },
+    VIPGuest: { create: () => null, update: () => null },
     ActivityLog: { create: () => null },
   },
 };
