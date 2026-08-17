@@ -258,7 +258,7 @@ export default function DreamTeamPage() {
     <>
       <SEOHead
         title="GlyphLock Dream Team - AI Player Cards | Master Covenant Series"
-        description="Meet the GlyphLock Dream Team. Collectible AI player cards featuring Alfred, Claude, Copilot, Perplexity, and Cursor. Master Covenant Series with BPAA certification."
+        description="Meet the GlyphLock Dream Team: a collectible visualization of AI tools and workflow roles used in GlyphLock research, coding, review, and orchestration. No provider partnership or contractual binding is implied."
         url="/dream-team"
       />
 
@@ -286,7 +286,7 @@ export default function DreamTeamPage() {
             </p>
             
             <p className="text-cyan-300 font-semibold">
-              GlyphLock doesn't give you models. We give you a TEAM.
+              GlyphLock organizes model-assisted work as a TEAM.
             </p>
             
             <p>
@@ -312,8 +312,8 @@ export default function DreamTeamPage() {
                   <ul className="space-y-2 text-white">
                     <li>• Orchestrated chain execution</li>
                     <li>• Cross-validation between models</li>
-                    <li>• Bad answers die before reaching you</li>
-                    <li>• We coach. We validate. We win.</li>
+                    <li>• Outputs can be cross-checked before human approval</li>
+                    <li>• Defined roles make review and accountability clearer</li>
                   </ul>
                 </div>
               </div>
@@ -324,7 +324,7 @@ export default function DreamTeamPage() {
             </p>
             
             <p className="text-cyan-300 text-2xl font-black">
-              They don't compete. They dominate together.
+              Different tools. Defined roles. Human-owned outcomes.
             </p>
           </div>
           
