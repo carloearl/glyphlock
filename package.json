@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc -p ./jsconfig.json",
     "audit:entities": "node scripts/audit-entity-model.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:dj-functions": "node scripts/check-dj-function-sdk.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.42",
