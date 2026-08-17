@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Save, Lock, Eye, Receipt } from "lucide-react";
 import { toast } from "sonner";
-import { invalidateRateCache } from "@/lib/nups/venueRateConfig";
+import { invalidateRateCache, ensureVenueRateConfig } from "@/lib/nups/venueRateConfig";
 
 const EDIT_ROLES = new Set(["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"]);
 
@@ -50,6 +50,11 @@ export default function ReceiptConfigEditor({ venueId, user }) {
           service_fee_label: row?.service_fee_label ?? "Service Fee",
           show_processing_fee: row?.show_processing_fee ?? true,
           show_service_fee: row?.show_service_fee ?? false,
+          payment_terminal_enabled: row?.payment_terminal_enabled ?? false,
+          gift_card_enabled: row?.gift_card_enabled ?? false,
+          room_tab_enabled: row?.room_tab_enabled ?? false,
+          receipt_auto_prompt: row?.receipt_auto_prompt ?? true,
+          receipt_print_copies: row?.receipt_print_copies ?? 1,
           receipt_legal_name: row?.receipt_legal_name ?? "",
           receipt_footer_text: row?.receipt_footer_text ?? "",
           receipt_tax_id: row?.receipt_tax_id ?? "",
@@ -62,19 +67,24 @@ export default function ReceiptConfigEditor({ venueId, user }) {
   }, [venueId]);
 
   const handleSave = async () => {
-    if (!record?.id) {
-      toast.error("Venue rate config missing — create one from Rates & Fees first.");
+    if (!venueId) {
+      toast.error("Select a venue before saving receipt settings.");
       return;
     }
     setSaving(true);
     try {
-      await base44.entities.VenueRateConfig.update(record.id, {
+      const target = record?.id
+        ? record
+        : await ensureVenueRateConfig(venueId, "", user?.email || "admin");
+      if (!target?.id) throw new Error("Venue configuration could not be created.");
+      await base44.entities.VenueRateConfig.update(target.id, {
         ...draft,
         last_edited_by: user?.email || "admin",
         last_edited_at: new Date().toISOString(),
       });
+      setRecord(target);
       invalidateRateCache(venueId);
-      toast.success("Receipt settings saved. Next receipt will use the new values.");
+      toast.success("Receipt and tender settings saved. New transactions use these controls immediately.");
     } catch (e) {
       toast.error("Save failed: " + (e?.message || "unknown"));
     } finally {
