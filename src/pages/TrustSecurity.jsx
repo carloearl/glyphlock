@@ -41,41 +41,40 @@ const colorMap = {
 };
 
 const roadmap = [
-  { phase: "Completed — Security Foundation", period: "Q1–Q2 2025", status: "done", items: ["Firebase authentication", "Encryption for sensitive data at rest", "Logging and monitoring", "Security policy documentation", "Incident response procedures"] },
-  { phase: "Completed — SOC 2 Type II Preparation", period: "Q3–Q4 2025", status: "done", items: ["Control framework implementation", "Risk assessment", "Internal audits", "Staff security training"] },
-  { phase: "Current Phase — SOC 2 Type II Audit Period", period: "Q1 2026", status: "current", items: ["Six month observation period", "CPA firm audit engagement", "Continuous monitoring", "Control effectiveness validation", "ISO 27001 framework alignment"] },
-  { phase: "Planned — Formal Certifications", period: "Q2–Q3 2026", status: "planned", items: ["SOC 2 Type II audit completion", "ISO 27001 certification audit", "GDPR validation", "Industry specific compliance as applicable"] },
-  { phase: "Planned — Advanced Security Posture", period: "Q4 2026", status: "planned", items: ["Post quantum cryptography roadmap", "24/7 security operations", "Advanced threat detection", "Continuous compliance monitoring", "Annual penetration testing"] }
+  { phase: "Implemented — Security Foundation", period: "Current", status: "done", items: ["Authentication and role controls", "Transport encryption through hosted infrastructure", "Application logging and audit workflows", "Security and governance documentation", "Incident-response process documentation"] },
+  { phase: "Active — Control Hardening", period: "2026", status: "current", items: ["Access-control review", "Dependency and configuration review", "Audit-log coverage expansion", "Backup and recovery validation", "Security documentation cleanup"] },
+  { phase: "Active — Evidence Program", period: "2026", status: "current", items: ["Control inventory", "Evidence ownership", "Change-management records", "Vendor and integration documentation", "Remediation tracking"] },
+  { phase: "Planned — Independent Assessment Readiness", period: "After evidence maturity", status: "planned", items: ["Select applicable assurance framework", "Engage qualified independent assessor if commercially justified", "Complete remediation before representing certification", "Publish attestation only after formal completion"] },
+  { phase: "Planned — Advanced Security Posture", period: "Ongoing", status: "planned", items: ["Cryptography inventory and migration planning", "Expanded monitoring", "Threat-detection improvements", "Periodic penetration testing", "Continuous control review"] }
 ];
 
 const controls = [
-  { category: "Encryption", items: ["In transit: TLS 1.3", "At rest: AES 256 roadmap", "Key management and HSM integration planned"] },
+  { category: "Encryption", items: ["Transport encryption provided through hosted HTTPS/TLS infrastructure", "At-rest protection depends on the underlying managed service and data store", "Key-management and cryptography inventory remain part of the hardening roadmap"] },
   { category: "Access Control", items: ["Firebase Authentication", "Multi factor authentication", "Role based access control", "Session management"] },
   { category: "Monitoring & Testing", items: ["Security event logging", "Dependency vulnerability scanning", "Scheduled penetration testing", "Third party audits as applicable"] },
   { category: "Infrastructure", items: ["Cloud native architecture", "CDN and DDoS protection", "Backup and disaster recovery planning"] },
-  { category: "Compliance Programs", items: ["Privacy policy and terms", "Data processing agreements", "User rights management", "GDPR and CCPA programs active", "PCI DSS and HIPAA applied only when feature scope requires"] }
+  { category: "Compliance Programs", items: ["Privacy policy and terms", "Data-processing documentation", "User-rights workflows", "Framework mapping performed where relevant", "Formal compliance or certification is not represented without supporting evidence"] }
 ];
 
 const frameworks = [
-  { title: "ISO 27001", status: "Aligned", statusColor: "blue", desc: "Information security management system (ISMS) implementation covering personnel, physical, and logical security controls.", specs: ["Annex A Controls", "Risk Treatment Plan", "Internal Audit Cycle"] },
-  { title: "SOC 2 Type II", status: "In Progress", statusColor: "amber", desc: "Service Organization Control evaluation for Security, Availability, and Confidentiality trust principles.", specs: ["Control Environment", "Risk Assessment", "Monitoring Activities"] },
-  { title: "GDPR", status: "Compliant", statusColor: "green", desc: "European Union data protection regulation compliance including data subject rights and processing records.", specs: ["DPA in Place", "Data Minimization", "Right to Erasure"] },
-  { title: "PCI DSS", status: "Level 4", statusColor: "purple", desc: "Payment Card Industry Data Security Standard for secure handling of credit card information.", specs: ["SAQ A Completed", "TLS 1.3 Enforcement", "No Card Data Retention"] }
+  { title: "ISO/IEC 27001", status: "Reference", statusColor: "blue", desc: "Used as a reference point for information-security management concepts. GlyphLock does not represent ISO/IEC 27001 certification on this page.", specs: ["Risk Management", "Access Control", "Evidence Discipline"] },
+  { title: "SOC 2", status: "Reference", statusColor: "blue", desc: "Trust Services Criteria may inform control design and evidence planning. GlyphLock does not represent a completed SOC 2 examination on this page.", specs: ["Security", "Availability", "Change Management"] },
+  { title: "Privacy", status: "Program", statusColor: "amber", desc: "Privacy requirements are handled according to feature scope, user data, contracts, and applicable law. No blanket GDPR certification claim is made.", specs: ["Data Minimization", "Access Requests", "Retention Review"] },
+  { title: "Payments", status: "Scoped", statusColor: "purple", desc: "Payment-card responsibilities depend on the payment flow and processor architecture. No PCI DSS certification level is represented here.", specs: ["Processor Scope", "Tokenized Flows", "No Unnecessary Card Storage"] }
 ];
 
 const certs = [
-  { name: "ISO 27001", subtitle: "STANDARDS MET", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg" },
-  { name: "SOC 2", subtitle: "PROGRAM IN PLACE", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg" },
-  { name: "GDPR", subtitle: "COMPLIANT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg" },
-  { name: "HIPAA", subtitle: "COMPLIANT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg" },
-  { name: "Post-Quantum", subtitle: "SECURED", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg" }
+  { name: "ISO/IEC 27001", subtitle: "REFERENCE FRAMEWORK", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/0dfb7aa86_1766061731969.jpg" },
+  { name: "SOC 2", subtitle: "REFERENCE CRITERIA", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ec8675dc5_1766064945798.jpg" },
+  { name: "PRIVACY", subtitle: "SCOPE DEPENDENT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/db009bbe8_1766062456894.jpg" },
+  { name: "HEALTH DATA", subtitle: "SCOPE DEPENDENT", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/c848fdb95_1766062491421.jpg" },
+  { name: "CRYPTOGRAPHY", subtitle: "HARDENING ROADMAP", image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/717da1754_1766062231110.jpg" }
 ];
 
 const statusBadge = {
-  Compliant: "bg-green-500/10 border border-green-500/30 text-green-400",
-  Aligned: "bg-blue-500/10 border border-blue-500/30 text-blue-400",
-  "In Progress": "bg-amber-500/10 border border-amber-500/30 text-amber-400",
-  "Level 4": "bg-purple-500/10 border border-purple-500/30 text-purple-400"
+  Reference: "bg-blue-500/10 border border-blue-500/30 text-blue-400",
+  Program: "bg-amber-500/10 border border-amber-500/30 text-amber-400",
+  Scoped: "bg-purple-500/10 border border-purple-500/30 text-purple-400"
 };
 
 export default function TrustSecurity() {
@@ -117,7 +116,7 @@ export default function TrustSecurity() {
             </motion.h1>
 
             <motion.p {...slideRight(0.2)} className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Battle-tested infrastructure protecting independent creators with audit-ready compliance
+              Current controls, evidence practices, framework references, and the security-hardening roadmap
             </motion.p>
           </div>
 
@@ -136,7 +135,7 @@ export default function TrustSecurity() {
           {/* ── COMPLIANCE BADGES ── */}
           <div className="mb-16">
             <motion.h2 {...fadeUp(0)} className="text-3xl font-bold text-white mb-8 text-center">
-              Infrastructure Standards &amp; Compliance
+              Security Framework References
             </motion.h2>
             <motion.div {...fadeUp(0.1)} className="rounded-2xl overflow-hidden relative"
               style={{ background: 'linear-gradient(135deg, rgba(87,61,255,0.06) 0%, rgba(168,60,255,0.04) 100%)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 0 50px rgba(87,61,255,0.15)' }}>
@@ -158,7 +157,7 @@ export default function TrustSecurity() {
                 </div>
                 <div className="mt-10 pt-8 border-t border-white/[0.07] text-center">
                   <p className="text-slate-400 max-w-3xl mx-auto leading-relaxed text-sm md:text-base">
-                    GlyphLock's infrastructure is engineered to protect independent creators against power imbalance. Our controls align with industry frameworks to ensure your work operates inside auditable, resilient systems — not as security theater, but as structural protection. Certifications are subject to audit cycles and formal attestation.
+                    These framework references describe design targets and evidence disciplines. They are not certification badges or third-party attestations. Formal certification will be represented only after the applicable independent process is completed and documented.
                   </p>
                 </div>
               </div>
@@ -199,14 +198,14 @@ export default function TrustSecurity() {
 
           {/* ── ROADMAP ── */}
           <div className="mb-16">
-            <motion.h2 {...slideRight(0)} className="text-3xl font-bold text-white mb-6">Path to Enterprise Certification</motion.h2>
+            <motion.h2 {...slideRight(0)} className="text-3xl font-bold text-white mb-6">Security Hardening & Assurance Roadmap</motion.h2>
 
             <motion.div {...fadeUp(0.05)} className="rounded-xl p-5 mb-8 flex items-start gap-3"
               style={{ background: 'rgba(251,146,60,0.05)', border: '1px solid rgba(251,146,60,0.25)' }}>
               <AlertCircle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-bold text-orange-400 uppercase tracking-wide mb-1">Transparency Notice</p>
-                <p className="text-sm text-slate-300 leading-relaxed">The milestones below reflect our compliance roadmap and ongoing audit activities. Official certification documentation is provided only under NDA once audits are formally completed.</p>
+                <p className="text-sm text-slate-300 leading-relaxed">The milestones below describe internal hardening and evidence work. They do not imply that an independent audit, certification engagement, or regulatory validation is currently underway unless separately documented.</p>
               </div>
             </motion.div>
 
@@ -318,7 +317,7 @@ export default function TrustSecurity() {
               </motion.div>
               <h2 className="text-3xl font-black text-white mb-4">Infrastructure Inquiries</h2>
               <p className="text-slate-300 leading-relaxed mb-6 max-w-2xl mx-auto">
-                For infrastructure questions, audit requests, or compliance documentation, contact the GlyphLock team. Certification docs provided under NDA once formal audits complete. We're here to protect your creative sovereignty with transparency.
+                For infrastructure questions, architecture reviews, control documentation, or evidence requests, contact the GlyphLock team. Any future third-party attestation will be identified by the assessor, scope, period, and supporting report when available.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-slate-400 mb-8">
                 <span><strong className="text-white">Contact:</strong> carloearl@glyphlock.com</span>
