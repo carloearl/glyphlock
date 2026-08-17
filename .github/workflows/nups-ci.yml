@@ -36,6 +36,9 @@ jobs:
       - name: Audit Base44 entity model
         run: npm run audit:entities
 
+      - name: Verify NUPS DJ function SDK pins
+        run: npm run check:dj-functions
+
       - name: Lint
         run: npm run lint
 
