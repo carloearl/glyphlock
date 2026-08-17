@@ -13,29 +13,6 @@ export default function HomeDreamTeamCTA() {
   return (
     <div ref={containerRef} className="w-full flex flex-col items-center px-4 overflow-hidden" style={{ maxWidth: '100vw' }}>
       
-      {/* HERO TEXT - ABOVE COURT */}
-      <div className="text-center px-4 md:px-8 -mb-10 md:-mb-16 max-w-5xl w-full">
-        {/* Title - Slide from left */}
-        <motion.h2 
-          initial={{ opacity: 0, x: -100 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-          className="text-white text-4xl md:text-5xl font-black mb-6 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)]"
-        >
-          <span className="text-blue-400">DREAM TEAM AI</span> — ORCHESTRATED INTELLIGENCE
-        </motion.h2>
-        
-        {/* Subtitle - Slide from right */}
-        <motion.div 
-          initial={{ opacity: 0, x: 100 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-xl md:text-2xl leading-relaxed font-black drop-shadow-[0_4px_12px_rgba(0,0,0,1)] space-y-4"
-        >
-          <p className="text-white">GlyphLock uses a six-role AI workflow model across multiple providers, with each role assigned a defined purpose in research, analysis, coding, and review.</p>
-        </motion.div>
-      </div>
-
       {/* PULSING GLOW BEHIND ENTIRE CTA */}
       <div 
         className="absolute inset-0 -m-8 rounded-3xl animate-pulse"
