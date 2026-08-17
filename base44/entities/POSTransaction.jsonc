@@ -128,7 +128,16 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "Ledger mode. REAL writes to live books."
+      "description": "Ledger mode. REAL writes to live books; DEMO/SANDBOX are funds-off."
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Explicit cleanup/isolation marker. True for DEMO, TRAINING, and SANDBOX records."
+    },
+    "training_session_id": {
+      "type": "string",
+      "description": "Session boundary for guided TRAINING mode, which persists on the DEMO ledger."
     },
     "validation_run": {
       "type": "boolean",
