@@ -53,6 +53,26 @@ export default function VerificationIntakeForm() {
         }
       }
 
+      // Notify GlyphLock
+      await base44.integrations.Core.SendEmail({
+        to: 'carloearl@glyphlock.com',
+        subject: `New governance review request — ${formData.organization_name}`,
+        body: [
+          `Organization: ${formData.organization_name}`,
+          `Contact: ${formData.contact_name}`,
+          `Email: ${formData.contact_email}`,
+          `Phone: ${formData.contact_phone || '—'}`,
+          `Size: ${formData.organization_size || '—'}`,
+          `Industry: ${formData.industry || '—'}`,
+          `Engagement interest: ${formData.verification_interest || '—'}`,
+          `Governance maturity: ${formData.current_governance_maturity || '—'}`,
+          `Timeline: ${formData.timeline || '—'}`,
+          '',
+          'Primary concern / goal:',
+          formData.primary_concern || '—',
+        ].join('\n'),
+      });
+
       setSubmitted(true);
       toast.success('Request submitted successfully');
     } catch (error) {
