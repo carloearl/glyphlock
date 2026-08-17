@@ -1,13 +1,13 @@
 export const SEO_DATA = {
   // --- CORE PAGES ---
   "Home": {
-    title: "Quantum-Resistant Encryption Platform | GlyphLock LLC",
-    description: "GlyphLock LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework.",
-    keywords: ["quantum-resistant encryption", "post-quantum cryptography", "AI cybersecurity", "enterprise security platform", "GlyphLock Security", "threat detection AI", "zero-trust architecture", "Master Covenant", "visual cryptography", "secure QR codes"],
-    h1: "Enterprise Quantum-Resistant Security Architecture",
+    title: "GlyphLock | Custom Software, NUPS, AI & Verification Workflows",
+    description: "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.",
+    keywords: ["GlyphLock", "custom software", "NUPS", "venue operations", "QR verification", "AI workflows", "systems integration", "GlyphBot", "Image Lab"],
+    h1: "Build. Verify. Operate.",
     url: "/",
-    ogTitle: "Quantum-Resistant Enterprise Security Platform | GlyphLock LLC",
-    ogDescription: "Enterprise-grade post-quantum encryption, AI-powered threat detection, and structured AI governance framework.",
+    ogTitle: "GlyphLock | Build. Verify. Operate.",
+    ogDescription: "Custom software, NUPS venue operations, QR verification, AI-assisted workflows, and connected operating systems.",
     schemaType: "Organization",
     priority: 1.0,
     changefreq: "daily",
@@ -215,13 +215,13 @@ export const SEO_DATA = {
     internalLinks: ["/roadmap", "/faq"]
   },
   "Roadmap": {
-    title: "Product Roadmap | Post-Quantum Security Development | GlyphLock LLC",
-    description: "GlyphLock Security development roadmap. Post-quantum cryptography milestones, AI governance framework evolution, and enterprise security platform expansion.",
-    keywords: ["security roadmap", "post-quantum development", "AI governance evolution", "enterprise platform expansion"],
-    h1: "Security Architecture Development Roadmap",
+    title: "Product Roadmap | GlyphLock LLC",
+    description: "Current GlyphLock product roadmap separating shipped capabilities, active work, hardening priorities, and planned development across NUPS, QR, AI, image, governance, financial, and security modules.",
+    keywords: ["GlyphLock roadmap", "NUPS roadmap", "product development", "AI workflows", "QR verification", "operational software"],
+    h1: "GlyphLock Product Roadmap",
     url: "/roadmap",
     ogTitle: "Product Roadmap | GlyphLock LLC",
-    ogDescription: "Post-quantum security development milestones and enterprise platform expansion.",
+    ogDescription: "Shipped, active, hardening, and planned work across the GlyphLock platform.",
     schemaType: "Schedule",
     priority: 0.7,
     changefreq: "monthly",
@@ -241,13 +241,13 @@ export const SEO_DATA = {
     internalLinks: ["/contact", "/dream-team"]
   },
   "MasterCovenant": {
-    title: "Master Covenant | AI Governance Framework | GlyphLock LLC",
-    description: "The Master Covenant is a structured AI governance framework with 71 binding clauses, exposure-based binding mechanisms, and enforcement protocols for enterprise AI accountability.",
-    keywords: ["Master Covenant", "AI governance framework", "AI binding protocol", "AI accountability", "enterprise AI governance", "NIST post-quantum standards"],
+    title: "Master Covenant | Internal Governance Framework | GlyphLock LLC",
+    description: "The Master Covenant is GlyphLock's 71-clause internal governance and drafting framework for AI accountability concepts. External enforceability depends on applicable law, actual assent, and conventional agreements.",
+    keywords: ["Master Covenant", "AI governance framework", "governance research", "AI accountability", "contract drafting", "GlyphLock"],
     h1: "The Master Covenant — AI Governance Framework",
     url: "/governance/covenant",
     ogTitle: "Master Covenant | AI Governance Framework | GlyphLock LLC",
-    ogDescription: "71-clause AI governance framework with structured enforcement for enterprise AI accountability.",
+    ogDescription: "GlyphLock's internal 71-clause governance and drafting framework for AI accountability concepts.",
     schemaType: "Article",
     priority: 0.95,
     changefreq: "monthly",
@@ -366,26 +366,26 @@ export const SEO_DATA = {
 
   // --- CASE STUDIES ---
   "CaseStudies": {
-    title: "Case Studies & Research | Security Architecture Documentation | GlyphLock LLC",
-    description: "Documented security architecture case studies including AI governance enforcement, blockchain verification, and post-quantum cryptography deployment.",
+    title: "Case Studies & Research | GlyphLock LLC",
+    description: "GlyphLock case studies covering internal governance research, reported incidents, archived system outputs, litigation simulations, and operational software work. Third-party validation is identified separately when available.",
     keywords: ["security case studies", "AI governance", "Master Covenant", "blockchain verification", "post-quantum deployment"],
     h1: "Case Studies & Security Research",
     url: "/case-studies",
     ogTitle: "Case Studies & Research | GlyphLock LLC",
-    ogDescription: "Documented security architecture deployments and AI governance enforcement.",
+    ogDescription: "Internal research, reported incidents, archived outputs, simulations, and operational case studies from GlyphLock.",
     schemaType: "CollectionPage",
     priority: 0.95,
     changefreq: "weekly",
     internalLinks: ["/case-study-truthstrike", "/case-study-ai-binding", "/case-study-covenant-victory", "/master-covenant"]
   },
   "CaseStudyTruthStrike": {
-    title: "TruthStrike Incident Documentation | AI Threat Case Study | GlyphLock LLC",
-    description: "Documented AI threat incident with federal filing, blockchain evidence chain, and Master Covenant enforcement protocol activation.",
+    title: "TruthStrike Incident Record | GlyphLock LLC",
+    description: "GlyphLock incident documentation describing reported events, archived evidence, internal PROBE classifications, and a reported IC3 complaint submission. Filing does not establish agency validation.",
     keywords: ["AI threat detection", "incident documentation", "Master Covenant enforcement", "blockchain evidence"],
     h1: "TruthStrike Incident Documentation",
     url: "/case-study-truthstrike",
     ogTitle: "TruthStrike Incident | GlyphLock LLC",
-    ogDescription: "Documented AI threat incident with federal filing and Master Covenant enforcement.",
+    ogDescription: "Reported incident documentation, internal classifications, archived evidence, and a reported IC3 complaint submission.",
     schemaType: "Article",
     priority: 0.9,
     changefreq: "monthly",
@@ -394,7 +394,7 @@ export const SEO_DATA = {
   "CaseStudyAIBinding": {
     title: "AI Governance Acknowledgment Case Study | Master Covenant | GlyphLock LLC",
     description: "Internal case study documenting AI-system outputs and acknowledgments classified under GlyphLock's 71-clause Master Covenant governance framework. No provider-level contractual assent is claimed.",
-    keywords: ["AI governance", "AI binding protocol", "Master Covenant", "AI governance framework", "enterprise AI governance"],
+    keywords: ["AI governance", "AI workflow records", "Master Covenant", "AI governance framework", "GlyphLock research"],
     h1: "AI Governance Acknowledgments Under the Master Covenant",
     url: "/case-study-ai-binding",
     ogTitle: "AI Governance Acknowledgment Case Study | GlyphLock LLC",
@@ -407,7 +407,7 @@ export const SEO_DATA = {
   "CaseStudyCovenantVictory": {
     title: "Master Covenant Litigation Simulation | Governance Case Study | GlyphLock LLC",
     description: "Internal litigation-simulation research evaluating Master Covenant governance, operator-liability, contract-incorporation, and IP-notice theories. Not a court ruling.",
-    keywords: ["Master Covenant", "legal validation", "AI governance law", "IP sovereignty", "operator liability"],
+    keywords: ["Master Covenant", "litigation simulation", "AI governance research", "IP notice", "operator liability"],
     h1: "Master Covenant Litigation Simulation",
     url: "/case-study-covenant-victory",
     ogTitle: "Master Covenant Litigation Simulation | GlyphLock LLC",
@@ -436,10 +436,10 @@ export const SEO_DATA = {
 
 export const getSeoData = (pageName) => {
   return SEO_DATA[pageName] || {
-    title: "Enterprise Security Platform | GlyphLock LLC",
-    description: "GlyphLock LLC delivers enterprise-grade quantum-resistant cybersecurity with AI-powered threat detection, visual cryptography, and structured compliance readiness.",
-    keywords: ["quantum-resistant encryption", "AI cybersecurity", "enterprise security platform", "GlyphLock Security"],
-    h1: "GlyphLock Security Platform",
+    title: "GlyphLock | Custom Software & Operations Systems",
+    description: "GlyphLock LLC builds custom software, NUPS venue operations, QR verification, AI-assisted workflows, image tools, governance tooling, and systems integrations.",
+    keywords: ["GlyphLock", "custom software", "NUPS", "QR verification", "AI workflows", "systems integration"],
+    h1: "GlyphLock Platform",
     url: "/",
     ogTitle: "GlyphLock LLC",
     ogDescription: "Enterprise-grade quantum-resistant cybersecurity architecture.",
