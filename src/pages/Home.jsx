@@ -286,12 +286,13 @@ function PlatformUniverse() {
       <div className="absolute right-[4%] top-[6%] h-80 w-80 rounded-full bg-violet-600/[.12] blur-[120px] pointer-events-none" />
       <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-7 mb-12">
         <div>
-          <div className="font-mono text-violet-300 text-[10px] md:text-xs tracking-[.28em] mb-4">// GLYPHLOCK PLATFORM UNIVERSE</div>
+          <div className="font-mono text-violet-300 text-[10px] md:text-xs tracking-[.28em] mb-4">// CANONICAL GLYPHLOCK SYSTEM MAP</div>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-[-.045em] leading-[.9]">
-            ONE ECOSYSTEM.
+            CREATE IT. OPERATE IT.
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-fuchsia-400 to-cyan-300">MULTIPLE ENGINES.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-fuchsia-400 to-cyan-300">PROVE IT. PROTECT IT. GOVERN IT.</span>
           </h2>
+          <p className="mt-5 max-w-3xl text-base md:text-lg text-slate-300 leading-relaxed">Every module has a job, a layer, a maturity signal, and evidence. The system becomes powerful when those modules exchange trusted records instead of operating as isolated tools.</p>
         </div>
         <Link
           to={createPageUrl('NUPSLanding')}
@@ -315,7 +316,7 @@ function PlatformUniverse() {
             >
               <Link
                 to={createPageUrl(module.link)}
-                className="group relative block min-h-[285px] overflow-hidden rounded-[24px] border border-white/10 bg-[#040815]/[.52] backdrop-blur-2xl p-6 transition-all duration-300 hover:border-white/25"
+                className="group relative block min-h-[390px] overflow-hidden rounded-[24px] border border-white/10 bg-[#040815]/[.52] backdrop-blur-2xl p-6 transition-all duration-300 hover:border-white/25"
                 style={{ boxShadow: `0 0 28px ${module.accent}22, inset 0 0 60px ${module.accent}0d` }}
               >
                 <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full blur-[65px] opacity-20 transition-all duration-300 group-hover:opacity-40 group-hover:scale-125" style={{ background: module.accent }} />
@@ -421,9 +422,9 @@ export default function Home() {
   return (
     <>
       <SEOHead
-        title="GlyphLock — Custom Software, AI & Operations Systems"
-        description="GlyphLock designs, builds, integrates, and operates custom software, AI-assisted workflows, websites, apps, and business systems. Explore NUPS and GlyphLock's working platform modules."
-        keywords="GlyphLock, custom software, NUPS, software development, AI workflows, integrations, POS, QR verification"
+        title="GlyphLock — Build. Verify. Operate."
+        description="GlyphLock is an infrastructure platform for creating, operating, verifying, protecting, governing, and connecting digital and real-world systems. Explore NUPS, QR Studio, GlyphBot, Image Lab, Financial, Security Operations, Governance, and creator tools."
+        keywords="GlyphLock, NUPS, QR Studio, GlyphBot, Image Lab, DJ Pro Mixer, custom software, AI workflows, venue operations, verification infrastructure, systems integration"
         url="/"
       />
 
