@@ -101,33 +101,70 @@ export default function ManagerConsole() {
 
   // ── Live data feeds (manager-relevant only) ────────────────────────
   const { data: staffShifts = [] } = useQuery({
-    queryKey: ["mgr-staff-shifts"],
-    queryFn: () => base44.entities.StaffShift.list("-check_in_time", 100),
+    queryKey: ["mgr-staff-shifts", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.StaffShift.list("-check_in_time", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     refetchInterval: 30000,
   });
   const { data: entShifts = [] } = useQuery({
-    queryKey: ["mgr-ent-shifts"],
-    queryFn: () => base44.entities.EntertainerShift.list("-check_in_time", 100),
+    queryKey: ["mgr-ent-shifts", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.EntertainerShift.list("-check_in_time", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     refetchInterval: 30000,
   });
   const { data: txns = [] } = useQuery({
-    queryKey: ["mgr-pos-today"],
-    queryFn: () => base44.entities.POSTransaction.list("-created_date", 500),
+    queryKey: ["mgr-pos-today", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.POSTransaction.list("-created_date", 2000);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     refetchInterval: 30000,
   });
   // Sealed VIP Show contracts — THE authoritative contract record.
   // Legacy VenueContract quick-create is retired from this console.
   const { data: contracts = [] } = useQuery({
-    queryKey: ["mgr-sealed-contracts"],
-    queryFn: () => base44.entities.VIPShowContract.list("-executed_at", 200),
+    queryKey: ["mgr-sealed-contracts", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.VIPShowContract.list("-executed_at", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
   });
   // Tonight's POS batch — opened HERE (manager-only), then confirmed at the
   // Front Door register before the first transaction of the shift.
   const { data: openBatches = [] } = useQuery({
-    queryKey: ["active-pos-batch"],
+    queryKey: ["active-pos-batch", venueId, ...modeQueryKey],
     queryFn: async () => {
-      const all = await base44.entities.POSBatch.list("-created_date", 5);
-      return all.filter((b) => (b.status || "open").toLowerCase() === "open");
+      const rows = await base44.entities.POSBatch.filter({ status: "open" }, "-created_date", 100);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
     },
     refetchInterval: 30000,
   });
