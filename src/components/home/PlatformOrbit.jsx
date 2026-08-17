@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { QrCode, Bot, Building2, Image, DollarSign, Radio, ShieldCheck } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import CoreCloudOrb from '@/components/home/CoreCloudOrb';
 
 const LOGO = 'https://media.base44.com/images/public/697a087fb354faebb72df54b/9f98e49a1_c867401ee_GLLogo.png';
 
@@ -28,29 +29,8 @@ export default function PlatformOrbit() {
       className="gl-orbit relative hidden lg:block h-[560px] w-full max-w-[560px] justify-self-end"
       aria-label="GlyphLock platform orbit"
     >
-      {/* Deep field glow */}
-      <div className="absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,.10),rgba(124,58,237,.08)_55%,transparent_72%)] blur-[2px]" />
-
-      {/* Orbit rings */}
-      <div className="absolute left-1/2 top-1/2 h-[392px] w-[392px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/[.18]" />
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-        className="absolute left-1/2 top-1/2 h-[392px] w-[392px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-violet-300/25"
-      />
-      <motion.div
-        animate={{ rotate: -360 }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-        className="absolute left-1/2 top-1/2 h-[268px] w-[268px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-cyan-300/[.28]"
-      />
-
-      {/* Sweeping radar arc */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
-        className="absolute left-1/2 top-1/2 h-[392px] w-[392px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{ background: 'conic-gradient(from 0deg, rgba(34,211,238,.20), transparent 22%, transparent 100%)', maskImage: 'radial-gradient(circle, transparent 44%, black 46%, black 50%, transparent 52%)' }}
-      />
+      {/* Cloud orb aura around the core */}
+      <CoreCloudOrb />
 
       {/* Core */}
       <div className="absolute left-1/2 top-1/2 z-20 h-0 w-0">
