@@ -110,6 +110,33 @@
       "default": false,
       "description": "When true, receipts print a Service Fee line at service_fee_pct."
     },
+    "payment_terminal_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only when a physical/payment-provider terminal workflow has been configured and verified."
+    },
+    "gift_card_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Shows the Gift Card tender in LIVE mode when the venue has a supported balance/authorization workflow."
+    },
+    "room_tab_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Shows Room Tab tender in LIVE mode when the venue has a supported tab workflow."
+    },
+    "receipt_auto_prompt": {
+      "type": "boolean",
+      "default": true,
+      "description": "Open the receipt confirmation after a completed POS transaction."
+    },
+    "receipt_print_copies": {
+      "type": "number",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 3,
+      "description": "Default receipt-copy count presented to the operator."
+    },
     "receipt_legal_name": {
       "type": "string",
       "default": "",
