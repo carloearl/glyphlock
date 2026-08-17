@@ -9,7 +9,6 @@ import { rebindIdentity, isIdentityCritical } from './identityRebind';
 import { getActiveMode } from './modeResolver';
 import { stampOperationalRecord, getOperatingMode } from './operatingMode';
 
-import { getNupsEnvironment } from '@/lib/nups/operatingEnvironment';
 import { saveLastReceipt } from '@/lib/nups/receiptService';
 const VALID_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
 
@@ -720,78 +719,96 @@ function describeWriteEntityCall(args) {
     : (second && typeof second === 'object')
       ? second
       : objectCall?.data || objectCall?.payload || {};
-  return { entityName: String(entityName || ''), operation: String(operation || ''), payload: payload || {} };
+  return {
+    entityName: String(entityName || ''),
+    operation: String(operation || ''),
+    payload: payload || {},
+    venueId: objectCall?.venue_id || payload?.venue_id || null,
+  };
 }
 
-function receiptFromWrite(entityName, payload, result) {
+function dollarsToCents(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? Math.round(amount * 100) : 0;
+}
+
+function centsFromRecord(source, centsKeys, dollarKeys) {
+  for (const key of centsKeys) {
+    const value = Number(source?.[key]);
+    if (Number.isFinite(value)) return Math.round(value);
+  }
+  for (const key of dollarKeys) {
+    const value = Number(source?.[key]);
+    if (Number.isFinite(value)) return dollarsToCents(value);
+  }
+  return 0;
+}
+
+function receiptFromWrite(entityName, payload, result, venueId) {
   const normalized = String(entityName || '').toLowerCase();
   if (!/(postransaction|paymentrecord|receipt|glyphbuckssale|glyphbuckstransaction)/.test(normalized)) return null;
-  const record = result?.record || result?.data || result?.entity || result || {};
+  if (!result?.ok) return null;
+
+  const record = result?.value || result?.record || result?.data || result?.entity || {};
   const source = record && typeof record === 'object' ? { ...payload, ...record } : payload;
-  const totalCents = Number(source.total_cents ?? source.amount_cents ?? source.total_amount_cents ?? source.total_sales_cents ?? 0) || 0;
-  const subtotalCents = Number(source.subtotal_cents ?? source.net_cents ?? totalCents) || totalCents;
+  const totalCents = centsFromRecord(
+    source,
+    ['total_cents', 'amount_cents', 'total_amount_cents', 'total_sales_cents', 'grand_total_cents'],
+    ['total', 'amount', 'total_amount', 'total_sales', 'grand_total'],
+  );
+  const subtotalCents = centsFromRecord(
+    source,
+    ['subtotal_cents', 'net_cents'],
+    ['subtotal', 'net'],
+  ) || totalCents;
+  const taxCents = centsFromRecord(source, ['tax_cents'], ['tax']);
+  const feesCents = centsFromRecord(source, ['fee_cents', 'fees_cents'], ['fee', 'fees', 'processing_fee', 'service_fee']);
   const label = source.item_name || source.description || source.transaction_type || source.category || 'NUPS transaction';
+  const environment = getOperatingMode(result?.mode || source.mode || 'REAL', venueId || source.venue_id);
+
   return {
     id: source.id || source.transaction_id,
     transaction_id: source.id || source.transaction_id,
-    receipt_number: source.receipt_number || source.receipt_id || source.transaction_number || `NUPS-${Date.now()}`,
+    receipt_number: source.receipt_number || source.receipt_id || source.transaction_number || source.order_number || `NUPS-${Date.now()}`,
     venue_name: source.venue_name || 'NUPS Venue',
-    operator_name: source.operator_name || source.cashier_name || source.created_by || '',
+    operator_name: source.operator_name || source.cashier_name || source.cashier || source.created_by || '',
     created_at: source.created_at || source.created_date || new Date().toISOString(),
     payment_method: source.payment_method || source.tender_type || '',
     subtotal_cents: subtotalCents,
-    tax_cents: Number(source.tax_cents || 0) || 0,
-    fees_cents: Number(source.fee_cents || source.fees_cents || 0) || 0,
+    tax_cents: taxCents,
+    fees_cents: feesCents,
     total_cents: totalCents,
     lines: Array.isArray(source.lines) && source.lines.length
       ? source.lines
-      : [{ label, quantity: Number(source.quantity || 1) || 1, unit_price_cents: Number(source.unit_price_cents || totalCents) || totalCents, total_cents: totalCents }],
-    environment: getNupsEnvironment(),
-    metadata: { entity_name: entityName },
+      : [{
+          label,
+          quantity: Number(source.quantity || 1) || 1,
+          unit_price_cents: centsFromRecord(source, ['unit_price_cents'], ['unit_price', 'price']) || totalCents,
+          total_cents: totalCents,
+        }],
+    environment,
+    metadata: { entity_name: entityName, ledger_mode: result?.mode || source.mode || null },
   };
 }
 
 /**
- * Environment-aware public gateway.
- *
- * TRAINING is defense-in-depth blocked here even though the UI routes trainees
- * into the browser-only Training Center. Existing REAL/DEMO enforcement remains
- * inside writeEntityInternal, preserving established NUPS financial controls.
+ * Public gateway wrapper. The existing mode resolver and stampOperationalRecord
+ * remain the single source of truth for LIVE, TRAINING, DEMO and SANDBOX data.
+ * The wrapper only captures a printable receipt after a successful write.
  */
 export async function writeEntity(...args) {
-  const environment = getNupsEnvironment();
-  if (environment === 'TRAINING') {
-    const error = new Error('NUPS training mode blocks database writes. Use the Training Center practice workflows instead.');
-    error.code = 'NUPS_TRAINING_WRITE_BLOCKED';
-    error.environment = environment;
-    throw error;
-  }
-
   const call = describeWriteEntityCall(args);
-  const explicitMode = String(call.payload?.mode || call.payload?.environment || call.payload?._nups_environment || '').toUpperCase();
-  if (environment === 'DEMO' && ['REAL', 'LIVE', 'PRODUCTION'].includes(explicitMode)) {
-    const error = new Error('NUPS demo mode refused a payload explicitly marked as live. Switch environments or correct the record scope.');
-    error.code = 'NUPS_DEMO_LIVE_SCOPE_CONFLICT';
-    throw error;
-  }
-  if (environment === 'LIVE' && ['DEMO', 'TRAINING', 'SANDBOX'].includes(explicitMode)) {
-    const error = new Error('NUPS live mode refused a demo/training payload. Keep non-live records out of the production data scope.');
-    error.code = 'NUPS_LIVE_NONLIVE_SCOPE_CONFLICT';
-    throw error;
-  }
-
   const result = await writeEntityInternal(...args);
 
   try {
     if (/create|post|complete/i.test(call.operation)) {
-      const receipt = receiptFromWrite(call.entityName, call.payload, result);
+      const receipt = receiptFromWrite(call.entityName, call.payload, result, call.venueId);
       if (receipt) saveLastReceipt(receipt);
     }
   } catch (receiptError) {
-    // A printer/receipt-cache failure must never roll back a successful ledger write.
+    // Receipt caching is non-blocking: a successful ledger write stays successful.
     console.warn('[NUPS receipt capture]', receiptError);
   }
 
   return result;
 }
-
