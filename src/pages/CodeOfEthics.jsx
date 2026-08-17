@@ -80,7 +80,7 @@ export default function CodeOfEthics() {
             GlyphLock LLC ("GlyphLock") is committed to earning trust through lawful conduct, accurate
             records, responsible technology practices, and fair dealing. This Policy establishes
             minimum standards for ethical conduct and anti-corruption compliance across GlyphLock's
-            business, including the development and operation of NUPS (Nexus Unified Portal System),
+            business, including the development and operation of NUPS (Nexus Unified POS System),
             partner integrations, customer relationships, procurement, sales, and marketplace
             activities.
           </p>
