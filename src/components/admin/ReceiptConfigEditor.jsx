@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Save, Lock, Eye, Receipt } from "lucide-react";
+import { Save, Lock, Eye, Receipt, CreditCard, Gift, Hotel, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { invalidateRateCache, ensureVenueRateConfig } from "@/lib/nups/venueRateConfig";
 
@@ -180,6 +180,82 @@ export default function ReceiptConfigEditor({ venueId, user }) {
         </CardContent>
       </Card>
 
+      {/* Live tender and print controls */}
+      <Card className="bg-slate-900 border-slate-800">
+        <CardContent className="p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-cyan-400" />
+            <div>
+              <div className="text-sm font-bold text-white">Live Tender & Print Controls</div>
+              <div className="text-[10px] text-slate-500">Disabled workflows stay hidden in LIVE mode but remain available for TRAINING.</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {[
+              {
+                key: "payment_terminal_enabled",
+                label: "Payment terminal configured",
+                detail: "Operators may record an approval returned by the physical terminal. NUPS never fabricates live authorization codes.",
+                icon: CreditCard,
+              },
+              {
+                key: "gift_card_enabled",
+                label: "Gift card tender enabled",
+                detail: "Show Gift Card in LIVE only after a supported balance and authorization workflow exists.",
+                icon: Gift,
+              },
+              {
+                key: "room_tab_enabled",
+                label: "Room / VIP tab enabled",
+                detail: "Show Room Tab in LIVE only after the venue has a supported tab ledger and reference workflow.",
+                icon: Hotel,
+              },
+              {
+                key: "receipt_auto_prompt",
+                label: "Prompt for receipt after sale",
+                detail: "Open the receipt confirmation immediately after a successful transaction.",
+                icon: Printer,
+              },
+            ].map(({ key, label, detail, icon: Icon }) => (
+              <div key={key} className="rounded-xl border border-white/[.07] bg-black/20 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-2.5">
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
+                    <div>
+                      <Label className="text-xs font-bold text-slate-200">{label}</Label>
+                      <p className="mt-1 text-[10px] leading-relaxed text-slate-500">{detail}</p>
+                    </div>
+                  </div>
+                  <Switch
+                    disabled={readOnly}
+                    checked={!!draft[key]}
+                    onCheckedChange={(value) => setDraft({ ...draft, [key]: value })}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="max-w-xs">
+            <Label className="text-xs text-slate-400">Default receipt copies</Label>
+            <Input
+              type="number"
+              min="1"
+              max="3"
+              step="1"
+              disabled={readOnly}
+              value={draft.receipt_print_copies}
+              onChange={(event) => setDraft({
+                ...draft,
+                receipt_print_copies: Math.max(1, Math.min(3, Number(event.target.value) || 1)),
+              })}
+              className="mt-1 bg-black/40 border-slate-700 text-white"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Header + footer text */}
       <Card className="bg-slate-900 border-slate-800">
         <CardContent className="p-5 space-y-4">
@@ -223,16 +299,15 @@ export default function ReceiptConfigEditor({ venueId, user }) {
         </CardContent>
       </Card>
 
-      {/* Blockchain / tamper-evident notice */}
+      {/* Receipt fingerprint notice */}
       <Card className="bg-slate-900 border-emerald-500/20">
         <CardContent className="p-5">
           <div className="flex items-start gap-3">
             <Lock className="w-4 h-4 text-emerald-400 mt-0.5" />
             <div className="text-xs text-slate-300 space-y-1">
-              <div className="font-bold text-emerald-300">Blockchain Hash · Always On</div>
+              <div className="font-bold text-emerald-300">SHA-256 Receipt Fingerprint · Always On</div>
               <div>
-                Every printed receipt carries a SHA-256 fingerprint of the transaction (id, totals, items, timestamp).
-                This cannot be disabled — it's the tamper-evidence anchor for downstream audits.
+                Every completed transaction can carry a deterministic SHA-256 receipt fingerprint covering its id, totals, items, and timestamp. It supports tamper checks against the stored ledger; it is not represented as a blockchain transaction or third-party notarization.
               </div>
             </div>
           </div>
