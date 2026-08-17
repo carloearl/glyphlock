@@ -256,7 +256,31 @@ export default function ReceiptPrinter({
       </html>
     `;
 
-    printHtml(receiptHtml, { title: `Receipt - ${transaction.transaction_id}` });
+    try {
+      const result = await printHtml(receiptHtml, { title: `Receipt - ${transaction.transaction_id || 'N/A'}` });
+      const printedAt = result?.invokedAt || new Date().toISOString();
+      setLastPrintAt(printedAt);
+      toast.success('Print dialog opened');
+      if (isTraining) markTrainingStep(transaction?.venue_id || activeVenue?.id, 'receipt-printed');
+      logActivity({
+        action_type: 'EXPORT',
+        entity_affected: `POSTransaction:${transaction.id || transaction.transaction_id || 'unknown'}`,
+        venue_id: transaction?.venue_id || activeVenue?.id || null,
+        after_value: {
+          document_type: 'receipt',
+          transaction_id: transaction.transaction_id || null,
+          print_method: result?.method || 'iframe',
+          dialog_opened: result?.dialogOpened === true,
+          operating_mode: receiptMode,
+        },
+        notes: 'receipt_print_dialog_opened',
+      }).catch(() => null);
+    } catch (error) {
+      console.error('Receipt print failed:', error);
+      toast.error(`Receipt print failed: ${error?.message || 'unknown error'}`);
+    } finally {
+      setPrinting(false);
+    }
   };
 
   if (!transaction) {
