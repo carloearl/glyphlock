@@ -53,20 +53,22 @@ export default function PlatformOrbit() {
       />
 
       {/* Core */}
-      <motion.div
-        animate={{ scale: [1, 1.04, 1] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
-      >
-        <div className="absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/[.16] blur-[70px]" />
-        <Link
-          to={createPageUrl('NUPSLanding')}
-          className="group relative flex h-40 w-40 flex-col items-center justify-center rounded-full border border-cyan-100/50 bg-[#020713]/[.72] backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,.32),0_0_130px_rgba(124,58,237,.24),inset_0_0_50px_rgba(59,130,246,.14)] transition-all duration-300 hover:scale-[1.05] hover:border-cyan-100/90 hover:shadow-[0_0_80px_rgba(34,211,238,.55),0_0_170px_rgba(124,58,237,.35)]"
+      <div className="absolute left-1/2 top-1/2 z-20 h-0 w-0">
+        <motion.div
+          animate={{ scale: [1, 1.04, 1] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex h-0 w-0 items-center justify-center"
         >
-          <img src={LOGO} alt="GlyphLock core" className="h-24 w-24 object-contain drop-shadow-[0_0_22px_rgba(34,211,238,.55)]" loading="eager" decoding="async" />
-          <span className="mt-0.5 font-mono text-[8px] tracking-[.24em] text-cyan-200/80 group-hover:text-cyan-100">ENTER CORE</span>
-        </Link>
-      </motion.div>
+          <div className="absolute h-56 w-56 flex-shrink-0 rounded-full bg-cyan-400/[.16] blur-[70px]" />
+          <Link
+            to={createPageUrl('NUPSLanding')}
+            className="group relative flex h-40 w-40 flex-shrink-0 flex-col items-center justify-center rounded-full border border-cyan-100/50 bg-[#020713]/[.72] backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,.32),0_0_130px_rgba(124,58,237,.24),inset_0_0_50px_rgba(59,130,246,.14)] transition-all duration-300 hover:scale-[1.05] hover:border-cyan-100/90 hover:shadow-[0_0_80px_rgba(34,211,238,.55),0_0_170px_rgba(124,58,237,.35)]"
+          >
+            <img src={LOGO} alt="GlyphLock core" className="h-24 w-24 object-contain drop-shadow-[0_0_22px_rgba(34,211,238,.55)]" loading="eager" decoding="async" />
+            <span className="mt-0.5 font-mono text-[8px] tracking-[.24em] text-cyan-200/80 group-hover:text-cyan-100">ENTER CORE</span>
+          </Link>
+        </motion.div>
+      </div>
 
       {/* Orbiting module nodes */}
       <motion.div
@@ -86,11 +88,11 @@ export default function PlatformOrbit() {
               <motion.div
                 animate={{ rotate: [-angle, -angle - 360] }}
                 transition={{ duration: ORBIT_SECONDS, repeat: Infinity, ease: 'linear' }}
-                className="absolute left-0 top-0"
+                className="absolute left-0 top-0 flex h-0 w-0 items-center justify-center"
               >
                 <Link
                   to={createPageUrl(node.link)}
-                  className="group flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 whitespace-nowrap rounded-full border bg-[#020713]/[.82] px-3 py-2 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.09]"
+                  className="group flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full border bg-[#020713]/[.82] px-3 py-2 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.09]"
                   style={{ borderColor: `${node.accent}66`, boxShadow: `0 0 22px ${node.accent}28, inset 0 0 18px ${node.accent}0f` }}
                 >
                   <span className="flex h-7 w-7 items-center justify-center rounded-full border bg-black/40" style={{ borderColor: `${node.accent}55` }}>
