@@ -263,7 +263,7 @@ export default function SEOHead({
         },
         {
           "@type": "ContactPoint",
-          "email": "carloearl@gmail.com",
+          "email": "carloearl@glyphlock.com",
           "contactType": "technical support"
         }
       ],

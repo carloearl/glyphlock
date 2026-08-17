@@ -54,7 +54,7 @@ export default function StructuredDataOrg() {
         },
         {
           "@type": "ContactPoint",
-          "email": "carloearl@gmail.com",
+          "email": "carloearl@glyphlock.com",
           "contactType": "technical support"
         }
       ],

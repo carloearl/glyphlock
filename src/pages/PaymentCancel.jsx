@@ -99,7 +99,7 @@ export default function PaymentCancel() {
             transition={{ delay: 0.9 }}
             className="text-center text-gray-500 text-xs mt-6"
           >
-            Questions? Contact support@glyphlock.io
+            Questions? Contact carloearl@glyphlock.com
           </motion.p>
         </motion.div>
       </div>

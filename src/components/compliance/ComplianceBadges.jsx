@@ -104,7 +104,7 @@ export default function ComplianceBadges({ showVerificationWarning = true }) {
             These labels are framework references only — not formal third-party certification, regulatory approval, or a legal compliance determination.
             Independent attestation will be identified by assessor, scope, period, and supporting report when available.
             For verification inquiries, contact{" "}
-            <a href="mailto:hello@glyphlock.io" className="text-blue-400 hover:underline">hello@glyphlock.io</a>.
+            <a href="mailto:carloearl@glyphlock.com" className="text-blue-400 hover:underline">carloearl@glyphlock.com</a>.
           </p>
         </div>
       </div>

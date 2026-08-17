@@ -61,7 +61,7 @@ export default function ErrorRecoveryPanel({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => window.location.href = 'mailto:support@glyphlock.com?subject=NUPS Error ' + errorId}
+                onClick={() => window.location.href = 'mailto:carloearl@glyphlock.com?subject=NUPS Error ' + errorId}
                 className={`border-${colorScheme}-500/40 text-${colorScheme}-400`}
               >
                 <Mail className="w-4 h-4 mr-2" />

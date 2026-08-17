@@ -211,7 +211,7 @@ export default function AccessibilityPage() {
               Found a barrier? We take accessibility bugs as seriously as security vulnerabilities. Report issues and we'll fix them within 48 hours.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <a href="mailto:support@glyphlock.io?subject=Accessibility%20Issue" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-colors">
+              <a href="mailto:carloearl@glyphlock.com?subject=Accessibility%20Issue" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition-colors">
                 <Mail className="w-4 h-4" /> Email Accessibility Team
               </a>
               <a href="tel:+14808865588" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 font-bold transition-colors">

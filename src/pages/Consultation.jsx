@@ -81,7 +81,7 @@ export default function Consultation() {
         <ImportantNotice />
         <VerificationIntakeForm />
         <div className="text-center pt-3">
-          <a href="mailto:support@glyphlock.io" className="inline-flex items-center gap-2 text-sm font-black text-cyan-200 transition-colors hover:text-white">QUESTIONS? CONTACT GLYPHLOCK <ArrowRight className="h-4 w-4" /></a>
+          <a href="mailto:carloearl@glyphlock.com" className="inline-flex items-center gap-2 text-sm font-black text-cyan-200 transition-colors hover:text-white">QUESTIONS? CONTACT GLYPHLOCK <ArrowRight className="h-4 w-4" /></a>
         </div>
       </section>
     </main>

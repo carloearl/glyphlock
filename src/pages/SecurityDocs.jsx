@@ -80,7 +80,7 @@ export default function SecurityDocs() {
                 Found a security vulnerability? We take security seriously and appreciate responsible disclosure. 
                 Our bounty program rewards valid findings.
               </p>
-              <a href="mailto:security@glyphlock.com" className="inline-flex items-center gap-2 text-[#00E4FF] hover:text-white font-bold uppercase tracking-wide transition-colors border-b border-[#00E4FF] pb-1">
+              <a href="mailto:carloearl@glyphlock.com" className="inline-flex items-center gap-2 text-[#00E4FF] hover:text-white font-bold uppercase tracking-wide transition-colors border-b border-[#00E4FF] pb-1">
                 Report Vulnerability <Shield className="w-4 h-4" />
               </a>
             </div>

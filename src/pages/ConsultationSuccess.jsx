@@ -130,7 +130,7 @@ export default function ConsultationSuccess() {
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-blue-400" />
                   <div>
-                    <span className="font-semibold">Email:</span> contact@glyphlock.com
+                    <span className="font-semibold">Email:</span> carloearl@glyphlock.com
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
