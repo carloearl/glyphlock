@@ -42,7 +42,7 @@ const platformModules = [
   {
     icon: Building2,
     title: 'NUPS',
-    status: 'FLAGSHIP · LIVE',
+    status: 'FLAGSHIP · CONTROLLED EVALUATION',
     layer: 'OPERATE',
     evidence: 'Working venue workflows, contracts, POS, reporting and integration surfaces.',
     cta: 'ENTER NUPS',
@@ -53,7 +53,7 @@ const platformModules = [
   {
     icon: QrCode,
     title: 'QR Studio',
-    status: 'CORE · LIVE',
+    status: 'CORE · IMPLEMENTED',
     layer: 'VERIFY',
     evidence: 'Generator, payload, scan, signing and verification workflows available in-product.',
     cta: 'CREATE A GLYPH',
@@ -64,7 +64,7 @@ const platformModules = [
   {
     icon: ShieldCheck,
     title: 'Governance Hub',
-    status: 'CORE · LIVE',
+    status: 'CORE · IMPLEMENTED',
     layer: 'GOVERN',
     evidence: 'Published framework, review methodology, documentation and public-claims boundaries.',
     cta: 'EXPLORE GOVERNANCE',
@@ -75,7 +75,7 @@ const platformModules = [
   {
     icon: Bot,
     title: 'GlyphBot',
-    status: 'INTELLIGENCE · LIVE',
+    status: 'INTELLIGENCE · IMPLEMENTED',
     layer: 'INTELLIGENCE',
     evidence: 'Interactive assistant plus research, code-analysis and site-audit workflows.',
     cta: 'ASK GLYPHBOT',
@@ -86,7 +86,7 @@ const platformModules = [
   {
     icon: Image,
     title: 'Image Lab',
-    status: 'CREATIVE · LIVE',
+    status: 'CREATIVE · IMPLEMENTED',
     layer: 'CREATE',
     evidence: 'Image generation, analysis and interactive image tooling available in the platform.',
     cta: 'OPEN IMAGE LAB',
@@ -97,7 +97,7 @@ const platformModules = [
   {
     icon: DollarSign,
     title: 'GlyphLock Financial',
-    status: 'OPERATIONS · LIVE',
+    status: 'OPERATIONS · IMPLEMENTED',
     layer: 'OPERATE',
     evidence: 'Ledger, settlement, payout, reconciliation and reporting surfaces implemented.',
     cta: 'VIEW FINANCIAL',
@@ -108,7 +108,7 @@ const platformModules = [
   {
     icon: Radio,
     title: 'Security Operations',
-    status: 'PROTECT · LIVE',
+    status: 'PROTECT · IMPLEMENTED',
     layer: 'PROTECT',
     evidence: 'Access, activity, audit and security-operations surfaces implemented; hardening continues.',
     cta: 'INSPECT SECURITY',
@@ -119,7 +119,7 @@ const platformModules = [
   {
     icon: Music2,
     title: 'DJ Pro Mixer',
-    status: 'CREATOR · LIVE',
+    status: 'CREATOR · IMPLEMENTED',
     layer: 'CREATE',
     evidence: 'Interactive DJ/audio tooling implemented as a creator and venue-facing surface.',
     cta: 'OPEN THE MIXER',
@@ -151,7 +151,7 @@ const capabilityCards = [
   {
     icon: Gauge,
     title: 'OPERATIONS SOFTWARE',
-    text: 'POS, contracts, scheduling, payouts, roles, reporting, audit logs and live business controls.',
+    text: 'POS, contracts, scheduling, payouts, roles, reporting, audit logs and documented operational controls.',
     accent: '#d946ef',
   },
 ];
