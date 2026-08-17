@@ -29,6 +29,7 @@ import HeroSection from '@/components/home/HeroSection';
 import FlagshipNUPSShowcase from '@/components/home/FlagshipNUPSShowcase';
 import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsMarquee';
 import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
+import DreamTeamBallButton from '@/components/home/DreamTeamBallButton';
 import ServicesGrid from '@/components/home/ServicesGrid';
 import TechnologyMarquee from '@/components/TechnologyMarquee';
 import TechServicesPreview from '@/components/home/TechServicesPreview';
@@ -368,12 +369,9 @@ function AIWorkflowIntro() {
               GlyphLock assigns defined roles across research, coding, analysis, review and automation while people remain responsible for decisions, approvals and outcomes.
             </p>
           </div>
-          <Link
-            to={createPageUrl('DreamTeam')}
-            className="gl-energy-button group inline-flex items-center justify-center gap-2 rounded-xl border border-violet-300/60 bg-violet-500/20 px-6 py-4 font-black text-violet-50 shadow-[0_0_32px_rgba(139,92,246,.35)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:bg-violet-400/30 hover:shadow-[0_0_58px_rgba(139,92,246,.62)]"
-          >
-            OPEN DREAM TEAM <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          <div className="flex justify-center lg:justify-end lg:pr-6">
+            <DreamTeamBallButton />
+          </div>
         </div>
       </div>
     </section>
