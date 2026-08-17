@@ -1,124 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  Play,
-  Sparkles,
-  QrCode,
-  Bot,
-  Building2,
-  Image,
-  DollarSign,
-  Radio,
-  ShieldCheck,
-  ChevronDown,
-} from 'lucide-react';
+import { ArrowRight, Play, Sparkles, ChevronDown } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import PlatformOrbit from '@/components/home/PlatformOrbit';
 
 const ORIGINAL_VIDEO = 'https://base44.app/api/apps/6902128ac3c5c94a82446585/files/public/6902128ac3c5c94a82446585/643dc9ba3_Dec_05__2220_13s_202512052257_lc8rw.mp4';
 const HERO_VIDEO = import.meta.env.VITE_GLYPHLOCK_HERO_VIDEO_URL || ORIGINAL_VIDEO;
 const HERO_POSTER = 'https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/hero-poster.jpg';
-const LOGO = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png';
-
-const nodes = [
-  { icon: Building2, label: 'NUPS', link: 'NUPSLanding', pos: 'left-[2%] top-[9%]', accent: '#22d3ee' },
-  { icon: QrCode, label: 'QR STUDIO', link: 'Qr', pos: 'right-[1%] top-[11%]', accent: '#38bdf8' },
-  { icon: Bot, label: 'GLYPHBOT', link: 'GlyphBot', pos: 'left-[-2%] top-[43%]', accent: '#818cf8' },
-  { icon: Image, label: 'IMAGE LAB', link: 'ImageLab', pos: 'right-[-3%] top-[43%]', accent: '#d946ef' },
-  { icon: DollarSign, label: 'FINANCIAL', link: 'GlyphLockFinancial', pos: 'left-[7%] bottom-[5%]', accent: '#10b981' },
-  { icon: Radio, label: 'SECURITY', link: 'SecurityOperationsCenter', pos: 'right-[7%] bottom-[5%]', accent: '#f43f5e' },
-  { icon: ShieldCheck, label: 'GOVERNANCE', link: 'GovernanceHub', pos: 'left-1/2 -translate-x-1/2 bottom-[-3%]', accent: '#8b5cf6' },
-];
-
-function PlatformMatrix() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.88, x: 45 }}
-      animate={{ opacity: 1, scale: 1, x: 0 }}
-      transition={{ delay: 0.35, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-      className="relative hidden lg:block h-[510px] w-full max-w-[510px] justify-self-end"
-      aria-label="GlyphLock platform map"
-    >
-      <div className="absolute inset-[8%] rounded-full border border-cyan-300/20 bg-black/10 backdrop-blur-[2px] shadow-[0_0_80px_rgba(34,211,238,.10),inset_0_0_80px_rgba(124,58,237,.08)]" />
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 34, repeat: Infinity, ease: 'linear' }}
-        className="absolute inset-[14%] rounded-full border border-dashed border-violet-300/[.28]"
-      />
-      <motion.div
-        animate={{ rotate: -360 }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
-        className="absolute inset-[22%] rounded-full border border-dashed border-cyan-300/30"
-      />
-
-      <div className="absolute left-1/2 top-1/2 h-[225px] w-[225px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 blur-[60px]" />
-      <motion.div
-        animate={{ scale: [1, 1.045, 1], filter: ['drop-shadow(0 0 18px rgba(34,211,238,.45))', 'drop-shadow(0 0 42px rgba(139,92,246,.75))', 'drop-shadow(0 0 18px rgba(34,211,238,.45))'] }}
-        transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-100/[.45] bg-[#020713]/[.65] backdrop-blur-2xl shadow-[0_0_45px_rgba(34,211,238,.28),0_0_110px_rgba(124,58,237,.20),inset_0_0_45px_rgba(59,130,246,.12)]"
-      >
-        <img src={LOGO} alt="GlyphLock platform core" className="h-24 w-24 object-contain" loading="eager" decoding="async" />
-      </motion.div>
-
-      <svg className="absolute inset-0 h-full w-full opacity-55" viewBox="0 0 510 510" aria-hidden="true">
-        <defs>
-          <linearGradient id="matrixLine" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#22d3ee" stopOpacity="0.15" />
-            <stop offset="0.5" stopColor="#60a5fa" stopOpacity="0.75" />
-            <stop offset="1" stopColor="#8b5cf6" stopOpacity="0.15" />
-          </linearGradient>
-        </defs>
-        {[
-          [255, 255, 95, 80], [255, 255, 415, 85], [255, 255, 75, 250], [255, 255, 435, 250],
-          [255, 255, 125, 420], [255, 255, 385, 420], [255, 255, 255, 475],
-        ].map((line, i) => (
-          <motion.line
-            key={i}
-            x1={line[0]}
-            y1={line[1]}
-            x2={line[2]}
-            y2={line[3]}
-            stroke="url(#matrixLine)"
-            strokeWidth="1.2"
-            strokeDasharray="7 9"
-            animate={{ strokeDashoffset: [0, -32] }}
-            transition={{ duration: 2.8 + i * 0.14, repeat: Infinity, ease: 'linear' }}
-          />
-        ))}
-      </svg>
-
-      {nodes.map((node, index) => {
-        const Icon = node.icon;
-        return (
-          <motion.div
-            key={node.label}
-            initial={{ opacity: 0, scale: 0.75 }}
-            animate={{ opacity: 1, scale: 1, y: [0, index % 2 === 0 ? -5 : 5, 0] }}
-            transition={{ opacity: { delay: 0.55 + index * 0.08, duration: 0.45 }, scale: { delay: 0.55 + index * 0.08, duration: 0.45 }, y: { delay: index * 0.2, duration: 4 + index * 0.25, repeat: Infinity, ease: 'easeInOut' } }}
-            className={`absolute ${node.pos}`}
-          >
-            <Link
-              to={createPageUrl(node.link)}
-              className="group flex items-center gap-2.5 rounded-xl border bg-[#020713]/[.68] px-3.5 py-3 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04]"
-              style={{ borderColor: `${node.accent}55`, boxShadow: `0 0 22px ${node.accent}20, inset 0 0 22px ${node.accent}0d` }}
-            >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg border bg-black/25" style={{ borderColor: `${node.accent}45` }}>
-                <Icon className="h-4 w-4" style={{ color: node.accent, filter: `drop-shadow(0 0 7px ${node.accent})` }} />
-              </span>
-              <span className="font-mono text-[9px] font-bold tracking-[.14em] text-slate-200 group-hover:text-white">{node.label}</span>
-            </Link>
-          </motion.div>
-        );
-      })}
-
-      <div className="absolute left-1/2 top-[13%] -translate-x-1/2 rounded-full border border-cyan-300/20 bg-black/30 px-3 py-1.5 font-mono text-[8px] tracking-[.2em] text-cyan-200/70 backdrop-blur-xl">
-        PLATFORM MATRIX // LIVE
-      </div>
-    </motion.div>
-  );
-}
-
 export default function HeroSection() {
   const [ready, setReady] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -230,7 +119,7 @@ export default function HeroSection() {
           </motion.div>
         </div>
 
-        <PlatformMatrix />
+        <PlatformOrbit />
       </div>
 
       <a href="#flagship" aria-label="Scroll to the GlyphLock flagship platform" className="absolute bottom-5 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5 font-mono text-[8px] tracking-[.22em] text-cyan-100/[.65] transition-colors hover:text-cyan-100">
