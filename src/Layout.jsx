@@ -6,7 +6,6 @@ import NebulaLayer from "@/components/global/NebulaLayer";
 import CursorOrb from "@/components/global/CursorOrb";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import GlyphLoader from "@/components/GlyphLoader";
 import UnifiedSidebar from "@/components/global/UnifiedSidebar";
 import ThemeProvider from "@/components/ThemeProvider";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
@@ -19,7 +18,6 @@ import ScreenReaderAnnouncer from "@/components/accessibility/ScreenReaderAnnoun
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [a11yOpen, setA11yOpen] = useState(false);
   const location = useLocation();
 
@@ -34,8 +32,6 @@ export default function Layout({ children, currentPageName }) {
         }
       } catch (err) {
         console.error("Failed to get user:", err);
-      } finally {
-        setLoading(false);
       }
     })();
   }, []);
@@ -89,9 +85,6 @@ export default function Layout({ children, currentPageName }) {
 
     return () => window.removeEventListener('keydown', handleA11yKey);
   }, [location.pathname]);
-
-
-  if (loading) return <GlyphLoader text="Initializing Secure Environment..." />;
 
 
   const handleLogout = async () => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -26,18 +26,20 @@ import {
 import SEOHead from '@/components/SEOHead';
 import { createPageUrl } from '@/utils';
 import HeroSection from '@/components/home/HeroSection';
-import FlagshipNUPSShowcase from '@/components/home/FlagshipNUPSShowcase';
-import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsMarquee';
-import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
 import DreamTeamBallButton from '@/components/home/DreamTeamBallButton';
-import ServicesGrid from '@/components/home/ServicesGrid';
-import TechnologyMarquee from '@/components/TechnologyMarquee';
-import TechServicesPreview from '@/components/home/TechServicesPreview';
-import OnSiteServices from '@/components/home/OnSiteServices';
-import PlatformCapabilities from '@/components/home/PlatformCapabilities';
-import CTASection from '@/components/home/CTASection';
 import GlyphHoverEngine from '@/components/home/GlyphHoverEngine';
-import InteractiveSystemMap from '@/components/home/InteractiveSystemMap';
+import DeferredRender from '@/components/shared/DeferredRender';
+
+const FlagshipNUPSShowcase = lazy(() => import('@/components/home/FlagshipNUPSShowcase'));
+const FeaturedIntegrationsMarquee = lazy(() => import('@/components/home/FeaturedIntegrationsMarquee'));
+const HomeDreamTeamCTA = lazy(() => import('@/components/home/HomeDreamTeamCTA'));
+const ServicesGrid = lazy(() => import('@/components/home/ServicesGrid'));
+const TechnologyMarquee = lazy(() => import('@/components/TechnologyMarquee'));
+const TechServicesPreview = lazy(() => import('@/components/home/TechServicesPreview'));
+const OnSiteServices = lazy(() => import('@/components/home/OnSiteServices'));
+const PlatformCapabilities = lazy(() => import('@/components/home/PlatformCapabilities'));
+const CTASection = lazy(() => import('@/components/home/CTASection'));
+const InteractiveSystemMap = lazy(() => import('@/components/home/InteractiveSystemMap'));
 
 const platformModules = [
   {
@@ -514,46 +516,46 @@ export default function Home() {
         <CommandRail />
 
         <section id="flagship" className="gl-home-section gl-home-stage relative pt-6 md:pt-10">
-          <FlagshipNUPSShowcase />
+          <DeferredRender minHeight={720}><FlagshipNUPSShowcase /></DeferredRender>
           <BuildStageRail />
         </section>
 
         <section className="relative border-y border-white/10 bg-black/10 py-3 backdrop-blur-sm">
-          <FeaturedIntegrationsMarquee />
+          <DeferredRender minHeight={88}><FeaturedIntegrationsMarquee /></DeferredRender>
         </section>
 
-        <InteractiveSystemMap />
+        <DeferredRender minHeight={760}><InteractiveSystemMap /></DeferredRender>
         <CapabilityGrid />
         <PlatformUniverse />
 
         <AIWorkflowIntro />
         <section className="gl-home-stage relative py-8 md:py-12">
-          <HomeDreamTeamCTA />
+          <DeferredRender minHeight={520}><HomeDreamTeamCTA /></DeferredRender>
         </section>
 
         <section id="services" className="gl-home-section gl-home-stage relative py-8 md:py-14">
-          <ServicesGrid />
+          <DeferredRender minHeight={640}><ServicesGrid /></DeferredRender>
         </section>
 
         <section className="gl-home-stage relative py-4 md:py-10">
-          <PlatformCapabilities />
+          <DeferredRender minHeight={640}><PlatformCapabilities /></DeferredRender>
         </section>
 
         <section className="gl-home-stage relative py-8 md:py-12">
-          <TechServicesPreview />
+          <DeferredRender minHeight={560}><TechServicesPreview /></DeferredRender>
         </section>
 
         <section className="gl-home-stage relative py-8 md:py-12">
-          <OnSiteServices />
+          <DeferredRender minHeight={560}><OnSiteServices /></DeferredRender>
         </section>
 
         <section className="relative py-5 md:py-10">
-          <TechnologyMarquee />
+          <DeferredRender minHeight={100}><TechnologyMarquee /></DeferredRender>
         </section>
 
         <CommandCTA />
         <section className="pb-16 md:pb-24">
-          <CTASection />
+          <DeferredRender minHeight={520}><CTASection /></DeferredRender>
         </section>
 
         <a href="#top" aria-label="Back to top" className="fixed bottom-5 left-5 z-[80] hidden md:flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/30 bg-[#020713]/[.72] backdrop-blur-xl text-cyan-200 shadow-[0_0_25px_rgba(34,211,238,.18)] transition-all hover:-translate-y-1 hover:border-cyan-200/[.65] hover:shadow-[0_0_38px_rgba(34,211,238,.4)]">
