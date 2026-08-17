@@ -435,12 +435,11 @@ export default function BatchManagement({ user, onBatchClosed }) {
       if (!confirmed) return;
     }
 
-    // Section 3 — filter REAL only for financial totals
-    // F-5: Card whitelist + F-1: Tips excluded — BPAAA v3.0
+    // batchTransactions is already isolated to venue + current operating mode.
+    // Tips are excluded from drawer revenue; supported non-cash tenders are explicit.
     const BATCH_CARD_WHITELIST = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
-    const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
-    const cashTx = realTxns.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
-    const cardTx = realTxns.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+    const cashTx = batchTransactions.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
+    const cardTx = batchTransactions.filter(t => BATCH_CARD_WHITELIST.includes(t.payment_method)).reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0);
     const totalSales = cashTx + cardTx;
     const expectedCash = (activeBatch?.opening_cash || 0) + cashTx;
     const discrepancy = parsed - expectedCash;
@@ -469,7 +468,10 @@ export default function BatchManagement({ user, onBatchClosed }) {
           status: hasDiscrepancy ? 'REQUIRES_REVIEW' : 'closed',
           discrepancy,
           discrepancy_note: hasDiscrepancy ? notes : null,
-          notes
+          notes,
+          mode: modeState.ledgerMode,
+          is_demo: modeState.isNonLive,
+          training_session_id: modeState.trainingSession?.id || null,
         }
       });
       const resolvedVenueId = batchBeingClosed?.venue_id || activeVenue?.id;
@@ -488,7 +490,10 @@ export default function BatchManagement({ user, onBatchClosed }) {
           closed_at:               new Date().toISOString(),
           total_cash:              cashTx,
           total_card:              cardTx,
-          total_glyphbucks_issued: 0
+          total_glyphbucks_issued: 0,
+          mode: modeState.ledgerMode,
+          operating_mode: modeState.operatingMode,
+          training_session_id: modeState.trainingSession?.id || null,
         },
         severity: hasDiscrepancy ? 'medium' : 'low',
         status:   hasDiscrepancy ? 'alert' : 'success'
@@ -506,9 +511,8 @@ export default function BatchManagement({ user, onBatchClosed }) {
   };
 
   const BATCH_CARD_WHITELIST_DISPLAY = ['Credit Card', 'Debit Card', 'Digital Wallet', 'Gift Card', 'Tab'];
-  const realTxns = batchTransactions.filter(t => !t.mode || t.mode === 'REAL');
-  const cashTotal = realTxns.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
-  const cardTotal = realTxns.filter(t => BATCH_CARD_WHITELIST_DISPLAY.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+  const cashTotal = batchTransactions.filter(t => t.payment_method === 'Cash').reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
+  const cardTotal = batchTransactions.filter(t => BATCH_CARD_WHITELIST_DISPLAY.includes(t.payment_method)).reduce((sum, t) => sum + ((t.total || 0) - (t.tip || 0)), 0);
   const batchTotal = cashTotal + cardTotal;
 
   const expectedCashPreview = (activeBatch?.opening_cash || 0) + cashTotal;
