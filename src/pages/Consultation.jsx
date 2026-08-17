@@ -1,75 +1,89 @@
-import React, { useEffect } from "react";
-import SEOHead from "@/components/SEOHead";
-import { injectServiceSchema } from "@/components/utils/seoHelpers";
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowRight, FileSearch, ShieldCheck, Layers3, ClipboardCheck, AlertTriangle } from 'lucide-react';
+import SEOHead from '@/components/SEOHead';
+import { injectServiceSchema } from '@/components/utils/seoHelpers';
+import VerificationIntro from '@/components/verification/VerificationIntro';
+import EngagementOptions from '@/components/verification/EngagementOptions';
+import VerificationFramework from '@/components/verification/VerificationFramework';
+import VerificationDeliverables from '@/components/verification/VerificationDeliverables';
+import AlignmentTiers from '@/components/verification/AlignmentTiers';
+import ImportantNotice from '@/components/verification/ImportantNotice';
+import VerificationIntakeForm from '@/components/verification/VerificationIntakeForm';
 
-import VerificationIntro from "@/components/verification/VerificationIntro";
-import EngagementOptions from "@/components/verification/EngagementOptions";
-import VerificationFramework from "@/components/verification/VerificationFramework";
-import VerificationDeliverables from "@/components/verification/VerificationDeliverables";
-import AlignmentTiers from "@/components/verification/AlignmentTiers";
-import ImportantNotice from "@/components/verification/ImportantNotice";
-import VerificationIntakeForm from "@/components/verification/VerificationIntakeForm";
+const reviewAreas = [
+  [Layers3, 'Architecture', 'System boundaries, data flows, dependencies and operational controls.'],
+  [FileSearch, 'Evidence', 'Policies, technical documentation, screenshots, records and implementation artifacts.'],
+  [ShieldCheck, 'Governance', 'Control ownership, decision paths, documented standards and accountability.'],
+  [ClipboardCheck, 'Remediation', 'Prioritized gaps, evidence requests and an actionable improvement roadmap.'],
+];
 
 export default function Consultation() {
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('cancelled') === 'true') {
-      // User returned from cancelled payment — stay on page
-    }
-  }, []);
-
-  useEffect(() => {
     const cleanup = injectServiceSchema(
-      'Independent Protocol Verification',
-      'Structured governance and security alignment review under the Deterministic Risk Profile and Master Covenant framework. Evaluates system architecture, documentation discipline, threat exposure posture, and enforceability positioning.',
+      'GlyphLock Governance Alignment Review',
+      'A structured evidence-led review of system architecture, operational controls, documentation and governance against selected GlyphLock framework criteria. This is not regulatory certification, legal validation or an independent third-party audit.',
       '/consultation'
     );
     return cleanup;
   }, []);
 
   return (
-    <div className="min-h-screen text-white pt-14 md:pt-20 pb-12 md:pb-16" style={{ background: 'transparent' }}>
+    <main className="min-h-screen bg-transparent text-white overflow-hidden">
       <SEOHead
-        title="Independent Protocol Verification | GlyphLock Security"
-        description="Structured governance and security alignment review under the Deterministic Risk Profile and Master Covenant framework. Enterprise security platform verification for AI governance framework alignment, post-quantum readiness, and zero-trust architecture."
-        keywords="AI governance framework, enterprise security platform, post-quantum readiness, zero-trust architecture, SOC 2 aligned, NIST post-quantum standards, protocol verification, security alignment review"
+        title="Governance Alignment Review | GlyphLock"
+        description="Evidence-led review of architecture, operational controls, documentation and governance against selected GlyphLock framework criteria. Not regulatory certification, legal validation or a third-party audit."
+        keywords="governance review, security architecture review, evidence review, operational controls, remediation roadmap, GlyphLock governance"
         url="/consultation"
       />
 
-      <div className="container mx-auto px-3 sm:px-4">
-        <div className="max-w-7xl mx-auto">
-
-          {/* Hero Header — Preserved */}
-          <div className="text-center mb-16 md:mb-24">
-            <p className="text-[10px] uppercase tracking-[5px] text-amber-500/70 mb-6 font-medium">
-              GlyphLock LLC
+      <section className="relative px-5 pt-28 pb-14 md:pt-36 md:pb-20">
+        <div className="absolute left-[8%] top-[10%] h-80 w-80 rounded-full bg-cyan-500/12 blur-[120px] pointer-events-none" />
+        <div className="absolute right-[5%] top-[2%] h-96 w-96 rounded-full bg-violet-600/14 blur-[140px] pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 rounded-full border border-cyan-300/35 bg-cyan-300/[.07] px-4 py-2 font-mono text-[10px] tracking-[.22em] text-cyan-200 shadow-[0_0_28px_rgba(34,211,238,.16)]">
+            <ShieldCheck className="h-4 w-4" /> GLYPHLOCK // REVIEW ENGAGEMENT
+          </motion.div>
+          <motion.h1 initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="mt-7 max-w-6xl text-5xl md:text-7xl lg:text-8xl font-black tracking-[-.055em] leading-[.84]">
+            GOVERNANCE
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-blue-400 to-violet-400">ALIGNMENT REVIEW.</span>
+          </motion.h1>
+          <div className="mt-8 grid gap-7 lg:grid-cols-[1fr_.72fr] lg:items-end">
+            <p className="max-w-3xl text-lg md:text-xl leading-relaxed text-slate-300">
+              A structured review of architecture, operational controls, documentation and governance using selected GlyphLock framework criteria. The engagement produces findings and a remediation path—not a government approval, legal ruling, or third-party certification.
             </p>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight leading-tight px-2">
-              Independent Protocol Verification
-            </h1>
-            <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto px-2 leading-relaxed">
-              Structured governance alignment review under the Master Covenant framework.
-            </p>
-          </div>
-
-          {/* Body Sections */}
-          <VerificationIntro />
-          <EngagementOptions />
-          <VerificationFramework />
-          <VerificationDeliverables />
-          <AlignmentTiers />
-          <ImportantNotice />
-          <VerificationIntakeForm />
-
-          {/* Final CTA */}
-          <div className="text-center pb-8">
-            <p className="text-xs text-slate-400 mb-2">Questions about the verification process?</p>
-            <a href="mailto:support@glyphlock.io" className="text-slate-300 hover:text-white font-medium transition-colors text-sm">
-              support@glyphlock.io
-            </a>
+            <div className="rounded-2xl border border-amber-300/25 bg-amber-300/[.055] p-5 text-sm leading-relaxed text-amber-100/80 backdrop-blur-xl">
+              <div className="flex gap-3"><AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-300" /><span><strong className="text-amber-200">Scope matters.</strong> “Independent Protocol Verification” is no longer used as the primary public label because GlyphLock performs the review under its own framework. Any truly independent assessment must identify the outside assessor.</span></div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <section className="max-w-7xl mx-auto px-5 pb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {reviewAreas.map(([Icon, title, text], index) => (
+            <motion.div key={title} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.06 }} className="rounded-2xl border border-cyan-300/15 bg-[#040815]/55 p-5 backdrop-blur-2xl shadow-[0_0_26px_rgba(34,211,238,.08)]">
+              <Icon className="h-6 w-6 text-cyan-300 drop-shadow-[0_0_9px_rgba(34,211,238,.7)]" />
+              <h2 className="mt-5 font-black text-white">{title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">{text}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      <section className="max-w-7xl mx-auto px-5 pb-24 space-y-10">
+        <VerificationIntro />
+        <EngagementOptions />
+        <VerificationFramework />
+        <VerificationDeliverables />
+        <AlignmentTiers />
+        <ImportantNotice />
+        <VerificationIntakeForm />
+        <div className="text-center pt-3">
+          <a href="mailto:support@glyphlock.io" className="inline-flex items-center gap-2 text-sm font-black text-cyan-200 transition-colors hover:text-white">QUESTIONS? CONTACT GLYPHLOCK <ArrowRight className="h-4 w-4" /></a>
+        </div>
+      </section>
+    </main>
   );
 }
