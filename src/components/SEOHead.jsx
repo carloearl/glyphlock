@@ -57,7 +57,7 @@ export default function SEOHead({
       favicon.setAttribute('rel', 'icon');
       document.head.appendChild(favicon);
     }
-    favicon.setAttribute('href', 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png');
+    favicon.setAttribute('href', 'https://media.base44.com/images/public/697a087fb354faebb72df54b/9f98e49a1_c867401ee_GLLogo.png');
     favicon.setAttribute('type', 'image/png');
 
     // Apple touch icon
@@ -67,7 +67,7 @@ export default function SEOHead({
       appleTouchIcon.setAttribute('rel', 'apple-touch-icon');
       document.head.appendChild(appleTouchIcon);
     }
-    appleTouchIcon.setAttribute('href', 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/08025b614_gl-logo.png');
+    appleTouchIcon.setAttribute('href', 'https://media.base44.com/images/public/697a087fb354faebb72df54b/9f98e49a1_c867401ee_GLLogo.png');
 
     // Manifest
     let manifest = document.querySelector('link[rel="manifest"]');

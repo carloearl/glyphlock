@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { QrCode, Bot, Building2, Image, DollarSign, Radio, ShieldCheck } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
-const LOGO = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png';
+const LOGO = 'https://media.base44.com/images/public/697a087fb354faebb72df54b/9f98e49a1_c867401ee_GLLogo.png';
 
 const ORBIT_SECONDS = 54;
 const RADIUS = 196;
