@@ -43,6 +43,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useAdminOverride } from "@/lib/nups/adminView";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { scopeRowsToOperatingMode } from "@/lib/nups/operatingMode";
 
 // One home per feature (Section 1 audit, 2026-07-21): the Register console
 // is the TILL only. Drivers, Receipts, Talent Check-In and Staff Clock each
@@ -109,6 +112,9 @@ function RegisterConsoleInner() {
   const [operator, setOperator] = useState(null);
   const [showSeedDialog, setShowSeedDialog] = useState(false);
   const adminOverride = useAdminOverride();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeState = useNUPSOperatingMode(venueId);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -157,11 +163,17 @@ function RegisterConsoleInner() {
     }
   }, [user, operator, adminOverride]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
   const { data: batches = [] } = useQuery({
-    queryKey: ["active-pos-batch"],
+    queryKey: ["active-pos-batch", venueId, ...modeQueryKey],
     queryFn: async () => {
-      const all = await base44.entities.POSBatch.list("-created_date", 5);
-      return all.filter((b) => (b.status || "open").toLowerCase() === "open");
+      const all = await base44.entities.POSBatch.filter({ status: "open" }, "-created_date", 100);
+      return scopeRowsToOperatingMode(all, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
     },
     refetchInterval: 30000,
   });
@@ -169,8 +181,16 @@ function RegisterConsoleInner() {
 
   // Transactions feed — only fetched for the Audit tab.
   const { data: transactions = [] } = useQuery({
-    queryKey: ["pos-transactions-receipts"],
-    queryFn: () => base44.entities.POSTransaction.list("-created_date", 100),
+    queryKey: ["pos-transactions-receipts", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.POSTransaction.list("-created_date", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     enabled: activeTab === "audit",
     staleTime: 30000,
   });
@@ -178,11 +198,11 @@ function RegisterConsoleInner() {
   return (
     <NUPSAppShell
       title="Register · POS"
-      subtitle="POS Terminal · Active batch · Live ring-up"
+      subtitle={`${modeState.operatingMode} POS Terminal · ${activeVenue?.name || activeVenue?.venue_name || "Selected venue"}`}
       actions={
         <div className="flex items-center gap-2">
           <BatchStatusBadge batch={activeBatch} />
-          {(isManagerOrAdmin || ["MANAGER", "VENUE_MANAGER"].includes(opRole)) && (
+          {(isManagerOrAdmin || ["MANAGER", "VENUE_MANAGER"].includes(opRole)) && modeState.isNonLive && (
           <Button
             onClick={() => setShowSeedDialog(true)}
             size="sm"
@@ -255,7 +275,7 @@ function RegisterConsoleInner() {
               (Operator feedback 2026-07-09.) */}
           {activeTab === "register" && (
             <div className="flex flex-col gap-3 sm:gap-4">
-              <NoBatchBanner batch={activeBatch} />
+              <NoBatchBanner batch={activeBatch} operatingMode={modeState.operatingMode} onOpenManager={() => navigate('/ManagerConsole')} />
               {/* Two-step batch open: the MANAGER opens tonight's batch on the
                   Manager Console; the door operator confirms it here before
                   the first transaction. No register-side batch opening. */}
@@ -266,11 +286,11 @@ function RegisterConsoleInner() {
                 operatorId={operator?.id || user?.id}
               />
               {/* Till ONLY — guest ID intake lives on 1 · Open Night (no duplicate screens). */}
-              <POSCashRegister showDriverPanel={false} showGuestIntake={false} user={user} station="door" />
-              <RecentTransactionsStrip onViewAll={() => setActiveTab("receipts")} />
+              <POSCashRegister showDriverPanel={false} showGuestIntake={false} user={operator || user} station="door" />
+              <RecentTransactionsStrip onViewAll={() => navigate('/Receipts')} />
             </div>
           )}
-          {activeTab === "bar" && <POSBarRegister user={user} />}
+          {activeTab === "bar" && <POSBarRegister user={operator || user} />}
           {activeTab === "dj" && <UnifiedMusicConsole />}
           {/* Manager/Admin ONLY — permission-gated render, never reachable by
               door/bar/DJ staff even if tab state is forced. */}
