@@ -11,7 +11,7 @@ export default function StructuredDataOrg() {
       "legalName": "GlyphLock LLC",
       "url": "https://glyphlock.io",
       "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
-      "description": "Enterprise-grade quantum-resistant cybersecurity architecture combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant AI governance framework. Built for high-security environments and structured compliance readiness.",
+      "description": "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.",
       "foundingDate": "2025-01",
       "founders": [
         {
@@ -62,24 +62,20 @@ export default function StructuredDataOrg() {
         "https://instagram.com/glyphlock",
         "https://tiktok.com/@glyphlock"
       ],
-      "slogan": "Post-Quantum Cybersecurity Architecture for Enterprise Defense",
+      "slogan": "Build. Verify. Operate.",
       "areaServed": "Worldwide",
       "numberOfEmployees": "3",
       "knowsAbout": [
-        "Quantum-resistant encryption",
-        "Post-quantum cryptography",
-        "AI cybersecurity",
-        "Enterprise security platform",
-        "Visual cryptography",
-        "Blockchain security",
-        "AI governance framework",
-        "Zero-trust architecture",
-        "Identity verification",
-        "Fraud prevention",
-        "Threat detection AI",
-        "NIST post-quantum standards",
-        "Secure QR infrastructure",
-        "Steganography",
+        "Custom software development",
+        "NUPS venue operations",
+        "Point-of-sale workflows",
+        "QR verification",
+        "AI-assisted workflows",
+        "Image tooling",
+        "Operational reporting",
+        "Systems integration",
+        "Security operations",
+        "Governance documentation",
         "Master Covenant Framework"
       ],
       "hasOfferCatalog": {
@@ -91,7 +87,7 @@ export default function StructuredDataOrg() {
             "itemOffered": {
               "@type": "Service",
               "name": "Master Covenant Framework",
-              "description": "71-clause legal framework for AI governance and accountability"
+              "description": "71-clause internal governance and drafting framework for AI accountability concepts"
             }
           },
           {
@@ -107,7 +103,7 @@ export default function StructuredDataOrg() {
             "itemOffered": {
               "@type": "SoftwareApplication",
               "name": "QR Studio",
-              "description": "Secure QR code generation with steganography and blockchain verification"
+              "description": "QR generation, scan logging, signing options, verification, and operational workflows"
             }
           },
           {
@@ -136,7 +132,7 @@ export default function StructuredDataOrg() {
       },
       "dateCreated": "2025-07-01",
       "url": "https://glyphlock.io/master-covenant",
-      "keywords": ["AI governance", "AI binding", "exposure-based binding", "PROBE violations", "TruthStrike", "AI accountability", "71 clauses"]
+      "keywords": ["AI governance", "governance research", "contract drafting", "PROBE classifications", "TruthStrike", "AI accountability", "71 clauses"]
     };
 
     // Case Studies schema
@@ -153,7 +149,7 @@ export default function StructuredDataOrg() {
           "item": {
             "@type": "Article",
             "name": "DeepSeek Escalation GLX-TRUTHSTRIKE-1108",
-            "description": "First documented case of AI-powered real-world coercion with IC3 federal filing",
+            "description": "GlyphLock incident case study documenting reported events, archived evidence, internal PROBE classifications, and a reported IC3 complaint filing",
             "url": "https://glyphlock.io/case-study-truthstrike",
             "datePublished": "2025-06-18"
           }
