@@ -47,17 +47,12 @@ Deno.serve(async (req) => {
       results.push(item);
     };
 
-    // 1) YouTube: server API key preferred, existing Google OAuth fallback.
+    // 1) YouTube search requires a server-side API key. Do not reuse the
+    // Google Drive OAuth connector: Base44 does not allow Drive + YouTube scopes
+    // on that connection and doing so produces an invalid/insufficient-scope token.
     try {
       const apiKey = String(Deno.env.get("YOUTUBE_API_KEY") || "").trim();
-      let accessToken = "";
-      if (!apiKey) {
-        try {
-          const connection = await base44.asServiceRole.connectors.getConnection("googledrive");
-          accessToken = String(connection?.accessToken || "").trim();
-        } catch (_) {}
-      }
-      if (apiKey || accessToken) {
+      if (apiKey) {
         const params = new URLSearchParams({
           part: "snippet",
           type: "video",
@@ -69,12 +64,12 @@ Deno.serve(async (req) => {
         });
         if (apiKey) params.set("key", apiKey);
         const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`, {
-          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+          headers: undefined,
           signal: AbortSignal.timeout(8000),
         });
         const ytData = await ytRes.json().catch(() => null);
         if (ytRes.ok && !ytData?.error) {
-          providers.push({ provider: "youtube", status: "ok", credential: apiKey ? "server_api_key" : "google_oauth" });
+          providers.push({ provider: "youtube", status: "ok", credential: "server_api_key" });
           for (const item of ytData?.items || []) {
             const videoId = item?.id?.videoId;
             if (!videoId) continue;
@@ -94,7 +89,7 @@ Deno.serve(async (req) => {
           providers.push({ provider: "youtube", status: "unavailable", detail: ytData?.error?.message || `HTTP ${ytRes.status}` });
         }
       } else {
-        providers.push({ provider: "youtube", status: "not_configured" });
+        providers.push({ provider: "youtube", status: "not_configured", detail: "Set YOUTUBE_API_KEY with YouTube Data API v3 enabled" });
       }
     } catch (error) {
       providers.push({ provider: "youtube", status: "error", detail: error?.message || String(error) });
@@ -192,9 +187,13 @@ Deno.serve(async (req) => {
     // 4) NUPS local Track Library: always available when the app database is healthy.
     try {
       const localRows = await E.Track.list("-created_date", 500).catch(() => []);
-      const matching = (localRows || []).filter((track) => track?.active !== false && localMatches(track, query)).slice(0, limit);
-      providers.push({ provider: "nups_library", status: "ok", count: matching.length });
-      for (const track of matching) {
+      const activePlayable = (localRows || []).filter((track) => track?.active !== false && (track?.file_url || track?.embed_url || (track?.source === "youtube" && track?.source_id)));
+      const matching = activePlayable.filter((track) => localMatches(track, query)).slice(0, limit);
+      // If external discovery is unavailable and the query has no local text match,
+      // return a small playable house-library fallback instead of a dead 0-result UI.
+      const chosen = matching.length ? matching : (results.length ? [] : activePlayable.slice(0, limit));
+      providers.push({ provider: "nups_library", status: "ok", count: chosen.length, fallback: !matching.length && chosen.length > 0 });
+      for (const track of chosen) {
         const videoId = track.source === "youtube" ? track.source_id : null;
         add({
           id: `nups-${track.id}`,

@@ -48,15 +48,6 @@ Deno.serve(async (req) => {
     const maxResults = Math.min(Math.max(parseInt(body?.maxResults) || 12, 1), 25);
     const key = String(Deno.env.get('YOUTUBE_API_KEY') || '').trim();
 
-    async function getGoogleOAuthToken() {
-      try {
-        const connection = await base44.asServiceRole.connectors.getConnection('googledrive');
-        return String(connection?.accessToken || '').trim();
-      } catch (_) {
-        return '';
-      }
-    }
-
     async function runYouTubeSearch({ apiKey = '', accessToken = '' } = {}) {
       const params = new URLSearchParams({
         part: 'snippet',
@@ -80,23 +71,15 @@ Deno.serve(async (req) => {
       return { response, payload };
     }
 
-    let credential = key ? 'server_api_key' : 'base44_google_oauth';
-    let { response: res, payload: data } = key
-      ? await runYouTubeSearch({ apiKey: key })
-      : await runYouTubeSearch({ accessToken: await getGoogleOAuthToken() });
-
-    // A server key remains the preferred production credential. If it is
-    // missing, disabled, or restricted incorrectly, transparently retry with
-    // the app-scoped Google OAuth connection authorized for youtube.readonly.
-    if ((!res.ok || data?.error) && key) {
-      const accessToken = await getGoogleOAuthToken();
-      if (accessToken) {
-        const retry = await runYouTubeSearch({ accessToken });
-        res = retry.response;
-        data = retry.payload;
-        credential = 'base44_google_oauth';
-      }
+    if (!key) {
+      return Response.json({
+        error: 'YouTube search is not configured. Add a server-side YOUTUBE_API_KEY with YouTube Data API v3 enabled.',
+        code: 'YOUTUBE_API_KEY_MISSING',
+      }, { status: 503 });
     }
+
+    const credential = 'server_api_key';
+    let { response: res, payload: data } = await runYouTubeSearch({ apiKey: key });
 
     if (!res.ok || data?.error) {
       const message = data?.error?.message || `YouTube API HTTP ${res.status}`;
@@ -105,7 +88,7 @@ Deno.serve(async (req) => {
         error: message,
         status: res.status,
         reason,
-        code: key ? 'YOUTUBE_API_ERROR' : 'YOUTUBE_OAUTH_NOT_READY',
+        code: 'YOUTUBE_API_ERROR',
         credential,
       }, { status: 502 });
     }
