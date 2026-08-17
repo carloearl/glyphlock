@@ -27,6 +27,7 @@ import TrainingCoach from "@/components/nups/training/TrainingCoach";
 
 import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
 import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
+import NUPSOperatorAssistant from '@/components/nups/shell/NUPSOperatorAssistant';
 // DACO 003 §2 — which sections each role class may see.
 // STAFF / ENTERTAINER never reach this shell for general nav (they use their
 // own scoped shells) but if they do, they get an empty sidebar — no cross-role
@@ -567,6 +568,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
       <TrainingCoach />
     </div>
 
+      <NUPSOperatorAssistant />
       <ReceiptPrintHub />
 
     </>

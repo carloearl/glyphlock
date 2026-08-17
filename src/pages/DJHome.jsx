@@ -7,6 +7,7 @@ import { Activity, Disc3, LogOut, Tv } from "lucide-react";
 
 import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
 import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
+import NUPSOperatorAssistant from '@/components/nups/shell/NUPSOperatorAssistant';
 // DACO-NUPS-ROLE-SELECTION — DJ workspace: the Auto-DJ console ONLY.
 // No dashboard, no accounting, no contracts, no back-office navigation.
 export default function DJHome() {
@@ -71,6 +72,7 @@ export default function DJHome() {
       </main>
     </div>
 
+      <NUPSOperatorAssistant />
       <ReceiptPrintHub />
 
     </>

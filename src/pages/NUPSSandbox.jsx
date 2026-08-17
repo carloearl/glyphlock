@@ -23,6 +23,7 @@ import ThermalPrinterPanel from "@/components/nups/hardware/ThermalPrinterPanel"
 import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
 import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
 import { printCurrentNupsView } from '@/lib/nups/receiptService';
+import NUPSOperatorAssistant from '@/components/nups/shell/NUPSOperatorAssistant';
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const MOCK_USERS = [
   { id: "sb-u1", name: "Alex Rivera", role: "Manager", email: "alex@demo.nups", status: "active" },
@@ -1385,7 +1386,8 @@ export default function NUPSSandbox() {
         </div>
       </div>
     </div>
-            <ReceiptPrintHub />
+            <NUPSOperatorAssistant />
+      <ReceiptPrintHub />
           </>
   );
 }
