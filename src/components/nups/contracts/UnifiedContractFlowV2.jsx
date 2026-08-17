@@ -8,6 +8,7 @@ import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
 import MemberCheckInAutofill from "@/components/nups/contracts/MemberCheckInAutofill";
 import ContractIdentityScanner from "@/components/nups/contracts/ContractIdentityScanner";
 import { VIP_TERMS, VIP_TERMS_TEXT, VIP_TERMS_VERSION } from "@/constants/vipShowTerms";
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 import {
   CheckCircle2,
   Coins,
@@ -482,7 +483,7 @@ export default function UnifiedContractFlowV2() {
           {done.vipRecord && <div className="mt-1 font-mono text-sm text-neutral-200">VIP: {done.vipRecord.verify_ref} · ${done.vipRecord.total.toFixed(2)}</div>}
         </div>
         <div className="flex gap-2 justify-center flex-wrap print:hidden">
-          <button type="button" onClick={() => window.print()} className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold px-6 py-2.5 min-h-[44px]">
+          <button type="button" onClick={() => printCurrentNupsView()} className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold px-6 py-2.5 min-h-[44px]">
             <Printer className="w-4 h-4" /> Print Contract and Receipt
           </button>
           {done.gbDoc && <a href={`/v/${done.gbDoc.verify_ref}`} className="rounded-lg bg-blue-600 hover:bg-blue-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Verify GlyphBucks</a>}

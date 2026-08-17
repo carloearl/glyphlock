@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import VenueContractText from "@/components/nups/VenueContractText";
 
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 const ACKNOWLEDGMENTS = [
   "You have read and understand this Order (front & back).",
   "You confirm the information in this Order is true and correct.",
@@ -61,7 +62,7 @@ export default function VenuePrintLayout({
     } catch (e) {
       console.warn("Audit log failed on print:", e.message);
     }
-    window.print();
+    printCurrentNupsView();
     onPrintComplete?.();
   };
 

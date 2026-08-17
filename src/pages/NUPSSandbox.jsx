@@ -22,6 +22,7 @@ import ThermalPrinterPanel from "@/components/nups/hardware/ThermalPrinterPanel"
 
 import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
 import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const MOCK_USERS = [
   { id: "sb-u1", name: "Alex Rivera", role: "Manager", email: "alex@demo.nups", status: "active" },
@@ -454,7 +455,7 @@ export default function NUPSSandbox() {
         <div><label>DATE / TIME</label><div class='line'></div></div>
       </div>
       <div class='footer'>N.U.P.S. POS — GlyphLock Financial LLC — ${now.toLocaleString()} — DEMO BATCH</div>
-      <br/><button onclick='window.print()' style='padding:8px 20px;font-size:13px;cursor:pointer;'>🖨️ Print</button>
+      <br/><button onclick='printCurrentNupsView()' style='padding:8px 20px;font-size:13px;cursor:pointer;'>🖨️ Print</button>
       </body></html>
     `);
     pw.document.close();

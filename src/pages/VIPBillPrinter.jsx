@@ -12,6 +12,7 @@ import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import RoleHomeButton from "@/components/nups/RoleHomeButton";
 import DreamPalaceBill from "@/components/nups/glyphbucks/DreamPalaceBill";
 
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 /**
  * Dream Palace VIP GlyphBucks — Bill Printer.
  * Upload the single-bill artwork, set denomination + start serial + quantity,
@@ -67,7 +68,7 @@ export default function VIPBillPrinter() {
 
   const handlePrint = useCallback(() => {
     if (!bills.length) { toast.error("Register the bills first"); return; }
-    setTimeout(() => window.print(), 300);
+    setTimeout(() => printCurrentNupsView(), 300);
   }, [bills]);
 
   return (

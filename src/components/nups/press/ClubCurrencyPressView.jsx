@@ -19,6 +19,7 @@ import AIAssistant from "@/components/nups/press/AIAssistant";
 import GlyphBucksContract from "@/components/nups/GlyphBucksContract";
 
 import { DEFAULT_PRESS_CONFIG } from "@/components/nups/press/types";
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 import {
   loadPressConfig, savePressConfig,
   loadFrontImages, saveFrontImages,
@@ -154,7 +155,7 @@ export default function ClubCurrencyPressView({ saleOrder = null }) {
       // Force layout reflow to guarantee sheets are rendered before print
       if (typeof window !== "undefined") {
         void document.body.offsetHeight;
-        window.print();
+        printCurrentNupsView();
       }
     }, 800);
   }, [config, layoutReady]);

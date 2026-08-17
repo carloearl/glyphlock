@@ -5,6 +5,7 @@ import { useActiveVenue } from '@/hooks/useActiveVenue';
 import QRCode from 'qrcode';
 import { GLYPHLOCK_DISCLAIMER_SHORT } from '@/constants/legalDisclaimer';
 
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 /**
  * Professional itemized receipt engine for GlyphBucks transactions.
  * Matches printed layout exactly — dynamic height expansion for variable item counts.
@@ -55,7 +56,7 @@ export default function GlyphBucksReceiptEngine({ transaction, batch, bills, cur
   }, [transaction?.order_number, batch?.batch_id]);
 
   const handlePrint = () => {
-    window.print();
+    printCurrentNupsView();
     onPrint?.();
   };
 
