@@ -2,6 +2,10 @@
   "name": "PerformanceAnalytics",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "track_id": {
       "type": "string"
     },

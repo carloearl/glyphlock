@@ -2,6 +2,10 @@
   "name": "AssetRegistry",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "asset_hash": {
       "type": "string",
       "description": "SHA-256 hash of the asset"

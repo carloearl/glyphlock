@@ -2,6 +2,10 @@
   "name": "AlertThreshold",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "name": {
       "type": "string",
       "description": "Threshold name (e.g., 'High Priority CVEs')"

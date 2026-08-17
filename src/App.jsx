@@ -91,6 +91,7 @@ import AccessRequests from './pages/AccessRequests';
 import RoleViews from './pages/RoleViews';
 import DJHome from './pages/DJHome';
 import GlyphBotMixer from './pages/GlyphBotMixer';
+import SecureQRStudio from './pages/SecureQRStudio';
 import KioskShell from './components/nups/KioskShell';
 import KioskSessionGuard from './components/nups/KioskSessionGuard';
 import RoleClassGuard from './components/nups/RoleClassGuard';
@@ -346,6 +347,9 @@ const AuthenticatedApp = () => {
       <GlobalBackButton />
       <Routes>
         <Route path="/" element={<MainPage />} />
+        <Route path="/SecureQRStudio" element={<SecureQRStudio />} />
+        <Route path="/Qr" element={<Navigate to="/SecureQRStudio" replace />} />
+        <Route path="/qr" element={<Navigate to="/SecureQRStudio" replace />} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}

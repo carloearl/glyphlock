@@ -2,6 +2,10 @@
   "name": "BrowserAgentSession",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "user_email": {
       "type": "string",
       "description": "User who initiated the session"

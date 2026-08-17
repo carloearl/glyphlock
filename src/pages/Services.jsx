@@ -38,7 +38,7 @@ export default function Services() {
         "Custom branding and design",
         "Cross-platform verification"
       ],
-      page: "Qr",
+      page: "SecureQRStudio",
       color: "blue"
     },
     {

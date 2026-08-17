@@ -2,6 +2,10 @@
   "name": "VoiceProfile",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "user_id": {
       "type": "string",
       "description": "User email"

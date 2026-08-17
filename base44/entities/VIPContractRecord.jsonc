@@ -2,6 +2,10 @@
   "name": "VIPContractRecord",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "serial_number": {
       "type": "string",
       "description": "Unique contract serial number"
@@ -140,7 +144,7 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "DACO WAVE 1 \u2014 Ledger mode."
+      "description": "DACO WAVE 1 — Ledger mode."
     }
   },
   "required": [

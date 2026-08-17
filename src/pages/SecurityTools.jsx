@@ -16,7 +16,7 @@ const TOOLS = [
     description: "Create secure QR codes with hidden data layers. Perfect for voucher systems, tickets, and authentication.",
     features: ["Cryptographic verification", "Steganographic encoding", "Custom branding options"],
     icon: QrCode,
-    link: "Qr",
+    link: "SecureQRStudio",
     cta: "Try Generator",
     color: "cyan"
   },
@@ -228,7 +228,7 @@ export default function SecurityTools() {
               All tools are open access. No paywall. No trial. Just build.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to={createPageUrl("Qr")}>
+              <Link to={createPageUrl("SecureQRStudio")}>
                 <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6">
                   Try QR Generator
                 </Button>

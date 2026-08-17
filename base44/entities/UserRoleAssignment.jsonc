@@ -2,6 +2,10 @@
   "name": "UserRoleAssignment",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "user_id": {
       "type": "string",
       "description": "Reference to NUPSUser or platform User"
@@ -23,7 +27,7 @@
         "DJ",
         "KIOSK"
       ],
-      "description": "Role assigned per \u00a79.2"
+      "description": "Role assigned per §9.2"
     },
     "venue_id": {
       "type": "string",

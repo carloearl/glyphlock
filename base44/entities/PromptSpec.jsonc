@@ -2,6 +2,10 @@
   "name": "PromptSpec",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "original_prompt": {
       "type": "string",
       "description": "User's original input prompt"

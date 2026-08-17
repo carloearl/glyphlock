@@ -2,6 +2,10 @@
   "name": "ServiceUsage",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "user_email": {
       "type": "string",
       "description": "Email of user (or anonymous ID for non-logged in users)"

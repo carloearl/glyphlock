@@ -2,6 +2,10 @@
   "name": "Entertainer",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "stage_name": {
       "type": "string",
       "description": "Professional stage name"
@@ -125,7 +129,7 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "DACO WAVE 1 \u2014 Ledger mode."
+      "description": "DACO WAVE 1 — Ledger mode."
     }
   },
   "required": [

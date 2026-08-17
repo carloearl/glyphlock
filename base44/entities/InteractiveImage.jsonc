@@ -2,6 +2,10 @@
   "name": "InteractiveImage",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "asset_id": {
       "type": "string",
       "description": "System-generated unique asset identifier"

@@ -2,6 +2,10 @@
   "name": "VIPSessionReport",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "session_id": {
       "type": "string",
       "description": "Unique session report identifier"
@@ -59,7 +63,7 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "DACO WAVE 1 \u2014 Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
+      "description": "DACO WAVE 1 — Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
     }
   },
   "required": [

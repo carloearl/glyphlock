@@ -1,8 +1,12 @@
 {
   "name": "ResolutionRequest",
   "type": "object",
-  "description": "W3-011 AFRW \u2014 Authorized Financial Resolution Request. Created by managers to correct financial discrepancies discovered during reconciliation. The ONLY authorized path for financial record correction. Original records remain immutable \u2014 corrections create compensating entries. Approval chain: Manager \u2192 Corporate Accounting \u2192 Compliance \u2192 Ownership \u2192 Execution.",
+  "description": "W3-011 AFRW — Authorized Financial Resolution Request. Created by managers to correct financial discrepancies discovered during reconciliation. The ONLY authorized path for financial record correction. Original records remain immutable — corrections create compensating entries. Approval chain: Manager → Corporate Accounting → Compliance → Ownership → Execution.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "resolution_id": {
       "type": "string",
       "description": "Unique resolution identifier (RR-{venue_short}-{timestamp}-{seq})."
@@ -92,7 +96,7 @@
     },
     "linked_financial_records": {
       "type": "array",
-      "description": "Records that will be affected by this correction (read-only references \u2014 originals never modified).",
+      "description": "Records that will be affected by this correction (read-only references — originals never modified).",
       "items": {
         "type": "object",
         "properties": {

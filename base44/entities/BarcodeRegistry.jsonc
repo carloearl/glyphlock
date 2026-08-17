@@ -2,6 +2,10 @@
   "name": "BarcodeRegistry",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "barcode_id": {
       "type": "string",
       "description": "Barcode identifier (Code 128 or QR)"

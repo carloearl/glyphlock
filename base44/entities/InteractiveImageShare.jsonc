@@ -2,6 +2,10 @@
   "name": "InteractiveImageShare",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "interactive_image_id": {
       "type": "string",
       "description": "Reference to shared InteractiveImage"

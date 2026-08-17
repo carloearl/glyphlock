@@ -2,6 +2,10 @@
   "name": "CustomerIdentity",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "identity_id": {
       "type": "string",
       "description": "Unique identity record ID"

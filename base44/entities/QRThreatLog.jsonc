@@ -2,6 +2,10 @@
   "name": "QRThreatLog",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "incident_id": {
       "type": "string",
       "description": "Unique incident identifier"

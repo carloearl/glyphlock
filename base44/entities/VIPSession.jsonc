@@ -1,8 +1,12 @@
 {
   "name": "VIPSession",
   "type": "object",
-  "description": "DACO-VIP-FIRST-BUILD-20260717 \u2014 One authoritative active/completed VIP session per activated contract.",
+  "description": "DACO-VIP-FIRST-BUILD-20260717 — One authoritative active/completed VIP session per activated contract.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "session_ref": {
       "type": "string",
       "description": "SES-YYMMDD-NNNN"

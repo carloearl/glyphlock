@@ -2,6 +2,10 @@
   "name": "SharedAuditAccess",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "auditId": {
       "type": "string",
       "description": "Reference to shared audit"

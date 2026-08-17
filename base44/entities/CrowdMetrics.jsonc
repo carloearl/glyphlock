@@ -2,6 +2,10 @@
   "name": "CrowdMetrics",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "entertainer_id": {
       "type": "string"
     },

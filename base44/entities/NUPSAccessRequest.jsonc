@@ -1,8 +1,12 @@
 {
   "name": "NUPSAccessRequest",
   "type": "object",
-  "description": "DACO-NUPS-ROLE-VIP-BUILD-20260717 \u00a74-5 \u2014 Owner/Administrator access requests. New requests start PENDING_OWNER_APPROVAL. No applicant may self-approve. Every decision records applicant, approver, requested vs granted role, reason, timestamp.",
+  "description": "DACO-NUPS-ROLE-VIP-BUILD-20260717 §4-5 — Owner/Administrator access requests. New requests start PENDING_OWNER_APPROVAL. No applicant may self-approve. Every decision records applicant, approver, requested vs granted role, reason, timestamp.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "full_legal_name": {
       "type": "string"
     },

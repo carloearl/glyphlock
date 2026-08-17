@@ -61,7 +61,7 @@ const platformModules = [
     evidence: 'Generator, payload, scan, signing and verification workflows available in-product.',
     cta: 'CREATE A GLYPH',
     text: 'Custom payloads, branded codes, scan logging, signing options, verification and vault workflows.',
-    link: 'Qr',
+    link: 'SecureQRStudio',
     accent: '#38bdf8',
   },
   {

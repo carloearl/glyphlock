@@ -197,7 +197,7 @@ export const SEO_DATA = {
     schemaType: "SoftwareApplication",
     priority: 0.9,
     changefreq: "weekly",
-    internalLinks: ["/qr", "/interactive-image-studio"]
+    internalLinks: ["/SecureQRStudio", "/interactive-image-studio"]
   },
 
   // --- RESOURCES ---
@@ -309,7 +309,7 @@ export const SEO_DATA = {
     schemaType: "WebPage",
     priority: 0.8,
     changefreq: "daily",
-    internalLinks: ["/qr", "/image-lab", "/glyphbot"]
+    internalLinks: ["/SecureQRStudio", "/image-lab", "/glyphbot"]
   },
   "SiteBuilder": {
     title: "Site Builder Agent | AI Development Assistant | GlyphLock LLC",

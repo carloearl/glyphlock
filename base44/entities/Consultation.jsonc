@@ -2,6 +2,10 @@
   "name": "Consultation",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "consultation_id": {
       "type": "string",
       "description": "Unique consultation identifier"

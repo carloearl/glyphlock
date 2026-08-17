@@ -1,8 +1,12 @@
 {
   "name": "PaymentVerificationLog",
   "type": "object",
-  "description": "W3-008B \u2014 Append-only verification trail for every payment record. Each step in the verification process gets a log entry. This is the forensic audit trail that binds PaymentRecord status changes to actor, method, and response hashes.",
+  "description": "W3-008B — Append-only verification trail for every payment record. Each step in the verification process gets a log entry. This is the forensic audit trail that binds PaymentRecord status changes to actor, method, and response hashes.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "log_id": {
       "type": "string",
       "description": "Unique log entry identifier."

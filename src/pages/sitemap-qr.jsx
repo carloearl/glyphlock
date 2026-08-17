@@ -88,7 +88,7 @@ export default function SitemapQr() {
             View Raw XML
           </a>
           <Link 
-            to={createPageUrl("Qr")}
+            to={createPageUrl("SecureQRStudio")}
             className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm transition-colors"
           >
             Open QR Studio

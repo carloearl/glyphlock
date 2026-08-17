@@ -2,6 +2,10 @@
   "name": "BlockchainActivity",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "user_email": {
       "type": "string",
       "description": "Email of user performing operation"

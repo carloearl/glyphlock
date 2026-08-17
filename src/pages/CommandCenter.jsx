@@ -545,7 +545,7 @@ function OverviewTab({ user, threatDetection }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Link to={createPageUrl('Qr')}>
+            <Link to={createPageUrl('SecureQRStudio')}>
               <Button variant="outline" className="w-full justify-start border-slate-700 hover:border-cyan-500/50 hover:bg-cyan-500/5 h-12">
                 <QrCode className="w-4 h-4 text-cyan-400 mr-3" />
                 <span className="text-sm">QR Studio</span>
@@ -649,7 +649,7 @@ function ResourcesTab({ user }) {
       count: qrAssets.length, 
       icon: QrCode, 
       color: 'cyan',
-      link: 'Qr'
+      link: 'SecureQRStudio'
     },
     { 
       name: 'Images', 

@@ -15,7 +15,7 @@ const modules = [
     color: '#06b6d4',
     border: 'rgba(6,182,212,0.35)',
     glow: 'rgba(6,182,212,0.5)',
-    link: 'Qr'
+    link: 'SecureQRStudio'
   },
   {
     title: 'Image Lab',

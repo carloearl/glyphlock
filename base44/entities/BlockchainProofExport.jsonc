@@ -2,6 +2,10 @@
   "name": "BlockchainProofExport",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "proof_bundle_url": {
       "type": "string",
       "description": "URL to exported JSON proof bundle"

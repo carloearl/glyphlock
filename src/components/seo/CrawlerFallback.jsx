@@ -363,7 +363,7 @@ function generateDefaultContent() {
           <li><a href="/master-covenant">Master Covenant — Your Rights Protected</a></li>
           <li><a href="/case-studies">Case Studies</a></li>
           <li><a href="/glyphbot">GlyphBot AI</a></li>
-          <li><a href="/qr">QR Studio</a></li>
+          <li><a href="/SecureQRStudio">Secure QR Studio</a></li>
           <li><a href="/about">About</a></li>
         </ul>
       </nav>

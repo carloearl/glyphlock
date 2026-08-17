@@ -8,7 +8,7 @@ import FaqSectionGlyphPanel from "@/components/faq/FaqSectionGlyphPanel";
 const quickTopics = [
   { icon: Shield, label: "Security Tools", page: "SecurityTools", color: "from-blue-500 to-indigo-600" },
   { icon: Bot, label: "GlyphBot AI", page: "GlyphBot", color: "from-cyan-500 to-blue-600" },
-  { icon: QrCode, label: "QR Studio", page: "Qr", color: "from-indigo-500 to-purple-600" },
+  { icon: QrCode, label: "QR Studio", page: "SecureQRStudio", color: "from-indigo-500 to-purple-600" },
   { icon: Image, label: "Image Lab", page: "ImageLab", color: "from-purple-500 to-pink-600" },
   { icon: Building2, label: "N.U.P.S. POS", page: "NUPSLogin", color: "from-amber-500 to-orange-600" },
   { icon: FileCheck, label: "Master Covenant", page: "GovernanceHub", color: "from-emerald-500 to-teal-600" },

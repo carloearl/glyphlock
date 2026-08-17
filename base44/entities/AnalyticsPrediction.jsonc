@@ -2,6 +2,10 @@
   "name": "AnalyticsPrediction",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "prediction_id": {
       "type": "string",
       "description": "Unique prediction identifier"
