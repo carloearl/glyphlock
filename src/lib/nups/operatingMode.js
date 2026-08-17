@@ -244,6 +244,12 @@ export function recordMatchesOperatingMode(record, {
     return recordTrainingSessionId(record) === session.id;
   }
 
+  // DEMO and TRAINING share the DEMO ledger mode, but they do not share a
+  // dataset. Session-tagged training rows stay invisible in ordinary demos.
+  if (resolvedOperating === OPERATING_MODE.DEMO && recordTrainingSessionId(record)) {
+    return false;
+  }
+
   return true;
 }
 
