@@ -35,6 +35,7 @@ import {
   ShieldAlert, Radio, HelpCircle
 } from "lucide-react";
 import AccountSecurityTab from '@/components/console/AccountSecurityTab';
+import GitHubCommitFeed from '@/components/dashboard/GitHubCommitFeed';
 import HelpPanel from '@/components/global/HelpPanel';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
@@ -571,6 +572,9 @@ function OverviewTab({ user, threatDetection }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* GitHub Commit Feed - public repo API, no OAuth */}
+      <GitHubCommitFeed />
 
       {/* Recent Activity - REAL LOGS ONLY */}
       <Card className="bg-slate-900/50 border-slate-800">
