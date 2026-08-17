@@ -1,4 +1,18 @@
-import { getTrainingSessionId } from '@/lib/nups/operatingEnvironment';
+const TRAINING_BROWSER_SESSION_KEY = 'nups_training_center_session';
+
+function getTrainingSessionId() {
+  if (typeof window === 'undefined') return 'training-server';
+  try {
+    let id = window.sessionStorage.getItem(TRAINING_BROWSER_SESSION_KEY);
+    if (!id) {
+      id = `training-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
+      window.sessionStorage.setItem(TRAINING_BROWSER_SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return 'training-browser';
+  }
+}
 
 const STORE_VERSION = 1;
 const EVENT_NAME = 'nups:training-data-changed';
