@@ -24,6 +24,7 @@ import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
 import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
 import { printCurrentNupsView } from '@/lib/nups/receiptService';
 import NUPSOperatorAssistant from '@/components/nups/shell/NUPSOperatorAssistant';
+import NUPSActionSafety from '@/components/nups/shell/NUPSActionSafety';
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const MOCK_USERS = [
   { id: "sb-u1", name: "Alex Rivera", role: "Manager", email: "alex@demo.nups", status: "active" },
@@ -538,7 +539,8 @@ export default function NUPSSandbox() {
       case "walkthrough":
         return (
           <>
-            <NUPSEnvironmentBar />
+            <NUPSActionSafety />
+      <NUPSEnvironmentBar />
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-2xl p-5">
               <div className="flex items-start gap-3">
