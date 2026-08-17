@@ -34,6 +34,9 @@ import LegacyPressPanel from "@/components/nups/LegacyPressPanel";
 import UnifiedContractRegister from "@/components/nups/contracts/UnifiedContractRegister";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { scopeRowsToOperatingMode } from "@/lib/nups/operatingMode";
 
 const TABS = [
   { key: "tonight",      label: "Tonight",      icon: Activity },
@@ -47,8 +50,10 @@ function fmtMoney(n) {
   return "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+function localDateKey(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function StatTile({ label, value, sub, Icon, tone }) {
@@ -74,6 +79,10 @@ export default function ManagerConsole() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("tonight");
   const [user, setUser] = useState(null);
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeState = useNUPSOperatingMode(venueId);
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
