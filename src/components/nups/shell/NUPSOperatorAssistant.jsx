@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, CircleHelp, GraduationCap, Home, X } from 'lucide-react';
-import useNupsEnvironment from '@/hooks/useNupsEnvironment';
+import { ArrowLeft, CheckCircle2, CircleHelp, Home, X } from 'lucide-react';
+import { useNUPSOperatingMode } from '@/hooks/useNUPSOperatingMode';
 
 const workflows = [
   {
@@ -39,7 +39,7 @@ const workflows = [
 export default function NUPSOperatorAssistant() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { environment } = useNupsEnvironment();
+  const { operatingMode: environment } = useNUPSOperatingMode();
   const [open, setOpen] = useState(false);
 
   const workflow = useMemo(
@@ -67,10 +67,9 @@ export default function NUPSOperatorAssistant() {
                 </li>
               ))}
             </ol>
-            <div className="mt-5 grid grid-cols-3 gap-2">
+            <div className="mt-5 grid grid-cols-2 gap-2">
               <button type="button" onClick={() => navigate(-1)} className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/[.04] text-[10px] font-black text-slate-200 transition hover:bg-white/10"><ArrowLeft className="h-3.5 w-3.5" /> BACK</button>
               <Link to="/NUPSLanding" className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-cyan-300/20 bg-cyan-300/[.05] text-[10px] font-black text-cyan-100 transition hover:bg-cyan-300/15"><Home className="h-3.5 w-3.5" /> NUPS</Link>
-              <Link to="/NUPSTraining" className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-amber-300/25 bg-amber-300/[.06] text-[10px] font-black text-amber-100 transition hover:bg-amber-300/15"><GraduationCap className="h-3.5 w-3.5" /> TRAIN</Link>
             </div>
             <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-300/15 bg-emerald-300/[.04] p-3 text-[11px] leading-relaxed text-emerald-100/80"><CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-emerald-300" /> Finish one record, confirm the success message, then move to the next task. Never double-click a financial action.</div>
           </div>

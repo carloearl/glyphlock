@@ -9,7 +9,7 @@ import {
   printNupsReceipt,
   subscribeToReceiptReady,
 } from '@/lib/nups/receiptService';
-import useNupsEnvironment from '@/hooks/useNupsEnvironment';
+import { useNUPSOperatingMode } from '@/hooks/useNUPSOperatingMode';
 
 function copyReceipt(receipt) {
   const lines = [
@@ -24,7 +24,7 @@ function copyReceipt(receipt) {
 }
 
 export default function ReceiptPrintHub() {
-  const { environment } = useNupsEnvironment();
+  const { operatingMode: environment } = useNUPSOperatingMode();
   const [receipt, setReceipt] = useState(() => getLastReceipt());
   const [open, setOpen] = useState(false);
 
