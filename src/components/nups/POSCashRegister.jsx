@@ -1263,7 +1263,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           {cart.length > 0 ? (
            <button
              onClick={handleCheckout}
-             disabled={isSubmitting}
+             disabled={isSubmitting || Boolean(checkoutBlockedReason)}
              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
              style={{
                height: '68px',
@@ -1279,9 +1279,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
              <Wallet className="w-6 h-6" />
              {isSubmitting
                ? 'Processing...'
-               : compAuth
-                 ? `CHARGE COMP $${finalTotal.toFixed(2)}`
-                 : `CHARGE $${total.toFixed(2)}`}
+               : checkoutBlockedReason
+                 ? checkoutBlockedReason
+                 : compAuth
+                   ? `CHARGE COMP $${finalTotal.toFixed(2)}`
+                   : `CHARGE $${total.toFixed(2)}`}
            </button>
           ) : (
            <div className="rounded-xl border border-dashed border-slate-700/70 bg-slate-900/40 p-3 text-center">
@@ -1326,7 +1328,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           style={{ background: 'linear-gradient(to top, rgba(5,5,8,0.98) 70%, transparent)' }}>
           <button
             onClick={handleCheckout}
-            disabled={isSubmitting}
+            disabled={isSubmitting || Boolean(checkoutBlockedReason)}
             className="w-full rounded-2xl font-black text-lg text-white active:scale-[0.97] transition-all flex items-center justify-between px-5 disabled:opacity-60"
             style={{
               height: '60px',
@@ -1340,7 +1342,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
               <Wallet className="w-5 h-5" />
               {cart.reduce((s, i) => s + i.quantity, 0)} item{cart.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}
             </span>
-            <span>{isSubmitting ? 'Processing...' : `CHARGE $${(compAuth ? finalTotal : total).toFixed(2)}`}</span>
+            <span>{isSubmitting ? 'Processing...' : checkoutBlockedReason || `CHARGE $${(compAuth ? finalTotal : total).toFixed(2)}`}</span>
           </button>
         </div>
       )}
