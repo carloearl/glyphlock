@@ -7,6 +7,7 @@ import {
   MODE_CHANGE_EVENT,
   getOperatingMode,
   readTrainingSession,
+  setCurrentOperatingModeSnapshot,
 } from '@/lib/nups/operatingMode';
 
 /**
@@ -30,6 +31,7 @@ export function useNUPSOperatingMode(explicitVenueId = null) {
       setLedgerMode(LEDGER_MODE.REAL);
       setOperatingMode(OPERATING_MODE.LIVE);
       setTrainingSession(null);
+      setCurrentOperatingModeSnapshot(OPERATING_MODE.LIVE, { ledger_mode: LEDGER_MODE.REAL, venue_id: null });
       setLoading(false);
       return;
     }
@@ -41,6 +43,7 @@ export function useNUPSOperatingMode(explicitVenueId = null) {
       const nextOperatingMode = getOperatingMode(nextLedgerMode, venueId);
       setLedgerMode(nextLedgerMode);
       setOperatingMode(nextOperatingMode);
+      setCurrentOperatingModeSnapshot(nextOperatingMode, { ledger_mode: nextLedgerMode, venue_id: venueId });
       setTrainingSession(readTrainingSession(venueId));
       setError(null);
     } catch (cause) {
