@@ -3,59 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 
 export default function VerificationFramework() {
   const phases = [
-    {
-      number: '01',
-      title: 'Authority and Scope Confirmation',
-      description: 'Establish engagement boundaries, define documentation requirements, and confirm organizational authority.'
-    },
-    {
-      number: '02',
-      title: 'System Architecture Review',
-      description: 'Structured evaluation of infrastructure design, data flows, and operational controls against defined governance standards.'
-    },
-    {
-      number: '03',
-      title: 'Threat Surface and Exposure Analysis',
-      description: 'Documented assessment of attack vectors, vulnerability posture, and exposure points aligned with post-quantum readiness criteria.'
-    },
-    {
-      number: '04',
-      title: 'Governance Alignment Assessment',
-      description: 'Review of policy documentation, SOC 2 aligned controls, AI governance framework adherence, and NIST post-quantum standards positioning.'
-    },
-    {
-      number: '05',
-      title: 'Determination and Roadmap Delivery',
-      description: 'Formal qualification tier assignment, credential eligibility statement, and structured remediation roadmap.'
-    }
+    ['01','Scope + Evidence Intake','Define the system boundary, review objectives, evidence sources, exclusions and responsible contacts.'],
+    ['02','Architecture + Data Flow','Review documented components, integrations, trust boundaries, data movement and operational dependencies.'],
+    ['03','Controls + Exposure','Map relevant access, logging, recovery, security and operational controls to the evidence supplied for the engagement.'],
+    ['04','Governance Alignment','Compare documented practices with the selected GlyphLock governance criteria. External standards may be referenced as benchmarks only where the mapping is explicit.'],
+    ['05','Findings + Remediation','Classify observations by evidence strength and priority, then deliver a remediation roadmap with requested proof for unresolved items.'],
   ];
-
-  return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-white">Section III — Structured 90-Minute Verification Framework</h2>
-        <p className="text-sm text-slate-400">Moderated · Structured · Time-controlled · Documentation-based</p>
-      </div>
-
-      <div className="space-y-4">
-        {phases.map((phase) => (
-          <Card key={phase.number} className="bg-slate-800/50 border-slate-700 hover:border-cyan-500/50 transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                    <span className="text-xl font-bold text-white">{phase.number}</span>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white mb-2">{phase.title}</h3>
-                  <p className="text-sm text-slate-300 leading-relaxed">{phase.description}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
+  return <div className="space-y-6"><div className="text-center space-y-2"><h2 className="text-2xl font-bold text-white">Section III — Review Workflow</h2><p className="text-sm text-slate-400">Scoped · Evidence-led · Documented · Remediation-oriented</p></div><div className="space-y-4">{phases.map(([number,title,description])=><Card key={number} className="bg-[#040815]/60 border-white/10 hover:border-cyan-300/35 transition-all backdrop-blur-xl"><CardContent className="p-6"><div className="flex items-start gap-4"><div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-300/35 bg-cyan-300/10 text-cyan-100 shadow-[0_0_22px_rgba(34,211,238,.16)]"><span className="text-lg font-black">{number}</span></div><div><h3 className="text-lg font-bold text-white mb-2">{title}</h3><p className="text-sm text-slate-300 leading-relaxed">{description}</p></div></div></CardContent></Card>)}</div></div>;
 }
