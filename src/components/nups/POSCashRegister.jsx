@@ -771,6 +771,8 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           <CardPaymentPanel
             total={total}
             method={paymentMethod}
+            isLive={modeState.isLive}
+            terminalConfigured={Boolean(doorRates?.payment_terminal_enabled)}
             onConfirm={(details) => completePayment(details)}
           />
         )}
@@ -788,8 +790,12 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
             />
             <Button
               onClick={() => {
-                const gcNum = document.getElementById('gift-card-input')?.value || '';
-                completePayment({ gift_card: true, gift_card_number: gcNum });
+                const gcNum = String(document.getElementById('gift-card-input')?.value || '').trim();
+                if (gcNum.length < 4) {
+                  toast.error('Enter or scan a valid gift card number.');
+                  return;
+                }
+                completePayment({ payment_method: 'Gift Card', gift_card: true, gift_card_number: gcNum });
               }}
               disabled={isSubmitting}
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-600"
@@ -812,8 +818,12 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
             />
             <Button
               onClick={() => {
-                const roomInfo = document.getElementById('room-tab-input')?.value || '';
-                completePayment({ room_tab: true, room_tab_reference: roomInfo });
+                const roomInfo = String(document.getElementById('room-tab-input')?.value || '').trim();
+                if (roomInfo.length < 2) {
+                  toast.error('Enter a room number, VIP session, or guest reference.');
+                  return;
+                }
+                completePayment({ payment_method: 'Tab', room_tab: true, room_tab_reference: roomInfo });
               }}
               disabled={isSubmitting}
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-pink-500 to-rose-600"
