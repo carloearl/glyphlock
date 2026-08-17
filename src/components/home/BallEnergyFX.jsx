@@ -1,7 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const ROLES = ['ALFRED', 'CLAUDE', 'GEMINI', 'COPILOT', 'PERPLEXITY', 'CURSOR'];
+const MODELS = [
+  { name: 'Alfred', logo: 'https://cdn.simpleicons.org/openai/ffffff' },
+  { name: 'Claude', logo: 'https://cdn.simpleicons.org/anthropic/ffffff' },
+  { name: 'Gemini', logo: 'https://cdn.simpleicons.org/googlegemini/ffffff' },
+  { name: 'Copilot', logo: 'https://cdn.simpleicons.org/githubcopilot/ffffff' },
+  { name: 'Perplexity', logo: 'https://cdn.simpleicons.org/perplexity/ffffff' },
+  { name: 'Cursor', logo: 'https://cdn.simpleicons.org/cursor/ffffff' },
+];
 
 /**
  * Electric energy rig around the Dream Team ball.
@@ -104,17 +111,32 @@ export default function BallEnergyFX() {
         transition={{ duration: 26, repeat: Infinity, ease: 'linear' }}
         className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
       >
-        {ROLES.map((role, i) => (
+        {MODELS.map((m, i) => (
           <div
-            key={role}
+            key={m.name}
             className="absolute left-1/2 top-1/2 h-0 w-0"
             style={{ transform: `rotate(${i * 60}deg) translateY(-196px)` }}
           >
             <span
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-cyan-200/60 bg-black/80 px-3 py-1 font-mono text-[9px] font-black tracking-[.22em] text-cyan-100 shadow-[0_0_22px_rgba(34,211,238,.55)] backdrop-blur-md"
+              className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-200/60 bg-black/80 shadow-[0_0_22px_rgba(34,211,238,.55)] backdrop-blur-md"
               style={{ transform: `translate(-50%,-50%) rotate(${-i * 60}deg)` }}
+              title={m.name}
             >
-              {role}
+              <img
+                src={m.logo}
+                alt={m.name}
+                className="h-5 w-5 object-contain"
+                loading="lazy"
+                draggable="false"
+                onError={(e) => {
+                  e.currentTarget.replaceWith(
+                    Object.assign(document.createElement('span'), {
+                      className: 'font-mono text-[9px] font-black tracking-widest text-cyan-100',
+                      textContent: m.name.slice(0, 3).toUpperCase(),
+                    })
+                  );
+                }}
+              />
             </span>
           </div>
         ))}

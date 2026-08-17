@@ -14,7 +14,7 @@ export default function HomeDreamTeamCTA() {
     <div ref={containerRef} className="w-full flex flex-col items-center px-4 overflow-hidden" style={{ maxWidth: '100vw' }}>
       
       {/* HERO TEXT - ABOVE COURT */}
-      <div className="text-center px-4 md:px-8 mb-8 max-w-5xl w-full">
+      <div className="text-center px-4 md:px-8 -mb-10 md:-mb-16 max-w-5xl w-full">
         {/* Title - Slide from left */}
         <motion.h2 
           initial={{ opacity: 0, x: -100 }}
@@ -51,14 +51,13 @@ export default function HomeDreamTeamCTA() {
         initial={{ opacity: 0, y: 70, scale: 0.9 }}
         animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
         transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full mx-auto max-w-5xl rounded-3xl shadow-[0_0_80px_rgba(79,70,229,0.6)] overflow-hidden"
+        className="relative w-full mx-auto max-w-5xl"
         style={{ maxWidth: 'min(1280px, calc(100vw - 32px))' }}
       >
         
-        {/* ELECTRIC NEBULA NODE FIELD BACKDROP */}
+        {/* ELECTRIC NEBULA NODE FIELD BACKDROP — edge-faded, no panel */}
         <div className="relative w-full aspect-[21/9]">
           <NebulaNodeField />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
         </div>
 
         {/* BUTTON WITH GLOW - ON COURT */}
@@ -68,9 +67,10 @@ export default function HomeDreamTeamCTA() {
             className="group block"
           >
             <motion.div 
-              whileHover={{ scale: 1.15, rotate: 5 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative cursor-pointer transition-all duration-300 flex flex-col items-center" 
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 140, damping: 20 }}
+              className="relative cursor-pointer flex flex-col items-center will-change-transform" 
               style={{ 
                 isolation: 'isolate', 
                 pointerEvents: 'auto',
@@ -96,9 +96,9 @@ export default function HomeDreamTeamCTA() {
               <motion.img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/48ca17dba_c44b0deb.png"
                 alt="Click to Meet The Dream Team"
-                whileHover={{ rotate: [0, -6, 6, 0], scale: 1.06 }}
-                transition={{ duration: 0.7, ease: 'easeInOut' }}
-                className="relative w-48 sm:w-56 md:w-64 lg:w-72 h-auto dream-team-logo-glow transition-[filter] duration-500 group-hover:[filter:drop-shadow(0_0_26px_rgba(34,211,238,.9))_drop-shadow(0_0_52px_rgba(217,70,239,.6))_saturate(1.5)]"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                className="relative w-48 sm:w-56 md:w-64 lg:w-72 h-auto will-change-transform dream-team-logo-glow transition-[filter] duration-700 group-hover:[filter:drop-shadow(0_0_26px_rgba(34,211,238,.9))_drop-shadow(0_0_52px_rgba(217,70,239,.6))_saturate(1.5)]"
                 style={{ 
                   zIndex: 100,
                   pointerEvents: 'auto',

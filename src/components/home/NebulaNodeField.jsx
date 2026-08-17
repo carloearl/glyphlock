@@ -95,8 +95,15 @@ export default function NebulaNodeField({ density = 62 }) {
   }, [density]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(79,70,229,.30),transparent_62%),radial-gradient(circle_at_18%_78%,rgba(34,211,238,.18),transparent_55%),radial-gradient(circle_at_82%_22%,rgba(217,70,239,.18),transparent_55%),linear-gradient(140deg,#04030f,#0a0725_55%,#050214)]" />
+    <div
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+      aria-hidden="true"
+      style={{
+        maskImage: 'radial-gradient(ellipse 62% 62% at 50% 50%, black 40%, transparent 78%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 62% 62% at 50% 50%, black 40%, transparent 78%)',
+      }}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(79,70,229,.30),transparent_62%),radial-gradient(circle_at_18%_78%,rgba(34,211,238,.18),transparent_55%),radial-gradient(circle_at_82%_22%,rgba(217,70,239,.18),transparent_55%)]" />
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
     </div>
   );
