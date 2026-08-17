@@ -5,13 +5,52 @@
 import { TrackVibe } from "@/components/mixer/types/mixerTypes";
 import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 
-const YT_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?].*)?$/;
+const YT_ID = /^[A-Za-z0-9_-]{11}$/;
 
-export function parseYoutubeUrl(url) {
-  if (!url) return null;
-  const match = url.trim().match(YT_REGEX);
-  if (!match) return null;
-  return { videoId: match[1], canonical: `https://www.youtube.com/watch?v=${match[1]}` };
+export function parseYoutubeUrl(input) {
+  const raw = String(input || '').trim();
+  if (!raw) return null;
+
+  if (YT_ID.test(raw)) {
+    return {
+      videoId: raw,
+      canonical: `https://www.youtube.com/watch?v=${raw}`,
+      embedUrl: `https://www.youtube.com/embed/${raw}`,
+    };
+  }
+
+  let value = raw;
+  if (!/^https?:\/\//i.test(value) && /^(?:www\.|m\.|music\.)?(?:youtube\.com|youtu\.be|youtube-nocookie\.com)\//i.test(value)) {
+    value = `https://${value}`;
+  }
+
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    let videoId = '';
+
+    if (host === 'youtu.be') {
+      videoId = parsed.pathname.split('/').filter(Boolean)[0] || '';
+    } else if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+      if (parsed.pathname === '/watch') videoId = parsed.searchParams.get('v') || '';
+      else if (/^\/(?:embed|shorts|live)\//.test(parsed.pathname)) videoId = parsed.pathname.split('/').filter(Boolean)[1] || '';
+    } else if (host === 'youtube-nocookie.com' && parsed.pathname.startsWith('/embed/')) {
+      videoId = parsed.pathname.split('/').filter(Boolean)[1] || '';
+    }
+
+    if (!YT_ID.test(videoId)) return null;
+    return {
+      videoId,
+      canonical: `https://www.youtube.com/watch?v=${videoId}`,
+      embedUrl: `https://www.youtube.com/embed/${videoId}`,
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+export function isYoutubeUrl(input) {
+  return Boolean(parseYoutubeUrl(input));
 }
 
 export function validateSong(song, allSongs = []) {
