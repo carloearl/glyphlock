@@ -31,6 +31,12 @@ import { computeReceiptHash } from "@/lib/nups/receiptHash";
 // BPAA-NUPS-AUDIT-001 §3.2 — emit financial_context on door sale finalize
 import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
 import { fromPOSTransaction } from "@/lib/nups/audit/financialContext";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import {
+  scopeRowsToOperatingMode,
+  stampOperationalRecord,
+  markTrainingStep,
+} from "@/lib/nups/operatingMode";
 
 export default function POSCashRegister({ user, station = 'door', showDriverPanel = true, showGuestIntake = true }) {
   // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
@@ -46,6 +52,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   }, [station, user]);
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
+  const modeState = useNUPSOperatingMode(activeVenue?.id || activeVenue?.venue_id);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [barcodeInput, setBarcodeInput] = useState("");
