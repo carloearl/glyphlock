@@ -200,9 +200,9 @@ export default function ModeToggle() {
   };
 
   if (loading) return null;
-  const cfg = STYLES[mode] || STYLES.REAL;
+  const cfg = STYLES[mode] || STYLES.LIVE;
   const Icon = cfg.icon;
-  const isDemo = mode === "DEMO";
+  const isDemo = mode === OPERATING_MODE.DEMO || mode === OPERATING_MODE.TRAINING;
 
   return (
     <div className="relative" data-mode-toggle>
@@ -218,7 +218,7 @@ export default function ModeToggle() {
       >
         <Icon className="w-3.5 h-3.5" />
         <span className="text-[10px] font-black tracking-wider">{cfg.label}</span>
-        {mode !== "REAL" && (
+        {mode !== OPERATING_MODE.LIVE && (
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: cfg.color }} />
         )}
         <ChevronDown className="w-3 h-3 opacity-70" />
@@ -243,14 +243,20 @@ export default function ModeToggle() {
 
           {/* Mode picker */}
           <div className="p-2 space-y-1">
-            {["REAL", "DEMO", "SANDBOX"].map(m => {
+            {[OPERATING_MODE.LIVE, OPERATING_MODE.TRAINING, OPERATING_MODE.DEMO, OPERATING_MODE.SANDBOX].map(m => {
               const s = STYLES[m];
               const MIcon = s.icon;
               const active = mode === m;
               return (
                 <button
                   key={m}
-                  onClick={() => switchTo(m)}
+                  onClick={() => {
+                    if (m === OPERATING_MODE.LIVE && mode !== OPERATING_MODE.LIVE) {
+                      setConfirmLive(true);
+                      return;
+                    }
+                    switchTo(m);
+                  }}
                   disabled={!!working}
                   className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all ${
                     active ? "bg-white/[0.05] border border-white/10" : "hover:bg-white/[0.03] border border-transparent"
@@ -275,7 +281,20 @@ export default function ModeToggle() {
             })}
           </div>
 
-          {/* Seed / Wipe — only meaningful in DEMO */}
+          {confirmLive && (
+            <div className="mx-2 mb-2 rounded-lg border border-emerald-500/35 bg-emerald-950/35 p-2.5">
+              <div className="flex items-start gap-2 text-[10px] leading-snug text-emerald-100">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
+                <span><b>Go live?</b> New sales, payouts, batches, and receipts will enter the real operating books.</span>
+              </div>
+              <div className="mt-2 flex gap-1.5">
+                <button type="button" onClick={() => setConfirmLive(false)} className="flex-1 rounded-md border border-white/10 px-2 py-1.5 text-[10px] text-slate-300 hover:bg-white/5">Stay non-live</button>
+                <button type="button" onClick={() => switchTo(OPERATING_MODE.LIVE)} disabled={!!working} className="flex-1 rounded-md bg-emerald-500/25 px-2 py-1.5 text-[10px] font-black text-emerald-100 hover:bg-emerald-500/40 disabled:opacity-50">CONFIRM LIVE</button>
+              </div>
+            </div>
+          )}
+
+          {/* Seed / Wipe — only meaningful in DEMO/TRAINING */}
           <div className="px-2 pb-2 pt-1 border-t border-white/5">
             <div className="text-[9px] uppercase tracking-[0.2em] text-slate-500 font-bold px-1 py-1.5">
               Demo Data
@@ -283,7 +302,7 @@ export default function ModeToggle() {
             {!isDemo && (
               <div className="px-2 py-2 text-[10px] text-slate-500 flex items-start gap-2 leading-snug">
                 <Lock className="w-3 h-3 mt-0.5 shrink-0" />
-                Switch to DEMO to seed or clear demo records. Real records are always protected.
+                Switch to TRAINING or DEMO to seed or clear non-live records. Real records are always protected.
               </div>
             )}
             {isDemo && !confirmWipe && (
