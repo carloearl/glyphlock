@@ -1,9 +1,118 @@
-#env
+# -----------------------------------------------------------------------------
+# Secrets and environment configuration
+# -----------------------------------------------------------------------------
+# Real environment files must never be committed. Placeholder templates are
+# allowed so required variable names can be documented safely.
 .env
 .env.*
+*.env
+*.env.*
+.envrc
+.direnv/
+!.env.example
+!.env.sample
+!.env.template
+!**/.env.example
+!**/.env.sample
+!**/.env.template
+
+# Local overrides
+*.local
+*.local.*
+config/local.*
+
+# Secret stores, OAuth credentials, service accounts, API-key exports
+.secrets
+.secrets.*
+**/.secrets
+**/.secrets.*
+secrets.json
+secrets.yaml
+secrets.yml
+secrets.toml
+**/secrets.json
+**/secrets.yaml
+**/secrets.yml
+**/secrets.toml
+**/*-secrets.json
+**/*_secrets.json
+**/client_secret*.json
+**/client-secret*.json
+**/oauth-client*.json
+**/oauth_client*.json
+**/credentials.json
+**/*-credentials.json
+**/*_credentials.json
+**/service-account*.json
+**/service_account*.json
+**/firebase-adminsdk*.json
+**/google-credentials*.json
+**/api-keys.json
+**/api_keys.json
+**/token.json
+**/tokens.json
+**/*refresh-token*.json
+
+# Private keys, signing material, keystores and certificate bundles
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# Package-manager / CLI credentials
+.npmrc
+.pypirc
+.netrc
+.yarnrc.local
+
+# Cloud and infrastructure credentials/state
+.aws/
+.azure/
+.gcloud/
+.kube/
+.docker/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.auto.tfvars
+
+# Base44 and deployment-provider local authentication/state
+base44/.app.jsonc
+base44/.env
+base44/.env.*
+base44/.secrets
+base44/.secrets.*
+.base44/
+.vercel/
+.netlify/
+.firebase/
+.wrangler/
+.serverless/
+.sst/
+
+# -----------------------------------------------------------------------------
+# Generated output, dependencies and caches
+# -----------------------------------------------------------------------------
+node_modules/
+dist/
+dist-ssr/
+build/
+artifacts/
+coverage/
+.cache/
+.vite/
+.turbo/
 
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -11,21 +120,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# OS / editors
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-.env
-base44/.app.jsonc
