@@ -12,13 +12,12 @@
  */
 
 import { base44 } from '@/api/base44Client';
+import { getActiveMode } from './modeResolver';
 
 const VALID_ACTIONS = new Set([
   'LOGIN', 'LOGOUT', 'CREATE', 'UPDATE', 'DELETE',
   'EXPORT', 'SETTLEMENT_RUN', 'PAYOUT_TOGGLE', 'CONFIG_CHANGE',
 ]);
-
-const VALID_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
 
 function uuid() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -39,18 +38,8 @@ async function resolveCurrentUser() {
 }
 
 async function resolveMode(venue_id) {
-  // DACO WAVE 1 — Per-venue SystemConfig first, global fallback
   try {
-    if (venue_id) {
-      const venueRows = await base44.entities.SystemConfig.filter({ venue_id, config_key: 'venue' });
-      if (venueRows && venueRows.length === 1) {
-        const vm = venueRows[0].mode;
-        if (VALID_MODES.has(vm)) return vm;
-      }
-    }
-    const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-    const m = rows?.[0]?.mode;
-    return VALID_MODES.has(m) ? m : 'REAL';
+    return await getActiveMode(venue_id);
   } catch {
     return 'REAL';
   }
