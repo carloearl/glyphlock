@@ -347,11 +347,11 @@ const AuthenticatedApp = () => {
         {Object.entries(Pages).map(([path, Page]) => (
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}
-        <Route path="/AnalyticsDashboard" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
-        <Route path="/SettlementReports" element={<LayoutWrapper currentPageName="SettlementReports"><SettlementReports /></LayoutWrapper>} />
-        <Route path="/GovernanceHub" element={<LayoutWrapper currentPageName="GovernanceHub"><GovernanceHub /></LayoutWrapper>} />
-        <Route path="/CodeOfEthics" element={<LayoutWrapper currentPageName="CodeOfEthics"><CodeOfEthics /></LayoutWrapper>} />
-        <Route path="/codeofethics" element={<LayoutWrapper currentPageName="CodeOfEthics"><CodeOfEthics /></LayoutWrapper>} />
+        <Route path="/AnalyticsDashboard" element={<AnalyticsDashboard />} />
+        <Route path="/SettlementReports" element={<SettlementReports />} />
+        <Route path="/GovernanceHub" element={<GovernanceHub />} />
+        <Route path="/CodeOfEthics" element={<CodeOfEthics />} />
+        <Route path="/codeofethics" element={<CodeOfEthics />} />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
@@ -362,34 +362,34 @@ const AuthenticatedApp = () => {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
         <Route path="/CaseStudyOracleOHIP" element={<CaseStudyOracleOHIP />} />
-        <Route path="/admin/activity-log" element={<LayoutWrapper currentPageName="ActivityLogViewer"><ActivityLogViewer /></LayoutWrapper>} />
-        <Route path="/admin/settlement" element={<LayoutWrapper currentPageName="DailySettlementDashboard"><DailySettlementDashboard /></LayoutWrapper>} />
-        <Route path="/admin/payout-history" element={<LayoutWrapper currentPageName="DriverPayoutHistory"><DriverPayoutHistory /></LayoutWrapper>} />
-        <Route path="/Accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
-        <Route path="/accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
-        <Route path="/admin/audit-integrity" element={<LayoutWrapper currentPageName="AuditIntegrity"><AuditIntegrity /></LayoutWrapper>} />
-        <Route path="/Search" element={<LayoutWrapper currentPageName="UnifiedSearch"><UnifiedSearch /></LayoutWrapper>} />
-        <Route path="/search" element={<LayoutWrapper currentPageName="UnifiedSearch"><UnifiedSearch /></LayoutWrapper>} />
-        <Route path="/Tonight" element={<LayoutWrapper currentPageName="Tonight"><Tonight /></LayoutWrapper>} />
-        <Route path="/tonight" element={<LayoutWrapper currentPageName="Tonight"><Tonight /></LayoutWrapper>} />
-        <Route path="/admin/venue-settings" element={<LayoutWrapper currentPageName="VenueAdminSettings"><VenueAdminSettings /></LayoutWrapper>} />
-        <Route path="/Contracts" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
-        <Route path="/contracts" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
-        <Route path="/ContractsHub" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
-        <Route path="/Register" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
-        <Route path="/register" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
-        <Route path="/RegisterConsole" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
-        <Route path="/Receipts" element={<LayoutWrapper currentPageName="Receipts"><Receipts /></LayoutWrapper>} />
-        <Route path="/receipts" element={<LayoutWrapper currentPageName="Receipts"><Receipts /></LayoutWrapper>} />
-        <Route path="/DriverPayouts" element={<LayoutWrapper currentPageName="DriverPayouts"><DriverPayouts /></LayoutWrapper>} />
-        <Route path="/driverpayouts" element={<LayoutWrapper currentPageName="DriverPayouts"><DriverPayouts /></LayoutWrapper>} />
-        <Route path="/NUPSHub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
-        <Route path="/nupshub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
-        <Route path="/Hub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
-        <Route path="/GlyphBotMixer" element={<LayoutWrapper currentPageName="GlyphBotMixer"><GlyphBotMixer /></LayoutWrapper>} />
-        <Route path="/glyphbotmixer" element={<LayoutWrapper currentPageName="GlyphBotMixer"><GlyphBotMixer /></LayoutWrapper>} />
-        <Route path="/BotAnalytics" element={<LayoutWrapper currentPageName="BotAnalytics"><BotAnalytics /></LayoutWrapper>} />
-        <Route path="/botanalytics" element={<LayoutWrapper currentPageName="BotAnalytics"><BotAnalytics /></LayoutWrapper>} />
+        <Route path="/admin/activity-log" element={<ActivityLogViewer />} />
+        <Route path="/admin/settlement" element={<DailySettlementDashboard />} />
+        <Route path="/admin/payout-history" element={<DriverPayoutHistory />} />
+        <Route path="/Accounting" element={<Accounting />} />
+        <Route path="/accounting" element={<Accounting />} />
+        <Route path="/admin/audit-integrity" element={<AuditIntegrity />} />
+        <Route path="/Search" element={<UnifiedSearch />} />
+        <Route path="/search" element={<UnifiedSearch />} />
+        <Route path="/Tonight" element={<Tonight />} />
+        <Route path="/tonight" element={<Tonight />} />
+        <Route path="/admin/venue-settings" element={<VenueAdminSettings />} />
+        <Route path="/Contracts" element={<ContractsHub />} />
+        <Route path="/contracts" element={<ContractsHub />} />
+        <Route path="/ContractsHub" element={<ContractsHub />} />
+        <Route path="/Register" element={<RegisterConsole />} />
+        <Route path="/register" element={<RegisterConsole />} />
+        <Route path="/RegisterConsole" element={<RegisterConsole />} />
+        <Route path="/Receipts" element={<Receipts />} />
+        <Route path="/receipts" element={<Receipts />} />
+        <Route path="/DriverPayouts" element={<DriverPayouts />} />
+        <Route path="/driverpayouts" element={<DriverPayouts />} />
+        <Route path="/NUPSHub" element={<NUPSHub />} />
+        <Route path="/nupshub" element={<NUPSHub />} />
+        <Route path="/Hub" element={<NUPSHub />} />
+        <Route path="/GlyphBotMixer" element={<GlyphBotMixer />} />
+        <Route path="/glyphbotmixer" element={<GlyphBotMixer />} />
+        <Route path="/BotAnalytics" element={<BotAnalytics />} />
+        <Route path="/botanalytics" element={<BotAnalytics />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
