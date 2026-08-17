@@ -49,7 +49,7 @@ export default function VerificationIntakeForm() {
         });
 
         if (tokenResponse.data.success) {
-          toast.success(`Verification token generated: ${tokenResponse.data.token_id}`);
+          toast.success(`Request reference: ${tokenResponse.data.token_id}`);
         }
       }
 
@@ -69,8 +69,8 @@ export default function VerificationIntakeForm() {
           <CheckCircle className="h-16 w-16 text-green-400 mx-auto" />
           <h3 className="text-2xl font-bold text-green-400">Request Received</h3>
           <p className="text-slate-300">
-            Thank you for your verification engagement request. You will receive a confirmation email 
-            with next steps within 24 hours.
+            We have your request. Someone will follow up by email to discuss scope and pricing.
+            No review has started and no findings exist until a written scope is agreed.
           </p>
           <Button onClick={() => setSubmitted(false)} variant="outline" className="border-green-500/40 text-green-400">
             Submit Another Request
@@ -83,8 +83,8 @@ export default function VerificationIntakeForm() {
   return (
     <Card className="bg-slate-800/50 border-slate-700">
       <CardHeader>
-        <CardTitle className="text-white">Request Verification Review</CardTitle>
-        <p className="text-sm text-slate-400">Complete this form to initiate your protocol verification engagement</p>
+        <CardTitle className="text-white">Request a governance documentation review</CardTitle>
+        <p className="text-sm text-slate-400">Submitting this form starts a conversation about scope and pricing. It does not create an engagement, and nothing is reviewed or represented until a written scope is agreed.</p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -159,14 +159,14 @@ export default function VerificationIntakeForm() {
           </div>
 
           <div>
-            <Label className="text-white">Verification Interest *</Label>
+            <Label className="text-white">Engagement Interest *</Label>
             <Select value={formData.verification_interest} onValueChange={(v) => setFormData({...formData, verification_interest: v})}>
               <SelectTrigger className="bg-slate-900 border-slate-700 text-white">
                 <SelectValue placeholder="Select interest level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="founding_cohort">Founding Cohort ($6,500)</SelectItem>
-                <SelectItem value="standard_verification">Standard Verification</SelectItem>
+                <SelectItem value="founding_cohort">Founding Cohort (from $6,500)</SelectItem>
+                <SelectItem value="standard_verification">Standard Review</SelectItem>
                 <SelectItem value="not_sure">Not Sure / Exploratory</SelectItem>
               </SelectContent>
             </Select>
@@ -194,7 +194,7 @@ export default function VerificationIntakeForm() {
               required
               value={formData.primary_concern}
               onChange={(e) => setFormData({...formData, primary_concern: e.target.value})}
-              placeholder="What are you hoping to achieve through verification?"
+              placeholder="What are you hoping to get out of a documentation review?"
               className="bg-slate-900 border-slate-700 text-white min-h-24"
             />
           </div>
@@ -242,7 +242,7 @@ export default function VerificationIntakeForm() {
             ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />
-                Submit Verification Request
+                Submit Request
               </>
             )}
           </Button>

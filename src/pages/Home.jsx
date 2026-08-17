@@ -36,6 +36,7 @@ import OnSiteServices from '@/components/home/OnSiteServices';
 import PlatformCapabilities from '@/components/home/PlatformCapabilities';
 import CTASection from '@/components/home/CTASection';
 import GlyphHoverEngine from '@/components/home/GlyphHoverEngine';
+import InteractiveSystemMap from '@/components/home/InteractiveSystemMap';
 
 const platformModules = [
   {
@@ -168,7 +169,7 @@ const buildStages = [
 function CommandRail() {
   const items = [
     ['FLAGSHIP', '#flagship'],
-    ['SYSTEM MAP', '#platform-universe'],
+    ['SYSTEM MAP', '#system-map'],
     ['INTELLIGENCE', '#ai-workflow'],
     ['SERVICES', '#services'],
     ['START PROJECT', '#start-project'],
@@ -523,6 +524,7 @@ export default function Home() {
           <FeaturedIntegrationsMarquee />
         </section>
 
+        <InteractiveSystemMap />
         <CapabilityGrid />
         <PlatformUniverse />
 
