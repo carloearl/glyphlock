@@ -192,7 +192,7 @@ export default function DreamTeamCards() {
             transition={{ duration: 1.1, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="text-base md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed px-4 mb-2"
           >
-            Cryptographically bound AI systems working under the Master Covenant
+            A collectible visualization of the AI tools used across GlyphLock workflows — not a claim that the model providers are partners or contractually bound.
           </motion.p>
           
           {/* Badges - Pop in with stagger */}
@@ -207,7 +207,7 @@ export default function DreamTeamCards() {
               className="flex items-center gap-1.5 text-xs text-slate-400"
             >
               <Lock className="w-3 h-3 text-green-400" />
-              <span>Verified Signatures</span>
+              <span>Archived Workflow Records</span>
             </motion.div>
             <motion.div 
               whileHover={{ scale: 1.1 }}
@@ -217,8 +217,8 @@ export default function DreamTeamCards() {
               <span>BPAAA v3.0 Governed</span>
             </motion.div>
           </motion.div>
-          <p className="text-sm text-gray-500 mt-4 hidden md:block">Hover over cards to reveal binding details</p>
-          <p className="text-sm text-gray-500 mt-4 md:hidden">Tap cards to reveal binding details</p>
+          <p className="text-sm text-gray-500 mt-4 hidden md:block">Hover over cards to reveal internal workflow metadata</p>
+          <p className="text-sm text-gray-500 mt-4 md:hidden">Tap cards to reveal internal workflow metadata</p>
         </div>
 
         {/* Mobile: Snap Scroll | Desktop: 2-2-1 Grid */}
