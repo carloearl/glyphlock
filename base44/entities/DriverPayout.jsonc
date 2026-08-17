@@ -1,20 +1,116 @@
 {
   "name": "DriverPayout",
   "type": "object",
+  "description": "Per-night driver earning and disbursement record. Supports guest-drop credits, GlyphBucks redemptions, settlement status, batch linkage, and strict LIVE/DEMO/SANDBOX separation.",
   "properties": {
-    "driver_name": {
+    "payout_id": {
       "type": "string",
-      "description": "Driver's display name"
+      "description": "Stable public payout identifier."
     },
-    "driver_number": {
+    "contractor_id": {
       "type": "string",
-      "description": "Driver's phone or badge number"
+      "description": "DriverProfile.driver_id or other contractor identifier."
     },
-    "driver_code": {
-      "type": "string",
-      "description": "Unique driver code / QR payload"
+    "contractor_name": {
+      "type": "string"
     },
     "venue_id": {
+      "type": "string"
+    },
+    "payout_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "payout_type": {
+      "type": "string",
+      "enum": [
+        "shift_earnings",
+        "driver_credit",
+        "glyphbucks_redemption",
+        "vip_commission",
+        "tip_share",
+        "other"
+      ],
+      "default": "shift_earnings"
+    },
+    "bills_redeemed": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "total_face_value": {
+      "type": "number",
+      "default": 0
+    },
+    "redemption_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "total_payout": {
+      "type": "number",
+      "default": 0
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "check",
+        "ach",
+        "glyphbucks",
+        "other"
+      ],
+      "default": "cash"
+    },
+    "payment_reference": {
+      "type": "string",
+      "description": "Batch, terminal, check, ACH, or cash handoff reference."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "open",
+        "paid",
+        "voided"
+      ],
+      "default": "pending"
+    },
+    "payout_status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "PROCESSED"
+      ],
+      "default": "PENDING"
+    },
+    "tax_year": {
+      "type": "number"
+    },
+    "headcount_confirmed": {
+      "type": "boolean",
+      "default": false
+    },
+    "confirmed_by": {
+      "type": "string"
+    },
+    "confirmed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "processed_by": {
+      "type": "string"
+    },
+    "processed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paid_by": {
       "type": "string"
     },
     "mode": {
@@ -33,14 +129,28 @@
     "training_session_id": {
       "type": "string"
     },
+    "notes": {
+      "type": "string"
+    },
+    "driver_name": {
+      "type": "string",
+      "description": "Legacy alias of contractor_name."
+    },
+    "driver_number": {
+      "type": "string",
+      "description": "Legacy driver phone or badge number."
+    },
+    "driver_code": {
+      "type": "string",
+      "description": "Legacy driver code / QR payload."
+    },
     "session_date": {
       "type": "string",
       "format": "date",
-      "description": "Night/shift date"
+      "description": "Legacy alias of payout_date."
     },
     "drop_offs": {
       "type": "array",
-      "description": "Each guest drop-off log entry",
       "items": {
         "type": "object",
         "properties": {
@@ -66,7 +176,8 @@
             "type": "string"
           }
         }
-      }
+      },
+      "default": []
     },
     "total_drops": {
       "type": "number",
@@ -82,65 +193,26 @@
     },
     "base_payout": {
       "type": "number",
-      "default": 0,
-      "description": "Base per-drop payout"
+      "default": 0
     },
     "incentive_bonus": {
       "type": "number",
-      "default": 0,
-      "description": "Bonus for 3+ drops"
+      "default": 0
     },
     "vip_kickback": {
       "type": "number",
-      "default": 0,
-      "description": "Kickback per VIP guest"
-    },
-    "total_payout": {
-      "type": "number",
       "default": 0
-    },
-    "status": {
-      "type": "string",
-      "enum": [
-        "open",
-        "paid"
-      ],
-      "default": "open",
-      "description": "LEGACY status field \u2014 preserved for DriverDropOffTracker compatibility"
-    },
-    "payout_status": {
-      "type": "string",
-      "enum": [
-        "PENDING",
-        "PROCESSED"
-      ],
-      "default": "PENDING",
-      "description": "DACO-20260610 WS-3 \u2014 Settlement-facing payout status. PROCESSED rolls into DailySettlement.driver_payouts_total."
-    },
-    "processed_by": {
-      "type": "string",
-      "description": "DACO-20260610 WS-3 \u2014 User email from session, set when payout_status flipped to PROCESSED"
-    },
-    "processed_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "DACO-20260610 WS-3 \u2014 Server time, set when payout_status flipped to PROCESSED"
-    },
-    "paid_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "paid_by": {
-      "type": "string"
-    },
-    "notes": {
-      "type": "string"
     }
   },
   "required": [
-    "driver_name",
-    "driver_number",
-    "session_date"
+    "payout_id",
+    "contractor_id",
+    "contractor_name",
+    "venue_id",
+    "payout_date",
+    "payout_type",
+    "total_payout",
+    "status"
   ],
   "rls": {
     "create": {
@@ -148,7 +220,8 @@
         "role": {
           "$in": [
             "admin",
-            "manager"
+            "manager",
+            "staff"
           ]
         }
       }
@@ -163,7 +236,8 @@
             "role": {
               "$in": [
                 "admin",
-                "manager"
+                "manager",
+                "staff"
               ]
             }
           }
@@ -175,7 +249,8 @@
         "role": {
           "$in": [
             "admin",
-            "manager"
+            "manager",
+            "staff"
           ]
         }
       }
