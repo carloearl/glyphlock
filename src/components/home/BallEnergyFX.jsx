@@ -22,8 +22,8 @@ export default function BallEnergyFX() {
     <div className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 3 }} aria-hidden="true">
       {/* ATMOSPHERIC NEBULA ORB — drifting plumes behind the ball */}
       <motion.div
-        animate={{ scale: [1, 1.08, 1], opacity: [0.55, 0.85, 0.55] }}
-        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduceMotion ? { scale: 1, opacity: 0.65 } : { scale: [1, 1.08, 1], opacity: [0.55, 0.85, 0.55] }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 7, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute inset-[8%] rounded-full blur-[38px]"
         style={{
           background:
@@ -31,8 +31,8 @@ export default function BallEnergyFX() {
         }}
       />
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 34, repeat: Infinity, ease: 'linear' }}
+        animate={reduceMotion ? { rotate: 0 } : { rotate: 360 }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 34, repeat: Infinity, ease: 'linear' }}
         className="absolute inset-[14%] rounded-full blur-[26px] opacity-70 mix-blend-screen"
         style={{
           background:
@@ -40,8 +40,8 @@ export default function BallEnergyFX() {
         }}
       />
       <motion.div
-        animate={{ rotate: -360, scale: [1.02, 0.96, 1.02] }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
+        animate={reduceMotion ? { rotate: 0, scale: 1 } : { rotate: -360, scale: [1.02, 0.96, 1.02] }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 22, repeat: Infinity, ease: 'linear' }}
         className="absolute inset-[22%] rounded-full blur-[18px] opacity-60 mix-blend-screen"
         style={{
           background:
