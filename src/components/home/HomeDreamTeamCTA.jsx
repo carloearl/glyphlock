@@ -79,22 +79,13 @@ export default function HomeDreamTeamCTA() {
               }}
             >
               
-              {/* STATIC BLACK GLOW */}
-              <div 
-                className="absolute inset-0 -m-20 rounded-full bg-black/90 blur-[100px]" 
-                style={{ 
-                  zIndex: 1,
-                  boxShadow: '0 0 120px rgba(0,0,0,0.95), inset 0 0 80px rgba(0,0,0,0.8)'
-                }}
-              ></div>
-              
               {/* SUBTLE DREAM GLOW */}
               <div 
-                className="absolute inset-0 -m-16 rounded-full"
+                className="absolute inset-0 rounded-full"
                 style={{ 
                   zIndex: 2,
-                  background: 'radial-gradient(circle, rgba(79,70,229,0.6) 0%, rgba(65,105,225,0.4) 40%, transparent 70%)',
-                  filter: 'blur(60px)'
+                  background: 'radial-gradient(circle, rgba(79,70,229,0.55) 0%, rgba(65,105,225,0.32) 42%, transparent 68%)',
+                  filter: 'blur(38px)'
                 }}
               ></div>
               
@@ -105,9 +96,9 @@ export default function HomeDreamTeamCTA() {
               <motion.img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/48ca17dba_c44b0deb.png"
                 alt="Click to Meet The Dream Team"
-                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
-                transition={{ duration: 0.5 }}
-                className="relative w-48 sm:w-56 md:w-64 lg:w-72 h-auto dream-team-logo-glow"
+                whileHover={{ rotate: [0, -6, 6, 0], scale: 1.06 }}
+                transition={{ duration: 0.7, ease: 'easeInOut' }}
+                className="relative w-48 sm:w-56 md:w-64 lg:w-72 h-auto dream-team-logo-glow transition-[filter] duration-500 group-hover:[filter:drop-shadow(0_0_26px_rgba(34,211,238,.9))_drop-shadow(0_0_52px_rgba(217,70,239,.6))_saturate(1.5)]"
                 style={{ 
                   zIndex: 100,
                   pointerEvents: 'auto',
@@ -124,7 +115,7 @@ export default function HomeDreamTeamCTA() {
               <motion.p 
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="relative mt-6 text-white text-sm md:text-base font-black uppercase tracking-[0.3em] drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]" 
+                className="relative mt-2 text-white text-sm md:text-base font-black uppercase tracking-[0.3em] drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]" 
                 style={{ zIndex: 100 }}
               >
                 ↑ CLICK THE BALL ↑

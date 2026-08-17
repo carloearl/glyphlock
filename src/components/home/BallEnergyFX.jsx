@@ -120,6 +120,15 @@ export default function BallEnergyFX() {
         ))}
       </motion.div>
 
+      {/* HOVER — expanding shockwave rings */}
+      <div className="absolute inset-[20%] rounded-full border-2 border-cyan-200/70 opacity-0 group-hover:animate-ping group-hover:opacity-100" />
+      <div className="absolute inset-[26%] rounded-full border border-fuchsia-300/70 opacity-0 [animation-delay:.35s] group-hover:animate-ping group-hover:opacity-100" />
+
+      {/* HOVER — chromatic split halo */}
+      <div className="absolute inset-[10%] rounded-full opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-90 mix-blend-screen"
+        style={{ background: 'radial-gradient(circle at 44% 46%, rgba(34,211,238,.5), transparent 52%), radial-gradient(circle at 58% 56%, rgba(255,60,180,.45), transparent 52%)' }}
+      />
+
       {/* HIDDEN UNTIL HOVER — charge burst */}
       <div className="absolute inset-[18%] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,.35),rgba(124,58,237,.22)_55%,transparent_72%)] opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
     </div>
