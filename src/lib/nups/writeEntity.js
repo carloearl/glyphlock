@@ -6,6 +6,8 @@ import { enforceRoleScope, isScopedRole } from './roleGate';
 import { emitFromGatewayWrite } from './audit/auditEventEmitter';
 // DACO WAVE 2 — ID-01 identity rebind for every protected write
 import { rebindIdentity, isIdentityCritical } from './identityRebind';
+import { getActiveMode } from './modeResolver';
+import { stampOperationalRecord, getOperatingMode } from './operatingMode';
 
 const VALID_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
 
@@ -34,6 +36,16 @@ const FINANCIAL_AUTHORIZED_ROLES = new Set([
 ]);
 
 const PROTECTED_ENTITIES = new Set(['SystemConfig', 'MigrationAuditLog']);
+
+// Entities whose schemas carry an explicit is_demo marker. Mode is stamped on
+// every ordinary entity; this additional flag makes destructive demo cleanup
+// and cross-mode filtering deterministic instead of relying on names/notes.
+const DEMO_FLAGGED_ENTITIES = new Set([
+  'NUPSUser', 'POSTransaction', 'POSBatch', 'POSProduct', 'POSCustomer',
+  'Entertainer', 'VIPGuest', 'VIPRoom', 'DriverProfile', 'DriverPayout',
+  'StaffShift', 'EntertainerShift', 'VenueContract', 'PayrollRecord',
+  'GlyphBucksBill', 'GlyphBucksTransaction', 'DailySettlement',
+]);
 
 const DEMO_PRESENCE_CHECK_ENTITIES = [
   'NUPSUser',
@@ -95,41 +107,9 @@ async function resolveMode(requestContextMode, venue_id) {
     }
     return requestContextMode;
   }
-  // DACO WAVE 1 — Layer 1: per-venue SystemConfig (if venue_id provided)
-  if (venue_id) {
-    try {
-      const venueRows = await base44.entities.SystemConfig.filter({ venue_id, config_key: 'venue' });
-      if (venueRows && venueRows.length === 1 && VALID_MODES.has(venueRows[0].mode)) {
-        return venueRows[0].mode;
-      }
-      if (venueRows && venueRows.length > 1) {
-        throw new Error(`writeEntity: SystemConfig_venue_duplicate: ${venueRows.length}_records_found`);
-      }
-    } catch (e) {
-      if (e.message && e.message.includes('SystemConfig_venue_duplicate')) throw e;
-      // Fall through to global on any other error
-    }
-  }
-  // DACO WAVE 1 — Layer 2: global SystemConfig (fallback)
-  const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-  // Auto-bootstrap on first use. Throwing here blocks every write in the app
-  // (door POS, settlements, payouts) on a fresh tenant. Default = REAL.
-  if (!rows || rows.length === 0) {
-    try {
-      await base44.entities.SystemConfig.create({ config_key: 'global', mode: 'REAL' });
-    } catch (e) {
-      // Race: someone else just created it. Re-read below.
-    }
-    const after = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-    if (after && after.length === 1 && VALID_MODES.has(after[0].mode)) return after[0].mode;
-    return 'REAL';
-  }
-  if (rows.length > 1) {
-    throw new Error(`writeEntity: SystemConfig_global_duplicate: ${rows.length}_records_found`);
-  }
-  const m = rows[0].mode;
-  if (!VALID_MODES.has(m)) throw new Error(`writeEntity: mode_invalid: ${m || 'null'}`);
-  return m;
+  // One source of truth for UI, audit logging, and writes. getActiveMode reads
+  // VenueRateConfig first and keeps SystemConfig only as a legacy fallback.
+  return getActiveMode(venue_id);
 }
 
 function checkGlyphBucksLeakage(data) {
@@ -226,9 +206,24 @@ function validateFinancialRules(entity, data) {
   return null;
 }
 
-function injectMode(record, mode) {
+function stampGatewayRecord(entity, record, mode, venue_id, requestContext = {}) {
   if (!record || typeof record !== 'object') return record;
-  return { ...record, mode };
+  const explicitValidation = requestContext?.validation_run === true;
+  const transactional = entity === 'POSTransaction';
+  const stamped = stampOperationalRecord(record, {
+    ledgerMode: mode,
+    operatingMode: getOperatingMode(mode, venue_id),
+    venueId: venue_id,
+    supportsDemoFlag: DEMO_FLAGGED_ENTITIES.has(entity),
+    transactional,
+  });
+
+  if (transactional) {
+    const fundsOff = mode !== 'REAL' || explicitValidation;
+    stamped.validation_run = fundsOff;
+    stamped.funds_settled = !fundsOff;
+  }
+  return stamped;
 }
 
 export async function writeEntity({
