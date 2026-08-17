@@ -10,7 +10,7 @@ import { providerLabel, searchMusicSources } from '@/lib/musicDiscovery';
 import PasteLinkPanel from '@/components/mixer/suite/PasteLinkPanel';
 import ArchiveSearchPanel from '@/components/mixer/suite/ArchiveSearchPanel';
 
-export default function MusicSearchTab() {
+export default function MusicSearchTab({ onLoadToMixerDeck }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -55,9 +55,10 @@ export default function MusicSearchTab() {
     toast.success(`Imported "${r.title.slice(0, 40)}…"`);
   }
 
-  // Send a YouTube result straight to a deck — broadcasts to the ClubTV window
-  // so staff can preview on the TV without needing to import first.
+  // Load the result into the actual mixer deck, then mirror the same payload
+  // to Club TV. This keeps one source of truth instead of a TV-only side path.
   function loadToDeck(r, deck) {
+    onLoadToMixerDeck?.(r, deck);
     const payload = {
       [deck === 'A' ? 'deckA' : 'deckB']: {
         title: r.title,
@@ -69,7 +70,7 @@ export default function MusicSearchTab() {
       },
     };
     getClubTVSender().publish(payload);
-    toast.success(`Sent to Deck ${deck} · Club TV`);
+    toast.success(`Loaded Deck ${deck}${onLoadToMixerDeck ? ' · Mixer' : ''} · Club TV`);
   }
 
   function handleDragStart(e, r) {
