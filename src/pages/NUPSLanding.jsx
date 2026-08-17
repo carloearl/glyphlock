@@ -1401,6 +1401,7 @@ export default function NUPSLanding() {
 
         <nav className="nups-section-nav" aria-label="NUPS landing sections">
           <div className="nups-section-nav-inner">
+            <button type="button" onClick={() => navigate('/')}>← Back</button>
             <button type="button" onClick={() => scrollToSection('nups-video')}>Overview</button>
             <button type="button" onClick={() => scrollToSection('nups-walkthrough')}>Demo</button>
             <button type="button" onClick={() => scrollToSection('nups-architecture')}>Architecture</button>
