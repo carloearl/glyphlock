@@ -9,6 +9,8 @@ import { rebindIdentity, isIdentityCritical } from './identityRebind';
 import { getActiveMode } from './modeResolver';
 import { stampOperationalRecord, getOperatingMode } from './operatingMode';
 
+import { getNupsEnvironment } from '@/lib/nups/operatingEnvironment';
+import { saveLastReceipt } from '@/lib/nups/receiptService';
 const VALID_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
 
 const FINANCIAL_ENTITIES = new Set([
@@ -236,7 +238,7 @@ function stampGatewayRecord(entity, record, mode, venue_id, requestContext = {})
   return stamped;
 }
 
-export async function writeEntity({
+async function writeEntityInternal({
   entity,
   operation,
   data,
@@ -701,3 +703,83 @@ export async function clearDemoEcosystem({ actor }) {
 
   return { ok: true, removed, skipped };
 }
+
+function describeWriteEntityCall(args) {
+  const first = args?.[0];
+  const second = args?.[1];
+  const third = args?.[2];
+  const objectCall = first && typeof first === 'object' && !Array.isArray(first) ? first : null;
+  const entityName = typeof first === 'string'
+    ? first
+    : objectCall?.entityName || objectCall?.entity || objectCall?.entity_name || '';
+  const operation = typeof second === 'string'
+    ? second
+    : objectCall?.operation || objectCall?.op || 'create';
+  const payload = (third && typeof third === 'object')
+    ? third
+    : (second && typeof second === 'object')
+      ? second
+      : objectCall?.data || objectCall?.payload || {};
+  return { entityName: String(entityName || ''), operation: String(operation || ''), payload: payload || {} };
+}
+
+function receiptFromWrite(entityName, payload, result) {
+  const normalized = String(entityName || '').toLowerCase();
+  if (!/(postransaction|paymentrecord|receipt|glyphbuckssale|glyphbuckstransaction)/.test(normalized)) return null;
+  const record = result?.record || result?.data || result?.entity || result || {};
+  const source = record && typeof record === 'object' ? { ...payload, ...record } : payload;
+  const totalCents = Number(source.total_cents ?? source.amount_cents ?? source.total_amount_cents ?? source.total_sales_cents ?? 0) || 0;
+  const subtotalCents = Number(source.subtotal_cents ?? source.net_cents ?? totalCents) || totalCents;
+  const label = source.item_name || source.description || source.transaction_type || source.category || 'NUPS transaction';
+  return {
+    id: source.id || source.transaction_id,
+    transaction_id: source.id || source.transaction_id,
+    receipt_number: source.receipt_number || source.receipt_id || source.transaction_number || `NUPS-${Date.now()}`,
+    venue_name: source.venue_name || 'NUPS Venue',
+    operator_name: source.operator_name || source.cashier_name || source.created_by || '',
+    created_at: source.created_at || source.created_date || new Date().toISOString(),
+    payment_method: source.payment_method || source.tender_type || '',
+    subtotal_cents: subtotalCents,
+    tax_cents: Number(source.tax_cents || 0) || 0,
+    fees_cents: Number(source.fee_cents || source.fees_cents || 0) || 0,
+    total_cents: totalCents,
+    lines: Array.isArray(source.lines) && source.lines.length
+      ? source.lines
+      : [{ label, quantity: Number(source.quantity || 1) || 1, unit_price_cents: Number(source.unit_price_cents || totalCents) || totalCents, total_cents: totalCents }],
+    environment: getNupsEnvironment(),
+    metadata: { entity_name: entityName },
+  };
+}
+
+/**
+ * Environment-aware public gateway.
+ *
+ * TRAINING is defense-in-depth blocked here even though the UI routes trainees
+ * into the browser-only Training Center. Existing REAL/DEMO enforcement remains
+ * inside writeEntityInternal, preserving established NUPS financial controls.
+ */
+export async function writeEntity(...args) {
+  const environment = getNupsEnvironment();
+  if (environment === 'TRAINING') {
+    const error = new Error('NUPS training mode blocks database writes. Use the Training Center practice workflows instead.');
+    error.code = 'NUPS_TRAINING_WRITE_BLOCKED';
+    error.environment = environment;
+    throw error;
+  }
+
+  const call = describeWriteEntityCall(args);
+  const result = await writeEntityInternal(...args);
+
+  try {
+    if (/create|post|complete/i.test(call.operation)) {
+      const receipt = receiptFromWrite(call.entityName, call.payload, result);
+      if (receipt) saveLastReceipt(receipt);
+    }
+  } catch (receiptError) {
+    // A printer/receipt-cache failure must never roll back a successful ledger write.
+    console.warn('[NUPS receipt capture]', receiptError);
+  }
+
+  return result;
+}
+
