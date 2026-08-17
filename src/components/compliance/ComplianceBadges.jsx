@@ -26,8 +26,8 @@ export default function ComplianceBadges({ showVerificationWarning = true }) {
     soc2: { verified: false, inProgress: true },
     iso27001: { verified: false, inProgress: true },
     pciDss: { verified: false, inProgress: true },
-    gdpr: { verified: true, inProgress: false },
-    hipaa: { verified: true, inProgress: false }
+    gdpr: { verified: false, inProgress: true },
+    hipaa: { verified: false, inProgress: true }
   };
 
   return (
@@ -42,8 +42,8 @@ export default function ComplianceBadges({ showVerificationWarning = true }) {
                   ⚠️ COMPLIANCE VERIFICATION REQUIRED
                 </div>
                 <div className="text-xs text-yellow-200">
-                  CEO must verify active certifications before public display.
-                  Currently showing compliance programs in place.
+                  Framework references must not be read as third-party certification or legal compliance determinations.
+                  Public certification language requires supporting evidence.
                 </div>
               </div>
             </div>
@@ -52,43 +52,42 @@ export default function ComplianceBadges({ showVerificationWarning = true }) {
 
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-            Enterprise-Grade Security Standards
+            Security Framework References
           </h2>
           <p className="text-lg text-slate-300 max-w-3xl mx-auto">
-            GlyphLock maintains comprehensive security and compliance programs
-            aligned with industry-leading standards for credentialed integrity systems.
+            These references describe control-design targets and scope considerations. They are not certification badges or independent attestations.
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
           <ComplianceBadge
             BadgeComponent={SOC2Badge}
-            title="SOC 2 Aligned"
-            subtitle={certifications.soc2.verified ? "Verified Program" : "Program In Place"}
+            title="SOC 2 Reference"
+            subtitle={certifications.soc2.verified ? "Verified Program" : "Control Reference"}
             verified={certifications.soc2.verified}
           />
           <ComplianceBadge
             BadgeComponent={ISO27001Badge}
-            title="ISO 27001 Architecture"
-            subtitle={certifications.iso27001.verified ? "Certified" : "Standards Met"}
+            title="ISO/IEC 27001 Reference"
+            subtitle={certifications.iso27001.verified ? "Certified" : "Control Reference"}
             verified={certifications.iso27001.verified}
           />
           <ComplianceBadge
             BadgeComponent={PCIDSSBadge}
-            title="PCI DSS Compatible"
-            subtitle={certifications.pciDss.verified ? "Compliant" : "Standards Met"}
+            title="PCI DSS Scope Reference"
+            subtitle={certifications.pciDss.verified ? "Validated" : "Scope Dependent"}
             verified={certifications.pciDss.verified}
           />
           <ComplianceBadge
             BadgeComponent={GDPRBadge}
-            title="GDPR Aligned"
-            subtitle="Compliant"
+            title="Privacy Program"
+            subtitle="Scope Dependent"
             verified={certifications.gdpr.verified}
           />
           <ComplianceBadge
             BadgeComponent={HIPAABadge}
-            title="HIPAA Ready"
-            subtitle="Compliant"
+            title="Health Data Controls"
+            subtitle="Scope Dependent"
             verified={certifications.hipaa.verified}
           />
         </div>
@@ -102,8 +101,8 @@ export default function ComplianceBadges({ showVerificationWarning = true }) {
 
         <div className="mt-12 p-6 bg-slate-900/50 border border-slate-700/50 rounded-lg">
           <p className="text-xs text-slate-500 text-center leading-relaxed mt-2">
-            These labels indicate architectural alignment and program implementation — not formal third-party certification.
-            GlyphLock maintains ongoing security audits and assessments toward formal certification.
+            These labels are framework references only — not formal third-party certification, regulatory approval, or a legal compliance determination.
+            Independent attestation will be identified by assessor, scope, period, and supporting report when available.
             For verification inquiries, contact{" "}
             <a href="mailto:hello@glyphlock.io" className="text-blue-400 hover:underline">hello@glyphlock.io</a>.
           </p>
