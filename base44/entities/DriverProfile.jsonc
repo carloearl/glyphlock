@@ -95,7 +95,14 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "DACO WAVE 1 \u2014 Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
+      "description": "Ledger mode. REAL = live, DEMO = demo/training, SANDBOX = development."
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false
+    },
+    "training_session_id": {
+      "type": "string"
     }
   },
   "required": [
@@ -110,6 +117,7 @@
           "$in": [
             "admin",
             "manager",
+            "staff",
             "doorman"
           ]
         }
@@ -126,6 +134,7 @@
               "$in": [
                 "admin",
                 "manager",
+                "staff",
                 "doorman"
               ]
             }
