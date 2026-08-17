@@ -16,6 +16,7 @@ import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import SettlementReports from './pages/SettlementReports';
 import GovernanceHub from './pages/GovernanceHub';
 import CodeOfEthics from './pages/CodeOfEthics';
+import EmailDeliveryLogPage from './pages/EmailDeliveryLogPage';
 import NUPSPostLogin from './pages/NUPSPostLogin';
 import SystemAudit from './pages/SystemAudit';
 import OfficialChecks from './pages/OfficialChecks';
@@ -352,6 +353,7 @@ const AuthenticatedApp = () => {
         <Route path="/GovernanceHub" element={<GovernanceHub />} />
         <Route path="/CodeOfEthics" element={<CodeOfEthics />} />
         <Route path="/codeofethics" element={<CodeOfEthics />} />
+        <Route path="/admin/email-log" element={<EmailDeliveryLogPage />} />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />

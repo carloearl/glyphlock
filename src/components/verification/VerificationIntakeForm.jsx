@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { Send, CheckCircle } from 'lucide-react';
+import { sendFormNotification, NOTIFICATION_RECIPIENT } from '@/lib/notifications/sendFormNotification';
 
 export default function VerificationIntakeForm() {
   const [formData, setFormData] = useState({
@@ -56,9 +57,12 @@ export default function VerificationIntakeForm() {
         }
       }
 
-      // Notify GlyphLock
-      const emailResult = await base44.integrations.Core.SendEmail({
-        to: 'carloearl@glyphlock.com',
+      // Notify GlyphLock — never blocks the submission, always logged
+      const delivery = await sendFormNotification({
+        source: 'verification_intake',
+        reference: referenceId,
+        organization: formData.organization_name,
+        contactEmail: formData.contact_email,
         subject: `New governance review request — ${formData.organization_name}`,
         body: [
           `Organization: ${formData.organization_name}`,
@@ -76,16 +80,20 @@ export default function VerificationIntakeForm() {
         ].join('\n'),
       });
 
-      console.log('[Consultation] email result', emailResult);
-
       setConfirmation({
         reference: referenceId,
         organization: formData.organization_name,
         email: formData.contact_email,
         submitted_at: new Date().toLocaleString(),
+        delivery_status: delivery.status,
+        delivery_error: delivery.error,
       });
       setSubmitted(true);
-      toast.success('Request submitted successfully');
+      if (delivery.status === 'sent') {
+        toast.success('Request submitted and notification delivered');
+      } else {
+        toast.warning('Request saved, but the notification email failed to send');
+      }
     } catch (error) {
       toast.error('Submission failed: ' + error.message);
     } finally {
@@ -122,6 +130,17 @@ export default function VerificationIntakeForm() {
                 <span className="text-slate-400">Sent</span>
                 <span className="text-white">{confirmation.submitted_at}</span>
               </div>
+              <div className="flex justify-between gap-4 text-sm border-t border-slate-700 pt-3">
+                <span className="text-slate-400">Notification</span>
+                <span className={confirmation.delivery_status === 'sent' ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}>
+                  {confirmation.delivery_status === 'sent'
+                    ? `Delivered to ${NOTIFICATION_RECIPIENT}`
+                    : 'Send failed — logged for retry'}
+                </span>
+              </div>
+              {confirmation.delivery_error && (
+                <p className="text-xs text-red-300 break-all">{confirmation.delivery_error}</p>
+              )}
             </div>
           )}
 

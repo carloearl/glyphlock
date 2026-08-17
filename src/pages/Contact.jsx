@@ -9,6 +9,7 @@ import SEOHead from "@/components/SEOHead";
 import { GlyphInput, GlyphButton, GlyphFormPanel } from "@/components/ui/GlyphForm";
 import { motion, useInView } from "framer-motion";
 import CyanLoader from "@/components/shared/CyanLoader";
+import { sendFormNotification } from "@/lib/notifications/sendFormNotification";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -39,21 +40,18 @@ export default function Contact() {
         ip_address: "client_ip"
       });
 
-      // Send email
-      try {
-        await base44.integrations.Core.SendEmail({
-          to: "carloearl@glyphlock.com",
-          subject: `Contact Form: ${data.subject}`,
-          body: `Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`
-        });
-        
-        // Update status to sent
-        await base44.entities.ContactEvent.update(contactEvent.id, { status: "sent" });
-      } catch (err) {
-        // Update status to failed
-        await base44.entities.ContactEvent.update(contactEvent.id, { status: "failed" });
-        throw err;
-      }
+      // Send email (logged to EmailDeliveryLog either way)
+      const delivery = await sendFormNotification({
+        source: "contact_form",
+        reference: contactEvent.id,
+        contactEmail: data.email,
+        subject: `Contact Form: ${data.subject}`,
+        body: `Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`
+      });
+
+      await base44.entities.ContactEvent.update(contactEvent.id, { status: delivery.status });
+
+      if (delivery.status === "failed") throw new Error(delivery.error);
     },
     onSuccess: () => {
       setSubmitted(true);

@@ -1,0 +1,68 @@
+{
+  "name": "EmailDeliveryLog",
+  "type": "object",
+  "description": "Audit trail of outbound notification emails sent by public forms. One record per send attempt, written whether the send succeeded or failed.",
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "Which form or flow triggered the send (e.g. verification_intake, contact_form)."
+    },
+    "recipient": {
+      "type": "string",
+      "description": "Destination email address."
+    },
+    "subject": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Related request reference (consultation id or verification token id)."
+    },
+    "organization": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Email address of the person who submitted the form."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "failed"
+      ],
+      "default": "sent"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error text when status is failed."
+    },
+    "attempted_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "source",
+    "recipient",
+    "status"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
