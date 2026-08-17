@@ -81,7 +81,7 @@ export default function HeroSection() {
             transition={{ delay: 0.22, duration: 0.8 }}
             className="mt-7 max-w-2xl text-base leading-relaxed text-slate-200 drop-shadow-[0_4px_14px_rgba(0,0,0,.92)] md:text-xl"
           >
-            GlyphLock builds the software layer between an idea and a working operation — custom systems, AI workflows, verification, integrations, financial tooling and the flagship NUPS platform.
+            GlyphLock is an infrastructure platform for creating, operating, verifying, protecting, and governing digital and real-world systems. At its core, GlyphLock creates trusted records — and the systems required to act on them.
           </motion.p>
 
           <motion.div
@@ -116,9 +116,13 @@ export default function HeroSection() {
             transition={{ delay: 0.58 }}
             className="mt-8 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[9px] tracking-[.17em] text-slate-400 md:text-[10px]"
           >
-            <span><b className="text-cyan-300">01</b> CUSTOM SOFTWARE</span>
-            <span><b className="text-blue-300">02</b> AI WORKFLOWS</span>
-            <span><b className="text-violet-300">03</b> OPERATIONS SYSTEMS</span>
+            <span><b className="text-cyan-300">01</b> CREATE</span>
+            <span><b className="text-blue-300">02</b> INTELLIGENCE</span>
+            <span><b className="text-violet-300">03</b> VERIFY</span>
+            <span><b className="text-fuchsia-300">04</b> OPERATE</span>
+            <span><b className="text-rose-300">05</b> PROTECT</span>
+            <span><b className="text-amber-300">06</b> GOVERN</span>
+            <span><b className="text-emerald-300">07</b> CONNECT</span>
           </motion.div>
         </div>
 
