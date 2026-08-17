@@ -12,7 +12,7 @@ function localMatches(track, query) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const JAMENDO_CLIENT_ID = String(Deno.env.get("JAMENDO_CLIENT_ID") || "").trim();
+    const JAMENDO_CLIENT_ID = "";
     const body = await req.json().catch(() => ({}));
     const query = String(body?.query || "").trim();
     const limit = Math.min(Math.max(parseInt(body?.limit) || 12, 1), 25);
