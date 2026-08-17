@@ -303,7 +303,7 @@ export async function writeEntity({
   // rejection reason instead of the generic "role_not_authorized_in_REAL".
   // Sovereign bypasses (consistent with existing precedent).
   if (!sovereign) {
-    const scopeReason = enforceRoleScope({ role, entity, operation, data, actor });
+    const scopeReason = enforceRoleScope({ role, entity, operation, data, actor, mode });
     if (scopeReason) {
       const audit_id = await audit({
         entity_name: entity,
