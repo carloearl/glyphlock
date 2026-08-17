@@ -395,9 +395,9 @@ export async function writeEntity({
   if (PROTECTED_ENTITIES.has(entity)) {
     stamped = data;
   } else if (operation === 'bulkCreate') {
-    stamped = (data || []).map((r) => injectMode(r, mode));
+    stamped = (data || []).map((r) => stampGatewayRecord(entity, r, mode, venue_id, requestContext));
   } else if (operation === 'create' || operation === 'update') {
-    stamped = injectMode(data, mode);
+    stamped = stampGatewayRecord(entity, data, mode, venue_id, requestContext);
   } else {
     stamped = data;
   }
