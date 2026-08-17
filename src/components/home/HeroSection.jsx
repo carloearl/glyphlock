@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Play, Sparkles, ChevronDown } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import PlatformOrbit from '@/components/home/PlatformOrbit';
+import HeroCursorSpotlight from '@/components/home/HeroCursorSpotlight';
 
 export default function HeroSection() {
   return (
@@ -16,6 +17,8 @@ export default function HeroSection() {
         <div className="absolute inset-0 opacity-25" style={{ backgroundImage: 'linear-gradient(rgba(34,211,238,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.13) 1px,transparent 1px)', backgroundSize: '50px 50px', maskImage: 'linear-gradient(to bottom,black,transparent 88%)' }} />
         <div className="absolute inset-0 opacity-[.08]" style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(255,255,255,.13) 4px)' }} />
       </div>
+
+      <HeroCursorSpotlight />
 
       <div className="absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-cyan-200 to-transparent shadow-[0_0_26px_#22d3ee]" />
       <motion.div animate={{ x: ['-18%', '118%'] }} transition={{ duration: 7, repeat: Infinity, ease: 'linear' }} className="absolute top-[17%] z-10 h-px w-[30%] bg-gradient-to-r from-transparent via-cyan-200/[.85] to-transparent shadow-[0_0_20px_#22d3ee] pointer-events-none" />
