@@ -768,6 +768,18 @@ export async function writeEntity(...args) {
   }
 
   const call = describeWriteEntityCall(args);
+  const explicitMode = String(call.payload?.mode || call.payload?.environment || call.payload?._nups_environment || '').toUpperCase();
+  if (environment === 'DEMO' && ['REAL', 'LIVE', 'PRODUCTION'].includes(explicitMode)) {
+    const error = new Error('NUPS demo mode refused a payload explicitly marked as live. Switch environments or correct the record scope.');
+    error.code = 'NUPS_DEMO_LIVE_SCOPE_CONFLICT';
+    throw error;
+  }
+  if (environment === 'LIVE' && ['DEMO', 'TRAINING', 'SANDBOX'].includes(explicitMode)) {
+    const error = new Error('NUPS live mode refused a demo/training payload. Keep non-live records out of the production data scope.');
+    error.code = 'NUPS_LIVE_NONLIVE_SCOPE_CONFLICT';
+    throw error;
+  }
+
   const result = await writeEntityInternal(...args);
 
   try {
