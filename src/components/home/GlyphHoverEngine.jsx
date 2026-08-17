@@ -129,14 +129,14 @@ export default function GlyphHoverEngine() {
       activeTarget = element;
       activeIndex = center;
       tick += 1;
-      render(element, center, 2);
+      render(element, center, 1);
 
       if (!flickerTimer) {
         flickerTimer = window.setInterval(() => {
           if (!activeTarget || activeIndex < 0) return;
           tick += 1;
-          render(activeTarget, activeIndex, 2);
-        }, 72);
+          render(activeTarget, activeIndex, 1);
+        }, 160);
       }
     };
 
@@ -196,8 +196,8 @@ export default function GlyphHoverEngine() {
         sweep = (sweep + 1) % state.length;
         activeIndex = sweep;
         tick += 1;
-        render(target, sweep, 3);
-      }, 58);
+        render(target, sweep, 1);
+      }, 110);
 
       if (touchRestoreTimer) window.clearTimeout(touchRestoreTimer);
       touchRestoreTimer = window.setTimeout(() => {
@@ -226,8 +226,8 @@ export default function GlyphHoverEngine() {
         }
         activeIndex = sweep;
         tick += 1;
-        render(target, sweep, 2);
-      }, 62);
+        render(target, sweep, 1);
+      }, 110);
     };
 
     const onFocusOut = (event) => {

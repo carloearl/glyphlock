@@ -169,9 +169,9 @@ export default function HeroContent() {
           50%, 100% { opacity: 0; }
         }
         @keyframes heroGlitchTag {
-          0%, 90%, 100% { transform: translate(0, 0); filter: hue-rotate(0deg); }
-          92% { transform: translate(-2px, 1px); filter: hue-rotate(90deg); }
-          94% { transform: translate(2px, -1px); filter: hue-rotate(-90deg); }
+          0%, 94%, 100% { transform: translate(0, 0); filter: hue-rotate(0deg); }
+          96% { transform: translate(-0.5px, 0); filter: hue-rotate(20deg); }
+          98% { transform: translate(0.5px, 0); filter: hue-rotate(-20deg); }
         }
         @keyframes heroScanShift {
           0% { transform: translateX(0) translateY(0); }
@@ -527,7 +527,7 @@ function FragmentCard({ card, delay, isInView }) {
       animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
       transition={{ duration: 0.8, delay, type: "spring", stiffness: 100, damping: 14 }}
       whileHover={{ scale: 1.05 }}
-      className={`relative overflow-hidden p-6 border-2 ${card.borderClass} cursor-pointer transition-all duration-500 ${card.glowClass}`}
+      className={`relative overflow-hidden p-6 border-2 ${card.borderClass} cursor-pointer transition-all duration-500 ${card.glowClass} grayscale hover:grayscale-0 opacity-80 hover:opacity-100`}
       style={{
         background: 'linear-gradient(135deg, rgba(10,1,24,0.95), rgba(30,27,75,0.9))',
         clipPath: card.clipPath

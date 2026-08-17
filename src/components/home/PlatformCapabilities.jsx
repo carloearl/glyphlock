@@ -91,6 +91,8 @@ function ModuleCard({ mod, index, isInView }) {
         <div
           className="relative overflow-hidden rounded-xl p-6 h-full transition-all duration-400 cursor-pointer"
           style={{
+            filter: hovered ? 'grayscale(0) saturate(1.15)' : 'grayscale(1)',
+            opacity: hovered ? 1 : 0.85,
             background: hovered
               ? `linear-gradient(135deg, rgba(10,1,24,0.98), rgba(20,10,50,0.95))`
               : 'linear-gradient(135deg, rgba(10,1,24,0.95), rgba(15,5,35,0.9))',
