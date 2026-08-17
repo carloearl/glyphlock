@@ -20,6 +20,9 @@ import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleC
 import { isSovereign } from "@/lib/nups/sovereign";
 import { useAdminOverride, setAdminOverride } from "@/lib/nups/adminView";
 import { readNUPSSession } from "@/lib/nups/persistentSession";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { OPERATING_MODE } from "@/lib/nups/operatingMode";
+import TrainingCoach from "@/components/nups/training/TrainingCoach";
 
 
 // DACO 003 §2 — which sections each role class may see.
@@ -240,6 +243,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   const navigate = useNavigate();
   const location = useLocation();
   const activeVenue = useActiveVenue();
+  const modeState = useNUPSOperatingMode(activeVenue?.id || activeVenue?.venue_id);
   const now = useClock();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -528,6 +532,25 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
           </div>
         </header>
 
+        {modeState.isNonLive && (
+          <div className={`border-b px-3 py-2 sm:px-4 lg:px-8 ${
+            modeState.operatingMode === OPERATING_MODE.TRAINING
+              ? "border-sky-400/25 bg-sky-500/[.08] text-sky-100"
+              : modeState.operatingMode === OPERATING_MODE.DEMO
+                ? "border-amber-400/25 bg-amber-500/[.08] text-amber-100"
+                : "border-violet-400/25 bg-violet-500/[.08] text-violet-100"
+          }`} role="status" aria-live="polite">
+            <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-2 text-[11px]">
+              <div className="font-black tracking-wide">
+                {modeState.operatingMode} MODE · FUNDS OFF
+              </div>
+              <div className="text-[10px] opacity-75">
+                Non-live records are isolated from live sales, batches, payouts, receipts, and settlement totals.
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 min-w-0 px-3 sm:px-4 lg:px-8 py-4 sm:py-5 lg:py-6 overflow-x-hidden">
           {children}
         </div>
@@ -535,6 +558,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
 
       {/* Global Search Drawer — reads from Feature Registry (§3 keystone) */}
       <GlobalSearchDrawer open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <TrainingCoach />
     </div>
   );
 }
