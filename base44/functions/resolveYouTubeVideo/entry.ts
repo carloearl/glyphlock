@@ -13,7 +13,10 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const query = String(body?.query || '').trim();
-    if (!query) return Response.json({ error: 'Query is required' }, { status: 400 });
+    const videoId = String(body?.videoId || '').trim();
+    if (!query && !/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+      return Response.json({ error: 'Query or valid videoId is required' }, { status: 400 });
+    }
 
     const key = String(Deno.env.get('YOUTUBE_API_KEY') || '').trim();
     if (!key) {
@@ -23,16 +26,22 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
-    const params = new URLSearchParams({
-      part: 'snippet',
-      type: 'video',
-      videoCategoryId: '10',
-      maxResults: '1',
-      q: query,
-      key,
-    });
+    const directLookup = /^[A-Za-z0-9_-]{11}$/.test(videoId);
+    const params = directLookup
+      ? new URLSearchParams({ part: 'snippet,status,contentDetails', id: videoId, key })
+      : new URLSearchParams({
+          part: 'snippet',
+          type: 'video',
+          videoCategoryId: '10',
+          videoEmbeddable: 'true',
+          videoSyndicated: 'true',
+          maxResults: '1',
+          q: query,
+          key,
+        });
 
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`, {
+    const endpoint = directLookup ? 'videos' : 'search';
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/${endpoint}?${params.toString()}`, {
       signal: AbortSignal.timeout(8000),
     });
     const data = await res.json().catch(() => null);
@@ -47,11 +56,26 @@ Deno.serve(async (req) => {
     const item = data?.items?.[0];
     if (!item) return Response.json({ videoId: null, notFound: true });
 
+    const resolvedVideoId = directLookup ? item.id : item.id?.videoId;
+    if (!resolvedVideoId) return Response.json({ videoId: null, notFound: true });
+    if (directLookup && item.status?.embeddable === false) {
+      return Response.json({
+        error: 'This YouTube video does not allow embedded playback.',
+        code: 'YOUTUBE_NOT_EMBEDDABLE',
+        videoId: resolvedVideoId,
+        watchUrl: `https://www.youtube.com/watch?v=${resolvedVideoId}`,
+      }, { status: 409 });
+    }
+
     return Response.json({
-      videoId: item.id.videoId,
+      videoId: resolvedVideoId,
       title: item.snippet?.title || '',
       channel: item.snippet?.channelTitle || '',
-      thumbnail: item.snippet?.thumbnails?.medium?.url || '',
+      thumbnail: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.high?.url || '',
+      watchUrl: `https://www.youtube.com/watch?v=${resolvedVideoId}`,
+      embedUrl: `https://www.youtube.com/embed/${resolvedVideoId}`,
+      embeddable: directLookup ? item.status?.embeddable !== false : true,
+      duration: directLookup ? item.contentDetails?.duration || '' : '',
     });
   } catch (error) {
     return Response.json({ error: error?.message || 'Unknown error' }, { status: 500 });
