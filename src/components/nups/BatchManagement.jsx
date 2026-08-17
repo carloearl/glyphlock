@@ -96,30 +96,57 @@ export default function BatchManagement({ user, onBatchClosed }) {
     if (!activeBatch) return;
     const unsubscribe = base44.entities.POSTransaction.subscribe((event) => {
       // When any transaction is created/updated, refresh batch transactions
-      queryClient.invalidateQueries(['batch-transactions', activeBatch.id]);
+      queryClient.invalidateQueries({ queryKey: ['batch-transactions', activeBatch.id] });
     });
     return unsubscribe;
   }, [activeBatch?.id, queryClient]);
 
+  const writeBatch = async ({ operation, id = null, data }) => {
+    let liveActor = null;
+    try { liveActor = await base44.auth.me(); } catch (_) { /* kiosk/admin shell may carry user */ }
+    const result = await writeEntity({
+      entity: 'POSBatch',
+      operation,
+      recordId: id,
+      data,
+      actor: {
+        email: liveActor?.email || user?.email,
+        id: liveActor?.id || user?.id,
+        role: user?._highestRole || user?.role || liveActor?._highestRole || liveActor?.role || 'External',
+      },
+      venue_id: venueId,
+      intent: `${modeState.operatingMode}_BATCH_${operation.toUpperCase()}`,
+      requestContext: {
+        mode: modeState.ledgerMode,
+        validation_run: modeState.isNonLive,
+        session_id: modeState.trainingSession?.id || null,
+      },
+    });
+    if (!result?.ok) throw new Error(result?.block_reason || `Batch ${operation} rejected.`);
+    return result.value || data;
+  };
+
   const openBatchMutation = useMutation({
-    mutationFn: (data) => base44.entities.POSBatch.create(data),
+    mutationFn: (data) => writeBatch({ operation: 'create', data }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['active-batch']);
+      queryClient.invalidateQueries({ queryKey: ['active-batch'] });
       setOpeningCash('');
       setNotes("");
-    }
+      if (modeState.isTraining) markTrainingStep(venueId, 'batch-opened');
+    },
   });
 
   const closeBatchMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.POSBatch.update(id, data),
+    mutationFn: ({ id, data }) => writeBatch({ operation: 'update', id, data }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['active-batch']);
-      queryClient.invalidateQueries(['batch-transactions']);
+      queryClient.invalidateQueries({ queryKey: ['active-batch'] });
+      queryClient.invalidateQueries({ queryKey: ['batch-transactions'] });
       setShowCloseDialog(false);
       setClosingCash('');
       setNotes("");
+      if (modeState.isTraining) markTrainingStep(venueId, 'batch-closed');
       onBatchClosed?.();
-    }
+    },
   });
 
   // ─── RESET (manager override required) ───────────────────────────────────────
