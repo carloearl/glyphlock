@@ -220,7 +220,6 @@ export default function DJPlayerSection({
       const targetId = activeDeck === "A" ? deckBSongId : deckASongId;
       if (!targetId) return;
       const ref = activeDeck === "A" ? deckARef.current : deckBRef.current;
-      const cueRef = targetDeck === "A" ? deckARef.current : deckBRef.current;
       const duration = Number(ref?.getDuration?.() || 0);
       const current = Number(ref?.getCurrentTime?.() || 0);
       if (!duration || current < 1) return;
