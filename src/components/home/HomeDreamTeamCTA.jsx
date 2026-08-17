@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, useInView } from "framer-motion";
+import NebulaNodeField from "@/components/home/NebulaNodeField";
 
 export default function HomeDreamTeamCTA() {
   const containerRef = useRef(null);
@@ -53,16 +54,10 @@ export default function HomeDreamTeamCTA() {
         style={{ maxWidth: 'min(1280px, calc(100vw - 32px))' }}
       >
         
-        {/* COURT BACKGROUND - TIGHTER CROP */}
+        {/* ELECTRIC NEBULA NODE FIELD BACKDROP */}
         <div className="relative w-full aspect-[21/9]">
-          <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/03ba5648e_3880beef-889a-4dec-9b80-2b561f3c47a31.jpg"
-            alt="Basketball Court"
-            className="w-full h-full object-cover object-center brightness-125 contrast-125 saturate-150"
-            loading="lazy"
-            decoding="async"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+          <NebulaNodeField />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
         </div>
 
         {/* BUTTON WITH GLOW - ON COURT */}
