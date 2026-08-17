@@ -81,10 +81,10 @@ export default function GlobalSearchDrawer({ open, onClose }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] px-4">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-3 sm:px-4 sm:pt-[10vh]">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
       <div
-        className="relative w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl"
+        className="relative w-full max-w-2xl max-h-[calc(100dvh-24px)] sm:max-h-[80dvh] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
         style={{
           background: "linear-gradient(180deg, #0c1024 0%, #050818 100%)",
           border: "1px solid rgba(124,58,237,0.3)",
@@ -110,7 +110,7 @@ export default function GlobalSearchDrawer({ open, onClose }) {
         </div>
 
         {/* Results */}
-        <div className="max-h-[60vh] overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {loading ? (
             <div className="p-8 flex items-center justify-center text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading…

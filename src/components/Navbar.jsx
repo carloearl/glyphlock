@@ -361,7 +361,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
         }}
       />
 
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-10 py-4 flex items-center justify-between gap-6">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-5 lg:px-10 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4 lg:gap-6">
         {/* Logo with hover effects */}
         <Link to={createPageUrl("Home")} className="flex items-center gap-3 group">
           <MagneticButton>
@@ -387,7 +387,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
           </MagneticButton>
           
           <div className="flex flex-col">
-            <span className="text-xl font-black tracking-tight leading-none">
+            <span className="text-lg sm:text-xl font-black tracking-tight leading-none">
               <span className="text-white">GLYPH</span>
               <span className="text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-500 bg-clip-text">LOCK</span>
             </span>
@@ -510,7 +510,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
               whileTap={{ scale: 0.95 }}
               onClick={onLogin}
               style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minHeight: '48px' }}
-              className="px-4 h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white text-sm font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95 border border-cyan-400/40"
+              className="px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 text-white text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95 border border-cyan-400/40"
               aria-label="Sign in to GlyphLock account"
             >
               Sign In
@@ -519,7 +519,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
           <motion.button
             whileTap={{ scale: 0.9 }}
             style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', minWidth: '52px', minHeight: '52px' }}
-            className="relative w-14 h-14 flex items-center justify-center rounded-xl bg-white/5 border-2 border-white/10 hover:border-cyan-400/50 transition-all active:bg-cyan-500/20"
+            className="relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-white/5 border-2 border-white/10 hover:border-cyan-400/50 transition-all active:bg-cyan-500/20"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={mobileMenuOpen}
@@ -561,7 +561,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
             transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="lg:hidden border-t border-white/10 bg-slate-950/98 backdrop-blur-2xl overflow-hidden"
           >
-            <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-h-[calc(100dvh-72px)] overflow-y-auto overscroll-contain">
               {NAV && NAV.map((section, sectionIdx) => (
                 <motion.div
                   key={section.label}
