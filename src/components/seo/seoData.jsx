@@ -442,7 +442,7 @@ export const getSeoData = (pageName) => {
     h1: "GlyphLock Platform",
     url: "/",
     ogTitle: "GlyphLock LLC",
-    ogDescription: "Enterprise-grade quantum-resistant cybersecurity architecture.",
+    ogDescription: "Custom software, NUPS venue operations, QR verification, AI-assisted workflows, and connected operating systems.",
     schemaType: "WebSite",
     priority: 0.5,
     internalLinks: []
