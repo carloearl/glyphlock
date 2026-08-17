@@ -348,6 +348,10 @@ export default function BatchManagement({ user, onBatchClosed }) {
 
   const handleOpenBatch = async () => {
     if (isOpeningBatch) return;
+    if (activeBatch) {
+      toast({ title: 'Batch already open', description: `Close ${activeBatch.batch_id || activeBatch.id} before opening another batch in this mode.` });
+      return;
+    }
 
     const parsed = parseFloat(openingCash || '0') || 0;
     if (isNaN(parsed) || parsed < 0) {
@@ -359,7 +363,6 @@ export default function BatchManagement({ user, onBatchClosed }) {
       if (!confirmed) return;
     }
 
-    const venueId = activeVenue?.id || activeVenue?.venue_id;
     if (!venueId) {
       alert('No active venue selected. Please select a venue before opening a batch.');
       return;
@@ -368,18 +371,27 @@ export default function BatchManagement({ user, onBatchClosed }) {
     setIsOpeningBatch(true);
     try {
       const cashierEmail = user?.email || user?.id || 'unknown';
-      const newBatch = await openBatchMutation.mutateAsync({
-        batch_id: `BATCH-${Date.now()}`,
+      const batchPayload = stampOperationalRecord({
+        batch_id: `BATCH-${Date.now()}-${modeState.operatingMode}`,
         start_time: new Date().toISOString(),
         opening_cash: parsed,
         cashier: cashierEmail,
         cashier_email: cashierEmail,
         cashier_name: user?.full_name || user?.name || user?.email,
+        opened_by: cashierEmail,
         venue_id: venueId,
         status: 'open',
+        door_confirmed: false,
         total_sales: 0,
-        transaction_count: 0
+        transaction_count: 0,
+        notes: notes.trim() || `${modeState.operatingMode} batch opened`,
+      }, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        supportsDemoFlag: true,
       });
+      const newBatch = await openBatchMutation.mutateAsync(batchPayload);
       const resolvedVenueId = newBatch?.venue_id || venueId;
       if (newBatch && resolvedVenueId) {
         await base44.entities.SystemAuditLog.create({
@@ -389,7 +401,14 @@ export default function BatchManagement({ user, onBatchClosed }) {
           actor_id: cashierEmail,
           venue_id: resolvedVenueId,
           description: `Batch ${newBatch?.batch_id || newBatch?.id} opened by ${cashierEmail}`,
-          metadata: { batch_id: newBatch?.batch_id || newBatch?.id, opened_at: new Date().toISOString(), opening_cash: parsed },
+          metadata: {
+            batch_id: newBatch?.batch_id || newBatch?.id,
+            opened_at: new Date().toISOString(),
+            opening_cash: parsed,
+            mode: modeState.ledgerMode,
+            operating_mode: modeState.operatingMode,
+            training_session_id: modeState.trainingSession?.id || null,
+          },
           severity: 'low',
           status: 'success'
         });
