@@ -33,6 +33,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Block tracked environments and secrets
+        run: npm run check:secrets
+
       - name: Audit Base44 entity model
         run: npm run audit:entities
 
