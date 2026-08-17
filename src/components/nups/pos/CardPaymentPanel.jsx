@@ -41,7 +41,7 @@ export default function CardPaymentPanel({
       onConfirm?.({
         payment_method: method,
         card_last_four: isLive ? lastFour : (lastFour || "4242"),
-        approval_code: isLive ? approvalCode.trim() : (approvalCode.trim() || `TRAIN-${sampleSuffix}`),
+        auth_code: isLive ? approvalCode.trim() : (approvalCode.trim() || `TRAIN-${sampleSuffix}`),
         payment_source: isLive
           ? (terminalConfigured ? "configured_terminal_manual_confirmation" : "external_terminal_manual_confirmation")
           : "training_simulation",
