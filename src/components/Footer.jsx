@@ -254,6 +254,12 @@ export default function Footer() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              to="/CodeOfEthics"
+              className="text-[11px] text-slate-600 hover:text-slate-300 transition-colors duration-200"
+            >
+              Code of Ethics
+            </Link>
           </div>
         </div>
       </div>
