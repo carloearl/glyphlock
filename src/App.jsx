@@ -15,6 +15,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import SettlementReports from './pages/SettlementReports';
 import GovernanceHub from './pages/GovernanceHub';
+import CodeOfEthics from './pages/CodeOfEthics';
 import NUPSPostLogin from './pages/NUPSPostLogin';
 import SystemAudit from './pages/SystemAudit';
 import OfficialChecks from './pages/OfficialChecks';
@@ -349,6 +350,8 @@ const AuthenticatedApp = () => {
         <Route path="/AnalyticsDashboard" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
         <Route path="/SettlementReports" element={<LayoutWrapper currentPageName="SettlementReports"><SettlementReports /></LayoutWrapper>} />
         <Route path="/GovernanceHub" element={<LayoutWrapper currentPageName="GovernanceHub"><GovernanceHub /></LayoutWrapper>} />
+        <Route path="/CodeOfEthics" element={<LayoutWrapper currentPageName="CodeOfEthics"><CodeOfEthics /></LayoutWrapper>} />
+        <Route path="/codeofethics" element={<LayoutWrapper currentPageName="CodeOfEthics"><CodeOfEthics /></LayoutWrapper>} />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
