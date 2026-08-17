@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Printer, Loader2, CheckCircle2, AlertCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { printHtml } from "@/lib/nups/printHtml";
 
 export default function ThermalPrinterPanel({
   documentHtml,
@@ -26,40 +27,27 @@ export default function ThermalPrinterPanel({
   });
   const [printing, setPrinting] = useState(false);
   const [lastPrint, setLastPrint] = useState(null);
-  const [printerReady, setPrinterReady] = useState(true);
+  const printerReady = typeof window !== 'undefined' && Boolean(document?.body);
 
   const handlePrint = async () => {
+    if (printing || !documentHtml) return;
     setPrinting(true);
-    
     try {
-      // Open print window with document
-      const w = window.open('', '_blank', 'width=850,height=1100');
-      w.document.write(documentHtml);
-      w.document.close();
-      
-      // Trigger browser print dialog
-      setTimeout(() => {
-        w.print();
-        
-        const printRecord = {
-          timestamp: new Date().toISOString(),
-          document: documentName,
-          printer: "Adesso NuPrint 210",
-          status: "sent"
-        };
-        
-        setLastPrint(printRecord);
-        setPrinting(false);
-        toast.success("Document sent to printer");
-        
-        if (onPrintComplete) {
-          onPrintComplete(printRecord);
-        }
-      }, 400);
-      
+      const result = await printHtml(documentHtml, { title: documentName });
+      const printRecord = {
+        timestamp: result?.invokedAt || new Date().toISOString(),
+        document: documentName,
+        printer: deviceConfig?.device_label || deviceConfig?.model || 'Browser Print Service',
+        status: 'dialog_opened',
+        method: result?.method || 'iframe',
+      };
+      setLastPrint(printRecord);
+      toast.success('Print dialog opened');
+      onPrintComplete?.(printRecord);
     } catch (e) {
+      toast.error(`Print failed: ${e?.message || 'unknown error'}`);
+    } finally {
       setPrinting(false);
-      toast.error("Print failed: " + e.message);
     }
   };
 
@@ -92,7 +80,7 @@ export default function ThermalPrinterPanel({
             {documentName}
           </div>
           <div className="text-[10px] text-gray-500 mt-1">
-            Adesso NuPrint 210 · Thermal Receipt Printer
+            {deviceConfig?.model || 'Browser Print Service'} · {deviceConfig ? 'Configured thermal printer' : 'Use system printer dialog'}
           </div>
         </div>
 
@@ -124,7 +112,7 @@ export default function ThermalPrinterPanel({
         </Button>
 
         <div className="text-[10px] text-gray-600 text-center">
-          {deviceConfig?.model || 'Adesso NuPrint 210'} · 58mm thermal
+          {deviceConfig?.model || 'Browser Print Service'}{deviceConfig ? ' · thermal configuration' : ' · choose your receipt printer'}
           {deviceConfig?.is_sandbox && <span className="text-yellow-500 ml-2">[SANDBOX]</span>}
         </div>
       </CardContent>
