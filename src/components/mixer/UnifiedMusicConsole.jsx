@@ -53,6 +53,7 @@ export default function UnifiedMusicConsole() {
   const [playHistory, setPlayHistory] = useState([]);
   const [runtimeBlockedTrackIds, setRuntimeBlockedTrackIds] = useState([]);
   const [performerOverrideId, setPerformerOverrideId] = useState("");
+  const [deckLoadRequest, setDeckLoadRequest] = useState(null);
   const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
 
   const activeNav = NAV.find((n) => n.key === active) || NAV[0];
@@ -98,6 +99,26 @@ export default function UnifiedMusicConsole() {
     blockedTrackIds: runtimeBlockedTrackIds,
     limit: 5,
   }), [snapshot, activePersona, activeCrowd, activeEntertainer?.id, playHistory, currentEntityTrackId, runtimeBlockedTrackIds]);
+
+  const handleLoadToMixerDeck = useCallback((track, deck = 'A') => {
+    if (!track) return;
+    const sourceId = track.source_id || track.videoId || String(track.id || '').replace(/^yt-/, '');
+    const youtubeUrl = track.source === 'youtube' || sourceId?.length === 11
+      ? (track.watch_url || `https://www.youtube.com/watch?v=${sourceId}`)
+      : '';
+    const song = {
+      id: `search-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      title: track.title || 'YouTube Track',
+      artist: track.artist || 'YouTube',
+      youtubeUrl,
+      uploadUrl: track.source === 'youtube' ? '' : (track.audio_url || track.file_url || track.embed_url || ''),
+      imageUrl: track.thumbnail || track.thumbnail_url || '',
+      source: track.source || (youtubeUrl ? 'youtube' : 'url'),
+      _entityTrackId: track.library_track_id || null,
+    };
+    setDeckLoadRequest({ requestId: Date.now(), deck, song });
+    setActive('mixer');
+  }, []);
 
   const handlePlaybackEvent = useCallback((event) => {
     if (!event) return;
@@ -209,11 +230,12 @@ export default function UnifiedMusicConsole() {
             automationPlan={automationPlan}
             onPlaybackEvent={handlePlaybackEvent}
             libraryTracks={snapshot?.tracks || []}
+            deckLoadRequest={deckLoadRequest}
           />
         )}
         {active === "tracks"   && <TracksTab />}
         {active === "radio"    && <RadioTab />}
-        {active === "search"   && <MusicSearchTab />}
+        {active === "search"   && <MusicSearchTab onLoadToMixerDeck={handleLoadToMixerDeck} />}
         {active === "personas" && <PersonasTab />}
         {active === "playlist" && <PlaylistGenTab />}
         {active === "crowd"    && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
