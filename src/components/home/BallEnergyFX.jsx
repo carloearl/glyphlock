@@ -11,6 +11,35 @@ const ROLES = ['ALFRED', 'CLAUDE', 'GEMINI', 'COPILOT', 'PERPLEXITY', 'CURSOR'];
 export default function BallEnergyFX() {
   return (
     <div className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 3 }} aria-hidden="true">
+      {/* ATMOSPHERIC NEBULA ORB — drifting plumes behind the ball */}
+      <motion.div
+        animate={{ scale: [1, 1.08, 1], opacity: [0.55, 0.85, 0.55] }}
+        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute inset-[8%] rounded-full blur-[38px]"
+        style={{
+          background:
+            'radial-gradient(circle at 38% 34%, rgba(34,211,238,.55), transparent 46%), radial-gradient(circle at 68% 62%, rgba(217,70,239,.45), transparent 48%), radial-gradient(circle at 52% 50%, rgba(99,102,241,.55), transparent 62%)',
+        }}
+      />
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 34, repeat: Infinity, ease: 'linear' }}
+        className="absolute inset-[14%] rounded-full blur-[26px] opacity-70 mix-blend-screen"
+        style={{
+          background:
+            'conic-gradient(from 0deg, rgba(34,211,238,.30), rgba(129,140,248,.28), rgba(217,70,239,.30), rgba(34,211,238,.30))',
+        }}
+      />
+      <motion.div
+        animate={{ rotate: -360, scale: [1.02, 0.96, 1.02] }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
+        className="absolute inset-[22%] rounded-full blur-[18px] opacity-60 mix-blend-screen"
+        style={{
+          background:
+            'radial-gradient(circle at 30% 70%, rgba(124,58,237,.55), transparent 55%), radial-gradient(circle at 74% 30%, rgba(56,189,248,.5), transparent 55%)',
+        }}
+      />
+
       {/* Electric sweep arcs */}
       <motion.div
         animate={{ rotate: 360 }}
