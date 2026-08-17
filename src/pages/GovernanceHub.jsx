@@ -11,10 +11,10 @@ import ImportantNotice from '@/components/verification/ImportantNotice';
 import VerificationIntro from '@/components/verification/VerificationIntro';
 
 const principles = [
-  [FileSearch, 'Evidence before claims', 'Public statements should be traceable to code, records, filings, contracts, test results or clearly labeled internal research.'],
-  [Scale, 'Framework is not law', 'The Master Covenant is a GlyphLock-authored governance framework. Its existence does not itself create court, regulatory or third-party authority.'],
-  [ShieldCheck, 'Controls need owners', 'Architecture, policy and operational controls should identify scope, responsible parties, evidence and review cadence.'],
-  [ClipboardCheck, 'Gaps become roadmap', 'Unverified or incomplete areas are recorded as remediation work rather than represented as completed validation.'],
+  [FileSearch, 'Every claim cites a source', 'If a statement here cannot be traced to code, a record, a contract, a test result or clearly labeled internal research, it does not belong on this page.'],
+  [Scale, 'This framework carries no authority', 'The Master Covenant is documentation GlyphLock wrote for itself. It grants no legal, regulatory, court or third-party standing to GlyphLock or to anyone reviewed under it.'],
+  [ShieldCheck, 'Controls are named, not implied', 'Each control we describe has a stated scope, a responsible person, the evidence behind it and a review date — or it is listed as a gap instead.'],
+  [ClipboardCheck, 'Gaps stay visible', 'Anything untested or incomplete is written down as open remediation work. Nothing incomplete is described as validated, certified or approved.'],
 ];
 
 export default function GovernanceHub() {
@@ -28,8 +28,8 @@ export default function GovernanceHub() {
         <div className="absolute right-[5%] top-[5%] h-96 w-96 rounded-full bg-violet-600/14 blur-[140px] pointer-events-none" />
         <div className="relative max-w-7xl mx-auto">
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/35 bg-violet-400/[.07] px-4 py-2 font-mono text-[10px] tracking-[.22em] text-violet-200"><ShieldCheck className="h-4 w-4" /> GLYPHLOCK // GOVERNANCE HUB</div>
-          <h1 className="mt-7 max-w-5xl text-5xl md:text-7xl lg:text-8xl font-black tracking-[-.055em] leading-[.84]">GOVERNANCE<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-blue-400 to-violet-400">WITH RECEIPTS.</span></h1>
-          <p className="mt-7 max-w-3xl text-lg md:text-xl leading-relaxed text-slate-300">The Master Covenant organizes GlyphLock's governance concepts and review criteria. This hub separates internal framework alignment from external certification, legal enforceability and regulatory approval.</p>
+          <h1 className="mt-7 max-w-5xl text-5xl md:text-7xl lg:text-8xl font-black tracking-[-.055em] leading-[.84]">HOW WE<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-blue-400 to-violet-400">DOCUMENT OUR WORK.</span></h1>
+          <p className="mt-7 max-w-3xl text-lg md:text-xl leading-relaxed text-slate-300">The Master Covenant is GlyphLock's own internal documentation standard: how we write down architecture, controls, ownership and evidence. It is not a certification, an audit standard or a compliance program, and nothing on this page has been reviewed or approved by an outside body.</p>
         </div>
       </section>
 
@@ -40,7 +40,7 @@ export default function GovernanceHub() {
       </section>
 
       <section className="max-w-7xl mx-auto px-5 pb-24">
-        <div className="mb-7 rounded-2xl border border-amber-300/20 bg-amber-300/[.05] p-5 text-sm text-amber-100/80"><div className="flex gap-3"><AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-300"/><span><strong className="text-amber-200">Public boundary:</strong> a GlyphLock alignment review is an internal/framework-based assessment unless an identified outside organization conducts the review. It is not represented here as an independent certification.</span></div></div>
+        <div className="mb-7 rounded-2xl border border-amber-300/20 bg-amber-300/[.05] p-5 text-sm text-amber-100/80"><div className="flex gap-3"><AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-300"/><span><strong className="text-amber-200">Read this first:</strong> a GlyphLock review is work performed by GlyphLock against documentation GlyphLock wrote. It is not independent, not accredited, and not a certification, audit opinion, or statement of compliance with any law or standard. If an engagement ever involves an outside assessor, that organization will be named by us in writing.</span></div></div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid h-auto grid-cols-2 lg:grid-cols-6 gap-2 bg-[#030714]/70 border border-white/10 p-2 rounded-2xl backdrop-blur-xl">
             <TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="engagement">Engagement</TabsTrigger><TabsTrigger value="framework">Framework</TabsTrigger><TabsTrigger value="tiers">Alignment Tiers</TabsTrigger><TabsTrigger value="deliverables">Deliverables</TabsTrigger><TabsTrigger value="request">Request</TabsTrigger>
