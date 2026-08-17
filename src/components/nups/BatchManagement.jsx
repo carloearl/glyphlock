@@ -9,6 +9,9 @@ import { DollarSign, Clock, XCircle, CheckCircle2, AlertCircle, RefreshCw, Save,
 import { useToast } from "@/components/ui/use-toast";
 import { useActiveVenue } from '../../hooks/useActiveVenue';
 import ManagerOverrideModal from "./ManagerOverrideModal";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { scopeRowsToOperatingMode, stampOperationalRecord, markTrainingStep } from "@/lib/nups/operatingMode";
+import { writeEntity } from "@/lib/nups/writeEntity";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +23,8 @@ export default function BatchManagement({ user, onBatchClosed }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeState = useNUPSOperatingMode(venueId);
   const [showOpenDialog, setShowOpenDialog] = useState(false);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [openingCash, setOpeningCash] = useState('');
@@ -36,13 +41,20 @@ export default function BatchManagement({ user, onBatchClosed }) {
   const [showRestoreList, setShowRestoreList] = useState(false);
 
   const cashierKey = user?.email || user?.id || 'unknown';
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
 
   const { data: activeBatch } = useQuery({
-    queryKey: ['active-batch', cashierKey],
+    queryKey: ['active-batch', venueId, ...modeQueryKey],
     queryFn: async () => {
-      const batches = await base44.entities.POSBatch.filter({ status: 'open', cashier: cashierKey });
-      return batches[0] ?? null;
-    }
+      const batches = await base44.entities.POSBatch.filter({ status: 'open' }, '-created_date', 100);
+      const scoped = scopeRowsToOperatingMode(batches, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: 'transactional',
+      });
+      return scoped[0] ?? null;
+    },
   });
 
   // Backups stored in SystemAuditLog with event_type BATCH_BACKUP
@@ -58,20 +70,25 @@ export default function BatchManagement({ user, onBatchClosed }) {
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
   const { data: batchTransactions = [] } = useQuery({
-    queryKey: ['batch-transactions', activeBatch?.id],
+    queryKey: ['batch-transactions', activeBatch?.id, ...modeQueryKey],
     queryFn: async () => {
       if (!activeBatch) return [];
-      const allTransactions = await base44.entities.POSTransaction.list('-created_date', 1000);
-      return allTransactions.filter(t => {
-        // Exclude voided/reset transactions from live totals
-        if (t.status === 'refunded' && t.notes?.includes('VOIDED by manager reset')) return false;
+      const allTransactions = await base44.entities.POSTransaction.list('-created_date', 2000);
+      const scoped = scopeRowsToOperatingMode(allTransactions, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: 'transactional',
+      });
+      return scoped.filter(t => {
+        if (t.status === 'refunded' || t.status === 'void') return false;
         if (t.batch_id) return t.batch_id === activeBatch.id;
         const start = new Date(activeBatch.start_time);
         const end = activeBatch.end_time ? new Date(activeBatch.end_time) : new Date();
         return new Date(t.created_date) >= start && new Date(t.created_date) <= end;
       });
     },
-    enabled: !!activeBatch
+    enabled: !!activeBatch,
   });
 
   // ✅ REAL-TIME SYNC: Subscribe to transaction changes
