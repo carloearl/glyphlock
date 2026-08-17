@@ -95,20 +95,22 @@ export default function ReceiptPrinter({
   const svcLabel    = rates?.service_fee_label || 'Service Fee';
   const procRate    = Number(rates?.cc_processing_fee_rate || 0);
 
-  const printReceipt = () => {
-    if (!transaction) return;
+  const printReceipt = async () => {
+    if (!transaction || printing) return;
+    setPrinting(true);
 
     const items = transaction.items || [];
-    const txDate = new Date(transaction.created_date);
+    const parsedDate = new Date(transaction.created_date || Date.now());
+    const txDate = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
     const formattedDate = txDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
     const formattedTime = txDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const cashierDisplay = getCashierDisplay(transaction);
 
     const itemsHtml = items.map((item, idx) =>
       `<div style="padding:4px 0;border-bottom:1px dotted #ddd;">
-         <div style="font-weight:bold;">${idx + 1}. ${item.product_name}</div>
-         <div style="font-size:10px;color:#555;padding-left:8px;">Qty: ${item.quantity} × $${item.price?.toFixed(2)}</div>
-         <div style="text-align:right;font-weight:bold;padding-top:2px;">$${item.total?.toFixed(2)}</div>
+         <div style="font-weight:bold;">${idx + 1}. ${escapeHtml(item.product_name || 'Item')}</div>
+         <div style="font-size:10px;color:#555;padding-left:8px;">Qty: ${money(item.quantity)} × $${money(item.price).toFixed(2)}</div>
+         <div style="text-align:right;font-weight:bold;padding-top:2px;">$${money(item.total).toFixed(2)}</div>
        </div>`
     ).join('');
 
@@ -120,12 +122,12 @@ export default function ReceiptPrinter({
       <div style="border:2px solid #000;padding:8px;margin:8px 0;background:#f9f9f9;">
         <div style="text-align:center;font-weight:bold;font-size:14px;margin-bottom:4px;">★ VIP SHOW SERVICE ★</div>
         <table style="width:100%;font-size:11px;">
-          <tr><td>Room:</td><td style="text-align:right;font-weight:bold;">${vipDetails.room_name || vipDetails.room_number || 'N/A'}</td></tr>
-          <tr><td>Entertainer:</td><td style="text-align:right;font-weight:bold;">${vipDetails.entertainer_name || 'N/A'}</td></tr>
-          <tr><td>Guest:</td><td style="text-align:right;font-weight:bold;">${vipDetails.guest_name || 'N/A'}</td></tr>
-          <tr><td>Duration:</td><td style="text-align:right;">${vipDetails.duration_minutes || 60} min</td></tr>
-          <tr><td>Rate:</td><td style="text-align:right;">$${(vipDetails.rate_per_hour || 300).toFixed(2)}/hr</td></tr>
-          ${vipDetails.contract_number ? `<tr><td>Contract#:</td><td style="text-align:right;font-family:monospace;">${vipDetails.contract_number}</td></tr>` : ''}
+          <tr><td>Room:</td><td style="text-align:right;font-weight:bold;">${escapeHtml(vipDetails.room_name || vipDetails.room_number || 'N/A')}</td></tr>
+          <tr><td>Entertainer:</td><td style="text-align:right;font-weight:bold;">${escapeHtml(vipDetails.entertainer_name || 'N/A')}</td></tr>
+          <tr><td>Guest:</td><td style="text-align:right;font-weight:bold;">${escapeHtml(vipDetails.guest_name || 'N/A')}</td></tr>
+          <tr><td>Duration:</td><td style="text-align:right;">${money(vipDetails.duration_minutes || 60)} min</td></tr>
+          <tr><td>Rate:</td><td style="text-align:right;">$${money(vipDetails.rate_per_hour || 300).toFixed(2)}/hr</td></tr>
+          ${vipDetails.contract_number ? `<tr><td>Contract#:</td><td style="text-align:right;font-family:monospace;">${escapeHtml(vipDetails.contract_number)}</td></tr>` : ''}
         </table>
       </div>
     ` : '';
