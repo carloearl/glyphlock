@@ -20,9 +20,7 @@ import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
 import FingerprintPanel from "@/components/nups/hardware/FingerprintPanel";
 import ThermalPrinterPanel from "@/components/nups/hardware/ThermalPrinterPanel";
 
-import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
 import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
-import { printCurrentNupsView } from '@/lib/nups/receiptService';
 import NUPSOperatorAssistant from '@/components/nups/shell/NUPSOperatorAssistant';
 import NUPSActionSafety from '@/components/nups/shell/NUPSActionSafety';
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
@@ -457,7 +455,7 @@ export default function NUPSSandbox() {
         <div><label>DATE / TIME</label><div class='line'></div></div>
       </div>
       <div class='footer'>N.U.P.S. POS — GlyphLock Financial LLC — ${now.toLocaleString()} — DEMO BATCH</div>
-      <br/><button onclick='printCurrentNupsView()' style='padding:8px 20px;font-size:13px;cursor:pointer;'>🖨️ Print</button>
+      <br/><button onclick='window.print()' style='padding:8px 20px;font-size:13px;cursor:pointer;'>🖨️ Print</button>
       </body></html>
     `);
     pw.document.close();
@@ -538,9 +536,6 @@ export default function NUPSSandbox() {
     switch (activeSection) {
       case "walkthrough":
         return (
-          <>
-            <NUPSActionSafety />
-      <NUPSEnvironmentBar />
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-2xl p-5">
               <div className="flex items-start gap-3">
@@ -1314,6 +1309,7 @@ export default function NUPSSandbox() {
 
   return (
     <>
+      <NUPSActionSafety />
       <div className="min-h-screen bg-black text-white">
       {/* Demo Receipt Modal */}
       {showReceipt && currentTransaction && (
@@ -1345,7 +1341,18 @@ export default function NUPSSandbox() {
               <div className="text-[10px] text-emerald-400">Demo Mode — No real data</div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <label className="relative">
+              <span className="sr-only">Sandbox section</span>
+              <select
+                value={activeSection}
+                onChange={(event) => setActiveSection(event.target.value)}
+                className="min-h-9 max-w-[210px] rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 text-[11px] font-black text-violet-100 outline-none focus:border-violet-300"
+                aria-label="Choose sandbox section"
+              >
+                {SECTIONS.map((section) => <option key={section.key} value={section.key}>{section.label}</option>)}
+              </select>
+            </label>
             <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">SANDBOX</Badge>
             <button
               onClick={handleResetDemo}
@@ -1360,32 +1367,8 @@ export default function NUPSSandbox() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto p-4 flex gap-4">
-        {/* Sidebar nav */}
-        <div className="w-36 flex-shrink-0">
-          <div className="space-y-1 sticky top-20">
-            {SECTIONS.map(s => {
-              const Icon = s.icon;
-              return (
-                <button
-                  key={s.key}
-                  onClick={() => setActiveSection(s.key)}
-                  className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left transition-all text-xs font-medium ${
-                    activeSection === s.key
-                      ? "bg-violet-500/15 text-violet-400 border border-violet-500/20"
-                      : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                  {s.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 min-w-0 py-1">
+      <div className="mx-auto max-w-4xl p-4">
+        <div className="min-w-0 py-1">
           {renderSection()}
         </div>
       </div>
