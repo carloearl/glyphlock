@@ -4,41 +4,64 @@
  * a playable track: import to the library or send straight to a deck / Club TV.
  */
 import React, { useState } from 'react';
-import { Link2, Plus, Disc } from 'lucide-react';
+import { Link2, Plus, Disc, Loader2, Youtube } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-
-function parseYouTubeId(url) {
-  const m = String(url).match(
-    /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
-  );
-  return m ? m[1] : null;
-}
+import { base44 } from '@/api/base44Client';
+import { parseYoutubeUrl } from '@/components/mixer/services/validation';
 
 export default function PasteLinkPanel({ onImport, onSendDeck }) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [track, setTrack] = useState(null);
+  const [resolving, setResolving] = useState(false);
 
-  function handleResolve(e) {
+  async function handleResolve(e) {
     e?.preventDefault?.();
     const raw = url.trim();
-    if (!raw) return;
+    if (!raw || resolving) return;
 
-    const videoId = parseYouTubeId(raw);
-    if (videoId) {
-      setTrack({
+    const parsedYouTube = parseYoutubeUrl(raw);
+    if (parsedYouTube?.videoId) {
+      setResolving(true);
+      const fallback = {
         source: 'youtube',
-        id: videoId,
-        title: title.trim() || `YouTube ${videoId}`,
-        artist: artist.trim() || 'Unknown Artist',
-        thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-        embed_url: `https://www.youtube.com/embed/${videoId}`,
-        watch_url: `https://www.youtube.com/watch?v=${videoId}`,
-      });
+        id: `yt-${parsedYouTube.videoId}`,
+        source_id: parsedYouTube.videoId,
+        title: title.trim() || `YouTube ${parsedYouTube.videoId}`,
+        artist: artist.trim() || 'YouTube',
+        thumbnail: `https://i.ytimg.com/vi/${parsedYouTube.videoId}/hqdefault.jpg`,
+        embed_url: parsedYouTube.embedUrl,
+        watch_url: parsedYouTube.canonical,
+        playable: true,
+      };
+      try {
+        const res = await base44.functions.invoke('resolveYouTubeVideo', { videoId: parsedYouTube.videoId });
+        const data = res?.data || {};
+        if (data?.code === 'YOUTUBE_NOT_EMBEDDABLE' || data?.embeddable === false) {
+          toast.error('That YouTube video blocks embedded playback. Pick another upload.');
+          setTrack(null);
+          return;
+        }
+        setTrack({
+          ...fallback,
+          title: title.trim() || data.title || fallback.title,
+          artist: artist.trim() || data.channel || fallback.artist,
+          thumbnail: data.thumbnail || fallback.thumbnail,
+          embed_url: data.embedUrl || fallback.embed_url,
+          watch_url: data.watchUrl || fallback.watch_url,
+        });
+      } catch (error) {
+        // Direct YouTube playback only needs the public video ID. Metadata lookup
+        // may require an authenticated Base44 session, so keep the URL usable.
+        console.debug('[DJ PasteLink] YouTube metadata lookup unavailable:', error?.message || error);
+        setTrack(fallback);
+      } finally {
+        setResolving(false);
+      }
       return;
     }
 
@@ -59,7 +82,7 @@ export default function PasteLinkPanel({ onImport, onSendDeck }) {
       return;
     }
 
-    toast.error('Paste a YouTube link or a direct media URL (http/https).');
+    toast.error('Paste a YouTube watch/share/shorts/live link, an 11-character YouTube ID, or a direct media URL.');
   }
 
   function reset() {
@@ -75,20 +98,20 @@ export default function PasteLinkPanel({ onImport, onSendDeck }) {
         <div className="flex items-center gap-2">
           <Link2 className="w-4 h-4 text-cyan-400" />
           <h4 className="text-sm font-bold text-white">Add by Link</h4>
-          <span className="text-[10px] text-slate-500">no search API needed</span>
+          <span className="text-[10px] text-slate-500">YouTube URL → real deck playback</span>
         </div>
 
         <form onSubmit={handleResolve} className="space-y-2">
           <Input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste YouTube link or direct audio/video URL (.mp3, .mp4, .m3u8…)"
+            placeholder="Paste YouTube URL / Shorts / Live / youtu.be / video ID"
           />
           <div className="grid grid-cols-2 gap-2">
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (optional)" />
             <Input value={artist} onChange={(e) => setArtist(e.target.value)} placeholder="Artist (optional)" />
           </div>
-          <Button type="submit" className="w-full bg-cyan-600 hover:bg-cyan-500">Load Link</Button>
+          <Button type="submit" disabled={resolving || !url.trim()} className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50">{resolving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>Resolving YouTube…</> : <><Youtube className="w-4 h-4 mr-2"/>Load YouTube / URL</>}</Button>
         </form>
 
         {track && (
