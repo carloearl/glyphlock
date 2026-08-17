@@ -36,7 +36,7 @@ export default function DreamTeamBallButton() {
           alt="Meet the Dream Team"
           animate={reduceMotion ? { y: 0 } : { y: [0, -5, 0] }}
           transition={reduceMotion ? { duration: 0 } : { duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          className="relative w-36 sm:w-40 md:w-48 h-auto will-change-transform dream-team-logo-glow transition-[filter] duration-700 group-hover:[filter:drop-shadow(0_0_26px_rgba(34,211,238,.9))_drop-shadow(0_0_52px_rgba(217,70,239,.6))_saturate(1.4)]"
+          className="relative w-48 sm:w-56 md:w-64 h-auto will-change-transform dream-team-logo-glow transition-[filter] duration-700 group-hover:[filter:drop-shadow(0_0_26px_rgba(34,211,238,.9))_drop-shadow(0_0_52px_rgba(217,70,239,.6))_saturate(1.4)]"
           style={{ zIndex: 100 }}
           loading="lazy"
           decoding="async"
@@ -46,11 +46,17 @@ export default function DreamTeamBallButton() {
         <motion.p
           animate={reduceMotion ? { opacity: 0.85 } : { opacity: [0.55, 1, 0.55] }}
           transition={reduceMotion ? { duration: 0 } : { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
-          className="relative mt-2 text-white text-xs md:text-sm font-black uppercase tracking-[0.28em] drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]"
+          className="relative mt-3 text-center text-white text-sm md:text-base font-black uppercase tracking-[0.22em] drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]"
           style={{ zIndex: 100 }}
         >
-          Tap the ball · Meet the team
+          Take the shot
         </motion.p>
+        <p
+          className="relative mt-1 text-center font-mono text-[9px] md:text-[10px] tracking-[.2em] text-cyan-200/80"
+          style={{ zIndex: 100 }}
+        >
+          SEE WHO PLAYS EACH POSITION →
+        </p>
       </motion.div>
     </Link>
   );

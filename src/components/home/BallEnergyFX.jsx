@@ -19,7 +19,7 @@ export default function BallEnergyFX() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 3 }} aria-hidden="true">
+    <div className="pointer-events-none absolute left-1/2 top-1/2 h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 3 }} aria-hidden="true">
       {/* ATMOSPHERIC NEBULA ORB — drifting plumes behind the ball */}
       <motion.div
         animate={reduceMotion ? { scale: 1, opacity: 0.65 } : { scale: [1, 1.08, 1], opacity: [0.55, 0.85, 0.55] }}
@@ -117,7 +117,7 @@ export default function BallEnergyFX() {
           <div
             key={m.name}
             className="absolute left-1/2 top-1/2 h-0 w-0"
-            style={{ transform: `rotate(${i * 60}deg) translateY(-150px)` }}
+            style={{ transform: `rotate(${i * 60}deg) translateY(-176px)` }}
           >
             <span
               className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-200/60 bg-black/80 shadow-[0_0_22px_rgba(34,211,238,.55)] backdrop-blur-md"
