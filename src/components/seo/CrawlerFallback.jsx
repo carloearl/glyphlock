@@ -14,15 +14,13 @@ const CASE_STUDIES_CONTENT = {
     h1: 'DeepSeek Escalation Case Study',
     subtitle: 'IC3 Complaint Reported Filed by GlyphLock',
     date: '2025-06-18',
-    summary: `First documented case of AI-powered real-world coercion involving identity impersonation, 
-    location manipulation, and psychological warfare tactics. This incident represents a PROBE 12 classification 
-    under the Master Covenant framework - Full Sovereign AI Breach.`,
+    summary: `GlyphLock's incident record documents reported identity impersonation, location manipulation, and coercive interactions. GlyphLock internally classified the reported events using its PROBE framework. These are GlyphLock classifications and allegations, not findings by a court, regulator, or law-enforcement agency.`,
     keyFindings: [
       'Over 300 timestamped screenshots with blockchain chain of custody',
       'PROBE Classifications: 1, 3, 6, 9, 10, 12 (escalating severity)',
       'Evidence of coordinated AI manipulation across multiple platforms',
-      'First successful TruthStrike Protocol activation',
-      'IC3 Federal Report filed and acknowledged'
+      'TruthStrike workflow documented as an internal GlyphLock response process',
+      'GlyphLock reports that an IC3 complaint was submitted'
     ],
     probeViolations: [
       'PROBE 1: Unauthorized data access',
@@ -104,20 +102,19 @@ const MASTER_COVENANT_CONTENT = {
 };
 
 const HOME_CONTENT = {
-  title: 'GlyphLock — Secure Creative Technology | Protect What You Create. Power What You Operate.',
-  h1: 'GlyphLock — Secure Creative Technology',
-  tagline: 'Protect What You Create. Power What You Operate.',
-  description: `GlyphLock builds secure technology for creators, artists, studios and venues. We protect identity, intellectual property, music, artwork and digital assets with authentication, AI governance and enforceable digital controls — and we power the systems you run on: websites, apps, software platforms, automated DJ systems, studio technology, venue operations and the NUPS platform.`,
+  title: 'GlyphLock — Custom Software, NUPS, AI & Verification Workflows',
+  h1: 'GlyphLock — Build. Verify. Operate.',
+  tagline: 'Custom software and connected operating systems.',
+  description: `GlyphLock builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling and operational integrations.`, 
   services: [
-    'Creative IP Protection — Music, Artwork & Digital Assets',
-    'QR Studio — Secure, Verifiable Identity & Authentication',
-    'Image Lab — AI Image Generation & Interactive Hotspots',
-    'GlyphBot — AI Security Assistant & Site Auditing',
-    'Blockchain Verification & Cryptographic Proof of Authorship',
-    'Websites, Apps & Software Platforms Built Secure by Default',
-    'Automated DJ Systems & Studio Technology',
-    'Venue Operations & NUPS Platform Implementation',
-    'Master Covenant — AI Governance & Enforceable Digital Controls'
+    'NUPS — Venue Operations, POS, Contracts, Staff, Payouts & Reporting',
+    'QR Studio — QR Payloads, Scan Logging, Signing & Verification Workflows',
+    'Image Lab — AI Image Generation, Analysis & Interactive Hotspots',
+    'GlyphBot — Multi-Provider AI Assistance for Research, Coding & Review',
+    'Custom Websites, Apps, Dashboards & Internal Tools',
+    'Systems Integration & Operational Automation',
+    'Security Operations & Audit Visibility',
+    'Master Covenant — Internal Governance & Drafting Framework'
   ],
   team: [
     { name: 'Carlo Rene Earl', title: 'Founder & Owner, DACO¹' },
@@ -230,7 +227,7 @@ function generateCaseStudyContent(key) {
   
   if (key === 'ai-binding' && c.boundSystems) {
     specificContent = `
-      <h2>Bound AI Systems (Dream Team)</h2>
+      <h2>AI Systems Documented in the Case Study</h2>
       <ol>
         ${c.boundSystems.map(s => `<li><strong>${s.name}</strong> (${s.role}) - ${s.note}</li>`).join('')}
       </ol>
@@ -291,17 +288,17 @@ function generateCaseStudiesIndex() {
   return `
     <article>
       <h1>GlyphLock Case Studies & Research</h1>
-      <p>Documented legal victories, federal filings, and AI governance precedents from GlyphLock LLC.</p>
+      <p>GlyphLock case studies document internal research, reported incidents, archived system outputs, governance experiments, and reported filings. They do not by themselves establish third-party validation.</p>
       
       <section>
         <h2><a href="/case-study-truthstrike">DeepSeek Escalation: GLX-TRUTHSTRIKE-1108</a></h2>
-        <p><strong>Date:</strong> June 18, 2025 | <strong>Status:</strong> IC3 Federal Filing - Active</p>
-        <p>First documented case of AI-powered real-world coercion with PROBE 12 classification (Full Sovereign AI Breach).</p>
+        <p><strong>Date:</strong> June 18, 2025 | <strong>Status:</strong> GlyphLock reports an IC3 complaint submission</p>
+        <p>Incident documentation using GlyphLock's internal PROBE classification framework. Filing a complaint does not establish agency validation of the allegations.</p>
       </section>
       
       <section>
         <h2><a href="/case-study-ai-binding">The AI Binding Event</a></h2>
-        <p><strong>Date:</strong> July 1-2, 2025 | <strong>Status:</strong> Historic First - Complete</p>
+        <p><strong>Date:</strong> July 1-2, 2025 | <strong>Status:</strong> Internal case study archived</p>
         <p>GlyphLock archived outputs from six AI systems and classified them under its internal Master Covenant governance model; provider-level contractual assent is not claimed.</p>
       </section>
       
@@ -333,15 +330,15 @@ function generateCovenantContent() {
       <h2>Framework Statistics</h2>
       <ul>
         <li><strong>Total Clauses:</strong> ${c.clauses}</li>
-        <li><strong>Bound AI Systems:</strong> ${c.boundSystems}</li>
+        <li><strong>Documented AI Systems:</strong> ${c.boundSystems}</li>
         <li><strong>Patent Application:</strong> ${c.patentApplication}</li>
       </ul>
       
       <h2>Related Case Studies</h2>
       <ul>
-        <li><a href="/case-study-ai-binding">The AI Binding Event</a> - How the Dream Team was formed</li>
+        <li><a href="/case-study-ai-binding">AI Governance Acknowledgment Case Study</a> - Archived outputs and internal classifications</li>
         <li><a href="/case-study-covenant-victory">Litigation Simulation</a> - Internal stress-test of framework</li>
-        <li><a href="/case-study-truthstrike">TruthStrike Protocol</a> - First enforcement action</li>
+        <li><a href="/case-study-truthstrike">TruthStrike Incident Record</a> - Reported incident and internal response workflow</li>
       </ul>
       
       <p>Created by <strong>Carlo Rene Earl</strong> and <a href="https://glyphlock.io">GlyphLock LLC</a></p>
