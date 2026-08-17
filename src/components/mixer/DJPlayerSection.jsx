@@ -224,11 +224,14 @@ export default function DJPlayerSection({
       const duration = Number(ref?.getDuration?.() || 0);
       const current = Number(ref?.getCurrentTime?.() || 0);
       const cueDuration = Number(cueRef?.getDuration?.() || 0);
-      // Never fade toward a cue source whose media metadata has not loaded.
-      // A late/broken source stays cued while the live deck continues safely.
-      if (!duration || current < 1 || !cueDuration) return;
+      if (!duration || current < 1) return;
       const remaining = duration - current;
       if (remaining > 0 && remaining <= Math.max(2, Number(transitionSeconds || 6))) {
+        // Start the transition even if the cue deck has not reported metadata
+        // yet. YouTube frequently reports duration late; waiting for a non-zero
+        // cue duration caused the visible fader to never move. performTransition
+        // issues play() first and the deck's source-error path still provides
+        // failover if the cue cannot actually start.
         performTransition(targetDeck);
       }
     }, 400);
