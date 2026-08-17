@@ -48,11 +48,20 @@ const ownShiftUpdate = (data, actor, roleName) =>
     ? null
     : `${roleName}_can_only_update_own_StaffShift`;
 
+const batchConfirmationRule = (data) => {
+  const allowed = new Set(['door_confirmed', 'door_confirmed_by', 'door_confirmed_at']);
+  const keys = Object.keys(data || {});
+  return data?.door_confirmed === true && keys.every((key) => allowed.has(key))
+    ? null
+    : 'door_operator_may_only_confirm_the_current_batch';
+};
+
 // Per-role policy. For each entity, list the allowed operations. An entity
 // not present in the map means the role CANNOT write to it at all.
 const POLICY = {
   DOOR_GIRL: {
     POSTransaction: { create: transactionRuleForStation('door') },
+    POSBatch: { update: batchConfirmationRule },
     StaffShift: {
       create: (data, actor) => ownShiftCreate(data, actor, 'door_girl'),
       update: (data, actor) => ownShiftUpdate(data, actor, 'door_girl'),
@@ -62,6 +71,7 @@ const POLICY = {
   },
   DOORMAN: {
     // Doorman handles onboarding — driver + guest. NO door POS writes.
+    POSBatch: { update: batchConfirmationRule },
     DriverPayout: { create: () => null, update: () => null },
     VIPGuest:     { create: () => null, update: () => null },
     StaffShift: {
