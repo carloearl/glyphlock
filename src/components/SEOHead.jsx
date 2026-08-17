@@ -24,11 +24,11 @@ export default function SEOHead({
       autoData = getSeoData(key);
   }
 
-  const resolvedTitle = title || autoData.title || "Quantum-Resistant Enterprise Security Platform | GlyphLock LLC";
-  const resolvedDescription = description || autoData.description || "GlyphLock LLC delivers enterprise-grade quantum-resistant cybersecurity architecture, combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant governance framework. Designed for high-security environments and structured compliance alignment.";
+  const resolvedTitle = title || autoData.title || "GlyphLock | Custom Software, NUPS, AI & Verification Workflows";
+  const resolvedDescription = description || autoData.description || "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.";
   
   // Combine and deduplicate keywords
-  const defaultKeywords = "GlyphLock LLC, quantum-resistant encryption, post-quantum cryptography, AI cybersecurity, enterprise security platform, visual cryptography, secure QR codes, blockchain security, AI governance framework, Master Covenant, GlyphLock Security, threat detection AI, zero-trust architecture, identity verification, fraud prevention, steganography tools, secure QR code generator, image encryption, NIST post-quantum standards, AI binding protocol, security operations center";
+  const defaultKeywords = "GlyphLock LLC, custom software, NUPS, venue operations, QR verification, AI workflows, GlyphBot, Image Lab, systems integration, operational software, governance tooling, security operations";
   const autoKeywords = autoData.keywords ? autoData.keywords.join(", ") : "";
   const propKeywords = Array.isArray(keywords) ? keywords.join(", ") : (keywords || "");
   
@@ -122,7 +122,7 @@ export default function SEOHead({
     updateMetaTag('apple-mobile-web-app-capable', 'yes');
     updateMetaTag('apple-mobile-web-app-status-bar-style', 'black-translucent');
     updateMetaTag('apple-mobile-web-app-title', 'GlyphLock');
-    updateMetaTag('application-name', 'GlyphLock Security');
+    updateMetaTag('application-name', 'GlyphLock');
     updateMetaTag('msapplication-TileColor', '#000000');
     updateMetaTag('referrer', 'strict-origin-when-cross-origin');
 
@@ -143,7 +143,7 @@ export default function SEOHead({
     updateMetaTag('og:image:height', '630', true);
     updateMetaTag('og:image:alt', resolvedTitle, true);
     updateMetaTag('og:image:type', 'image/png', true);
-    updateMetaTag('og:site_name', 'GlyphLock Security', true);
+    updateMetaTag('og:site_name', 'GlyphLock', true);
     updateMetaTag('og:locale', 'en_US', true);
     // fb:app_id omitted — no verified FB app ID
 
@@ -228,7 +228,7 @@ export default function SEOHead({
       "url": siteUrl,
       "logo": image,
       "image": image,
-      "description": "Enterprise-grade quantum-resistant cybersecurity architecture combining post-quantum encryption, AI-powered threat detection, visual cryptography, secure QR infrastructure, and the Master Covenant AI governance framework. Designed for structured compliance alignment.",
+      "description": "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.",
       "foundingDate": "2025-01",
       "founder": [
         {
@@ -271,27 +271,24 @@ export default function SEOHead({
         "https://instagram.com/glyphlock",
         "https://tiktok.com/@glyphlock"
       ],
-      "slogan": "Post-Quantum Cybersecurity Architecture for Enterprise Defense",
+      "slogan": "Build. Verify. Operate.",
       "areaServed": "Worldwide",
       "keywords": resolvedKeywords,
       "knowsAbout": [
-        "Quantum-resistant encryption",
-        "Post-quantum cryptography",
-        "AI cybersecurity",
-        "Blockchain security",
-        "Visual cryptography",
-        "AI governance framework",
-        "Zero-trust architecture",
-        "Identity verification",
-        "Fraud prevention",
-        "Threat detection AI",
-        "NIST post-quantum standards",
-        "Steganography",
-        "Secure QR infrastructure"
+        "Custom software development",
+        "Venue operations software",
+        "Point-of-sale workflows",
+        "QR verification",
+        "AI-assisted workflows",
+        "Systems integration",
+        "Image tooling",
+        "Operational reporting",
+        "Security operations",
+        "Governance documentation"
       ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
-        "name": "Cybersecurity Services",
+        "name": "GlyphLock Products & Services",
         "itemListElement": [
           {
             "@type": "Offer",
@@ -333,8 +330,8 @@ export default function SEOHead({
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "QR Code Security Generator",
-              "description": "Generate secure, quantum-resistant QR codes with AI-powered threat detection",
+              "name": "QR Studio",
+              "description": "Generate QR payloads and support scan logging, signing, verification, and operational workflows",
               "provider": {
                 "@type": "Organization",
                 "name": "GlyphLock LLC"
@@ -357,8 +354,8 @@ export default function SEOHead({
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Security Consultation",
-              "description": "60-minute expert cybersecurity analysis and custom solution recommendations",
+              "name": "Architecture & Governance Review",
+              "description": "Structured review of architecture, documentation, controls, evidence gaps, and remediation priorities",
               "provider": {
                 "@type": "Organization",
                 "name": "GlyphLock LLC"
@@ -380,7 +377,7 @@ export default function SEOHead({
     websiteScript.textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "GlyphLock Security",
+      "name": "GlyphLock",
       "url": siteUrl,
       "description": resolvedDescription,
       "publisher": {
