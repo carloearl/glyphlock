@@ -480,6 +480,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   // the gross stays on the books (visible in OrderDisplay) so accounting can
   // see the gap. The CHARGE button uses finalTotal; OrderDisplay keeps `total`.
   const finalTotal = compAuth ? 0 : total;
+  const checkoutBlockedReason = !activeBatch
+    ? `OPEN ${modeState.operatingMode} BATCH`
+    : !activeBatch.door_confirmed
+      ? 'CONFIRM BATCH AT DOOR'
+      : null;
 
   // Invalidate comp auth if the cart changes after authorization — forces
   // re-auth so a manager can't pre-comp and then have someone ring more in.
