@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Beaker, ShieldCheck, FlaskConical, GraduationCap, ChevronDown, Loader2, Sparkles, Trash2, AlertTriangle, Lock, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -63,6 +64,7 @@ const STYLES = {
 };
 
 export default function ModeToggle() {
+  const navigate = useNavigate();
   const venue = useActiveVenue();
   const venueId = venue?.id;
   const { toast } = useToast();
@@ -280,6 +282,20 @@ export default function ModeToggle() {
               );
             })}
           </div>
+
+          {mode === OPERATING_MODE.TRAINING && (
+            <div className="border-t border-sky-300/15 px-2 py-2">
+              <button
+                type="button"
+                onClick={() => { setOpen(false); navigate("/NUPSTraining"); }}
+                className="flex w-full items-center gap-2 rounded-lg border border-sky-300/30 bg-sky-400/10 px-2.5 py-2 text-left text-[11px] font-black text-sky-100 transition hover:bg-sky-400/20"
+              >
+                <GraduationCap className="h-4 w-4" />
+                <span className="flex-1">Open Training Center</span>
+                <span className="font-mono text-[8px] tracking-wider text-sky-300/70">GUIDED</span>
+              </button>
+            </div>
+          )}
 
           {confirmLive && (
             <div className="mx-2 mb-2 rounded-lg border border-emerald-500/35 bg-emerald-950/35 p-2.5">
