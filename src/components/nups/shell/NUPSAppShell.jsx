@@ -222,7 +222,7 @@ function NavItem({ item, depth = 0, pathname, search, navigate, onNavigate }) {
         {(exactActive || headerActive) && <ChevronRight className="w-3.5 h-3.5 text-emerald-300/70" />}
       </button>
 
-      {hasChildren && parentActive && (
+      {hasChildren && (
         <div className="mt-0.5 space-y-0.5">
           {item.children.map((child) => (
             <NavItem

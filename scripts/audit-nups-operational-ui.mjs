@@ -35,7 +35,7 @@ for (const file of files) {
     const attrs = match[1];
     const line = source.slice(0, match.index).split('\n').length;
     const nearby = source.slice(match.index, Math.min(source.length, match.index + 450));
-    const actionable = /\bon(?:Click|Submit|PointerDown|MouseDown|KeyDown|TouchStart)\s*=|\btype\s*=\s*["']submit["']|\bform\s*=|\{\.\.\./.test(attrs);
+    const actionable = /\bon(?:Click|Submit|PointerDown|MouseDown|KeyDown|TouchStart)\s*=|\bonclick\s*=|\btype\s*=\s*["']submit["']|\bform\s*=|\{\.\.\./i.test(attrs);
     const inert = /onClick\s*=\s*\{\s*\(.*?\)\s*=>\s*\{?\s*\}?\s*\}/s.test(attrs) || /onClick\s*=\s*\{\s*undefined\s*\}/.test(attrs);
     const placeholder = /coming soon|todo|not implemented/i.test(nearby);
     const label = (nearby.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120) || 'button').replaceAll('|', '/');
