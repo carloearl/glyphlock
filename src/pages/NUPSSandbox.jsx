@@ -20,6 +20,8 @@ import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
 import FingerprintPanel from "@/components/nups/hardware/FingerprintPanel";
 import ThermalPrinterPanel from "@/components/nups/hardware/ThermalPrinterPanel";
 
+import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
+import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 const MOCK_USERS = [
   { id: "sb-u1", name: "Alex Rivera", role: "Manager", email: "alex@demo.nups", status: "active" },
@@ -533,6 +535,8 @@ export default function NUPSSandbox() {
     switch (activeSection) {
       case "walkthrough":
         return (
+          <>
+            <NUPSEnvironmentBar />
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30 rounded-2xl p-5">
               <div className="flex items-start gap-3">
@@ -1380,5 +1384,7 @@ export default function NUPSSandbox() {
         </div>
       </div>
     </div>
+            <ReceiptPrintHub />
+          </>
   );
 }

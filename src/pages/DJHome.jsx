@@ -5,6 +5,8 @@ import DJDiagnosticsPanel from "@/components/mixer/diagnostics/DJDiagnosticsPane
 import { Badge } from "@/components/ui/badge";
 import { Activity, Disc3, LogOut, Tv } from "lucide-react";
 
+import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
+import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
 // DACO-NUPS-ROLE-SELECTION — DJ workspace: the Auto-DJ console ONLY.
 // No dashboard, no accounting, no contracts, no back-office navigation.
 export default function DJHome() {
@@ -21,6 +23,10 @@ export default function DJHome() {
   }, []);
 
   return (
+
+    <>
+
+      <NUPSEnvironmentBar />
     <div className="min-h-screen bg-slate-950 text-white">
       <header className="border-b border-violet-900/50 bg-slate-900/80 px-4 py-3 flex flex-wrap items-center gap-3">
         <Disc3 className="w-6 h-6 text-violet-400 animate-spin" style={{ animationDuration: "5s" }} />
@@ -64,5 +70,9 @@ export default function DJHome() {
         <UnifiedMusicConsole />
       </main>
     </div>
+
+      <ReceiptPrintHub />
+
+    </>
   );
 }

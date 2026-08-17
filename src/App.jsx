@@ -23,6 +23,7 @@ import SystemAudit from './pages/SystemAudit';
 import OfficialChecks from './pages/OfficialChecks';
 import NUPSLanding from './pages/NUPSLanding';
 import NUPSSandbox from './pages/NUPSSandbox';
+import NUPSTraining from './pages/NUPSTraining';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSStaff from './pages/NUPSStaff';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
@@ -100,6 +101,7 @@ import GlobalBackButton from './components/nups/GlobalBackButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
+import '@/styles/nups-print.css';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -202,6 +204,9 @@ const AuthenticatedApp = () => {
             bookmark or link resurrects the fragmented login surfaces. */}
         <Route path="/NUPSGateway" element={<Navigate to="/NUPSKiosk" replace />} />
         <Route path="/nupsgateway" element={<Navigate to="/NUPSKiosk" replace />} />
+        <Route path="/NUPSTraining" element={<LayoutWrapper currentPageName="NUPSTraining"><NUPSTraining /></LayoutWrapper>} />
+        <Route path="/nupstraining" element={<LayoutWrapper currentPageName="NUPSTraining"><NUPSTraining /></LayoutWrapper>} />
+
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/nupssandbox" element={<NUPSSandbox />} />
         <Route path="/NUPSLogin" element={<Navigate to="/NUPSKiosk?panel=clockIn" replace />} />

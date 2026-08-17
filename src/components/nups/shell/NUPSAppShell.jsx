@@ -25,6 +25,8 @@ import { OPERATING_MODE } from "@/lib/nups/operatingMode";
 import TrainingCoach from "@/components/nups/training/TrainingCoach";
 
 
+import NUPSEnvironmentBar from '@/components/nups/shell/NUPSEnvironmentBar';
+import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
 // DACO 003 §2 — which sections each role class may see.
 // STAFF / ENTERTAINER never reach this shell for general nav (they use their
 // own scoped shells) but if they do, they get an empty sidebar — no cross-role
@@ -204,6 +206,10 @@ function NavItem({ item, depth = 0, pathname, search, navigate, onNavigate }) {
   const headerActive = hasChildren && parentActive && !item.children.some(c => isItemActive(pathname, search, c));
 
   return (
+
+    <>
+
+      <NUPSEnvironmentBar />
     <div>
       <button
         onClick={() => { navigate(item.to); onNavigate?.(); }}
@@ -560,5 +566,9 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
       <GlobalSearchDrawer open={searchOpen} onClose={() => setSearchOpen(false)} />
       <TrainingCoach />
     </div>
+
+      <ReceiptPrintHub />
+
+    </>
   );
 }
