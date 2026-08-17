@@ -131,7 +131,7 @@ const AuthenticatedApp = () => {
 
   const currentPath = location.pathname;
   const currentPathLower = currentPath.toLowerCase();
-  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk', '/vipsale', '/managerconsole'];
+  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupstraining', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk', '/vipsale', '/managerconsole'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
@@ -146,7 +146,7 @@ const AuthenticatedApp = () => {
   // Fullscreen pages that must render WITHOUT the GlyphLock layout wrapper.
   // All NUPS operator pages live here so kiosk mode shows only the NUPS UI.
   const fullscreenPaths = [
-    '/nupslanding', '/landing', '/nupsgateway', '/unauthorized',
+    '/nupslanding', '/landing', '/nupsgateway', '/nupstraining', '/unauthorized',
     '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff',
     '/frontdoor', '/entertainercheckin', '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome', '/glyphlockfinancialpage',
     '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
