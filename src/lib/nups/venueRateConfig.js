@@ -16,6 +16,8 @@ import { base44 } from "@/api/base44Client";
 // First write to the entity supersedes these forever.
 const SEED_DEFAULTS = {
   cover_charge: 20,
+  house_fee: 20,
+  glyphbucks_tender_enabled: false,
   reentry_charge: 10,
   card_discount: 10,
   vip_entry: 100,
