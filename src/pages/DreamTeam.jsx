@@ -569,7 +569,7 @@ export default function DreamTeamPage() {
                 <div className="bg-gradient-to-r from-indigo-500/20 via-violet-500/15 to-fuchsia-500/20 border border-indigo-400/40 rounded-xl px-4 py-3 shadow-[inset_0_0_30px_rgba(87,61,255,0.1)]">
                   <div className="flex items-center gap-2 mb-1">
                     <Zap className="w-5 h-5 text-violet-300" />
-                    <span className="text-sm font-bold text-violet-200 uppercase tracking-wide">{card.bindingType}</span>
+                    <span className="text-sm font-bold text-violet-200 uppercase tracking-wide">{card.bindingType.replaceAll('BINDING', 'WORKFLOW').replaceAll('Protocol', 'Workflow')}</span>
                   </div>
                   <p className="text-xs text-indigo-200">{card.covenant}</p>
                 </div>
@@ -631,7 +631,7 @@ export default function DreamTeamPage() {
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-violet-200" />
                       <div>
-                        <span className="text-violet-200 text-[10px] uppercase block mb-1">Binding Date</span>
+                        <span className="text-violet-200 text-[10px] uppercase block mb-1">Workflow Record Date</span>
                         <p className="text-white text-xs">{formatDate(card.bindingDate)}</p>
                       </div>
                     </div>
@@ -641,7 +641,7 @@ export default function DreamTeamPage() {
                     <span className="text-[10px] text-violet-200 uppercase tracking-wider">Status</span>
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-                      <span className="text-xs text-green-400 font-bold uppercase">VERIFIED & BOUND</span>
+                      <span className="text-xs text-green-400 font-bold uppercase">INTERNAL RECORD ARCHIVED</span>
                     </div>
                   </div>
                 </div>
