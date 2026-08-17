@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { CloudOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 const CRITICAL_ACTION = /\b(pay|payment|charge|refund|settle|settlement|payout|complete sale|finalize|close batch|close shift|submit contract|sign contract|mint|post to ledger|delete|void)\b/i;
 const LOCK_MS = 1400;
 
+function isCriticalButton(button) {
+  if (!(button instanceof HTMLButtonElement)) return false;
+  const label = `${button.textContent || ''} ${button.getAttribute('aria-label') || ''}`;
+  return CRITICAL_ACTION.test(label) || button.dataset.nupsCritical === 'true';
+}
+
 function lockButton(button) {
   if (!(button instanceof HTMLButtonElement) || button.dataset.nupsGuardLock === '1') return;
-  const label = `${button.textContent || ''} ${button.getAttribute('aria-label') || ''}`;
-  if (!CRITICAL_ACTION.test(label) && button.dataset.nupsCritical !== 'true') return;
+  if (!isCriticalButton(button)) return;
 
   const wasDisabled = button.disabled;
   button.dataset.nupsGuardLock = '1';
@@ -39,11 +45,24 @@ export default function NUPSActionSafety() {
     const onOffline = () => setOnline(false);
     const onClick = (event) => {
       const button = event.target?.closest?.('button');
-      if (button) queueMicrotask(() => lockButton(button));
+      if (!button) return;
+      if (!navigator.onLine && isCriticalButton(button)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        toast.error('NUPS is offline', { description: 'Money, contract and closeout actions are blocked until the connection returns.' });
+        return;
+      }
+      queueMicrotask(() => lockButton(button));
     };
     const onSubmit = (event) => {
       const form = event.target;
       if (!(form instanceof HTMLFormElement) || form.dataset.nupsSubmitLock === '1') return;
+      if (!navigator.onLine) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        toast.error('NUPS is offline', { description: 'This form was not submitted. Reconnect and try once.' });
+        return;
+      }
       form.dataset.nupsSubmitLock = '1';
       window.setTimeout(() => {
         if (form.isConnected) delete form.dataset.nupsSubmitLock;
