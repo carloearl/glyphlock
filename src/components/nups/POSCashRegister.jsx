@@ -145,10 +145,33 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   }, [activeVenue?.id]);
 
   const createTransaction = useMutation({
-    mutationFn: (data) => base44.entities.POSTransaction.create(data),
+    mutationFn: async (data) => {
+      let liveActor = null;
+      try { liveActor = await base44.auth.me(); } catch (_) { /* kiosk session may be primary */ }
+      const operatorRole = user?._highestRole || user?.role || liveActor?._highestRole || liveActor?.role || 'External';
+      const result = await writeEntity({
+        entity: 'POSTransaction',
+        operation: 'create',
+        data,
+        actor: {
+          email: liveActor?.email || user?.email,
+          id: liveActor?.id || user?.id,
+          role: operatorRole,
+        },
+        venue_id: venueId,
+        intent: `${modeState.operatingMode}_${station.toUpperCase()}_POS_SALE`,
+        requestContext: {
+          mode: modeState.ledgerMode,
+          validation_run: modeState.isNonLive,
+          session_id: modeState.trainingSession?.id || null,
+        },
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'Transaction gateway rejected the sale.');
+      return result.value || data;
+    },
     onSuccess: (result, variables) => {
-      queryClient.invalidateQueries(['pos-transactions']);
-      queryClient.invalidateQueries(['active-batch']);
+      queryClient.invalidateQueries({ queryKey: ['pos-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['active-batch'] });
       setLastTransaction(result || variables);
       setShowReceiptModal(true);
       setCart([]);
@@ -158,6 +181,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       setPaymentStep("register");
       setPaymentMethod(null);
       setCompAuth(null);
+      if (modeState.isTraining) markTrainingStep(venueId, 'transaction-completed');
     },
     onError: (err) => {
       console.error('Transaction create failed:', err);
