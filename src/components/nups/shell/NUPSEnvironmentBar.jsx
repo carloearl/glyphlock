@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AlertTriangle, BookOpenCheck, Database, Eye, Radio, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import useNupsEnvironment from '@/hooks/useNupsEnvironment';
@@ -25,6 +25,7 @@ const environmentStyles = {
 
 export default function NUPSEnvironmentBar({ compact = false }) {
   const { environment, policy, dataScope, setEnvironment } = useNupsEnvironment();
+  const location = useLocation();
   const [switching, setSwitching] = useState(false);
   const style = environmentStyles[environment] || environmentStyles.LIVE;
   const Icon = style.icon;
@@ -42,6 +43,10 @@ export default function NUPSEnvironmentBar({ compact = false }) {
     setSwitching(true);
     try {
       setEnvironment(next);
+      if (next === NUPS_ENVIRONMENTS.TRAINING && !location.pathname.toLowerCase().includes('training')) {
+        window.location.assign('/NUPSTraining');
+        return;
+      }
       toast.success(`${next} mode active`, {
         description: next === 'TRAINING'
           ? 'Practice records stay in this browser and never enter the live NUPS database.'
@@ -60,6 +65,19 @@ export default function NUPSEnvironmentBar({ compact = false }) {
       data-no-print
       aria-label="NUPS operating environment"
     >
+      {environment === 'TRAINING' && !location.pathname.toLowerCase().includes('training') && (
+        <div className="fixed inset-0 z-[250] flex items-center justify-center bg-[#02040c]/95 p-5 backdrop-blur-2xl" role="dialog" aria-modal="true" aria-label="Training data isolation guard">
+          <div className="w-full max-w-xl rounded-[28px] border border-amber-300/35 bg-[#100b03] p-7 text-center shadow-[0_0_80px_rgba(251,191,36,.18)]">
+            <BookOpenCheck className="mx-auto h-12 w-12 text-amber-300" />
+            <h2 className="mt-5 text-3xl font-black text-white">TRAINING MODE IS ISOLATED</h2>
+            <p className="mt-3 leading-relaxed text-slate-300">Live NUPS workspaces are locked while Training mode is active. Use the Training Center for browser-only practice records, or switch to Demo before returning to operational screens.</p>
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <Link to="/NUPSTraining" className="flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-5 font-black text-slate-950 transition hover:bg-amber-100">OPEN TRAINING CENTER</Link>
+              <button type="button" onClick={() => switchMode(NUPS_ENVIRONMENTS.DEMO)} className="min-h-12 rounded-xl border border-violet-300/35 bg-violet-300/[.08] px-5 font-black text-violet-100 transition hover:bg-violet-300/20">SWITCH TO DEMO</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className={`mx-auto flex max-w-[1680px] flex-col gap-3 px-3 py-2.5 md:px-5 ${compact ? '' : 'lg:flex-row lg:items-center lg:justify-between'}`}>
         <div className="flex min-w-0 items-center gap-3">
           <div className={`flex h-9 w-9 flex-none items-center justify-center rounded-xl border ${style.badge}`}>
