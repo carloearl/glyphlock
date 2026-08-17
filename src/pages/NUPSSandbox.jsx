@@ -582,7 +582,6 @@ export default function NUPSSandbox() {
               <span>Sandbox mode — every action above writes mock data only. Nothing here touches the live venue books.</span>
             </div>
           </div>
-          </>
         );
 
       case "hardware":
