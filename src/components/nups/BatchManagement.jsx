@@ -595,7 +595,7 @@ export default function BatchManagement({ user, onBatchClosed }) {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  Active Batch
+                  Active {modeState.operatingMode} Batch
                 </CardTitle>
                 <p className="text-sm text-gray-400 mt-1">Started {new Date(activeBatch.start_time).toLocaleString()}</p>
               </div>
@@ -628,7 +628,9 @@ export default function BatchManagement({ user, onBatchClosed }) {
               </div>
             </div>
             <div className="glass-card p-4 mt-4 border-green-500/30">
-              <div className="text-sm text-gray-400 mb-1">Total Batch Sales (Real Tender)</div>
+              <div className="text-sm text-gray-400 mb-1">
+                {modeState.isLive ? 'Total Batch Sales (Live Tender)' : `Total Batch Sales (${modeState.operatingMode} Simulation)`}
+              </div>
               <div className="text-3xl font-bold text-green-400">${batchTotal.toFixed(2)}</div>
               <div className="text-sm text-gray-400 mt-2">Expected Cash: ${expectedCashPreview.toFixed(2)}</div>
             </div>
@@ -637,8 +639,8 @@ export default function BatchManagement({ user, onBatchClosed }) {
             <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-800">
               <Button size="sm" variant="outline"
                 onClick={() => {
-                  queryClient.removeQueries(['active-batch']);
-                  queryClient.removeQueries(['batch-transactions']);
+                  queryClient.removeQueries({ queryKey: ['active-batch'] });
+                  queryClient.removeQueries({ queryKey: ['batch-transactions'] });
                   queryClient.invalidateQueries();
                   toast({ title: 'Refreshed', description: 'Batch data reloaded.' });
                 }}
@@ -646,9 +648,23 @@ export default function BatchManagement({ user, onBatchClosed }) {
                 <RefreshCw className="w-3 h-3 mr-1" /> Refresh
               </Button>
               <Button size="sm" variant="outline"
+                onClick={() => setOverrideAction('backup')}
+                className="border-blue-500/40 text-blue-300 hover:bg-blue-500/10">
+                <Save className="w-3 h-3 mr-1" /> Save Snapshot
+              </Button>
+              <Button size="sm" variant="outline"
+                onClick={() => setShowRestoreList(true)}
+                disabled={modeState.isLive || relevantBackups.length === 0}
+                title={modeState.isLive ? 'Live books cannot be rolled back from a UI snapshot' : 'Restore a non-live batch snapshot'}
+                className="border-violet-500/40 text-violet-300 hover:bg-violet-500/10 disabled:opacity-40">
+                <RotateCcw className="w-3 h-3 mr-1" /> Restore ({relevantBackups.length})
+              </Button>
+              <Button size="sm" variant="outline"
                 onClick={() => setOverrideAction('reset')}
-                className="border-red-500/40 text-red-400 hover:bg-red-500/10">
-                <Trash2 className="w-3 h-3 mr-1" /> Reset to Zero
+                disabled={modeState.isLive}
+                title={modeState.isLive ? 'Live financial records are append-only' : 'Void non-live transactions and reset this practice batch'}
+                className="border-red-500/40 text-red-400 hover:bg-red-500/10 disabled:opacity-40">
+                <Trash2 className="w-3 h-3 mr-1" /> Reset Non-Live Batch
               </Button>
             </div>
           </CardContent>
