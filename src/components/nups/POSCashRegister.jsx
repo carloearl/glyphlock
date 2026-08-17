@@ -389,7 +389,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           action_type: 'CONFIG_CHANGE',
           entity_affected: 'POSCart:Discount',
           venue_id: activeVenue?.id || null,
-          mode: 'REAL',
+          mode: modeState.ledgerMode,
           notes: `$${amount} discount applied by ${authName}`,
           after_value: { amount, authorized_by: authName, station },
         });
@@ -452,7 +452,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         action_type: 'DELETE',
         entity_affected: `POSCart:${action}`,
         venue_id: activeVenue?.id || null,
-        mode: 'REAL',
+        mode: modeState.ledgerMode,
         notes: `Void approved by ${auth.authorized_by_name} — ${auth.reason}${auth.note ? ` · ${auth.note}` : ''}`,
         before_value: { action, productId, itemLabel: pendingVoid.itemLabel, payload },
         after_value: { authorized_by: auth.authorized_by_email, authorized_by_id: auth.authorized_by_id, reason: auth.reason, note: auth.note },
@@ -743,7 +743,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         action_type: "CONFIG_CHANGE",
         entity_affected: "POSTransaction:Comp",
         venue_id: activeVenue?.id || null,
-        mode: "REAL",
+        mode: modeState.ledgerMode,
         notes: `COMP $${auth.comp_amount.toFixed(2)} authorized by ${auth.authorized_by_name} — reason: ${auth.reason}${auth.note ? ` · ${auth.note}` : ""}`,
         after_value: {
           comp_amount: auth.comp_amount,
