@@ -587,6 +587,7 @@ export default function NUPSSandbox() {
               <span>Sandbox mode — every action above writes mock data only. Nothing here touches the live venue books.</span>
             </div>
           </div>
+          </>
         );
 
       case "hardware":
@@ -1312,7 +1313,8 @@ export default function NUPSSandbox() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <>
+      <div className="min-h-screen bg-black text-white">
       {/* Demo Receipt Modal */}
       {showReceipt && currentTransaction && (
         <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4">

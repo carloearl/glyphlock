@@ -245,6 +245,7 @@ function NavItem({ item, depth = 0, pathname, search, navigate, onNavigate }) {
         </div>
       )}
     </div>
+    </>
   );
 }
 
@@ -434,7 +435,8 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   );
 
   return (
-    <div className="min-h-screen bg-[#05070d] text-white flex">
+    <>
+      <div className="min-h-screen bg-[#05070d] text-white flex">
       {visibleSections.length > 0 && <div className="hidden lg:flex">{SideRail}</div>}
 
       {open && visibleSections.length > 0 && (
