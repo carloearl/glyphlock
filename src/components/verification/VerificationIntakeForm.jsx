@@ -165,9 +165,9 @@ export default function VerificationIntakeForm() {
                 <SelectValue placeholder="Select interest level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="founding_cohort">Founding Cohort (from $6,500)</SelectItem>
-                <SelectItem value="standard_verification">Standard Review</SelectItem>
-                <SelectItem value="not_sure">Not Sure / Exploratory</SelectItem>
+                <SelectItem value="founding_cohort">Partnership or licensing</SelectItem>
+                <SelectItem value="standard_verification">Documentation review</SelectItem>
+                <SelectItem value="not_sure">Not sure / exploratory</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -200,21 +200,6 @@ export default function VerificationIntakeForm() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label className="text-white">Budget Range</Label>
-              <Select value={formData.budget_range} onValueChange={(v) => setFormData({...formData, budget_range: v})}>
-                <SelectTrigger className="bg-slate-900 border-slate-700 text-white">
-                  <SelectValue placeholder="Select range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="under_5k">Under $5,000</SelectItem>
-                  <SelectItem value="5k_10k">$5,000 - $10,000</SelectItem>
-                  <SelectItem value="10k_25k">$10,000 - $25,000</SelectItem>
-                  <SelectItem value="25k_plus">$25,000+</SelectItem>
-                  <SelectItem value="not_disclosed">Not Disclosed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div>
               <Label className="text-white">Timeline *</Label>
               <Select value={formData.timeline} onValueChange={(v) => setFormData({...formData, timeline: v})}>

@@ -1,90 +1,91 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Handshake, FileSignature, ArrowRight } from 'lucide-react';
+
+const REVIEW_SCOPE = [
+  'Documentation intake and gap list',
+  'Working session with your technical owners',
+  'Written findings report',
+  'Short brief for leadership',
+  'Prioritized remediation roadmap',
+];
+
+const PARTNERSHIP_SCOPE = [
+  'Platform or module licensing',
+  'White-label and OEM arrangements',
+  'Joint delivery or referral partnerships',
+  'Custom build and integration work',
+];
 
 export default function EngagementOptions() {
-  const founding_features = [
-    'Pre-session documentation intake review',
-    'Structured 90-minute moderated verification session',
-    'Comprehensive Verification Report',
-    'Executive Brief for leadership',
-    'Qualification Tier Determination',
-    'Remediation Roadmap'
-  ];
-
-  const standard_features = [
-    'Pre-session structured documentation review',
-    'Formal 90-minute verification engagement',
-    'Comprehensive written determination report',
-    'Executive Brief',
-    'Credential eligibility statement',
-    'Structured enforcement roadmap'
-  ];
-
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Section II — Engagement Options</h2>
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-white">How to engage</h2>
+        <p className="max-w-3xl text-sm text-slate-400">
+          Pricing is not published. Scope, effort and terms differ too much between organizations for a fixed
+          number to be honest, so every engagement is quoted in writing after a scoping conversation.
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Subsection A: Founding Cohort */}
-        <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/40">
+        <Card className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 border-cyan-500/40">
           <CardHeader>
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <CardTitle className="text-xl text-purple-300">Founding Cohort Verification</CardTitle>
-                <p className="text-sm text-slate-400 mt-1">Limited Enrollment Program</p>
+                <CardTitle className="flex items-center gap-2 text-xl text-cyan-300">
+                  <FileSignature className="h-5 w-5" /> Documentation Review
+                </CardTitle>
+                <p className="mt-1 text-sm text-slate-400">Quoted per engagement</p>
               </div>
-              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40">
-                Limited
-              </Badge>
+              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40">By scope</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-purple-300">$6,500</div>
-              <p className="text-xs text-slate-400 mt-1">Limited to five organizations</p>
-            </div>
-
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-white">Includes:</p>
-              {founding_features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-slate-300">{feature}</span>
+              <p className="text-sm font-semibold text-white">Typically includes:</p>
+              {REVIEW_SCOPE.map((item) => (
+                <div key={item} className="flex items-start gap-2">
+                  <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-400" />
+                  <span className="text-sm text-slate-300">{item}</span>
                 </div>
               ))}
             </div>
-
-            <div className="pt-4 border-t border-purple-500/20">
-              <p className="text-xs text-slate-400 italic">
-                Upon completion of Founding Cohort enrollment, standard engagement pricing applies.
-              </p>
-            </div>
+            <p className="border-t border-cyan-500/20 pt-4 text-xs italic text-slate-400">
+              Deliverables are written findings only — not a certification, audit opinion or compliance approval.
+            </p>
           </CardContent>
         </Card>
 
-        {/* Subsection B: Standard Verification */}
-        <Card className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 border-cyan-500/40">
+        <Card className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/40">
           <CardHeader>
-            <CardTitle className="text-xl text-cyan-300">Standard Verification Engagement</CardTitle>
-            <p className="text-sm text-slate-400">For qualified organizations</p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-xl text-purple-300">
+                  <Handshake className="h-5 w-5" /> Partnership &amp; Licensing
+                </CardTitle>
+                <p className="mt-1 text-sm text-slate-400">Direct conversation</p>
+              </div>
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40">Contact us</Badge>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-cyan-300">Custom Pricing</div>
-              <p className="text-xs text-slate-400 mt-1">Engagement Fee Provided Upon Qualification</p>
-            </div>
-
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-white">Includes:</p>
-              {standard_features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-cyan-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-slate-300">{feature}</span>
+              <p className="text-sm font-semibold text-white">Available discussions:</p>
+              {PARTNERSHIP_SCOPE.map((item) => (
+                <div key={item} className="flex items-start gap-2">
+                  <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-400" />
+                  <span className="text-sm text-slate-300">{item}</span>
                 </div>
               ))}
             </div>
+            <a
+              href="mailto:carloearl@glyphlock.com?subject=Partnership%20or%20Licensing%20Inquiry"
+              className="inline-flex items-center gap-2 rounded-xl border border-purple-400/40 bg-purple-500/15 px-4 py-3 text-sm font-bold text-purple-200 transition-colors hover:bg-purple-500/25 hover:text-white"
+            >
+              Contact for partnership or licensing <ArrowRight className="h-4 w-4" />
+            </a>
           </CardContent>
         </Card>
       </div>
