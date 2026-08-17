@@ -444,18 +444,24 @@ export async function writeEntity({
     return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `write_failed: ${writeError.message}` };
   }
 
-  const audit_id = await audit({
-    entity_name: entity,
-    operation,
-    actor_id: actorId,
-    actor_role: role,
-    fields_changed: fieldsOf(data),
-    mode,
-    tier,
-    result: 'allowed',
-    venue_id: venue_id || null,
-    notes: intent || null,
-  }, identityContext);
+  // The business write already succeeded. Post-write audit/mirror failures must
+  // NEVER throw here — that would abandon the caller (no receipt, no feedback)
+  // even though the record exists. They are recorded best-effort instead.
+  let audit_id = null;
+  try {
+    audit_id = await audit({
+      entity_name: entity,
+      operation,
+      actor_id: actorId,
+      actor_role: role,
+      fields_changed: fieldsOf(data),
+      mode,
+      tier,
+      result: 'allowed',
+      venue_id: venue_id || null,
+      notes: intent || null,
+    }, identityContext);
+  } catch (e) { console.warn('post-write audit failed:', e); }
 
   // BPAA-NUPS-AUDIT-001 §5 — emit observational AuditEvent. Recursion guard
   // is inside the emitter (skips entity===AuditEvent and audit_depth>=max).
@@ -485,15 +491,17 @@ export async function writeEntity({
   // DACO-20260610 WS-1: Mirror to ActivityLog (user-facing audit trail)
   const actionMap = { create: 'CREATE', update: 'UPDATE', delete: 'DELETE', bulkCreate: 'CREATE' };
   const action_type = actionMap[operation] || 'UPDATE';
-  await logActivity({
-    action_type,
-    entity_affected: `${entity}${id ? ':' + id : ''}`,
-    before_value: null,
-    after_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
-    venue_id: venue_id || null,
-    actor: { email: verifiedActorEmail, role },
-    notes: intent || `gateway:${operation}`,
-  });
+  try {
+    await logActivity({
+      action_type,
+      entity_affected: `${entity}${id ? ':' + id : ''}`,
+      before_value: null,
+      after_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
+      venue_id: venue_id || null,
+      actor: { email: verifiedActorEmail, role },
+      notes: intent || `gateway:${operation}`,
+    });
+  } catch (e) { console.warn('ActivityLog mirror failed:', e); }
 
   return { ok: true, audit_id, mode, tier, result: 'allowed', value };
 }

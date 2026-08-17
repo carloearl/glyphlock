@@ -119,6 +119,10 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       setPaymentStep("register");
       setPaymentMethod(null);
       setCompAuth(null);
+    },
+    onError: (err) => {
+      console.error('Transaction create failed:', err);
+      toast.error(`Sale could not be completed: ${err?.message || 'unknown error'}`);
     }
   });
 
@@ -622,6 +626,10 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         });
         queryClient.invalidateQueries(['pos-customers']);
       }
+    } catch (err) {
+      // Never fail silently — the operator must know the sale didn't post.
+      console.error('completePayment failed:', err);
+      toast.error(`Sale could not be completed: ${err?.message || 'unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }
