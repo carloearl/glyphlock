@@ -225,8 +225,12 @@ function stampGatewayRecord(entity, record, mode, venue_id, requestContext = {})
 
   if (transactional) {
     const fundsOff = mode !== 'REAL' || explicitValidation;
+    const isComp = String(stamped.payment_method || '').toLowerCase() === 'comp'
+      || Number(stamped.comp_amount || 0) > 0;
     stamped.validation_run = fundsOff;
-    stamped.funds_settled = !fundsOff;
+    // A real comp is a live accounting gap, not a settled tender. Non-live
+    // transactions are always funds-off regardless of payment method.
+    stamped.funds_settled = fundsOff ? false : !isComp;
   }
   return stamped;
 }
