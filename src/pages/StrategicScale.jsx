@@ -9,9 +9,9 @@ export default function StrategicScale() {
   return (
     <>
       <SEOHead 
-        title="Strategic Scale Target - GlyphLock | Billion-Scale Protocol Infrastructure"
-        description="GlyphLock is architected for billion-scale deployment as protocol infrastructure, not an application layer. Long-term objective: $1B+ enterprise valuation through protocol licensing and global identity infrastructure."
-        keywords="protocol infrastructure, strategic scale, billion dollar valuation, enterprise licensing, identity infrastructure, credential governance networks"
+        title="Strategic Scale | GlyphLock Platform Architecture"
+        description="GlyphLock's long-term platform direction: modular software, reusable integrations, operational reliability, documentation discipline, and scalable deployment patterns."
+        keywords="GlyphLock platform architecture, scalable software, systems integration, NUPS, operational software, deployment architecture"
         url="/strategic-scale"
       />
       
@@ -29,10 +29,10 @@ export default function StrategicScale() {
               STRATEGIC <span className="text-transparent bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] bg-clip-text">SCALE TARGET</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              GlyphLock is architected for billion-scale deployment.
+              GlyphLock is being engineered for repeatable, scalable deployment.
             </p>
             <p className="text-base text-gray-400 max-w-2xl mx-auto mt-4">
-              The protocol is designed as infrastructure, not an application layer.
+              The objective is a reusable software and integration layer that can support multiple operational environments without overstating present deployment scale.
             </p>
           </div>
 
@@ -40,13 +40,13 @@ export default function StrategicScale() {
           <div className="glass-card rounded-3xl border border-[#00E4FF]/30 p-12 mb-16 text-center bg-gradient-to-b from-[#001F54] to-black relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
             <div className="relative z-10">
-              <p className="text-sm text-[#00E4FF] font-bold uppercase tracking-widest mb-4">Long term objective</p>
-              <h2 className="text-5xl md:text-7xl font-black text-white mb-6 font-space">
-                $1B<span className="text-[#00E4FF]">+</span>
+              <p className="text-sm text-[#00E4FF] font-bold uppercase tracking-widest mb-4">Long-term engineering objective</p>
+              <h2 className="text-4xl md:text-6xl font-black text-white mb-6 font-space">
+                REPEATABLE<span className="text-[#00E4FF]"> DEPLOYMENT</span>
               </h2>
-              <p className="text-xl text-gray-300 mb-4">enterprise valuation</p>
+              <p className="text-xl text-gray-300 mb-4">modular systems · documented integrations · measurable reliability</p>
               <p className="text-base text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                Establish a global protocol infrastructure capable of operating at billion dollar scale across creative and enterprise ecosystems.
+                Scale the platform through reusable modules, deployment playbooks, evidence-backed integrations, observability, and operational support rather than valuation claims.
               </p>
             </div>
           </div>
@@ -79,8 +79,7 @@ export default function StrategicScale() {
           {/* Disclaimer */}
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-6 mb-12">
             <p className="text-sm text-yellow-200 leading-relaxed text-center">
-              <strong>Important:</strong> This is a strategic target, not a current valuation claim. 
-              Forward projections are available under NDA to qualified partners.
+              <strong>Important:</strong> This page describes engineering direction and product strategy. It is not a valuation, revenue, customer-count, certification, or deployment-scale claim.
             </p>
           </div>
 
