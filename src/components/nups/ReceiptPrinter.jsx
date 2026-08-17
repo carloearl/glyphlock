@@ -1,14 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer, ShieldCheck } from "lucide-react";
+import { Printer, ShieldCheck, Loader2 } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import { computeReceiptHash } from "@/lib/nups/receiptHash";
 import { buildReceiptBreakdown, getCashierDisplay } from "@/lib/nups/receiptBreakdown";
 import { DEMO_RECEIPT_VENUE, isDemoTransaction } from "@/lib/nups/demoReceiptVenue";
 import { printHtml } from "@/lib/nups/printHtml";
+import { logActivity } from "@/lib/nups/activityLog";
+import { markTrainingStep } from "@/lib/nups/operatingMode";
+import { toast } from "sonner";
 
 const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
+
+const escapeHtml = (value) => String(value ?? '')
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#039;');
+
+const money = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
 
 export default function ReceiptPrinter({
   transaction,
@@ -18,6 +30,8 @@ export default function ReceiptPrinter({
   const activeVenue = useActiveVenue();
   const [rates, setRates] = useState(null);
   const [hashInfo, setHashInfo] = useState(null);
+  const [printing, setPrinting] = useState(false);
+  const [lastPrintAt, setLastPrintAt] = useState(null);
 
   // Load per-venue receipt config (processing fee, service fee, footer, tax id).
   useEffect(() => {
