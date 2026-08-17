@@ -1,4 +1,4 @@
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.38";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.41";
 
 // youtubeMusicSearch — server-side YouTube Data API v3 search for the NUPS DJ Booth.
 // Requires the YOUTUBE_API_KEY app secret (no HTTP-referrer restriction).

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.38";
+import { createClientFromRequest } from "npm:@base44/sdk";
 
 const JAMENDO_CLIENT_ID = String(Deno.env.get("JAMENDO_CLIENT_ID") || "").trim();
 
