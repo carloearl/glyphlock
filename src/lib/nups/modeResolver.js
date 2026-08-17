@@ -2,8 +2,9 @@
 //
 // Priority (highest wins):
 //   1. Request context override (per-call argument)
-//   2. SystemConfig per-venue record (config_key: 'venue', venue_id match)
-//   3. SystemConfig global record (config_key: 'global')
+//   2. Active VenueRateConfig.mode for the selected venue (UI + ledger source)
+//   3. Legacy SystemConfig per-venue record (compatibility fallback)
+//   4. Legacy SystemConfig global record (compatibility fallback)
 //
 // Modes: REAL | DEMO | SANDBOX
 // Default if nothing is set: 'REAL'.
@@ -19,6 +20,22 @@ const VALID_MODES = ['REAL', 'DEMO', 'SANDBOX'];
 
 let _globalCache = null;
 const _venueCache = {};
+const _venueRateModeCache = {};
+
+async function readVenueRateMode(venue_id) {
+  if (!venue_id) return null;
+  if (Object.prototype.hasOwnProperty.call(_venueRateModeCache, venue_id)) {
+    return _venueRateModeCache[venue_id];
+  }
+  try {
+    const rows = await base44.entities.VenueRateConfig.filter({ venue_id, active: true }, '-created_date', 1);
+    const mode = rows?.[0]?.mode;
+    _venueRateModeCache[venue_id] = VALID_MODES.includes(mode) ? mode : null;
+  } catch {
+    _venueRateModeCache[venue_id] = null;
+  }
+  return _venueRateModeCache[venue_id];
+}
 
 /**
  * Read per-venue SystemConfig record. Returns null if not found.
@@ -56,9 +73,11 @@ async function readGlobalConfig() {
 export function invalidateModeCache(venue_id) {
   if (venue_id) {
     delete _venueCache[venue_id];
+    delete _venueRateModeCache[venue_id];
   } else {
     _globalCache = null;
     Object.keys(_venueCache).forEach((k) => delete _venueCache[k]);
+    Object.keys(_venueRateModeCache).forEach((k) => delete _venueRateModeCache[k]);
   }
 }
 
@@ -72,12 +91,17 @@ export async function getMode(requestContext, venue_id) {
   if (requestContext?.mode && VALID_MODES.includes(requestContext.mode)) {
     return requestContext.mode;
   }
-  // Layer 2: per-venue SystemConfig
+  // Layer 2: active per-venue rate/config row — the same record ModeToggle edits.
+  if (venue_id) {
+    const rateMode = await readVenueRateMode(venue_id);
+    if (rateMode) return rateMode;
+  }
+  // Layer 3: legacy per-venue SystemConfig compatibility fallback.
   if (venue_id) {
     const venueCfg = await readVenueConfig(venue_id);
     if (venueCfg?.mode && VALID_MODES.includes(venueCfg.mode)) return venueCfg.mode;
   }
-  // Layer 3: global SystemConfig
+  // Layer 4: global SystemConfig
   const cfg = await readGlobalConfig();
   if (cfg?.mode && VALID_MODES.includes(cfg.mode)) return cfg.mode;
   // Default
@@ -97,9 +121,11 @@ export async function getActiveMode(venue_id) {
  * @param {string} venue_id optional venue scope
  */
 export async function describeMode(venue_id) {
+  const venueRateMode = venue_id ? await readVenueRateMode(venue_id) : null;
   const venueCfg = venue_id ? await readVenueConfig(venue_id) : null;
   const globalCfg = await readGlobalConfig();
   return {
+    venue_rate_config: venueRateMode,
     venue_config: venueCfg?.mode || null,
     global_config: globalCfg?.mode || null,
     request: null,
