@@ -1,6 +1,37 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { GoogleGenerativeAI } from 'npm:@google/generative-ai';
 
+// SSRF guard: only allow plain http(s) requests to public hosts.
+function assertSafePublicUrl(rawUrl) {
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw new Error('Invalid URL');
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error('Only http and https URLs are allowed');
+  }
+  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  const blockedHost =
+    host === 'localhost' ||
+    host.endsWith('.localhost') ||
+    host.endsWith('.internal') ||
+    host.endsWith('.local') ||
+    host === '::1' ||
+    host === '0.0.0.0' ||
+    host.startsWith('127.') ||
+    host.startsWith('10.') ||
+    host.startsWith('169.254.') ||
+    host.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+    /^(fc|fd|fe8|fe9|fea|feb)/.test(host);
+  if (blockedHost) {
+    throw new Error('URL host is not allowed');
+  }
+  return parsed.toString();
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -19,8 +50,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
     }
 
-    // Fetch image
-    const imageResponse = await fetch(image_url);
+    // Fetch image (SSRF-guarded, no redirect following)
+    let safeImageUrl;
+    try {
+      safeImageUrl = assertSafePublicUrl(image_url);
+    } catch (urlError) {
+      return Response.json({ error: urlError.message }, { status: 400 });
+    }
+    const imageResponse = await fetch(safeImageUrl, { redirect: 'error' });
     const imageBuffer = await imageResponse.arrayBuffer();
     const imageBase64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
 
