@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import useHardwareScanner from "@/hooks/useHardwareScanner";
+import { parseAAMVA, normalizeIdType } from "@/lib/nups/aamva";
+import ScannedIdSummary from "@/components/nups/frontdoor/ScannedIdSummary";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -39,42 +41,6 @@ async function hashIdNumber(idNum) {
     for (let i = 0; i < idNum.length; i++) h = ((h << 5) - h + idNum.charCodeAt(i)) | 0;
     return "fallback-" + Math.abs(h).toString(16).padStart(16, "0");
   }
-}
-
-/**
- * Parse a raw AAMVA PDF417 payload from a 2D barcode scanner (HID keyboard
- * wedge). Every US/Canada license back encodes this. Returns null if the
- * input doesn't look like an AAMVA payload — plain typed ID numbers fall
- * through to the normal lookup.
- */
-function parseAAMVA(raw) {
-  if (!raw || raw.length < 40) return null;
-  if (!/ANSI |AAMVA|DAQ/.test(raw)) return null;
-  const get = (code) => {
-    const m = raw.match(new RegExp(code + "([^\\n\\r]*)"));
-    return m ? m[1].trim() : "";
-  };
-  const idNumber = get("DAQ");
-  if (!idNumber) return null;
-  const last = get("DCS");
-  const first = get("DAC") || get("DCT");
-  const middle = get("DAD");
-  const dobRaw = get("DBB");
-  let dob = "";
-  if (/^\d{8}$/.test(dobRaw)) {
-    // US = MMDDCCYY, Canada = CCYYMMDD
-    dob = Number(dobRaw.slice(0, 2)) <= 12 && Number(dobRaw.slice(4, 8)) > 1900
-      ? `${dobRaw.slice(4, 8)}-${dobRaw.slice(0, 2)}-${dobRaw.slice(2, 4)}`
-      : `${dobRaw.slice(0, 4)}-${dobRaw.slice(4, 6)}-${dobRaw.slice(6, 8)}`;
-  }
-  const fullName = [first, middle, last].filter(Boolean).join(" ").replace(/,/g, "").trim();
-  return {
-    id_number: idNumber,
-    full_name: fullName || undefined,
-    date_of_birth: dob || undefined,
-    id_state: get("DAJ") || undefined,
-    id_type: "Drivers License",
-  };
 }
 
 const TIER_CONFIG = {
@@ -168,6 +134,7 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
   const [lookingUp, setLookingUp] = useState(false);
   const [showCardFields, setShowCardFields] = useState(false);
   const [showCamera, setShowCamera] = useState(initialCameraOpen);
+  const [lastScan, setLastScan] = useState(null);
   const scanTimer = useRef(null);
   const activeVenue = useActiveVenue();
 
@@ -235,24 +202,23 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
 
   const age = calcAge(form.date_of_birth);
 
-  // Apply data extracted from a 2D scanner payload or camera OCR scan
+  // Apply data extracted from a 2D scanner payload or camera OCR scan.
+  // Every decoded element is routed to its own form field — the raw payload
+  // never stays in the scan box.
   const applyScanData = async (d) => {
-    const idTypeMap = {
-      drivers_license: "Drivers License",
-      state_id: "State ID",
-      passport: "Passport",
-      military_id: "Military ID",
-    };
     setAgeBlocked(false);
     setForm((f) => ({
       ...f,
       full_name: d.full_name || f.full_name,
       date_of_birth: (d.date_of_birth || "").split("T")[0] || f.date_of_birth,
-      id_type: idTypeMap[d.id_type] || d.id_type || "Drivers License",
-      id_state: (d.id_state || f.id_state || "").toUpperCase(),
+      id_type: normalizeIdType(d.id_type) || "Drivers License",
+      id_number: d.id_number || f.id_number,
+      id_state: (d.id_state || d.state || f.id_state || "").toUpperCase().slice(0, 2),
     }));
+    setLastScan(d);
     setShowCamera(false);
-    toast.success("ID scanned — check the age gate, then check in");
+    if (d.id_expired) toast.error("ID is EXPIRED — verify manually before entry");
+    else toast.success("ID scanned — fields filled. Check the age gate, then check in.");
     if (d.id_number) await handleIdLookup(d.id_number);
   };
 
@@ -463,6 +429,7 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
                 />
               </div>
             )}
+            <ScannedIdSummary scan={lastScan} onDismiss={() => setLastScan(null)} />
             {returningGuest && (
               <div className="mt-2 p-2 rounded bg-purple-500/10 border border-purple-500/30 text-xs text-purple-300 flex items-center gap-2">
                 <Crown className="w-3 h-3" />
