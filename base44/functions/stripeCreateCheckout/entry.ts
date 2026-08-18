@@ -1,20 +1,47 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import Stripe from 'npm:stripe@^14.14.0';
+import Stripe from 'npm:stripe@14.14.0';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+/**
+ * Create a Stripe-hosted subscription checkout using server-owned pricing.
+ *
+ * The browser selects only a stable plan key. Price IDs, line items, mode,
+ * entitlement metadata, and return destinations are controlled server-side so
+ * a caller cannot buy an arbitrary Price and label it "professional".
+ */
 
-// GLYPHLOCK: Env-based price ID mapping
-const PRICE_MAPPING = {
-  creator: Deno.env.get('STRIPE_PRICE_CREATOR_MONTHLY'),
-  professional: Deno.env.get('STRIPE_PRICE_PROFESSIONAL_MONTHLY')
+const PLAN_PRICE_SECRETS = {
+  creator: 'STRIPE_PRICE_CREATOR_MONTHLY',
+  professional: 'STRIPE_PRICE_PROFESSIONAL_MONTHLY',
 };
 
-Deno.serve(async (req) => {
-  try {
-    if (req.method !== 'POST') {
-      return new Response('Method Not Allowed', { status: 405 });
-    }
+function getAllowedOrigin(req) {
+  const candidates = [Deno.env.get('APP_BASE_URL'), req.headers.get('origin')].filter(Boolean);
 
+  for (const candidate of candidates) {
+    try {
+      const url = new URL(candidate);
+      const host = url.hostname.toLowerCase();
+      const allowed =
+        url.protocol === 'https:' &&
+        (host === 'glyphlock.io' ||
+          host.endsWith('.glyphlock.io') ||
+          host.endsWith('.base44.app'));
+
+      if (allowed) return url.origin;
+    } catch {
+      // Ignore malformed candidates and continue to the safe production default.
+    }
+  }
+
+  return 'https://glyphlock.io';
+}
+
+Deno.serve(async (req) => {
+  if (req.method !== 'POST') {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 });
+  }
+
+  try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
@@ -22,52 +49,93 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { plan, priceId, lineItems, mode = 'subscription', successUrl, cancelUrl } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
 
-    // GLYPHLOCK: Enterprise requires manual approval, not direct checkout
+    const plan = typeof body?.plan === 'string' ? body.plan.toLowerCase() : '';
+
     if (plan === 'enterprise') {
-      return Response.json({ 
-        error: 'Enterprise requires manual approval. Please submit a request instead.' 
-      }, { status: 400 });
+      return Response.json(
+        { error: 'Enterprise access requires an approved engagement' },
+        { status: 400 },
+      );
     }
 
-    // GLYPHLOCK: Resolve price ID from plan name or use provided priceId
-    let resolvedPriceId = priceId;
-    if (plan && PRICE_MAPPING[plan]) {
-      resolvedPriceId = PRICE_MAPPING[plan];
+    if (!Object.hasOwn(PLAN_PRICE_SECRETS, plan)) {
+      return Response.json({ error: 'Unsupported subscription plan' }, { status: 400 });
     }
 
-    if (!resolvedPriceId && !lineItems) {
-      return Response.json({ error: 'Plan, price ID, or line items are required' }, { status: 400 });
+    // Reject legacy client-controlled pricing inputs explicitly. Silently
+    // ignoring them would conceal an integration bug and invite future drift.
+    if (body?.priceId || body?.lineItems || (body?.mode && body.mode !== 'subscription')) {
+      return Response.json(
+        { error: 'Client-controlled prices, line items, and checkout modes are not accepted' },
+        { status: 400 },
+      );
     }
 
-    // GLYPHLOCK: Build line items - either from resolved priceId or custom lineItems
-    const checkoutLineItems = lineItems || [
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    const priceId = Deno.env.get(PLAN_PRICE_SECRETS[plan]);
+
+    if (!stripeSecretKey || !priceId) {
+      return Response.json(
+        { error: 'Stripe subscription checkout is not configured' },
+        { status: 503 },
+      );
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+    const appOrigin = getAllowedOrigin(req);
+    const successUrl = `${appOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${appOrigin}/payment-cancel`;
+
+    const session = await stripe.checkout.sessions.create(
       {
-        price: resolvedPriceId,
-        quantity: 1,
+        mode: 'subscription',
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        customer_email: user.email,
+        client_reference_id: user.id,
+        metadata: {
+          userId: user.id,
+          userEmail: user.email,
+          plan,
+          expectedPriceId: priceId,
+        },
+        subscription_data: {
+          metadata: {
+            userId: user.id,
+            userEmail: user.email,
+            plan,
+            expectedPriceId: priceId,
+          },
+        },
+        allow_promotion_codes: true,
+        billing_address_collection: 'auto',
       },
-    ];
+      {
+        idempotencyKey: `glyphlock-subscription-${user.id}-${plan}-${Math.floor(Date.now() / 300000)}`,
+      },
+    );
 
-    // Create Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: checkoutLineItems,
-      mode: mode, // 'payment' for one-time, 'subscription' for recurring
-      success_url: successUrl || `${req.headers.get('origin')}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl || `${req.headers.get('origin')}/pricing`,
-      customer_email: user.email,
-      metadata: {
-        userId: user.id,
-        userEmail: user.email,
-        plan: plan || 'unknown' // GLYPHLOCK: Track plan type for webhook mapping
-      },
-      allow_promotion_codes: true,
+    return Response.json({
+      success: true,
+      url: session.url,
+      checkoutUrl: session.url,
+      sessionId: session.id,
+      plan,
     });
-
-    return Response.json({ url: session.url });
   } catch (error) {
-    console.error('Stripe Checkout Error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    const errorId = crypto.randomUUID();
+    console.error(`[${errorId}] Stripe checkout error:`, error);
+    return Response.json(
+      { error: 'Unable to create checkout session', error_id: errorId },
+      { status: 500 },
+    );
   }
 });
