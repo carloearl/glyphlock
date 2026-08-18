@@ -214,8 +214,16 @@ Deno.serve(async (req) => {
 
           await logVerificationStep(base44, record_id, venue_id, 'api_call_made', resolvedProvider, 'PENDING', 'PENDING', user.email, user.role, mode, `Retrieving PI ${processor_reference}`, null);
 
-          const paymentIntent = await stripe.paymentIntents.retrieve(processor_reference);
-          rawResponseHash = await sha256(JSON.stringify({ id: paymentIntent.id, status: paymentIntent.status, amount: paymentIntent.amount }));
+          const connectedAccountId = venueConfig.stripe_connected_account_id || null;
+          const paymentIntent = connectedAccountId
+            ? await stripe.paymentIntents.retrieve(processor_reference, {}, { stripeAccount: connectedAccountId })
+            : await stripe.paymentIntents.retrieve(processor_reference);
+          rawResponseHash = await sha256(JSON.stringify({
+            id: paymentIntent.id,
+            status: paymentIntent.status,
+            amount: paymentIntent.amount,
+            stripe_connected_account_id: connectedAccountId
+          }));
 
           await logVerificationStep(base44, record_id, venue_id, 'api_response_received', resolvedProvider, 'PENDING', 'PENDING', user.email, user.role, mode, null, rawResponseHash);
 
@@ -227,7 +235,9 @@ Deno.serve(async (req) => {
             verifiedApprovalCode = paymentIntent.id.slice(-4).toUpperCase();
 
             const charge = paymentIntent.latest_charge
-              ? await stripe.charges.retrieve(paymentIntent.latest_charge)
+              ? (connectedAccountId
+                  ? await stripe.charges.retrieve(paymentIntent.latest_charge, {}, { stripeAccount: connectedAccountId })
+                  : await stripe.charges.retrieve(paymentIntent.latest_charge))
               : null;
             verifiedCardLast4 = charge?.payment_method_details?.card?.last4 || null;
             verifiedCardBrand = charge?.payment_method_details?.card?.brand || null;
