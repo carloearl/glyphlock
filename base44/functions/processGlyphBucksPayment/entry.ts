@@ -150,8 +150,15 @@ Deno.serve(async (req) => {
     const { default: Stripe } = await import('npm:stripe@14.14.0');
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100),
+    const amountCents = Math.round(amount * 100);
+    const connectedAccountId = venueConfig.stripe_connected_account_id || null;
+    const feeBps = Math.max(0, Math.min(10000, Number(venueConfig.stripe_application_fee_bps) || 0));
+    const applicationFeeAmount = connectedAccountId && feeBps > 0
+      ? Math.floor((amountCents * feeBps) / 10000)
+      : 0;
+
+    const intentParams = {
+      amount: amountCents,
       currency: 'usd',
       description: description || `GlyphBucks Order ${order_number}`,
       metadata: {
@@ -159,11 +166,21 @@ Deno.serve(async (req) => {
         customer_name,
         processed_by: user.email,
         venue_id,
-        order_type: 'glyphbucks_sale'
+        order_type: 'glyphbucks_sale',
+        stripe_connected_account_id: connectedAccountId || '',
+        platform_fee_bps: String(feeBps)
       },
       receipt_email: customer_email || user.email,
       automatic_payment_methods: { enabled: true }
-    });
+    };
+
+    if (applicationFeeAmount > 0) {
+      intentParams.application_fee_amount = applicationFeeAmount;
+    }
+
+    const paymentIntent = connectedAccountId
+      ? await stripe.paymentIntents.create(intentParams, { stripeAccount: connectedAccountId })
+      : await stripe.paymentIntents.create(intentParams);
 
     await base44.asServiceRole.entities.SystemAuditLog.create({
       event_type: 'GLYPHBUCKS_PAYMENT_INTENT_CREATED',
@@ -177,7 +194,10 @@ Deno.serve(async (req) => {
         amount,
         order_number,
         status: paymentIntent.status,
-        payment_intent_id: paymentIntent.id
+        payment_intent_id: paymentIntent.id,
+        stripe_connected_account_id: connectedAccountId,
+        application_fee_amount: applicationFeeAmount,
+        application_fee_bps: feeBps
       },
       status: 'success',
       timestamp: new Date().toISOString()
@@ -188,7 +208,10 @@ Deno.serve(async (req) => {
       client_secret: paymentIntent.client_secret,
       payment_intent_id: paymentIntent.id,
       amount: amount,
-      status: paymentIntent.status
+      status: paymentIntent.status,
+      stripe_connected_account_id: connectedAccountId,
+      application_fee_amount: applicationFeeAmount,
+      application_fee_bps: feeBps
     });
 
   } catch (error) {
