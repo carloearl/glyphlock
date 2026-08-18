@@ -6,12 +6,31 @@ import Stripe from 'npm:stripe@14.14.0';
  * All Stripe-driven state changes enter through this signature-verified route.
  */
 
-function pricePlanMap() {
+const SANDBOX_PLAN_PRICES = {
+  creator: 'price_1T6tJqLLyyDLnlhpwgi7rjJY',
+  professional: 'price_1T6tfXLLyyDLnlhpsCNhFRXE',
+};
+
+function stripeKeyMode(secretKey) {
+  if (secretKey.startsWith('sk_test_') || secretKey.startsWith('rk_test_')) return 'test';
+  if (secretKey.startsWith('sk_live_') || secretKey.startsWith('rk_live_')) return 'live';
+  return 'unknown';
+}
+
+function pricePlanMap(stripeSecretKey) {
   const map = {};
   const creator = Deno.env.get('STRIPE_PRICE_CREATOR_MONTHLY');
   const professional = Deno.env.get('STRIPE_PRICE_PROFESSIONAL_MONTHLY');
   if (creator) map[creator] = 'creator';
   if (professional) map[professional] = 'professional';
+
+  // Public sandbox Price IDs are accepted only while the configured Stripe
+  // credential is explicitly a test key. Live and unknown keys fail closed and
+  // require explicit live Price IDs above.
+  if (stripeKeyMode(stripeSecretKey) === 'test') {
+    map[SANDBOX_PLAN_PRICES.creator] = 'creator';
+    map[SANDBOX_PLAN_PRICES.professional] = 'professional';
+  }
   return map;
 }
 
@@ -90,7 +109,7 @@ Deno.serve(async (req) => {
     }
 
     const object = event.data.object;
-    const plansByPrice = pricePlanMap();
+    const plansByPrice = pricePlanMap(stripeSecretKey);
 
     switch (event.type) {
       case 'checkout.session.completed': {
