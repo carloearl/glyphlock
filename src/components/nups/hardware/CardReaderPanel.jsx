@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import useHardwareScanner from "@/hooks/useHardwareScanner";
+import { parseMagstripe, isMagstripePayload } from "@/lib/nups/magstripe";
 
 export default function CardReaderPanel({ onCardRead, activeVenue }) {
   const venueId = activeVenue?.id || activeVenue?.venue_id;
@@ -25,28 +27,23 @@ export default function CardReaderPanel({ onCardRead, activeVenue }) {
   const [manualEntry, setManualEntry] = useState(false);
   const [manualData, setManualData] = useState({ number: "", exp: "", cvv: "", name: "" });
 
-  const handleSwipe = async () => {
-    setReading(true);
-    
-    // Simulate card swipe via Adesso reader
-    setTimeout(() => {
-      const mockCard = {
-        last_six: "123456",
-        exp: "12/28",
-        name: "JOHN DOE",
-        type: "VISA",
-        approval_code: `APV-${Math.random().toString(36).substr(2, 8).toUpperCase()}`
-      };
-      
-      setLastCard(mockCard);
-      setReading(false);
-      toast.success("Card read successfully");
-      
-      if (onCardRead) {
-        onCardRead(mockCard);
+  // Live Adesso keyboard-wedge reader. The device types the track data as a
+  // keystroke burst — no driver, no simulation. Only PCI-safe fields are kept.
+  useHardwareScanner(
+    (raw) => {
+      if (manualEntry || !isMagstripePayload(raw)) return;
+      const card = parseMagstripe(raw);
+      if (!card) {
+        toast.error("Card read failed — swipe again");
+        return;
       }
-    }, 1800);
-  };
+      setReading(false);
+      setLastCard(card);
+      toast.success(`${card.type} •••• ${card.last_four} read`);
+      if (onCardRead) onCardRead(card);
+    },
+    { enabled: !lastCard, minLength: 15 }
+  );
 
   const handleManualSubmit = () => {
     if (!manualData.number || !manualData.exp) {
@@ -55,11 +52,11 @@ export default function CardReaderPanel({ onCardRead, activeVenue }) {
     }
     
     const card = {
-      last_six: manualData.number.slice(-6),
+      last_four: manualData.number.slice(-4),
       exp: manualData.exp,
-      name: manualData.name || "CARDHOLDER",
+      name: (manualData.name || "CARDHOLDER").toUpperCase(),
       type: "MANUAL",
-      approval_code: `MAN-${Math.random().toString(36).substr(2, 8).toUpperCase()}`
+      entry_mode: "KEYED",
     };
     
     setLastCard(card);
@@ -100,8 +97,8 @@ export default function CardReaderPanel({ onCardRead, activeVenue }) {
                 <div className="text-white font-mono">{lastCard.type}</div>
               </div>
               <div>
-                <div className="text-gray-500">Last 6 Digits</div>
-                <div className="text-white font-mono">{lastCard.last_six}</div>
+                <div className="text-gray-500">Card Number</div>
+                <div className="text-white font-mono">•••• {lastCard.last_four}</div>
               </div>
               <div>
                 <div className="text-gray-500">Expiration</div>
@@ -173,23 +170,15 @@ export default function CardReaderPanel({ onCardRead, activeVenue }) {
           </div>
         ) : (
           <>
-            <Button 
-              onClick={handleSwipe}
-              disabled={reading}
-              className="w-full h-16 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 font-bold"
-            >
-              {reading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Reading Card...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Swipe or Insert Card
-                </>
-              )}
-            </Button>
+            <div className="w-full h-16 rounded-lg border-2 border-dashed border-blue-500/40 bg-blue-500/5 flex items-center justify-center gap-2 text-blue-300 font-bold">
+              <CreditCard className="w-5 h-5" />
+              Swipe card on the reader
+            </div>
+            <p className="text-[10px] text-gray-500 flex items-start gap-1">
+              <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />
+              Reader is listening. Only cardholder name, expiration and the last
+              four digits are captured — full card numbers are never stored.
+            </p>
             <Button 
               variant="outline"
               size="sm"
