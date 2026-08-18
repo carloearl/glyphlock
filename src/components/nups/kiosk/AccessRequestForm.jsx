@@ -19,9 +19,9 @@ const STATUS_COLORS = {
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §4 — Owner/Admin access request.
 // Requires platform sign-in (verified email). Requests start PENDING_OWNER_APPROVAL
 // and never create active access by themselves.
-export default function AccessRequestForm() {
+export default function AccessRequestForm({ requestedMode = "TEST" }) {
   const [authed, setAuthed] = useState(null);
-  const [form, setForm] = useState({ full_legal_name: "", phone: "", requested_role: "ENTERTAINER", reason: "" });
+  const [form, setForm] = useState({ full_legal_name: "", phone: "", requested_role: "ENTERTAINER", reason: "", mode: requestedMode });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [myRequests, setMyRequests] = useState([]);
@@ -42,7 +42,7 @@ export default function AccessRequestForm() {
     try {
       const request = await submitAccessRequest(form);
       setMyRequests([request, ...myRequests]);
-      setForm({ full_legal_name: "", phone: "", requested_role: "ENTERTAINER", reason: "" });
+      setForm({ full_legal_name: "", phone: "", requested_role: "ENTERTAINER", reason: "", mode: requestedMode });
     } catch (e) {
       setError(e?.response?.data?.error || e?.message || "Unable to submit request.");
     } finally {
@@ -56,7 +56,7 @@ export default function AccessRequestForm() {
     return (
       <div className="text-center space-y-4">
         <p className="text-slate-400 text-sm">Verify your email by signing in before requesting access.</p>
-        <Button onClick={() => base44.auth.redirectToLogin("/NUPSKiosk?panel=request")} className="w-full h-14 bg-cyan-700 hover:bg-cyan-600">
+        <Button onClick={() => base44.auth.redirectToLogin(`/NUPSKiosk?panel=${requestedMode === "DEMO" ? "trainingRequest" : "testRequest"}`)} className="w-full h-14 bg-cyan-700 hover:bg-cyan-600">
           Sign In to Continue
         </Button>
       </div>
@@ -67,11 +67,14 @@ export default function AccessRequestForm() {
 
   return (
     <div className="space-y-4">
+      <div className={`rounded-lg border px-3 py-2 text-center text-xs font-bold tracking-wide ${requestedMode === "DEMO" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-indigo-500/40 bg-indigo-500/10 text-indigo-300"}`}>
+        {requestedMode === "DEMO" ? "TRAINING ACCESS REQUEST" : "TEST ACCESS REQUEST"}
+      </div>
       {myRequests.length > 0 && (
         <div className="space-y-2">
           {myRequests.map((r) => (
             <div key={r.id} className="p-3 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-between gap-2">
-              <div className="text-sm text-slate-300">{r.requested_role} — {new Date(r.created_date).toLocaleDateString()}</div>
+              <div className="text-sm text-slate-300">{r.requested_role} · {r.mode === "DEMO" ? "TRAINING" : r.mode || "TEST"} — {new Date(r.created_date).toLocaleDateString()}</div>
               <Badge className={`${STATUS_COLORS[r.status] || "bg-slate-600"} text-white`}>{r.status.replaceAll("_", " ")}</Badge>
             </div>
           ))}

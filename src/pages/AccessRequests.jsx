@@ -88,6 +88,7 @@ export default function AccessRequests() {
               <Badge className="bg-slate-700 text-white">{r.requested_role}</Badge>
               <Badge className={`${STATUS_COLORS[r.status] || "bg-slate-600"} text-white`}>{r.status.replaceAll("_", " ")}</Badge>
               {r.mode === "TEST" && <Badge className="bg-amber-700 text-white">TEST</Badge>}
+              {r.mode === "DEMO" && <Badge className="bg-emerald-700 text-white">TRAINING</Badge>}
             </div>
             <p className="text-sm text-slate-400 mb-1">{r.reason}</p>
             <p className="text-xs text-slate-600">

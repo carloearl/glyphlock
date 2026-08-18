@@ -30,7 +30,7 @@ export async function submitAccessRequest(form) {
       email,
       venue_id: form.venue_id || "dream_palace",
       status: "PENDING_OWNER_APPROVAL",
-      mode: "REAL",
+      mode: form.mode === "DEMO" ? "DEMO" : "TEST",
       decision_log: [{ decision: "SUBMITTED", by: email, note: "", timestamp: new Date().toISOString() }],
     });
   }

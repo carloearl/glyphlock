@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
         venue_id: venue_id || 'dream_palace',
         reason,
         status: 'PENDING_OWNER_APPROVAL',
-        mode: mode === 'TEST' ? 'TEST' : 'REAL',
+        mode: ['TEST', 'DEMO'].includes(mode) ? mode : 'TEST',
         decision_log: [{ decision: 'SUBMITTED', by: email, note: '', timestamp: new Date().toISOString() }],
       });
       return Response.json({ success: true, request: safeRequest(rec) });
@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
             platform_email: r.email,
             approved_by: email,
             status: 'active',
-            is_demo: r.mode === 'TEST',
+            is_demo: ['TEST', 'DEMO'].includes(r.mode),
             created_note: `Approved via NUPSAccessRequest ${r.id} (${decision})`,
           });
           nupsUserId = nu.id;
