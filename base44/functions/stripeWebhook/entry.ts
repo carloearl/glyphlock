@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
         );
         const priceId = subscription?.items?.data?.[0]?.price?.id || null;
         const trustedPlan = priceId ? plansByPrice[priceId] : null;
-        const claimedPlan = session.metadata?.plan || null;
+        const claimedPlan = session.metadata?.plan ?? null;
         const expectedPriceId = session.metadata?.expectedPriceId || null;
 
         // Entitlements derive from the server-owned Stripe Price mapping, never
