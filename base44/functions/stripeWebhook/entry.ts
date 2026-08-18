@@ -1,353 +1,347 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe@14.14.0';
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
-  apiVersion: '2023-10-16',
-});
+/**
+ * Canonical Stripe webhook for GlyphLock subscriptions and NUPS payment state.
+ * All Stripe-driven state changes enter through this signature-verified route.
+ */
 
-const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+function pricePlanMap() {
+  const map = {};
+  const creator = Deno.env.get('STRIPE_PRICE_CREATOR_MONTHLY');
+  const professional = Deno.env.get('STRIPE_PRICE_PROFESSIONAL_MONTHLY');
+  if (creator) map[creator] = 'creator';
+  if (professional) map[professional] = 'professional';
+  return map;
+}
 
-// Env-based price mapping
-const PRICE_TO_PLAN = {
-  [Deno.env.get('STRIPE_PRICE_CREATOR_MONTHLY')]: 'creator',
-  [Deno.env.get('STRIPE_PRICE_PROFESSIONAL_MONTHLY')]: 'professional'
-};
+async function audit(db, eventType, resourceId, description, severity = 'low', metadata = {}) {
+  try {
+    await db.SystemAuditLog.create({
+      event_type: eventType,
+      description,
+      resource_id: resourceId || null,
+      metadata,
+      status: severity === 'critical' || severity === 'high' ? 'alert' : 'success',
+      severity,
+    });
+  } catch (error) {
+    console.error('[stripeWebhook] Audit write failed:', error?.message || error);
+  }
+}
+
+async function findUserByEmail(db, email) {
+  if (!email) return null;
+  const users = await db.User.filter({ email }, null, 1);
+  return users?.[0] || null;
+}
+
+async function retrieveSubscription(stripe, subscriptionId, connectedAccountId) {
+  if (!subscriptionId) return null;
+  return connectedAccountId
+    ? await stripe.subscriptions.retrieve(subscriptionId, {}, { stripeAccount: connectedAccountId })
+    : await stripe.subscriptions.retrieve(subscriptionId);
+}
 
 Deno.serve(async (req) => {
+  if (req.method !== 'POST') {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 });
+  }
+
+  const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  const signature = req.headers.get('stripe-signature');
+
+  // Fail closed before constructing a Stripe client. Missing configuration is
+  // an operational outage, not permission to trust unsigned JSON.
+  if (!stripeSecretKey || !webhookSecret) {
+    console.error('[stripeWebhook] Stripe secrets are not configured');
+    return Response.json({ error: 'Stripe webhook is not configured' }, { status: 503 });
+  }
+  if (!signature) {
+    return Response.json({ error: 'Missing Stripe signature' }, { status: 401 });
+  }
+
+  const rawBody = await req.text();
+  const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+
+  let event;
   try {
-    const body = await req.text();
-    const signature = req.headers.get('stripe-signature');
+    event = await stripe.webhooks.constructEventAsync(rawBody, signature, webhookSecret);
+  } catch (error) {
+    console.error('[stripeWebhook] Signature verification failed:', error?.message || error);
+    return Response.json({ error: 'Invalid Stripe signature' }, { status: 401 });
+  }
 
-    // ✅ SIGNATURE VERIFICATION: Reject invalid/missing signatures immediately
-    if (!signature || !webhookSecret) {
-      console.error('WEBHOOK_SIGNATURE_FAILURE: Missing signature or webhook secret');
-      return Response.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
-    }
-
-    let event;
-    try {
-      event = await stripe.webhooks.constructEventAsync(
-        body,
-        signature,
-        webhookSecret
-      );
-    } catch (sigError) {
-      console.error('WEBHOOK_SIGNATURE_FAILURE:', sigError.message);
-      
-      // Log signature validation failure to audit trail
-      try {
-        const base44 = createClientFromRequest(req);
-        await base44.asServiceRole.entities.AuditEvent.create({
-          event_id: crypto.randomUUID(),
-          timestamp: new Date().toISOString(),
-          actor_id: 'STRIPE_WEBHOOK',
-          actor_role: 'system',
-          venue_id: null,
-          entity_type: 'StripeWebhook',
-          entity_id: 'SIGNATURE_FAILURE',
-          action: 'ACCESS',
-          is_system_action: true,
-          severity: 'CRITICAL',
-          description: `Webhook signature validation failed: ${sigError.message}`
-        });
-      } catch {}
-      
-      return Response.json({ error: 'Invalid signature' }, { status: 401 });
-    }
-
+  try {
     const base44 = createClientFromRequest(req);
+    const db = base44.asServiceRole.entities;
+    const connectedAccountId = event.account || null;
 
-    // ✅ IDEMPOTENCY: Check DB for already-processed webhook (survives cold starts)
-    const existingEvent = await base44.asServiceRole.entities.AuditEvent.filter({
-      entity_type: 'StripeWebhook',
-      entity_id: event.id
+    // Durable success marker. We check only PROCESSED markers so a prior failed
+    // attempt remains retryable by Stripe.
+    const processed = await db.SystemAuditLog.filter({
+      event_type: 'STRIPE_WEBHOOK_PROCESSED',
+      resource_id: event.id,
     }, null, 1);
 
-    if (existingEvent.length > 0) {
-      // Already processed — acknowledge Stripe but skip DB writes
+    if (processed.length > 0) {
       return Response.json({ received: true, idempotent: true, event_id: event.id });
     }
 
-    // Log webhook receipt (idempotency anchor)
-    await base44.asServiceRole.entities.AuditEvent.create({
-      event_id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-      actor_id: 'STRIPE_WEBHOOK',
-      actor_role: 'system',
-      venue_id: null,
-      entity_type: 'StripeWebhook',
-      entity_id: event.id,
-      action: 'ACCESS',
-      after_state: JSON.stringify({ type: event.type }),
-      is_system_action: true,
-      severity: 'INFO',
-      description: `Webhook received: ${event.type}`
-    });
+    const object = event.data.object;
+    const plansByPrice = pricePlanMap();
 
-    // Process event based on type
     switch (event.type) {
-      // ═══ SUBSCRIPTION EVENTS (GlyphLock SaaS) ═══
       case 'checkout.session.completed': {
-        const session = event.data.object;
-        const userEmail = session.customer_email || session.metadata?.userEmail;
+        const session = object;
+        if (session.mode !== 'subscription' || !session.subscription) break;
 
-        if (userEmail && session.subscription) {
-          const users = await base44.asServiceRole.entities.User.filter({ email: userEmail });
-          if (users.length > 0) {
-            const subscription = await stripe.subscriptions.retrieve(session.subscription);
-            const priceId = subscription.items.data[0]?.price?.id;
-            
-            let planName = PRICE_TO_PLAN[priceId] || session.metadata?.plan || 'unknown';
+        const subscription = await retrieveSubscription(
+          stripe,
+          String(session.subscription),
+          connectedAccountId,
+        );
+        const priceId = subscription?.items?.data?.[0]?.price?.id || null;
+        const trustedPlan = priceId ? plansByPrice[priceId] : null;
+        const claimedPlan = session.metadata?.plan || null;
+        const expectedPriceId = session.metadata?.expectedPriceId || null;
 
-            await base44.asServiceRole.entities.User.update(users[0].id, {
-              subscription_status: 'active',
-              subscription_id: session.subscription,
-              stripe_customer_id: session.customer,
-              subscription_plan: planName,
-              subscription_start_date: new Date(subscription.current_period_start * 1000).toISOString(),
-              subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
-              cancel_at_period_end: false
-            });
-          }
+        // Entitlements derive from the server-owned Stripe Price mapping, never
+        // from mutable Checkout metadata supplied by a browser or stale client.
+        if (!trustedPlan || (claimedPlan && claimedPlan !== trustedPlan) ||
+            (expectedPriceId && expectedPriceId !== priceId)) {
+          await audit(
+            db,
+            'STRIPE_ENTITLEMENT_REJECTED',
+            session.id,
+            'Checkout completed with an unrecognized or inconsistent subscription price',
+            'critical',
+            { price_id: priceId, claimed_plan: claimedPlan, connected_account_id: connectedAccountId },
+          );
+          break;
         }
+
+        const userEmail = session.customer_details?.email || session.customer_email || session.metadata?.userEmail;
+        const user = await findUserByEmail(db, userEmail);
+        if (!user) {
+          await audit(db, 'STRIPE_USER_NOT_FOUND', session.id, 'No GlyphLock user matched completed checkout', 'high', { user_email: userEmail });
+          break;
+        }
+
+        await db.User.update(user.id, {
+          subscription_status: subscription.status,
+          subscription_id: subscription.id,
+          stripe_customer_id: String(session.customer || subscription.customer || ''),
+          subscription_plan: trustedPlan,
+          subscription_start_date: subscription.current_period_start
+            ? new Date(subscription.current_period_start * 1000).toISOString()
+            : null,
+          subscription_end_date: subscription.current_period_end
+            ? new Date(subscription.current_period_end * 1000).toISOString()
+            : null,
+          cancel_at_period_end: Boolean(subscription.cancel_at_period_end),
+        });
         break;
       }
 
       case 'customer.subscription.updated': {
-        const subscription = event.data.object;
-        const users = await base44.asServiceRole.entities.User.filter({ 
-          subscription_id: subscription.id 
-        });
-        
-        if (users.length > 0) {
-          await base44.asServiceRole.entities.User.update(users[0].id, {
-            subscription_status: subscription.status,
-            subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
-            cancel_at_period_end: subscription.cancel_at_period_end || false
-          });
-        }
+        const subscription = object;
+        const users = await db.User.filter({ subscription_id: subscription.id }, null, 1);
+        if (!users.length) break;
+        const priceId = subscription?.items?.data?.[0]?.price?.id || null;
+        const trustedPlan = priceId ? plansByPrice[priceId] : null;
+        const patch = {
+          subscription_status: subscription.status,
+          subscription_end_date: subscription.current_period_end
+            ? new Date(subscription.current_period_end * 1000).toISOString()
+            : null,
+          cancel_at_period_end: Boolean(subscription.cancel_at_period_end),
+        };
+        if (trustedPlan) patch.subscription_plan = trustedPlan;
+        await db.User.update(users[0].id, patch);
         break;
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object;
-        const users = await base44.asServiceRole.entities.User.filter({ 
-          subscription_id: subscription.id 
+        const subscription = object;
+        const users = await db.User.filter({ subscription_id: subscription.id }, null, 1);
+        if (!users.length) break;
+        await db.User.update(users[0].id, {
+          subscription_status: 'canceled',
+          subscription_id: null,
+          subscription_plan: null,
+          cancel_at_period_end: false,
         });
-        
-        if (users.length > 0) {
-          await base44.asServiceRole.entities.User.update(users[0].id, {
-            subscription_status: 'canceled',
-            subscription_id: null,
-            subscription_plan: null,
-            cancel_at_period_end: false
-          });
-        }
         break;
       }
 
       case 'invoice.payment_succeeded': {
-        const invoice = event.data.object;
-        if (invoice.subscription) {
-          const users = await base44.asServiceRole.entities.User.filter({ 
-            subscription_id: invoice.subscription 
-          });
-          
-          if (users.length > 0) {
-            await base44.asServiceRole.entities.User.update(users[0].id, {
-              subscription_status: 'active'
-            });
-          }
+        const invoice = object;
+        if (!invoice.subscription) break;
+        const users = await db.User.filter({ subscription_id: String(invoice.subscription) }, null, 1);
+        if (users.length) {
+          await db.User.update(users[0].id, { subscription_status: 'active' });
         }
         break;
       }
 
       case 'invoice.payment_failed': {
-        const invoice = event.data.object;
-        if (invoice.subscription) {
-          const users = await base44.asServiceRole.entities.User.filter({ 
-            subscription_id: invoice.subscription 
-          });
-          
-          if (users.length > 0) {
-            await base44.asServiceRole.entities.User.update(users[0].id, {
-              subscription_status: 'past_due'
-            });
-          }
+        const invoice = object;
+        if (!invoice.subscription) break;
+        const users = await db.User.filter({ subscription_id: String(invoice.subscription) }, null, 1);
+        if (users.length) {
+          await db.User.update(users[0].id, { subscription_status: 'past_due' });
         }
         break;
       }
 
-      // ═══ GLYPHBUCKS PAYMENT EVENTS ═══
       case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object;
-        
-        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale') {
-          const order_number = paymentIntent.metadata?.order_number;
-          
-          // Find associated GlyphBucksOrder record if exists
-          const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
-            order_number
-          }, null, 1);
+        const paymentIntent = object;
+        const orderNumber = paymentIntent.metadata?.order_number;
+        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale' && orderNumber) {
+          const orders = await db.GlyphBucksOrder.filter({ order_number: orderNumber }, null, 1);
+          if (orders.length) {
+            await db.GlyphBucksOrder.update(orders[0].id, { status: 'signed' });
+          }
+        }
 
-          if (orders.length > 0) {
-            await base44.asServiceRole.entities.GlyphBucksOrder.update(orders[0].id, {
-              status: 'signed' // Payment confirmed — ready for fulfillment
+        const consultationId = paymentIntent.metadata?.consultation_id;
+        if (consultationId) {
+          const consultations = await db.Consultation.filter({ consultation_id: consultationId }, null, 1);
+          if (consultations.length) {
+            await db.Consultation.update(consultations[0].id, {
+              payment_status: 'paid',
+              stripe_payment_intent_id: paymentIntent.id,
+              amount_paid: paymentIntent.amount,
+              payment_date: new Date().toISOString(),
             });
           }
-
-          await base44.asServiceRole.entities.AuditEvent.create({
-            event_id: crypto.randomUUID(),
-            timestamp: new Date().toISOString(),
-            actor_id: 'STRIPE_WEBHOOK',
-            actor_role: 'system',
-            venue_id: paymentIntent.metadata?.venue_id || 'dream-palace-tempe',
-            entity_type: 'PaymentIntent',
-            entity_id: paymentIntent.id,
-            action: 'UPDATE',
-            after_state: JSON.stringify({
-              status: 'succeeded',
-              amount: paymentIntent.amount / 100,
-              order_number
-            }),
-            is_system_action: true,
-            severity: 'INFO',
-            description: `GlyphBucks payment succeeded: ${order_number}, $${(paymentIntent.amount / 100).toFixed(2)}`
-          });
         }
         break;
       }
 
       case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object;
-        
-        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale') {
-          const order_number = paymentIntent.metadata?.order_number;
-          const failure_reason = paymentIntent.last_payment_error?.message || 'Unknown error';
-          
-          // Update order status to FAILED
-          const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
-            order_number
-          }, null, 1);
-
-          if (orders.length > 0) {
-            await base44.asServiceRole.entities.GlyphBucksOrder.update(orders[0].id, {
-              status: 'draft' // Reset to draft — payment failed, retry needed
-            });
-          }
-
-          // CRITICAL: Log payment failure for staff alert
-          await base44.asServiceRole.entities.AuditEvent.create({
-            event_id: crypto.randomUUID(),
-            timestamp: new Date().toISOString(),
-            actor_id: 'STRIPE_WEBHOOK',
-            actor_role: 'system',
-            venue_id: paymentIntent.metadata?.venue_id || 'dream-palace-tempe',
-            entity_type: 'PaymentIntent',
-            entity_id: paymentIntent.id,
-            action: 'UPDATE',
-            after_state: JSON.stringify({
-              status: 'failed',
-              amount: paymentIntent.amount / 100,
-              order_number,
-              failure_reason
-            }),
-            is_system_action: true,
-            severity: 'CRITICAL',
-            description: `PAYMENT FAILED: GlyphBucks order ${order_number}, reason: ${failure_reason}`
-          });
+        const paymentIntent = object;
+        const orderNumber = paymentIntent.metadata?.order_number;
+        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale' && orderNumber) {
+          const orders = await db.GlyphBucksOrder.filter({ order_number: orderNumber }, null, 1);
+          if (orders.length) await db.GlyphBucksOrder.update(orders[0].id, { status: 'draft' });
         }
+        const consultationId = paymentIntent.metadata?.consultation_id;
+        if (consultationId) {
+          const consultations = await db.Consultation.filter({ consultation_id: consultationId }, null, 1);
+          if (consultations.length) {
+            await db.Consultation.update(consultations[0].id, { payment_status: 'failed' });
+          }
+        }
+        await audit(
+          db,
+          'STRIPE_PAYMENT_FAILED',
+          paymentIntent.id,
+          'Stripe payment intent failed',
+          'high',
+          {
+            order_number: orderNumber || null,
+            failure_code: paymentIntent.last_payment_error?.code || null,
+            connected_account_id: connectedAccountId,
+          },
+        );
         break;
       }
 
       case 'payment_intent.canceled': {
-        const paymentIntent = event.data.object;
-        
-        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale') {
-          const order_number = paymentIntent.metadata?.order_number;
-          
-          // Mark order as CANCELED
-          const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
-            order_number
-          }, null, 1);
+        const paymentIntent = object;
+        const orderNumber = paymentIntent.metadata?.order_number;
+        if (paymentIntent.metadata?.order_type === 'glyphbucks_sale' && orderNumber) {
+          const orders = await db.GlyphBucksOrder.filter({ order_number: orderNumber }, null, 1);
+          if (orders.length) await db.GlyphBucksOrder.update(orders[0].id, { status: 'archived' });
 
-          if (orders.length > 0) {
-            await base44.asServiceRole.entities.GlyphBucksOrder.update(orders[0].id, {
-              status: 'archived' // Payment canceled — order voided
-            });
-          }
-
-          // VOID any GlyphBucks batch created for this order
-          const batches = await base44.asServiceRole.entities.GlyphBucksBatch.filter({
-            order_number
-          });
-
+          const batches = await db.GlyphBucksBatch.filter({ order_number: orderNumber }, null, 100);
           for (const batch of batches) {
-            await base44.asServiceRole.entities.GlyphBucksBatch.update(batch.id, {
-              status: 'voided'
-            });
-
-            // VOID all bills in the batch
-            const bills = await base44.asServiceRole.entities.GlyphBucksBill.filter({
-              batch_id: batch.batch_id
-            });
-
+            await db.GlyphBucksBatch.update(batch.id, { status: 'voided' });
+            const bills = await db.GlyphBucksBill.filter({ batch_id: batch.batch_id }, null, 500);
             for (const bill of bills) {
-              await base44.asServiceRole.entities.GlyphBucksBill.update(bill.id, {
-                status: 'voided',
-                voided_at: new Date().toISOString(),
-                voided_by: 'STRIPE_WEBHOOK',
-                void_reason: 'Payment canceled by Stripe'
-              });
+              if (bill.status !== 'voided') {
+                await db.GlyphBucksBill.update(bill.id, {
+                  status: 'voided',
+                  voided_at: new Date().toISOString(),
+                  voided_by: 'STRIPE_WEBHOOK',
+                  void_reason: 'Stripe payment canceled',
+                });
+              }
             }
           }
+        }
+        break;
+      }
 
-          await base44.asServiceRole.entities.AuditEvent.create({
-            event_id: crypto.randomUUID(),
-            timestamp: new Date().toISOString(),
-            actor_id: 'STRIPE_WEBHOOK',
-            actor_role: 'system',
-            venue_id: paymentIntent.metadata?.venue_id || 'dream-palace-tempe',
-            entity_type: 'PaymentIntent',
-            entity_id: paymentIntent.id,
-            action: 'UPDATE',
-            after_state: JSON.stringify({
-              status: 'canceled',
-              amount: paymentIntent.amount / 100,
-              order_number,
-              batches_voided: batches.length
-            }),
-            is_system_action: true,
-            severity: 'WARNING',
-            description: `PAYMENT CANCELED: GlyphBucks order ${order_number}, voided ${batches.length} batch(es)`
+      case 'charge.refunded': {
+        const charge = object;
+        const paymentIntentId = charge.payment_intent ? String(charge.payment_intent) : null;
+        if (!paymentIntentId) break;
+        const records = await db.PaymentRecord.filter({ processor_reference: paymentIntentId }, null, 100);
+        const fullRefund = Number(charge.amount_refunded || 0) >= Number(charge.amount || 0);
+        for (const record of records) {
+          await db.PaymentRecord.update(record.id, {
+            status: fullRefund ? 'REFUNDED' : record.status,
+            metadata: {
+              ...(record.metadata || {}),
+              stripe_refund_amount_cents: charge.amount_refunded || 0,
+              stripe_fully_refunded: fullRefund,
+              stripe_connected_account_id: connectedAccountId,
+            },
           });
         }
         break;
       }
 
-      // ✅ UNHANDLED EVENTS: Log but do not error
-      default: {
-        await base44.asServiceRole.entities.AuditEvent.create({
-          event_id: crypto.randomUUID(),
-          timestamp: new Date().toISOString(),
-          actor_id: 'STRIPE_WEBHOOK',
-          actor_role: 'system',
-          venue_id: null,
-          entity_type: 'StripeWebhook',
-          entity_id: event.id,
-          action: 'ACCESS',
-          is_system_action: true,
-          severity: 'INFO',
-          description: `Unhandled webhook event: ${event.type}`
-        });
+      case 'charge.dispute.created': {
+        const dispute = object;
+        await audit(
+          db,
+          'STRIPE_DISPUTE_CREATED',
+          dispute.id,
+          'Stripe dispute opened',
+          'critical',
+          {
+            charge_id: dispute.charge || null,
+            amount: dispute.amount || null,
+            reason: dispute.reason || null,
+            connected_account_id: connectedAccountId,
+          },
+        );
         break;
       }
+
+      default:
+        await audit(
+          db,
+          'STRIPE_WEBHOOK_UNHANDLED',
+          event.id,
+          `Unhandled Stripe event: ${event.type}`,
+          'low',
+          { connected_account_id: connectedAccountId },
+        );
     }
+
+    await audit(
+      db,
+      'STRIPE_WEBHOOK_PROCESSED',
+      event.id,
+      `Stripe webhook processed: ${event.type}`,
+      'low',
+      { event_type: event.type, connected_account_id: connectedAccountId },
+    );
 
     return Response.json({ received: true, event_id: event.id });
   } catch (error) {
     const errorId = crypto.randomUUID();
-    console.error(`[${errorId}] Webhook error:`, error);
-    return Response.json({ error: 'Webhook processing failed', error_id: errorId }, { status: 400 });
+    console.error(`[${errorId}] Stripe webhook processing failed:`, error);
+    // A 5xx response tells Stripe to retry. Do not write a PROCESSED marker.
+    return Response.json(
+      { error: 'Stripe webhook processing failed', error_id: errorId },
+      { status: 500 },
+    );
   }
 });
