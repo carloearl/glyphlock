@@ -24,6 +24,17 @@
       "type": "string",
       "description": "Terminal/device ID for card-present flows."
     },
+    "stripe_connected_account_id": {
+      "type": "string",
+      "description": "Optional Stripe Connect account ID (acct_...) for this venue. When set and Stripe is the primary provider, NUPS creates and verifies direct charges on this connected account."
+    },
+    "stripe_application_fee_bps": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000,
+      "default": 0,
+      "description": "Optional GlyphLock platform fee in basis points for Stripe Connect direct charges. 100 = 1%. Zero disables an application fee."
+    },
     "external_approval_required": {
       "type": "boolean",
       "default": false,
