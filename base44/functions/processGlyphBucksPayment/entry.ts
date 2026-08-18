@@ -147,9 +147,6 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
-    const { default: Stripe } = await import('npm:stripe@14.14.0');
-    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
-
     const amountCents = Math.round(amount * 100);
     const connectedAccountId = venueConfig.stripe_connected_account_id || null;
     const feeBps = Math.max(0, Math.min(10000, Number(venueConfig.stripe_application_fee_bps) || 0));
@@ -157,30 +154,45 @@ Deno.serve(async (req) => {
       ? Math.floor((amountCents * feeBps) / 10000)
       : 0;
 
-    const intentParams: any = {
-      amount: amountCents,
-      currency: 'usd',
-      description: description || `GlyphBucks Order ${order_number}`,
-      metadata: {
-        order_number,
-        customer_name,
-        processed_by: user.email,
-        venue_id,
-        order_type: 'glyphbucks_sale',
-        stripe_connected_account_id: connectedAccountId || '',
-        platform_fee_bps: String(feeBps)
-      },
-      receipt_email: customer_email || user.email,
-      automatic_payment_methods: { enabled: true }
-    };
-
+    const stripeBody = new URLSearchParams();
+    stripeBody.set('amount', String(amountCents));
+    stripeBody.set('currency', 'usd');
+    stripeBody.set('description', description || `GlyphBucks Order ${order_number}`);
+    stripeBody.set('metadata[order_number]', order_number);
+    stripeBody.set('metadata[customer_name]', customer_name || '');
+    stripeBody.set('metadata[processed_by]', user.email);
+    stripeBody.set('metadata[venue_id]', venue_id);
+    stripeBody.set('metadata[order_type]', 'glyphbucks_sale');
+    stripeBody.set('metadata[stripe_connected_account_id]', connectedAccountId || '');
+    stripeBody.set('metadata[platform_fee_bps]', String(feeBps));
+    stripeBody.set('receipt_email', customer_email || user.email);
+    stripeBody.set('automatic_payment_methods[enabled]', 'true');
     if (applicationFeeAmount > 0) {
-      intentParams.application_fee_amount = applicationFeeAmount;
+      stripeBody.set('application_fee_amount', String(applicationFeeAmount));
     }
 
-    const paymentIntent = connectedAccountId
-      ? await stripe.paymentIntents.create(intentParams, { stripeAccount: connectedAccountId })
-      : await stripe.paymentIntents.create(intentParams);
+    const stripeHeaders = {
+      'Authorization': `Bearer ${stripeKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    };
+    if (connectedAccountId) {
+      stripeHeaders['Stripe-Account'] = connectedAccountId;
+    }
+
+    const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
+      method: 'POST',
+      headers: stripeHeaders,
+      body: stripeBody
+    });
+    const paymentIntent = await stripeResponse.json();
+    if (!stripeResponse.ok) {
+      return Response.json({
+        success: false,
+        error: 'STRIPE_PAYMENT_INTENT_CREATE_FAILED',
+        message: paymentIntent?.error?.message || 'Stripe rejected the payment intent',
+        provider_code: providerCode
+      }, { status: stripeResponse.status || 502 });
+    }
 
     await base44.asServiceRole.entities.SystemAuditLog.create({
       event_type: 'GLYPHBUCKS_PAYMENT_INTENT_CREATED',
