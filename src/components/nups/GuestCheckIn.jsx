@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import useHardwareScanner from "@/hooks/useHardwareScanner";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -158,7 +159,7 @@ const EMPTY_FORM = {
   card_type: "Visa",
 };
 
-export default function GuestCheckIn({ initialCameraOpen = false }) {
+export default function GuestCheckIn({ initialCameraOpen = false, initialScan = null }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -304,6 +305,29 @@ export default function GuestCheckIn({ initialCameraOpen = false }) {
       setLookingUp(false);
     }
   };
+
+  // Hardware USB scanner (keyboard wedge) — captures scans even when the ID
+  // field isn't focused. AAMVA payloads autofill the form; anything else is
+  // treated as an ID number lookup.
+  const handleHardwareScan = (data) => {
+    const parsed = parseAAMVA(data);
+    if (parsed) applyScanData(parsed);
+    else {
+      set("id_number", data);
+      handleIdLookup(data);
+    }
+  };
+  useHardwareScanner(handleHardwareScan);
+
+  // Scan payload captured by a parent surface (e.g. Register quick-action)
+  const initialScanApplied = useRef(false);
+  useEffect(() => {
+    if (initialScan && !initialScanApplied.current) {
+      initialScanApplied.current = true;
+      handleHardwareScan(initialScan);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialScan]);
 
   const handleSubmit = async () => {
     if (!form.full_name.trim()) { toast.error("Guest name is required"); return; }

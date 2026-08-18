@@ -44,6 +44,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 
 import { useAdminOverride } from "@/lib/nups/adminView";
+import useHardwareScanner from "@/hooks/useHardwareScanner";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -113,6 +114,7 @@ function RegisterConsoleInner() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("register");
   const [quickAction, setQuickAction] = useState(null);
+  const [scanPayload, setScanPayload] = useState(null);
   const [user, setUser] = useState(null);
   const [operator, setOperator] = useState(null);
   const [showSeedDialog, setShowSeedDialog] = useState(false);
@@ -183,6 +185,17 @@ function RegisterConsoleInner() {
     refetchInterval: 30000,
   });
   const activeBatch = batches[0];
+
+  // Hardware USB scanner (keyboard wedge) — a scan anywhere on the register
+  // opens the ID/guest dialog pre-loaded with the scanned payload.
+  useHardwareScanner(
+    (data) => {
+      setScanPayload(data);
+      setQuickAction("scan");
+      toast.info("Scanner input captured");
+    },
+    { enabled: activeTab === "register" && !quickAction }
+  );
 
   const handleQuickAction = async (action) => {
     if (action !== "update") {
@@ -325,12 +338,12 @@ function RegisterConsoleInner() {
 
       {activeTab === "register" && <POSFloatingActionMenu onAction={handleQuickAction} />}
 
-      <Dialog open={quickAction === "scan" || quickAction === "guest"} onOpenChange={(open) => !open && setQuickAction(null)}>
+      <Dialog open={quickAction === "scan" || quickAction === "guest"} onOpenChange={(open) => { if (!open) { setQuickAction(null); setScanPayload(null); } }}>
         <DialogContent className="max-w-3xl max-h-[90dvh] overflow-y-auto bg-slate-950 border-cyan-500/40 text-white">
           <DialogHeader>
             <DialogTitle>{quickAction === "scan" ? "Scan Customer ID" : "Guest Registration"}</DialogTitle>
           </DialogHeader>
-          {quickAction && <GuestCheckIn initialCameraOpen={quickAction === "scan"} />}
+          {quickAction && <GuestCheckIn initialCameraOpen={quickAction === "scan" && !scanPayload} initialScan={scanPayload} />}
         </DialogContent>
       </Dialog>
 

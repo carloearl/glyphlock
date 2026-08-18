@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import QRCode from "qrcode";
 import { ShieldCheck, ShieldX } from "lucide-react";
+import useHardwareScanner from "@/hooks/useHardwareScanner";
 
 /** QR VERIFY — enter (or scan) a verify ref, recompute the seal server-side, show QR to /v/:ref. */
 export default function VIPShowVerifyPanel() {
@@ -10,8 +11,17 @@ export default function VIPShowVerifyPanel() {
   const [data, setData] = useState(null);
   const [qr, setQr] = useState(null);
 
-  const verify = async () => {
-    const clean = ref.trim().toUpperCase();
+  // Hardware USB scanner — a scanned contract QR encodes the /v/:ref URL;
+  // extract the ref and verify immediately, no field focus required.
+  useHardwareScanner((scanned) => {
+    const m = scanned.match(/\/v\/([A-Za-z0-9-]+)/);
+    const clean = (m ? m[1] : scanned).trim().toUpperCase();
+    setRef(clean);
+    verify(clean);
+  });
+
+  const verify = async (value) => {
+    const clean = String(typeof value === "string" ? value : ref).trim().toUpperCase();
     if (!clean) return;
     setBusy(true); setData(null); setQr(null);
     try {
