@@ -151,16 +151,12 @@ export const glyphLockAPI = {
 
   // Stripe Payments
   stripe: {
-    startCheckout: async (productId, priceId, mode) => {
+    startCheckout: async (plan) => {
       try {
-        const response = await base44.functions.invoke('stripeCreateCheckout', {
-          productId,
-          priceId,
-          mode,
-          successUrl: `${window.location.origin}/PaymentSuccess?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/PaymentCancel`
-        });
-        // Map 'url' to 'checkoutUrl' for backward compatibility
+        // The server resolves the plan to a trusted Stripe Price ID and owns
+        // mode, metadata, and return URLs. Browser-controlled price IDs are
+        // intentionally not accepted.
+        const response = await base44.functions.invoke('stripeCreateCheckout', { plan });
         return { ...response.data, checkoutUrl: response.data.url };
       } catch (error) {
         console.error('Error starting Stripe checkout:', error);
