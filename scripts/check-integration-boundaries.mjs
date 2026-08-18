@@ -27,6 +27,8 @@ requireText(stripeWebhook, 'constructEventAsync', 'Stripe webhook must verify th
 requireText(stripeWebhook, 'STRIPE_WEBHOOK_PROCESSED', 'Stripe webhook must have durable idempotency');
 requireText(stripeWebhook, 'trustedPlan', 'Stripe entitlements must derive from trusted server pricing');
 requireText(stripeWebhook, 'event.account', 'Stripe Connect webhook context must be retained');
+requireText(stripeWebhook, 'SANDBOX_PLAN_PRICES', 'Stripe webhook must recognize the trusted GlyphLock sandbox catalog');
+requireText(stripeWebhook, "stripeKeyMode(stripeSecretKey) === 'test'", 'Sandbox prices must be gated to Stripe test credentials');
 forbidText(stripeWebhook, "session.metadata?.plan ||", 'Stripe metadata must not grant entitlements');
 forbidText(stripeWebhook, 'AuditEvent.create', 'Stripe webhook must not use the incompatible AuditEvent schema for idempotency');
 
@@ -36,6 +38,9 @@ requireText(legacyStripeWebhook, 'status: 410', 'Disabled Stripe webhook handler
 
 const checkout = 'base44/functions/stripeCreateCheckout/entry.ts';
 requireText(checkout, 'PLAN_PRICE_SECRETS', 'Subscription pricing must be server-owned');
+requireText(checkout, 'SANDBOX_PLAN_PRICES', 'Checkout must contain the trusted GlyphLock sandbox catalog');
+requireText(checkout, "stripeKeyMode(stripeSecretKey) === 'test'", 'Checkout sandbox prices must be gated to Stripe test credentials');
+requireText(checkout, 'resolvePlanPrice', 'Checkout must resolve server-owned prices by Stripe environment');
 requireText(checkout, 'Unsupported subscription plan', 'Subscription plans must be allowlisted');
 requireText(checkout, 'Client-controlled prices, line items, and checkout modes are not accepted', 'Legacy client pricing must be rejected');
 requireText(checkout, 'expectedPriceId', 'Checkout must bind expected server price metadata');
