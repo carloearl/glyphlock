@@ -47,7 +47,7 @@ export default function Privacy() {
             <h1 className="mt-6 text-5xl md:text-7xl font-black tracking-[-.045em] leading-[.9]">
               PRIVACY <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400">POLICY</span>
             </h1>
-            <p className="mt-5 text-sm text-slate-400">Last updated: August 15, 2026</p>
+            <p className="mt-5 text-sm text-slate-400">Last updated: August 18, 2026</p>
             <p className="mt-5 mx-auto max-w-3xl text-base md:text-lg leading-relaxed text-slate-300">
               This policy explains how GlyphLock LLC handles personal information across GlyphLock websites, applications, APIs, developer tools, AI-assisted services, QR and verification tools, financial workflows, and the NUPS venue operations platform.
             </p>
@@ -136,9 +136,47 @@ export default function Privacy() {
               <p>We may also disclose information when required by law, to protect rights or safety, investigate abuse or fraud, enforce agreements, respond to lawful requests, or support a business transaction such as a financing, merger, acquisition, or asset transfer subject to appropriate safeguards.</p>
             </InfoCard>
 
-            <InfoCard icon={DollarSign} title="Payments, Refunds, and Chargebacks" accent="amber">
-              <p>Payment information may be processed by payment providers rather than stored directly by GlyphLock. Transaction, usage, settlement, and audit records may be used to administer refunds, investigate disputes, respond to chargebacks, and document delivery of services.</p>
-              <p>Refund eligibility is governed by the applicable purchase, subscription, venue, or service terms and by rights that apply under law.</p>
+            <InfoCard icon={DollarSign} title="Payments — Stripe Is Our Only Payment Processor" accent="amber">
+              <p><strong className="text-white">Stripe, Inc. is the sole payment processor used by GlyphLock and NUPS.</strong> We do not process card payments through any other gateway, aggregator, or processor. Where a venue chooses to run card authorization on its own merchant account or terminal, that authorization happens outside GlyphLock and GlyphLock records only the resulting reference data described below.</p>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {[
+                  ["Card data never touches our systems", "Card numbers, magnetic-stripe track data, chip data, CVV/CVC values, and PINs are never stored in GlyphLock or NUPS databases. Card entry and authorization occur in Stripe-hosted checkout, Stripe Elements, or a Stripe-connected physical terminal."],
+                  ["What we do store", "Stripe identifiers (customer, checkout session, payment intent, charge, refund, subscription, and event IDs), payment status, currency, amount, brand, card expiration, the last four digits, approval/authorization code, and timestamps."],
+                  ["Server-side only credentials", "Stripe secret keys and webhook signing secrets are held exclusively in server-side secret storage and are never exposed to browser code, mobile clients, agent prompts, or logs."],
+                  ["Webhook-confirmed truth", "Payment success, failure, refund, dispute, and subscription state are recorded only from Stripe's signature-verified webhook events. A browser redirect or client message is never treated as proof of payment."],
+                  ["Information Stripe receives", "To create a payment, GlyphLock transmits to Stripe the amount, currency, product or price reference, your email address, an internal account reference, and workflow metadata such as venue, transaction, or contract identifiers. Stripe additionally collects payment and billing details directly from you."],
+                  ["Stripe as an independent controller", "Stripe processes your payment details under its own privacy policy and as an independent controller for fraud prevention, regulatory, and financial-reporting purposes. Review Stripe's privacy notice at stripe.com/privacy."],
+                  ["Refunds and chargebacks", "Refunds are issued through Stripe and mirrored into our transaction, receipt, and ledger records. For a dispute, GlyphLock may compile evidence packages containing transaction records, receipts, delivery/service history, audit events, and communications, and submit them to Stripe."],
+                  ["Reconciliation and retention", "Stripe references are retained alongside our transaction, receipt, settlement, and ledger records so that application transaction, Stripe transaction, receipt, and audit entry can be reconciled. These financial records are retained for the periods required by accounting, tax, dispute, and legal-hold obligations, which may outlast account deletion."],
+                ].map(([name, text]) => (
+                  <div key={name} className="rounded-xl border border-amber-300/15 bg-amber-300/[.035] p-4">
+                    <h3 className="font-bold text-white">{name}</h3>
+                    <p className="mt-2 text-sm text-slate-400">{text}</p>
+                  </div>
+                ))}
+              </div>
+
+              <p>Where an Adesso or similar card reader is used inside NUPS for guest-record purposes, it captures only cardholder name, brand, expiration, and last four digits for identification on the venue record. It does not authorize funds. All authorization remains with Stripe or the venue's certified terminal.</p>
+              <p>Refund eligibility is governed by the applicable purchase, subscription, venue, or service terms and by rights that apply under law. GlyphLock does not sell, rent, or share payment data for advertising or marketing purposes.</p>
+            </InfoCard>
+
+            <InfoCard icon={Building2} title="Oracle Hospitality Integration Platform (OHIP)" accent="blue">
+              <p>GlyphLock&apos;s integration request for the <strong className="text-white">Oracle Hospitality Integration Platform (OHIP)</strong> has been approved, giving NUPS an authorized integration pathway to Oracle Hospitality property-management systems for participating properties.</p>
+              <p>When a property enables the OHIP integration, GlyphLock may exchange operational records with that property&apos;s Oracle Hospitality environment — for example reservation or folio references, room and charge postings, guest identifiers supplied by the property, and posting confirmations — strictly as needed to complete the workflow the property has enabled.</p>
+              <div className="grid md:grid-cols-2 gap-4">
+                {[
+                  ["Property-controlled", "The property or enterprise customer determines which OHIP workflows are enabled and remains the owner and controller of the records held in its Oracle environment."],
+                  ["Credential handling", "OHIP client identifiers, secrets, hotel and enterprise identifiers, and application keys are stored only in server-side secret storage and are never exposed to client code."],
+                  ["Scope limitation", "GlyphLock requests only the OHIP data required for the enabled workflow. Card authorization is never routed through OHIP — payments remain with Stripe or the property's certified terminal."],
+                  ["What approval means", "Approval is an authorization to integrate with the platform. It is not a security certification, an endorsement of GlyphLock by Oracle, or a warranty of any particular property configuration."],
+                ].map(([name, text]) => (
+                  <div key={name} className="rounded-xl border border-blue-300/15 bg-blue-300/[.035] p-4">
+                    <h3 className="font-bold text-white">{name}</h3>
+                    <p className="mt-2 text-sm text-slate-400">{text}</p>
+                  </div>
+                ))}
+              </div>
             </InfoCard>
 
             <InfoCard icon={Trash2} title="Retention and Deletion" accent="amber">

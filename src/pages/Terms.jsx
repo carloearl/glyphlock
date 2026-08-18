@@ -35,6 +35,30 @@ export default function Terms() {
     {
       title: "8. Changes to Terms",
       content: "We may modify these terms at any time. Continued use of our services constitutes acceptance of modified terms."
+    },
+    {
+      title: "9. Payments — Stripe Is Our Exclusive Payment Processor",
+      content: "Stripe, Inc. is the sole and exclusive payment processor for GlyphLock and NUPS. We do not accept or process card payments through any other gateway, aggregator, or processor. By making a payment you also agree to Stripe's applicable terms and authorize Stripe to process your payment details. Card numbers, magnetic-stripe track data, chip data, CVV/CVC values, and PINs are never stored on GlyphLock systems — card entry and authorization occur in Stripe-hosted checkout, Stripe Elements, or a Stripe-connected physical terminal. GlyphLock retains only Stripe reference identifiers, payment status, amount, currency, card brand, expiration, last four digits, approval code, and timestamps."
+    },
+    {
+      title: "10. Payment Authority, Pricing, and Confirmation",
+      content: "All amounts, taxes, fees, discounts, and totals are calculated or independently verified server-side. Client-supplied prices or payment statuses are never trusted. A payment is treated as complete only when GlyphLock receives a signature-verified Stripe webhook event confirming it; a browser redirect, on-screen message, or emailed receipt is not by itself proof of payment. Where the same operation may be retried, idempotency controls apply so that a single authorization is not duplicated. Payments in a Stripe test mode carry no monetary value and confer no entitlement."
+    },
+    {
+      title: "11. Refunds, Disputes, and Chargebacks",
+      content: "Refunds are issued exclusively through Stripe and are mirrored into GlyphLock transaction, receipt, and ledger records. Refund eligibility is governed by the applicable purchase, subscription, venue, or service terms and by rights available under law. If you initiate a chargeback, you authorize GlyphLock to submit evidence to Stripe, including transaction records, receipts, service and delivery history, audit events, and relevant communications. Corrections to financial history are recorded as traceable adjustments rather than silent rewrites, and financial records are retained for the periods required by accounting, tax, dispute, and legal-hold obligations."
+    },
+    {
+      title: "12. Venue Card Readers and Terminals",
+      content: "Where NUPS supports a card reader such as an Adesso device, that reader captures only cardholder name, card brand, expiration, and last four digits for identification on a venue record. It does not authorize funds and is not a payment terminal. All card authorization must occur through Stripe or through the venue's own certified payment terminal. Venues are solely responsible for maintaining PCI DSS obligations applicable to hardware and environments they operate, and for lawful use of identity, scanning, and card-capture features they enable."
+    },
+    {
+      title: "13. Oracle Hospitality Integration Platform (OHIP)",
+      content: "GlyphLock's integration request for the Oracle Hospitality Integration Platform (OHIP) has been approved, providing NUPS with an authorized integration pathway to Oracle Hospitality property-management systems for participating properties. Where a property enables this integration, GlyphLock may exchange only the operational records required for the enabled workflow, such as reservation or folio references, room and charge postings, property-supplied guest identifiers, and posting confirmations. OHIP credentials are held server-side only. Card authorization is never routed through OHIP and remains with Stripe or the property's certified terminal. OHIP approval is an authorization to integrate; it is not a security certification, an Oracle endorsement of GlyphLock, or a warranty of availability, uptime, or any particular property configuration. Oracle and Oracle Hospitality are trademarks of Oracle Corporation, and Stripe is a trademark of Stripe, Inc.; use of these names indicates integration only, not affiliation or sponsorship."
+    },
+    {
+      title: "14. Third-Party Service Dependencies",
+      content: "Payment, hospitality, hosting, AI, communications, and storage functions depend on third-party providers, including Stripe and Oracle. GlyphLock is not responsible for outages, policy changes, account actions, pricing changes, or service discontinuation by those providers. If a provider suspends or restricts service, affected GlyphLock features may be unavailable until the condition is resolved."
     }
   ];
 
@@ -56,7 +80,7 @@ export default function Terms() {
               TERMS OF <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">SERVICE</span>
             </h1>
             <div className="inline-block px-4 py-2 glyph-glass border border-cyan-500/30 rounded-full">
-              <p className="text-cyan-300 text-sm font-bold uppercase tracking-widest">Last Updated: May 2025</p>
+              <p className="text-cyan-300 text-sm font-bold uppercase tracking-widest">Last Updated: August 18, 2026</p>
             </div>
           </div>
 
