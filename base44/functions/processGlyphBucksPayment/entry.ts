@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
       ? Math.floor((amountCents * feeBps) / 10000)
       : 0;
 
-    const intentParams = {
+    const intentParams: any = {
       amount: amountCents,
       currency: 'usd',
       description: description || `GlyphBucks Order ${order_number}`,
