@@ -44,6 +44,26 @@
       "type": "string",
       "description": "Issuing state (2-letter)"
     },
+    "id_expiration": {
+      "type": "string",
+      "description": "ID expiration date (YYYY-MM-DD) decoded from the license barcode"
+    },
+    "address_line1": {
+      "type": "string",
+      "description": "Street address as printed on the ID"
+    },
+    "city": {
+      "type": "string",
+      "description": "City as printed on the ID"
+    },
+    "state": {
+      "type": "string",
+      "description": "Residence state as printed on the ID"
+    },
+    "zip_code": {
+      "type": "string",
+      "description": "Postal code as printed on the ID"
+    },
     "id_verified": {
       "type": "boolean",
       "default": false

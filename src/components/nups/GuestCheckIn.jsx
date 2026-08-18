@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import useHardwareScanner from "@/hooks/useHardwareScanner";
 import { parseAAMVA, normalizeIdType } from "@/lib/nups/aamva";
 import ScannedIdSummary from "@/components/nups/frontdoor/ScannedIdSummary";
+import ScannedIdFields from "@/components/nups/frontdoor/ScannedIdFields";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -118,6 +119,11 @@ const EMPTY_FORM = {
   id_type: "",
   id_number: "",
   id_state: "",
+  id_expiration: "",
+  address_line1: "",
+  city: "",
+  state: "",
+  zip_code: "",
   phone: "",
   card_name: "",
   card_last4: "",
@@ -214,6 +220,11 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
       id_type: normalizeIdType(d.id_type) || "Drivers License",
       id_number: d.id_number || f.id_number,
       id_state: (d.id_state || d.state || f.id_state || "").toUpperCase().slice(0, 2),
+      id_expiration: (d.id_expiration || "").split("T")[0] || f.id_expiration,
+      address_line1: d.address_line1 || f.address_line1,
+      city: d.city || f.city,
+      state: (d.state || d.id_state || f.state || "").toUpperCase().slice(0, 2),
+      zip_code: d.zip_code || f.zip_code,
     }));
     setLastScan(d);
     setShowCamera(false);
@@ -257,6 +268,11 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
             : f.date_of_birth,
           id_type: existing.id_type || f.id_type,
           id_state: existing.id_state || f.id_state,
+          id_expiration: existing.id_expiration || f.id_expiration,
+          address_line1: existing.address_line1 || f.address_line1,
+          city: existing.city || f.city,
+          state: existing.state || f.state,
+          zip_code: existing.zip_code || f.zip_code,
           phone: existing.phone || f.phone,
           card_name: existing.card_name || f.card_name,
           card_last4: existing.card_last4 || f.card_last4,
@@ -317,6 +333,11 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
           // Update card info if provided
           ...(form.card_last4 && { card_last4: form.card_last4, card_name: form.card_name, card_exp: form.card_exp, card_type: form.card_type }),
           ...(form.phone && { phone: form.phone }),
+          ...(form.id_expiration && { id_expiration: form.id_expiration }),
+          ...(form.address_line1 && { address_line1: form.address_line1 }),
+          ...(form.city && { city: form.city }),
+          ...(form.state && { state: form.state.toUpperCase() }),
+          ...(form.zip_code && { zip_code: form.zip_code }),
         });
         // Permanent archive snapshot — survives demo wipes
         await snapshotPerson({ type: "guest", event: "checked_in", record: updated });
@@ -334,6 +355,11 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
           id_type: form.id_type,
           id_number: form.id_number,
           id_state: form.id_state.toUpperCase(),
+          id_expiration: form.id_expiration,
+          address_line1: form.address_line1,
+          city: form.city,
+          state: form.state.toUpperCase(),
+          zip_code: form.zip_code,
           phone: form.phone,
           card_name: form.card_name,
           card_last4: form.card_last4,
@@ -501,6 +527,8 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
               </Button>
             </div>
           </div>
+
+          <ScannedIdFields form={form} set={set} />
 
           {showCardFields && (
             <div className="grid sm:grid-cols-2 gap-3 p-3 rounded-lg border border-yellow-500/20 bg-yellow-500/5">
