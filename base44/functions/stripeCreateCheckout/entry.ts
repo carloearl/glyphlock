@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@14.14.0';
 
 /**
@@ -13,6 +13,31 @@ const PLAN_PRICE_SECRETS = {
   creator: 'STRIPE_PRICE_CREATOR_MONTHLY',
   professional: 'STRIPE_PRICE_PROFESSIONAL_MONTHLY',
 };
+
+// Stripe Price IDs are public catalog identifiers, not credentials. These
+// trusted sandbox defaults belong to GlyphLock's connected Stripe sandbox and
+// remove two unnecessary secret-entry steps during testing. A live Stripe key
+// can NEVER use these values; live checkout still requires explicit live Price
+// IDs in Base44's server-side environment.
+const SANDBOX_PLAN_PRICES = {
+  creator: 'price_1T6tJqLLyyDLnlhpwgi7rjJY',
+  professional: 'price_1T6tfXLLyyDLnlhpsCNhFRXE',
+};
+
+function stripeKeyMode(secretKey) {
+  if (secretKey.startsWith('sk_test_') || secretKey.startsWith('rk_test_')) return 'test';
+  if (secretKey.startsWith('sk_live_') || secretKey.startsWith('rk_live_')) return 'live';
+  return 'unknown';
+}
+
+function resolvePlanPrice(plan, stripeSecretKey) {
+  const configured = Deno.env.get(PLAN_PRICE_SECRETS[plan]);
+  if (configured) return configured;
+
+  // Fail closed for live or unrecognized credentials. This prevents a live
+  // account from accidentally receiving a sandbox Price ID.
+  return stripeKeyMode(stripeSecretKey) === 'test' ? SANDBOX_PLAN_PRICES[plan] : null;
+}
 
 function getAllowedOrigin(req) {
   const candidates = [Deno.env.get('APP_BASE_URL'), req.headers.get('origin')].filter(Boolean);
@@ -79,7 +104,7 @@ Deno.serve(async (req) => {
     }
 
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
-    const priceId = Deno.env.get(PLAN_PRICE_SECRETS[plan]);
+    const priceId = stripeSecretKey ? resolvePlanPrice(plan, stripeSecretKey) : null;
 
     if (!stripeSecretKey || !priceId) {
       return Response.json(
