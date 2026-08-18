@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CreditCard, Smartphone, Wifi, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
+import useHardwareScanner from "@/hooks/useHardwareScanner";
+import { parseMagstripe } from "@/lib/nups/magstripe";
+import SwipedCardChip from "./SwipedCardChip";
 
 /**
  * Card / Tap-to-Pay / Digital Wallet panel.
@@ -21,6 +24,17 @@ export default function CardPaymentPanel({
   const [approvalCode, setApprovalCode] = useState("");
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [swipedCard, setSwipedCard] = useState(null);
+
+  // Adesso keyboard-wedge reader: the swipe fills in the card identity so the
+  // operator only has to key the approval code from the Stripe terminal.
+  useHardwareScanner((raw) => {
+    const card = parseMagstripe(raw);
+    if (!card) return;
+    setSwipedCard(card);
+    setLastFour(card.last_four);
+    setError("");
+  });
 
   const isTap = method === "Digital Wallet";
   const title = isTap ? "Tap to Pay" : method === "Debit Card" ? "Debit Card" : "Credit Card";
@@ -46,6 +60,12 @@ export default function CardPaymentPanel({
           ? (terminalConfigured ? "configured_terminal_manual_confirmation" : "external_terminal_manual_confirmation")
           : "training_simulation",
         payment_confirmed_at: new Date().toISOString(),
+        ...(swipedCard ? {
+          card_name: swipedCard.name,
+          card_type: swipedCard.type,
+          card_exp: swipedCard.exp,
+          card_entry_mode: swipedCard.entry_mode,
+        } : {}),
       });
     } finally {
       setProcessing(false);
@@ -88,6 +108,8 @@ export default function CardPaymentPanel({
           <div className="text-[10px] text-gray-300 font-bold">NFC Tap</div>
         </div>
       </div>
+
+      <SwipedCardChip card={swipedCard} onClear={() => setSwipedCard(null)} />
 
       <div className="space-y-2">
         <div className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
