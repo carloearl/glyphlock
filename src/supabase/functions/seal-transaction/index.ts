@@ -23,6 +23,39 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 
 const TERMS_VERSION = "NUPS-GBK-SVA-v2.0";
 
+function authorizeInternalRequest(req: Request): Response | null {
+  if (Deno.env.get("ENABLE_SUPABASE_NUPS1_SIGNER") !== "true") {
+    return new Response(
+      JSON.stringify({ error: "Dormant Supabase signer is disabled. Use the Base44 glyphbucksSeal function." }),
+      { status: 410, headers: { "content-type": "application/json" } },
+    );
+  }
+
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!serviceRoleKey) {
+    return new Response(
+      JSON.stringify({ error: "Supabase signer authorization is not configured." }),
+      { status: 503, headers: { "content-type": "application/json" } },
+    );
+  }
+
+  if ((req.headers.get("authorization") || "") !== `Bearer ${serviceRoleKey}`) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized." }),
+      { status: 401, headers: { "content-type": "application/json" } },
+    );
+  }
+
+  if (!req.headers.get("x-user-id")) {
+    return new Response(
+      JSON.stringify({ error: "Authenticated user context is required." }),
+      { status: 401, headers: { "content-type": "application/json" } },
+    );
+  }
+
+  return null;
+}
+
 function b64uFromBytes(bytes: Uint8Array): string {
   let s = btoa(String.fromCharCode(...bytes));
   return s.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -45,6 +78,9 @@ function canonical(obj: Record<string, unknown>): string {
 
 serve(async (req) => {
   if (req.method !== "POST") return new Response("POST only", { status: 405 });
+
+  const authorizationError = authorizeInternalRequest(req);
+  if (authorizationError) return authorizationError;
 
   const PRIV_B64 = Deno.env.get("NUPS_ED25519_PRIVATE_PKCS8_B64");
   const PUB_B64U = Deno.env.get("NUPS_ED25519_PUBLIC_B64URL");
