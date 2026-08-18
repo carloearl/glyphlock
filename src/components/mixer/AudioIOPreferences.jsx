@@ -10,16 +10,15 @@ export default function AudioIOPreferences() {
 
   useEffect(() => {
     if (!open || !navigator.mediaDevices?.enumerateDevices) return;
-    let stream;
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((next) => {
-      stream = next;
-      return navigator.mediaDevices.enumerateDevices();
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(async (stream) => {
+      const available = await navigator.mediaDevices.enumerateDevices();
+      stream.getTracks().forEach((track) => track.stop());
+      return available;
     }).then(setDevices).catch(() => navigator.mediaDevices.enumerateDevices().then(setDevices));
-    return () => stream?.getTracks().forEach((track) => track.stop());
   }, [open]);
 
   const inputs = devices.filter((device) => device.kind === "audioinput");
-  const outputs = devices.filter((device) => device.kind === "audiooutput");
+  const outputs = devices.filter((device) => device.kind === "audiooutput" && device.deviceId !== "default");
 
   return (
     <div className="relative">

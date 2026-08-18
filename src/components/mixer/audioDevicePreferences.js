@@ -16,6 +16,11 @@ export function saveAudioOutputId(deviceId) {
 
 export async function applyPreferredOutput(audio, deviceId = getAudioOutputId()) {
   if (!audio?.setSinkId) return false;
-  await audio.setSinkId(deviceId);
+  try {
+    await audio.setSinkId(deviceId || "default");
+  } catch {
+    localStorage.setItem(OUTPUT_KEY, "default");
+    await audio.setSinkId("default");
+  }
   return true;
 }
