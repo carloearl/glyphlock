@@ -113,12 +113,15 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
-    const { default: Stripe } = await import('npm:stripe@14.14.0');
-    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+    const connectedAccountId = venueConfig.stripe_connected_account_id || null;
 
     let paymentIntent;
     try {
-      paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
+      const headers = { 'Authorization': `Bearer ${stripeKey}` };
+      if (connectedAccountId) headers['Stripe-Account'] = connectedAccountId;
+      const stripeResponse = await fetch(`https://api.stripe.com/v1/payment_intents/${encodeURIComponent(payment_intent_id)}`, { headers });
+      paymentIntent = await stripeResponse.json();
+      if (!stripeResponse.ok) throw new Error(paymentIntent?.error?.message || 'Stripe payment lookup failed');
     } catch (stripeError) {
       return Response.json({
         success: false,
@@ -184,7 +187,8 @@ Deno.serve(async (req) => {
       metadata: {
         approval_code,
         card_last_four: rd.card_last_four || null,
-        amount: rd.amount
+        amount: rd.amount,
+        stripe_connected_account_id: connectedAccountId
       }
     });
 
@@ -195,7 +199,8 @@ Deno.serve(async (req) => {
       processor_reference: payment_intent_id,
       card_last_four: rd.card_last_four,
       amount_charged: rd.amount,
-      payment_record_id: rd.record_id
+      payment_record_id: rd.record_id,
+      stripe_connected_account_id: connectedAccountId
     });
 
   } catch (error) {
