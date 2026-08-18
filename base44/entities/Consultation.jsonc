@@ -88,6 +88,55 @@
         "exploratory"
       ]
     },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "unpaid",
+        "pending",
+        "paid",
+        "failed",
+        "refund_pending",
+        "refunded"
+      ],
+      "default": "unpaid",
+      "description": "Stripe-confirmed payment lifecycle. Browser redirects never set this field."
+    },
+    "stripe_payment_intent_id": {
+      "type": "string",
+      "description": "Stripe PaymentIntent identifier associated with the engagement payment."
+    },
+    "stripe_charge_id": {
+      "type": "string",
+      "description": "Stripe Charge identifier, when available."
+    },
+    "stripe_connected_account_id": {
+      "type": "string",
+      "description": "Optional Stripe Connect account that owns the direct charge."
+    },
+    "amount_paid": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Stripe-confirmed amount in the currency's minor unit (cents for USD)."
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "refund_id": {
+      "type": "string"
+    },
+    "refund_status": {
+      "type": "string"
+    },
+    "refund_amount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Refund amount in the currency's minor unit."
+    },
+    "refund_date": {
+      "type": "string",
+      "format": "date-time"
+    },
     "status": {
       "type": "string",
       "enum": [
