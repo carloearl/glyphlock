@@ -12,6 +12,7 @@
     "audit:nups-ui": "node scripts/audit-nups-operational-ui.mjs",
     "check:nups-isolation": "node scripts/check-nups-mode-boundaries.mjs",
     "check:secrets": "node scripts/check-no-tracked-secrets.mjs",
+    "check:integrations": "node scripts/check-integration-boundaries.mjs",
     "preview": "vite preview",
     "check:dj-functions": "node scripts/check-dj-function-sdk.mjs"
   },
