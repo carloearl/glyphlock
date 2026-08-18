@@ -119,10 +119,10 @@ export default function BillingAndPayments({ user: propUser }) {
     }
   }, [location.search, navigate, location.pathname]);
 
-  const handleCheckout = async (productId, priceId, mode) => {
+  const handleCheckout = async (plan) => {
     setLoading(true);
     try {
-      const response = await glyphLockAPI.stripe.startCheckout(productId, priceId, mode);
+      const response = await glyphLockAPI.stripe.startCheckout(plan);
       
       if (response?.checkoutUrl) {
         window.location.href = response.checkoutUrl;
