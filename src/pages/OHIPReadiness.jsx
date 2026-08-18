@@ -35,13 +35,15 @@ const PRODUCTION_STAGES = [
   },
   {
     label: 'Oracle PartnerNetwork',
-    status: 'verify',
-    detail: 'Membership must be explicitly confirmed by Oracle before this is marked complete.',
+    status: 'review',
+    detail:
+      'OPN enrollment #1654123 was submitted August 17, 2026. Oracle requested address evidence, and GlyphLock LLC supplied its filed Arizona Articles of Organization on August 18, 2026. Awaiting explicit Oracle approval.',
   },
   {
     label: 'Marketplace Listing',
-    status: 'pending',
-    detail: 'Prepare and submit after OPN membership is verified.',
+    status: 'blocked',
+    detail:
+      'Preparation may continue, but publisher submission and paid-listing onboarding remain gated on OPN approval. No banking information has been supplied to Oracle.',
   },
   {
     label: 'Production Application',
@@ -307,20 +309,38 @@ export default function OHIPReadiness() {
                   Evidence-based progression. A stage is never marked complete from a related Oracle order or account alone.
                 </CardDescription>
               </div>
-              <Badge className="bg-amber-500 text-slate-950">OPN Verification Required</Badge>
+              <Badge className="bg-amber-500 text-slate-950">OPN Application Under Review</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
+            <div className="grid gap-2 rounded-lg border border-amber-500/35 bg-amber-950/20 p-3 text-sm sm:grid-cols-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-300">
+                  Current OPN evidence
+                </p>
+                <p className="mt-1 text-slate-200">
+                  Application #1654123 · Submitted August 17, 2026
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-300">
+                  Latest action
+                </p>
+                <p className="mt-1 text-slate-200">
+                  Address evidence supplied August 18, 2026 · Oracle decision pending
+                </p>
+              </div>
+            </div>
             {PRODUCTION_STAGES.map((stage, index) => {
               const isComplete = stage.status === 'complete';
-              const isVerify = stage.status === 'verify';
+              const isReview = stage.status === 'review';
               return (
                 <div
                   key={stage.label}
                   className={`flex gap-3 rounded-lg border p-3 ${
                     isComplete
                       ? 'border-emerald-500/35 bg-emerald-950/20'
-                      : isVerify
+                      : isReview
                         ? 'border-amber-500/45 bg-amber-950/20'
                         : 'border-slate-700 bg-slate-950/50'
                   }`}
@@ -328,7 +348,7 @@ export default function OHIPReadiness() {
                   <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current text-xs font-bold">
                     {isComplete ? (
                       <CheckCircle2 className="h-4 w-4 text-emerald-300" />
-                    ) : isVerify ? (
+                    ) : isReview ? (
                       <AlertTriangle className="h-4 w-4 text-amber-300" />
                     ) : (
                       <span className="text-slate-500">{index + 1}</span>
@@ -342,12 +362,18 @@ export default function OHIPReadiness() {
                         className={
                           isComplete
                             ? 'border-emerald-500/50 text-emerald-200'
-                            : isVerify
+                            : isReview
                               ? 'border-amber-500/50 text-amber-200'
                               : 'border-slate-600 text-slate-400'
                         }
                       >
-                        {isComplete ? 'Verified' : isVerify ? 'Verify Now' : stage.status === 'pending' ? 'Pending' : 'Locked'}
+                        {isComplete
+                          ? 'Verified'
+                          : isReview
+                            ? 'Under Review'
+                            : stage.status === 'blocked'
+                              ? 'Blocked'
+                              : 'Locked'}
                       </Badge>
                     </div>
                     <p className="mt-1 text-sm text-slate-400">{stage.detail}</p>
@@ -356,7 +382,7 @@ export default function OHIPReadiness() {
               );
             })}
             <p className="text-xs leading-5 text-slate-500">
-              Current evidence confirms the Partner Sandbox connection only. OPN, Marketplace, production application, and customer authorization remain separate gates.
+              Current evidence confirms the Partner Sandbox connection and an OPN application under review. It does not establish OPN approval, Marketplace publisher approval, production access, customer authorization, or Oracle supplier/banking setup.
             </p>
           </CardContent>
         </Card>
