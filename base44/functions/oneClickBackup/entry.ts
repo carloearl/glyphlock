@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 /**
  * ONE CLICK BACKUP - EVERYTHING
@@ -6,6 +6,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
  */
 
 Deno.serve(async (req) => {
+  try {
   const base44 = createClientFromRequest(req);
   const user = await base44.auth.me();
   if (!user || user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
@@ -14,7 +15,7 @@ Deno.serve(async (req) => {
   const PAGES = {
     'Home.jsx': `PLACEHOLDER_HOME`,
     'GlyphBot.jsx': `PLACEHOLDER_GLYPHBOT`,
-    'Qr.jsx': `PLACEHOLDER_QR`,
+    'SecureQRStudio.jsx': `PLACEHOLDER_QR`,
     'ImageLab.jsx': `PLACEHOLDER_IMAGELAB`,
     'CommandCenter.jsx': `PLACEHOLDER_COMMANDCENTER`,
     'SiteBuilder.jsx': `PLACEHOLDER_SITEBUILDER`,
@@ -146,4 +147,7 @@ Done. Your site is live in 60 seconds.
   };
 
   return Response.json(backup);
+  } catch (error) {
+    return Response.json({ error: error?.message || 'Backup failed' }, { status: 500 });
+  }
 });

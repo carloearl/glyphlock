@@ -11,7 +11,7 @@ const RADIUS = 196;
 
 const nodes = [
   { icon: Building2, label: 'NUPS', link: 'NUPSLanding', accent: '#22d3ee' },
-  { icon: QrCode, label: 'QR STUDIO', link: 'Qr', accent: '#38bdf8' },
+  { icon: QrCode, label: 'QR STUDIO', link: 'SecureQRStudio', accent: '#38bdf8' },
   { icon: Image, label: 'IMAGE LAB', link: 'ImageLab', accent: '#d946ef' },
   { icon: Radio, label: 'SECURITY', link: 'SecurityOperationsCenter', accent: '#f43f5e' },
   { icon: ShieldCheck, label: 'GOVERNANCE', link: 'GovernanceHub', accent: '#8b5cf6' },

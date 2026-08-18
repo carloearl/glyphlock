@@ -2,6 +2,10 @@
   "name": "QRGenHistory",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "code_id": {
       "type": "string",
       "description": "Unique identifier for the QR code"

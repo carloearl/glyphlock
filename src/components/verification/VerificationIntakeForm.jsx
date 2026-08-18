@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { Send, CheckCircle } from 'lucide-react';
+import { sendFormNotification, NOTIFICATION_RECIPIENT } from '@/lib/notifications/sendFormNotification';
 
 export default function VerificationIntakeForm() {
   const [formData, setFormData] = useState({
@@ -26,6 +27,7 @@ export default function VerificationIntakeForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [confirmation, setConfirmation] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,6 +41,8 @@ export default function VerificationIntakeForm() {
         status: 'submitted'
       });
 
+      let referenceId = consultation?.consultation_id;
+
       // Generate verification token if founding cohort or standard selected
       if (formData.verification_interest !== 'not_sure') {
         const tokenResponse = await base44.functions.invoke('generateVerificationToken', {
@@ -49,12 +53,47 @@ export default function VerificationIntakeForm() {
         });
 
         if (tokenResponse.data.success) {
-          toast.success(`Request reference: ${tokenResponse.data.token_id}`);
+          referenceId = tokenResponse.data.token_id;
         }
       }
 
+      // Notify GlyphLock — never blocks the submission, always logged
+      const delivery = await sendFormNotification({
+        source: 'verification_intake',
+        reference: referenceId,
+        organization: formData.organization_name,
+        contactEmail: formData.contact_email,
+        subject: `New governance review request — ${formData.organization_name}`,
+        body: [
+          `Organization: ${formData.organization_name}`,
+          `Contact: ${formData.contact_name}`,
+          `Email: ${formData.contact_email}`,
+          `Phone: ${formData.contact_phone || '—'}`,
+          `Size: ${formData.organization_size || '—'}`,
+          `Industry: ${formData.industry || '—'}`,
+          `Engagement interest: ${formData.verification_interest || '—'}`,
+          `Governance maturity: ${formData.current_governance_maturity || '—'}`,
+          `Timeline: ${formData.timeline || '—'}`,
+          '',
+          'Primary concern / goal:',
+          formData.primary_concern || '—',
+        ].join('\n'),
+      });
+
+      setConfirmation({
+        reference: referenceId,
+        organization: formData.organization_name,
+        email: formData.contact_email,
+        submitted_at: new Date().toLocaleString(),
+        delivery_status: delivery.status,
+        delivery_error: delivery.error,
+      });
       setSubmitted(true);
-      toast.success('Request submitted successfully');
+      if (delivery.status === 'sent') {
+        toast.success('Request submitted and notification delivered');
+      } else {
+        toast.warning('Request saved, but the notification email failed to send');
+      }
     } catch (error) {
       toast.error('Submission failed: ' + error.message);
     } finally {
@@ -65,14 +104,53 @@ export default function VerificationIntakeForm() {
   if (submitted) {
     return (
       <Card className="bg-green-900/20 border-green-500/40">
-        <CardContent className="p-12 text-center space-y-4">
+        <CardContent className="p-8 md:p-12 text-center space-y-5">
           <CheckCircle className="h-16 w-16 text-green-400 mx-auto" />
-          <h3 className="text-2xl font-bold text-green-400">Request Received</h3>
-          <p className="text-slate-300">
-            We have your request. Someone will follow up by email to discuss scope and pricing.
+          <h3 className="text-2xl font-bold text-green-400">Request Sent</h3>
+          <p className="text-slate-300 max-w-xl mx-auto">
+            Your request was sent to the GlyphLock team. Someone will follow up by email to discuss scope.
             No review has started and no findings exist until a written scope is agreed.
           </p>
-          <Button onClick={() => setSubmitted(false)} variant="outline" className="border-green-500/40 text-green-400">
+
+          {confirmation && (
+            <div className="max-w-md mx-auto text-left bg-slate-900/60 border border-green-500/30 rounded-xl p-5 space-y-3">
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-slate-400">Reference</span>
+                <span className="text-white font-mono break-all">{confirmation.reference}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-slate-400">Organization</span>
+                <span className="text-white">{confirmation.organization}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-slate-400">Reply to</span>
+                <span className="text-white break-all">{confirmation.email}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-slate-400">Sent</span>
+                <span className="text-white">{confirmation.submitted_at}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm border-t border-slate-700 pt-3">
+                <span className="text-slate-400">Notification</span>
+                <span className={confirmation.delivery_status === 'sent' ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}>
+                  {confirmation.delivery_status === 'sent'
+                    ? `Delivered to ${NOTIFICATION_RECIPIENT}`
+                    : 'Send failed — logged for retry'}
+                </span>
+              </div>
+              {confirmation.delivery_error && (
+                <p className="text-xs text-red-300 break-all">{confirmation.delivery_error}</p>
+              )}
+            </div>
+          )}
+
+          <p className="text-xs text-slate-500">Keep your reference number for any follow-up correspondence.</p>
+
+          <Button
+            onClick={() => { setSubmitted(false); setConfirmation(null); }}
+            variant="outline"
+            className="border-green-500/40 text-green-400"
+          >
             Submit Another Request
           </Button>
         </CardContent>

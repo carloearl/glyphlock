@@ -2,6 +2,10 @@
   "name": "QrScanEvent",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "qrAssetId": {
       "type": "string",
       "description": "Reference to scanned QR code_id"
@@ -60,7 +64,9 @@
     "scannedAt"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "created_by": "{{user.email}}"
+    },
     "read": {
       "user_condition": {
         "role": "admin"

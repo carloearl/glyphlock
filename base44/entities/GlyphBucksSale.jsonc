@@ -1,11 +1,15 @@
 {
   "name": "GlyphBucksSale",
   "type": "object",
-  "description": "DACO GlyphBucks Stored-Value Contract-Receipt System \u2014 one row per stored-value voucher sale. Instrument sale ONLY (never performance/service framing). Issuance is a LIABILITY, never revenue \u2014 excluded from total_sales. RLS: admin-only direct access; all operational writes go through the server-side seal function.",
+  "description": "DACO GlyphBucks Stored-Value Contract-Receipt System — one row per stored-value voucher sale. Instrument sale ONLY (never performance/service framing). Issuance is a LIABILITY, never revenue — excluded from total_sales. RLS: admin-only direct access; all operational writes go through the server-side seal function.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "sale_id": {
       "type": "string",
-      "description": "Unique sale identifier (GBS-\u2026)."
+      "description": "Unique sale identifier (GBS-…)."
     },
     "agreement_no": {
       "type": "string",
@@ -17,7 +21,7 @@
     },
     "verify_ref": {
       "type": "string",
-      "description": "VRF-YYMMDD-NNNNNN-XXXX \u2014 QR verification reference. Regex ^VRF-\\d{6}-\\d{6}-[0-9A-F]{4}$."
+      "description": "VRF-YYMMDD-NNNNNN-XXXX — QR verification reference. Regex ^VRF-\\d{6}-\\d{6}-[0-9A-F]{4}$."
     },
     "venue_id": {
       "type": "string"
@@ -61,14 +65,14 @@
     },
     "face_cents": {
       "type": "number",
-      "description": "denom_cents \u00d7 qty."
+      "description": "denom_cents × qty."
     },
     "card_fee_cents": {
       "type": "number"
     },
     "amount_cents": {
       "type": "number",
-      "description": "face_cents + card_fee_cents. Tax $0.00 \u2014 stored-value issuance is not a retail sale (tax at redemption, A.R.S. \u00a7 42-5061)."
+      "description": "face_cents + card_fee_cents. Tax $0.00 — stored-value issuance is not a retail sale (tax at redemption, A.R.S. § 42-5061)."
     },
     "currency": {
       "type": "string",
@@ -84,7 +88,7 @@
     },
     "mcc": {
       "type": "string",
-      "description": "The real, underwritten stored-value merchant category \u2014 recorded for audit. NEVER misrepresented (\u00a70.1)."
+      "description": "The real, underwritten stored-value merchant category — recorded for audit. NEVER misrepresented (§0.1)."
     },
     "mode": {
       "type": "string",

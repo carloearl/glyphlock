@@ -6,7 +6,10 @@ import { enforceRoleScope, isScopedRole } from './roleGate';
 import { emitFromGatewayWrite } from './audit/auditEventEmitter';
 // DACO WAVE 2 — ID-01 identity rebind for every protected write
 import { rebindIdentity, isIdentityCritical } from './identityRebind';
+import { getActiveMode } from './modeResolver';
+import { stampOperationalRecord, getOperatingMode } from './operatingMode';
 
+import { saveLastReceipt } from '@/lib/nups/receiptService';
 const VALID_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
 
 const FINANCIAL_ENTITIES = new Set([
@@ -34,6 +37,21 @@ const FINANCIAL_AUTHORIZED_ROLES = new Set([
 ]);
 
 const PROTECTED_ENTITIES = new Set(['SystemConfig', 'MigrationAuditLog']);
+
+// Entities whose schemas carry an explicit is_demo marker. Mode is stamped on
+// every ordinary entity; this additional flag makes destructive demo cleanup
+// and cross-mode filtering deterministic instead of relying on names/notes.
+const DEMO_FLAGGED_ENTITIES = new Set([
+  'NUPSUser', 'POSTransaction', 'POSBatch', 'POSProduct', 'POSCustomer',
+  'Entertainer', 'VIPGuest', 'VIPRoom', 'DriverProfile', 'DriverPayout',
+  'StaffShift', 'EntertainerShift', 'VenueContract', 'PayrollRecord',
+  'GlyphBucksBill', 'GlyphBucksTransaction', 'DailySettlement',
+]);
+
+const TRAINING_SESSION_ENTITIES = new Set([
+  'POSTransaction', 'POSBatch', 'POSProduct', 'POSCustomer',
+  'DriverProfile', 'DriverPayout',
+]);
 
 const DEMO_PRESENCE_CHECK_ENTITIES = [
   'NUPSUser',
@@ -95,41 +113,9 @@ async function resolveMode(requestContextMode, venue_id) {
     }
     return requestContextMode;
   }
-  // DACO WAVE 1 — Layer 1: per-venue SystemConfig (if venue_id provided)
-  if (venue_id) {
-    try {
-      const venueRows = await base44.entities.SystemConfig.filter({ venue_id, config_key: 'venue' });
-      if (venueRows && venueRows.length === 1 && VALID_MODES.has(venueRows[0].mode)) {
-        return venueRows[0].mode;
-      }
-      if (venueRows && venueRows.length > 1) {
-        throw new Error(`writeEntity: SystemConfig_venue_duplicate: ${venueRows.length}_records_found`);
-      }
-    } catch (e) {
-      if (e.message && e.message.includes('SystemConfig_venue_duplicate')) throw e;
-      // Fall through to global on any other error
-    }
-  }
-  // DACO WAVE 1 — Layer 2: global SystemConfig (fallback)
-  const rows = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-  // Auto-bootstrap on first use. Throwing here blocks every write in the app
-  // (door POS, settlements, payouts) on a fresh tenant. Default = REAL.
-  if (!rows || rows.length === 0) {
-    try {
-      await base44.entities.SystemConfig.create({ config_key: 'global', mode: 'REAL' });
-    } catch (e) {
-      // Race: someone else just created it. Re-read below.
-    }
-    const after = await base44.entities.SystemConfig.filter({ config_key: 'global' });
-    if (after && after.length === 1 && VALID_MODES.has(after[0].mode)) return after[0].mode;
-    return 'REAL';
-  }
-  if (rows.length > 1) {
-    throw new Error(`writeEntity: SystemConfig_global_duplicate: ${rows.length}_records_found`);
-  }
-  const m = rows[0].mode;
-  if (!VALID_MODES.has(m)) throw new Error(`writeEntity: mode_invalid: ${m || 'null'}`);
-  return m;
+  // One source of truth for UI, audit logging, and writes. getActiveMode reads
+  // VenueRateConfig first and keeps SystemConfig only as a legacy fallback.
+  return getActiveMode(venue_id);
 }
 
 function checkGlyphBucksLeakage(data) {
@@ -226,12 +212,32 @@ function validateFinancialRules(entity, data) {
   return null;
 }
 
-function injectMode(record, mode) {
+function stampGatewayRecord(entity, record, mode, venue_id, requestContext = {}) {
   if (!record || typeof record !== 'object') return record;
-  return { ...record, mode };
+  const explicitValidation = requestContext?.validation_run === true;
+  const transactional = entity === 'POSTransaction';
+  const stamped = stampOperationalRecord(record, {
+    ledgerMode: mode,
+    operatingMode: getOperatingMode(mode, venue_id),
+    venueId: venue_id,
+    supportsDemoFlag: DEMO_FLAGGED_ENTITIES.has(entity),
+    supportsTrainingSession: TRAINING_SESSION_ENTITIES.has(entity),
+    transactional,
+  });
+
+  if (transactional) {
+    const fundsOff = mode !== 'REAL' || explicitValidation;
+    const isComp = String(stamped.payment_method || '').toLowerCase() === 'comp'
+      || Number(stamped.comp_amount || 0) > 0;
+    stamped.validation_run = fundsOff;
+    // A real comp is a live accounting gap, not a settled tender. Non-live
+    // transactions are always funds-off regardless of payment method.
+    stamped.funds_settled = fundsOff ? false : !isComp;
+  }
+  return stamped;
 }
 
-export async function writeEntity({
+async function writeEntityInternal({
   entity,
   operation,
   data,
@@ -308,7 +314,7 @@ export async function writeEntity({
   // rejection reason instead of the generic "role_not_authorized_in_REAL".
   // Sovereign bypasses (consistent with existing precedent).
   if (!sovereign) {
-    const scopeReason = enforceRoleScope({ role, entity, operation, data, actor });
+    const scopeReason = enforceRoleScope({ role, entity, operation, data, actor, mode });
     if (scopeReason) {
       const audit_id = await audit({
         entity_name: entity,
@@ -400,9 +406,9 @@ export async function writeEntity({
   if (PROTECTED_ENTITIES.has(entity)) {
     stamped = data;
   } else if (operation === 'bulkCreate') {
-    stamped = (data || []).map((r) => injectMode(r, mode));
+    stamped = (data || []).map((r) => stampGatewayRecord(entity, r, mode, venue_id, requestContext));
   } else if (operation === 'create' || operation === 'update') {
-    stamped = injectMode(data, mode);
+    stamped = stampGatewayRecord(entity, data, mode, venue_id, requestContext);
   } else {
     stamped = data;
   }
@@ -444,18 +450,24 @@ export async function writeEntity({
     return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `write_failed: ${writeError.message}` };
   }
 
-  const audit_id = await audit({
-    entity_name: entity,
-    operation,
-    actor_id: actorId,
-    actor_role: role,
-    fields_changed: fieldsOf(data),
-    mode,
-    tier,
-    result: 'allowed',
-    venue_id: venue_id || null,
-    notes: intent || null,
-  }, identityContext);
+  // The business write already succeeded. Post-write audit/mirror failures must
+  // NEVER throw here — that would abandon the caller (no receipt, no feedback)
+  // even though the record exists. They are recorded best-effort instead.
+  let audit_id = null;
+  try {
+    audit_id = await audit({
+      entity_name: entity,
+      operation,
+      actor_id: actorId,
+      actor_role: role,
+      fields_changed: fieldsOf(data),
+      mode,
+      tier,
+      result: 'allowed',
+      venue_id: venue_id || null,
+      notes: intent || null,
+    }, identityContext);
+  } catch (e) { console.warn('post-write audit failed:', e); }
 
   // BPAA-NUPS-AUDIT-001 §5 — emit observational AuditEvent. Recursion guard
   // is inside the emitter (skips entity===AuditEvent and audit_depth>=max).
@@ -485,15 +497,17 @@ export async function writeEntity({
   // DACO-20260610 WS-1: Mirror to ActivityLog (user-facing audit trail)
   const actionMap = { create: 'CREATE', update: 'UPDATE', delete: 'DELETE', bulkCreate: 'CREATE' };
   const action_type = actionMap[operation] || 'UPDATE';
-  await logActivity({
-    action_type,
-    entity_affected: `${entity}${id ? ':' + id : ''}`,
-    before_value: null,
-    after_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
-    venue_id: venue_id || null,
-    actor: { email: verifiedActorEmail, role },
-    notes: intent || `gateway:${operation}`,
-  });
+  try {
+    await logActivity({
+      action_type,
+      entity_affected: `${entity}${id ? ':' + id : ''}`,
+      before_value: null,
+      after_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
+      venue_id: venue_id || null,
+      actor: { email: verifiedActorEmail, role },
+      notes: intent || `gateway:${operation}`,
+    });
+  } catch (e) { console.warn('ActivityLog mirror failed:', e); }
 
   return { ok: true, audit_id, mode, tier, result: 'allowed', value };
 }
@@ -687,4 +701,114 @@ export async function clearDemoEcosystem({ actor }) {
   });
 
   return { ok: true, removed, skipped };
+}
+
+function describeWriteEntityCall(args) {
+  const first = args?.[0];
+  const second = args?.[1];
+  const third = args?.[2];
+  const objectCall = first && typeof first === 'object' && !Array.isArray(first) ? first : null;
+  const entityName = typeof first === 'string'
+    ? first
+    : objectCall?.entityName || objectCall?.entity || objectCall?.entity_name || '';
+  const operation = typeof second === 'string'
+    ? second
+    : objectCall?.operation || objectCall?.op || 'create';
+  const payload = (third && typeof third === 'object')
+    ? third
+    : (second && typeof second === 'object')
+      ? second
+      : objectCall?.data || objectCall?.payload || {};
+  return {
+    entityName: String(entityName || ''),
+    operation: String(operation || ''),
+    payload: payload || {},
+    venueId: objectCall?.venue_id || payload?.venue_id || null,
+  };
+}
+
+function dollarsToCents(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? Math.round(amount * 100) : 0;
+}
+
+function centsFromRecord(source, centsKeys, dollarKeys) {
+  for (const key of centsKeys) {
+    const value = Number(source?.[key]);
+    if (Number.isFinite(value)) return Math.round(value);
+  }
+  for (const key of dollarKeys) {
+    const value = Number(source?.[key]);
+    if (Number.isFinite(value)) return dollarsToCents(value);
+  }
+  return 0;
+}
+
+function receiptFromWrite(entityName, payload, result, venueId) {
+  const normalized = String(entityName || '').toLowerCase();
+  if (!/(postransaction|paymentrecord|receipt|glyphbuckssale|glyphbuckstransaction)/.test(normalized)) return null;
+  if (!result?.ok) return null;
+
+  const record = result?.value || result?.record || result?.data || result?.entity || {};
+  const source = record && typeof record === 'object' ? { ...payload, ...record } : payload;
+  const totalCents = centsFromRecord(
+    source,
+    ['total_cents', 'amount_cents', 'total_amount_cents', 'total_sales_cents', 'grand_total_cents'],
+    ['total', 'amount', 'total_amount', 'total_sales', 'grand_total'],
+  );
+  const subtotalCents = centsFromRecord(
+    source,
+    ['subtotal_cents', 'net_cents'],
+    ['subtotal', 'net'],
+  ) || totalCents;
+  const taxCents = centsFromRecord(source, ['tax_cents'], ['tax']);
+  const feesCents = centsFromRecord(source, ['fee_cents', 'fees_cents'], ['fee', 'fees', 'processing_fee', 'service_fee']);
+  const label = source.item_name || source.description || source.transaction_type || source.category || 'NUPS transaction';
+  const environment = getOperatingMode(result?.mode || source.mode || 'REAL', venueId || source.venue_id);
+
+  return {
+    id: source.id || source.transaction_id,
+    transaction_id: source.id || source.transaction_id,
+    receipt_number: source.receipt_number || source.receipt_id || source.transaction_number || source.order_number || `NUPS-${Date.now()}`,
+    venue_name: source.venue_name || 'NUPS Venue',
+    operator_name: source.operator_name || source.cashier_name || source.cashier || source.created_by || '',
+    created_at: source.created_at || source.created_date || new Date().toISOString(),
+    payment_method: source.payment_method || source.tender_type || '',
+    subtotal_cents: subtotalCents,
+    tax_cents: taxCents,
+    fees_cents: feesCents,
+    total_cents: totalCents,
+    lines: Array.isArray(source.lines) && source.lines.length
+      ? source.lines
+      : [{
+          label,
+          quantity: Number(source.quantity || 1) || 1,
+          unit_price_cents: centsFromRecord(source, ['unit_price_cents'], ['unit_price', 'price']) || totalCents,
+          total_cents: totalCents,
+        }],
+    environment,
+    metadata: { entity_name: entityName, ledger_mode: result?.mode || source.mode || null },
+  };
+}
+
+/**
+ * Public gateway wrapper. The existing mode resolver and stampOperationalRecord
+ * remain the single source of truth for LIVE, TRAINING, DEMO and SANDBOX data.
+ * The wrapper only captures a printable receipt after a successful write.
+ */
+export async function writeEntity(...args) {
+  const call = describeWriteEntityCall(args);
+  const result = await writeEntityInternal(...args);
+
+  try {
+    if (/create|post|complete/i.test(call.operation)) {
+      const receipt = receiptFromWrite(call.entityName, call.payload, result, call.venueId);
+      if (receipt) saveLastReceipt(receipt);
+    }
+  } catch (receiptError) {
+    // Receipt caching is non-blocking: a successful ledger write stays successful.
+    console.warn('[NUPS receipt capture]', receiptError);
+  }
+
+  return result;
 }

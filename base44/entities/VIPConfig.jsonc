@@ -1,8 +1,12 @@
 {
   "name": "VIPConfig",
   "type": "object",
-  "description": "DACO-VIP-FIRST-BUILD-20260717 \u2014 Venue-scoped VIP workflow configuration. One record per venue. All VIP contract creation resolves through this record; contract creation is rejected if the venue has no active VIPConfig.",
+  "description": "DACO-VIP-FIRST-BUILD-20260717 — Venue-scoped VIP workflow configuration. One record per venue. All VIP contract creation resolves through this record; contract creation is rejected if the venue has no active VIPConfig.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "venue_id": {
       "type": "string",
       "description": "Venue key (e.g. dream_palace). One config per venue."
@@ -109,7 +113,7 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "Config records are REAL \u2014 they govern both live and test contracts."
+      "description": "Config records are REAL — they govern both live and test contracts."
     }
   },
   "required": [

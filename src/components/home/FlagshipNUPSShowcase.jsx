@@ -28,7 +28,7 @@ export default function FlagshipNUPSShowcase() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-[11px] font-black tracking-[.22em] text-emerald-300 uppercase shadow-[0_0_24px_rgba(16,185,129,.16)]"><Radio className="w-3.5 h-3.5 animate-pulse"/> GLYPHLOCK FLAGSHIP PLATFORM</div>
             <h2 className="mt-5 text-4xl md:text-6xl font-black text-white tracking-tight">NUPS <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 bg-clip-text text-transparent">RUNS THE ROOM.</span></h2>
-            <p className="mt-4 max-w-3xl text-base md:text-xl text-slate-300 leading-relaxed">Nexus Unified Portal System is GlyphLock's flagship real-world operating environment — connecting front-door workflows, point of sale, contracts, staff operations, payouts, records, reporting, QR operations and integrations in one operating surface.</p>
+            <p className="mt-4 max-w-3xl text-base md:text-xl text-slate-300 leading-relaxed">Nexus Unified POS System is GlyphLock's flagship venue-operations platform in controlled development and evaluation, connecting front-door workflows, point of sale, contracts, staff operations, payouts, records, reporting, QR operations and integrations in one operating surface.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to={createPageUrl('NUPSLanding')} className="group inline-flex items-center gap-2 rounded-xl border border-cyan-100/70 bg-cyan-300/20 px-6 py-3.5 font-black text-cyan-50 shadow-[0_0_28px_rgba(34,211,238,.48),0_0_70px_rgba(34,211,238,.18)] hover:-translate-y-1 hover:scale-105 hover:bg-cyan-200 hover:text-slate-950 hover:shadow-[0_0_48px_rgba(34,211,238,.75),0_0_100px_rgba(99,102,241,.25)] transition-all duration-300"><Play className="w-4 h-4"/> EXPERIENCE NUPS <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform"/></Link>
@@ -42,7 +42,7 @@ export default function FlagshipNUPSShowcase() {
           <div className="absolute -right-12 bottom-0 h-56 w-56 rounded-full bg-violet-500/20 blur-[80px] animate-pulse" />
           <div className="relative z-10 grid md:grid-cols-[1.1fr_.9fr] gap-6 items-center h-full">
             <div>
-              <div className="font-mono text-[10px] md:text-xs tracking-[.24em] text-cyan-300 mb-3">NUPS // LIVE OPERATING SURFACE</div>
+              <div className="font-mono text-[10px] md:text-xs tracking-[.24em] text-cyan-300 mb-3">NUPS // CONTROLLED OPERATING SURFACE</div>
               <h3 className="text-3xl md:text-5xl font-black text-white leading-tight">ONE COMMAND DECK.<br/><span className="text-violet-300">EVERY VENUE FLOW.</span></h3>
               <p className="mt-4 max-w-2xl text-slate-300">Front door, guest identity, staff shifts, registers, contracts, payouts, reporting, audit evidence and integrations are organized as one connected operating system — a working demonstration of the GlyphLock architecture creating and preserving the records it later needs to verify.</p>
             </div>

@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Append-only provenance record for external evidence used by GlyphBot Audit. External provider data is corroborative evidence, not an authoritative eligibility decision or identity assertion.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "audit_id": {
       "type": "string",
       "description": "Audit or AuditReport correlation identifier supplied by the caller."
@@ -13,7 +17,11 @@
     },
     "provider": {
       "type": "string",
-      "enum": ["beenverified", "manual", "other"]
+      "enum": [
+        "beenverified",
+        "manual",
+        "other"
+      ]
     },
     "lookup_type": {
       "type": "string",
@@ -25,11 +33,23 @@
     },
     "purpose": {
       "type": "string",
-      "enum": ["audit", "fraud_investigation", "business_due_diligence", "identity_corroboration"]
+      "enum": [
+        "audit",
+        "fraud_investigation",
+        "business_due_diligence",
+        "identity_corroboration"
+      ]
     },
     "status": {
       "type": "string",
-      "enum": ["configured", "unconfigured", "success", "no_match", "provider_error", "blocked"]
+      "enum": [
+        "configured",
+        "unconfigured",
+        "success",
+        "no_match",
+        "provider_error",
+        "blocked"
+      ]
     },
     "retrieved_at": {
       "type": "string",
@@ -43,7 +63,13 @@
     },
     "corroboration_status": {
       "type": "string",
-      "enum": ["unreviewed", "single_source", "corroborated", "conflict", "insufficient_evidence"],
+      "enum": [
+        "unreviewed",
+        "single_source",
+        "corroborated",
+        "conflict",
+        "insufficient_evidence"
+      ],
       "default": "unreviewed"
     },
     "provider_reference": {
@@ -58,9 +84,18 @@
     "policy": {
       "type": "object",
       "properties": {
-        "eligibility_use_prohibited": { "type": "boolean", "default": true },
-        "raw_query_stored": { "type": "boolean", "default": false },
-        "provider_is_source_of_truth": { "type": "boolean", "default": false }
+        "eligibility_use_prohibited": {
+          "type": "boolean",
+          "default": true
+        },
+        "raw_query_stored": {
+          "type": "boolean",
+          "default": false
+        },
+        "provider_is_source_of_truth": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "error_code": {

@@ -2,6 +2,10 @@
   "name": "ReferenceImage",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "original_image_url": {
       "type": "string",
       "description": "Original uploaded reference image"

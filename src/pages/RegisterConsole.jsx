@@ -18,7 +18,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,11 +38,17 @@ import NoBatchBanner from "@/components/nups/register/NoBatchBanner";
 import BatchConfirmControl from "@/components/nups/register/BatchConfirmControl";
 import RegisterStatusHeader from "@/components/nups/register/RegisterStatusHeader";
 import RecentTransactionsStrip from "@/components/nups/register/RecentTransactionsStrip";
+import POSFloatingActionMenu from "@/components/nups/register/POSFloatingActionMenu";
+import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 import { useAdminOverride } from "@/lib/nups/adminView";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { scopeRowsToOperatingMode } from "@/lib/nups/operatingMode";
 
 // One home per feature (Section 1 audit, 2026-07-21): the Register console
 // is the TILL only. Drivers, Receipts, Talent Check-In and Staff Clock each
@@ -104,11 +110,16 @@ const STAFF_TAB_ACCESS = {
 
 function RegisterConsoleInner() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("register");
+  const [quickAction, setQuickAction] = useState(null);
   const [user, setUser] = useState(null);
   const [operator, setOperator] = useState(null);
   const [showSeedDialog, setShowSeedDialog] = useState(false);
   const adminOverride = useAdminOverride();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeState = useNUPSOperatingMode(venueId);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -157,20 +168,48 @@ function RegisterConsoleInner() {
     }
   }, [user, operator, adminOverride]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
   const { data: batches = [] } = useQuery({
-    queryKey: ["active-pos-batch"],
+    queryKey: ["active-pos-batch", venueId, ...modeQueryKey],
     queryFn: async () => {
-      const all = await base44.entities.POSBatch.list("-created_date", 5);
-      return all.filter((b) => (b.status || "open").toLowerCase() === "open");
+      const all = await base44.entities.POSBatch.filter({ status: "open" }, "-created_date", 100);
+      return scopeRowsToOperatingMode(all, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
     },
     refetchInterval: 30000,
   });
   const activeBatch = batches[0];
 
+  const handleQuickAction = async (action) => {
+    if (action !== "update") {
+      setQuickAction(action);
+      return;
+    }
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["pos-products"] }),
+      queryClient.invalidateQueries({ queryKey: ["pos-customers"] }),
+      queryClient.invalidateQueries({ queryKey: ["active-batch"] }),
+      queryClient.invalidateQueries({ queryKey: ["active-pos-batch"] }),
+    ]);
+    toast.success("Register data updated");
+  };
+
   // Transactions feed — only fetched for the Audit tab.
   const { data: transactions = [] } = useQuery({
-    queryKey: ["pos-transactions-receipts"],
-    queryFn: () => base44.entities.POSTransaction.list("-created_date", 100),
+    queryKey: ["pos-transactions-receipts", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.POSTransaction.list("-created_date", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     enabled: activeTab === "audit",
     staleTime: 30000,
   });
@@ -178,11 +217,11 @@ function RegisterConsoleInner() {
   return (
     <NUPSAppShell
       title="Register · POS"
-      subtitle="POS Terminal · Active batch · Live ring-up"
+      subtitle={`${modeState.operatingMode} POS Terminal · ${activeVenue?.name || activeVenue?.venue_name || "Selected venue"}`}
       actions={
         <div className="flex items-center gap-2">
           <BatchStatusBadge batch={activeBatch} />
-          {(isManagerOrAdmin || ["MANAGER", "VENUE_MANAGER"].includes(opRole)) && (
+          {(isManagerOrAdmin || ["MANAGER", "VENUE_MANAGER"].includes(opRole)) && modeState.isNonLive && (
           <Button
             onClick={() => setShowSeedDialog(true)}
             size="sm"
@@ -204,7 +243,7 @@ function RegisterConsoleInner() {
             clock, connection. Register type follows the active tab. */}
         {(activeTab === "register" || activeTab === "bar") && (
           <RegisterStatusHeader
-            user={user}
+            user={operator || user}
             batch={activeBatch}
             registerType={activeTab === "bar" ? "Bar" : "Door"}
           />
@@ -255,17 +294,22 @@ function RegisterConsoleInner() {
               (Operator feedback 2026-07-09.) */}
           {activeTab === "register" && (
             <div className="flex flex-col gap-3 sm:gap-4">
-              <NoBatchBanner batch={activeBatch} />
+              <NoBatchBanner batch={activeBatch} operatingMode={modeState.operatingMode} onOpenManager={() => navigate('/ManagerConsole')} />
               {/* Two-step batch open: the MANAGER opens tonight's batch on the
                   Manager Console; the door operator confirms it here before
                   the first transaction. No register-side batch opening. */}
-              <BatchConfirmControl operatorName={operator?.full_name || user?.full_name} />
+              <BatchConfirmControl
+                operatorName={operator?.full_name || user?.full_name || user?.email}
+                operatorRole={operator?.role || user?._highestRole || user?.role}
+                operatorEmail={operator?.email || user?.email}
+                operatorId={operator?.id || user?.id}
+              />
               {/* Till ONLY — guest ID intake lives on 1 · Open Night (no duplicate screens). */}
-              <POSCashRegister showDriverPanel={false} showGuestIntake={false} user={user} station="door" />
-              <RecentTransactionsStrip onViewAll={() => setActiveTab("receipts")} />
+              <POSCashRegister showDriverPanel={false} showGuestIntake={false} user={operator || user} station="door" />
+              <RecentTransactionsStrip onViewAll={() => navigate('/Receipts')} />
             </div>
           )}
-          {activeTab === "bar" && <POSBarRegister user={user} />}
+          {activeTab === "bar" && <POSBarRegister user={operator || user} />}
           {activeTab === "dj" && <UnifiedMusicConsole />}
           {/* Manager/Admin ONLY — permission-gated render, never reachable by
               door/bar/DJ staff even if tab state is forced. */}
@@ -278,6 +322,17 @@ function RegisterConsoleInner() {
           )}
         </div>
       </div>
+
+      {activeTab === "register" && <POSFloatingActionMenu onAction={handleQuickAction} />}
+
+      <Dialog open={quickAction === "scan" || quickAction === "guest"} onOpenChange={(open) => !open && setQuickAction(null)}>
+        <DialogContent className="max-w-3xl max-h-[90dvh] overflow-y-auto bg-slate-950 border-cyan-500/40 text-white">
+          <DialogHeader>
+            <DialogTitle>{quickAction === "scan" ? "Scan Customer ID" : "Guest Registration"}</DialogTitle>
+          </DialogHeader>
+          {quickAction && <GuestCheckIn initialCameraOpen={quickAction === "scan"} />}
+        </DialogContent>
+      </Dialog>
 
       {/* Demo Data dialog — single ON/OFF switch wipes + reseeds DEMO_VENUE_001
           so the operator can walk through a full night in seconds. */}

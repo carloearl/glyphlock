@@ -2,6 +2,10 @@
   "name": "JukeboxRequest",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "guest_session_id": {
       "type": "string"
     },

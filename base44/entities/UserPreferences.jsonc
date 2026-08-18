@@ -2,6 +2,10 @@
   "name": "UserPreferences",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "emailNotifications": {
       "type": "boolean",
       "default": true,
@@ -24,12 +28,12 @@
     },
     "voiceSpeed": {
       "type": "number",
-      "default": 1.0,
+      "default": 1,
       "description": "Voice playback speed"
     },
     "voicePitch": {
       "type": "number",
-      "default": 1.0,
+      "default": 1,
       "description": "Voice pitch adjustment"
     },
     "voiceSettings": {
@@ -46,11 +50,11 @@
         },
         "speed": {
           "type": "number",
-          "default": 1.0
+          "default": 1
         },
         "pitch": {
           "type": "number",
-          "default": 1.0
+          "default": 1
         },
         "naturalness": {
           "type": "number",
@@ -58,7 +62,7 @@
         },
         "volume": {
           "type": "number",
-          "default": 1.0
+          "default": 1
         },
         "bass": {
           "type": "number",
@@ -82,7 +86,7 @@
         },
         "style": {
           "type": "number",
-          "default": 0.0
+          "default": 0
         },
         "useSpeakerBoost": {
           "type": "boolean",

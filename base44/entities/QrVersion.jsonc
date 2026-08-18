@@ -2,6 +2,10 @@
   "name": "QrVersion",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "asset_id": {
       "type": "string"
     },

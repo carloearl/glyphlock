@@ -34,6 +34,9 @@ import LegacyPressPanel from "@/components/nups/LegacyPressPanel";
 import UnifiedContractRegister from "@/components/nups/contracts/UnifiedContractRegister";
 import NUPSRouteGuard from "@/components/nups/NUPSRouteGuard";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { scopeRowsToOperatingMode } from "@/lib/nups/operatingMode";
 
 const TABS = [
   { key: "tonight",      label: "Tonight",      icon: Activity },
@@ -47,8 +50,10 @@ function fmtMoney(n) {
   return "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+function localDateKey(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function StatTile({ label, value, sub, Icon, tone }) {
@@ -74,6 +79,10 @@ export default function ManagerConsole() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("tonight");
   const [user, setUser] = useState(null);
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeState = useNUPSOperatingMode(venueId);
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
@@ -92,64 +101,95 @@ export default function ManagerConsole() {
 
   // ── Live data feeds (manager-relevant only) ────────────────────────
   const { data: staffShifts = [] } = useQuery({
-    queryKey: ["mgr-staff-shifts"],
-    queryFn: () => base44.entities.StaffShift.list("-check_in_time", 100),
+    queryKey: ["mgr-staff-shifts", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.StaffShift.list("-check_in_time", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     refetchInterval: 30000,
   });
   const { data: entShifts = [] } = useQuery({
-    queryKey: ["mgr-ent-shifts"],
-    queryFn: () => base44.entities.EntertainerShift.list("-check_in_time", 100),
+    queryKey: ["mgr-ent-shifts", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.EntertainerShift.list("-check_in_time", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     refetchInterval: 30000,
   });
   const { data: txns = [] } = useQuery({
-    queryKey: ["mgr-pos-today"],
-    queryFn: () => base44.entities.POSTransaction.list("-created_date", 500),
+    queryKey: ["mgr-pos-today", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.POSTransaction.list("-created_date", 2000);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     refetchInterval: 30000,
   });
   // Sealed VIP Show contracts — THE authoritative contract record.
   // Legacy VenueContract quick-create is retired from this console.
   const { data: contracts = [] } = useQuery({
-    queryKey: ["mgr-sealed-contracts"],
-    queryFn: () => base44.entities.VIPShowContract.list("-executed_at", 200),
+    queryKey: ["mgr-sealed-contracts", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.VIPShowContract.list("-executed_at", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
   });
   // Tonight's POS batch — opened HERE (manager-only), then confirmed at the
   // Front Door register before the first transaction of the shift.
   const { data: openBatches = [] } = useQuery({
-    queryKey: ["active-pos-batch"],
+    queryKey: ["active-pos-batch", venueId, ...modeQueryKey],
     queryFn: async () => {
-      const all = await base44.entities.POSBatch.list("-created_date", 5);
-      return all.filter((b) => (b.status || "open").toLowerCase() === "open");
+      const rows = await base44.entities.POSBatch.filter({ status: "open" }, "-created_date", 100);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
     },
     refetchInterval: 30000,
   });
   const activeBatch = openBatches[0];
 
-  const today = todayISO();
+  const today = localDateKey();
 
-  // REAL-mode records only — TEST/DEMO/SANDBOX shifts must never surface
-  // on the live manager console (DACO mode separation).
-  const isReal = (r) => !r.mode || r.mode === "REAL";
+  // Queries above are already isolated to current venue + operating mode.
   const activeStaff = useMemo(
-    () => staffShifts.filter(s => s.status === "checked_in" && isReal(s)),
+    () => staffShifts.filter(s => s.status === "checked_in"),
     [staffShifts]
   );
   const activeEntertainers = useMemo(
-    () => entShifts.filter(s => !s.check_out_time && isReal(s)),
+    () => entShifts.filter(s => !s.check_out_time),
     [entShifts]
   );
   const todaysTxns = useMemo(
-    () => txns.filter(t => !t.validation_run && t.status === "completed" && (t.created_date || "").slice(0, 10) === today),
+    () => txns.filter(t => t.status === "completed" && localDateKey(t.created_date) === today),
     [txns, today]
   );
   const tonightGross = todaysTxns.reduce((s, t) => s + (Number(t.total) || 0), 0);
-  // REAL-mode sealed records only; every sealed record is executed/signed.
-  const realContracts = useMemo(
-    () => contracts.filter(c => !c.mode || c.mode === "REAL"),
-    [contracts]
-  );
+  const currentContracts = contracts;
   const todaysContracts = useMemo(
-    () => realContracts.filter(c => (c.executed_at || c.created_date || "").slice(0, 10) === today),
-    [realContracts, today]
+    () => currentContracts.filter(c => localDateKey(c.executed_at || c.created_date) === today),
+    [currentContracts, today]
   );
   const signedToday = todaysContracts.length;
 
@@ -159,7 +199,12 @@ export default function ManagerConsole() {
       {/* Batch control — managers open tonight's batch here. The Front Door
           then confirms it at the register before the first ring-up. */}
       {!activeBatch ? (
-        <OpenBatchControl cashierName={user?.full_name || user?.email || "Manager"} />
+        <OpenBatchControl
+          cashierName={user?.full_name || user?.email || "Manager"}
+          cashierEmail={user?.email}
+          cashierId={user?.id}
+          cashierRole={user?._highestRole || user?.role || "VENUE_MANAGER"}
+        />
       ) : (
         <div className={`flex items-center gap-3 rounded-xl border p-3 ${
           activeBatch.door_confirmed
@@ -183,7 +228,7 @@ export default function ManagerConsole() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatTile label="Staff on Clock"        value={activeStaff.length}        Icon={Clock}      tone="cyan" />
         <StatTile label="Entertainers on Floor" value={activeEntertainers.length} Icon={Music}      tone="violet" />
-        <StatTile label="Gross Sales Tonight"   value={fmtMoney(tonightGross)}    Icon={DollarSign} tone="emerald" sub={`${todaysTxns.length} transactions`} />
+        <StatTile label={`${modeState.operatingMode} Sales Tonight`} value={fmtMoney(tonightGross)} Icon={DollarSign} tone="emerald" sub={`${todaysTxns.length} transactions${modeState.isNonLive ? " · funds off" : ""}`} />
         <StatTile label="Contracts Signed"      value={signedToday}               Icon={FileText}   tone="amber"   sub={`${todaysContracts.length} created today`} />
       </div>
 
@@ -301,7 +346,7 @@ export default function ManagerConsole() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <StatTile label="Sealed Today" value={todaysContracts.length} Icon={FileText} tone="amber" />
         <StatTile label="Contract Value Today" value={fmtMoney(todaysContracts.reduce((s, c) => s + (Number(c.total) || 0), 0))} Icon={ShieldCheck} tone="emerald" />
-        <StatTile label="All Sealed Contracts" value={realContracts.length} Icon={Activity} tone="violet" />
+        <StatTile label={`All ${modeState.operatingMode} Contracts`} value={currentContracts.length} Icon={Activity} tone="violet" />
       </div>
 
       {/* Every agreement — VIP Show, VIP, Venue and Entertainer — in one register. */}
@@ -364,7 +409,7 @@ export default function ManagerConsole() {
      <RoleClassGuard allow={["MANAGER", "ADMIN"]}>
       <NUPSAppShell
         title="Manager Console"
-        subtitle="Floor ops · Onboarding · Live oversight"
+        subtitle={`${modeState.operatingMode} floor ops · ${activeVenue?.name || activeVenue?.venue_name || "Selected venue"}`}
         role="VENUE_MANAGER"
       >
         <div className="max-w-[1600px] mx-auto space-y-4">

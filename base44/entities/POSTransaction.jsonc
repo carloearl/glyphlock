@@ -109,6 +109,20 @@
       ],
       "default": "completed"
     },
+    "refund_reference": {
+      "type": "string",
+      "description": "Processor/terminal/cash-return reference supplied when the refund is completed."
+    },
+    "refund_reason": {
+      "type": "string"
+    },
+    "refunded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "refunded_by": {
+      "type": "string"
+    },
     "station": {
       "type": "string",
       "enum": [
@@ -128,7 +142,16 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "Ledger mode. REAL writes to live books."
+      "description": "Ledger mode. REAL writes to live books; DEMO/SANDBOX are funds-off."
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Explicit cleanup/isolation marker. True for DEMO, TRAINING, and SANDBOX records."
+    },
+    "training_session_id": {
+      "type": "string",
+      "description": "Session boundary for guided TRAINING mode, which persists on the DEMO ledger."
     },
     "validation_run": {
       "type": "boolean",
@@ -179,6 +202,14 @@
     },
     "auth_code": {
       "type": "string"
+    },
+    "payment_source": {
+      "type": "string",
+      "description": "How tender approval was captured (external terminal confirmation, provider integration, or training simulation)."
+    },
+    "payment_confirmed_at": {
+      "type": "string",
+      "format": "date-time"
     },
     "cash_tendered": {
       "type": "number"

@@ -13,8 +13,18 @@
  * Clearing filters on `notes` prefix so we never delete real rows.
  */
 import { base44 } from "@/api/base44Client";
+import { LEDGER_MODE, stampOperationalRecord } from "./operatingMode";
 
 const DEMO_TAG = "[DEMO]";
+const DEMO_VENUE_ID = "DEMO_VENUE_001";
+
+const demoRecord = (record, venueId = DEMO_VENUE_ID, transactional = false) =>
+  stampOperationalRecord(record, {
+    ledgerMode: LEDGER_MODE.DEMO,
+    venueId,
+    supportsDemoFlag: true,
+    transactional,
+  });
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 // ── Venue Performance / Today's Summary ─────────────────────────────────
@@ -32,7 +42,7 @@ export async function seedVenuePerformance() {
       const total = 50 + Math.floor(Math.random() * 400);
       const cash = Math.random() > 0.5 ? total : 0;
       const card = cash === 0 ? total : 0;
-      rows.push({
+      rows.push(demoRecord({
         transaction_id: `DEMO-${v.id}-${i}`,
         items: [{ product_name: v.name + " Cover", quantity: 1, price: total, total }],
         subtotal: total,
@@ -43,14 +53,11 @@ export async function seedVenuePerformance() {
         payment_method: cash ? "Cash" : "Credit Card",
         status: "completed",
         station: "door",
-        mode: "REAL",
-        validation_run: false,
-        funds_settled: true,
         venue_id: v.id,
         cashier_name: "Demo Cashier",
         notes: `${DEMO_TAG} venue-performance`,
         created_date: new Date(now - Math.floor(Math.random() * 6 * 3600 * 1000)).toISOString(),
-      });
+      }, v.id, true));
     }
   });
   await base44.entities.POSTransaction.bulkCreate(rows);
@@ -59,7 +66,7 @@ export async function seedVenuePerformance() {
 export async function clearVenuePerformance() {
   const all = await base44.entities.POSTransaction.list("-created_date", 500);
   const demoIds = all
-    .filter((t) => (t.notes || "").startsWith(DEMO_TAG))
+    .filter((t) => t.mode === "DEMO" && t.is_demo === true && (t.notes || "").startsWith(DEMO_TAG))
     .map((t) => t.id);
   for (const id of demoIds) {
     await base44.entities.POSTransaction.delete(id);
@@ -74,22 +81,22 @@ export async function seedDrivers() {
     { name: "Demo Driver — Outside Tom", phone: "555-0103", affiliated: false },
   ];
   for (const d of drivers) {
-    await base44.entities.DriverProfile.create({
+    await base44.entities.DriverProfile.create(demoRecord({
       driver_id: `DEMO-DRV-${Math.random().toString(36).slice(2, 8)}`,
-      venue_id: "DEMO_VENUE_001",
+      venue_id: DEMO_VENUE_ID,
       name: d.name,
       phone: d.phone,
       affiliated: d.affiliated,
       status: "active",
       notes: `${DEMO_TAG} driver-roster`,
-    });
+    }));
   }
 }
 
 export async function clearDrivers() {
   const all = await base44.entities.DriverProfile.list("-created_date", 500);
   const demoIds = all
-    .filter((d) => (d.notes || "").startsWith(DEMO_TAG))
+    .filter((d) => d.mode === "DEMO" && d.is_demo === true && (d.notes || "").startsWith(DEMO_TAG))
     .map((d) => d.id);
   for (const id of demoIds) await base44.entities.DriverProfile.delete(id);
 }
@@ -102,9 +109,9 @@ export async function seedGuests() {
     { first: "James",   last: "Walker",   dob: "1990-11-22" },
   ];
   for (const g of guests) {
-    await base44.entities.GuestProfile.create({
+    await base44.entities.GuestProfile.create(demoRecord({
       guest_id: `DEMO-GST-${Math.random().toString(36).slice(2, 10)}`,
-      venue_id: "DEMO_VENUE_001",
+      venue_id: DEMO_VENUE_ID,
       first_name: g.first,
       last_name: g.last,
       dob: g.dob,
@@ -115,14 +122,14 @@ export async function seedGuests() {
       first_visit_at: new Date().toISOString(),
       last_visit_at: new Date().toISOString(),
       notes: `${DEMO_TAG} guest-roster`,
-    });
+    }));
   }
 }
 
 export async function clearGuests() {
   const all = await base44.entities.GuestProfile.list("-created_date", 500);
   const demoIds = all
-    .filter((g) => (g.notes || "").startsWith(DEMO_TAG))
+    .filter((g) => g.mode === "DEMO" && (g.notes || "").startsWith(DEMO_TAG))
     .map((g) => g.id);
   for (const id of demoIds) await base44.entities.GuestProfile.delete(id);
 }
@@ -136,24 +143,25 @@ export async function seedDriverPayouts() {
     { name: "Demo Driver — Tom",   drops: 2, total: 40  },
   ];
   for (const p of payouts) {
-    await base44.entities.DriverPayout.create({
+    await base44.entities.DriverPayout.create(demoRecord({
       driver_name: p.name,
       driver_number: "555-0000",
       driver_code: `DEMO-${Math.random().toString(36).slice(2, 8)}`,
+      venue_id: DEMO_VENUE_ID,
       session_date: today,
       total_drops: p.drops,
       total_payout: p.total,
       status: "open",
       payout_status: "PENDING",
       notes: `${DEMO_TAG} driver-payouts`,
-    });
+    }));
   }
 }
 
 export async function clearDriverPayouts() {
   const all = await base44.entities.DriverPayout.list("-created_date", 500);
   const demoIds = all
-    .filter((p) => (p.notes || "").startsWith(DEMO_TAG))
+    .filter((p) => p.mode === "DEMO" && p.is_demo === true && (p.notes || "").startsWith(DEMO_TAG))
     .map((p) => p.id);
   for (const id of demoIds) await base44.entities.DriverPayout.delete(id);
 }

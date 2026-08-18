@@ -2,6 +2,10 @@
   "name": "HotspotMap",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "map_id": {
       "type": "string",
       "description": "Unique map identifier"

@@ -6,7 +6,6 @@ import NebulaLayer from "@/components/global/NebulaLayer";
 import CursorOrb from "@/components/global/CursorOrb";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import GlyphLoader from "@/components/GlyphLoader";
 import UnifiedSidebar from "@/components/global/UnifiedSidebar";
 import ThemeProvider from "@/components/ThemeProvider";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
@@ -19,9 +18,17 @@ import ScreenReaderAnnouncer from "@/components/accessibility/ScreenReaderAnnoun
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [a11yOpen, setA11yOpen] = useState(false);
+  const [ambientReady, setAmbientReady] = useState(false);
   const location = useLocation();
+
+
+  useEffect(() => {
+    const schedule = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 500));
+    const cancel = window.cancelIdleCallback || window.clearTimeout;
+    const id = schedule(() => setAmbientReady(true));
+    return () => cancel(id);
+  }, []);
 
 
   useEffect(() => {
@@ -34,8 +41,6 @@ export default function Layout({ children, currentPageName }) {
         }
       } catch (err) {
         console.error("Failed to get user:", err);
-      } finally {
-        setLoading(false);
       }
     })();
   }, []);
@@ -91,9 +96,6 @@ export default function Layout({ children, currentPageName }) {
   }, [location.pathname]);
 
 
-  if (loading) return <GlyphLoader text="Initializing Secure Environment..." />;
-
-
   const handleLogout = async () => {
     try {
       await base44.auth.logout();
@@ -133,7 +135,7 @@ export default function Layout({ children, currentPageName }) {
         }}
         aria-hidden="true"
       >
-        <NebulaLayer intensity={1.45} />
+        {ambientReady && <NebulaLayer intensity={1.45} />}
         <CursorOrb />
       </div>
 

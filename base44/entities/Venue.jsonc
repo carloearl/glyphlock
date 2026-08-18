@@ -2,6 +2,10 @@
   "name": "Venue",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "venue_id": {
       "type": "string",
       "description": "Unique venue identifier"
@@ -62,7 +66,7 @@
         18,
         21
       ],
-      "description": "SECTION 5A \u2014 Venue minimum age requirement. 18 or 21. Default 21 if not set. Used by all contract gates."
+      "description": "SECTION 5A — Venue minimum age requirement. 18 or 21. Default 21 if not set. Used by all contract gates."
     },
     "bar_enabled": {
       "type": "boolean",

@@ -2,13 +2,17 @@
   "name": "ComponentRegistry",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "component_name": {
       "type": "string",
       "description": "PascalCase component name matching file path"
     },
     "purpose": {
       "type": "string",
-      "description": "What this component does \u2014 one sentence"
+      "description": "What this component does — one sentence"
     },
     "used_by": {
       "type": "string",

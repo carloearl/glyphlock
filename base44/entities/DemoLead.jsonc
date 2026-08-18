@@ -2,6 +2,10 @@
   "name": "DemoLead",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "full_name": {
       "type": "string",
       "description": "Prospect full name"
@@ -108,16 +112,20 @@
     "session_token"
   ],
   "rls": {
-    "create": true,
+    "create": null,
     "read": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "sales_manager"
-          ]
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "sales_manager"
+          }
         }
-      }
+      ]
     },
     "update": {
       "user_condition": {

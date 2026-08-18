@@ -2,6 +2,10 @@
   "name": "GlyphBucksBill",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "serial_number": {
       "type": "string",
       "description": "Unique 12-digit serial number"

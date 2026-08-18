@@ -114,16 +114,17 @@ export default function KioskShell({ children }) {
   return (
     <div className="min-h-screen bg-black text-white">
       {showOperationalChrome && (
-        <div className="sticky top-0 z-50 flex items-center justify-between gap-2 px-4 py-2 bg-gradient-to-r from-slate-950 via-blue-950/40 to-slate-950 border-b border-cyan-500/20 backdrop-blur">
+        <div className="sticky top-0 z-50 flex items-center justify-between gap-2 px-2 sm:px-4 py-2 bg-gradient-to-r from-slate-950 via-blue-950/40 to-slate-950 border-b border-cyan-500/20 backdrop-blur">
           <div className="min-w-0">
             <GlobalBackButton inline />
           </div>
           <button
             onClick={() => setShowExit(true)}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-red-600/15 border border-red-500/40 text-red-300 text-xs font-bold hover:bg-red-600/25 transition-colors"
+            className="inline-flex min-h-[44px] items-center gap-2 px-3 py-1.5 rounded-md bg-red-600/15 border border-red-500/40 text-red-300 text-xs font-bold hover:bg-red-600/25 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
-            Exit (Manager PIN)
+            <span className="sm:hidden">Exit</span>
+            <span className="hidden sm:inline">Exit (Manager PIN)</span>
           </button>
         </div>
       )}

@@ -63,6 +63,7 @@ import CommandCenter from './pages/CommandCenter';
 import Consultation from './pages/Consultation';
 import ConsultationSuccess from './pages/ConsultationSuccess';
 import Contact from './pages/Contact';
+import CodeOfEthics from './pages/CodeOfEthics';
 import ContentGenerator from './pages/ContentGenerator';
 import ContractArchive from './pages/ContractArchive';
 import ContractSearch from './pages/ContractSearch';
@@ -89,11 +90,9 @@ import Mobile from './pages/Mobile';
 import NISTChallenge from './pages/NISTChallenge';
 import NUPSAudit from './pages/NUPSAudit';
 import NUPSDemoManager from './pages/NUPSDemoManager';
-import NUPSGateway from './pages/NUPSGateway';
 import NUPSInfrastructurePage from './pages/NUPSInfrastructurePage';
 import OHIPReadiness from './pages/OHIPReadiness';
 import NUPSLanding from './pages/NUPSLanding';
-import NUPSLogin from './pages/NUPSLogin';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSPostLogin from './pages/NUPSPostLogin';
 import NUPSReport from './pages/NUPSReport';
@@ -108,7 +107,7 @@ import Pricing from './pages/Pricing';
 import Privacy from './pages/Privacy';
 import ProjectUpdates from './pages/ProjectUpdates';
 import ProviderConsole from './pages/ProviderConsole';
-import Qr from './pages/Qr';
+import SecureQRStudio from './pages/SecureQRStudio';
 import Roadmap from './pages/Roadmap';
 import Robots from './pages/Robots';
 import SDKDocs from './pages/SDKDocs';
@@ -157,6 +156,7 @@ export const PAGES = {
     "Consultation": Consultation,
     "ConsultationSuccess": ConsultationSuccess,
     "Contact": Contact,
+    "CodeOfEthics": CodeOfEthics,
     "ContentGenerator": ContentGenerator,
     "ContractArchive": ContractArchive,
     "ContractSearch": ContractSearch,
@@ -183,11 +183,9 @@ export const PAGES = {
     "NISTChallenge": NISTChallenge,
     "NUPSAudit": NUPSAudit,
     "NUPSDemoManager": NUPSDemoManager,
-    "NUPSGateway": NUPSGateway,
     "NUPSInfrastructurePage": NUPSInfrastructurePage,
     "OHIPReadiness": OHIPReadiness,
     "NUPSLanding": NUPSLanding,
-    "NUPSLogin": NUPSLogin,
     "NUPSOwner": NUPSOwner,
     "NUPSPostLogin": NUPSPostLogin,
     "NUPSReport": NUPSReport,
@@ -202,7 +200,7 @@ export const PAGES = {
     "Privacy": Privacy,
     "ProjectUpdates": ProjectUpdates,
     "ProviderConsole": ProviderConsole,
-    "Qr": Qr,
+    "SecureQRStudio": SecureQRStudio,
     "Roadmap": Roadmap,
     "Robots": Robots,
     "SDKDocs": SDKDocs,

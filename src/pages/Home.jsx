@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -26,23 +26,27 @@ import {
 import SEOHead from '@/components/SEOHead';
 import { createPageUrl } from '@/utils';
 import HeroSection from '@/components/home/HeroSection';
-import FlagshipNUPSShowcase from '@/components/home/FlagshipNUPSShowcase';
-import FeaturedIntegrationsMarquee from '@/components/home/FeaturedIntegrationsMarquee';
-import HomeDreamTeamCTA from '@/components/home/HomeDreamTeamCTA';
-import ServicesGrid from '@/components/home/ServicesGrid';
-import TechnologyMarquee from '@/components/TechnologyMarquee';
-import TechServicesPreview from '@/components/home/TechServicesPreview';
-import OnSiteServices from '@/components/home/OnSiteServices';
-import PlatformCapabilities from '@/components/home/PlatformCapabilities';
-import CTASection from '@/components/home/CTASection';
+import DreamTeamBallButton from '@/components/home/DreamTeamBallButton';
 import GlyphHoverEngine from '@/components/home/GlyphHoverEngine';
-import InteractiveSystemMap from '@/components/home/InteractiveSystemMap';
+import DeferredRender from '@/components/shared/DeferredRender';
+import EcosystemBlueprint from '@/components/home/EcosystemBlueprint';
+
+const FlagshipNUPSShowcase = lazy(() => import('@/components/home/FlagshipNUPSShowcase'));
+const FeaturedIntegrationsMarquee = lazy(() => import('@/components/home/FeaturedIntegrationsMarquee'));
+const HomeDreamTeamCTA = lazy(() => import('@/components/home/HomeDreamTeamCTA'));
+const ServicesGrid = lazy(() => import('@/components/home/ServicesGrid'));
+const TechnologyMarquee = lazy(() => import('@/components/TechnologyMarquee'));
+const TechServicesPreview = lazy(() => import('@/components/home/TechServicesPreview'));
+const OnSiteServices = lazy(() => import('@/components/home/OnSiteServices'));
+const PlatformCapabilities = lazy(() => import('@/components/home/PlatformCapabilities'));
+const CTASection = lazy(() => import('@/components/home/CTASection'));
+const InteractiveSystemMap = lazy(() => import('@/components/home/InteractiveSystemMap'));
 
 const platformModules = [
   {
     icon: Building2,
     title: 'NUPS',
-    status: 'FLAGSHIP · LIVE',
+    status: 'FLAGSHIP · CONTROLLED EVALUATION',
     layer: 'OPERATE',
     evidence: 'Working venue workflows, contracts, POS, reporting and integration surfaces.',
     cta: 'ENTER NUPS',
@@ -53,18 +57,18 @@ const platformModules = [
   {
     icon: QrCode,
     title: 'QR Studio',
-    status: 'CORE · LIVE',
+    status: 'CORE · IMPLEMENTED',
     layer: 'VERIFY',
     evidence: 'Generator, payload, scan, signing and verification workflows available in-product.',
     cta: 'CREATE A GLYPH',
     text: 'Custom payloads, branded codes, scan logging, signing options, verification and vault workflows.',
-    link: 'Qr',
+    link: 'SecureQRStudio',
     accent: '#38bdf8',
   },
   {
     icon: ShieldCheck,
     title: 'Governance Hub',
-    status: 'CORE · LIVE',
+    status: 'CORE · IMPLEMENTED',
     layer: 'GOVERN',
     evidence: 'Published framework, review methodology, documentation and public-claims boundaries.',
     cta: 'EXPLORE GOVERNANCE',
@@ -75,7 +79,7 @@ const platformModules = [
   {
     icon: Bot,
     title: 'GlyphBot',
-    status: 'INTELLIGENCE · LIVE',
+    status: 'INTELLIGENCE · IMPLEMENTED',
     layer: 'INTELLIGENCE',
     evidence: 'Interactive assistant plus research, code-analysis and site-audit workflows.',
     cta: 'ASK GLYPHBOT',
@@ -86,7 +90,7 @@ const platformModules = [
   {
     icon: Image,
     title: 'Image Lab',
-    status: 'CREATIVE · LIVE',
+    status: 'CREATIVE · IMPLEMENTED',
     layer: 'CREATE',
     evidence: 'Image generation, analysis and interactive image tooling available in the platform.',
     cta: 'OPEN IMAGE LAB',
@@ -97,7 +101,7 @@ const platformModules = [
   {
     icon: DollarSign,
     title: 'GlyphLock Financial',
-    status: 'OPERATIONS · LIVE',
+    status: 'OPERATIONS · IMPLEMENTED',
     layer: 'OPERATE',
     evidence: 'Ledger, settlement, payout, reconciliation and reporting surfaces implemented.',
     cta: 'VIEW FINANCIAL',
@@ -108,7 +112,7 @@ const platformModules = [
   {
     icon: Radio,
     title: 'Security Operations',
-    status: 'PROTECT · LIVE',
+    status: 'PROTECT · IMPLEMENTED',
     layer: 'PROTECT',
     evidence: 'Access, activity, audit and security-operations surfaces implemented; hardening continues.',
     cta: 'INSPECT SECURITY',
@@ -119,7 +123,7 @@ const platformModules = [
   {
     icon: Music2,
     title: 'DJ Pro Mixer',
-    status: 'CREATOR · LIVE',
+    status: 'CREATOR · IMPLEMENTED',
     layer: 'CREATE',
     evidence: 'Interactive DJ/audio tooling implemented as a creator and venue-facing surface.',
     cta: 'OPEN THE MIXER',
@@ -151,7 +155,7 @@ const capabilityCards = [
   {
     icon: Gauge,
     title: 'OPERATIONS SOFTWARE',
-    text: 'POS, contracts, scheduling, payouts, roles, reporting, audit logs and live business controls.',
+    text: 'POS, contracts, scheduling, payouts, roles, reporting, audit logs and documented operational controls.',
     accent: '#d946ef',
   },
 ];
@@ -368,12 +372,9 @@ function AIWorkflowIntro() {
               GlyphLock assigns defined roles across research, coding, analysis, review and automation while people remain responsible for decisions, approvals and outcomes.
             </p>
           </div>
-          <Link
-            to={createPageUrl('DreamTeam')}
-            className="gl-energy-button group inline-flex items-center justify-center gap-2 rounded-xl border border-violet-300/60 bg-violet-500/20 px-6 py-4 font-black text-violet-50 shadow-[0_0_32px_rgba(139,92,246,.35)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:bg-violet-400/30 hover:shadow-[0_0_58px_rgba(139,92,246,.62)]"
-          >
-            OPEN DREAM TEAM <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          <div className="flex justify-center lg:justify-end lg:pr-6">
+            <DreamTeamBallButton />
+          </div>
         </div>
       </div>
     </section>
@@ -516,46 +517,50 @@ export default function Home() {
         <CommandRail />
 
         <section id="flagship" className="gl-home-section gl-home-stage relative pt-6 md:pt-10">
-          <FlagshipNUPSShowcase />
+          <DeferredRender minHeight={720}><FlagshipNUPSShowcase /></DeferredRender>
           <BuildStageRail />
         </section>
 
         <section className="relative border-y border-white/10 bg-black/10 py-3 backdrop-blur-sm">
-          <FeaturedIntegrationsMarquee />
+          <DeferredRender minHeight={88}><FeaturedIntegrationsMarquee /></DeferredRender>
         </section>
 
-        <InteractiveSystemMap />
+        <section id="ecosystem-blueprint" className="gl-home-section gl-home-stage relative py-10 md:py-16">
+          <DeferredRender minHeight={620}><EcosystemBlueprint /></DeferredRender>
+        </section>
+
+        <DeferredRender minHeight={760}><InteractiveSystemMap /></DeferredRender>
         <CapabilityGrid />
         <PlatformUniverse />
 
         <AIWorkflowIntro />
         <section className="gl-home-stage relative py-8 md:py-12">
-          <HomeDreamTeamCTA />
+          <DeferredRender minHeight={520}><HomeDreamTeamCTA /></DeferredRender>
         </section>
 
         <section id="services" className="gl-home-section gl-home-stage relative py-8 md:py-14">
-          <ServicesGrid />
+          <DeferredRender minHeight={640}><ServicesGrid /></DeferredRender>
         </section>
 
         <section className="gl-home-stage relative py-4 md:py-10">
-          <PlatformCapabilities />
+          <DeferredRender minHeight={640}><PlatformCapabilities /></DeferredRender>
         </section>
 
         <section className="gl-home-stage relative py-8 md:py-12">
-          <TechServicesPreview />
+          <DeferredRender minHeight={560}><TechServicesPreview /></DeferredRender>
         </section>
 
         <section className="gl-home-stage relative py-8 md:py-12">
-          <OnSiteServices />
+          <DeferredRender minHeight={560}><OnSiteServices /></DeferredRender>
         </section>
 
         <section className="relative py-5 md:py-10">
-          <TechnologyMarquee />
+          <DeferredRender minHeight={100}><TechnologyMarquee /></DeferredRender>
         </section>
 
         <CommandCTA />
         <section className="pb-16 md:pb-24">
-          <CTASection />
+          <DeferredRender minHeight={520}><CTASection /></DeferredRender>
         </section>
 
         <a href="#top" aria-label="Back to top" className="fixed bottom-5 left-5 z-[80] hidden md:flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/30 bg-[#020713]/[.72] backdrop-blur-xl text-cyan-200 shadow-[0_0_25px_rgba(34,211,238,.18)] transition-all hover:-translate-y-1 hover:border-cyan-200/[.65] hover:shadow-[0_0_38px_rgba(34,211,238,.4)]">

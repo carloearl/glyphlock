@@ -1,8 +1,12 @@
 {
   "name": "GlyphBotActivityLog",
   "type": "object",
-  "description": "DACO GLYPHBOT CLOSEOUT REV A \u00a72a \u2014 GlyphBot product-domain activity ledger. NOT a NUPS entity: no venue_id, no session_id, no NUPS enum reuse. Direct backend/frontend .create() authorized per Amendment 006-A product-domain precedent. Append-only. DIRECTIVE_RATIFIED added beyond the \u00a72a base enum to carry the \u00a71b ratification row inside this ledger (disclosed deviation).",
+  "description": "DACO GLYPHBOT CLOSEOUT REV A §2a — GlyphBot product-domain activity ledger. NOT a NUPS entity: no venue_id, no session_id, no NUPS enum reuse. Direct backend/frontend .create() authorized per Amendment 006-A product-domain precedent. Append-only. DIRECTIVE_RATIFIED added beyond the §2a base enum to carry the §1b ratification row inside this ledger (disclosed deviation).",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "event_type": {
       "type": "string",
       "enum": [

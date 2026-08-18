@@ -2,6 +2,10 @@
   "name": "ContentAuditRow",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "scan_run_id": {
       "type": "string"
     },
@@ -43,11 +47,25 @@
     "route_path"
   ],
   "rls": {
-    "read": {
-      "role": "admin"
-    },
     "create": {
-      "role": "admin"
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }

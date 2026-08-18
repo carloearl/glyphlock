@@ -2,6 +2,10 @@
   "name": "GlyphBotFeedback",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "message_text": {
       "type": "string",
       "description": "The bot response that was rated"

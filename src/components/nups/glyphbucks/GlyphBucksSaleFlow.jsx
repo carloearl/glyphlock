@@ -7,6 +7,7 @@ import ThumbprintScanner from "./ThumbprintScanner";
 import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
 import { Stamp, Printer, ShieldCheck, Coins, Fingerprint, CreditCard, PenLine, CheckCircle2, FlaskConical, Banknote } from "lucide-react";
 
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 /**
  * DACO §7 — GlyphBucks stored-value sale flow (LIVE).
  * Terms + clickwrap → vouchers/tender → camera ID scan (identity binding) →
@@ -212,7 +213,7 @@ export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrin
       <div className="space-y-4">
         <GlyphBucksReceipt doc={doc} />
         <div className="flex flex-wrap gap-2 justify-center print:hidden">
-          <button onClick={() => window.print()} className="rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 font-bold px-5 py-2.5 min-h-[44px] flex items-center gap-2 transition-all">
+          <button onClick={() => printCurrentNupsView()} className="rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 font-bold px-5 py-2.5 min-h-[44px] flex items-center gap-2 transition-all">
             <Printer className="w-4 h-4" /> Print (Legal 8.5×14)
           </button>
           {onPrintBills && (

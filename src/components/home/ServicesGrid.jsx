@@ -6,7 +6,7 @@ import { motion, useInView } from "framer-motion";
 
 /**
  * PHASE 3B SERVICES GRID
- * QR Studio is the ONLY QR link - points to /Qr
+ * QR Studio is the ONLY QR link - points to /SecureQRStudio
  * Hotzone Mapper REMOVED (it's an Image Suite tool, not a security product)
  */
 
@@ -21,7 +21,7 @@ const services = [
   {
     title: "QR Studio",
     description: "Generate custom QR codes with cryptographic signing options, scan logging, and configurable payload checks",
-    link: "Qr",
+    link: "SecureQRStudio",
     image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/ef8ed5e35_ee8d4930-e046-49b0-8beb-87745181d506.jpg",
     icon: Eye
   },

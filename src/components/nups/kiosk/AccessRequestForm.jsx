@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+import { loadMyAccessRequests, submitAccessRequest } from "@/lib/nups/accessRequestClient";
 
 const STATUS_COLORS = {
   PENDING_OWNER_APPROVAL: "bg-amber-600",
@@ -18,9 +19,9 @@ const STATUS_COLORS = {
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §4 — Owner/Admin access request.
 // Requires platform sign-in (verified email). Requests start PENDING_OWNER_APPROVAL
 // and never create active access by themselves.
-export default function AccessRequestForm() {
+export default function AccessRequestForm({ requestedMode = "TEST" }) {
   const [authed, setAuthed] = useState(null);
-  const [form, setForm] = useState({ full_legal_name: "", phone: "", requested_role: "ADMINISTRATOR", reason: "" });
+  const [form, setForm] = useState({ full_legal_name: "", phone: "", requested_role: "ENTERTAINER", reason: "", mode: requestedMode });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [myRequests, setMyRequests] = useState([]);
@@ -30,8 +31,7 @@ export default function AccessRequestForm() {
       const ok = await base44.auth.isAuthenticated();
       setAuthed(ok);
       if (ok) {
-        const res = await base44.functions.invoke("nupsAccessControl", { action: "myStatus" });
-        setMyRequests(res.data?.requests || []);
+        setMyRequests(await loadMyAccessRequests());
       }
     })();
   }, []);
@@ -40,11 +40,11 @@ export default function AccessRequestForm() {
     setBusy(true);
     setError("");
     try {
-      const res = await base44.functions.invoke("nupsAccessControl", { action: "submitRequest", ...form });
-      setMyRequests([res.data.request, ...myRequests]);
-      setForm({ full_legal_name: "", phone: "", requested_role: "ADMINISTRATOR", reason: "" });
+      const request = await submitAccessRequest(form);
+      setMyRequests([request, ...myRequests]);
+      setForm({ full_legal_name: "", phone: "", requested_role: "ENTERTAINER", reason: "", mode: requestedMode });
     } catch (e) {
-      setError(e?.response?.data?.error || "Unable to submit request.");
+      setError(e?.response?.data?.error || e?.message || "Unable to submit request.");
     } finally {
       setBusy(false);
     }
@@ -56,7 +56,7 @@ export default function AccessRequestForm() {
     return (
       <div className="text-center space-y-4">
         <p className="text-slate-400 text-sm">Verify your email by signing in before requesting access.</p>
-        <Button onClick={() => base44.auth.redirectToLogin("/NUPSKiosk?panel=request")} className="w-full h-14 bg-cyan-700 hover:bg-cyan-600">
+        <Button onClick={() => base44.auth.redirectToLogin(`/NUPSKiosk?panel=${requestedMode === "DEMO" ? "trainingRequest" : "testRequest"}`)} className="w-full h-14 bg-cyan-700 hover:bg-cyan-600">
           Sign In to Continue
         </Button>
       </div>
@@ -67,11 +67,14 @@ export default function AccessRequestForm() {
 
   return (
     <div className="space-y-4">
+      <div className={`rounded-lg border px-3 py-2 text-center text-xs font-bold tracking-wide ${requestedMode === "DEMO" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-indigo-500/40 bg-indigo-500/10 text-indigo-300"}`}>
+        {requestedMode === "DEMO" ? "TRAINING ACCESS REQUEST" : "TEST ACCESS REQUEST"}
+      </div>
       {myRequests.length > 0 && (
         <div className="space-y-2">
           {myRequests.map((r) => (
             <div key={r.id} className="p-3 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-between gap-2">
-              <div className="text-sm text-slate-300">{r.requested_role} — {new Date(r.created_date).toLocaleDateString()}</div>
+              <div className="text-sm text-slate-300">{r.requested_role} · {r.mode === "DEMO" ? "TRAINING" : r.mode || "TEST"} — {new Date(r.created_date).toLocaleDateString()}</div>
               <Badge className={`${STATUS_COLORS[r.status] || "bg-slate-600"} text-white`}>{r.status.replaceAll("_", " ")}</Badge>
             </div>
           ))}
@@ -83,8 +86,8 @@ export default function AccessRequestForm() {
             onChange={(e) => setForm({ ...form, full_legal_name: e.target.value })} className="h-12 bg-slate-900 border-slate-700 text-white" />
           <Input placeholder="Mobile number" value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-12 bg-slate-900 border-slate-700 text-white" />
-          <div className="grid grid-cols-2 gap-2">
-            {["ADMINISTRATOR", "OWNER"].map((r) => (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {["ENTERTAINER", "ADMINISTRATOR", "OWNER"].map((r) => (
               <button key={r} onClick={() => setForm({ ...form, requested_role: r })}
                 className={`h-12 rounded-lg border text-sm font-semibold ${form.requested_role === r ? "bg-violet-700 border-violet-500 text-white" : "bg-slate-900 border-slate-700 text-slate-400"}`}>
                 {r}
@@ -99,7 +102,7 @@ export default function AccessRequestForm() {
             {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : "Submit Access Request"}
           </Button>
           <p className="text-xs text-slate-500 text-center">
-            Requests are reviewed by the venue Owner. Approval is required before any back-office access is granted.
+            Requests are reviewed by the venue Owner. Approval is required before any NUPS site access is granted.
           </p>
         </>
       )}

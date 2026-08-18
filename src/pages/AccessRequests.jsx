@@ -69,7 +69,7 @@ export default function AccessRequests() {
       <header className="flex items-center gap-3 mb-6">
         <ShieldCheck className="w-7 h-7 text-violet-400" />
         <div>
-          <h1 className="text-xl font-bold">Owner / Admin Access Requests</h1>
+          <h1 className="text-xl font-bold">NUPS Access Requests</h1>
           <p className="text-sm text-slate-500">Approval authority: Carlo Earl only. Self-approval is blocked server-side.</p>
         </div>
       </header>
@@ -88,6 +88,7 @@ export default function AccessRequests() {
               <Badge className="bg-slate-700 text-white">{r.requested_role}</Badge>
               <Badge className={`${STATUS_COLORS[r.status] || "bg-slate-600"} text-white`}>{r.status.replaceAll("_", " ")}</Badge>
               {r.mode === "TEST" && <Badge className="bg-amber-700 text-white">TEST</Badge>}
+              {r.mode === "DEMO" && <Badge className="bg-emerald-700 text-white">TRAINING</Badge>}
             </div>
             <p className="text-sm text-slate-400 mb-1">{r.reason}</p>
             <p className="text-xs text-slate-600">
@@ -98,6 +99,7 @@ export default function AccessRequests() {
             <div className="flex flex-wrap gap-2 mt-3">
               {canDecide && ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status) && (
                 <>
+                  {r.requested_role === "ENTERTAINER" && <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ENTERTAINER")} className="bg-pink-700 hover:bg-pink-600 min-h-[44px]">Approve as Entertainer</Button>}
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ADMIN")} className="bg-emerald-700 hover:bg-emerald-600 min-h-[44px]">Approve as Administrator</Button>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_OWNER")} className="bg-violet-700 hover:bg-violet-600 min-h-[44px]">Approve as Owner</Button>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REJECT")} variant="destructive" className="min-h-[44px]">Reject</Button>

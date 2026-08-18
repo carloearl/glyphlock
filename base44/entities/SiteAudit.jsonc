@@ -2,6 +2,10 @@
   "name": "SiteAudit",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "audit_type": {
       "type": "string",
       "enum": [

@@ -2,6 +2,10 @@
   "name": "GlyphBotMemory",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "topics_discussed": {
       "type": "array",
       "items": {

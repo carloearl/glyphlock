@@ -2,6 +2,10 @@
   "name": "VerificationToken",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "token_id": {
       "type": "string",
       "description": "Unique verification token identifier"

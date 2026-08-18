@@ -1,87 +1,85 @@
-// DACO VIP SHOW CONTRACT SYSTEM v2 — ANCHOR COMPLETION / RETRY (cron-safe)
-// Re-submits any record stuck in ANCHOR_PENDING_SERVER or ANCHOR_FAILED_RETRY
-// to the OpenTimestamps Bitcoin calendars. Runs on a 15-minute schedule.
-// Anchor lifecycle: ANCHOR_PENDING_SERVER → ANCHOR_SUBMITTED → (offline OTS
-// upgrade) BITCOIN_ATTESTED(block_height). The .ots proof_b64 is stored
-// unmodified — it is the cryptographic evidence.
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-
-const OTS_CALENDARS = [
-  'https://alice.btc.calendar.opentimestamps.org/digest',
-  'https://bob.btc.calendar.opentimestamps.org/digest',
-  'https://a.pool.opentimestamps.org/digest',
-];
-
-function hexToBytes(hex: string): Uint8Array {
-  const out = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
-  return out;
-}
-
-function bytesToB64(bytes: Uint8Array): string {
-  let bin = '';
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
-}
-
-async function anchorDigest(chainSealHex: string) {
-  for (const cal of OTS_CALENDARS) {
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 8000);
-      const res = await fetch(cal, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/vnd.opentimestamps.v1' },
-        body: hexToBytes(chainSealHex),
-        signal: ctrl.signal,
-      });
-      clearTimeout(t);
-      if (!res.ok) throw new Error('OTS calendar HTTP ' + res.status);
-      const proof = new Uint8Array(await res.arrayBuffer());
-      return {
-        status: 'ANCHOR_SUBMITTED',
-        protocol: 'OpenTimestamps→Bitcoin',
-        calendar: cal,
-        proof_b64: bytesToB64(proof),
-        submitted_at: new Date().toISOString(),
-        note: 'Pending Bitcoin attestation; upgrade proof via OTS client to obtain block height.',
-      };
-    } catch (_e) { /* try next calendar */ }
-  }
-  return { status: 'ANCHOR_FAILED_RETRY', protocol: 'OpenTimestamps→Bitcoin' };
-}
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    // Automation runs without a user session; direct invocations require admin.
+    const calendars = [
+      'https://alice.btc.calendar.opentimestamps.org/digest',
+      'https://bob.btc.calendar.opentimestamps.org/digest',
+      'https://a.pool.opentimestamps.org/digest',
+    ];
+    const hexToBytes = (hex) => {
+      const bytes = new Uint8Array(hex.length / 2);
+      for (let index = 0; index < bytes.length; index += 1) {
+        bytes[index] = parseInt(hex.slice(index * 2, index * 2 + 2), 16);
+      }
+      return bytes;
+    };
+    const bytesToB64 = (bytes) => {
+      let binary = '';
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      return btoa(binary);
+    };
+    const anchorDigest = async (chainSealHex) => {
+      for (const calendar of calendars) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        try {
+          const response = await fetch(calendar, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/vnd.opentimestamps.v1' },
+            body: hexToBytes(chainSealHex),
+            signal: controller.signal,
+          });
+          if (!response.ok) continue;
+          const proof = new Uint8Array(await response.arrayBuffer());
+          return {
+            status: 'ANCHOR_SUBMITTED',
+            protocol: 'OpenTimestamps→Bitcoin',
+            calendar,
+            proof_b64: bytesToB64(proof),
+            submitted_at: new Date().toISOString(),
+            note: 'Pending Bitcoin attestation; upgrade proof via OTS client to obtain block height.',
+          };
+        } catch (_error) {
+          // Try the next OpenTimestamps calendar.
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+      return { status: 'ANCHOR_FAILED_RETRY', protocol: 'OpenTimestamps→Bitcoin' };
+    };
+
     let user = null;
-    try { user = await base44.auth.me(); } catch (_e) { user = null; }
+    try {
+      user = await base44.auth.me();
+    } catch (_error) {
+      user = null;
+    }
     if (user && user.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const rows = await base44.asServiceRole.entities.VIPShowContract.filter({}, '-executed_at', 500);
-    const pending = rows.filter((r: any) =>
-      r.anchor && ['ANCHOR_PENDING_SERVER', 'ANCHOR_FAILED_RETRY'].includes(r.anchor.status));
+    const pending = rows.filter((record) => record.anchor && ['ANCHOR_PENDING_SERVER', 'ANCHOR_FAILED_RETRY'].includes(record.anchor.status));
+    const results = [];
 
-    const results: any[] = [];
-    for (const rec of pending) {
-      const anchor = await anchorDigest(rec.chain_seal);
-      await base44.asServiceRole.entities.VIPShowContract.update(rec.id, { anchor });
+    for (const record of pending) {
+      const anchor = await anchorDigest(record.chain_seal);
+      await base44.asServiceRole.entities.VIPShowContract.update(record.id, { anchor });
       await base44.asServiceRole.entities.SystemAuditLog.create({
         event_type: 'ANCHOR_COMPLETED',
-        description: `VIP Show Contract ${rec.verify_ref} anchor retry → ${anchor.status}`,
+        description: `VIP Show Contract ${record.verify_ref} anchor retry → ${anchor.status}`,
         actor_email: user?.email || 'automation',
-        resource_id: rec.id,
-        metadata: { verify_ref: rec.verify_ref, anchor_status: anchor.status, calendar: (anchor as any).calendar || null },
+        resource_id: record.id,
+        metadata: { verify_ref: record.verify_ref, anchor_status: anchor.status, calendar: anchor.calendar || null },
         status: anchor.status === 'ANCHOR_SUBMITTED' ? 'success' : 'failure',
       });
-      results.push({ verify_ref: rec.verify_ref, anchor: anchor.status });
+      results.push({ verify_ref: record.verify_ref, anchor: anchor.status });
     }
 
     return Response.json({ ok: true, checked: rows.length, retried: results.length, results });
   } catch (error) {
-    return Response.json({ ok: false, error: (error as Error).message }, { status: 500 });
+    return Response.json({ ok: false, error: error?.message || String(error) }, { status: 500 });
   }
 });

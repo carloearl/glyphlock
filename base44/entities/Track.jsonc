@@ -2,6 +2,10 @@
   "name": "Track",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "title": {
       "type": "string",
       "description": "Track title"

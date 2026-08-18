@@ -2,6 +2,10 @@
   "name": "SecureQRCode",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "qr_id": {
       "type": "string",
       "description": "Unique QR code identifier"

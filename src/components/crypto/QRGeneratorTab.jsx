@@ -2,7 +2,7 @@
  * DEPRECATED COMPONENT - DO NOT USE
  * This component is legacy and has been replaced by the unified QrStudio.jsx
  * Located at: components/qr/QrStudio.jsx
- * Route: /qr
+ * Route: /SecureQRStudio
  * 
  * Kept for reference only - will be removed in future cleanup phase
  */
@@ -28,7 +28,7 @@ export default function QRGeneratorTab() {
     <div className="p-12 text-center">
       <h2 className="text-2xl font-bold text-red-400 mb-4">DEPRECATED COMPONENT</h2>
       <p className="text-gray-400">This component has been replaced by the unified QR Studio.</p>
-      <p className="text-gray-400">Please use /qr route instead.</p>
+      <p className="text-gray-400">Please use /SecureQRStudio instead.</p>
     </div>
   );
 }

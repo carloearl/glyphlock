@@ -5,6 +5,7 @@ import { Plus, Trash2, Stamp, FlaskConical, Printer } from "lucide-react";
 import VIPShowReprint from "@/components/nups/vip/VIPShowReprint";
 import { VIP_TERMS, VIP_TERMS_TEXT, VIP_TERMS_VERSION } from "@/constants/vipShowTerms";
 
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 /**
  * DACO VIP SHOW CONTRACT — FULL IN-APP GENERATOR
  * Builds the sealed record client-side (record_hash → prev_seal → chain_seal),
@@ -261,7 +262,7 @@ export default function VIPShowGenerator({ prefill }) {
         </div>
 
         <div className="flex gap-2 justify-center flex-wrap">
-          <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold px-6 py-2.5 min-h-[44px]">
+          <button onClick={() => printCurrentNupsView()} className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold px-6 py-2.5 min-h-[44px]">
             <Printer className="w-4 h-4" /> Print Contract (Legal 8.5×14)
           </button>
           <a href={sealed.url} target="_blank" rel="noreferrer" className="rounded-lg bg-blue-600 hover:bg-blue-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Open Verify Page</a>

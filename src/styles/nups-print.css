@@ -1,0 +1,87 @@
+/* NUPS operational print rules. Receipt windows use their own compact layout;
+   these rules make in-app reports, registers and contract views printable too. */
+@media print {
+  @page {
+    margin: 10mm;
+  }
+
+  html,
+  body,
+  #root {
+    background: #fff !important;
+    color: #111 !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  nav,
+  aside,
+  header,
+  footer,
+  [data-no-print],
+  .print\:hidden,
+  button:not([data-print-keep]),
+  [role='dialog'] [data-no-print] {
+    display: none !important;
+  }
+
+  main,
+  section,
+  article,
+  [data-nups-receipt],
+  [data-receipt],
+  .nups-receipt,
+  .nups-print-region {
+    position: static !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    transform: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    color: #111 !important;
+  }
+
+  [data-nups-receipt],
+  [data-receipt],
+  .nups-receipt {
+    display: block !important;
+    border: 1px solid #111 !important;
+    padding: 12px !important;
+    page-break-inside: avoid;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th,
+  td {
+    color: #111 !important;
+    border-color: #bbb !important;
+  }
+
+  a {
+    color: #111 !important;
+    text-decoration: none !important;
+  }
+
+  img,
+  svg {
+    max-width: 100% !important;
+    break-inside: avoid;
+  }
+
+  .nups-environment-watermark {
+    display: block !important;
+    border: 2px solid #111;
+    padding: 8px;
+    margin-bottom: 12px;
+    text-align: center;
+    font-weight: 900;
+  }
+}

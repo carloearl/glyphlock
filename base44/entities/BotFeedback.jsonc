@@ -1,8 +1,12 @@
 {
   "name": "BotFeedback",
   "type": "object",
-  "description": "DACO 006-A \u2014 GlyphBot product-domain feedback (GLYPHBOT product, NOT a NUPS venue entity). Direct writes, anonymous raters allowed (R-006A-2). Analytics defaults to app_env=production only. No user message content stored (F-3).",
+  "description": "DACO 006-A — GlyphBot product-domain feedback (GLYPHBOT product, NOT a NUPS venue entity). Direct writes, anonymous raters allowed (R-006A-2). Analytics defaults to app_env=production only. No user message content stored (F-3).",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "product": {
       "type": "string",
       "default": "glyphbot",
@@ -45,7 +49,7 @@
     },
     "response_preview": {
       "type": "string",
-      "description": "First N chars of the rated bot response. Bot output only \u2014 never user message content."
+      "description": "First N chars of the rated bot response. Bot output only — never user message content."
     },
     "user_role": {
       "type": "string",
@@ -62,8 +66,12 @@
     "rating"
   ],
   "rls": {
-    "create": true,
-    "read": true,
+    "create": null,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "update": {
       "user_condition": {
         "role": "admin"

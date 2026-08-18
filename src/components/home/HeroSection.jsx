@@ -1,49 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, Sparkles, ChevronDown } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import PlatformOrbit from '@/components/home/PlatformOrbit';
+import HeroCursorSpotlight from '@/components/home/HeroCursorSpotlight';
 
-const ORIGINAL_VIDEO = 'https://base44.app/api/apps/6902128ac3c5c94a82446585/files/public/6902128ac3c5c94a82446585/643dc9ba3_Dec_05__2220_13s_202512052257_lc8rw.mp4';
-const HERO_VIDEO = import.meta.env.VITE_GLYPHLOCK_HERO_VIDEO_URL || ORIGINAL_VIDEO;
-const HERO_POSTER = 'https://base44.app/api/apps/697a087fb354faebb72df54b/files/public/697a087fb354faebb72df54b/hero-poster.jpg';
 export default function HeroSection() {
-  const [ready, setReady] = useState(false);
-  const [videoError, setVideoError] = useState(false);
-
   return (
     <section id="top" data-build="GLX-HOME-CINEMATIC-R3" className="relative flex min-h-[calc(100vh-64px)] w-full items-center overflow-hidden border-b border-cyan-300/[.15]">
       <div className="absolute inset-0 z-0">
-        {(!ready || videoError) && (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_32%,rgba(79,70,229,.32),transparent_28%),radial-gradient(circle_at_30%_28%,rgba(6,182,212,.22),transparent_34%),linear-gradient(135deg,#02040d,#071126_48%,#050318)]" />
-        )}
-        {!videoError && (
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            poster={HERO_POSTER}
-            onCanPlay={() => setReady(true)}
-            onLoadedData={() => setReady(true)}
-            onError={() => setVideoError(true)}
-            className={`absolute inset-0 h-full w-full scale-[1.12] object-cover object-center transition-opacity duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}
-            aria-label="GlyphLock platform cinematic hero"
-          >
-            <source src={HERO_VIDEO} type="video/mp4" />
-          </video>
-        )}
-
-        {/* Covers the generator watermark in the bottom-right of the source clip */}
-        <div className="absolute bottom-0 right-0 h-24 w-56 bg-[#02040d]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_32%,rgba(79,70,229,.32),transparent_28%),radial-gradient(circle_at_30%_28%,rgba(6,182,212,.22),transparent_34%),linear-gradient(135deg,#02040d,#071126_48%,#050318)]" />
 
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(1,4,13,.96)_0%,rgba(1,4,13,.80)_36%,rgba(1,4,13,.38)_65%,rgba(1,4,13,.70)_100%)] lg:bg-[linear-gradient(90deg,rgba(1,4,13,.96)_0%,rgba(1,4,13,.79)_36%,rgba(1,4,13,.24)_70%,rgba(1,4,13,.54)_100%)]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#02040d] via-transparent to-[#02040d]/[.62]" />
         <div className="absolute inset-0 opacity-25" style={{ backgroundImage: 'linear-gradient(rgba(34,211,238,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.13) 1px,transparent 1px)', backgroundSize: '50px 50px', maskImage: 'linear-gradient(to bottom,black,transparent 88%)' }} />
         <div className="absolute inset-0 opacity-[.08]" style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(255,255,255,.13) 4px)' }} />
       </div>
+
+      <HeroCursorSpotlight />
 
       <div className="absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-cyan-200 to-transparent shadow-[0_0_26px_#22d3ee]" />
       <motion.div animate={{ x: ['-18%', '118%'] }} transition={{ duration: 7, repeat: Infinity, ease: 'linear' }} className="absolute top-[17%] z-10 h-px w-[30%] bg-gradient-to-r from-transparent via-cyan-200/[.85] to-transparent shadow-[0_0_20px_#22d3ee] pointer-events-none" />

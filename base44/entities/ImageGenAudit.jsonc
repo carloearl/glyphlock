@@ -2,6 +2,10 @@
   "name": "ImageGenAudit",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "image_id": {
       "type": "string",
       "description": "Reference to InteractiveImage"

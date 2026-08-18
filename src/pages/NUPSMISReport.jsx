@@ -11,6 +11,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format, startOfQuarter, endOfQuarter, subQuarters, isWithinInterval } from "date-fns";
 
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 // Toast notification helper
 const toast = {
   error: (msg) => console.error(msg),
@@ -154,7 +155,7 @@ export default function NUPSMISReport() {
     .slice(0, 5)
     .map(([name, earnings]) => ({ name, earnings }));
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => printCurrentNupsView();
 
   const handleDownloadPDF = async () => {
     try {

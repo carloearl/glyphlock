@@ -2,6 +2,10 @@
   "name": "QRKeyRegistry",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "kid": {
       "type": "string",
       "description": "Key ID for JWT signing"

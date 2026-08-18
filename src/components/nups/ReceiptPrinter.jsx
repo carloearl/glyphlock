@@ -1,14 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer, ShieldCheck } from "lucide-react";
+import { Printer, ShieldCheck, Loader2 } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import { computeReceiptHash } from "@/lib/nups/receiptHash";
 import { buildReceiptBreakdown, getCashierDisplay } from "@/lib/nups/receiptBreakdown";
 import { DEMO_RECEIPT_VENUE, isDemoTransaction } from "@/lib/nups/demoReceiptVenue";
 import { printHtml } from "@/lib/nups/printHtml";
+import { logActivity } from "@/lib/nups/activityLog";
+import { markTrainingStep } from "@/lib/nups/operatingMode";
+import { toast } from "sonner";
 
 const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
+
+const escapeHtml = (value) => String(value ?? '')
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#039;');
+
+const money = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
 
 export default function ReceiptPrinter({
   transaction,
@@ -18,6 +30,8 @@ export default function ReceiptPrinter({
   const activeVenue = useActiveVenue();
   const [rates, setRates] = useState(null);
   const [hashInfo, setHashInfo] = useState(null);
+  const [printing, setPrinting] = useState(false);
+  const [lastPrintAt, setLastPrintAt] = useState(null);
 
   // Load per-venue receipt config (processing fee, service fee, footer, tax id).
   useEffect(() => {
@@ -55,6 +69,13 @@ export default function ReceiptPrinter({
   // Demo receipts render with the mock demo venue instead of a live venue —
   // clearly labeled demonstration data, never a real venue's identity.
   const isDemo = isDemoTransaction(transaction);
+  const isTraining = Boolean(
+    transaction?.training_session_id ||
+    /\[TRAINING:/i.test(String(transaction?.notes || ''))
+  );
+  const receiptMode = isTraining
+    ? 'TRAINING'
+    : String(transaction?.mode || (isDemo ? 'DEMO' : 'REAL')).toUpperCase();
   const dv = isDemo ? DEMO_RECEIPT_VENUE : null;
 
   const VENUE_BRAND = dv?.name || activeVenue?.name || transaction?.venue_name || '';
@@ -74,20 +95,22 @@ export default function ReceiptPrinter({
   const svcLabel    = rates?.service_fee_label || 'Service Fee';
   const procRate    = Number(rates?.cc_processing_fee_rate || 0);
 
-  const printReceipt = () => {
-    if (!transaction) return;
+  const printReceipt = async () => {
+    if (!transaction || printing) return;
+    setPrinting(true);
 
     const items = transaction.items || [];
-    const txDate = new Date(transaction.created_date);
+    const parsedDate = new Date(transaction.created_date || Date.now());
+    const txDate = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
     const formattedDate = txDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
     const formattedTime = txDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const cashierDisplay = getCashierDisplay(transaction);
 
     const itemsHtml = items.map((item, idx) =>
       `<div style="padding:4px 0;border-bottom:1px dotted #ddd;">
-         <div style="font-weight:bold;">${idx + 1}. ${item.product_name}</div>
-         <div style="font-size:10px;color:#555;padding-left:8px;">Qty: ${item.quantity} × $${item.price?.toFixed(2)}</div>
-         <div style="text-align:right;font-weight:bold;padding-top:2px;">$${item.total?.toFixed(2)}</div>
+         <div style="font-weight:bold;">${idx + 1}. ${escapeHtml(item.product_name || 'Item')}</div>
+         <div style="font-size:10px;color:#555;padding-left:8px;">Qty: ${money(item.quantity)} × $${money(item.price).toFixed(2)}</div>
+         <div style="text-align:right;font-weight:bold;padding-top:2px;">$${money(item.total).toFixed(2)}</div>
        </div>`
     ).join('');
 
@@ -99,19 +122,19 @@ export default function ReceiptPrinter({
       <div style="border:2px solid #000;padding:8px;margin:8px 0;background:#f9f9f9;">
         <div style="text-align:center;font-weight:bold;font-size:14px;margin-bottom:4px;">★ VIP SHOW SERVICE ★</div>
         <table style="width:100%;font-size:11px;">
-          <tr><td>Room:</td><td style="text-align:right;font-weight:bold;">${vipDetails.room_name || vipDetails.room_number || 'N/A'}</td></tr>
-          <tr><td>Entertainer:</td><td style="text-align:right;font-weight:bold;">${vipDetails.entertainer_name || 'N/A'}</td></tr>
-          <tr><td>Guest:</td><td style="text-align:right;font-weight:bold;">${vipDetails.guest_name || 'N/A'}</td></tr>
-          <tr><td>Duration:</td><td style="text-align:right;">${vipDetails.duration_minutes || 60} min</td></tr>
-          <tr><td>Rate:</td><td style="text-align:right;">$${(vipDetails.rate_per_hour || 300).toFixed(2)}/hr</td></tr>
-          ${vipDetails.contract_number ? `<tr><td>Contract#:</td><td style="text-align:right;font-family:monospace;">${vipDetails.contract_number}</td></tr>` : ''}
+          <tr><td>Room:</td><td style="text-align:right;font-weight:bold;">${escapeHtml(vipDetails.room_name || vipDetails.room_number || 'N/A')}</td></tr>
+          <tr><td>Entertainer:</td><td style="text-align:right;font-weight:bold;">${escapeHtml(vipDetails.entertainer_name || 'N/A')}</td></tr>
+          <tr><td>Guest:</td><td style="text-align:right;font-weight:bold;">${escapeHtml(vipDetails.guest_name || 'N/A')}</td></tr>
+          <tr><td>Duration:</td><td style="text-align:right;">${money(vipDetails.duration_minutes || 60)} min</td></tr>
+          <tr><td>Rate:</td><td style="text-align:right;">$${money(vipDetails.rate_per_hour || 300).toFixed(2)}/hr</td></tr>
+          ${vipDetails.contract_number ? `<tr><td>Contract#:</td><td style="text-align:right;font-family:monospace;">${escapeHtml(vipDetails.contract_number)}</td></tr>` : ''}
         </table>
       </div>
     ` : '';
 
     const receiptHtml = `
       <html>
-      <head><title>Receipt - ${transaction.transaction_id}</title>
+      <head><title>Receipt - ${escapeHtml(transaction.transaction_id || 'N/A')}</title>
       <style>
         @media print {
           @page { margin: 4mm; size: 80mm auto; }
@@ -135,25 +158,27 @@ export default function ReceiptPrinter({
         .barcode { font-family: monospace; font-size: 10px; letter-spacing: 3px; margin: 6px 0; }
         .footer { font-size: 8px; color: #444; margin-top: 8px; }
         .audit-box { border: 1px solid #000; padding: 6px; margin: 6px 0; font-size: 9px; }
+        .mode-banner { border: 2px solid #000; padding: 5px; margin-bottom: 8px; text-align:center; font-size: 11px; font-weight: 900; letter-spacing: 1px; }
       </style>
       </head>
       <body>
+        ${receiptMode !== 'REAL' ? `<div class="mode-banner">${escapeHtml(receiptMode)} · SAMPLE · FUNDS OFF<br/><span style="font-size:8px;font-weight:normal;letter-spacing:0;">Not a live financial receipt</span></div>` : ''}
         <div class="center">
-          <div class="header-logo">${BIZ_LEGAL}</div>
-          ${VENUE_BRAND && VENUE_BRAND !== BIZ_LEGAL ? `<div style="font-size:10px;font-weight:bold;">${VENUE_BRAND}</div>` : ''}
-          <div style="font-size:10px;margin-top:2px;font-weight:bold;">${BIZ_ADDRESS}</div>
-          <div style="font-size:10px;">Tel: ${BIZ_PHONE}</div>
-          <div style="font-size:9px;margin-top:2px;">${BIZ_TAX_ID}</div>
+          <div class="header-logo">${escapeHtml(BIZ_LEGAL)}</div>
+          ${VENUE_BRAND && VENUE_BRAND !== BIZ_LEGAL ? `<div style="font-size:10px;font-weight:bold;">${escapeHtml(VENUE_BRAND)}</div>` : ''}
+          <div style="font-size:10px;margin-top:2px;font-weight:bold;">${escapeHtml(BIZ_ADDRESS)}</div>
+          <div style="font-size:10px;">Tel: ${escapeHtml(BIZ_PHONE)}</div>
+          <div style="font-size:9px;margin-top:2px;">${escapeHtml(BIZ_TAX_ID)}</div>
         </div>
         <div class="double-divider"></div>
         <table>
-          <tr class="info-row"><td>Receipt #:</td><td class="right bold">${transaction.transaction_id}</td></tr>
+          <tr class="info-row"><td>Receipt #:</td><td class="right bold">${escapeHtml(transaction.transaction_id || 'N/A')}</td></tr>
           <tr class="info-row"><td>Date:</td><td class="right">${formattedDate}</td></tr>
           <tr class="info-row"><td>Time:</td><td class="right">${formattedTime}</td></tr>
-          <tr class="info-row"><td>Cashier:</td><td class="right">${cashierDisplay}</td></tr>
-          ${transaction.customer_id ? `<tr class="info-row"><td>Customer:</td><td class="right">${transaction.customer_id}</td></tr>` : ''}
-          <tr class="info-row"><td>Batch:</td><td class="right">${transaction.batch_id || 'N/A'}</td></tr>
-          <tr class="info-row"><td>Terminal:</td><td class="right">${transaction.station?.toUpperCase() || transaction.terminal_name || 'POS'}</td></tr>
+          <tr class="info-row"><td>Cashier:</td><td class="right">${escapeHtml(cashierDisplay)}</td></tr>
+          ${transaction.customer_id ? `<tr class="info-row"><td>Customer:</td><td class="right">${escapeHtml(transaction.customer_id)}</td></tr>` : ''}
+          <tr class="info-row"><td>Batch:</td><td class="right">${escapeHtml(transaction.batch_id || 'N/A')}</td></tr>
+          <tr class="info-row"><td>Terminal:</td><td class="right">${escapeHtml(transaction.station?.toUpperCase() || transaction.terminal_name || 'POS')}</td></tr>
         </table>
         ${vipSection}
         <div class="divider"></div>
@@ -176,23 +201,23 @@ export default function ReceiptPrinter({
         </div>
         <div class="divider"></div>
         <table>
-          <tr><td class="bold">Payment:</td><td class="right bold">${transaction.payment_method}</td></tr>
+          <tr><td class="bold">Payment:</td><td class="right bold">${escapeHtml(transaction.payment_method || 'N/A')}</td></tr>
           ${transaction.payment_method === 'Cash' && transaction.cash_tendered ? `
           <tr><td>Tendered:</td><td class="right">$${parseFloat(transaction.cash_tendered).toFixed(2)}</td></tr>
           <tr class="bold"><td>Change:</td><td class="right">$${(transaction.change_due > 0 ? parseFloat(transaction.change_due).toFixed(2) : '0.00')}</td></tr>` : ''}
           ${(transaction.payment_method === 'Credit Card' || transaction.payment_method === 'Debit Card') ? `
-          <tr class="info-row"><td>Card:</td><td class="right">**** **** **** ${transaction.card_last_four || 'XXXX'}</td></tr>
-          <tr class="info-row"><td>Auth Code:</td><td class="right">${transaction.auth_code || Math.random().toString(36).substr(2, 6).toUpperCase()}</td></tr>
+          <tr class="info-row"><td>Card:</td><td class="right">**** **** **** ${escapeHtml(transaction.card_last_four || transaction.card_last4 || 'XXXX')}</td></tr>
+          <tr class="info-row"><td>Auth Code:</td><td class="right">${escapeHtml(transaction.auth_code || 'NOT CAPTURED')}</td></tr>
           <tr class="info-row"><td>Entry:</td><td class="right">CHIP/TAP</td></tr>` : ''}
         </table>
         <div class="double-divider"></div>
         <div class="audit-box">
           <div style="text-align:center;font-weight:bold;margin-bottom:3px;">AUDIT TRAIL</div>
           <table style="font-size:9px;">
-            <tr><td>Terminal:</td><td class="right">${transaction.terminal_id || 'NUPS-001'}</td></tr>
-            <tr><td>Sequence:</td><td class="right">${transaction.transaction_id}</td></tr>
-            <tr><td>Timestamp:</td><td class="right">${txDate.toISOString()}</td></tr>
-            <tr><td>Operator:</td><td class="right">${cashierDisplay}</td></tr>
+            <tr><td>Terminal:</td><td class="right">${escapeHtml(transaction.terminal_id || 'NUPS-001')}</td></tr>
+            <tr><td>Sequence:</td><td class="right">${escapeHtml(transaction.transaction_id || 'N/A')}</td></tr>
+            <tr><td>Timestamp:</td><td class="right">${escapeHtml(txDate.toISOString())}</td></tr>
+            <tr><td>Operator:</td><td class="right">${escapeHtml(cashierDisplay)}</td></tr>
           </table>
         </div>
         ${hashInfo ? `
@@ -211,18 +236,18 @@ export default function ReceiptPrinter({
             Tamper-evident. Verify at ${BIZ_PHONE || 'venue office'}.
           </div>
         </div>` : ''}
-        <div class="center barcode">||| ${transaction.transaction_id} |||</div>
+        <div class="center barcode">||| ${escapeHtml(transaction.transaction_id || 'N/A')} |||</div>
         <div class="divider"></div>
         <div class="center footer">
           ${FOOTER_TEXT
-            ? `<div style="font-size:10px;">${FOOTER_TEXT.replace(/\n/g, '<br/>')}</div>`
+            ? `<div style="font-size:10px;">${escapeHtml(FOOTER_TEXT).replace(/\n/g, '<br/>')}</div>`
             : `<div style="font-size:10px;font-weight:bold;margin-bottom:4px;">Thank you for your patronage!</div>
                <div>All sales are final. Refunds require manager</div>
                <div>approval within 24 hours with valid receipt.</div>`}
-          ${BIZ_PHONE ? `<div style="margin-top:4px;">For disputes contact: ${BIZ_PHONE}</div>` : ''}
+          ${BIZ_PHONE ? `<div style="margin-top:4px;">For disputes contact: ${escapeHtml(BIZ_PHONE)}</div>` : ''}
           <div style="margin-top:6px;font-size:7px;color:#888;">
-            ${BIZ_LEGAL}<br/>
-            ${BIZ_ADDRESS}<br/>
+            ${escapeHtml(BIZ_LEGAL)}<br/>
+            ${escapeHtml(BIZ_ADDRESS)}<br/>
             Printed: ${new Date().toLocaleString()}<br/>
             ${BIZ_SYSTEM}
           </div>
@@ -231,7 +256,31 @@ export default function ReceiptPrinter({
       </html>
     `;
 
-    printHtml(receiptHtml, { title: `Receipt - ${transaction.transaction_id}` });
+    try {
+      const result = await printHtml(receiptHtml, { title: `Receipt - ${transaction.transaction_id || 'N/A'}` });
+      const printedAt = result?.invokedAt || new Date().toISOString();
+      setLastPrintAt(printedAt);
+      toast.success('Print dialog opened');
+      if (isTraining) markTrainingStep(transaction?.venue_id || activeVenue?.id, 'receipt-printed');
+      logActivity({
+        action_type: 'EXPORT',
+        entity_affected: `POSTransaction:${transaction.id || transaction.transaction_id || 'unknown'}`,
+        venue_id: transaction?.venue_id || activeVenue?.id || null,
+        after_value: {
+          document_type: 'receipt',
+          transaction_id: transaction.transaction_id || null,
+          print_method: result?.method || 'iframe',
+          dialog_opened: result?.dialogOpened === true,
+          operating_mode: receiptMode,
+        },
+        notes: 'receipt_print_dialog_opened',
+      }).catch(() => null);
+    } catch (error) {
+      console.error('Receipt print failed:', error);
+      toast.error(`Receipt print failed: ${error?.message || 'unknown error'}`);
+    } finally {
+      setPrinting(false);
+    }
   };
 
   if (!transaction) {
@@ -243,7 +292,8 @@ export default function ReceiptPrinter({
   }
 
   const items = transaction.items || [];
-  const txDate = new Date(transaction.created_date);
+  const previewDate = new Date(transaction.created_date || Date.now());
+  const txDate = Number.isNaN(previewDate.getTime()) ? new Date() : previewDate;
   const cashierDisplay = getCashierDisplay(transaction);
 
   // Standardized breakdown — shared with the printable receipt.
@@ -254,6 +304,12 @@ export default function ReceiptPrinter({
     <div className="space-y-3" style={{ position: 'relative', zIndex: 30, pointerEvents: 'auto' }}>
       {/* On-screen receipt preview */}
       <div className="bg-black/90 border border-cyan-500/40 rounded-xl p-4 font-mono text-xs max-w-sm mx-auto shadow-[0_0_30px_rgba(6,182,212,0.2)]">
+        {receiptMode !== 'REAL' && (
+          <div className="mb-3 rounded-lg border-2 border-amber-400/70 bg-amber-400/10 p-2 text-center text-[10px] font-black tracking-[.15em] text-amber-200">
+            {receiptMode} · SAMPLE · FUNDS OFF
+            <div className="mt-0.5 text-[8px] font-normal tracking-normal text-amber-200/65">Not a live financial receipt</div>
+          </div>
+        )}
         <div className="text-center mb-3">
           <div className="text-base font-black text-white tracking-widest">{BIZ_LEGAL}</div>
           {VENUE_BRAND && VENUE_BRAND !== BIZ_LEGAL && <div className="text-[10px] font-bold text-gray-300">{VENUE_BRAND}</div>}
@@ -369,11 +425,17 @@ export default function ReceiptPrinter({
       </div>
 
       <div className="flex justify-center">
-        <Button onClick={printReceipt} variant="outline" size="sm"
-          className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-          style={{ position: 'relative', zIndex: 31, pointerEvents: 'auto', cursor: 'pointer' }}>
-          <Printer className="w-4 h-4 mr-1" /> Print Receipt
+        <Button onClick={printReceipt} disabled={printing} variant="outline" size="sm"
+          className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)] disabled:opacity-60"
+          style={{ position: 'relative', zIndex: 31, pointerEvents: 'auto', cursor: printing ? 'wait' : 'pointer' }}>
+          {printing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Printer className="w-4 h-4 mr-1" />}
+          {printing ? 'Opening Print…' : 'Print Receipt'}
         </Button>
+        {lastPrintAt && (
+          <span className="self-center text-[10px] text-emerald-400/70">
+            Sent {new Date(lastPrintAt).toLocaleTimeString()}
+          </span>
+        )}
       </div>
     </div>
   );

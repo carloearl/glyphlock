@@ -2,6 +2,10 @@
   "name": "Hotspot",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "hotspot_id": {
       "type": "string",
       "description": "Unique hotspot identifier"

@@ -2,6 +2,10 @@
   "name": "POSCampaign",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "campaign_id": {
       "type": "string",
       "description": "Unique campaign identifier"

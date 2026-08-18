@@ -95,11 +95,11 @@ export default function QrStudio({ initialTab = 'create' }) {
   // Update URL when tab changes
   useEffect(() => {
     const currentPath = window.location.pathname;
-    if (currentPath === '/qr' || currentPath === '/Qr') {
+    if (currentPath === '/SecureQRStudio') {
       if (activeTab && activeTab !== 'create') {
-        window.history.replaceState(null, '', `/qr?tab=${activeTab}`);
+        window.history.replaceState(null, '', `/SecureQRStudio?tab=${activeTab}`);
       } else {
-        window.history.replaceState(null, '', '/qr');
+        window.history.replaceState(null, '', '/SecureQRStudio');
       }
     }
   }, [activeTab]);

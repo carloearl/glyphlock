@@ -1,8 +1,12 @@
 {
   "name": "AssentEvidence",
   "type": "object",
-  "description": "DACO GlyphBucks \u2014 clickwrap + identity + e-signature evidence for one sealed sale. Stores match scores and template/reference hashes ONLY \u2014 never raw biometrics or images beyond the retained presence photo reference. Timeline must be monotonic and physically plausible. RLS: admin-only direct access \u2014 most sensitive PII in the GlyphBucks chain; all writes are server-side only.",
+  "description": "DACO GlyphBucks — clickwrap + identity + e-signature evidence for one sealed sale. Stores match scores and template/reference hashes ONLY — never raw biometrics or images beyond the retained presence photo reference. Timeline must be monotonic and physically plausible. RLS: admin-only direct access — most sensitive PII in the GlyphBucks chain; all writes are server-side only.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "verify_ref": {
       "type": "string"
     },
@@ -29,11 +33,11 @@
     },
     "initials_term1": {
       "type": "string",
-      "description": "Purchaser initials for Term 1 (nature of transaction) \u2014 captured at clickwrap."
+      "description": "Purchaser initials for Term 1 (nature of transaction) — captured at clickwrap."
     },
     "initials_term3": {
       "type": "string",
-      "description": "Purchaser initials for Term 3 (non-refundable) \u2014 captured at clickwrap."
+      "description": "Purchaser initials for Term 3 (non-refundable) — captured at clickwrap."
     },
     "ip": {
       "type": "string"
@@ -69,15 +73,15 @@
     },
     "esig_purchaser_ref": {
       "type": "string",
-      "description": "/s/ electronic signature \u2014 purchaser."
+      "description": "/s/ electronic signature — purchaser."
     },
     "esig_issuer_rep_ref": {
       "type": "string",
-      "description": "/s/ electronic signature \u2014 issuer rep (cashier)."
+      "description": "/s/ electronic signature — issuer rep (cashier)."
     },
     "esig_manager_ref": {
       "type": "string",
-      "description": "/s/ electronic signature \u2014 approving manager (MUST be a distinct person from the issuer rep; carries the auth ref)."
+      "description": "/s/ electronic signature — approving manager (MUST be a distinct person from the issuer rep; carries the auth ref)."
     },
     "delivery_printed_at": {
       "type": "string",

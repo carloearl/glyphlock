@@ -31,6 +31,12 @@ import { computeReceiptHash } from "@/lib/nups/receiptHash";
 // BPAA-NUPS-AUDIT-001 §3.2 — emit financial_context on door sale finalize
 import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
 import { fromPOSTransaction } from "@/lib/nups/audit/financialContext";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import {
+  scopeRowsToOperatingMode,
+  stampOperationalRecord,
+  markTrainingStep,
+} from "@/lib/nups/operatingMode";
 
 export default function POSCashRegister({ user, station = 'door', showDriverPanel = true, showGuestIntake = true }) {
   // H-1 FIX: Age 21+ enforcement for bar register — BPAAA Phase 6
@@ -46,6 +52,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   }, [station, user]);
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
+  const modeState = useNUPSOperatingMode(activeVenue?.id || activeVenue?.venue_id);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [barcodeInput, setBarcodeInput] = useState("");
@@ -77,23 +84,55 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   // and after charge is posted.
   const [compAuth, setCompAuth] = useState(null);
 
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
+
   const { data: products = [] } = useQuery({
-    queryKey: ['pos-products'],
-    queryFn: () => base44.entities.POSProduct.filter({ is_active: true })
+    queryKey: ['pos-products', venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.POSProduct.filter({ is_active: true }, 'name', 1000);
+      const venueRows = rows.filter((row) => !venueId || !row.venue_id || row.venue_id === venueId);
+      const scoped = scopeRowsToOperatingMode(venueRows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: 'reference',
+      });
+      if (modeState.isLive) return scoped;
+      const nonLiveCatalog = scoped.filter((row) => row.mode === modeState.ledgerMode || row.is_demo === true);
+      // Product catalog is safe as a read-only fallback for training. Sales and
+      // inventory mutations still post to the non-live ledger boundary.
+      return nonLiveCatalog.length ? nonLiveCatalog : scoped.filter((row) => !row.mode || row.mode === 'REAL');
+    },
   });
 
   const { data: customers = [] } = useQuery({
-    queryKey: ['pos-customers'],
-    queryFn: () => base44.entities.POSCustomer.list()
+    queryKey: ['pos-customers', venueId, ...modeQueryKey],
+    queryFn: async () => {
+      const rows = await base44.entities.POSCustomer.list('-created_date', 1000);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: 'transactional',
+      });
+    },
   });
 
   // Tonight's batch is opened by the MANAGER and shared venue-wide — the
-  // door girl / bartender rings against it, they never open their own.
+  // door girl / bartender rings against it, they never open their own. Live,
+  // demo, sandbox, and individual training sessions never share a batch.
   const { data: activeBatch } = useQuery({
-    queryKey: ['active-batch', activeVenue?.id],
+    queryKey: ['active-batch', venueId, ...modeQueryKey],
     queryFn: async () => {
-      const batches = await base44.entities.POSBatch.filter({ status: 'open' }, '-created_date', 10);
-      return batches.find(b => !b.venue_id || !activeVenue?.id || b.venue_id === activeVenue.id) || batches[0];
+      const batches = await base44.entities.POSBatch.filter({ status: 'open' }, '-created_date', 100);
+      const scoped = scopeRowsToOperatingMode(batches, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: 'transactional',
+      });
+      return scoped[0] || null;
     },
     refetchInterval: 30000,
   });
@@ -106,10 +145,33 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   }, [activeVenue?.id]);
 
   const createTransaction = useMutation({
-    mutationFn: (data) => base44.entities.POSTransaction.create(data),
+    mutationFn: async (data) => {
+      let liveActor = null;
+      try { liveActor = await base44.auth.me(); } catch (_) { /* kiosk session may be primary */ }
+      const operatorRole = user?._highestRole || user?.role || liveActor?._highestRole || liveActor?.role || 'External';
+      const result = await writeEntity({
+        entity: 'POSTransaction',
+        operation: 'create',
+        data,
+        actor: {
+          email: liveActor?.email || user?.email,
+          id: liveActor?.id || user?.id,
+          role: operatorRole,
+        },
+        venue_id: venueId,
+        intent: `${modeState.operatingMode}_${station.toUpperCase()}_POS_SALE`,
+        requestContext: {
+          mode: modeState.ledgerMode,
+          validation_run: modeState.isNonLive,
+          session_id: modeState.trainingSession?.id || null,
+        },
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'Transaction gateway rejected the sale.');
+      return result.value || data;
+    },
     onSuccess: (result, variables) => {
-      queryClient.invalidateQueries(['pos-transactions']);
-      queryClient.invalidateQueries(['active-batch']);
+      queryClient.invalidateQueries({ queryKey: ['pos-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['active-batch'] });
       setLastTransaction(result || variables);
       setShowReceiptModal(true);
       setCart([]);
@@ -119,6 +181,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       setPaymentStep("register");
       setPaymentMethod(null);
       setCompAuth(null);
+      if (modeState.isTraining) markTrainingStep(venueId, 'transaction-completed');
+    },
+    onError: (err) => {
+      console.error('Transaction create failed:', err);
+      toast.error(`Sale could not be completed: ${err?.message || 'unknown error'}`);
     }
   });
 
@@ -276,7 +343,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     }
 
     const bootstrapPins = ['1234', '0000'];
-    if (bootstrapPins.includes(managerPin)) {
+    if (modeState.isNonLive && bootstrapPins.includes(managerPin)) {
       performClearPOS('manager (bootstrap)');
       return;
     }
@@ -299,7 +366,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       const validRoles = ['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'admin', 'manager'];
       const manager = matches.find(m => validRoles.includes(m.role));
       const authName = manager?.full_name || manager?.username
-        || (['1234', '0000'].includes(discountPin) ? 'manager (bootstrap)' : null);
+        || (modeState.isNonLive && ['1234', '0000'].includes(discountPin) ? 'manager (training bootstrap)' : null);
       if (!authName) {
         toast.error('Invalid manager PIN');
         setDiscountPin('');
@@ -322,7 +389,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           action_type: 'CONFIG_CHANGE',
           entity_affected: 'POSCart:Discount',
           venue_id: activeVenue?.id || null,
-          mode: 'REAL',
+          mode: modeState.ledgerMode,
           notes: `$${amount} discount applied by ${authName}`,
           after_value: { amount, authorized_by: authName, station },
         });
@@ -385,7 +452,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         action_type: 'DELETE',
         entity_affected: `POSCart:${action}`,
         venue_id: activeVenue?.id || null,
-        mode: 'REAL',
+        mode: modeState.ledgerMode,
         notes: `Void approved by ${auth.authorized_by_name} — ${auth.reason}${auth.note ? ` · ${auth.note}` : ''}`,
         before_value: { action, productId, itemLabel: pendingVoid.itemLabel, payload },
         after_value: { authorized_by: auth.authorized_by_email, authorized_by_id: auth.authorized_by_id, reason: auth.reason, note: auth.note },
@@ -413,6 +480,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   // the gross stays on the books (visible in OrderDisplay) so accounting can
   // see the gap. The CHARGE button uses finalTotal; OrderDisplay keeps `total`.
   const finalTotal = compAuth ? 0 : total;
+  const checkoutBlockedReason = !activeBatch
+    ? `OPEN ${modeState.operatingMode} BATCH`
+    : !activeBatch.door_confirmed
+      ? 'CONFIRM BATCH AT DOOR'
+      : null;
 
   // Invalidate comp auth if the cart changes after authorization — forces
   // re-auth so a manager can't pre-comp and then have someone ring more in.
@@ -472,19 +544,28 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   const completePayment = async (details = {}) => {
     if (isSubmitting) return;
     if (!activeBatch) {
-      toast.error("Cannot process transaction: no open batch. A manager must open tonight's batch.");
+      toast.error("Cannot process transaction: no open batch for this venue and mode.");
       return;
     }
     if (!activeBatch.door_confirmed) {
-      toast.error("Cannot process transaction: tonight's batch hasn't been confirmed at the door yet.");
+      toast.error("Cannot process transaction: the current batch has not been confirmed at the door.");
       return;
     }
+    if (!cart.length) {
+      toast.error('Add at least one item before taking payment.');
+      return;
+    }
+
     setIsSubmitting(true);
     const cashierName = user?.full_name || user?.name || user?.email || 'Staff';
-    const isComp = (details?.payment_method || paymentMethod) === "Comp";
-    const transactionData = {
-      transaction_id: `TXN-${Date.now()}`,
-      customer_id: selectedCustomer?.id,
+    const resolvedMethod = details?.payment_method || paymentMethod || 'Cash';
+    const isComp = resolvedMethod === 'Comp';
+    const nonLive = modeState.isNonLive;
+
+    const transactionData = stampOperationalRecord({
+      ...details,
+      transaction_id: `TXN-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
+      customer_id: selectedCustomer?.id || null,
       items: cart,
       subtotal,
       tax,
@@ -493,135 +574,102 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
       discount: discountAmount,
       tip: tipAmount,
       total,
-      // Comps: gross stays on `total` (so the gap is visible) but cash/card stay zero
-      cash_sales: isComp ? 0 : ((details?.payment_method || paymentMethod) === 'Cash' ? total : 0),
-      card_sales: isComp ? 0 : (['Credit Card','Debit Card','Digital Wallet'].includes(details?.payment_method || paymentMethod) ? total : 0),
-      payment_method: paymentMethod || "Cash",
+      // Non-live transactions retain simulated tender amounts for training
+      // reports, but validation_run/funds_settled keep them out of live books.
+      cash_sales: isComp ? 0 : (resolvedMethod === 'Cash' ? total : 0),
+      card_sales: isComp ? 0 : (['Credit Card', 'Debit Card', 'Digital Wallet'].includes(resolvedMethod) ? total : 0),
+      payment_method: resolvedMethod,
       cashier: cashierName,
       cashier_name: cashierName,
       cashier_email: user?.email || null,
-      station: station,
-      mode: 'REAL',
-      venue_id: activeVenue?.id || null,
-      status: "completed",
-      batch_id: activeBatch?.id,
-      created_date: new Date().toISOString(), // pin for reproducible receipt hash
-      terminal_id: activeVenue?.id
-        ? `TERM-${activeVenue.id.slice(-6).toUpperCase()}`
-        : 'TERM-UNKNOWN',
+      cashier_role: user?._highestRole || user?.role || null,
+      station,
+      venue_id: venueId,
+      status: 'completed',
+      batch_id: activeBatch.id,
+      created_date: new Date().toISOString(),
+      terminal_id: venueId ? `TERM-${String(venueId).slice(-6).toUpperCase()}` : 'TERM-UNKNOWN',
       cashier_id: user?.id || user?.email || null,
-      ...details,
       card_last4: details?.card_last_four || details?.card_last4 || null,
-    };
+      validation_run: nonLive,
+      funds_settled: !nonLive,
+    }, {
+      ledgerMode: modeState.ledgerMode,
+      operatingMode: modeState.operatingMode,
+      venueId,
+      supportsDemoFlag: true,
+      transactional: true,
+    });
 
-    // SHA-256 receipt fingerprint — persisted on the record so the hash
-    // printed on paper can be re-verified against the ledger later.
     try {
       const { hash, version } = await computeReceiptHash(transactionData);
       transactionData.receipt_hash = hash;
       transactionData.receipt_hash_version = version;
-    } catch (_) { /* best-effort — never block the sale */ }
+    } catch (_) { /* hashing is best-effort; posting remains available */ }
+
     try {
-      // DACO-20260613-DOOR-RBAC — Door writes go through the gateway with
-      // validation_run=true (funds-off). The gateway enforces the DOOR_GIRL
-      // role scope and stamps cashier_role for audit.
+      const postedTransaction = await createTransaction.mutateAsync(transactionData);
+
       if (station === 'door') {
-        const doorRole = user?._highestRole || user?.role || 'External';
-        // The register runs in kiosk mode — the operator on screen is a NUPS
-        // kiosk session, not the browser's authenticated account. The gateway
-        // rebinds against the live session, so the actor must be the live
-        // account; the kiosk operator stays on the record as the cashier.
-        let liveActor = null;
-        try { liveActor = await base44.auth.me(); } catch (_) { /* no live session */ }
-        const gateResult = await writeEntity({
-          entity: 'POSTransaction',
-          operation: 'create',
-          data: {
-            ...transactionData,
-            station: 'door',
-            validation_run: true,
-            funds_settled: false,
-            cashier_role: doorRole,
-          },
-          actor: {
-            email: liveActor?.email || user?.email,
-            role: doorRole,
-            id: liveActor?.id || user?.id,
-          },
-          venue_id: activeVenue?.id || null,
-          intent: 'DOOR_COVER_VALIDATION_RUN',
-        });
-        if (!gateResult?.ok) {
-          toast.error(gateResult?.block_reason || 'Door write rejected by gateway');
-          setIsSubmitting(false);
-          return;
-        }
-        // BPAA-NUPS-AUDIT-001 §3.2 — explicit AuditEvent with financial_context
-        // for the canonical door-sale case. Observational; never blocks the
-        // business write. §3.1 invariant is enforced inside the emitter.
         try {
-          const fc = fromPOSTransaction({
-            total: transactionData.total,
-            discount: transactionData.discount,
-            payment_method: transactionData.payment_method,
-            comp_amount: transactionData.comp_amount,
-          });
+          const fc = fromPOSTransaction(transactionData);
           await emitAuditEvent({
-            venue_id: activeVenue?.id || null,
-            mode: 'real',
-            event_type: (transactionData.payment_method === 'Comp') ? 'Comp' : 'DoorSale',
+            venue_id: venueId,
+            mode: String(modeState.ledgerMode || 'REAL').toLowerCase(),
+            event_type: transactionData.payment_method === 'Comp' ? 'Comp' : 'DoorSale',
             event_category: 'sales',
             severity: 'low',
             source: 'door',
             session_id: transactionData.transaction_id,
             entity_type: 'POSTransaction',
-            entity_id: gateResult.value?.id || transactionData.transaction_id,
+            entity_id: postedTransaction?.id || transactionData.transaction_id,
             financial_context: fc,
             reason: transactionData.comp_reason || undefined,
-            notes: { station: 'door', batch_id: activeBatch?.id },
+            notes: {
+              station: 'door',
+              batch_id: activeBatch.id,
+              operating_mode: modeState.operatingMode,
+              funds_settled: transactionData.funds_settled,
+            },
             actor_ref: user?.email,
             retention_class: 'financial',
           });
-        } catch (_) { /* observational — never block the door write */ }
-        // The gateway may acknowledge the write without echoing the record —
-        // fall back to the local payload so the digital receipt always shows.
-        setLastTransaction(gateResult.value || gateResult.record || transactionData);
-        setShowReceiptModal(true);
-        setCart([]);
-        setSelectedCustomer(null);
-        setDiscount(0);
-        setTip(0);
-        setPaymentStep("register");
-        setPaymentMethod(null);
-        setCompAuth(null);
-      } else {
-        await createTransaction.mutateAsync(transactionData);
+        } catch (_) { /* observational only */ }
       }
-      // AUDIT LOG: Transaction created — BPAAA Phase 7
+
       try {
         await base44.entities.SystemAuditLog.create({
           event_type: 'TRANSACTION_CREATED',
-          description: `Transaction ${transactionData.transaction_id} created — $${total.toFixed(2)} via ${paymentMethod} at ${station} station`,
+          description: `${modeState.operatingMode} transaction ${transactionData.transaction_id} — $${total.toFixed(2)} via ${resolvedMethod} at ${station}`,
           actor_email: user?.email || 'unknown',
           status: 'success',
           severity: 'low',
           metadata: {
             transaction_id: transactionData.transaction_id,
-            total: total,
-            payment_method: paymentMethod,
+            total,
+            payment_method: resolvedMethod,
             station,
-            batch_id: activeBatch?.id,
+            batch_id: activeBatch.id,
             cashier: user?.email,
+            mode: modeState.ledgerMode,
+            operating_mode: modeState.operatingMode,
+            validation_run: transactionData.validation_run,
+            funds_settled: transactionData.funds_settled,
           },
         });
       } catch (auditErr) { console.warn('Audit log write failed:', auditErr); }
-      if (selectedCustomer?.id) {
+
+      // Never let a practice transaction mutate a live customer profile.
+      if (modeState.isLive && selectedCustomer?.id) {
         await base44.entities.POSCustomer.update(selectedCustomer.id, {
           visit_count: (selectedCustomer.visit_count || 0) + 1,
           total_spent: (selectedCustomer.total_spent || 0) + total,
         });
-        queryClient.invalidateQueries(['pos-customers']);
+        queryClient.invalidateQueries({ queryKey: ['pos-customers'] });
       }
+    } catch (err) {
+      console.error('completePayment failed:', err);
+      toast.error(`Sale could not be completed: ${err?.message || 'unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -638,10 +686,17 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     // it's a manager override. Use the dedicated "Manager Comp" button on the
     // register screen (opens PIN modal → on auth, finalize as $0 with comp_amount).
   ];
-  // Door register accepts cash, credit card, and tap-to-pay (Digital Wallet).
+  // Door register accepts cash, credit card, and tap-to-pay. Gift cards and
+  // room tabs appear in LIVE only when the venue has explicitly enabled the
+  // workflow; TRAINING/DEMO can practice them without affecting real balances.
+  const configuredPaymentMethods = ALL_PAYMENT_METHODS.filter((method) => {
+    if (method.key === 'Gift Card') return modeState.isNonLive || doorRates?.gift_card_enabled === true;
+    if (method.key === 'Tab') return modeState.isNonLive || doorRates?.room_tab_enabled === true;
+    return true;
+  });
   const PAYMENT_METHODS = station === 'door'
-    ? ALL_PAYMENT_METHODS.filter(m => ['Cash', 'Credit Card', 'Digital Wallet'].includes(m.key))
-    : ALL_PAYMENT_METHODS;
+    ? configuredPaymentMethods.filter(m => ['Cash', 'Credit Card', 'Digital Wallet'].includes(m.key))
+    : configuredPaymentMethods;
 
   const getMethodColor = (color) => ({
     green: { bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.5)', text: '#22c55e' },
@@ -672,7 +727,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
         action_type: "CONFIG_CHANGE",
         entity_affected: "POSTransaction:Comp",
         venue_id: activeVenue?.id || null,
-        mode: "REAL",
+        mode: modeState.ledgerMode,
         notes: `COMP $${auth.comp_amount.toFixed(2)} authorized by ${auth.authorized_by_name} — reason: ${auth.reason}${auth.note ? ` · ${auth.note}` : ""}`,
         after_value: {
           comp_amount: auth.comp_amount,
@@ -728,6 +783,8 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           <CardPaymentPanel
             total={total}
             method={paymentMethod}
+            isLive={modeState.isLive}
+            terminalConfigured={Boolean(doorRates?.payment_terminal_enabled)}
             onConfirm={(details) => completePayment(details)}
           />
         )}
@@ -745,8 +802,12 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
             />
             <Button
               onClick={() => {
-                const gcNum = document.getElementById('gift-card-input')?.value || '';
-                completePayment({ gift_card: true, gift_card_number: gcNum });
+                const gcNum = String(document.getElementById('gift-card-input')?.value || '').trim();
+                if (gcNum.length < 4) {
+                  toast.error('Enter or scan a valid gift card number.');
+                  return;
+                }
+                completePayment({ payment_method: 'Gift Card', gift_card: true, gift_card_number: gcNum });
               }}
               disabled={isSubmitting}
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-amber-500 to-orange-600"
@@ -769,8 +830,12 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
             />
             <Button
               onClick={() => {
-                const roomInfo = document.getElementById('room-tab-input')?.value || '';
-                completePayment({ room_tab: true, room_tab_reference: roomInfo });
+                const roomInfo = String(document.getElementById('room-tab-input')?.value || '').trim();
+                if (roomInfo.length < 2) {
+                  toast.error('Enter a room number, VIP session, or guest reference.');
+                  return;
+                }
+                completePayment({ payment_method: 'Tab', room_tab: true, room_tab_reference: roomInfo });
               }}
               disabled={isSubmitting}
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-pink-500 to-rose-600"
@@ -1198,7 +1263,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           {cart.length > 0 ? (
            <button
              onClick={handleCheckout}
-             disabled={isSubmitting}
+             disabled={isSubmitting || Boolean(checkoutBlockedReason)}
              className="w-full rounded-2xl font-black text-xl text-white active:scale-[0.97] transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
              style={{
                height: '68px',
@@ -1214,9 +1279,11 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
              <Wallet className="w-6 h-6" />
              {isSubmitting
                ? 'Processing...'
-               : compAuth
-                 ? `CHARGE COMP $${finalTotal.toFixed(2)}`
-                 : `CHARGE $${total.toFixed(2)}`}
+               : checkoutBlockedReason
+                 ? checkoutBlockedReason
+                 : compAuth
+                   ? `CHARGE COMP $${finalTotal.toFixed(2)}`
+                   : `CHARGE $${total.toFixed(2)}`}
            </button>
           ) : (
            <div className="rounded-xl border border-dashed border-slate-700/70 bg-slate-900/40 p-3 text-center">
@@ -1261,7 +1328,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
           style={{ background: 'linear-gradient(to top, rgba(5,5,8,0.98) 70%, transparent)' }}>
           <button
             onClick={handleCheckout}
-            disabled={isSubmitting}
+            disabled={isSubmitting || Boolean(checkoutBlockedReason)}
             className="w-full rounded-2xl font-black text-lg text-white active:scale-[0.97] transition-all flex items-center justify-between px-5 disabled:opacity-60"
             style={{
               height: '60px',
@@ -1275,7 +1342,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
               <Wallet className="w-5 h-5" />
               {cart.reduce((s, i) => s + i.quantity, 0)} item{cart.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}
             </span>
-            <span>{isSubmitting ? 'Processing...' : `CHARGE $${(compAuth ? finalTotal : total).toFixed(2)}`}</span>
+            <span>{isSubmitting ? 'Processing...' : checkoutBlockedReason || `CHARGE $${(compAuth ? finalTotal : total).toFixed(2)}`}</span>
           </button>
         </div>
       )}

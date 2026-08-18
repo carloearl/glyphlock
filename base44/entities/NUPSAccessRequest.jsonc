@@ -1,14 +1,18 @@
 {
   "name": "NUPSAccessRequest",
   "type": "object",
-  "description": "DACO-NUPS-ROLE-VIP-BUILD-20260717 \u00a74-5 \u2014 Owner/Administrator access requests. New requests start PENDING_OWNER_APPROVAL. No applicant may self-approve. Every decision records applicant, approver, requested vs granted role, reason, timestamp.",
+  "description": "Owner-reviewed requests for NUPS access. Entertainers, administrators, and owners may request access, but no applicant may self-approve.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "full_legal_name": {
       "type": "string"
     },
     "email": {
       "type": "string",
-      "description": "Platform-verified email of the requester (from base44 auth)."
+      "description": "Platform-verified email of the requester."
     },
     "phone": {
       "type": "string"
@@ -16,10 +20,11 @@
     "requested_role": {
       "type": "string",
       "enum": [
+        "ENTERTAINER",
         "ADMINISTRATOR",
         "OWNER"
       ],
-      "default": "ADMINISTRATOR"
+      "default": "ENTERTAINER"
     },
     "venue_id": {
       "type": "string",
@@ -43,11 +48,10 @@
     },
     "granted_role": {
       "type": "string",
-      "description": "Role actually granted on approval (ADMINISTRATOR | OWNER). May differ from requested."
+      "description": "Role granted on approval."
     },
     "decided_by": {
-      "type": "string",
-      "description": "Approving owner's email."
+      "type": "string"
     },
     "decided_at": {
       "type": "string",
@@ -58,7 +62,6 @@
     },
     "decision_log": {
       "type": "array",
-      "description": "Append-only decision history.",
       "items": {
         "type": "object",
         "properties": {
@@ -79,8 +82,7 @@
       }
     },
     "nups_user_id": {
-      "type": "string",
-      "description": "NUPSUser record created on approval."
+      "type": "string"
     },
     "mode": {
       "type": "string",
@@ -99,11 +101,13 @@
     "requested_role"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
     "read": {
       "$or": [
         {
-          "data.email": "{{user.email}}"
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {

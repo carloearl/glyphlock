@@ -2,6 +2,10 @@
   "name": "LLMFeedback",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "conversation_id": {
       "type": "string",
       "description": "Unique conversation/message identifier"

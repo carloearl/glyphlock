@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, DoorOpen, ShoppingCart, Moon, Calculator, FileText,
@@ -20,8 +20,13 @@ import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleC
 import { isSovereign } from "@/lib/nups/sovereign";
 import { useAdminOverride, setAdminOverride } from "@/lib/nups/adminView";
 import { readNUPSSession } from "@/lib/nups/persistentSession";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { OPERATING_MODE } from "@/lib/nups/operatingMode";
 
 
+import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
+import NUPSOperatorAssistant from '@/components/nups/shell/NUPSOperatorAssistant';
+import NUPSActionSafety from '@/components/nups/shell/NUPSActionSafety';
 // DACO 003 §2 — which sections each role class may see.
 // STAFF / ENTERTAINER never reach this shell for general nav (they use their
 // own scoped shells) but if they do, they get an empty sidebar — no cross-role
@@ -92,7 +97,7 @@ const NAV_SECTIONS = [
     label: "Accounting",
     items: [
       {
-        id: "accounting",  label: "Accounting",  icon: Calculator, to: "/Accounting",
+        id: "accounting",  label: "Accounting Home",  icon: Calculator, to: "/Accounting",
         children: [
           // All four children resolve to ADMIN-only routes (App.jsx guards).
           { id: "gl-reports", label: "GL Reports",   icon: BarChart3,  to: "/AccountingHub",          adminOnly: true },
@@ -126,7 +131,6 @@ const NAV_SECTIONS = [
       {
         id: "audit",       label: "Audit",            icon: ShieldCheck, to: "/admin/audit-integrity",
         children: [
-          { id: "audit-integrity", label: "Integrity",   icon: ShieldCheck,   to: "/admin/audit-integrity" },
           { id: "activity",        label: "Activity",    icon: ScrollText,    to: "/admin/activity-log" },
         ],
       },
@@ -217,7 +221,7 @@ function NavItem({ item, depth = 0, pathname, search, navigate, onNavigate }) {
         {(exactActive || headerActive) && <ChevronRight className="w-3.5 h-3.5 text-emerald-300/70" />}
       </button>
 
-      {hasChildren && parentActive && (
+      {hasChildren && (
         <div className="mt-0.5 space-y-0.5">
           {item.children.map((child) => (
             <NavItem
@@ -240,8 +244,10 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
   const navigate = useNavigate();
   const location = useLocation();
   const activeVenue = useActiveVenue();
+  const modeState = useNUPSOperatingMode(activeVenue?.id || activeVenue?.venue_id);
   const now = useClock();
   const [open, setOpen] = useState(false);
+  const navigationRef = useRef(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [roleClass, setRoleClass] = useState(ROLE_CLASS.ADMIN);
   // True while a PIN-clocked-in operator session scopes the shell.
@@ -368,28 +374,47 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const SideRail = (
-    <aside className="w-72 lg:w-64 shrink-0 border-r border-white/5 bg-gradient-to-b from-slate-950 via-slate-950 to-black flex flex-col">
-      {/* Brand block */}
-      <div className="px-4 py-5 border-b border-white/5">
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onPointerDown = (event) => {
+      if (navigationRef.current && !navigationRef.current.contains(event.target)) setOpen(false);
+    };
+    const onEscape = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onEscape);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onEscape);
+    };
+  }, [open]);
+
+  const NavigationMenu = (
+    <div
+      className="w-[min(360px,calc(100vw-24px))] max-h-[min(76vh,760px)] overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-slate-950 via-slate-950 to-black shadow-[0_24px_80px_rgba(0,0,0,.65)]"
+      role="menu"
+      aria-label="NUPS navigation"
+    >
+      <div className="flex items-center justify-between gap-3 border-b border-white/5 px-4 py-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-600 via-indigo-600 to-emerald-500 flex items-center justify-center font-black text-white text-base shadow-[0_0_24px_-4px_rgba(124,58,237,0.6)]">
-            N
-          </div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 via-indigo-600 to-emerald-500 text-base font-black text-white shadow-[0_0_24px_-4px_rgba(124,58,237,0.6)]">N</div>
           <div className="leading-tight">
-            <div className="font-black text-white text-base tracking-wide">NUPS</div>
-            <div className="text-[9px] uppercase tracking-[0.2em] text-slate-500">Nexus Unified</div>
+            <div className="text-sm font-black tracking-wide text-white">NUPS NAVIGATION</div>
+            <div className="text-[9px] uppercase tracking-[0.2em] text-slate-500">Choose one workspace destination</div>
           </div>
         </div>
+        <button type="button" onClick={() => setOpen(false)} className="rounded-lg p-2 text-slate-500 transition hover:bg-white/5 hover:text-white" aria-label="Close navigation">×</button>
       </div>
 
-      {/* Nav sections — role-scoped per DACO 003 §2 */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2">
+      <nav className="max-h-[min(62vh,620px)] overflow-y-auto px-2 py-3">
         {visibleSections.map((section) => (
-          <div key={section.label} className="mb-4">
-            <div className="px-3 mb-1 text-[9px] font-mono uppercase tracking-[0.18em] text-slate-600">
-              {section.label}
-            </div>
+          <div key={section.label} className="mb-4 last:mb-0">
+            <div className="mb-1 px-3 font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">{section.label}</div>
             <div className="space-y-0.5">
               {section.items.map((item) => (
                 <NavItem
@@ -406,42 +431,43 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
         ))}
       </nav>
 
-      {/* Footer — venue + integrity status */}
-      <div className="border-t border-white/5 p-3 space-y-2">
+      <div className="space-y-2 border-t border-white/5 p-3">
         <div className="flex items-center gap-2 text-[10px] text-slate-500">
-          <Building2 className="w-3 h-3" />
+          <Building2 className="h-3 w-3" />
           <span className="truncate">{activeVenue?.name || activeVenue?.venue_name || "No venue"}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[9px] text-emerald-400/80 font-mono uppercase tracking-wider">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-emerald-400/80">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
           BPAAA v3.0 Locked
         </div>
       </div>
-    </aside>
+    </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#05070d] text-white flex">
-      {visibleSections.length > 0 && <div className="hidden lg:flex">{SideRail}</div>}
-
-      {open && visibleSections.length > 0 && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur" onClick={() => setOpen(false)} />
-          <div className="relative h-full flex">{SideRail}</div>
-        </div>
-      )}
-
-      <main className="flex-1 min-w-0 flex flex-col">
+    <>
+      <NUPSActionSafety />
+      <div className="min-h-screen bg-[#05070d] text-white">
+      <main className="flex min-h-screen min-w-0 flex-col">
         <header className="sticky top-0 z-40 bg-[#05070d]/85 backdrop-blur-xl border-b border-white/5">
-          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 px-4 lg:px-8 min-h-16 py-2">
+          <div className="flex items-center flex-wrap gap-x-2 sm:gap-x-3 gap-y-2 px-3 sm:px-4 lg:px-8 min-h-16 py-2">
             {visibleSections.length > 0 && (
-            <button
-              onClick={() => setOpen(true)}
-              className="lg:hidden min-w-[44px] min-h-[44px] -ml-2 rounded-lg hover:bg-white/5 active:bg-white/10 text-slate-200 flex items-center justify-center"
-              aria-label="Open menu"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
+              <div ref={navigationRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setOpen((value) => !value)}
+                  className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-2.5 text-[11px] font-black transition ${open ? "border-violet-400/45 bg-violet-500/12 text-violet-100" : "border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.07]"}`}
+                  aria-label="Open NUPS navigation"
+                  aria-expanded={open}
+                >
+                  <Menu className="h-4 w-4" />
+                  <span className="hidden sm:inline">NAVIGATION</span>
+                  <ChevronRight className={`h-3.5 w-3.5 rotate-90 transition-transform ${open ? "-rotate-90" : ""}`} />
+                </button>
+                {open && (
+                  <div className="absolute left-0 top-full z-[80] mt-2">{NavigationMenu}</div>
+                )}
+              </div>
             )}
 
             {/* HOME — role-aware, honest label. Staff/entertainers go to
@@ -493,6 +519,9 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
             </button>
             )}
 
+            {!kioskOperator && <ModeToggle />}
+            {!kioskOperator && <ReceiptPrintHub inline />}
+
             <div className="hidden md:flex items-center gap-2">
               {/* W3-012A — Workspace Switcher: lets users switch between
                   Staff, Register, Manager, Back Office, Owner, System Admin
@@ -512,7 +541,6 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               )}
               {/* Cross-role controls suppressed on staff/entertainer stations (§2 rev 3) */}
               {!kioskOperator && <WorkspaceSwitcher roleClass={roleClass} platformAdmin={platformAdmin} />}
-              {!kioskOperator && <ModeToggle />}
               {!kioskOperator && <VenueSwitcher activeVenue={activeVenue} />}
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5 font-mono">
                 <span className="text-[11px] font-bold text-emerald-300">{timeStr}</span>
@@ -524,11 +552,30 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
               </Badge>
             </div>
 
-            {actions && <div className="flex items-center gap-2 flex-wrap justify-end">{actions}</div>}
+            {actions && <div className="order-last flex w-full items-center gap-2 overflow-x-auto pb-1 sm:order-none sm:w-auto sm:flex-wrap sm:justify-end sm:overflow-visible sm:pb-0">{actions}</div>}
           </div>
         </header>
 
-        <div className="flex-1 px-4 lg:px-8 py-6">
+        {modeState.isNonLive && (
+          <div className={`border-b px-3 py-2 sm:px-4 lg:px-8 ${
+            modeState.operatingMode === OPERATING_MODE.TRAINING
+              ? "border-sky-400/25 bg-sky-500/[.08] text-sky-100"
+              : modeState.operatingMode === OPERATING_MODE.DEMO
+                ? "border-amber-400/25 bg-amber-500/[.08] text-amber-100"
+                : "border-violet-400/25 bg-violet-500/[.08] text-violet-100"
+          }`} role="status" aria-live="polite">
+            <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-2 text-[11px]">
+              <div className="font-black tracking-wide">
+                {modeState.operatingMode} MODE · FUNDS OFF
+              </div>
+              <div className="text-[10px] opacity-75">
+                Non-live records are isolated from live sales, batches, payouts, receipts, and settlement totals.
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 min-w-0 px-3 sm:px-4 lg:px-8 py-4 sm:py-5 lg:py-6 overflow-x-hidden">
           {children}
         </div>
       </main>
@@ -536,5 +583,9 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
       {/* Global Search Drawer — reads from Feature Registry (§3 keystone) */}
       <GlobalSearchDrawer open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
+
+      <NUPSOperatorAssistant />
+
+    </>
   );
 }

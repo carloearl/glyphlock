@@ -18,6 +18,8 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import ModeBadge from "@/components/nups/shell/ModeBadge";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { scopeRowsToOperatingMode } from "@/lib/nups/operatingMode";
 import { Building2, User, Clock, Wifi, WifiOff, BadgeCheck, CircleOff } from "lucide-react";
 
 function Cell({ icon: Icon, label, value, valueClass = "text-white" }) {
@@ -34,6 +36,8 @@ function Cell({ icon: Icon, label, value, valueClass = "text-white" }) {
 
 export default function RegisterStatusHeader({ user, batch, registerType = "Door" }) {
   const venue = useActiveVenue();
+  const venueId = venue?.id || venue?.venue_id || null;
+  const modeState = useNUPSOperatingMode(venueId);
   const [now, setNow] = useState(new Date());
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
 
@@ -48,12 +52,24 @@ export default function RegisterStatusHeader({ user, batch, registerType = "Door
 
   // Read-only shift awareness — same entity the TimeClock writes to.
   const { data: activeShift } = useQuery({
-    queryKey: ["register-header-shift", user?.email],
+    queryKey: [
+      "register-header-shift",
+      user?.email,
+      venueId,
+      modeState.ledgerMode,
+      modeState.operatingMode,
+      modeState.trainingSession?.id || null,
+    ],
     queryFn: async () => {
       const shifts = await base44.entities.StaffShift.filter(
-        { user_email: user.email, status: "checked_in" }, "-check_in_time", 1
+        { user_email: user.email, status: "checked_in" }, "-check_in_time", 50
       );
-      return shifts[0] || null;
+      return scopeRowsToOperatingMode(shifts, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      })[0] || null;
     },
     enabled: !!user?.email,
     refetchInterval: 60000,
@@ -64,7 +80,7 @@ export default function RegisterStatusHeader({ user, batch, registerType = "Door
     : "Not clocked in";
 
   const batchValue = batch
-    ? `Open · ${(batch.batch_id || batch.id || "").toString().slice(-6).toUpperCase()}`
+    ? `${modeState.operatingMode} · ${(batch.batch_id || batch.id || "").toString().slice(-8).toUpperCase()}`
     : "No batch";
 
   return (

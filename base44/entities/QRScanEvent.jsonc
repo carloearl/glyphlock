@@ -2,6 +2,10 @@
   "name": "QRScanEvent",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "qr_asset_id": {
       "type": "string",
       "description": "Reference to QrAsset"

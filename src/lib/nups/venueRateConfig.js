@@ -16,6 +16,8 @@ import { base44 } from "@/api/base44Client";
 // First write to the entity supersedes these forever.
 const SEED_DEFAULTS = {
   cover_charge: 20,
+  house_fee: 20,
+  glyphbucks_tender_enabled: false,
   reentry_charge: 10,
   card_discount: 10,
   vip_entry: 100,
@@ -32,6 +34,11 @@ const SEED_DEFAULTS = {
   service_fee_label: "Service Fee",
   show_processing_fee: true,
   show_service_fee: false,
+  payment_terminal_enabled: false,
+  gift_card_enabled: false,
+  room_tab_enabled: false,
+  receipt_auto_prompt: true,
+  receipt_print_copies: 1,
   receipt_legal_name: "",        // Legal entity name on receipt header (e.g. RAS Liberty Holding LLC)
   receipt_footer_text: "",
   receipt_tax_id: "",

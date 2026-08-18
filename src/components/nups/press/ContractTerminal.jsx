@@ -14,6 +14,7 @@ import {
   Fingerprint, PenTool, ArrowRight, RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 import {
   ContractStatus, CURRENCY_AMOUNTS, createContractRecord, calculateFinancials,
 } from "@/components/nups/press/types";
@@ -146,7 +147,7 @@ export default function ContractTerminal({ onArchive }) {
   };
 
   const handlePrint = () => {
-    window.print();
+    printCurrentNupsView();
   };
 
   const handleReset = () => {

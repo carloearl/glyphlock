@@ -29,7 +29,7 @@ export const NAV_SECTIONS = [
     label: "Modules",
     visibility: "public",
     items: [
-      { label: "QR Verification", page: "Qr", visibility: "public" },
+      { label: "QR Verification", page: "SecureQRStudio", visibility: "public" },
       { label: "Image Processing", page: "ImageLab", visibility: "public" },
       { label: "AI Image Generator", page: "ImageGenerator", visibility: "public" },
       { label: "GlyphBot Intelligence", page: "GlyphBot", visibility: "public" },
@@ -105,7 +105,7 @@ export const FOOTER_LINKS = {
     { label: "Accessibility", page: "Accessibility", visibility: "public" }
   ],
   modules: [
-    { label: "QR Verification", page: "Qr", visibility: "public" },
+    { label: "QR Verification", page: "SecureQRStudio", visibility: "public" },
     { label: "Image Processing", page: "ImageLab", visibility: "public" },
     { label: "AI Image Generator", page: "ImageGenerator", visibility: "public" },
     { label: "GlyphBot Intelligence", page: "GlyphBot", visibility: "public" },

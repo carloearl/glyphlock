@@ -1,8 +1,12 @@
 {
   "name": "VIPContract",
   "type": "object",
-  "description": "DACO-VIP-FIRST-BUILD-20260717 \u2014 Authoritative VIP contract record.",
+  "description": "DACO-VIP-FIRST-BUILD-20260717 — Authoritative VIP contract record.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "contract_id": {
       "type": "string",
       "description": "Unique human ref VIP-YYMMDD-NNNN."
@@ -168,7 +172,7 @@
     },
     "receipt_id": {
       "type": "string",
-      "description": "Receipt reference RCPT-\u2026"
+      "description": "Receipt reference RCPT-…"
     },
     "session_id": {
       "type": "string",
@@ -177,7 +181,7 @@
     "signatures": {
       "type": "object",
       "additionalProperties": true,
-      "description": "role \u2192 { name, signed_at, ref }."
+      "description": "role → { name, signed_at, ref }."
     },
     "terms_locked": {
       "type": "boolean",

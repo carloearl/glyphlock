@@ -61,7 +61,8 @@ Deno.serve(async (req) => {
     let fetchError = null;
 
     try {
-      const pageResp = await fetch(targetUrl, {
+      const pageResp = await fetch(assertSafePublicUrl(targetUrl), {
+        redirect: 'error',
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -167,7 +168,8 @@ Analyze the page and respond with this exact JSON structure:
     let pageContent = '';
     let fetchError = null;
     try {
-      const pageResp = await fetch(targetUrl, {
+      const pageResp = await fetch(assertSafePublicUrl(targetUrl), {
+        redirect: 'error',
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
           'Accept': 'text/html,application/xhtml+xml,*/*;q=0.8'
@@ -277,6 +279,37 @@ Continue working on the task. Respond with JSON:
 
 
 // ── HELPERS ──
+
+// SSRF guard: only allow plain http(s) requests to public hosts.
+function assertSafePublicUrl(rawUrl) {
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw new Error('Invalid URL');
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error('Only http and https URLs are allowed');
+  }
+  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  const blockedHost =
+    host === 'localhost' ||
+    host.endsWith('.localhost') ||
+    host.endsWith('.internal') ||
+    host.endsWith('.local') ||
+    host === '::1' ||
+    host === '0.0.0.0' ||
+    host.startsWith('127.') ||
+    host.startsWith('10.') ||
+    host.startsWith('169.254.') ||
+    host.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+    /^(fc|fd|fe8|fe9|fea|feb)/.test(host);
+  if (blockedHost) {
+    throw new Error('URL host is not allowed');
+  }
+  return parsed.toString();
+}
 
 function extractTextContent(html) {
   // Remove scripts, styles, comments

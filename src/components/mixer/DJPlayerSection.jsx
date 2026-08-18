@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PlayerDeck from "@/components/mixer/PlayerDeck";
 import Crossfader from "@/components/mixer/Crossfader";
+import DJMasterAudioControls from "@/components/mixer/DJMasterAudioControls";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftRight, ChevronUp, ChevronDown, Tv, WandSparkles } from "lucide-react";
 import { getClubTVSender, openClubTVWindow } from "@/components/mixer/ClubBroadcastChannel";
@@ -47,6 +48,8 @@ export default function DJPlayerSection({
   const [deckBMuted, setDeckBMuted] = useState(false);
   const [deckABaseVol, setDeckABaseVol] = useState(1);
   const [deckBBaseVol, setDeckBBaseVol] = useState(1);
+  const [masterVolume, setMasterVolume] = useState(1);
+  const [masterMuted, setMasterMuted] = useState(false);
   // Auto Blend runs the smoothstep crossfade at track end even when AUTO-DJ is
   // disarmed, so the crossfader never has to be ridden by hand.
   const [autoBlend, setAutoBlend] = useState(true);
@@ -128,14 +131,14 @@ export default function DJPlayerSection({
   const deckAVolume = useMemo(() => {
     const angle = (Math.max(0, Math.min(100, crossfade)) / 100) * (Math.PI / 2);
     const gain = Math.cos(angle);
-    return deckAMuted ? 0 : deckABaseVol * gain;
-  }, [crossfade, deckAMuted, deckABaseVol]);
+    return deckAMuted || masterMuted ? 0 : deckABaseVol * gain * masterVolume;
+  }, [crossfade, deckAMuted, deckABaseVol, masterMuted, masterVolume]);
 
   const deckBVolume = useMemo(() => {
     const angle = (Math.max(0, Math.min(100, crossfade)) / 100) * (Math.PI / 2);
     const gain = Math.sin(angle);
-    return deckBMuted ? 0 : deckBBaseVol * gain;
-  }, [crossfade, deckBMuted, deckBBaseVol]);
+    return deckBMuted || masterMuted ? 0 : deckBBaseVol * gain * masterVolume;
+  }, [crossfade, deckBMuted, deckBBaseVol, masterMuted, masterVolume]);
 
   const finishPromotion = useCallback((targetDeck, reason = "auto_transition") => {
     const promotedId = targetDeck === "A" ? deckASongId : deckBSongId;
@@ -182,6 +185,20 @@ export default function DJPlayerSection({
     };
     rafRef.current = requestAnimationFrame(tick);
   }, [activeDeck, deckASongId, deckBSongId, crossfade, transitionSeconds, finishPromotion]);
+
+  const handlePlayLive = useCallback(() => {
+    const liveRef = activeDeck === "A" ? deckARef.current : deckBRef.current;
+    if (!liveRef || !activeSongId) return;
+    setMasterMuted(false);
+    if (activeDeck === "A") {
+      setDeckAMuted(false);
+      if (deckABaseVol === 0) setDeckABaseVol(1);
+    } else {
+      setDeckBMuted(false);
+      if (deckBBaseVol === 0) setDeckBBaseVol(1);
+    }
+    Promise.resolve(liveRef.play?.()).catch((error) => handleDeckPlaybackError(activeDeck, error));
+  }, [activeDeck, activeSongId, deckABaseVol, deckBBaseVol]);
 
   const handleDeckPlaybackError = useCallback((deck, error) => {
     const songId = deck === "A" ? deckASongId : deckBSongId;
@@ -307,7 +324,14 @@ export default function DJPlayerSection({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-1">
+          <DJMasterAudioControls
+            volume={masterVolume}
+            muted={masterMuted}
+            onPlay={handlePlayLive}
+            onMute={() => setMasterMuted((value) => !value)}
+            onVolumeChange={(value) => { setMasterVolume(value); setMasterMuted(value === 0); }}
+          />
           <Button
             size="sm"
             variant="outline"

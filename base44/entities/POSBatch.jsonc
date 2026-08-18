@@ -33,6 +33,12 @@
     "cashier": {
       "type": "string"
     },
+    "cashier_email": {
+      "type": "string"
+    },
+    "cashier_name": {
+      "type": "string"
+    },
     "opened_by": {
       "type": "string",
       "description": "Manager who opened the batch (Manager Console only)."
@@ -54,13 +60,45 @@
       "type": "string",
       "enum": [
         "open",
-        "closed"
+        "closed",
+        "REQUIRES_REVIEW",
+        "void"
       ],
       "default": "open"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL",
+      "description": "Ledger boundary for this shift batch."
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false
+    },
+    "training_session_id": {
+      "type": "string"
     },
     "discrepancy": {
       "type": "number",
       "default": 0
+    },
+    "original_closing_cash": {
+      "type": "number"
+    },
+    "closing_cash_entered_by": {
+      "type": "string"
+    },
+    "closing_cash_entered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "discrepancy_note": {
+      "type": "string"
     },
     "notes": {
       "type": "string"

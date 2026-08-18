@@ -9,6 +9,9 @@
     "lint": "eslint .",
     "typecheck": "tsc -p ./jsconfig.json",
     "audit:entities": "node scripts/audit-entity-model.mjs",
+    "audit:nups-ui": "node scripts/audit-nups-operational-ui.mjs",
+    "check:nups-isolation": "node scripts/check-nups-mode-boundaries.mjs",
+    "check:secrets": "node scripts/check-no-tracked-secrets.mjs",
     "preview": "vite preview",
     "check:dj-functions": "node scripts/check-dj-function-sdk.mjs"
   },

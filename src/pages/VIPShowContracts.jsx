@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import VIPShowReprint from "@/components/nups/vip/VIPShowReprint";
 import { Crown, Search, Link2, FileCheck2, DollarSign, ShieldCheck, Printer, Loader2 } from "lucide-react";
 
+import { printCurrentNupsView } from '@/lib/nups/receiptService';
 /**
  * MANAGER DASHBOARD — VIP Show Contract search & reprint (GlyphLock styled).
  * Searchable by guest name, membership_id, verify_ref, contract_ref, with
@@ -60,7 +61,7 @@ export default function VIPShowContracts() {
     return (
       <div className="min-h-screen bg-neutral-200 p-6">
         <div className="mx-auto w-[800px] max-w-full flex gap-2 mb-4 print:hidden">
-          <button onClick={() => window.print()} className="rounded-lg bg-[#152049] text-white font-bold px-5 py-2.5 flex items-center gap-2"><Printer className="w-4 h-4" /> Print</button>
+          <button onClick={() => printCurrentNupsView()} className="rounded-lg bg-[#152049] text-white font-bold px-5 py-2.5 flex items-center gap-2"><Printer className="w-4 h-4" /> Print</button>
           <button onClick={() => setReprint(null)} className="rounded-lg border border-neutral-400 bg-white px-5 py-2.5 font-semibold text-neutral-800">Back to search</button>
         </div>
         <VIPShowReprint record={reprint.record} anchor={reprint.anchor} />

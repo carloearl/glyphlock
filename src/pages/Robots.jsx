@@ -8,8 +8,8 @@ User-agent: *
 Allow: /
 
 # Public Tools
-Allow: /qr
-Allow: /qr/*
+Allow: /SecureQRStudio
+Allow: /SecureQRStudio/*
 Allow: /image-lab
 Allow: /steganography
 Allow: /blockchain

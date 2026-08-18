@@ -2,6 +2,10 @@
   "name": "RateLimitAttempt",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "resource_id": {
       "type": "string",
       "description": "Resource being rate-limited (serial_number, payment_intent_id, pin_auth:<ip>, etc.)"
@@ -49,7 +53,18 @@
     "attempt_timestamp"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "user_condition": {
         "role": "admin"

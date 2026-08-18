@@ -77,10 +77,10 @@ export default function DailySettlementSummary() {
       <CardHeader className="pb-3 flex flex-row items-start justify-between gap-2 flex-wrap">
         <div>
           <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-emerald-300/80 font-bold">
-            Daily Settlement
+            2 · Tender & Disbursement
           </div>
           <CardTitle className="text-white text-base sm:text-lg font-black mt-0.5">
-            Cash & Card · Today
+            Daily Settlement · Today
           </CardTitle>
         </div>
         <Badge variant="outline" className="border-emerald-500/40 text-emerald-300 font-mono text-[10px]">
@@ -93,9 +93,9 @@ export default function DailySettlementSummary() {
         <div>
           <div className="flex items-center justify-between text-[11px] mb-1.5">
             <span className="font-mono text-slate-400">
-              Net revenue <span className="text-white font-bold">{fmt(totals.net)}</span>
+              Gross ringed <span className="text-white font-bold">{fmt(totals.gross)}</span>
             </span>
-            <span className="font-mono text-slate-500">Gross {fmt(totals.gross)}</span>
+            <span className="font-mono text-slate-500">Tender collected {fmt(totals.net)}</span>
           </div>
           <div className="h-3 w-full rounded-full bg-white/[0.04] border border-white/10 overflow-hidden flex">
             <div
@@ -115,8 +115,8 @@ export default function DailySettlementSummary() {
           </div>
         </div>
 
-        {/* Line items — 2 cols mobile, 4 cols desktop */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+        {/* Ordered accounting line items */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
           <Stat
             icon={Banknote}
             label="Cash In"
@@ -165,12 +165,12 @@ const TONES = {
 
 function Stat({ icon: Icon, label, value, tone = "emerald", highlight = false }) {
   return (
-    <div className={`rounded-xl border p-2.5 sm:p-3 ${TONES[tone]} ${highlight ? "shadow-[0_0_18px_-6px_rgba(139,92,246,0.5)]" : ""}`}>
-      <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider opacity-80">
-        <Icon className="w-3 h-3" />
-        <span className="truncate">{label}</span>
+    <div className={`flex min-h-[58px] items-center gap-3 rounded-xl border p-3 ${TONES[tone]} ${highlight ? "shadow-[0_0_18px_-6px_rgba(139,92,246,0.5)]" : ""}`}>
+      <div className="flex min-w-0 flex-1 items-center gap-2 font-mono text-[10px] uppercase tracking-wider opacity-80">
+        <Icon className="h-4 w-4 shrink-0" />
+        <span>{label}</span>
       </div>
-      <div className="text-base sm:text-lg font-black font-mono text-white mt-1">
+      <div className="shrink-0 text-right font-mono text-lg font-black text-white sm:text-xl">
         {value}
       </div>
     </div>

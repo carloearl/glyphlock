@@ -26,7 +26,8 @@ const PANELS = [
   { key: "clockIn", label: "Staff Clock In", icon: Clock, color: "from-cyan-700 to-cyan-900" },
   { key: "clockOut", label: "Staff Clock Out", icon: LogOut, color: "from-slate-700 to-slate-900" },
   { key: "admin", label: "Owner / Admin Sign In", icon: ShieldCheck, color: "from-violet-700 to-violet-900" },
-  { key: "request", label: "Request Owner / Admin Access", icon: UserPlus, color: "from-indigo-700 to-indigo-900" },
+  { key: "testRequest", label: "Request Test Access", icon: UserPlus, color: "from-indigo-700 to-indigo-900" },
+  { key: "trainingRequest", label: "Request Training Access", icon: UserPlus, color: "from-emerald-700 to-emerald-900" },
 ];
 
 export default function NUPSKiosk() {
@@ -110,7 +111,6 @@ export default function NUPSKiosk() {
             />
           </div>
           <h1 className="text-4xl font-black tracking-[0.3em] bg-gradient-to-r from-cyan-300 via-white to-violet-300 bg-clip-text text-transparent">NUPS</h1>
-          <p className="text-slate-500 text-sm mt-2 tracking-wide">Staff Entry & Clock Station</p>
         </div>
 
         {!secureDisplay ? (
@@ -195,7 +195,8 @@ export default function NUPSKiosk() {
             {panel === "clockIn" && <KioskPinPad mode="clockIn" onSuccess={onClockIn} />}
             {panel === "clockOut" && <KioskPinPad mode="clockOut" onSuccess={onClockOut} />}
             {panel === "admin" && <OwnerAdminSignIn />}
-            {panel === "request" && <AccessRequestForm />}
+            {panel === "testRequest" && <AccessRequestForm requestedMode="TEST" />}
+            {panel === "trainingRequest" && <AccessRequestForm requestedMode="DEMO" />}
           </div>
         )}
       </div>

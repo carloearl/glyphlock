@@ -9,6 +9,9 @@ import { Car, Plus, Users, CheckCircle, Banknote, AlertCircle, Ticket, Edit3, Tr
 import { toast } from "sonner";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
+import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
+import { scopeRowsToOperatingMode, stampOperationalRecord } from "@/lib/nups/operatingMode";
+import { writeEntity } from "@/lib/nups/writeEntity";
 import DriverPayoutPanel from "@/components/nups/frontdoor/DriverPayoutPanel";
 // BPAA-NUPS-AUDIT-001 §4 — driver credit is a SEPARATE house-absorbed event
 import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
@@ -40,8 +43,10 @@ function makeDriverId(venueId) {
 export default function DriverQuickAdd({ user }) {
   const qc = useQueryClient();
   const activeVenue = useActiveVenue();
-  const venueId = activeVenue?.id || null;
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const modeState = useNUPSOperatingMode(venueId);
   const today = todayDate();
+  const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
 
   const [rates, setRates] = useState(null);
   const [newName, setNewName] = useState("");
@@ -63,31 +68,50 @@ export default function DriverQuickAdd({ user }) {
 
   // All saved drivers for this venue
   const { data: profiles = [] } = useQuery({
-    queryKey: ["driver-profiles", venueId],
-    queryFn: () => venueId
-      ? base44.entities.DriverProfile.filter({ venue_id: venueId, status: "active" }, "-last_active_at", 200)
-      : Promise.resolve([]),
+    queryKey: ["driver-profiles", venueId, ...modeQueryKey],
+    queryFn: async () => {
+      if (!venueId) return [];
+      const rows = await base44.entities.DriverProfile.filter({ venue_id: venueId, status: "active" }, "-last_active_at", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     enabled: !!venueId,
     staleTime: 30000,
   });
 
   // Tonight's open driver sessions
   const { data: sessions = [] } = useQuery({
-    queryKey: ["driver-sessions", today, venueId],
-    queryFn: () => venueId
-      ? base44.entities.DriverPayout.filter({ payout_date: today, venue_id: venueId })
-      : Promise.resolve([]),
+    queryKey: ["driver-sessions", today, venueId, ...modeQueryKey],
+    queryFn: async () => {
+      if (!venueId) return [];
+      const rows = await base44.entities.DriverPayout.filter({ payout_date: today, venue_id: venueId }, "-created_date", 500);
+      return scopeRowsToOperatingMode(rows, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      });
+    },
     enabled: !!venueId,
     refetchInterval: 30000,
   });
 
   // Active POS batch — pin disbursements to it
   const { data: activeBatch } = useQuery({
-    queryKey: ["active-pos-batch", venueId],
+    queryKey: ["active-pos-batch", venueId, ...modeQueryKey],
     queryFn: async () => {
       if (!venueId) return null;
-      const batches = await base44.entities.POSBatch.filter({ status: "open" });
-      return batches.find(b => b.venue_id === venueId) || batches[0] || null;
+      const batches = await base44.entities.POSBatch.filter({ status: "open" }, "-created_date", 100);
+      return scopeRowsToOperatingMode(batches, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        kind: "transactional",
+      })[0] || null;
     },
     enabled: !!venueId,
     refetchInterval: 60000,
@@ -104,7 +128,10 @@ export default function DriverQuickAdd({ user }) {
   // counts at once after the cover has been rung up at the register.
   const savePayout = useMutation({
     mutationFn: async ({ profile, payload }) => {
-      let session = sessionByDriver.get(profile.driver_id);
+      const session = sessionByDriver.get(profile.driver_id);
+      const liveActor = me || await base44.auth.me().catch(() => null);
+      const actorRole = user?._highestRole || user?.role || liveActor?._highestRole || liveActor?.role || "DOOR_GIRL";
+      const confirmedAt = new Date().toISOString();
       const baseMeta = {
         source: "driver_quick_add",
         affiliated: !!profile.affiliated,
@@ -115,35 +142,60 @@ export default function DriverQuickAdd({ user }) {
         batch_reference: batchRef,
         breakdown: payload.breakdown,
         headcount_confirmed: true,
-        confirmed_by: user?.email || user?.username || "door",
-        confirmed_at: new Date().toISOString(),
+        confirmed_by: user?.email || liveActor?.email || user?.username || "door",
+        confirmed_at: confirmedAt,
+        operating_mode: modeState.operatingMode,
       };
 
-      if (!session) {
-        return base44.entities.DriverPayout.create({
-          payout_id: `DPO-${profile.driver_id}-${Date.now().toString(36).toUpperCase()}`,
-          contractor_id: profile.driver_id,
-          contractor_name: profile.name,
-          venue_id: venueId,
-          payout_date: today,
-          payout_type: "shift_earnings",
-          bills_redeemed: [],
-          total_face_value: 0,
-          redemption_rate: 0,
-          total_payout: payload.total_payout,
-          payment_method: "cash",
-          status: "pending",
-          tax_year: thisYear(),
-          payment_reference: batchRef ? `BATCH-${batchRef}` : null,
-          notes: JSON.stringify(baseMeta),
-        });
-      }
-
-      const prevMeta = safeJSON(session.notes);
-      return base44.entities.DriverPayout.update(session.id, {
-        notes: JSON.stringify({ ...prevMeta, ...baseMeta }),
-        total_payout: payload.total_payout,
+      const record = stampOperationalRecord({
+        ...(session || {}),
+        payout_id: session?.payout_id || `DPO-${profile.driver_id}-${Date.now().toString(36).toUpperCase()}`,
+        contractor_id: profile.driver_id,
+        contractor_name: profile.name,
+        venue_id: venueId,
+        payout_date: today,
+        payout_type: "shift_earnings",
+        bills_redeemed: session?.bills_redeemed || [],
+        total_face_value: Number(session?.total_face_value || 0),
+        redemption_rate: Number(session?.redemption_rate || 0),
+        total_payout: Number(payload.total_payout || 0),
+        payment_method: session?.payment_method || "cash",
+        status: session?.status || "pending",
+        payout_status: session?.payout_status || "PENDING",
+        tax_year: session?.tax_year || thisYear(),
+        payment_reference: batchRef ? `BATCH-${batchRef}` : null,
+        headcount_confirmed: true,
+        confirmed_by: baseMeta.confirmed_by,
+        confirmed_at: confirmedAt,
+        notes: JSON.stringify({ ...safeJSON(session?.notes), ...baseMeta }),
+      }, {
+        ledgerMode: modeState.ledgerMode,
+        operatingMode: modeState.operatingMode,
+        venueId,
+        supportsDemoFlag: true,
+        supportsTrainingSession: true,
       });
+
+      const result = await writeEntity({
+        entity: "DriverPayout",
+        operation: session ? "update" : "create",
+        recordId: session?.id || null,
+        data: record,
+        actor: {
+          email: liveActor?.email || user?.email,
+          id: liveActor?.id || user?.id,
+          role: actorRole,
+        },
+        venue_id: venueId,
+        intent: `${modeState.operatingMode}_DRIVER_CREDIT`,
+        requestContext: {
+          mode: modeState.ledgerMode,
+          validation_run: modeState.isNonLive,
+          session_id: modeState.trainingSession?.id || null,
+        },
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Driver payout save was rejected.");
+      return result.value || record;
     },
     onSuccess: (saved, variables) => {
       qc.invalidateQueries({ queryKey: ["driver-sessions"] });

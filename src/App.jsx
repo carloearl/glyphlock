@@ -1,5 +1,6 @@
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
@@ -15,11 +16,14 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import SettlementReports from './pages/SettlementReports';
 import GovernanceHub from './pages/GovernanceHub';
+import CodeOfEthics from './pages/CodeOfEthics';
+import EmailDeliveryLogPage from './pages/EmailDeliveryLogPage';
 import NUPSPostLogin from './pages/NUPSPostLogin';
 import SystemAudit from './pages/SystemAudit';
 import OfficialChecks from './pages/OfficialChecks';
 import NUPSLanding from './pages/NUPSLanding';
 import NUPSSandbox from './pages/NUPSSandbox';
+import NUPSTraining from './pages/NUPSTraining';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSStaff from './pages/NUPSStaff';
 import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
@@ -88,6 +92,7 @@ import AccessRequests from './pages/AccessRequests';
 import RoleViews from './pages/RoleViews';
 import DJHome from './pages/DJHome';
 import GlyphBotMixer from './pages/GlyphBotMixer';
+import SecureQRStudio from './pages/SecureQRStudio';
 import KioskShell from './components/nups/KioskShell';
 import KioskSessionGuard from './components/nups/KioskSessionGuard';
 import RoleClassGuard from './components/nups/RoleClassGuard';
@@ -96,6 +101,7 @@ import GlobalBackButton from './components/nups/GlobalBackButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 
+import '@/styles/nups-print.css';
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -109,23 +115,24 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
   const location = useLocation();
+  const currentPath = location.pathname;
+  const currentPathLower = currentPath.toLowerCase();
+  const rendersWhileAuthLoads = currentPathLower === '/' || currentPathLower === '/home' || currentPathLower.startsWith('/nupslanding') || currentPathLower.startsWith('/landing');
 
   // Record EVERY route change in the central nav stack (idempotent), before
   // children render — so the Back button works on all pages, not only pages
   // that kept it mounted while navigating.
   recordNavigation(location.pathname + location.search);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if ((isLoadingPublicSettings || isLoadingAuth) && !rendersWhileAuthLoads) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center bg-slate-950 text-white">
+        <div className="w-8 h-8 border-4 border-slate-700 border-t-cyan-300 rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  const currentPath = location.pathname;
-  const currentPathLower = currentPath.toLowerCase();
-  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk', '/vipsale', '/managerconsole'];
+  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupstraining', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk', '/vipsale', '/managerconsole'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
@@ -140,7 +147,7 @@ const AuthenticatedApp = () => {
   // Fullscreen pages that must render WITHOUT the GlyphLock layout wrapper.
   // All NUPS operator pages live here so kiosk mode shows only the NUPS UI.
   const fullscreenPaths = [
-    '/nupslanding', '/landing', '/nupsgateway', '/unauthorized',
+    '/nupslanding', '/landing', '/nupsgateway', '/nupstraining', '/unauthorized',
     '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff',
     '/frontdoor', '/entertainercheckin', '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome', '/glyphlockfinancialpage',
     '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
@@ -198,6 +205,8 @@ const AuthenticatedApp = () => {
             bookmark or link resurrects the fragmented login surfaces. */}
         <Route path="/NUPSGateway" element={<Navigate to="/NUPSKiosk" replace />} />
         <Route path="/nupsgateway" element={<Navigate to="/NUPSKiosk" replace />} />
+        <Route path="/NUPSTraining" element={<LayoutWrapper currentPageName="NUPSTraining"><NUPSTraining /></LayoutWrapper>} />
+
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/nupssandbox" element={<NUPSSandbox />} />
         <Route path="/NUPSLogin" element={<Navigate to="/NUPSKiosk?panel=clockIn" replace />} />
@@ -343,12 +352,18 @@ const AuthenticatedApp = () => {
       <GlobalBackButton />
       <Routes>
         <Route path="/" element={<MainPage />} />
+        <Route path="/SecureQRStudio" element={<SecureQRStudio />} />
+        <Route path="/Qr" element={<Navigate to="/SecureQRStudio" replace />} />
+        <Route path="/qr" element={<Navigate to="/SecureQRStudio" replace />} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}
-        <Route path="/AnalyticsDashboard" element={<LayoutWrapper currentPageName="AnalyticsDashboard"><AnalyticsDashboard /></LayoutWrapper>} />
-        <Route path="/SettlementReports" element={<LayoutWrapper currentPageName="SettlementReports"><SettlementReports /></LayoutWrapper>} />
-        <Route path="/GovernanceHub" element={<LayoutWrapper currentPageName="GovernanceHub"><GovernanceHub /></LayoutWrapper>} />
+        <Route path="/AnalyticsDashboard" element={<AnalyticsDashboard />} />
+        <Route path="/SettlementReports" element={<SettlementReports />} />
+        <Route path="/GovernanceHub" element={<GovernanceHub />} />
+        <Route path="/CodeOfEthics" element={<CodeOfEthics />} />
+        <Route path="/codeofethics" element={<CodeOfEthics />} />
+        <Route path="/admin/email-log" element={<EmailDeliveryLogPage />} />
         <Route path="/NUPSPostLogin" element={<NUPSPostLogin />} />
         <Route path="/NUPSMISReport" element={<NUPSMISReport />} />
         <Route path="/NUPSDemoManager" element={<NUPSDemoManager />} />
@@ -359,34 +374,34 @@ const AuthenticatedApp = () => {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/CaseStudyNUPS" element={<CaseStudyNUPS />} />
         <Route path="/CaseStudyOracleOHIP" element={<CaseStudyOracleOHIP />} />
-        <Route path="/admin/activity-log" element={<LayoutWrapper currentPageName="ActivityLogViewer"><ActivityLogViewer /></LayoutWrapper>} />
-        <Route path="/admin/settlement" element={<LayoutWrapper currentPageName="DailySettlementDashboard"><DailySettlementDashboard /></LayoutWrapper>} />
-        <Route path="/admin/payout-history" element={<LayoutWrapper currentPageName="DriverPayoutHistory"><DriverPayoutHistory /></LayoutWrapper>} />
-        <Route path="/Accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
-        <Route path="/accounting" element={<LayoutWrapper currentPageName="Accounting"><Accounting /></LayoutWrapper>} />
-        <Route path="/admin/audit-integrity" element={<LayoutWrapper currentPageName="AuditIntegrity"><AuditIntegrity /></LayoutWrapper>} />
-        <Route path="/Search" element={<LayoutWrapper currentPageName="UnifiedSearch"><UnifiedSearch /></LayoutWrapper>} />
-        <Route path="/search" element={<LayoutWrapper currentPageName="UnifiedSearch"><UnifiedSearch /></LayoutWrapper>} />
-        <Route path="/Tonight" element={<LayoutWrapper currentPageName="Tonight"><Tonight /></LayoutWrapper>} />
-        <Route path="/tonight" element={<LayoutWrapper currentPageName="Tonight"><Tonight /></LayoutWrapper>} />
-        <Route path="/admin/venue-settings" element={<LayoutWrapper currentPageName="VenueAdminSettings"><VenueAdminSettings /></LayoutWrapper>} />
-        <Route path="/Contracts" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
-        <Route path="/contracts" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
-        <Route path="/ContractsHub" element={<LayoutWrapper currentPageName="ContractsHub"><ContractsHub /></LayoutWrapper>} />
-        <Route path="/Register" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
-        <Route path="/register" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
-        <Route path="/RegisterConsole" element={<LayoutWrapper currentPageName="RegisterConsole"><RegisterConsole /></LayoutWrapper>} />
-        <Route path="/Receipts" element={<LayoutWrapper currentPageName="Receipts"><Receipts /></LayoutWrapper>} />
-        <Route path="/receipts" element={<LayoutWrapper currentPageName="Receipts"><Receipts /></LayoutWrapper>} />
-        <Route path="/DriverPayouts" element={<LayoutWrapper currentPageName="DriverPayouts"><DriverPayouts /></LayoutWrapper>} />
-        <Route path="/driverpayouts" element={<LayoutWrapper currentPageName="DriverPayouts"><DriverPayouts /></LayoutWrapper>} />
-        <Route path="/NUPSHub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
-        <Route path="/nupshub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
-        <Route path="/Hub" element={<LayoutWrapper currentPageName="NUPSHub"><NUPSHub /></LayoutWrapper>} />
-        <Route path="/GlyphBotMixer" element={<LayoutWrapper currentPageName="GlyphBotMixer"><GlyphBotMixer /></LayoutWrapper>} />
-        <Route path="/glyphbotmixer" element={<LayoutWrapper currentPageName="GlyphBotMixer"><GlyphBotMixer /></LayoutWrapper>} />
-        <Route path="/BotAnalytics" element={<LayoutWrapper currentPageName="BotAnalytics"><BotAnalytics /></LayoutWrapper>} />
-        <Route path="/botanalytics" element={<LayoutWrapper currentPageName="BotAnalytics"><BotAnalytics /></LayoutWrapper>} />
+        <Route path="/admin/activity-log" element={<ActivityLogViewer />} />
+        <Route path="/admin/settlement" element={<DailySettlementDashboard />} />
+        <Route path="/admin/payout-history" element={<DriverPayoutHistory />} />
+        <Route path="/Accounting" element={<Accounting />} />
+        <Route path="/accounting" element={<Accounting />} />
+        <Route path="/admin/audit-integrity" element={<AuditIntegrity />} />
+        <Route path="/Search" element={<UnifiedSearch />} />
+        <Route path="/search" element={<UnifiedSearch />} />
+        <Route path="/Tonight" element={<Tonight />} />
+        <Route path="/tonight" element={<Tonight />} />
+        <Route path="/admin/venue-settings" element={<VenueAdminSettings />} />
+        <Route path="/Contracts" element={<ContractsHub />} />
+        <Route path="/contracts" element={<ContractsHub />} />
+        <Route path="/ContractsHub" element={<ContractsHub />} />
+        <Route path="/Register" element={<RegisterConsole />} />
+        <Route path="/register" element={<RegisterConsole />} />
+        <Route path="/RegisterConsole" element={<RegisterConsole />} />
+        <Route path="/Receipts" element={<Receipts />} />
+        <Route path="/receipts" element={<Receipts />} />
+        <Route path="/DriverPayouts" element={<DriverPayouts />} />
+        <Route path="/driverpayouts" element={<DriverPayouts />} />
+        <Route path="/NUPSHub" element={<NUPSHub />} />
+        <Route path="/nupshub" element={<NUPSHub />} />
+        <Route path="/Hub" element={<NUPSHub />} />
+        <Route path="/GlyphBotMixer" element={<GlyphBotMixer />} />
+        <Route path="/glyphbotmixer" element={<GlyphBotMixer />} />
+        <Route path="/BotAnalytics" element={<BotAnalytics />} />
+        <Route path="/botanalytics" element={<BotAnalytics />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
@@ -407,6 +422,7 @@ function App() {
           </ErrorBoundary>
         </Router>
         <Toaster />
+        <SonnerToaster position="top-center" richColors closeButton />
         <VisualEditAgent />
       </QueryClientProvider>
     </AuthProvider>

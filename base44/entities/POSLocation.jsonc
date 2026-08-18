@@ -2,6 +2,10 @@
   "name": "POSLocation",
   "type": "object",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "location_id": {
       "type": "string",
       "description": "Unique location identifier"

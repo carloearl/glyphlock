@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Beaker, ShieldCheck, FlaskConical } from "lucide-react";
+import { Beaker, ShieldCheck, FlaskConical, GraduationCap } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
+import { OPERATING_MODE, getOperatingMode, MODE_CHANGE_EVENT } from "@/lib/nups/operatingMode";
 
 /**
  * BPAA-NUPS-MASTER-001 §2 / F-7 — Mode badge.
@@ -12,13 +13,21 @@ import { loadVenueRates } from "@/lib/nups/venueRateConfig";
  * are recording.
  */
 const STYLES = {
-  REAL: {
+  LIVE: {
     label: "LIVE",
     icon: ShieldCheck,
     color: "#10b981",
     bg: "rgba(16,185,129,0.12)",
     border: "rgba(16,185,129,0.45)",
     tip: "Live books — every write hits the real ledger.",
+  },
+  TRAINING: {
+    label: "TRAINING",
+    icon: GraduationCap,
+    color: "#38bdf8",
+    bg: "rgba(56,189,248,0.12)",
+    border: "rgba(56,189,248,0.5)",
+    tip: "Guided training — funds off and records isolated to this session.",
   },
   DEMO: {
     label: "DEMO",
@@ -41,24 +50,32 @@ const STYLES = {
 export default function ModeBadge() {
   const venue = useActiveVenue();
   const venueId = venue?.id;
-  const [mode, setMode] = useState("REAL");
+  const [mode, setMode] = useState(OPERATING_MODE.LIVE);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!venueId) { setLoading(false); return; }
     let cancelled = false;
-    (async () => {
+    const refresh = async () => {
       const rates = await loadVenueRates(venueId);
       if (!cancelled) {
-        setMode(String(rates?.mode || "REAL").toUpperCase());
+        setMode(getOperatingMode(String(rates?.mode || "REAL").toUpperCase(), venueId));
         setLoading(false);
       }
-    })();
-    return () => { cancelled = true; };
+    };
+    refresh();
+    const onModeChanged = (event) => {
+      if (!event?.detail?.venue_id || event.detail.venue_id === venueId) refresh();
+    };
+    window.addEventListener(MODE_CHANGE_EVENT, onModeChanged);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(MODE_CHANGE_EVENT, onModeChanged);
+    };
   }, [venueId]);
 
   if (loading) return null;
-  const cfg = STYLES[mode] || STYLES.REAL;
+  const cfg = STYLES[mode] || STYLES.LIVE;
   const Icon = cfg.icon;
 
   return (
@@ -73,7 +90,7 @@ export default function ModeBadge() {
     >
       <Icon className="w-3.5 h-3.5" />
       <span className="text-[10px] font-black tracking-wider">{cfg.label}</span>
-      {mode !== "REAL" && (
+      {mode !== OPERATING_MODE.LIVE && (
         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: cfg.color }} />
       )}
     </div>

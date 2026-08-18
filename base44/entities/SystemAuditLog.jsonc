@@ -61,26 +61,41 @@
   ],
   "rls": {
     "create": {
-      "created_by": "{{user.email}}"
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "read": {
-      "logic": "OR",
-      "conditions": [
+      "$or": [
         {
-          "field": "{{user._highestRole}}",
-          "operator": "in_list",
-          "value": [
-            "PLATFORM_ADMIN",
-            "VENUE_OWNER",
-            "VENUE_MANAGER"
-          ]
+          "created_by": "{{user.email}}"
         },
         {
-          "field": "created_by",
-          "operator": "equals",
-          "value": "{{user.email}}"
+          "user_condition": {
+            "role": "PLATFORM_ADMIN"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "VENUE_OWNER"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "VENUE_MANAGER"
+          }
         }
       ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
     }
   }
 }
