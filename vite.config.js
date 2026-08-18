@@ -55,6 +55,9 @@ export default defineConfig(({ mode }) => {
       }
     },
     resolve: {
+      // Guarantee a single React instance — duplicate copies cause
+      // "Cannot read properties of null (reading 'useContext')" crashes.
+      dedupe: ['react', 'react-dom'],
       alias: {
         '@': path.resolve(__dirname, './src'),
       },

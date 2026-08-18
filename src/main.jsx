@@ -39,6 +39,21 @@ class RootErrorBoundary extends React.Component {
   }
 }
 
+// No service worker is used by this app. Unregister any worker left behind
+// by an older build — a stale worker cache-serving old JS chunks loads a
+// second React copy and crashes with "Cannot read properties of null
+// (reading 'useContext')".
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then((registrations) => {
+      registrations.forEach((registration) => registration.unregister());
+      if (registrations.length > 0 && 'caches' in window) {
+        return caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key))));
+      }
+    })
+    .catch(() => {});
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
   <RootErrorBoundary>
