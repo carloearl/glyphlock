@@ -279,16 +279,30 @@ Deno.serve(async (req) => {
     // Get raw body for signature verification
     const rawBody = await req.text();
 
-    // Verify signature if secret is configured
-    if (webhookSecret && signature) {
-      const isValid = verifyWebhookSignature(rawBody, signature, timestamp, webhookSecret);
-      if (!isValid) {
-        console.error('[Webhook] Invalid signature');
-        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+    // Fail closed. An unsigned webhook must never be able to mutate payment,
+    // contract, QR, or security state merely because a secret was forgotten.
+    if (!webhookSecret) {
+      console.error('[Webhook] GLYPHKEY is not configured');
+      return new Response(JSON.stringify({ error: 'Webhook is not configured' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    if (!signature || !timestamp) {
+      console.error('[Webhook] Missing signature headers');
+      return new Response(JSON.stringify({ error: 'Missing webhook signature' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const isValid = verifyWebhookSignature(rawBody, signature, timestamp, webhookSecret);
+    if (!isValid) {
+      console.error('[Webhook] Invalid signature');
+      return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Parse event
@@ -302,16 +316,44 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Validate event structure
-    if (!event.type || !event.data) {
+    // Validate event structure. event_id is required for durable replay
+    // protection; accepting a mutation event without it would make retries and
+    // malicious replays indistinguishable.
+    if (!event.type || !event.data || !event.event_id) {
       return new Response(JSON.stringify({ error: 'Invalid event structure' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Process the event
-    const result = await processWebhookEvent(event, base44);
+    const existing = await base44.asServiceRole.entities.SystemAuditLog.filter({
+      event_type: 'GLYPHLOCK_WEBHOOK_RECEIVED',
+      resource_id: event.event_id
+    }, null, 1);
+
+    if (existing.length > 0) {
+      return new Response(JSON.stringify({
+        received: true,
+        idempotent: true,
+        event_id: event.event_id
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Record the replay-protection anchor before applying side effects.
+    await base44.asServiceRole.entities.SystemAuditLog.create({
+      event_type: 'GLYPHLOCK_WEBHOOK_RECEIVED',
+      description: `Verified webhook received: ${event.type}`,
+      resource_id: event.event_id,
+      metadata: { event_type: event.type },
+      status: 'success',
+      severity: 'low'
+    });
+
+    // Process through the service role only after signature and replay checks.
+    const result = await processWebhookEvent(event, base44.asServiceRole);
 
     return new Response(JSON.stringify({ 
       received: true, 
@@ -323,9 +365,8 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('[Webhook] Error processing webhook:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Internal server error',
-      message: error.message 
+    return new Response(JSON.stringify({
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
