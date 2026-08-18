@@ -23,7 +23,7 @@ function copyReceipt(receipt) {
   return navigator.clipboard.writeText(lines.join('\n'));
 }
 
-export default function ReceiptPrintHub() {
+export default function ReceiptPrintHub({ inline = false }) {
   const { operatingMode: environment } = useNUPSOperatingMode();
   const [receipt, setReceipt] = useState(() => getLastReceipt());
   const [open, setOpen] = useState(false);
@@ -60,9 +60,9 @@ export default function ReceiptPrintHub() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-[120] flex flex-col items-end gap-2 print:hidden" data-no-print>
+    <div className={inline ? "relative z-[120] print:hidden" : "fixed bottom-4 right-4 z-[120] flex flex-col items-end gap-2 print:hidden"} data-no-print>
       {open && (
-        <div className="w-[min(360px,calc(100vw-32px))] overflow-hidden rounded-2xl border border-cyan-300/25 bg-[#020713]/95 shadow-[0_20px_70px_rgba(0,0,0,.6),0_0_35px_rgba(34,211,238,.15)] backdrop-blur-2xl">
+        <div className={`${inline ? "absolute right-0 top-full mt-2" : ""} w-[min(360px,calc(100vw-32px))] overflow-hidden rounded-2xl border border-cyan-300/25 bg-[#020713]/95 shadow-[0_20px_70px_rgba(0,0,0,.6),0_0_35px_rgba(34,211,238,.15)] backdrop-blur-2xl`}>
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <div className="flex items-center gap-2 text-sm font-black text-white"><ReceiptText className="h-4 w-4 text-cyan-300" /> RECEIPT CONTROL</div>
             <button type="button" onClick={() => setOpen(false)} className="rounded-lg p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-white" aria-label="Close receipt controls"><X className="h-4 w-4" /></button>
@@ -100,11 +100,14 @@ export default function ReceiptPrintHub() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex h-12 items-center gap-2 rounded-full border border-cyan-300/35 bg-[#020713]/90 px-4 font-mono text-[10px] font-black tracking-[.12em] text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,.22)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-cyan-200/70 hover:shadow-[0_0_40px_rgba(34,211,238,.4)]"
+        className={inline ? "relative flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 transition hover:border-cyan-300/40 hover:bg-white/[0.07] hover:text-cyan-200" : "flex h-12 items-center gap-2 rounded-full border border-cyan-300/35 bg-[#020713]/90 px-4 font-mono text-[10px] font-black tracking-[.12em] text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,.22)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-cyan-200/70 hover:shadow-[0_0_40px_rgba(34,211,238,.4)]"}
         aria-expanded={open}
+        aria-label="Receipt controls"
+        title="Receipt controls"
       >
-        <Printer className="h-4 w-4" /> RECEIPTS
-        {receipt && <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7]" />}
+        <Printer className="h-4 w-4" />
+        {!inline && <>RECEIPTS</>}
+        {receipt && <span className={inline ? "absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-300" : "h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7]"} />}
       </button>
     </div>
   );

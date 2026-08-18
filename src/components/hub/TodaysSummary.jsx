@@ -67,12 +67,13 @@ export default function TodaysSummary({ grossSales = 0, netRevenue = 0, transact
         <div>
           <h3 className="text-[10px] uppercase tracking-[0.22em] text-emerald-300/80 font-mono font-bold">Today · Live</h3>
           <div className="text-2xl font-black text-white tracking-tight">Operational Summary</div>
+          <p className="mt-1 text-[11px] font-mono text-slate-500">1 · Gross activity is recorded before payouts or adjustments</p>
         </div>
         <span className="text-[11px] text-slate-500 font-mono">
           {new Date().toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" })}
         </span>
       </div>
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
         <KPI label="Gross Sales"  value={fmtMoney(grossSales)}  delta={deltas.gross ?? null} Icon={DollarSign} tone="emerald" />
         <KPI label="Net Revenue"  value={fmtMoney(netRevenue)}  delta={deltas.net ?? null}   Icon={Banknote}   tone="violet" />
         <KPI label="Transactions" value={fmtNum(transactions)}  delta={deltas.txns ?? null}  Icon={Receipt}    tone="cyan" />

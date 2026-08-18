@@ -77,10 +77,10 @@ export default function DailySettlementSummary() {
       <CardHeader className="pb-3 flex flex-row items-start justify-between gap-2 flex-wrap">
         <div>
           <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-emerald-300/80 font-bold">
-            Daily Settlement
+            2 · Tender & Disbursement
           </div>
           <CardTitle className="text-white text-base sm:text-lg font-black mt-0.5">
-            Cash & Card · Today
+            Daily Settlement · Today
           </CardTitle>
         </div>
         <Badge variant="outline" className="border-emerald-500/40 text-emerald-300 font-mono text-[10px]">
@@ -93,9 +93,9 @@ export default function DailySettlementSummary() {
         <div>
           <div className="flex items-center justify-between text-[11px] mb-1.5">
             <span className="font-mono text-slate-400">
-              Net revenue <span className="text-white font-bold">{fmt(totals.net)}</span>
+              Gross ringed <span className="text-white font-bold">{fmt(totals.gross)}</span>
             </span>
-            <span className="font-mono text-slate-500">Gross {fmt(totals.gross)}</span>
+            <span className="font-mono text-slate-500">Tender collected {fmt(totals.net)}</span>
           </div>
           <div className="h-3 w-full rounded-full bg-white/[0.04] border border-white/10 overflow-hidden flex">
             <div
@@ -116,7 +116,7 @@ export default function DailySettlementSummary() {
         </div>
 
         {/* Ordered accounting line items */}
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
           <Stat
             icon={Banknote}
             label="Cash In"

@@ -520,6 +520,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
             )}
 
             {!kioskOperator && <ModeToggle />}
+            {!kioskOperator && <ReceiptPrintHub inline />}
 
             <div className="hidden md:flex items-center gap-2">
               {/* W3-012A — Workspace Switcher: lets users switch between
@@ -584,7 +585,6 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
     </div>
 
       <NUPSOperatorAssistant />
-      <ReceiptPrintHub />
 
     </>
   );

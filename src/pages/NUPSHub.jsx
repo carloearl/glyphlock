@@ -154,7 +154,7 @@ export default function NUPSHub() {
           </div>
         )}
 
-        <div className="w-full max-w-xl mx-auto space-y-4">
+        <div className="w-full max-w-6xl mx-auto space-y-4">
           <TodaysSummary
             grossSales={agg.grossSales}
             netRevenue={agg.netRevenue}
