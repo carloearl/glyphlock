@@ -19,7 +19,16 @@ import ScreenReaderAnnouncer from "@/components/accessibility/ScreenReaderAnnoun
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [a11yOpen, setA11yOpen] = useState(false);
+  const [ambientReady, setAmbientReady] = useState(false);
   const location = useLocation();
+
+
+  useEffect(() => {
+    const schedule = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 500));
+    const cancel = window.cancelIdleCallback || window.clearTimeout;
+    const id = schedule(() => setAmbientReady(true));
+    return () => cancel(id);
+  }, []);
 
 
   useEffect(() => {
@@ -126,7 +135,7 @@ export default function Layout({ children, currentPageName }) {
         }}
         aria-hidden="true"
       >
-        <NebulaLayer intensity={1.45} />
+        {ambientReady && <NebulaLayer intensity={1.45} />}
         <CursorOrb />
       </div>
 

@@ -115,13 +115,16 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
   const location = useLocation();
+  const currentPath = location.pathname;
+  const currentPathLower = currentPath.toLowerCase();
+  const rendersWhileAuthLoads = currentPathLower === '/' || currentPathLower === '/home' || currentPathLower.startsWith('/nupslanding') || currentPathLower.startsWith('/landing');
 
   // Record EVERY route change in the central nav stack (idempotent), before
   // children render — so the Back button works on all pages, not only pages
   // that kept it mounted while navigating.
   recordNavigation(location.pathname + location.search);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if ((isLoadingPublicSettings || isLoadingAuth) && !rendersWhileAuthLoads) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-slate-950 text-white">
         <div className="w-8 h-8 border-4 border-slate-700 border-t-cyan-300 rounded-full animate-spin"></div>
@@ -129,8 +132,6 @@ const AuthenticatedApp = () => {
     );
   }
 
-  const currentPath = location.pathname;
-  const currentPathLower = currentPath.toLowerCase();
   const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupstraining', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk', '/vipsale', '/managerconsole'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
