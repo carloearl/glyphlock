@@ -26,7 +26,7 @@ const PANELS = [
   { key: "clockIn", label: "Staff Clock In", icon: Clock, color: "from-cyan-700 to-cyan-900" },
   { key: "clockOut", label: "Staff Clock Out", icon: LogOut, color: "from-slate-700 to-slate-900" },
   { key: "admin", label: "Owner / Admin Sign In", icon: ShieldCheck, color: "from-violet-700 to-violet-900" },
-  { key: "request", label: "Request Owner / Admin Access", icon: UserPlus, color: "from-indigo-700 to-indigo-900" },
+  { key: "request", label: "Request NUPS Site Access", icon: UserPlus, color: "from-indigo-700 to-indigo-900" },
 ];
 
 export default function NUPSKiosk() {
