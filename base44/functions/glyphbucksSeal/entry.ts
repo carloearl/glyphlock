@@ -55,21 +55,32 @@ function bytesToHex(bytes: Uint8Array): string {
 // seed = SHA-256 of pepper+context). Same key every call → one published public key
 // printed on every receipt, valid offline verification forever.
 const PKCS8_ED25519_PREFIX = '302e020100300506032b657004220420';
-async function resolveKeyPair() {
+async function resolveKeyPair(mode: string) {
   const skB64 = Deno.env.get('GLYPHBUCKS_ED25519_SK');
   let pkcs8: Uint8Array;
+  let keySource: 'dedicated_secret' | 'derived_demo';
+
   if (skB64) {
     pkcs8 = Uint8Array.from(atob(skB64), (c) => c.charCodeAt(0));
+    keySource = 'dedicated_secret';
   } else {
+    // REAL evidence must never depend on a general application pepper. Demo
+    // continuity may use the deterministic fallback, but production requires a
+    // dedicated, independently rotatable signing key.
+    if (mode === 'REAL') {
+      throw new Error('REAL mode requires the dedicated GLYPHBUCKS_ED25519_SK signing key.');
+    }
     const pepper = Deno.env.get('KEY_PEPPER');
-    if (!pepper) throw new Error('No signing key available: set GLYPHBUCKS_ED25519_SK or KEY_PEPPER.');
+    if (!pepper) throw new Error('No demo signing key available. Configure KEY_PEPPER or GLYPHBUCKS_ED25519_SK.');
     const seedHex = await sha256Hex('glyphbucks-ed25519-signing-v1:' + pepper);
     pkcs8 = new Uint8Array([...hexToBytes(PKCS8_ED25519_PREFIX), ...hexToBytes(seedHex)]);
+    keySource = 'derived_demo';
   }
+
   const privateKey = await crypto.subtle.importKey('pkcs8', pkcs8.buffer as ArrayBuffer, { name: 'Ed25519' }, true, ['sign']);
   const jwk = await crypto.subtle.exportKey('jwk', privateKey);
   const pubRaw = Uint8Array.from(atob(String(jwk.x || '').replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
-  return { privateKey, publicHex: bytesToHex(pubRaw) };
+  return { privateKey, publicHex: bytesToHex(pubRaw), keySource };
 }
 
 // Real blockchain timestamp — submit the chain hash digest to OpenTimestamps
