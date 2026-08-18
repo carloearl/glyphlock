@@ -1,7 +1,7 @@
 {
   "name": "SealRecord",
   "type": "object",
-  "description": "DACO GlyphBucks — APPEND-ONLY cryptographic seal record. One per sealed sale. chain_hash = sha256(prev_block_hash + terms_hash + agreement_no); prev_block_hash links to the prior record's chain_hash per venue (hash chain). signed_token is the Ed25519-signed NUPS1.… compact token encoded in the receipt QR. Signing is SERVER-SIDE ONLY — the private key never reaches any client. No updates, no deletes. RLS: admin-only direct access; public verification reads go through the server-side verify function.",
+  "description": "DACO GlyphBucks \u2014 APPEND-ONLY cryptographic seal record. One per sealed sale. chain_hash = sha256(prev_block_hash + terms_hash + agreement_no); prev_block_hash links to the prior record's chain_hash per venue (hash chain). signed_token is the Ed25519-signed NUPS1.\u2026 compact token encoded in the receipt QR. Signing is SERVER-SIDE ONLY \u2014 the private key never reaches any client. No updates, no deletes. RLS: admin-only direct access; public verification reads go through the server-side verify function.",
   "properties": {
     "description": {
       "type": "string",
@@ -15,6 +15,14 @@
     },
     "agreement_no": {
       "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Caller-generated request key used to prevent duplicate seals during retries. Unique within a venue by application invariant."
+    },
+    "payment_record_id": {
+      "type": "string",
+      "description": "Confirmed NUPS PaymentRecord bound to a REAL-mode stored-value issuance."
     },
     "terms_version": {
       "type": "string",
@@ -38,7 +46,7 @@
     },
     "public_key_hex": {
       "type": "string",
-      "description": "Published Ed25519 public key (hex) — safe to expose; printed on the receipt."
+      "description": "Published Ed25519 public key (hex) \u2014 safe to expose; printed on the receipt."
     },
     "signed_token": {
       "type": "string",
@@ -46,12 +54,12 @@
     },
     "tsa_token": {
       "type": "string",
-      "description": "RFC 3161 timestamp token. NULL until a real TSA integration is live — the document must NOT claim TSA until then (§4)."
+      "description": "RFC 3161 timestamp token. NULL until a real TSA integration is live \u2014 the document must NOT claim TSA until then (\u00a74)."
     },
     "anchor": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Blockchain timestamp anchor: status (ANCHOR_SUBMITTED → BITCOIN_ATTESTED | ANCHOR_FAILED_RETRY), protocol (OpenTimestamps→Bitcoin), calendar, proof_b64 (stored unmodified — cryptographic evidence), submitted_at."
+      "description": "Blockchain timestamp anchor: status (ANCHOR_SUBMITTED \u2192 BITCOIN_ATTESTED | ANCHOR_FAILED_RETRY), protocol (OpenTimestamps\u2192Bitcoin), calendar, proof_b64 (stored unmodified \u2014 cryptographic evidence), submitted_at."
     },
     "sealed_at": {
       "type": "string",
@@ -71,6 +79,7 @@
     "verify_ref",
     "venue_id",
     "agreement_no",
+    "idempotency_key",
     "terms_hash",
     "chain_hash",
     "signed_token",
