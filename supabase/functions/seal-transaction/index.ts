@@ -33,9 +33,40 @@ const CONTRACT_TERMS_TEXT = [
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-user-id, x-user-email, x-user-role",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+function authorizeInternalRequest(req: Request): Response | null {
+  if (Deno.env.get("ENABLE_LEGACY_GB1_SIGNER") !== "true") {
+    return Response.json(
+      { error: "Legacy GB1 signer is disabled. Use the Base44 glyphbucksSeal function." },
+      { status: 410, headers: CORS },
+    );
+  }
+
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!serviceRoleKey) {
+    return Response.json(
+      { error: "Supabase signer authorization is not configured." },
+      { status: 503, headers: CORS },
+    );
+  }
+
+  const authorization = req.headers.get("authorization") || "";
+  if (authorization !== `Bearer ${serviceRoleKey}`) {
+    return Response.json({ error: "Unauthorized." }, { status: 401, headers: CORS });
+  }
+
+  if (!req.headers.get("x-user-id")) {
+    return Response.json(
+      { error: "Authenticated user context is required." },
+      { status: 401, headers: CORS },
+    );
+  }
+
+  return null;
+}
 
 const enc = new TextEncoder();
 
@@ -74,6 +105,12 @@ function b64uEncode(bytes: Uint8Array): string {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method !== "POST") {
+    return Response.json({ error: "Method not allowed." }, { status: 405, headers: CORS });
+  }
+
+  const authorizationError = authorizeInternalRequest(req);
+  if (authorizationError) return authorizationError;
 
   try {
     const privB64 = Deno.env.get("NUPS_ED25519_PRIVATE_PKCS8_B64");
