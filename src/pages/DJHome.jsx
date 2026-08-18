@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Activity, Disc3, LogOut, Tv } from "lucide-react";
 
 import ModeToggle from '@/components/nups/shell/ModeToggle';
-import ReceiptPrintHub from '@/components/nups/receipts/ReceiptPrintHub';
+import AudioIOPreferences from '@/components/mixer/AudioIOPreferences';
 import NUPSOperatorAssistant from '@/components/nups/shell/NUPSOperatorAssistant';
 import NUPSActionSafety from '@/components/nups/shell/NUPSActionSafety';
 // DACO-NUPS-ROLE-SELECTION — DJ workspace: the Auto-DJ console ONLY.
@@ -39,6 +39,7 @@ export default function DJHome() {
         <Badge className="bg-violet-800 text-white">AUTO-DJ</Badge>
         <div className="ml-auto flex items-center gap-2">
           <ModeToggle />
+          <AudioIOPreferences />
           <button
             onClick={() => {
               setDiagnosticsOpen(true);
@@ -75,7 +76,6 @@ export default function DJHome() {
     </div>
 
       <NUPSOperatorAssistant />
-      <ReceiptPrintHub />
 
     </>
   );

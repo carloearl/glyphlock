@@ -9,6 +9,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Repeat, Shuffle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { AUDIO_OUTPUT_EVENT, applyPreferredOutput } from "@/components/mixer/audioDevicePreferences";
 
 function formatTime(sec) {
   if (!sec || !isFinite(sec)) return "0:00";
@@ -34,9 +35,14 @@ export default function AudioEngine({
   const progressRef = useRef(null);
   const animRef = useRef(null);
 
-  // Expose the audio element upward (once) for the visualizer
+  // Expose the audio element upward and apply the saved DJ output route.
   useEffect(() => {
-    if (audioRef.current && onAudioElement) onAudioElement(audioRef.current);
+    const audio = audioRef.current;
+    if (audio && onAudioElement) onAudioElement(audio);
+    if (audio) applyPreferredOutput(audio).catch(() => undefined);
+    const syncOutput = (event) => applyPreferredOutput(audio, event.detail).catch(() => undefined);
+    window.addEventListener(AUDIO_OUTPUT_EVENT, syncOutput);
+    return () => window.removeEventListener(AUDIO_OUTPUT_EVENT, syncOutput);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
