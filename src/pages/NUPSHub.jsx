@@ -154,16 +154,18 @@ export default function NUPSHub() {
           </div>
         )}
 
-        <TodaysSummary
-          grossSales={agg.grossSales}
-          netRevenue={agg.netRevenue}
-          transactions={agg.transactions}
-          cashPct={agg.cashPct}
-          deltas={agg.deltas}
-        />
+        <div className="w-full max-w-xl mx-auto space-y-4">
+          <TodaysSummary
+            grossSales={agg.grossSales}
+            netRevenue={agg.netRevenue}
+            transactions={agg.transactions}
+            cashPct={agg.cashPct}
+            deltas={agg.deltas}
+          />
 
-        {/* Cash + card split, driver payouts, and net deposit for today */}
-        <DailySettlementSummary />
+          {/* Cash + card split, driver payouts, and net deposit for today */}
+          <DailySettlementSummary />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <TopProductsTable products={agg.topProducts} />
