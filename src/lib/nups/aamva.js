@@ -25,7 +25,57 @@ export function normalizeIdType(value) {
 /** True when the raw string looks like an AAMVA barcode payload. */
 export function isAAMVAPayload(raw) {
   if (!raw || raw.length < 40) return false;
-  return /ANSI\s*\d|AAMVA/.test(raw) || /(^|[\r\n])D(AQ|CS|BB)/.test(raw);
+  return /ANSI\s*\d|AAMVA/.test(raw) || /D(AQ|CS|BB)/.test(raw);
+}
+
+// Every AAMVA element ID we recognize. Only these codes split the stream, so
+// a 3-letter sequence inside an address or name can never be mistaken for a
+// field boundary unless it exactly matches a real element ID.
+const KNOWN_CODES = new Set([
+  "DAA", "DAB", "DAC", "DAD", "DAE", "DAF", "DAG", "DAH", "DAI", "DAJ",
+  "DAK", "DAL", "DAM", "DAN", "DAO", "DAP", "DAQ", "DAR", "DAS", "DAT",
+  "DAU", "DAV", "DAW", "DAX", "DAY", "DAZ",
+  "DBA", "DBB", "DBC", "DBD", "DBE", "DBF", "DBG", "DBH", "DBI", "DBJ",
+  "DBK", "DBL", "DBM", "DBN", "DBO", "DBP", "DBQ", "DBR", "DBS",
+  "DCA", "DCB", "DCD", "DCE", "DCF", "DCG", "DCH", "DCI", "DCJ", "DCK",
+  "DCL", "DCM", "DCN", "DCO", "DCP", "DCQ", "DCR", "DCS", "DCT", "DCU",
+  "DDA", "DDB", "DDC", "DDD", "DDE", "DDF", "DDG", "DDH", "DDI", "DDJ",
+  "DDK", "DDL",
+]);
+
+/**
+ * Split a raw payload into element ID → value. Works whether the scanner
+ * delivers each element on its own line OR as one continuous string with no
+ * separators (common with omnidirectional desktop scanners).
+ */
+function extractElements(raw) {
+  const text = String(raw);
+  // The DL/ID subfile begins with its type marker followed by DAQ (license
+  // number) — start scanning there so header bytes never produce phantom
+  // element matches.
+  const subfileAt = text.search(/(?:DL|ID)DAQ/);
+  const startAt = subfileAt >= 0 ? subfileAt + 2 : Math.max(text.indexOf("DAQ"), 0);
+
+  const positions = [];
+  for (let i = startAt; i <= text.length - 3; ) {
+    const candidate = text.slice(i, i + 3);
+    if (KNOWN_CODES.has(candidate)) {
+      positions.push({ code: candidate, start: i });
+      i += 3;
+    } else {
+      i += 1; // overlap-safe: codes can start at any offset
+    }
+  }
+  const elements = {};
+  for (let i = 0; i < positions.length; i++) {
+    const { code, start } = positions[i];
+    const end = i + 1 < positions.length ? positions[i + 1].start : text.length;
+    const value = cleanValue(text.slice(start + 3, end).split(/[\r\n]/)[0]);
+    // First occurrence wins — header subfile pointers come before real data,
+    // but real data codes never repeat before their own value.
+    if (!(code in elements) || !elements[code]) elements[code] = value;
+  }
+  return elements;
 }
 
 /** MMDDCCYY (US) or CCYYMMDD (Canada) → YYYY-MM-DD */
@@ -54,12 +104,7 @@ function cleanValue(value) {
 export function parseAAMVA(raw) {
   if (!isAAMVAPayload(raw)) return null;
 
-  // Element IDs only count at the start of a line.
-  const elements = {};
-  for (const line of String(raw).split(/[\r\n]+/)) {
-    const match = line.match(/^([A-Z]{3})(.*)$/);
-    if (match) elements[match[1]] = cleanValue(match[2]);
-  }
+  const elements = extractElements(raw);
 
   const get = (...codes) => {
     for (const code of codes) {
