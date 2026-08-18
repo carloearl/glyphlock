@@ -37,7 +37,7 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVol
   useImperativeHandle(ref, () => ({
     play: () => {
       if (videoId) return youtubeRef.current?.play?.();
-      return audioEl?.play?.().catch?.(() => {});
+      return audioEl?.play?.();
     },
     pause: () => {
       if (videoId) return youtubeRef.current?.pause?.();
