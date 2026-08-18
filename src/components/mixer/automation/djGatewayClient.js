@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import { loadAuthenticatedDJFallback } from "@/components/mixer/automation/djSnapshotFallback";
 
 export async function invokeDJGateway(action, payload = {}) {
   const kioskSession = typeof window !== "undefined" ? sessionStorage.getItem("nups_kiosk_session") : null;
@@ -18,6 +19,10 @@ export async function invokeDJGateway(action, payload = {}) {
     } catch (error) {
       lastError = error;
       const status = Number(error?.response?.status || error?.status || 0);
+      if (action === "snapshot" && status === 502) {
+        const fallback = await loadAuthenticatedDJFallback();
+        if (fallback) return fallback;
+      }
       const retryable = [502, 503, 504].includes(status);
       if (!retryable || attempt === 3) break;
       await new Promise((resolve) => setTimeout(resolve, 350 * attempt));
