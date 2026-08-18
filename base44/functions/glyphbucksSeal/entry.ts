@@ -128,9 +128,84 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 
-    const body = await req.json();
-    const mode = String(body.mode || 'DEMO').toUpperCase();
-    if (!body.venue_id) return Response.json({ ok: false, error: 'venue_id required.' }, { status: 400 });
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return Response.json({ ok: false, error: 'Invalid JSON body.' }, { status: 400 });
+    }
+
+    const venueId = String(body.venue_id || '').trim();
+    const idempotencyKey = String(body.idempotency_key || '').trim();
+    const requestedMode = String(body.mode || 'DEMO').toUpperCase();
+
+    if (!venueId) return Response.json({ ok: false, error: 'venue_id required.' }, { status: 400 });
+    if (!/^[A-Za-z0-9:_-]{8,128}$/.test(idempotencyKey)) {
+      return Response.json({ ok: false, error: 'A valid idempotency_key is required.' }, { status: 400 });
+    }
+    if (!['REAL', 'DEMO', 'SANDBOX'].includes(requestedMode)) {
+      return Response.json({ ok: false, error: 'Invalid mode.' }, { status: 400 });
+    }
+
+    // Venue scope is resolved server-side. A text box in the browser is not a
+    // tenancy boundary, despite its obvious confidence.
+    const access = await base44.functions.invoke('validateVenueAccess', {
+      venue_id: venueId,
+      action: 'write',
+    });
+    if (!access?.data?.authorized) {
+      return Response.json({ ok: false, error: access?.data?.reason || 'Venue access denied.' }, { status: 403 });
+    }
+
+    let mode = requestedMode;
+    if (requestedMode === 'REAL') {
+      // REAL is opt-in per venue. A global fallback cannot promote an unknown
+      // venue into live financial mode.
+      const venueModes = await base44.asServiceRole.entities.SystemConfig.filter(
+        { config_key: 'venue', venue_id: venueId }, null, 1
+      );
+      if (!venueModes?.[0] || venueModes[0].mode !== 'REAL') {
+        return Response.json({
+          ok: false,
+          error: 'REAL mode is not enabled for this venue. Use DEMO/SANDBOX or complete the production gate.',
+        }, { status: 409 });
+      }
+      mode = 'REAL';
+    }
+
+    // Durable retry protection. The same request key returns the original
+    // immutable seal instead of minting a second liability.
+    const existingSeals = await base44.asServiceRole.entities.SealRecord.filter(
+      { venue_id: venueId, idempotency_key: idempotencyKey }, null, 1
+    );
+    if (existingSeals.length > 0) {
+      const existingSeal = existingSeals[0];
+      const sales = await base44.asServiceRole.entities.GlyphBucksSale.filter(
+        { verify_ref: existingSeal.verify_ref }, null, 1
+      );
+      const sale = sales[0] || {};
+      return Response.json({
+        ok: true,
+        idempotent: true,
+        verify_ref: existingSeal.verify_ref,
+        agreement_no: existingSeal.agreement_no,
+        receipt_no: sale.receipt_no || null,
+        face_cents: sale.face_cents || null,
+        amount_cents: sale.amount_cents || null,
+        serial_lo: sale.serial_lo || null,
+        serial_hi: sale.serial_hi || null,
+        terms_hash: existingSeal.terms_hash,
+        prev_block_hash: existingSeal.prev_block_hash,
+        chain_hash: existingSeal.chain_hash,
+        public_key_hex: existingSeal.public_key_hex,
+        signed_token: existingSeal.signed_token,
+        anchor: existingSeal.anchor,
+        sealed_at: existingSeal.sealed_at,
+        mode: existingSeal.mode,
+        payment_record_id: existingSeal.payment_record_id || null,
+      });
+    }
+
     const esigs = body.esigs || {};
     if (!esigs.purchaser || !esigs.issuer_rep || !esigs.manager) {
       return Response.json({ ok: false, error: 'Three e-signatures required (purchaser, issuer rep, manager).' }, { status: 422 });
@@ -151,7 +226,50 @@ Deno.serve(async (req) => {
     const faceCents = denom * qty;
     const cardFee = Number(body.card_fee_cents) || 0;
     const amountCents = faceCents + cardFee;
-    if (faceCents <= 0) return Response.json({ ok: false, error: 'Face value must be positive.' }, { status: 422 });
+    if (!Number.isInteger(denom) || !Number.isInteger(qty) || !Number.isInteger(cardFee)) {
+      return Response.json({ ok: false, error: 'Stored-value amounts must be integer cents.' }, { status: 422 });
+    }
+    if (faceCents <= 0 || qty <= 0) return Response.json({ ok: false, error: 'Face value and quantity must be positive.' }, { status: 422 });
+
+    let paymentRecordId: string | null = null;
+    let verifiedCardAuthCode = body.card_auth_code || null;
+    let verifiedCardLast4 = body.card_last4 || null;
+    let verifiedCardBrand = body.card_brand || null;
+
+    if (mode === 'REAL') {
+      paymentRecordId = String(body.payment_record_id || '').trim();
+      if (!paymentRecordId) {
+        return Response.json({
+          ok: false,
+          error: 'REAL mode requires a confirmed NUPS PaymentRecord before stored value can be issued.',
+        }, { status: 422 });
+      }
+
+      const paymentRows = await base44.asServiceRole.entities.PaymentRecord.filter(
+        { record_id: paymentRecordId, venue_id: venueId }, null, 1
+      );
+      const payment = paymentRows[0];
+      if (!payment || !['CONFIRMED', 'EXTERNAL_CONFIRMED', 'CAPTURED'].includes(payment.status)) {
+        return Response.json({ ok: false, error: 'PaymentRecord is missing or not confirmed.' }, { status: 409 });
+      }
+      if (payment.mode !== 'REAL') {
+        return Response.json({ ok: false, error: 'A non-REAL PaymentRecord cannot fund a REAL issuance.' }, { status: 409 });
+      }
+      if (Math.round(Number(payment.amount || 0) * 100) !== amountCents) {
+        return Response.json({ ok: false, error: 'PaymentRecord amount does not match the stored-value issuance total.' }, { status: 409 });
+      }
+
+      const priorUse = await base44.asServiceRole.entities.SealRecord.filter(
+        { venue_id: venueId, payment_record_id: paymentRecordId }, null, 1
+      );
+      if (priorUse.length > 0) {
+        return Response.json({ ok: false, error: 'PaymentRecord is already bound to another sealed issuance.' }, { status: 409 });
+      }
+
+      verifiedCardAuthCode = payment.approval_code || verifiedCardAuthCode;
+      verifiedCardLast4 = payment.card_last_four || verifiedCardLast4;
+      verifiedCardBrand = payment.card_brand || verifiedCardBrand;
+    }
 
     const now = new Date();
     const ymd = now.toISOString().slice(2, 10).replace(/-/g, '');
