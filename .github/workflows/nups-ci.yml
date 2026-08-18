@@ -42,6 +42,15 @@ jobs:
       - name: Verify NUPS DJ function SDK pins
         run: npm run check:dj-functions
 
+      - name: Verify integration security boundaries
+        run: npm run check:integrations
+
+      - name: Verify NUPS mode and venue isolation guards
+        run: npm run check:nups-isolation
+
+      - name: Audit required NUPS operational UI
+        run: npm run audit:nups-ui
+
       - name: Lint
         run: npm run lint
 
