@@ -6,8 +6,8 @@
  */
 import React from "react";
 import { Switch } from "@/components/ui/switch";
-import { Play, Square, ExternalLink, Mic, MicOff } from "lucide-react";
-import { THEMES, BACKGROUNDS, VISUALS } from "./fableThemes";
+import { Square, ExternalLink, Mic, MicOff } from "lucide-react";
+import { THEMES, BACKGROUNDS, VISUALS, FONTS } from "./fableThemes";
 
 const OVERLAYS = [
   ["showNowPlaying", "Now Playing"],
@@ -18,6 +18,7 @@ const OVERLAYS = [
   ["showDeck", "Deck Badge"],
   ["showOnAir", "On Air Badge"],
   ["showLogo", "Fable Logo"],
+  ["showBeatCounter", "4/4 Beat Counter"],
 ];
 
 const EFFECTS = [
@@ -58,9 +59,9 @@ export default function FableControlPanel({
   settings,
   onChange,
   running,
-  onToggleRun,
-  onPopOut,
-  poppedOut,
+  onStop,
+  onLaunch,
+  stageOpen,
   micStatus,
   bpm,
 }) {
@@ -71,24 +72,21 @@ export default function FableControlPanel({
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={onToggleRun}
-          className={`flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-black uppercase tracking-wider transition-colors ${
-            running
-              ? "bg-red-600/80 text-white hover:bg-red-600"
-              : "bg-fuchsia-600 text-white hover:bg-fuchsia-500"
-          }`}
-        >
-          {running ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          {running ? "Stop Visualizer" : "Start Visualizer"}
-        </button>
-        <button
-          type="button"
-          onClick={onPopOut}
-          className="flex h-11 items-center gap-2 rounded-xl border border-white/15 bg-black/40 px-4 text-sm font-bold text-slate-200 hover:bg-white/5"
+          onClick={onLaunch}
+          className="flex h-11 items-center gap-2 rounded-xl bg-fuchsia-600 px-5 text-sm font-black uppercase tracking-wider text-white hover:bg-fuchsia-500"
         >
           <ExternalLink className="h-4 w-4" />
-          {poppedOut ? "Reopen Stage Window" : "Pop Out To 2nd Screen"}
+          {stageOpen ? "Reopen Stage Window" : "Launch Stage On 2nd Screen"}
         </button>
+        {running && (
+          <button
+            type="button"
+            onClick={onStop}
+            className="flex h-11 items-center gap-2 rounded-xl border border-red-500/40 bg-red-600/20 px-4 text-sm font-bold text-red-200 hover:bg-red-600/30"
+          >
+            <Square className="h-4 w-4" /> Stop Engine
+          </button>
+        )}
         <div className="ml-auto flex items-center gap-2 text-xs font-mono text-slate-400">
           {micStatus === "listening" ? (
             <><Mic className="h-4 w-4 text-emerald-400" /> Beat lock {bpm ? `${bpm} BPM` : "syncing…"}</>
@@ -100,7 +98,29 @@ export default function FableControlPanel({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">
+        <div className="flex-1 min-w-[180px]">
+          <div className="text-xs font-black uppercase tracking-wider text-white">Auto Mode</div>
+          <div className="text-[11px] text-slate-400">
+            Locks to the room's 4/4 count and rotates theme, background and visualizer automatically.
+          </div>
+        </div>
+        <Switch checked={!!settings.autoMode} onCheckedChange={set("autoMode")} />
+        <label className="text-[11px] font-semibold text-slate-400">
+          Rotate every
+          <select
+            value={settings.autoBars}
+            onChange={(e) => set("autoBars")(Number(e.target.value))}
+            className="ml-2 h-9 rounded-lg border border-white/10 bg-black/50 px-2 text-sm text-white"
+          >
+            {[4, 8, 16, 32, 64].map((n) => (
+              <option key={n} value={n}>{n} bars</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className={`grid gap-3 sm:grid-cols-3 ${settings.autoMode ? "opacity-50" : ""}`}>
         <Picker label="Theme" value={settings.theme} options={THEMES}
           onChange={(v) => {
             const preset = THEMES.find((t) => t.key === v);
@@ -119,6 +139,34 @@ export default function FableControlPanel({
           value={settings.intensity}
           onChange={(e) => set("intensity")(Number(e.target.value))}
           className="w-full"
+        />
+      </label>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Picker label="Stage Font" value={settings.font} options={FONTS} onChange={set("font")} />
+        <label className="block">
+          <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+            Marquee Speed · {Number(settings.marqueeSpeed) || 14}s loop
+          </span>
+          <input
+            type="range" min="4" max="40" step="1"
+            value={Number(settings.marqueeSpeed) || 14}
+            onChange={(e) => set("marqueeSpeed")(Number(e.target.value))}
+            className="w-full"
+          />
+        </label>
+      </div>
+
+      <label className="block">
+        <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+          Marquee Text
+        </span>
+        <input
+          type="text"
+          value={settings.marqueeText || ""}
+          onChange={(e) => set("marqueeText")(e.target.value)}
+          placeholder="Leave blank to scroll the live track · artist · venue"
+          className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white"
         />
       </label>
 

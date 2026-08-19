@@ -105,8 +105,12 @@ export default function useFableBeat({ enabled, onFrame }) {
           const step = Math.floor(wave.length / 64);
           for (let i = 0; i < 64; i++) shape[i] = (wave[i * step] - 128) / 128;
 
+          // 4/4 count: every detected onset advances the beat, four beats to a bar.
+          const beatInBar = (beatCount % 4) + 1;
+          const barCount = Math.floor(beatCount / 4);
+
           onFrameRef.current?.({
-            bass, mid, high, energy, beat, beatCount,
+            bass, mid, high, energy, beat, beatCount, beatInBar, barCount,
             bands: Array.from(freq.slice(0, 128), (v) => v / 255),
             shape,
           });

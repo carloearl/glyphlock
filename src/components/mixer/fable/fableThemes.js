@@ -42,6 +42,17 @@ export const VISUALS = [
   { key: "off",    label: "Background Only" },
 ];
 
+export const FONTS = [
+  { key: "display", label: "Oxanium (Display)", css: "'Oxanium', system-ui, sans-serif" },
+  { key: "grotesk", label: "Space Grotesk", css: "'Space Grotesk', system-ui, sans-serif" },
+  { key: "mono", label: "JetBrains Mono", css: "'JetBrains Mono', ui-monospace, monospace" },
+  { key: "system", label: "System Sans", css: "system-ui, -apple-system, sans-serif" },
+];
+
+export function getFont(key) {
+  return (FONTS.find((f) => f.key === key) || FONTS[0]).css;
+}
+
 export function getTheme(key) {
   return THEMES.find((t) => t.key === key) || THEMES[0];
 }
@@ -51,6 +62,15 @@ export const DEFAULT_SETTINGS = {
   background: "nebula",
   visual: "bars",
   intensity: 1,
+  // Auto mode: locks to a 4/4 count off the room mic and rotates the look
+  // every autoBars bars so the stage runs unattended.
+  autoMode: true,
+  autoBars: 8,
+  // Typography + marquee copy
+  font: "display",
+  marqueeText: "",
+  marqueeSpeed: 14,
+  showBeatCounter: true,
   // Overlay toggles — every element is independently switchable.
   showNowPlaying: true,
   showUpNext: true,

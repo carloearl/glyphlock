@@ -3,11 +3,12 @@
  * Renders background + spectrum on canvas and toggleable text overlays on top.
  * Reads live beat data from a ref so it never re-renders per frame.
  */
-import React, { useEffect, useRef } from "react";
-import { getTheme } from "./fableThemes";
+import React, { useEffect, useRef, useState } from "react";
+import { getTheme, getFont, THEMES, VISUALS } from "./fableThemes";
 import { makeParticles, drawBackground, drawVisual } from "./fableRenderers";
 
-const EMPTY_FRAME = { bass: 0, mid: 0, high: 0, energy: 0, bands: [], shape: [], beatCount: 0 };
+const EMPTY_FRAME = { bass: 0, mid: 0, high: 0, energy: 0, bands: [], shape: [], beatCount: 0, beatInBar: 1, barCount: 0 };
+const AUTO_VISUALS = VISUALS.filter((v) => v.key !== "off").map((v) => v.key);
 
 export default function FableStage({
   settings,
@@ -22,7 +23,14 @@ export default function FableStage({
   const shellRef = useRef(null);
   const flashRef = useRef(null);
   const clockRef = useRef(null);
-  const theme = getTheme(settings.theme);
+  const countRef = useRef(null);
+  // Auto mode rotates the look every `autoBars` bars of the detected 4/4 count.
+  const [autoStep, setAutoStep] = useState(0);
+  const auto = !!settings.autoMode;
+  const theme = auto ? THEMES[autoStep % THEMES.length] : getTheme(settings.theme);
+  const background = auto ? theme.bg : settings.background;
+  const visual = auto ? AUTO_VISUALS[autoStep % AUTO_VISUALS.length] : settings.visual;
+  const fontCss = getFont(settings.font);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -62,11 +70,11 @@ export default function FableStage({
         g.fillRect(0, 0, W, H);
       }
 
-      drawBackground(g, W, H, t, frame, theme, settings.background, particles);
+      drawBackground(g, W, H, t, frame, theme, background, particles);
 
       g.shadowBlur = settings.bloom ? 24 : 0;
       g.shadowColor = theme.colors[1];
-      drawVisual(g, W, H, t, frame, theme, settings.visual, Number(settings.intensity) || 1);
+      drawVisual(g, W, H, t, frame, theme, visual, Number(settings.intensity) || 1);
       g.shadowBlur = 0;
 
       // Beat reactions
@@ -86,6 +94,15 @@ export default function FableStage({
           ? `translate3d(${(Math.random() - 0.5) * shake}px, ${(Math.random() - 0.5) * shake}px, 0)`
           : "none";
       }
+      if (countRef.current && settings.showBeatCounter) {
+        countRef.current.textContent = `${frame.beatInBar || 1} / 4`;
+        countRef.current.style.opacity = String(0.45 + flash * 0.55);
+      }
+      if (auto) {
+        const bars = Math.max(1, Number(settings.autoBars) || 8);
+        const step = Math.floor((frame.barCount || 0) / bars);
+        if (step !== autoStep) setAutoStep(step);
+      }
       if (clockRef.current && settings.showClock) {
         clockRef.current.textContent = new Date().toLocaleTimeString("en-US", {
           hour: "numeric", minute: "2-digit", timeZone: "America/Phoenix",
@@ -98,12 +115,16 @@ export default function FableStage({
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [settings, theme, frameRef]);
+  }, [settings, theme, background, visual, auto, autoStep, frameRef]);
 
   const accent = theme.colors[2];
 
   return (
-    <div ref={shellRef} className={`relative h-full w-full overflow-hidden bg-black ${className}`}>
+    <div
+      ref={shellRef}
+      className={`relative h-full w-full overflow-hidden bg-black ${className}`}
+      style={{ fontFamily: fontCss }}
+    >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       <div ref={flashRef} className="pointer-events-none absolute inset-0 opacity-0 mix-blend-screen" />
 
@@ -133,6 +154,15 @@ export default function FableStage({
           {settings.showClock && (
             <span ref={clockRef} className="rounded-lg border border-white/15 bg-black/40 px-2 py-1" />
           )}
+          {settings.showBeatCounter && (
+            <span
+              ref={countRef}
+              className="rounded-lg border border-white/15 bg-black/40 px-2 py-1 font-black"
+              style={{ color: theme.colors[1] }}
+            >
+              1 / 4
+            </span>
+          )}
         </div>
       </div>
 
@@ -161,17 +191,20 @@ export default function FableStage({
         )}
       </div>
 
-      {/* Marquee */}
-      {settings.showMarquee && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full" />
-      )}
+      {/* Marquee — custom copy when provided, otherwise live track info */}
       {settings.showMarquee && (
         <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 overflow-hidden">
           <div
             className="animate-ticker whitespace-nowrap text-center text-[13px] font-black uppercase tracking-[0.5em]"
-            style={{ color: `${accent}88` }}
+            style={{
+              color: `${accent}aa`,
+              animationDuration: `${Math.max(4, Number(settings.marqueeSpeed) || 14)}s`,
+            }}
           >
-            {`${track?.title || "N.U.P.S."} · ${track?.artist || "Autonomous DJ"} · Dream Palace · `.repeat(6)}
+            {`${
+              settings.marqueeText?.trim() ||
+              `${track?.title || "N.U.P.S."} · ${track?.artist || "Autonomous DJ"} · Dream Palace`
+            } · `.repeat(6)}
           </div>
         </div>
       )}
