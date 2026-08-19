@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
   }
 
   const rawBody = await req.text();
-  const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+  const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-06-24.dahlia' });
 
   let event = null;
   let verificationError = null;
