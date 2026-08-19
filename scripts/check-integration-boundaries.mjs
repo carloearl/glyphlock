@@ -29,6 +29,8 @@ requireText(stripeWebhook, 'for (const webhookSecret of webhookSecrets)', 'Strip
 requireText(stripeWebhook, 'STRIPE_WEBHOOK_PROCESSED', 'Stripe webhook must have durable idempotency');
 requireText(stripeWebhook, 'trustedPlan', 'Stripe entitlements must derive from trusted server pricing');
 requireText(stripeWebhook, 'event.account', 'Stripe Connect webhook context must be retained');
+requireText(stripeWebhook, 'resolveStripeConnection', 'Stripe webhook must support the server-only Base44 connector');
+requireText(stripeWebhook, "getConnection('stripe')", 'Stripe webhook connector access must remain server-side');
 requireText(stripeWebhook, 'SANDBOX_PLAN_PRICES', 'Stripe webhook must recognize the trusted GlyphLock sandbox catalog');
 requireText(stripeWebhook, "stripeKeyMode(stripeSecretKey) === 'test'", 'Sandbox prices must be gated to Stripe test credentials');
 forbidText(stripeWebhook, "session.metadata?.plan ||", 'Stripe metadata must not grant entitlements');
@@ -43,6 +45,8 @@ requireText(checkout, 'PLAN_PRICE_SECRETS', 'Subscription pricing must be server
 requireText(checkout, 'SANDBOX_PLAN_PRICES', 'Checkout must contain the trusted GlyphLock sandbox catalog');
 requireText(checkout, "stripeKeyMode(stripeSecretKey) === 'test'", 'Checkout sandbox prices must be gated to Stripe test credentials');
 requireText(checkout, 'resolvePlanPrice', 'Checkout must resolve server-owned prices by Stripe environment');
+requireText(checkout, 'resolveStripeSecretKey', 'Checkout must support server-side connector key resolution');
+requireText(checkout, "getConnection('stripe')", 'Checkout connector access must remain server-side');
 requireText(checkout, 'Unsupported subscription plan', 'Subscription plans must be allowlisted');
 requireText(checkout, 'Client-controlled prices, line items, and checkout modes are not accepted', 'Legacy client pricing must be rejected');
 requireText(checkout, 'expectedPriceId', 'Checkout must bind expected server price metadata');
@@ -55,10 +59,15 @@ const stripePoll = 'base44/functions/stripePoll/entry.ts';
 requireText(stripePoll, 'ownsByReference', 'Checkout Session lookup must verify ownership');
 requireText(stripePoll, 'ownsByEmail', 'Checkout Session lookup must support verified email ownership');
 requireText(stripePoll, 'Checkout Session not found', 'Checkout Session IDOR must fail without disclosure');
+requireText(stripePoll, 'trustedPlan', 'Checkout reconciliation must derive entitlements from trusted prices');
+requireText(stripePoll, 'entitlementConfirmed', 'Checkout reconciliation must return an explicit entitlement result');
+requireText(stripePoll, "getConnection('stripe')", 'Checkout reconciliation must support the server-only Stripe connector');
 
 const paymentSuccess = 'src/pages/PaymentSuccess.jsx';
 requireText(paymentSuccess, 'base44.functions.invoke("stripePoll"', 'Payment success page must verify with the server');
 requireText(paymentSuccess, 'PAYMENT NOT CONFIRMED', 'Payment success page must have a non-success state');
+requireText(paymentSuccess, 'data.entitlementConfirmed === true', 'Payment success page must require server reconciliation');
+forbidText(paymentSuccess, 'paymentStatus === "paid"', 'Payment success page must not trust paid status without entitlement reconciliation');
 forbidText(paymentSuccess, 'Your quantum-grade security is now activated', 'Browser redirect must not claim entitlement activation');
 
 const supabaseProxy = 'base44/functions/supabaseProxy/entry.ts';
