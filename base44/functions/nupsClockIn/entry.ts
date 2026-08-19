@@ -235,6 +235,54 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, closed });
     }
 
+    // ─── MANAGER PIN VERIFICATION / TERMINAL UNLOCK ────────────────────────
+    // Used by the kiosk exit screen and by the lockout recovery flow. The PIN
+    // is verified only against hashed server records and never leaves this
+    // function in logs, analytics, storage, or responses.
+    if (action === 'verifyManagerPin' || action === 'managerUnlockTerminal') {
+      const managerResourceId = `manager_auth:${terminalId !== 'unidentified' ? terminalId : ip}`;
+      if (await throttled(managerResourceId)) {
+        return Response.json({
+          error: 'Manager verification is temporarily locked. Try again later.',
+          code: 'MANAGER_AUTH_LOCKED',
+        }, { status: 429 });
+      }
+
+      const cleanManagerPin = String(body.pin || '').trim();
+      if (!/^\d{4,6}$/.test(cleanManagerPin)) {
+        return genericAuthFailure('manager_pin_format_invalid', 401, managerResourceId);
+      }
+
+      const manager = await resolveUserByPin(cleanManagerPin);
+      let managerAllowed = Boolean(
+        manager &&
+        manager.status === 'active' &&
+        manager.is_demo !== true &&
+        MANAGER_ROLES.has(manager.role) &&
+        (!manager.venue_id || manager.venue_id === VENUE_ID)
+      );
+
+      if (managerAllowed && manager.require_platform_login) {
+        const live = await base44.auth.me().catch(() => null);
+        managerAllowed = String(live?.email || '').toLowerCase() === String(manager.platform_email || '').toLowerCase();
+      }
+
+      if (!managerAllowed) {
+        return genericAuthFailure('manager_pin_not_authorized', 401, managerResourceId);
+      }
+
+      await logAttempt('pin_auth', true, 'manager_verified', managerResourceId);
+      if (action === 'managerUnlockTerminal') {
+        await logAttempt('pin_auth', true, 'manager_unlock', throttleResourceId);
+      }
+
+      return Response.json({
+        success: true,
+        unlocked: action === 'managerUnlockTerminal',
+        manager: { full_name: manager.full_name, role: manager.role },
+      });
+    }
+
     // ─── ADMIN SET PIN (owner/approved-admin only — provisioning path) ───────
     if (action === 'adminSetPin') {
       const admin = await base44.auth.me().catch(() => null);
