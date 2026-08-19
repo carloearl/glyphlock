@@ -38,6 +38,7 @@ import NoBatchBanner from "@/components/nups/register/NoBatchBanner";
 import BatchConfirmControl from "@/components/nups/register/BatchConfirmControl";
 import RegisterStatusHeader from "@/components/nups/register/RegisterStatusHeader";
 import RecentTransactionsStrip from "@/components/nups/register/RecentTransactionsStrip";
+import OfflineSyncBanner from "@/components/nups/OfflineSyncBanner";
 import POSFloatingActionMenu from "@/components/nups/register/POSFloatingActionMenu";
 import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -250,17 +251,22 @@ function RegisterConsoleInner() {
       }
       role="CASHIER"
     >
+      <OfflineSyncBanner />
       <div className="max-w-[1600px] mx-auto">
-        {/* W3-012B Cycle 2B — BPAAA Register Standard §1.1 status header.
-            Display-only: venue, register type, cashier, shift, batch, mode,
-            clock, connection. Register type follows the active tab. */}
-        {(activeTab === "register" || activeTab === "bar") && (
-          <RegisterStatusHeader
-            user={operator || user}
-            batch={activeBatch}
-            registerType={activeTab === "bar" ? "Bar" : "Door"}
-          />
-        )}
+        {/* BPAAA Register Standard §1.1 + §5 — status and sync safety stay
+            visible on every allowed tab so context is never lost while the
+            operator moves between Door, Bar, DJ, Onboarding, and Audit. */}
+        <RegisterStatusHeader
+          user={operator || user}
+          batch={activeBatch}
+          registerType={{
+            register: "Door",
+            bar: "Bar",
+            dj: "DJ",
+            onboarding: "Onboarding",
+            audit: "Audit",
+          }[activeTab] || "Door"}
+        />
 
         {/* Tab strip — tablet-first: horizontal scroll on narrow screens,
             wraps cleanly on wider ones, every chip stays ≥44px tall so
