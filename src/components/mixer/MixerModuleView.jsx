@@ -25,6 +25,8 @@ import SongUploadDialog from "@/components/mixer/SongUploadDialog";
 import AIPlaylistGenerator from "@/components/mixer/AIPlaylistGenerator";
 import MusicSearchPanel from "@/components/mixer/MusicSearchPanel";
 import TrackLibraryDock from "@/components/mixer/TrackLibraryDock";
+import EntertainerPlaylistDock from "@/components/mixer/EntertainerPlaylistDock";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent, libraryTracks = [] }) {
   // ─── State hydration ───
@@ -402,6 +404,35 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     const dup = createDancerProfile({ name: `${src.name} (copy)`, colorTheme: src.colorTheme, songIds: [...src.songIds], tags: [...src.tags] });
     setProfiles((prev) => [...prev, dup]);
     toast.success(`Duplicated "${src.name}"`);
+  }, [profiles]);
+
+  // ─── Entertainer shift playlist load ───
+  // Hydrates a checked-in entertainer's saved playlist into its own profile so
+  // the deck, cue pool and automix all work off their tracks immediately.
+  const handleLoadEntertainerPlaylist = useCallback((songDataList, entertainerName) => {
+    const created = (songDataList || []).map((data) => createSongEntry(data));
+    if (!created.length) return;
+    setSongs((previous) => [...previous, ...created]);
+    const ids = created.map((song) => song.id);
+
+    const existing = profiles.find((profile) => profile.name === entertainerName);
+    if (existing) {
+      setProfiles((previous) => previous.map((profile) =>
+        profile.id === existing.id ? { ...profile, songIds: ids } : profile
+      ));
+      setUiState((state) => ({ ...state, activeProfileId: existing.id }));
+    } else {
+      const profile = createDancerProfile({
+        name: entertainerName || "Entertainer",
+        colorTheme: "#ec4899",
+        songIds: ids,
+        tags: ["entertainer", "shift"],
+      });
+      setProfiles((previous) => [...previous, profile]);
+      setUiState((state) => ({ ...state, activeProfileId: profile.id }));
+    }
+    setSelectedSongId(null);
+    setPlayingSongId(null);
   }, [profiles]);
 
   // ─── Upload song handler ───

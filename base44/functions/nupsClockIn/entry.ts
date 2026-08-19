@@ -109,6 +109,16 @@ Deno.serve(async (req) => {
       for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
       return diff === 0;
     };
+    const resolveUserByPin = async (pin) => {
+      const lookup = await hmacHex('pin:' + pin);
+      const candidates = (await E.NUPSUser.filter({ pin_lookup: lookup })) || [];
+      for (const candidate of candidates) {
+        if (!candidate.pin_hash || !candidate.pin_salt) continue;
+        const candidateHash = await pbkdf2Hex(pin, candidate.pin_salt);
+        if (timingSafeEq(candidateHash, candidate.pin_hash)) return candidate;
+      }
+      return null;
+    };
 
     const signToken = async (payload) => {
       const p = b64u(te.encode(JSON.stringify(payload)));
@@ -132,10 +142,21 @@ Deno.serve(async (req) => {
       } catch { return null; }
     };
 
-    const logAttempt = async (type, success, reason) => {
+    const logAttempt = async (type, success, reason, resourceId = null) => {
+      const resolvedResourceId = resourceId || (type === 'pin_auth'
+        ? throttleResourceId
+        : `${type}:${terminalId !== 'unidentified' ? terminalId : ip}`);
       await E.RateLimitAttempt.create({
-        resource_id: `${type}:${ip}`, resource_type: type, venue_id: VENUE_ID,
-        attempt_timestamp: now(), ip_address: ip, success, failure_reason: reason || '',
+        resource_id: resolvedResourceId,
+        resource_type: type,
+        venue_id: VENUE_ID,
+        actor_id: terminalId,
+        terminal_id: terminalId,
+        attempt_timestamp: now(),
+        ip_address: ip,
+        user_agent: userAgent,
+        success,
+        failure_reason: reason || '',
       }).catch(() => null);
     };
     // Auto clock-out sweep — closes any REAL open shift whose last activity
@@ -158,11 +179,20 @@ Deno.serve(async (req) => {
       return closed;
     };
 
-    const throttled = async () => {
+    const throttled = async (resourceId = throttleResourceId) => {
       const recent = (await E.RateLimitAttempt.filter(
-        { resource_id: `pin_auth:${ip}`, resource_type: 'pin_auth', success: false }, '-attempt_timestamp', MAX_FAILS)) || [];
+        { resource_id: resourceId, resource_type: 'pin_auth' }, '-attempt_timestamp', 50)) || [];
       const cutoff = Date.now() - FAIL_WINDOW_MS;
-      return recent.filter(r => new Date(r.attempt_timestamp).getTime() > cutoff).length >= MAX_FAILS;
+      const unlock = recent.find((attempt) => attempt.success === true && attempt.failure_reason === 'manager_unlock');
+      const unlockAt = unlock ? new Date(unlock.attempt_timestamp).getTime() : 0;
+      const effectiveCutoff = Math.max(cutoff, unlockAt);
+      return recent.filter((attempt) =>
+        attempt.success === false && new Date(attempt.attempt_timestamp).getTime() > effectiveCutoff
+      ).length >= MAX_FAILS;
+    };
+    const genericAuthFailure = async (reason, status = 401, resourceId = throttleResourceId) => {
+      await logAttempt('pin_auth', false, reason, resourceId);
+      return Response.json({ error: GENERIC_AUTH_ERROR, code: 'AUTHENTICATION_FAILED' }, { status });
     };
 
     const shiftEmailFor = (u) => u.platform_email || `${String(u.username || u.id).toLowerCase()}@nups.local`;
