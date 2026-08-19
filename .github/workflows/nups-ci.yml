@@ -42,6 +42,9 @@ jobs:
       - name: Audit Base44 entity model
         run: npm run audit:entities
 
+      - name: Enforce Tier 2 write-gateway cutoff
+        run: npm run check:nups-write-gateway
+
       - name: Run Base44-managed CI checks
         run: npm run ci:base44
 
