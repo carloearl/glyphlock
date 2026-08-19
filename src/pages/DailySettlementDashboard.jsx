@@ -18,6 +18,10 @@ import { logActivity } from '@/lib/nups/activityLog';
 import { writeEntity } from '@/lib/nups/writeEntity';
 import SettlementLockGuardModal from '@/components/nups/SettlementLockGuardModal';
 import { downloadSettlementCsv } from '@/lib/accounting/settlementCsv';
+import { buildSettlementBreakdown } from '@/lib/accounting/settlementBreakdown';
+import StationTotalsPanel from '@/components/settlement/StationTotalsPanel';
+import ItemizedSalesPanel from '@/components/settlement/ItemizedSalesPanel';
+import PayoutsAndNetPanel from '@/components/settlement/PayoutsAndNetPanel';
 
 const STATUS_STYLES = {
   OPEN: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
@@ -109,6 +113,46 @@ export default function DailySettlementDashboard() {
     enabled: !!selectedVenue,
   });
 
+  // Product catalogue — so every drink / bottle appears itemized, even at zero
+  const { data: products = [] } = useQuery({
+    queryKey: ['settlement-products', selectedVenue],
+    queryFn: async () => {
+      const all = await base44.entities.POSProduct.list('-created_date', 500);
+      return all.filter(p => !p.venue_id || p.venue_id === selectedVenue);
+    },
+    enabled: !!selectedVenue,
+  });
+
+  // Dancer / entertainer payouts for the day
+  const { data: contractorPayouts = [] } = useQuery({
+    queryKey: ['settlement-contractors', selectedVenue, businessDate],
+    queryFn: async () => {
+      const all = await base44.entities.ContractorPayout.list('-created_date', 500);
+      return all.filter(r => r.venue_id === selectedVenue && (r.payout_date || '').slice(0, 10) === businessDate);
+    },
+    enabled: !!selectedVenue,
+  });
+
+  // Staff payroll for the day
+  const { data: payrollRecords = [] } = useQuery({
+    queryKey: ['settlement-payroll', selectedVenue, businessDate],
+    queryFn: async () => {
+      const all = await base44.entities.PayrollRecord.list('-created_date', 500);
+      return all.filter(r => r.venue_id === selectedVenue && (r.pay_period_end || '').slice(0, 10) === businessDate);
+    },
+    enabled: !!selectedVenue,
+  });
+
+  // Tip payouts for the day
+  const { data: tipPayouts = [] } = useQuery({
+    queryKey: ['settlement-tips', selectedVenue, businessDate],
+    queryFn: async () => {
+      const all = await base44.entities.TipPayout.list('-created_date', 500);
+      return all.filter(r => r.venue_id === selectedVenue && (r.payout_date || '').slice(0, 10) === businessDate);
+    },
+    enabled: !!selectedVenue,
+  });
+
   // Existing settlement record for this day
   const { data: existingSettlement, refetch: refetchSettlement } = useQuery({
     queryKey: ['settlement-record', selectedVenue, businessDate],
@@ -180,6 +224,16 @@ export default function DailySettlementDashboard() {
       glyphbucks_activity: gbActivity,
     };
   }, [txns, zReports, driverPayouts]);
+
+  // Full operational breakdown — door/bar/VIP, itemized inventory, payout legs
+  const breakdown = useMemo(() => buildSettlementBreakdown({
+    transactions: txns,
+    products,
+    driverPayouts,
+    contractorPayouts,
+    payrollRecords,
+    tipPayouts,
+  }), [txns, products, driverPayouts, contractorPayouts, payrollRecords, tipPayouts]);
 
   const handleLockClick = () => {
     if (!user || !isManager) {
@@ -361,6 +415,12 @@ export default function DailySettlementDashboard() {
           <MetricCard label="Total Sales" value={`$${metrics.total_sales.toFixed(2)}`} sub="cash + card ONLY" accent="purple" />
           <MetricCard label="Variance" value={`$${metrics.variance.toFixed(2)}`} sub="Z-Report over/short" accent={metrics.variance < 0 ? 'red' : 'slate'} warning={metrics.variance !== 0} />
         </div>
+
+        <StationTotalsPanel breakdown={breakdown} />
+
+        <PayoutsAndNetPanel breakdown={breakdown} />
+
+        <ItemizedSalesPanel items={breakdown.items} />
 
         <div className="space-y-3">
           <Card className="bg-slate-900 border-slate-800">
