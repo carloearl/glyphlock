@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@14.14.0';
 
 /**
@@ -34,6 +34,38 @@ function pricePlanMap(stripeSecretKey) {
   return map;
 }
 
+async function resolveStripeConnection(base44) {
+  let stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+  const webhookSecrets = [
+    Deno.env.get('STRIPE_WEBHOOK_SECRET'),
+    Deno.env.get('STRIPE_CONNECT_WEBHOOK_SECRET'),
+  ].filter(Boolean);
+
+  try {
+    const connection = await base44.asServiceRole.connectors.getConnection('stripe');
+    const config = connection?.connectionConfig || {};
+    if (!stripeSecretKey && typeof connection?.accessToken === 'string') {
+      stripeSecretKey = connection.accessToken;
+    }
+    for (const candidate of [
+      config.webhook_secret,
+      config.webhookSecret,
+      config.connect_webhook_secret,
+      config.signing_secret,
+      config.endpoint_secret,
+    ]) {
+      if (typeof candidate === 'string' && candidate.length > 0) webhookSecrets.push(candidate);
+    }
+  } catch (error) {
+    console.warn('[stripeWebhook] Stripe connector unavailable:', error?.message || 'not connected');
+  }
+
+  return {
+    stripeSecretKey,
+    webhookSecrets: [...new Set(webhookSecrets)],
+  };
+}
+
 async function audit(db, eventType, resourceId, description, severity = 'low', metadata = {}) {
   try {
     await db.SystemAuditLog.create({
@@ -67,11 +99,8 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Method not allowed' }, { status: 405 });
   }
 
-  const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
-  const webhookSecrets = [
-    Deno.env.get('STRIPE_WEBHOOK_SECRET'),
-    Deno.env.get('STRIPE_CONNECT_WEBHOOK_SECRET'),
-  ].filter(Boolean);
+  const base44 = createClientFromRequest(req);
+  const { stripeSecretKey, webhookSecrets } = await resolveStripeConnection(base44);
   const signature = req.headers.get('stripe-signature');
 
   // Fail closed before constructing a Stripe client. Platform-account and
@@ -105,7 +134,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const base44 = createClientFromRequest(req);
     const db = base44.asServiceRole.entities;
     const connectedAccountId = event.account || null;
 
