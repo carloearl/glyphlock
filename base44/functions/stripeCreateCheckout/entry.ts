@@ -39,6 +39,22 @@ function resolvePlanPrice(plan, stripeSecretKey) {
   return stripeKeyMode(stripeSecretKey) === 'test' ? SANDBOX_PLAN_PRICES[plan] : null;
 }
 
+async function resolveStripeSecretKey(base44) {
+  const configured = Deno.env.get('STRIPE_SECRET_KEY');
+  if (configured) return configured;
+
+  try {
+    const connection = await base44.asServiceRole.connectors.getConnection('stripe');
+    const connectorToken = connection?.accessToken;
+    return typeof connectorToken === 'string' && connectorToken.length > 0
+      ? connectorToken
+      : null;
+  } catch (error) {
+    console.warn('[stripeCreateCheckout] Stripe connector unavailable:', error?.message || 'not connected');
+    return null;
+  }
+}
+
 function getAllowedOrigin(req) {
   const candidates = [Deno.env.get('APP_BASE_URL'), req.headers.get('origin')].filter(Boolean);
 
@@ -103,7 +119,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    const stripeSecretKey = await resolveStripeSecretKey(base44);
     const priceId = stripeSecretKey ? resolvePlanPrice(plan, stripeSecretKey) : null;
 
     if (!stripeSecretKey || !priceId) {
