@@ -195,12 +195,15 @@ export default function TipBreakdown({ transactions = [] }) {
       return;
     }
 
+    const signedEmployees = Object.keys(tipSignatures).map((empId) => nupsUsers.find((u) => u.id === empId));
+    if (signedEmployees.some((emp) => !emp || INDEPENDENT_CONTRACTOR_ROLES.has(String(emp.role || "").toUpperCase()))) {
+      toast.error("Independent contractors cannot be included in an employee tip payout.");
+      return;
+    }
+
     const signatures = Object.entries(tipSignatures).map(([empId, sig]) => {
       const emp = nupsUsers.find(u => u.id === empId);
-      if (!emp || INDEPENDENT_CONTRACTOR_ROLES.has(String(emp.role || "").toUpperCase())) {
-        throw new Error("Independent contractors cannot be included in an employee tip payout.");
-      }
-      const poolKey = ROLE_POOLS[emp.role] || "security";
+      const poolKey = ROLE_POOLS[String(emp.role || "").toUpperCase()] || "security";
       const payout = payouts[poolKey];
       return {
         employee_id: empId,
@@ -324,6 +327,16 @@ export default function TipBreakdown({ transactions = [] }) {
           </div>
         )}
       </div>
+
+      {allocationInvalid && (
+        <div className="rounded-xl border border-red-500/40 bg-red-950/30 p-3 text-sm text-red-200 flex items-start gap-2" role="alert">
+          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>
+            This formula requests {fmt(payouts.__meta.allocated)} from a {fmt(totalTips)} tip pool.
+            Saving is blocked until the allocation is reduced to the available balance.
+          </span>
+        </div>
+      )}
 
       {/* Formula legend */}
       <div className="rounded-xl p-3 text-[10px] text-gray-500 space-y-1" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
