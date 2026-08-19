@@ -22,6 +22,7 @@ const OVERLAYS = [
   ["showLogo", "Fable Logo"],
   ["showBeatCounter", "4/4 Beat Counter"],
   ["showDancer", "On Stage Name"],
+  ["showHeadline", "Center Headline"],
 ];
 
 const EFFECTS = [
@@ -170,14 +171,18 @@ export default function FableControlPanel({
         </label>
       </div>
 
-      <div className={`grid gap-3 sm:grid-cols-3 ${settings.autoMode ? "opacity-50" : ""}`}>
+      {/* Picking a look manually takes over from auto-rotation immediately so
+          the operator always sees the theme they just clicked. */}
+      <div className="grid gap-3 sm:grid-cols-3">
         <Picker label="Theme" value={settings.theme} options={THEMES}
           onChange={(v) => {
             const preset = THEMES.find((t) => t.key === v);
-            onChange({ ...settings, theme: v, background: preset?.bg || settings.background });
+            onChange({ ...settings, autoMode: false, theme: v, background: preset?.bg || settings.background });
           }} />
-        <Picker label="Stage Background" value={settings.background} options={BACKGROUNDS} onChange={set("background")} />
-        <Picker label="Visualizer" value={settings.visual} options={VISUALS} onChange={set("visual")} />
+        <Picker label="Stage Background" value={settings.background} options={BACKGROUNDS}
+          onChange={(v) => onChange({ ...settings, autoMode: false, background: v })} />
+        <Picker label="Visualizer" value={settings.visual} options={VISUALS}
+          onChange={(v) => onChange({ ...settings, autoMode: false, visual: v })} />
       </div>
 
       <label className="block">

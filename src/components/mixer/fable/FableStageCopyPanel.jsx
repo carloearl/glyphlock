@@ -5,6 +5,7 @@
  */
 import React from "react";
 import { FONTS } from "./fableThemes";
+import { TEXT_FX } from "./fableTextFx";
 
 function Field({ label, value, onChange, placeholder }) {
   return (
@@ -26,7 +27,48 @@ export default function FableStageCopyPanel({ settings, onChange }) {
 
   return (
     <div className="space-y-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stage Copy</div>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Center Headline</div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Headline Line 1" value={settings.headline1} onChange={set("headline1")} placeholder="Dream Palace" />
+        <Field label="Headline Line 2" value={settings.headline2} onChange={set("headline2")} placeholder="VIP Showroom" />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <label className="block">
+          <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Headline Font</span>
+          <select
+            value={settings.headlineFont || settings.font}
+            onChange={(e) => set("headlineFont")(e.target.value)}
+            className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm font-semibold text-white"
+          >
+            {FONTS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Headline Effect</span>
+          <select
+            value={settings.headlineFx || "neon"}
+            onChange={(e) => set("headlineFx")(e.target.value)}
+            className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm font-semibold text-white"
+          >
+            {TEXT_FX.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+            Headline Size · {Number(settings.headlineSize) || 96}px
+          </span>
+          <input
+            type="range" min="32" max="220" step="2"
+            value={Number(settings.headlineSize) || 96}
+            onChange={(e) => set("headlineSize")(Number(e.target.value))}
+            className="w-full"
+          />
+        </label>
+      </div>
+
+      <div className="pt-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stage Copy</div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field

@@ -95,6 +95,13 @@ export const DEFAULT_SETTINGS = {
   marqueeSpeed: 14,
   marqueeDirection: "ltr",
   showBeatCounter: true,
+  // Center headline — two independently styled lines.
+  headline1: "Dream Palace",
+  headline2: "VIP Showroom",
+  headlineFont: "display",
+  headlineSize: 96,
+  headlineFx: "neon",
+  showHeadline: true,
   // Typed stage copy — who is on stage and who is up next.
   dancerName: "",
   dancerLabel: "On Stage",

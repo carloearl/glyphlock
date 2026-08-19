@@ -8,6 +8,7 @@ import { getTheme, getFont, THEMES, VISUALS } from "./fableThemes";
 import { makeParticles, drawBackground, drawVisual } from "./fableRenderers";
 import FableMediaLayer from "./FableMediaLayer";
 import FableMarquee from "./FableMarquee";
+import FableHeadline from "./FableHeadline";
 import FableStageFx from "./FableStageFx";
 import { resolveFableMedia } from "./fableMedia";
 
@@ -179,6 +180,7 @@ export default function FableStage({
       </div>
 
       <FableStageFx settings={settings} theme={theme} />
+      {settings.showHeadline && <FableHeadline settings={settings} theme={theme} />}
 
       {/* On stage · now playing · up next */}
       <div
