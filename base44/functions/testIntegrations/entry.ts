@@ -1,7 +1,18 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@14.14.0';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+async function resolveStripeSecretKey(base44) {
+  const configured = Deno.env.get('STRIPE_SECRET_KEY');
+  if (configured) return configured;
+
+  try {
+    const connection = await base44.asServiceRole.connectors.getConnection('stripe');
+    const token = connection?.accessToken;
+    return typeof token === 'string' && token.length > 0 ? token : null;
+  } catch {
+    return null;
+  }
+}
 
 Deno.serve(async (req) => {
   try {
@@ -34,30 +45,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Test 2: Entity CRUD Operations
+    // Test 2: Entity read access. SystemAuditLog is append-only, so a health
+    // check must not create and then attempt to delete an audit record.
     try {
-      const testLog = await base44.entities.SystemAuditLog.create({
-        event_type: 'INTEGRATION_TEST',
-        description: 'Testing entity create operation',
-        actor_email: user.email,
-        resource_id: 'test-integration',
-        status: 'success'
-      });
-
-      const logs = await base44.entities.SystemAuditLog.filter({ 
-        event_type: 'INTEGRATION_TEST' 
-      });
-
-      await base44.entities.SystemAuditLog.delete(testLog.id);
-
+      const configs = await base44.asServiceRole.entities.SystemConfig.list('-updated_date', 3);
       testResults.tests.push({
-        name: 'Entity CRUD Operations',
+        name: 'Entity Read Operations',
         status: 'PASS',
-        details: { created: !!testLog.id, retrieved: logs.length > 0, deleted: true }
+        details: { recordsRead: configs.length }
       });
     } catch (error) {
       testResults.tests.push({
-        name: 'Entity CRUD Operations',
+        name: 'Entity Read Operations',
         status: 'FAIL',
         error: error.message
       });
@@ -65,6 +64,9 @@ Deno.serve(async (req) => {
 
     // Test 3: Stripe Connection
     try {
+      const stripeSecretKey = await resolveStripeSecretKey(base44);
+      if (!stripeSecretKey) throw new Error('Stripe is not configured');
+      const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
       const balance = await stripe.balance.retrieve();
       const products = await stripe.products.list({ limit: 3 });
       
