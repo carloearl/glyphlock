@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Stripe is not configured' }, { status: 503 });
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-06-24.dahlia' });
     const existing = await stripe.subscriptions.retrieve(user.subscription_id);
     if (String(existing.customer || '') !== String(user.stripe_customer_id)) {
       return Response.json({ error: 'Subscription not found' }, { status: 404 });

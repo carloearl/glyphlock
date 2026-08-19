@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-06-24.dahlia' });
     const appOrigin = getAllowedOrigin(req);
     const successUrl = `${appOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${appOrigin}/payment-cancel`;

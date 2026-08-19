@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Stripe is not configured' }, { status: 503 });
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-06-24.dahlia' });
     const subscription = await stripe.subscriptions.retrieve(user.subscription_id, {
       expand: ['default_payment_method', 'items.data.price.product'],
     });

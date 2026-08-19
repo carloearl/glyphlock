@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     try {
       const stripeSecretKey = await resolveStripeSecretKey(base44);
       if (!stripeSecretKey) throw new Error('Stripe is not configured');
-      const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+      const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-06-24.dahlia' });
       const balance = await stripe.balance.retrieve();
       const products = await stripe.products.list({ limit: 3 });
       
