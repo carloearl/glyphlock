@@ -29,7 +29,6 @@ import HeroSection from '@/components/home/HeroSection';
 import DreamTeamBallButton from '@/components/home/DreamTeamBallButton';
 import GlyphHoverEngine from '@/components/home/GlyphHoverEngine';
 import DeferredRender from '@/components/shared/DeferredRender';
-import EcosystemBlueprint from '@/components/home/EcosystemBlueprint';
 
 const FlagshipNUPSShowcase = lazy(() => import('@/components/home/FlagshipNUPSShowcase'));
 const FeaturedIntegrationsMarquee = lazy(() => import('@/components/home/FeaturedIntegrationsMarquee'));
@@ -523,10 +522,6 @@ export default function Home() {
 
         <section className="relative border-y border-white/10 bg-black/10 py-3 backdrop-blur-sm">
           <DeferredRender minHeight={88}><FeaturedIntegrationsMarquee /></DeferredRender>
-        </section>
-
-        <section id="ecosystem-blueprint" className="gl-home-section gl-home-stage relative py-10 md:py-16">
-          <DeferredRender minHeight={620}><EcosystemBlueprint /></DeferredRender>
         </section>
 
         <DeferredRender minHeight={760}><InteractiveSystemMap /></DeferredRender>
