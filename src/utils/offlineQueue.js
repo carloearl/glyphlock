@@ -1,7 +1,27 @@
 /**
- * OFFLINE TRANSACTION QUEUE — IndexedDB persistence
- * Allows POS to continue operating when network is down
+ * OFFLINE OPERATION QUEUE — IndexedDB persistence
+ *
+ * This store preserves non-financial operational work for manager review.
+ * Payment authorization, capture, refunds, payouts, settlement, and card data
+ * are deliberately prohibited from browser-queued replay.
  */
+
+const FINANCIAL_FIELD_PATTERN = /(amount|total|payment|card|processor|approval|refund|payout|settlement|bank|cash|charge|intent|checkout|cvv|cvc|track)/i;
+
+function assertNonFinancialPayload(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new TypeError('Offline operation payload must be an object.');
+  }
+
+  const forbiddenField = Object.keys(payload).find((key) => FINANCIAL_FIELD_PATTERN.test(key));
+  if (forbiddenField) {
+    throw new Error(`Financial field ${forbiddenField} cannot be queued offline.`);
+  }
+
+  if (!payload.operation_type || typeof payload.operation_type !== 'string') {
+    throw new Error('Offline operations require an operation_type for manager review.');
+  }
+}
 
 // Simple IndexedDB wrapper without external dependencies
 class OfflineDB {
@@ -78,15 +98,21 @@ class OfflineDB {
 const db = new OfflineDB();
 
 export const OfflineQueue = {
-  addTransaction: async (payload) => {
+  addOperation: async (payload) => {
+    assertNonFinancialPayload(payload);
     const id = await db.add('pendingTransactions', {
       ...payload,
       created_at: new Date().toISOString(),
       status: 'pending',
-      offline_id: crypto.randomUUID()
+      sync_policy: 'manual_manager_review',
+      offline_id: crypto.randomUUID(),
     });
     return id;
   },
+
+  // Backward-compatible name. The same non-financial gate applies, so legacy
+  // callers cannot turn a browser queue into an unattended payment executor.
+  addTransaction: async (payload) => OfflineQueue.addOperation(payload),
 
   getPending: async () => {
     const all = await db.getAll('pendingTransactions');
