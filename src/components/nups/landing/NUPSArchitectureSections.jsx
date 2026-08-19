@@ -80,7 +80,7 @@ export default function NUPSArchitectureSections() {
       {/* § 11 · HYBRID ARCHITECTURE */}
       <div className="section-header"><h2>Hybrid <b>Architecture</b></h2><div className="index">§ 11 · Edge + Server</div></div>
       <div style={{ margin: "-58px 0 28px", maxWidth: 980, padding: "20px 24px", borderLeft: "3px solid var(--cyan)", background: "rgba(0,212,255,0.045)", color: "var(--ink)", fontSize: 16, lineHeight: 1.65 }}>
-        Our primary technical objective is to achieve <b style={{ color: "var(--cyan-soft)" }}>seamless, reliable interoperability between legacy hardware and modern cloud-based services</b>—preserving useful venue infrastructure while adding secure synchronization, audit continuity, and cloud orchestration.
+        Our primary technical objective is a <b style={{ color: "var(--cyan-soft)" }}>cloud-forward NUPS architecture that can communicate with legacy venue hardware during transition—without being constrained by it</b>. NUPS maintains operational continuity while venues migrate to secure, modern, API-capable devices; legacy equipment is replaced whenever it limits security, reliability, automation, or support.
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--line)", border: "1px solid var(--line)", marginBottom: 48 }}>
         {hybrid.map((r) => (
