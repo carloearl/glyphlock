@@ -327,15 +327,14 @@ export default function TipBreakdown({ transactions = [] }) {
 
       {/* Formula legend */}
       <div className="rounded-xl p-3 text-[10px] text-gray-500 space-y-1" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="font-bold text-gray-400 uppercase tracking-widest mb-2">Payout Formula — Floor Tips Only</div>
-        <div>🎤 <strong className="text-pink-400">Entertainer</strong> — 37% of floor tip pool each (floor/bar tips only — VIP show earnings are paid separately via contract receipts)</div>
+        <div className="font-bold text-gray-400 uppercase tracking-widest mb-2">Employee Tip Pool — Floor Tips Only</div>
         <div>⭐ <strong className="text-amber-400">Hostess / Host</strong> — 15% of total, split equally among all hosts</div>
         <div>🛡 <strong className="text-purple-400">Manager / Promo</strong> — Hostess share + $100 each</div>
         <div>🎧 <strong className="text-cyan-400">DJ / Asst Manager</strong> — 50% of hostess pool total, split equally</div>
         <div>👥 <strong className="text-gray-400">Security / Staff</strong> — Remaining balance, split equally</div>
-        <div className="mt-2 flex items-start gap-1.5 p-2 rounded-lg" style={{ background: 'rgba(236,72,153,0.07)', border: '1px solid rgba(236,72,153,0.2)' }}>
-          <Info className="w-3 h-3 text-pink-400 mt-0.5 shrink-0" />
-          <span className="text-pink-300">VIP show revenue (Dream Palace contracts) is tracked separately. Entertainers receive their VIP show earnings via the scanned contract receipt — that payout is <em>not</em> included here.</span>
+        <div className="mt-2 flex items-start gap-1.5 p-2 rounded-lg" style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)' }}>
+          <AlertTriangle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" />
+          <span className="text-amber-200">Independent contractors are excluded from this employee pool. Entertainer earnings must use the separate ContractorPayout workflow.</span>
         </div>
       </div>
 
@@ -343,9 +342,8 @@ export default function TipBreakdown({ transactions = [] }) {
       {showSplitEditor && (
         <div className="rounded-xl p-4 space-y-3" style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.25)' }}>
           <div className="text-xs font-bold text-purple-300 uppercase tracking-widest">Adjust Payout Formula</div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { key: 'entertainerPct', label: 'Entertainer %', suffix: '%', color: '#ec4899', note: 'each, of total' },
               { key: 'hostessPct',     label: 'Hostess Pool %', suffix: '%', color: '#f59e0b', note: '% of total, split' },
               { key: 'managerBonus',   label: 'Mgr Bonus $',    suffix: '$', color: '#a855f7', note: 'added to hostess/ea' },
               { key: 'djPct',          label: 'DJ % of Hostess',suffix: '%', color: '#22d3ee', note: '% of hostess pool' },
@@ -355,7 +353,7 @@ export default function TipBreakdown({ transactions = [] }) {
                 <div className="flex items-center gap-1">
                   {suffix === '$' && <span className="text-gray-400 text-sm">$</span>}
                   <input
-                    type="number" min={0} max={key === 'entertainerPct' ? 100 : key === 'managerBonus' ? 1000 : 100}
+                    type="number" min={0} max={key === 'managerBonus' ? 1000 : 100}
                     value={formula[key]}
                     onChange={e => setFormula(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
                     className="h-8 w-20 rounded-lg px-2 font-mono text-sm text-white"
@@ -397,7 +395,7 @@ export default function TipBreakdown({ transactions = [] }) {
         />
       ))}
 
-      {nupsUsers.length === 0 && (
+      {totalEmployees === 0 && (
         <div className="text-center py-10 text-gray-600 text-sm">
           No active employees found. Add employees in the Staff tab to see payout breakdown.
         </div>
@@ -407,7 +405,7 @@ export default function TipBreakdown({ transactions = [] }) {
       {totalTips > 0 && (
         <div className="rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.07)' }}>
           <div className="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">Pool Summary</div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {POOL_CONFIG.map(cfg => {
               const p = payouts[cfg.key];
               return (
@@ -421,7 +419,6 @@ export default function TipBreakdown({ transactions = [] }) {
           </div>
           <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-gray-600 text-right">
             Total allocated: {fmt(
-              (payouts.entertainer?.total || 0) +
               (payouts.hostess?.total    || 0) +
               (payouts.manager?.total    || 0) +
               (payouts.dj?.total         || 0) +
