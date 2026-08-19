@@ -119,6 +119,7 @@ function RegisterConsoleInner() {
   const [user, setUser] = useState(null);
   const [operator, setOperator] = useState(null);
   const [showSeedDialog, setShowSeedDialog] = useState(false);
+  const [djMounted, setDjMounted] = useState(false);
   const adminOverride = useAdminOverride();
   const activeVenue = useActiveVenue();
   const venueId = activeVenue?.id || activeVenue?.venue_id || null;
@@ -169,7 +170,13 @@ function RegisterConsoleInner() {
     if ((user || operator) && !allowedKeys.includes(activeTab)) {
       setActiveTab(allowedKeys[0]);
     }
-  }, [user, operator, adminOverride]);  
+  }, [user, operator, adminOverride]);
+
+  // Mount the DJ console on first entry and keep it alive afterward. The deck
+  // players must survive movement between Register, Bar, and DJ station tabs.
+  useEffect(() => {
+    if (activeTab === "dj") setDjMounted(true);
+  }, [activeTab]);  
 
   const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
   const { data: batches = [] } = useQuery({
@@ -329,7 +336,17 @@ function RegisterConsoleInner() {
             </div>
           )}
           {activeTab === "bar" && <POSBarRegister user={operator || user} />}
-          {activeTab === "dj" && <UnifiedMusicConsole />}
+          {djMounted && (
+            <div
+              className={activeTab === "dj"
+                ? ""
+                : "fixed left-[-200vw] top-0 z-[-1] w-screen max-w-[1600px] pointer-events-none opacity-0"}
+              aria-hidden={activeTab !== "dj"}
+              inert={activeTab !== "dj" ? true : undefined}
+            >
+              <UnifiedMusicConsole />
+            </div>
+          )}
           {/* Manager/Admin ONLY — permission-gated render, never reachable by
               door/bar/DJ staff even if tab state is forced. */}
           {activeTab === "onboarding" && isManagerOrAdmin && <StaffOnboardingPanel />}
