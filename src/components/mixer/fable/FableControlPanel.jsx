@@ -8,6 +8,7 @@ import React from "react";
 import { Switch } from "@/components/ui/switch";
 import { Square, ExternalLink, Mic, MicOff, Play, Activity } from "lucide-react";
 import { THEMES, BACKGROUNDS, VISUALS, FONTS } from "./fableThemes";
+import FableStageCopyPanel from "./FableStageCopyPanel";
 import { MEDIA_MODES } from "./fableMedia";
 
 const OVERLAYS = [
@@ -20,6 +21,7 @@ const OVERLAYS = [
   ["showOnAir", "On Air Badge"],
   ["showLogo", "Fable Logo"],
   ["showBeatCounter", "4/4 Beat Counter"],
+  ["showDancer", "On Stage Name"],
 ];
 
 const EFFECTS = [
@@ -28,6 +30,10 @@ const EFFECTS = [
   ["beatFlash", "Beat Flash"],
   ["beatShake", "Beat Shake"],
   ["strobe", "Strobe On Beat"],
+  ["vignette", "Edge Vignette"],
+  ["scanlines", "CRT Scanlines"],
+  ["grain", "Film Grain"],
+  ["colorSweep", "Color Sweep"],
 ];
 
 function Picker({ label, value, options, onChange }) {
@@ -213,6 +219,8 @@ export default function FableControlPanel({
           className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white"
         />
       </label>
+
+      <FableStageCopyPanel settings={settings} onChange={onChange} />
 
       <div>
         <div className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stage Overlays</div>

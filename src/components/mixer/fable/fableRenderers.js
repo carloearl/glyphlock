@@ -124,6 +124,69 @@ export function drawBackground(g, W, H, t, frame, theme, mode, particles) {
     return;
   }
 
+  if (mode === "matrix") {
+    const cols = Math.ceil(W / 18);
+    g.font = "16px 'JetBrains Mono', monospace";
+    for (let i = 0; i < cols; i++) {
+      const speed = 60 + ((i * 37) % 90);
+      const y = ((t * 0.001 * speed + i * 90) % (H + 160)) - 80;
+      g.fillStyle = i % 5 === 0 ? c3 : c2;
+      g.globalAlpha = 0.25 + e * 0.6;
+      g.fillText("01".charAt(i % 2), i * 18, y);
+      g.globalAlpha = 0.5 + e * 0.5;
+      g.fillText("Δ", i * 18, y - 22);
+    }
+    g.globalAlpha = 1;
+    return;
+  }
+
+  if (mode === "kaleido") {
+    const cx = W / 2;
+    const cy = H / 2;
+    const wedges = 12;
+    for (let i = 0; i < wedges; i++) {
+      const a = (i / wedges) * Math.PI * 2 + t * 0.0003;
+      const rad = Math.min(W, H) * (0.25 + e * 0.5);
+      g.fillStyle = `${[c1, c2, c3][i % 3]}44`;
+      g.beginPath();
+      g.moveTo(cx, cy);
+      g.arc(cx, cy, rad, a, a + Math.PI / wedges);
+      g.closePath();
+      g.fill();
+    }
+    return;
+  }
+
+  if (mode === "lasers") {
+    g.lineWidth = 2;
+    for (let i = 0; i < 14; i++) {
+      const a = Math.sin(t * 0.0006 + i * 0.5) * 0.7 - Math.PI / 2;
+      const len = Math.max(W, H) * (0.8 + e * 0.6);
+      g.strokeStyle = `${[c1, c2, c3][i % 3]}88`;
+      g.beginPath();
+      g.moveTo(W / 2, H * 0.08);
+      g.lineTo(W / 2 + Math.cos(a + i * 0.22) * len, H * 0.08 + Math.sin(a + i * 0.22) * len);
+      g.stroke();
+    }
+    return;
+  }
+
+  if (mode === "floor") {
+    const horizon = H * 0.45;
+    const rows = 16;
+    for (let r = 0; r < rows; r++) {
+      const k = (r + ((t * 0.0004) % 1)) / rows;
+      const y = horizon + k * k * (H - horizon) * 1.3;
+      const nh = Math.max(2, (H - horizon) * 0.06 * (k + 0.2));
+      for (let cIdx = 0; cIdx < 12; cIdx++) {
+        if ((cIdx + r) % 2) continue;
+        g.fillStyle = `${(r + cIdx) % 4 === 0 ? c2 : c1}${Math.round(40 + e * 90).toString(16).padStart(2, "0")}`;
+        g.fillRect((cIdx / 12) * W, y, W / 12, nh);
+      }
+    }
+    return;
+  }
+
   if (mode === "embers") {
     particles.forEach((p, i) => {
       p.y -= (0.8 + p.z * 2.6) * (1 + frame.bass * 2);
@@ -212,6 +275,73 @@ export function drawVisual(g, W, H, t, frame, theme, mode, intensity) {
       g.stroke();
     }
     g.globalAlpha = 1;
+    return;
+  }
+
+  if (mode === "peaks") {
+    const count = 56;
+    const gap = 4;
+    const bw = W / count - gap;
+    for (let i = 0; i < count; i++) {
+      const v = (bands[i] || 0) * gain;
+      const h = Math.max(3, v * H * 0.7);
+      const x = i * (bw + gap);
+      g.fillStyle = `${c1}cc`;
+      g.fillRect(x, H - h, bw, h);
+      g.fillStyle = c3;
+      g.fillRect(x, H - h - 6, bw, 4);
+    }
+    return;
+  }
+
+  if (mode === "rings") {
+    const cx = W / 2;
+    const cy = H / 2;
+    for (let i = 0; i < 9; i++) {
+      const v = (bands[i * 6] || 0) * gain;
+      g.strokeStyle = [c1, c2, c3][i % 3];
+      g.globalAlpha = 0.35 + v;
+      g.lineWidth = 2 + v * 10;
+      g.beginPath();
+      g.arc(cx, cy, Math.min(W, H) * (0.06 + i * 0.05) * (1 + v * 0.3), 0, Math.PI * 2);
+      g.stroke();
+    }
+    g.globalAlpha = 1;
+    return;
+  }
+
+  if (mode === "spiral") {
+    const cx = W / 2;
+    const cy = H / 2;
+    const turns = 220;
+    g.lineWidth = Math.max(2, W / 500);
+    g.beginPath();
+    for (let i = 0; i < turns; i++) {
+      const v = (bands[i % Math.max(1, bands.length)] || 0) * gain;
+      const a = (i / turns) * Math.PI * 8 + t * 0.0004;
+      const rad = (i / turns) * Math.min(W, H) * 0.45 * (1 + v * 0.5);
+      const x = cx + Math.cos(a) * rad;
+      const y = cy + Math.sin(a) * rad;
+      if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+    }
+    g.strokeStyle = c2;
+    g.stroke();
+    return;
+  }
+
+  if (mode === "blocks") {
+    const cols = 32;
+    const rows = 12;
+    const cw = W / cols;
+    const ch = H / rows;
+    for (let i = 0; i < cols; i++) {
+      const v = (bands[i * 2] || 0) * gain;
+      const lit = Math.round(v * rows);
+      for (let r = 0; r < lit; r++) {
+        g.fillStyle = r > rows * 0.75 ? c3 : r > rows * 0.45 ? c2 : c1;
+        g.fillRect(i * cw + 2, H - (r + 1) * ch + 2, cw - 4, ch - 4);
+      }
+    }
     return;
   }
 

@@ -30,6 +30,10 @@ export const BACKGROUNDS = [
   { key: "confetti",  label: "Confetti Fall" },
   { key: "snow",      label: "Snowfall" },
   { key: "embers",    label: "Rising Embers" },
+  { key: "matrix",    label: "Glyph Rain" },
+  { key: "kaleido",   label: "Kaleido Prism" },
+  { key: "lasers",    label: "Laser Fan" },
+  { key: "floor",     label: "Checker Floor" },
   { key: "none",      label: "Pure Black" },
 ];
 
@@ -39,7 +43,19 @@ export const VISUALS = [
   { key: "radial", label: "Radial Burst" },
   { key: "wave",   label: "Waveform Ribbon" },
   { key: "orbs",   label: "Reactive Orbs" },
+  { key: "peaks",  label: "Peak Cap Bars" },
+  { key: "rings",  label: "Pulse Rings" },
+  { key: "spiral", label: "Spectrum Spiral" },
+  { key: "blocks", label: "LED Block Wall" },
   { key: "off",    label: "Background Only" },
+];
+
+export const FONT_SIZES = [
+  { key: "0.75", label: "Small" },
+  { key: "1", label: "Standard" },
+  { key: "1.25", label: "Large" },
+  { key: "1.6", label: "Jumbo" },
+  { key: "2", label: "Marquee Wall" },
 ];
 
 export const FONTS = [
@@ -72,9 +88,18 @@ export const DEFAULT_SETTINGS = {
   mediaOpacity: 1,
   // Typography + marquee copy
   font: "display",
+  fontScale: 1,
+  marqueeFont: "display",
+  marqueeSize: 13,
   marqueeText: "",
   marqueeSpeed: 14,
+  marqueeDirection: "ltr",
   showBeatCounter: true,
+  // Typed stage copy — who is on stage and who is up next.
+  dancerName: "",
+  dancerLabel: "On Stage",
+  upNextName: "",
+  showDancer: true,
   // Overlay toggles — every element is independently switchable.
   showNowPlaying: true,
   showUpNext: true,
@@ -91,4 +116,8 @@ export const DEFAULT_SETTINGS = {
   beatShake: false,
   strobe: false,
   beatSync: true,
+  vignette: true,
+  scanlines: false,
+  grain: false,
+  colorSweep: false,
 };

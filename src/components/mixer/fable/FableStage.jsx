@@ -7,6 +7,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { getTheme, getFont, THEMES, VISUALS } from "./fableThemes";
 import { makeParticles, drawBackground, drawVisual } from "./fableRenderers";
 import FableMediaLayer from "./FableMediaLayer";
+import FableMarquee from "./FableMarquee";
+import FableStageFx from "./FableStageFx";
 import { resolveFableMedia } from "./fableMedia";
 
 const EMPTY_FRAME = { bass: 0, mid: 0, high: 0, energy: 0, bands: [], shape: [], beatCount: 0, beatInBar: 1, barCount: 0 };
@@ -33,6 +35,9 @@ export default function FableStage({
   const background = auto ? theme.bg : settings.background;
   const visual = auto ? AUTO_VISUALS[autoStep % AUTO_VISUALS.length] : settings.visual;
   const fontCss = getFont(settings.font);
+  // One operator-set scale drives every text overlay on the stage.
+  const scale = Math.min(2.5, Math.max(0.6, Number(settings.fontScale) || 1));
+  const px = (base) => `${(base * scale).toFixed(2)}px`;
   // When a video backdrop is showing, the canvas must stay see-through.
   const mediaOn = !!resolveFableMedia(settings, track).kind;
 
@@ -173,47 +178,62 @@ export default function FableStage({
         </div>
       </div>
 
-      {/* Now playing / up next */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-6">
+      <FableStageFx settings={settings} theme={theme} />
+
+      {/* On stage · now playing · up next */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 p-6"
+        style={{ paddingBottom: settings.showMarquee ? "3.75rem" : undefined }}
+      >
+        {settings.showDancer && !!settings.dancerName?.trim() && (
+          <div className="mb-3">
+            <div
+              className="font-black uppercase tracking-[0.4em] text-white/50"
+              style={{ fontSize: px(10) }}
+            >
+              {settings.dancerLabel?.trim() || "On Stage"}
+            </div>
+            <div
+              className="truncate font-black leading-none drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)]"
+              style={{ fontSize: px(56), color: accent }}
+            >
+              {settings.dancerName}
+            </div>
+          </div>
+        )}
         {settings.showNowPlaying && (
           <div className="mb-2">
-            <div className="text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: accent }}>
+            <div className="font-black uppercase tracking-[0.4em]" style={{ color: accent, fontSize: px(10) }}>
               Now Playing
             </div>
-            <div className="truncate text-4xl font-black leading-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+            <div
+              className="truncate font-black leading-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]"
+              style={{ fontSize: px(36) }}
+            >
               {track?.title || "Awaiting DJ Signal"}
             </div>
-            <div className="truncate text-lg font-semibold text-white/60">
+            <div className="truncate font-semibold text-white/60" style={{ fontSize: px(18) }}>
               {track?.artist || "—"}
             </div>
           </div>
         )}
         {settings.showUpNext && (
           <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-xl border border-white/10 bg-black/45 px-3 py-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Up Next</span>
-            <span className="truncate text-sm font-bold text-white/85">
-              {nextTrack?.title ? `${nextTrack.title}${nextTrack.artist ? ` · ${nextTrack.artist}` : ""}` : "Queue open"}
+            <span className="font-black uppercase tracking-[0.3em] text-white/45" style={{ fontSize: px(10) }}>
+              Up Next
+            </span>
+            <span className="truncate font-bold text-white/85" style={{ fontSize: px(14) }}>
+              {settings.upNextName?.trim() ||
+                (nextTrack?.title
+                  ? `${nextTrack.title}${nextTrack.artist ? ` · ${nextTrack.artist}` : ""}`
+                  : "Queue open")}
             </span>
           </div>
         )}
       </div>
 
-      {/* Marquee — custom copy when provided, otherwise live track info */}
       {settings.showMarquee && (
-        <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 overflow-hidden">
-          <div
-            className="animate-ticker whitespace-nowrap text-center text-[13px] font-black uppercase tracking-[0.5em]"
-            style={{
-              color: `${accent}aa`,
-              animationDuration: `${Math.max(4, Number(settings.marqueeSpeed) || 14)}s`,
-            }}
-          >
-            {`${
-              settings.marqueeText?.trim() ||
-              `${track?.title || "N.U.P.S."} · ${track?.artist || "Autonomous DJ"} · Dream Palace`
-            } · `.repeat(6)}
-          </div>
-        </div>
+        <FableMarquee settings={settings} track={track} accent={accent} />
       )}
     </div>
   );
