@@ -63,7 +63,12 @@
 - Production build: PASS across 4,284 transformed modules.
 - Active source references to legacy `QRScanEvent`: 0.
 
-## Evidence pending final seal
+## Evidence and final seal
 
-- Live UI and GitHub screenshot capture.
-- Final named checkpoint and synchronized GitHub commit verification.
+- GitHub Actions `NUPS CI #819` completed successfully on current `main` during the final visual check.
+- Workflow source was visually verified at `.github/workflows/nups-ci.yml` lines 37–44, including `npm run check:nups-write-gateway`.
+- Register safety source was visually verified at `src/pages/RegisterConsole.jsx` lines 248–268, including `OfflineSyncBanner` and persistent `RegisterStatusHeader` mounting.
+- The live protected Register route redirected the cloud browser to the Base44 login surface; authenticated runtime rendering was not claimed.
+- Screenshots rendered successfully in the cloud browser, but the browser shared-files mount returned `EROFS` and could not synchronize durable screenshot files into the workspace. Verified public evidence URLs remain available in the run handoff.
+- Final checkpoints: `6a8557c385e5c39bb903fb5f` (`DACO 2026-08-19 visual evidence seal`) and `6a85519635b346ede002ba16` (pre-change rollback baseline).
+- Checkpoint commit `0f6eb2d24539d74bba49af6c0afe5dbee449b352` completed successfully as GitHub Actions run `NUPS CI #813`; newer concurrent Base44 commits on `main` also passed in `NUPS CI #818` and `#819`.
