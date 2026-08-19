@@ -56,50 +56,6 @@ function computePayoutsCustom(totalTips, byPool, formula) {
   };
 }
 
-// ─── Payout Calculator ────────────────────────────────────────────────
-// Rules:
-//  1. Each entertainer gets 37% of totalTips (individually, nightly)
-//  2. Hostess pool = defined pct of remaining after entertainers; split equally (2 hostesses)
-//  3. Manager = hostess per-person + $100
-//  4. DJ + Asst Manager = 50% of total hostess pool, split equally between them
-//  5. Security = whatever is left, split equally
-function computePayouts(totalTips, byPool) {
-  const entertainers = byPool.entertainer || [];
-  const hostesses    = byPool.hostess     || [];
-  const managers     = byPool.manager     || [];
-  const djs          = byPool.dj          || [];
-  const security     = byPool.security    || [];
-
-  // 1. Entertainers — each individual gets 37% of totalTips
-  const entertainerPerPerson = totalTips * 0.37;
-  const entertainerTotal     = entertainerPerPerson * entertainers.length; // sum paid out
-
-  // 2. Hostess pool — 15% of totalTips, split equally
-  const hostessTotal     = totalTips * 0.15;
-  const hostessPerPerson = hostesses.length > 0 ? hostessTotal / hostesses.length : 0;
-
-  // 3. Manager — hostess per-person + $100 each
-  const managerPerPerson = hostessPerPerson + 100;
-  const managerTotal     = managerPerPerson * managers.length;
-
-  // 4. DJ (and any "Asst Manager" stored as DJ role) — 50% of hostess total pool, split equally
-  const djTotal     = hostessTotal * 0.5;
-  const djPerPerson = djs.length > 0 ? djTotal / djs.length : 0;
-
-  // 5. Security — everything left over
-  const allocated      = entertainerTotal + hostessTotal + managerTotal + djTotal;
-  const securityTotal  = Math.max(0, totalTips - allocated);
-  const securityPerPerson = security.length > 0 ? securityTotal / security.length : 0;
-
-  return {
-    entertainer: { total: entertainerTotal, perPerson: entertainerPerPerson, employees: entertainers },
-    hostess:     { total: hostessTotal,     perPerson: hostessPerPerson,     employees: hostesses   },
-    manager:     { total: managerTotal,     perPerson: managerPerPerson,     employees: managers    },
-    dj:          { total: djTotal,          perPerson: djPerPerson,          employees: djs         },
-    security:    { total: securityTotal,    perPerson: securityPerPerson,    employees: security    },
-  };
-}
-
 // ─── Pool display config ──────────────────────────────────────────────
 const POOL_CONFIG = [
   { key: "entertainer", label: "Entertainer (37% each)", color: "#ec4899", icon: <Music  className="w-4 h-4" />, note: "37% of total — per performer" },
