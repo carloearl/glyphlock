@@ -53,6 +53,8 @@ export default function DJPlayerSection({
   // Auto Blend runs the smoothstep crossfade at track end even when AUTO-DJ is
   // disarmed, so the crossfader never has to be ridden by hand.
   const [autoBlend, setAutoBlend] = useState(true);
+  // Operator-adjustable blend length, seeded from the automation plan.
+  const [blendSeconds, setBlendSeconds] = useState(Math.max(2, Number(transitionSeconds) || 6));
   const blending = autoDj || autoBlend;
 
   const deckARef = useRef(null);
@@ -170,7 +172,7 @@ export default function DJPlayerSection({
 
     const startCrossfade = crossfade;
     const startedAt = performance.now();
-    const durationMs = Math.max(1000, Number(transitionSeconds || 6) * 1000);
+    const durationMs = Math.max(1000, Number(blendSeconds || 6) * 1000);
     const tick = (timestamp) => {
       const progress = Math.min(1, (timestamp - startedAt) / durationMs);
       // Smoothstep gives a gentler club-style fade than a hard linear ramp.
@@ -184,7 +186,7 @@ export default function DJPlayerSection({
       finishPromotion(targetDeck, reason);
     };
     rafRef.current = requestAnimationFrame(tick);
-  }, [activeDeck, deckASongId, deckBSongId, crossfade, transitionSeconds, finishPromotion]);
+  }, [activeDeck, deckASongId, deckBSongId, crossfade, blendSeconds, finishPromotion]);
 
   const handlePlayLive = useCallback(() => {
     const liveRef = activeDeck === "A" ? deckARef.current : deckBRef.current;

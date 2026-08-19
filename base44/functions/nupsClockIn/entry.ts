@@ -347,21 +347,26 @@ Deno.serve(async (req) => {
       return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
     }
     if (await throttled()) {
-      return Response.json({ error: 'Too many failed attempts. Try again in a few minutes.' }, { status: 429 });
+      return Response.json({
+        error: 'Too many failed attempts. Wait for the lockout window or ask a manager to unlock this terminal.',
+        code: 'TERMINAL_LOCKED',
+        manager_unlock_required: true,
+      }, { status: 429 });
     }
     const cleanPin = String(body.pin || '').trim();
-    if (!/^\d{4,6}$/.test(cleanPin)) return Response.json({ error: 'PIN is required.' }, { status: 400 });
+    if (!/^\d{4,6}$/.test(cleanPin)) {
+      return genericAuthFailure('pin_format_invalid');
+    }
 
-    // ─── UNIVERSAL OWNER PIN (90210) — full live access to every card/tab ───
-    if (cleanPin === UNIVERSAL_PIN) {
+    // ─── OPTIONAL OWNER OVERRIDE — server-secret + live owner binding ───────
+    if (UNIVERSAL_PIN && cleanPin === UNIVERSAL_PIN) {
       const live = await base44.auth.me().catch(() => null);
       const liveEmail = String(live?.email || '').toLowerCase();
       if (liveEmail !== OWNER_EMAIL) {
-        await logAttempt('pin_auth', false, 'universal_pin_owner_binding_failed');
-        return Response.json({ error: 'Invalid PIN.' }, { status: 401 });
+        return genericAuthFailure('owner_override_binding_failed');
       }
-      const owner = ((await E.NUPSUser.filter({ platform_email: OWNER_EMAIL })) || [])[0];
-      if (!owner) return Response.json({ error: 'Owner account not found.' }, { status: 404 });
+      const owner = ((await E.NUPSUser.filter({ platform_email: OWNER_EMAIL, status: 'active' })) || [])[0];
+      if (!owner) return genericAuthFailure('owner_override_account_unavailable');
       await logAttempt('pin_auth', true, '');
       const ts = now();
       // Close ALL existing open owner shifts first — there is only ever ONE
@@ -390,22 +395,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    const lookup = await hmacHex('pin:' + cleanPin);
-    const candidates = (await E.NUPSUser.filter({ pin_lookup: lookup })) || [];
-    let nupsUser = null;
-    for (const u of candidates) {
-      if (!u.pin_hash || !u.pin_salt) continue;
-      const h = await pbkdf2Hex(cleanPin, u.pin_salt);
-      if (timingSafeEq(h, u.pin_hash)) { nupsUser = u; break; }
-    }
+    const nupsUser = await resolveUserByPin(cleanPin);
     if (!nupsUser) {
-      await logAttempt('pin_auth', false, 'invalid_pin');
-      return Response.json({ error: 'Invalid PIN.' }, { status: 401 });
+      return genericAuthFailure('invalid_pin');
     }
-    await logAttempt('pin_auth', true, '');
 
     if (nupsUser.status !== 'active') {
-      return Response.json({ error: 'Account is suspended or terminated.' }, { status: 403 });
+      return genericAuthFailure('account_not_active');
     }
     // Email-bound PIN: the account owner must be actively signed in to the
     // platform on this device with the bound email. PIN alone is not enough.
@@ -414,15 +410,15 @@ Deno.serve(async (req) => {
       const liveEmail = String(live?.email || '').toLowerCase();
       const boundEmail = String(nupsUser.platform_email || '').toLowerCase();
       if (!boundEmail || liveEmail !== boundEmail) {
-        await logAttempt('pin_auth', false, 'platform_login_binding_failed');
-        return Response.json({ error: 'This PIN only works while its owner is signed in on this device.' }, { status: 403 });
+        return genericAuthFailure('platform_login_binding_failed');
       }
     }
     if (nupsUser.venue_id && nupsUser.venue_id !== VENUE_ID && nupsUser.venue_id !== DEMO_VENUE_ID) {
-      return Response.json({ error: 'No access to this venue.' }, { status: 403 });
+      return genericAuthFailure('venue_scope_denied');
     }
     const ws = WORKSPACE_BY_ROLE[nupsUser.role];
-    if (!ws) return Response.json({ error: 'No operational workspace is assigned to this role. Contact an administrator.' }, { status: 403 });
+    if (!ws) return genericAuthFailure('workspace_not_assigned');
+    await logAttempt('pin_auth', true, 'authenticated');
 
     const shiftEmail = shiftEmailFor(nupsUser);
     const mode = nupsUser.is_demo ? 'DEMO' : 'REAL';
@@ -457,7 +453,8 @@ Deno.serve(async (req) => {
 
     // clockOut — closes all open shifts, which revokes every session bound to them.
     if (openShifts.length === 0) {
-      return Response.json({ error: 'No active shift found.' }, { status: 404 });
+      await logAttempt('pin_auth', false, 'clock_out_without_open_shift');
+      return Response.json({ error: 'Unable to complete clock out. Ask a manager to verify the active shift.' }, { status: 409 });
     }
     const ts = now();
     for (const s of openShifts) {
