@@ -368,7 +368,15 @@ Deno.serve(async (req) => {
     auditId = audit.id;
 
     const [repo, pageSpeed, crawler] = await Promise.all([
-      fetchRepositoryEvidence(auditType),
+      fetchRepositoryEvidence(auditType).catch((error) => ({
+        repository: REPOSITORY,
+        branch: REPOSITORY_BRANCH,
+        commitSha: '',
+        inventoryCount: 0,
+        inventoryPaths: [],
+        sources: [],
+        error: (error as Error).message,
+      })),
       fetchPageSpeedEvidence(parsedUrl.toString()),
       fetchCrawlerEvidence(db),
     ]);
@@ -379,26 +387,35 @@ Deno.serve(async (req) => {
       response_json_schema: responseSchema,
     });
 
-    const securityResult = sanitizeSecurity(auditResults.security_findings, repo);
-    const psiIds = new Set((pageSpeed.evidence || []).map((item: AnyRecord) => item.evidence_id));
+    const wantsSecurity = auditType === 'full' || auditType === 'security';
+    const wantsPerformance = auditType === 'full' || auditType === 'performance';
+    const wantsSeo = auditType === 'full' || auditType === 'seo';
+    const wantsUx = auditType === 'full' || auditType === 'ux';
+    const performanceMeasured = wantsPerformance && typeof pageSpeed.categoryScores?.performance === 'number';
+    const seoMeasured = wantsSeo && (typeof pageSpeed.categoryScores?.seo === 'number' || crawler.status === 'measured');
+    const uxMeasured = wantsUx && typeof pageSpeed.categoryScores?.accessibility === 'number';
+
+    const securityResult = wantsSecurity
+      ? sanitizeSecurity(auditResults.security_findings, repo)
+      : { accepted: [], discarded: (auditResults.security_findings || []).length };
     const crawlerIds = new Set((crawler.evidence || []).map((item: AnyRecord) => item.evidence_id));
     const performanceIds = new Set((pageSpeed.evidence || []).filter((item: AnyRecord) => item.categories?.includes('performance')).map((item: AnyRecord) => item.evidence_id));
-    const seoIds = new Set([...psiIds, ...crawlerIds]);
+    const seoPsiIds = (pageSpeed.evidence || []).filter((item: AnyRecord) => item.categories?.includes('seo')).map((item: AnyRecord) => item.evidence_id);
+    const seoIds = new Set([...seoPsiIds, ...crawlerIds]);
     const uxIds = new Set((pageSpeed.evidence || []).filter((item: AnyRecord) => item.categories?.includes('accessibility')).map((item: AnyRecord) => item.evidence_id));
 
-    const performanceResult = pageSpeed.status === 'measured'
+    const performanceResult = performanceMeasured
       ? sanitizeMeasured(auditResults.performance_findings, performanceIds, (f) => ({
           severity: safeSeverity(f.severity), title: text(f.title), description: text(f.description), metric: text(f.metric),
           current_value: text(f.current_value), target_value: text(f.target_value), file_path: '', recommendation: text(f.recommendation), auto_fixable: false,
         }))
       : { accepted: [], discarded: (auditResults.performance_findings || []).length };
-    const seoMeasured = pageSpeed.status === 'measured' || crawler.status === 'measured';
     const seoResult = seoMeasured
       ? sanitizeMeasured(auditResults.seo_findings, seoIds, (f) => ({
           severity: safeSeverity(f.severity), title: text(f.title), description: text(f.description), page_path: text(f.page_path), recommendation: text(f.recommendation), auto_fixable: false,
         }))
       : { accepted: [], discarded: (auditResults.seo_findings || []).length };
-    const uxResult = pageSpeed.status === 'measured'
+    const uxResult = uxMeasured
       ? sanitizeMeasured(auditResults.ux_findings, uxIds, (f) => ({
           severity: safeSeverity(f.severity), title: text(f.title), description: text(f.description), component_path: text(f.component_path), recommendation: text(f.recommendation), auto_fixable: false,
         }))
@@ -417,17 +434,17 @@ Deno.serve(async (req) => {
       ux_findings: uxResult.accepted,
       files_scanned: repo.sources.length,
       source_inventory_count: repo.inventoryCount,
-      source_commit_sha: repo.commitSha,
       audit_url: parsedUrl.toString(),
-      security_measurement_status: repo.sources.length ? 'verified_source' : 'no_data_available',
-      performance_measurement_status: pageSpeed.status,
+      security_measurement_status: wantsSecurity && repo.sources.length ? 'verified_source' : 'no_data_available',
+      performance_measurement_status: performanceMeasured ? 'measured' : 'no_data_available',
       seo_measurement_status: seoMeasured ? 'measured' : 'no_data_available',
-      ux_measurement_status: pageSpeed.status,
+      ux_measurement_status: uxMeasured ? 'measured' : 'no_data_available',
       invalid_findings_discarded: invalidFindingsDiscarded,
       evidence_summary: JSON.stringify({ page_speed_scores: pageSpeed.categoryScores, page_speed_status: pageSpeed.status, crawler_status: crawler.status, crawler_scan_id: crawler.scan_id || null }),
       execution_time_ms: executionTime,
       auto_fixes_applied: 0,
     };
+    if (repo.commitSha) update.source_commit_sha = repo.commitSha;
     if (overallScore !== null) update.overall_score = overallScore;
     await db.entities.SiteAudit.update(audit.id, update);
 
