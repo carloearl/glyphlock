@@ -104,6 +104,10 @@ async function logVerificationStep(base44, paymentRecordId, venueId, step, provi
 }
 
 Deno.serve(async (req) => {
+  if (req.method !== 'POST') {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 });
+  }
+
   try {
     const base44 = createClientFromRequest(req);
 
@@ -131,7 +135,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Venue access denied' }, { status: 403 });
     }
 
-    const payload = await req.json();
+    let payload;
+    try {
+      payload = await req.json();
+    } catch {
+      return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
     const {
       provider_code,
       processor_reference,
@@ -150,7 +159,18 @@ Deno.serve(async (req) => {
 
     const venueConfig = await resolveVenueConfig(base44, venue_id);
     const resolvedProvider = provider_code || venueConfig.primary_provider_code || 'external_terminal';
-    const mode = await resolveMode(base44, venue_id);
+    const allowedProviders = new Set([
+      venueConfig.primary_provider_code || 'external_terminal',
+      venueConfig.fallback_provider_code,
+      'cash',
+    ].filter(Boolean));
+    if (!allowedProviders.has(resolvedProvider)) {
+      return Response.json({
+        error: 'PAYMENT_PROVIDER_NOT_ALLOWED',
+        message: `Provider ${resolvedProvider} is not configured for this venue.`,
+      }, { status: 403 });
+    }
+    const mode = venueConfig.mode || await resolveMode(base44, venue_id);
 
     if (!processor_reference) {
       return Response.json({ error: 'Missing processor_reference' }, { status: 400 });
@@ -162,15 +182,21 @@ Deno.serve(async (req) => {
     );
     if (existing && existing.length > 0) {
       const existingRecord = existing[0];
+      const confirmed = ['CONFIRMED', 'EXTERNAL_CONFIRMED', 'CAPTURED'].includes(existingRecord.status);
       return Response.json({
-        success: true,
+        success: confirmed,
         idempotent: true,
         record_id: existingRecord.record_id,
         status: existingRecord.status,
+        provider_code: existingRecord.provider_code,
+        processor_reference: existingRecord.processor_reference,
         amount: existingRecord.amount,
+        approval_code: existingRecord.approval_code,
+        card_last_four: existingRecord.card_last_four,
+        card_brand: existingRecord.card_brand,
         linked_order_id: existingRecord.linked_order_id,
-        message: 'Payment record already exists'
-      });
+        message: confirmed ? 'Payment record already exists' : 'Existing payment record is not confirmed',
+      }, { status: confirmed ? 200 : 409 });
     }
 
     // Create PENDING PaymentRecord
@@ -220,7 +246,7 @@ Deno.serve(async (req) => {
       } else {
         try {
           const { default: Stripe } = await import('npm:stripe@14.14.0');
-          const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+          const stripe = new Stripe(stripeKey, { apiVersion: '2026-06-24.dahlia' });
 
           await logVerificationStep(base44, record_id, venue_id, 'api_call_made', resolvedProvider, 'PENDING', 'PENDING', user.email, user.role, mode, `Retrieving PI ${processor_reference}`, null);
 
@@ -347,14 +373,16 @@ Deno.serve(async (req) => {
       try {
         await base44.asServiceRole.entities.SystemAuditLog.create({
           event_type: 'PAYMENT_VERIFICATION_FAILED',
-          entity_type: 'PaymentRecord',
-          entity_id: record_id,
-          actor_id: user.email,
-          actor_role: user.role,
-          venue_id,
-          severity: 'WARNING',
           description: `Payment verification failed: ${verificationError}`,
-          timestamp: new Date().toISOString()
+          actor_email: user.email,
+          resource_id: record_id,
+          severity: 'medium',
+          status: 'failure',
+          metadata: {
+            venue_id,
+            actor_role: user.role,
+            provider_code: resolvedProvider,
+          },
         });
       } catch (_) { /* non-blocking */ }
 
@@ -418,15 +446,17 @@ Deno.serve(async (req) => {
     try {
       await base44.asServiceRole.entities.SystemAuditLog.create({
         event_type: 'PAYMENT_RECORD_CONFIRMED',
-        entity_type: 'PaymentRecord',
-        entity_id: record_id,
-        actor_id: user.email,
-        actor_role: user.role,
-        venue_id,
-        severity: 'INFO',
         description: `Payment confirmed via ${resolvedProvider}: $${verifiedAmount.toFixed(2)} ${confirmedStatus}`,
-        timestamp: new Date().toISOString(),
-        metadata: { provider_code: resolvedProvider, verification_method: verificationMethod }
+        actor_email: user.email,
+        resource_id: record_id,
+        severity: 'low',
+        status: 'success',
+        metadata: {
+          venue_id,
+          actor_role: user.role,
+          provider_code: resolvedProvider,
+          verification_method: verificationMethod,
+        },
       });
     } catch (_) { /* non-blocking */ }
 
@@ -435,6 +465,7 @@ Deno.serve(async (req) => {
       record_id,
       status: confirmedStatus,
       provider_code: resolvedProvider,
+      processor_reference,
       amount: verifiedAmount,
       approval_code: verifiedApprovalCode,
       card_last_four: verifiedCardLast4,
