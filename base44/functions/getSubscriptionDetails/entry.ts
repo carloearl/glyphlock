@@ -1,9 +1,21 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@14.14.0';
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
-  apiVersion: '2023-10-16',
-});
+async function resolveStripeSecretKey(base44) {
+  const configured = Deno.env.get('STRIPE_SECRET_KEY');
+  if (configured) return configured;
+
+  try {
+    const connection = await base44.asServiceRole.connectors.getConnection('stripe');
+    const connectorToken = connection?.accessToken;
+    return typeof connectorToken === 'string' && connectorToken.length > 0
+      ? connectorToken
+      : null;
+  } catch (error) {
+    console.warn('[getSubscriptionDetails] Stripe connector unavailable:', error?.message || 'not connected');
+    return null;
+  }
+}
 
 Deno.serve(async (req) => {
   try {
@@ -15,22 +27,30 @@ Deno.serve(async (req) => {
     }
 
     if (!user.stripe_customer_id || !user.subscription_id) {
-      return Response.json({ 
+      return Response.json({
         hasSubscription: false,
         subscription: null,
-        invoices: []
+        invoices: [],
       });
     }
 
-    // Get subscription details
+    const stripeSecretKey = await resolveStripeSecretKey(base44);
+    if (!stripeSecretKey) {
+      return Response.json({ error: 'Stripe is not configured' }, { status: 503 });
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
     const subscription = await stripe.subscriptions.retrieve(user.subscription_id, {
-      expand: ['default_payment_method', 'items.data.price.product']
+      expand: ['default_payment_method', 'items.data.price.product'],
     });
 
-    // Get billing history (last 12 invoices)
+    if (String(subscription.customer || '') !== String(user.stripe_customer_id)) {
+      return Response.json({ error: 'Subscription not found' }, { status: 404 });
+    }
+
     const invoices = await stripe.invoices.list({
       customer: user.stripe_customer_id,
-      limit: 12
+      limit: 12,
     });
 
     return Response.json({
@@ -43,27 +63,28 @@ Deno.serve(async (req) => {
         cancel_at_period_end: subscription.cancel_at_period_end,
         cancel_at: subscription.cancel_at,
         canceled_at: subscription.canceled_at,
-        plan_name: user.plan_name || 'Unknown',
+        plan_name: user.subscription_plan || 'Unknown',
         amount: subscription.items.data[0]?.price?.unit_amount || 0,
         currency: subscription.items.data[0]?.price?.currency || 'usd',
         interval: subscription.items.data[0]?.price?.recurring?.interval || 'month',
-        payment_method: subscription.default_payment_method
+        payment_method: subscription.default_payment_method,
       },
-      invoices: invoices.data.map(inv => ({
-        id: inv.id,
-        amount_paid: inv.amount_paid,
-        currency: inv.currency,
-        status: inv.status,
-        created: inv.created,
-        invoice_pdf: inv.invoice_pdf,
-        hosted_invoice_url: inv.hosted_invoice_url
-      }))
+      invoices: invoices.data.map((invoice) => ({
+        id: invoice.id,
+        amount_paid: invoice.amount_paid,
+        currency: invoice.currency,
+        status: invoice.status,
+        created: invoice.created,
+        invoice_pdf: invoice.invoice_pdf,
+        hosted_invoice_url: invoice.hosted_invoice_url,
+      })),
     });
-
   } catch (error) {
-    console.error('Get subscription error:', error);
-    return Response.json({ 
-      error: error.message 
-    }, { status: 500 });
+    const errorId = crypto.randomUUID();
+    console.error(`[${errorId}] Subscription lookup failed:`, error);
+    return Response.json(
+      { error: 'Unable to retrieve subscription', error_id: errorId },
+      { status: 500 },
+    );
   }
 });
