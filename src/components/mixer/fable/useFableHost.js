@@ -7,6 +7,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import useFableBeat from "./useFableBeat";
+import useFableDeckAudio from "./useFableDeckAudio";
 import { DEFAULT_SETTINGS } from "./fableThemes";
 import { openFableChannel, publishFable } from "./fableChannel";
 
@@ -48,12 +49,20 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A" } = {})
     }
   }, []);
 
-  const { bpm: detectedBpm, error: micError, listening } = useFableBeat({
+  // Primary sync source: the deck's own audio (Serato/VirtualDJ style) so the
+  // visuals ride exactly what is playing. The room mic is only a fallback for
+  // when nothing is streaming through a deck element (e.g. external CDJs).
+  const { bpm: deckBpm, connected: deckConnected } = useFableDeckAudio({
     enabled: running,
     onFrame: handleFrame,
   });
 
-  const liveBpm = detectedBpm || Number(bpm) || Number(track?.bpm) || null;
+  const { bpm: micBpm, error: micError, listening } = useFableBeat({
+    enabled: running && !deckConnected,
+    onFrame: handleFrame,
+  });
+
+  const liveBpm = deckBpm || micBpm || Number(bpm) || Number(track?.bpm) || null;
 
   const publishMeta = useCallback(() => {
     publishFable(channelRef.current, {
@@ -114,7 +123,8 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A" } = {})
     launchStage,
     stageOpen,
     liveBpm,
-    micStatus: micError ? "error" : listening ? "listening" : "idle",
-    micError,
+    syncSource: deckConnected ? "deck" : listening ? "mic" : "none",
+    micStatus: deckConnected ? "deck" : micError ? "error" : listening ? "listening" : "idle",
+    micError: deckConnected ? null : micError,
   };
 }

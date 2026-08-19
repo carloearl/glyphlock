@@ -6,7 +6,7 @@
  */
 import React from "react";
 import { Switch } from "@/components/ui/switch";
-import { Square, ExternalLink, Mic, MicOff, Play } from "lucide-react";
+import { Square, ExternalLink, Mic, MicOff, Play, Activity } from "lucide-react";
 import { THEMES, BACKGROUNDS, VISUALS, FONTS } from "./fableThemes";
 import { MEDIA_MODES } from "./fableMedia";
 
@@ -92,7 +92,9 @@ export default function FableControlPanel({
           {stageOpen ? "Reopen Stage Window" : "Launch Stage On 2nd Screen"}
         </button>
         <div className="ml-auto flex items-center gap-2 text-xs font-mono text-slate-400">
-          {micStatus === "listening" ? (
+          {micStatus === "deck" ? (
+            <><Activity className="h-4 w-4 text-cyan-400" /> Deck synced {bpm ? `${bpm} BPM` : "…"}</>
+          ) : micStatus === "listening" ? (
             <><Mic className="h-4 w-4 text-emerald-400" /> Beat lock {bpm ? `${bpm} BPM` : "syncing…"}</>
           ) : micStatus === "error" ? (
             <><MicOff className="h-4 w-4 text-red-400" /> Mic unavailable</>
@@ -142,7 +144,7 @@ export default function FableControlPanel({
         <div className="flex-1 min-w-[180px]">
           <div className="text-xs font-black uppercase tracking-wider text-white">Auto Mode</div>
           <div className="text-[11px] text-slate-400">
-            Locks to the room's 4/4 count and rotates theme, background and visualizer automatically.
+            Locks to the deck's 4/4 count and rotates theme, background and visualizer automatically.
           </div>
         </div>
         <Switch checked={!!settings.autoMode} onCheckedChange={set("autoMode")} />
