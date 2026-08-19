@@ -24,6 +24,8 @@ forbidText(glyphlockWebhook, "if (webhookSecret && signature)", 'Optional webhoo
 
 const stripeWebhook = 'base44/functions/stripeWebhook/entry.ts';
 requireText(stripeWebhook, 'constructEventAsync', 'Stripe webhook must verify the raw body signature');
+requireText(stripeWebhook, 'STRIPE_CONNECT_WEBHOOK_SECRET', 'Stripe Connect events must use a distinct signing secret');
+requireText(stripeWebhook, 'for (const webhookSecret of webhookSecrets)', 'Stripe webhook must verify against the platform and Connect secret allowlist');
 requireText(stripeWebhook, 'STRIPE_WEBHOOK_PROCESSED', 'Stripe webhook must have durable idempotency');
 requireText(stripeWebhook, 'trustedPlan', 'Stripe entitlements must derive from trusted server pricing');
 requireText(stripeWebhook, 'event.account', 'Stripe Connect webhook context must be retained');
