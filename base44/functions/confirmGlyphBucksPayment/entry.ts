@@ -139,6 +139,22 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
+    const venueMode = String(venueConfig.mode || 'REAL').toUpperCase();
+    const liveCredential = /_(live)_/.test(stripeKey);
+    if (venueMode === 'REAL' && !liveCredential) {
+      return Response.json({ error: 'STRIPE_LIVE_CREDENTIAL_REQUIRED' }, { status: 503 });
+    }
+    if (venueMode !== 'REAL' && liveCredential) {
+      return Response.json({ error: 'STRIPE_ENVIRONMENT_MISMATCH' }, { status: 503 });
+    }
+    if (
+      checkoutSessionId &&
+      ((venueMode === 'REAL' && checkoutSessionId.startsWith('cs_test_')) ||
+        (venueMode !== 'REAL' && checkoutSessionId.startsWith('cs_live_')))
+    ) {
+      return Response.json({ error: 'CHECKOUT_ENVIRONMENT_MISMATCH' }, { status: 409 });
+    }
+
     const connectedAccountId = venueConfig.stripe_connected_account_id || null;
     const requestOptions = connectedAccountId ? { stripeAccount: connectedAccountId } : {};
     const stripe = new Stripe(stripeKey, { apiVersion: '2026-06-24.dahlia' });
@@ -172,7 +188,7 @@ Deno.serve(async (req) => {
           'Stripe Checkout Session ownership or scope validation failed',
           'high',
           user.email,
-          { venue_id: venueId, requested_order_number: requestedOrderNumber || null },
+          { venue_id: venueId, mode: venueMode, requested_order_number: requestedOrderNumber || null },
         );
         return Response.json({ error: 'Checkout Session not found' }, { status: 404 });
       }
@@ -297,6 +313,7 @@ Deno.serve(async (req) => {
         payment_record_id: record.record_id,
         checkout_session_id: checkoutSession?.id || null,
         stripe_connected_account_id: connectedAccountId,
+        mode: venueMode,
       },
     );
 
