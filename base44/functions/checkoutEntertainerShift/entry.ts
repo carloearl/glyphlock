@@ -87,8 +87,19 @@ Deno.serve(async (req) => {
       const entertainers = await base44.asServiceRole.entities.Entertainer.filter({ status: 'active' });
       const entertainer = entertainers.find(e => e.id === shift.entertainer_id);
       if (entertainer) {
-        await base44.asServiceRole.entities.Entertainer.update(shift.entertainer_id, {
-          total_earnings: (parseFloat(entertainer.total_earnings) || 0) + shiftEarnings
+        await base44.functions.invoke('serverAuditGateway', {
+          entity: 'Entertainer',
+          operation: 'update',
+          id: shift.entertainer_id,
+          venue_id: shift.venue_id,
+          intent: 'entertainer_earnings_accrual',
+          event_type: 'PerformanceSnapshot',
+          event_category: 'payout',
+          source: 'payout',
+          retention_class: 'financial',
+          data: {
+            total_earnings: (parseFloat(entertainer.total_earnings) || 0) + shiftEarnings
+          },
         });
       }
     }
