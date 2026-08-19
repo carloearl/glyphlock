@@ -1,7 +1,7 @@
 {
   "version": 1,
   "policy": "TIER_2_LOCKED: direct frontend Base44 entity writes may only decrease from this checkpoint. New files, new call signatures, or increased counts fail CI.",
-  "generated_at": "2026-08-19T06:53:09.091Z",
+  "generated_at": "2026-08-19T07:03:10.591Z",
   "source_root": "src",
   "files": {
     "src/components/admin/AdminConsultations.jsx": {
@@ -32,6 +32,12 @@
         "DailyChecklistConfig.create": 1
       }
     },
+    "src/components/admin/DataManagerTable.jsx": {
+      "total": 2,
+      "calls": {
+        "[entityName].delete": 2
+      }
+    },
     "src/components/admin/RateFeeEditor.jsx": {
       "total": 2,
       "calls": {
@@ -43,6 +49,12 @@
       "total": 1,
       "calls": {
         "VenueRateConfig.update": 1
+      }
+    },
+    "src/components/admin/RecordEditDialog.jsx": {
+      "total": 1,
+      "calls": {
+        "[entityName].update": 1
       }
     },
     "src/components/Chat.jsx": {
@@ -700,11 +712,15 @@
       }
     },
     "src/lib/nups/writeEntity.js": {
-      "total": 5,
+      "total": 9,
       "calls": {
         "MigrationAuditLog.create": 1,
         "SystemConfig.update": 2,
-        "SystemConfig.create": 2
+        "SystemConfig.create": 2,
+        "[entity].create": 1,
+        "[entity].update": 1,
+        "[entity].delete": 1,
+        "[entity].bulkCreate": 1
       }
     },
     "src/lib/registry/reconcileRegistry.js": {
@@ -754,9 +770,11 @@
       }
     },
     "src/pages/NUPSDemoManager.jsx": {
-      "total": 1,
+      "total": 3,
       "calls": {
-        "SystemAuditLog.create": 1
+        "SystemAuditLog.create": 1,
+        "[entityName].delete": 1,
+        "[entityName].create": 1
       }
     },
     "src/pages/NUPSSandbox.jsx": {
