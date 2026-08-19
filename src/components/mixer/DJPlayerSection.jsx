@@ -343,9 +343,9 @@ export default function DJPlayerSection({
             variant="outline"
             className="h-7 text-[10px] gap-1 border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"
             onClick={() => openClubTVWindow()}
-            title="Open Club TV window — drag onto the TV display or cast the tab"
+            title="Open Fable X visualizer — drag onto the TV display or cast the tab"
           >
-            <Tv className="w-3 h-3" /> Open Club TV
+            <Tv className="w-3 h-3" /> Open Visualizer
           </Button>
           <Button size="sm" variant="ghost" className="h-6 text-[10px] gap-1 text-slate-400" onClick={handleCueNext}>
             Cue Next
