@@ -31,8 +31,8 @@ export default function ClubTV() {
 
   // Expose audio tag to visualizer
   useEffect(() => {
-    if (audioTagRef.current) setAudioEl(audioTagRef.current);
-  }, []);
+    setAudioEl(audioTagRef.current || null);
+  }, [audioUrl]);
 
   const enterFullscreen = async () => {
     try {
