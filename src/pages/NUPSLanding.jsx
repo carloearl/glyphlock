@@ -257,6 +257,13 @@ export default function NUPSLanding() {
           flex-wrap: wrap;
           margin-bottom: 28px;
         }
+        .integration-statuses {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
         .integration-status {
           display: inline-flex;
           align-items: center;
@@ -280,6 +287,15 @@ export default function NUPSLanding() {
           background: var(--pass);
           box-shadow: 0 0 12px var(--pass);
         }
+        .integration-status.opn {
+          border-color: rgba(0, 212, 255, 0.6);
+          color: #a5f3fc;
+          background: rgba(0, 212, 255, 0.1);
+        }
+        .integration-status.opn::before {
+          background: var(--cyan);
+          box-shadow: 0 0 12px var(--cyan);
+        }
         .integration-proof h3 {
           margin: 0;
           color: #fff;
@@ -296,7 +312,7 @@ export default function NUPSLanding() {
         }
         .integration-grid {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-columns: repeat(5, minmax(0, 1fr));
           gap: 12px;
           margin-bottom: 26px;
         }
@@ -1775,17 +1791,26 @@ export default function NUPSLanding() {
                 </div>
                 <h3 id="oracle-ohip-heading">Oracle Hospitality <span>via OHIP</span></h3>
               </div>
-              <div className="integration-status">Partner Sandbox Connected</div>
+              <div className="integration-statuses">
+                <div className="integration-status">Partner Sandbox Connected</div>
+                <div className="integration-status opn">OPN Level 0 Principal</div>
+              </div>
             </div>
 
             <p className="integration-lead">
               NUPS has completed authenticated, controlled read-only calls against the Oracle
               Hospitality Integration Platform Partner Sandbox. This establishes the technical
               path for connecting verified NUPS venue operations with OPERA Cloud property
-              configuration while keeping Oracle credentials and tokens server-side.
+              configuration while keeping Oracle credentials and tokens server-side. Oracle also
+              received GlyphLock LLC’s paid Level 0 Principal OPN enrollment #1654123.
             </p>
 
             <div className="integration-grid">
+              <div className="integration-proof-card">
+                <span className="kicker">Oracle PartnerNetwork</span>
+                <strong>Paid Enrollment Received</strong>
+                <p>Level 0 Principal enrollment #1654123 was received August 17, 2026; company-address evidence was supplied August 18.</p>
+              </div>
               <div className="integration-proof-card">
                 <span className="kicker">Authentication</span>
                 <strong>OCIM OAuth Verified</strong>
@@ -1823,10 +1848,13 @@ export default function NUPSLanding() {
             </div>
 
             <p className="integration-disclaimer">
-              Current status: technical validation in Oracle's shared Partner Sandbox. This does
-              not represent Oracle certification, endorsement, a production customer connection,
-              or an executed commercial partnership. Production access requires the applicable
-              Oracle application, environment, subscription, hotel authorization, and credentials.
+              Current status: paid Level 0 Principal OPN enrollment #1654123 received by Oracle,
+              company-address evidence submitted, and read-only OHIP technical validation completed
+              in Oracle's shared Partner Sandbox. These are verified onboarding and technical
+              milestones, but they do not yet represent Marketplace publisher approval, Oracle
+              certification or endorsement, a production customer connection, or an executed
+              commercial partnership. Production access still requires the applicable Oracle
+              application, environment, hotel authorization, and production credentials.
             </p>
           </section>
 
