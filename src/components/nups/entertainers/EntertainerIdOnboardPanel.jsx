@@ -13,6 +13,7 @@ import { licenseStatus } from "@/lib/nups/licenseStatus";
 import { writeIdentityRecord, snapshotPersonAudited } from "@/lib/nups/identityWrites";
 import ContractorAgreementBlock from "./ContractorAgreementBlock";
 import { ENTERTAINER_CLICKWRAP } from "@/constants/entertainerClickwrap";
+import { generateUniquePin } from "@/lib/nups/entertainerPin";
 
 /**
  * EntertainerIdOnboardPanel — onboard an adult entertainer's credential.
@@ -40,6 +41,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [contract, setContract] = useState({ agreed: false, acks: {}, signature: "" });
+  const [issuedPin, setIssuedPin] = useState("");
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const status = licenseStatus({ license_expiration: form.license_expiration });
@@ -87,13 +89,18 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
     if (missingAck) return toast.error(`Acknowledgment required: ${missingAck.title}`);
     if (!contract.signature.trim()) return toast.error("A typed digital signature is required.");
 
+    // Every entertainer leaves onboarding with a door PIN — issued automatically
+    // when the operator didn't set one.
+    const pin = form.nups_pin || generateUniquePin(existing);
+    if (!pin) return toast.error("Could not issue a unique PIN — set one manually.");
+
     setSaving(true);
     try {
       const credentials = {
         stage_name: form.stage_name.trim(),
         legal_name: form.legal_name.trim(),
         phone: form.phone || undefined,
-        nups_pin: form.nups_pin || undefined,
+        nups_pin: pin,
         date_of_birth: form.date_of_birth || undefined,
         id_type: form.id_type || undefined,
         license_number_last4: form.license_number_last4 || undefined,
@@ -154,6 +161,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
       });
 
       toast.success(match ? "Credential updated" : "Entertainer onboarded");
+      setIssuedPin(pin);
       setForm(EMPTY);
       setContract({ agreed: false, acks: {}, signature: "" });
       setPhotoUrl("");
@@ -180,6 +188,21 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
           )}
         </div>
 
+        {issuedPin && (
+          <div className="rounded-lg border border-emerald-500/40 bg-emerald-950/30 p-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-emerald-400 font-bold">Door PIN issued</p>
+              <p className="text-3xl font-mono font-extrabold text-white tracking-widest">{issuedPin}</p>
+              <p className="text-[11px] text-emerald-200/70">
+                Give this to the entertainer — she checks in with this PIN or by scanning her license at the door.
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => setIssuedPin("")} className="border-emerald-500/40 text-emerald-300 text-xs">
+              Done
+            </Button>
+          </div>
+        )}
+
         {form.license_expiration && status.code !== "VALID" && (
           <div className={`flex items-center gap-2 text-xs rounded-lg p-2 border ${status.code === "EXPIRED" ? "text-red-300 bg-red-950/40 border-red-500/40" : "text-amber-300 bg-amber-950/30 border-amber-500/40"}`}>
             <AlertTriangle className="w-4 h-4 shrink-0" /> {status.label} — {status.reason}
@@ -201,12 +224,27 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
           </div>
           <div>
             <Label className="text-gray-300 text-xs">Door PIN (4 digits)</Label>
-            <Input
-              value={form.nups_pin}
-              onChange={(e) => set("nups_pin", e.target.value.replace(/\D/g, "").slice(0, 4))}
-              maxLength={4}
-              className="bg-gray-800 border-gray-700 text-white font-mono"
-            />
+            <div className="flex gap-2">
+              <Input
+                value={form.nups_pin}
+                onChange={(e) => set("nups_pin", e.target.value.replace(/\D/g, "").slice(0, 4))}
+                maxLength={4}
+                placeholder="auto-issued"
+                className="bg-gray-800 border-gray-700 text-white font-mono"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  const p = generateUniquePin(existing);
+                  if (!p) return toast.error("No PIN available — enter one manually.");
+                  set("nups_pin", p);
+                }}
+                className="border-pink-500/40 text-pink-300 text-xs shrink-0"
+              >
+                Issue
+              </Button>
+            </div>
           </div>
           <div>
             <Label className="text-gray-300 text-xs">Date of Birth</Label>

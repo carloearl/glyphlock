@@ -13,6 +13,9 @@ import { resolveVenueId } from "@/lib/venueDefaults";
 import { snapshotPerson } from "@/lib/nups/personArchive";
 import { licenseStatus } from "@/lib/nups/licenseStatus";
 import { SHIFT_CLICKWRAP } from "@/constants/shiftClickwrap";
+import useHardwareScanner from "@/hooks/useHardwareScanner";
+import { parseAAMVA } from "@/lib/nups/aamva";
+import { matchEntertainerByLicense } from "@/lib/nups/entertainerPin";
 
 const ShiftTimer = ({ checkInTime }) => {
   const [elapsed, setElapsed] = useState('');
@@ -79,8 +82,8 @@ export default function EntertainerCheckIn({ user }) {
   });
 
   const checkInByPin = useMutation({
-    mutationFn: async () => {
-      const ent = entertainers.find(e => e.nups_pin && e.nups_pin === pin);
+    mutationFn: async (scannedEntertainer) => {
+      const ent = scannedEntertainer || entertainers.find(e => e.nups_pin && e.nups_pin === pin);
       if (!ent) throw new Error('PIN not recognized — if you just signed up, ask the manager to confirm your PIN was saved.');
       // License gate — expired / missing credential blocks the floor and the
       // nightly cash payout (earnings accrue as an IOU until it's valid).
@@ -158,6 +161,22 @@ export default function EntertainerCheckIn({ user }) {
     if (!window.confirm(`Permanently delete ${shift.stage_name || 'this entertainer'} and their shift record? This cannot be undone.`)) return;
     deleteEntertainer.mutate(shift);
   };
+
+  // ID-scan quick check-in — active only on the PIN step, so the shift
+  // agreement is always accepted first.
+  useHardwareScanner((raw) => {
+    if (!(showPinPad && verificationComplete)) return;
+    const parsed = parseAAMVA(raw);
+    if (!parsed) return toast.error("That scan wasn't a readable ID barcode — scan the back of the license.");
+    const ent = matchEntertainerByLicense(entertainers, parsed);
+    if (!ent) return toast.error("This ID isn't on the roster — onboard the entertainer first, or enter her PIN.");
+    checkInByPin.mutate(ent);
+    setShowPinPad(false);
+    setShowVerification(false);
+    setVerificationComplete(false);
+    setPin('');
+    setDailyChecklist({});
+  });
 
   const handlePinInput = (digit) => {
     if (pin.length < 4) setPin(prev => prev + digit);
@@ -261,6 +280,9 @@ export default function EntertainerCheckIn({ user }) {
           </CardHeader>
           <CardContent className="space-y-4">
             <h2 className="text-center font-bold text-white">Enter your 4-digit PIN</h2>
+            <p className="text-center text-xs text-gray-400">
+              …or scan your license barcode on the door scanner to check in instantly.
+            </p>
 
             {/* PIN Display */}
             <div className="border border-gray-700 rounded-lg p-6 text-center bg-gray-900/50">
