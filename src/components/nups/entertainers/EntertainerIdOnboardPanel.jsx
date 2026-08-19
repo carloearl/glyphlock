@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import useHardwareScanner from "@/hooks/useHardwareScanner";
 import { parseAAMVA } from "@/lib/nups/aamva";
 import { licenseStatus } from "@/lib/nups/licenseStatus";
+import { writeIdentityRecord, snapshotPersonAudited } from "@/lib/nups/identityWrites";
 
 /**
  * EntertainerIdOnboardPanel — onboard an adult entertainer's credential.
@@ -101,17 +102,35 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
         (e) => (e.stage_name || "").trim().toLowerCase() === form.stage_name.trim().toLowerCase()
       );
 
+      // Step 1 (ARCH-BASELINE-01) — routes through the audit gateway.
       const saved = match
-        ? await base44.entities.Entertainer.update(match.id, credentials)
-        : await base44.entities.Entertainer.create({
-            venue_id: venueId,
-            status: "active",
-            contract_signed: false,
-            contract_status: "PENDING",
-            iou_balance: 0,
-            mode: "REAL",
-            ...credentials,
+        ? await writeIdentityRecord({
+            entity: "Entertainer",
+            operation: "update",
+            id: match.id,
+            data: credentials,
+            venueId,
+            intent: "entertainer_onboarding:recredential",
+          })
+        : await writeIdentityRecord({
+            entity: "Entertainer",
+            operation: "create",
+            venueId,
+            intent: "entertainer_onboarding:create",
+            data: {
+              venue_id: venueId,
+              status: "active",
+              contract_signed: false,
+              contract_status: "PENDING",
+              iou_balance: 0,
+              ...credentials,
+            },
           });
+      await snapshotPersonAudited({
+        type: "entertainer",
+        event: match ? "updated" : "created",
+        record: saved,
+      });
 
       toast.success(match ? "Credential updated" : "Entertainer onboarded");
       setForm(EMPTY);

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import useHardwareScanner from "@/hooks/useHardwareScanner";
 import { parseAAMVA } from "@/lib/nups/aamva";
 import ScannedIdFields from "@/components/nups/frontdoor/ScannedIdFields";
+import { writeIdentityRecord, snapshotPersonAudited } from "@/lib/nups/identityWrites";
 
 /**
  * DriverIdScanPanel — onboard a driver by scanning the barcode on the back of
@@ -97,12 +98,25 @@ export default function DriverIdScanPanel({ venueId, user, existingProfiles = []
         last_active_at: new Date().toISOString(),
       };
 
+      // Step 1 (ARCH-BASELINE-01) — driver credentials route through the audit gateway.
       let profile;
       if (duplicate) {
-        profile = await base44.entities.DriverProfile.update(duplicate.id, credentials);
+        profile = await writeIdentityRecord({
+          entity: "DriverProfile",
+          operation: "update",
+          id: duplicate.id,
+          data: credentials,
+          venueId,
+          intent: "driver_onboarding:recredential",
+        });
         profile = { ...duplicate, ...credentials, ...(profile || {}) };
       } else {
-        profile = await base44.entities.DriverProfile.create({
+        profile = await writeIdentityRecord({
+          entity: "DriverProfile",
+          operation: "create",
+          venueId,
+          intent: "driver_onboarding:create",
+          data: {
           driver_id: makeDriverId(venueId),
           venue_id: venueId,
           affiliated,
@@ -112,9 +126,11 @@ export default function DriverIdScanPanel({ venueId, user, existingProfiles = []
           ten99_threshold: 600,
           status: "active",
           onboarded_by: user?.email || "door",
-          ...credentials,
+            ...credentials,
+          },
         });
       }
+      await snapshotPersonAudited({ type: "driver", event: duplicate ? "updated" : "created", record: profile });
 
       // Personalized QR — signed server-side, key never reaches the device.
       let qrToken = profile.qr_token || null;

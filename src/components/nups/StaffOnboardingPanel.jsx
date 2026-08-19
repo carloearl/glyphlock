@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Users, Eye, EyeOff, Pencil, Check, X, ToggleLeft, ToggleRight } from "lucide-react";
-import { snapshotPerson } from "@/lib/nups/personArchive";
+import { writeIdentityRecord, snapshotPersonAudited } from "@/lib/nups/identityWrites";
 import { toast } from "sonner";
 
 const ROLES = [
@@ -59,14 +59,17 @@ export default function StaffOnboardingPanel() {
         status: "active",
         created_by_manager: true,
       };
-      const result = await base44.entities.NUPSUser.create(payload);
-      await provisionPin(result.id, pin);
-      // Permanent archive snapshot
-      await snapshotPerson({
-        type: "staff",
-        event: "created",
-        record: result,
+      // Step 1 (ARCH-BASELINE-01) — identity writes route through the audit gateway.
+      const result = await writeIdentityRecord({
+        entity: "NUPSUser",
+        operation: "create",
+        data: payload,
+        venueId: payload.venue_id,
+        intent: "staff_onboarding:create",
       });
+      await provisionPin(result.id, pin);
+      // Permanent archive snapshot (also gateway-audited)
+      await snapshotPersonAudited({ type: "staff", event: "created", record: result });
       return result;
     },
     onSuccess: () => {
@@ -93,13 +96,15 @@ export default function StaffOnboardingPanel() {
 
   const updateStaff = useMutation({
     mutationFn: async ({ id, data }) => {
-      const result = await base44.entities.NUPSUser.update(id, data);
-      const eventType = "status" in data ? "status_change" : "updated";
-      await snapshotPerson({
-        type: "staff",
-        event: eventType,
-        record: result,
+      const result = await writeIdentityRecord({
+        entity: "NUPSUser",
+        operation: "update",
+        id,
+        data,
+        intent: "staff_onboarding:update",
       });
+      const eventType = "status" in data ? "status_change" : "updated";
+      await snapshotPersonAudited({ type: "staff", event: eventType, record: result });
       return result;
     },
     onSuccess: () => {
