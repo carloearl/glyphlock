@@ -224,9 +224,18 @@ export default function UnifiedMusicConsole() {
         })}
       </div>
 
-      {/* ── Active Panel ── */}
-      <SuiteErrorBoundary key={active}>
-        {active === "mixer"    && (
+      {/* ── Persistent mixer ──
+          The decks own the live <audio>/YouTube player instances. Keep them
+          mounted while another module is visible so switching to Visuals,
+          Tracks, Search, etc. cannot tear down the current performance. */}
+      <SuiteErrorBoundary>
+        <div
+          className={active === "mixer"
+            ? ""
+            : "fixed left-[-200vw] top-0 z-[-1] w-screen max-w-[1600px] pointer-events-none opacity-0"}
+          aria-hidden={active !== "mixer"}
+          inert={active !== "mixer" ? true : undefined}
+        >
           <MixerModuleView
             autoDj={autoDj}
             automationPlan={automationPlan}
@@ -234,17 +243,23 @@ export default function UnifiedMusicConsole() {
             libraryTracks={snapshot?.tracks || []}
             deckLoadRequest={deckLoadRequest}
           />
-        )}
-        {active === "tracks"   && <TracksTab />}
-        {active === "radio"    && <RadioTab />}
-        {active === "search"   && <MusicSearchTab onLoadToMixerDeck={handleLoadToMixerDeck} />}
-        {active === "personas" && <PersonasTab />}
-        {active === "playlist" && <PlaylistGenTab />}
-        {active === "crowd"    && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
-        {active === "jukebox"  && <JukeboxTab />}
-        {active === "visuals"  && <FableVisualizerTab />}
-        {active === "health"   && <TrackHealthTab />}
+        </div>
       </SuiteErrorBoundary>
+
+      {/* ── Active utility panel ── */}
+      {active !== "mixer" && (
+        <SuiteErrorBoundary key={active}>
+          {active === "tracks"   && <TracksTab />}
+          {active === "radio"    && <RadioTab />}
+          {active === "search"   && <MusicSearchTab onLoadToMixerDeck={handleLoadToMixerDeck} />}
+          {active === "personas" && <PersonasTab />}
+          {active === "playlist" && <PlaylistGenTab />}
+          {active === "crowd"    && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
+          {active === "jukebox"  && <JukeboxTab />}
+          {active === "visuals"  && <FableVisualizerTab />}
+          {active === "health"   && <TrackHealthTab />}
+        </SuiteErrorBoundary>
+      )}
     </div>
   );
 }
