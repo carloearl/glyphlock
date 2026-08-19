@@ -68,12 +68,16 @@ Deno.serve(async (req) => {
   }
 
   const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  const webhookSecrets = [
+    Deno.env.get('STRIPE_WEBHOOK_SECRET'),
+    Deno.env.get('STRIPE_CONNECT_WEBHOOK_SECRET'),
+  ].filter(Boolean);
   const signature = req.headers.get('stripe-signature');
 
-  // Fail closed before constructing a Stripe client. Missing configuration is
-  // an operational outage, not permission to trust unsigned JSON.
-  if (!stripeSecretKey || !webhookSecret) {
+  // Fail closed before constructing a Stripe client. Platform-account and
+  // Connect endpoints use different signing secrets even when they share the
+  // same URL, so verify against the complete server-side allowlist.
+  if (!stripeSecretKey || webhookSecrets.length === 0) {
     console.error('[stripeWebhook] Stripe secrets are not configured');
     return Response.json({ error: 'Stripe webhook is not configured' }, { status: 503 });
   }
@@ -84,11 +88,19 @@ Deno.serve(async (req) => {
   const rawBody = await req.text();
   const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
 
-  let event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(rawBody, signature, webhookSecret);
-  } catch (error) {
-    console.error('[stripeWebhook] Signature verification failed:', error?.message || error);
+  let event = null;
+  let verificationError = null;
+  for (const webhookSecret of webhookSecrets) {
+    try {
+      event = await stripe.webhooks.constructEventAsync(rawBody, signature, webhookSecret);
+      break;
+    } catch (error) {
+      verificationError = error;
+    }
+  }
+
+  if (!event) {
+    console.error('[stripeWebhook] Signature verification failed:', verificationError?.message || verificationError);
     return Response.json({ error: 'Invalid Stripe signature' }, { status: 401 });
   }
 
