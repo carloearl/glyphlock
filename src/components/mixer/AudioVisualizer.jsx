@@ -27,6 +27,20 @@ function getSharedCtx() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
   sharedCtx = new AC();
+  // Browsers create AudioContexts suspended until a user gesture. Since the
+  // whole deck output is routed through this context, a suspended context
+  // means the track "plays" with zero sound. Resume on the next gesture.
+  const resumeOnGesture = () => {
+    if (sharedCtx && sharedCtx.state === "suspended") {
+      sharedCtx.resume().catch(() => {});
+    }
+    if (sharedCtx && sharedCtx.state === "running") {
+      window.removeEventListener("pointerdown", resumeOnGesture);
+      window.removeEventListener("keydown", resumeOnGesture);
+    }
+  };
+  window.addEventListener("pointerdown", resumeOnGesture);
+  window.addEventListener("keydown", resumeOnGesture);
   return sharedCtx;
 }
 

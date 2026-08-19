@@ -171,7 +171,7 @@ export default function AudioEngine({
 
   return (
     <div className="w-full space-y-2">
-      <audio ref={audioRef} preload="metadata" />
+      <audio ref={audioRef} preload="metadata" crossOrigin="anonymous" />
 
       {/* Waveform-style progress visualization */}
       <div
