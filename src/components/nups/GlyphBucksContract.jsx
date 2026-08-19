@@ -53,6 +53,47 @@ By signing below, you acknowledge that you have read and agreed to these Terms a
 
 You are purchasing GlyphBucks along with other products and services. GlyphBucks are for use as an alternative form of payment while at the Dream Palace. When you have spent them or otherwise used them, the GlyphBucks have functioned correctly and have used them for your benefit. Any Attempt to avoid your responsibility to pay for your purchase will be in bad faith and considered an attempt to commit fraud against Club/Bar.`;
 
+function waitForStripeCheckout(popup, orderNumber) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Stripe Checkout verification timed out. Check the payment status before retrying."));
+    }, 10 * 60 * 1000);
+    const closeWatcher = window.setInterval(() => {
+      if (!settled && popup.closed) {
+        cleanup();
+        reject(new Error("Stripe Checkout was closed before NUPS received confirmation."));
+      }
+    }, 500);
+
+    const cleanup = () => {
+      settled = true;
+      window.clearTimeout(timeout);
+      window.clearInterval(closeWatcher);
+      window.removeEventListener("message", onMessage);
+    };
+
+    const onMessage = (event) => {
+      if (event.origin !== window.location.origin) return;
+      const message = event.data || {};
+      if (message.type !== "nups:stripe-payment-result") return;
+      if (message.order_number !== orderNumber) return;
+
+      cleanup();
+      if (message.status === "succeeded" && message.data?.success === true) {
+        resolve(message.data);
+      } else if (message.status === "canceled") {
+        reject(new Error("Stripe Checkout was canceled. No payment record was created."));
+      } else {
+        reject(new Error(message.data?.message || message.data?.error || "Stripe payment was not confirmed."));
+      }
+    };
+
+    window.addEventListener("message", onMessage);
+  });
+}
+
 const ACKNOWLEDGMENTS = [
   "You have read and understand this Order (front & back).",
   "You confirm the information in this Order is true and correct.",
@@ -78,6 +119,21 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const venueLegal = currentVenue?.legal_name || currentVenue?.name || 'Club';
   const venueName = currentVenue?.name || 'Club';
   const currentVenueId = currentVenue?.venue_id || currentVenue?.id || null;
+
+  const { data: venuePaymentConfig, isLoading: paymentConfigLoading } = useQuery({
+    queryKey: ['venue-payment-config', currentVenueId],
+    queryFn: async () => {
+      if (!currentVenueId) return null;
+      const rows = await base44.entities.VenuePaymentConfig.filter({
+        venue_id: currentVenueId,
+        active: true,
+      });
+      return rows?.[0] || null;
+    },
+    enabled: Boolean(currentVenueId),
+  });
+  const activeProviderCode = venuePaymentConfig?.primary_provider_code || 'external_terminal';
+  const isStripeProvider = activeProviderCode === 'stripe';
 
   const [accessDenied, setAccessDenied] = useState(false);
 
@@ -228,7 +284,8 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     });
   };
 
-  const canProceedToSign = customerName.trim() && cardLastSix.length >= 4 && processorReference.trim() && approvalCode.trim() && lineItemsTotal > 0;
+  const externalPaymentReady = cardLastSix.length >= 4 && processorReference.trim() && approvalCode.trim();
+  const canProceedToSign = !paymentConfigLoading && customerName.trim() && lineItemsTotal > 0 && (isStripeProvider || externalPaymentReady);
   const canSign = allAcked && signature.trim() && thumbprintUrl && guestPhotoUrl && idPhotoUrl;
   const canStaffSign = managerSignature.trim() && hostessSignature.trim();
 
