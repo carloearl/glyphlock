@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
-  DollarSign, Printer, Users, Star, Music, Shield, Disc3, ChevronDown, ChevronUp, PenLine, Info
+  DollarSign, Printer, Users, Star, Shield, Disc3, ChevronDown, ChevronUp, PenLine, AlertTriangle
 } from "lucide-react";
 
 // ─── Role → pool ─────────────────────────────────────────────────────
@@ -17,48 +17,44 @@ const ROLE_POOLS = {
   SECURITY:        "security",
   KIOSK:           "security",
   DJ:              "dj",
-  PERFORMER:       "entertainer",
 };
+
+// Frozen financial rule: performers/entertainers are 1099 contractors and
+// must never enter employee payroll or an employee tip-pool calculation.
+const INDEPENDENT_CONTRACTOR_ROLES = new Set(["PERFORMER", "ENTERTAINER"]);
 
 const fmt = (n) => `$${(n || 0).toFixed(2)}`;
 
 // ─── Payout Calculator (custom params) ───────────────────────────────
 function computePayoutsCustom(totalTips, byPool, formula) {
-  const { entertainerPct, hostessPct, managerBonus, djPct } = formula;
-  const entertainers = byPool.entertainer || [];
-  const hostesses    = byPool.hostess     || [];
-  const managers     = byPool.manager     || [];
-  const djs          = byPool.dj          || [];
-  const security     = byPool.security    || [];
+  const { hostessPct, managerBonus, djPct } = formula;
+  const hostesses = byPool.hostess || [];
+  const managers = byPool.manager || [];
+  const djs = byPool.dj || [];
+  const security = byPool.security || [];
 
-  const entertainerPerPerson = totalTips * (entertainerPct / 100);
-  const entertainerTotal     = entertainerPerPerson * entertainers.length;
-
-  const hostessTotal     = totalTips * (hostessPct / 100);
+  const hostessTotal = totalTips * (hostessPct / 100);
   const hostessPerPerson = hostesses.length > 0 ? hostessTotal / hostesses.length : 0;
-
   const managerPerPerson = hostessPerPerson + managerBonus;
-  const managerTotal     = managerPerPerson * managers.length;
-
-  const djTotal     = hostessTotal * (djPct / 100);
+  const managerTotal = managerPerPerson * managers.length;
+  const djTotal = hostessTotal * (djPct / 100);
   const djPerPerson = djs.length > 0 ? djTotal / djs.length : 0;
-
-  const allocated      = entertainerTotal + hostessTotal + managerTotal + djTotal;
-  const securityTotal  = Math.max(0, totalTips - allocated);
+  const allocated = hostessTotal + managerTotal + djTotal;
+  const overAllocated = allocated > totalTips + 0.005;
+  const securityTotal = Math.max(0, totalTips - allocated);
   const securityPerPerson = security.length > 0 ? securityTotal / security.length : 0;
 
   return {
-    entertainer: { total: entertainerTotal, perPerson: entertainerPerPerson, employees: entertainers },
-    hostess:     { total: hostessTotal,     perPerson: hostessPerPerson,     employees: hostesses   },
-    manager:     { total: managerTotal,     perPerson: managerPerPerson,     employees: managers    },
-    dj:          { total: djTotal,          perPerson: djPerPerson,          employees: djs         },
-    security:    { total: securityTotal,    perPerson: securityPerPerson,    employees: security    },
+    __meta: { allocated, overAllocated },
+    hostess: { total: hostessTotal, perPerson: hostessPerPerson, employees: hostesses },
+    manager: { total: managerTotal, perPerson: managerPerPerson, employees: managers },
+    dj: { total: djTotal, perPerson: djPerPerson, employees: djs },
+    security: { total: securityTotal, perPerson: securityPerPerson, employees: security },
   };
 }
 
 // ─── Pool display config ──────────────────────────────────────────────
 const POOL_CONFIG = [
-  { key: "entertainer", label: "Entertainer (37% each)", color: "#ec4899", icon: <Music  className="w-4 h-4" />, note: "37% of total — per performer" },
   { key: "hostess",     label: "Hostess / Host",         color: "#f59e0b", icon: <Star   className="w-4 h-4" />, note: "15% of total — split equally" },
   { key: "manager",     label: "Manager / Promo",        color: "#a855f7", icon: <Shield className="w-4 h-4" />, note: "Hostess share + $100 each"   },
   { key: "dj",          label: "DJ / Asst Manager",      color: "#22d3ee", icon: <Disc3  className="w-4 h-4" />, note: "50% of hostess pool, split"  },
