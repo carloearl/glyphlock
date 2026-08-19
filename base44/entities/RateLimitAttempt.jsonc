@@ -27,7 +27,11 @@
     },
     "actor_id": {
       "type": "string",
-      "description": "User who triggered attempt"
+      "description": "Non-sensitive actor or terminal reference associated with the attempt."
+    },
+    "terminal_id": {
+      "type": "string",
+      "description": "Non-secret terminal/device identifier supplied by the NUPS kiosk. Never contains a PIN."
     },
     "attempt_timestamp": {
       "type": "string",
