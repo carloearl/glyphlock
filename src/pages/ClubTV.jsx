@@ -134,10 +134,9 @@ export default function ClubTV() {
           <div className="absolute inset-0 bg-black">
             <FableEngineVisualizer
               track={active}
+              nextTrack={visualDeck === "A" ? state?.deckB : state?.deckA}
               bpm={active?.bpm}
               activeDeck={visualDeck}
-              crossfade={state?.crossfade}
-              transitioning={state?.transitioning}
             />
           </div>
         ) : !videoId && audioUrl ? (
