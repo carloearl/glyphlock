@@ -54,11 +54,42 @@ Deno.serve(async (req) => {
     const E = base44.asServiceRole.entities;
     const body = await req.json();
     const action = body.action;
+    const now = () => new Date().toISOString();
+    const ip = (req.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
+    const userAgent = String(req.headers.get('user-agent') || 'unknown').slice(0, 500);
+    const rawTerminalId = String(body.terminal_id || req.headers.get('x-nups-terminal-id') || 'unidentified');
+    const terminalId = rawTerminalId.replace(/[^A-Za-z0-9._:-]/g, '').slice(0, 120) || 'unidentified';
+    const throttleResourceId = `pin_auth:${terminalId !== 'unidentified' ? terminalId : ip}`;
+
+    // Safe pre-authentication mode indicator. This exposes no roster, secret,
+    // credential or payment identifier; it only lets the public kiosk display
+    // the authoritative operating boundary before a PIN is entered.
+    if (action === 'getPublicMode') {
+      const venues = (await E.Venue.filter({ venue_id: VENUE_ID }, null, 1).catch(() => [])) || [];
+      const venueRecordId = venues?.[0]?.id || null;
+      const rateRows = venueRecordId
+        ? await E.VenueRateConfig.filter({ venue_id: venueRecordId, active: true }, '-created_date', 1).catch(() => [])
+        : [];
+      const fallbackRateRows = rateRows.length
+        ? rateRows
+        : await E.VenueRateConfig.filter({ venue_id: VENUE_ID, active: true }, '-created_date', 1).catch(() => []);
+      const paymentRows = await E.VenuePaymentConfig.filter({ venue_id: VENUE_ID, active: true }, '-created_date', 1).catch(() => []);
+      const operatingMode = String(fallbackRateRows?.[0]?.mode || 'REAL').toUpperCase();
+      const paymentMode = String(paymentRows?.[0]?.mode || 'UNCONFIGURED').toUpperCase();
+      const providerCode = paymentRows?.[0]?.primary_provider_code || 'unconfigured';
+      return Response.json({
+        success: true,
+        venue: venues?.[0]?.name || 'Dream Palace',
+        operating_mode: operatingMode,
+        payment_mode: paymentMode,
+        payment_provider: providerCode,
+        payment_mode_consistent: paymentMode === 'UNCONFIGURED' || paymentMode === operatingMode,
+      });
+    }
+
     const PEPPER = Deno.env.get('KEY_PEPPER') || '';
     if (!PEPPER) return Response.json({ error: 'Server configuration error.' }, { status: 500 });
     const te = new TextEncoder();
-    const now = () => new Date().toISOString();
-    const ip = (req.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
 
     const hex = (buf) => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     const b64u = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
