@@ -20,8 +20,8 @@ const PLAN_PRICE_SECRETS = {
 // can NEVER use these values; live checkout still requires explicit live Price
 // IDs in Base44's server-side environment.
 const SANDBOX_PLAN_PRICES = {
-  creator: 'price_1T6tJqLLyyDLnlhpwgi7rjJY',
-  professional: 'price_1T6tfXLLyyDLnlhpsCNhFRXE',
+  creator: 'price_1U5wo5AOlRvharGOaHq8bkWs',
+  professional: 'price_1U5wpWAOlRvharGOW3oA5U6B',
 };
 
 function stripeKeyMode(secretKey) {
