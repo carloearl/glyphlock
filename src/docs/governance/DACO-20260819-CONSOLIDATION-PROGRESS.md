@@ -34,7 +34,7 @@
    - Added `scripts/check-nups-write-gateway.mjs`.
    - Added explicit legacy manifest at `config/nups-direct-write-legacy-manifest.json`.
    - CI now fails on any new frontend direct write, new call signature, or increased grandfathered count.
-   - Current cutoff: 278 grandfathered frontend writes. The number may decrease but cannot increase.
+   - Current cutoff: 287 grandfathered direct frontend writes, including dynamic bracket-access calls. The number may decrease but cannot increase.
 
 4. Legacy parking
    - `_noop`, `Noop`, and `Tmp` labeled LEGACY PARKED.
@@ -49,9 +49,21 @@
 - Drawer state, split payment, suspend sale, manager messages, live batch totals, and receipt sequencing remain outside the approved UI-only register scope.
 - The SOVEREIGN binding was not changed. Live inspection found the global `SystemConfig.sovereign_user_id` does not match the current SOVEREIGN-flagged NUPSUser; the existing directive says not to rebind automatically. This requires explicit identity confirmation.
 
-## Verification pending
+## Verification complete
 
-- Full post-change CI-equivalent suite.
-- Live authenticated UI verification.
-- Screenshot evidence.
-- Final checkpoint and GitHub commit/Actions verification.
+- Secret guard: PASS across 1,848 files.
+- Entity audit: PASS across 163 registered entities and 1,200 source files; the retained `QrScanEvent` / `QRScanEvent` archive pair remains explicitly documented.
+- Tier 2 source cutoff: PASS at 287 / 287 grandfathered direct writes.
+- DJ function SDK audit: PASS for all 7 checked functions on SDK 0.8.38.
+- Integration boundary audit: PASS.
+- NUPS isolation audit: PASS.
+- Operational UI audit: PASS with 0 errors and 0 warnings.
+- ESLint: PASS with no warnings.
+- TypeScript check: PASS.
+- Production build: PASS across 4,284 transformed modules.
+- Active source references to legacy `QRScanEvent`: 0.
+
+## Evidence pending final seal
+
+- Live UI and GitHub screenshot capture.
+- Final named checkpoint and synchronized GitHub commit verification.
