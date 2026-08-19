@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // W3-008B — Payment Provider Abstraction Layer
 // This function is the SINGLE entry point for payment verification across all
@@ -12,9 +12,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 //   cash              → Simple confirmation, no processor
 //   legacy named provider codes remain accepted only for backward-compatible records
 //
-// CRITICAL: No literal STRIPE_SECRET_KEY string in source — the secret name
-// is read dynamically from PaymentProvider.secret_name so non-Stripe paths
-// are never blocked by the test runner's secret scanner.
+// Stripe credentials resolve from the provider-configured environment secret
+// first, then Base44's managed Stripe connector. Non-Stripe paths never depend
+// on Stripe configuration.
 
 const ALLOWED_ROLES = ['admin', 'manager', 'staff'];
 
@@ -53,6 +53,20 @@ async function resolveProviderConfig(base44, providerCode) {
     { provider_code: providerCode, active: true }, null, 1
   );
   return providers?.[0] || null;
+}
+
+async function resolveStripeSecretKey(base44, providerConfig) {
+  const secretName = providerConfig?.secret_name || 'STRIPE_SECRET_KEY';
+  const configured = Deno.env.get(secretName);
+  if (configured) return configured;
+
+  try {
+    const connection = await base44.asServiceRole.connectors.getConnection('stripe');
+    const token = connection?.accessToken;
+    return typeof token === 'string' && token.length > 0 ? token : null;
+  } catch {
+    return null;
+  }
 }
 
 async function resolveMode(base44, venue_id) {
@@ -197,12 +211,8 @@ Deno.serve(async (req) => {
 
     if (resolvedProvider === 'stripe') {
       // ── Stripe Adapter (lazy) ──
-      // Secret name resolved dynamically from PaymentProvider entity —
-      // no literal STRIPE_SECRET_KEY in source so non-Stripe paths
-      // are never blocked by the secret scanner.
       const providerConfig = await resolveProviderConfig(base44, 'stripe');
-      const secretName = providerConfig?.secret_name || 'STRIPE_SECRET_KEY';
-      const stripeKey = Deno.env.get(secretName);
+      const stripeKey = await resolveStripeSecretKey(base44, providerConfig);
 
       if (!stripeKey) {
         verificationError = 'STRIPE_NOT_CONFIGURED';
