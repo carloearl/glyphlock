@@ -79,6 +79,32 @@ Deno.serve(async (req) => {
         mode: ['TEST', 'DEMO'].includes(mode) ? mode : 'TEST',
         decision_log: [{ decision: 'SUBMITTED', by: email, note: '', timestamp: new Date().toISOString() }],
       });
+      // Owner notification — requests can be approved in-app (NUPSAdminPortal /
+      // AccessRequests) or acted on from this email.
+      try {
+        await base44.asServiceRole.integrations.Core.SendEmail({
+          to: OWNER_EMAIL,
+          from_name: 'NUPS Access Control',
+          subject: `NUPS access request — ${full_legal_name} (${requested_role})`,
+          body: [
+            'A new NUPS access request is pending owner approval.',
+            '',
+            `Name: ${full_legal_name}`,
+            `Email: ${email}`,
+            `Phone: ${phone || '—'}`,
+            `Requested role: ${requested_role}`,
+            `Mode: ${rec.mode}`,
+            `Venue: ${rec.venue_id}`,
+            `Reason: ${reason}`,
+            '',
+            `Request ID: ${rec.id}`,
+            'Approve or reject in the app: /AccessRequests',
+          ].join('\n'),
+        });
+      } catch (mailErr) {
+        console.warn('Access request notification failed:', mailErr.message);
+      }
+
       return Response.json({ success: true, request: safeRequest(rec) });
     }
 
