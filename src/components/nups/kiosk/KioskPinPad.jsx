@@ -2,26 +2,10 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { ShieldCheck, X } from "lucide-react";
 import SecureNumericKeypad from "@/components/nups/kiosk/SecureNumericKeypad";
+import { getNUPSTerminalId } from "@/lib/nups/terminalIdentity";
 
 const CLIENT_MAX_FAILS = 5;
 const CLIENT_LOCK_MS = 60_000;
-const TERMINAL_ID_KEY = "nups_terminal_id";
-
-function getTerminalId() {
-  if (typeof window === "undefined") return "unidentified";
-  try {
-    const existing = window.localStorage.getItem(TERMINAL_ID_KEY);
-    if (existing) return existing;
-    const random = typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    const created = `NUPS-TERM-${random}`;
-    window.localStorage.setItem(TERMINAL_ID_KEY, created);
-    return created;
-  } catch {
-    return `NUPS-SESSION-${Date.now()}`;
-  }
-}
 
 function responseData(error) {
   return error?.response?.data || error?.data || error?.body || error || {};
@@ -34,7 +18,7 @@ function responseData(error) {
  * storage, logs, analytics, URLs, query strings, or entity records.
  */
 export default function KioskPinPad({ mode, onSuccess }) {
-  const [terminalId] = useState(() => getTerminalId());
+  const [terminalId] = useState(() => getNUPSTerminalId());
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
