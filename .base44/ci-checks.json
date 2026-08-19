@@ -1,7 +1,5 @@
 {
   "version": 1,
-  "description": "Base44-managed CI extension point. Add npm script names here instead of editing .github/workflows from Base44.",
-  "scripts": [
-    "check:nups-write-gateway"
-  ]
+  "description": "Base44-managed CI extension point for additional checks. Add npm script names here instead of editing .github/workflows from Base44.",
+  "scripts": []
 }
