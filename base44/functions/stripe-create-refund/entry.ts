@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import Stripe from 'npm:stripe@14.14.0';
+import Stripe from 'npm:stripe@22.5.0';
 
 const ALLOWED_REASONS = new Set(['duplicate', 'fraudulent', 'requested_by_customer']);
 

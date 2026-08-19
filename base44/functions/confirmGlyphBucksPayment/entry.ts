@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import Stripe from 'npm:stripe@14.14.0';
+import Stripe from 'npm:stripe@22.5.0';
 
 // W3-008B — Optional Native Payment Integration
 // Confirms a Stripe-hosted Checkout Session (preferred) or a legacy

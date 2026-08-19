@@ -245,7 +245,7 @@ Deno.serve(async (req) => {
         confirmedStatus = 'FAILED';
       } else {
         try {
-          const { default: Stripe } = await import('npm:stripe@14.14.0');
+          const { default: Stripe } = await import('npm:stripe@22.5.0');
           const stripe = new Stripe(stripeKey, { apiVersion: '2026-06-24.dahlia' });
 
           await logVerificationStep(base44, record_id, venue_id, 'api_call_made', resolvedProvider, 'PENDING', 'PENDING', user.email, user.role, mode, `Retrieving PI ${processor_reference}`, null);

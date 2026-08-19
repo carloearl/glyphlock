@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import Stripe from 'npm:stripe@14.14.0';
+import Stripe from 'npm:stripe@22.5.0';
 
 const EXPECTED_ACCOUNT_ID = Deno.env.get('STRIPE_EXPECTED_ACCOUNT_ID') || 'acct_1RvNQlAOlRvharGO';
 const EXPECTED_CONNECTED_ACCOUNT_ID = Deno.env.get('STRIPE_EXPECTED_CONNECTED_ACCOUNT_ID') || 'acct_1S7x8fAOlRz4oyOk';
