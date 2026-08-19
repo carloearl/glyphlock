@@ -41,8 +41,59 @@
     },
     "date_of_birth": {
       "type": "string",
-      "format": "date-time",
       "description": "Date of birth for age verification"
+    },
+    "id_type": {
+      "type": "string",
+      "description": "Credential type presented at onboarding (Drivers License, State ID, adult entertainment license)."
+    },
+    "license_number_last4": {
+      "type": "string",
+      "description": "Last 4 characters of the license/ID number. The full number is intentionally NEVER stored."
+    },
+    "license_state": {
+      "type": "string",
+      "description": "Issuing state / province (2-letter)."
+    },
+    "license_expiration": {
+      "type": "string",
+      "description": "Credential expiration date (YYYY-MM-DD). Required for check-in; expired blocks check-in and cash payout."
+    },
+    "license_photo_url": {
+      "type": "string",
+      "description": "Uploaded photo of the FRONT of the adult-entertainment license / ID. Retained as credential evidence."
+    },
+    "id_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the credential was captured by scanning the physical ID barcode or verified against an uploaded license photo."
+    },
+    "id_verified_by": {
+      "type": "string",
+      "description": "Email of the operator who captured/confirmed the credential."
+    },
+    "id_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "id_scan_source": {
+      "type": "string",
+      "enum": [
+        "hardware_scanner",
+        "photo_upload",
+        "manual_entry"
+      ],
+      "description": "How the credential was captured."
+    },
+    "payout_hold": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the license is expired/missing \u2014 nightly cash payout is withheld and accrues as an IOU."
+    },
+    "iou_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Accrued earnings owed but withheld while the license is invalid. Released once a valid license is on file."
     },
     "contract_signed": {
       "type": "boolean",
@@ -75,12 +126,12 @@
     },
     "nups_pin": {
       "type": "string",
-      "description": "ID-01: 4-digit PIN the entertainer enters at the door check-in kiosk."
+      "description": "4-digit PIN the entertainer enters at the door check-in kiosk."
     },
     "is_demo": {
       "type": "boolean",
       "default": false,
-      "description": "ID-01: Set true for demo seed records to isolate from production queries"
+      "description": "Set true for demo seed records to isolate from production queries"
     },
     "status": {
       "type": "string",
@@ -129,7 +180,7 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "DACO WAVE 1 — Ledger mode."
+      "description": "Ledger mode."
     }
   },
   "required": [

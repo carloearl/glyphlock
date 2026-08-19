@@ -122,6 +122,26 @@ Deno.serve(async (req) => {
       return Response.json({ error: `Check-in blocked: Contract status is ${entertainer.contract_status || 'INVALID'}.` }, { status: 422 });
     }
 
+    // GATE 8 — adult-entertainment license must be on file and unexpired.
+    // Expired / missing credential ⇒ no check-in and no nightly cash payout (IOU only).
+    if (!entertainer.license_expiration) {
+      await blockLog('missing_license', `Check-in blocked: no license_expiration on file for ${entertainer.stage_name}`);
+      return Response.json({ error: 'Check-in blocked: No adult entertainment license on file. Scan or upload the license first.' }, { status: 422 });
+    }
+    const licenseExp = new Date(`${String(entertainer.license_expiration).slice(0, 10)}T00:00:00`);
+    const midnight = new Date();
+    midnight.setHours(0, 0, 0, 0);
+    if (isNaN(licenseExp.getTime()) || licenseExp < midnight) {
+      await blockLog('license_expired',
+        `Check-in blocked: license expired ${entertainer.license_expiration} for ${entertainer.stage_name}`,
+        'high', { license_expiration: entertainer.license_expiration });
+      await base44.asServiceRole.entities.Entertainer.update(entertainer.id, { payout_hold: true });
+      return Response.json({
+        error: `Check-in blocked: License expired ${entertainer.license_expiration}. Earnings accrue as an IOU until a valid license is on file.`,
+        license_expired: true,
+      }, { status: 422 });
+    }
+
     // ALL GATES PASSED — create shift
     const shift = await base44.asServiceRole.entities.EntertainerShift.create({
       entertainer_id,

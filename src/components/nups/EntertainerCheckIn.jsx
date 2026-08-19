@@ -11,6 +11,7 @@ import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { resolveVenueId } from "@/lib/venueDefaults";
 import { snapshotPerson } from "@/lib/nups/personArchive";
+import { licenseStatus } from "@/lib/nups/licenseStatus";
 
 const ShiftTimer = ({ checkInTime }) => {
   const [elapsed, setElapsed] = useState('');
@@ -84,6 +85,12 @@ export default function EntertainerCheckIn({ user }) {
     mutationFn: async () => {
       const ent = entertainers.find(e => e.nups_pin && e.nups_pin === pin);
       if (!ent) throw new Error('PIN not recognized — if you just signed up, ask the manager to confirm your PIN was saved.');
+      // License gate — expired / missing credential blocks the floor and the
+      // nightly cash payout (earnings accrue as an IOU until it's valid).
+      const lic = licenseStatus(ent);
+      if (!lic.can_check_in) {
+        throw new Error(`${ent.stage_name}: ${lic.label} — ${lic.reason} Payout will be held as an IOU.`);
+      }
       if (activeShifts.some(s => s.entertainer_id === ent.id)) {
         throw new Error(`${ent.stage_name} already checked in`);
       }

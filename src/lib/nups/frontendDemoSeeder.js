@@ -153,9 +153,20 @@ function buildVIPSessions() {
 // Main seeder — returns a summary of what was created.
 // Throws if caller is not an owner email.
 // ---------------------------------------------------------------------------
-export async function seedDemoContracts(actorEmail) {
+export async function seedDemoContracts(actorEmail, { ledgerMode } = {}) {
   if (!isOwnerEmail(actorEmail)) {
     throw new Error('Access denied — demo seeding is restricted to the venue owner.');
+  }
+
+  // LIVE-MODE LOCK — never seed demo data while operating live.
+  if (ledgerMode && ledgerMode !== 'DEMO' && ledgerMode !== 'SANDBOX') {
+    throw new Error('Demo seeding is blocked in LIVE mode. Switch to DEMO mode first.');
+  }
+  const demoVenueConfig = await base44.entities.VenueRateConfig
+    .filter({ venue_id: DEMO_VENUE_ID })
+    .catch(() => []);
+  if (demoVenueConfig?.[0]?.mode === 'REAL') {
+    throw new Error(`${DEMO_VENUE_ID} is configured as a LIVE venue — demo data cannot be seeded into it.`);
   }
 
   const results = {};
