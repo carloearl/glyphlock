@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import Stripe from 'npm:stripe@14.14.0';
 
 // W3-008B — Optional Native Payment Integration
 // This function creates a payment intent for the Stripe adapter ONLY when a
@@ -46,6 +47,31 @@ async function resolveStripeSecretKey(base44, providerConfig) {
   } catch {
     return null;
   }
+}
+
+function getAllowedOrigin(req) {
+  const candidates = [Deno.env.get('APP_BASE_URL'), req.headers.get('origin')].filter(Boolean);
+  for (const candidate of candidates) {
+    try {
+      const url = new URL(candidate);
+      const host = url.hostname.toLowerCase();
+      if (
+        url.protocol === 'https:' &&
+        (host === 'glyphlock.io' || host.endsWith('.glyphlock.io') || host.endsWith('.base44.app'))
+      ) {
+        return url.origin;
+      }
+    } catch {
+      // Ignore malformed origins and use the canonical app fallback.
+    }
+  }
+  return 'https://glyphlock.base44.app';
+}
+
+function integrationIdentifier() {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const suffix = Array.from(bytes, (value) => String.fromCharCode(97 + (value % 26))).join('');
+  return `glyphlock_nups_${suffix}`;
 }
 
 Deno.serve(async (req) => {
