@@ -6,6 +6,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getTheme, getFont, THEMES, VISUALS } from "./fableThemes";
 import { makeParticles, drawBackground, drawVisual } from "./fableRenderers";
+import FableMediaLayer from "./FableMediaLayer";
+import { resolveFableMedia } from "./fableMedia";
 
 const EMPTY_FRAME = { bass: 0, mid: 0, high: 0, energy: 0, bands: [], shape: [], beatCount: 0, beatInBar: 1, barCount: 0 };
 const AUTO_VISUALS = VISUALS.filter((v) => v.key !== "off").map((v) => v.key);
@@ -31,6 +33,8 @@ export default function FableStage({
   const background = auto ? theme.bg : settings.background;
   const visual = auto ? AUTO_VISUALS[autoStep % AUTO_VISUALS.length] : settings.visual;
   const fontCss = getFont(settings.font);
+  // When a video backdrop is showing, the canvas must stay see-through.
+  const mediaOn = !!resolveFableMedia(settings, track).kind;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -62,7 +66,9 @@ export default function FableStage({
       const t = performance.now();
       const frame = frameRef?.current || EMPTY_FRAME;
 
-      if (settings.trails) {
+      if (mediaOn) {
+        g.clearRect(0, 0, W, H);
+      } else if (settings.trails) {
         g.fillStyle = `${theme.tint}66`;
         g.fillRect(0, 0, W, H);
       } else {
@@ -70,7 +76,7 @@ export default function FableStage({
         g.fillRect(0, 0, W, H);
       }
 
-      drawBackground(g, W, H, t, frame, theme, background, particles);
+      if (!mediaOn) drawBackground(g, W, H, t, frame, theme, background, particles);
 
       g.shadowBlur = settings.bloom ? 24 : 0;
       g.shadowColor = theme.colors[1];
@@ -115,7 +121,7 @@ export default function FableStage({
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [settings, theme, background, visual, auto, autoStep, frameRef]);
+  }, [settings, theme, background, visual, auto, autoStep, frameRef, mediaOn]);
 
   const accent = theme.colors[2];
 
@@ -125,6 +131,7 @@ export default function FableStage({
       className={`relative h-full w-full overflow-hidden bg-black ${className}`}
       style={{ fontFamily: fontCss }}
     >
+      <FableMediaLayer settings={settings} track={track} />
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       <div ref={flashRef} className="pointer-events-none absolute inset-0 opacity-0 mix-blend-screen" />
 

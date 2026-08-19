@@ -66,6 +66,10 @@ export const DEFAULT_SETTINGS = {
   // every autoBars bars so the stage runs unattended.
   autoMode: true,
   autoBars: 8,
+  // Media backdrop: "graphics" (none) · "player" (live track video) · "url"
+  mediaMode: "graphics",
+  mediaUrl: "",
+  mediaOpacity: 1,
   // Typography + marquee copy
   font: "display",
   marqueeText: "",

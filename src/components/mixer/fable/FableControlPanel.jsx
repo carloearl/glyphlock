@@ -6,8 +6,9 @@
  */
 import React from "react";
 import { Switch } from "@/components/ui/switch";
-import { Square, ExternalLink, Mic, MicOff } from "lucide-react";
+import { Square, ExternalLink, Mic, MicOff, Play } from "lucide-react";
 import { THEMES, BACKGROUNDS, VISUALS, FONTS } from "./fableThemes";
+import { MEDIA_MODES } from "./fableMedia";
 
 const OVERLAYS = [
   ["showNowPlaying", "Now Playing"],
@@ -60,10 +61,12 @@ export default function FableControlPanel({
   onChange,
   running,
   onStop,
+  onStart,
   onLaunch,
   stageOpen,
   micStatus,
   bpm,
+  liveTrackLabel,
 }) {
   const set = (key) => (value) => onChange({ ...settings, [key]: value });
 
@@ -72,21 +75,22 @@ export default function FableControlPanel({
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
+          onClick={running ? onStop : onStart}
+          className={`flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-black uppercase tracking-wider text-white ${
+            running ? "bg-red-600/80 hover:bg-red-600" : "bg-emerald-600 hover:bg-emerald-500"
+          }`}
+        >
+          {running ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          {running ? "Stop Visualizer" : "Start Visualizer"}
+        </button>
+        <button
+          type="button"
           onClick={onLaunch}
           className="flex h-11 items-center gap-2 rounded-xl bg-fuchsia-600 px-5 text-sm font-black uppercase tracking-wider text-white hover:bg-fuchsia-500"
         >
           <ExternalLink className="h-4 w-4" />
           {stageOpen ? "Reopen Stage Window" : "Launch Stage On 2nd Screen"}
         </button>
-        {running && (
-          <button
-            type="button"
-            onClick={onStop}
-            className="flex h-11 items-center gap-2 rounded-xl border border-red-500/40 bg-red-600/20 px-4 text-sm font-bold text-red-200 hover:bg-red-600/30"
-          >
-            <Square className="h-4 w-4" /> Stop Engine
-          </button>
-        )}
         <div className="ml-auto flex items-center gap-2 text-xs font-mono text-slate-400">
           {micStatus === "listening" ? (
             <><Mic className="h-4 w-4 text-emerald-400" /> Beat lock {bpm ? `${bpm} BPM` : "syncing…"}</>
@@ -96,6 +100,42 @@ export default function FableControlPanel({
             <><MicOff className="h-4 w-4" /> Idle · silent output</>
           )}
         </div>
+      </div>
+
+      <div className="space-y-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">
+        <Picker
+          label="Stage Backdrop"
+          value={settings.mediaMode || "graphics"}
+          options={MEDIA_MODES}
+          onChange={set("mediaMode")}
+        />
+        {settings.mediaMode === "player" && (
+          <div className="text-[11px] text-slate-400">
+            Mirroring the live player: {liveTrackLabel || "waiting for a track…"} — video only, audio stays on the club system.
+          </div>
+        )}
+        {settings.mediaMode === "url" && (
+          <input
+            type="url"
+            value={settings.mediaUrl || ""}
+            onChange={(e) => set("mediaUrl")(e.target.value)}
+            placeholder="YouTube link, MP4/WebM URL, or any direct video URL"
+            className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white"
+          />
+        )}
+        {settings.mediaMode !== "graphics" && (
+          <label className="block">
+            <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+              Video Brightness · {Math.round((Number(settings.mediaOpacity) || 1) * 100)}%
+            </span>
+            <input
+              type="range" min="0.2" max="1" step="0.05"
+              value={Number(settings.mediaOpacity) || 1}
+              onChange={(e) => set("mediaOpacity")(Number(e.target.value))}
+              className="w-full"
+            />
+          </label>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">

@@ -58,7 +58,11 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A" } = {})
   const publishMeta = useCallback(() => {
     publishFable(channelRef.current, {
       type: "meta",
-      track: track ? { title: track.title, artist: track.artist } : null,
+      // Include media fields so the pop-out stage can play the same video.
+      track: track ? {
+        title: track.title, artist: track.artist, source: track.source,
+        source_id: track.source_id, embed_url: track.embed_url, file_url: track.file_url,
+      } : null,
       nextTrack: nextTrack ? { title: nextTrack.title, artist: nextTrack.artist } : null,
       bpm: liveBpm,
       deck,
@@ -93,11 +97,19 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A" } = {})
     return !!win;
   }, [settings, publishMeta]);
 
+  // Start the engine on this screen without opening a window.
+  const startEngine = useCallback(() => {
+    setRunning(true);
+    publishFable(channelRef.current, { type: "settings", settings });
+    publishMeta();
+  }, [settings, publishMeta]);
+
   return {
     settings,
     setSettings,
     running,
     setRunning,
+    startEngine,
     frameRef,
     launchStage,
     stageOpen,
