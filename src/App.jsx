@@ -48,6 +48,7 @@ import DemoPosRegisterPreview from './pages/DemoPosRegisterPreview';
 import DemoCloseNightPreview from './pages/DemoCloseNightPreview';
 import DemoCompliancePreview from './pages/DemoCompliancePreview';
 import ClubTV from './pages/ClubTV';
+import FableStagePage from './pages/FableStagePage';
 import ActivityLogViewer from './pages/ActivityLogViewer';
 import DailySettlementDashboard from './pages/DailySettlementDashboard';
 import DriverPayoutHistory from './pages/DriverPayoutHistory';
@@ -151,7 +152,7 @@ const AuthenticatedApp = () => {
     '/nupslanding', '/landing', '/nupsgateway', '/nupstraining', '/unauthorized',
     '/nupssandbox', '/nupslogin', '/nupspaymentreturn', '/nupsowner', '/nupsstaff',
     '/frontdoor', '/entertainercheckin', '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome', '/glyphlockfinancialpage',
-    '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
+    '/nupsinfrastructurepage', '/demo/', '/clubtv', '/fablestage', '/mobilescanner',
     // NUPS operator surface — kiosk-wrapped
     '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub', '/glyphbucks',
@@ -253,6 +254,8 @@ const AuthenticatedApp = () => {
         <Route path="/demo/compliance-preview" element={<DemoCompliancePreview />} />
         <Route path="/ClubTV" element={<ClubTV />} />
         <Route path="/clubtv" element={<ClubTV />} />
+        <Route path="/FableStage" element={<FableStagePage />} />
+        <Route path="/fablestage" element={<FableStagePage />} />
         <Route path="/MobileScanner" element={<MobileScanner />} />
         <Route path="/mobilescanner" element={<MobileScanner />} />
         {/* NUPS operator surface */}

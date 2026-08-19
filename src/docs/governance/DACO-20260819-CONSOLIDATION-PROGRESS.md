@@ -73,7 +73,7 @@
 ## Evidence and final seal
 
 - GitHub Actions `NUPS CI #819` completed successfully on current `main` during the final visual check.
-- Workflow source was visually verified at `.github/workflows/nups-ci.yml` lines 37–44, including `npm run check:nups-write-gateway`.
+- GitHub-admin workflow and the Base44-managed extension point were verified together: `.github/workflows/nups-ci.yml` runs `npm run ci:base44`, and `.base44/ci-checks.json` dispatches `check:nups-write-gateway` without requiring Base44 workflow-write permission.
 - Register safety source was visually verified at `src/pages/RegisterConsole.jsx` lines 248–268, including `OfflineSyncBanner` and persistent `RegisterStatusHeader` mounting.
 - The production DJ visualizer was visually verified at `https://glyphlock.base44.app/fable-engine-x.html?embedded=1` with the demo beat running.
 - The live protected Register route redirected the cloud browser to the Base44 login surface; authenticated runtime rendering was not claimed.
