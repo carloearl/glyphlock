@@ -78,7 +78,7 @@ requireMatch(
 requireMatch(
   "The register must render the persistent DJ instance from djMounted",
   register,
-  /\{djMounted && \(/[\s\S]*<UnifiedMusicConsole/,
+  /\{djMounted && \([\s\S]*<UnifiedMusicConsole/,
 );
 
 for (const [label, source] of [["UnifiedContractFlow", contractV1], ["UnifiedContractFlowV2", contractV2]]) {
