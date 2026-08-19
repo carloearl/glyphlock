@@ -2,6 +2,7 @@
  * Fable Engine X canvas painters — backgrounds and spectrum visuals.
  * Every function is pure drawing: (ctx, geometry, frame, theme, settings).
  */
+import { paintBackground } from "./fableBackgrounds";
 
 export function makeParticles(count, W, H) {
   return Array.from({ length: count }, () => ({
@@ -15,192 +16,12 @@ export function makeParticles(count, W, H) {
 }
 
 /* ─────────────── Backgrounds ─────────────── */
-
+/** Backgrounds now live in fableBackgrounds.js; this stays as the entry point. */
 export function drawBackground(g, W, H, t, frame, theme, mode, particles) {
-  const [c1, c2, c3] = theme.colors;
-  const e = frame.energy;
-
-  if (mode === "nebula") {
-    for (let i = 0; i < 3; i++) {
-      const cx = W * (0.3 + 0.2 * Math.sin(t * 0.00013 + i * 2));
-      const cy = H * (0.4 + 0.25 * Math.cos(t * 0.00017 + i * 1.7));
-      const rad = Math.min(W, H) * (0.35 + 0.18 * i + e * 0.25);
-      const grad = g.createRadialGradient(cx, cy, 0, cx, cy, rad);
-      grad.addColorStop(0, `${[c1, c2, c3][i]}66`);
-      grad.addColorStop(1, "transparent");
-      g.fillStyle = grad;
-      g.fillRect(0, 0, W, H);
-    }
-    return;
-  }
-
-  if (mode === "starfield") {
-    g.fillStyle = c3;
-    particles.forEach((p) => {
-      p.y += (0.4 + p.z * 2.4) * (1 + e * 2);
-      if (p.y > H) { p.y = -4; p.x = Math.random() * W; }
-      g.globalAlpha = 0.25 + p.z * 0.7;
-      g.fillRect(p.x, p.y, p.z * 2, p.z * 2 + e * 4);
-    });
-    g.globalAlpha = 1;
-    return;
-  }
-
-  if (mode === "tunnel") {
-    const cx = W / 2;
-    const cy = H / 2;
-    g.lineWidth = 1.5;
-    for (let i = 0; i < 18; i++) {
-      const k = ((t * 0.00035 + i / 18) % 1);
-      const size = k * k * Math.max(W, H) * (1 + e * 0.5);
-      g.strokeStyle = i % 2 ? `${c1}80` : `${c2}80`;
-      g.strokeRect(cx - size / 2, cy - size / 2, size, size);
-    }
-    return;
-  }
-
-  if (mode === "aurora") {
-    for (let i = 0; i < 4; i++) {
-      g.beginPath();
-      const base = H * (0.25 + i * 0.16);
-      g.moveTo(0, base);
-      for (let x = 0; x <= W; x += 24) {
-        const y = base + Math.sin(x * 0.004 + t * 0.0006 + i) * (40 + e * 160);
-        g.lineTo(x, y);
-      }
-      g.lineTo(W, H);
-      g.lineTo(0, H);
-      g.closePath();
-      const grad = g.createLinearGradient(0, base - 120, 0, H);
-      grad.addColorStop(0, `${[c1, c2, c3][i % 3]}55`);
-      grad.addColorStop(1, "transparent");
-      g.fillStyle = grad;
-      g.fill();
-    }
-    return;
-  }
-
-  if (mode === "plasma") {
-    const grad = g.createLinearGradient(0, 0, W, H);
-    const shift = (Math.sin(t * 0.0004) + 1) / 2;
-    grad.addColorStop(0, `${c1}${Math.round(60 + e * 80).toString(16).padStart(2, "0")}`);
-    grad.addColorStop(Math.max(0.05, Math.min(0.95, shift)), `${c2}55`);
-    grad.addColorStop(1, `${c3}22`);
-    g.fillStyle = grad;
-    g.fillRect(0, 0, W, H);
-    return;
-  }
-
-  if (mode === "confetti") {
-    particles.forEach((p, i) => {
-      p.y += (1.2 + p.z * 3) * (1 + e);
-      p.x += Math.sin(t * 0.001 + p.spin) * p.drift;
-      p.spin += 0.05;
-      if (p.y > H + 10) { p.y = -10; p.x = Math.random() * W; }
-      g.save();
-      g.translate(p.x, p.y);
-      g.rotate(p.spin);
-      g.fillStyle = [c1, c2, c3][i % 3];
-      g.globalAlpha = 0.85;
-      g.fillRect(-p.r, -p.r * 2, p.r * 2, p.r * 4);
-      g.restore();
-    });
-    g.globalAlpha = 1;
-    return;
-  }
-
-  if (mode === "snow") {
-    g.fillStyle = c3;
-    particles.forEach((p) => {
-      p.y += 0.6 + p.z * 1.6;
-      p.x += Math.sin(t * 0.0008 + p.spin) * 0.8;
-      if (p.y > H) { p.y = -6; p.x = Math.random() * W; }
-      g.globalAlpha = 0.35 + p.z * 0.5;
-      g.beginPath();
-      g.arc(p.x, p.y, p.r * 0.9, 0, Math.PI * 2);
-      g.fill();
-    });
-    g.globalAlpha = 1;
-    return;
-  }
-
-  if (mode === "matrix") {
-    const cols = Math.ceil(W / 18);
-    g.font = "16px 'JetBrains Mono', monospace";
-    for (let i = 0; i < cols; i++) {
-      const speed = 60 + ((i * 37) % 90);
-      const y = ((t * 0.001 * speed + i * 90) % (H + 160)) - 80;
-      g.fillStyle = i % 5 === 0 ? c3 : c2;
-      g.globalAlpha = 0.25 + e * 0.6;
-      g.fillText("01".charAt(i % 2), i * 18, y);
-      g.globalAlpha = 0.5 + e * 0.5;
-      g.fillText("Δ", i * 18, y - 22);
-    }
-    g.globalAlpha = 1;
-    return;
-  }
-
-  if (mode === "kaleido") {
-    const cx = W / 2;
-    const cy = H / 2;
-    const wedges = 12;
-    for (let i = 0; i < wedges; i++) {
-      const a = (i / wedges) * Math.PI * 2 + t * 0.0003;
-      const rad = Math.min(W, H) * (0.25 + e * 0.5);
-      g.fillStyle = `${[c1, c2, c3][i % 3]}44`;
-      g.beginPath();
-      g.moveTo(cx, cy);
-      g.arc(cx, cy, rad, a, a + Math.PI / wedges);
-      g.closePath();
-      g.fill();
-    }
-    return;
-  }
-
-  if (mode === "lasers") {
-    g.lineWidth = 2;
-    for (let i = 0; i < 14; i++) {
-      const a = Math.sin(t * 0.0006 + i * 0.5) * 0.7 - Math.PI / 2;
-      const len = Math.max(W, H) * (0.8 + e * 0.6);
-      g.strokeStyle = `${[c1, c2, c3][i % 3]}88`;
-      g.beginPath();
-      g.moveTo(W / 2, H * 0.08);
-      g.lineTo(W / 2 + Math.cos(a + i * 0.22) * len, H * 0.08 + Math.sin(a + i * 0.22) * len);
-      g.stroke();
-    }
-    return;
-  }
-
-  if (mode === "floor") {
-    const horizon = H * 0.45;
-    const rows = 16;
-    for (let r = 0; r < rows; r++) {
-      const k = (r + ((t * 0.0004) % 1)) / rows;
-      const y = horizon + k * k * (H - horizon) * 1.3;
-      const nh = Math.max(2, (H - horizon) * 0.06 * (k + 0.2));
-      for (let cIdx = 0; cIdx < 12; cIdx++) {
-        if ((cIdx + r) % 2) continue;
-        g.fillStyle = `${(r + cIdx) % 4 === 0 ? c2 : c1}${Math.round(40 + e * 90).toString(16).padStart(2, "0")}`;
-        g.fillRect((cIdx / 12) * W, y, W / 12, nh);
-      }
-    }
-    return;
-  }
-
-  if (mode === "embers") {
-    particles.forEach((p, i) => {
-      p.y -= (0.8 + p.z * 2.6) * (1 + frame.bass * 2);
-      p.x += Math.sin(t * 0.0012 + p.spin) * 1.1;
-      if (p.y < -8) { p.y = H + 8; p.x = Math.random() * W; }
-      g.globalAlpha = 0.2 + p.z * 0.6;
-      g.fillStyle = [c1, c2, c3][i % 3];
-      g.beginPath();
-      g.arc(p.x, p.y, p.r * (0.7 + frame.bass), 0, Math.PI * 2);
-      g.fill();
-    });
-    g.globalAlpha = 1;
-  }
+  paintBackground(g, W, H, t, frame, theme, mode, particles);
 }
+
+
 
 /* ─────────────── Spectrum visuals ─────────────── */
 

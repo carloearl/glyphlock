@@ -6,6 +6,7 @@
 import React from "react";
 import { FONTS } from "./fableThemes";
 import { TEXT_FX } from "./fableTextFx";
+import { HEADLINE_MOTIONS } from "./fableHeadlineMotion";
 
 function Field({ label, value, onChange, placeholder }) {
   return (
@@ -53,6 +54,16 @@ export default function FableStageCopyPanel({ settings, onChange }) {
             className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm font-semibold text-white"
           >
             {TEXT_FX.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Headline Motion</span>
+          <select
+            value={settings.headlineMotion || "none"}
+            onChange={(e) => set("headlineMotion")(e.target.value)}
+            className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm font-semibold text-white"
+          >
+            {HEADLINE_MOTIONS.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
           </select>
         </label>
         <label className="block">
