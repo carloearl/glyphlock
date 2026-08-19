@@ -64,10 +64,22 @@ Deno.serve(async (req) => {
     const shiftEarnings = tips + commissions;
 
     // Update shift
-    await base44.asServiceRole.entities.EntertainerShift.update(shift_id, {
-      check_out_time: new Date().toISOString(),
-      status: 'checked_out',
-      shift_earnings: shiftEarnings
+    // ARCH-BASELINE-01 — shift close + earnings write routes through the audit gateway.
+    await base44.functions.invoke('serverAuditGateway', {
+      entity: 'EntertainerShift',
+      operation: 'update',
+      id: shift_id,
+      venue_id: shift.venue_id,
+      intent: 'entertainer_check_out',
+      event_type: 'ShiftClose',
+      event_category: 'identity',
+      source: 'door',
+      retention_class: 'compliance',
+      data: {
+        check_out_time: new Date().toISOString(),
+        status: 'checked_out',
+        shift_earnings: shiftEarnings
+      },
     });
 
     // Update entertainer total_earnings

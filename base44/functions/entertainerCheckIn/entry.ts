@@ -118,14 +118,29 @@ Deno.serve(async (req) => {
     // Update entertainer contract status — stamp mode (skip if no Entertainer record)
     if (entertainerRecord) {
       try {
-        await base44.asServiceRole.entities.Entertainer.update(entertainer_id, {
-          contract_signed: true,
-          contract_signature: signature,
-          contract_signed_date: now,
-          contract_ip_address: clientIP,
-          contract_status: "VALID",
-          status: "active",
+        // ARCH-BASELINE-01 — identity write routes through the audit gateway
+        // (MigrationAuditLog + AuditEvent + ActivityLog).
+        await base44.functions.invoke('serverAuditGateway', {
+          entity: 'Entertainer',
+          operation: 'update',
+          id: entertainer_id,
+          venue_id,
           mode: resolvedMode,
+          intent: 'entertainer_contract_signed',
+          event_type: 'ShiftOpen',
+          event_category: 'identity',
+          severity: 'medium',
+          source: 'door',
+          retention_class: 'compliance',
+          data: {
+            contract_signed: true,
+            contract_signature: signature,
+            contract_signed_date: now,
+            contract_ip_address: clientIP,
+            contract_status: "VALID",
+            status: "active",
+            mode: resolvedMode,
+          },
         });
       } catch (updateErr) {
         console.warn('Entertainer update skipped:', updateErr.message);
