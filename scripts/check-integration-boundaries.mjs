@@ -63,6 +63,12 @@ requireText(stripePoll, 'trustedPlan', 'Checkout reconciliation must derive enti
 requireText(stripePoll, 'entitlementConfirmed', 'Checkout reconciliation must return an explicit entitlement result');
 requireText(stripePoll, "getConnection('stripe')", 'Checkout reconciliation must support the server-only Stripe connector');
 
+const stripeHealth = 'base44/functions/stripe-integration-health/entry.ts';
+requireText(stripeHealth, 'EXPECTED_ACCOUNT_ID', 'Stripe health must bind to the intended GlyphLock account');
+requireText(stripeHealth, 'REQUIRED_WEBHOOK_SECRET_COUNT = 2', 'Stripe health must require platform and Connect signing secrets');
+requireText(stripeHealth, "{ error: 'Authentication required' }", 'Stripe health must return an explicit authentication failure');
+requireText(stripeHealth, 'catalogReady && webhookReady && accountMatches && accountReadable', 'Stripe health must require the full integration boundary');
+
 const paymentSuccess = 'src/pages/PaymentSuccess.jsx';
 requireText(paymentSuccess, 'base44.functions.invoke("stripePoll"', 'Payment success page must verify with the server');
 requireText(paymentSuccess, 'PAYMENT NOT CONFIRMED', 'Payment success page must have a non-success state');
