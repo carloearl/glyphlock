@@ -7,8 +7,8 @@ import Stripe from 'npm:stripe@14.14.0';
  */
 
 const SANDBOX_PLAN_PRICES = {
-  creator: 'price_1T6tJqLLyyDLnlhpwgi7rjJY',
-  professional: 'price_1T6tfXLLyyDLnlhpsCNhFRXE',
+  creator: 'price_1U5wo5AOlRvharGOaHq8bkWs',
+  professional: 'price_1U5wpWAOlRvharGOW3oA5U6B',
 };
 
 function stripeKeyMode(secretKey) {
