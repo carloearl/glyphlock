@@ -2,9 +2,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@14.14.0';
 
 // W3-008B — Optional Native Payment Integration
-// This function creates a payment intent for the Stripe adapter ONLY when a
-// venue explicitly chooses Stripe integration. NUPS otherwise runs on top of
-// the venue's existing processor/terminal via createPaymentRecord.
+// Creates a Stripe-hosted one-time Checkout Session only when a venue
+// explicitly selects Stripe. Other providers stay on the provider-agnostic
+// PaymentRecord evidence path.
 //
 // Stripe credentials resolve from the provider-configured environment secret
 // first, then Base44's managed Stripe connector. The credential never reaches
@@ -75,6 +75,10 @@ function integrationIdentifier() {
 }
 
 Deno.serve(async (req) => {
+  if (req.method !== 'POST') {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 });
+  }
+
   try {
     const base44 = createClientFromRequest(req);
 
