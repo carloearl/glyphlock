@@ -37,7 +37,7 @@ const WORKSPACE_BY_ROLE = {
   DOORMAN:        { destination: '/DoormanHome',     workspace: 'Doorman Home', station: 'door' },
   DRIVER:         { destination: '/NUPSKiosk',       workspace: 'Driver Clock In/Out', station: 'floor' },
   PERFORMER:      { destination: '/EntertainerCheckIn', workspace: 'Entertainer Check-In', station: 'floor' },
-  BARTENDER:      { destination: '/StaffHome',       workspace: 'Staff Home', station: 'bar' },
+  BARTENDER:      { destination: '/BarRegister',     workspace: 'Bar Register', station: 'bar' },
   // SECURITY clocks in/out only — no workspace. Shift is logged to StaffShift
   // (payroll + Manager Console visibility); kiosk shows the confirmation screen.
   SECURITY:       { destination: '/NUPSKiosk',       workspace: 'Security Clock In/Out', station: 'security' },
