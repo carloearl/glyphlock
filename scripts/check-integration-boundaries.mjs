@@ -136,6 +136,15 @@ requireText(nupsPaymentReturn, 'confirmGlyphBucksPayment', 'Stripe return page m
 requireText(nupsPaymentReturn, 'window.location.origin', 'Stripe return messaging must use an exact same-origin target');
 requireText(nupsPaymentReturn, 'nups:stripe-payment-result', 'Stripe return page must notify the originating NUPS workflow');
 
+const offlineSyncBanner = 'src/components/nups/OfflineSyncBanner.jsx';
+forbidText(offlineSyncBanner, 'processGlyphBucksPayment', 'Reconnect must never replay a payment from browser storage');
+requireText(offlineSyncBanner, 'Payments are never submitted automatically', 'Offline UI must disclose the manual-review payment boundary');
+
+const offlineQueue = 'src/utils/offlineQueue.js';
+requireText(offlineQueue, 'assertNonFinancialPayload', 'Offline queue must reject financial payloads');
+requireText(offlineQueue, "sync_policy: 'manual_manager_review'", 'Offline operations must remain quarantined for review');
+requireText(offlineQueue, 'FINANCIAL_FIELD_PATTERN', 'Offline queue must detect payment and card fields');
+
 const paymentSuccess = 'src/pages/PaymentSuccess.jsx';
 requireText(paymentSuccess, 'base44.functions.invoke("stripePoll"', 'Payment success page must verify with the server');
 requireText(paymentSuccess, 'PAYMENT NOT CONFIRMED', 'Payment success page must have a non-success state');
