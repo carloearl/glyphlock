@@ -50,6 +50,7 @@ requireText(checkout, "getConnection('stripe')", 'Checkout connector access must
 requireText(checkout, 'Unsupported subscription plan', 'Subscription plans must be allowlisted');
 requireText(checkout, 'Client-controlled prices, line items, and checkout modes are not accepted', 'Legacy client pricing must be rejected');
 requireText(checkout, 'expectedPriceId', 'Checkout must bind expected server price metadata');
+requireText(checkout, 'integration_identifier', 'Subscription Checkout must identify the integration');
 
 const legacyCheckout = 'base44/functions/stripeCheckout/entry.ts';
 requireText(legacyCheckout, 'Legacy client-price checkout endpoint — disabled', 'Arbitrary client Price checkout must remain disabled');
@@ -67,7 +68,10 @@ const stripeHealth = 'base44/functions/stripe-integration-health/entry.ts';
 requireText(stripeHealth, 'EXPECTED_ACCOUNT_ID', 'Stripe health must bind to the intended GlyphLock account');
 requireText(stripeHealth, 'REQUIRED_WEBHOOK_SECRET_COUNT = 2', 'Stripe health must require platform and Connect signing secrets');
 requireText(stripeHealth, "{ error: 'Authentication required' }", 'Stripe health must return an explicit authentication failure');
-requireText(stripeHealth, 'catalogReady && webhookReady && accountMatches && accountReadable', 'Stripe health must require the full integration boundary');
+requireText(stripeHealth, 'EXPECTED_CONNECTED_ACCOUNT_ID', 'Stripe health must bind to the intended venue connected account');
+requireText(stripeHealth, 'connectedAccountReady', 'Stripe health must verify connected-account payment readiness');
+requireText(stripeHealth, 'environmentReady', 'Stripe health must verify venue mode against Stripe environment');
+requireText(stripeHealth, 'catalogReady && webhookReady && accountMatches && accountReadable && connectedAccountReady && environmentReady', 'Stripe health must require the full integration boundary');
 
 const nupsPaymentFunctions = [
   'base44/functions/processGlyphBucksPayment/entry.ts',
@@ -86,6 +90,8 @@ requireText(processGlyphBucksPayment, "mode: 'payment'", 'NUPS Checkout must cre
 requireText(processGlyphBucksPayment, 'integration_identifier', 'NUPS Checkout must identify the integration');
 requireText(processGlyphBucksPayment, 'idempotencyKey', 'NUPS Checkout creation must be idempotent');
 requireText(processGlyphBucksPayment, 'NUPSPaymentReturn', 'NUPS Checkout must return through the verified payment page');
+requireText(processGlyphBucksPayment, 'STRIPE_LIVE_CREDENTIAL_REQUIRED', 'NUPS Checkout must fail closed when REAL mode lacks live credentials');
+requireText(processGlyphBucksPayment, 'STRIPE_CONNECTED_ACCOUNT_NOT_READY', 'NUPS Checkout must verify connected-account readiness');
 forbidText(processGlyphBucksPayment, 'client_secret:', 'NUPS hosted Checkout must not return a PaymentIntent client secret');
 
 const confirmGlyphBucksPayment = 'base44/functions/confirmGlyphBucksPayment/entry.ts';
@@ -94,6 +100,12 @@ requireText(confirmGlyphBucksPayment, 'ownsSession', 'NUPS Checkout confirmation
 requireText(confirmGlyphBucksPayment, 'matchesVenue', 'NUPS Checkout confirmation must enforce venue scope');
 requireText(confirmGlyphBucksPayment, "functions.invoke('createPaymentRecord'", 'NUPS Checkout must reconcile into the provider-agnostic evidence record');
 requireText(confirmGlyphBucksPayment, "create_linked_order: false", 'NUPS Checkout confirmation must not create a duplicate lightweight order');
+requireText(confirmGlyphBucksPayment, 'CHECKOUT_ENVIRONMENT_MISMATCH', 'NUPS Checkout confirmation must reject test/live crossover');
+
+const createPaymentRecord = 'base44/functions/createPaymentRecord/entry.ts';
+requireText(createPaymentRecord, 'allowedProviders', 'Payment evidence must reject providers not configured for the venue');
+requireText(createPaymentRecord, 'venueConfig.mode || await resolveMode', 'Payment evidence must preserve the venue payment mode');
+requireText(createPaymentRecord, "status: confirmed ? 200 : 409", 'Failed duplicate payment records must not be returned as success');
 
 const glyphBucksContract = 'src/components/nups/GlyphBucksContract.jsx';
 requireText(glyphBucksContract, 'waitForStripeCheckout', 'NUPS contract flow must wait for Stripe-hosted payment confirmation');
