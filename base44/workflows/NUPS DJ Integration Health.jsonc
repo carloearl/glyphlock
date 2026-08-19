@@ -1,23 +1,6 @@
 {
-  "name": "NUPS DJ Integration Health",
   "description": "Runs a quota-safe daily server-side YouTube connectivity probe and records the result in IntegrationTestAuditRow without exposing credentials.",
-  "trigger": {
-    "condition": null,
-    "config": {
-      "trigger_type": "scheduled",
-      "events": [],
-      "schedule_mode": "interval",
-      "cron_expression": null,
-      "one_time_date": null,
-      "timezone": "UTC",
-      "interval_value": 1,
-      "interval_unit": "days",
-      "interval_anchor": "2026-08-19T02:18:53.692Z",
-      "ends_type": "never",
-      "ends_on_date": null,
-      "ends_after_count": null
-    }
-  },
+  "name": "NUPS DJ Integration Health",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -41,5 +24,22 @@
         }
       }
     ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 1,
+      "interval_unit": "days",
+      "interval_anchor": "2026-08-19T02:18:53.692000Z",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
   }
 }
