@@ -138,7 +138,7 @@ export default function TipBreakdown({ transactions = [] }) {
   const today = new Date().toDateString();
   const [tipSignatures, setTipSignatures] = useState({});
   const [showSplitEditor, setShowSplitEditor] = useState(false);
-  const [formula, setFormula] = useState({ entertainerPct: 37, hostessPct: 15, managerBonus: 100, djPct: 50 });
+  const [formula, setFormula] = useState({ hostessPct: 15, managerBonus: 100, djPct: 50 });
 
   const { data: nupsUsers = [] } = useQuery({
     queryKey: ['nups-users-for-tip'],
@@ -159,9 +159,11 @@ export default function TipBreakdown({ transactions = [] }) {
   });
 
   const byPool = useMemo(() => {
-    const pools = { staff: [], hostess: [], manager: [], entertainer: [], dj: [], security: [] };
+    const pools = { hostess: [], manager: [], dj: [], security: [] };
     nupsUsers.forEach(u => {
-      const p = ROLE_POOLS[u.role] || "security";
+      const role = String(u.role || "").toUpperCase();
+      if (INDEPENDENT_CONTRACTOR_ROLES.has(role)) return;
+      const p = ROLE_POOLS[role] || "security";
       if (pools[p]) pools[p].push(u);
     });
     return pools;
@@ -180,12 +182,25 @@ export default function TipBreakdown({ transactions = [] }) {
   };
 
   const signedCount = Object.keys(tipSignatures).length;
-  const totalEmployees = nupsUsers.length;
+  const totalEmployees = Object.values(byPool).reduce((sum, employees) => sum + employees.length, 0);
+  const allocationInvalid = payouts.__meta.overAllocated;
 
   const handleSave = () => {
+    if (totalTips <= 0) {
+      toast.error("No floor tips are available to distribute.");
+      return;
+    }
+    if (allocationInvalid) {
+      toast.error("Payout formula exceeds the available tip pool. Adjust the split before saving.");
+      return;
+    }
+
     const signatures = Object.entries(tipSignatures).map(([empId, sig]) => {
       const emp = nupsUsers.find(u => u.id === empId);
-      const poolKey = emp ? (ROLE_POOLS[emp.role] || 'security') : 'security';
+      if (!emp || INDEPENDENT_CONTRACTOR_ROLES.has(String(emp.role || "").toUpperCase())) {
+        throw new Error("Independent contractors cannot be included in an employee tip payout.");
+      }
+      const poolKey = ROLE_POOLS[emp.role] || "security";
       const payout = payouts[poolKey];
       return {
         employee_id: empId,
@@ -197,13 +212,19 @@ export default function TipBreakdown({ transactions = [] }) {
     });
 
     saveMutation.mutate({
-      payout_date: new Date().toISOString().split('T')[0],
+      payout_date: new Date().toISOString().split("T")[0],
       total_tips: totalTips,
-      split_config: { formula: "37pct-entertainer / 15pct-hostess / hostess+100-manager / 50pct-dj / leftover-security" },
+      split_config: {
+        formula: "employee_pool_v2",
+        hostess_pct: formula.hostessPct,
+        manager_bonus: formula.managerBonus,
+        dj_pct_of_hostess: formula.djPct,
+        contractors_excluded: true,
+      },
       signatures,
       cashier_summary: tipsByCashier,
-      manager_email: '',
-      status: 'completed',
+      manager_email: "",
+      status: "completed",
     });
   };
 
@@ -241,7 +262,7 @@ export default function TipBreakdown({ transactions = [] }) {
       <span><strong>TOTAL NIGHTLY TIPS:</strong></span>
       <span style="font-size:20px;font-weight:900;">$${totalTips.toFixed(2)}</span>
     </div>
-    <div style="font-size:9px;color:#555;margin-bottom:10px;">Formula: Entertainers 37% each · Hostess 15% split · Manager = Hostess+$100 · DJ/AsstMgr = 50% of Hostess pool · Security = remainder</div>
+    <div style="font-size:9px;color:#555;margin-bottom:10px;">Formula: Hostess 15% split · Manager = Hostess+$100 · DJ/AsstMgr = 50% of Hostess pool · Security = remainder · Contractors excluded</div>
     <div style="font-size:10px;color:#333;margin-bottom:10px;">${poolSummary}</div>
     <table>
       <thead><tr><th>Employee</th><th>Role</th><th>Formula</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Signature</th></tr></thead>
@@ -279,7 +300,7 @@ export default function TipBreakdown({ transactions = [] }) {
           </button>
           {signedCount > 0 && (
             <button onClick={handleSave}
-              disabled={saveMutation.isPending}
+              disabled={saveMutation.isPending || allocationInvalid}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
               style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80' }}>
               {saveMutation.isPending ? 'Saving...' : '💾 Save Record'}
