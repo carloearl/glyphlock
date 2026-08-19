@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /NUPSOwner
+Disallow: /NUPSStaff
+Disallow: /RegisterConsole
+Disallow: /ManagerConsole
+Disallow: /NUPSKiosk
+Disallow: /Accounting
+Disallow: /AdminPortal
+Disallow: /api/
+Disallow: /functions/
+
+Sitemap: https://glyphlock.io/sitemap.xml
