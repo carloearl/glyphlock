@@ -129,7 +129,18 @@ const glyphBucksContract = 'src/components/nups/GlyphBucksContract.jsx';
 requireText(glyphBucksContract, 'waitForStripeCheckout', 'NUPS contract flow must wait for Stripe-hosted payment confirmation');
 requireText(glyphBucksContract, "functions.invoke('createPaymentRecord'", 'External terminal payments must use the provider-agnostic evidence path');
 requireText(glyphBucksContract, 'Processor / Terminal Reference', 'External payment UI must collect the required processor reference');
+requireText(glyphBucksContract, "functions.invoke('finalizeNUPSOrderAfterPayment'", 'Paid orders must finalize through the server-side payment proof gate');
+forbidText(glyphBucksContract, 'base44.entities.GlyphBucksOrder.create', 'Browser code must not manufacture finalized paid orders');
+forbidText(glyphBucksContract, 'base44.entities.VIPContractRecord.create', 'Browser code must not manufacture finalized paid contracts');
 forbidText(glyphBucksContract, 'const { client_secret, payment_intent_id }', 'NUPS UI must not skip PaymentIntent confirmation');
+
+const finalizeNupsOrder = 'base44/functions/finalizeNUPSOrderAfterPayment/entry.ts';
+requireText(finalizeNupsOrder, 'CONFIRMED_STATUSES', 'Order finalization must require confirmed payment evidence');
+requireText(finalizeNupsOrder, 'Payment amount does not match order total', 'Order finalization must enforce payment amount integrity');
+requireText(finalizeNupsOrder, 'Payment proof belongs to another order', 'Order finalization must enforce order binding');
+requireText(finalizeNupsOrder, 'NUPS_ORDER_FINALIZED_AFTER_PAYMENT', 'Order finalization must emit an audit event');
+requireText(finalizeNupsOrder, 'PAYMENT_RECONCILIATION_REQUIRED', 'Partial finalization failures must enter reconciliation');
+requireText(finalizeNupsOrder, 'retry_payment_prohibited: true', 'Reconciliation must explicitly prohibit duplicate payment retries');
 
 const nupsPaymentReturn = 'src/pages/NUPSPaymentReturn.jsx';
 requireText(nupsPaymentReturn, 'confirmGlyphBucksPayment', 'Stripe return page must reconcile payment server-side');
