@@ -21,6 +21,7 @@ export default function FableVisualizerTab() {
     nextTrack: live.nextTrack,
     bpm: live.track?.bpm,
     deck: live.deck,
+    autoStart: true,
   });
 
   const liveLabel = live.track
@@ -44,26 +45,22 @@ export default function FableVisualizerTab() {
         </div>
         {micError && (
           <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
-            {micError} — visuals still run; allow microphone access for beat-locked 4/4 sync.
+            {micError} — visuals keep running on the tempo grid. Allow audio input in the
+            browser (address-bar icon) for live beat-locked 4/4 sync.
           </div>
         )}
       </div>
 
       <div className="aspect-video w-full overflow-hidden rounded-2xl border border-white/10 bg-black">
-        {running ? (
-          <FableStage
-            settings={settings}
-            frameRef={frameRef}
-            track={live.track}
-            nextTrack={live.nextTrack}
-            bpm={liveBpm}
-            deck={live.deck}
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-xs font-bold uppercase tracking-[0.3em] text-white/30">
-            Stage Idle — press Start Visualizer
-          </div>
-        )}
+        <FableStage
+          settings={settings}
+          frameRef={frameRef}
+          track={live.track}
+          nextTrack={live.nextTrack}
+          bpm={liveBpm}
+          deck={live.deck}
+        />
+
       </div>
 
       <FableControlPanel

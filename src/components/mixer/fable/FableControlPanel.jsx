@@ -96,6 +96,8 @@ export default function FableControlPanel({
             <><Activity className="h-4 w-4 text-cyan-400" /> Deck synced {bpm ? `${bpm} BPM` : "…"}</>
           ) : micStatus === "listening" ? (
             <><Mic className="h-4 w-4 text-emerald-400" /> Beat lock {bpm ? `${bpm} BPM` : "syncing…"}</>
+          ) : micStatus === "auto" ? (
+            <><Activity className="h-4 w-4 text-fuchsia-400" /> Tempo grid {bpm ? `${bpm} BPM` : "124 BPM"}</>
           ) : micStatus === "error" ? (
             <><MicOff className="h-4 w-4 text-red-400" /> Mic unavailable</>
           ) : (

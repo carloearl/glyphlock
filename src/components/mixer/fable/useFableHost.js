@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import useFableBeat from "./useFableBeat";
 import useFableDeckAudio from "./useFableDeckAudio";
+import useFableSyntheticBeat from "./useFableSyntheticBeat";
 import { DEFAULT_SETTINGS } from "./fableThemes";
 import { openFableChannel, publishFable } from "./fableChannel";
 
@@ -27,9 +28,9 @@ const EMPTY_FRAME = {
   beatCount: 0, beatInBar: 1, barCount: 0,
 };
 
-export default function useFableHost({ track, nextTrack, bpm, deck = "A" } = {}) {
+export default function useFableHost({ track, nextTrack, bpm, deck = "A", autoStart = false } = {}) {
   const [settings, setSettings] = useState(loadSettings);
-  const [running, setRunning] = useState(false);
+  const [running, setRunning] = useState(!!autoStart);
   const [stageOpen, setStageOpen] = useState(false);
   const frameRef = useRef(EMPTY_FRAME);
   const channelRef = useRef(null);
@@ -63,6 +64,14 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A" } = {})
   });
 
   const liveBpm = deckBpm || micBpm || Number(bpm) || Number(track?.bpm) || null;
+
+  // Last resort so the stage is never a dead screen: drive the visuals from the
+  // known tempo when neither the deck tap nor the mic is measuring anything.
+  useFableSyntheticBeat({
+    enabled: running && !deckConnected && !listening,
+    bpm: liveBpm || 124,
+    onFrame: handleFrame,
+  });
 
   const publishMeta = useCallback(() => {
     publishFable(channelRef.current, {
@@ -124,7 +133,7 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A" } = {})
     stageOpen,
     liveBpm,
     syncSource: deckConnected ? "deck" : listening ? "mic" : "none",
-    micStatus: deckConnected ? "deck" : micError ? "error" : listening ? "listening" : "idle",
+    micStatus: deckConnected ? "deck" : listening ? "listening" : micError ? "error" : running ? "auto" : "idle",
     micError: deckConnected ? null : micError,
   };
 }
