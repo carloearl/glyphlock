@@ -308,7 +308,7 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
       initialScanApplied.current = true;
       handleHardwareScan(initialScan);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [initialScan]);
 
   const handleSubmit = async () => {

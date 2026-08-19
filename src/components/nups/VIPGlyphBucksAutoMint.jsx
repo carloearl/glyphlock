@@ -38,7 +38,7 @@ export default function VIPGlyphBucksAutoMint({
   // Auto-trigger once mounted with a valid face value
   useEffect(() => {
     if (faceValue > 0 && status === "idle") mintGlyphBucks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const mintGlyphBucks = async () => {

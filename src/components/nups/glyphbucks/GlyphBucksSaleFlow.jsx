@@ -105,7 +105,7 @@ export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrin
       face_id_match_pct: f.face_id_match_pct, thumb_match_pct: f.thumb_match_pct,
       assent,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [venueId, mode, assent, f.purchaser_name, f.purchaser_member_id, f.member_tier, f.id_scan_ref, f.card_last4, f.card_brand, f.face_id_match_pct, f.thumb_match_pct]);
 
   // Member check-in autofill (from the unified desk picker)
@@ -122,7 +122,7 @@ export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrin
       age_verified: prefill.age_verified || p.age_verified,
       esig_purchaser: p.esig_purchaser || prefill.purchaser_name || "",
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [JSON.stringify(prefill)]);
 
   // Camera ID scan → identity binding + purchaser autofill (never raw PII beyond agreement fields)

@@ -93,7 +93,7 @@ export default function RoleClassGuard({ allow = [], children }) {
       }
     })();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   if (status === "loading") {

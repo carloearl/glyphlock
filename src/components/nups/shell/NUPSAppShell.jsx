@@ -314,7 +314,7 @@ export default function NUPSAppShell({ title, subtitle, actions, children, role 
       cancelled = true;
       window.removeEventListener("nups:operator-changed", onOperatorChanged);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Owner directive 2026-07-17: admins default to STAFF-PARITY (manager-tier)

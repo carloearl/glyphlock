@@ -42,7 +42,7 @@ export default function CameraScanner({ onDecode, formats = ['qr_code'], active 
       }
 
       try {
-        // eslint-disable-next-line no-undef
+         
         detectorRef.current = new BarcodeDetector({ formats });
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -69,7 +69,7 @@ export default function CameraScanner({ onDecode, formats = ['qr_code'], active 
       cancelled = true;
       stopCamera();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [active, formats.join(',')]);
 
   const stopCamera = () => {

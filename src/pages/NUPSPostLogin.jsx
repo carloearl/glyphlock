@@ -16,7 +16,7 @@ export default function NUPSPostLogin() {
 
   useEffect(() => {
     checkAuthAndRedirect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const checkAuthAndRedirect = async () => {

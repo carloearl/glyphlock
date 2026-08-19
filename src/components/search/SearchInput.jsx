@@ -11,7 +11,7 @@ export default function SearchInput({ value, onChange, isLoading, placeholder = 
       if (local !== value) onChange(local);
     }, 250);
     return () => clearTimeout(id);
-  }, [local]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [local]);  
 
   // Autofocus
   useEffect(() => {

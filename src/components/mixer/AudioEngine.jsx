@@ -43,7 +43,7 @@ export default function AudioEngine({
     const syncOutput = (event) => applyPreferredOutput(audio, event.detail).catch(() => undefined);
     window.addEventListener(AUDIO_OUTPUT_EVENT, syncOutput);
     return () => window.removeEventListener(AUDIO_OUTPUT_EVENT, syncOutput);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const [playing, setPlaying] = useState(false);

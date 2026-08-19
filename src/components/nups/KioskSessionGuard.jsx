@@ -49,7 +49,7 @@ export default function KioskSessionGuard({ roles = [], children }) {
       }
     })();
     return () => { alive = false; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   if (state === "checking") {
     return (

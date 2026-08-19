@@ -169,7 +169,7 @@ function RegisterConsoleInner() {
     if ((user || operator) && !allowedKeys.includes(activeTab)) {
       setActiveTab(allowedKeys[0]);
     }
-  }, [user, operator, adminOverride]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, operator, adminOverride]);  
 
   const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
   const { data: batches = [] } = useQuery({

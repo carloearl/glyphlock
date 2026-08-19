@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { resolveVenueId } from "@/lib/venueDefaults";
 import { snapshotPerson } from "@/lib/nups/personArchive";
 import { licenseStatus } from "@/lib/nups/licenseStatus";
+import { SHIFT_CLICKWRAP } from "@/constants/shiftClickwrap";
 
 const ShiftTimer = ({ checkInTime }) => {
   const [elapsed, setElapsed] = useState('');
@@ -37,12 +38,8 @@ export default function EntertainerCheckIn({ user }) {
   const [isCheckingOut, setIsCheckingOut] = useState(null);
   const [showVerification, setShowVerification] = useState(false);
   const [verificationComplete, setVerificationComplete] = useState(false);
-  const [dailyChecklist, setDailyChecklist] = useState({
-    contractValid: false,
-    licenseValid: false,
-    venueRules: false,
-    safetyAck: false
-  });
+  const [dailyChecklist, setDailyChecklist] = useState({});
+  const allAcked = SHIFT_CLICKWRAP.every((c) => dailyChecklist[c.key]);
 
   const activeVenue = useActiveVenue();
   const venueId = resolveVenueId(activeVenue?.id || activeVenue?.venue_id || user?.venue_id);
@@ -171,7 +168,7 @@ export default function EntertainerCheckIn({ user }) {
   };
 
   const handleVerificationComplete = () => {
-    if (Object.values(dailyChecklist).every(v => v)) {
+    if (allAcked) {
       setVerificationComplete(true);
       setShowPinPad(true);
     } else {
@@ -186,7 +183,7 @@ export default function EntertainerCheckIn({ user }) {
       setShowVerification(false);
       setVerificationComplete(false);
       setPin('');
-      setDailyChecklist({ contractValid: false, licenseValid: false, venueRules: false, safetyAck: false });
+      setDailyChecklist({});
     }
   };
 
@@ -208,38 +205,39 @@ export default function EntertainerCheckIn({ user }) {
           <CardHeader className="space-y-3">
             <div className="flex items-center justify-center gap-2 bg-pink-600/20 border border-pink-500/50 rounded-lg py-3">
               <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-              <span className="font-bold text-pink-400">Agreement & Eligibility</span>
+              <span className="font-bold text-pink-400">Shift Agreement — Acknowledge Each Item</span>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 flex gap-3">
               <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-blue-300">Confirm your eligibility and agreement to venue terms before proceeding.</p>
+              <p className="text-sm text-blue-300">
+                This is a binding clickwrap agreement for tonight's shift, governed by Arizona law.
+                Read and accept each clause to continue.
+              </p>
             </div>
 
             <div className="space-y-3">
-              {[
-                { key: 'contractValid', label: 'I confirm my contract with this venue is valid and current' },
-                { key: 'licenseValid', label: 'I confirm my license/credentials are valid' },
-                { key: 'venueRules', label: 'I agree to follow all venue rules and policies' },
-                { key: 'safetyAck', label: 'I acknowledge the safety and conduct expectations' }
-              ].map(item => (
+              {SHIFT_CLICKWRAP.map(item => (
                 <div key={item.key} className="flex items-start gap-3 p-3 bg-gray-800/50 border border-gray-700 rounded">
                   <Checkbox
-                    checked={dailyChecklist[item.key]}
+                    checked={!!dailyChecklist[item.key]}
                     onCheckedChange={(checked) =>
-                      setDailyChecklist(prev => ({ ...prev, [item.key]: checked }))
+                      setDailyChecklist(prev => ({ ...prev, [item.key]: !!checked }))
                     }
                     className="mt-1"
                   />
-                  <label className="text-sm text-gray-300 cursor-pointer flex-1">{item.label}</label>
+                  <label className="flex-1 cursor-pointer text-xs text-gray-300">
+                    <span className="block font-bold text-pink-300">{item.title}</span>
+                    {item.text}
+                  </label>
                 </div>
               ))}
             </div>
 
             <Button
               onClick={handleVerificationComplete}
-              disabled={!Object.values(dailyChecklist).every(v => v)}
+              disabled={!allAcked}
               className="w-full bg-gradient-to-r from-pink-600 to-pink-500 h-12 font-bold hover:from-pink-500 hover:to-pink-400 text-white"
             >
               I Agree - Continue to PIN
