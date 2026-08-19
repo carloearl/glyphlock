@@ -1,5 +1,6 @@
 {
   "name": "QRScanEvent",
+  "description": "LEGACY ARCHIVE \u2014 retired 2026-08-19. No active writers. Preserved for rollback; canonical writes use QrScanEvent.",
   "type": "object",
   "properties": {
     "description": {

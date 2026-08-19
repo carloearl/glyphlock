@@ -156,16 +156,30 @@ Deno.serve(async (req) => {
     }
 
     // ALL GATES PASSED — create shift
-    const shift = await base44.asServiceRole.entities.EntertainerShift.create({
-      entertainer_id,
-      // ID-01: entertainer_id always resolves against the Entertainer entity here.
-      entertainer_type: 'entertainer',
-      stage_name: entertainer.stage_name,
-      check_in_time: new Date().toISOString(),
-      location: location || 'Main Floor',
+    const gatewayRes = await base44.functions.invoke('serverAuditGateway', {
+      entity: 'EntertainerShift',
+      operation: 'create',
       venue_id,
-      status: 'on_floor'
+      intent: 'entertainer_check_in',
+      event_type: 'ShiftOpen',
+      event_category: 'identity',
+      source: 'door',
+      retention_class: 'compliance',
+      data: {
+        entertainer_id,
+        // ID-01: entertainer_id always resolves against the Entertainer entity here.
+        entertainer_type: 'entertainer',
+        stage_name: entertainer.stage_name,
+        check_in_time: new Date().toISOString(),
+        location: location || 'Main Floor',
+        venue_id,
+        status: 'on_floor'
+      }
     });
+    const shift = gatewayRes?.data?.value;
+    if (!shift) {
+      return Response.json({ error: gatewayRes?.data?.error || 'Shift creation failed at the audit gateway.' }, { status: 500 });
+    }
 
     // Audit log — successful check-in
     await base44.asServiceRole.entities.SystemAuditLog.create({
