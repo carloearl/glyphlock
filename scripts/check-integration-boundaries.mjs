@@ -73,6 +73,24 @@ requireText(stripeHealth, 'connectedAccountReady', 'Stripe health must verify co
 requireText(stripeHealth, 'environmentReady', 'Stripe health must verify venue mode against Stripe environment');
 requireText(stripeHealth, 'catalogReady && webhookReady && accountMatches && accountReadable && connectedAccountReady && environmentReady', 'Stripe health must require the full integration boundary');
 
+const stripeRuntimeFunctions = [
+  'base44/functions/cancelSubscription/entry.ts',
+  'base44/functions/confirmGlyphBucksPayment/entry.ts',
+  'base44/functions/createPaymentRecord/entry.ts',
+  'base44/functions/getSubscriptionDetails/entry.ts',
+  'base44/functions/processGlyphBucksPayment/entry.ts',
+  'base44/functions/stripe-create-refund/entry.ts',
+  'base44/functions/stripe-integration-health/entry.ts',
+  'base44/functions/stripeCreateCheckout/entry.ts',
+  'base44/functions/stripePoll/entry.ts',
+  'base44/functions/stripeWebhook/entry.ts',
+  'base44/functions/testIntegrations/entry.ts',
+];
+for (const file of stripeRuntimeFunctions) {
+  requireText(file, 'npm:stripe@22.5.0', 'Stripe functions must use the current pinned SDK');
+  forbidText(file, 'npm:stripe@14.14.0', 'Legacy Stripe SDK pin is prohibited');
+}
+
 const nupsPaymentFunctions = [
   'base44/functions/processGlyphBucksPayment/entry.ts',
   'base44/functions/confirmGlyphBucksPayment/entry.ts',
