@@ -14,13 +14,15 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 const VENUE_ID = 'dream_palace';
 const DEMO_VENUE_ID = 'DEMO_VENUE_001';
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
-// Universal owner PIN — full LIVE access to every card and tab. Only works
-// while the owner's platform account is actively signed in on the device.
-const UNIVERSAL_PIN = '90210';
+// Optional emergency owner override. The value is server-secret only and is
+// disabled when the secret is absent; no operational PIN is committed to source.
+const UNIVERSAL_PIN = Deno.env.get('NUPS_OWNER_OVERRIDE_PIN') || '';
 const PBKDF2_ITERATIONS = 100000;
 const SESSION_TTL_MS = 14 * 60 * 60 * 1000;
 const MAX_FAILS = 5;
 const FAIL_WINDOW_MS = 10 * 60 * 1000;
+const MANAGER_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
+const GENERIC_AUTH_ERROR = 'Unable to authenticate. Check your credentials or contact a manager.';
 // Auto clock-out: a device left clocked-in with no activity for this long is
 // closed automatically. Enforces "never more than one open shift left running".
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
