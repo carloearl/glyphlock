@@ -116,12 +116,14 @@ export default function DJPlayerSection({
       deckA: deckASong ? {
         title: deckASong.title,
         artist: deckASong.artist,
+        bpm: Number(deckASong.bpm) || null,
         videoId: extractVideoId(deckASong.youtubeUrl),
         audioUrl: deckASong.uploadUrl || null,
       } : null,
       deckB: deckBSong ? {
         title: deckBSong.title,
         artist: deckBSong.artist,
+        bpm: Number(deckBSong.bpm) || null,
         videoId: extractVideoId(deckBSong.youtubeUrl),
         audioUrl: deckBSong.uploadUrl || null,
       } : null,
