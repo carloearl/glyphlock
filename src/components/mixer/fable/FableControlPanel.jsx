@@ -6,8 +6,10 @@
  */
 import React from "react";
 import { Switch } from "@/components/ui/switch";
-import { Play, Square, ExternalLink, Mic, MicOff } from "lucide-react";
-import { THEMES, BACKGROUNDS, VISUALS } from "./fableThemes";
+import { Square, ExternalLink, Mic, MicOff, Play, Activity } from "lucide-react";
+import { THEMES, BACKGROUNDS, VISUALS, FONTS } from "./fableThemes";
+import FableStageCopyPanel from "./FableStageCopyPanel";
+import { MEDIA_MODES } from "./fableMedia";
 
 const OVERLAYS = [
   ["showNowPlaying", "Now Playing"],
@@ -18,6 +20,9 @@ const OVERLAYS = [
   ["showDeck", "Deck Badge"],
   ["showOnAir", "On Air Badge"],
   ["showLogo", "Fable Logo"],
+  ["showBeatCounter", "4/4 Beat Counter"],
+  ["showDancer", "On Stage Name"],
+  ["showHeadline", "Center Headline"],
 ];
 
 const EFFECTS = [
@@ -26,6 +31,10 @@ const EFFECTS = [
   ["beatFlash", "Beat Flash"],
   ["beatShake", "Beat Shake"],
   ["strobe", "Strobe On Beat"],
+  ["vignette", "Edge Vignette"],
+  ["scanlines", "CRT Scanlines"],
+  ["grain", "Film Grain"],
+  ["colorSweep", "Color Sweep"],
 ];
 
 function Picker({ label, value, options, onChange }) {
@@ -58,11 +67,13 @@ export default function FableControlPanel({
   settings,
   onChange,
   running,
-  onToggleRun,
-  onPopOut,
-  poppedOut,
+  onStop,
+  onStart,
+  onLaunch,
+  stageOpen,
   micStatus,
   bpm,
+  liveTrackLabel,
 }) {
   const set = (key) => (value) => onChange({ ...settings, [key]: value });
 
@@ -71,11 +82,9 @@ export default function FableControlPanel({
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={onToggleRun}
-          className={`flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-black uppercase tracking-wider transition-colors ${
-            running
-              ? "bg-red-600/80 text-white hover:bg-red-600"
-              : "bg-fuchsia-600 text-white hover:bg-fuchsia-500"
+          onClick={running ? onStop : onStart}
+          className={`flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-black uppercase tracking-wider text-white ${
+            running ? "bg-red-600/80 hover:bg-red-600" : "bg-emerald-600 hover:bg-emerald-500"
           }`}
         >
           {running ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -83,15 +92,19 @@ export default function FableControlPanel({
         </button>
         <button
           type="button"
-          onClick={onPopOut}
-          className="flex h-11 items-center gap-2 rounded-xl border border-white/15 bg-black/40 px-4 text-sm font-bold text-slate-200 hover:bg-white/5"
+          onClick={onLaunch}
+          className="flex h-11 items-center gap-2 rounded-xl bg-fuchsia-600 px-5 text-sm font-black uppercase tracking-wider text-white hover:bg-fuchsia-500"
         >
           <ExternalLink className="h-4 w-4" />
-          {poppedOut ? "Reopen Stage Window" : "Pop Out To 2nd Screen"}
+          {stageOpen ? "Reopen Stage Window" : "Launch Stage On 2nd Screen"}
         </button>
         <div className="ml-auto flex items-center gap-2 text-xs font-mono text-slate-400">
-          {micStatus === "listening" ? (
+          {micStatus === "deck" ? (
+            <><Activity className="h-4 w-4 text-cyan-400" /> Deck synced {bpm ? `${bpm} BPM` : "…"}</>
+          ) : micStatus === "listening" ? (
             <><Mic className="h-4 w-4 text-emerald-400" /> Beat lock {bpm ? `${bpm} BPM` : "syncing…"}</>
+          ) : micStatus === "auto" ? (
+            <><Activity className="h-4 w-4 text-fuchsia-400" /> Tempo grid {bpm ? `${bpm} BPM` : "124 BPM"}</>
           ) : micStatus === "error" ? (
             <><MicOff className="h-4 w-4 text-red-400" /> Mic unavailable</>
           ) : (
@@ -100,14 +113,76 @@ export default function FableControlPanel({
         </div>
       </div>
 
+      <div className="space-y-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">
+        <Picker
+          label="Stage Backdrop"
+          value={settings.mediaMode || "graphics"}
+          options={MEDIA_MODES}
+          onChange={set("mediaMode")}
+        />
+        {settings.mediaMode === "player" && (
+          <div className="text-[11px] text-slate-400">
+            Mirroring the live player: {liveTrackLabel || "waiting for a track…"} — video only, audio stays on the club system.
+          </div>
+        )}
+        {settings.mediaMode === "url" && (
+          <input
+            type="url"
+            value={settings.mediaUrl || ""}
+            onChange={(e) => set("mediaUrl")(e.target.value)}
+            placeholder="YouTube link, MP4/WebM URL, or any direct video URL"
+            className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white"
+          />
+        )}
+        {settings.mediaMode !== "graphics" && (
+          <label className="block">
+            <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+              Video Brightness · {Math.round((Number(settings.mediaOpacity) || 1) * 100)}%
+            </span>
+            <input
+              type="range" min="0.2" max="1" step="0.05"
+              value={Number(settings.mediaOpacity) || 1}
+              onChange={(e) => set("mediaOpacity")(Number(e.target.value))}
+              className="w-full"
+            />
+          </label>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">
+        <div className="flex-1 min-w-[180px]">
+          <div className="text-xs font-black uppercase tracking-wider text-white">Auto Mode</div>
+          <div className="text-[11px] text-slate-400">
+            Locks to the deck's 4/4 count and rotates theme, background and visualizer automatically.
+          </div>
+        </div>
+        <Switch checked={!!settings.autoMode} onCheckedChange={set("autoMode")} />
+        <label className="text-[11px] font-semibold text-slate-400">
+          Rotate every
+          <select
+            value={settings.autoBars}
+            onChange={(e) => set("autoBars")(Number(e.target.value))}
+            className="ml-2 h-9 rounded-lg border border-white/10 bg-black/50 px-2 text-sm text-white"
+          >
+            {[4, 8, 16, 32, 64].map((n) => (
+              <option key={n} value={n}>{n} bars</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      {/* Picking a look manually takes over from auto-rotation immediately so
+          the operator always sees the theme they just clicked. */}
       <div className="grid gap-3 sm:grid-cols-3">
         <Picker label="Theme" value={settings.theme} options={THEMES}
           onChange={(v) => {
             const preset = THEMES.find((t) => t.key === v);
-            onChange({ ...settings, theme: v, background: preset?.bg || settings.background });
+            onChange({ ...settings, autoMode: false, theme: v, background: preset?.bg || settings.background });
           }} />
-        <Picker label="Stage Background" value={settings.background} options={BACKGROUNDS} onChange={set("background")} />
-        <Picker label="Visualizer" value={settings.visual} options={VISUALS} onChange={set("visual")} />
+        <Picker label="Stage Background" value={settings.background} options={BACKGROUNDS}
+          onChange={(v) => onChange({ ...settings, autoMode: false, background: v })} />
+        <Picker label="Visualizer" value={settings.visual} options={VISUALS}
+          onChange={(v) => onChange({ ...settings, autoMode: false, visual: v })} />
       </div>
 
       <label className="block">
@@ -121,6 +196,36 @@ export default function FableControlPanel({
           className="w-full"
         />
       </label>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Picker label="Stage Font" value={settings.font} options={FONTS} onChange={set("font")} />
+        <label className="block">
+          <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+            Marquee Speed · {Number(settings.marqueeSpeed) || 14}s loop
+          </span>
+          <input
+            type="range" min="4" max="40" step="1"
+            value={Number(settings.marqueeSpeed) || 14}
+            onChange={(e) => set("marqueeSpeed")(Number(e.target.value))}
+            className="w-full"
+          />
+        </label>
+      </div>
+
+      <label className="block">
+        <span className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+          Marquee Text
+        </span>
+        <input
+          type="text"
+          value={settings.marqueeText || ""}
+          onChange={(e) => set("marqueeText")(e.target.value)}
+          placeholder="Leave blank to scroll the live track · artist · venue"
+          className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white"
+        />
+      </label>
+
+      <FableStageCopyPanel settings={settings} onChange={onChange} />
 
       <div>
         <div className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Stage Overlays</div>
