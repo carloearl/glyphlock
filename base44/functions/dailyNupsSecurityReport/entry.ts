@@ -19,7 +19,8 @@ function sevColor(sev: string) {
   return { critical: '#dc2626', high: '#ea580c', medium: '#d97706', low: '#0891b2', info: '#64748b' }[String(sev || '').toLowerCase()] || '#64748b';
 }
 
-function scoreColor(score: number) {
+function scoreColor(score: number | null) {
+  if (score === null) return '#64748b';
   if (score >= 90) return '#16a34a';
   if (score >= 70) return '#d97706';
   return '#dc2626';
@@ -67,7 +68,7 @@ function buildHtml({ date, score, findings, counts }: any) {
       <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">
         <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:8px;">
           <div style="text-align:center;">
-            <div style="font-size:44px;font-weight:800;color:${scoreColor(score)};line-height:1;">${score}</div>
+            <div style="font-size:44px;font-weight:800;color:${scoreColor(score)};line-height:1;">${score ?? 'N/A'}</div>
             <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;">Health Score</div>
           </div>
           <div style="flex:1;min-width:220px;font-size:13px;color:#475569;">
@@ -103,76 +104,35 @@ Deno.serve(async (req) => {
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
     const date = new Date().toISOString().slice(0, 10);
 
-    // Run the audit engine directly (reuse the same AI audit as runSiteAudit).
-    const audit = await db.integrations.Core.InvokeLLM({
-      prompt: `You are a security expert running the daily automated audit for the NUPS venue operating platform (GlyphLock). Analyze the codebase for SECURITY (OWASP Top 10) and PERFORMANCE issues. Return real, actionable findings with file paths, severity (critical/high/medium/low/info), and a concise recommendation. Give an overall health score 0-100.`,
-      add_context_from_internet: true,
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          overall_score: { type: 'number' },
-          security_findings: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                severity: { type: 'string' },
-                category: { type: 'string' },
-                title: { type: 'string' },
-                description: { type: 'string' },
-                file_path: { type: 'string' },
-                line_number: { type: 'number' },
-                recommendation: { type: 'string' },
-              },
-            },
-          },
-          performance_findings: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                severity: { type: 'string' },
-                category: { type: 'string' },
-                title: { type: 'string' },
-                description: { type: 'string' },
-                file_path: { type: 'string' },
-                line_number: { type: 'number' },
-                recommendation: { type: 'string' },
-              },
-            },
-          },
-        },
-      },
+    // Reuse the evidence-backed audit pipeline. Do not run a separate unconstrained LLM audit.
+    const invocation = await db.functions.invoke('runSiteAudit', {
+      audit_type: 'security',
+      auto_fix: false,
     });
+    const auditRun = invocation?.data || invocation;
+    if (!auditRun?.success || !auditRun?.audit_id) {
+      throw new Error('Evidence-backed runSiteAudit did not return a completed audit id.');
+    }
+    const auditRecords = await db.entities.SiteAudit.filter({ id: auditRun.audit_id });
+    const audit = auditRecords?.[0];
+    if (!audit) throw new Error('Completed SiteAudit record could not be loaded.');
 
     const findings = {
       security: audit.security_findings || [],
       performance: audit.performance_findings || [],
-      seo: [],
-      ux: [],
+      seo: audit.seo_findings || [],
+      ux: audit.ux_findings || [],
     };
-    const all = [...findings.security, ...findings.performance];
+    const all = [...findings.security, ...findings.performance, ...findings.seo, ...findings.ux];
     const counts = {
       critical: all.filter((f: any) => String(f.severity).toLowerCase() === 'critical').length,
       high: all.filter((f: any) => String(f.severity).toLowerCase() === 'high').length,
       security: findings.security.length,
       performance: findings.performance.length,
-      seo: 0,
-      ux: 0,
+      seo: findings.seo.length,
+      ux: findings.ux.length,
     };
-    const score = Math.round(Number(audit.overall_score ?? 0));
-
-    // Persist a SiteAudit record for the in-app history.
-    try {
-      await db.entities.SiteAudit.create({
-        audit_type: 'security',
-        status: 'completed',
-        overall_score: score,
-        security_findings: findings.security,
-        performance_findings: findings.performance,
-        files_scanned: 0,
-      });
-    } catch (_) { /* history is best-effort */ }
+    const score = typeof audit.overall_score === 'number' ? Math.round(audit.overall_score) : null;
 
     // Resolve recipients: explicit override, else all admin users.
     let recipients: string[] = [];
@@ -184,7 +144,7 @@ Deno.serve(async (req) => {
     }
 
     const html = buildHtml({ date, score, findings, counts });
-    const subject = `🛡️ NUPS Security Report — ${date} · Score ${score}${counts.critical ? ` · ${counts.critical} critical` : ''}`;
+    const subject = `🛡️ NUPS Security Report — ${date} · Score ${score ?? 'N/A'}${counts.critical ? ` · ${counts.critical} critical` : ''}`;
 
     if (body.dry_run) {
       return Response.json({ date, score, counts, recipients: recipients.length, preview_html: html });
