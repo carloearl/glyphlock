@@ -8,6 +8,7 @@ import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
 import { Stamp, Printer, ShieldCheck, Coins, Fingerprint, CreditCard, PenLine, CheckCircle2, FlaskConical, Banknote } from "lucide-react";
 
 import { printCurrentNupsView } from '@/lib/nups/receiptService';
+import { buildGlyphBucksIdempotencyKey } from "@/lib/nups/glyphbucksIdempotency";
 /**
  * DACO §7 — GlyphBucks stored-value sale flow (LIVE).
  * Terms + clickwrap → vouchers/tender → camera ID scan (identity binding) →
@@ -161,7 +162,22 @@ export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrin
     if (!f.age_verified) return setError("Age/identity verification is required (Term 8) — scan the purchaser's ID.");
     setBusy(true);
     try {
+      const idempotencyKey = await buildGlyphBucksIdempotencyKey({
+        mode,
+        venueId,
+        assent,
+        purchaserName: f.purchaser_name,
+        purchaserMemberId: f.purchaser_member_id,
+        idScanRef: f.id_scan_ref,
+        denomCents: f.denom_cents,
+        qty: f.qty,
+        cardFeeCents: f.card_fee_cents,
+        cardAuthCode: f.card_auth_code,
+        cardLast4: f.card_last4,
+        terminalId: f.terminal_id,
+      });
       const res = await base44.functions.invoke("glyphbucksSeal", {
+        idempotency_key: idempotencyKey,
         mode, venue_id: venueId,
         purchaser_name: f.purchaser_name.trim(),
         purchaser_member_id: f.purchaser_member_id.trim(),
