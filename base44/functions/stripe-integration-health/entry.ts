@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@14.14.0';
 
 const EXPECTED_ACCOUNT_ID = Deno.env.get('STRIPE_EXPECTED_ACCOUNT_ID') || 'acct_1RvNQlAOlRvharGO';
+const EXPECTED_CONNECTED_ACCOUNT_ID = Deno.env.get('STRIPE_EXPECTED_CONNECTED_ACCOUNT_ID') || 'acct_1S7x8fAOlRz4oyOk';
 const REQUIRED_WEBHOOK_SECRET_COUNT = 2;
 
 const EXPECTED_PRICES = {
@@ -55,6 +56,10 @@ async function resolveConnection(base44) {
 }
 
 Deno.serve(async (req) => {
+  if (!['GET', 'POST'].includes(req.method)) {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 });
+  }
+
   try {
     const base44 = createClientFromRequest(req);
     let user = null;
@@ -82,7 +87,7 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
-    const stripe = new Stripe(connection.secretKey, { apiVersion: '2023-10-16' });
+    const stripe = new Stripe(connection.secretKey, { apiVersion: '2026-06-24.dahlia' });
     const checks = {};
 
     for (const [plan, expected] of Object.entries(EXPECTED_PRICES)) {
@@ -115,13 +120,48 @@ Deno.serve(async (req) => {
       headers: { Authorization: `Bearer ${connection.secretKey}` },
     });
     const account = accountResponse.ok ? await accountResponse.json() : null;
+
+    let venuePaymentConfig = null;
+    try {
+      const configs = await base44.asServiceRole.entities.VenuePaymentConfig.filter(
+        { venue_id: 'dream_palace', active: true }, null, 1,
+      );
+      venuePaymentConfig = configs?.[0] || null;
+    } catch {
+      // Reported below as configuration not ready.
+    }
+
+    const configuredConnectedAccountId =
+      venuePaymentConfig?.stripe_connected_account_id || EXPECTED_CONNECTED_ACCOUNT_ID;
+    let connectedAccount = null;
+    let connectedAccountError = null;
+    try {
+      connectedAccount = await stripe.accounts.retrieve(configuredConnectedAccountId);
+    } catch (error) {
+      connectedAccountError = error?.code || error?.type || 'connected_account_lookup_failed';
+    }
+
     const catalogReady = Object.values(checks).every((check) => check.ok === true);
     const webhookReady = connection.webhookSecretCount >= REQUIRED_WEBHOOK_SECRET_COUNT;
     const accountMatches = Boolean(account?.id && account.id === EXPECTED_ACCOUNT_ID);
     const accountReadable = Boolean(account);
+    const connectedAccountMatches = Boolean(
+      connectedAccount?.id && connectedAccount.id === EXPECTED_CONNECTED_ACCOUNT_ID,
+    );
+    const connectedAccountReady = Boolean(
+      connectedAccountMatches &&
+      connectedAccount?.capabilities?.card_payments === 'active' &&
+      connectedAccount?.charges_enabled === true &&
+      connectedAccount?.controller?.stripe_dashboard?.type === 'full' &&
+      connectedAccount?.controller?.fees?.payer === 'account' &&
+      connectedAccount?.controller?.losses?.payments === 'stripe'
+    );
+    const venueMode = String(venuePaymentConfig?.mode || 'UNCONFIGURED').toUpperCase();
+    const liveCredential = /_(live)_/.test(connection.secretKey);
+    const environmentReady = venueMode === 'REAL' ? liveCredential : !liveCredential;
 
     return Response.json({
-      ok: catalogReady && webhookReady && accountMatches && accountReadable,
+      ok: catalogReady && webhookReady && accountMatches && accountReadable && connectedAccountReady && environmentReady,
       source: connection.source,
       connectorConnected: connection.connectorConnected,
       webhookReady,
@@ -130,6 +170,9 @@ Deno.serve(async (req) => {
       connectionConfigFields: connection.connectionConfigFields,
       expectedAccountId: EXPECTED_ACCOUNT_ID,
       accountMatches,
+      venueMode,
+      credentialEnvironment: liveCredential ? 'live' : 'sandbox',
+      environmentReady,
       account: account ? {
         id: account.id,
         livemode: Boolean(account.livemode),
@@ -141,6 +184,22 @@ Deno.serve(async (req) => {
       } : {
         readable: false,
         status: accountResponse.status,
+      },
+      connectedAccount: connectedAccount ? {
+        id: connectedAccount.id,
+        expectedId: EXPECTED_CONNECTED_ACCOUNT_ID,
+        matches: connectedAccountMatches,
+        ready: connectedAccountReady,
+        cardPayments: connectedAccount.capabilities?.card_payments || null,
+        dashboard: connectedAccount.controller?.stripe_dashboard?.type || null,
+        feesPayer: connectedAccount.controller?.fees?.payer || null,
+        lossesPayer: connectedAccount.controller?.losses?.payments || null,
+      } : {
+        id: configuredConnectedAccountId,
+        expectedId: EXPECTED_CONNECTED_ACCOUNT_ID,
+        matches: false,
+        ready: false,
+        error: connectedAccountError,
       },
       catalogReady,
       prices: checks,
