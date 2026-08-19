@@ -1,6 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@14.14.0';
 
+const EXPECTED_ACCOUNT_ID = Deno.env.get('STRIPE_EXPECTED_ACCOUNT_ID') || 'acct_1RvNQlAOlRvharGO';
+const REQUIRED_WEBHOOK_SECRET_COUNT = 2;
+
 const EXPECTED_PRICES = {
   creator: {
     id: 'price_1U5wo5AOlRvharGOaHq8bkWs',
@@ -54,8 +57,16 @@ async function resolveConnection(base44) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user || user.role !== 'admin') {
+    let user = null;
+    try {
+      user = await base44.auth.me();
+    } catch {
+      return Response.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    if (!user) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    if (user.role !== 'admin') {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
@@ -105,14 +116,20 @@ Deno.serve(async (req) => {
     });
     const account = accountResponse.ok ? await accountResponse.json() : null;
     const catalogReady = Object.values(checks).every((check) => check.ok === true);
+    const webhookReady = connection.webhookSecretCount >= REQUIRED_WEBHOOK_SECRET_COUNT;
+    const accountMatches = Boolean(account?.id && account.id === EXPECTED_ACCOUNT_ID);
+    const accountReadable = Boolean(account);
 
     return Response.json({
-      ok: catalogReady,
+      ok: catalogReady && webhookReady && accountMatches && accountReadable,
       source: connection.source,
       connectorConnected: connection.connectorConnected,
-      webhookReady: connection.webhookSecretCount > 0,
+      webhookReady,
+      requiredWebhookSecretCount: REQUIRED_WEBHOOK_SECRET_COUNT,
       webhookSecretCount: connection.webhookSecretCount,
       connectionConfigFields: connection.connectionConfigFields,
+      expectedAccountId: EXPECTED_ACCOUNT_ID,
+      accountMatches,
       account: account ? {
         id: account.id,
         livemode: Boolean(account.livemode),
