@@ -320,6 +320,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
     setPaymentProcessing(true);
 
     let stripePopup = null;
+    let confirmedPayment = null;
 
     try {
       if (glyphbucksValue > 0) {
@@ -381,6 +382,12 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       const confirmedApprovalCode = paymentResult.approval_code || approvalCode;
       const confirmedProcessorRef = paymentResult.processor_reference || processorReference;
       const confirmedCardLastFour = String(paymentResult.card_last_four || cardLastSix).replace(/\D/g, '').slice(-4);
+      confirmedPayment = {
+        approval_code: confirmedApprovalCode,
+        processor_reference: confirmedProcessorRef,
+        card_last_four: confirmedCardLastFour,
+        payment_record_id: paymentResult.payment_record_id || paymentResult.record_id || null,
+      };
 
       if (!confirmedApprovalCode || !confirmedProcessorRef) {
         throw new Error("Payment confirmation did not return the required approval and processor references.");
@@ -394,7 +401,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
 
       toast.success(`Payment approved: ${confirmedApprovalCode}`);
 
-      const order = await base44.entities.GlyphBucksOrder.create({
+      const orderPayload = {
         order_number: orderNumber,
         venue_id: currentVenueId,
         status: "signed",
@@ -424,7 +431,15 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
         id_photo_url: idPhotoUrl,
         id_photo_back_url: idPhotoBackUrl,
         signed_at: new Date().toISOString(),
+      };
+      const existingOrders = await base44.entities.GlyphBucksOrder.filter({
+        order_number: orderNumber,
+        venue_id: currentVenueId,
       });
+      const order = existingOrders?.[0] || await base44.entities.GlyphBucksOrder.create(orderPayload);
+      if (existingOrders?.[0]) {
+        await base44.entities.GlyphBucksOrder.update(order.id, orderPayload);
+      }
       setSavedOrderId(order.id);
 
       const contractMetadata = {
@@ -438,7 +453,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
         payment_processor_reference: confirmedProcessorRef,
         payment_provider: isStripeProvider ? 'stripe' : activeProviderCode,
       };
-      const contract = await base44.entities.VIPContractRecord.create({
+      const contractPayload = {
         token: crypto.randomUUID(),
         serial_number: orderNumber,
         record_type: "signed_contract",
@@ -454,7 +469,19 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
         status: "signed",
         issued_by: user.email,
         metadata: contractMetadata,
+      };
+      const existingContracts = await base44.entities.VIPContractRecord.filter({
+        serial_number: orderNumber,
+        venue_id: currentVenueId,
+        record_type: "signed_contract",
       });
+      const contract = existingContracts?.[0] || await base44.entities.VIPContractRecord.create(contractPayload);
+      if (existingContracts?.[0]) {
+        await base44.entities.VIPContractRecord.update(contract.id, {
+          ...contractPayload,
+          token: contract.token,
+        });
+      }
       setSavedContractId(contract.id);
       setSavedContractMetadata(contractMetadata);
 
@@ -462,24 +489,34 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       setStep(4);
     } catch (error) {
       if (stripePopup && !stripePopup.closed) stripePopup.close();
-      const errorMsg = error?.message || "Failed to process sale. Please contact support.";
+      const rawError = error?.message || "Failed to process sale. Please contact support.";
+      const paymentSucceeded = Boolean(confirmedPayment?.processor_reference);
+      const errorMsg = paymentSucceeded
+        ? `Payment was confirmed, but NUPS could not finish the records. Do not charge again. Reconcile processor reference ${confirmedPayment.processor_reference}. Error: ${rawError}`
+        : rawError;
       setBackendError(errorMsg);
       setLoading(false);
       setPaymentProcessing(false);
-      setPaymentConfirmed(false);
+      setPaymentConfirmed(paymentSucceeded);
 
       try {
         await base44.entities.SystemAuditLog.create({
-          event_type: 'GLYPHBUCKS_PAYMENT_FAILED',
-          description: `Transaction failed for order ${orderNumber}`,
+          event_type: paymentSucceeded ? 'PAYMENT_RECONCILIATION_REQUIRED' : 'GLYPHBUCKS_PAYMENT_FAILED',
+          description: paymentSucceeded
+            ? `Payment confirmed but record finalization failed for order ${orderNumber}`
+            : `Transaction failed for order ${orderNumber}`,
           actor_email: user.email,
-          resource_id: orderNumber,
+          resource_id: confirmedPayment?.processor_reference || orderNumber,
           status: 'failure',
           severity: 'critical',
           metadata: {
             venue_id: currentVenueId || null,
             provider_code: activeProviderCode,
-            error: errorMsg,
+            order_number: orderNumber,
+            payment_record_id: confirmedPayment?.payment_record_id || null,
+            processor_reference: confirmedPayment?.processor_reference || null,
+            error: rawError,
+            retry_payment_prohibited: paymentSucceeded,
           },
         });
       } catch {
