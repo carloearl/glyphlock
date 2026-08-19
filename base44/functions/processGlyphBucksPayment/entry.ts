@@ -1,12 +1,13 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // W3-008B — Optional Native Payment Integration
 // This function creates a payment intent for the Stripe adapter ONLY when a
 // venue explicitly chooses Stripe integration. NUPS otherwise runs on top of
 // the venue's existing processor/terminal via createPaymentRecord.
 //
-// Stripe is lazily imported. The secret name is resolved dynamically from
-// the PaymentProvider entity — no literal STRIPE_SECRET_KEY in source.
+// Stripe credentials resolve from the provider-configured environment secret
+// first, then Base44's managed Stripe connector. The credential never reaches
+// the browser or an entity record.
 
 const ALLOWED_ROLES = ['admin', 'manager', 'staff'];
 const paymentAttempts = new Map();
@@ -31,6 +32,20 @@ async function resolveProviderConfig(base44, providerCode) {
     { provider_code: providerCode, active: true }, null, 1
   );
   return providers?.[0] || null;
+}
+
+async function resolveStripeSecretKey(base44, providerConfig) {
+  const secretName = providerConfig?.secret_name || 'STRIPE_SECRET_KEY';
+  const configured = Deno.env.get(secretName);
+  if (configured) return configured;
+
+  try {
+    const connection = await base44.asServiceRole.connectors.getConnection('stripe');
+    const token = connection?.accessToken;
+    return typeof token === 'string' && token.length > 0 ? token : null;
+  } catch {
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -135,8 +150,7 @@ Deno.serve(async (req) => {
 
     // ── Stripe Adapter (lazy) ──
     const providerConfig = await resolveProviderConfig(base44, 'stripe');
-    const secretName = providerConfig?.secret_name || 'STRIPE_SECRET_KEY';
-    const stripeKey = Deno.env.get(secretName);
+    const stripeKey = await resolveStripeSecretKey(base44, providerConfig);
 
     if (!stripeKey) {
       return Response.json({
