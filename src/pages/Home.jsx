@@ -40,6 +40,7 @@ const OnSiteServices = lazy(() => import('@/components/home/OnSiteServices'));
 const PlatformCapabilities = lazy(() => import('@/components/home/PlatformCapabilities'));
 const CTASection = lazy(() => import('@/components/home/CTASection'));
 const InteractiveSystemMap = lazy(() => import('@/components/home/InteractiveSystemMap'));
+const WordOfTheDay = lazy(() => import('@/components/home/WordOfTheDay'));
 
 const platformModules = [
   {
@@ -534,6 +535,8 @@ export default function Home() {
         <section className="relative border-y border-white/10 bg-black/10 py-3 backdrop-blur-sm">
           <DeferredRender minHeight={88}><FeaturedIntegrationsMarquee /></DeferredRender>
         </section>
+
+        <DeferredRender minHeight={96}><WordOfTheDay /></DeferredRender>
 
         <DeferredRender minHeight={760}><InteractiveSystemMap /></DeferredRender>
         <CapabilityGrid />

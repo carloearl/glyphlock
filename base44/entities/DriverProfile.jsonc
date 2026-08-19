@@ -1,7 +1,7 @@
 {
   "name": "DriverProfile",
   "type": "object",
-  "description": "Durable driver record \u2014 onboarded once at the door, issued a QR code, scanned on every subsequent visit. Tracks YTD payout for 1099 reporting. Distinct from DriverPayout (which is a per-night disbursement ledger entry).",
+  "description": "Durable driver record \u2014 onboarded once at the door by scanning their government ID, issued a personalized signed QR code, scanned on every subsequent visit. Tracks YTD payout for 1099 reporting. Distinct from DriverPayout (which is a per-night disbursement ledger entry). Credential storage is minimized: only the license last-4, issuing state and expiration are retained \u2014 the full ID number is never persisted.",
   "properties": {
     "driver_id": {
       "type": "string",
@@ -22,6 +22,60 @@
       "type": "boolean",
       "default": false,
       "description": "True = NUPS-owned/contracted driver. False = outside driver. Controls payout rate leg in VenueRateConfig."
+    },
+    "date_of_birth": {
+      "type": "string",
+      "description": "Date of birth (YYYY-MM-DD) decoded from the scanned license. Used for age verification only."
+    },
+    "id_type": {
+      "type": "string",
+      "description": "Credential type presented at onboarding (e.g. Drivers License, State ID)."
+    },
+    "license_last4": {
+      "type": "string",
+      "description": "Last 4 characters of the scanned license/ID number. The full number is intentionally NEVER stored."
+    },
+    "license_state": {
+      "type": "string",
+      "description": "Issuing state / province (2-letter) decoded from the license."
+    },
+    "license_expiration": {
+      "type": "string",
+      "description": "Credential expiration date (YYYY-MM-DD) decoded from the license."
+    },
+    "address_line1": {
+      "type": "string",
+      "description": "Street address as printed on the scanned ID."
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "id_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the credential was captured by scanning the physical ID barcode."
+    },
+    "id_verified_by": {
+      "type": "string",
+      "description": "Email of the operator who scanned and confirmed the credential."
+    },
+    "id_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "id_scan_source": {
+      "type": "string",
+      "enum": [
+        "hardware_scanner",
+        "manual_entry"
+      ],
+      "description": "How the credential was captured."
     },
     "qr_code": {
       "type": "string",
