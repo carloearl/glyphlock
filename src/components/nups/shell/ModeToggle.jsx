@@ -90,7 +90,7 @@ export default function ModeToggle() {
     setLoading(false);
   };
 
-  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [venueId]);
+  useEffect(() => { refresh();   }, [venueId]);
 
   // Click-outside closes dropdown
   useEffect(() => {

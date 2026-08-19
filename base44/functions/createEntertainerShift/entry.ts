@@ -122,17 +122,64 @@ Deno.serve(async (req) => {
       return Response.json({ error: `Check-in blocked: Contract status is ${entertainer.contract_status || 'INVALID'}.` }, { status: 422 });
     }
 
+    // GATE 8 — adult-entertainment license must be on file and unexpired.
+    // Expired / missing credential ⇒ no check-in and no nightly cash payout (IOU only).
+    if (!entertainer.license_expiration) {
+      await blockLog('missing_license', `Check-in blocked: no license_expiration on file for ${entertainer.stage_name}`);
+      return Response.json({ error: 'Check-in blocked: No adult entertainment license on file. Scan or upload the license first.' }, { status: 422 });
+    }
+    const licenseExp = new Date(`${String(entertainer.license_expiration).slice(0, 10)}T00:00:00`);
+    const midnight = new Date();
+    midnight.setHours(0, 0, 0, 0);
+    if (isNaN(licenseExp.getTime()) || licenseExp < midnight) {
+      await blockLog('license_expired',
+        `Check-in blocked: license expired ${entertainer.license_expiration} for ${entertainer.stage_name}`,
+        'high', { license_expiration: entertainer.license_expiration });
+      // ARCH-BASELINE-01 — identity/state writes route through the audit gateway.
+      await base44.functions.invoke('serverAuditGateway', {
+        entity: 'Entertainer',
+        operation: 'update',
+        id: entertainer.id,
+        data: { payout_hold: true },
+        venue_id,
+        intent: 'license_expired:payout_hold',
+        event_type: 'SelfAuditAlert',
+        event_category: 'identity',
+        severity: 'high',
+        source: 'door',
+        retention_class: 'compliance',
+      });
+      return Response.json({
+        error: `Check-in blocked: License expired ${entertainer.license_expiration}. Earnings accrue as an IOU until a valid license is on file.`,
+        license_expired: true,
+      }, { status: 422 });
+    }
+
     // ALL GATES PASSED — create shift
-    const shift = await base44.asServiceRole.entities.EntertainerShift.create({
-      entertainer_id,
-      // ID-01: entertainer_id always resolves against the Entertainer entity here.
-      entertainer_type: 'entertainer',
-      stage_name: entertainer.stage_name,
-      check_in_time: new Date().toISOString(),
-      location: location || 'Main Floor',
+    const gatewayRes = await base44.functions.invoke('serverAuditGateway', {
+      entity: 'EntertainerShift',
+      operation: 'create',
       venue_id,
-      status: 'on_floor'
+      intent: 'entertainer_check_in',
+      event_type: 'ShiftOpen',
+      event_category: 'identity',
+      source: 'door',
+      retention_class: 'compliance',
+      data: {
+        entertainer_id,
+        // ID-01: entertainer_id always resolves against the Entertainer entity here.
+        entertainer_type: 'entertainer',
+        stage_name: entertainer.stage_name,
+        check_in_time: new Date().toISOString(),
+        location: location || 'Main Floor',
+        venue_id,
+        status: 'on_floor'
+      }
     });
+    const shift = gatewayRes?.data?.value;
+    if (!shift) {
+      return Response.json({ error: gatewayRes?.data?.error || 'Shift creation failed at the audit gateway.' }, { status: 500 });
+    }
 
     // Audit log — successful check-in
     await base44.asServiceRole.entities.SystemAuditLog.create({

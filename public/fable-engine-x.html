@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Dream Palace Fable Engine X</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Anton&family=Archivo+Black&family=Audiowide&family=Bangers&family=Bebas+Neue&family=Black+Ops+One&family=Bungee&family=Bungee+Shade&family=Chango&family=Cinzel:wght@900&family=Creepster&family=Exo+2:ital,wght@1,900&family=Faster+One&family=Fjalla+One&family=Lobster&family=Luckiest+Guy&family=Metal+Mania&family=Michroma&family=Monoton&family=Nosifer&family=Orbitron:wght@900&family=Oswald:wght@500;700&family=Pacifico&family=Passion+One:wght@900&family=Permanent+Marker&family=Pirata+One&family=Playfair+Display:ital,wght@1,900&family=Press+Start+2P&family=Righteous&family=Rubik+Mono+One&family=Russo+One&family=Rye&family=Shrikhand&family=Staatliches&family=Teko:wght@700&family=Titan+One&family=Ultra&family=Wallpoet&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07050D; --panel:rgba(12,9,20,.86); --line:rgba(157,107,255,.20);
+  --text:#EDE9F7; --muted:#75699A; --gold:#FFC72E; --ame:#9D6BFF; --rose:#FF4D8D;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'Oswald',sans-serif;color:var(--text);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+button,select,input{font-family:inherit}
+button{cursor:pointer;background:none;border:none;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+
+#wrap{position:fixed;inset:0}
+#gl,#tx{position:absolute;inset:0;width:100%;height:100%}
+#tx{pointer-events:none}
+
+/* ---------- HUD (always on, subtle) ---------- */
+#hud{
+  position:absolute;top:14px;left:16px;z-index:14;pointer-events:none;
+  font-family:'Oswald',sans-serif;opacity:.6;transition:opacity .3s;
+}
+#wrap.ui #hud{opacity:.95}
+#hud .brand{font-weight:700;font-size:13px;letter-spacing:.32em;color:var(--text)}
+#hud .brand b{color:var(--gold);font-weight:700}
+#hud .sub{font-size:8.5px;letter-spacing:.3em;color:#8E82B0;margin-top:2px}
+#hud .live{display:flex;align-items:center;gap:8px;margin-top:8px}
+#hud .res{font-size:8px;letter-spacing:.24em;color:#6B6091;margin-top:6px;font-weight:500}
+#hud .live .bpm{font-size:15px;font-weight:700;color:var(--gold);letter-spacing:.06em;min-width:44px}
+#hud .hband{width:30px;height:3px;background:rgba(255,255,255,.10);border-radius:2px;overflow:hidden}
+#hud .hband i{display:block;height:100%;width:0}
+#hb1{background:var(--gold)} #hb2{background:var(--ame)} #hb3{background:var(--rose)}
+
+/* ---------- corner buttons (always visible) ---------- */
+.corner{
+  position:absolute;right:14px;z-index:22;width:44px;height:44px;border-radius:12px;
+  background:rgba(12,9,20,.6);border:1px solid var(--line);color:#B7ACD6;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);
+  transition:color .2s,border-color .2s,background .2s;
+}
+.corner:hover{color:var(--text)}
+.corner.on{color:var(--gold);border-color:rgba(255,199,46,.5)}
+#fsCorner{top:14px}
+#pinCorner{top:66px}
+.corner svg{width:19px;height:19px}
+
+/* ---------- toast ---------- */
+#toast{
+  position:absolute;top:20px;left:50%;transform:translateX(-50%) translateY(-6px);
+  background:var(--panel);border:1px solid var(--line);color:var(--text);z-index:30;
+  padding:8px 18px;border-radius:8px;font-size:12px;letter-spacing:.18em;font-weight:500;
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
+  backdrop-filter:blur(12px);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- gate ---------- */
+#gate{
+  position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 40%, #14092B 0%, #07050D 70%);
+  transition:opacity .6s;
+}
+#gate.off{opacity:0;pointer-events:none}
+.gateCard{text-align:center;padding:0 24px}
+.gateCard h1{
+  font-family:'Cinzel',serif;font-weight:900;font-size:clamp(30px,6vw,54px);
+  letter-spacing:.14em;color:var(--text);
+}
+.gateCard h1 b{color:var(--gold);font-weight:900}
+.gateCard p{
+  font-size:12px;letter-spacing:.34em;color:#8E82B0;margin:12px 0 34px;font-weight:500;
+}
+.gateBtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.gbtn{
+  font-size:13px;font-weight:700;letter-spacing:.22em;padding:15px 30px;border-radius:100px;
+  transition:transform .15s,box-shadow .2s;
+}
+.gbtn:active{transform:scale(.96)}
+.gbtn.gold{background:var(--gold);color:#1A1206;box-shadow:0 8px 34px rgba(255,199,46,.35)}
+.gbtn.ghost{border:1px solid var(--line);color:var(--text);background:rgba(157,107,255,.07)}
+
+/* ---------- deck ---------- */
+#deck{
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%) translateY(16px);
+  width:min(1180px, calc(100vw - 20px));z-index:20;
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:10px 14px;opacity:0;pointer-events:none;
+  transition:opacity .35s,transform .35s;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+#wrap.ui #deck{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.row + .row{margin-top:8px;padding-top:8px;border-top:1px solid rgba(157,107,255,.10)}
+
+.lbl{font-size:9px;letter-spacing:.22em;color:#8E82B0;font-weight:700;flex:none}
+
+select{
+  background:#171028;border:1px solid var(--line);color:var(--text);
+  font-size:11px;font-weight:500;letter-spacing:.06em;
+  padding:8px 8px;border-radius:8px;max-width:140px;
+}
+input[type=text]{
+  background:#171028;border:1px solid var(--line);color:var(--text);
+  font-size:12px;font-weight:500;letter-spacing:.06em;
+  padding:8px 10px;border-radius:8px;width:170px;
+  -webkit-user-select:text;user-select:text;
+}
+input[type=text]::placeholder{color:#5C527A}
+.btn{
+  font-size:11px;font-weight:700;letter-spacing:.14em;color:#B7ACD6;
+  border:1px solid var(--line);border-radius:8px;padding:8px 13px;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.btn:hover{color:var(--text)}
+.btn.on{color:var(--gold);border-color:rgba(255,199,46,.55);background:rgba(255,199,46,.08)}
+.step{
+  width:32px;height:32px;border:1px solid var(--line);border-radius:8px;color:#B7ACD6;
+  font-size:15px;font-weight:700;line-height:1;flex:none;
+}
+.step:hover{color:var(--text)}
+
+/* tempo cluster */
+#bpmBig{
+  font-size:24px;font-weight:700;color:var(--gold);letter-spacing:.04em;
+  min-width:52px;text-align:center;flex:none;
+}
+#dots{display:flex;gap:5px;flex:none;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.14);transition:transform .1s,background .1s}
+.dot.on{background:var(--ame);transform:scale(1.35)}
+.dot.on.down{background:var(--gold);transform:scale(1.6)}
+#tapBtn{
+  background:var(--gold);color:#1A1206;font-weight:700;font-size:12px;letter-spacing:.2em;
+  padding:10px 20px;border-radius:100px;flex:none;transition:transform .1s,box-shadow .12s;
+  box-shadow:0 4px 18px rgba(255,199,46,.28);
+}
+#tapBtn.hit{transform:scale(.92)}
+.pair{display:flex;gap:0;flex:none;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.pair button{font-size:10px;font-weight:700;letter-spacing:.12em;padding:8px 11px;color:#8E82B0}
+.pair button.on{background:rgba(157,107,255,.22);color:var(--text)}
+.grow{flex:1}
+.grp{display:flex;align-items:center;gap:6px;flex:none}
+
+@media (max-width:900px){
+  input[type=text]{width:120px}
+  select{max-width:104px}
+  #hud .sub{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  #deck,#toast,.dot{transition:none}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="gl"></canvas>
+  <canvas id="tx"></canvas>
+
+  <div id="hud">
+    <div class="brand">DREAM <b>PALACE</b></div>
+    <div class="sub">FABLE ENGINE X · GLYPHLOCK</div>
+    <div class="live">
+      <span class="bpm" id="hudBpm">96</span>
+      <span class="hband"><i id="hb1"></i></span>
+      <span class="hband"><i id="hb2"></i></span>
+      <span class="hband"><i id="hb3"></i></span>
+    </div>
+    <div class="res" id="hudRes">—</div>
+  </div>
+
+  <button id="fsCorner" class="corner" title="Fullscreen (F)" aria-label="Fullscreen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+  </button>
+  <button id="pinCorner" class="corner" title="Pin menu (P)" aria-label="Pin menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M8 3h8l-1 7 3 3H6l3-3z"/></svg>
+  </button>
+
+  <div id="toast"></div>
+
+  <div id="gate">
+    <div class="gateCard">
+      <h1>DREAM <b>PALACE</b></h1>
+      <p>FABLE ENGINE X · CABARET VISUALS</p>
+      <div class="gateBtns">
+        <button class="gbtn gold" id="gateMic">GO LIVE · ROOM MIC</button>
+        <button class="gbtn ghost" id="gateDemo">DEMO BEAT</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deck">
+    <div class="row">
+      <span id="bpmBig">96</span>
+      <span id="dots"></span>
+      <button id="tapBtn">TAP</button>
+      <div class="grp">
+        <span class="lbl">COUNT</span>
+        <select id="countSel">
+          <option value="3">3</option><option value="4" selected>4</option>
+          <option value="5">5</option><option value="6">6</option><option value="8">8</option>
+        </select>
+      </div>
+      <div class="grp">
+        <span class="lbl">HOLD</span>
+        <select id="holdSel" title="Bars each auto-show look holds">
+          <option value="4">4 BARS</option><option value="8" selected>8 BARS</option>
+          <option value="16">16 BARS</option><option value="32">32 BARS</option>
+        </select>
+      </div>
+      <div class="pair" role="group" aria-label="Tempo source">
+        <button id="tmAuto" class="on">AUTO BPM</button><button id="tmTap">TAP LOCK</button>
+      </div>
+      <span class="grow"></span>
+      <div class="grp"><span class="lbl">SCENE</span><select id="sceneSel"></select></div>
+      <div class="grp"><span class="lbl">COLOR</span><select id="palSel"></select></div>
+      <button id="autoBtn" class="btn on" title="Auto show (A)">AUTO SHOW</button>
+      <button id="micBtn" class="btn" title="Room mic (M)">MIC</button>
+      <button id="demoBtn" class="btn" title="Demo beat (D)">DEMO</button>
+    </div>
+    <div class="row">
+      <span class="lbl">LINE 1</span>
+      <input type="text" id="l1Txt" maxlength="24" placeholder="Line 1">
+      <select id="f1Sel" title="Line 1 font"></select>
+      <select id="s1Sel" title="Line 1 style"></select>
+      <button class="step" id="l1Minus" aria-label="Line 1 smaller">−</button>
+      <button class="step" id="l1Plus" aria-label="Line 1 bigger">+</button>
+      <span class="grow"></span>
+      <span class="lbl">LINE 2</span>
+      <input type="text" id="l2Txt" maxlength="28" placeholder="Line 2">
+      <select id="f2Sel" title="Line 2 font"></select>
+      <select id="s2Sel" title="Line 2 style"></select>
+      <button class="step" id="l2Minus" aria-label="Line 2 smaller">−</button>
+      <button class="step" id="l2Plus" aria-label="Line 2 bigger">+</button>
+    </div>
+    <div class="row">
+      <span class="lbl">MARQUEE</span>
+      <input type="text" id="mqTxt" maxlength="80" placeholder="Scrolling marquee" style="width:280px">
+      <select id="mqFontSel" title="Marquee font"></select>
+      <select id="mqStyleSel" title="Marquee style"></select>
+      <button class="step" id="mqMinus" aria-label="Marquee smaller">−</button>
+      <button class="step" id="mqPlus" aria-label="Marquee bigger">+</button>
+      <span class="grow"></span>
+      <div class="grp"><span class="lbl">ENTRANCE</span><select id="fxSel"></select></div>
+      <div class="grp"><span class="lbl">MOTION</span><select id="moSel"></select></div>
+      <div class="grp"><span class="lbl">RENDER</span>
+        <select id="qSel" title="Render quality (Q)"></select>
+      </div>
+      <div class="grp"><span class="lbl">FX</span>
+        <select id="fxLvlSel">
+          <option value="0">OFF</option><option value="1">LITE</option><option value="2" selected>FULL</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ============ DREAM PALACE FABLE ENGINE X — SHADERS ============
+const VERT = `#version 300 es
+in vec2 aPos; out vec2 vUv;
+void main(){ vUv = aPos*0.5+0.5; gl_Position = vec4(aPos,0.0,1.0); }`;
+
+// Scene pass: draws the GPU scene and folds in the previous frame for trails
+const SCENE_FRAG = `#version 300 es
+precision highp float;
+uniform vec2 uRes;
+uniform float uTime;
+uniform float uBass, uMid, uTreb, uEnergy, uBeat, uDown;
+uniform int uScene;
+uniform vec3 uColA, uColB, uColC;
+uniform sampler2D uPrev;
+uniform float uTrail;
+uniform float uQual;   // 0 lite · 1 sharp · 2 ultra
+uniform float uHdr;    // headroom ceiling (1.6 LDR · 14.0 HDR)
+in vec2 vUv; out vec4 fragColor;
+
+mat2 rot(float a){ float c=cos(a),s=sin(a); return mat2(c,-s,s,c); }
+mat3 rotX(float a){ float c=cos(a),s=sin(a); return mat3(1.0,0.0,0.0, 0.0,c,-s, 0.0,s,c); }
+mat3 rotY(float a){ float c=cos(a),s=sin(a); return mat3(c,0.0,-s, 0.0,1.0,0.0, s,0.0,c); }
+
+// --- low-bias hashes: no visible lattice artifacts at 4K ---
+float hash(vec2 p){
+  vec3 q = fract(vec3(p.xyx)*0.1031);
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.x + q.y) * q.z);
+}
+vec2 hash22(vec2 p){
+  vec3 q = fract(vec3(p.xyx)*vec3(0.1031,0.1030,0.0973));
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.xx + q.yz) * q.zy);
+}
+float hash3(vec3 p){
+  p = fract(p*0.1031);
+  p += dot(p, p.zyx + 31.32);
+  return fract((p.x + p.y) * p.z);
+}
+// --- gradient (Perlin) noise: smooth, isotropic, no blocky value-noise grid ---
+float noise(vec2 p){
+  vec2 i=floor(p), f=fract(p);
+  vec2 u=f*f*f*(f*(f*6.0-15.0)+10.0);
+  vec2 g00=hash22(i)*2.0-1.0,                g10=hash22(i+vec2(1.0,0.0))*2.0-1.0;
+  vec2 g01=hash22(i+vec2(0.0,1.0))*2.0-1.0,  g11=hash22(i+vec2(1.0,1.0))*2.0-1.0;
+  float a=dot(g00,f),               b=dot(g10,f-vec2(1.0,0.0));
+  float c=dot(g01,f-vec2(0.0,1.0)), d=dot(g11,f-vec2(1.0,1.0));
+  return clamp(0.5 + 0.74*mix(mix(a,b,u.x), mix(c,d,u.x), u.y), 0.0, 1.0);
+}
+float fbm(vec2 p){
+  float v=0.0, a=0.5;
+  mat2 m = mat2(0.80,0.60,-0.60,0.80);   // rotate each octave: kills axis streaking
+  int oct = uQual>1.5 ? 7 : (uQual>0.5 ? 5 : 4);
+  for(int i=0;i<7;i++){
+    if(i>=oct) break;
+    v += a*noise(p); p = m*p*2.03 + 17.13; a *= 0.5;
+  }
+  return v;
+}
+
+// --- geometry primitives ---
+float sdSeg(vec2 p, vec2 a, vec2 b){
+  vec2 pa=p-a, ba=b-a;
+  float h=clamp(dot(pa,ba)/max(dot(ba,ba),1e-6),0.0,1.0);
+  return length(pa-ba*h);
+}
+float sdBox3(vec3 p, vec3 b){
+  vec3 q=abs(p)-b;
+  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+float sdTetra(vec3 p, float r){
+  return (max(abs(p.x+p.y)-p.z, abs(p.x-p.y)+p.z) - r) * 0.57735027;
+}
+float noise3(vec3 p){
+  vec3 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+  float n000=hash3(i), n100=hash3(i+vec3(1.,0.,0.));
+  float n010=hash3(i+vec3(0.,1.,0.)), n110=hash3(i+vec3(1.,1.,0.));
+  float n001=hash3(i+vec3(0.,0.,1.)), n101=hash3(i+vec3(1.,0.,1.));
+  float n011=hash3(i+vec3(0.,1.,1.)), n111=hash3(i+vec3(1.,1.,1.));
+  return mix(mix(mix(n000,n100,f.x),mix(n010,n110,f.x),f.y),
+             mix(mix(n001,n101,f.x),mix(n011,n111,f.x),f.y), f.z);
+}
+float fbm3(vec3 p){
+  float v=0.0, a=0.5;
+  int oct = uQual>1.5 ? 5 : (uQual>0.5 ? 4 : 3);
+  for(int i=0;i<5;i++){ if(i>=oct) break; v+=a*noise3(p); p=p*2.1+11.3; a*=0.5; }
+  return v;
+}
+vec3 grade(float t){
+  t = clamp(t,0.0,1.0);
+  return t<0.5 ? mix(uColA,uColB,t*2.0) : mix(uColB,uColC,t*2.0-1.0);
+}
+
+// 0 — ELECTRIC SHEEP: iterated fractal-glass fold — living filament sheets
+vec3 scElectricSheep(vec2 uv){
+  vec2 p = (uv-0.5)*vec2(uRes.x/uRes.y,1.0)*2.0;
+  p *= rot(uTime*0.04);
+  float acc = 0.0, glow = 1e9;
+  float k = 0.85 + 0.10*sin(uTime*0.11) + uBass*0.10;
+  for(int i=0;i<5;i++){
+    p = abs(p)/dot(p,p) - k;
+    p *= rot(0.35 + uTime*0.015 + uMid*0.2);
+    float l = length(p);
+    acc += exp(-l*2.2);
+    glow = min(glow, abs(l - 0.55));
+  }
+  float fil = exp(-glow*7.0);
+  vec3 c = grade(acc*0.30 + uBass*0.2) * (0.35 + acc*0.55);
+  c += uColC * fil * (0.9 + uTreb*1.8);
+  c += uColB * exp(-length(p)*1.4) * 0.5;
+  return c * (0.9 + uEnergy*0.8 + uDown*0.3);
+}
+
+// 1 — CLOUD KINGDOM: lit rolling clouds with silver lining
+vec3 scClouds(vec2 uv){
+  vec2 p = uv*vec2(2.2,1.5);
+  float t = uTime*0.045;
+  vec2 sunDir = normalize(vec2(0.4, 0.75))*0.10;
+  float base = fbm(p*1.4 + vec2(t*1.6, t*0.35));
+  float wisp = fbm(p*3.6 + vec2(-t*2.4, t*0.7) + base*1.4);
+  float d = base*0.7 + wisp*0.5 + uBass*0.20;
+  // light: density difference toward the sun = scattering edge
+  float dLit = fbm(p*1.4 + sunDir*2.0 + vec2(t*1.6, t*0.35))*0.7
+             + fbm(p*3.6 + sunDir*2.0 + vec2(-t*2.4, t*0.7) + base*1.4)*0.5;
+  float rim = clamp((d - dLit)*4.0, 0.0, 1.0);
+  float sun = max(1.0 - length(uv - vec2(0.62, 0.72))*1.15, 0.0);
+  vec3 sky = mix(uColA*0.55, uColB*0.7, uv.y);
+  vec3 cloud = grade(d*0.8) * (0.55 + d*0.5);
+  cloud += vec3(1.0,0.98,0.92) * rim * (0.8 + uMid*0.8);   // silver lining
+  cloud += uColC * pow(sun,3.0)*0.9;
+  float mask = smoothstep(0.32, 0.85, d);
+  vec3 c = mix(sky, cloud, mask);
+  c += uColC * pow(sun, 6.0) * (0.7 + uDown*1.0);
+  return c * (0.9 + uEnergy*0.55);
+}
+
+// 2 — NEBULA STORM: raymarched volumetric gas — real depth, real light
+vec3 scNebula(vec2 uv){
+  vec2 q = (uv-0.5)*vec2(uRes.x/uRes.y,1.0);
+  vec3 ro = vec3(0.0, 0.0, uTime*0.22);
+  vec3 rd = normalize(vec3(q*1.15, 1.0));
+  rd.xy *= rot(uTime*0.02);
+  vec3 c = vec3(0.0);
+  float trans = 1.0;
+  for(int i=0;i<20;i++){
+    vec3 pos = ro + rd*(0.5 + float(i)*0.17);
+    float d = fbm3(pos*1.15) - 0.42 - uBass*0.06;
+    if(d > 0.0){
+      float dens = min(d*2.2, 1.0);
+      vec3 em = grade(fbm3(pos*0.55 + 4.0)) * (0.4 + dens*1.1);
+      c += em * dens * trans * 0.38;
+      trans *= 1.0 - dens*0.34;
+      if(trans < 0.05) break;
+    }
+  }
+  // stars showing through the gas
+  vec2 sp = uv*uRes*0.5;
+  float star = step(0.9972, hash(floor(sp/2.0)));
+  float tw = 0.5 + 0.5*sin(uTime*3.0 + hash(floor(sp/2.0))*40.0);
+  c += vec3(star) * tw * trans * (0.7 + uTreb*1.5);
+  c += uColC * uDown * 0.10;
+  return c * (1.0 + uEnergy*0.7);
+}
+
+// 3 — PLASMA CORE: radial plasma
+vec3 scPlasma(vec2 uv){
+  vec2 p = uv - 0.5; p.x *= uRes.x/uRes.y;
+  float r = length(p), a = atan(p.y,p.x);
+  float w = sin(r*14.0 - uTime*2.2 + uBass*6.0)
+          + sin(a*6.0 + uTime*1.1)
+          + sin((r+a)*9.0 - uTime*1.6 + uMid*3.0);
+  float f = w/3.0*0.5+0.5;
+  vec3 c = grade(f + uBass*0.2);
+  float core = smoothstep(0.34 + uBass*0.16, 0.0, r);
+  c += uColC * core * (0.8 + uDown*1.2);
+  c += uColB * pow(max(0.0,1.0-r*1.4),2.0)*0.4;
+  return c * (0.7 + uEnergy*0.8);
+}
+
+// 4 — VORTEX TUNNEL: textured wormhole flythrough
+vec3 scVortex(vec2 uv){
+  vec2 p = uv - 0.5; p.x *= uRes.x/uRes.y;
+  float r = length(p)+1e-4, a = atan(p.y,p.x);
+  float z = 0.32/r + uTime*(1.9 + uBass*1.6);
+  a += 0.20*sin(z*0.35 + uTime*0.25);                        // corkscrew twist
+  float wall = fbm(vec2(a*3.0/3.14159, z*0.55));
+  float ribs = pow(0.5+0.5*sin(z*2.2 - uTime*0.4), 3.0);
+  float fog = smoothstep(0.02, 0.42, r);                     // depth fade to center
+  vec3 c = grade(wall*0.85 + 0.1) * (0.25 + wall*1.5) * fog;
+  c += uColC * ribs * fog * (0.6 + uTreb*1.3);
+  c += uColB * exp(-r*7.0) * (1.6 + uDown*2.0);              // hot core light
+  float speck = step(0.985, hash(vec2(floor(a*30.0), floor(z*4.0))));
+  c += vec3(1.0) * speck * fog * (0.4 + uTreb*0.8);
+  return c * (0.9 + uEnergy*0.7);
+}
+
+// 5 — LIQUID CHROME
+vec3 scChrome(vec2 uv){
+  vec2 p = uv*3.2; p *= rot(0.4 + uTime*0.03);
+  float w = fbm(p + vec2(uTime*0.22, -uTime*0.14) + uBass*0.7);
+  float n = fbm(p*2.1 - w*2.2 + uTime*0.1);
+  float spec = pow(abs(sin(n*10.0 + w*6.0 - uTime*0.9)), 8.0);
+  vec3 base = mix(uColA*0.35, uColB, n);
+  vec3 c = base + vec3(0.95,0.97,1.0)*spec*(0.85 + uTreb*1.4);
+  c += uColC * pow(w,3.0)*0.6;
+  return c * (0.7 + uEnergy*0.7 + uDown*0.3);
+}
+
+// 6 — STARFALL WARP: radial streaks
+vec3 scStarfall(vec2 uv){
+  vec2 p = uv - 0.5; p.x *= uRes.x/uRes.y;
+  float r = length(p)+1e-4, a = atan(p.y,p.x);
+  float speed = 2.0 + uBass*4.0;
+  float id = floor(a*40.0/6.28318);
+  float rn = hash(vec2(id, 7.0));
+  float streak = fract(r*2.2 - uTime*speed*(0.4+rn*0.8) - rn*9.0);
+  float line = smoothstep(0.5, 0.0, abs(fract(a*40.0/6.28318)-0.5)*2.0);
+  float tail = pow(streak, 5.0);
+  vec3 c = grade(rn) * line * tail * (1.4 + uTreb*1.6);
+  c += uColB * smoothstep(0.18, 0.0, r) * (0.9 + uDown*1.3);
+  c *= smoothstep(0.02, 0.25, r);
+  return c;
+}
+
+// 7 — GALAXY SPIRAL: rotating arms, dust, star specks
+vec3 scGalaxy(vec2 uv){
+  vec2 p = uv - 0.5; p.x *= uRes.x/uRes.y;
+  p *= rot(uTime*0.05);
+  float r = length(p)+1e-4, a = atan(p.y,p.x);
+  float arm = sin(a*2.0 + log(r)*6.5 - uTime*0.35);
+  float arms = smoothstep(0.15, 0.95, arm*0.5+0.5);
+  float dust = fbm(p*4.0 + uTime*0.03);
+  float disk = smoothstep(0.85, 0.05, r);
+  vec3 c = grade(arms*0.7 + dust*0.4 + uBass*0.2) * arms * disk * (0.9 + dust);
+  c += uColC * smoothstep(0.16 + uBass*0.05, 0.0, r) * (1.4 + uDown*1.6);
+  vec2 sp = uv*uRes*0.5;
+  float star = step(0.997, hash(floor(sp/2.0)));
+  c += vec3(star) * (0.4+0.6*sin(uTime*4.0+hash(floor(sp/2.0))*30.0)) * disk * (0.7+uTreb*1.5);
+  return c * (1.0 + uEnergy*0.8);
+}
+
+// 8 — DEEP SPACE: 3-layer parallax starfield + faint nebula
+vec3 scDeepSpace(vec2 uv){
+  vec3 c = grade(fbm(uv*2.2 + uTime*0.015)*0.5) * 0.30;
+  for(int L=0; L<3; L++){
+    float fl = float(L);
+    float sc = 26.0 + fl*34.0;
+    vec2 sp = uv*sc + vec2(uTime*(0.25+fl*0.45)*(0.4+uBass*0.8), fl*7.0);
+    vec2 cell = floor(sp);
+    vec2 f = fract(sp) - (vec2(hash(cell), hash(cell+7.0)));
+    float d = length(f);
+    float br = step(0.86 - fl*0.03, hash(cell+3.0));
+    float tw = 0.5 + 0.5*sin(uTime*(2.0+fl*2.0) + hash(cell)*40.0);
+    float s = smoothstep(0.10 + fl*0.03, 0.0, d);
+    c += mix(vec3(1.0), uColC, fl*0.4) * s * br * tw * (0.9 + uTreb*1.6) * (1.0 - fl*0.2);
+  }
+  c += uColB * pow(fbm(uv*3.0 - uTime*0.02), 3.0) * (0.5 + uDown*0.7);
+  return c * (0.95 + uEnergy*0.6);
+}
+
+// 9 — SUPERNOVA: hot core + expanding shock rings
+vec3 scSupernova(vec2 uv){
+  vec2 p = uv - 0.5; p.x *= uRes.x/uRes.y;
+  float r = length(p)+1e-4;
+  float n = fbm(p*5.0 + uTime*0.25);
+  vec3 c = grade(n*0.6 + uBass*0.25) * smoothstep(1.0, 0.1, r) * 0.45;
+  for(int i=0;i<3;i++){
+    float ph = fract(uTime*0.16 + float(i)*0.333);
+    float rr = ph*1.1;
+    float ring = smoothstep(0.06, 0.0, abs(r-rr)) * (1.0-ph);
+    c += grade(0.7+float(i)*0.1) * ring * (1.2 + uBass*1.5);
+  }
+  float core = smoothstep(0.30 + uBass*0.18, 0.0, r);
+  c += uColC * core * (1.6 + uDown*2.2);
+  c += vec3(1.0,0.98,0.9) * pow(core, 3.0) * (1.2 + uDown*1.5);
+  float rays = pow(abs(sin(atan(p.y,p.x)*9.0 + uTime*0.4)), 6.0);
+  c += uColB * rays * smoothstep(0.9, 0.1, r) * (0.35 + uTreb*0.9);
+  return c;
+}
+
+// 10 — AURORA VEIL: drifting curtains
+vec3 scAurora(vec2 uv){
+  vec3 c = grade(0.06) * 0.35 * (1.0-uv.y);
+  for(int i=0;i<3;i++){
+    float fl = float(i);
+    float x = uv.x*(2.2+fl*0.8) + uTime*(0.05+fl*0.04);
+    float band = fbm(vec2(x, fl*5.0 + uTime*0.05));
+    float y0 = 0.25 + band*0.5 + fl*0.06;
+    float d = uv.y - y0;
+    float curtain = smoothstep(0.0, 0.08, d) * smoothstep(0.55, 0.05, d);
+    float shimmer = fbm(vec2(x*3.0, uv.y*6.0 - uTime*0.6));
+    c += grade(0.35 + fl*0.22 + shimmer*0.25) * curtain * (0.75 + shimmer*0.8) * (0.8 + uMid*1.2);
+  }
+  vec2 sp = uv*uRes*0.5;
+  float star = step(0.9982, hash(floor(sp/2.0)));
+  c += vec3(star)*0.5*smoothstep(0.6,1.0,uv.y)*(0.6+uTreb);
+  c += uColC * uDown * 0.12;
+  return c * (0.95 + uEnergy*0.55);
+}
+
+// 11 — HEX PULSE: hex grid with radial energy waves
+vec3 scHexPulse(vec2 uv){
+  vec2 p = (uv-0.5); p.x *= uRes.x/uRes.y;
+  float rr = length(p);
+  vec2 h = p*9.0;
+  vec2 r1 = vec2(1.0, 1.7320508);
+  vec2 a1 = mod(h, r1) - r1*0.5;
+  vec2 b1 = mod(h - r1*0.5, r1) - r1*0.5;
+  vec2 g = dot(a1,a1) < dot(b1,b1) ? a1 : b1;
+  float hex = max(abs(g.x)*0.8660254 + abs(g.y)*0.5, abs(g.y));
+  float edge = smoothstep(0.5, 0.44, hex);
+  float wave = sin(rr*16.0 - uTime*3.0 - uDown*4.0)*0.5+0.5;
+  float wave2 = sin(rr*7.0 - uTime*1.2)*0.5+0.5;
+  vec3 c = grade(wave*0.6 + rr*0.3) * edge * (0.35 + wave*wave2*(0.9 + uBass*1.6));
+  c += uColC * (1.0-edge) * smoothstep(0.5,0.42,hex) * wave * (0.5 + uTreb*1.2);
+  c += uColB * smoothstep(0.2+uBass*0.1, 0.0, rr) * (0.8 + uDown*1.4);
+  return c * (0.9 + uEnergy*0.7);
+}
+
+// 12 — CATHEDRAL BEAMS: sweeping light shafts + rose glow
+vec3 scCathedral(vec2 uv){
+  vec2 src = vec2(0.5, 1.05);
+  vec2 d = uv - src;
+  float a = atan(d.x, -d.y);
+  float beams = 0.0;
+  for(int i=0;i<4;i++){
+    float fl = float(i);
+    float ba = sin(uTime*(0.12+fl*0.05) + fl*2.1) * 0.7;
+    beams += pow(smoothstep(0.22, 0.0, abs(a-ba)), 2.0) * (0.5+0.5*sin(uTime*0.5+fl));
+  }
+  float dust = fbm(uv*5.0 + vec2(uTime*0.06, -uTime*0.10));
+  vec3 c = grade(0.15 + dust*0.2) * 0.30;
+  c += grade(0.75) * beams * (0.45 + dust*0.6) * (0.8 + uMid*1.1);
+  float rose = smoothstep(0.30, 0.0, length(uv-vec2(0.5,0.68)));
+  c += uColC * rose * beams * (0.3 + uDown*0.9);
+  c += uColB * pow(1.0-uv.y, 3.0) * 0.15;
+  return c * (0.95 + uEnergy*0.55);
+}
+
+// 13 — BLACK HOLE: lensed starfield, doppler disk, double photon ring
+vec3 scBlackHole(vec2 uv){
+  vec2 p = uv - 0.5; p.x *= uRes.x/uRes.y;
+  float r = length(p)+1e-4;
+  float swirl = 1.4/r;
+  vec2 q = p * rot(swirl*0.35 + uTime*0.25);
+  float a = atan(q.y,q.x);
+  float disk = fbm(vec2(a*2.0 + uTime*0.4, r*9.0));
+  float band = smoothstep(0.42, 0.16, r) * smoothstep(0.10, 0.17, r);
+  float doppler = 0.65 + 0.55*sin(a + uTime*0.25);           // approaching side burns hotter
+  vec3 c = grade(disk*0.8 + uBass*0.25) * band * (1.1 + disk*1.2 + uBass*1.2) * doppler;
+  c += vec3(1.0,0.97,0.9) * band * pow(doppler,4.0) * 0.35;
+  float horizon = smoothstep(0.115, 0.10, r);
+  c *= 1.0 - horizon;
+  float photon = smoothstep(0.013, 0.0, abs(r-0.118));
+  float photon2 = smoothstep(0.006, 0.0, abs(r-0.104));
+  c += uColC * photon * (2.2 + uDown*2.0);
+  c += vec3(1.0) * photon2 * 1.2;
+  // gravitationally lensed background stars — pulled toward the hole
+  vec2 lensUv = uv + (p/r) * (-0.020/max(r,0.13));
+  vec2 sp = lensUv*uRes*0.5;
+  float star = step(0.996, hash(floor(sp/2.0)));
+  float stretch = smoothstep(0.13, 0.30, r);
+  c += vec3(star) * mix(0.2, 1.0, stretch) * (1.0-horizon) * (0.7 + uTreb*1.2);
+  return c * (1.0 + uEnergy*0.6);
+}
+
+// 14 — KALEIDOSCOPE: 6-fold mirrored fractal bloom
+vec3 scKaleido(vec2 uv){
+  vec2 p = uv - 0.5; p.x *= uRes.x/uRes.y;
+  float r = length(p), a = atan(p.y,p.x) + uTime*0.1;
+  float seg = 3.14159/3.0;
+  a = abs(mod(a, seg*2.0) - seg);
+  vec2 q = vec2(cos(a), sin(a))*r*3.2;
+  float f = fbm(q + uTime*0.15 + uBass*0.6);
+  float g = fbm(q*2.2 - uTime*0.1 + f*1.5);
+  vec3 c = grade(f*0.9 + g*0.4) * (0.6 + g*1.2);
+  float veins = pow(1.0-abs(sin(f*10.0 - uTime*0.8)), 4.0);
+  c += uColC * veins * (0.6 + uTreb*1.4);
+  c += uColB * smoothstep(0.14+uBass*0.08, 0.0, r) * (1.0 + uDown*1.5);
+  return c * (0.95 + uEnergy*0.75);
+}
+
+// 15 — LASER GRID: synthwave horizon, scrolling grid, striped sun
+vec3 scLaserGrid(vec2 uv){
+  float hz = 0.46;
+  vec3 c = vec3(0.0);
+  if(uv.y < hz){
+    float d = hz - uv.y + 0.001;
+    float persp = 0.06/d;
+    float gx = abs(fract((uv.x-0.5)*persp*4.0)-0.5);
+    float gz = abs(fract(persp*2.0 - uTime*(1.2 + uBass*1.5))-0.5);
+    float lines = smoothstep(0.06,0.0,gx) + smoothstep(0.06,0.0,gz);
+    c = grade(0.15) * 0.25 + uColB * lines * (0.7 + uBass*1.1) * smoothstep(0.0,0.12,d);
+  } else {
+    float sr = length((uv-vec2(0.5, hz+0.16))*vec2(uRes.x/uRes.y,1.0));
+    float sun = smoothstep(0.15+uBass*0.03, 0.145+uBass*0.03, sr);
+    float stripes = step(0.5, fract(uv.y*30.0 + uTime*0.3));
+    float cut = mix(1.0, stripes, smoothstep(hz+0.16, hz+0.02, uv.y));
+    c = mix(grade(0.1)*0.35, grade(0.85)*(1.3+uDown*0.8), sun*cut);
+    vec2 sp = uv*uRes*0.5;
+    float star = step(0.9975, hash(floor(sp/2.0)));
+    c += vec3(star)*(1.0-sun)*(0.5+uTreb*1.2)*(0.4+0.6*sin(uTime*3.0+hash(floor(sp/2.0))*30.0));
+  }
+  float glow = smoothstep(0.10, 0.0, abs(uv.y-hz));
+  c += uColC * glow * (0.5 + uBass*0.9);
+  return c;
+}
+
+// 16 — PRISM SHARDS: voronoi facets flashing on the beat
+vec3 scPrism(vec2 uv){
+  vec2 p = uv*vec2(uRes.x/uRes.y,1.0)*5.0 + uTime*0.12;
+  vec2 cell = floor(p);
+  float md = 8.0; vec2 mid2 = vec2(0.0); float mi = 0.0;
+  for(int y=-1;y<=1;y++) for(int x=-1;x<=1;x++){
+    vec2 n = cell + vec2(float(x),float(y));
+    vec2 pt = n + vec2(hash(n), hash(n+3.7));
+    float d = length(p - pt);
+    if(d < md){ md = d; mid2 = pt; mi = hash(n+9.1); }
+  }
+  float flash = 0.4 + 0.6*sin(mi*40.0 + uTime*(1.0+mi*2.0) + uDown*3.0);
+  vec3 c = grade(mi) * flash * (0.55 + uEnergy*0.9);
+  float edge = smoothstep(0.05, 0.0, abs(md - 0.35));
+  c += uColC * edge * (0.5 + uTreb*1.3);
+  c += uColC * smoothstep(0.08,0.0,md) * (0.7 + uBass*1.2);
+  return c;
+}
+
+// 17 — FRACTAL DIVE: animated Julia set with orbit-trap glow
+vec3 scFractalDive(vec2 uv){
+  vec2 p = (uv-0.5)*vec2(uRes.x/uRes.y,1.0)*(2.7 - uBass*0.5);
+  p *= rot(uTime*0.03);
+  float t = uTime*0.10;
+  vec2 cj = vec2(0.7885*cos(t), 0.7885*sin(t*1.31));
+  vec2 z = p;
+  float m = 0.0, trap = 1e9;
+  for(int i=0;i<40;i++){
+    z = vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + cj;
+    trap = min(trap, abs(dot(z, vec2(0.707,0.707))));
+    if(dot(z,z) > 16.0) break;
+    m += 1.0;
+  }
+  float f = m/40.0;
+  vec3 c = grade(f + uBass*0.2) * (0.30 + f*1.4);
+  c += uColC * exp(-trap*3.5) * (0.7 + uTreb*1.6);
+  c += uColB * exp(-trap*12.0) * (1.0 + uDown*1.2);
+  return c;
+}
+
+// 18 — ION STORM: live lightning webs over a storm bed
+vec3 scIonStorm(vec2 uv){
+  vec3 c = grade(fbm(uv*3.0 + uTime*0.05)*0.45) * 0.30;
+  c *= 0.6 + 0.4*(1.0-uv.y);
+  for(int i=0;i<3;i++){
+    float fi = float(i);
+    float seedt = floor(uTime*(1.6+fi*0.7) + uDown*2.0);
+    float xoff = (hash(vec2(seedt, fi)) - 0.5)*1.1;
+    float path = 0.5 + xoff*0.5 + (fbm(vec2(uv.y*3.2 + seedt*7.0, fi*9.0)) - 0.5)*0.45;
+    float d = abs(uv.x - path);
+    float alive = step(0.35, hash(vec2(seedt, fi+5.0)));
+    float flick = 0.4 + 0.6*step(0.3, hash(vec2(floor(uTime*24.0), fi)));
+    float bolt = exp(-d*110.0);
+    c += (vec3(0.85,0.9,1.0)*0.6 + uColC*0.6) * bolt * alive * flick * (0.9 + uMid*1.3);
+    c += uColB * exp(-d*13.0) * 0.4 * alive * flick;
+    // branch fork
+    float bpath = path + (fbm(vec2(uv.y*6.0 + seedt*3.0, fi*4.0))-0.5)*0.25;
+    float bd = abs(uv.x - bpath);
+    c += uColC * exp(-bd*140.0) * alive * flick * smoothstep(0.2,0.6,uv.y) * 0.7;
+  }
+  c += grade(0.8) * uDown * 0.10;
+  vec2 sp = uv*uRes*0.5;
+  c += vec3(step(0.998, hash(floor(sp/2.0)))) * 0.3 * (0.5+uTreb);
+  return c * (0.95 + uEnergy*0.6);
+}
+
+// 19 — LIQUID GOLD: molten metaball chrome with specular streaks
+float lgField(vec2 p){
+  float f = 0.0;
+  for(int i=0;i<5;i++){
+    float fi = float(i);
+    vec2 c2 = vec2(sin(uTime*(0.30+fi*0.13)+fi*2.1), cos(uTime*(0.41+fi*0.09)+fi*1.7))
+              * (0.42 + 0.10*sin(uTime*0.2+fi));
+    f += (0.050 + uBass*0.02) / (dot(p-c2, p-c2) + 0.012);
+  }
+  return f;
+}
+vec3 scLiquidGold(vec2 uv){
+  vec2 p = (uv-0.5)*vec2(uRes.x/uRes.y,1.0)*1.9;
+  float f = lgField(p);
+  float e = 0.012;
+  vec2 g = vec2(lgField(p+vec2(e,0.0)) - lgField(p-vec2(e,0.0)),
+                lgField(p+vec2(0.0,e)) - lgField(p-vec2(0.0,e)));
+  vec3 n = normalize(vec3(-g, 0.35));
+  float surf = smoothstep(1.0, 1.15, f);
+  vec3 l = normalize(vec3(0.5, 0.8, 0.6));
+  float diff = max(dot(n, l), 0.0);
+  float spec = pow(max(dot(reflect(-l, n), vec3(0.0,0.0,1.0)), 0.0), 24.0);
+  float fres = pow(1.0 - abs(n.z), 2.0);
+  vec3 metal = grade(0.45 + n.y*0.35) * (0.35 + diff*0.9);
+  metal += vec3(1.0,0.97,0.88) * spec * (1.6 + uTreb*1.6);
+  metal += uColC * fres * 0.8;
+  float edge = smoothstep(0.98, 1.02, f) * smoothstep(1.10, 1.04, f);
+  vec3 c = metal * surf + uColB * edge * (1.2 + uDown*1.4);
+  c += grade(0.12) * (1.0-surf) * 0.22;                      // dark backdrop sheen
+  return c * (0.95 + uEnergy*0.6);
+}
+
+// 20 — GLYPH FOG: dim amethyst-gold fog bed for the 2D sacred-geometry lattice
+vec3 scGlyphFog(vec2 uv){
+  vec2 p = uv*2.4; p *= rot(uTime*0.015);
+  float f = fbm(p + uTime*0.04);
+  float g = fbm(p*1.7 - uTime*0.05 + f);
+  vec2 cpv = uv-0.5; cpv.x *= uRes.x/uRes.y;
+  float cd = length(cpv);
+  vec3 c = grade(f*0.55 + 0.1) * (0.28 + g*0.4);
+  c += uColB * smoothstep(0.7, 0.0, cd) * (0.12 + uBass*0.30);
+  c += uColC * pow(g,4.0) * (0.25 + uDown*0.5);
+  return c * (0.65 + uEnergy*0.4);
+}
+
+
+// ============================================================
+// SACRED GEOMETRY BLOCK — scenes 21..28
+// ============================================================
+
+// 21 — METATRON CUBE: 13 circles of the Fruit of Life + all 78 connecting chords
+vec3 scMetatron(vec2 uv){
+  vec2 p = (uv-0.5)*vec2(uRes.x/uRes.y,1.0)*3.0;
+  p *= rot(uTime*0.05);
+  float R = 0.60 + 0.025*sin(uTime*0.45) + uBass*0.06;
+  vec2 pts[13];
+  pts[0] = vec2(0.0);
+  for(int i=0;i<6;i++){
+    float a = float(i)*1.0471975512 + 1.5707963268;
+    vec2 d = vec2(cos(a), sin(a));
+    pts[1+i] = d*R;
+    pts[7+i] = d*R*2.0;
+  }
+  float lines=0.0, circles=0.0;
+  float lw = 78.0 + uTreb*46.0;
+  float cw = 20.0 + uMid*14.0;
+  if(length(p) < R*2.0 + 1.25){
+    for(int i=0;i<13;i++){
+      circles += exp(-abs(length(p-pts[i]) - R)*cw);
+      for(int j=0;j<13;j++){
+        if(j<=i) continue;
+        lines += exp(-sdSeg(p, pts[i], pts[j])*lw);
+      }
+    }
+  }
+  float halo = exp(-abs(length(p) - (R*2.0+0.30))*16.0);
+  vec3 c = grade(0.10 + fbm(p*0.55 + uTime*0.03)*0.34) * 0.18;   // deep field
+  c += uColB * lines   * (0.16 + uBeat*0.10);
+  c += uColC * circles * (0.13 + uDown*0.12);
+  c += grade(0.85) * pow(lines, 1.6) * 0.05;                     // hot chord crossings
+  c += uColA * halo * (0.35 + uEnergy*0.5);
+  c += uColC * exp(-length(p)*2.6) * (0.25 + uBass*0.7);         // core
+  return c * (1.0 + uEnergy*0.8);
+}
+
+// 22 — FLOWER OF LIFE: triangular-lattice circle field, three parallax planes
+float folLayer(vec2 p, float rad, float glow){
+  const float rowH = 0.8660254;
+  vec2 id = vec2(floor(p.x + 0.5), floor(p.y/rowH + 0.5));
+  float g = 0.0;
+  for(int j=-2;j<=2;j++){
+    float jy = id.y + float(j);
+    float off = mod(abs(jy), 2.0) > 0.5 ? 0.5 : 0.0;
+    for(int i=-2;i<=2;i++){
+      vec2 cc = vec2(id.x + float(i) + off, jy*rowH);
+      g += exp(-abs(length(p-cc) - rad)*glow);
+    }
+  }
+  return g;
+}
+vec3 scFlower(vec2 uv){
+  vec2 q = (uv-0.5)*vec2(uRes.x/uRes.y,1.0);
+  float t = uTime*0.05;
+  vec3 c = grade(0.08 + fbm(q*1.6 + t)*0.30) * 0.20;
+  float breathe = 1.0 + uBass*0.10;
+  // far plane
+  vec2 p1 = q*7.4*breathe; p1 *= rot(-t*0.6); p1 += vec2(t*0.5, -t*0.2);
+  c += uColA * folLayer(p1, 1.0, 26.0) * 0.055;
+  // mid plane
+  vec2 p2 = q*4.6*breathe; p2 *= rot(t*0.9);
+  c += uColB * folLayer(p2, 1.0, 30.0 + uTreb*20.0) * (0.075 + uMid*0.05);
+  // near plane
+  if(uQual > 0.5){
+    vec2 p3 = q*2.7*breathe; p3 *= rot(-t*1.5);
+    float g3 = folLayer(p3, 1.0, 34.0);
+    c += uColC * g3 * (0.085 + uDown*0.09);
+    c += grade(0.9) * pow(g3, 2.2) * 0.02;
+  }
+  c += uColC * exp(-length(q)*2.2) * (0.20 + uBass*0.55);
+  return c * (0.95 + uEnergy*0.85);
+}
+
+// 23 — MERKABA: raymarched dual-tetrahedron star, glass shell + hot intersection edges
+vec2 merkMap(vec3 p){
+  vec3 q = rotY(uTime*0.30) * rotX(0.42 + sin(uTime*0.19)*0.32) * p;
+  float s = 1.00 + uBass*0.10;
+  float d1 = sdTetra(q, s);
+  float d2 = sdTetra(q*vec3(1.0,-1.0,-1.0), s);
+  float d = min(abs(d1)-0.015, abs(d2)-0.015);
+  return vec2(d, abs(d1-d2));
+}
+vec3 scMerkaba(vec2 uv){
+  vec2 q = (uv-0.5)*vec2(uRes.x/uRes.y,1.0);
+  vec3 ro = vec3(0.0,0.0,-3.5);
+  vec3 rd = normalize(vec3(q*1.25, 1.0));
+  int steps = uQual>1.5 ? 90 : (uQual>0.5 ? 62 : 42);
+  float tt = 0.0, hit = 0.0, ed = 1e9;
+  vec3 glow = vec3(0.0);
+  for(int i=0;i<90;i++){
+    if(i>=steps) break;
+    vec3 pp = ro + rd*tt;
+    vec2 m = merkMap(pp);
+    glow += grade(0.5 + 0.35*sin(tt*1.5 + uTime*0.8)) * exp(-max(m.x,0.0)*10.0) * 0.016;
+    if(m.x < 0.0018){ hit = 1.0; ed = m.y; break; }
+    tt += max(m.x*0.85, 0.0025);
+    if(tt > 9.0) break;
+  }
+  vec3 c = glow * (0.85 + uEnergy*1.0);
+  if(hit > 0.5){
+    vec3 pp = ro + rd*tt;
+    vec2 e = vec2(0.0014, 0.0);
+    vec3 n = normalize(vec3(
+      merkMap(pp+e.xyy).x - merkMap(pp-e.xyy).x,
+      merkMap(pp+e.yxy).x - merkMap(pp-e.yxy).x,
+      merkMap(pp+e.yyx).x - merkMap(pp-e.yyx).x));
+    vec3 l = normalize(vec3(0.55, 0.80, -0.55));
+    float dif = max(dot(n,l), 0.0);
+    float fres = pow(1.0 - max(dot(n,-rd),0.0), 3.0);
+    float spec = pow(max(dot(reflect(-l,n), -rd), 0.0), 42.0);
+    c += grade(0.32 + dif*0.5) * (0.22 + dif*0.9);
+    c += vec3(1.0,0.96,0.87) * spec * (1.5 + uTreb*1.9);
+    c += uColC * fres * (1.0 + uDown*1.0);
+    c += uColB * exp(-ed*24.0) * (1.7 + uBeat*1.3);
+  } else {
+    vec2 sp = uv*uRes*0.5;
+    float star = step(0.9976, hash(floor(sp/2.0)));
+    float tw = 0.5 + 0.5*sin(uTime*3.0 + hash(floor(sp/2.0))*40.0);
+    c += vec3(star)*tw*(0.6 + uTreb*1.3);
+  }
+  return c * (0.95 + uEnergy*0.55);
+}
+
+// 24 — MENGER DIVE: infinite fractal-sponge corridor with iteration AO
+float mengerMap(vec3 p){
+  p.xy *= rot(p.z*0.05 + uTime*0.04);
+  vec3 q = p;
+  q.xy = mod(q.xy + 2.0, 4.0) - 2.0;
+  float d = sdBox3(q, vec3(1.28));
+  float s = 1.0;
+  int it = uQual>1.5 ? 4 : 3;
+  for(int m=0;m<4;m++){
+    if(m>=it) break;
+    vec3 a = mod(q*s, 2.0) - 1.0;
+    s *= 3.0;
+    vec3 r = abs(1.0 - 3.0*abs(a));
+    float da = max(r.x,r.y), db = max(r.y,r.z), dc = max(r.z,r.x);
+    d = max(d, (min(da,min(db,dc)) - 1.0)/s);
+  }
+  return d;
+}
+vec3 scMenger(vec2 uv){
+  vec2 q = (uv-0.5)*vec2(uRes.x/uRes.y,1.0);
+  vec3 ro = vec3(0.0, 0.0, uTime*(0.85 + uBass*0.9));
+  vec3 rd = normalize(vec3(q*1.20, 1.0));
+  rd.xy *= rot(sin(uTime*0.11)*0.22);
+  int steps = uQual>1.5 ? 96 : (uQual>0.5 ? 66 : 46);
+  float tt = 0.04, ao = 0.0, hit = 0.0;
+  for(int i=0;i<96;i++){
+    if(i>=steps) break;
+    float d = mengerMap(ro + rd*tt);
+    if(d < 0.0012*tt + 0.0007){ hit = 1.0; ao = 1.0 - float(i)/float(steps); break; }
+    tt += d*0.90;
+    if(tt > 14.0) break;
+  }
+  float fog = exp(-tt*0.17);
+  vec3 c = grade(0.05 + fbm(uv*2.2 + uTime*0.03)*0.22) * 0.16;
+  if(hit > 0.5){
+    vec3 pp = ro + rd*tt;
+    vec2 e = vec2(0.0016, 0.0);
+    vec3 n = normalize(vec3(
+      mengerMap(pp+e.xyy) - mengerMap(pp-e.xyy),
+      mengerMap(pp+e.yxy) - mengerMap(pp-e.yxy),
+      mengerMap(pp+e.yyx) - mengerMap(pp-e.yyx)));
+    vec3 l = normalize(vec3(0.4, 0.7, -0.6));
+    float dif = max(dot(n,l), 0.0);
+    float rim = pow(1.0 - max(dot(n,-rd),0.0), 2.5);
+    vec3 surf = grade(0.20 + ao*0.55 + dif*0.30) * (0.20 + dif*0.85) * (0.35 + ao*0.85);
+    surf += uColC * rim * (0.55 + uTreb*1.1);
+    surf += uColB * pow(ao, 3.0) * (0.5 + uDown*0.9);
+    c = mix(c, surf, fog);
+  }
+  c += uColC * exp(-length(q)*3.2) * (0.18 + uBass*0.55);   // headlight
+  return c * (1.0 + uEnergy*0.8);
+}
+
+// 25 — APOLLONIAN: inversive sphere-packing fractal, orbit-trap coloured
+float apoMap(vec3 p, out float trap){
+  float scale = 1.0;
+  trap = 1e9;
+  float s = 1.14 + 0.04*sin(uTime*0.11) + uBass*0.05;
+  int it = uQual>1.5 ? 8 : (uQual>0.5 ? 6 : 5);
+  for(int i=0;i<8;i++){
+    if(i>=it) break;
+    p = -1.0 + 2.0*fract(0.5*p + 0.5);
+    float r2 = dot(p,p);
+    trap = min(trap, r2);
+    float k = s/max(r2, 1e-4);
+    p *= k; scale *= k;
+  }
+  return 0.25*abs(p.y)/scale;
+}
+vec3 scApollonian(vec2 uv){
+  vec2 q = (uv-0.5)*vec2(uRes.x/uRes.y,1.0);
+  mat3 cam = rotY(uTime*0.09) * rotX(0.30*sin(uTime*0.06));
+  vec3 ro = cam * vec3(0.0, 0.0, -2.1);
+  vec3 rd = cam * normalize(vec3(q*1.2, 1.0));
+  int steps = uQual>1.5 ? 110 : (uQual>0.5 ? 76 : 50);
+  float tt = 0.0, hit = 0.0, trap = 1.0, tr = 1.0;
+  vec3 glow = vec3(0.0);
+  for(int i=0;i<110;i++){
+    if(i>=steps) break;
+    float d = apoMap(ro + rd*tt, tr);
+    glow += grade(clamp(tr*2.2, 0.0, 1.0)) * exp(-max(d,0.0)*22.0) * 0.012;
+    if(d < 0.0009){ hit = 1.0; trap = tr; break; }
+    tt += d*0.72;
+    if(tt > 6.0) break;
+  }
+  vec3 c = glow * (0.9 + uEnergy*0.9);
+  if(hit > 0.5){
+    vec3 pp = ro + rd*tt;
+    vec2 e = vec2(0.0009, 0.0);
+    float t0;
+    vec3 n = normalize(vec3(
+      apoMap(pp+e.xyy,t0) - apoMap(pp-e.xyy,t0),
+      apoMap(pp+e.yxy,t0) - apoMap(pp-e.yxy,t0),
+      apoMap(pp+e.yyx,t0) - apoMap(pp-e.yyx,t0)));
+    vec3 l = normalize(vec3(0.6, 0.75, -0.4));
+    float dif = max(dot(n,l), 0.0);
+    float spec = pow(max(dot(reflect(-l,n), -rd), 0.0), 30.0);
+    float fres = pow(1.0 - max(dot(n,-rd),0.0), 2.5);
+    c += grade(clamp(trap*2.6 + 0.1, 0.0, 1.0)) * (0.22 + dif*0.95);
+    c += vec3(1.0,0.97,0.9) * spec * (1.1 + uTreb*1.6);
+    c += uColC * fres * (0.7 + uDown*0.9);
+  }
+  return c * (0.95 + uEnergy*0.7);
+}
+
+// 26 — HYPERCUBE 4D: tesseract under XW/YZ rotation, double-projected to screen
+vec3 scHypercube(vec2 uv){
+  vec2 p = (uv-0.5)*vec2(uRes.x/uRes.y,1.0)*2.2;
+  float t = uTime*(0.85 + uBass*0.45);
+  float c1=cos(t*0.31), s1=sin(t*0.31);
+  float c2=cos(t*0.23), s2=sin(t*0.23);
+  float c3=cos(t*0.19), s3=sin(t*0.19);
+  vec2 pts[16];
+  for(int i=0;i<16;i++){
+    vec4 v = vec4(float(i & 1), float((i>>1) & 1), float((i>>2) & 1), float((i>>3) & 1))*2.0 - 1.0;
+    vec4 q = vec4(v.x*c1 - v.w*s1, v.y, v.z, v.x*s1 + v.w*c1);   // XW plane
+    q = vec4(q.x, q.y*c2 - q.z*s2, q.y*s2 + q.z*c2, q.w);        // YZ plane
+    vec3 p3 = q.xyz * (2.2/(3.0 - q.w));                         // 4D -> 3D
+    p3 = vec3(p3.x*c3 - p3.z*s3, p3.y, p3.x*s3 + p3.z*c3);
+    pts[i] = p3.xy * (2.4/(3.0 - p3.z));                         // 3D -> 2D
+  }
+  float lines=0.0, verts=0.0;
+  float lw = 86.0 + uTreb*44.0;
+  for(int i=0;i<16;i++){
+    verts += exp(-length(p - pts[i])*62.0);
+    for(int b=0;b<4;b++){
+      int j = i ^ (1<<b);
+      if(j <= i) continue;
+      lines += exp(-sdSeg(p, pts[i], pts[j])*lw);
+    }
+  }
+  vec3 c = grade(0.06 + fbm(uv*2.6 + uTime*0.04)*0.26) * 0.16;
+  c += uColB * lines * (0.24 + uBeat*0.14);
+  c += grade(0.9) * pow(lines, 1.8) * 0.06;
+  c += uColC * verts * (0.9 + uDown*1.2);
+  c += uColA * exp(-length(p)*1.5) * 0.16;
+  return c * (0.95 + uEnergy*0.9);
+}
+
+// 27 — QUASICRYSTAL: 7-fold plane-wave interference, aperiodic tiling
+vec3 scQuasi(vec2 uv){
+  vec2 p = (uv-0.5)*vec2(uRes.x/uRes.y,1.0)*11.0;
+  p *= rot(uTime*0.025);
+  float sum = 0.0;
+  float k = 1.0 + uBass*0.30;
+  for(int i=0;i<7;i++){
+    float a = float(i)*0.4487989505;                 // pi/7
+    sum += cos(dot(vec2(cos(a), sin(a)), p)*k + uTime*0.65 + float(i)*0.9);
+  }
+  float v = sum/7.0;
+  float band = 1.0 - abs(fract(v*4.0 + uTime*0.05) - 0.5)*2.0;
+  float edge = smoothstep(0.86, 1.0, band);
+  vec3 c = grade(v*0.5 + 0.5) * (0.32 + band*0.55);
+  c += uColC * pow(edge, 2.0) * (0.9 + uTreb*1.5);
+  c += uColB * smoothstep(0.55, 1.0, v) * (0.35 + uDown*0.7);
+  c *= 0.55 + 0.65*smoothstep(1.4, 0.15, length((uv-0.5)*vec2(uRes.x/uRes.y,1.0)));
+  return c * (0.9 + uEnergy*0.85);
+}
+
+// 28 — TRUCHET WEAVE: beat-retiled arc lattice with bevel shading
+float truchetD(vec2 p, float seed){
+  vec2 id = floor(p);
+  vec2 f = fract(p) - 0.5;
+  if(hash(id + seed*7.31) > 0.5) f.x = -f.x;
+  return abs(min(length(f - 0.5), length(f + 0.5)) - 0.5);
+}
+vec3 scTruchet(vec2 uv){
+  vec2 q = (uv-0.5)*vec2(uRes.x/uRes.y,1.0);
+  vec2 p = q*6.0;
+  p *= rot(uTime*0.02);
+  p += vec2(uTime*0.12, uTime*0.05);
+  float seed = floor(uTime*0.22);
+  float d = truchetD(p, seed);
+  float w = 0.075 + uBass*0.035;
+  float pipe = smoothstep(w + 0.028, w - 0.010, d);
+  float e = 0.008;
+  vec2 g = vec2(truchetD(p+vec2(e,0.0), seed) - truchetD(p-vec2(e,0.0), seed),
+                truchetD(p+vec2(0.0,e), seed) - truchetD(p-vec2(0.0,e), seed));
+  vec3 n = normalize(vec3(-g*7.0, 1.0));
+  vec3 l = normalize(vec3(0.5, 0.7, 0.6));
+  float dif = max(dot(n,l), 0.0);
+  float spec = pow(max(dot(reflect(-l,n), vec3(0.0,0.0,1.0)), 0.0), 26.0);
+  vec3 c = grade(0.06 + fbm(q*2.4 + uTime*0.05)*0.26) * 0.16;
+  c += grade(0.30 + dif*0.45) * pipe * (0.30 + dif*0.95);
+  c += vec3(1.0,0.97,0.9) * spec * pipe * (1.2 + uTreb*1.6);
+  c += uColC * exp(-abs(d - w)*30.0) * (0.35 + uBeat*0.55);
+  c += uColB * exp(-length(q)*2.4) * (0.16 + uDown*0.55);
+  return c * (0.95 + uEnergy*0.8);
+}
+
+void main(){
+  vec2 uv = vUv;
+  vec3 c;
+  if      (uScene==0)  c = scElectricSheep(uv);
+  else if (uScene==1)  c = scClouds(uv);
+  else if (uScene==2)  c = scNebula(uv);
+  else if (uScene==3)  c = scPlasma(uv);
+  else if (uScene==4)  c = scVortex(uv);
+  else if (uScene==5)  c = scChrome(uv);
+  else if (uScene==6)  c = scStarfall(uv);
+  else if (uScene==7)  c = scGalaxy(uv);
+  else if (uScene==8)  c = scDeepSpace(uv);
+  else if (uScene==9)  c = scSupernova(uv);
+  else if (uScene==10) c = scAurora(uv);
+  else if (uScene==11) c = scHexPulse(uv);
+  else if (uScene==12) c = scCathedral(uv);
+  else if (uScene==13) c = scBlackHole(uv);
+  else if (uScene==14) c = scKaleido(uv);
+  else if (uScene==15) c = scLaserGrid(uv);
+  else if (uScene==16) c = scPrism(uv);
+  else if (uScene==17) c = scFractalDive(uv);
+  else if (uScene==18) c = scIonStorm(uv);
+  else if (uScene==19) c = scLiquidGold(uv);
+  else if (uScene==20) c = scGlyphFog(uv);
+  else if (uScene==21) c = scMetatron(uv);
+  else if (uScene==22) c = scFlower(uv);
+  else if (uScene==23) c = scMerkaba(uv);
+  else if (uScene==24) c = scMenger(uv);
+  else if (uScene==25) c = scApollonian(uv);
+  else if (uScene==26) c = scHypercube(uv);
+  else if (uScene==27) c = scQuasi(uv);
+  else                 c = scTruchet(uv);
+  c *= 1.22; // master visibility lift
+
+  // feedback trails: sample previous frame slightly zoomed toward center
+  vec2 tuv = (uv - 0.5) * (1.0 - 0.006 - uBass*0.010) + 0.5;
+  vec3 prev = texture(uPrev, tuv).rgb;
+  c = max(c, prev * uTrail);
+  fragColor = vec4(min(c, vec3(uHdr)), 1.0);
+}`;
+
+// Bloom bright-pass: soft-knee highlight extraction
+const BRIGHT_FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uTex;
+uniform vec2 uTexel;
+uniform float uThresh, uKnee;
+in vec2 vUv; out vec4 fragColor;
+void main(){
+  vec3 c = texture(uTex, vUv).rgb;
+  c += texture(uTex, vUv + vec2( uTexel.x,  uTexel.y)).rgb;
+  c += texture(uTex, vUv + vec2(-uTexel.x,  uTexel.y)).rgb;
+  c += texture(uTex, vUv + vec2( uTexel.x, -uTexel.y)).rgb;
+  c += texture(uTex, vUv + vec2(-uTexel.x, -uTexel.y)).rgb;
+  c *= 0.2;
+  float br = max(c.r, max(c.g, c.b));
+  float soft = clamp(br - uThresh + uKnee, 0.0, 2.0*uKnee);
+  soft = soft*soft / (4.0*uKnee + 1e-4);
+  float w = max(soft, br - uThresh) / max(br, 1e-4);
+  fragColor = vec4(c*w, 1.0);
+}`;
+
+// 13-tap downsample (stable under motion, no fireflies)
+const DOWN_FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uTex;
+uniform vec2 uTexel;
+in vec2 vUv; out vec4 fragColor;
+void main(){
+  vec2 t = uTexel;
+  vec3 a = texture(uTex, vUv + vec2(-2.0*t.x,  2.0*t.y)).rgb;
+  vec3 b = texture(uTex, vUv + vec2( 0.0,      2.0*t.y)).rgb;
+  vec3 c = texture(uTex, vUv + vec2( 2.0*t.x,  2.0*t.y)).rgb;
+  vec3 d = texture(uTex, vUv + vec2(-2.0*t.x,  0.0)).rgb;
+  vec3 e = texture(uTex, vUv).rgb;
+  vec3 f = texture(uTex, vUv + vec2( 2.0*t.x,  0.0)).rgb;
+  vec3 g = texture(uTex, vUv + vec2(-2.0*t.x, -2.0*t.y)).rgb;
+  vec3 h = texture(uTex, vUv + vec2( 0.0,     -2.0*t.y)).rgb;
+  vec3 i = texture(uTex, vUv + vec2( 2.0*t.x, -2.0*t.y)).rgb;
+  vec3 j = texture(uTex, vUv + vec2(-t.x,  t.y)).rgb;
+  vec3 k = texture(uTex, vUv + vec2( t.x,  t.y)).rgb;
+  vec3 l = texture(uTex, vUv + vec2(-t.x, -t.y)).rgb;
+  vec3 m = texture(uTex, vUv + vec2( t.x, -t.y)).rgb;
+  vec3 o = e*0.125;
+  o += (a+c+g+i)*0.03125;
+  o += (b+d+f+h)*0.0625;
+  o += (j+k+l+m)*0.125;
+  fragColor = vec4(o, 1.0);
+}`;
+
+// 9-tap tent upsample, blended additively back down the chain
+const UP_FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uTex;
+uniform vec2 uTexel;
+uniform float uAmt;
+in vec2 vUv; out vec4 fragColor;
+void main(){
+  vec2 t = uTexel;
+  vec3 s  = texture(uTex, vUv + vec2(-t.x,  t.y)).rgb;
+  s += texture(uTex, vUv + vec2( 0.0,  t.y)).rgb * 2.0;
+  s += texture(uTex, vUv + vec2( t.x,  t.y)).rgb;
+  s += texture(uTex, vUv + vec2(-t.x,  0.0)).rgb * 2.0;
+  s += texture(uTex, vUv).rgb * 4.0;
+  s += texture(uTex, vUv + vec2( t.x,  0.0)).rgb * 2.0;
+  s += texture(uTex, vUv + vec2(-t.x, -t.y)).rgb;
+  s += texture(uTex, vUv + vec2( 0.0, -t.y)).rgb * 2.0;
+  s += texture(uTex, vUv + vec2( t.x, -t.y)).rgb;
+  fragColor = vec4(s * 0.0625 * uAmt, 1.0);
+}`;
+
+// Final composite: sharpen, bloom, anamorphic streak, ACES, vignette, grain, dither
+const FINAL_FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uTex;      // HDR scene
+uniform sampler2D uBloom;    // bloom chain, mip 0
+uniform vec2 uRes;           // output (canvas) resolution
+uniform vec2 uSrcTexel;      // 1 / internal render size
+uniform float uTimeG, uBeat, uDown, uAber;
+uniform float uBloomAmt, uSharp, uGrain, uExpo;
+in vec2 vUv; out vec4 fragColor;
+float hash(vec2 p){
+  vec3 q = fract(vec3(p.xyx)*0.1031);
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.x + q.y) * q.z);
+}
+vec3 aces(vec3 x){
+  return clamp((x*(2.51*x + 0.03)) / (x*(2.43*x + 0.59) + 0.14), 0.0, 1.0);
+}
+void main(){
+  vec2 uv = vUv;
+  // downbeat camera punch — tiny seeded kick, decays with the pulse
+  uv += (vec2(hash(vec2(uTimeG,1.0)), hash(vec2(uTimeG,7.0))) - 0.5) * uDown * 0.006;
+  vec2 d = (uv - 0.5) * (0.0026 + uAber*0.004 + uDown*0.004);
+  vec3 c = vec3(texture(uTex, uv + d).r, texture(uTex, uv).g, texture(uTex, uv - d).b);
+  // unsharp mask against the render-scale upsample — restores edge bite at 4K
+  if(uSharp > 0.001){
+    vec2 t = uSrcTexel;
+    vec3 b = texture(uTex, uv + vec2( t.x, 0.0)).rgb
+           + texture(uTex, uv + vec2(-t.x, 0.0)).rgb
+           + texture(uTex, uv + vec2( 0.0, t.y)).rgb
+           + texture(uTex, uv + vec2( 0.0,-t.y)).rgb;
+    c += (c - b*0.25) * uSharp;
+  }
+  // bloom + horizontal anamorphic streak
+  vec3 bl = texture(uBloom, uv).rgb;
+  vec3 streak = vec3(0.0);
+  for(int i=1;i<=4;i++){
+    float o = float(i)*0.007;
+    streak += texture(uBloom, uv + vec2( o, 0.0)).rgb;
+    streak += texture(uBloom, uv + vec2(-o, 0.0)).rgb;
+  }
+  c += bl * uBloomAmt;
+  c += streak * 0.05 * uBloomAmt * vec3(0.72, 0.86, 1.18);
+  // filmic pipeline: exposure -> ACES tonemap -> vibrance
+  c = aces(c * uExpo);
+  float lum = dot(c, vec3(0.299, 0.587, 0.114));
+  c = mix(vec3(lum), c, 1.24);
+  float hot = max(max(c.r,c.g),c.b);
+  c += vec3(hot) * 0.08 * smoothstep(0.75, 1.2, hot);
+  float vig = smoothstep(1.35, 0.30, length((uv-0.5)*vec2(uRes.x/uRes.y,1.0)*1.28));
+  c *= mix(0.84, 1.0, vig);
+  c += (hash(uv*uRes + uTimeG) - 0.5) * uGrain;
+  c += vec3(uDown*0.05);
+  // dither before the 8-bit write — no banding across big gradients
+  c += (hash(uv*uRes*1.37 + 11.0) - 0.5) / 255.0;
+  fragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
+}`;
+
+// ============ DREAM PALACE FABLE ENGINE X — CORE ============
+(function(){
+'use strict';
+
+const $ = id => document.getElementById(id);
+const wrap = $('wrap'), glCv = $('gl'), txCv = $('tx');
+const tctx = txCv.getContext('2d');
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- deterministic rand (no per-frame Math.random flicker) ----------
+function srnd(n){ const x = Math.sin(n*127.1 + 311.7)*43758.5453; return x - Math.floor(x); }
+
+// ---------- PALETTES (curated crazy — no rainbow) ----------
+const PALETTES = [
+  ['ROYAL GOLD',   '#8C5C0D','#FFC72E','#FFF3B8'],
+  ['ULTRAVIOLET',  '#1A0059','#8C0DFF','#BFE6FF'],
+  ['LAVA CORE',    '#400000','#FF4D05','#FFEB8C'],
+  ['MIAMI HEAT',   '#003847','#FF1F99','#FFF2CC'],
+  ['GOLD CLASH',   '#002E33','#FFBF1A','#D9FFF2'],
+  ['CRIMSON',      '#4D0308','#D90F1A','#FF8C59'],
+  ['SAPPHIRE',     '#050D4D','#1A59F2','#8CD9FF'],
+  ['AMETHYST',     '#290547','#8C26E6','#E6A6FF'],
+  ['EMERALD',      '#032E14','#0DBF59','#B3FFCC'],
+  ['MAGENTA NOIR', '#330024','#E60D8C','#FF99D9'],
+  ['CYAN ICE',     '#001F2E','#0DB3D9','#CCFAFF'],
+  ['NEON PINK',    '#40051A','#FF2673','#FFCC99'],
+];
+function hexRGB(h){ return [parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255]; }
+
+// ---------- SCENES ----------
+const SCENES = ['ELECTRIC SHEEP','CLOUD KINGDOM','NEBULA STORM','PLASMA CORE','VORTEX TUNNEL','LIQUID CHROME','STARFALL WARP','GALAXY SPIRAL','DEEP SPACE','SUPERNOVA','AURORA VEIL','HEX PULSE','CATHEDRAL BEAMS','BLACK HOLE','KALEIDOSCOPE','LASER GRID','PRISM SHARDS','FRACTAL DIVE','ION STORM','LIQUID GOLD','GLYPH BLOOM','METATRON CUBE','FLOWER OF LIFE','MERKABA','MENGER DIVE','APOLLONIAN','HYPERCUBE 4D','QUASICRYSTAL','TRUCHET WEAVE'];
+const GLYPH_SCENE = 20;
+
+// ---------- FONTS (40 display faces) ----------
+const FONTS = [
+  ['Bebas Neue','"Bebas Neue"',400],
+  ['Archivo Black','"Archivo Black"',400],
+  ['Passion One','"Passion One"',900],
+  ['Russo One','"Russo One"',400],
+  ['Black Ops One','"Black Ops One"',400],
+  ['Teko','"Teko"',700],
+  ['Oswald','"Oswald"',700],
+  ['Fjalla One','"Fjalla One"',400],
+  ['Permanent Marker','"Permanent Marker"',400],
+  ['Righteous','"Righteous"',400],
+  ['Creepster','"Creepster"',400],
+  ['Monoton','"Monoton"',400],
+  ['Cinzel','"Cinzel"',900],
+  ['Bungee','"Bungee"',400],
+  ['Playfair Italic','"Playfair Display"',900,1],
+  ['Alfa Slab One','"Alfa Slab One"',400],
+  ['Orbitron','"Orbitron"',900],
+  ['Exo 2 Italic','"Exo 2"',900,1],
+  ['Lobster','"Lobster"',400],
+  ['Pacifico','"Pacifico"',400],
+  ['Anton','"Anton"',400],
+  ['Bangers','"Bangers"',400],
+  ['Bungee Shade','"Bungee Shade"',400],
+  ['Rubik Mono One','"Rubik Mono One"',400],
+  ['Ultra','"Ultra"',400],
+  ['Titan One','"Titan One"',400],
+  ['Shrikhand','"Shrikhand"',400],
+  ['Luckiest Guy','"Luckiest Guy"',400],
+  ['Rye','"Rye"',400],
+  ['Faster One','"Faster One"',400],
+  ['Wallpoet','"Wallpoet"',400],
+  ['Audiowide','"Audiowide"',400],
+  ['Michroma','"Michroma"',400],
+  ['Press Start 2P','"Press Start 2P"',400],
+  ['Abril Fatface','"Abril Fatface"',400],
+  ['Staatliches','"Staatliches"',400],
+  ['Metal Mania','"Metal Mania"',400],
+  ['Nosifer','"Nosifer"',400],
+  ['Pirata One','"Pirata One"',400],
+  ['Chango','"Chango"',400],
+];
+
+// ---------- PAINT STYLES (22) ----------
+const STYLES = ['NEON','CHROME','ROYAL GOLD','FIRE','ICE','OUTLINE','SHADOW POP','GLITCH','HOLOGRAM','3D POP','GOLD FOIL','EMBER','ELECTRIC SHEEP','PRISMATIC','VAPORWAVE','GRAFFITI DRIP','TOXIC SLIME','DIAMOND','BLOOD DRIP','CIRCUIT','STARDUST','MAGMA'];
+
+// ---------- ENTRANCE FX (12) + IDLE MOTION ----------
+const ENTRANCES = ['SLAM','SLIDE UP','DISSOLVE','ELECTRIC','GHOST','WARP','SHATTER','SPIN','DROP BOUNCE','ZOOM PUNCH','FLIP UP','TYPEWRITER'];
+const MOTIONS = ['WAVE','BOUNCE','SWAY','PULSE','STILL'];
+
+// ---------- FONT DNA: each font's best-match paint + motion ----------
+const DNA = {
+  'Bebas Neue':[0,0],'Archivo Black':[6,1],'Passion One':[3,1],'Russo One':[12,3],
+  'Black Ops One':[7,4],'Teko':[4,0],'Oswald':[1,3],'Fjalla One':[0,0],
+  'Permanent Marker':[15,2],'Righteous':[8,0],'Creepster':[16,1],'Monoton':[12,3],
+  'Cinzel':[2,3],'Bungee':[9,1],'Playfair Italic':[10,2],'Alfa Slab One':[9,1],
+  'Orbitron':[8,3],'Exo 2 Italic':[7,0],'Lobster':[3,2],'Pacifico':[4,2],
+  'Anton':[0,3],'Bangers':[15,1],'Bungee Shade':[13,0],'Rubik Mono One':[19,3],
+  'Ultra':[9,1],'Titan One':[16,1],'Shrikhand':[14,2],'Luckiest Guy':[15,1],
+  'Rye':[10,3],'Faster One':[12,0],'Wallpoet':[19,4],'Audiowide':[8,3],
+  'Michroma':[1,4],'Press Start 2P':[7,1],'Abril Fatface':[17,2],'Staatliches':[6,0],
+  'Metal Mania':[21,2],'Nosifer':[18,1],'Pirata One':[18,2],'Chango':[3,1],
+};
+
+// ---------- AUTO COMBOS (rotate every HOLD bars) ----------
+const COMBOS = [
+  {f1:0,s1:12,f2:6,s2:5,scene:0,pal:1,fx:3,mo:0},    // Bebas electric-sheep · Sheep · Ultraviolet
+  {f1:20,s1:13,f2:31,s2:8,scene:14,pal:3,fx:9,mo:3}, // Anton prismatic · Kaleido · Miami
+  {f1:16,s1:8,f2:17,s2:7,scene:7,pal:6,fx:0,mo:3},   // Orbitron holo · Galaxy · Sapphire
+  {f1:26,s1:14,f2:31,s2:19,scene:15,pal:11,fx:10,mo:2},// Shrikhand vaporwave · Laser Grid · Neon Pink
+  {f1:21,s1:15,f2:27,s2:6,scene:3,pal:2,fx:6,mo:1},  // Bangers graffiti · Plasma · Lava
+  {f1:12,s1:2,f2:14,s2:10,scene:12,pal:0,fx:4,mo:3}, // Cinzel gold · Cathedral · Royal Gold
+  {f1:1,s1:6,f2:7,s2:0,scene:9,pal:2,fx:9,mo:1},     // Archivo shadow · Supernova · Lava
+  {f1:34,s1:17,f2:32,s2:1,scene:16,pal:10,fx:7,mo:4},// Abril diamond · Prism · Cyan Ice
+  {f1:4,s1:7,f2:33,s2:7,scene:8,pal:10,fx:3,mo:4},   // BlackOps glitch · Deep Space · Cyan Ice
+  {f1:36,s1:21,f2:38,s2:18,scene:13,pal:5,fx:8,mo:1},// Metal Mania magma · Black Hole · Crimson
+  {f1:13,s1:9,f2:9,s2:8,scene:2,pal:9,fx:5,mo:0},    // Bungee 3D · Nebula · Magenta
+  {f1:3,s1:12,f2:18,s2:11,scene:13,pal:7,fx:2,mo:2}, // Russo electric-sheep · Black Hole · Amethyst
+  {f1:2,s1:3,f2:19,s2:4,scene:10,pal:8,fx:1,mo:0},   // Passion fire · Aurora · Emerald
+  {f1:29,s1:12,f2:16,s2:19,scene:17,pal:1,fx:6,mo:3},// Faster One electric-sheep · Fractal Dive · Ultraviolet
+  {f1:23,s1:19,f2:30,s2:7,scene:18,pal:6,fx:3,mo:4}, // Rubik Mono circuit · Ion Storm · Sapphire
+  {f1:24,s1:2,f2:28,s2:10,scene:19,pal:0,fx:9,mo:1}, // Ultra gold · Liquid Gold · Royal Gold
+  {f1:12,s1:2,f2:12,s2:20,scene:20,pal:7,fx:4,mo:2}, // Cinzel gold + stardust · Glyph Bloom · Amethyst
+  {f1:12,s1:2,f2:14,s2:10,scene:21,pal:0,fx:4,mo:3}, // Cinzel gold · Metatron Cube · Royal Gold
+  {f1:16,s1:8,f2:17,s2:7,scene:22,pal:7,fx:0,mo:0},  // Orbitron holo · Flower of Life · Amethyst
+  {f1:34,s1:17,f2:32,s2:1,scene:23,pal:10,fx:7,mo:4},// Abril diamond · Merkaba · Cyan Ice
+  {f1:23,s1:19,f2:30,s2:7,scene:24,pal:1,fx:3,mo:3}, // Rubik Mono circuit · Menger Dive · Ultraviolet
+  {f1:29,s1:12,f2:16,s2:19,scene:25,pal:2,fx:6,mo:1},// Faster One · Apollonian · Lava
+  {f1:4,s1:7,f2:33,s2:7,scene:26,pal:6,fx:3,mo:4},   // BlackOps glitch · Hypercube 4D · Sapphire
+  {f1:26,s1:14,f2:31,s2:19,scene:27,pal:11,fx:10,mo:2},// Shrikhand vaporwave · Quasicrystal · Neon Pink
+  {f1:24,s1:2,f2:28,s2:10,scene:28,pal:0,fx:9,mo:1}, // Ultra gold · Truchet Weave · Royal Gold
+];
+
+// ---------- STATE ----------
+const ST = {
+  scene:0, pal:0, auto:true,
+  bpm:96, count:4, beatIdx:-1, nextBeat:0, phrase:0,
+  tempoMode:'auto',           // 'auto' (detected) | 'tap'
+  beatPulse:0, downPulse:0,
+  running:false, source:null, // 'mic' | 'demo'
+  pinned:false,
+  entrance:0, motion:0,
+  detBPM:0, hold:8,           // bars per auto-show hold
+};
+const A = { bass:0, mid:0, treb:0, energy:0 };
+
+// ---------- SIZING + QUALITY ----------
+// cap  = longest edge of the canvas backing store (display pixels)
+// scale = internal render size relative to the canvas (>1 = supersampled)
+// tx   = device-pixel cap for the 2D type/FX layer
+// qual = shader detail level fed to uQual (octaves, march steps)
+let W=0,H=0, dpr2d=1;
+const QUALITY = [
+  {name:'AUTO · ADAPTIVE', cap:3840, scale:0.86, dpr:2.0, adapt:true,  qual:2, tx:2.0},
+  {name:'1080p · LITE',    cap:1920, scale:0.75, dpr:1.5, adapt:false, qual:0, tx:1.5},
+  {name:'1440p · SHARP',   cap:2560, scale:0.92, dpr:2.0, adapt:false, qual:1, tx:1.75},
+  {name:'4K · ULTRA HD',   cap:3840, scale:1.00, dpr:2.0, adapt:false, qual:2, tx:2.0},
+  {name:'4K · CINEMA SS',  cap:3840, scale:1.35, dpr:2.0, adapt:false, qual:2, tx:2.0},
+];
+let QI = 0;          // active tier
+let adaptK = 1.0;    // adaptive multiplier (AUTO only)
+let TXSS = 1;        // type/sprite supersample = device pixel ratio of the 2D layer
+const RS = {cw:2, ch:2, iw:2, ih:2};   // canvas size + internal render size
+
+function computeRS(){
+  const q = QUALITY[QI];
+  const dpr = Math.min(window.devicePixelRatio||1, q.dpr);
+  let cw = Math.max(2, Math.round(W*dpr)), ch = Math.max(2, Math.round(H*dpr));
+  const lng = Math.max(cw, ch);
+  if(lng > q.cap){ const k = q.cap/lng; cw = Math.round(cw*k); ch = Math.round(ch*k); }
+  const maxTex = (gl && gl.getParameter(gl.MAX_TEXTURE_SIZE)) || 4096;
+  cw = Math.min(cw, maxTex); ch = Math.min(ch, maxTex);
+  const k2 = q.scale * (q.adapt ? adaptK : 1);
+  let iw = Math.round(cw*k2), ih = Math.round(ch*k2);
+  // fill-rate + VRAM budget: half-float targets are 8 bytes/px and we hold several
+  const budget = HDR ? 9.6e6 : 13.0e6;
+  if(iw*ih > budget){ const k = Math.sqrt(budget/(iw*ih)); iw = Math.round(iw*k); ih = Math.round(ih*k); }
+  RS.cw = cw; RS.ch = ch;
+  RS.iw = Math.max(2, Math.min(iw, maxTex));
+  RS.ih = Math.max(2, Math.min(ih, maxTex));
+}
+function resize(){
+  W = window.innerWidth; H = window.innerHeight;
+  dpr2d = Math.min(window.devicePixelRatio||1, QUALITY[QI].tx);
+  TXSS = Math.max(1, Math.min(2, dpr2d));   // bake glyphs at panel resolution, stamp at CSS size
+  txCv.width = Math.round(W*dpr2d); txCv.height = Math.round(H*dpr2d);
+  txCv.style.width = W+'px'; txCv.style.height = H+'px';
+  tctx.setTransform(dpr2d,0,0,dpr2d,0,0);
+  computeRS();
+  glCv.width = RS.cw; glCv.height = RS.ch;
+  glCv.style.width = W+'px'; glCv.style.height = H+'px';
+  glResize();
+  L1.dirty = L2.dirty = MQ.dirty = true;
+}
+window.addEventListener('resize', ()=>{ resize(); });
+
+// ============================================================
+// WEBGL PIPELINE
+// ============================================================
+const gl = glCv.getContext('webgl2', {
+  antialias:false, alpha:false, preserveDrawingBuffer:false,
+  powerPreference:'high-performance', desynchronized:true
+});
+// Half-float render targets give the scene real headroom above 1.0, which is what
+// makes bloom read as light instead of as a white smear.
+let HDR = false, PSC = null;
+if(gl){
+  HDR = !!(gl.getExtension('EXT_color_buffer_half_float') || gl.getExtension('EXT_color_buffer_float'));
+  gl.getExtension('OES_texture_float_linear');
+  // lets the driver compile the (large) scene shader off the main thread
+  PSC = gl.getExtension('KHR_parallel_shader_compile');
+}
+let progScene=null, progFinal=null, progBright=null, progDown=null, progUp=null, vao=null;
+let fboA=null, fboB=null, texA=null, texB=null, fbW=0, fbH=0;
+const MIPS = [];
+const U = {scene:{}, final:{}, bright:{}, down:{}, up:{}};
+const BLOOM = {thresh:1.10, knee:0.60, amt:0.55};
+
+function compile(type, src){
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  // querying COMPILE_STATUS forces a synchronous stall — skip it when the driver
+  // can compile in parallel; link status below reports the same failures.
+  if(!PSC && !gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+function program(fs){
+  const p = gl.createProgram();
+  gl.attachShader(p, compile(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+  gl.bindAttribLocation(p, 0, 'aPos');   // every pass shares one quad VAO
+  gl.linkProgram(p);
+  return p;   // link status is checked in finishInit(), once compilation lands
+}
+function locs(prog, names, into){
+  names.forEach(n => into[n] = gl.getUniformLocation(prog, n));
+  return into;
+}
+function mkTex(w,h){
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  if(HDR) gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA16F,w,h,0,gl.RGBA,gl.HALF_FLOAT,null);
+  else    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  return t;
+}
+function mkFbo(t){
+  const f = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+  return f;
+}
+function glResize(){
+  if(!gl) return;
+  computeRS();
+  fbW = RS.iw; fbH = RS.ih;
+  if(texA){
+    gl.deleteTexture(texA); gl.deleteTexture(texB);
+    gl.deleteFramebuffer(fboA); gl.deleteFramebuffer(fboB);
+  }
+  MIPS.forEach(m => { gl.deleteTexture(m.tex); gl.deleteFramebuffer(m.fbo); });
+  MIPS.length = 0;
+  texA = mkTex(fbW,fbH); texB = mkTex(fbW,fbH);
+  fboA = mkFbo(texA);    fboB = mkFbo(texB);
+  // bloom chain: halve until the smallest mip is a few pixels across
+  let w = Math.max(2, fbW>>1), h = Math.max(2, fbH>>1);
+  const levels = Math.max(3, Math.min(7, Math.floor(Math.log2(Math.min(fbW,fbH))) - 3));
+  for(let i=0;i<levels;i++){
+    const t = mkTex(w,h);
+    MIPS.push({w:w, h:h, tex:t, fbo:mkFbo(t)});
+    w = Math.max(2, w>>1); h = Math.max(2, h>>1);
+    if(w < 8 || h < 8) break;
+  }
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+function glInit(){
+  progScene  = program(SCENE_FRAG);
+  progFinal  = program(FINAL_FRAG);
+  progBright = program(BRIGHT_FRAG);
+  progDown   = program(DOWN_FRAG);
+  progUp     = program(UP_FRAG);
+  const quad = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  glResize();
+}
+
+// Uniform lookups block until the program has finished linking, so they wait
+// until the driver reports every program complete. Until then the loop idles —
+// no frozen tab while a 29-scene shader compiles on modest hardware.
+let glReady = false;
+function finishInit(){
+  const all = [progScene, progFinal, progBright, progDown, progUp];
+  if(PSC){
+    for(const pr of all)
+      if(!gl.getProgramParameter(pr, PSC.COMPLETION_STATUS_KHR)) return false;
+  }
+  for(const pr of all)
+    if(!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+  locs(progScene, ['uRes','uTime','uBass','uMid','uTreb','uEnergy','uBeat','uDown','uScene',
+                   'uColA','uColB','uColC','uPrev','uTrail','uQual','uHdr'], U.scene);
+  locs(progFinal, ['uTex','uBloom','uRes','uSrcTexel','uTimeG','uBeat','uDown','uAber',
+                   'uBloomAmt','uSharp','uGrain','uExpo'], U.final);
+  locs(progBright,['uTex','uTexel','uThresh','uKnee'], U.bright);
+  locs(progDown,  ['uTex','uTexel'], U.down);
+  locs(progUp,    ['uTex','uTexel','uAmt'], U.up);
+  glReady = true;
+  return true;
+}
+
+function pass(prog, fbo, w, h){
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.viewport(0,0,w,h);
+  gl.useProgram(prog);
+}
+function bindTex(unit, tex, loc){
+  gl.activeTexture(gl.TEXTURE0 + unit);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.uniform1i(loc, unit);
+}
+function drawQuad(){ gl.drawArrays(gl.TRIANGLE_STRIP,0,4); }
+
+let flip=false;
+function glDraw(t){
+  if(!progScene) return;
+  if(!glReady){
+    try{ if(!finishInit()) return; }
+    catch(err){ progScene = null; console.error(err); toast('SHADER COMPILE FAILED'); return; }
+  }
+  const pal = PALETTES[ST.pal];
+  const q = QUALITY[QI];
+  const [srcTex, dstFbo] = flip ? [texA, fboB] : [texB, fboA];
+  const outTex = flip ? texB : texA;
+  flip = !flip;
+  gl.bindVertexArray(vao);
+  gl.disable(gl.BLEND);
+
+  // ---- 1. scene → HDR target (with previous frame folded in for trails) ----
+  pass(progScene, dstFbo, fbW, fbH);
+  gl.uniform2f(U.scene.uRes, fbW, fbH);
+  gl.uniform1f(U.scene.uTime, t*(reduced?0.4:1));
+  gl.uniform1f(U.scene.uBass, A.bass);
+  gl.uniform1f(U.scene.uMid, A.mid);
+  gl.uniform1f(U.scene.uTreb, A.treb);
+  gl.uniform1f(U.scene.uEnergy, A.energy);
+  gl.uniform1f(U.scene.uBeat, ST.beatPulse);
+  gl.uniform1f(U.scene.uDown, ST.downPulse);
+  gl.uniform1i(U.scene.uScene, ST.scene);
+  gl.uniform3fv(U.scene.uColA, hexRGB(pal[1]));
+  gl.uniform3fv(U.scene.uColB, hexRGB(pal[2]));
+  gl.uniform3fv(U.scene.uColC, hexRGB(pal[3]));
+  gl.uniform1f(U.scene.uQual, (q.adapt && adaptK < 0.72) ? Math.max(0, q.qual-1) : q.qual);
+  gl.uniform1f(U.scene.uHdr, HDR ? 14.0 : 1.6);
+  bindTex(0, srcTex, U.scene.uPrev);
+  gl.uniform1f(U.scene.uTrail, reduced ? 0.34 : (0.52 + A.bass*0.30));
+  drawQuad();
+
+  // ---- 2..4. bloom: extract → downsample chain → additive tent upsample ----
+  if(MIPS.length){
+    const m0 = MIPS[0];
+    pass(progBright, m0.fbo, m0.w, m0.h);
+    gl.uniform2f(U.bright.uTexel, 1/fbW, 1/fbH);
+    gl.uniform1f(U.bright.uThresh, HDR ? BLOOM.thresh : 0.78);
+    gl.uniform1f(U.bright.uKnee, BLOOM.knee);
+    bindTex(0, outTex, U.bright.uTex);
+    drawQuad();
+
+    for(let i=1;i<MIPS.length;i++){
+      const a = MIPS[i-1], b = MIPS[i];
+      pass(progDown, b.fbo, b.w, b.h);
+      gl.uniform2f(U.down.uTexel, 1/a.w, 1/a.h);
+      bindTex(0, a.tex, U.down.uTex);
+      drawQuad();
+    }
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    for(let i=MIPS.length-1;i>0;i--){
+      const a = MIPS[i], b = MIPS[i-1];
+      pass(progUp, b.fbo, b.w, b.h);
+      gl.uniform2f(U.up.uTexel, 1/a.w, 1/a.h);
+      gl.uniform1f(U.up.uAmt, 0.82);
+      bindTex(0, a.tex, U.up.uTex);
+      drawQuad();
+    }
+    gl.disable(gl.BLEND);
+  }
+
+  // ---- 5. composite → screen ----
+  pass(progFinal, null, RS.cw, RS.ch);
+  gl.uniform2f(U.final.uRes, RS.cw, RS.ch);
+  gl.uniform2f(U.final.uSrcTexel, 1/fbW, 1/fbH);
+  gl.uniform1f(U.final.uTimeG, (t*60)%997);
+  gl.uniform1f(U.final.uBeat, ST.beatPulse);
+  gl.uniform1f(U.final.uDown, ST.downPulse);
+  gl.uniform1f(U.final.uAber, A.treb);
+  gl.uniform1f(U.final.uBloomAmt, MIPS.length ? BLOOM.amt : 0.0);
+  // sharpen only pays for itself when the internal buffer is below the canvas
+  gl.uniform1f(U.final.uSharp, Math.max(0, Math.min(0.42, (1 - fbW/RS.cw) * 1.5)));
+  gl.uniform1f(U.final.uGrain, RS.ch > 1600 ? 0.020 : 0.032);
+  gl.uniform1f(U.final.uExpo, HDR ? 1.30 : 1.35);
+  bindTex(0, outTex, U.final.uTex);
+  bindTex(1, MIPS.length ? MIPS[0].tex : outTex, U.final.uBloom);
+  drawQuad();
+}
+
+// ---------- adaptive resolution governor (AUTO tier only) ----------
+const PERF = {ema:16.7, up:0, down:0, fps:60};
+function govern(dtMs){
+  PERF.ema = PERF.ema*0.92 + dtMs*0.08;
+  PERF.fps = 1000/Math.max(PERF.ema, 1);
+  if(!QUALITY[QI].adapt) return;
+  if(PERF.ema > 21.5){ PERF.down++; PERF.up = 0; }
+  else if(PERF.ema < 14.2){ PERF.up++; PERF.down = 0; }
+  else { PERF.up = 0; PERF.down = 0; }
+  if(PERF.down > 45 && adaptK > 0.50){
+    adaptK = Math.max(0.50, adaptK - 0.08); PERF.down = PERF.up = 0; glResize();
+  } else if(PERF.up > 260 && adaptK < 1.18){
+    adaptK = Math.min(1.18, adaptK + 0.06); PERF.down = PERF.up = 0; glResize();
+  }
+}
+
+// ============================================================
+// AUDIO — mic or demo, band analysis, auto BPM detect
+// ============================================================
+let AC=null, analyser=null, freqD=null;
+let micStream=null, micSrc=null, demo=null;
+
+function ensureAC(){
+  if(!AC){
+    AC = new (window.AudioContext||window.webkitAudioContext)();
+    analyser = AC.createAnalyser();
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0.72;
+    freqD = new Uint8Array(analyser.frequencyBinCount);
+  }
+  if(AC.state==='suspended') AC.resume();
+}
+function stopSources(){
+  if(demo){ demo.stop(); demo=null; }
+  if(micSrc){ try{micSrc.disconnect();}catch(e){} micSrc=null; }
+  if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+  try{ analyser.disconnect(); }catch(e){}
+}
+async function startMic(){
+  ensureAC(); stopSources();
+  try{
+    micStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  }catch(e){ toast('MIC BLOCKED — CHECK PERMISSIONS'); return false; }
+  micSrc = AC.createMediaStreamSource(micStream);
+  micSrc.connect(analyser); // analyser only — no monitor loop, no feedback
+  ST.source='mic'; ST.running=true;
+  srcUI(); toast('LIVE ROOM AUDIO'); return true;
+}
+function startDemo(){
+  ensureAC(); stopSources();
+  demo = makeDemo();
+  ST.source='demo'; ST.running=true;
+  if(ST.tempoMode==='tap'){ /* keep tapped */ } else { ST.bpm=96; reanchor(performance.now()); }
+  srcUI(); toast('DEMO BEAT · 96 BPM');
+}
+function makeDemo(){
+  const bpm=96, spb=60/bpm;
+  const bus=AC.createGain(); bus.gain.value=.9;
+  const out=AC.createGain(); out.gain.value=.8;
+  bus.connect(analyser); analyser.connect(out); out.connect(AC.destination);
+  let next=AC.currentTime+.08, step=0, timer=null, alive=true;
+  const bassLine=[41.2,41.2,49,41.2,41.2,55,49,36.7];
+  function kick(t){
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(42,t+.11);
+    g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(.001,t+.24);
+    o.connect(g); g.connect(bus); o.start(t); o.stop(t+.26);
+  }
+  function hat(t,open){
+    const len=Math.floor(AC.sampleRate*(open?.14:.045));
+    const buf=AC.createBuffer(1,len,AC.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);
+    const b=AC.createBufferSource(), f=AC.createBiquadFilter(), g=AC.createGain();
+    f.type='highpass'; f.frequency.value=7000; g.gain.value=open?.22:.15;
+    b.buffer=buf; b.connect(f); f.connect(g); g.connect(bus); b.start(t);
+  }
+  function bass(t,f0){
+    const o=AC.createOscillator(), g=AC.createGain(), fl=AC.createBiquadFilter();
+    o.type='sawtooth'; o.frequency.value=f0;
+    fl.type='lowpass'; fl.frequency.setValueAtTime(900,t); fl.frequency.exponentialRampToValueAtTime(180,t+spb*.9);
+    g.gain.setValueAtTime(.30,t); g.gain.exponentialRampToValueAtTime(.001,t+spb*.95);
+    o.connect(fl); fl.connect(g); g.connect(bus); o.start(t); o.stop(t+spb);
+  }
+  function schedule(){
+    if(!alive) return;
+    while(next < AC.currentTime+.25){
+      const s=step%16;
+      if(s%4===0) kick(next);
+      if(s%2===0) hat(next, s===14);
+      if(s%2===0) bass(next, bassLine[(s/2)%8]);
+      next += spb/2; step++;
+    }
+    timer=setTimeout(schedule,60);
+  }
+  schedule();
+  return { stop(){ alive=false; clearTimeout(timer); try{bus.disconnect(); out.disconnect();}catch(e){} } };
+}
+
+// ---- analysis + onset-based BPM detection ----
+const bassHist = new Array(48).fill(0);
+let bhIdx=0, lastOnset=0;
+const gaps=[];
+function analyse(now){
+  analyser.getByteFrequencyData(freqD);
+  const n = freqD.length; // 512
+  const avg=(a,b)=>{ let s=0; for(let i=a;i<b;i++) s+=freqD[i]; return s/((b-a)*255); };
+  const bass=avg(1,6), mid=avg(6,60), treb=avg(60,Math.min(280,n));
+  const k = 0.4;
+  A.bass += (bass-A.bass)*k; A.mid += (mid-A.mid)*k; A.treb += (treb-A.treb)*k;
+  A.energy = A.bass*.5 + A.mid*.35 + A.treb*.15;
+  // onsets
+  bassHist[bhIdx]=bass; bhIdx=(bhIdx+1)%bassHist.length;
+  let mean=0; for(let i=0;i<bassHist.length;i++) mean+=bassHist[i];
+  mean/=bassHist.length;
+  if(bass > mean*1.30 && bass > .10 && now-lastOnset > 230){
+    if(lastOnset){
+      const g = now-lastOnset;
+      if(g<1500){ gaps.push(g); if(gaps.length>12) gaps.shift(); }
+    }
+    lastOnset=now;
+    if(gaps.length>=6){
+      const s=[...gaps].sort((a,b)=>a-b);
+      let bpm = 60000/s[Math.floor(s.length/2)];
+      while(bpm<70) bpm*=2; while(bpm>180) bpm/=2;
+      ST.detBPM = Math.round(bpm);
+      if(ST.tempoMode==='auto' && Math.abs(ST.detBPM-ST.bpm)>=2){
+        ST.bpm = ST.detBPM;
+        // re-anchor phase to this onset so downbeats ride the kick
+        ST.nextBeat = now + 60000/ST.bpm;
+      }
+    }
+  }
+}
+
+// ============================================================
+// BEAT CLOCK — bpm × count, tap tempo, downbeats, phrases
+// ============================================================
+function reanchor(now){ ST.nextBeat = now + 60000/ST.bpm; }
+const taps=[];
+function tap(now){
+  if(taps.length && now-taps[taps.length-1]>2000) taps.length=0;
+  taps.push(now); if(taps.length>7) taps.shift();
+  if(taps.length>=3){
+    const g=[]; for(let i=1;i<taps.length;i++) g.push(taps[i]-taps[i-1]);
+    g.sort((a,b)=>a-b);
+    ST.bpm = Math.round(60000/g[Math.floor(g.length/2)]);
+    ST.tempoMode='tap'; tempoUI();
+  }
+  // every tap is treated as a downbeat anchor
+  ST.beatIdx = Math.floor((ST.beatIdx+1)/ST.count)*ST.count;
+  fireBeat(now, true);
+  ST.nextBeat = now + 60000/ST.bpm;
+  flashTap();
+}
+function clockTick(now){
+  if(!ST.nextBeat) ST.nextBeat = now + 60000/ST.bpm;
+  let guard=0;
+  while(now >= ST.nextBeat && guard++<8){
+    ST.beatIdx++;
+    fireBeat(ST.nextBeat, ST.beatIdx % ST.count === 0);
+    ST.nextBeat += 60000/ST.bpm;
+  }
+  const decay = reduced? .92 : .955;
+  ST.beatPulse *= decay; ST.downPulse *= decay;
+}
+let sweepT = -9999;
+function fireBeat(t, down){
+  ST.beatPulse = 1;
+  dotsUI();
+  if(down){
+    ST.downPulse = 1;
+    spawnRing();
+    if(FXLEVEL===2) laserT = performance.now();
+    sweepT = performance.now();
+    ST.phrase++;
+    if(ST.auto && ST.phrase % ST.hold === 0) nextCombo();
+    else if(ST.phrase % ST.hold === 0){ L1.tStart = performance.now(); L2.tStart = performance.now()+140; }
+  }
+}
+let comboIdx=-1;
+function nextCombo(){
+  comboIdx = (comboIdx+1) % COMBOS.length;
+  const c = COMBOS[comboIdx];
+  ST.scene=c.scene; ST.pal=c.pal; ST.entrance=c.fx; ST.motion=c.mo;
+  L1.font=c.f1; L1.style=c.s1; L2.font=c.f2; L2.style=c.s2;
+  L1.dirty=L2.dirty=MQ.dirty=true;
+  L1.tStart=performance.now(); L2.tStart=performance.now()+140;
+  if(FXLEVEL>0) sparkT=performance.now();
+  selUI();
+}
+
+// ============================================================
+// TEXT ENGINE — sprite-cached glyphs (bake once, stamp per frame)
+// ============================================================
+function mkLine(text, font, style, size){
+  return {text, font, style, size, sprites:[], totalW:0, px:0, dirty:true, tStart:performance.now()};
+}
+const L1 = mkLine('DREAM PALACE', 0, 0, 1);
+const L2 = mkLine('CABARET', 12, 2, 1);
+const MQ = {text:'FRIDAY NIGHT · DREAM PALACE CABARET · SCOTTSDALE RD', font:3, style:0, size:1,
+            sprite:null, dirty:true, x:0};
+
+function fontCSS(fi, px){
+  const f=FONTS[fi];
+  return (f[3]?'italic ':'') + f[2] + ' ' + px + 'px ' + f[1];
+}
+
+// bake a single styled glyph to an offscreen canvas — heavy fx allowed HERE only
+function bakeGlyph(ch, fi, px, si, pal){
+  const pad = Math.ceil(px*0.55);
+  const meas = document.createElement('canvas').getContext('2d');
+  meas.font = fontCSS(fi, px);
+  const w = Math.ceil(meas.measureText(ch).width);
+  const cv = document.createElement('canvas');
+  cv.width = w + pad*2; cv.height = Math.ceil(px*1.5) + pad*2;
+  const c = cv.getContext('2d');
+  const cx = cv.width/2, cy = cv.height/2;
+  c.font = fontCSS(fi, px);
+  c.textAlign='center'; c.textBaseline='middle';
+  const lo=pal[1], mid=pal[2], hi=pal[3];
+  const lw = Math.max(2, px*0.045);
+  function grad(stops){
+    const g=c.createLinearGradient(0,cy-px*0.55,0,cy+px*0.55);
+    stops.forEach(s=>g.addColorStop(s[0],s[1]));
+    return g;
+  }
+  function core(fill, strokeCol){
+    c.lineJoin='round'; c.lineWidth=lw; c.strokeStyle=strokeCol||'#0A0810';
+    c.strokeText(ch,cx,cy);
+    c.fillStyle=fill; c.fillText(ch,cx,cy);
+  }
+  switch(si){
+    case 0: // NEON
+      c.shadowColor=mid; c.shadowBlur=px*0.32; core(hi); c.shadowBlur=px*0.14; core(hi);
+      break;
+    case 1: // CHROME
+      core(grad([[0,'#FFFFFF'],[0.42,'#C9D2E0'],[0.5,'#4E5766'],[0.58,'#AEB9C9'],[1,'#E8EEF7']]), '#0C0F16');
+      break;
+    case 2: // ROYAL GOLD
+      c.shadowColor='#FFC72E'; c.shadowBlur=px*0.22;
+      core(grad([[0,'#FFF6C9'],[0.5,'#F5C542'],[1,'#8A5A08']]), '#241503');
+      break;
+    case 3: // FIRE
+      c.shadowColor='#FF5A00'; c.shadowBlur=px*0.30;
+      core(grad([[0,'#FFF0A0'],[0.55,'#FF9A2E'],[1,'#D42605']]), '#2A0500');
+      break;
+    case 4: // ICE
+      c.shadowColor='#57C9FF'; c.shadowBlur=px*0.28;
+      core(grad([[0,'#FFFFFF'],[0.55,'#BFEAFF'],[1,'#2E8FD4']]), '#04121F');
+      break;
+    case 5: // OUTLINE
+      c.lineJoin='round';
+      c.lineWidth=lw*2.6; c.strokeStyle=hi; c.strokeText(ch,cx,cy);
+      c.lineWidth=lw*0.9; c.strokeStyle='#0A0810'; c.strokeText(ch,cx,cy);
+      c.fillStyle='rgba(10,8,16,0.45)'; c.fillText(ch,cx,cy);
+      break;
+    case 6: // SHADOW POP
+      c.fillStyle='#0A0810';
+      c.fillText(ch, cx+px*0.06, cy+px*0.07);
+      core(hi);
+      break;
+    case 7: // GLITCH — bake base; RGB split happens at stamp time via offsets
+      core(hi);
+      break;
+    case 8: // HOLOGRAM
+      c.shadowColor=mid; c.shadowBlur=px*0.20;
+      core(grad([[0,'#7DF9FF'],[0.5,hi],[1,'#FF7DEB']]), '#070512');
+      c.shadowBlur=0;
+      c.globalCompositeOperation='destination-out';
+      for(let y=0;y<cv.height;y+=Math.max(3,px*0.075)) c.fillRect(0,y,cv.width,1);
+      c.globalCompositeOperation='source-over';
+      break;
+    case 9:{ // 3D POP
+      const steps=Math.max(4,Math.floor(px*0.09));
+      for(let i=steps;i>0;i--){
+        c.fillStyle = i>steps*0.5 ? '#0A0810' : lo;
+        c.fillText(ch, cx+i*0.9, cy+i*0.9);
+      }
+      core(hi);
+      break;
+    }
+    case 10: // GOLD FOIL
+      core(grad([[0,'#FFF6C9'],[0.35,'#F5C542'],[0.5,'#FFFFFF'],[0.65,'#D89B1E'],[1,'#7A4E06']]), '#241503');
+      break;
+    case 11: // EMBER
+      c.shadowColor='#FF3A00'; c.shadowBlur=px*0.26;
+      core(grad([[0,'#FF7A2E'],[0.6,'#8C1500'],[1,'#2A0200']]), '#180100');
+      break;
+    case 12:{ // ELECTRIC SHEEP — fractal fringe: jittered strokes swarm the core
+      const seed = ch.charCodeAt(0)*1.7;
+      c.lineJoin='round';
+      c.lineWidth=Math.max(1, px*0.02);
+      for(let k=0;k<10;k++){
+        const ang = srnd(seed+k)*Math.PI*2;
+        const rad = (0.5+srnd(seed+k+40))*px*0.055;
+        c.strokeStyle = k%2 ? mid : hi;
+        c.globalAlpha = 0.22;
+        c.strokeText(ch, cx+Math.cos(ang)*rad, cy+Math.sin(ang)*rad);
+      }
+      c.globalAlpha=1;
+      c.shadowColor=mid; c.shadowBlur=px*0.34;
+      core(hi);
+      c.shadowBlur=px*0.12;
+      c.lineWidth=Math.max(1, px*0.018); c.strokeStyle='#FFFFFF';
+      c.globalAlpha=0.85; c.strokeText(ch,cx,cy); c.globalAlpha=1;
+      break;
+    }
+    case 13:{ // PRISMATIC — full-spectrum sweep with glow
+      const g=c.createLinearGradient(cx-px*0.6,cy-px*0.5,cx+px*0.6,cy+px*0.5);
+      g.addColorStop(0,'#FF4DD2'); g.addColorStop(0.33,'#4DC3FF');
+      g.addColorStop(0.66,'#7DFFB2'); g.addColorStop(1,'#FFD84D');
+      c.shadowColor=mid; c.shadowBlur=px*0.24;
+      core(g);
+      break;
+    }
+    case 14:{ // VAPORWAVE — pink/cyan horizon split + scanlines
+      c.shadowColor='#FF71CE'; c.shadowBlur=px*0.22;
+      core(grad([[0,'#FF71CE'],[0.49,'#B967FF'],[0.51,'#01CDFE'],[1,'#05FFA1']]), '#12002E');
+      c.shadowBlur=0;
+      c.globalCompositeOperation='destination-out';
+      for(let y=Math.floor(cv.height*0.5); y<cv.height; y+=Math.max(3,px*0.07))
+        c.fillRect(0,y,cv.width,1);
+      c.globalCompositeOperation='source-over';
+      break;
+    }
+    case 15:{ // GRAFFITI DRIP — fat white halo, hot fill, paint drips
+      const seed = ch.charCodeAt(0)*2.3;
+      c.lineJoin='round';
+      c.lineWidth=lw*3.2; c.strokeStyle='#FFFFFF'; c.strokeText(ch,cx,cy);
+      c.lineWidth=lw*1.1; c.strokeStyle='#0A0810'; c.strokeText(ch,cx,cy);
+      c.fillStyle=hi; c.fillText(ch,cx,cy);
+      for(let k=0;k<2;k++){
+        const dx = cx + (srnd(seed+k)-0.5)*px*0.55;
+        const dy = cy + px*0.42;
+        const dl = px*(0.18 + srnd(seed+k+9)*0.28);
+        const dw = Math.max(2, px*0.06);
+        c.fillStyle=hi;
+        c.fillRect(dx-dw/2, dy, dw, dl);
+        c.beginPath(); c.arc(dx, dy+dl, dw*0.65, 0, Math.PI*2); c.fill();
+      }
+      break;
+    }
+    case 16:{ // TOXIC SLIME — acid green ooze + drips
+      const seed = ch.charCodeAt(0)*3.1;
+      c.shadowColor='#39FF14'; c.shadowBlur=px*0.28;
+      core(grad([[0,'#D8FF7A'],[0.55,'#39FF14'],[1,'#0E5C00']]), '#04140A');
+      c.shadowBlur=px*0.10;
+      for(let k=0;k<2;k++){
+        const dx = cx + (srnd(seed+k)-0.5)*px*0.5;
+        const dy = cy + px*0.40;
+        const dl = px*(0.14 + srnd(seed+k+5)*0.24);
+        const dw = Math.max(2, px*0.055);
+        c.fillStyle='#39FF14';
+        c.fillRect(dx-dw/2, dy, dw, dl);
+        c.beginPath(); c.arc(dx, dy+dl, dw*0.7, 0, Math.PI*2); c.fill();
+      }
+      break;
+    }
+    case 17:{ // DIAMOND — silver facets + baked sparkle crosses
+      const seed = ch.charCodeAt(0)*4.7;
+      c.shadowColor='#FFFFFF'; c.shadowBlur=px*0.20;
+      core(grad([[0,'#FFFFFF'],[0.35,'#DDE8F5'],[0.5,'#8FA3BD'],[0.65,'#F0F6FF'],[1,'#B8C9DE']]), '#0C1420');
+      c.shadowBlur=0;
+      c.strokeStyle='#FFFFFF'; c.lineWidth=Math.max(1,px*0.014);
+      for(let k=0;k<4;k++){
+        const sx = cx + (srnd(seed+k)-0.5)*px*0.7;
+        const sy = cy + (srnd(seed+k+11)-0.5)*px*0.8;
+        const sl = px*(0.05 + srnd(seed+k+21)*0.05);
+        c.globalAlpha = 0.9;
+        c.beginPath();
+        c.moveTo(sx-sl,sy); c.lineTo(sx+sl,sy);
+        c.moveTo(sx,sy-sl); c.lineTo(sx,sy+sl);
+        c.stroke();
+      }
+      c.globalAlpha=1;
+      break;
+    }
+    case 18:{ // BLOOD DRIP — deep crimson + heavy drips
+      const seed = ch.charCodeAt(0)*5.3;
+      c.shadowColor='#8C0000'; c.shadowBlur=px*0.18;
+      core(grad([[0,'#FF3D3D'],[0.5,'#A80000'],[1,'#3D0000']]), '#140000');
+      c.shadowBlur=0;
+      for(let k=0;k<3;k++){
+        const dx = cx + (srnd(seed+k)-0.5)*px*0.6;
+        const dy = cy + px*0.38;
+        const dl = px*(0.20 + srnd(seed+k+7)*0.34);
+        const dw = Math.max(2, px*0.05);
+        c.fillStyle='#A80000';
+        c.fillRect(dx-dw/2, dy, dw, dl);
+        c.beginPath(); c.arc(dx, dy+dl, dw*0.75, 0, Math.PI*2); c.fill();
+      }
+      break;
+    }
+    case 19:{ // CIRCUIT — dark board with glowing traces inside the glyph
+      const seed = ch.charCodeAt(0)*6.1;
+      core(grad([[0,'#12303A'],[1,'#05141A']]), '#020A0D');
+      c.globalCompositeOperation='source-atop';
+      c.strokeStyle='#28F5D0'; c.lineWidth=Math.max(1,px*0.02);
+      c.fillStyle='#28F5D0';
+      for(let k=0;k<6;k++){
+        let tx = cx + (srnd(seed+k)-0.5)*px*0.7;
+        let ty = cy + (srnd(seed+k+13)-0.5)*px*0.8;
+        c.beginPath(); c.moveTo(tx,ty);
+        for(let s2=0;s2<3;s2++){
+          if(srnd(seed+k*7+s2)>0.5) tx += (srnd(seed+k+s2*3)-0.3)*px*0.3;
+          else ty += (srnd(seed+k+s2*5)-0.5)*px*0.3;
+          c.lineTo(tx,ty);
+        }
+        c.stroke();
+        c.beginPath(); c.arc(tx,ty,Math.max(1.5,px*0.028),0,Math.PI*2); c.fill();
+      }
+      c.globalCompositeOperation='source-over';
+      c.shadowColor='#28F5D0'; c.shadowBlur=px*0.14;
+      c.lineWidth=lw*0.8; c.strokeStyle='#28F5D0';
+      c.globalAlpha=0.8; c.strokeText(ch,cx,cy); c.globalAlpha=1;
+      break;
+    }
+    case 20:{ // STARDUST — deep space fill with star specks inside
+      const seed = ch.charCodeAt(0)*7.9;
+      c.shadowColor=mid; c.shadowBlur=px*0.26;
+      core(grad([[0,'#2A1A5E'],[0.5,'#10093A'],[1,'#05021A']]), '#020112');
+      c.shadowBlur=0;
+      c.globalCompositeOperation='source-atop';
+      for(let k=0;k<14;k++){
+        const sx = cx + (srnd(seed+k)-0.5)*px*0.8;
+        const sy = cy + (srnd(seed+k+31)-0.5)*px*0.95;
+        const sr = Math.max(0.8, px*(0.008 + srnd(seed+k+61)*0.014));
+        c.fillStyle = k%3 ? '#FFFFFF' : hi;
+        c.globalAlpha = 0.55 + srnd(seed+k+91)*0.45;
+        c.beginPath(); c.arc(sx,sy,sr,0,Math.PI*2); c.fill();
+      }
+      c.globalAlpha=1;
+      c.globalCompositeOperation='source-over';
+      c.lineWidth=Math.max(1,px*0.016); c.strokeStyle=hi;
+      c.globalAlpha=0.9; c.strokeText(ch,cx,cy); c.globalAlpha=1;
+      break;
+    }
+    case 21:{ // MAGMA — cooled rock with glowing cracks
+      const seed = ch.charCodeAt(0)*8.7;
+      c.shadowColor='#FF4A00'; c.shadowBlur=px*0.24;
+      core(grad([[0,'#3A2A24'],[0.6,'#1C110D'],[1,'#0A0503']]), '#050200');
+      c.shadowBlur=0;
+      c.globalCompositeOperation='source-atop';
+      c.lineWidth=Math.max(1,px*0.022);
+      for(let k=0;k<5;k++){
+        let tx = cx + (srnd(seed+k)-0.5)*px*0.6;
+        let ty = cy - px*0.45;
+        const g2=c.createLinearGradient(0,cy-px*0.5,0,cy+px*0.5);
+        g2.addColorStop(0,'#FFD84D'); g2.addColorStop(0.6,'#FF6A00'); g2.addColorStop(1,'#7A1500');
+        c.strokeStyle=g2;
+        c.beginPath(); c.moveTo(tx,ty);
+        for(let s2=0;s2<4;s2++){
+          tx += (srnd(seed+k*9+s2)-0.5)*px*0.24;
+          ty += px*0.24;
+          c.lineTo(tx,ty);
+        }
+        c.stroke();
+      }
+      c.globalCompositeOperation='source-over';
+      break;
+    }
+  }
+  c.shadowBlur=0;
+  return {cv, adv: w + px*0.06};
+}
+
+function bakeLine(L, basePx){
+  const pal = PALETTES[ST.pal];
+  const px = Math.round(basePx * L.size);
+  L.px = px; L.sprites.length = 0; L.totalW = 0;
+  const txt = L.text.toUpperCase();
+  for(const ch of txt){
+    if(ch===' '){ L.sprites.push(null); L.totalW += px*0.32; continue; }
+    const g = bakeGlyph(ch, L.font, Math.round(px*TXSS), L.style, pal);
+    g.adv /= TXSS;                       // advance back to CSS units
+    g.w = g.cv.width/TXSS; g.h = g.cv.height/TXSS;
+    L.sprites.push(g); L.totalW += g.adv;
+  }
+  L.dirty=false;
+}
+function bakeMarquee(){
+  const pal = PALETTES[ST.pal];
+  const px = Math.round(Math.max(22, H*0.042) * MQ.size * TXSS);
+  const txt = (MQ.text || ' ').toUpperCase() + '      ';
+  const meas = document.createElement('canvas').getContext('2d');
+  meas.font = fontCSS(MQ.font, px);
+  const w = Math.ceil(meas.measureText(txt).width) + px;
+  const cv = document.createElement('canvas');
+  cv.width = Math.min(w, 8192); cv.height = Math.ceil(px*1.7);
+  const c = cv.getContext('2d');
+  c.font = fontCSS(MQ.font, px);
+  c.textAlign='left'; c.textBaseline='middle';
+  const lw = Math.max(2, px*0.05);
+  c.lineJoin='round'; c.lineWidth=lw; c.strokeStyle='#0A0810';
+  const g=c.createLinearGradient(0,0,0,cv.height);
+  g.addColorStop(0,pal[3]); g.addColorStop(1,pal[2]);
+  if(MQ.style===0){ c.shadowColor=pal[2]; c.shadowBlur=px*0.24; }
+  c.strokeText(txt, px*0.5, cv.height/2);
+  c.fillStyle = MQ.style===1 ? '#EDEDF2' : g;
+  c.fillText(txt, px*0.5, cv.height/2);
+  c.shadowBlur=0;
+  MQ.sprite = cv; MQ.w = cv.width/TXSS; MQ.h = cv.height/TXSS; MQ.dirty=false;
+}
+
+// entrance transform for glyph i at time now
+function entranceT(L, i, now){
+  const e = ST.entrance;
+  const stag = e===11 ? 90 : 42, dur = e===11 ? 60 : 460;
+  let t = (now - L.tStart - i*stag) / dur;
+  t = Math.max(0, Math.min(1, t));
+  const back = x => { const s=1.70158; x-=1; return x*x*((s+1)*x+s)+1; };
+  const bounce = x => {
+    const n=7.5625, d=2.75;
+    if(x<1/d) return n*x*x;
+    if(x<2/d) return n*(x-=1.5/d)*x+.75;
+    if(x<2.5/d) return n*(x-=2.25/d)*x+.9375;
+    return n*(x-=2.625/d)*x+.984375;
+  };
+  const out = {a:1, sx:1, sy:1, dx:0, dy:0, rot:0};
+  if(t>=1) return out;
+  if(e===0){ const k=back(t); out.sx=out.sy=2.6-(1.6*k); out.a=t; }                    // SLAM
+  else if(e===1){ out.dy=(1-t)*(1-t)*L.px*0.9; out.a=t; }                              // SLIDE UP
+  else if(e===2){ out.a = t > srnd(i*7.3+L.font) ? 1 : t*0.25; }                       // DISSOLVE
+  else if(e===3){ const f=srnd(i*3.1+Math.floor(now/46)); out.a = t*0.4 + (f>0.4?0.6:0); out.dx=(f-0.5)*L.px*0.10*(1-t); } // ELECTRIC
+  else if(e===4){ out.a=t*t; out.sx=out.sy=1.15-0.15*t; }                              // GHOST
+  else if(e===5){ const k=back(t); out.dx=(i - L.text.length/2)*L.px*0.6*(1-k); out.a=t; } // WARP
+  else if(e===6){ // SHATTER — fly in from seeded directions, spinning
+    const k=back(t), ang=srnd(i*11.7)*Math.PI*2;
+    out.dx=Math.cos(ang)*L.px*2.2*(1-k); out.dy=Math.sin(ang)*L.px*2.2*(1-k);
+    out.rot=(srnd(i*5.9)-0.5)*6.0*(1-k); out.a=t;
+  }
+  else if(e===7){ // SPIN — corkscrew in
+    const k=back(t);
+    out.rot=(srnd(i*3.3)>0.5?1:-1)*Math.PI*2*(1-k);
+    out.sx=out.sy=0.2+0.8*k; out.a=t;
+  }
+  else if(e===8){ // DROP BOUNCE — fall from above and bounce
+    const k=bounce(t);
+    out.dy=-(1-k)*L.px*1.6; out.a=Math.min(1,t*3);
+  }
+  else if(e===9){ // ZOOM PUNCH — blow up past size and snap back
+    const k=back(t);
+    out.sx=out.sy=0.1+1.28*k-0.38*t; out.a=Math.min(1,t*2.5);
+  }
+  else if(e===10){ // FLIP UP — hinge up from flat
+    out.sy=Math.max(0.02, t*t); out.dy=(1-t)*L.px*0.2; out.a=t;
+  }
+  else if(e===11){ out.a = t>=1?1:(t>0?1:0); if(t<=0) out.a=0; }                       // TYPEWRITER
+  return out;
+}
+// idle motion for glyph i
+function motionT(i, px, now){
+  const m = ST.motion, ph = (ST.beatIdx + (1 - Math.min(1,(ST.nextBeat-now)/(60000/ST.bpm))));
+  const out = {dx:0, dy:0, rot:0, s:1};
+  if(reduced || m===4) return out;
+  if(m===0) out.dy = Math.sin(ph*Math.PI + i*0.55) * px*0.05;                 // WAVE
+  else if(m===1) out.dy = -Math.abs(Math.sin(ph*Math.PI)) * px*0.07 * ST.beatPulse; // BOUNCE
+  else if(m===2) out.rot = Math.sin(ph*Math.PI*0.5 + i*0.4) * 0.05;           // SWAY
+  else if(m===3) out.s = 1 + ST.beatPulse*0.075;                              // PULSE
+  return out;
+}
+function drawLine(L, cy, now){
+  if(!L.sprites.length && !L.dirty) return;
+  const maxW = W*0.92;
+  const scale = L.totalW > maxW ? maxW/L.totalW : 1;
+  const lineW = L.totalW*scale;
+  const x0 = (W - lineW)/2;
+  let x = x0;
+  const glitchOn = L.style===7;
+  const gOff = glitchOn ? (ST.beatPulse*L.px*0.06) : 0;
+  for(let i=0;i<L.sprites.length;i++){
+    const g = L.sprites[i];
+    if(!g){ x += L.px*0.32*scale; continue; }
+    const en = entranceT(L, i, now);
+    const mo = motionT(i, L.px, now);
+    const s = scale * en.sx * mo.s;
+    const gx = x + (g.adv*scale)/2 + en.dx + mo.dx;
+    const gy = cy + en.dy + mo.dy;
+    tctx.save();
+    tctx.translate(gx, gy);
+    if(mo.rot || en.rot) tctx.rotate(mo.rot + en.rot);
+    tctx.scale(s, scale*en.sy*mo.s);
+    tctx.globalAlpha = en.a;
+    if(glitchOn && gOff>0.5){
+      tctx.globalCompositeOperation='lighter';
+      tctx.globalAlpha = en.a*0.5;
+      tctx.drawImage(g.cv, -g.w/2 - gOff, -g.h/2, g.w, g.h);
+      tctx.drawImage(g.cv, -g.w/2 + gOff, -g.h/2, g.w, g.h);
+      tctx.globalCompositeOperation='source-over';
+      tctx.globalAlpha = en.a;
+    }
+    tctx.drawImage(g.cv, -g.w/2, -g.h/2, g.w, g.h);
+    tctx.restore();
+    x += g.adv*scale;
+  }
+  // ELECTRIC SHEEP live arcs — seeded per beat, so no flicker between frames
+  if(L.style===12 && ST.beatPulse>0.25 && lineW>0){
+    const pal = PALETTES[ST.pal];
+    const hh = L.px*0.75*scale;
+    tctx.save();
+    tctx.globalCompositeOperation='lighter';
+    tctx.lineWidth=Math.max(1.2, L.px*0.014);
+    for(let b=0;b<3;b++){
+      const seed = ST.beatIdx*13.7 + b*57.3;
+      tctx.strokeStyle = b===1 ? '#FFFFFF' : pal[3];
+      tctx.globalAlpha = ST.beatPulse*(b===1?0.85:0.55);
+      tctx.beginPath();
+      let bx = x0 + srnd(seed)*lineW;
+      let by = cy - hh;
+      tctx.moveTo(bx, by);
+      const segs=6;
+      for(let sgi=1; sgi<=segs; sgi++){
+        bx += (srnd(seed+sgi*3.1)-0.5)*L.px*0.9;
+        by = cy - hh + (sgi/segs)*hh*2;
+        tctx.lineTo(bx, by);
+      }
+      tctx.stroke();
+    }
+    tctx.restore();
+  }
+  // downbeat shimmer sweep — bright band crossing the line
+  const swAge = (now - sweepT)/650;
+  if(swAge>=0 && swAge<1 && lineW>0 && !reduced){
+    const sx = x0 + swAge*lineW;
+    const bw = L.px*1.2;
+    const g = tctx.createLinearGradient(sx-bw,0,sx+bw,0);
+    g.addColorStop(0,'rgba(255,255,255,0)');
+    g.addColorStop(0.5,'rgba(255,255,255,'+(0.20*(1-swAge))+')');
+    g.addColorStop(1,'rgba(255,255,255,0)');
+    tctx.save();
+    tctx.globalCompositeOperation='lighter';
+    tctx.fillStyle=g;
+    tctx.fillRect(sx-bw, cy-L.px*0.8, bw*2, L.px*1.6);
+    tctx.restore();
+  }
+  // STYLE AURAS — stateless seeded particles, zero allocation per frame
+  if(FXLEVEL>0 && !reduced && lineW>0) drawAura(L, x0, lineW, cy, now);
+}
+
+// aura families: 0 none · 1 rising embers · 2 falling glints · 3 rising bubbles · 4 orbit sparkles
+const AURA = {3:1, 11:1, 21:1, 4:2, 17:2, 1:2, 16:3, 20:4, 13:4, 12:4, 8:4};
+function drawAura(L, x0, lineW, cy, now){
+  const fam = AURA[L.style];
+  if(!fam) return;
+  const pal = PALETTES[ST.pal];
+  const K = FXLEVEL===2 ? 16 : 8;
+  const hh = L.px*0.85;
+  tctx.save();
+  tctx.globalCompositeOperation='lighter';
+  for(let k=0;k<K;k++){
+    const speed = 0.00022*(0.6+srnd(k+3)*0.9)*(1+A.bass*0.6);
+    const ph = (now*speed + srnd(k)) % 1;
+    let px2, py, col, r;
+    if(fam===1){ // embers rise
+      px2 = x0 + srnd(k+9)*lineW + Math.sin(now*0.002+k)*L.px*0.10;
+      py = cy + hh*0.6 - ph*hh*2.0;
+      col = k%2 ? '#FFB25E' : '#FF5A1F'; r = 3+srnd(k+17)*4;
+    } else if(fam===2){ // glints fall
+      px2 = x0 + srnd(k+9)*lineW;
+      py = cy - hh*0.8 + ph*hh*1.9;
+      col = k%3 ? '#FFFFFF' : pal[3]; r = 2+srnd(k+17)*3;
+    } else if(fam===3){ // bubbles rise
+      px2 = x0 + srnd(k+9)*lineW + Math.sin(now*0.003+k*2)*L.px*0.14;
+      py = cy + hh*0.7 - ph*hh*1.8;
+      col = '#39FF14'; r = 2+srnd(k+17)*4;
+    } else { // orbit sparkles
+      const ang = ph*Math.PI*2 + srnd(k)*Math.PI*2;
+      px2 = x0 + lineW*0.5 + Math.cos(ang)*(lineW*0.5 + L.px*0.5);
+      py = cy + Math.sin(ang)*hh*1.05;
+      col = k%2 ? pal[3] : '#FFFFFF'; r = 2+srnd(k+17)*3;
+    }
+    const fadeA = fam===4 ? 0.5 : Math.sin(ph*Math.PI)*0.7;
+    if(fadeA<=0.02) continue;
+    const d = glowDot(col, 6);
+    const sc = r/6;
+    tctx.globalAlpha = fadeA;
+    tctx.drawImage(d, px2-d.width*sc/2, py-d.height*sc/2, d.width*sc, d.height*sc);
+  }
+  tctx.restore();
+  tctx.globalAlpha=1;
+}
+function drawMarquee(now, dt){
+  if(!MQ.sprite) return;
+  const sp = MQ.sprite;
+  const spw = MQ.w || sp.width, sph = MQ.h || sp.height;
+  const speed = W * 0.070 * (ST.bpm/96);
+  MQ.x -= speed*dt;
+  if(MQ.x < -spw) MQ.x += spw;
+  const y = H - sph*0.5 - Math.max(10, H*0.012) - 6;
+  const pulse = 1 + ST.beatPulse*0.05;
+  tctx.save();
+  tctx.translate(0, y); tctx.scale(1, pulse); tctx.translate(0, -y);
+  let x = MQ.x;
+  while(x < W){
+    tctx.drawImage(sp, x, y - sph/2, spw, sph);
+    x += spw;
+  }
+  tctx.restore();
+}
+
+// ---- downbeat burst rings + cached glow dots (Glyph Bloom) ----
+let FXLEVEL = 2; // 0 off · 1 lite · 2 full
+const rings=[];
+function spawnRing(){ if(rings.length<6) rings.push({r:Math.min(W,H)*0.16, a:0.8}); }
+let laserT=-9999, sparkT=-9999;
+const dotCache={};
+function glowDot(color, r){
+  const key=color+'|'+r;
+  if(dotCache[key]) return dotCache[key];
+  const cv=document.createElement('canvas'); cv.width=cv.height=r*4;
+  const c=cv.getContext('2d');
+  const g=c.createRadialGradient(r*2,r*2,0,r*2,r*2,r*2);
+  g.addColorStop(0,color); g.addColorStop(0.35,color); g.addColorStop(1,'rgba(0,0,0,0)');
+  c.fillStyle=g; c.fillRect(0,0,cv.width,cv.height);
+  dotCache[key]=cv; return cv;
+}
+let latticeRot=0;
+function drawGlyphLattice(now){
+  const pal = PALETTES[ST.pal];
+  const cx=W/2, cy=H/2;
+  const R = Math.min(W,H)*0.30*(1 + A.bass*0.45);
+  latticeRot += (reduced?0.0006:0.0015) + A.treb*0.005;
+  const nodes=[{x:cx,y:cy}];
+  for(let ring=1; ring<=2; ring++){
+    const rr=R*0.5*ring;
+    for(let i=0;i<6;i++){
+      const a = latticeRot*(ring===2?-1:1) + i/6*Math.PI*2 + (ring===2?Math.PI/6:0);
+      nodes.push({x:cx+Math.cos(a)*rr, y:cy+Math.sin(a)*rr});
+    }
+  }
+  tctx.lineWidth=1;
+  tctx.strokeStyle=pal[2];
+  tctx.globalAlpha = 0.10 + A.mid*0.40;
+  tctx.beginPath();
+  for(let i=0;i<nodes.length;i++)
+    for(let j=i+1;j<nodes.length;j++){
+      tctx.moveTo(nodes[i].x,nodes[i].y); tctx.lineTo(nodes[j].x,nodes[j].y);
+    }
+  tctx.stroke();
+  tctx.globalAlpha=1;
+  const dR = Math.max(6, Math.min(W,H)*0.012);
+  for(let i=0;i<nodes.length;i++){
+    const bin = 3 + i*12;
+    const v = freqD ? freqD[Math.min(bin, freqD.length-1)]/255 : 0;
+    const col = i===0 ? pal[3] : (i<7 ? pal[2] : pal[3]);
+    const d = glowDot(col, dR);
+    const sc = 0.5 + v*1.4*(1+A.bass*0.5);
+    tctx.globalAlpha = 0.85;
+    tctx.drawImage(d, nodes[i].x - d.width*sc/2, nodes[i].y - d.height*sc/2, d.width*sc, d.height*sc);
+  }
+  tctx.globalAlpha=1;
+  tctx.beginPath(); tctx.arc(cx,cy,R,0,Math.PI*2);
+  tctx.strokeStyle=pal[3]; tctx.lineWidth=1.5 + A.bass*2.5;
+  tctx.globalAlpha=0.3 + A.bass*0.4; tctx.stroke();
+  tctx.globalAlpha=1;
+}
+function drawRings(){
+  const pal = PALETTES[ST.pal];
+  for(let i=rings.length-1;i>=0;i--){
+    const r=rings[i];
+    r.r += (reduced?4:9)*(1+A.bass); r.a*=0.93;
+    if(r.a<0.03){ rings.splice(i,1); continue; }
+    tctx.beginPath(); tctx.arc(W/2,H/2,r.r,0,Math.PI*2);
+    tctx.strokeStyle=pal[3]; tctx.lineWidth=2;
+    tctx.globalAlpha=r.a; tctx.stroke();
+  }
+  tctx.globalAlpha=1;
+}
+// ---- LASER SWEEP: two beams fan out from the bottom corners on the downbeat ----
+function drawLasers(now){
+  const age = (now - laserT)/750;
+  if(age<0 || age>=1) return;
+  const pal = PALETTES[ST.pal];
+  const fade = 1-age;
+  tctx.save();
+  tctx.globalCompositeOperation='lighter';
+  tctx.lineWidth=Math.max(2, H*0.004);
+  for(let b=0;b<2;b++){
+    const ox = b===0 ? 0 : W;
+    const dir = b===0 ? 1 : -1;
+    const ang = (-Math.PI/2) + dir*(0.15 + age*1.1);
+    const ex = ox + Math.cos(ang)*H*1.6*dir*-1;
+    const ey = H + Math.sin(ang)*H*1.6;
+    const g = tctx.createLinearGradient(ox,H,ex,ey);
+    g.addColorStop(0,pal[3]); g.addColorStop(1,'rgba(0,0,0,0)');
+    tctx.strokeStyle=g;
+    tctx.globalAlpha=fade*0.6;
+    tctx.beginPath(); tctx.moveTo(ox,H); tctx.lineTo(ex,ey); tctx.stroke();
+    const d = glowDot(pal[3], 10);
+    tctx.globalAlpha=fade*0.8;
+    tctx.drawImage(d, ox-d.width/2, H-d.height/2);
+  }
+  tctx.restore();
+  tctx.globalAlpha=1;
+}
+// ---- SPARK SHOWER: seeded burst raining from top on every look change ----
+function drawSparks(now){
+  const age = (now - sparkT)/1300;
+  if(age<0 || age>=1) return;
+  const pal = PALETTES[ST.pal];
+  const K = FXLEVEL===2 ? 42 : 20;
+  tctx.save();
+  tctx.globalCompositeOperation='lighter';
+  for(let k=0;k<K;k++){
+    const sd = srnd(k*1.31 + comboIdx*77.7);
+    const vx = (srnd(k+40)-0.5)*W*0.6;
+    const x = W/2 + vx*age;
+    const y = H*0.06 + srnd(k+80)*H*0.12 + age*age*H*0.95;
+    if(y>H) continue;
+    const fade = (1-age)*(0.5+srnd(k+120)*0.5);
+    const col = k%3===0 ? '#FFFFFF' : (k%3===1 ? pal[3] : pal[2]);
+    const d = glowDot(col, 6);
+    const sc = (2+sd*3)/6;
+    tctx.globalAlpha=fade;
+    tctx.drawImage(d, x-d.width*sc/2, y-d.height*sc/2, d.width*sc, d.height*sc);
+  }
+  tctx.restore();
+  tctx.globalAlpha=1;
+}
+// ---- CORNER PADS: soft glow pulsing in the corners with the beat ----
+function drawPads(){
+  const pal = PALETTES[ST.pal];
+  const d = glowDot(pal[2], 14);
+  const R = Math.min(W,H)*0.42*(0.8 + ST.beatPulse*0.35);
+  tctx.save();
+  tctx.globalCompositeOperation='lighter';
+  tctx.globalAlpha = 0.10 + ST.downPulse*0.14;
+  const pts=[[0,0],[W,0],[0,H],[W,H]];
+  for(const [px2,py] of pts) tctx.drawImage(d, px2-R, py-R, R*2, R*2);
+  tctx.restore();
+  tctx.globalAlpha=1;
+}
+// ---- frequency strip along the bottom edge ----
+function drawStrip(){
+  if(!freqD) return;
+  const pal = PALETTES[ST.pal];
+  const N=64, bw=W/N;
+  tctx.globalAlpha=0.8;
+  for(let i=0;i<N;i++){
+    const bin = Math.floor(Math.pow(i/N,1.6)*300)+2;
+    const v = freqD[Math.min(bin,freqD.length-1)]/255;
+    const h = 2 + v*Math.max(14, H*0.03);
+    tctx.fillStyle = i%2? pal[2] : pal[3];
+    tctx.fillRect(i*bw+1, H-h, bw-2, h);
+  }
+  tctx.globalAlpha=1;
+}
+
+// ============================================================
+// UI
+// ============================================================
+const deck=$('deck'), gate=$('gate'), bpmBig=$('bpmBig'), dotsEl=$('dots');
+const hudBpm=$('hudBpm'), hb1=$('hb1'), hb2=$('hb2'), hb3=$('hb3'), hudResEl=$('hudRes');
+const toastEl=$('toast');
+let toastT=null;
+function toast(msg){
+  toastEl.textContent=msg; toastEl.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>toastEl.classList.remove('show'),1600);
+}
+function fill(sel, arr, fmt){
+  sel.innerHTML='';
+  arr.forEach((v,i)=>{
+    const o=document.createElement('option');
+    o.value=i; o.textContent = fmt? fmt(v):v;
+    sel.appendChild(o);
+  });
+}
+fill($('sceneSel'), SCENES);
+fill($('palSel'), PALETTES, p=>p[0]);
+fill($('fxSel'), ENTRANCES);
+fill($('moSel'), MOTIONS);
+['f1Sel','f2Sel','mqFontSel'].forEach(id=>fill($(id), FONTS, f=>f[0]));
+['s1Sel','s2Sel'].forEach(id=>fill($(id), STYLES));
+fill($('mqStyleSel'), ['NEON','CLEAN']);
+fill($('qSel'), QUALITY, q=>q.name);
+
+function setQuality(i){
+  QI = Math.max(0, Math.min(QUALITY.length-1, i));
+  adaptK = 1.0;
+  $('qSel').value = QI;
+  resize();
+  toast('RENDER · ' + QUALITY[QI].name);
+}
+$('qSel').addEventListener('change', e=>setQuality(+e.target.value));
+
+function dotsUI(){
+  const kids=dotsEl.children;
+  for(let i=0;i<kids.length;i++)
+    kids[i].className = 'dot' + (i===((ST.beatIdx%ST.count)+ST.count)%ST.count ? (i===0?' on down':' on') : '');
+}
+function buildDots(){
+  dotsEl.innerHTML='';
+  for(let i=0;i<ST.count;i++){ const d=document.createElement('span'); d.className='dot'; dotsEl.appendChild(d); }
+}
+function selUI(){
+  $('sceneSel').value=ST.scene; $('palSel').value=ST.pal;
+  $('fxSel').value=ST.entrance; $('moSel').value=ST.motion;
+  $('f1Sel').value=L1.font; $('s1Sel').value=L1.style;
+  $('f2Sel').value=L2.font; $('s2Sel').value=L2.style;
+  $('autoBtn').classList.toggle('on', ST.auto);
+}
+function tempoUI(){
+  $('tmAuto').classList.toggle('on', ST.tempoMode==='auto');
+  $('tmTap').classList.toggle('on', ST.tempoMode==='tap');
+}
+function srcUI(){
+  $('micBtn').classList.toggle('on', ST.source==='mic');
+  $('demoBtn').classList.toggle('on', ST.source==='demo');
+}
+function flashTap(){ const b=$('tapBtn'); b.classList.add('hit'); setTimeout(()=>b.classList.remove('hit'),120); }
+
+function manualTouch(){
+  if(ST.auto){ ST.auto=false; $('autoBtn').classList.remove('on'); toast('MANUAL CONTROL'); }
+}
+
+$('sceneSel').addEventListener('change', e=>{ manualTouch(); ST.scene=+e.target.value; });
+$('palSel').addEventListener('change', e=>{ manualTouch(); ST.pal=+e.target.value; L1.dirty=L2.dirty=MQ.dirty=true; });
+$('fxSel').addEventListener('change', e=>{ manualTouch(); ST.entrance=+e.target.value; L1.tStart=performance.now(); L2.tStart=performance.now()+140; });
+$('moSel').addEventListener('change', e=>{ manualTouch(); ST.motion=+e.target.value; });
+
+function lineWire(L, txtId, fontId, styleId, minusId, plusId, useDNA){
+  $(txtId).addEventListener('input', e=>{ L.text=e.target.value; L.dirty=true; L.tStart=performance.now(); });
+  $(fontId).addEventListener('change', e=>{
+    manualTouch(); L.font=+e.target.value; L.dirty=true; L.tStart=performance.now();
+    if(useDNA){
+      const dna = DNA[FONTS[L.font][0]];
+      if(dna){ L.style=dna[0]; ST.motion=dna[1]; $(styleId).value=L.style; $('moSel').value=ST.motion; }
+    }
+  });
+  $(styleId).addEventListener('change', e=>{ manualTouch(); L.style=+e.target.value; L.dirty=true; L.tStart=performance.now(); });
+  $(minusId).addEventListener('click', ()=>{ L.size=Math.max(0.5, +(L.size-0.1).toFixed(2)); L.dirty=true; });
+  $(plusId).addEventListener('click', ()=>{ L.size=Math.min(2.0, +(L.size+0.1).toFixed(2)); L.dirty=true; });
+}
+lineWire(L1,'l1Txt','f1Sel','s1Sel','l1Minus','l1Plus',true);
+lineWire(L2,'l2Txt','f2Sel','s2Sel','l2Minus','l2Plus',false);
+$('mqTxt').addEventListener('input', e=>{ MQ.text=e.target.value; MQ.dirty=true; });
+$('mqFontSel').addEventListener('change', e=>{ MQ.font=+e.target.value; MQ.dirty=true; });
+$('mqStyleSel').addEventListener('change', e=>{ MQ.style=+e.target.value; MQ.dirty=true; });
+$('mqMinus').addEventListener('click', ()=>{ MQ.size=Math.max(0.5,+(MQ.size-0.1).toFixed(2)); MQ.dirty=true; });
+$('mqPlus').addEventListener('click', ()=>{ MQ.size=Math.min(2.0,+(MQ.size+0.1).toFixed(2)); MQ.dirty=true; });
+
+$('autoBtn').addEventListener('click', ()=>{
+  ST.auto=!ST.auto;
+  $('autoBtn').classList.toggle('on', ST.auto);
+  toast(ST.auto?'AUTO SHOW':'MANUAL CONTROL');
+  if(ST.auto) nextCombo();
+});
+$('tapBtn').addEventListener('click', ()=>tap(performance.now()));
+$('countSel').addEventListener('change', e=>{ ST.count=+e.target.value; buildDots(); });
+$('holdSel').addEventListener('change', e=>{ ST.hold=+e.target.value; toast('HOLD · '+ST.hold+' BARS'); });
+$('fxLvlSel').addEventListener('change', e=>{ FXLEVEL=+e.target.value; toast(['FX OFF','FX LITE','FX FULL'][FXLEVEL]); });
+$('tmAuto').addEventListener('click', ()=>{ ST.tempoMode='auto'; tempoUI(); toast('BPM: AUTO DETECT'); });
+$('tmTap').addEventListener('click', ()=>{ ST.tempoMode='tap'; tempoUI(); toast('BPM: TAP LOCKED'); });
+$('micBtn').addEventListener('click', startMic);
+$('demoBtn').addEventListener('click', startDemo);
+
+function goFS(){
+  if(document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(()=>{});
+}
+$('fsCorner').addEventListener('click', goFS);
+$('pinCorner').addEventListener('click', ()=>{
+  ST.pinned=!ST.pinned;
+  $('pinCorner').classList.toggle('on', ST.pinned);
+  bumpUI();
+});
+
+// gate
+$('gateMic').addEventListener('click', async ()=>{ if(await startMic()) hideGate(); });
+$('gateDemo').addEventListener('click', ()=>{ startDemo(); hideGate(); });
+function hideGate(){ gate.classList.add('off'); bumpUI(); reanchor(performance.now()); }
+
+// auto-hide deck
+let uiT=null;
+function bumpUI(){
+  wrap.classList.add('ui');
+  clearTimeout(uiT);
+  if(!ST.pinned && ST.running)
+    uiT=setTimeout(()=>{
+      if(document.activeElement && document.activeElement.tagName==='INPUT') { bumpUI(); return; }
+      wrap.classList.remove('ui');
+    }, 4200);
+}
+['pointermove','pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev, bumpUI, {passive:true}));
+
+// keyboard
+window.addEventListener('keydown', e=>{
+  const typing = e.target.tagName==='INPUT' || e.target.tagName==='SELECT';
+  if(e.code==='Space' && !typing){ e.preventDefault(); tap(performance.now()); return; }
+  if(typing) return;
+  const k=e.key.toLowerCase();
+  if(k==='f') goFS();
+  else if(k==='a') $('autoBtn').click();
+  else if(k==='m') startMic();
+  else if(k==='d') startDemo();
+  else if(k==='p') $('pinCorner').click();
+  else if(k==='q') setQuality((QI+1) % QUALITY.length);
+  else if(k==='['){ manualTouch(); ST.pal=(ST.pal+PALETTES.length-1)%PALETTES.length; L1.dirty=L2.dirty=MQ.dirty=true; selUI(); }
+  else if(k===']'){ manualTouch(); ST.pal=(ST.pal+1)%PALETTES.length; L1.dirty=L2.dirty=MQ.dirty=true; selUI(); }
+  else{
+    const n=parseInt(e.key);
+    if(n>=1 && n<=9){ manualTouch(); ST.scene=n-1; selUI(); }
+  }
+});
+
+// ============================================================
+// MAIN LOOP
+// ============================================================
+let lastT=performance.now(), resT=0;
+function frame(nowMs){
+  requestAnimationFrame(frame);
+  const now=nowMs, dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+  govern(dt*1000);
+  if(ST.running && analyser) analyse(now);
+  else { A.bass*=.96; A.mid*=.96; A.treb*=.96; A.energy*=.96; }
+  if(ST.running) clockTick(now);
+
+  glDraw(now/1000);
+
+  tctx.clearRect(0,0,W,H);
+  if(FXLEVEL>0) drawPads();
+  if(ST.scene===GLYPH_SCENE) drawGlyphLattice(now);
+  drawRings();
+  if(FXLEVEL===2){ drawLasers(now); }
+  if(FXLEVEL>0){ drawSparks(now); }
+
+  const base1 = Math.min(W*0.115, H*0.20);
+  const base2 = Math.min(W*0.070, H*0.12);
+  if(L1.dirty) bakeLine(L1, base1);
+  if(L2.dirty) bakeLine(L2, base2);
+  if(MQ.dirty) bakeMarquee();
+  drawLine(L1, H*0.40, now);
+  drawLine(L2, H*0.575, now);
+  drawMarquee(now, dt);
+  drawStrip();
+
+  // HUD + deck readouts (cheap DOM writes throttled)
+  if((now|0) % 4 === 0){
+    bpmBig.textContent = ST.bpm;
+    hudBpm.textContent = ST.bpm + (ST.tempoMode==='auto' ? '·A' : '·T');
+    hb1.style.width=(A.bass*100)+'%';
+    hb2.style.width=(A.mid*100)+'%';
+    hb3.style.width=(A.treb*100)+'%';
+  }
+  if(now - resT > 600){
+    resT = now;
+    hudResEl.textContent = RS.cw + '×' + RS.ch + ' · ' + Math.round(fbW/RS.cw*100) + '% · '
+                         + (HDR ? 'HDR' : 'SDR') + ' · ' + Math.round(PERF.fps) + 'FPS';
+  }
+}
+
+// ---------- NUPS DJ APP BRIDGE ----------
+let hostTrackKey = '';
+let hostTransitioning = false;
+const cleanHostText = (value, fallback, maxLength) => {
+  const cleaned = String(value ?? '').replace(/\s+/g, ' ').trim();
+  return (cleaned || fallback).slice(0, maxLength);
+};
+const syncHostInput = (id, value) => {
+  const input = $(id);
+  if (input && input.value !== value) input.value = value;
+};
+
+window.addEventListener('message', (event) => {
+  if (event.source !== window.parent || event.origin !== window.location.origin) return;
+  const data = event.data;
+  if (!data || data.type !== 'NUPS_FABLE_STATE') return;
+
+  const title = cleanHostText(data.title, 'N.U.P.S.', 72);
+  const artist = cleanHostText(data.artist, 'AUTONOMOUS DJ', 72);
+  const deck = data.activeDeck === 'B' ? 'DECK B' : 'DECK A';
+  const marquee = cleanHostText(
+    data.marquee,
+    'NOW PLAYING · ' + title + ' · ' + artist + ' · ' + deck,
+    180
+  );
+
+  const trackKey = title + '\u0000' + artist;
+  if (trackKey !== hostTrackKey) {
+    hostTrackKey = trackKey;
+    L1.text = title;
+    L2.text = artist;
+    MQ.text = marquee;
+    L1.dirty = L2.dirty = MQ.dirty = true;
+    L1.tStart = performance.now();
+    L2.tStart = performance.now() + 140;
+    syncHostInput('l1Txt', title);
+    syncHostInput('l2Txt', artist);
+    syncHostInput('mqTxt', marquee);
+    if (ST.auto && title !== 'N.U.P.S.') nextCombo();
+  } else if (MQ.text !== marquee) {
+    MQ.text = marquee;
+    MQ.dirty = true;
+    syncHostInput('mqTxt', marquee);
+  }
+
+  const bpm = Number(data.bpm);
+  if (Number.isFinite(bpm) && bpm >= 50 && bpm <= 220 && Math.abs(ST.bpm - bpm) >= 0.5) {
+    ST.bpm = Math.round(bpm);
+    ST.detBPM = ST.bpm;
+    ST.tempoMode = 'tap';
+    reanchor(performance.now());
+    tempoUI();
+  }
+
+  if (data.transitioning && !hostTransitioning) {
+    ST.downPulse = 1;
+    ST.beatPulse = 1;
+    if (ST.auto) nextCombo();
+  }
+  hostTransitioning = Boolean(data.transitioning);
+});
+
+// ---------- BOOT ----------
+resize();
+try{ glInit(); }catch(err){
+  console.error(err);
+  toast('GPU INIT FAILED — CHECK WEBGL2');
+}
+buildDots(); selUI(); tempoUI();
+$('qSel').value = QI;
+$('l1Txt').value=L1.text; $('l2Txt').value=L2.text; $('mqTxt').value=MQ.text;
+if(document.fonts && document.fonts.ready)
+  document.fonts.ready.then(()=>{ L1.dirty=L2.dirty=MQ.dirty=true; });
+requestAnimationFrame(frame);
+bumpUI();
+if (window.parent !== window) {
+  window.parent.postMessage({type:'NUPS_FABLE_READY'}, window.location.origin);
+}
+
+})();
+
+</script>
+</body>
+</html>

@@ -1,5 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+<<<<<<< HEAD
 import Stripe from 'npm:stripe@14.14.0';
+=======
+import Stripe from 'npm:stripe@22.5.0';
+>>>>>>> 27a82df5414d70bd72c5dbc1a6a90a2f6cf26b66
 
 /**
  * Create a Stripe-hosted subscription checkout using server-owned pricing.
@@ -55,6 +59,15 @@ async function resolveStripeSecretKey(base44) {
   }
 }
 
+<<<<<<< HEAD
+=======
+function integrationIdentifier() {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const suffix = Array.from(bytes, (value) => String.fromCharCode(97 + (value % 26))).join('');
+  return `glyphlock_subscription_${suffix}`;
+}
+
+>>>>>>> 27a82df5414d70bd72c5dbc1a6a90a2f6cf26b66
 function getAllowedOrigin(req) {
   const candidates = [Deno.env.get('APP_BASE_URL'), req.headers.get('origin')].filter(Boolean);
 
@@ -129,7 +142,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-06-24.dahlia' });
     const appOrigin = getAllowedOrigin(req);
     const successUrl = `${appOrigin}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${appOrigin}/payment-cancel`;
@@ -137,6 +150,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create(
       {
         mode: 'subscription',
+        integration_identifier: integrationIdentifier(),
         line_items: [{ price: priceId, quantity: 1 }],
         success_url: successUrl,
         cancel_url: cancelUrl,

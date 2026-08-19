@@ -53,6 +53,8 @@ export default function DJPlayerSection({
   // Auto Blend runs the smoothstep crossfade at track end even when AUTO-DJ is
   // disarmed, so the crossfader never has to be ridden by hand.
   const [autoBlend, setAutoBlend] = useState(true);
+  // Operator-adjustable blend length, seeded from the automation plan.
+  const [blendSeconds, setBlendSeconds] = useState(Math.max(2, Number(transitionSeconds) || 6));
   const blending = autoDj || autoBlend;
 
   const deckARef = useRef(null);
@@ -114,12 +116,14 @@ export default function DJPlayerSection({
       deckA: deckASong ? {
         title: deckASong.title,
         artist: deckASong.artist,
+        bpm: Number(deckASong.bpm) || null,
         videoId: extractVideoId(deckASong.youtubeUrl),
         audioUrl: deckASong.uploadUrl || null,
       } : null,
       deckB: deckBSong ? {
         title: deckBSong.title,
         artist: deckBSong.artist,
+        bpm: Number(deckBSong.bpm) || null,
         videoId: extractVideoId(deckBSong.youtubeUrl),
         audioUrl: deckBSong.uploadUrl || null,
       } : null,
@@ -170,7 +174,7 @@ export default function DJPlayerSection({
 
     const startCrossfade = crossfade;
     const startedAt = performance.now();
-    const durationMs = Math.max(1000, Number(transitionSeconds || 6) * 1000);
+    const durationMs = Math.max(1000, Number(blendSeconds || 6) * 1000);
     const tick = (timestamp) => {
       const progress = Math.min(1, (timestamp - startedAt) / durationMs);
       // Smoothstep gives a gentler club-style fade than a hard linear ramp.
@@ -184,7 +188,7 @@ export default function DJPlayerSection({
       finishPromotion(targetDeck, reason);
     };
     rafRef.current = requestAnimationFrame(tick);
-  }, [activeDeck, deckASongId, deckBSongId, crossfade, transitionSeconds, finishPromotion]);
+  }, [activeDeck, deckASongId, deckBSongId, crossfade, blendSeconds, finishPromotion]);
 
   const handlePlayLive = useCallback(() => {
     const liveRef = activeDeck === "A" ? deckARef.current : deckBRef.current;
@@ -241,7 +245,7 @@ export default function DJPlayerSection({
       const current = Number(ref?.getCurrentTime?.() || 0);
       if (!duration || current < 1) return;
       const remaining = duration - current;
-      if (remaining > 0 && remaining <= Math.max(2, Number(transitionSeconds || 6))) {
+      if (remaining > 0 && remaining <= Math.max(2, Number(blendSeconds || 6))) {
         // Start the transition even if the cue deck has not reported metadata
         // yet. YouTube frequently reports duration late; waiting for a non-zero
         // cue duration caused the visible fader to never move. performTransition
@@ -251,7 +255,7 @@ export default function DJPlayerSection({
       }
     }, 400);
     return () => clearInterval(timer);
-  }, [blending, activeDeck, deckASongId, deckBSongId, transitionSeconds, performTransition]);
+  }, [blending, activeDeck, deckASongId, deckBSongId, blendSeconds, performTransition]);
 
   useEffect(() => () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -262,7 +266,9 @@ export default function DJPlayerSection({
     const targetDeck = deck === "A" ? "B" : "A";
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
     if (blending && targetId) {
-      performTransition(targetDeck, { immediate: true, reason: "natural_end" });
+      // Ramp the cue deck up instead of snapping the fader across — the
+      // outgoing track has finished, so the incoming one fades in cleanly.
+      performTransition(targetDeck, { reason: "natural_end" });
       return;
     }
     onSkip?.(activeSongId, "ended");
@@ -280,7 +286,7 @@ export default function DJPlayerSection({
   const handleSwap = useCallback(() => {
     const targetDeck = activeDeck === "A" ? "B" : "A";
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
-    if (targetId) performTransition(targetDeck, { immediate: true, reason: "manual_swap" });
+    if (targetId) performTransition(targetDeck, { reason: "manual_swap" });
   }, [activeDeck, deckASongId, deckBSongId, performTransition]);
 
   if (collapsed) {
@@ -335,22 +341,11 @@ export default function DJPlayerSection({
           <Button
             size="sm"
             variant="outline"
-            className={`h-7 text-[10px] gap-1 ${autoBlend
-              ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
-              : "border-slate-600 text-slate-400"}`}
-            onClick={() => setAutoBlend((value) => !value)}
-            title="Automatically crossfade into the cue deck as each track ends"
-          >
-            <WandSparkles className="w-3 h-3" /> Auto Blend {autoBlend ? "ON" : "OFF"}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
             className="h-7 text-[10px] gap-1 border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"
             onClick={() => openClubTVWindow()}
-            title="Open Club TV window — drag onto the TV display or cast the tab"
+            title="Open Fable X visualizer — drag onto the TV display or cast the tab"
           >
-            <Tv className="w-3 h-3" /> Open Club TV
+            <Tv className="w-3 h-3" /> Open Visualizer
           </Button>
           <Button size="sm" variant="ghost" className="h-6 text-[10px] gap-1 text-slate-400" onClick={handleCueNext}>
             Cue Next
@@ -406,7 +401,16 @@ export default function DJPlayerSection({
         />
       </div>
 
-      <Crossfader value={crossfade} onChange={setCrossfade} />
+      <Crossfader
+        value={crossfade}
+        onChange={setCrossfade}
+        autoMix={autoBlend}
+        onToggleAutoMix={() => setAutoBlend((value) => !value)}
+        blendSeconds={blendSeconds}
+        onBlendSecondsChange={(seconds) => setBlendSeconds(Math.max(2, seconds))}
+        onBlendNow={handleSwap}
+        transitioning={transitioning}
+      />
     </div>
   );
 }

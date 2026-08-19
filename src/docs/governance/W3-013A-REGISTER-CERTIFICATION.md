@@ -39,7 +39,7 @@ Verdicts: **PASS** · **CONDITIONAL PASS** · **FAIL** · **N/A**
 | Mode (REAL/DEMO/SANDBOX) | PASS | Reuses `ModeBadge` — VenueRateConfig.mode, same source as ledger gateway |
 | Time | PASS | Live 1s clock |
 | Connection Status | PASS | `navigator.onLine` + online/offline listeners (existing browser source, not invented) |
-| Always visible | CONDITIONAL PASS | Rendered on Register + Bar tabs (the operational tabs); not on DJ/Onboarding/Audit tabs — deemed non-register surfaces |
+| Always visible | PASS | 2026-08-19 completion: rendered on every permitted RegisterConsole tab with tab-specific station label |
 
 ### §1.2 Left Panel — Operational Actions
 
@@ -123,7 +123,7 @@ Verdicts: **PASS** · **CONDITIONAL PASS** · **FAIL** · **N/A**
 | No audit/writeEntity bypasses | PASS | Door writes route through writeEntity + emitAuditEvent + SystemAuditLog |
 | Batch status never hidden | PASS | Three surfaces (header, banner, badge) |
 | Receipt failures visible | PASS | Receipt modal + printer error paths surface |
-| Sync failures visible | CONDITIONAL PASS | Connection indicator added (Cycle 2B); offline write queue visibility exists via OfflineSyncBanner on other surfaces, not embedded in register |
+| Sync failures visible | PASS | 2026-08-19 completion: OfflineSyncBanner embedded in RegisterConsole; payment replay remains explicitly blocked |
 
 ### §6 Modernization Rule
 
@@ -145,8 +145,8 @@ Verdicts: **PASS** · **CONDITIONAL PASS** · **FAIL** · **N/A**
 
 ## 3. Recommended Final Improvements (UI-only, safe for a future cycle)
 
-- Render RegisterStatusHeader on all RegisterConsole tabs (currently Register + Bar).
-- Embed OfflineSyncBanner in RegisterConsole for §5 sync-failure parity.
+- [x] Render RegisterStatusHeader on all RegisterConsole tabs — completed 2026-08-19.
+- [x] Embed OfflineSyncBanner in RegisterConsole for §5 sync-failure parity — completed 2026-08-19.
 - Compact fixed action rail on ≥1280px screens (re-anchoring, not duplicating, existing CHARGE/Cancel).
 
 ## 4. Changes Made Under W3-013A
@@ -155,6 +155,7 @@ Verdicts: **PASS** · **CONDITIONAL PASS** · **FAIL** · **N/A**
 |---|---|---|
 | `src/components/nups/pos/OrderDisplay.jsx` | Tax line label "Tax (8%)" → "Tax" (display string only; door station is tax-exempt so the hardcoded rate text was misleading) | **None — computed `tax` value untouched** |
 | `src/docs/governance/W3-013A-REGISTER-CERTIFICATION.md` | This report | None |
+| `src/pages/RegisterConsole.jsx` | Persistent status header across all permitted tabs + OfflineSyncBanner | None |
 
 ## 5. Evidence & Screenshot Note
 

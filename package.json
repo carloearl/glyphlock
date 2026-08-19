@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc -p ./jsconfig.json",
     "audit:entities": "node scripts/audit-entity-model.mjs",
+    "check:nups-write-gateway": "node scripts/check-nups-write-gateway.mjs",
+    "ci:base44": "node scripts/run-base44-ci.mjs",
     "audit:nups-ui": "node scripts/audit-nups-operational-ui.mjs",
     "check:nups-isolation": "node scripts/check-nups-mode-boundaries.mjs",
     "check:secrets": "node scripts/check-no-tracked-secrets.mjs",

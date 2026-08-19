@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, Users, CheckCircle, Banknote, AlertCircle, Ticket, Edit3, Trash2 } from "lucide-react";
+import { Car, Plus, Users, CheckCircle, Banknote, AlertCircle, Ticket, Edit3, Trash2, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
@@ -13,6 +13,8 @@ import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
 import { scopeRowsToOperatingMode, stampOperationalRecord } from "@/lib/nups/operatingMode";
 import { writeEntity } from "@/lib/nups/writeEntity";
 import DriverPayoutPanel from "@/components/nups/frontdoor/DriverPayoutPanel";
+import DriverIdScanPanel from "@/components/nups/frontdoor/DriverIdScanPanel";
+import DriverQRDeliveryModal from "@/components/nups/frontdoor/DriverQRDeliveryModal";
 // BPAA-NUPS-AUDIT-001 §4 — driver credit is a SEPARATE house-absorbed event
 import { emitAuditEvent } from "@/lib/nups/audit/auditEventEmitter";
 import { buildFinancialContext } from "@/lib/nups/audit/financialContext";
@@ -35,10 +37,6 @@ import { buildFinancialContext } from "@/lib/nups/audit/financialContext";
 function todayDate() { return new Date().toISOString().split("T")[0]; }
 function thisYear() { return new Date().getFullYear(); }
 function safeJSON(s) { try { return typeof s === "string" ? JSON.parse(s) : (s || {}); } catch { return {}; } }
-function makeDriverId(venueId) {
-  const short = (venueId || "VENUE").toString().slice(-4).toUpperCase();
-  return `DRV-${short}-${Date.now().toString(36).toUpperCase()}`;
-}
 
 export default function DriverQuickAdd({ user }) {
   const qc = useQueryClient();
@@ -49,8 +47,9 @@ export default function DriverQuickAdd({ user }) {
   const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
 
   const [rates, setRates] = useState(null);
-  const [newName, setNewName] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  // Driver whose personalized QR pass is being delivered/reprinted
+  const [qrDriver, setQrDriver] = useState(null);
   // The driver currently being edited in the payout panel
   const [editingDriver, setEditingDriver] = useState(null);
 
@@ -245,40 +244,15 @@ export default function DriverQuickAdd({ user }) {
     },
   });
 
-  // Onboard a brand new driver — name only, defaults to affiliated.
-  // After save, immediately open the payout panel so the door girl can set
-  // guests + promo + waived for that driver.
-  // Duplicate-safe: a same-name (case-insensitive) active driver for this
-  // venue opens the EXISTING profile instead of creating a copy — a fast
-  // double-tap or double-Enter can never mint duplicate records again.
-  const onboardDriver = useMutation({
-    mutationFn: async (name) => {
-      if (!venueId) throw new Error("No active venue");
-      const trimmed = name.trim().toLowerCase();
-      const existing = profiles.find(p => (p.name || "").trim().toLowerCase() === trimmed);
-      if (existing) return existing;
-      const profile = await base44.entities.DriverProfile.create({
-        driver_id: makeDriverId(venueId),
-        venue_id: venueId,
-        name: name.trim(),
-        affiliated: true,
-        ytd_payout_total: 0,
-        ytd_year: thisYear(),
-        ten99_flag: false,
-        ten99_threshold: 600,
-        status: "active",
-        onboarded_by: user?.email || "door",
-        last_active_at: new Date().toISOString(),
-      });
-      return profile;
-    },
-    onSuccess: (profile) => {
-      qc.invalidateQueries({ queryKey: ["driver-profiles"] });
-      setNewName("");
-      setShowAdd(false);
-      setEditingDriver(profile);
-    },
-  });
+  // Onboarding runs through DriverIdScanPanel: the operator scans the driver's
+  // license, credentials are stored on the durable DriverProfile, and a
+  // personalized server-signed QR pass is issued and delivered on the spot.
+  const handleDriverIssued = (profile) => {
+    qc.invalidateQueries({ queryKey: ["driver-profiles"] });
+    setShowAdd(false);
+    setQrDriver(profile);
+    setEditingDriver(profile);
+  };
 
   // Admin-only: hard-delete a driver profile + tonight's pending session
   const deleteDriver = useMutation({
@@ -324,7 +298,7 @@ export default function DriverQuickAdd({ user }) {
           onClick={() => setShowAdd(v => !v)}
           className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold text-sm"
         >
-          <Plus className="w-4 h-4 mr-1" /> New Driver
+          <Plus className="w-4 h-4 mr-1" /> Scan New Driver
         </Button>
       </div>
 
@@ -347,31 +321,24 @@ export default function DriverQuickAdd({ user }) {
         waived cover. The payout calculates automatically and appears under <strong className="text-pink-300">Driver Payouts</strong>.
       </p>
 
-      {/* New driver inline form */}
+      {/* New driver — scan their ID, store credentials, issue personalized QR */}
       {showAdd && (
-        <Card className="bg-yellow-950/30 border-yellow-500/40">
-          <CardContent className="p-4 flex gap-2">
-            <Input
-              autoFocus
-              placeholder="Driver name"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && newName.trim() && !onboardDriver.isPending && onboardDriver.mutate(newName)}
-              className="bg-black/40 border-gray-700 text-white"
-            />
-            <Button
-              onClick={() => onboardDriver.mutate(newName)}
-              disabled={!newName.trim() || onboardDriver.isPending}
-              className="bg-yellow-600 hover:bg-yellow-700 text-black font-bold"
-            >
-              Save & +1
-            </Button>
-            <Button variant="outline" onClick={() => { setShowAdd(false); setNewName(""); }} className="border-gray-700 text-gray-300">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
+        <DriverIdScanPanel
+          venueId={venueId}
+          user={me || user}
+          existingProfiles={profiles}
+          onIssued={handleDriverIssued}
+          onCancel={() => setShowAdd(false)}
+        />
       )}
+
+      {/* QR pass delivery / reprint */}
+      <DriverQRDeliveryModal
+        open={!!qrDriver}
+        onOpenChange={(v) => !v && setQrDriver(null)}
+        driver={qrDriver}
+        venueName={activeVenue?.name}
+      />
 
       {/* Editing panel — modal-ish inline, replaces the grid while open */}
       {editingDriver ? (
@@ -424,6 +391,15 @@ export default function DriverQuickAdd({ user }) {
                     )}
                   </div>
                   <span className="flex items-center gap-1 shrink-0">
+                    {(p.qr_token || p.qr_code) && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setQrDriver({ ...p, qr_code: p.qr_token || p.qr_code }); }}
+                        title="Show / reprint driver QR pass"
+                        className="p-1.5 rounded border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/20"
+                      >
+                        <QrCode className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                     {isAdmin && (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteDriver(p); }}

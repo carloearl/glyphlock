@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 Deno.serve(async (req) => {
   try {
@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
 
     // Calculate scan velocity (scans per minute)
     const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
-    const recentScans = await base44.asServiceRole.entities.QRScanEvent.filter({
+    const recentScans = await base44.asServiceRole.entities.QrScanEvent.filter({
       decoded_content,
       created_date: { $gte: oneMinuteAgo }
     });
@@ -71,7 +71,12 @@ Deno.serve(async (req) => {
     const contrast_score = 0.85; // Placeholder
 
     // Create scan event
-    const scanEvent = await base44.asServiceRole.entities.QRScanEvent.create({
+    const scannedAt = new Date().toISOString();
+    const canonicalAssetId = qr_asset_id || 'UNLINKED';
+    const scanEvent = await base44.asServiceRole.entities.QrScanEvent.create({
+      qrAssetId: canonicalAssetId,
+      scannedAt,
+      interactionType: 'scan',
       qr_asset_id: qr_asset_id || null,
       decoded_content,
       device_context: device_context || {},

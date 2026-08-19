@@ -39,9 +39,9 @@ export default function PaymentSuccess() {
         if (cancelled) return;
         const data = response?.data || {};
         const normalizedStatus = String(data.status || "unknown").toLowerCase();
-        const paymentStatus = String(data.paymentStatus || "").toLowerCase();
+        const entitlementConfirmed = data.entitlementConfirmed === true;
 
-        if (CONFIRMED_STATUSES.has(normalizedStatus) || paymentStatus === "paid") {
+        if (entitlementConfirmed && CONFIRMED_STATUSES.has(normalizedStatus)) {
           setVerification({ state: "confirmed", detail: data });
           setShowConfetti(true);
         } else if (PENDING_STATUSES.has(normalizedStatus)) {
@@ -88,7 +88,7 @@ export default function PaymentSuccess() {
           icon: CheckCircle,
           iconClass: "text-[#00E4FF]",
           title: "PAYMENT CONFIRMED",
-          message: "Stripe confirmed the payment and the webhook will finalize account access.",
+          message: "Stripe confirmed the payment and the server reconciled account access to a trusted plan.",
           border: "border-[#00E4FF]/30",
         }
       : pending
@@ -178,8 +178,8 @@ export default function PaymentSuccess() {
               <div className="grid grid-cols-3 gap-3 mb-10">
                 {[
                   { icon: Shield, label: "Verified" },
-                  { icon: Zap, label: "Webhook queued" },
-                  { icon: Sparkles, label: "Account updating" },
+                  { icon: Zap, label: "Plan reconciled" },
+                  { icon: Sparkles, label: "Access updated" },
                 ].map((item) => (
                   <div key={item.label} className="text-center p-4 rounded-xl bg-white/5 border border-[#00E4FF]/20">
                     <item.icon className="w-7 h-7 text-[#00E4FF] mx-auto mb-2" />

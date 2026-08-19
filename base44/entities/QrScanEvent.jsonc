@@ -1,5 +1,6 @@
 {
   "name": "QrScanEvent",
+  "description": "Canonical immutable QR scan evidence stream. Includes redirect analytics and structured diagnostics telemetry.",
   "type": "object",
   "properties": {
     "description": {
@@ -57,6 +58,50 @@
     "hotZoneId": {
       "type": "string",
       "description": "If hot zone interaction"
+    },
+    "qr_asset_id": {
+      "type": "string",
+      "description": "Structured diagnostics reference to QrAsset. Retained alongside qrAssetId for compatibility."
+    },
+    "decoded_content": {
+      "type": "string",
+      "description": "Decoded QR payload captured by the protected diagnostics endpoint."
+    },
+    "device_context": {
+      "type": "object",
+      "description": "Device metadata supplied by the scanner."
+    },
+    "scan_velocity": {
+      "type": "number",
+      "description": "Matching scans observed in the preceding minute."
+    },
+    "scan_location": {
+      "type": "object",
+      "description": "Optional coarse scanner location."
+    },
+    "resolved_slots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rejection_reasons": {
+      "type": "object"
+    },
+    "error_correction_level": {
+      "type": "string",
+      "enum": [
+        "L",
+        "M",
+        "Q",
+        "H"
+      ]
+    },
+    "contrast_score": {
+      "type": "number"
+    },
+    "quiet_zone_valid": {
+      "type": "boolean"
     }
   },
   "required": [

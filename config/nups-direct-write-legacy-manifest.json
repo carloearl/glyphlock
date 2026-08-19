@@ -1,0 +1,791 @@
+{
+  "version": 1,
+  "policy": "TIER_2_LOCKED: direct frontend Base44 entity writes may only decrease from this checkpoint. New files, new call signatures, or increased counts fail CI.",
+  "generated_at": "2026-08-19T07:03:10.591Z",
+  "source_root": "src",
+  "files": {
+    "src/components/admin/AdminConsultations.jsx": {
+      "total": 1,
+      "calls": {
+        "Consultation.update": 1
+      }
+    },
+    "src/components/admin/ChartOfAccountsEditor.jsx": {
+      "total": 4,
+      "calls": {
+        "ChartOfAccounts.bulkCreate": 1,
+        "ChartOfAccounts.update": 2,
+        "ChartOfAccounts.create": 1
+      }
+    },
+    "src/components/admin/ContractTermsEditor.jsx": {
+      "total": 2,
+      "calls": {
+        "ContractTermsConfig.update": 1,
+        "ContractTermsConfig.create": 1
+      }
+    },
+    "src/components/admin/DailyChecklistEditor.jsx": {
+      "total": 2,
+      "calls": {
+        "DailyChecklistConfig.update": 1,
+        "DailyChecklistConfig.create": 1
+      }
+    },
+    "src/components/admin/DataManagerTable.jsx": {
+      "total": 2,
+      "calls": {
+        "[entityName].delete": 2
+      }
+    },
+    "src/components/admin/RateFeeEditor.jsx": {
+      "total": 2,
+      "calls": {
+        "VenueRateConfig.update": 1,
+        "VenueRateConfig.create": 1
+      }
+    },
+    "src/components/admin/ReceiptConfigEditor.jsx": {
+      "total": 1,
+      "calls": {
+        "VenueRateConfig.update": 1
+      }
+    },
+    "src/components/admin/RecordEditDialog.jsx": {
+      "total": 1,
+      "calls": {
+        "[entityName].update": 1
+      }
+    },
+    "src/components/Chat.jsx": {
+      "total": 4,
+      "calls": {
+        "UserPreferences.update": 1,
+        "UserPreferences.create": 1,
+        "Conversation.update": 1,
+        "Conversation.create": 1
+      }
+    },
+    "src/components/commandcenter/ThreatDetectionEngine.jsx": {
+      "total": 3,
+      "calls": {
+        "SystemAuditLog.create": 2,
+        "APIKey.update": 1
+      }
+    },
+    "src/components/console/APIKeyVault.jsx": {
+      "total": 1,
+      "calls": {
+        "APIKey.delete": 1
+      }
+    },
+    "src/components/dashboard/DeveloperKeys.jsx": {
+      "total": 2,
+      "calls": {
+        "APIKey.update": 1,
+        "APIKey.delete": 1
+      }
+    },
+    "src/components/devengine/DeployPanel.jsx": {
+      "total": 1,
+      "calls": {
+        "AgentChangeSet.delete": 1
+      }
+    },
+    "src/components/FreeTrialGuard.jsx": {
+      "total": 2,
+      "calls": {
+        "ServiceUsage.create": 2
+      }
+    },
+    "src/components/glyphbot/AuditGenerator.jsx": {
+      "total": 1,
+      "calls": {
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/glyphbot/CodeExecutor.jsx": {
+      "total": 1,
+      "calls": {
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/glyphbot/FeedbackWidget.jsx": {
+      "total": 1,
+      "calls": {
+        "LLMFeedback.create": 1
+      }
+    },
+    "src/components/glyphbot/FileAnalysisView.jsx": {
+      "total": 1,
+      "calls": {
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/glyphbot/KnowledgeBaseConnector.jsx": {
+      "total": 2,
+      "calls": {
+        "SystemAuditLog.create": 2
+      }
+    },
+    "src/components/glyphbot/ProactiveMonitor.jsx": {
+      "total": 3,
+      "calls": {
+        "SystemAuditLog.create": 3
+      }
+    },
+    "src/components/glyphbot/SecurityDashboard.jsx": {
+      "total": 1,
+      "calls": {
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/glyphbot/SecurityScanner.jsx": {
+      "total": 1,
+      "calls": {
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/glyphlock/bot/logic/useGlyphBotAudit.jsx": {
+      "total": 5,
+      "calls": {
+        "GlyphBotAudit.create": 1,
+        "GlyphBotAudit.update": 3,
+        "GlyphBotAudit.delete": 1
+      }
+    },
+    "src/components/glyphlock/HotspotPayloadConfig.jsx": {
+      "total": 1,
+      "calls": {
+        "HotspotPayload.delete": 1
+      }
+    },
+    "src/components/imageLab/tabs/GalleryTab.jsx": {
+      "total": 2,
+      "calls": {
+        "InteractiveImage.delete": 2
+      }
+    },
+    "src/components/imageLab/tabs/InteractiveTab.jsx": {
+      "total": 3,
+      "calls": {
+        "InteractiveImage.create": 1,
+        "InteractiveImage.update": 2
+      }
+    },
+    "src/components/mixer/automation/djDirectFallbacks.js": {
+      "total": 2,
+      "calls": {
+        "Playlist.create": 1,
+        "Playlist.delete": 1
+      }
+    },
+    "src/components/nups/AuditLogDashboard.jsx": {
+      "total": 1,
+      "calls": {
+        "AuditEvent.create": 1
+      }
+    },
+    "src/components/nups/BarcodeFirstCapture.jsx": {
+      "total": 2,
+      "calls": {
+        "VIPContractRecord.update": 1,
+        "AuditEvent.create": 1
+      }
+    },
+    "src/components/nups/BatchManagement.jsx": {
+      "total": 5,
+      "calls": {
+        "SystemAuditLog.create": 5
+      }
+    },
+    "src/components/nups/BulkPayoutProcessor.jsx": {
+      "total": 1,
+      "calls": {
+        "DriverPayout.update": 1
+      }
+    },
+    "src/components/nups/ContractManager.jsx": {
+      "total": 6,
+      "calls": {
+        "VenueContract.create": 1,
+        "GlyphBucksTransaction.create": 1,
+        "SystemAuditLog.create": 2,
+        "VenueContract.update": 2
+      }
+    },
+    "src/components/nups/contracts/BigSpenderLetter.jsx": {
+      "total": 1,
+      "calls": {
+        "ActivityLog.create": 1
+      }
+    },
+    "src/components/nups/contracts/BigSpenderQuestionnaire.jsx": {
+      "total": 1,
+      "calls": {
+        "ActivityLog.create": 1
+      }
+    },
+    "src/components/nups/contracts/DemoContractSeeder.jsx": {
+      "total": 1,
+      "calls": {
+        "X.bulkCreate": 1
+      }
+    },
+    "src/components/nups/ContractScanBack.jsx": {
+      "total": 1,
+      "calls": {
+        "VenueContract.update": 1
+      }
+    },
+    "src/components/nups/CustomerManagement.jsx": {
+      "total": 2,
+      "calls": {
+        "POSCustomer.create": 1,
+        "POSCustomer.update": 1
+      }
+    },
+    "src/components/nups/DoorPOSFinalizationAudit.jsx": {
+      "total": 1,
+      "calls": {
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/nups/DriverDropOffTracker.jsx": {
+      "total": 10,
+      "calls": {
+        "DriverProfile.create": 1,
+        "DriverPayout.create": 1,
+        "DriverPayout.update": 4,
+        "DriverPayout.delete": 1,
+        "DriverProfile.delete": 1,
+        "DriverProfile.update": 1,
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/nups/DriverPayoutStatusToggle.jsx": {
+      "total": 1,
+      "calls": {
+        "DriverPayout.update": 1
+      }
+    },
+    "src/components/nups/EmployeeManagement.jsx": {
+      "total": 3,
+      "calls": {
+        "NUPSUser.update": 2,
+        "NUPSUser.create": 1
+      }
+    },
+    "src/components/nups/EntertainerCheckIn.jsx": {
+      "total": 2,
+      "calls": {
+        "EntertainerShift.delete": 1,
+        "Entertainer.delete": 1
+      }
+    },
+    "src/components/nups/EntertainerPayrollEngine.jsx": {
+      "total": 7,
+      "calls": {
+        "SystemAuditLog.create": 4,
+        "PayrollRecord.update": 2,
+        "PayrollRecord.create": 1
+      }
+    },
+    "src/components/nups/entertainers/EntertainerCredentialRoster.jsx": {
+      "total": 1,
+      "calls": {
+        "Entertainer.update": 1
+      }
+    },
+    "src/components/nups/flows/StaffShiftFlow.jsx": {
+      "total": 1,
+      "calls": {
+        "StaffShift.update": 1
+      }
+    },
+    "src/components/nups/frontdoor/DriverQuickAdd.jsx": {
+      "total": 2,
+      "calls": {
+        "DriverPayout.delete": 1,
+        "DriverProfile.delete": 1
+      }
+    },
+    "src/components/nups/GlyphBuckInventory.jsx": {
+      "total": 2,
+      "calls": {
+        "GlyphBucksOrder.update": 1,
+        "VIPContractRecord.create": 1
+      }
+    },
+    "src/components/nups/glyphbucks/BillScanner.jsx": {
+      "total": 2,
+      "calls": {
+        "SystemAuditLog.create": 1,
+        "GlyphBucksTransaction.update": 1
+      }
+    },
+    "src/components/nups/GlyphBucksContract.jsx": {
+      "total": 3,
+      "calls": {
+        "SystemAuditLog.create": 1,
+        "GlyphBucksOrder.update": 1,
+        "VIPContractRecord.update": 1
+      }
+    },
+    "src/components/nups/GlyphBucksLedger.jsx": {
+      "total": 2,
+      "calls": {
+        "GlyphBucksTransaction.create": 1,
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/nups/GuestCheckIn.jsx": {
+      "total": 4,
+      "calls": {
+        "VIPGuest.delete": 1,
+        "VIPGuest.update": 2,
+        "VIPGuest.create": 1
+      }
+    },
+    "src/components/nups/GuestTracking.jsx": {
+      "total": 3,
+      "calls": {
+        "VIPGuest.create": 1,
+        "VIPGuest.update": 2
+      }
+    },
+    "src/components/nups/InventoryManagement.jsx": {
+      "total": 2,
+      "calls": {
+        "POSInventoryBatch.create": 1,
+        "POSProduct.update": 1
+      }
+    },
+    "src/components/nups/LocationManagement.jsx": {
+      "total": 2,
+      "calls": {
+        "POSLocation.create": 1,
+        "POSLocation.update": 1
+      }
+    },
+    "src/components/nups/ManagerOverrideModal.jsx": {
+      "total": 2,
+      "calls": {
+        "SystemAuditLog.create": 2
+      }
+    },
+    "src/components/nups/MarketingCampaigns.jsx": {
+      "total": 1,
+      "calls": {
+        "POSCampaign.create": 1
+      }
+    },
+    "src/components/nups/NUPSUserManager.jsx": {
+      "total": 3,
+      "calls": {
+        "NUPSUser.create": 1,
+        "NUPSUser.update": 1,
+        "NUPSUser.delete": 1
+      }
+    },
+    "src/components/nups/OnboardingPacket.jsx": {
+      "total": 9,
+      "calls": {
+        "Entertainer.create": 1,
+        "Entertainer.update": 5,
+        "UserRoleAssignment.create": 1,
+        "UserRoleAssignment.update": 1,
+        "EntertainerShift.create": 1
+      }
+    },
+    "src/components/nups/payroll/ContractorOnboardingPanel.jsx": {
+      "total": 3,
+      "calls": {
+        "ContractorTaxForm.update": 1,
+        "ContractorTaxForm.create": 1,
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/nups/pos/QuickChargePanel.jsx": {
+      "total": 1,
+      "calls": {
+        "POSProduct.create": 1
+      }
+    },
+    "src/components/nups/POSCashRegister.jsx": {
+      "total": 6,
+      "calls": {
+        "ActivityLog.create": 3,
+        "SystemAuditLog.create": 2,
+        "POSCustomer.update": 1
+      }
+    },
+    "src/components/nups/ProductManagement.jsx": {
+      "total": 8,
+      "calls": {
+        "POSProduct.create": 1,
+        "POSProduct.update": 5,
+        "POSProduct.delete": 2
+      }
+    },
+    "src/components/nups/QuickDriverGuestAdd.jsx": {
+      "total": 2,
+      "calls": {
+        "DriverPayout.update": 1,
+        "ActivityLog.create": 1
+      }
+    },
+    "src/components/nups/RefundManager.jsx": {
+      "total": 1,
+      "calls": {
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/nups/SafeDataWipeModal.jsx": {
+      "total": 1,
+      "calls": {
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/nups/SeedDoorGuestsButton.jsx": {
+      "total": 7,
+      "calls": {
+        "VIPRoom.bulkCreate": 1,
+        "VIPGuest.update": 2,
+        "VIPGuest.create": 1,
+        "VIPRoom.update": 2,
+        "VIPGuest.delete": 1
+      }
+    },
+    "src/components/nups/shell/ModeToggle.jsx": {
+      "total": 4,
+      "calls": {
+        "VenueRateConfig.update": 1,
+        "VenueRateConfig.create": 1,
+        "SystemConfig.update": 1,
+        "SystemConfig.create": 1
+      }
+    },
+    "src/components/nups/ShiftClockInOut.jsx": {
+      "total": 2,
+      "calls": {
+        "EntertainerShift.create": 1,
+        "EntertainerShift.update": 1
+      }
+    },
+    "src/components/nups/TimeClock.jsx": {
+      "total": 1,
+      "calls": {
+        "StaffShift.update": 1
+      }
+    },
+    "src/components/nups/TipBreakdown.jsx": {
+      "total": 1,
+      "calls": {
+        "TipPayout.create": 1
+      }
+    },
+    "src/components/nups/VenueSettings.jsx": {
+      "total": 2,
+      "calls": {
+        "Venue.update": 1,
+        "Venue.create": 1
+      }
+    },
+    "src/components/nups/vip/UltimateVIPContract.jsx": {
+      "total": 2,
+      "calls": {
+        "ContractTermsConfig.update": 1,
+        "ContractTermsConfig.create": 1
+      }
+    },
+    "src/components/nups/VIPContractLifecycle.jsx": {
+      "total": 2,
+      "calls": {
+        "ContractorPayout.create": 1,
+        "ContractorPayout.update": 1
+      }
+    },
+    "src/components/nups/VIPEntertainerQuestionnaire.jsx": {
+      "total": 3,
+      "calls": {
+        "VIPSessionReport.create": 1,
+        "AuditEvent.create": 2
+      }
+    },
+    "src/components/nups/VIPRoomBoard.jsx": {
+      "total": 11,
+      "calls": {
+        "VIPRoom.update": 3,
+        "VIPRoom.bulkCreate": 1,
+        "SystemAuditLog.create": 7
+      }
+    },
+    "src/components/nups/VIPRoomManagement.jsx": {
+      "total": 4,
+      "calls": {
+        "SystemAuditLog.create": 2,
+        "VIPRoom.update": 2
+      }
+    },
+    "src/components/nups/ZReportGenerator.jsx": {
+      "total": 2,
+      "calls": {
+        "POSZReport.create": 1,
+        "SystemAuditLog.create": 1
+      }
+    },
+    "src/components/partners/DocumentCenter.jsx": {
+      "total": 1,
+      "calls": {
+        "PartnerDocument.update": 1
+      }
+    },
+    "src/components/partners/MarketingCollateral.jsx": {
+      "total": 1,
+      "calls": {
+        "MarketingAsset.update": 1
+      }
+    },
+    "src/components/qr/QrBatchUploader.jsx": {
+      "total": 1,
+      "calls": {
+        "QRGenHistory.create": 1
+      }
+    },
+    "src/components/qr/QrPreviewPanel.jsx": {
+      "total": 1,
+      "calls": {
+        "QrPreview.create": 1
+      }
+    },
+    "src/components/qr/QrPreviewStorage.jsx": {
+      "total": 4,
+      "calls": {
+        "QrPreview.delete": 2,
+        "QrPreview.create": 1,
+        "QrPreview.update": 1
+      }
+    },
+    "src/components/qr/QrStudio.jsx": {
+      "total": 4,
+      "calls": {
+        "QRThreatLog.create": 1,
+        "QRGenHistory.create": 1,
+        "QRAIScore.create": 1,
+        "QrPreview.delete": 1
+      }
+    },
+    "src/components/scanner/ScanTab.jsx": {
+      "total": 2,
+      "calls": {
+        "GuestProfile.update": 1,
+        "GuestProfile.create": 1
+      }
+    },
+    "src/components/studio/EditorTab.jsx": {
+      "total": 1,
+      "calls": {
+        "InteractiveImage.create": 1
+      }
+    },
+    "src/components/verification/VerificationIntakeForm.jsx": {
+      "total": 1,
+      "calls": {
+        "Consultation.create": 1
+      }
+    },
+    "src/components/vip2/RoomTimingModal.jsx": {
+      "total": 1,
+      "calls": {
+        "VIPRoom.update": 1
+      }
+    },
+    "src/hooks/useFrontDoorConfig.js": {
+      "total": 2,
+      "calls": {
+        "FrontDoorConfig.update": 1,
+        "FrontDoorConfig.create": 1
+      }
+    },
+    "src/lib/accounting/coaSeed.js": {
+      "total": 1,
+      "calls": {
+        "LedgerAccount.create": 1
+      }
+    },
+    "src/lib/accounting/postToLedger.js": {
+      "total": 1,
+      "calls": {
+        "JournalEntry.update": 1
+      }
+    },
+    "src/lib/notifications/sendFormNotification.js": {
+      "total": 1,
+      "calls": {
+        "EmailDeliveryLog.create": 1
+      }
+    },
+    "src/lib/nups/accessRequestClient.js": {
+      "total": 1,
+      "calls": {
+        "NUPSAccessRequest.create": 1
+      }
+    },
+    "src/lib/nups/activityLog.js": {
+      "total": 1,
+      "calls": {
+        "ActivityLog.create": 1
+      }
+    },
+    "src/lib/nups/audit/auditEventEmitter.js": {
+      "total": 3,
+      "calls": {
+        "AuditEvent.create": 3
+      }
+    },
+    "src/lib/nups/auditDifferential.js": {
+      "total": 1,
+      "calls": {
+        "ActivityLog.create": 1
+      }
+    },
+    "src/lib/nups/demoSeeders.js": {
+      "total": 8,
+      "calls": {
+        "POSTransaction.bulkCreate": 1,
+        "POSTransaction.delete": 1,
+        "DriverProfile.create": 1,
+        "DriverProfile.delete": 1,
+        "GuestProfile.create": 1,
+        "GuestProfile.delete": 1,
+        "DriverPayout.create": 1,
+        "DriverPayout.delete": 1
+      }
+    },
+    "src/lib/nups/entertainerPlaylists.js": {
+      "total": 2,
+      "calls": {
+        "Playlist.update": 1,
+        "Playlist.create": 1
+      }
+    },
+    "src/lib/nups/frontendDemoSeeder.js": {
+      "total": 12,
+      "calls": {
+        "X.bulkCreate": 1,
+        "VIPConfig.create": 1,
+        "Entertainer.bulkCreate": 1,
+        "VIPRoom.bulkCreate": 1,
+        "VIPGuest.bulkCreate": 1,
+        "VIPContract.bulkCreate": 1,
+        "VIPSession.bulkCreate": 1,
+        "VenueContract.bulkCreate": 1,
+        "VIPContractRecord.bulkCreate": 1,
+        "GlyphBucksBill.bulkCreate": 1,
+        "GlyphBucksBatch.create": 1,
+        "GlyphBucksOrder.create": 1
+      }
+    },
+    "src/lib/nups/identityWrites.js": {
+      "total": 1,
+      "calls": {
+        "X.create": 1
+      }
+    },
+    "src/lib/nups/personArchive.js": {
+      "total": 1,
+      "calls": {
+        "PersonRecord.create": 1
+      }
+    },
+    "src/lib/nups/privilegedAccess.js": {
+      "total": 1,
+      "calls": {
+        "NUPSUser.create": 1
+      }
+    },
+    "src/lib/nups/venueRateConfig.js": {
+      "total": 1,
+      "calls": {
+        "VenueRateConfig.create": 1
+      }
+    },
+    "src/lib/nups/writeEntity.js": {
+      "total": 9,
+      "calls": {
+        "MigrationAuditLog.create": 1,
+        "SystemConfig.update": 2,
+        "SystemConfig.create": 2,
+        "[entity].create": 1,
+        "[entity].update": 1,
+        "[entity].delete": 1,
+        "[entity].bulkCreate": 1
+      }
+    },
+    "src/lib/registry/reconcileRegistry.js": {
+      "total": 3,
+      "calls": {
+        "FeatureRegistry.create": 2,
+        "FeatureRegistry.update": 1
+      }
+    },
+    "src/pages/ArchitecturalDecisionRegister.jsx": {
+      "total": 3,
+      "calls": {
+        "ArchitecturalDecisionRecord.create": 1,
+        "ArchitecturalDecisionRecord.update": 2
+      }
+    },
+    "src/pages/Blockchain.jsx": {
+      "total": 4,
+      "calls": {
+        "BlockchainActivity.create": 4
+      }
+    },
+    "src/pages/CommandCenter.jsx": {
+      "total": 2,
+      "calls": {
+        "APIKey.update": 1,
+        "APIKey.delete": 1
+      }
+    },
+    "src/pages/Contact.jsx": {
+      "total": 2,
+      "calls": {
+        "ContactEvent.create": 1,
+        "ContactEvent.update": 1
+      }
+    },
+    "src/pages/DriverPayoutHistory.jsx": {
+      "total": 1,
+      "calls": {
+        "DriverPayout.delete": 1
+      }
+    },
+    "src/pages/GlyphBot.jsx": {
+      "total": 1,
+      "calls": {
+        "GlyphBotActivityLog.create": 1
+      }
+    },
+    "src/pages/NUPSDemoManager.jsx": {
+      "total": 3,
+      "calls": {
+        "SystemAuditLog.create": 1,
+        "[entityName].delete": 1,
+        "[entityName].create": 1
+      }
+    },
+    "src/pages/NUPSSandbox.jsx": {
+      "total": 6,
+      "calls": {
+        "VenueContract.delete": 1,
+        "VenueContract.bulkCreate": 1,
+        "VenueContract.update": 2,
+        "Entertainer.bulkCreate": 1,
+        "POSTransaction.bulkCreate": 1
+      }
+    }
+  }
+}

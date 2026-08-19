@@ -49,7 +49,7 @@ export default function VIPShowContracts() {
     }
   };
 
-  useEffect(() => { search(); /* initial load */ }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { search(); /* initial load */ }, []);  
 
   const stats = useMemo(() => {
     const total = rows.reduce((s, r) => s + Number(r.total || 0), 0);

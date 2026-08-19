@@ -1,7 +1,7 @@
 {
   "name": "NUPSAccessRequest",
   "type": "object",
-  "description": "Owner-reviewed requests for NUPS access. Entertainers, administrators, and owners may request access, but no applicant may self-approve.",
+  "description": "Owner-reviewed requests for NUPS access. Any staff role, administrator, or owner may request access, but no applicant may self-approve. Sovereign owner accounts never need a request.",
   "properties": {
     "description": {
       "type": "string",
@@ -21,6 +21,13 @@
       "type": "string",
       "enum": [
         "ENTERTAINER",
+        "HOSTESS",
+        "DOORMAN",
+        "DOOR_GIRL",
+        "BARTENDER",
+        "DJ",
+        "SECURITY",
+        "MANAGER",
         "ADMINISTRATOR",
         "OWNER"
       ],

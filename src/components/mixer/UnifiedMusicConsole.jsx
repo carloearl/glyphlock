@@ -15,7 +15,7 @@
  */
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Disc3, Music, Youtube, Disc, Zap, Activity, Radio, RadioTower, Stethoscope, Sparkles, Power,
+  Disc3, Music, Youtube, Disc, Zap, Activity, Radio, RadioTower, Stethoscope, Sparkles, Power, MonitorPlay,
 } from "lucide-react";
 
 import MixerModuleView from "@/components/mixer/MixerModuleView";
@@ -27,6 +27,7 @@ import CrowdTab from "@/components/mixer/suite/CrowdTab";
 import JukeboxTab from "@/components/mixer/suite/JukeboxTab";
 import RadioTab from "@/components/mixer/suite/RadioTab";
 import TrackHealthTab from "@/components/mixer/suite/TrackHealthTab";
+import FableVisualizerTab from "@/components/mixer/suite/FableVisualizerTab";
 import SuiteErrorBoundary from "@/components/mixer/suite/SuiteErrorBoundary";
 import DJAutomationDeck from "@/components/mixer/automation/DJAutomationDeck";
 import useDJOperationalState from "@/components/mixer/automation/useDJOperationalState";
@@ -42,6 +43,7 @@ const NAV = [
   { key: "playlist", label: "AI Playlist",    icon: Zap,      accent: "from-cyan-500 to-sky-500",       ring: "border-cyan-500/60 bg-cyan-500/15 text-cyan-200" },
   { key: "crowd",    label: "Crowd Pulse",    icon: Activity, accent: "from-emerald-500 to-green-500",  ring: "border-emerald-500/60 bg-emerald-500/15 text-emerald-200" },
   { key: "jukebox",  label: "Jukebox Queue",  icon: Radio,    accent: "from-amber-500 to-yellow-500",   ring: "border-amber-500/60 bg-amber-500/15 text-amber-200" },
+  { key: "visuals",  label: "Fable Visuals",  icon: MonitorPlay, accent: "from-fuchsia-500 to-violet-500", ring: "border-fuchsia-500/60 bg-fuchsia-500/15 text-fuchsia-200" },
   { key: "health",   label: "Diagnostics",    icon: Stethoscope, accent: "from-slate-500 to-slate-400", ring: "border-cyan-500/60 bg-cyan-500/15 text-cyan-200" },
 ];
 
@@ -222,9 +224,18 @@ export default function UnifiedMusicConsole() {
         })}
       </div>
 
-      {/* ── Active Panel ── */}
-      <SuiteErrorBoundary key={active}>
-        {active === "mixer"    && (
+      {/* ── Persistent mixer ──
+          The decks own the live <audio>/YouTube player instances. Keep them
+          mounted while another module is visible so switching to Visuals,
+          Tracks, Search, etc. cannot tear down the current performance. */}
+      <SuiteErrorBoundary>
+        <div
+          className={active === "mixer"
+            ? ""
+            : "fixed left-[-200vw] top-0 z-[-1] w-screen max-w-[1600px] pointer-events-none opacity-0"}
+          aria-hidden={active !== "mixer"}
+          inert={active !== "mixer" ? true : undefined}
+        >
           <MixerModuleView
             autoDj={autoDj}
             automationPlan={automationPlan}
@@ -232,16 +243,23 @@ export default function UnifiedMusicConsole() {
             libraryTracks={snapshot?.tracks || []}
             deckLoadRequest={deckLoadRequest}
           />
-        )}
-        {active === "tracks"   && <TracksTab />}
-        {active === "radio"    && <RadioTab />}
-        {active === "search"   && <MusicSearchTab onLoadToMixerDeck={handleLoadToMixerDeck} />}
-        {active === "personas" && <PersonasTab />}
-        {active === "playlist" && <PlaylistGenTab />}
-        {active === "crowd"    && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
-        {active === "jukebox"  && <JukeboxTab />}
-        {active === "health"   && <TrackHealthTab />}
+        </div>
       </SuiteErrorBoundary>
+
+      {/* ── Active utility panel ── */}
+      {active !== "mixer" && (
+        <SuiteErrorBoundary key={active}>
+          {active === "tracks"   && <TracksTab />}
+          {active === "radio"    && <RadioTab />}
+          {active === "search"   && <MusicSearchTab onLoadToMixerDeck={handleLoadToMixerDeck} />}
+          {active === "personas" && <PersonasTab />}
+          {active === "playlist" && <PlaylistGenTab />}
+          {active === "crowd"    && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
+          {active === "jukebox"  && <JukeboxTab />}
+          {active === "visuals"  && <FableVisualizerTab />}
+          {active === "health"   && <TrackHealthTab />}
+        </SuiteErrorBoundary>
+      )}
     </div>
   );
 }

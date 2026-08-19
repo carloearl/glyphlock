@@ -16,7 +16,7 @@
     },
     "pin_hash": {
       "type": "string",
-      "description": "DACO-NUPS-RBAC-CORRECTION-20260717 §2 — PBKDF2-SHA256 (100k iterations) hex of the PIN, keyed with a unique per-account salt and the server-held KEY_PEPPER. Never returned to clients, never logged. No plaintext PIN storage exists."
+      "description": "DACO-NUPS-RBAC-CORRECTION-20260717 \u00a72 \u2014 PBKDF2-SHA256 (100k iterations) hex of the PIN, keyed with a unique per-account salt and the server-held KEY_PEPPER. Never returned to clients, never logged. No plaintext PIN storage exists."
     },
     "pin_salt": {
       "type": "string",
@@ -24,11 +24,35 @@
     },
     "pin_lookup": {
       "type": "string",
-      "description": "HMAC-SHA256(pin, KEY_PEPPER) hex — deterministic peppered lookup index so PIN auth is an indexed query, not a table scan. Useless without the server secret."
+      "description": "HMAC-SHA256(pin, KEY_PEPPER) hex \u2014 deterministic peppered lookup index so PIN auth is an indexed query, not a table scan. Useless without the server secret."
     },
     "pin_hint": {
       "type": "string",
-      "description": "Optional staff-set reminder phrase shown by the kiosk Hint button. Never contains the PIN itself — server rejects hints containing digit runs."
+      "description": "Legacy authenticated reminder phrase. It is never displayed on the unauthenticated staff kiosk."
+    },
+    "pin_failed_attempts": {
+      "type": "number",
+      "default": 0,
+      "description": "Server-maintained count of account-specific authentication failures. Never exposed on the public login screen."
+    },
+    "pin_locked_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Server-enforced account lock expiration. Managers can clear this through the protected staff console."
+    },
+    "pin_locked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pin_lock_reason": {
+      "type": "string"
+    },
+    "pin_unlocked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pin_unlocked_by": {
+      "type": "string"
     },
     "require_platform_login": {
       "type": "boolean",
@@ -59,7 +83,7 @@
         "SOVEREIGN"
       ],
       "default": "BARTENDER",
-      "description": "RBAC role per §9.2. DACO-NUPS-ROLE-VIP-BUILD-20260717 added HOSTESS (VIP contract sale workspace) and DRIVER (clock in/out only)."
+      "description": "RBAC role per \u00a79.2. DACO-NUPS-ROLE-VIP-BUILD-20260717 added HOSTESS (VIP contract sale workspace) and DRIVER (clock in/out only)."
     },
     "platform_email": {
       "type": "string",
@@ -72,7 +96,7 @@
     "sovereign_flag": {
       "type": "boolean",
       "default": false,
-      "description": "DACO OMEGA v6.0: True only for the single SOVEREIGN account (Carlo). Bypasses all RBAC checks. Cannot be set via UI — must be set via direct entity update by platform admin."
+      "description": "DACO OMEGA v6.0: True only for the single SOVEREIGN account (Carlo). Bypasses all RBAC checks. Cannot be set via UI \u2014 must be set via direct entity update by platform admin."
     },
     "employee_id": {
       "type": "string",

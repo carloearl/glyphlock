@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import KioskPinPad from "@/components/nups/kiosk/KioskPinPad";
 import OwnerAdminSignIn from "@/components/nups/kiosk/OwnerAdminSignIn";
 import AccessRequestForm from "@/components/nups/kiosk/AccessRequestForm";
+import KioskLocalClock from "@/components/nups/kiosk/KioskLocalClock";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -10,7 +11,6 @@ import {
   Expand,
   LockKeyhole,
   LogOut,
-  PlayCircle,
   ShieldCheck,
   UserPlus,
 } from "lucide-react";
@@ -23,11 +23,41 @@ import {
 // Public kiosk entry. Operational controls remain hidden until NUPS is running
 // in fullscreen, an installed standalone window, or the Base44 editor preview.
 const PANELS = [
-  { key: "clockIn", label: "Staff Clock In", icon: Clock, color: "from-cyan-700 to-cyan-900" },
-  { key: "clockOut", label: "Staff Clock Out", icon: LogOut, color: "from-slate-700 to-slate-900" },
-  { key: "admin", label: "Owner / Admin Sign In", icon: ShieldCheck, color: "from-violet-700 to-violet-900" },
-  { key: "testRequest", label: "Request Test Access", icon: UserPlus, color: "from-indigo-700 to-indigo-900" },
-  { key: "trainingRequest", label: "Request Training Access", icon: UserPlus, color: "from-emerald-700 to-emerald-900" },
+  {
+    key: "clockIn",
+    label: "Check In",
+    hint: "Entertainers & staff — enter your 4-digit PIN",
+    icon: Clock,
+    color: "from-cyan-600 to-cyan-900",
+  },
+  {
+    key: "clockOut",
+    label: "Check Out",
+    hint: "End your shift",
+    icon: LogOut,
+    color: "from-slate-700 to-slate-900",
+  },
+  {
+    key: "admin",
+    label: "Owner / Admin Sign In",
+    hint: "Back office and management",
+    icon: ShieldCheck,
+    color: "from-violet-700 to-violet-900",
+  },
+  {
+    key: "testRequest",
+    label: "Request Test Access",
+    hint: "New account — reviewed by the owner",
+    icon: UserPlus,
+    color: "from-indigo-700 to-indigo-900",
+  },
+  {
+    key: "trainingRequest",
+    label: "Request Training Access",
+    hint: "Practice mode — reviewed by the owner",
+    icon: UserPlus,
+    color: "from-emerald-700 to-emerald-900",
+  },
 ];
 
 export default function NUPSKiosk() {
@@ -158,13 +188,13 @@ export default function NUPSKiosk() {
           </div>
         ) : !panel ? (
           <>
-            <button
-              onClick={() => navigate("/demo/command-center")}
-              className="mx-auto mb-6 flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-sm font-semibold hover:bg-cyan-500/20 hover:border-cyan-400/70 transition-all"
-            >
-              <PlayCircle className="w-4 h-4" />
-              View Command Center Demo
-            </button>
+            <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 py-4">
+              <KioskLocalClock />
+            </div>
+
+            <p className="mb-4 text-center text-sm text-slate-400">
+              Already onboarded? Just check in — no sign-up needed.
+            </p>
 
             <div className="grid gap-4">
               {PANELS.map((p) => (
@@ -176,7 +206,10 @@ export default function NUPSKiosk() {
                   <span className="w-12 h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
                     <p.icon className="w-6 h-6" />
                   </span>
-                  <span className="text-lg font-semibold">{p.label}</span>
+                  <span className="min-w-0">
+                    <span className="block text-lg font-semibold">{p.label}</span>
+                    <span className="block text-xs text-white/60">{p.hint}</span>
+                  </span>
                 </button>
               ))}
             </div>

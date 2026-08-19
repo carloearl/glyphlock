@@ -9,6 +9,7 @@ import MemberCheckInAutofill from "@/components/nups/contracts/MemberCheckInAuto
 import ContractIdentityScanner from "@/components/nups/contracts/ContractIdentityScanner";
 import { VIP_TERMS, VIP_TERMS_TEXT, VIP_TERMS_VERSION } from "@/constants/vipShowTerms";
 import { printCurrentNupsView } from '@/lib/nups/receiptService';
+import { buildGlyphBucksIdempotencyKey } from "@/lib/nups/glyphbucksIdempotency";
 import {
   CheckCircle2,
   Coins,
@@ -278,7 +279,22 @@ export default function UnifiedContractFlowV2() {
       let vipAnchor = null;
 
       if (includeGB) {
+        const idempotencyKey = await buildGlyphBucksIdempotencyKey({
+          mode,
+          venueId,
+          assent,
+          purchaserName: identity.name,
+          purchaserMemberId: identity.member_id,
+          idScanRef: identity.id_scan_ref,
+          denomCents: gb.denom_cents,
+          qty: gb.qty,
+          cardFeeCents: gb.card_fee_cents,
+          cardAuthCode: card.auth_code,
+          cardLast4: card.last4,
+          terminalId: gb.terminal_id,
+        });
         const response = await base44.functions.invoke("glyphbucksSeal", {
+          idempotency_key: idempotencyKey,
           mode,
           venue_id: venueId,
           purchaser_name: identity.name.trim(),

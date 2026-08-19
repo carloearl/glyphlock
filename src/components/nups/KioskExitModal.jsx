@@ -1,185 +1,138 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Lock, Loader2, XCircle, ShieldCheck, ArrowLeft, KeyRound } from "lucide-react";
+import { ArrowLeft, KeyRound, Lock, ShieldCheck, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import SecureNumericKeypad from "@/components/nups/kiosk/SecureNumericKeypad";
+import { getNUPSTerminalId } from "@/lib/nups/terminalIdentity";
+
+const MAX_LOCAL_ATTEMPTS = 3;
+
+function responseData(error) {
+  return error?.response?.data || error?.data || error?.body || error || {};
+}
 
 /**
- * KioskExitModal
- *
- * Dedicated, purpose-clear unlock screen for leaving NUPS kiosk mode.
- * Separate from ManagerPINVerifier (which is built for authorizing payouts/voids)
- * because that copy/CTA was confusing operators trying to simply leave the system.
- *
- * Flow:
- *  - Operator enters 3-digit Manager PIN.
- *  - Matches against active NUPSUser with manager-tier role.
- *  - Admin (current logged-in admin session) gets a one-tap override.
- *  - 3 failed attempts locks the modal — operator must close and retry.
+ * Manager-authorized exit from the fullscreen NUPS kiosk.
+ * Verification is performed by nupsClockIn against the hashed manager PIN;
+ * this component never queries NUPSUser PIN fields or persists the entered PIN.
  */
 export default function KioskExitModal({ onUnlock, onCancel }) {
-  const [pin, setPin] = useState(["", "", ""]);
+  const [terminalId] = useState(() => getNUPSTerminalId());
+  const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
   const [attempts, setAttempts] = useState(0);
+  const [shuffleKey, setShuffleKey] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
-  const refs = [useRef(), useRef(), useRef()];
 
   useEffect(() => {
-    refs[0].current?.focus();
     base44.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
   }, []);
 
   const isAdmin = currentUser?.role === "admin";
-  const locked = attempts >= 3;
-
-  const handleDigit = (idx, val) => {
-    const d = val.replace(/\D/g, "").slice(-1);
-    const next = [...pin];
-    next[idx] = d;
-    setPin(next);
-    setFailed(false);
-    if (d && idx < 2) refs[idx + 1].current?.focus();
-  };
-
-  const handleKeyDown = (idx, e) => {
-    if (e.key === "Backspace" && !pin[idx] && idx > 0) refs[idx - 1].current?.focus();
-    if (e.key === "Enter" && pin.every((d) => d)) handleUnlock();
-  };
+  const locked = attempts >= MAX_LOCAL_ATTEMPTS;
 
   const handleUnlock = async () => {
-    const fullPin = pin.join("");
-    if (fullPin.length !== 3) return;
+    if (loading || locked || pin.length < 4) return;
     setLoading(true);
-    setFailed(false);
+    setError("");
     try {
-      const staffList = await base44.entities.NUPSUser.filter(
-        { pin: fullPin, status: "active" },
-        null,
-        10
+      const response = await base44.functions.invoke("nupsClockIn", {
+        action: "verifyManagerPin",
+        pin,
+        terminal_id: terminalId,
+      });
+      if (!response?.data?.success) throw new Error("Manager verification failed.");
+      setPin("");
+      toast.success(`Unlocked by ${response.data.manager?.full_name || "manager"}`);
+      onUnlock();
+    } catch (cause) {
+      const nextAttempts = attempts + 1;
+      const data = responseData(cause);
+      setPin("");
+      setAttempts(nextAttempts);
+      setShuffleKey((value) => value + 1);
+      setError(
+        nextAttempts >= MAX_LOCAL_ATTEMPTS
+          ? "Manager verification is locked. Close this dialog and use the staff-login Manager Unlock workflow."
+          : data?.error || "Manager verification failed.",
       );
-      const validRoles = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER", "admin", "manager"];
-      const match = staffList.find((s) => validRoles.includes(s.role));
-      if (match) {
-        toast.success(`Unlocked by ${match.full_name || match.username}`);
-        onUnlock();
-      } else {
-        const n = attempts + 1;
-        setAttempts(n);
-        setFailed(true);
-        setPin(["", "", ""]);
-        refs[0].current?.focus();
-        toast.error(n >= 3 ? "Locked — close and try again." : `Wrong PIN — ${3 - n} left`);
-      }
-    } catch (err) {
-      toast.error("Verification error: " + err.message);
-      setFailed(true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-gray-950 border border-cyan-500/30 rounded-xl shadow-2xl overflow-hidden">
-      {/* Header */}
-      <div className="px-5 py-4 bg-gradient-to-r from-slate-900 to-cyan-950/40 border-b border-cyan-500/20">
+    <div className="overflow-hidden rounded-xl border border-cyan-500/30 bg-gray-950 shadow-2xl">
+      <div className="border-b border-cyan-500/20 bg-gradient-to-r from-slate-900 to-cyan-950/40 px-5 py-4">
         <div className="flex items-center gap-2">
-          <Lock className="w-5 h-5 text-cyan-300" />
-          <h2 className="text-white font-bold text-base">Leave NUPS Kiosk</h2>
+          <Lock className="h-5 w-5 text-cyan-300" />
+          <h2 className="text-base font-bold text-white">Leave NUPS Kiosk</h2>
         </div>
-        <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
-          You're about to <strong className="text-cyan-300">exit the NUPS operator system</strong> and
-          return to the GlyphLock website. A manager must enter their PIN to unlock the screen.
+        <p className="mt-1.5 text-xs leading-relaxed text-gray-400">
+          Exiting returns this terminal to the GlyphLock website. An active Dream Palace manager must authorize the exit with a 4–6 digit PIN.
         </p>
       </div>
 
-      <div className="p-5 space-y-4">
+      <div className="space-y-4 p-5">
         {locked ? (
-          <div className="bg-red-950/30 border border-red-500/40 rounded-lg p-4 text-center">
-            <XCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
-            <p className="text-sm text-red-300 font-bold">Locked</p>
-            <p className="text-xs text-gray-500 mt-1">Too many failed attempts — cancel and try again.</p>
+          <div className="rounded-lg border border-red-500/40 bg-red-950/30 p-4 text-center">
+            <XCircle className="mx-auto mb-2 h-8 w-8 text-red-400" />
+            <p className="text-sm font-bold text-red-300">Manager verification locked</p>
+            <p className="mt-1 text-xs text-gray-500">Return to Staff Clock In and use Manager Unlock.</p>
           </div>
         ) : (
-          <>
-            <div className="flex justify-center gap-4">
-              {pin.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={refs[idx]}
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleDigit(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  disabled={loading}
-                  className={`w-14 h-14 text-center text-2xl font-bold rounded-xl border-2 bg-gray-900 text-white outline-none transition-all ${
-                    failed
-                      ? "border-red-500 bg-red-950/30"
-                      : digit
-                      ? "border-cyan-400"
-                      : "border-gray-700 focus:border-cyan-400"
-                  }`}
-                />
-              ))}
-            </div>
-
-            {failed && (
-              <p className="flex items-center justify-center gap-2 text-xs text-red-400">
-                <XCircle className="w-4 h-4" /> Wrong PIN — try again
-              </p>
-            )}
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={onCancel}
-                disabled={loading}
-                className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800"
-              >
-                <ArrowLeft className="w-4 h-4 mr-1.5" />
-                Stay in NUPS
-              </Button>
-              <Button
-                onClick={handleUnlock}
-                disabled={pin.some((d) => !d) || loading}
-                className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-black font-bold"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <KeyRound className="w-4 h-4 mr-2" />
-                )}
-                {loading ? "Unlocking…" : "Unlock & Exit"}
-              </Button>
-            </div>
-
-            {attempts > 0 && !locked && (
-              <p className="text-center text-xs text-yellow-400">
-                {attempts} wrong — {3 - attempts} attempt{3 - attempts === 1 ? "" : "s"} left
-              </p>
-            )}
-          </>
+          <SecureNumericKeypad
+            value={pin}
+            onChange={(next) => { setPin(next); if (next) setError(""); }}
+            onSubmit={handleUnlock}
+            busy={loading}
+            error={error}
+            minLength={4}
+            maxLength={6}
+            submitLabel="EXIT"
+            shuffleKey={shuffleKey}
+            onExpired={() => setError("Manager PIN entry cleared after inactivity.")}
+          />
         )}
 
-        {isAdmin && !locked && (
-          <div className="pt-3 border-t border-gray-800">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => { setPin(""); onCancel(); }}
+            disabled={loading}
+            className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800"
+          >
+            <ArrowLeft className="mr-1.5 h-4 w-4" /> Stay in NUPS
+          </Button>
+          {!locked && (
             <Button
-              onClick={onUnlock}
-              className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold"
+              onClick={handleUnlock}
+              disabled={pin.length < 4 || loading}
+              className="flex-1 bg-cyan-500 font-bold text-black hover:bg-cyan-400"
             >
-              <ShieldCheck className="w-4 h-4 mr-2" />
-              Admin Override — Unlock Now
+              <KeyRound className="mr-2 h-4 w-4" /> Unlock & Exit
             </Button>
-            <p className="text-[10px] text-gray-500 text-center mt-2">
-              Signed in as <strong className="text-gray-400">{currentUser?.full_name || currentUser?.email}</strong>
+          )}
+        </div>
+
+        {isAdmin && !locked && (
+          <div className="border-t border-gray-800 pt-3">
+            <Button
+              onClick={() => { setPin(""); onUnlock(); }}
+              className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 font-bold text-white hover:from-purple-500 hover:to-cyan-500"
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" /> Authenticated Admin Exit
+            </Button>
+            <p className="mt-2 text-center text-[10px] text-gray-500">
+              Server-authenticated as <strong className="text-gray-400">{currentUser?.full_name || currentUser?.email}</strong>
             </p>
           </div>
         )}
 
-        <p className="text-[10px] text-gray-600 text-center pt-1">
-          Manager PINs are set in Staff Profile → Credentials
+        <p className="pt-1 text-center text-[10px] text-gray-600">
+          Manager PINs are provisioned through Manager Console → Staff & PINs.
         </p>
       </div>
     </div>

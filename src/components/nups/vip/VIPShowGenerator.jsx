@@ -67,7 +67,7 @@ export default function VIPShowGenerator({ prefill }) {
     // Shared clickwrap — assent captured once in the GlyphBucks terms panel
     // (scroll-tracked, initials on Terms 1 & 3) satisfies the VIP clickwrap too.
     if (prefill.assent?.clickwrap_accepted) setClickwrap(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [JSON.stringify(prefill)]);
 
   // Load this venue's editable VIP terms (admin-managed in ContractTermsConfig).

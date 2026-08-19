@@ -93,7 +93,7 @@ export default function NUPSOwner() {
       const next = resolveTab(new URLSearchParams(location.search).get('tab'));
       if (next && next !== activeModule) setActiveModule(next);
     } catch { /* ignore */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [location.search]);
   const [rbacRole, setRbacRole] = useState('manager');
   const queryClient = useQueryClient();

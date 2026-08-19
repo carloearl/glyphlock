@@ -1,7 +1,20 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import Stripe from 'npm:stripe@14.14.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import Stripe from 'npm:stripe@22.5.0';
 
 const ALLOWED_REASONS = new Set(['duplicate', 'fraudulent', 'requested_by_customer']);
+
+async function resolveStripeSecretKey(base44) {
+  const configured = Deno.env.get('STRIPE_SECRET_KEY');
+  if (configured) return configured;
+
+  try {
+    const connection = await base44.asServiceRole.connectors.getConnection('stripe');
+    const token = connection?.accessToken;
+    return typeof token === 'string' && token.length > 0 ? token : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Admin-only full or partial Stripe refund for a Consultation payment.
@@ -66,12 +79,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    const stripeSecretKey = await resolveStripeSecretKey(base44);
     if (!stripeSecretKey) {
       return Response.json({ error: 'Stripe is not configured' }, { status: 503 });
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-06-24.dahlia' });
     const params = {
       payment_intent: consultation.stripe_payment_intent_id,
       reason,

@@ -10,6 +10,7 @@ import { VIP_TERMS, VIP_TERMS_TEXT, VIP_TERMS_VERSION } from "@/constants/vipSho
 import { Stamp, Printer, ShieldCheck, Coins, Crown, Fingerprint, CreditCard, PenLine, CheckCircle2, FlaskConical, Plus, Trash2 } from "lucide-react";
 
 import { printCurrentNupsView } from '@/lib/nups/receiptService';
+import { buildGlyphBucksIdempotencyKey } from "@/lib/nups/glyphbucksIdempotency";
 /**
  * UNIFIED CONTRACT FLOW — GlyphBucks issuance + VIP suite contract MERGED into
  * one flow. Terms, guest identity, ID/thumb scan, card capture, and
@@ -90,7 +91,7 @@ export default function UnifiedContractFlow({ memberFill }) {
     }));
     setCard((c) => ({ ...c, last4: memberFill.card_last4 || c.last4, brand: memberFill.card_brand || c.brand }));
     setEsigs((e) => ({ ...e, purchaser: e.purchaser || memberFill.purchaser_name || "" }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [JSON.stringify(memberFill)]);
 
   const resetForm = () => {
@@ -143,7 +144,22 @@ export default function UnifiedContractFlow({ memberFill }) {
 
       // ── Part A: GlyphBucks stored-value seal (server-side Ed25519)
       if (includeGB) {
+        const idempotencyKey = await buildGlyphBucksIdempotencyKey({
+          mode,
+          venueId,
+          assent,
+          purchaserName: guest.name,
+          purchaserMemberId: guest.member_id,
+          idScanRef: guest.id_scan_ref,
+          denomCents: gb.denom_cents,
+          qty: gb.qty,
+          cardFeeCents: gb.card_fee_cents,
+          cardAuthCode: card.auth_code,
+          cardLast4: card.last4,
+          terminalId: gb.terminal_id,
+        });
         const res = await base44.functions.invoke("glyphbucksSeal", {
+          idempotency_key: idempotencyKey,
           mode, venue_id: venueId,
           purchaser_name: guest.name.trim(), purchaser_member_id: guest.member_id.trim(),
           gb_account_last4: guest.gb_account_last4.trim(),

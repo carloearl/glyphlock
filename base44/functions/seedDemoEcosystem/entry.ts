@@ -30,6 +30,28 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const venue_id = body.venue_id || 'DEMO_VENUE_001';
 
+    // LIVE-MODE LOCK — demo data may never be seeded into a live venue.
+    // The venue's own VenueRateConfig.mode is the authority (never the client).
+    const configs = await base44.asServiceRole.entities.VenueRateConfig.filter({ venue_id });
+    const venueMode = configs[0]?.mode || null;
+    if (venueMode === 'REAL') {
+      await base44.asServiceRole.entities.MigrationAuditLog.create({
+        entity_name: 'multi',
+        operation: 'create',
+        actor_id: me.email,
+        actor_role: 'SOVEREIGN',
+        mode: 'DEMO',
+        tier: 'TIER_1_OBSERVE',
+        result: 'blocked',
+        venue_id,
+        notes: 'seedDemoEcosystem blocked — venue is in LIVE (REAL) mode',
+      });
+      return Response.json({
+        error: 'DEMO_SEED_BLOCKED_LIVE_MODE',
+        message: `${venue_id} is operating in LIVE mode. Demo data cannot be seeded into a live venue.`,
+      }, { status: 409 });
+    }
+
     const created = { staff: [], batches: [], transactions: [], tipPayouts: [] };
 
     // --- Staff seats (one per role) ---

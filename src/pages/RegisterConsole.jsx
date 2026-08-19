@@ -38,6 +38,7 @@ import NoBatchBanner from "@/components/nups/register/NoBatchBanner";
 import BatchConfirmControl from "@/components/nups/register/BatchConfirmControl";
 import RegisterStatusHeader from "@/components/nups/register/RegisterStatusHeader";
 import RecentTransactionsStrip from "@/components/nups/register/RecentTransactionsStrip";
+import OfflineSyncBanner from "@/components/nups/OfflineSyncBanner";
 import POSFloatingActionMenu from "@/components/nups/register/POSFloatingActionMenu";
 import GuestCheckIn from "@/components/nups/GuestCheckIn";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -118,6 +119,7 @@ function RegisterConsoleInner() {
   const [user, setUser] = useState(null);
   const [operator, setOperator] = useState(null);
   const [showSeedDialog, setShowSeedDialog] = useState(false);
+  const [djMounted, setDjMounted] = useState(false);
   const adminOverride = useAdminOverride();
   const activeVenue = useActiveVenue();
   const venueId = activeVenue?.id || activeVenue?.venue_id || null;
@@ -168,7 +170,13 @@ function RegisterConsoleInner() {
     if ((user || operator) && !allowedKeys.includes(activeTab)) {
       setActiveTab(allowedKeys[0]);
     }
-  }, [user, operator, adminOverride]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, operator, adminOverride]);
+
+  // Mount the DJ console on first entry and keep it alive afterward. The deck
+  // players must survive movement between Register, Bar, and DJ station tabs.
+  useEffect(() => {
+    if (activeTab === "dj") setDjMounted(true);
+  }, [activeTab]);  
 
   const modeQueryKey = [modeState.ledgerMode, modeState.operatingMode, modeState.trainingSession?.id || null];
   const { data: batches = [] } = useQuery({
@@ -250,17 +258,22 @@ function RegisterConsoleInner() {
       }
       role="CASHIER"
     >
+      <OfflineSyncBanner />
       <div className="max-w-[1600px] mx-auto">
-        {/* W3-012B Cycle 2B — BPAAA Register Standard §1.1 status header.
-            Display-only: venue, register type, cashier, shift, batch, mode,
-            clock, connection. Register type follows the active tab. */}
-        {(activeTab === "register" || activeTab === "bar") && (
-          <RegisterStatusHeader
-            user={operator || user}
-            batch={activeBatch}
-            registerType={activeTab === "bar" ? "Bar" : "Door"}
-          />
-        )}
+        {/* BPAAA Register Standard §1.1 + §5 — status and sync safety stay
+            visible on every allowed tab so context is never lost while the
+            operator moves between Door, Bar, DJ, Onboarding, and Audit. */}
+        <RegisterStatusHeader
+          user={operator || user}
+          batch={activeBatch}
+          registerType={{
+            register: "Door",
+            bar: "Bar",
+            dj: "DJ",
+            onboarding: "Onboarding",
+            audit: "Audit",
+          }[activeTab] || "Door"}
+        />
 
         {/* Tab strip — tablet-first: horizontal scroll on narrow screens,
             wraps cleanly on wider ones, every chip stays ≥44px tall so
@@ -323,7 +336,17 @@ function RegisterConsoleInner() {
             </div>
           )}
           {activeTab === "bar" && <POSBarRegister user={operator || user} />}
-          {activeTab === "dj" && <UnifiedMusicConsole />}
+          {djMounted && (
+            <div
+              className={activeTab === "dj"
+                ? ""
+                : "fixed left-[-200vw] top-0 z-[-1] w-screen max-w-[1600px] pointer-events-none opacity-0"}
+              aria-hidden={activeTab !== "dj"}
+              inert={activeTab !== "dj" ? true : undefined}
+            >
+              <UnifiedMusicConsole />
+            </div>
+          )}
           {/* Manager/Admin ONLY — permission-gated render, never reachable by
               door/bar/DJ staff even if tab state is forced. */}
           {activeTab === "onboarding" && isManagerOrAdmin && <StaffOnboardingPanel />}

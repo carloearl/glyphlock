@@ -6,6 +6,27 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
 
+// Sovereign accounts — never need an access request (owner directive 2026-08-19).
+const SOVEREIGN_EMAILS = ['carloearl@glyphlock.com', 'carloearl@gmail.com', 'svsantos@outlook.com'];
+
+// Any staff role may request access; ADMINISTRATOR / OWNER are privileged tiers.
+const STAFF_ROLES = ['ENTERTAINER', 'HOSTESS', 'DOORMAN', 'DOOR_GIRL', 'BARTENDER', 'DJ', 'SECURITY', 'MANAGER'];
+const REQUESTABLE_ROLES = [...STAFF_ROLES, 'ADMINISTRATOR', 'OWNER'];
+
+// Requested role → NUPSUser.role
+const NUPS_ROLE_MAP = {
+  OWNER: 'VENUE_OWNER',
+  ADMINISTRATOR: 'PLATFORM_ADMIN',
+  MANAGER: 'VENUE_MANAGER',
+  ENTERTAINER: 'PERFORMER',
+  HOSTESS: 'HOSTESS',
+  DOORMAN: 'DOORMAN',
+  DOOR_GIRL: 'DOOR_GIRL',
+  BARTENDER: 'BARTENDER',
+  DJ: 'DJ',
+  SECURITY: 'SECURITY',
+};
+
 // Decision lockdown (owner directive 2026-07-21): ONLY Carlo Earl's accounts
 // may approve/reject/suspend/revoke owner-admin access requests. Approved
 // OWNERs may still VIEW the list, but cannot decide.
@@ -14,7 +35,7 @@ const DECISION_EMAILS = ['carloearl@glyphlock.com', 'carloearl@gmail.com'];
 async function isAuthorizedOwner(base44, email) {
   const e = String(email || '').trim().toLowerCase();
   if (!e) return false;
-  if (e === OWNER_EMAIL) return true;
+  if (SOVEREIGN_EMAILS.includes(e)) return true;
   const approved = await base44.asServiceRole.entities.NUPSAccessRequest.filter({
     email: e, status: 'APPROVED', granted_role: 'OWNER'
   });
@@ -59,7 +80,7 @@ Deno.serve(async (req) => {
       if (!full_legal_name || !requested_role || !reason) {
         return Response.json({ error: 'Full legal name, requested access type, and reason are required.' }, { status: 400 });
       }
-      if (!['ENTERTAINER', 'ADMINISTRATOR', 'OWNER'].includes(requested_role)) {
+      if (!REQUESTABLE_ROLES.includes(requested_role)) {
         return Response.json({ error: 'Invalid access type.' }, { status: 400 });
       }
       const existing = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email });
@@ -79,6 +100,32 @@ Deno.serve(async (req) => {
         mode: ['TEST', 'DEMO'].includes(mode) ? mode : 'TEST',
         decision_log: [{ decision: 'SUBMITTED', by: email, note: '', timestamp: new Date().toISOString() }],
       });
+      // Owner notification — requests can be approved in-app (NUPSAdminPortal /
+      // AccessRequests) or acted on from this email.
+      try {
+        await base44.asServiceRole.integrations.Core.SendEmail({
+          to: OWNER_EMAIL,
+          from_name: 'NUPS Access Control',
+          subject: `NUPS access request — ${full_legal_name} (${requested_role})`,
+          body: [
+            'A new NUPS access request is pending owner approval.',
+            '',
+            `Name: ${full_legal_name}`,
+            `Email: ${email}`,
+            `Phone: ${phone || '—'}`,
+            `Requested role: ${requested_role}`,
+            `Mode: ${rec.mode}`,
+            `Venue: ${rec.venue_id}`,
+            `Reason: ${reason}`,
+            '',
+            `Request ID: ${rec.id}`,
+            'Approve or reject in the app: /AccessRequests',
+          ].join('\n'),
+        });
+      } catch (mailErr) {
+        console.warn('Access request notification failed:', mailErr.message);
+      }
+
       return Response.json({ success: true, request: safeRequest(rec) });
     }
 
@@ -92,7 +139,7 @@ Deno.serve(async (req) => {
     if (action === 'checkAccess') {
       // DACO-NUPS-RBAC-CORRECTION-20260717 §5 — no implicit platform-admin ownership.
       // Back office requires Carlo's protected Owner identity or an explicit APPROVED grant.
-      if (email === OWNER_EMAIL) {
+      if (SOVEREIGN_EMAILS.includes(email)) {
         return Response.json({ authorized: true, granted_role: 'OWNER', destination: '/NUPSAdminPortal', full_name: user.full_name });
       }
       const mine = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 5);
@@ -112,7 +159,10 @@ Deno.serve(async (req) => {
           return Response.json({ authorized: false, reason: 'Account has been suspended or revoked.' });
         }
       }
-      const destination = grant.granted_role === 'ENTERTAINER' ? '/EntertainerHome' : '/NUPSAdminPortal';
+      const destination =
+        grant.granted_role === 'ENTERTAINER' ? '/EntertainerHome'
+        : ['ADMINISTRATOR', 'OWNER'].includes(grant.granted_role) ? '/NUPSAdminPortal'
+        : '/StaffHome';
       return Response.json({ authorized: true, granted_role: grant.granted_role, destination, full_name: grant.full_legal_name });
     }
 
@@ -132,7 +182,7 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Only Carlo Earl can approve or revoke owner/admin access.' }, { status: 403 });
       }
       const { request_id, decision, note } = body;
-      const valid = ['APPROVE_ENTERTAINER', 'APPROVE_ADMIN', 'APPROVE_OWNER', 'REJECT', 'REQUEST_INFO', 'SUSPEND', 'REVOKE'];
+      const valid = ['APPROVE_ENTERTAINER', 'APPROVE_STAFF', 'APPROVE_ADMIN', 'APPROVE_OWNER', 'REJECT', 'REQUEST_INFO', 'SUSPEND', 'REVOKE'];
       if (!request_id || !valid.includes(decision)) {
         return Response.json({ error: 'request_id and a valid decision are required.' }, { status: 400 });
       }
@@ -146,11 +196,16 @@ Deno.serve(async (req) => {
       const log = [...(r.decision_log || []), { decision, by: email, note: note || '', timestamp: now }];
       const patch = { decided_by: email, decided_at: now, decision_note: note || '', decision_log: log };
 
-      if (['APPROVE_ENTERTAINER', 'APPROVE_ADMIN', 'APPROVE_OWNER'].includes(decision)) {
-        const grantedRole = decision === 'APPROVE_OWNER' ? 'OWNER' : decision === 'APPROVE_ADMIN' ? 'ADMINISTRATOR' : 'ENTERTAINER';
+      if (['APPROVE_ENTERTAINER', 'APPROVE_STAFF', 'APPROVE_ADMIN', 'APPROVE_OWNER'].includes(decision)) {
+        // APPROVE_STAFF grants exactly the staff role that was requested.
+        const grantedRole =
+          decision === 'APPROVE_OWNER' ? 'OWNER'
+          : decision === 'APPROVE_ADMIN' ? 'ADMINISTRATOR'
+          : decision === 'APPROVE_STAFF' && STAFF_ROLES.includes(r.requested_role) ? r.requested_role
+          : 'ENTERTAINER';
         // Create (or reactivate) the NUPS account bound to the platform email.
         let nupsUserId = r.nups_user_id;
-        const nupsRole = grantedRole === 'OWNER' ? 'VENUE_OWNER' : grantedRole === 'ADMINISTRATOR' ? 'PLATFORM_ADMIN' : 'PERFORMER';
+        const nupsRole = NUPS_ROLE_MAP[grantedRole] || 'PERFORMER';
         if (nupsUserId) {
           await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, { status: 'active', role: nupsRole, approved_by: email });
         } else {

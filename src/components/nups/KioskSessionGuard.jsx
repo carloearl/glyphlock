@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldX } from "lucide-react";
 import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 
@@ -14,6 +14,7 @@ import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 // the denial is logged server-side without the PIN.
 export default function KioskSessionGuard({ roles = [], children }) {
   const [state, setState] = useState("checking");
+  const [denial, setDenial] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -27,7 +28,8 @@ export default function KioskSessionGuard({ roles = [], children }) {
             action: "validateSession", kiosk_session: token, allowed_roles: roles,
           });
           if (res.data?.valid) { if (alive) setState("ok"); return; }
-        } catch { /* invalid/expired/revoked — fall through */ }
+          if (alive) setDenial("Your NUPS session is expired, revoked, or not authorized for this workspace.");
+        } catch { if (alive) setDenial("Your NUPS session could not be verified for this workspace."); }
         sessionStorage.removeItem("nups_kiosk_session");
         sessionStorage.removeItem("nups_kiosk_operator");
       }
@@ -41,10 +43,13 @@ export default function KioskSessionGuard({ roles = [], children }) {
           if (res.data?.authorized) { if (alive) setState("ok"); return; }
         }
       } catch { /* denied */ }
-      if (alive) setState("denied");
+      if (alive) {
+        setDenial((current) => current || "Access is denied. Clock in with an authorized role or ask a manager to unlock this workspace.");
+        setState("denied");
+      }
     })();
     return () => { alive = false; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   if (state === "checking") {
     return (
@@ -53,6 +58,24 @@ export default function KioskSessionGuard({ roles = [], children }) {
       </div>
     );
   }
-  if (state === "denied") return <Navigate to="/NUPSKiosk" replace />;
+  if (state === "denied") {
+    return (
+      <main className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
+        <section className="w-full max-w-lg rounded-3xl border border-red-500/30 bg-slate-900/95 p-8 text-center shadow-2xl" role="alert">
+          <ShieldX className="mx-auto h-14 w-14 text-red-300" />
+          <h1 className="mt-5 text-2xl font-black">NUPS Access Denied</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            {denial || "This signed-in identity is not authorized for the requested NUPS workspace."}
+          </p>
+          <Link
+            to="/NUPSKiosk"
+            className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-cyan-600 px-5 text-sm font-black text-white transition hover:bg-cyan-500"
+          >
+            Return to Staff Clock In
+          </Link>
+        </section>
+      </main>
+    );
+  }
   return children;
 }

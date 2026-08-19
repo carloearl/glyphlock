@@ -43,7 +43,7 @@ export default function AudioEngine({
     const syncOutput = (event) => applyPreferredOutput(audio, event.detail).catch(() => undefined);
     window.addEventListener(AUDIO_OUTPUT_EVENT, syncOutput);
     return () => window.removeEventListener(AUDIO_OUTPUT_EVENT, syncOutput);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const [playing, setPlaying] = useState(false);
@@ -171,7 +171,7 @@ export default function AudioEngine({
 
   return (
     <div className="w-full space-y-2">
-      <audio ref={audioRef} preload="metadata" />
+      <audio ref={audioRef} preload="metadata" crossOrigin="anonymous" />
 
       {/* Waveform-style progress visualization */}
       <div

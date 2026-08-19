@@ -11,7 +11,8 @@
  */
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { LogOut } from "lucide-react";
+import { Link } from "react-router-dom";
+import { LogOut, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StaffShiftFlow from "@/components/nups/flows/StaffShiftFlow";
 import StaffQuickActions from "@/components/nups/staff/StaffQuickActions";
@@ -42,6 +43,9 @@ export default function StaffHome() {
   }, []);
 
   const firstName = (user?.full_name || user?.email || "").split(/[ @]/)[0];
+  // Admins / owners / managers are only here for support — they don't work a
+  // station, so the nine-tile fallback is replaced with a way back.
+  const isSupervisor = /ADMIN|OWNER|MANAGER/i.test(user?.role || "");
 
   return (
     <div className="min-h-screen bg-[#05070d] text-white flex flex-col">
@@ -85,7 +89,22 @@ export default function StaffHome() {
             employee can find Front Door, Check-In, Register, Driver
             Payouts, and Receipts without hunting. Navigation only —
             each destination keeps its own route guard. */}
-        <StaffQuickActions role={user?.role} />
+        {isSupervisor ? (
+          <Link
+            to="/RoleViews"
+            className="flex items-center gap-3 rounded-2xl border border-violet-500/30 bg-white/[0.02] p-4 hover:bg-white/[0.04] transition-colors"
+          >
+            <Eye className="w-6 h-6 text-violet-300 shrink-0" />
+            <div>
+              <div className="font-bold text-white">Back to Choose a View</div>
+              <div className="text-[11px] text-slate-400">
+                You're viewing Staff Home as {user?.role} — station tiles belong to each staff role.
+              </div>
+            </div>
+          </Link>
+        ) : (
+          <StaffQuickActions role={user?.role} />
+        )}
       </main>
     </div>
   );

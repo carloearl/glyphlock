@@ -25,6 +25,8 @@ import SongUploadDialog from "@/components/mixer/SongUploadDialog";
 import AIPlaylistGenerator from "@/components/mixer/AIPlaylistGenerator";
 import MusicSearchPanel from "@/components/mixer/MusicSearchPanel";
 import TrackLibraryDock from "@/components/mixer/TrackLibraryDock";
+import EntertainerPlaylistDock from "@/components/mixer/EntertainerPlaylistDock";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent, libraryTracks = [] }) {
   // ─── State hydration ───
@@ -404,6 +406,35 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     toast.success(`Duplicated "${src.name}"`);
   }, [profiles]);
 
+  // ─── Entertainer shift playlist load ───
+  // Hydrates a checked-in entertainer's saved playlist into its own profile so
+  // the deck, cue pool and automix all work off their tracks immediately.
+  const handleLoadEntertainerPlaylist = useCallback((songDataList, entertainerName) => {
+    const created = (songDataList || []).map((data) => createSongEntry(data));
+    if (!created.length) return;
+    setSongs((previous) => [...previous, ...created]);
+    const ids = created.map((song) => song.id);
+
+    const existing = profiles.find((profile) => profile.name === entertainerName);
+    if (existing) {
+      setProfiles((previous) => previous.map((profile) =>
+        profile.id === existing.id ? { ...profile, songIds: ids } : profile
+      ));
+      setUiState((state) => ({ ...state, activeProfileId: existing.id }));
+    } else {
+      const profile = createDancerProfile({
+        name: entertainerName || "Entertainer",
+        colorTheme: "#ec4899",
+        songIds: ids,
+        tags: ["entertainer", "shift"],
+      });
+      setProfiles((previous) => [...previous, profile]);
+      setUiState((state) => ({ ...state, activeProfileId: profile.id }));
+    }
+    setSelectedSongId(null);
+    setPlayingSongId(null);
+  }, [profiles]);
+
   // ─── Upload song handler ───
   const handleUploadedSong = useCallback((songData) => {
     const song = createSongEntry(songData);
@@ -517,108 +548,125 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         )}
       </div>
 
-      {/* Main panels */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left: Profiles */}
-        <div className={`${isDesktop ? "w-[280px]" : "w-[220px]"} flex-shrink-0 ${isMobile ? "hidden" : ""}`}>
-          <ProfilePanel
-            profiles={profiles}
-            activeProfileId={uiState.activeProfileId}
-            songs={songs}
-            onSwitchProfile={handleSwitchProfile}
-            onOpenProfileManager={(p) => { setEditingProfile(p); setDialogMode(DialogMode.profileManager); }}
-            onDeleteProfile={handleDeleteProfile}
-            onDuplicateProfile={handleDuplicateProfile}
-            onFocusZone={setFocusZone}
-          />
-        </div>
+      {/* Main panels — drag the dividers to resize any window */}
+      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v1" className="flex-1 overflow-hidden">
+        {/* Left: Profiles + checked-in entertainer playlists */}
+        {!isMobile && (
+          <>
+            <ResizablePanel defaultSize={22} minSize={12} maxSize={40} collapsible collapsedSize={0} className="flex flex-col min-h-0">
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <ProfilePanel
+                  profiles={profiles}
+                  activeProfileId={uiState.activeProfileId}
+                  songs={songs}
+                  onSwitchProfile={handleSwitchProfile}
+                  onOpenProfileManager={(p) => { setEditingProfile(p); setDialogMode(DialogMode.profileManager); }}
+                  onDeleteProfile={handleDeleteProfile}
+                  onDuplicateProfile={handleDuplicateProfile}
+                  onFocusZone={setFocusZone}
+                />
+              </div>
+              <EntertainerPlaylistDock
+                activeProfileName={activeProfile?.name}
+                profileSongs={profileSongs}
+                onLoadPlaylist={handleLoadEntertainerPlaylist}
+              />
+            </ResizablePanel>
+            <ResizableHandle withHandle className="bg-slate-700/60 hover:bg-purple-500/60 transition-colors" />
+          </>
+        )}
 
         {/* Center: Song Deck */}
-        <SongDeck
-          songs={songs}
-          profile={activeProfile}
-          playingSongId={playingSongId}
-          selectedSongId={selectedSongId}
-          viewMode={uiState.viewMode || "list"}
-          searchQuery={uiState.searchQuery}
-          vibeFilter={uiState.vibeFilter}
-          onReorder={handleReorder}
-          onPlay={handlePlay}
-          onSkip={handleSkip}
-          onFavorite={handleFavorite}
-          onArchive={handleArchive}
-          onEdit={(song) => { setEditingSong(song); setDialogMode(DialogMode.editSong); }}
-          onSelectSong={setSelectedSongId}
-          onFocusZone={setFocusZone}
-        />
+        <ResizablePanel defaultSize={isMobile ? 100 : 52} minSize={25} className="flex min-h-0 overflow-hidden">
+          <SongDeck
+            songs={songs}
+            profile={activeProfile}
+            playingSongId={playingSongId}
+            selectedSongId={selectedSongId}
+            viewMode={uiState.viewMode || "list"}
+            searchQuery={uiState.searchQuery}
+            vibeFilter={uiState.vibeFilter}
+            onReorder={handleReorder}
+            onPlay={handlePlay}
+            onSkip={handleSkip}
+            onFavorite={handleFavorite}
+            onArchive={handleArchive}
+            onEdit={(song) => { setEditingSong(song); setDialogMode(DialogMode.editSong); }}
+            onSelectSong={setSelectedSongId}
+            onFocusZone={setFocusZone}
+          />
+        </ResizablePanel>
 
-        {/* Right: AI panel OR Music Search (desktop only) */}
+        {/* Right: Library / AI panel / Music Search (desktop + tablet) */}
         {!isMobile && (
-          <div className={`${isDesktop ? "w-[320px]" : "w-[260px]"} flex-shrink-0 flex flex-col border-l border-slate-700/30`}>
-            {/* Tab toggle between Library, AI and Search */}
-            <div className="flex border-b border-slate-700/30 bg-slate-900/80">
-              {[
-                { key: "library", label: "🎵 Library", color: "text-emerald-400 border-emerald-400" },
-                { key: "ai", label: "AI Assistant", color: "text-purple-400 border-purple-400" },
-                { key: "search", label: "🔍 Music API", color: "text-cyan-400 border-cyan-400" },
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setRightTab(tab.key)}
-                  className={`flex-1 px-2 py-2 text-[10px] uppercase tracking-wider font-bold transition-colors ${
-                    rightTab === tab.key ? `${tab.color} border-b-2` : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-            {rightTab === "library" ? (
-              <TrackLibraryDock
-                tracks={libraryTracks}
-                onPlay={handleLibraryPlay}
-                onQueue={handleQueueSongs}
-                onQueueAll={handleQueueSongs}
-              />
-            ) : rightTab === "search" ? (
-              <MusicSearchPanel
-                onAddTrack={(trackData) => handleUploadedSong(trackData)}
-                onPreviewTrack={(track) => {
-                  // Find existing or create new, then load on Deck A
-                  const existing = songs.find(s => s.uploadUrl === track.audio_url);
-                  if (existing) {
-                    setPlayingSongId(existing.id);
+          <>
+            <ResizableHandle withHandle className="bg-slate-700/60 hover:bg-cyan-500/60 transition-colors" />
+            <ResizablePanel defaultSize={26} minSize={14} maxSize={45} collapsible collapsedSize={0} className="flex flex-col min-h-0 border-l border-slate-700/30">
+              {/* Tab toggle between Library, AI and Search */}
+              <div className="flex border-b border-slate-700/30 bg-slate-900/80">
+                {[
+                  { key: "library", label: "🎵 Library", color: "text-emerald-400 border-emerald-400" },
+                  { key: "ai", label: "AI Assistant", color: "text-purple-400 border-purple-400" },
+                  { key: "search", label: "🔍 Music API", color: "text-cyan-400 border-cyan-400" },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setRightTab(tab.key)}
+                    className={`flex-1 px-2 py-2 text-[10px] uppercase tracking-wider font-bold transition-colors ${
+                      rightTab === tab.key ? `${tab.color} border-b-2` : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              {rightTab === "library" ? (
+                <TrackLibraryDock
+                  tracks={libraryTracks}
+                  onPlay={handleLibraryPlay}
+                  onQueue={handleQueueSongs}
+                  onQueueAll={handleQueueSongs}
+                />
+              ) : rightTab === "search" ? (
+                <MusicSearchPanel
+                  onAddTrack={(trackData) => handleUploadedSong(trackData)}
+                  onPreviewTrack={(track) => {
+                    // Find existing or create new, then load on Deck A
+                    const existing = songs.find(s => s.uploadUrl === track.audio_url);
+                    if (existing) {
+                      setPlayingSongId(existing.id);
+                      setPlayerCollapsed(false);
+                      return;
+                    }
+                    const tempSong = createSongEntry({
+                      title: track.title || 'Unknown Track',
+                      artist: track.artist || 'Unknown Artist',
+                      uploadUrl: track.audio_url,
+                      imageUrl: track.image_url || '',
+                      album: track.album || '',
+                      genre: track.genre || '',
+                    });
+                    setSongs(prev => [...prev, tempSong]);
+                    if (activeProfile) {
+                      setProfiles(prev => prev.map(p => p.id === activeProfile.id ? { ...p, songIds: [...p.songIds, tempSong.id] } : p));
+                    }
+                    setPlayingSongId(tempSong.id);
                     setPlayerCollapsed(false);
-                    return;
-                  }
-                  const tempSong = createSongEntry({
-                    title: track.title || 'Unknown Track',
-                    artist: track.artist || 'Unknown Artist',
-                    uploadUrl: track.audio_url,
-                    imageUrl: track.image_url || '',
-                    album: track.album || '',
-                    genre: track.genre || '',
-                  });
-                  setSongs(prev => [...prev, tempSong]);
-                  if (activeProfile) {
-                    setProfiles(prev => prev.map(p => p.id === activeProfile.id ? { ...p, songIds: [...p.songIds, tempSong.id] } : p));
-                  }
-                  setPlayingSongId(tempSong.id);
-                  setPlayerCollapsed(false);
-                }}
-              />
-            ) : (
-              <AISidePanel
-                profile={activeProfile}
-                songs={songs}
-                selectedSong={selectedSong}
-                profileSongs={profileSongs}
-                onApplySuggestion={handleApplyAISuggestion}
-              />
-            )}
-          </div>
+                  }}
+                />
+              ) : (
+                <AISidePanel
+                  profile={activeProfile}
+                  songs={songs}
+                  selectedSong={selectedSong}
+                  profileSongs={profileSongs}
+                  onApplySuggestion={handleApplyAISuggestion}
+                />
+              )}
+            </ResizablePanel>
+          </>
         )}
-      </div>
+      </ResizablePanelGroup>
 
       {/* DJ Player with crossfader */}
       <DJPlayerSection

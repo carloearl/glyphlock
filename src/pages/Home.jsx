@@ -29,7 +29,6 @@ import HeroSection from '@/components/home/HeroSection';
 import DreamTeamBallButton from '@/components/home/DreamTeamBallButton';
 import GlyphHoverEngine from '@/components/home/GlyphHoverEngine';
 import DeferredRender from '@/components/shared/DeferredRender';
-import EcosystemBlueprint from '@/components/home/EcosystemBlueprint';
 
 const FlagshipNUPSShowcase = lazy(() => import('@/components/home/FlagshipNUPSShowcase'));
 const FeaturedIntegrationsMarquee = lazy(() => import('@/components/home/FeaturedIntegrationsMarquee'));
@@ -41,6 +40,7 @@ const OnSiteServices = lazy(() => import('@/components/home/OnSiteServices'));
 const PlatformCapabilities = lazy(() => import('@/components/home/PlatformCapabilities'));
 const CTASection = lazy(() => import('@/components/home/CTASection'));
 const InteractiveSystemMap = lazy(() => import('@/components/home/InteractiveSystemMap'));
+const WordOfTheDay = lazy(() => import('@/components/home/WordOfTheDay'));
 
 const platformModules = [
   {
@@ -507,6 +507,17 @@ export default function Home() {
             transition: transform .65s ease;
           }
           .gl-energy-button:hover::after { transform: translateX(120%) skewX(-18deg); }
+          /* Tablet range: md/lg styles are sized for desktop, so scale the
+             display type, padding and card minimums down to fit. */
+          @media (min-width: 768px) and (max-width: 1279px) {
+            .gl-home h1 { font-size: clamp(2.4rem, 6vw, 4rem); line-height: .95; }
+            .gl-home h2 { font-size: clamp(2rem, 4.6vw, 3.1rem); line-height: .96; }
+            .gl-home h3 { font-size: clamp(1.05rem, 2vw, 1.35rem); }
+            .gl-home p { font-size: clamp(.9rem, 1.5vw, 1.05rem); }
+            .gl-home section { padding-left: 1rem; padding-right: 1rem; }
+            .gl-home .gl-cyber-panel { min-height: 0; }
+            .gl-home a[class*="min-h-["] { min-height: 0; }
+          }
           @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             .gl-energy-button::after { display: none; }
@@ -525,9 +536,7 @@ export default function Home() {
           <DeferredRender minHeight={88}><FeaturedIntegrationsMarquee /></DeferredRender>
         </section>
 
-        <section id="ecosystem-blueprint" className="gl-home-section gl-home-stage relative py-10 md:py-16">
-          <DeferredRender minHeight={620}><EcosystemBlueprint /></DeferredRender>
-        </section>
+        <DeferredRender minHeight={96}><WordOfTheDay /></DeferredRender>
 
         <DeferredRender minHeight={760}><InteractiveSystemMap /></DeferredRender>
         <CapabilityGrid />

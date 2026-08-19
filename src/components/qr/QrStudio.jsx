@@ -1106,8 +1106,9 @@ export default function QrStudio({ initialTab = 'create' }) {
                     dynamic_config: { rules: [] }
                   }}
                   onRunDiagnostics={async (results) => {
-                    // Log scan event
-                    await base44.entities.QRScanEvent.create({
+                    // Protected backend write — the server derives scan velocity
+                    // and writes the canonical QrScanEvent evidence stream.
+                    await base44.functions.invoke('recordQrScanEvent', {
                       qr_asset_id: qrAssetDraft.id,
                       decoded_content: results.decoded_content,
                       device_context: {

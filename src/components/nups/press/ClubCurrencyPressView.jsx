@@ -101,7 +101,7 @@ export default function ClubCurrencyPressView({ saleOrder = null }) {
       serial_lo: saleOrder.serial_lo, serial_hi: saleOrder.serial_hi, mode: saleOrder.mode,
     });
     toast.success(`Sealed sale ${saleOrder.agreement_no || ""} loaded — ${saleOrder.qty} × $${((saleOrder.denom_cents || 0) / 100).toFixed(0)} bills prefilled`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [saleOrder]);
 
   // FIX-D — lock layout for 150ms whenever layoutMode changes

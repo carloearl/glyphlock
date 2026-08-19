@@ -13,6 +13,10 @@ export default function CursorOrb() {
   const timeRef = useRef(0);
 
   useEffect(() => {
+    // Touch devices (tablets/phones) have no cursor to follow — skip the
+    // per-frame gradient work entirely.
+    if (window.matchMedia?.('(pointer: coarse)').matches) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 

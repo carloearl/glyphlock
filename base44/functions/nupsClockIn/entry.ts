@@ -14,13 +14,15 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 const VENUE_ID = 'dream_palace';
 const DEMO_VENUE_ID = 'DEMO_VENUE_001';
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
-// Universal owner PIN — full LIVE access to every card and tab. Only works
-// while the owner's platform account is actively signed in on the device.
-const UNIVERSAL_PIN = '90210';
+// Optional emergency owner override. The value is server-secret only and is
+// disabled when the secret is absent; no operational PIN is committed to source.
+const UNIVERSAL_PIN = Deno.env.get('NUPS_OWNER_OVERRIDE_PIN') || '';
 const PBKDF2_ITERATIONS = 100000;
 const SESSION_TTL_MS = 14 * 60 * 60 * 1000;
 const MAX_FAILS = 5;
 const FAIL_WINDOW_MS = 10 * 60 * 1000;
+const MANAGER_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
+const GENERIC_AUTH_ERROR = 'Unable to authenticate. Check your credentials or contact a manager.';
 // Auto clock-out: a device left clocked-in with no activity for this long is
 // closed automatically. Enforces "never more than one open shift left running".
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
@@ -37,7 +39,7 @@ const WORKSPACE_BY_ROLE = {
   DOORMAN:        { destination: '/DoormanHome',     workspace: 'Doorman Home', station: 'door' },
   DRIVER:         { destination: '/NUPSKiosk',       workspace: 'Driver Clock In/Out', station: 'floor' },
   PERFORMER:      { destination: '/EntertainerCheckIn', workspace: 'Entertainer Check-In', station: 'floor' },
-  BARTENDER:      { destination: '/StaffHome',       workspace: 'Staff Home', station: 'bar' },
+  BARTENDER:      { destination: '/BarRegister',     workspace: 'Bar Register', station: 'bar' },
   // SECURITY clocks in/out only — no workspace. Shift is logged to StaffShift
   // (payroll + Manager Console visibility); kiosk shows the confirmation screen.
   SECURITY:       { destination: '/NUPSKiosk',       workspace: 'Security Clock In/Out', station: 'security' },
@@ -52,11 +54,42 @@ Deno.serve(async (req) => {
     const E = base44.asServiceRole.entities;
     const body = await req.json();
     const action = body.action;
+    const now = () => new Date().toISOString();
+    const ip = (req.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
+    const userAgent = String(req.headers.get('user-agent') || 'unknown').slice(0, 500);
+    const rawTerminalId = String(body.terminal_id || req.headers.get('x-nups-terminal-id') || 'unidentified');
+    const terminalId = rawTerminalId.replace(/[^A-Za-z0-9._:-]/g, '').slice(0, 120) || 'unidentified';
+    const throttleResourceId = `pin_auth:${terminalId !== 'unidentified' ? terminalId : ip}`;
+
+    // Safe pre-authentication mode indicator. This exposes no roster, secret,
+    // credential or payment identifier; it only lets the public kiosk display
+    // the authoritative operating boundary before a PIN is entered.
+    if (action === 'getPublicMode') {
+      const venues = (await E.Venue.filter({ venue_id: VENUE_ID }, null, 1).catch(() => [])) || [];
+      const venueRecordId = venues?.[0]?.id || null;
+      const rateRows = venueRecordId
+        ? await E.VenueRateConfig.filter({ venue_id: venueRecordId, active: true }, '-created_date', 1).catch(() => [])
+        : [];
+      const fallbackRateRows = rateRows.length
+        ? rateRows
+        : await E.VenueRateConfig.filter({ venue_id: VENUE_ID, active: true }, '-created_date', 1).catch(() => []);
+      const paymentRows = await E.VenuePaymentConfig.filter({ venue_id: VENUE_ID, active: true }, '-created_date', 1).catch(() => []);
+      const operatingMode = String(fallbackRateRows?.[0]?.mode || 'REAL').toUpperCase();
+      const paymentMode = String(paymentRows?.[0]?.mode || 'UNCONFIGURED').toUpperCase();
+      const providerCode = paymentRows?.[0]?.primary_provider_code || 'unconfigured';
+      return Response.json({
+        success: true,
+        venue: venues?.[0]?.name || 'Dream Palace',
+        operating_mode: operatingMode,
+        payment_mode: paymentMode,
+        payment_provider: providerCode,
+        payment_mode_consistent: paymentMode === 'UNCONFIGURED' || paymentMode === operatingMode,
+      });
+    }
+
     const PEPPER = Deno.env.get('KEY_PEPPER') || '';
     if (!PEPPER) return Response.json({ error: 'Server configuration error.' }, { status: 500 });
     const te = new TextEncoder();
-    const now = () => new Date().toISOString();
-    const ip = (req.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
 
     const hex = (buf) => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     const b64u = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -75,6 +108,16 @@ Deno.serve(async (req) => {
       let diff = 0;
       for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
       return diff === 0;
+    };
+    const resolveUserByPin = async (pin) => {
+      const lookup = await hmacHex('pin:' + pin);
+      const candidates = (await E.NUPSUser.filter({ pin_lookup: lookup })) || [];
+      for (const candidate of candidates) {
+        if (!candidate.pin_hash || !candidate.pin_salt) continue;
+        const candidateHash = await pbkdf2Hex(pin, candidate.pin_salt);
+        if (timingSafeEq(candidateHash, candidate.pin_hash)) return candidate;
+      }
+      return null;
     };
 
     const signToken = async (payload) => {
@@ -99,10 +142,21 @@ Deno.serve(async (req) => {
       } catch { return null; }
     };
 
-    const logAttempt = async (type, success, reason) => {
+    const logAttempt = async (type, success, reason, resourceId = null) => {
+      const resolvedResourceId = resourceId || (type === 'pin_auth'
+        ? throttleResourceId
+        : `${type}:${terminalId !== 'unidentified' ? terminalId : ip}`);
       await E.RateLimitAttempt.create({
-        resource_id: `${type}:${ip}`, resource_type: type, venue_id: VENUE_ID,
-        attempt_timestamp: now(), ip_address: ip, success, failure_reason: reason || '',
+        resource_id: resolvedResourceId,
+        resource_type: type,
+        venue_id: VENUE_ID,
+        actor_id: terminalId,
+        terminal_id: terminalId,
+        attempt_timestamp: now(),
+        ip_address: ip,
+        user_agent: userAgent,
+        success,
+        failure_reason: reason || '',
       }).catch(() => null);
     };
     // Auto clock-out sweep — closes any REAL open shift whose last activity
@@ -125,11 +179,20 @@ Deno.serve(async (req) => {
       return closed;
     };
 
-    const throttled = async () => {
+    const throttled = async (resourceId = throttleResourceId) => {
       const recent = (await E.RateLimitAttempt.filter(
-        { resource_id: `pin_auth:${ip}`, resource_type: 'pin_auth', success: false }, '-attempt_timestamp', MAX_FAILS)) || [];
+        { resource_id: resourceId, resource_type: 'pin_auth' }, '-attempt_timestamp', 50)) || [];
       const cutoff = Date.now() - FAIL_WINDOW_MS;
-      return recent.filter(r => new Date(r.attempt_timestamp).getTime() > cutoff).length >= MAX_FAILS;
+      const unlock = recent.find((attempt) => attempt.success === true && attempt.failure_reason === 'manager_unlock');
+      const unlockAt = unlock ? new Date(unlock.attempt_timestamp).getTime() : 0;
+      const effectiveCutoff = Math.max(cutoff, unlockAt);
+      return recent.filter((attempt) =>
+        attempt.success === false && new Date(attempt.attempt_timestamp).getTime() > effectiveCutoff
+      ).length >= MAX_FAILS;
+    };
+    const genericAuthFailure = async (reason, status = 401, resourceId = throttleResourceId) => {
+      await logAttempt('pin_auth', false, reason, resourceId);
+      return Response.json({ error: GENERIC_AUTH_ERROR, code: 'AUTHENTICATION_FAILED' }, { status });
     };
 
     const shiftEmailFor = (u) => u.platform_email || `${String(u.username || u.id).toLowerCase()}@nups.local`;
@@ -170,6 +233,54 @@ Deno.serve(async (req) => {
     if (action === 'sweepStale') {
       const closed = await sweepStaleShifts();
       return Response.json({ success: true, closed });
+    }
+
+    // ─── MANAGER PIN VERIFICATION / TERMINAL UNLOCK ────────────────────────
+    // Used by the kiosk exit screen and by the lockout recovery flow. The PIN
+    // is verified only against hashed server records and never leaves this
+    // function in logs, analytics, storage, or responses.
+    if (action === 'verifyManagerPin' || action === 'managerUnlockTerminal') {
+      const managerResourceId = `manager_auth:${terminalId !== 'unidentified' ? terminalId : ip}`;
+      if (await throttled(managerResourceId)) {
+        return Response.json({
+          error: 'Manager verification is temporarily locked. Try again later.',
+          code: 'MANAGER_AUTH_LOCKED',
+        }, { status: 429 });
+      }
+
+      const cleanManagerPin = String(body.pin || '').trim();
+      if (!/^\d{4,6}$/.test(cleanManagerPin)) {
+        return genericAuthFailure('manager_pin_format_invalid', 401, managerResourceId);
+      }
+
+      const manager = await resolveUserByPin(cleanManagerPin);
+      let managerAllowed = Boolean(
+        manager &&
+        manager.status === 'active' &&
+        manager.is_demo !== true &&
+        MANAGER_ROLES.has(manager.role) &&
+        (!manager.venue_id || manager.venue_id === VENUE_ID)
+      );
+
+      if (managerAllowed && manager.require_platform_login) {
+        const live = await base44.auth.me().catch(() => null);
+        managerAllowed = String(live?.email || '').toLowerCase() === String(manager.platform_email || '').toLowerCase();
+      }
+
+      if (!managerAllowed) {
+        return genericAuthFailure('manager_pin_not_authorized', 401, managerResourceId);
+      }
+
+      await logAttempt('pin_auth', true, 'manager_verified', managerResourceId);
+      if (action === 'managerUnlockTerminal') {
+        await logAttempt('pin_auth', true, 'manager_unlock', throttleResourceId);
+      }
+
+      return Response.json({
+        success: true,
+        unlocked: action === 'managerUnlockTerminal',
+        manager: { full_name: manager.full_name, role: manager.role },
+      });
     }
 
     // ─── ADMIN SET PIN (owner/approved-admin only — provisioning path) ───────
@@ -236,21 +347,26 @@ Deno.serve(async (req) => {
       return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
     }
     if (await throttled()) {
-      return Response.json({ error: 'Too many failed attempts. Try again in a few minutes.' }, { status: 429 });
+      return Response.json({
+        error: 'Too many failed attempts. Wait for the lockout window or ask a manager to unlock this terminal.',
+        code: 'TERMINAL_LOCKED',
+        manager_unlock_required: true,
+      }, { status: 429 });
     }
     const cleanPin = String(body.pin || '').trim();
-    if (!/^\d{4,6}$/.test(cleanPin)) return Response.json({ error: 'PIN is required.' }, { status: 400 });
+    if (!/^\d{4,6}$/.test(cleanPin)) {
+      return genericAuthFailure('pin_format_invalid');
+    }
 
-    // ─── UNIVERSAL OWNER PIN (90210) — full live access to every card/tab ───
-    if (cleanPin === UNIVERSAL_PIN) {
+    // ─── OPTIONAL OWNER OVERRIDE — server-secret + live owner binding ───────
+    if (UNIVERSAL_PIN && cleanPin === UNIVERSAL_PIN) {
       const live = await base44.auth.me().catch(() => null);
       const liveEmail = String(live?.email || '').toLowerCase();
       if (liveEmail !== OWNER_EMAIL) {
-        await logAttempt('pin_auth', false, 'universal_pin_owner_binding_failed');
-        return Response.json({ error: 'Invalid PIN.' }, { status: 401 });
+        return genericAuthFailure('owner_override_binding_failed');
       }
-      const owner = ((await E.NUPSUser.filter({ platform_email: OWNER_EMAIL })) || [])[0];
-      if (!owner) return Response.json({ error: 'Owner account not found.' }, { status: 404 });
+      const owner = ((await E.NUPSUser.filter({ platform_email: OWNER_EMAIL, status: 'active' })) || [])[0];
+      if (!owner) return genericAuthFailure('owner_override_account_unavailable');
       await logAttempt('pin_auth', true, '');
       const ts = now();
       // Close ALL existing open owner shifts first — there is only ever ONE
@@ -279,22 +395,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    const lookup = await hmacHex('pin:' + cleanPin);
-    const candidates = (await E.NUPSUser.filter({ pin_lookup: lookup })) || [];
-    let nupsUser = null;
-    for (const u of candidates) {
-      if (!u.pin_hash || !u.pin_salt) continue;
-      const h = await pbkdf2Hex(cleanPin, u.pin_salt);
-      if (timingSafeEq(h, u.pin_hash)) { nupsUser = u; break; }
-    }
+    const nupsUser = await resolveUserByPin(cleanPin);
     if (!nupsUser) {
-      await logAttempt('pin_auth', false, 'invalid_pin');
-      return Response.json({ error: 'Invalid PIN.' }, { status: 401 });
+      return genericAuthFailure('invalid_pin');
     }
-    await logAttempt('pin_auth', true, '');
 
     if (nupsUser.status !== 'active') {
-      return Response.json({ error: 'Account is suspended or terminated.' }, { status: 403 });
+      return genericAuthFailure('account_not_active');
     }
     // Email-bound PIN: the account owner must be actively signed in to the
     // platform on this device with the bound email. PIN alone is not enough.
@@ -303,15 +410,15 @@ Deno.serve(async (req) => {
       const liveEmail = String(live?.email || '').toLowerCase();
       const boundEmail = String(nupsUser.platform_email || '').toLowerCase();
       if (!boundEmail || liveEmail !== boundEmail) {
-        await logAttempt('pin_auth', false, 'platform_login_binding_failed');
-        return Response.json({ error: 'This PIN only works while its owner is signed in on this device.' }, { status: 403 });
+        return genericAuthFailure('platform_login_binding_failed');
       }
     }
     if (nupsUser.venue_id && nupsUser.venue_id !== VENUE_ID && nupsUser.venue_id !== DEMO_VENUE_ID) {
-      return Response.json({ error: 'No access to this venue.' }, { status: 403 });
+      return genericAuthFailure('venue_scope_denied');
     }
     const ws = WORKSPACE_BY_ROLE[nupsUser.role];
-    if (!ws) return Response.json({ error: 'No operational workspace is assigned to this role. Contact an administrator.' }, { status: 403 });
+    if (!ws) return genericAuthFailure('workspace_not_assigned');
+    await logAttempt('pin_auth', true, 'authenticated');
 
     const shiftEmail = shiftEmailFor(nupsUser);
     const mode = nupsUser.is_demo ? 'DEMO' : 'REAL';
@@ -346,7 +453,8 @@ Deno.serve(async (req) => {
 
     // clockOut — closes all open shifts, which revokes every session bound to them.
     if (openShifts.length === 0) {
-      return Response.json({ error: 'No active shift found.' }, { status: 404 });
+      await logAttempt('pin_auth', false, 'clock_out_without_open_shift');
+      return Response.json({ error: 'Unable to complete clock out. Ask a manager to verify the active shift.' }, { status: 409 });
     }
     const ts = now();
     for (const s of openShifts) {

@@ -1,3 +1,6 @@
+# GitHub-admin managed workflow.
+# Base44 agents must add CI checks through .base44/ci-checks.json and npm scripts,
+# because the Base44 GitHub App does not have workflows: write permission.
 name: NUPS CI
 
 on:
@@ -38,6 +41,12 @@ jobs:
 
       - name: Audit Base44 entity model
         run: npm run audit:entities
+
+      - name: Enforce Tier 2 write-gateway cutoff
+        run: npm run check:nups-write-gateway
+
+      - name: Run Base44-managed CI checks
+        run: npm run ci:base44
 
       - name: Verify NUPS DJ function SDK pins
         run: npm run check:dj-functions

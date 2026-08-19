@@ -2,52 +2,49 @@
  * GlyphLock Nebula Layer - Site-Wide Background System
  * Renders behind all cards/content
  * z-index: 0-1 (starfield + animated layer)
+ *
+ * Performance: on touch / tablet / low-core devices the node count, link work
+ * and frame rate are all reduced so the ambient layer never dominates the
+ * main thread while the page is still loading.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+
+function detectLowPower() {
+  if (typeof window === 'undefined') return true;
+  const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches;
+  const smallViewport = window.innerWidth < 1280;
+  const fewCores = (navigator.hardwareConcurrency || 8) < 8;
+  return Boolean(coarsePointer || smallViewport || fewCores);
+}
 
 export default function NebulaLayer({ intensity = 0.5 }) {
   const canvasRef = useRef(null);
   const starsCanvasRef = useRef(null);
   const animationRef = useRef(null);
-  const [isLowPower, setIsLowPower] = useState(false);
 
   useEffect(() => {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isSlowDevice = navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
-    setIsLowPower(isMobile || isSlowDevice);
-
     const canvas = canvasRef.current;
     const starsCanvas = starsCanvasRef.current;
     if (!canvas || !starsCanvas) return;
 
-    const ctx = canvas.getContext('2d', { 
-      alpha: true,
-      desynchronized: true,
-      willReadFrequently: false
-    });
-    const starsCtx = starsCanvas.getContext('2d', { 
-      alpha: true,
-      willReadFrequently: false
-    });
-    
-    let mouseX = canvas.width / 2;
-    let mouseY = canvas.height / 2;
+    const lowPower = detectLowPower();
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+    const starsCtx = starsCanvas.getContext('2d', { alpha: true });
+
+    const nodeCount = lowPower ? 32 : 100;
+    const linkDistance = lowPower ? 110 : 160;
+    const frameInterval = lowPower ? 1000 / 30 : 0;
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
     let time = 0;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      starsCanvas.width = window.innerWidth;
-      starsCanvas.height = window.innerHeight;
-
-      initNodes();
-      renderStarfield();
-    };
-
+    let lastFrame = 0;
+    let paused = false;
     let nodes = [];
-    const nodeCount = isLowPower ? 60 : 100;
-    
+
     class NebulaNode {
       constructor() {
         this.x = Math.random() * canvas.width;
@@ -59,14 +56,14 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         this.radius = Math.random() * 1.8 + 0.8;
         this.pulse = Math.random() * Math.PI * 2;
         this.pulseSpeed = 0.02 + Math.random() * 0.02;
-        
+
         const colorIndex = Math.random();
         if (colorIndex > 0.7) {
-          this.color = 'rgba(139, 0, 255, '; // Purple
+          this.color = 'rgba(139, 0, 255, ';
         } else if (colorIndex > 0.4) {
-          this.color = 'rgba(0, 191, 255, '; // Blue
+          this.color = 'rgba(0, 191, 255, ';
         } else {
-          this.color = 'rgba(178, 123, 255, '; // Light Purple
+          this.color = 'rgba(178, 123, 255, ';
         }
       }
 
@@ -79,18 +76,23 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         if (this.baseY < -50) this.baseY = canvas.height + 50;
         if (this.baseY > canvas.height + 50) this.baseY = -50;
 
-        const dx = mouseX - this.baseX;
-        const dy = mouseY - this.baseY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist < 400) {
-          const force = (400 - dist) / 400;
-          const smoothForce = force * force * 0.8;
-          this.x += (this.baseX + dx * smoothForce - this.x) * 0.25;
-          this.y += (this.baseY + dy * smoothForce - this.y) * 0.25;
+        if (lowPower) {
+          this.x = this.baseX;
+          this.y = this.baseY;
         } else {
-          this.x += (this.baseX - this.x) * 0.08;
-          this.y += (this.baseY - this.y) * 0.08;
+          const dx = mouseX - this.baseX;
+          const dy = mouseY - this.baseY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 400) {
+            const force = (400 - dist) / 400;
+            const smoothForce = force * force * 0.8;
+            this.x += (this.baseX + dx * smoothForce - this.x) * 0.25;
+            this.y += (this.baseY + dy * smoothForce - this.y) * 0.25;
+          } else {
+            this.x += (this.baseX - this.x) * 0.08;
+            this.y += (this.baseY - this.y) * 0.08;
+          }
         }
 
         this.pulse += this.pulseSpeed;
@@ -100,18 +102,20 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         const pulseIntensity = Math.sin(this.pulse) * 0.4 + 0.6;
         const currentRadius = this.radius * pulseIntensity;
 
-        const glowGradient = ctx.createRadialGradient(
-          this.x, this.y, 0,
-          this.x, this.y, currentRadius * 4
-        );
-        glowGradient.addColorStop(0, this.color + (0.9 * intensity) + ')');
-        glowGradient.addColorStop(0.4, this.color + (0.6 * intensity) + ')');
-        glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        if (!lowPower) {
+          const glowGradient = ctx.createRadialGradient(
+            this.x, this.y, 0,
+            this.x, this.y, currentRadius * 4
+          );
+          glowGradient.addColorStop(0, this.color + (0.9 * intensity) + ')');
+          glowGradient.addColorStop(0.4, this.color + (0.6 * intensity) + ')');
+          glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
-        ctx.fillStyle = glowGradient;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, currentRadius * 4, 0, Math.PI * 2);
-        ctx.fill();
+          ctx.fillStyle = glowGradient;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, currentRadius * 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
         ctx.fillStyle = this.color + (1.0 * intensity) + ')';
         ctx.beginPath();
@@ -129,8 +133,8 @@ export default function NebulaLayer({ intensity = 0.5 }) {
 
     function renderStarfield() {
       starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
-      const starCount = isLowPower ? 150 : 250;
-      
+      const starCount = lowPower ? 110 : 250;
+
       for (let i = 0; i < starCount; i++) {
         const x = Math.random() * starsCanvas.width;
         const y = Math.random() * starsCanvas.height;
@@ -141,37 +145,27 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         starsCtx.beginPath();
         starsCtx.arc(x, y, radius, 0, Math.PI * 2);
         starsCtx.fill();
-
-        if (Math.random() > 0.95) {
-          const glowGradient = starsCtx.createRadialGradient(x, y, 0, x, y, radius * 3);
-          glowGradient.addColorStop(0, `rgba(139, 0, 255, ${opacity * 0.8 * intensity})`);
-          glowGradient.addColorStop(0.5, `rgba(0, 191, 255, ${opacity * 0.6 * intensity})`);
-          glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-          starsCtx.fillStyle = glowGradient;
-          starsCtx.beginPath();
-          starsCtx.arc(x, y, radius * 3, 0, Math.PI * 2);
-          starsCtx.fill();
-        }
       }
     }
 
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      starsCanvas.width = window.innerWidth;
+      starsCanvas.height = window.innerHeight;
+
+      initNodes();
+      renderStarfield();
+    };
+
     const handlePointerMove = (e) => {
-      const x = e.clientX || (e.touches && e.touches[0]?.clientX);
-      const y = e.clientY || (e.touches && e.touches[0]?.clientY);
-      if (x !== undefined && y !== undefined) {
-        mouseX = x;
-        mouseY = y;
+      if (e.clientX !== undefined) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
       }
     };
 
-    function animate() {
-      time += 0.005;
-
-      // Fill with pure space black
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Nebula clouds
+    function drawNebulaClouds() {
       const nebula1 = ctx.createRadialGradient(
         canvas.width * 0.25 + Math.sin(time * 0.5) * 100,
         canvas.height * 0.3 + Math.cos(time * 0.3) * 80,
@@ -199,27 +193,36 @@ export default function NebulaLayer({ intensity = 0.5 }) {
       nebula2.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = nebula2;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
-      // Update and draw nodes
-      nodes.forEach((node) => {
-        node.update();
-        node.draw();
-      });
+    function drawLinks() {
+      // Low power: one flat stroke style for every link (no per-link gradients).
+      if (lowPower) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = `rgba(120, 140, 255, ${0.22 * intensity})`;
+        ctx.beginPath();
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x;
+            const dy = nodes[i].y - nodes[j].y;
+            if (dx * dx + dy * dy > linkDistance * linkDistance) continue;
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+          }
+        }
+        ctx.stroke();
+        return;
+      }
 
-      // Neural connections between nodes
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x;
           const dy = nodes[i].y - nodes[j].y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < (isLowPower ? 120 : 160)) {
-            const opacity = (1 - distance / (isLowPower ? 120 : 160)) * 0.4 * intensity;
-
-            const gradient = ctx.createLinearGradient(
-              nodes[i].x, nodes[i].y,
-              nodes[j].x, nodes[j].y
-            );
+          if (distance < linkDistance) {
+            const opacity = (1 - distance / linkDistance) * 0.4 * intensity;
+            const gradient = ctx.createLinearGradient(nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y);
             gradient.addColorStop(0, `rgba(139, 0, 255, ${opacity})`);
             gradient.addColorStop(0.5, `rgba(0, 191, 255, ${opacity * 0.9})`);
             gradient.addColorStop(1, `rgba(178, 123, 255, ${opacity})`);
@@ -233,18 +236,13 @@ export default function NebulaLayer({ intensity = 0.5 }) {
           }
         }
 
-        // Connect nodes to cursor orb
         const dxOrb = nodes[i].x - mouseX;
         const dyOrb = nodes[i].y - mouseY;
         const distanceToOrb = Math.sqrt(dxOrb * dxOrb + dyOrb * dyOrb);
 
         if (distanceToOrb < 300) {
           const orbOpacity = (1 - distanceToOrb / 300) * 0.6 * intensity;
-
-          const orbGradient = ctx.createLinearGradient(
-            nodes[i].x, nodes[i].y,
-            mouseX, mouseY
-          );
+          const orbGradient = ctx.createLinearGradient(nodes[i].x, nodes[i].y, mouseX, mouseY);
           orbGradient.addColorStop(0, `rgba(139, 0, 255, ${orbOpacity * 0.4})`);
           orbGradient.addColorStop(0.5, `rgba(168, 85, 247, ${orbOpacity * 0.7})`);
           orbGradient.addColorStop(1, `rgba(56, 189, 248, ${orbOpacity})`);
@@ -257,26 +255,56 @@ export default function NebulaLayer({ intensity = 0.5 }) {
           ctx.stroke();
         }
       }
-
-      animationRef.current = requestAnimationFrame(animate);
     }
+
+    function renderFrame() {
+      time += 0.005;
+
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawNebulaClouds();
+
+      nodes.forEach((node) => {
+        node.update();
+        node.draw();
+      });
+
+      drawLinks();
+    }
+
+    function animate(now) {
+      animationRef.current = requestAnimationFrame(animate);
+      if (paused) return;
+      if (frameInterval && now - lastFrame < frameInterval) return;
+      lastFrame = now || 0;
+      renderFrame();
+    }
+
+    const handleVisibility = () => {
+      paused = document.hidden;
+    };
 
     resize();
     window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', handlePointerMove, { passive: true });
-    window.addEventListener('touchmove', handlePointerMove, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibility);
+    if (!lowPower) {
+      window.addEventListener('mousemove', handlePointerMove, { passive: true });
+    }
 
-    animate();
+    if (reduceMotion) {
+      renderFrame();
+    } else {
+      animationRef.current = requestAnimationFrame(animate);
+    }
 
     return () => {
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handlePointerMove);
-      window.removeEventListener('touchmove', handlePointerMove);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [intensity, isLowPower]);
+  }, [intensity]);
 
   return (
     <>
@@ -284,7 +312,7 @@ export default function NebulaLayer({ intensity = 0.5 }) {
         ref={starsCanvasRef}
         id="nebula-layer-stars"
         className="fixed inset-0 nebula-layer-container"
-        style={{ 
+        style={{
           zIndex: 0,
           mixBlendMode: 'screen',
           opacity: 0.82,
@@ -292,15 +320,14 @@ export default function NebulaLayer({ intensity = 0.5 }) {
           touchAction: 'none',
           userSelect: 'none',
           transform: 'translateZ(0)',
-          willChange: 'transform'
         }}
       />
-      
+
       <canvas
         ref={canvasRef}
         id="nebula-layer"
         className="fixed inset-0 nebula-layer-container"
-        style={{ 
+        style={{
           zIndex: 1,
           mixBlendMode: 'screen',
           opacity: 0.92,
@@ -308,7 +335,6 @@ export default function NebulaLayer({ intensity = 0.5 }) {
           touchAction: 'none',
           userSelect: 'none',
           transform: 'translateZ(0)',
-          willChange: 'transform'
         }}
       />
     </>

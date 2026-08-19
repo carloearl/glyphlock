@@ -23,6 +23,7 @@ import SystemAudit from './pages/SystemAudit';
 import OfficialChecks from './pages/OfficialChecks';
 import NUPSLanding from './pages/NUPSLanding';
 import NUPSSandbox from './pages/NUPSSandbox';
+import NUPSPaymentReturn from './pages/NUPSPaymentReturn';
 import NUPSTraining from './pages/NUPSTraining';
 import NUPSOwner from './pages/NUPSOwner';
 import NUPSStaff from './pages/NUPSStaff';
@@ -47,6 +48,7 @@ import DemoPosRegisterPreview from './pages/DemoPosRegisterPreview';
 import DemoCloseNightPreview from './pages/DemoCloseNightPreview';
 import DemoCompliancePreview from './pages/DemoCompliancePreview';
 import ClubTV from './pages/ClubTV';
+import FableStagePage from './pages/FableStagePage';
 import ActivityLogViewer from './pages/ActivityLogViewer';
 import DailySettlementDashboard from './pages/DailySettlementDashboard';
 import DriverPayoutHistory from './pages/DriverPayoutHistory';
@@ -132,7 +134,7 @@ const AuthenticatedApp = () => {
     );
   }
 
-  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupstraining', '/nupslogin', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk', '/vipsale', '/managerconsole'];
+  const nupsPublicPaths = ['/nupslanding', '/nupsgateway', '/nupssandbox', '/nupstraining', '/nupslogin', '/nupspaymentreturn', '/unauthorized', '/entertainercheckin', '/demo/', '/v/', '/offlineverify', '/nupskiosk', '/vipsale', '/managerconsole'];
   const isNupsPublicRoute = nupsPublicPaths.some(p => currentPathLower.startsWith(p));
 
   if (authError && !isNupsPublicRoute) {
@@ -148,9 +150,9 @@ const AuthenticatedApp = () => {
   // All NUPS operator pages live here so kiosk mode shows only the NUPS UI.
   const fullscreenPaths = [
     '/nupslanding', '/landing', '/nupsgateway', '/nupstraining', '/unauthorized',
-    '/nupssandbox', '/nupslogin', '/nupsowner', '/nupsstaff',
+    '/nupssandbox', '/nupslogin', '/nupspaymentreturn', '/nupsowner', '/nupsstaff',
     '/frontdoor', '/entertainercheckin', '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome', '/glyphlockfinancialpage',
-    '/nupsinfrastructurepage', '/demo/', '/clubtv', '/mobilescanner',
+    '/nupsinfrastructurepage', '/demo/', '/clubtv', '/fablestage', '/mobilescanner',
     // NUPS operator surface — kiosk-wrapped
     '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub', '/glyphbucks',
@@ -166,6 +168,7 @@ const AuthenticatedApp = () => {
     '/nupskiosk', '/vipsale', '/accessrequests', '/roleviews', '/djhome',
   ];
   const isFullscreen = fullscreenPaths.some(p => currentPathLower.startsWith(p));
+  const isNupsPaymentReturn = currentPathLower.startsWith('/nupspaymentreturn');
 
   // Every NUPS surface gets the kiosk shell. KioskShell auto-engages kiosk
   // mode on mount so the entire NUPS system runs locked from first entry.
@@ -195,7 +198,7 @@ const AuthenticatedApp = () => {
     const inner = (
       // Kiosk routes get the Back button inside the kiosk strip (KioskShell);
       // a second floating one stacked/overlaid content (overlay audit 2026-07-17).
-      <><RoleClassBadge />{!isNupsKioskRoute && <GlobalBackButton />}<Routes>
+      <>{!isNupsPaymentReturn && <RoleClassBadge />}{!isNupsKioskRoute && !isNupsPaymentReturn && <GlobalBackButton />}<Routes>
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/nupslanding" element={<NUPSLanding />} />
         <Route path="/landing" element={<NUPSLanding />} />
@@ -209,6 +212,8 @@ const AuthenticatedApp = () => {
 
         <Route path="/NUPSSandbox" element={<NUPSSandbox />} />
         <Route path="/nupssandbox" element={<NUPSSandbox />} />
+        <Route path="/NUPSPaymentReturn" element={<NUPSPaymentReturn />} />
+        <Route path="/nupspaymentreturn" element={<NUPSPaymentReturn />} />
         <Route path="/NUPSLogin" element={<Navigate to="/NUPSKiosk?panel=clockIn" replace />} />
         <Route path="/nupslogin" element={<Navigate to="/NUPSKiosk?panel=clockIn" replace />} />
         {/* NUPSOwner restored — hosts all legacy operator tabs
@@ -249,6 +254,8 @@ const AuthenticatedApp = () => {
         <Route path="/demo/compliance-preview" element={<DemoCompliancePreview />} />
         <Route path="/ClubTV" element={<ClubTV />} />
         <Route path="/clubtv" element={<ClubTV />} />
+        <Route path="/FableStage" element={<FableStagePage />} />
+        <Route path="/fablestage" element={<FableStagePage />} />
         <Route path="/MobileScanner" element={<MobileScanner />} />
         <Route path="/mobilescanner" element={<MobileScanner />} />
         {/* NUPS operator surface */}

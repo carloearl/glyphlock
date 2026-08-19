@@ -1,95 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
-import { Loader2, WifiOff, Wifi } from 'lucide-react';
-import { toast } from 'sonner';
+import { AlertTriangle, WifiOff, Wifi } from 'lucide-react';
 import { OfflineQueue } from '@/utils/offlineQueue';
 
+/**
+ * Offline queue visibility only.
+ *
+ * Payment authorization, capture, refunds, payouts, and settlement are never
+ * replayed automatically from browser storage. A reconnect is not consent to
+ * move money. Queued operational records remain available for manager review.
+ */
 export default function OfflineSyncBanner() {
   const [pendingCount, setPendingCount] = useState(0);
-  const [syncing, setSyncing] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
 
   useEffect(() => {
+    let disposed = false;
+
     const checkQueue = async () => {
       try {
         const count = await OfflineQueue.getPendingCount();
-        setPendingCount(count);
-      } catch (err) {
-        console.error('Failed to check queue:', err);
+        if (!disposed) setPendingCount(count);
+      } catch (error) {
+        console.error('Failed to check offline queue:', error);
       }
     };
-    
-    checkQueue();
-    const interval = setInterval(checkQueue, 5000);
 
+    checkQueue();
+    const interval = window.setInterval(checkQueue, 5000);
     const handleOnline = () => {
       setOnline(true);
-      autoSync();
+      checkQueue();
     };
     const handleOffline = () => setOnline(false);
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
-      clearInterval(interval);
+      disposed = true;
+      window.clearInterval(interval);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
-  const autoSync = async () => {
-    if (syncing) return;
-    const pending = await OfflineQueue.getPending();
-    if (pending.length === 0) return;
-    
-    setSyncing(true);
-    let synced = 0;
-    
-    for (const tx of pending) {
-      try {
-        const res = await base44.functions.invoke('processGlyphBucksPayment', tx);
-        if (res.data?.success) {
-          await OfflineQueue.markSynced(tx.id);
-          synced++;
-        }
-      } catch (err) {
-        console.error('Sync failed for tx', tx.id, err);
-      }
-    }
-    
-    setSyncing(false);
-    setPendingCount(await OfflineQueue.getPendingCount());
-    
-    if (synced > 0) {
-      toast.success(`✅ Synced ${synced} offline transaction(s)`);
-    }
-  };
-
   if (online && pendingCount === 0) return null;
 
   return (
-    <div className={`w-full px-4 py-2 text-sm font-medium flex items-center justify-between ${!online ? 'bg-red-500 text-white' : 'bg-yellow-400 text-yellow-900'}`}>
-      <div className="flex items-center gap-2">
-        {!online ? <WifiOff className="w-4 h-4" /> : <Wifi className="w-4 h-4" />}
-        <span>
-          {!online
-            ? '📴 Offline Mode — Transactions queuing locally'
-            : `⚡ ${pendingCount} transaction(s) pending sync`
-          }
-        </span>
-      </div>
-      {online && pendingCount > 0 && (
-        <Button
-          onClick={autoSync}
-          disabled={syncing}
-          size="sm"
-          className="ml-4 bg-white text-yellow-900 hover:bg-gray-100 h-8"
-        >
-          {syncing ? <><Loader2 className="w-3 h-3 animate-spin mr-1" /> Syncing...</> : 'Sync Now'}
-        </Button>
-      )}
+    <div
+      className={`w-full px-4 py-2 text-sm font-medium flex items-center gap-3 ${
+        !online ? 'bg-red-500 text-white' : 'bg-amber-400 text-amber-950'
+      }`}
+      role="status"
+      aria-live="polite"
+    >
+      {!online ? <WifiOff className="w-4 h-4 shrink-0" /> : <Wifi className="w-4 h-4 shrink-0" />}
+      <span className="flex-1">
+        {!online
+          ? 'Offline mode: payment actions are blocked. Operational records may be held for review.'
+          : `${pendingCount} offline record${pendingCount === 1 ? '' : 's'} require manager review. Payments are never submitted automatically.`}
+      </span>
+      {online && pendingCount > 0 && <AlertTriangle className="w-4 h-4 shrink-0" />}
     </div>
   );
 }

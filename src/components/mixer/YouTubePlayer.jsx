@@ -93,7 +93,7 @@ const YouTubePlayer = forwardRef(function YouTubePlayer(
       playerRef.current = null;
       setReady(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [videoId]);
 
   // Live volume/mute updates — this is what makes the crossfader actually work

@@ -32,7 +32,7 @@ custom platform middleware.
 | 4     | writeEntity() gateway (Tier 1)| DONE     |
 | 5     | runIntegrityCheck() validator | DONE     |
 | 6     | Demo seed / clear             | DONE     |
-| 7     | Tier 2 promotion              | BLOCKED  |
+| 7     | Tier 2 promotion              | DONE — source/CI cutoff active; legacy migration ongoing |
 
 ---
 
@@ -228,3 +228,16 @@ linters can run. Until then, NUPS stays at Tier 1.
 Run ended cleanly within capacity. All declared phases either DONE,
 DONE-PARTIAL (with documented gap), or BLOCKED (with documented reason).
 Build is green (Base44 saves are non-erroring). No regression introduced.
+
+---
+
+## 2026-08-19 CONSOLIDATION ADDENDUM
+
+The original Phase 7 blocker is superseded by the current environment. GitHub
+CI and shell-backed repository checks now exist. Method B is active through
+`scripts/check-nups-write-gateway.mjs` and an explicit legacy manifest.
+No new frontend direct entity writes are allowed; the 287 grandfathered calls
+may only decrease. Runtime migration remains incomplete and is not claimed done.
+
+See `src/docs/governance/DACO-20260819-CONSOLIDATION-PROGRESS.md` and
+`docs/audits/ENTITY_RETIREMENT_REGISTER.md` for current evidence.

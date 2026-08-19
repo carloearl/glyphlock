@@ -7,6 +7,7 @@ const functions = [
   'resolveYouTubeVideo',
   'nupsDJGateway',
   'nupsMusicDiscovery',
+  'djIntegrationHealth',
   'archiveAudioSearch',
   'musicSearch',
 ];

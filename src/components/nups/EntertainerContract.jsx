@@ -10,6 +10,7 @@ import { FileSignature, AlertTriangle, ScrollText } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ENTERTAINER_LICENSE_AGREEMENT } from '@/constants/contractText';
+import { writeIdentityRecord, snapshotPersonAudited } from '@/lib/nups/identityWrites';
 
 export default function EntertainerContract({ onContractSigned }) {
   const queryClient = useQueryClient();
@@ -91,10 +92,17 @@ export default function EntertainerContract({ onContractSigned }) {
       };
       const contractStatus = calculateContractStatus(entertainerPayload, minimumAge);
 
-      return base44.entities.Entertainer.create({
-        ...entertainerPayload,
-        contract_status: contractStatus
+      // Step 1 (ARCH-BASELINE-01) — entertainer onboarding routes through the
+      // audit gateway so the contract signing carries a full audit trail.
+      const created = await writeIdentityRecord({
+        entity: 'Entertainer',
+        operation: 'create',
+        data: { ...entertainerPayload, contract_status: contractStatus },
+        venueId: entertainerPayload.venue_id || venues?.[0]?.id,
+        intent: 'entertainer_contract:signed',
       });
+      await snapshotPersonAudited({ type: 'entertainer', event: 'contract_signed', record: created });
+      return created;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entertainers'] });

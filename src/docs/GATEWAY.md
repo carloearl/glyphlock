@@ -1,6 +1,6 @@
 # writeEntity() Gateway — Phase 4
 
-**Tier:** TIER_1_OBSERVE (default)
+**Tier:** TIER_2 source cutoff active; legacy runtime calls remain in monitored migration
 **Location:** `src/lib/nups/writeEntity.js`
 
 ## API
@@ -39,10 +39,14 @@ const receipt = await writeEntity({
   - `MigrationAuditLog` entry tagged `result: 'blocked'`.
   - Receipt: `{ ok: false, block_reason: 'role_not_authorized_in_REAL' }`.
 
-### TIER_2_LOCKED (deferred — see TIER_DETECTION.md)
-- Not active in this environment.
+### TIER_2_LOCKED (active for new frontend source)
+- CI runs `check:nups-write-gateway` against an explicit legacy manifest.
+- New frontend direct entity writes fail CI.
+- New operation signatures or increased grandfathered counts fail CI.
+- Existing calls may only decrease and remain an incremental migration backlog.
 
 ## Adoption
 
-Tier 1 is observe-only. Existing direct-write call sites are NOT modified
-this run. Adoption is a future incremental migration.
+Use `writeEntity()` for governed frontend operations. Prefer authenticated
+backend functions for protected identity, financial, contract, or administrative
+writes. See `TIER_DETECTION.md` for the cutoff and limitations.
