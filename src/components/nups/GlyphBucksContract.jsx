@@ -168,6 +168,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const [uploading, setUploading] = useState({});
   const [savedOrderId, setSavedOrderId] = useState(null);
   const [savedContractId, setSavedContractId] = useState(null);
+  const [savedContractMetadata, setSavedContractMetadata] = useState(null);
   const [batchCreated, setBatchCreated] = useState(null);
   const [backendError, setBackendError] = useState(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
@@ -426,23 +427,36 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       });
       setSavedOrderId(order.id);
 
-      const contract = await base44.entities.VIPContractRecord.create({
+      const contractMetadata = {
         order_number: orderNumber,
-        guest_name: customerName,
-        venue_id: currentVenueId,
-        contract_type: "glyphbucks_sale",
+        contract_type: "nups_order",
         total_amount: grandTotal,
         customer_signature: signature,
         manager_signature: null,
         hostess_signature: null,
-        status: "executed",
-        biometric_thumbprint_url: thumbprintUrl,
-        guest_photo_url: guestPhotoUrl,
-        id_scan_front_url: idPhotoUrl,
-        id_scan_back_url: idPhotoBackUrl,
         payment_approval_code: confirmedApprovalCode,
+        payment_processor_reference: confirmedProcessorRef,
+        payment_provider: isStripeProvider ? 'stripe' : activeProviderCode,
+      };
+      const contract = await base44.entities.VIPContractRecord.create({
+        token: crypto.randomUUID(),
+        serial_number: orderNumber,
+        record_type: "signed_contract",
+        guest_name: customerName,
+        venue_id: currentVenueId,
+        card_last_four: confirmedCardLastFour || null,
+        thumbprint_url: thumbprintUrl,
+        guest_photo_url: guestPhotoUrl,
+        id_photo_url: idPhotoUrl,
+        id_photo_back_url: idPhotoBackUrl,
+        signed_at: new Date().toISOString(),
+        used: true,
+        status: "signed",
+        issued_by: user.email,
+        metadata: contractMetadata,
       });
       setSavedContractId(contract.id);
+      setSavedContractMetadata(contractMetadata);
 
       setLoading(false);
       setStep(4);
@@ -483,10 +497,16 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
       hostess_signature: hostessSignature,
     });
     if (savedContractId) {
-      await base44.entities.VIPContractRecord.update(savedContractId, {
+      const nextMetadata = {
+        ...(savedContractMetadata || {}),
         manager_signature: managerSignature,
         hostess_signature: hostessSignature,
+        staff_signed_at: new Date().toISOString(),
+      };
+      await base44.entities.VIPContractRecord.update(savedContractId, {
+        metadata: nextMetadata,
       });
+      setSavedContractMetadata(nextMetadata);
     }
     setLoading(false);
     setStep(5);
