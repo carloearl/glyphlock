@@ -683,14 +683,33 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           </Card>
 
           <Card className="bg-gray-900/60 border-gray-700">
-            <CardHeader className="pb-2"><CardTitle className="text-sm text-yellow-400">Purchaser Card Info.</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              <div><Label className="text-xs text-red-400">Name:</Label><Input value={purchaserCardName} onChange={e => setPurchaserCardName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
-              <div><Label className="text-xs text-red-400">Card Number (Last 6 #s): *</Label><Input value={cardLastSix} onChange={e => setCardLastSix(e.target.value.replace(/\D/g,'').slice(0,6))} maxLength={6} className="bg-gray-800 border-gray-700" /></div>
-              <div className="grid grid-cols-2 gap-2">
-                <div><Label className="text-xs text-red-400">EXP:</Label><Input value={cardExp} onChange={e => setCardExp(e.target.value)} placeholder="MM/YY" className="bg-gray-800 border-gray-700" /></div>
-                <div><Label className="text-xs">Approval Code:</Label><Input value={approvalCode} onChange={e => setApprovalCode(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className="text-sm text-yellow-400">Payment Evidence</CardTitle>
+                <Badge className={isStripeProvider ? "bg-purple-500/20 text-purple-300" : "bg-amber-500/20 text-amber-300"}>
+                  {paymentConfigLoading ? "Loading" : isStripeProvider ? "Stripe hosted" : activeProviderCode.replace(/_/g, ' ')}
+                </Badge>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {isStripeProvider ? (
+                <div className="rounded-lg border border-purple-500/30 bg-purple-500/10 p-3 text-xs leading-relaxed text-purple-100">
+                  Card entry happens only on Stripe-hosted Checkout after the customer signs. NUPS receives the PaymentIntent reference, approval evidence, brand, and last four digits after Stripe confirms payment.
+                </div>
+              ) : (
+                <>
+                  <div><Label className="text-xs">Cardholder Name:</Label><Input value={purchaserCardName} onChange={e => setPurchaserCardName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><Label className="text-xs text-red-400">Card Last 4: *</Label><Input value={cardLastSix} onChange={e => setCardLastSix(e.target.value.replace(/\D/g,'').slice(0,4))} maxLength={4} className="bg-gray-800 border-gray-700" /></div>
+                    <div><Label className="text-xs">EXP:</Label><Input value={cardExp} onChange={e => setCardExp(e.target.value)} placeholder="MM/YY" className="bg-gray-800 border-gray-700" /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><Label className="text-xs text-red-400">Approval Code: *</Label><Input value={approvalCode} onChange={e => setApprovalCode(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
+                    <div><Label className="text-xs">Processor:</Label><Input value={processorName} onChange={e => setProcessorName(e.target.value)} placeholder={activeProviderCode} className="bg-gray-800 border-gray-700" /></div>
+                  </div>
+                  <div><Label className="text-xs text-red-400">Processor / Terminal Reference: *</Label><Input value={processorReference} onChange={e => setProcessorReference(e.target.value)} placeholder="Receipt, transaction, or authorization reference" className="bg-gray-800 border-gray-700 font-mono" /></div>
+                </>
+              )}
               <div className="grid grid-cols-2 gap-2">
                 <div><Label className="text-xs">Manager:</Label><Input value={managerName} onChange={e => setManagerName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
                 <div><Label className="text-xs">Hostess:</Label><Input value={hostessName} onChange={e => setHostessName(e.target.value)} className="bg-gray-800 border-gray-700" /></div>
