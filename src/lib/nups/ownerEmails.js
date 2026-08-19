@@ -13,6 +13,7 @@
 export const OWNER_EMAILS = [
   'carloearl@glyphlock.com',
   'carloearl@gmail.com',
+  'svsantos@outlook.com',
 ];
 
 const OWNER_SET = new Set(OWNER_EMAILS.map((e) => e.toLowerCase()));

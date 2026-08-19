@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { loadMyAccessRequests, submitAccessRequest } from "@/lib/nups/accessRequestClient";
+import AccessRoleSelector, { PRIVILEGED_ROLES } from "./AccessRoleSelector";
 
 const STATUS_COLORS = {
   PENDING_OWNER_APPROVAL: "bg-amber-600",
@@ -86,14 +87,14 @@ export default function AccessRequestForm({ requestedMode = "TEST" }) {
             onChange={(e) => setForm({ ...form, full_legal_name: e.target.value })} className="h-12 bg-slate-900 border-slate-700 text-white" />
           <Input placeholder="Mobile number" value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-12 bg-slate-900 border-slate-700 text-white" />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {["ENTERTAINER", "ADMINISTRATOR", "OWNER"].map((r) => (
-              <button key={r} onClick={() => setForm({ ...form, requested_role: r })}
-                className={`h-12 rounded-lg border text-sm font-semibold ${form.requested_role === r ? "bg-violet-700 border-violet-500 text-white" : "bg-slate-900 border-slate-700 text-slate-400"}`}>
-                {r}
-              </button>
-            ))}
-          </div>
+          <AccessRoleSelector value={form.requested_role} onSelect={(r) => setForm({ ...form, requested_role: r })} />
+          {PRIVILEGED_ROLES.includes(form.requested_role) && (
+            <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-[11px] text-amber-200">
+              Administrator and Owner access is reserved for the sovereign owner accounts. Anyone else
+              requesting this tier must be approved by the owner — the request is emailed to
+              carloearl@glyphlock.com and also appears in the Admin panel of the NUPS dashboard for approval.
+            </p>
+          )}
           <Textarea placeholder="Reason for access" value={form.reason}
             onChange={(e) => setForm({ ...form, reason: e.target.value })} className="bg-slate-900 border-slate-700 text-white" rows={3} />
           {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -102,7 +103,8 @@ export default function AccessRequestForm({ requestedMode = "TEST" }) {
             {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : "Submit Access Request"}
           </Button>
           <p className="text-xs text-slate-500 text-center">
-            Requests are reviewed by the venue Owner. Approval is required before any NUPS site access is granted.
+            Requests are reviewed by the venue Owner — emailed to carloearl@glyphlock.com and listed in the
+            Admin panel of the NUPS dashboard. Approval is required before any NUPS site access is granted.
           </p>
         </>
       )}
