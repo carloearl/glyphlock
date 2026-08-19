@@ -170,9 +170,64 @@
       },
       "description": "UX improvement areas"
     },
+    "security_measurement_status": {
+      "type": "string",
+      "enum": [
+        "verified_source",
+        "no_data_available"
+      ],
+      "description": "Whether security findings were grounded in verified repository source content"
+    },
+    "performance_measurement_status": {
+      "type": "string",
+      "enum": [
+        "measured",
+        "no_data_available"
+      ],
+      "description": "Whether real PageSpeed/Lighthouse performance data was available"
+    },
+    "seo_measurement_status": {
+      "type": "string",
+      "enum": [
+        "measured",
+        "no_data_available"
+      ],
+      "description": "Whether real PageSpeed or crawler SEO data was available"
+    },
+    "ux_measurement_status": {
+      "type": "string",
+      "enum": [
+        "measured",
+        "no_data_available"
+      ],
+      "description": "Whether real Lighthouse accessibility data was available"
+    },
+    "source_commit_sha": {
+      "type": "string",
+      "description": "Git commit SHA used to build the verified source evidence bundle"
+    },
+    "source_inventory_count": {
+      "type": "number",
+      "description": "Number of auditable files in the verified repository inventory"
+    },
+    "audit_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Public GlyphLock URL measured by PageSpeed and crawler evidence"
+    },
+    "invalid_findings_discarded": {
+      "type": "number",
+      "default": 0,
+      "description": "Model findings rejected because they lacked verified source or measurement evidence"
+    },
+    "evidence_summary": {
+      "type": "string",
+      "maxLength": 10000,
+      "description": "Compact JSON summary of measurement availability and identifiers"
+    },
     "files_scanned": {
       "type": "number",
-      "description": "Total files analyzed"
+      "description": "Actual number of repository source files supplied to the audit model"
     },
     "execution_time_ms": {
       "type": "number",
