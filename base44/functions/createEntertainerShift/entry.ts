@@ -135,7 +135,20 @@ Deno.serve(async (req) => {
       await blockLog('license_expired',
         `Check-in blocked: license expired ${entertainer.license_expiration} for ${entertainer.stage_name}`,
         'high', { license_expiration: entertainer.license_expiration });
-      await base44.asServiceRole.entities.Entertainer.update(entertainer.id, { payout_hold: true });
+      // ARCH-BASELINE-01 — identity/state writes route through the audit gateway.
+      await base44.functions.invoke('serverAuditGateway', {
+        entity: 'Entertainer',
+        operation: 'update',
+        id: entertainer.id,
+        data: { payout_hold: true },
+        venue_id,
+        intent: 'license_expired:payout_hold',
+        event_type: 'SelfAuditAlert',
+        event_category: 'identity',
+        severity: 'high',
+        source: 'door',
+        retention_class: 'compliance',
+      });
       return Response.json({
         error: `Check-in blocked: License expired ${entertainer.license_expiration}. Earnings accrue as an IOU until a valid license is on file.`,
         license_expired: true,
