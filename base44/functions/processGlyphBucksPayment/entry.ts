@@ -133,10 +133,16 @@ Deno.serve(async (req) => {
       }, { status });
     }
 
-    const payload = await req.json();
+    let payload;
+    try {
+      payload = await req.json();
+    } catch {
+      return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
     const { amount, order_number, customer_name, customer_email, description } = payload;
+    const amountNumber = Number(amount);
 
-    if (!amount || amount <= 0 || amount > 50000) {
+    if (!Number.isFinite(amountNumber) || amountNumber <= 0 || amountNumber > 50000) {
       return Response.json({
         error: 'Invalid amount',
         message: 'Amount must be between $0.01 and $50,000'
@@ -176,7 +182,25 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
-    const amountCents = Math.round(Number(amount) * 100);
+    const venueMode = String(venueConfig.mode || 'REAL').toUpperCase();
+    const liveCredential = /_(live)_/.test(stripeKey);
+    const testCredential = /_(test)_/.test(stripeKey);
+    if (venueMode === 'REAL' && !liveCredential) {
+      return Response.json({
+        success: false,
+        error: 'STRIPE_LIVE_CREDENTIAL_REQUIRED',
+        message: 'REAL mode requires a live Stripe credential.',
+      }, { status: 503 });
+    }
+    if (venueMode !== 'REAL' && liveCredential) {
+      return Response.json({
+        success: false,
+        error: 'STRIPE_ENVIRONMENT_MISMATCH',
+        message: `${venueMode} mode cannot use a live Stripe credential.`,
+      }, { status: 503 });
+    }
+
+    const amountCents = Math.round(amountNumber * 100);
     const connectedAccountId = venueConfig.stripe_connected_account_id || null;
     const feeBps = Math.max(0, Math.min(10000, Number(venueConfig.stripe_application_fee_bps) || 0));
     const applicationFeeAmount = connectedAccountId && feeBps > 0
@@ -200,6 +224,29 @@ Deno.serve(async (req) => {
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: '2026-06-24.dahlia' });
+
+    if (connectedAccountId) {
+      try {
+        // Compatibility gate for the existing connected account. Its controller
+        // configuration is SaaS/direct-charge shaped; migrate the readiness
+        // check to Accounts v2 when this legacy account is upgraded.
+        const account = await stripe.accounts.retrieve(connectedAccountId);
+        if (account.capabilities?.card_payments !== 'active' || account.charges_enabled !== true) {
+          return Response.json({
+            success: false,
+            error: 'STRIPE_CONNECTED_ACCOUNT_NOT_READY',
+            message: 'The venue connected account is not ready to accept card payments.',
+          }, { status: 409 });
+        }
+      } catch (accountError) {
+        return Response.json({
+          success: false,
+          error: 'STRIPE_CONNECTED_ACCOUNT_LOOKUP_FAILED',
+          message: accountError?.message || 'Unable to verify the venue connected account.',
+        }, { status: accountError?.statusCode || 502 });
+      }
+    }
+
     let session;
     try {
       session = await stripe.checkout.sessions.create(
@@ -241,8 +288,6 @@ Deno.serve(async (req) => {
 
     await base44.asServiceRole.entities.SystemAuditLog.create({
       event_type: 'GLYPHBUCKS_CHECKOUT_SESSION_CREATED',
-      entity_type: 'CheckoutSession',
-      entity_id: session.id,
       actor_email: user.email,
       resource_id: session.id,
       severity: 'low',
@@ -250,6 +295,8 @@ Deno.serve(async (req) => {
       metadata: {
         amount_cents: amountCents,
         order_number,
+        mode: venueMode,
+        credential_environment: liveCredential ? 'live' : testCredential ? 'test' : 'managed_sandbox',
         checkout_session_id: session.id,
         stripe_connected_account_id: connectedAccountId,
         application_fee_amount: applicationFeeAmount,
@@ -263,7 +310,7 @@ Deno.serve(async (req) => {
       provider_code: providerCode,
       checkout_url: session.url,
       checkout_session_id: session.id,
-      amount,
+      amount: amountNumber,
       status: session.status,
       stripe_connected_account_id: connectedAccountId,
       application_fee_amount: applicationFeeAmount,
