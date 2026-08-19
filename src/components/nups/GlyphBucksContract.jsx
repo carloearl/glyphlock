@@ -401,89 +401,49 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
 
       toast.success(`Payment approved: ${confirmedApprovalCode}`);
 
-      const orderPayload = {
-        order_number: orderNumber,
-        venue_id: currentVenueId,
-        status: "signed",
-        customer_name: customerName,
-        customer_id_number: customerId,
-        customer_address: customerAddress,
-        customer_state: customerState,
-        customer_zip: customerZip,
-        purchaser_card_name: purchaserCardName || customerName,
-        card_last_four: confirmedCardLastFour ? `****${confirmedCardLastFour}` : null,
-        card_token: confirmedProcessorRef,
-        card_exp: isStripeProvider ? null : cardExp,
-        processor_name: isStripeProvider ? 'Stripe' : (processorName || activeProviderCode),
+      const finalizationResponse = await base44.functions.invoke('finalizeNUPSOrderAfterPayment', {
+        payment_record_id: confirmedPayment.payment_record_id,
         processor_reference: confirmedProcessorRef,
-        approval_code: confirmedApprovalCode,
-        manager_name: managerName,
-        hostess_name: hostessName,
-        line_items: lineItems.filter((item) => item.room_number || item.entertainer || item.amount > 0),
-        glyphbucks_value: glyphbucksValue,
-        processing_surcharge: processingSurcharge,
-        waitress_tip: waitressTip,
-        grand_total: grandTotal,
-        acknowledgments_checked: true,
-        customer_signature: signature,
-        thumbprint_url: thumbprintUrl,
-        guest_photo_url: guestPhotoUrl,
-        id_photo_url: idPhotoUrl,
-        id_photo_back_url: idPhotoBackUrl,
-        signed_at: new Date().toISOString(),
-      };
-      const existingOrders = await base44.entities.GlyphBucksOrder.filter({
         order_number: orderNumber,
-        venue_id: currentVenueId,
+        order: {
+          customer_name: customerName,
+          customer_id_number: customerId,
+          customer_address: customerAddress,
+          customer_state: customerState,
+          customer_zip: customerZip,
+          purchaser_card_name: purchaserCardName || customerName,
+          card_exp: isStripeProvider ? null : cardExp,
+          processor_name: isStripeProvider ? 'Stripe' : (processorName || activeProviderCode),
+          manager_name: managerName,
+          hostess_name: hostessName,
+          line_items: lineItems.filter((item) => item.room_number || item.entertainer || item.amount > 0),
+          waitress_tip: waitressTip,
+          grand_total: grandTotal,
+          acknowledgments_checked: true,
+          customer_signature: signature,
+          thumbprint_url: thumbprintUrl,
+          guest_photo_url: guestPhotoUrl,
+          id_photo_url: idPhotoUrl,
+          id_photo_back_url: idPhotoBackUrl,
+        },
+        contract: {
+          customer_signature: signature,
+          thumbprint_url: thumbprintUrl,
+          guest_photo_url: guestPhotoUrl,
+          id_photo_url: idPhotoUrl,
+          id_photo_back_url: idPhotoBackUrl,
+        },
       });
-      const order = existingOrders?.[0] || await base44.entities.GlyphBucksOrder.create(orderPayload);
-      if (existingOrders?.[0]) {
-        await base44.entities.GlyphBucksOrder.update(order.id, orderPayload);
+      const finalization = finalizationResponse?.data || {};
+      if (finalization.success !== true) {
+        throw new Error(
+          finalization.error ||
+          `Payment confirmed, but order finalization failed. Do not charge again. Reference ${confirmedProcessorRef}.`,
+        );
       }
-      setSavedOrderId(order.id);
-
-      const contractMetadata = {
-        order_number: orderNumber,
-        contract_type: "nups_order",
-        total_amount: grandTotal,
-        customer_signature: signature,
-        manager_signature: null,
-        hostess_signature: null,
-        payment_approval_code: confirmedApprovalCode,
-        payment_processor_reference: confirmedProcessorRef,
-        payment_provider: isStripeProvider ? 'stripe' : activeProviderCode,
-      };
-      const contractPayload = {
-        token: crypto.randomUUID(),
-        serial_number: orderNumber,
-        record_type: "signed_contract",
-        guest_name: customerName,
-        venue_id: currentVenueId,
-        card_last_four: confirmedCardLastFour || null,
-        thumbprint_url: thumbprintUrl,
-        guest_photo_url: guestPhotoUrl,
-        id_photo_url: idPhotoUrl,
-        id_photo_back_url: idPhotoBackUrl,
-        signed_at: new Date().toISOString(),
-        used: true,
-        status: "signed",
-        issued_by: user.email,
-        metadata: contractMetadata,
-      };
-      const existingContracts = await base44.entities.VIPContractRecord.filter({
-        serial_number: orderNumber,
-        venue_id: currentVenueId,
-        record_type: "signed_contract",
-      });
-      const contract = existingContracts?.[0] || await base44.entities.VIPContractRecord.create(contractPayload);
-      if (existingContracts?.[0]) {
-        await base44.entities.VIPContractRecord.update(contract.id, {
-          ...contractPayload,
-          token: contract.token,
-        });
-      }
-      setSavedContractId(contract.id);
-      setSavedContractMetadata(contractMetadata);
+      setSavedOrderId(finalization.order_id);
+      setSavedContractId(finalization.contract_id);
+      setSavedContractMetadata(finalization.contract_metadata || null);
 
       setLoading(false);
       setStep(4);
