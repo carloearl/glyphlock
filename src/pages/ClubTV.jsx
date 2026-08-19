@@ -29,11 +29,6 @@ export default function ClubTV() {
     return unsub;
   }, []);
 
-  // Expose audio tag to visualizer
-  useEffect(() => {
-    setAudioEl(audioTagRef.current || null);
-  }, [audioUrl]);
-
   const enterFullscreen = async () => {
     try {
       if (document.fullscreenElement) {
@@ -51,6 +46,11 @@ export default function ClubTV() {
   const videoId = active?.videoId || null;
   const audioUrl = active?.audioUrl || null;
   const visualDeck = state?.crossfade >= 50 ? "B" : "A";
+
+  // Expose a newly mounted audio tag to the classic FFT visualizer.
+  useEffect(() => {
+    setAudioEl(audioTagRef.current || null);
+  }, [audioUrl]);
 
   // Load audio URL into TV's <audio> tag when it changes
   useEffect(() => {
