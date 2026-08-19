@@ -39,6 +39,9 @@ jobs:
       - name: Audit Base44 entity model
         run: npm run audit:entities
 
+      - name: Enforce Tier 2 write-gateway cutoff
+        run: npm run check:nups-write-gateway
+
       - name: Verify NUPS DJ function SDK pins
         run: npm run check:dj-functions
 
