@@ -11,6 +11,7 @@ import useHardwareScanner from "@/hooks/useHardwareScanner";
 import { parseAAMVA } from "@/lib/nups/aamva";
 import { licenseStatus } from "@/lib/nups/licenseStatus";
 import { writeIdentityRecord, snapshotPersonAudited } from "@/lib/nups/identityWrites";
+import ContractorAgreementBlock from "./ContractorAgreementBlock";
 
 /**
  * EntertainerIdOnboardPanel — onboard an adult entertainer's credential.
@@ -37,6 +38,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
   const [photoUrl, setPhotoUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [contract, setContract] = useState({ agreed: false, contractor_ack: false, signature: "" });
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const status = licenseStatus({ license_expiration: form.license_expiration });
@@ -77,6 +79,10 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
     if (!form.stage_name.trim() || !form.legal_name.trim()) return toast.error("Stage name and legal name are required.");
     if (!form.license_expiration) return toast.error("License expiration is required — scan the ID or enter it.");
     if (!photoUrl) return toast.error("Attach a photo of the front of the license.");
+    if (!contract.agreed || !contract.contractor_ack) {
+      return toast.error("The entertainer must read and accept the Independent Contractor Agreement.");
+    }
+    if (!contract.signature.trim()) return toast.error("A typed digital signature is required.");
 
     setSaving(true);
     try {
@@ -96,6 +102,10 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
         id_verified_at: new Date().toISOString(),
         id_scan_source: scanned ? "hardware_scanner" : "photo_upload",
         payout_hold: !status.can_receive_cash_payout,
+        contract_signed: true,
+        contract_signature: contract.signature.trim(),
+        contract_signed_date: new Date().toISOString(),
+        contract_status: status.can_receive_cash_payout ? "VALID" : "PENDING",
       };
 
       const match = existing.find(
@@ -134,6 +144,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
 
       toast.success(match ? "Credential updated" : "Entertainer onboarded");
       setForm(EMPTY);
+      setContract({ agreed: false, contractor_ack: false, signature: "" });
       setPhotoUrl("");
       setScanned(false);
       onSaved?.(saved);
@@ -229,6 +240,8 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
         <p className="text-[11px] text-gray-500 bg-gray-900/40 border border-gray-800 rounded p-2">
           Only the license last-4, issuing state and expiration are stored alongside the credential photo. The full ID number is never saved.
         </p>
+
+        <ContractorAgreementBlock venueId={venueId} value={contract} onChange={setContract} />
 
         <Button onClick={save} disabled={saving || uploading} className="w-full bg-pink-600 hover:bg-pink-500 font-bold">
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
