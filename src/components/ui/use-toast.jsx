@@ -1,8 +1,9 @@
 // Inspired by react-hot-toast library
 import { useState, useEffect, createContext, useContext } from "react";
 
-const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_LIMIT = 3;
+const TOAST_REMOVE_DELAY = 400;
+const TOAST_AUTO_DISMISS_MS = 4000;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -134,6 +135,8 @@ function toast({ ...props }) {
     },
   });
 
+  setTimeout(dismiss, TOAST_AUTO_DISMISS_MS);
+
   return {
     id,
     dismiss,
@@ -161,4 +164,4 @@ function useToast() {
   };
 }
 
-export { useToast, toast }; 
+export { useToast, toast };
