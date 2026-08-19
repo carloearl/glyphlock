@@ -142,29 +142,18 @@ Deno.serve(async (req) => {
         message: 'Amount must be between $0.01 and $50,000'
       }, { status: 400 });
     }
-    if (!order_number || typeof order_number !== 'string') {
+    if (
+      typeof order_number !== 'string' ||
+      !/^[A-Za-z0-9_-]{6,80}$/.test(order_number)
+    ) {
       return Response.json({ error: 'Missing or invalid order_number' }, { status: 400 });
-    }
-
-    // Duplicate check
-    const existingPayment = await base44.asServiceRole.entities.SystemAuditLog.filter({
-      entity_type: 'PaymentIntent',
-      event_type: 'GLYPHBUCKS_PAYMENT_INTENT_CREATED'
-    }, null, 100);
-
-    const isDuplicate = existingPayment.some(e => e.description && e.description.includes(order_number));
-    if (isDuplicate) {
-      return Response.json({
-        error: 'DUPLICATE_ORDER',
-        message: 'This order number has already been processed'
-      }, { status: 409 });
     }
 
     // ── PROVIDER ROUTING ────────────────────────────────────────
     const venueConfig = await resolveVenueConfig(base44, venue_id);
     const providerCode = venueConfig.primary_provider_code || 'external_terminal';
 
-    // Non-Stripe providers don't create payment intents — they go to createPaymentRecord
+    // Non-Stripe providers use the provider-agnostic evidence path directly.
     if (providerCode !== 'stripe') {
       return Response.json({
         success: false,
@@ -187,83 +176,98 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
-    const amountCents = Math.round(amount * 100);
+    const amountCents = Math.round(Number(amount) * 100);
     const connectedAccountId = venueConfig.stripe_connected_account_id || null;
     const feeBps = Math.max(0, Math.min(10000, Number(venueConfig.stripe_application_fee_bps) || 0));
     const applicationFeeAmount = connectedAccountId && feeBps > 0
       ? Math.floor((amountCents * feeBps) / 10000)
       : 0;
-
-    const stripeBody = new URLSearchParams();
-    stripeBody.set('amount', String(amountCents));
-    stripeBody.set('currency', 'usd');
-    stripeBody.set('description', description || `GlyphBucks Order ${order_number}`);
-    stripeBody.set('metadata[order_number]', order_number);
-    stripeBody.set('metadata[customer_name]', customer_name || '');
-    stripeBody.set('metadata[processed_by]', user.email);
-    stripeBody.set('metadata[venue_id]', venue_id);
-    stripeBody.set('metadata[order_type]', 'glyphbucks_sale');
-    stripeBody.set('metadata[stripe_connected_account_id]', connectedAccountId || '');
-    stripeBody.set('metadata[platform_fee_bps]', String(feeBps));
-    stripeBody.set('receipt_email', customer_email || user.email);
-    stripeBody.set('automatic_payment_methods[enabled]', 'true');
-    if (applicationFeeAmount > 0) {
-      stripeBody.set('application_fee_amount', String(applicationFeeAmount));
-    }
-
-    const stripeHeaders = {
-      'Authorization': `Bearer ${stripeKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+    const appOrigin = getAllowedOrigin(req);
+    const metadata = {
+      order_number,
+      customer_name: String(customer_name || '').slice(0, 200),
+      processed_by: user.email,
+      operator_user_id: user.id,
+      venue_id,
+      order_type: 'glyphbucks_sale',
+      stripe_connected_account_id: connectedAccountId || '',
+      platform_fee_bps: String(feeBps),
     };
-    if (connectedAccountId) {
-      stripeHeaders['Stripe-Account'] = connectedAccountId;
+
+    const paymentIntentData = { metadata };
+    if (applicationFeeAmount > 0) {
+      paymentIntentData.application_fee_amount = applicationFeeAmount;
     }
 
-    const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
-      method: 'POST',
-      headers: stripeHeaders,
-      body: stripeBody
-    });
-    const paymentIntent = await stripeResponse.json();
-    if (!stripeResponse.ok) {
+    const stripe = new Stripe(stripeKey, { apiVersion: '2026-06-24.dahlia' });
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create(
+        {
+          mode: 'payment',
+          integration_identifier: integrationIdentifier(),
+          line_items: [{
+            price_data: {
+              currency: 'usd',
+              unit_amount: amountCents,
+              product_data: {
+                name: String(description || `NUPS order ${order_number}`).slice(0, 120),
+                description: `Venue ${venue_id} · Order ${order_number}`,
+              },
+            },
+            quantity: 1,
+          }],
+          success_url: `${appOrigin}/NUPSPaymentReturn?session_id={CHECKOUT_SESSION_ID}&order_number=${encodeURIComponent(order_number)}`,
+          cancel_url: `${appOrigin}/NUPSPaymentReturn?canceled=1&order_number=${encodeURIComponent(order_number)}`,
+          customer_email: customer_email || user.email,
+          client_reference_id: user.id,
+          metadata,
+          payment_intent_data: paymentIntentData,
+          expires_at: Math.floor(Date.now() / 1000) + 1800,
+        },
+        {
+          stripeAccount: connectedAccountId || undefined,
+          idempotencyKey: `nups-glyphbucks-${venue_id}-${order_number}`,
+        },
+      );
+    } catch (stripeError) {
       return Response.json({
         success: false,
-        error: 'STRIPE_PAYMENT_INTENT_CREATE_FAILED',
-        message: paymentIntent?.error?.message || 'Stripe rejected the payment intent',
-        provider_code: providerCode
-      }, { status: stripeResponse.status || 502 });
+        error: 'STRIPE_CHECKOUT_CREATE_FAILED',
+        message: stripeError?.message || 'Stripe rejected the checkout session',
+        provider_code: providerCode,
+      }, { status: stripeError?.statusCode || 502 });
     }
 
     await base44.asServiceRole.entities.SystemAuditLog.create({
-      event_type: 'GLYPHBUCKS_PAYMENT_INTENT_CREATED',
-      entity_type: 'PaymentIntent',
-      entity_id: paymentIntent.id,
-      actor_id: user.email,
-      venue_id,
+      event_type: 'GLYPHBUCKS_CHECKOUT_SESSION_CREATED',
+      entity_type: 'CheckoutSession',
+      entity_id: session.id,
+      actor_email: user.email,
+      resource_id: session.id,
       severity: 'low',
-      description: `Payment intent created for order ${order_number}: $${amount}`,
+      description: `Stripe-hosted checkout created for order ${order_number}`,
       metadata: {
-        amount,
+        amount_cents: amountCents,
         order_number,
-        status: paymentIntent.status,
-        payment_intent_id: paymentIntent.id,
+        checkout_session_id: session.id,
         stripe_connected_account_id: connectedAccountId,
         application_fee_amount: applicationFeeAmount,
-        application_fee_bps: feeBps
+        application_fee_bps: feeBps,
       },
       status: 'success',
-      timestamp: new Date().toISOString()
     });
 
     return Response.json({
       success: true,
-      client_secret: paymentIntent.client_secret,
-      payment_intent_id: paymentIntent.id,
-      amount: amount,
-      status: paymentIntent.status,
+      provider_code: providerCode,
+      checkout_url: session.url,
+      checkout_session_id: session.id,
+      amount,
+      status: session.status,
       stripe_connected_account_id: connectedAccountId,
       application_fee_amount: applicationFeeAmount,
-      application_fee_bps: feeBps
+      application_fee_bps: feeBps,
     });
 
   } catch (error) {
