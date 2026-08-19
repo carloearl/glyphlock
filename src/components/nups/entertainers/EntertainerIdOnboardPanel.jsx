@@ -12,6 +12,7 @@ import { parseAAMVA } from "@/lib/nups/aamva";
 import { licenseStatus } from "@/lib/nups/licenseStatus";
 import { writeIdentityRecord, snapshotPersonAudited } from "@/lib/nups/identityWrites";
 import ContractorAgreementBlock from "./ContractorAgreementBlock";
+import { ENTERTAINER_CLICKWRAP } from "@/constants/entertainerClickwrap";
 
 /**
  * EntertainerIdOnboardPanel — onboard an adult entertainer's credential.
@@ -38,7 +39,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
   const [photoUrl, setPhotoUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [contract, setContract] = useState({ agreed: false, contractor_ack: false, signature: "" });
+  const [contract, setContract] = useState({ agreed: false, acks: {}, signature: "" });
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const status = licenseStatus({ license_expiration: form.license_expiration });
@@ -79,9 +80,11 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
     if (!form.stage_name.trim() || !form.legal_name.trim()) return toast.error("Stage name and legal name are required.");
     if (!form.license_expiration) return toast.error("License expiration is required — scan the ID or enter it.");
     if (!photoUrl) return toast.error("Attach a photo of the front of the license.");
-    if (!contract.agreed || !contract.contractor_ack) {
+    if (!contract.agreed) {
       return toast.error("The entertainer must read and accept the Independent Contractor Agreement.");
     }
+    const missingAck = ENTERTAINER_CLICKWRAP.find((c) => !contract.acks?.[c.key]);
+    if (missingAck) return toast.error(`Acknowledgment required: ${missingAck.title}`);
     if (!contract.signature.trim()) return toast.error("A typed digital signature is required.");
 
     setSaving(true);
@@ -106,6 +109,14 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
         contract_signature: contract.signature.trim(),
         contract_signed_date: new Date().toISOString(),
         contract_status: status.can_receive_cash_payout ? "VALID" : "PENDING",
+        clickwrap_acknowledgments: ENTERTAINER_CLICKWRAP.map((c) => ({
+          key: c.key,
+          title: c.title,
+          text: c.text,
+          accepted: true,
+          accepted_at: new Date().toISOString(),
+          witnessed_by: user?.email || "manager",
+        })),
       };
 
       const match = existing.find(
@@ -144,7 +155,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
 
       toast.success(match ? "Credential updated" : "Entertainer onboarded");
       setForm(EMPTY);
-      setContract({ agreed: false, contractor_ack: false, signature: "" });
+      setContract({ agreed: false, acks: {}, signature: "" });
       setPhotoUrl("");
       setScanned(false);
       onSaved?.(saved);

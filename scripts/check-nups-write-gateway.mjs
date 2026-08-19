@@ -6,6 +6,7 @@ const SRC_ROOT = path.join(ROOT, "src");
 const MANIFEST_PATH = path.join(ROOT, "config", "nups-direct-write-legacy-manifest.json");
 const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx"]);
 const WRITE_PATTERN = /\bbase44\.entities\.([A-Za-z_$][\w$]*)\.(create|update|delete|bulkCreate)\s*\(/g;
+const DYNAMIC_WRITE_PATTERN = /\bbase44\.entities\[([^\]\n]+)\]\.(create|update|delete|bulkCreate)\s*\(/g;
 
 function walk(dir, output = []) {
   if (!fs.existsSync(dir)) return output;
@@ -27,6 +28,12 @@ function inventory() {
     let match;
     while ((match = WRITE_PATTERN.exec(source)) !== null) {
       const signature = `${match[1]}.${match[2]}`;
+      calls[signature] = (calls[signature] || 0) + 1;
+    }
+    DYNAMIC_WRITE_PATTERN.lastIndex = 0;
+    while ((match = DYNAMIC_WRITE_PATTERN.exec(source)) !== null) {
+      const expression = match[1].trim().replace(/\s+/g, " ");
+      const signature = `[${expression}].${match[2]}`;
       calls[signature] = (calls[signature] || 0) + 1;
     }
     const total = Object.values(calls).reduce((sum, count) => sum + count, 0);
