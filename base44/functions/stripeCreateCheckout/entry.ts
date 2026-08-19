@@ -55,6 +55,12 @@ async function resolveStripeSecretKey(base44) {
   }
 }
 
+function integrationIdentifier() {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const suffix = Array.from(bytes, (value) => String.fromCharCode(97 + (value % 26))).join('');
+  return `glyphlock_subscription_${suffix}`;
+}
+
 function getAllowedOrigin(req) {
   const candidates = [Deno.env.get('APP_BASE_URL'), req.headers.get('origin')].filter(Boolean);
 
@@ -137,6 +143,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create(
       {
         mode: 'subscription',
+        integration_identifier: integrationIdentifier(),
         line_items: [{ price: priceId, quantity: 1 }],
         success_url: successUrl,
         cancel_url: cancelUrl,
