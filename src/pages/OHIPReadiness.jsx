@@ -34,16 +34,22 @@ const PRODUCTION_STAGES = [
     detail: 'OAuth and controlled read-only OHIP validation verified.',
   },
   {
-    label: 'Oracle PartnerNetwork',
+    label: 'Oracle PartnerNetwork Enrollment',
+    status: 'received',
+    detail:
+      'Oracle received GlyphLock LLC’s paid Level 0 Principal enrollment #1654123 on August 17, 2026. The enrollment and payment are complete; this is not an unpaid or unsubmitted application.',
+  },
+  {
+    label: 'Company Detail Validation',
     status: 'review',
     detail:
-      'OPN enrollment #1654123 was submitted August 17, 2026. Oracle requested address evidence, and GlyphLock LLC supplied its filed Arizona Articles of Organization on August 18, 2026. Awaiting explicit Oracle approval.',
+      'Oracle Global Business Operations requested complete-address evidence. GlyphLock LLC supplied its filed Arizona Articles of Organization on August 18, 2026, and is awaiting confirmation that validation is complete.',
   },
   {
     label: 'Marketplace Listing',
     status: 'blocked',
     detail:
-      'Preparation may continue, but publisher submission and paid-listing onboarding remain gated on OPN approval. No banking information has been supplied to Oracle.',
+      'Listing preparation may continue, but Marketplace publisher submission and paid-listing supplier onboarding remain separate gates. No banking information has been supplied to Oracle.',
   },
   {
     label: 'Production Application',
@@ -309,30 +315,31 @@ export default function OHIPReadiness() {
                   Evidence-based progression. A stage is never marked complete from a related Oracle order or account alone.
                 </CardDescription>
               </div>
-              <Badge className="bg-amber-500 text-slate-950">OPN Application Under Review</Badge>
+              <Badge className="bg-cyan-500 text-slate-950">OPN Enrollment Received</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="grid gap-2 rounded-lg border border-amber-500/35 bg-amber-950/20 p-3 text-sm sm:grid-cols-2">
+            <div className="grid gap-2 rounded-lg border border-cyan-500/35 bg-cyan-950/20 p-3 text-sm sm:grid-cols-2">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-amber-300">
-                  Current OPN evidence
+                <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">
+                  OPN enrollment
                 </p>
                 <p className="mt-1 text-slate-200">
-                  Application #1654123 · Submitted August 17, 2026
+                  Level 0 Principal · #1654123 · Payment completed
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-amber-300">
-                  Latest action
+                <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">
+                  Remaining validation
                 </p>
                 <p className="mt-1 text-slate-200">
-                  Address evidence supplied August 18, 2026 · Oracle decision pending
+                  Address evidence supplied August 18, 2026 · Confirmation pending
                 </p>
               </div>
             </div>
             {PRODUCTION_STAGES.map((stage, index) => {
               const isComplete = stage.status === 'complete';
+              const isReceived = stage.status === 'received';
               const isReview = stage.status === 'review';
               return (
                 <div
@@ -340,14 +347,18 @@ export default function OHIPReadiness() {
                   className={`flex gap-3 rounded-lg border p-3 ${
                     isComplete
                       ? 'border-emerald-500/35 bg-emerald-950/20'
-                      : isReview
-                        ? 'border-amber-500/45 bg-amber-950/20'
-                        : 'border-slate-700 bg-slate-950/50'
+                      : isReceived
+                        ? 'border-cyan-500/45 bg-cyan-950/20'
+                        : isReview
+                          ? 'border-amber-500/45 bg-amber-950/20'
+                          : 'border-slate-700 bg-slate-950/50'
                   }`}
                 >
                   <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current text-xs font-bold">
                     {isComplete ? (
                       <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                    ) : isReceived ? (
+                      <CheckCircle2 className="h-4 w-4 text-cyan-300" />
                     ) : isReview ? (
                       <AlertTriangle className="h-4 w-4 text-amber-300" />
                     ) : (
@@ -362,18 +373,22 @@ export default function OHIPReadiness() {
                         className={
                           isComplete
                             ? 'border-emerald-500/50 text-emerald-200'
-                            : isReview
-                              ? 'border-amber-500/50 text-amber-200'
-                              : 'border-slate-600 text-slate-400'
+                            : isReceived
+                              ? 'border-cyan-500/50 text-cyan-200'
+                              : isReview
+                                ? 'border-amber-500/50 text-amber-200'
+                                : 'border-slate-600 text-slate-400'
                         }
                       >
                         {isComplete
                           ? 'Verified'
-                          : isReview
-                            ? 'Under Review'
-                            : stage.status === 'blocked'
-                              ? 'Blocked'
-                              : 'Locked'}
+                          : isReceived
+                            ? 'Received'
+                            : isReview
+                              ? 'Under Review'
+                              : stage.status === 'blocked'
+                                ? 'Blocked'
+                                : 'Locked'}
                       </Badge>
                     </div>
                     <p className="mt-1 text-sm text-slate-400">{stage.detail}</p>
@@ -382,7 +397,7 @@ export default function OHIPReadiness() {
               );
             })}
             <p className="text-xs leading-5 text-slate-500">
-              Current evidence confirms the Partner Sandbox connection and an OPN application under review. It does not establish OPN approval, Marketplace publisher approval, production access, customer authorization, or Oracle supplier/banking setup.
+              Current evidence confirms the Partner Sandbox and Oracle’s receipt of GlyphLock LLC’s paid Level 0 Principal OPN enrollment. Company-detail validation is still being completed and is tracked separately; Marketplace publisher approval, production access, customer authorization, and Oracle supplier/banking setup remain separate gates.
             </p>
           </CardContent>
         </Card>
