@@ -19,6 +19,8 @@ const STATUS_COLORS = {
 // see and use the decision buttons. Server enforces the same rule.
 const DECISION_EMAILS = ["carloearl@glyphlock.com", "carloearl@gmail.com"];
 
+const STAFF_ROLES = ["ENTERTAINER", "HOSTESS", "DOORMAN", "DOOR_GIRL", "BARTENDER", "DJ", "SECURITY", "MANAGER"];
+
 export default function AccessRequests() {
   const [requests, setRequests] = useState(null);
   const [busyId, setBusyId] = useState(null);
@@ -100,6 +102,11 @@ export default function AccessRequests() {
               {canDecide && ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status) && (
                 <>
                   {r.requested_role === "ENTERTAINER" && <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ENTERTAINER")} className="bg-pink-700 hover:bg-pink-600 min-h-[44px]">Approve as Entertainer</Button>}
+                  {STAFF_ROLES.includes(r.requested_role) && r.requested_role !== "ENTERTAINER" && (
+                    <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_STAFF")} className="bg-cyan-700 hover:bg-cyan-600 min-h-[44px]">
+                      Approve as {r.requested_role.replaceAll("_", " ")}
+                    </Button>
+                  )}
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ADMIN")} className="bg-emerald-700 hover:bg-emerald-600 min-h-[44px]">Approve as Administrator</Button>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_OWNER")} className="bg-violet-700 hover:bg-violet-600 min-h-[44px]">Approve as Owner</Button>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REJECT")} variant="destructive" className="min-h-[44px]">Reject</Button>
