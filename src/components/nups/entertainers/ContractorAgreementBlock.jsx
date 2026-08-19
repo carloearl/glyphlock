@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollText, AlertTriangle } from "lucide-react";
 import { ENTERTAINER_LICENSE_AGREEMENT } from "@/constants/contractText";
+import { ENTERTAINER_CLICKWRAP } from "@/constants/entertainerClickwrap";
 
 /**
  * ContractorAgreementBlock — scroll-gated Independent Entertainer License
@@ -64,21 +65,32 @@ export default function ContractorAgreementBlock({ venueId, value, onChange }) {
       </p>
 
       <div className={`space-y-3 ${read ? "" : "opacity-50 pointer-events-none"}`}>
-        <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2">
-          <Checkbox
-            checked={!!value.contractor_ack}
-            onCheckedChange={(v) => set({ contractor_ack: !!v })}
-            disabled={!read}
-            className="mt-1"
-          />
-          <label className="text-[11px] text-white">
-            I am an <strong>independent contractor</strong>, not an employee. I
-            control the manner and means of my own performances, I am solely
-            responsible for my own federal, state and self-employment taxes
-            (Form 1099 where applicable), no taxes are withheld on my behalf, I
-            receive no employment benefits, and I will maintain all licenses and
-            permits required by law.
-          </label>
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-amber-300">
+            Acknowledge each item separately
+          </p>
+          {ENTERTAINER_CLICKWRAP.map((item) => {
+            const checked = !!value.acks?.[item.key];
+            return (
+              <div
+                key={item.key}
+                className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2"
+              >
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(v) =>
+                    set({ acks: { ...(value.acks || {}), [item.key]: !!v } })
+                  }
+                  disabled={!read}
+                  className="mt-1"
+                />
+                <label className="text-[11px] text-white">
+                  <span className="block font-bold text-amber-200">{item.title}</span>
+                  {item.text}
+                </label>
+              </div>
+            );
+          })}
         </div>
 
         <div className="flex items-start gap-3 rounded-lg border border-purple-500/30 bg-purple-500/5 p-2">

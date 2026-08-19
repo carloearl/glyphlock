@@ -124,6 +124,36 @@
       "default": "INVALID",
       "description": "Contract validation status. Must be VALID for check-in."
     },
+    "clickwrap_acknowledgments": {
+      "type": "array",
+      "description": "Per-clause clickwrap consent captured at onboarding (master covenant, contractor status, house fee, late-arrival surcharge after 2AM, early-arrival incentive before 10PM, credential/payout hold, identity capture). Append-only evidence.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "description": "Exact clause text shown at the time of acceptance."
+          },
+          "accepted": {
+            "type": "boolean"
+          },
+          "accepted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "witnessed_by": {
+            "type": "string",
+            "description": "Operator email who ran the onboarding station."
+          }
+        }
+      }
+    },
     "nups_pin": {
       "type": "string",
       "description": "4-digit PIN the entertainer enters at the door check-in kiosk."
