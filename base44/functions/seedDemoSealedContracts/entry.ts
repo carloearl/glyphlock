@@ -51,9 +51,18 @@ Deno.serve(async (req) => {
     }
 
     // --- GLYPHBUCKS DEMO SALES — through the real seal path (DEMO mode) ---
-    for (const d of GB_DEMOS) {
+    for (const [index, d] of GB_DEMOS.entries()) {
       try {
+        const seedDigest = await sha256Hex(JSON.stringify({
+          venue_id: venueId,
+          index,
+          purchaser_member_id: d.purchaser_member_id,
+          denom_cents: d.denom_cents,
+          qty: d.qty,
+          card_fee_cents: d.card_fee_cents,
+        }));
         const res = await base44.functions.invoke('glyphbucksSeal', {
+          idempotency_key: `GBSEAL:DEMO:SEED:${seedDigest.slice(0, 48)}`,
           mode: 'DEMO',
           venue_id: venueId,
           purchaser_name: d.purchaser_name,
