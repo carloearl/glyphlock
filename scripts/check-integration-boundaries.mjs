@@ -69,6 +69,43 @@ requireText(stripeHealth, 'REQUIRED_WEBHOOK_SECRET_COUNT = 2', 'Stripe health mu
 requireText(stripeHealth, "{ error: 'Authentication required' }", 'Stripe health must return an explicit authentication failure');
 requireText(stripeHealth, 'catalogReady && webhookReady && accountMatches && accountReadable', 'Stripe health must require the full integration boundary');
 
+const nupsPaymentFunctions = [
+  'base44/functions/processGlyphBucksPayment/entry.ts',
+  'base44/functions/confirmGlyphBucksPayment/entry.ts',
+  'base44/functions/createPaymentRecord/entry.ts',
+  'base44/functions/stripe-create-refund/entry.ts',
+  'base44/functions/testIntegrations/entry.ts',
+];
+for (const file of nupsPaymentFunctions) {
+  requireText(file, "getConnection('stripe')", 'NUPS Stripe operations must support the server-only Base44 connector');
+}
+
+const processGlyphBucksPayment = 'base44/functions/processGlyphBucksPayment/entry.ts';
+requireText(processGlyphBucksPayment, 'checkout.sessions.create', 'NUPS web payments must use Stripe-hosted Checkout');
+requireText(processGlyphBucksPayment, "mode: 'payment'", 'NUPS Checkout must create a one-time payment');
+requireText(processGlyphBucksPayment, 'integration_identifier', 'NUPS Checkout must identify the integration');
+requireText(processGlyphBucksPayment, 'idempotencyKey', 'NUPS Checkout creation must be idempotent');
+requireText(processGlyphBucksPayment, 'NUPSPaymentReturn', 'NUPS Checkout must return through the verified payment page');
+forbidText(processGlyphBucksPayment, 'client_secret:', 'NUPS hosted Checkout must not return a PaymentIntent client secret');
+
+const confirmGlyphBucksPayment = 'base44/functions/confirmGlyphBucksPayment/entry.ts';
+requireText(confirmGlyphBucksPayment, 'checkout.sessions.retrieve', 'NUPS payment confirmation must retrieve the Checkout Session server-side');
+requireText(confirmGlyphBucksPayment, 'ownsSession', 'NUPS Checkout confirmation must enforce session ownership');
+requireText(confirmGlyphBucksPayment, 'matchesVenue', 'NUPS Checkout confirmation must enforce venue scope');
+requireText(confirmGlyphBucksPayment, "functions.invoke('createPaymentRecord'", 'NUPS Checkout must reconcile into the provider-agnostic evidence record');
+requireText(confirmGlyphBucksPayment, "create_linked_order: false", 'NUPS Checkout confirmation must not create a duplicate lightweight order');
+
+const glyphBucksContract = 'src/components/nups/GlyphBucksContract.jsx';
+requireText(glyphBucksContract, 'waitForStripeCheckout', 'NUPS contract flow must wait for Stripe-hosted payment confirmation');
+requireText(glyphBucksContract, "functions.invoke('createPaymentRecord'", 'External terminal payments must use the provider-agnostic evidence path');
+requireText(glyphBucksContract, 'Processor / Terminal Reference', 'External payment UI must collect the required processor reference');
+forbidText(glyphBucksContract, 'const { client_secret, payment_intent_id }', 'NUPS UI must not skip PaymentIntent confirmation');
+
+const nupsPaymentReturn = 'src/pages/NUPSPaymentReturn.jsx';
+requireText(nupsPaymentReturn, 'confirmGlyphBucksPayment', 'Stripe return page must reconcile payment server-side');
+requireText(nupsPaymentReturn, 'window.location.origin', 'Stripe return messaging must use an exact same-origin target');
+requireText(nupsPaymentReturn, 'nups:stripe-payment-result', 'Stripe return page must notify the originating NUPS workflow');
+
 const paymentSuccess = 'src/pages/PaymentSuccess.jsx';
 requireText(paymentSuccess, 'base44.functions.invoke("stripePoll"', 'Payment success page must verify with the server');
 requireText(paymentSuccess, 'PAYMENT NOT CONFIRMED', 'Payment success page must have a non-success state');
