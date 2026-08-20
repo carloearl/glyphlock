@@ -11,7 +11,7 @@ import { base44 } from '@/api/base44Client';
 import CameraScanner from './CameraScanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Loader2, ShieldAlert, User, UserPlus, UserCheck, IdCard, QrCode } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, ShieldAlert, User, UserPlus, UserCheck, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 import useHardwareScanner from '@/hooks/useHardwareScanner';
 import { parseAAMVA } from '@/lib/nups/aamva';
@@ -226,7 +226,7 @@ export default function ScanTab({ venueId, validationRun }) {
         {active ? (
           <CameraScanner onDecode={handleDecode} formats={['qr_code', 'pdf417']} active label="Scan" />
         ) : (
-          <div className="rounded-2xl border border-slate-800 bg-black/40 p-6 text-center space-y-3">
+          <div role="dialog" aria-modal="true" aria-label="Age verification result" className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm p-6 text-center flex flex-col items-center justify-center space-y-3">
             {busy ? (
               <div className="space-y-2">
                 <Loader2 className="w-8 h-8 mx-auto animate-spin text-emerald-400" />
