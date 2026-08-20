@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, ClipboardList, Clock3, KeyRound, ShieldAlert, UserPlus, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { DEFAULT_VENUE_ID } from "@/lib/venueDefaults";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const POSITIONS=["manager","bartender","floor host","hostess","door girl","doorman","driver","security","dj"];
@@ -37,7 +38,7 @@ function SignaturePad({value,onChange}){
 export default function StaffOnboardingPanel(){
  const qc=useQueryClient(),[form,setForm]=useState(empty),[open,setOpen]=useState(false),[selected,setSelected]=useState(null),[issued,setIssued]=useState(null);
  const {data:apps=[]}=useQuery({queryKey:["staff-applications"],queryFn:()=>base44.entities.StaffApplication.list("-created_date",100)});
- const save=useMutation({mutationFn:async data=>{const gates=gateList(data),pct=Math.round(gates.filter(x=>x[1]).length/gates.length*100);const payload={...data,completion_percent:pct,status:data.id?data.status:"DRAFT"};return data.id?base44.entities.StaffApplication.update(data.id,payload):base44.entities.StaffApplication.create(payload);},onSuccess:r=>{qc.invalidateQueries({queryKey:["staff-applications"]});setSelected(r);setForm(r);toast.success("Application saved.");},onError:e=>toast.error(e.message)});
+ const save=useMutation({mutationFn:async data=>{const gates=gateList(data),pct=Math.round(gates.filter(x=>x[1]).length/gates.length*100);const payload={...data,completion_percent:pct,status:data.id?data.status:"DRAFT"};return writeIdentityRecord({ entity:"StaffApplication", operation:data.id?"update":"create", id:data.id, data:payload, venueId:payload.venue_id, intent:`staff_application:${data.id?"update":"create"}` });},onSuccess:r=>{qc.invalidateQueries({queryKey:["staff-applications"]});setSelected(r);setForm(r);toast.success("Application saved.");},onError:e=>toast.error(e.message)});
  const finalize=useMutation({mutationFn:async id=>{const r=await base44.functions.invoke("manageStaffOnboarding",{action:"finalizeActivation",application_id:id});if(r.data?.error)throw new Error(r.data.error+(r.data.blockers?" — "+r.data.blockers.join(", "):""));return r.data;},onSuccess:r=>{setIssued(r);qc.invalidateQueries({queryKey:["staff-applications"]});qc.invalidateQueries({queryKey:["nups-users"]});toast.success("Employee activated. Temporary PIN shown once.");},onError:e=>toast.error(e.message)});
  const set=(k,v)=>setForm(x=>({...x,[k]:v}));
  const submit=()=>{const g=gateList(form);save.mutate({...form,status:g.slice(0,2).every(x=>x[1])?"SUBMITTED":"DRAFT",current_step:g.findIndex(x=>!x[1])+1});};
