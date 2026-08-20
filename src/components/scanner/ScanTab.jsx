@@ -98,6 +98,11 @@ export default function ScanTab({ venueId, validationRun }) {
         last_name: aamva.last_name || '',
         dob: aamva.date_of_birth || null,
         license_state: aamva.id_state || '',
+        id_type: aamva.id_type === 'Drivers License' ? 'drivers_license' : (aamva.id_type || 'drivers_license'),
+        id_expiration: aamva.id_expiration || null,
+        id_expired: !!aamva.id_expired,
+        last_initial: (aamva.last_name || '').trim().slice(0, 1).toUpperCase(),
+        license_last4: String(aamva.id_number || '').replace(/\s/g, '').slice(-4).toUpperCase(),
       } : null;
       if (!parsed || !parsed.license_number || !parsed.dob) {
         setResult({ kind: 'id', ok: false, reason: 'Not a readable driver license' });
@@ -124,6 +129,11 @@ export default function ScanTab({ venueId, validationRun }) {
           last_name: profile.last_name || parsed.last_name,
           dob: profile.dob || parsed.dob,
           license_state: profile.license_state || parsed.license_state,
+          id_type: parsed.id_type,
+          last_initial: parsed.last_initial,
+          license_last4: parsed.license_last4,
+          id_expiration: parsed.id_expiration,
+          id_expired: parsed.id_expired,
         });
       } else {
         profile = await base44.entities.GuestProfile.create({
@@ -133,6 +143,11 @@ export default function ScanTab({ venueId, validationRun }) {
           last_name: parsed.last_name,
           dob: parsed.dob,
           license_state: parsed.license_state,
+          id_type: parsed.id_type,
+          last_initial: parsed.last_initial,
+          license_last4: parsed.license_last4,
+          id_expiration: parsed.id_expiration,
+          id_expired: parsed.id_expired,
           age_verified,
           visit_count: 1,
           first_visit_at: nowIso,
@@ -167,9 +182,17 @@ export default function ScanTab({ venueId, validationRun }) {
         last_name: parsed.last_name,
         visit_count: isNew ? 1 : (profile.visit_count || 0) + 1,
         status: profile.status || 'active',
+        date_of_birth: parsed.dob,
+        id_type: parsed.id_type,
+        last_initial: parsed.last_initial,
+        license_last4: parsed.license_last4,
+        id_expiration: parsed.id_expiration,
+        id_expired: parsed.id_expired,
+        license_state: parsed.license_state,
       });
 
       if (!age_verified) toast.error(`Under 21 — entry denied`);
+      else if (parsed.id_expired) toast.error(`Expired ID — entry denied`);
       else if (profile.status === 'banned') toast.error(`Banned guest — deny entry`);
       else if (isNew) toast.success(`✓ New guest profile created`);
       else toast.success(`✓ Welcome back, ${parsed.first_name}`);
@@ -186,7 +209,7 @@ export default function ScanTab({ venueId, validationRun }) {
     setActive(true);
   };
 
-  const idDenied = result?.kind === 'id' && result.ok && (!result.age_verified || result.status === 'banned');
+  const idDenied = result?.kind === 'id' && result.ok && (!result.age_verified || result.id_expired || result.status === 'banned');
 
   return (
     <Card className="bg-slate-900 border-slate-800">
@@ -231,8 +254,15 @@ export default function ScanTab({ venueId, validationRun }) {
                     {result.is_new ? 'New guest — profile created' : `Welcome back · visit #${result.visit_count}`}
                   </div>
                   <div className="text-2xl font-bold text-white">{result.first_name} {result.last_name}</div>
-                  <div className="text-xs text-slate-400 flex items-center justify-center gap-2">
-                    <IdCard className="w-3.5 h-3.5" /> Age {result.computed_age}
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3 text-left grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                    <div><span className="text-slate-500">DOB</span><div className="font-semibold text-white">{result.date_of_birth || 'Not captured'}</div></div>
+                    <div><span className="text-slate-500">Age verification</span><div className="font-semibold text-emerald-300">21+ VERIFIED · AGE {result.computed_age}</div></div>
+                    <div><span className="text-slate-500">ID type</span><div className="font-semibold text-white">{result.id_type === 'drivers_license' ? 'Driver License' : result.id_type}</div></div>
+                    <div><span className="text-slate-500">Name check</span><div className="font-semibold text-white">Last initial: {result.last_initial || '—'}</div></div>
+                    <div><span className="text-slate-500">DL number</span><div className="font-semibold text-white font-mono">•••• {result.license_last4 || '—'}</div></div>
+                    <div><span className="text-slate-500">Expiration</span><div className="font-semibold text-white">{result.id_expiration || 'Not captured'}</div></div>
+                    <div><span className="text-slate-500">Issuing state</span><div className="font-semibold text-white">{result.license_state || '—'}</div></div>
+                    <div><span className="text-slate-500">Profile</span><div className="font-semibold text-white">{result.is_new ? 'Created' : `Visit #${result.visit_count}`}</div></div>
                     {result.status === 'vip' && <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">VIP</span>}
                   </div>
                 </div>
@@ -245,6 +275,7 @@ export default function ScanTab({ venueId, validationRun }) {
                   <div className="text-xs uppercase tracking-wider text-red-400">Denied</div>
                   <div className="text-sm text-slate-300">
                     {result?.kind === 'id' && result.status === 'banned' ? 'Banned guest — do not admit'
+                      : result?.kind === 'id' && result.id_expired ? `ID expired ${result.id_expiration || ''} — do not admit`
                       : result?.kind === 'id' && result?.computed_age != null ? `Age ${result.computed_age} — under 21`
                       : result?.reason || 'Could not read code'}
                   </div>
