@@ -216,11 +216,11 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
     setForm((f) => ({
       ...f,
       full_name: d.full_name || f.full_name,
-      date_of_birth: (d.date_of_birth || "").split("T")[0] || f.date_of_birth,
+      date_of_birth: (d.date_of_birth || d.dob || d.birth_date || d.birthday || "").split("T")[0] || f.date_of_birth,
       id_type: normalizeIdType(d.id_type) || "Drivers License",
       id_number: d.id_number || f.id_number,
       id_state: (d.id_state || d.state || f.id_state || "").toUpperCase().slice(0, 2),
-      id_expiration: (d.id_expiration || "").split("T")[0] || f.id_expiration,
+      id_expiration: (d.id_expiration || d.expiration_date || d.expiry_date || d.license_expiration || "").split("T")[0] || f.id_expiration,
       address_line1: d.address_line1 || f.address_line1,
       city: d.city || f.city,
       state: (d.state || d.id_state || f.state || "").toUpperCase().slice(0, 2),
