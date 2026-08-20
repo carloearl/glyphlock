@@ -62,6 +62,21 @@ export default function UnifiedSearch() {
     queryFn: () => base44.entities.Entertainer.list("-created_date", 500),
     ...COMMON_OPTS,
   });
+  const { data: guestProfiles = [], isLoading: l10 } = useQuery({
+    queryKey: ["search-guest-profiles", venueId],
+    queryFn: () => base44.entities.GuestProfile.filter(venueFilter, "-last_visit_at", 2000),
+    ...COMMON_OPTS,
+  });
+  const { data: driverProfiles = [], isLoading: l11 } = useQuery({
+    queryKey: ["search-driver-profiles", venueId],
+    queryFn: () => base44.entities.DriverProfile.filter(venueFilter, "-last_active_at", 1000),
+    ...COMMON_OPTS,
+  });
+  const { data: staffApplications = [], isLoading: l12 } = useQuery({
+    queryKey: ["search-staff-applications", venueId],
+    queryFn: () => base44.entities.StaffApplication.filter(venueFilter, "-created_date", 1000),
+    ...COMMON_OPTS,
+  });
   const { data: gbOrders = [], isLoading: l5 } = useQuery({
     queryKey: ["search-gb-orders", venueId],
     queryFn: () => base44.entities.GlyphBucksOrder.filter(venueFilter, "-created_date", 1000),
@@ -89,7 +104,7 @@ export default function UnifiedSearch() {
     enabled: authChecked && isAdmin,
   });
 
-  const loadingAny = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || (isAdmin && l9);
+  const loadingAny = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l10 || l11 || l12 || (isAdmin && l9);
 
   const results = useMemo(
     () =>
@@ -99,7 +114,10 @@ export default function UnifiedSearch() {
           driverPayouts,
           settlements,
           customers,
+          guestProfiles,
           entertainers,
+          driverProfiles,
+          staffApplications,
           gbOrders,
           gbBills,
           contracts,
@@ -113,7 +131,10 @@ export default function UnifiedSearch() {
       driverPayouts,
       settlements,
       customers,
+      guestProfiles,
       entertainers,
+      driverProfiles,
+      staffApplications,
       gbOrders,
       gbBills,
       contracts,
@@ -128,7 +149,10 @@ export default function UnifiedSearch() {
     driverPayouts.length +
     settlements.length +
     customers.length +
+    guestProfiles.length +
     entertainers.length +
+    driverProfiles.length +
+    staffApplications.length +
     gbOrders.length +
     gbBills.length +
     contracts.length +
@@ -219,7 +243,7 @@ export default function UnifiedSearch() {
               <SearchIcon className="w-12 h-12 text-gray-700 mx-auto mb-3" />
               <p className="text-sm text-gray-500">Type 2+ characters to search…</p>
               <p className="text-[11px] text-gray-700 mt-2">
-                Try: a driver's name, an order number, a date (2026-06-10), a serial, an email
+                Search guest, entertainer, driver, staff, or manager by name, email, employee number, profile ID, or license last four
               </p>
             </div>
           ) : loadingAny ? (
