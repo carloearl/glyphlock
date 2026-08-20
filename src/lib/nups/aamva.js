@@ -80,14 +80,15 @@ function extractElements(raw) {
 
 /** MMDDCCYY (US) or CCYYMMDD (Canada) → YYYY-MM-DD */
 function parseAamvaDate(value) {
-  if (!/^\d{8}$/.test(value || "")) return "";
-  const a = value.slice(0, 4);
-  const b = value.slice(4, 8);
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 8);
+  if (!/^\d{8}$/.test(digits)) return "";
+  const a = digits.slice(0, 4);
+  const b = digits.slice(4, 8);
   // A leading 4-digit year in a plausible range means CCYYMMDD.
   if (Number(a) >= 1900 && Number(a) <= 2200) {
-    return `${a}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+    return `${a}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
   }
-  return `${b}-${value.slice(0, 2)}-${value.slice(2, 4)}`;
+  return `${b}-${digits.slice(0, 2)}-${digits.slice(2, 4)}`;
 }
 
 function cleanValue(value) {
@@ -125,7 +126,15 @@ export function parseAAMVA(raw) {
     .replace(/\s+/g, " ")
     .trim();
 
-  const expiry = parseAamvaDate(get("DBA"));
+  // Fixed-width date fallback is intentionally read directly from the raw
+  // payload. Some Ambir/2D scanner profiles remove all separators, and a
+  // neighboring optional AAMVA element can otherwise obscure DBA/DBB.
+  const fixedDate = (code) => {
+    const match = String(raw).match(new RegExp(`${code}[^0-9]{0,3}(\\d{8})`));
+    return match?.[1] || "";
+  };
+  const expiry = parseAamvaDate(get("DBA") || fixedDate("DBA"));
+  const birthDate = parseAamvaDate(get("DBB") || fixedDate("DBB"));
 
   return {
     id_type: "Drivers License",
@@ -136,7 +145,7 @@ export function parseAAMVA(raw) {
     full_name: fullName || undefined,
     first_name: first || undefined,
     last_name: last || undefined,
-    date_of_birth: parseAamvaDate(get("DBB")) || undefined,
+    date_of_birth: birthDate || undefined,
     address_line1: get("DAG") || undefined,
     city: get("DAI") || undefined,
     state: (get("DAJ") || "").toUpperCase() || undefined,
