@@ -1,11 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   DollarSign, Users, DoorOpen, AlertTriangle, ShoppingCart,
-  TrendingUp, FileText, Banknote, CheckCircle, Package
+  TrendingUp, FileText, Banknote, CheckCircle, Package, ClipboardList, Clock3, UserPlus, ArrowRight, ShieldAlert
 } from "lucide-react";
 import AuditFixReport from './AuditFixReport';
 
@@ -21,6 +22,7 @@ export default function NUPSManagerDashboard({
   occupiedRooms: propOccupiedRooms,
   activeGuestsCount: propActiveGuestsCount,
 }) {
+  const navigate = useNavigate();
   const today = new Date().toDateString();
 
   // Only fetch what the parent doesn't provide
@@ -38,7 +40,19 @@ export default function NUPSManagerDashboard({
     queryFn: () => base44.entities.POSZReport.list('-created_date', 5),
   });
 
-  const { data: auditAlerts = [] } = useQuery({
+  const { data: staffApplications = [] } = useQuery({
+    queryKey: ['mgr-staff-applications'],
+    queryFn: () => base44.entities.StaffApplication.list('-created_date', 100),
+    refetchInterval: 30000,
+  });
+
+  const { data: staffShifts = [] } = useQuery({
+    queryKey: ['mgr-staff-shifts'],
+    queryFn: () => base44.entities.StaffShift.list('-created_date', 100),
+    refetchInterval: 30000,
+  });
+
+  const { data: auditAlerts = [] } = useQuery({ 
     queryKey: ['mgr-audit-alerts'],
     queryFn: async () => {
       const all = await base44.entities.SystemAuditLog.list('-created_date', 20);
@@ -92,6 +106,43 @@ export default function NUPSManagerDashboard({
 
   return (
     <div className="p-4 space-y-5 text-white">
+
+      {/* TONIGHT — action-first operating picture */}
+      <div>
+        <div className="flex items-end justify-between mb-3"><div><h2 className="text-xl font-black">Tonight</h2><p className="text-xs text-gray-400">What needs attention before and during service</p></div><span className="text-xs text-gray-500">{new Date().toLocaleString()}</span></div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            ['Clocked in', staffShifts.filter(s => s.status === 'checked_in').length, 'text-green-400'],
+            ['Applications waiting', staffApplications.filter(a => ['SUBMITTED','MANAGER_REVIEW'].includes(a.status)).length, 'text-blue-400'],
+            ['Onboarding blockers', staffApplications.filter(a => !['DRAFT','ACTIVE','REJECTED','WITHDRAWN'].includes(a.status) && (a.completion_percent || 0) < 100).length, 'text-amber-400'],
+            ['Critical alerts', auditAlerts.length + (hasDiscrepancy ? 1 : 0), 'text-red-400'],
+          ].map(([label,value,color]) => <Card key={label} className="bg-gray-900/70 border-gray-700"><CardContent className="p-4"><div className={`text-2xl font-black ${color}`}>{value}</div><div className="text-xs text-gray-400">{label}</div></CardContent></Card>)}
+        </div>
+      </div>
+
+      {/* APPLICATION / ONBOARDING PIPELINE */}
+      <Card className="bg-gray-900/60 border border-purple-500/30">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap justify-between gap-2 items-center mb-3"><h3 className="font-bold flex gap-2 items-center"><ClipboardList className="w-4 h-4 text-purple-400"/>Applications & Onboarding</h3><button onClick={() => navigate('/NUPSOwner?tab=staff')} className="text-xs text-purple-300 hover:text-white">Open staff workspace <ArrowRight className="inline w-3 h-3"/></button></div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            {[
+              ['New', staffApplications.filter(a=>['DRAFT','SUBMITTED'].includes(a.status)).length],
+              ['Review', staffApplications.filter(a=>['MANAGER_REVIEW','NEEDS_INFORMATION'].includes(a.status)).length],
+              ['Forms', staffApplications.filter(a=>['CONDITIONALLY_APPROVED','EMPLOYEE_FORMS','IDENTITY_REVIEW'].includes(a.status)).length],
+              ['Policies/training', staffApplications.filter(a=>['POLICIES_TRAINING','FINAL_REVIEW'].includes(a.status)).length],
+              ['Active', staffApplications.filter(a=>a.status==='ACTIVE').length],
+            ].map(([label,value])=><div key={label} className="bg-black/40 rounded p-3"><div className="text-xl font-bold">{value}</div><div className="text-[11px] text-gray-400">{label}</div></div>)}
+          </div>
+          <div className="mt-3 space-y-1">{staffApplications.filter(a=>!['ACTIVE','REJECTED','WITHDRAWN'].includes(a.status)).slice(0,4).map(a=><div key={a.id} className="flex justify-between bg-gray-800/50 rounded px-3 py-2 text-xs"><span className="text-white">{a.full_legal_name || 'Unnamed draft'} · {a.position || 'position pending'}</span><span className={(a.completion_percent||0)<100?'text-amber-300':'text-green-300'}>{a.status} · {a.completion_percent||0}%</span></div>)}</div>
+        </CardContent>
+      </Card>
+
+      {/* QUICK ACTIONS */}
+      <div className="grid sm:grid-cols-3 gap-2">
+        <Button onClick={()=>navigate('/NUPSOwner?tab=staff')} className="bg-purple-700 min-h-12"><UserPlus className="w-4 h-4 mr-2"/>Start employee application</Button>
+        <Button onClick={()=>navigate('/ManagerConsole')} variant="outline" className="border-green-600 text-green-300 min-h-12"><Clock3 className="w-4 h-4 mr-2"/>Review live staff</Button>
+        <Button onClick={()=>navigate('/NUPSOwner?tab=audit')} variant="outline" className="border-amber-600 text-amber-300 min-h-12"><ShieldAlert className="w-4 h-4 mr-2"/>Review approvals & alerts</Button>
+      </div>
 
       {/* AUDIT FIX REPORT */}
       <AuditFixReport issues={auditIssues} />
