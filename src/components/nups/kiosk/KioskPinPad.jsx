@@ -27,6 +27,10 @@ export default function KioskPinPad({ mode, onSuccess }) {
   const [serverLocked, setServerLocked] = useState(false);
   const [shuffleKey, setShuffleKey] = useState(0);
   const [clock, setClock] = useState(Date.now());
+  const [temporaryPin, setTemporaryPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [pinChangeRequired, setPinChangeRequired] = useState(false);
 
   const [showManagerUnlock, setShowManagerUnlock] = useState(false);
   const [managerPin, setManagerPin] = useState("");
@@ -94,11 +98,31 @@ export default function KioskPinPad({ mode, onSuccess }) {
         onSuccess(data);
         return;
       }
+      if (data?.code === "PIN_CHANGE_REQUIRED") {
+        setTemporaryPin(pin);
+        setPin("");
+        setPinChangeRequired(true);
+        setError("");
+        return;
+      }
       const isServerLock = data?.code === "TERMINAL_LOCKED" || cause?.response?.status === 429;
       failAttempt(data?.error, isServerLock);
     } finally {
       setBusy(false);
     }
+  };
+
+  const changeTemporaryPin = async () => {
+    if (busy || !/^\\d{4,6}$/.test(newPin) || newPin !== confirmPin || newPin === temporaryPin) {
+      setError("Choose a different 4–6 digit PIN and enter it twice."); return;
+    }
+    setBusy(true); setError("");
+    try {
+      const response = await base44.functions.invoke("nupsClockIn", { action:"changeTemporaryPin", current_pin:temporaryPin, new_pin:newPin, terminal_id:terminalId });
+      if (!response?.data?.success) throw new Error("PIN change failed.");
+      setPinChangeRequired(false); setTemporaryPin(""); setNewPin(""); setConfirmPin(""); setError("PIN changed. Enter your new PIN to clock in.");
+    } catch (cause) { setError(responseData(cause)?.error || cause.message || "PIN change failed."); }
+    finally { setBusy(false); }
   };
 
   const unlockTerminal = async () => {
@@ -132,7 +156,16 @@ export default function KioskPinPad({ mode, onSuccess }) {
 
   return (
     <div className="mx-auto w-full max-w-xs">
-      {!showManagerUnlock ? (
+      {pinChangeRequired ? (
+        <section className="rounded-2xl border border-amber-400/40 bg-amber-950/20 p-4">
+          <h3 className="font-black text-white">Change temporary PIN</h3>
+          <p className="mt-1 text-xs text-amber-200">Your first clock-in is blocked until you choose a private PIN.</p>
+          <input type="password" inputMode="numeric" maxLength={6} value={newPin} onChange={e=>setNewPin(e.target.value.replace(/\\D/g,""))} placeholder="New 4–6 digit PIN" className="mt-4 w-full rounded-xl border border-slate-700 bg-black p-3 text-white"/>
+          <input type="password" inputMode="numeric" maxLength={6} value={confirmPin} onChange={e=>setConfirmPin(e.target.value.replace(/\\D/g,""))} placeholder="Confirm new PIN" className="mt-2 w-full rounded-xl border border-slate-700 bg-black p-3 text-white"/>
+          {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
+          <button type="button" disabled={busy} onClick={changeTemporaryPin} className="mt-3 min-h-12 w-full rounded-xl bg-amber-500 font-black text-black disabled:opacity-50">{busy?"Changing…":"Change PIN"}</button>
+        </section>
+      ) : !showManagerUnlock ? (
         <>
           <SecureNumericKeypad
             value={pin}
