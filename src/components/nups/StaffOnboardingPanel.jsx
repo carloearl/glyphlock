@@ -1,302 +1,62 @@
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users, Eye, EyeOff, Pencil, Check, X, ToggleLeft, ToggleRight } from "lucide-react";
-import { writeIdentityRecord, snapshotPersonAudited } from "@/lib/nups/identityWrites";
+import { CheckCircle2, ClipboardList, Clock3, KeyRound, ShieldAlert, UserPlus, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { DEFAULT_VENUE_ID } from "@/lib/venueDefaults";
 
-const ROLES = [
-  "VENUE_MANAGER", "BARTENDER", "FLOOR_HOST", "SECURITY", "DJ", "HOSTESS", "DOOR_GIRL", "DOORMAN", "DRIVER"
-];
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const POSITIONS=["manager","bartender","floor host","hostess","door girl","doorman","driver","security","dj"];
+const POLICY_KEYS=["code_of_conduct","employee_handbook","anti_harassment","cash_handling","safety","confidentiality"];
+const empty={application_type:"W2_EMPLOYEE",venue_id:DEFAULT_VENUE_ID,status:"DRAFT",current_step:1,completion_percent:0,full_legal_name:"",preferred_name:"",email:"",phone:"",date_of_birth:"",address:"",position:"",employment_type:"PART_TIME",desired_start_date:"",availability:{},eligibility_attested:false,information_certified:false,background_consent:false,employee_forms:{w4_status:"PENDING",a4_status:"PENDING",i9_status:"PENDING",direct_deposit_status:"PENDING"},identity_reviewed:false,policies:Object.fromEntries(POLICY_KEYS.map(k=>[k,false])),policy_version:"2026-08-20",scroll_completed:false,typed_legal_name:"",signature_data:"",training_complete:false,manager_decision:""};
 
-import { DEFAULT_VENUE_ID, DEFAULT_VENUE_NAME, resolveVenueId } from "@/lib/venueDefaults";
+function gateList(a){
+ const f=a.employee_forms||{}, p=a.policies||{}; return [
+  ["Application",!!(a.full_legal_name&&a.email&&a.phone&&a.date_of_birth&&a.address&&a.position&&a.employment_type&&Object.keys(a.availability||{}).length)],
+  ["Attestations",!!(a.eligibility_attested&&a.information_certified&&a.background_consent)],
+  ["W-4 / A-4 / I-9",f.w4_status==="COMPLETE"&&f.a4_status==="COMPLETE"&&f.i9_status==="COMPLETE"],
+  ["Identity review",a.identity_reviewed===true],["Policies",Object.values(p).length>=6&&Object.values(p).every(Boolean)],
+  ["Scroll + signature",!!(a.scroll_completed&&a.typed_legal_name&&a.signature_data&&a.signature_captured_at)],
+  ["Training",a.training_complete===true],["Manager approval",a.manager_decision==="APPROVED"]
+ ];}
 
-const EMPTY_FORM = { display_name: "", username: "", pin: "", role: "FLOOR_HOST", venue_id: DEFAULT_VENUE_ID };
+function SignaturePad({value,onChange}){
+ const ref=useRef(null), drawing=useRef(false);
+ useEffect(()=>{const c=ref.current;if(!c||!value)return;const i=new Image();i.onload=()=>c.getContext("2d").drawImage(i,0,0,c.width,c.height);i.src=value;},[]);
+ const point=e=>{const r=ref.current.getBoundingClientRect(),t=e.touches?.[0]||e;return{x:(t.clientX-r.left)*(ref.current.width/r.width),y:(t.clientY-r.top)*(ref.current.height/r.height)}};
+ const start=e=>{drawing.current=true;const p=point(e),x=ref.current.getContext("2d");x.beginPath();x.moveTo(p.x,p.y);};
+ const move=e=>{if(!drawing.current)return;e.preventDefault();const p=point(e),x=ref.current.getContext("2d");x.strokeStyle="#e9d5ff";x.lineWidth=3;x.lineCap="round";x.lineTo(p.x,p.y);x.stroke();};
+ const end=()=>{if(!drawing.current)return;drawing.current=false;onChange(ref.current.toDataURL("image/png"));};
+ return <div><canvas ref={ref} width="720" height="150" onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end} onTouchStart={start} onTouchMove={move} onTouchEnd={end} className="w-full h-28 bg-black border border-gray-600 rounded touch-none"/><Button type="button" size="sm" variant="ghost" onClick={()=>{ref.current.getContext("2d").clearRect(0,0,720,150);onChange("");}} className="text-gray-400">Clear signature</Button></div>;
+}
 
-export default function StaffOnboardingPanel() {
-  const qc = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [showPin, setShowPin] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [editPin, setEditPin] = useState("");
-  const [showEditPin, setShowEditPin] = useState(false);
-
-  const { data: staffList = [], isLoading } = useQuery({
-    queryKey: ["nups-users"],
-    queryFn: () => base44.entities.NUPSUser.list("-created_date", 100),
-  });
-
-  // Server-side PIN provisioning — DACO-NUPS-RBAC-CORRECTION §2: PINs are
-  // PBKDF2-hashed with a server pepper via nupsClockIn adminSetPin. A raw
-  // `pin` field on the record is NEVER read by clock-in, so writing it
-  // client-side would produce accounts that can never authenticate.
-  const provisionPin = async (nupsUserId, pin) => {
-    const clean = String(pin || "").trim();
-    if (!/^\d{4,6}$/.test(clean)) throw new Error("PIN must be 4–6 digits.");
-    try {
-      const res = await base44.functions.invoke("nupsClockIn", {
-        action: "adminSetPin", nups_user_id: nupsUserId, pin: clean,
-      });
-      if (res.data?.error) throw new Error(res.data.error);
-    } catch (e) {
-      throw new Error(e?.response?.data?.error || e.message || "PIN provisioning failed.");
-    }
-  };
-
-  const createStaff = useMutation({
-    mutationFn: async (data) => {
-      const { pin, ...rest } = data;
-      const payload = {
-        ...rest,
-        // Always route live-system onboards to Dream Palace DB when no venue is specified
-        venue_id: resolveVenueId(data.venue_id),
-        full_name: data.display_name || data.username,
-        status: "active",
-        created_by_manager: true,
-      };
-      // Step 1 (ARCH-BASELINE-01) — identity writes route through the audit gateway.
-      const result = await writeIdentityRecord({
-        entity: "NUPSUser",
-        operation: "create",
-        data: payload,
-        venueId: payload.venue_id,
-        intent: "staff_onboarding:create",
-      });
-      await provisionPin(result.id, pin);
-      // Permanent archive snapshot (also gateway-audited)
-      await snapshotPersonAudited({ type: "staff", event: "created", record: result });
-      return result;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries(["nups-users"]);
-      setForm(EMPTY_FORM);
-      setShowForm(false);
-      toast.success("Staff account created — PIN is live for clock-in.");
-    },
-    onError: (e) => toast.error(e.message),
-  });
-
-  const changePin = useMutation({
-    mutationFn: async ({ id, pin }) => {
-      await provisionPin(id, pin);
-      return id;
-    },
-    onSuccess: () => {
-      setEditingId(null);
-      setEditPin("");
-      toast.success("PIN updated.");
-    },
-    onError: (e) => toast.error(e.message),
-  });
-
-  const updateStaff = useMutation({
-    mutationFn: async ({ id, data }) => {
-      const result = await writeIdentityRecord({
-        entity: "NUPSUser",
-        operation: "update",
-        id,
-        data,
-        intent: "staff_onboarding:update",
-      });
-      const eventType = "status" in data ? "status_change" : "updated";
-      await snapshotPersonAudited({ type: "staff", event: eventType, record: result });
-      return result;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries(["nups-users"]);
-      setEditingId(null);
-      setEditPin("");
-    },
-    onError: (e) => toast.error(e.message || "Update failed."),
-  });
-
-  const roleColor = (role) => {
-    const map = {
-      VENUE_MANAGER: "bg-purple-500/20 text-purple-300 border-purple-500/40",
-      BARTENDER: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
-      SECURITY: "bg-red-500/20 text-red-300 border-red-500/40",
-      DJ: "bg-pink-500/20 text-pink-300 border-pink-500/40",
-      FLOOR_HOST: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
-      HOSTESS: "bg-green-500/20 text-green-300 border-green-500/40",
-      DOOR_GIRL: "bg-orange-500/20 text-orange-300 border-orange-500/40",
-    };
-    return map[role] || "bg-gray-500/20 text-gray-300 border-gray-500/40";
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Users className="w-5 h-5 text-purple-400" />
-          <h3 className="text-white font-bold text-lg">Staff Onboarding & PINs</h3>
-        </div>
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-purple-600 hover:bg-purple-700 text-white"
-          size="sm"
-        >
-          <UserPlus className="w-4 h-4 mr-2" />
-          Add Staff Member
-        </Button>
-      </div>
-
-      {/* Create Form */}
-      {showForm && (
-        <Card className="bg-gray-900/80 border-purple-500/40">
-          <CardHeader><CardTitle className="text-white text-base">New Staff Account</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Display Name</label>
-                <Input
-                  placeholder="e.g. Jessica"
-                  value={form.display_name}
-                  onChange={e => setForm(v => ({ ...v, display_name: e.target.value }))}
-                  className="bg-black/50 border-gray-700 text-white"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Username (login ID)</label>
-                <Input
-                  placeholder="e.g. jessica.bar"
-                  value={form.username}
-                  onChange={e => setForm(v => ({ ...v, username: e.target.value.toLowerCase().replace(/\s/g, '.') }))}
-                  className="bg-black/50 border-gray-700 text-white"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">PIN / Password</label>
-                <div className="relative">
-                  <Input
-                    type={showPin ? "text" : "password"}
-                    placeholder="4–6 digits"
-                    value={form.pin}
-                    onChange={e => setForm(v => ({ ...v, pin: e.target.value }))}
-                    className="bg-black/50 border-gray-700 text-white pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPin(p => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
-                  >{showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Role</label>
-                <select
-                  value={form.role}
-                  onChange={e => setForm(v => ({ ...v, role: e.target.value }))}
-                  className="w-full bg-black/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm"
-                >
-                  {ROLES.map(r => <option key={r} value={r}>{r.replace(/_/g, ' ')}</option>)}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block flex items-center gap-2">
-                Venue ID
-                <span className="text-[10px] text-purple-400 font-semibold uppercase tracking-wide">
-                  Default: {DEFAULT_VENUE_NAME}
-                </span>
-              </label>
-              <Input
-                placeholder={DEFAULT_VENUE_ID}
-                value={form.venue_id}
-                onChange={e => setForm(v => ({ ...v, venue_id: e.target.value }))}
-                className="bg-black/50 border-gray-700 text-white"
-              />
-              <p className="text-[10px] text-gray-500 mt-1">
-                Leave as <code className="text-purple-300">{DEFAULT_VENUE_ID}</code> to save to the Dream Palace DB.
-              </p>
-            </div>
-            <div className="flex gap-2 pt-1">
-              <Button
-                onClick={() => createStaff.mutate(form)}
-                disabled={!form.username || !form.pin || !form.display_name || createStaff.isPending}
-                className="bg-green-700 hover:bg-green-600 text-white"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                {createStaff.isPending ? "Creating..." : "Create Account"}
-              </Button>
-              <Button variant="outline" onClick={() => setShowForm(false)} className="border-gray-700 text-gray-400">
-                <X className="w-4 h-4 mr-2" /> Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Staff List */}
-      <Card className="bg-gray-900/60 border-gray-700/50">
-        <CardContent className="p-4">
-          {isLoading && <p className="text-gray-500 text-sm">Loading staff...</p>}
-          {!isLoading && staffList.length === 0 && (
-            <p className="text-gray-600 text-sm text-center py-6">No staff accounts yet. Add one above.</p>
-          )}
-          <div className="space-y-2">
-            {staffList.map(staff => (
-              <div key={staff.id} className="flex items-center justify-between bg-gray-800/50 rounded-lg px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-semibold text-sm">{staff.display_name || staff.username}</span>
-                      <Badge className={`text-[10px] ${roleColor(staff.role)}`}>{staff.role?.replace(/_/g, ' ')}</Badge>
-                      {staff.status !== "active" && <Badge className="bg-red-500/20 text-red-400 border-red-500/40 text-[10px]">{staff.status === "terminated" ? "Terminated" : "Suspended"}</Badge>}
-                      {!staff.pin_lookup && <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-[10px]">No PIN</Badge>}
-                    </div>
-                    <p className="text-xs text-gray-500">@{staff.username}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {editingId === staff.id ? (
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <Input
-                          type={showEditPin ? "text" : "password"}
-                          placeholder="New PIN"
-                          value={editPin}
-                          onChange={e => setEditPin(e.target.value)}
-                          className="bg-black/50 border-gray-700 text-white text-sm w-28 pr-8"
-                        />
-                        <button type="button" onClick={() => setShowEditPin(p => !p)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">
-                          {showEditPin ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                        </button>
-                      </div>
-                      <Button size="sm" onClick={() => changePin.mutate({ id: staff.id, pin: editPin })}
-                        disabled={!editPin || changePin.isPending} className="bg-green-700 hover:bg-green-600 text-white h-8 px-2">
-                        <Check className="w-3 h-3" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); setEditPin(""); }}
-                        className="text-gray-500 h-8 px-2"><X className="w-3 h-3" /></Button>
-                    </div>
-                  ) : (
-                    <>
-                      <Button size="sm" variant="ghost" onClick={() => { setEditingId(staff.id); setEditPin(""); }}
-                        className="text-gray-400 hover:text-white h-8 px-2" title="Change PIN">
-                        <Pencil className="w-3 h-3" />
-                      </Button>
-                      {/* status (not is_active) is what the clock-in backend enforces */}
-                      <Button size="sm" variant="ghost"
-                        onClick={() => updateStaff.mutate({ id: staff.id, data: { status: staff.status === "active" ? "suspended" : "active" } })}
-                        className={`h-8 px-2 ${staff.status === "active" ? 'text-green-400 hover:text-red-400' : 'text-gray-600 hover:text-green-400'}`}
-                        title={staff.status === "active" ? "Suspend (blocks clock-in immediately)" : "Reactivate"}>
-                        {staff.status === "active" ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+export default function StaffOnboardingPanel(){
+ const qc=useQueryClient(),[form,setForm]=useState(empty),[open,setOpen]=useState(false),[selected,setSelected]=useState(null),[issued,setIssued]=useState(null);
+ const {data:apps=[]}=useQuery({queryKey:["staff-applications"],queryFn:()=>base44.entities.StaffApplication.list("-created_date",100)});
+ const save=useMutation({mutationFn:async data=>{const gates=gateList(data),pct=Math.round(gates.filter(x=>x[1]).length/gates.length*100);const payload={...data,completion_percent:pct,status:data.id?data.status:"DRAFT"};return data.id?base44.entities.StaffApplication.update(data.id,payload):base44.entities.StaffApplication.create(payload);},onSuccess:r=>{qc.invalidateQueries({queryKey:["staff-applications"]});setSelected(r);setForm(r);toast.success("Application saved.");},onError:e=>toast.error(e.message)});
+ const finalize=useMutation({mutationFn:async id=>{const r=await base44.functions.invoke("manageStaffOnboarding",{action:"finalizeActivation",application_id:id});if(r.data?.error)throw new Error(r.data.error+(r.data.blockers?" — "+r.data.blockers.join(", "):""));return r.data;},onSuccess:r=>{setIssued(r);qc.invalidateQueries({queryKey:["staff-applications"]});qc.invalidateQueries({queryKey:["nups-users"]});toast.success("Employee activated. Temporary PIN shown once.");},onError:e=>toast.error(e.message)});
+ const set=(k,v)=>setForm(x=>({...x,[k]:v}));
+ const submit=()=>{const g=gateList(form);save.mutate({...form,status:g.slice(0,2).every(x=>x[1])?"SUBMITTED":"DRAFT",current_step:g.findIndex(x=>!x[1])+1});};
+ const choose=a=>{setSelected(a);setForm({...empty,...a,availability:a.availability||{},employee_forms:{...empty.employee_forms,...(a.employee_forms||{})},policies:{...empty.policies,...(a.policies||{})}});setOpen(true);setIssued(null);};
+ const gates=gateList(form),ready=gates.every(x=>x[1]);
+ return <div className="space-y-4">
+  <div className="flex flex-wrap justify-between gap-3 items-center"><div><h3 className="text-white font-bold text-lg flex gap-2 items-center"><ClipboardList className="w-5 h-5 text-purple-400"/>Employee Applications & Onboarding</h3><p className="text-xs text-gray-400">W-2 employees only. Entertainers and other contractors stay in the separate 1099 workflow.</p></div><Button onClick={()=>{setForm(empty);setSelected(null);setOpen(true);setIssued(null);}} className="bg-purple-600"><UserPlus className="w-4 h-4 mr-2"/>New application</Button></div>
+  <div className="grid sm:grid-cols-4 gap-3">{[["Draft",apps.filter(a=>a.status==="DRAFT").length],["Review",apps.filter(a=>["SUBMITTED","MANAGER_REVIEW","NEEDS_INFORMATION"].includes(a.status)).length],["Onboarding",apps.filter(a=>["CONDITIONALLY_APPROVED","EMPLOYEE_FORMS","IDENTITY_REVIEW","POLICIES_TRAINING","FINAL_REVIEW"].includes(a.status)).length],["Active",apps.filter(a=>a.status==="ACTIVE").length]].map(([l,n])=><Card key={l} className="bg-gray-900 border-gray-700"><CardContent className="p-3"><div className="text-2xl font-bold text-white">{n}</div><div className="text-xs text-gray-400">{l}</div></CardContent></Card>)}</div>
+  <Card className="bg-gray-900/60 border-gray-700"><CardContent className="p-3 space-y-2">{apps.length===0?<p className="text-sm text-gray-500 py-4 text-center">No employee applications yet.</p>:apps.map(a=><button key={a.id} onClick={()=>choose(a)} className="w-full text-left bg-gray-800/60 hover:bg-gray-800 rounded p-3 flex justify-between gap-3"><div><div className="text-sm font-semibold text-white">{a.full_legal_name||"Unnamed draft"}</div><div className="text-xs text-gray-400">{a.position||"Position pending"} · {a.email||"Email pending"}</div></div><div className="text-right"><Badge className="bg-purple-500/15 text-purple-300">{a.status}</Badge><div className="text-xs text-gray-500 mt-1">{a.completion_percent||0}% complete</div></div></button>)}</CardContent></Card>
+  {open&&<Card className="bg-gray-950 border-purple-500/40"><CardHeader><CardTitle className="text-white flex justify-between">Guided W-2 Onboarding <Button variant="ghost" onClick={()=>setOpen(false)}>×</Button></CardTitle></CardHeader><CardContent className="space-y-6">
+   <section><h4 className="text-purple-300 font-bold mb-2">1. Personal information</h4><div className="grid md:grid-cols-2 gap-2">{[["full_legal_name","Full legal name"],["preferred_name","Preferred name"],["email","Email address"],["phone","Phone"],["date_of_birth","Date of birth","date"],["address","Home address"]].map(([k,p,t])=><Input key={k} type={t||"text"} placeholder={p} value={form[k]||""} onChange={e=>set(k,e.target.value)} className="bg-black border-gray-700 text-white"/>)}</div></section>
+   <section><h4 className="text-purple-300 font-bold mb-2">2. Position & availability</h4><div className="grid md:grid-cols-3 gap-2"><select value={form.position} onChange={e=>set("position",e.target.value)} className="bg-black border border-gray-700 rounded px-3 text-white"><option value="">Select position</option>{POSITIONS.map(x=><option key={x}>{x}</option>)}</select><select value={form.employment_type} onChange={e=>set("employment_type",e.target.value)} className="bg-black border border-gray-700 rounded px-3 text-white"><option>FULL_TIME</option><option>PART_TIME</option><option>ON_CALL</option><option>SEASONAL</option></select><Input type="date" value={form.desired_start_date||""} onChange={e=>set("desired_start_date",e.target.value)} className="bg-black border-gray-700 text-white"/></div><div className="grid grid-cols-2 md:grid-cols-7 gap-2 mt-2">{DAYS.map(d=><label key={d} className="text-xs text-gray-300 border border-gray-700 rounded p-2"><input type="checkbox" checked={!!form.availability?.[d]} onChange={e=>set("availability",{...(form.availability||{}),[d]:e.target.checked})}/> {d}</label>)}</div></section>
+   <section><h4 className="text-purple-300 font-bold mb-2">3. Attestations</h4>{[["eligibility_attested","I attest I am eligible to work and will complete official employment verification."],["information_certified","I certify this application is accurate."],["background_consent","I authorize lawful job-related reference/background checks."]].map(([k,l])=><label key={k} className="block text-sm text-gray-300 py-1"><input type="checkbox" checked={!!form[k]} onChange={e=>set(k,e.target.checked)}/> {l}</label>)}</section>
+   <section><h4 className="text-purple-300 font-bold mb-2">4. Official employee forms</h4><p className="text-xs text-amber-300 mb-2">Store completion status and provider references only—never SSN, bank numbers, or raw tax fields in NUPS.</p><div className="grid md:grid-cols-4 gap-2">{[["w4_status","Federal W-4"],["a4_status","Arizona A-4"],["i9_status","Form I-9"],["direct_deposit_status","Direct deposit"]].map(([k,l])=><label key={k} className="text-xs text-gray-300">{l}<select value={form.employee_forms?.[k]||"PENDING"} onChange={e=>set("employee_forms",{...form.employee_forms,[k]:e.target.value})} className="w-full bg-black border border-gray-700 rounded p-2 mt-1 text-white"><option>PENDING</option><option>COMPLETE</option><option>DECLINED</option></select></label>)}</div><label className="block text-sm text-gray-300 mt-2"><input type="checkbox" checked={!!form.identity_reviewed} onChange={e=>set("identity_reviewed",e.target.checked)}/> Authorized manager physically reviewed I-9 identity/work-authorization documents.</label></section>
+   <section><h4 className="text-purple-300 font-bold mb-2">5. Code of conduct, policies & clickwrap</h4><div onScroll={e=>{const x=e.currentTarget;if(x.scrollTop+x.clientHeight>=x.scrollHeight-8&&!form.scroll_completed)setForm(v=>({...v,scroll_completed:true,scroll_completed_at:new Date().toISOString()}));}} className="h-40 overflow-auto bg-black border border-gray-700 rounded p-3 text-xs text-gray-300 space-y-3"><p className="font-bold text-white">NUPS Staff Code of Conduct — version {form.policy_version}</p><p>Employees must act lawfully, professionally, safely, and respectfully; prevent harassment and discrimination; protect guest and business information; follow cash-handling and access-control rules; report incidents promptly; and never share credentials.</p><p>Alcohol service, security, privacy, timekeeping, anti-retaliation, emergency response, workplace safety, and venue-specific procedures apply. Staff must clock only their own time and may access only the workspace authorized for their role.</p><p>Violation may result in removal from duty or discipline consistent with applicable policy and law. Questions must be raised with management before accepting.</p><p className="py-16 text-center text-gray-500">Continue scrolling to review the entire clickwrap.</p><p className="font-bold text-green-300">End of agreement.</p></div><div className="text-xs mt-1">{form.scroll_completed?<span className="text-green-400">✓ Scroll requirement complete</span>:<span className="text-amber-300">Scroll to the end to unlock acceptance.</span>}</div><div className="grid md:grid-cols-2 gap-2 mt-2">{POLICY_KEYS.map(k=><label key={k} className="text-xs text-gray-300"><input disabled={!form.scroll_completed} type="checkbox" checked={!!form.policies?.[k]} onChange={e=>set("policies",{...form.policies,[k]:e.target.checked})}/> {k.replaceAll("_"," ")}</label>)}</div><Input placeholder="Type full legal name" value={form.typed_legal_name||""} onChange={e=>set("typed_legal_name",e.target.value)} disabled={!form.scroll_completed} className="bg-black border-gray-700 text-white mt-3"/><SignaturePad value={form.signature_data} onChange={v=>setForm(x=>({...x,signature_data:v,signature_captured_at:v?new Date().toISOString():""}))}/></section>
+   <section><h4 className="text-purple-300 font-bold mb-2">6. Training & manager approval</h4><label className="block text-sm text-gray-300"><input type="checkbox" checked={!!form.training_complete} onChange={e=>set("training_complete",e.target.checked)}/> Required role, safety, POS/access, and timeclock training completed.</label><select value={form.manager_decision||""} onChange={e=>set("manager_decision",e.target.value)} className="mt-2 bg-black border border-gray-700 rounded p-2 text-white"><option value="">Manager decision pending</option><option value="APPROVED">APPROVED</option><option value="NEEDS_INFORMATION">NEEDS INFORMATION</option><option value="REJECTED">REJECTED</option></select></section>
+   <div className="grid md:grid-cols-4 gap-2">{gates.map(([l,ok])=><div key={l} className={"rounded border p-2 text-xs "+(ok?"border-green-600/40 text-green-300":"border-red-600/40 text-red-300")}>{ok?<CheckCircle2 className="inline w-3 h-3 mr-1"/>:<XCircle className="inline w-3 h-3 mr-1"/>}{l}</div>)}</div>
+   {issued&&<div className="border border-amber-400 bg-amber-950/30 rounded p-4"><div className="font-bold text-amber-200">Display once — give directly to employee</div><div className="text-white text-xl mt-2">Employee #: <b>{issued.employee_number}</b> · Temporary PIN: <b className="font-mono">{issued.temporary_pin}</b></div><div className="text-xs text-amber-200 mt-1">The PIN must be changed before the first clock-in. It will not be shown again.</div></div>}
+   <div className="flex flex-wrap gap-2"><Button onClick={submit} disabled={save.isPending} className="bg-blue-700">{save.isPending?"Saving…":selected?"Save progress":"Create application"}</Button>{selected&&selected.id&&<Button onClick={()=>finalize.mutate(selected.id)} disabled={!ready||finalize.isPending||selected.status==="ACTIVE"} className="bg-green-700"><KeyRound className="w-4 h-4 mr-2"/>{finalize.isPending?"Issuing…":"Final approve & issue credentials"}</Button>} {!ready&&<span className="text-xs text-amber-300 self-center"><ShieldAlert className="inline w-4 h-4 mr-1"/>Activation remains blocked until every gate is green.</span>}</div>
+  </CardContent></Card>}
+ </div>;
 }
