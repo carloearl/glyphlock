@@ -22,10 +22,30 @@ export default function MemberCheckInAutofill({ onPick, venueId }) {
     setLoading(true);
     setError("");
     try {
-      const list = venueId
-        ? await base44.entities.VIPGuest.filter({ venue_id: venueId }, "-last_visit", 25)
-        : await base44.entities.VIPGuest.list("-last_visit", 25);
-      setGuests(list || []);
+      const [legacyGuests, scannedProfiles] = await Promise.all([
+        venueId
+          ? base44.entities.VIPGuest.filter({ venue_id: venueId }, "-last_visit", 25).catch(() => [])
+          : base44.entities.VIPGuest.list("-last_visit", 25).catch(() => []),
+        venueId
+          ? base44.entities.GuestProfile.filter({ venue_id: venueId }, "-last_visit_at", 25).catch(() => [])
+          : base44.entities.GuestProfile.list("-last_visit_at", 25).catch(() => []),
+      ]);
+      const profiles = (scannedProfiles || []).map((g) => ({
+        ...g,
+        full_name: [g.first_name, g.last_name].filter(Boolean).join(" "),
+        date_of_birth: g.dob,
+        id_state: g.license_state,
+        id_number: g.license_last4,
+        id_scan_ref: `IDS-${g.license_state || "XX"}-${g.license_last4 || "0000"}`,
+        id_verified: !!g.age_verified && !g.id_expired,
+        _profile_source: "GUEST_PROFILE",
+      }));
+      const combined = [...profiles, ...(legacyGuests || [])];
+      const unique = combined.filter((g, index, rows) => {
+        const key = g.guest_id || g.id;
+        return rows.findIndex((row) => (row.guest_id || row.id) === key) === index;
+      });
+      setGuests(unique.slice(0, 40));
     } catch (e) {
       setGuests([]);
       setError(e?.message || "Unable to load recent verified guests.");
@@ -36,7 +56,7 @@ export default function MemberCheckInAutofill({ onPick, venueId }) {
 
   const pick = (g) => {
     onPick({
-      identity_source: "VIP_GUEST_PROFILE",
+      identity_source: g._profile_source === "GUEST_PROFILE" ? "ID_SCAN" : "VIP_GUEST_PROFILE",
       identity_profile_ref: g.id || g.guest_id || "",
       purchaser_name: String(g.full_name || "").trim(),
       purchaser_member_id: String(g.guest_id || g.id || "").slice(0, 12).toUpperCase(),
