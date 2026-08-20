@@ -13,8 +13,8 @@
 - Base44 production app: **Glyphlock** (`697a087fb354faebb72df54b`)
 - Status: **Partner Sandbox technical validation complete.** The non-production NUPS application is registered, required server settings are present, Oracle OAuth succeeds, and controlled read-only OHIP requests return successfully.
 - Partner Sandbox hotel: **OHIPSB02** (shared Oracle sandbox; never treat its data as production inventory).
-- OPN status: **verification required**. Do not mark OPN complete until an Oracle PartnerNetwork membership page, approval notice, or membership confirmation explicitly shows GlyphLock LLC as active/approved/member.
-- Oracle Marketplace listing: **pending OPN verification**.
+- OPN status: **approved and active**. Oracle activated GlyphLock LLC’s Level 0 membership on August 19, 2026. OPN Company ID: **4-463913260838**; enrollment: **1654123**; term: **August 19, 2026–August 18, 2027**.
+- Oracle Marketplace listing: **next workstream; not yet approved or published**. OPN activation clears the membership prerequisite but does not itself establish publisher approval, a listing OCID, supplier onboarding, or production access.
 - Production OHIP application/customer environment: **not yet authorized**.
 - Do not attach or copy this subscription into the separate Free Tier account `glyphlockdev`.
 
@@ -95,8 +95,8 @@ Build the lowest-risk proof first:
 
 Partner Sandbox validation proves transport/authentication only; it is not Oracle certification, endorsement, Marketplace approval, or production customer authorization.
 
-1. **Verify Oracle PartnerNetwork membership status.** Do not assume that the OHIP Store order, Cloud subscription, Support account, or OPERA Digital Learning activation proves OPN membership.
-2. Once OPN is explicitly verified, prepare and publish the NUPS Oracle Cloud Marketplace listing under the applicable OHIP/Hospitality category.
+1. **Oracle PartnerNetwork membership verified.** Preserve the August 19, 2026 approval and activation notice as the controlling evidence; the OHIP Store order, Cloud subscription, Support account, and OPERA Digital Learning activation are supporting systems, not the membership proof.
+2. Prepare the NUPS Oracle Cloud Marketplace listing under the applicable OHIP/Hospitality category and complete the publisher-registration workflow. Do not describe the listing as published until Oracle accepts it and issues the listing record or OCID.
 3. Provide the Marketplace listing ID and OPN reference to `hospitality-integrations_ww@oracle.com` when Oracle's process calls for them.
 4. Register a separate **Production** OHIP application and application key.
 5. Add/connect only an authorized OPERA Cloud customer environment after customer approval.
