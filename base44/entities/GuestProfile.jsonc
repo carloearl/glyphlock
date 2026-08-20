@@ -26,6 +26,37 @@
       "type": "string",
       "description": "Issuing state/jurisdiction (e.g. AZ, CA)."
     },
+    "id_type": {
+      "type": "string",
+      "enum": [
+        "drivers_license",
+        "state_id",
+        "passport",
+        "military_id",
+        "tribal_id"
+      ],
+      "default": "drivers_license",
+      "description": "Government credential type. DOB is stored separately in dob."
+    },
+    "last_initial": {
+      "type": "string",
+      "maxLength": 1,
+      "description": "First letter of the legal last name for quick visual verification."
+    },
+    "license_last4": {
+      "type": "string",
+      "maxLength": 4,
+      "description": "Last four characters only; the full license number is never stored."
+    },
+    "id_expiration": {
+      "type": "string",
+      "format": "date",
+      "description": "Credential expiration date in YYYY-MM-DD format."
+    },
+    "id_expired": {
+      "type": "boolean",
+      "default": false
+    },
     "age_verified": {
       "type": "boolean",
       "default": false,
