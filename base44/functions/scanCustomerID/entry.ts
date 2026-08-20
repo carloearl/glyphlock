@@ -111,6 +111,10 @@ Deno.serve(async (req) => {
         city: scan_data.city || '',
         state: scan_data.state || guestProfile.license_state || '',
         zip_code: scan_data.zip_code || '',
+        identity_profile_ref: guestProfile.id || guestProfile.guest_id || guest_id,
+        profile_ref: guestProfile.id || guestProfile.guest_id || guest_id,
+        age_verified: !!guestProfile.age_verified,
+        id_last4: String(scan_data.id_number || '').replace(/\s/g, '').slice(-4).toUpperCase(),
       },
     });
   } catch (error) {
