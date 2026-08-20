@@ -30,6 +30,19 @@
       "type": "string",
       "description": "Legacy authenticated reminder phrase. It is never displayed on the unauthenticated staff kiosk."
     },
+    "pin_must_change": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only for a newly issued temporary PIN. Clock-in is blocked until the employee replaces it through the server-side first-use flow."
+    },
+    "pin_issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pin_changed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "pin_failed_attempts": {
       "type": "number",
       "default": 0,

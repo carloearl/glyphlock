@@ -1,0 +1,274 @@
+{
+  "name": "StaffApplication",
+  "type": "object",
+  "description": "Resumable W-2 staff application and activation gate. Never store SSN, bank data, or raw tax document values.",
+  "properties": {
+    "application_type": {
+      "type": "string",
+      "enum": [
+        "W2_EMPLOYEE",
+        "INDEPENDENT_CONTRACTOR"
+      ],
+      "default": "W2_EMPLOYEE"
+    },
+    "venue_id": {
+      "type": "string",
+      "default": "dream_palace"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "SUBMITTED",
+        "MANAGER_REVIEW",
+        "NEEDS_INFORMATION",
+        "CONDITIONALLY_APPROVED",
+        "EMPLOYEE_FORMS",
+        "IDENTITY_REVIEW",
+        "POLICIES_TRAINING",
+        "FINAL_REVIEW",
+        "ACTIVE",
+        "REJECTED",
+        "WITHDRAWN"
+      ],
+      "default": "DRAFT"
+    },
+    "current_step": {
+      "type": "number",
+      "default": 1
+    },
+    "completion_percent": {
+      "type": "number",
+      "default": 0
+    },
+    "full_legal_name": {
+      "type": "string"
+    },
+    "preferred_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "address": {
+      "type": "string"
+    },
+    "emergency_contact": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "position": {
+      "type": "string"
+    },
+    "employment_type": {
+      "type": "string",
+      "enum": [
+        "FULL_TIME",
+        "PART_TIME",
+        "ON_CALL",
+        "SEASONAL"
+      ]
+    },
+    "desired_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "pay_rate": {
+      "type": "number"
+    },
+    "pay_type": {
+      "type": "string",
+      "enum": [
+        "HOURLY",
+        "SALARY"
+      ]
+    },
+    "availability": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "work_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "eligibility_attested": {
+      "type": "boolean",
+      "default": false
+    },
+    "information_certified": {
+      "type": "boolean",
+      "default": false
+    },
+    "background_consent": {
+      "type": "boolean",
+      "default": false
+    },
+    "employee_forms": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "identity_reviewed": {
+      "type": "boolean",
+      "default": false
+    },
+    "identity_reviewed_by": {
+      "type": "string"
+    },
+    "identity_reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "policy_version": {
+      "type": "string"
+    },
+    "policy_content_hash": {
+      "type": "string"
+    },
+    "scroll_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "scroll_completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "typed_legal_name": {
+      "type": "string"
+    },
+    "signature_data": {
+      "type": "string",
+      "maxLength": 200000
+    },
+    "signature_captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signature_ip": {
+      "type": "string"
+    },
+    "signature_user_agent": {
+      "type": "string"
+    },
+    "training_complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "manager_decision": {
+      "type": "string"
+    },
+    "manager_note": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "final_approved_by": {
+      "type": "string"
+    },
+    "final_approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nups_user_id": {
+      "type": "string"
+    },
+    "employee_number": {
+      "type": "string"
+    },
+    "credentials_issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audit_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "TEST",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    }
+  },
+  "required": [
+    "application_type",
+    "venue_id",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
