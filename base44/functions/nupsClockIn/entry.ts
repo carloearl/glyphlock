@@ -313,7 +313,7 @@ Deno.serve(async (req) => {
       }
       const pin_salt = hex(crypto.getRandomValues(new Uint8Array(16)));
       const pin_hash = await pbkdf2Hex(cleanNew, pin_salt);
-      await E.NUPSUser.update(nups_user_id, { pin_hash, pin_salt, pin_lookup: lookup });
+      await E.NUPSUser.update(nups_user_id, { pin_hash, pin_salt, pin_lookup: lookup, pin_must_change: false, pin_changed_at: now() });
       return Response.json({ success: true });
     }
 
@@ -340,6 +340,24 @@ Deno.serve(async (req) => {
       }
       await E.NUPSUser.update(bound.id, { pin_hint: hint });
       return Response.json({ success: true, hint });
+    }
+
+    // ─── FIRST-USE TEMPORARY PIN CHANGE ─────────────────────────────────────
+    if (action === 'changeTemporaryPin') {
+      if (await throttled()) return Response.json({ error: 'Too many attempts. Ask a manager to unlock this terminal.', code: 'TERMINAL_LOCKED' }, { status: 429 });
+      const currentPin = String(body.current_pin || '').trim();
+      const newPin = String(body.new_pin || '').trim();
+      if (!/^\d{4,6}$/.test(currentPin) || !/^\d{4,6}$/.test(newPin) || currentPin === newPin) return Response.json({ error: 'Enter the temporary PIN and a different 4–6 digit new PIN.' }, { status: 400 });
+      const staff = await resolveUserByPin(currentPin);
+      if (!staff || staff.status !== 'active' || staff.pin_must_change !== true) return genericAuthFailure('temporary_pin_invalid');
+      const lookup = await hmacHex('pin:' + newPin);
+      const clash = (await E.NUPSUser.filter({ pin_lookup: lookup })) || [];
+      if (clash.some(u => u.id !== staff.id && u.status === 'active')) return Response.json({ error: 'PIN already in use — choose another.' }, { status: 409 });
+      const pin_salt = hex(crypto.getRandomValues(new Uint8Array(16)));
+      const pin_hash = await pbkdf2Hex(newPin, pin_salt);
+      await E.NUPSUser.update(staff.id, { pin_hash, pin_salt, pin_lookup: lookup, pin_must_change: false, pin_changed_at: now(), pin_failed_attempts: 0 });
+      await logAttempt('pin_auth', true, 'temporary_pin_changed');
+      return Response.json({ success: true, changed: true });
     }
 
     // ─── PIN CLOCK IN / OUT ──────────────────────────────────────────────────
@@ -402,6 +420,9 @@ Deno.serve(async (req) => {
 
     if (nupsUser.status !== 'active') {
       return genericAuthFailure('account_not_active');
+    }
+    if (nupsUser.pin_must_change === true) {
+      return Response.json({ error: 'Temporary PIN must be changed before clock-in.', code: 'PIN_CHANGE_REQUIRED', pin_change_required: true }, { status: 403 });
     }
     // Email-bound PIN: the account owner must be actively signed in to the
     // platform on this device with the bound email. PIN alone is not enough.
