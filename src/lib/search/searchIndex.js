@@ -21,7 +21,10 @@ export const ENTITY_TYPES = {
   DriverPayout: { label: "Driver Payout", color: "yellow", icon: "Car" },
   DailySettlement: { label: "Settlement", color: "emerald", icon: "Banknote" },
   POSCustomer: { label: "Customer", color: "blue", icon: "User" },
+  GuestProfile: { label: "Guest Profile", color: "blue", icon: "UserCheck" },
   Entertainer: { label: "Entertainer", color: "pink", icon: "Star" },
+  DriverProfile: { label: "Driver Profile", color: "yellow", icon: "Car" },
+  StaffApplication: { label: "Staff / Manager", color: "emerald", icon: "BadgeCheck" },
   GlyphBucksOrder: { label: "GB Order", color: "violet", icon: "Coins" },
   GlyphBucksBill: { label: "GB Bill", color: "violet", icon: "Banknote" },
   VenueContract: { label: "Contract", color: "amber", icon: "ScrollText" },
@@ -141,6 +144,53 @@ function searchCustomers(query, rows) {
   return out;
 }
 
+function searchGuestProfiles(query, rows) {
+  const out = [];
+  for (const r of rows) {
+    const name = [r.first_name, r.last_name].filter(Boolean).join(" ");
+    const score = scoreField(query, name, 1.5) + scoreField(query, r.guest_id, 1.4) +
+      scoreField(query, r.license_last4, 1.2) + scoreField(query, r.last_initial, 0.8) +
+      scoreField(query, r.license_state, 0.5);
+    if (!score) continue;
+    out.push(makeResult({ type: "GuestProfile", id: r.id, title: name || "Guest profile",
+      subtitle: `${r.status || "active"} · ${r.visit_count || 0} visits`,
+      fields: [{ label: "DOB", value: r.dob || "MISSING" }, { label: "ID", value: r.license_last4 ? `•••• ${r.license_last4}` : "MISSING" }, { label: "Expires", value: r.id_expiration || "MISSING" }],
+      deep_link: "/FrontDoor", raw: r, score, ts: r.last_visit_at }));
+  }
+  return out;
+}
+
+function searchDriverProfiles(query, rows) {
+  const out = [];
+  for (const r of rows) {
+    const score = scoreField(query, r.name, 1.5) + scoreField(query, r.driver_id, 1.4) +
+      scoreField(query, r.phone, 1.0) + scoreField(query, r.license_last4, 1.2) +
+      scoreField(query, r.license_state, 0.5);
+    if (!score) continue;
+    out.push(makeResult({ type: "DriverProfile", id: r.id, title: r.name || "Driver profile",
+      subtitle: `${r.driver_id || "ID pending"} · ${r.status || "active"}`,
+      fields: [{ label: "DOB", value: r.date_of_birth || "MISSING" }, { label: "ID", value: r.license_last4 ? `•••• ${r.license_last4}` : "MISSING" }, { label: "Expires", value: r.license_expiration || "MISSING" }],
+      deep_link: "/FrontDoor", raw: r, score, ts: r.last_active_at }));
+  }
+  return out;
+}
+
+function searchStaffApplications(query, rows) {
+  const out = [];
+  for (const r of rows) {
+    const score = scoreField(query, r.full_legal_name, 1.5) + scoreField(query, r.preferred_name, 1.2) +
+      scoreField(query, r.email, 1.4) + scoreField(query, r.phone, 1.0) +
+      scoreField(query, r.employee_number, 1.4) + scoreField(query, r.position, 1.0);
+    if (!score) continue;
+    out.push(makeResult({ type: "StaffApplication", id: r.id,
+      title: r.full_legal_name || r.preferred_name || "Staff application",
+      subtitle: `${r.position || "role pending"} · ${r.status || "DRAFT"}`,
+      fields: [{ label: "Email", value: r.email || "MISSING" }, { label: "DOB", value: r.date_of_birth || "MISSING" }, { label: "Employee #", value: r.employee_number || "NOT ISSUED" }],
+      deep_link: "/ManagerConsole", raw: r, score, ts: r.updated_date || r.created_date }));
+  }
+  return out;
+}
+
 function searchEntertainers(query, rows) {
   const out = [];
   for (const r of rows) {
@@ -149,7 +199,9 @@ function searchEntertainers(query, rows) {
       scoreField(query, r.legal_name, 1.2) +
       scoreField(query, r.email, 1.0) +
       scoreField(query, r.phone, 1.0) +
-      scoreField(query, r.id, 0.8);
+      scoreField(query, r.id, 0.8) +
+      scoreField(query, r.license_number_last4, 1.4) +
+      scoreField(query, r.license_state, 0.7);
     if (score === 0) continue;
     out.push(
       makeResult({
@@ -328,7 +380,10 @@ export function runSearch(query, datasets = {}, { types = null, limit = 50 } = {
     ...(allowed === null || allowed.has("DriverPayout") ? searchDriverPayouts(query, datasets.driverPayouts || []) : []),
     ...(allowed === null || allowed.has("DailySettlement") ? searchSettlements(query, datasets.settlements || []) : []),
     ...(allowed === null || allowed.has("POSCustomer") ? searchCustomers(query, datasets.customers || []) : []),
+    ...(allowed === null || allowed.has("GuestProfile") ? searchGuestProfiles(query, datasets.guestProfiles || []) : []),
     ...(allowed === null || allowed.has("Entertainer") ? searchEntertainers(query, datasets.entertainers || []) : []),
+    ...(allowed === null || allowed.has("DriverProfile") ? searchDriverProfiles(query, datasets.driverProfiles || []) : []),
+    ...(allowed === null || allowed.has("StaffApplication") ? searchStaffApplications(query, datasets.staffApplications || []) : []),
     ...(allowed === null || allowed.has("GlyphBucksOrder") ? searchGBOrders(query, datasets.gbOrders || []) : []),
     ...(allowed === null || allowed.has("GlyphBucksBill") ? searchGBBills(query, datasets.gbBills || []) : []),
     ...(allowed === null || allowed.has("VenueContract") ? searchContracts(query, datasets.contracts || []) : []),
