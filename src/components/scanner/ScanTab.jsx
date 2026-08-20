@@ -6,34 +6,15 @@
  *   - QR → verifyQrToken → logScanEvent (driver entry)
  *   - PDF417 → AAMVA parse → GuestProfile create/update → logScanEvent
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import CameraScanner from './CameraScanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, XCircle, Loader2, ShieldAlert, User, UserPlus, UserCheck, IdCard, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
-
-// ---------- AAMVA parser (PDF417) ----------
-function parseAamva(raw) {
-  if (!raw || !raw.includes('DAQ')) return null;
-  const get = (tag) => {
-    const m = raw.match(new RegExp(tag + '([^\\n\\r]+)'));
-    return m ? m[1].trim() : null;
-  };
-  const dobRaw = get('DBB');
-  let dob = null;
-  if (dobRaw && /^\d{8}$/.test(dobRaw)) {
-    dob = `${dobRaw.slice(4, 8)}-${dobRaw.slice(0, 2)}-${dobRaw.slice(2, 4)}`;
-  }
-  return {
-    license_number: get('DAQ'),
-    first_name: get('DAC') || get('DCT') || '',
-    last_name: get('DCS') || '',
-    dob,
-    license_state: get('DAJ') || '',
-  };
-}
+import useHardwareScanner from '@/hooks/useHardwareScanner';
+import { parseAAMVA } from '@/lib/nups/aamva';
 
 function ageFromDob(dobIso) {
   if (!dobIso) return null;
@@ -58,21 +39,28 @@ export default function ScanTab({ venueId, validationRun }) {
   const [result, setResult] = useState(null); // { kind: 'qr'|'id', ok, ... }
   const [active, setActive] = useState(true);
 
-  const handleDecode = async (raw, code) => {
+  const handleDecode = useCallback(async (raw, code) => {
     if (busy) return;
     setBusy(true);
     setActive(false);
 
-    // Auto-detect: AAMVA license barcodes contain "DAQ" (license#) and usually "@ANSI"
-    const isAamva = raw && (raw.startsWith('@') || raw.includes('ANSI ') || raw.includes('DAQ'));
+    // Ambir and other USB scanners arrive as keyboard-wedge AAMVA text;
+    // camera scans include a BarcodeDetector format hint.
+    const parsedId = parseAAMVA(raw);
     const isPdf417 = code?.format === 'pdf417';
 
-    if (isAamva || isPdf417) {
-      await handleId(raw);
+    if (parsedId || isPdf417) {
+      await handleId(raw, parsedId);
     } else {
       await handleQr(raw);
     }
-  };
+  }, [busy, venueId, validationRun]);
+
+  useHardwareScanner((raw) => handleDecode(raw, { format: 'pdf417', source: 'usb_hid' }), {
+    enabled: active && !busy,
+    minLength: 40,
+    maxGapMs: 100,
+  });
 
   const handleQr = async (raw) => {
     try {
@@ -101,9 +89,16 @@ export default function ScanTab({ venueId, validationRun }) {
     }
   };
 
-  const handleId = async (raw) => {
+  const handleId = async (raw, preParsed = null) => {
     try {
-      const parsed = parseAamva(raw);
+      const aamva = preParsed || parseAAMVA(raw);
+      const parsed = aamva ? {
+        license_number: aamva.id_number,
+        first_name: aamva.first_name || '',
+        last_name: aamva.last_name || '',
+        dob: aamva.date_of_birth || null,
+        license_state: aamva.id_state || '',
+      } : null;
       if (!parsed || !parsed.license_number || !parsed.dob) {
         setResult({ kind: 'id', ok: false, reason: 'Not a readable driver license' });
         toast.error('Could not read ID');
@@ -197,7 +192,7 @@ export default function ScanTab({ venueId, validationRun }) {
     <Card className="bg-slate-900 border-slate-800">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between text-sm font-bold text-emerald-300">
-          <span>Scan — auto-detects QR or ID</span>
+          <span>Scan — Ambir USB, camera QR, or ID</span>
           {validationRun && (
             <span className="text-[10px] px-2 py-0.5 rounded border border-amber-500/40 bg-amber-500/10 text-amber-300 font-mono uppercase">
               Validation run
@@ -262,7 +257,7 @@ export default function ScanTab({ venueId, validationRun }) {
 
         <div className="text-[10px] text-slate-500 leading-relaxed flex items-start gap-2">
           <ShieldAlert className="w-3 h-3 mt-0.5 shrink-0" />
-          One camera, two flows. QR codes verify drivers server-side; ID barcodes create guest profiles deduped by one-way license hash.
+          Ambir USB and camera scans share one flow. QR codes verify drivers server-side; ID barcodes create guest profiles deduped by one-way license hash.
         </div>
       </CardContent>
     </Card>
