@@ -1793,7 +1793,7 @@ export default function NUPSLanding() {
               </div>
               <div className="integration-statuses">
                 <div className="integration-status">Partner Sandbox Connected</div>
-                <div className="integration-status opn">OPN Level 0 Principal</div>
+                <div className="integration-status opn">OPN Level 0 Active</div>
               </div>
             </div>
 
@@ -1801,15 +1801,15 @@ export default function NUPSLanding() {
               NUPS has completed authenticated, controlled read-only calls against the Oracle
               Hospitality Integration Platform Partner Sandbox. This establishes the technical
               path for connecting verified NUPS venue operations with OPERA Cloud property
-              configuration while keeping Oracle credentials and tokens server-side. Oracle also
-              received GlyphLock LLC’s paid Level 0 Principal OPN enrollment #1654123.
+              configuration while keeping Oracle credentials and tokens server-side. Oracle approved
+              and activated GlyphLock LLC’s Level 0 OPN membership on August 19, 2026.
             </p>
 
             <div className="integration-grid">
               <div className="integration-proof-card">
                 <span className="kicker">Oracle PartnerNetwork</span>
-                <strong>Paid Enrollment Received</strong>
-                <p>Level 0 Principal enrollment #1654123 was received August 17, 2026; company-address evidence was supplied August 18.</p>
+                <strong>Membership Active</strong>
+                <p>Level 0 membership is active under OPN Company ID 4-463913260838 and enrollment #1654123 through August 18, 2027.</p>
               </div>
               <div className="integration-proof-card">
                 <span className="kicker">Authentication</span>
@@ -1848,10 +1848,10 @@ export default function NUPSLanding() {
             </div>
 
             <p className="integration-disclaimer">
-              Current status: paid Level 0 Principal OPN enrollment #1654123 received by Oracle,
-              company-address evidence submitted, and read-only OHIP technical validation completed
-              in Oracle's shared Partner Sandbox. These are verified onboarding and technical
-              milestones, but they do not yet represent Marketplace publisher approval, Oracle
+              Current status: Level 0 OPN membership approved and activated, with read-only OHIP
+              technical validation completed in Oracle's shared Partner Sandbox. These are verified
+              membership and technical milestones, but they do not yet represent Marketplace
+              publisher approval, listing acceptance, Oracle
               certification or endorsement, a production customer connection, or an executed
               commercial partnership. Production access still requires the applicable Oracle
               application, environment, hotel authorization, and production credentials.
