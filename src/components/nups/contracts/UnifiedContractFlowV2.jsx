@@ -8,7 +8,7 @@ import CardReaderPanel from "@/components/nups/hardware/CardReaderPanel";
 import MemberCheckInAutofill from "@/components/nups/contracts/MemberCheckInAutofill";
 import ContractIdentityScanner from "@/components/nups/contracts/ContractIdentityScanner";
 import { VIP_TERMS, VIP_TERMS_TEXT, VIP_TERMS_VERSION } from "@/constants/vipShowTerms";
-import { printCurrentNupsView } from '@/lib/nups/receiptService';
+import { printCurrentNupsView, saveLastReceipt } from '@/lib/nups/receiptService';
 import { buildGlyphBucksIdempotencyKey } from "@/lib/nups/glyphbucksIdempotency";
 import {
   CheckCircle2,
@@ -471,6 +471,34 @@ export default function UnifiedContractFlowV2() {
         vipAnchor = response.data.anchor;
       }
 
+      if (vipRecord) {
+        saveLastReceipt({
+          id: vipRecord.verify_ref,
+          receipt_number: vipRecord.contract_ref,
+          venue_name: vipRecord.venue || venue,
+          operator_name: vipRecord.staff?.hostess || signatures.issuer_rep,
+          created_at: vipRecord.executed_at,
+          payment_method: [
+            Number(vipRecord.tender?.cash_sales) > 0 ? 'Cash' : '',
+            Number(vipRecord.tender?.card_sales) > 0 ? 'Card' : '',
+            Number(vipRecord.notes?.glyphbucks_tendered) > 0 ? 'GlyphBucks' : '',
+          ].filter(Boolean).join(' + '),
+          lines: (vipRecord.lines || []).map((line, index) => ({
+            id: `vip-${index + 1}`,
+            label: line.description,
+            quantity: Number(line.qty) || 1,
+            unit_price_cents: Math.round(Number(line.amount || 0) * 100),
+            total_cents: Math.round((Number(line.qty) || 1) * Number(line.amount || 0) * 100),
+          })),
+          subtotal_cents: Math.round(Number(vipRecord.subtotal || 0) * 100),
+          fee_cents: Math.round(Number(vipRecord.card_fee || 0) * 100),
+          total_cents: Math.round(Number(vipRecord.total || 0) * 100),
+          environment: vipRecord.mode === 'REAL' ? 'LIVE' : vipRecord.mode,
+          notes: `VIP show · Guest ${vipRecord.guest?.name || '—'} · Suite ${vipRecord.staff?.suite || '—'} · Verify ${vipRecord.verify_ref}`,
+          metadata: { contract_ref: vipRecord.contract_ref, verify_ref: vipRecord.verify_ref, guest_profile_ref: identity.profile_ref || null },
+        });
+      }
+
       setDone({ gbDoc, vipRecord, vipAnchor });
     } catch (e) {
       setError(e?.response?.data?.error || e.message || "Sealing failed.");
@@ -499,14 +527,14 @@ export default function UnifiedContractFlowV2() {
           {done.vipRecord && <div className="mt-1 font-mono text-sm text-neutral-200">VIP: {done.vipRecord.verify_ref} · ${done.vipRecord.total.toFixed(2)}</div>}
         </div>
         <div className="flex gap-2 justify-center flex-wrap print:hidden">
-          <button type="button" onClick={() => printCurrentNupsView()} className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold px-6 py-2.5 min-h-[44px]">
+          <button type="button" onClick={() => printCurrentNupsView({ title: 'NUPS VIP Contract and Receipt', selector: '.unified-contract-print' })} className="flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold px-6 py-2.5 min-h-[44px]">
             <Printer className="w-4 h-4" /> Print Contract and Receipt
           </button>
           {done.gbDoc && <a href={`/v/${done.gbDoc.verify_ref}`} className="rounded-lg bg-blue-600 hover:bg-blue-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Verify GlyphBucks</a>}
           {done.vipRecord && <a href={`/v/${done.vipRecord.verify_ref}`} className="rounded-lg bg-purple-600 hover:bg-purple-500 font-bold px-5 py-2.5 min-h-[44px] flex items-center">Verify VIP</a>}
           <button type="button" onClick={() => { setDone(null); reset(); }} className="rounded-lg border border-neutral-500 px-5 py-2.5 font-semibold min-h-[44px]">New Contract</button>
         </div>
-        <div className="unified-contract-print space-y-6 overflow-x-auto">
+        <div data-nups-receipt className="unified-contract-print space-y-6 overflow-x-auto">
           {done.gbDoc && <div className="unified-doc"><GlyphBucksReceipt doc={done.gbDoc} /></div>}
           {done.vipRecord && <div className="unified-doc"><VIPShowReprint record={done.vipRecord} anchor={{ status: done.vipAnchor }} /></div>}
         </div>
