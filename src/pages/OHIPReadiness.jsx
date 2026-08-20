@@ -18,6 +18,7 @@ import {
   ExternalLink,
   LockKeyhole,
   MapPinned,
+  Store,
   RefreshCw,
   ServerCog,
   ShieldCheck,
@@ -25,6 +26,7 @@ import {
 
 const PORTAL_URL =
   'https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/';
+const PARTNER_HUB_URL = 'https://partners.oracle.com/';
 const INTEGRATION_OWNER_EMAIL = 'carloearl@glyphlock.com';
 
 const PRODUCTION_STAGES = [
@@ -34,22 +36,22 @@ const PRODUCTION_STAGES = [
     detail: 'OAuth and controlled read-only OHIP validation verified.',
   },
   {
-    label: 'Oracle PartnerNetwork Enrollment',
-    status: 'received',
+    label: 'Oracle PartnerNetwork Membership',
+    status: 'complete',
     detail:
-      'Oracle received GlyphLock LLC’s paid Level 0 Principal enrollment #1654123 on August 17, 2026. The enrollment and payment are complete; this is not an unpaid or unsubmitted application.',
+      'Oracle approved and activated GlyphLock LLC’s Level 0 membership on August 19, 2026. OPN Company ID 4-463913260838 · Enrollment #1654123 · active through August 18, 2027.',
   },
   {
     label: 'Company Detail Validation',
-    status: 'review',
+    status: 'complete',
     detail:
-      'Oracle Global Business Operations requested complete-address evidence. GlyphLock LLC supplied its filed Arizona Articles of Organization on August 18, 2026, and is awaiting confirmation that validation is complete.',
+      'Oracle accepted the submitted company-address evidence and subsequently approved and activated the OPN membership.',
   },
   {
     label: 'Marketplace Listing',
-    status: 'blocked',
+    status: 'next',
     detail:
-      'Listing preparation may continue, but Marketplace publisher submission and paid-listing supplier onboarding remain separate gates. No banking information has been supplied to Oracle.',
+      'OPN membership is active. Marketplace publisher registration, listing submission, commercial terms, and any supplier or banking onboarding remain separate Oracle-controlled steps.',
   },
   {
     label: 'Production Application',
@@ -65,6 +67,39 @@ const PRODUCTION_STAGES = [
     label: 'Production Validation',
     status: 'locked',
     detail: 'Read-only validation must pass before any production write workflow.',
+  },
+];
+
+const MARKETPLACE_HANDOFF = [
+  {
+    label: 'OPN membership evidence',
+    status: 'complete',
+    detail: 'Approval and activation notice received August 19, 2026.',
+  },
+  {
+    label: 'Public compliance package',
+    status: 'complete',
+    detail: 'Code of Ethics and Anti-Corruption Policy v1.4 is published for diligence review.',
+  },
+  {
+    label: 'OHIP technical evidence',
+    status: 'complete',
+    detail: 'OAuth plus controlled read-only property and room configuration calls passed in the Partner Sandbox.',
+  },
+  {
+    label: 'Marketplace publisher registration',
+    status: 'next',
+    detail: 'Open Partner Hub and complete the applicable publisher-registration workflow.',
+  },
+  {
+    label: 'Listing record and OCID',
+    status: 'pending',
+    detail: 'Prepare the NUPS listing package; record the listing OCID only after Oracle issues it.',
+  },
+  {
+    label: 'Production application and customer authorization',
+    status: 'locked',
+    detail: 'Remain locked until Oracle and an authorized OPERA Cloud customer provide the required production environment and credentials.',
   },
 ];
 
@@ -315,25 +350,25 @@ export default function OHIPReadiness() {
                   Evidence-based progression. A stage is never marked complete from a related Oracle order or account alone.
                 </CardDescription>
               </div>
-              <Badge className="bg-cyan-500 text-slate-950">OPN Enrollment Received</Badge>
+              <Badge className="bg-emerald-600 text-white">OPN Active</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid gap-2 rounded-lg border border-cyan-500/35 bg-cyan-950/20 p-3 text-sm sm:grid-cols-2">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">
-                  OPN enrollment
+                  OPN membership
                 </p>
                 <p className="mt-1 text-slate-200">
-                  Level 0 Principal · #1654123 · Payment completed
+                  Level 0 · Company ID 4-463913260838 · Enrollment #1654123
                 </p>
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">
-                  Remaining validation
+                  Active term
                 </p>
                 <p className="mt-1 text-slate-200">
-                  Address evidence supplied August 18, 2026 · Confirmation pending
+                  August 19, 2026–August 18, 2027
                 </p>
               </div>
             </div>
@@ -341,6 +376,7 @@ export default function OHIPReadiness() {
               const isComplete = stage.status === 'complete';
               const isReceived = stage.status === 'received';
               const isReview = stage.status === 'review';
+              const isNext = stage.status === 'next';
               return (
                 <div
                   key={stage.label}
@@ -351,7 +387,9 @@ export default function OHIPReadiness() {
                         ? 'border-cyan-500/45 bg-cyan-950/20'
                         : isReview
                           ? 'border-amber-500/45 bg-amber-950/20'
-                          : 'border-slate-700 bg-slate-950/50'
+                          : isNext
+                            ? 'border-violet-500/45 bg-violet-950/20'
+                            : 'border-slate-700 bg-slate-950/50'
                   }`}
                 >
                   <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current text-xs font-bold">
@@ -361,6 +399,8 @@ export default function OHIPReadiness() {
                       <CheckCircle2 className="h-4 w-4 text-cyan-300" />
                     ) : isReview ? (
                       <AlertTriangle className="h-4 w-4 text-amber-300" />
+                    ) : isNext ? (
+                      <Store className="h-4 w-4 text-violet-300" />
                     ) : (
                       <span className="text-slate-500">{index + 1}</span>
                     )}
@@ -377,7 +417,9 @@ export default function OHIPReadiness() {
                               ? 'border-cyan-500/50 text-cyan-200'
                               : isReview
                                 ? 'border-amber-500/50 text-amber-200'
-                                : 'border-slate-600 text-slate-400'
+                                : isNext
+                                  ? 'border-violet-500/50 text-violet-200'
+                                  : 'border-slate-600 text-slate-400'
                         }
                       >
                         {isComplete
@@ -386,9 +428,11 @@ export default function OHIPReadiness() {
                             ? 'Received'
                             : isReview
                               ? 'Under Review'
-                              : stage.status === 'blocked'
-                                ? 'Blocked'
-                                : 'Locked'}
+                              : isNext
+                                ? 'Next'
+                                : stage.status === 'pending'
+                                  ? 'Pending'
+                                  : 'Locked'}
                       </Badge>
                     </div>
                     <p className="mt-1 text-sm text-slate-400">{stage.detail}</p>
@@ -397,8 +441,88 @@ export default function OHIPReadiness() {
               );
             })}
             <p className="text-xs leading-5 text-slate-500">
-              Current evidence confirms the Partner Sandbox and Oracle’s receipt of GlyphLock LLC’s paid Level 0 Principal OPN enrollment. Company-detail validation is still being completed and is tracked separately; Marketplace publisher approval, production access, customer authorization, and Oracle supplier/banking setup remain separate gates.
+              Current evidence confirms active Level 0 OPN membership and successful Partner Sandbox validation. Marketplace publisher approval, listing acceptance, production access, customer authorization, and Oracle supplier or banking setup remain separate gates.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-violet-500/30 bg-slate-900 text-slate-100">
+          <CardHeader>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Store className="h-5 w-5 text-violet-300" />
+                  Oracle Marketplace &amp; Production Handoff
+                </CardTitle>
+                <CardDescription className="mt-2 text-slate-400">
+                  The next controlled workstream after OPN activation. Completed evidence is separated from Oracle-controlled approvals and production credentials.
+                </CardDescription>
+              </div>
+              <Badge className="bg-violet-600 text-white">Marketplace Next</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {MARKETPLACE_HANDOFF.map((item) => (
+              <div
+                key={item.label}
+                className="flex gap-3 rounded-lg border border-slate-700 bg-slate-950/50 p-3"
+              >
+                <div className="mt-0.5">
+                  {item.status === 'complete' ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                  ) : item.status === 'next' ? (
+                    <Store className="h-5 w-5 text-violet-300" />
+                  ) : item.status === 'locked' ? (
+                    <LockKeyhole className="h-5 w-5 text-slate-500" />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5 text-amber-300" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-slate-100">{item.label}</p>
+                    <Badge
+                      variant="outline"
+                      className={
+                        item.status === 'complete'
+                          ? 'border-emerald-500/50 text-emerald-200'
+                          : item.status === 'next'
+                            ? 'border-violet-500/50 text-violet-200'
+                            : item.status === 'locked'
+                              ? 'border-slate-600 text-slate-400'
+                              : 'border-amber-500/50 text-amber-200'
+                      }
+                    >
+                      {item.status === 'complete'
+                        ? 'Complete'
+                        : item.status === 'next'
+                          ? 'Next Action'
+                          : item.status === 'locked'
+                            ? 'Locked'
+                            : 'Pending'}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-sm text-slate-400">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Button
+                onClick={() => window.open(PARTNER_HUB_URL, '_blank', 'noopener,noreferrer')}
+                className="bg-violet-600 text-white hover:bg-violet-500"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Open Oracle Partner Hub
+              </Button>
+              <Button
+                onClick={() => window.open(PORTAL_URL, '_blank', 'noopener,noreferrer')}
+                variant="outline"
+                className="border-cyan-500/50 text-cyan-100 hover:bg-cyan-950/40"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Open OHIP Developer Portal
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
