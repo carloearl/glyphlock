@@ -189,44 +189,103 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Create VIPGuest record with full biometric data — stamp is_demo if DEMO
-    const guestRecord = await base44.asServiceRole.entities.VIPGuest.create({
-      guest_name,
-      date_of_birth,
-      phone: phone || undefined,
-      government_id_type,
-      government_id_number,
-      government_id_state: government_id_state || undefined,
-      id_photo_url,
-      id_photo_back_url: id_photo_back_url || undefined,
-      profile_photo_url: guest_photo_url || undefined,
-      card_last_four,
-      card_type: card_type || "Visa",
-      payment_method_on_file: true,
-      status: "in_building",
-      current_location: "VIP Area",
-      check_in_time: now,
-      total_spent_tonight: 0,
-      lifetime_spent: 0,
-      visit_count: 1,
-      contract_signed: true,
-      contract_signed_date: now,
-      contract_version: "2.0-biometric",
-      contract_signature: signature,
-      contract_signature_hash: signatureHash,
-      contract_ip_address: clientIP,
-      contract_device_fingerprint: userAgent,
-      thumbprint_captured: true,
-      thumbprint_hash: thumbprintHash,
-      verification_status: "verified",
-      id_verified_date: now,
-      membership_number: serial_number,
-      is_demo: resolvedMode === 'DEMO',
-    });
+    // Bind the signed contract to the canonical minimized GuestProfile, then
+    // create/update a VIPGuest workflow projection. Full government-ID numbers,
+    // raw signatures, and protected media are not copied into VIPGuest.
+    const normalizedGovernmentId = String(government_id_number).replace(/\s/g, '').trim().toUpperCase();
+    const guestIdentityKey = (await sha256(normalizedGovernmentId)).slice(0, 24);
+    const venue = (await base44.asServiceRole.entities.Venue.filter({ venue_id, status: 'active' }, null, 1).catch(() => []))?.[0]
+      || await base44.asServiceRole.entities.Venue.get(venue_id).catch(() => null);
+    if (!venue || venue.status === 'inactive') {
+      return Response.json({ error: 'Contract venue is not active' }, { status: 409 });
+    }
+    const dob = new Date(date_of_birth);
+    if (Number.isNaN(dob.getTime())) return Response.json({ error: 'Valid date of birth required' }, { status: 400 });
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const beforeBirthday = today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate());
+    if (beforeBirthday) age -= 1;
+    const minimumAge = Number(venue.minimum_age || venue.age_requirement || 21);
+    if (age < minimumAge) return Response.json({ error: `Guest does not meet venue minimum age ${minimumAge}` }, { status: 403 });
 
-    // Update contract record with guest reference
+    const nameParts = String(guest_name).trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts.shift() || String(guest_name).trim();
+    const lastName = nameParts.join(' ');
+    const profileIdTypeMap = {
+      'Drivers License': 'drivers_license', 'State ID': 'state_id', Passport: 'passport',
+      'Military ID': 'military_id', 'Tribal ID': 'tribal_id'
+    };
+    let guestProfile = (await base44.asServiceRole.entities.GuestProfile.filter({ guest_id: guestIdentityKey, venue_id }, null, 1).catch(() => []))?.[0] || null;
+    const profileData = {
+      venue_id,
+      first_name: firstName,
+      last_name: lastName,
+      dob: String(date_of_birth).split('T')[0],
+      license_state: String(government_id_state || '').toUpperCase(),
+      id_type: profileIdTypeMap[government_id_type] || 'drivers_license',
+      last_initial: (lastName || firstName).slice(0, 1).toUpperCase(),
+      license_last4: normalizedGovernmentId.slice(-4),
+      age_verified: true,
+      id_expired: false,
+      last_visit_at: now,
+      status: 'vip',
+      mode: resolvedMode,
+    };
+    if (guestProfile) {
+      guestProfile = await base44.asServiceRole.entities.GuestProfile.update(guestProfile.id, {
+        ...profileData,
+        visit_count: Math.max(1, Number(guestProfile.visit_count || 0) + 1),
+      });
+    } else {
+      guestProfile = await base44.asServiceRole.entities.GuestProfile.create({
+        guest_id: guestIdentityKey,
+        ...profileData,
+        first_visit_at: now,
+        visit_count: 1,
+      });
+    }
+
+    let guestRecord = (await base44.asServiceRole.entities.VIPGuest.filter({ venue_id, guest_profile_id: guestProfile.id }, null, 1).catch(() => []))?.[0]
+      || (await base44.asServiceRole.entities.VIPGuest.filter({ venue_id, guest_id: guestIdentityKey }, null, 1).catch(() => []))?.[0]
+      || null;
+    const vipProjection = {
+      guest_id: guestIdentityKey,
+      guest_profile_id: guestProfile.id,
+      venue_id,
+      full_name: String(guest_name).trim(),
+      date_of_birth: dob.toISOString(),
+      phone: phone || undefined,
+      id_type: government_id_type || 'Drivers License',
+      id_last4: normalizedGovernmentId.slice(-4),
+      id_state: String(government_id_state || '').toUpperCase() || undefined,
+      id_verified: true,
+      id_verified_by: liveUser.email,
+      id_verified_at: now,
+      card_last4: card_last_four,
+      card_type: card_type || 'Visa',
+      status: 'in_building',
+      current_location: 'VIP Area',
+      check_in_time: now,
+      last_visit: now,
+      total_spent_tonight: guestRecord?.total_spent_tonight || 0,
+      total_spend_lifetime: guestRecord?.total_spend_lifetime || 0,
+      visit_count: guestRecord ? Number(guestRecord.visit_count || 0) + 1 : 1,
+      vip_sessions_count: guestRecord?.vip_sessions_count || 0,
+      first_visit: guestRecord?.first_visit || now,
+      is_demo: resolvedMode !== 'REAL',
+    };
+    guestRecord = guestRecord
+      ? await base44.asServiceRole.entities.VIPGuest.update(guestRecord.id, vipProjection)
+      : await base44.asServiceRole.entities.VIPGuest.create(vipProjection);
+
+    // Update contract record with the workflow projection reference.
     await base44.asServiceRole.entities.VIPContractRecord.update(tokenRecord.id, {
       guest_record_id: guestRecord.id,
+      metadata: {
+        ...(tokenRecord.metadata || {}),
+        guest_profile_id: guestProfile.id,
+        guest_identity_key: guestIdentityKey,
+      },
     });
 
     // ── W3-001 REMEDIATION: AuditEvent emission ──
