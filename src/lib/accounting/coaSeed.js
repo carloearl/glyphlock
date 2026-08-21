@@ -7,6 +7,7 @@
  * Codes here match §3 of the spec exactly — DO NOT renumber.
  */
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 export const DEFAULT_COA = [
   // ── ASSETS ─────────────────────────────────────────────────────
@@ -69,23 +70,34 @@ export async function seedDefaultCoa({ venue_id, mode = "REAL" }) {
 
   let created = 0;
   let skipped = 0;
+  const me = await base44.auth.me();
+  const actor = { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" };
 
   for (const row of DEFAULT_COA) {
     if (haveCodes.has(row.code)) {
       skipped += 1;
       continue;
     }
-    await base44.entities.LedgerAccount.create({
+    const result = await writeEntity({
+      entity: "LedgerAccount",
+      operation: "create",
+      data: {
+        venue_id,
+        mode,
+        code: row.code,
+        name: row.name,
+        type: row.type,
+        normal_side: normalSideFor(row.type),
+        active: true,
+        parent_code: row.parent_code || null,
+        seeded_by_default: true,
+      },
+      actor,
       venue_id,
-      mode,
-      code: row.code,
-      name: row.name,
-      type: row.type,
-      normal_side: normalSideFor(row.type),
-      active: true,
-      parent_code: row.parent_code || null,
-      seeded_by_default: true,
+      intent: `LEDGER_ACCOUNT_SEED_${row.code}`,
+      requestContext: { mode },
     });
+    if (!result?.ok) throw new Error(result?.block_reason || `Ledger account ${row.code} seed was rejected.`);
     created += 1;
   }
 
