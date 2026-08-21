@@ -75,6 +75,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
+    const E = base44.asServiceRole.entities;
+    const email = String(user.email || '').toLowerCase();
+    const nupsUser = (await E.NUPSUser.filter({ platform_email: email, status: 'active' }, null, 1).catch(() => []))?.[0] || null;
+    if (!nupsUser) return Response.json({ error: 'Active NUPS identity required' }, { status: 403 });
+    const targetFromQuery = new URL(req.url).searchParams.get('venue_id');
+    const global = ['PLATFORM_ADMIN','SOVEREIGN'].includes(nupsUser.role);
+    const authorizedVenueId = global && targetFromQuery ? String(targetFromQuery) : String(nupsUser.venue_id || '');
+    if (!authorizedVenueId) return Response.json({ error: 'Authorized venue could not be resolved' }, { status: 403 });
+    const venue = (await E.Venue.filter({ venue_id: authorizedVenueId, status: 'active' }, null, 1).catch(() => []))?.[0]
+      || await E.Venue.get(authorizedVenueId).catch(() => null);
+    if (!venue || venue.status === 'inactive') return Response.json({ error: 'Authorized venue is not active' }, { status: 403 });
+    const resolvedVenueId = venue.venue_id || venue.id;
+
     const connection = await resolveConnection(base44);
     if (!connection.secretKey) {
       return Response.json({
@@ -123,8 +136,8 @@ Deno.serve(async (req) => {
 
     let venuePaymentConfig = null;
     try {
-      const configs = await base44.asServiceRole.entities.VenuePaymentConfig.filter(
-        { venue_id: 'dream_palace', active: true }, null, 1,
+      const configs = await E.VenuePaymentConfig.filter(
+        { venue_id: resolvedVenueId, active: true }, null, 1,
       );
       venuePaymentConfig = configs?.[0] || null;
     } catch {
@@ -170,6 +183,7 @@ Deno.serve(async (req) => {
       connectionConfigFields: connection.connectionConfigFields,
       expectedAccountId: EXPECTED_ACCOUNT_ID,
       accountMatches,
+      venueId: resolvedVenueId,
       venueMode,
       credentialEnvironment: liveCredential ? 'live' : 'sandbox',
       environmentReady,
