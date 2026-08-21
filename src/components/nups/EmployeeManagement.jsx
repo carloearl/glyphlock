@@ -13,6 +13,7 @@ import {
   Plus, Pencil, UserX, UserCheck, Eye, EyeOff, Search, Filter
 } from "lucide-react";
 import { toast } from "sonner";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 const ROLES = [
   { key: "PLATFORM_ADMIN", label: "Platform Admin",   color: "bg-violet-500/20 text-violet-300 border-violet-500/30" },
@@ -40,9 +41,14 @@ function EmployeeDialog({ open, onClose, employee, entertainers, venueId }) {
   const queryClient = useQueryClient();
 
   const save = useMutation({
-    mutationFn: (data) => employee?.id
-      ? base44.entities.NUPSUser.update(employee.id, data)
-      : base44.entities.NUPSUser.create({ ...data, venue_id: venueId }),
+    mutationFn: (data) => writeIdentityRecord({
+      entity: "NUPSUser",
+      operation: employee?.id ? "update" : "create",
+      id: employee?.id,
+      venueId,
+      intent: employee?.id ? "staff:employee_management:update" : "staff:employee_management:create",
+      data: { ...data, venue_id: venueId },
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nups-employees'] });
       toast.success(employee?.id ? "Employee updated." : "Employee created.");
@@ -170,7 +176,7 @@ function EmployeeDialog({ open, onClose, employee, entertainers, venueId }) {
 export default function EmployeeManagement() {
   const queryClient = useQueryClient();
   const activeVenue = useActiveVenue();
-  const venueId = activeVenue?.venue_id;
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("active");
@@ -188,7 +194,7 @@ export default function EmployeeManagement() {
   });
 
   const toggleStatus = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.NUPSUser.update(id, { status }),
+    mutationFn: ({ id, status }) => writeIdentityRecord({ entity: "NUPSUser", operation: "update", id, venueId, intent: "staff:employee_management:status", data: { venue_id: venueId, status } }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['nups-employees'] })
   });
 
