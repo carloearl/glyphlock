@@ -292,8 +292,8 @@ const architectureLayers = [
     body: "The GlyphBucks SVC engine covers configurable denomination design, note generation and printing, contracts, issuance, redemption, verification, liability roll-forward, and reconciliation. QR references connect each supported note to its transaction and agreement while financial ledgers keep stored value separate from sales.",
     points: ["Generate, print, issue + redeem", "Contract and transaction-linked verification", "Liability ledger + reconciliation"],
     status: "Implemented closed-loop workflows",
-    cta: "Open GlyphBucks",
-    to: "/glyphbucks",
+    cta: "See GlyphBucks architecture",
+    to: "/NUPSLanding",
     color: "#FBBF24",
   },
   {
@@ -1144,10 +1144,10 @@ export default function About() {
                 ))}
               </div>
               <Link
-                to="/glyphbucks"
+                to="/NUPSLanding"
                 className="group mt-8 inline-flex items-center gap-2 font-black text-[#00E4FF] focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
               >
-                Explore the GlyphBucks console
+                Explore the GlyphBucks architecture
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
               </Link>
             </motion.div>
@@ -1287,12 +1287,12 @@ export default function About() {
                   Map your workflow
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </Link>
-                <Link
-                  to="/NUPSLanding"
+                <a
+                  href="#layered-system"
                   className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-7 py-3.5 font-bold text-white transition-colors hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white"
                 >
-                  See NUPS
-                </Link>
+                  Explore every layer
+                </a>
               </div>
             </div>
           </motion.section>
