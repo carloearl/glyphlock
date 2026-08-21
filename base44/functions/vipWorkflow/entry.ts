@@ -163,29 +163,92 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'guestIntake') {
-      const { full_name } = body;
+      const full_name = String(body.full_name || '').trim();
       if (!full_name) return err('full_name required');
-      let guest_id = 'G-' + crypto.randomUUID().slice(0, 20);
-      if (body.id_number) {
-        const data = new TextEncoder().encode(body.id_number.trim().toUpperCase());
-        const hash = await crypto.subtle.digest('SHA-256', data);
-        guest_id = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
-        const existing = await E.VIPGuest.filter({ guest_id, venue_id: VENUE });
-        if (existing.length) {
-          const g = existing[0];
-          if (g.status === 'banned') return err('Guest is banned', 403);
-          await E.VIPGuest.update(g.id, { visit_count: (g.visit_count || 0) + 1, last_visit: now(), status: 'in_building' });
-          return Response.json({ guest: { ...g, visit_count: (g.visit_count || 0) + 1 }, existing: true });
-        }
+
+      let profile = null;
+      if (body.guest_profile_id) {
+        profile = await E.GuestProfile.get(body.guest_profile_id).catch(() => null);
+        if (!profile || profile.venue_id !== VENUE) return err('Canonical guest profile is unavailable for this venue', 403);
       } else {
-        const sameName = await E.VIPGuest.filter({ venue_id: VENUE, full_name }, null, 5);
-        if (sameName.length && !body.allow_duplicate) return err(`Possible duplicate guest '${full_name}' (${sameName[0].id}). Confirm or provide ID.`, 409);
+        if (!body.id_number || !body.date_of_birth) {
+          return err('Verified ID number and date of birth are required for a new guest identity', 400);
+        }
+        const normalizedId = String(body.id_number).replace(/\s/g, '').trim().toUpperCase();
+        const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalizedId));
+        const guest_id = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
+        profile = (await E.GuestProfile.filter({ guest_id, venue_id: VENUE }, null, 1).catch(() => []))?.[0] || null;
+        if (!profile) {
+          const parts = full_name.split(/\s+/).filter(Boolean);
+          const firstName = parts.shift() || full_name;
+          const lastName = parts.join(' ');
+          const dob = new Date(body.date_of_birth);
+          if (Number.isNaN(dob.getTime())) return err('Valid date_of_birth required', 400);
+          const today = new Date();
+          let age = today.getFullYear() - dob.getFullYear();
+          const beforeBirthday = today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate());
+          if (beforeBirthday) age -= 1;
+          const expiration = body.id_expiration ? new Date(body.id_expiration) : null;
+          profile = await E.GuestProfile.create({
+            guest_id,
+            venue_id: VENUE,
+            first_name: firstName,
+            last_name: lastName,
+            dob: String(body.date_of_birth).split('T')[0],
+            license_state: String(body.id_state || '').toUpperCase(),
+            id_type: body.id_type || 'drivers_license',
+            last_initial: (lastName || firstName).slice(0, 1).toUpperCase(),
+            license_last4: normalizedId.slice(-4),
+            id_expiration: body.id_expiration || undefined,
+            id_expired: !!(expiration && !Number.isNaN(expiration.getTime()) && expiration.getTime() < today.getTime()),
+            age_verified: age >= 21,
+            visit_count: 1,
+            first_visit_at: now(),
+            last_visit_at: now(),
+            status: 'active',
+            mode: body.live ? 'REAL' : 'SANDBOX',
+          });
+        }
       }
+
+      if (profile.status === 'banned') return err('Guest is banned', 403);
+      const existing = (await E.VIPGuest.filter({ venue_id: VENUE, guest_profile_id: profile.id }, null, 1).catch(() => []))?.[0]
+        || (await E.VIPGuest.filter({ venue_id: VENUE, guest_id: profile.guest_id }, null, 1).catch(() => []))?.[0]
+        || null;
+      if (existing) {
+        if (existing.status === 'banned') return err('Guest is banned', 403);
+        const patch = {
+          guest_profile_id: profile.id,
+          visit_count: (existing.visit_count || 0) + 1,
+          last_visit: now(),
+          status: 'in_building',
+          phone: body.phone || existing.phone || '',
+          id_verified: !!profile.age_verified && !profile.id_expired,
+          id_verified_by: user.email,
+          id_verified_at: now(),
+        };
+        const updated = await E.VIPGuest.update(existing.id, patch);
+        return Response.json({ guest: updated, existing: true });
+      }
+
+      const idTypeMap = {
+        drivers_license: 'Drivers License', state_id: 'State ID', passport: 'Passport',
+        military_id: 'Military ID', tribal_id: 'Tribal ID'
+      };
       const guest = await E.VIPGuest.create({
-        guest_id, full_name, phone: body.phone || '', venue_id: VENUE,
-        id_type: body.id_type || undefined, id_state: body.id_state || undefined,
-        id_verified: !!body.id_number, id_verified_by: body.id_number ? user.email : undefined,
-        id_verified_at: body.id_number ? now() : undefined,
+        guest_id: profile.guest_id,
+        guest_profile_id: profile.id,
+        full_name,
+        phone: body.phone || '',
+        venue_id: VENUE,
+        date_of_birth: profile.dob ? new Date(profile.dob).toISOString() : undefined,
+        id_type: idTypeMap[profile.id_type] || 'Drivers License',
+        id_last4: profile.license_last4 || undefined,
+        id_state: profile.license_state || undefined,
+        id_expiration: profile.id_expiration || undefined,
+        id_verified: !!profile.age_verified && !profile.id_expired,
+        id_verified_by: user.email,
+        id_verified_at: now(),
         status: 'in_building', first_visit: now(), last_visit: now(), visit_count: 1,
         is_demo: !body.live
       });
