@@ -47,7 +47,11 @@ export default function DeveloperKeys() {
   });
 
   const updateKeyMutation = useMutation({
-    mutationFn: async ({ id, data }) => base44.entities.APIKey.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const response = await base44.functions.invoke('manageAPIKeySecurity', { action: 'update_metadata', key_id: id, data });
+      if (!response?.data?.success) throw new Error(response?.data?.error || 'API key metadata update rejected');
+      return response.data.key;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       toast.success("Key settings updated");
@@ -55,10 +59,14 @@ export default function DeveloperKeys() {
   });
 
   const deleteKeyMutation = useMutation({
-    mutationFn: async (id) => base44.entities.APIKey.delete(id),
+    mutationFn: async (id) => {
+      const response = await base44.functions.invoke('manageAPIKeySecurity', { action: 'revoke', key_id: id, reason: 'Revoked from Developer Keys' });
+      if (!response?.data?.success) throw new Error(response?.data?.error || 'API key revocation rejected');
+      return response.data.key;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
-      toast.success("Key revoked and deleted");
+      toast.success("Key revoked");
     }
   });
 
