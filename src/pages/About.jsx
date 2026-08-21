@@ -108,6 +108,8 @@ const products = [
     modules: ["Credential-aware profiles", "QR-linked identity", "Authorship context"],
     output: "A subject connected to the correct context",
     status: "Implemented across current workflows",
+    cta: "Explore identity and QR",
+    to: "/SecureQRStudio",
     color: "#00E4FF",
   },
   {
@@ -120,6 +122,8 @@ const products = [
     modules: ["Secure QR Studio", "Image Lab", "Interactive media and web tools"],
     output: "Creative work with connected context",
     status: "Working product surfaces",
+    cta: "Open Image Lab",
+    to: "/ImageLab",
     color: "#8C4BFF",
   },
   {
@@ -132,6 +136,8 @@ const products = [
     modules: ["GlyphBot", "Site and workflow assistance", "Knowledge-guided construction"],
     output: "Assisted work with visible decisions",
     status: "Implemented with continuing development",
+    cta: "Meet GlyphBot",
+    to: "/GlyphBot",
     color: "#F5B942",
   },
   {
@@ -144,6 +150,8 @@ const products = [
     modules: ["NUPS", "Role-based workspaces", "Contracts, batches, and reporting"],
     output: "A connected operating record",
     status: "Hardware-tested operating product",
+    cta: "Explore NUPS",
+    to: "/NUPSLanding",
     color: "#34D399",
   },
   {
@@ -156,6 +164,8 @@ const products = [
     modules: ["Master Covenant", "Permission controls", "Governed activity patterns"],
     output: "Actions tied to explicit authority",
     status: "Implemented controls and internal frameworks",
+    cta: "Review governance",
+    to: "/GovernanceHub",
     color: "#60A5FA",
   },
   {
@@ -168,6 +178,8 @@ const products = [
     modules: ["Verification workflows", "Security operations surfaces", "Audit and provenance records"],
     output: "Reviewable security and provenance evidence",
     status: "Implemented features plus clearly labeled research",
+    cta: "See security operations",
+    to: "/SecurityOperationsCenter",
     color: "#22D3EE",
   },
   {
@@ -180,6 +192,8 @@ const products = [
     modules: ["Register and settlement evidence", "Reconciliation", "GlyphBucks liability records"],
     output: "Financial activity that can be reconstructed",
     status: "Operational recordkeeping—not banking or acquiring",
+    cta: "Review financial accountability",
+    to: "/GlyphLockFinancialPage",
     color: "#FBBF24",
   },
   {
@@ -192,6 +206,8 @@ const products = [
     modules: ["Provider adapters", "OHIP interoperability work", "Enterprise APIs and SDKs"],
     output: "Controlled interoperability with clear responsibility",
     status: "Integration work subject to external approval",
+    cta: "Review integration surfaces",
+    to: "/SDKDocs",
     color: "#C084FC",
   },
   {
@@ -204,6 +220,8 @@ const products = [
     modules: ["Hardware planning", "On-site configuration", "Deployment and training"],
     output: "A system configured for its real environment",
     status: "Deployment capability scoped per engagement",
+    cta: "See deployment services",
+    to: "/Services",
     color: "#FB7185",
   },
   {
@@ -216,6 +234,8 @@ const products = [
     modules: ["Exportable evidence", "Activity reconstruction", "Authorized review"],
     output: "A record that can explain itself",
     status: "The shared outcome across the ecosystem",
+    cta: "Explore verification",
+    to: "/SecureQRStudio",
     color: "#A7F3D0",
   },
 ];
