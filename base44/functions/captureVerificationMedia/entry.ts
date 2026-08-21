@@ -16,24 +16,31 @@ Deno.serve(async (req) => {
       venue_id,
       media_type, // 'photo', 'video', 'signature_capture', 'thumbprint'
       verification_type, // 'customer_signing', 'customer_receiving_bills', etc.
-      media_file,
+      evidence_id,
       geolocation
     } = payload;
 
-    // Upload media file
-    const upload_result = await base44.integrations.Core.UploadFile({
-      file: media_file
-    });
-
-    const media_url = upload_result.file_url;
-
-    // Calculate file hash (in production, do this server-side)
-    const media_hash = await calculateHash(media_file);
+    if (!evidence_id || !venue_id) {
+      return Response.json({ error: 'Protected evidence reference and venue are required' }, { status: 400 });
+    }
+    const E = base44.asServiceRole.entities;
+    const evidence = await E.ProtectedEvidence.get(evidence_id).catch(() => null);
+    if (!evidence || evidence.venue_id !== venue_id) {
+      return Response.json({ error: 'Protected evidence not found for this venue' }, { status: 403 });
+    }
+    const email = String(user.email || '').toLowerCase();
+    const nups = (await E.NUPSUser.filter({ platform_email: email, status: 'active' }, null, 1).catch(() => []))?.[0] || null;
+    const global = ['PLATFORM_ADMIN','SOVEREIGN'].includes(nups?.role);
+    if (!nups || (!global && nups.venue_id !== venue_id)) {
+      return Response.json({ error: 'Cross-venue verification media access denied' }, { status: 403 });
+    }
+    const media_url = `protected:${evidence.id}`;
+    const media_hash = evidence.content_hash || '';
 
     // Create VerificationMedia record
     const media_id = `MEDIA-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     
-    const media = await base44.asServiceRole.entities.VerificationMedia.create({
+    const media = await E.VerificationMedia.create({
       media_id,
       transaction_id,
       contract_barcode,
@@ -41,7 +48,7 @@ Deno.serve(async (req) => {
       media_type,
       media_url,
       media_hash,
-      media_size_bytes: media_file.size,
+      media_size_bytes: 0,
       capture_timestamp: new Date().toISOString(),
       captured_by: user.email,
       verification_type,
@@ -51,12 +58,12 @@ Deno.serve(async (req) => {
     });
 
     // Update barcode registry scan count
-    const barcode = await base44.asServiceRole.entities.BarcodeRegistry.filter({
+    const barcode = await E.BarcodeRegistry.filter({
       barcode_id: contract_barcode
     });
 
     if (barcode.length > 0) {
-      await base44.asServiceRole.entities.BarcodeRegistry.update(barcode[0].id, {
+      await E.BarcodeRegistry.update(barcode[0].id, {
         scan_count: (barcode[0].scan_count || 0) + 1,
         last_scanned_at: new Date().toISOString(),
         last_scanned_by: user.email
@@ -64,7 +71,7 @@ Deno.serve(async (req) => {
     }
 
     // Create audit log
-    await base44.asServiceRole.entities.AuditEvent.create({
+    await E.AuditEvent.create({
       event_id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       actor_id: user.email,
