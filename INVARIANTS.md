@@ -89,7 +89,7 @@ The frozen audit requirement remains: protected writes must produce sufficient i
 - `AuditEvent` observational business event
 - `ActivityLog` operational mirror
 
-The prior wording requiring specifically `SystemAuditLog + AuditEvent` does not exactly match the live gateway. This discrepancy is unresolved and must be settled by ADR rather than silently changing either the code or the invariant. See `KNOWN_ISSUES.md`.
+Per `docs/adr/ADR-0002-nups-audit-ledger-boundaries.md`, the canonical automatic audit pair for governed business writes is `MigrationAuditLog + AuditEvent`. `ActivityLog` remains a best-effort operational mirror. `SystemAuditLog` is reserved for security/system/administrative events and is not required for every business write.
 
 Direct frontend writes remain grandfathered under `config/nups-direct-write-legacy-manifest.json`; their count may decrease but may not increase. This is a migration exception, not permission for new bypasses.
 
