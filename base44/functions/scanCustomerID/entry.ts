@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-import { createHash } from 'https://deno.land/std@0.106.0/hash/mod.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -17,6 +16,20 @@ Deno.serve(async (req) => {
       scan_data: manualScanData,
       transaction_id,
     } = payload;
+
+    if (!venue_id) {
+      return Response.json({ error: 'Active venue is required.' }, { status: 400 });
+    }
+
+    const E = base44.asServiceRole.entities;
+    const email = String(user.email || '').toLowerCase();
+    const nupsUser = (await E.NUPSUser.filter({ platform_email: email, status: 'active' }, null, 1).catch(() => []))?.[0]
+      || (await E.NUPSUser.filter({ username: email.split('@')[0], status: 'active' }, null, 1).catch(() => []))?.[0]
+      || null;
+    const global = ['PLATFORM_ADMIN', 'SOVEREIGN'].includes(nupsUser?.role);
+    if (!nupsUser || (!global && nupsUser.venue_id !== venue_id)) {
+      return Response.json({ error: 'Identity scan venue access denied.' }, { status: 403 });
+    }
 
     if (!id_scan_front_url && !manualScanData) {
       return Response.json(
@@ -64,33 +77,49 @@ Deno.serve(async (req) => {
       );
     }
 
-    const hash = createHash('sha256');
-    hash.update(scan_data.id_number + (venue_id || 'default'));
-    const guest_id = hash.toString().slice(0, 24);
+    const normalizedId = String(scan_data.id_number || '').replace(/\s/g, '').trim().toUpperCase();
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalizedId));
+    const guest_id = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
 
-    let guestProfile = await base44.asServiceRole.entities.GuestProfile.get(guest_id).catch(() => null);
-
+    let guestProfile = (await E.GuestProfile.filter({ guest_id, venue_id }, null, 1).catch(() => []))?.[0] || null;
+    const fullName = String(scan_data.full_name || '').trim();
+    const nameParts = fullName.split(/\s+/).filter(Boolean);
+    const firstName = nameParts.shift() || fullName;
+    const lastName = nameParts.join(' ');
+    const dob = scan_data.date_of_birth ? new Date(scan_data.date_of_birth) : null;
+    const now = new Date();
+    let age = null;
+    if (dob && !Number.isNaN(dob.getTime())) {
+      age = now.getFullYear() - dob.getFullYear();
+      const beforeBirthday = now.getMonth() < dob.getMonth() || (now.getMonth() === dob.getMonth() && now.getDate() < dob.getDate());
+      if (beforeBirthday) age -= 1;
+    }
+    const expiration = scan_data.id_expiration ? new Date(scan_data.id_expiration) : null;
     const profileData = {
       venue_id,
-      first_name: scan_data.full_name?.split(' ')[0],
-      last_name: scan_data.full_name?.split(' ').slice(1).join(' '),
+      first_name: firstName,
+      last_name: lastName,
       dob: scan_data.date_of_birth,
-      license_state: scan_data.id_state,
-      id_scan_front_url: id_scan_front_url || undefined,
-      last_visit_at: new Date().toISOString(),
-      age_verified: true,
+      license_state: String(scan_data.id_state || '').toUpperCase(),
+      id_type: scan_data.id_type || 'drivers_license',
+      last_initial: (lastName || firstName).slice(0, 1).toUpperCase(),
+      license_last4: normalizedId.slice(-4),
+      id_expiration: scan_data.id_expiration || undefined,
+      id_expired: !!(expiration && !Number.isNaN(expiration.getTime()) && expiration.getTime() < now.getTime()),
+      last_visit_at: now.toISOString(),
+      age_verified: typeof age === 'number' && age >= 21,
     };
 
     if (guestProfile) {
-      guestProfile = await base44.asServiceRole.entities.GuestProfile.update(guest_id, {
+      guestProfile = await E.GuestProfile.update(guestProfile.id, {
         ...profileData,
         visit_count: (guestProfile.visit_count || 0) + 1,
       });
     } else {
-      guestProfile = await base44.asServiceRole.entities.GuestProfile.create({
+      guestProfile = await E.GuestProfile.create({
         guest_id,
         ...profileData,
-        first_visit_at: new Date().toISOString(),
+        first_visit_at: now.toISOString(),
         visit_count: 1,
         status: 'active',
       });
