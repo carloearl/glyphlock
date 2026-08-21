@@ -9,6 +9,7 @@ import { Stamp, Printer, ShieldCheck, Coins, Fingerprint, CreditCard, PenLine, C
 
 import { printCurrentNupsView } from '@/lib/nups/receiptService';
 import { buildGlyphBucksIdempotencyKey } from "@/lib/nups/glyphbucksIdempotency";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 /**
  * DACO §7 — GlyphBucks stored-value sale flow (LIVE).
  * Terms + clickwrap → vouchers/tender → camera ID scan (identity binding) →
@@ -37,8 +38,10 @@ const Section = ({ n, icon: Icon, title, sub, done, children }) => (
 );
 
 export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrintBills }) {
+  const activeVenue = useActiveVenue();
+  const activeVenueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [mode, setMode] = useState("REAL");
-  const [venueId, setVenueId] = useState("DP-TEMPE-001");
+  const [venueId, setVenueId] = useState(activeVenueId);
   const [assent, setAssent] = useState(null);
   const [idData, setIdData] = useState(null);
   const [cardData, setCardData] = useState(null);
@@ -66,13 +69,18 @@ export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrin
     member_tier: "MEMBER", card_brand: "VISA", terminal_id: "CG01-T1",
   };
 
+  useEffect(() => {
+    if (activeVenueId) setVenueId(activeVenueId);
+  }, [activeVenueId]);
+
   // One-click DEMO seed — fills EVERY field in this section with consistent
   // mock data. State-only: never stored, wiped on refresh or New Sale, and
   // forces DEMO mode so it can never mix with the live ledger.
   const fillDemo = () => {
     const now = new Date().toISOString();
     setMode("DEMO");
-    setVenueId("DP-TEMPE-001");
+    if (!activeVenueId) return setError("Select an active venue before loading demo sale data.");
+    setVenueId(activeVenueId);
     setAssent({
       clickwrap_accepted: true, terms_shown_at: now, scroll_depth_pct: 100,
       dwell_seconds: 45, accepted_at: now, initials_term1: "R.S.", initials_term3: "R.S.",
@@ -160,6 +168,7 @@ export default function GlyphBucksSaleFlow({ onShared, prefill, onSealed, onPrin
     if (f.esig_issuer_rep.trim().toLowerCase() === f.esig_manager.trim().toLowerCase())
       return setError("Manager must be a distinct person from the issuer rep (§7.5).");
     if (!f.age_verified) return setError("Age/identity verification is required (Term 8) — scan the purchaser's ID.");
+    if (!venueId) return setError("Select an active venue before sealing a GlyphBucks sale.");
     setBusy(true);
     try {
       const idempotencyKey = await buildGlyphBucksIdempotencyKey({
