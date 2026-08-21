@@ -583,7 +583,7 @@ export default function About() {
         <div className="pointer-events-none absolute bottom-[8%] right-[-18rem] h-[38rem] w-[38rem] rounded-full bg-amber-400/[0.06] blur-[150px]" />
 
         <div className="container relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-          <section className="grid min-h-[78vh] items-center gap-12 py-14 lg:grid-cols-[1.08fr_0.92fr] lg:py-20">
+          <section className="grid min-h-[78vh] items-center gap-12 py-14 lg:grid-cols-[1fr_1fr] lg:py-20">
             <div>
               <motion.div
                 initial={{ opacity: 0, y: 14 }}
@@ -686,7 +686,7 @@ export default function About() {
           </section>
 
           <section id="story-section" className="py-24">
-            <div className="mb-12 max-w-3xl">
+            <div className="mb-12 max-w-3xl mx-auto text-center">
               <p className="text-xs font-black uppercase tracking-[0.28em] text-[#00E4FF]">
                 The origin
               </p>
@@ -703,8 +703,7 @@ export default function About() {
                   The through line
                 </p>
                 <p className="mt-3 text-lg font-bold leading-relaxed text-white">
-                  Identify the subject. Apply permission. Record the action. Preserve
-                  the evidence.
+                  Identify the subject. Apply permission. Record the action. Preserve the evidence.
                 </p>
               </div>
             </div>
@@ -747,7 +746,7 @@ export default function About() {
             {...reveal}
             className="mb-24 overflow-hidden rounded-[2rem] border border-[#00E4FF]/20 bg-gradient-to-br from-[#071827] via-[#03070d] to-[#150a22] p-7 md:p-12"
           >
-            <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+            <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.24em] text-[#00E4FF]">The problem</p>
                 <h2 className="mt-4 text-3xl font-black tracking-tight text-white md:text-5xl font-space">
@@ -799,7 +798,7 @@ export default function About() {
             <WorkflowExplorer />
           </section>
 
-          <section className="mb-24 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <section className="mb-24 grid gap-6 lg:grid-cols-[1fr_1fr]">
             <motion.div {...reveal} className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-7 md:p-10">
               <SectionHeading
                 eyebrow="NUPS"
