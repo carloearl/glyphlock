@@ -7,7 +7,20 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 //
 // Auth: staff/manager/admin only. All writes are service-role (server side).
 
-const VENUE_ID = 'dream_palace';
+async function resolveAuthorizedVenue(base44, user, requestedVenueId) {
+  const E = base44.asServiceRole.entities;
+  const email = String(user?.email || '').toLowerCase();
+  const nups = (await E.NUPSUser.filter({ platform_email: email, status: 'active' }, null, 1).catch(() => []))?.[0] || null;
+  if (!nups) throw new Error('Active NUPS identity required.');
+  const global = ['PLATFORM_ADMIN','SOVEREIGN'].includes(nups.role);
+  const venueId = global && requestedVenueId ? String(requestedVenueId) : String(nups.venue_id || '');
+  if (!venueId) throw new Error('Authorized venue could not be resolved.');
+  if (!global && requestedVenueId && String(requestedVenueId) !== venueId) throw new Error('Cross-venue bill registration denied.');
+  const venue = (await E.Venue.filter({ venue_id: venueId, status: 'active' }, null, 1).catch(() => []))?.[0]
+    || await E.Venue.get(venueId).catch(() => null);
+  if (!venue || venue.status === 'inactive') throw new Error('Authorized venue is not active.');
+  return { venueId: venue.venue_id || venue.id, venue, nups };
+}
 
 Deno.serve(async (req) => {
   try {
@@ -19,9 +32,9 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const denomination = Number(body.denomination);
     const quantity = Number(body.quantity);
-    const serialPrefix = String(body.serial_prefix || 'DP').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+    const serialPrefix = String(body.serial_prefix || 'GB').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
     const startSerial = Number(body.start_serial || 1);
-    const venue_id = body.venue_id || VENUE_ID;
+    const { venueId: venue_id } = await resolveAuthorizedVenue(base44, user, body.venue_id);
 
     if (!denomination || denomination <= 0) return Response.json({ error: 'A positive denomination is required.' }, { status: 400 });
     if (!quantity || quantity < 1 || quantity > 500) return Response.json({ error: 'Quantity must be between 1 and 500.' }, { status: 400 });
