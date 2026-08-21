@@ -155,24 +155,11 @@ export default function ContractViewer() {
                 </div>
               )}
 
-              {/* Media Links */}
-              {(selected.guest_photo_url || selected.id_photo_url || selected.thumbprint_url) && (
-                <div className="flex flex-wrap gap-2">
-                  {selected.guest_photo_url && (
-                    <a href={selected.guest_photo_url} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 underline">Guest Photo</a>
-                  )}
-                  {selected.id_photo_url && (
-                    <a href={selected.id_photo_url} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 underline">ID (Front)</a>
-                  )}
-                  {selected.id_photo_back_url && (
-                    <a href={selected.id_photo_back_url} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 underline">ID (Back)</a>
-                  )}
-                  {selected.thumbprint_url && (
-                    <a href={selected.thumbprint_url} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 underline">Thumbprint</a>
-                  )}
-                  {selected.signed_hardcopy_photo_url && (
-                    <a href={selected.signed_hardcopy_photo_url} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-400 underline">Hardcopy</a>
-                  )}
+              {/* Protected media is intentionally not emitted as raw URLs here.
+                  A server-authorized retrieval path must be verified before archive viewing is re-enabled. */}
+              {(selected.guest_photo_url || selected.id_photo_url || selected.id_photo_back_url || selected.thumbprint_url || selected.signed_hardcopy_photo_url) && (
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+                  Protected identity media is on file. Direct-link viewing is disabled until authorized private retrieval is verified.
                 </div>
               )}
             </div>
