@@ -11,6 +11,7 @@
 
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { writeEntity } from '@/lib/nups/writeEntity';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
@@ -56,7 +57,16 @@ export default function DriverPayoutStatusToggle({ payout, currentUser, onUpdate
         updates.processed_at = null;
       }
 
-      await base44.entities.DriverPayout.update(payout.id, updates);
+      const write = await writeEntity({
+        entity: 'DriverPayout',
+        operation: 'update',
+        id: payout.id,
+        data: updates,
+        actor: { email: currentUser?.email, id: currentUser?.id, role: userRole },
+        venue_id: payout.venue_id || null,
+        intent: `DRIVER_PAYOUT_${nextStatus}`,
+      });
+      if (!write?.ok) throw new Error(write?.block_reason || 'Driver payout status update was rejected.');
 
       await logActivity({
         action_type: 'PAYOUT_TOGGLE',
