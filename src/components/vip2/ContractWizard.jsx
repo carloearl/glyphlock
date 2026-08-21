@@ -40,7 +40,7 @@ export default function ContractWizard({ state, refresh, onCreated }) {
 
   const create = async () => {
     setErr(''); setBusy(true);
-    const r = await vip('createContract', { ...f, client_request_id: requestId, mode: 'TEST' });
+    const r = await vip('createContract', { ...f, client_request_id: requestId, mode: 'DEMO' });
     setBusy(false);
     if (r.error) return setErr(r.error);
     await refresh();
@@ -78,7 +78,7 @@ export default function ContractWizard({ state, refresh, onCreated }) {
       {err && <p className="text-red-400 text-sm">{err}</p>}
       <Button onClick={create} className="bg-purple-700 hover:bg-purple-600 min-h-[44px] w-full"
         disabled={busy || !f.guest_id || !f.entertainer_id || !f.room_id || !rate || !f.payment_method}>
-        Create VIP Contract (TEST)
+        Create VIP Contract (DEMO)
       </Button>
     </div>
   );
