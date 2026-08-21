@@ -148,8 +148,9 @@ export default function TipBreakdown({ transactions = [] }) {
   const [formula, setFormula] = useState({ hostessPct: 15, managerBonus: 100, djPct: 50 });
 
   const { data: nupsUsers = [] } = useQuery({
-    queryKey: ['nups-users-for-tip'],
-    queryFn: () => base44.entities.NUPSUser.filter({ status: "active" }),
+    queryKey: ['nups-users-for-tip', venueId],
+    queryFn: () => venueId ? base44.entities.NUPSUser.filter({ status: "active", venue_id: venueId }) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   // Floor tips only — exclude VIP/contract revenue (those go through contract receipts)
