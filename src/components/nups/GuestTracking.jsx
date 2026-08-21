@@ -18,38 +18,70 @@ export default function GuestTracking() {
   const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
   const [guestForm, setGuestForm] = useState({
-    guest_name: "",
-    membership_number: "",
+    guest_profile_id: "",
     phone: "",
     email: ""
   });
 
   const { data: guests = [] } = useQuery({
-    queryKey: ['vip-guests'],
-    queryFn: () => base44.entities.VIPGuest.list('-created_date', 100)
+    queryKey: ['vip-guests', venueId],
+    queryFn: () => venueId ? base44.entities.VIPGuest.filter({ venue_id: venueId }, '-created_date', 100) : Promise.resolve([]),
+    enabled: !!venueId,
+  });
+  const { data: guestProfiles = [] } = useQuery({
+    queryKey: ['guest-profiles-tracking', venueId],
+    queryFn: () => venueId ? base44.entities.GuestProfile.filter({ venue_id: venueId }, '-last_visit_at', 200) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const activeGuests = guests.filter(g => g.status === 'in_building');
 
   const checkInGuest = useMutation({
-    mutationFn: (data) => writeIdentityRecord({
-      entity: "VIPGuest",
-      operation: "create",
-      venueId,
-      intent: "guest:tracking:checkin",
-      data: {
-        ...data,
-        venue_id: venueId,
-        status: 'in_building',
-        current_location: 'Lobby',
-        check_in_time: new Date().toISOString(),
-        total_spent_tonight: 0
-      },
-    }),
+    mutationFn: async (data) => {
+      if (!venueId) throw new Error('Active venue is required.');
+      const profile = await base44.entities.GuestProfile.get(data.guest_profile_id).catch(() => null);
+      if (!profile || profile.venue_id !== venueId) throw new Error('Select a canonical guest profile from this venue.');
+      const existing = (await base44.entities.VIPGuest.filter({ venue_id: venueId, guest_profile_id: profile.id }, '-created_date', 1).catch(() => []))?.[0];
+      const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim() || 'Verified Guest';
+      const now = new Date().toISOString();
+      if (existing) {
+        return writeIdentityRecord({ entity: 'VIPGuest', operation: 'update', id: existing.id, venueId, intent: 'guest:tracking:checkin-existing', data: { venue_id: venueId, guest_profile_id: profile.id, status: 'in_building', current_location: 'Lobby', check_in_time: now, last_visit: now, phone: data.phone || existing.phone, email: data.email || existing.email } });
+      }
+      return writeIdentityRecord({
+        entity: "VIPGuest",
+        operation: "create",
+        venueId,
+        intent: "guest:tracking:checkin",
+        data: {
+          guest_id: profile.guest_id,
+          guest_profile_id: profile.id,
+          venue_id: venueId,
+          full_name: fullName,
+          date_of_birth: profile.dob ? new Date(profile.dob).toISOString() : undefined,
+          id_last4: profile.license_last4 || undefined,
+          id_state: profile.license_state || undefined,
+          id_expiration: profile.id_expiration || undefined,
+          id_verified: !!profile.age_verified,
+          id_verified_at: profile.last_visit_at || now,
+          phone: data.phone,
+          email: data.email,
+          status: 'in_building',
+          current_location: 'Lobby',
+          check_in_time: now,
+          total_spent_tonight: 0,
+          first_visit: now,
+          last_visit: now,
+          visit_count: 1,
+          tier: 'standard',
+          total_spend_lifetime: 0,
+          vip_sessions_count: 0,
+        },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vip-guests'] });
       setShowCheckInDialog(false);
-      setGuestForm({ guest_name: "", membership_number: "", phone: "", email: "" });
+      setGuestForm({ guest_profile_id: "", phone: "", email: "" });
     }
   });
 
@@ -112,10 +144,8 @@ export default function GuestTracking() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="font-bold text-white text-lg">{guest.guest_name}</h3>
-                        {guest.membership_number && (
-                          <p className="text-xs text-gray-400">#{guest.membership_number}</p>
-                        )}
+                        <h3 className="font-bold text-white text-lg">{guest.full_name}</h3>
+                        {guest.guest_profile_id && <p className="text-xs text-gray-400">Verified profile linked</p>}
                       </div>
                       <Button
                         size="sm"
@@ -142,7 +172,7 @@ export default function GuestTracking() {
                         <span className="font-bold">${(guest.total_spent_tonight || 0).toFixed(2)} tonight</span>
                       </div>
                       <div className="text-xs text-gray-500">
-                        Lifetime: ${(guest.lifetime_spent || 0).toFixed(2)}
+                        Lifetime: ${(guest.total_spend_lifetime || 0).toFixed(2)}
                       </div>
                     </div>
 
@@ -184,37 +214,27 @@ export default function GuestTracking() {
               e.preventDefault();
               const stripHtml = (s) => (s || '').replace(/<[^>]*>/g, '').replace(/[<>"']/g, '').trim();
               const cleaned = {
-                guest_name: stripHtml(guestForm.guest_name),
-                membership_number: stripHtml(guestForm.membership_number),
+                guest_profile_id: guestForm.guest_profile_id,
                 phone: stripHtml(guestForm.phone),
                 email: (guestForm.email || '').trim(),
-                date_of_birth: "2000-01-01"
               };
-              if (cleaned.guest_name.length < 2) return;
+              if (!cleaned.guest_profile_id) return;
               if (cleaned.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.email)) return;
               checkInGuest.mutate(cleaned);
             }} 
             className="space-y-4"
           >
             <div>
-              <Label className="text-white">Guest Name *</Label>
-              <Input
-                value={guestForm.guest_name}
-                onChange={(e) => setGuestForm({...guestForm, guest_name: e.target.value})}
-                placeholder="Full name or alias"
-                className="glass-input"
-                required
-              />
-            </div>
-
-            <div>
-              <Label className="text-white">Membership Number</Label>
-              <Input
-                value={guestForm.membership_number}
-                onChange={(e) => setGuestForm({...guestForm, membership_number: e.target.value})}
-                placeholder="Optional"
-                className="glass-input"
-              />
+              <Label className="text-white">Verified Guest Profile *</Label>
+              <Select value={guestForm.guest_profile_id} onValueChange={(value) => setGuestForm({ ...guestForm, guest_profile_id: value })}>
+                <SelectTrigger className="glass-input"><SelectValue placeholder="Select a guest already verified by ID scan" /></SelectTrigger>
+                <SelectContent className="bg-gray-900 border-gray-700">
+                  {guestProfiles.map((profile) => (
+                    <SelectItem key={profile.id} value={profile.id}>{[profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Verified Guest'} · ID …{profile.license_last4 || '----'}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-gray-500 mt-1">New identities must be created through the ID scanner/check-in flow first.</p>
             </div>
 
             <div>
