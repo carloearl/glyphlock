@@ -131,7 +131,7 @@ export default function VIPCommandCenter() {
         {state?.config?.live_enabled ? (
           <Badge className="bg-emerald-600 text-white">LIVE</Badge>
         ) : (
-          <Badge className="bg-amber-600 text-white">TEST MODE — live launch not authorized</Badge>
+          <Badge className="bg-amber-600 text-white">DEMO MODE — live launch not authorized</Badge>
         )}
         <div className="ml-auto flex gap-2 flex-wrap">
           {isOwner && (
