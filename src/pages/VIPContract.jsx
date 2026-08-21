@@ -177,15 +177,16 @@ SECTION 1 — CONSENT TO BIOMETRIC IDENTIFICATION & VERIFICATION
      (b) Photograph of government-issued identification (front and back)
      (c) Digital signature
 
-1.2  All biometric data shall be processed using SHA-256 cryptographic 
-     hashing and stored in encrypted form. Raw biometric images are 
-     retained for verification purposes only and are subject to the 
-     retention policy in Section 7.
+1.2  Biometric evidence shall be cryptographically hashed where stated 
+     and stored as private, access-controlled evidence referenced by 
+     opaque identifiers. Temporary viewing links, when authorized, are 
+     time limited. Raw evidence is retained only for the documented 
+     verification purpose and remains subject to Section 7.
 
-1.3  Guest acknowledges this biometric collection is conducted in 
-     compliance with applicable state biometric privacy laws, including 
-     but not limited to BIPA (740 ILCS 14), CCPA (Cal. Civ. Code 
-     § 1798.100), and any analogous state statutes.
+1.3  This collection and use remain subject to all applicable biometric 
+     and privacy laws. Nothing in this Agreement waives any non-waivable 
+     privacy right or represents a technical control that the Venue has 
+     not actually implemented.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
