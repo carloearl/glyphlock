@@ -22,6 +22,7 @@
  * flow. Failures are logged to the console only.
  */
 import { base44 } from "@/api/base44Client";
+import { writeIdentityRecord, resolveGatewayActor } from "@/lib/nups/identityWrites";
 
 const NAME_FIELD_BY_TYPE = {
   entertainer: (r) => r?.stage_name || r?.legal_name || "Unknown Entertainer",
@@ -43,18 +44,26 @@ export async function snapshotPerson({ type, event, record, actor }) {
     const personId = ID_FIELD_BY_TYPE[type]?.(record) || record?.id;
     const displayName = NAME_FIELD_BY_TYPE[type]?.(record) || "Unknown";
 
-    return await base44.entities.PersonRecord.create({
-      person_type: type,
-      person_id: String(personId || "unknown"),
-      display_name: displayName,
-      venue_id: record?.venue_id || "",
-      event_type: event,
-      event_timestamp: new Date().toISOString(),
-      actor_email: actor?.email || "system",
-      actor_name: actor?.full_name || actor?.email || "System",
-      snapshot: { ...record },
-      is_demo: !!record?.is_demo,
-      notes: "",
+    const resolvedActor = actor?.role ? actor : await resolveGatewayActor();
+    return await writeIdentityRecord({
+      entity: "PersonRecord",
+      operation: "create",
+      actor: resolvedActor,
+      venueId: record?.venue_id || null,
+      intent: `person_archive:${type}:${event}`,
+      data: {
+        person_type: type,
+        person_id: String(personId || "unknown"),
+        display_name: displayName,
+        venue_id: record?.venue_id || "",
+        event_type: event,
+        event_timestamp: new Date().toISOString(),
+        actor_email: resolvedActor?.email || actor?.email || "system",
+        actor_name: resolvedActor?.full_name || actor?.full_name || actor?.email || "System",
+        snapshot: { ...record },
+        is_demo: !!record?.is_demo,
+        notes: "",
+      },
     });
   } catch (e) {
     // Never let archive failure block the calling flow
