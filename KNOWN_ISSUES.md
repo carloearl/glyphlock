@@ -211,7 +211,7 @@ Live paths including `GlyphBucksContract`, `IDScannerCamera`, `BarcodeFirstCaptu
 ### Batch 14 progress
 The application already exposed Base44 private-file primitives (`UploadPrivateFile` + `CreateFileSignedUrl`). Batch 14 introduced `ProtectedEvidence` as the opaque canonical reference layer plus server-side `registerProtectedEvidence` and `getProtectedEvidence` authorization. Live W-9, government-ID, entertainer-license, verification-media, hardcopy-contract, guest-photo, and thumbprint capture paths now use private file URIs; signed URLs are short-lived and generated only for temporary OCR/preview or authorized retrieval. Contract archive queries were additionally venue-scoped.
 
-The issue remains OPEN because anonymous, wrong-role, and wrong-venue retrieval denial have not yet been exercised end-to-end with runtime identities. Static architecture is implemented; adversarial retrieval testing remains required.
+Batch 15 extracted the exact retrieval decision into a shared server policy used by `getProtectedEvidence` and added `npm run check:nups-protected-evidence`. The executable matrix proves fail-closed role/classification and cross-venue decisions, including manager same-venue allow, door identity-only allow, and bartender/wrong-venue/tax/biometric denials. The issue remains OPEN because anonymous, wrong-role, wrong-venue, and signed-URL expiry behavior have not yet been exercised against the deployed function with distinct runtime identities. Static/policy architecture is verified; deployed adversarial testing remains required.
 
 ---
 
@@ -250,8 +250,11 @@ Batch 13 removed direct protected-media links/images from `ContractViewer`, `Con
 ### Batch 14 implementation
 `ProtectedEvidence` now stores opaque private Base44 `file_uri` references and evidence metadata. `registerProtectedEvidence` resolves the authenticated NUPS identity and enforces venue/classification registration rules. `getProtectedEvidence` authorizes by role + venue + evidence classification + purpose context, emits explicit security audit events, and returns only a 120-second signed URL. Live protected capture paths store `protected:<evidence-record-id>` references instead of permanent routable media URLs.
 
+### Batch 15 verification
+`getProtectedEvidence` and `scripts/check-protected-evidence-policy.mjs` now share the same authorization function. The matrix passes for global, manager, door, ordinary staff, classification, and cross-venue cases; access/denial audit payloads contain references and decision metadata, not file URIs, signed URLs, or document content.
+
 ### Remaining resolution
-Run synthetic end-to-end authorization tests proving anonymous retrieval denial, wrong-role denial, and wrong-venue denial. Do not re-enable raw archived media viewing until those tests pass.
+Run synthetic deployed end-to-end tests proving anonymous retrieval denial, wrong-role denial, wrong-venue denial, and signed-URL expiration. Do not re-enable raw archived media viewing until those tests pass.
 
 ---
 
@@ -259,19 +262,22 @@ Run synthetic end-to-end authorization tests proving anonymous retrieval denial,
 
 **Severity:** HIGH  
 **Invariant:** INV-07  
-**Status:** OPEN — UI/SECRET-LIFECYCLE DRIFT
+**Status:** RESOLVED — ONE-TIME SECRET LIFECYCLE
 
-### Expected
-API-key plaintext secrets are generated server-side, returned only once during creation/rotation, and never persisted or assumed retrievable from ordinary APIKey list records.
+### Resolution
+`DeveloperKeys`, `APIKeyVault`, and the Command Center now display plaintext secrets only from the transient creation/rotation response. Each uses one-time component state with explicit Copy and Dismiss actions; the ordinary APIKey list displays safe metadata and states that the secret cannot be retrieved later.
 
-### Observed
-The canonical `APIKey` schema stores `secret_key_hash`, not plaintext `secret_key`, and `generateAPIKey` returns the plaintext secret only at creation. Batch 14 removed client-side secret generation and direct APIKey update/delete security actions, but `DeveloperKeys` still contains legacy display/copy UI that references fields such as `key.secret_key`, `environment`, and `env_key` as though persisted keys were recoverable.
+The APIKey entity persists `secret_key_hash`, public key, environment, status, permissions, rotation/revocation metadata, and no plaintext secret. `generateAPIKey` and `rotateAPIKey` generate server-side, persist only the hash, and return the secret once. Normal security actions revoke rather than hard-delete the record, preserving investigation history.
 
-### Risk
-The stale UI can mislead operators about secret recoverability, produce broken copy/export controls, and encourage future code to reintroduce plaintext secret persistence.
+### Evidence
+`npm run check:nups-api-key-secrets` passes and verifies:
 
-### Required resolution
-Refactor API-key list/detail UI to display only persisted safe metadata. Show/copy a plaintext secret exclusively from the one-time creation/rotation response and then discard it from client state.
+- no `secret_key` field exists in the APIKey schema;
+- create/rotate persistence contains only the hash;
+- persisted list/detail UI does not read `key.secret_key`;
+- one-time secrets are not placed in local/session storage;
+- audit metadata excludes secret material;
+- revocation preserves the APIKey record.
 
 ---
 
