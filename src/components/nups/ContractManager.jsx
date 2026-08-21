@@ -76,21 +76,18 @@ export default function ContractManager({ user }) {
     notes: "",
   });
 
-  const { data: venues = [] } = useQuery({
-    queryKey: ["cm-venues"],
-    queryFn: () => base44.entities.Venue.list(),
-    initialData: [],
-  });
-  const currentVenue = venues?.[0] || activeVenue || { name: "Venue", address: "", age_requirement: 21 };
+  const currentVenue = activeVenue || { name: "Venue", address: "", age_requirement: 21 };
 
   const { data: contracts = [] } = useQuery({
     queryKey: ["venue-contracts", venue_id],
-    queryFn: () => base44.entities.VenueContract.filter({ venue_id }, "-created_date", 200),
+    queryFn: () => venue_id ? base44.entities.VenueContract.filter({ venue_id }, "-created_date", 200) : Promise.resolve([]),
+    enabled: !!venue_id,
   });
 
   const { data: batches = [] } = useQuery({
-    queryKey: ["pos-batches-open"],
-    queryFn: () => base44.entities.POSBatch.filter({ status: "open" }),
+    queryKey: ["pos-batches-open", venue_id],
+    queryFn: () => venue_id ? base44.entities.POSBatch.filter({ status: "open", venue_id }, "-created_date", 50) : Promise.resolve([]),
+    enabled: !!venue_id,
   });
 
   const createMutation = useMutation({
