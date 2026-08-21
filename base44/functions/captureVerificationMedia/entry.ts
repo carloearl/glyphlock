@@ -46,6 +46,7 @@ Deno.serve(async (req) => {
       contract_barcode,
       venue_id,
       media_type,
+      protected_evidence_id: evidence.id,
       media_url,
       media_hash,
       media_size_bytes: 0,
