@@ -46,6 +46,11 @@ Deno.serve(async (req) => {
       if (!entity?.filter) return [];
       return await entity.filter(filter, sort, limit).catch(() => []);
     };
+    const get = async (entityName, id) => {
+      const entity = E[entityName];
+      if (!entity?.get) return null;
+      return await entity.get(id).catch(() => null);
+    };
 
     let transactionId = null;
     let resolvedOrder = null;
@@ -77,8 +82,8 @@ Deno.serve(async (req) => {
     if (!transactionId) return Response.json({ error: 'Transaction not found' }, { status: 404 });
 
     if (!resolvedOrder) {
-      const candidate = await E.GlyphBucksOrder?.get?.(transactionId).catch(() => null)
-        || await E.DreamPalaceOrder?.get?.(transactionId).catch(() => null);
+      const candidate = await get('GlyphBucksOrder', transactionId)
+        || await get('DreamPalaceOrder', transactionId);
       if (candidate?.venue_id === resolvedVenueId) resolvedOrder = candidate;
     }
     if (!resolvedBatch) {
