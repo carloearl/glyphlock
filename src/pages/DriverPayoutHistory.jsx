@@ -9,6 +9,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { writeEntity } from '@/lib/nups/writeEntity';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -262,7 +263,16 @@ export default function DriverPayoutHistory({ embedded = false }) {
     if (!window.confirm(`Permanently delete this payout record?\n\n${label}\n\nThis cannot be undone.`)) return;
     setDeletingId(payout.id);
     try {
-      await base44.entities.DriverPayout.delete(payout.id);
+      const write = await writeEntity({
+        entity: 'DriverPayout',
+        operation: 'delete',
+        id: payout.id,
+        data: { venue_id: payout.venue_id || null },
+        actor: { email: user?.email, id: user?.id, role },
+        venue_id: payout.venue_id || null,
+        intent: 'DRIVER_PAYOUT_HISTORY_DELETE',
+      });
+      if (!write?.ok) throw new Error(write?.block_reason || 'Driver payout delete was rejected.');
       setSelectedIds(prev => { const next = new Set(prev); next.delete(payout.id); return next; });
       await refetch();
     } finally {
