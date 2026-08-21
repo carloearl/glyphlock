@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { getActiveVenueId } from "@/hooks/useActiveVenue";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 const unavailable = (error) => [502, 503, 504].includes(Number(error?.response?.status || error?.status || 0));
 
@@ -28,13 +29,19 @@ export async function submitAccessRequest(form) {
     }
     const venueId = form.venue_id || getActiveVenueId();
     if (!venueId) throw new Error("Select an active venue before requesting NUPS access.");
-    return base44.entities.NUPSAccessRequest.create({
-      ...form,
-      email,
-      venue_id: venueId,
-      status: "PENDING_OWNER_APPROVAL",
-      mode: form.mode === "DEMO" ? "DEMO" : "SANDBOX",
-      decision_log: [{ decision: "SUBMITTED", by: email, note: "", timestamp: new Date().toISOString() }],
+    return writeIdentityRecord({
+      entity: "NUPSAccessRequest",
+      operation: "create",
+      venueId,
+      intent: "NUPS_ACCESS_REQUEST_SUBMIT_FALLBACK",
+      data: {
+        ...form,
+        email,
+        venue_id: venueId,
+        status: "PENDING_OWNER_APPROVAL",
+        mode: form.mode === "DEMO" ? "DEMO" : "SANDBOX",
+        decision_log: [{ decision: "SUBMITTED", by: email, note: "", timestamp: new Date().toISOString() }],
+      },
     });
   }
 }
