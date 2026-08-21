@@ -73,7 +73,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const VENUE = body.venue_id || 'dream_palace';
+    const VENUE = body.venue_id;
+    if (!VENUE) return Response.json({ error: 'Active venue is required.' }, { status: 400 });
     const now = () => new Date().toISOString();
     const ref = (p) => `${p}-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
     const ev = (c, a, detail) => ([...(c.audit_events || []), { action: a, actor: user.email, detail: detail || '', timestamp: now() }]);
