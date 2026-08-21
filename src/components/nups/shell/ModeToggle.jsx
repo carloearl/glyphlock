@@ -15,6 +15,7 @@ import {
 } from "@/lib/nups/operatingMode";
 import { seedDemoVenue, wipeDemoVenue } from "@/lib/nups/demoSeedRunner";
 import { useToast } from "@/components/ui/use-toast";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 /**
  * BPAA-NUPS-MASTER-001 §2 / F-7 — Mode badge + Demo/Live toggle + Seed/Wipe.
@@ -111,30 +112,49 @@ export default function ModeToggle() {
     const nextLedgerMode = ledgerModeForOperatingMode(next);
     setWorking("switch");
     try {
+      const me = await base44.auth.me();
+      const actor = { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" };
       if (nextLedgerMode !== ledgerMode || !rateRowId) {
-        if (rateRowId) {
-          await base44.entities.VenueRateConfig.update(rateRowId, {
-            mode: nextLedgerMode,
-            last_edited_at: new Date().toISOString(),
-          });
-        } else {
-          await base44.entities.VenueRateConfig.create({
-            venue_id: venueId,
-            venue_name: venue?.name || venue?.venue_name || "",
-            mode: nextLedgerMode,
-            active: true,
-            last_edited_at: new Date().toISOString(),
-            notes: "Created by ModeToggle on first mode switch.",
-          });
-        }
+        const rateWrite = await writeEntity({
+          entity: "VenueRateConfig",
+          operation: rateRowId ? "update" : "create",
+          id: rateRowId || undefined,
+          data: rateRowId
+            ? { mode: nextLedgerMode, last_edited_at: new Date().toISOString(), venue_id: venueId }
+            : {
+                venue_id: venueId,
+                venue_name: venue?.name || venue?.venue_name || "",
+                mode: nextLedgerMode,
+                active: true,
+                last_edited_at: new Date().toISOString(),
+                notes: "Created by ModeToggle on first mode switch.",
+              },
+          actor,
+          venue_id: venueId,
+          intent: `MODE_TOGGLE_${nextLedgerMode}`,
+          requestContext: { mode: nextLedgerMode },
+        });
+        if (!rateWrite?.ok) throw new Error(rateWrite?.block_reason || "Venue mode update was rejected.");
+        if (!rateRowId && rateWrite?.value?.id) setRateRowId(rateWrite.value.id);
       }
 
       // Compatibility mirror: older helpers still read SystemConfig. Keep it
       // aligned while VenueRateConfig remains the authoritative UI/ledger row.
       try {
         const configRows = await base44.entities.SystemConfig.filter({ venue_id: venueId, config_key: "venue" });
-        if (configRows?.[0]) await base44.entities.SystemConfig.update(configRows[0].id, { mode: nextLedgerMode });
-        else await base44.entities.SystemConfig.create({ venue_id: venueId, config_key: "venue", mode: nextLedgerMode });
+        const configWrite = await writeEntity({
+          entity: "SystemConfig",
+          operation: configRows?.[0] ? "update" : "create",
+          id: configRows?.[0]?.id,
+          data: configRows?.[0]
+            ? { venue_id: venueId, mode: nextLedgerMode }
+            : { venue_id: venueId, config_key: "venue", mode: nextLedgerMode },
+          actor,
+          venue_id: venueId,
+          intent: `MODE_COMPATIBILITY_MIRROR_${nextLedgerMode}`,
+          requestContext: { mode: nextLedgerMode },
+        });
+        if (!configWrite?.ok) throw new Error(configWrite?.block_reason || "Legacy mode mirror was rejected.");
       } catch (_) { /* best-effort compatibility mirror */ }
 
       if (next === OPERATING_MODE.TRAINING) {
