@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Save, Lock, Eye, Receipt, CreditCard, Gift, Hotel, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { invalidateRateCache, ensureVenueRateConfig } from "@/lib/nups/venueRateConfig";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 const EDIT_ROLES = new Set(["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"]);
 
@@ -77,11 +78,21 @@ export default function ReceiptConfigEditor({ venueId, user }) {
         ? record
         : await ensureVenueRateConfig(venueId, "", user?.email || "admin");
       if (!target?.id) throw new Error("Venue configuration could not be created.");
-      await base44.entities.VenueRateConfig.update(target.id, {
-        ...draft,
-        last_edited_by: user?.email || "admin",
-        last_edited_at: new Date().toISOString(),
+      const result = await writeEntity({
+        entity: "VenueRateConfig",
+        operation: "update",
+        id: target.id,
+        data: {
+          ...draft,
+          venue_id: venueId,
+          last_edited_by: user?.email || "admin",
+          last_edited_at: new Date().toISOString(),
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" },
+        venue_id: venueId,
+        intent: "RECEIPT_CONFIG_UPDATE",
       });
+      if (!result?.ok) throw new Error(result?.block_reason || "Receipt configuration write was rejected.");
       setRecord(target);
       invalidateRateCache(venueId);
       toast.success("Receipt and tender settings saved. New transactions use these controls immediately.");
