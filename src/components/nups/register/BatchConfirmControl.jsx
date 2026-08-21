@@ -58,7 +58,7 @@ export default function BatchConfirmControl({
       const result = await writeEntity({
         entity: "POSBatch",
         operation: "update",
-        recordId: batch.id,
+        id: batch.id,
         data: {
           door_confirmed: true,
           door_confirmed_by: operatorName || operatorEmail || "door",
