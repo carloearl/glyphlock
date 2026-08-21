@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Loader2, AlertTriangle, FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { writeEntity } from '@/lib/nups/writeEntity';
 
 export default function VIPEntertainerQuestionnaire({ contractUUID, entertainerId, venueId, roomNumber, onComplete }) {
   const [answers, setAnswers] = useState({
@@ -73,19 +74,30 @@ export default function VIPEntertainerQuestionnaire({ contractUUID, entertainerI
 
     setSubmitting(true);
     try {
-      const report = await base44.entities.VIPSessionReport.create({
-        session_id: crypto.randomUUID(),
-        contract_uuid: contractUUID,
-        entertainer_id: entertainerId,
+      if (!venueId) throw new Error('Active venue is required to submit a VIP session report.');
+      const me = await base44.auth.me().catch(() => null);
+      const reportWrite = await writeEntity({
+        entity: 'VIPSessionReport',
+        operation: 'create',
+        data: {
+          session_id: crypto.randomUUID(),
+          contract_uuid: contractUUID,
+          entertainer_id: entertainerId,
+          venue_id: venueId,
+          room_number: answers.room_number,
+          session_date: new Date().toISOString(),
+          status: flagged ? 'flagged' : 'complete',
+          incident_flagged: flagged,
+          manager_alerted: false,
+          demo: false,
+          answers: answers
+        },
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || 'External' },
         venue_id: venueId,
-        room_number: answers.room_number,
-        session_date: new Date().toISOString(),
-        status: flagged ? 'flagged' : 'complete',
-        incident_flagged: flagged,
-        manager_alerted: false,
-        demo: false,
-        answers: answers
+        intent: flagged ? 'VIP_SESSION_REPORT_FLAGGED' : 'VIP_SESSION_REPORT_SUBMITTED',
       });
+      if (!reportWrite?.ok) throw new Error(reportWrite?.block_reason || 'VIP session report write was rejected.');
+      const report = reportWrite.value;
 
       if (flagged) {
         await base44.entities.AuditEvent.create({
