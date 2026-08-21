@@ -61,6 +61,10 @@ export function buildReceiptBreakdown(tx, rates = {}) {
   const ccFeeLabel = procRate > 0
     ? `Card Processing Fee (${(procRate * 100).toFixed(2)}%)`
     : 'Card Processing Fee';
+  // Only show the CC fee line when the guest actually paid by card — cash/comp
+  // receipts should not display "Card Processing Fee $0.00".
+  const isCardPayment = ['Credit Card', 'Debit Card', 'Digital Wallet']
+    .includes(tx.payment_method);
 
   // Service fee: explicit tx field wins; otherwise compute from subtotal × pct.
   const svcFee = Number(
@@ -77,7 +81,7 @@ export function buildReceiptBreakdown(tx, rates = {}) {
     { key: 'discount', label: 'Discount', amount: -discount, show: discount > 0, negative: true },
     { key: 'tip', label: 'Gratuity', amount: tipAmount, show: tipAmount > 0 },
     { key: 'tax', label: taxLabel, amount: taxValue, always: true },
-    { key: 'processing_fee', label: ccFeeLabel, amount: ccFee, show: showProcFee, always: false },
+    { key: 'processing_fee', label: ccFeeLabel, amount: ccFee, show: showProcFee && (isCardPayment || ccFee > 0), always: false },
   ];
 
   const visibleLines = lines.filter(l => l.always || l.show);
