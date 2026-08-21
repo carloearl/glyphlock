@@ -1102,11 +1102,43 @@ export default function About() {
             />
             <LayeredArchitecture />
             <div className="mt-6 rounded-2xl border border-[#00E4FF]/20 bg-[#00E4FF]/[0.035] p-5 text-sm leading-relaxed text-slate-300">
-              <strong className="text-white">Public technology record · August 2026:</strong>{" "}
-              GlyphLock identifies the concealed image-data carrier—built from least-significant-bit
+              <strong className="text-white">Historical technology and filing record · May 2025:</strong>{" "}
+              GlyphLock reports that its concealed image-data carrier—using least-significant-bit
               steganography, QR-like payload concepts, interactive links and hotspots, and provenance
-              context—as a core company technology direction. Working encode/decode experiments exist;
-              the complete carrier is not represented as publicly released.
+              context—was documented in a U.S. provisional patent application filed in May 2025.
+              The provisional filing window has since expired, so GlyphLock does not represent that
+              application as pending or active. This page records the technology&apos;s May 2025 origin
+              today; it does not claim that this webpage was published in May 2025 or that patent rights
+              remain in force.
+              <div className="mt-4 border-t border-white/10 pt-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8EEBFF]">
+                  Public demonstration trail
+                </p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <a
+                    href="https://www.dailymotion.com/video/x9lshzs"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 font-medium text-white transition hover:border-[#00E4FF]/40 hover:bg-[#00E4FF]/10"
+                  >
+                    GlyphLock Pharma · June 23, 2025
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                  <a
+                    href="https://www.dailymotion.com/video/x9m5qxe"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 font-medium text-white transition hover:border-[#00E4FF]/40 hover:bg-[#00E4FF]/10"
+                  >
+                    GlyphLock · July 1, 2025
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+                <p className="mt-3 text-xs text-slate-500">
+                  These dated videos document early public GlyphLock demonstrations; they do not establish
+                  the legal status of the provisional application or disclose every concealed-carrier detail.
+                </p>
+              </div>
             </div>
           </section>
 
