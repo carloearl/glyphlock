@@ -10,6 +10,7 @@
 // Idempotent: skips work if the user already has both.
 
 import { base44 } from '@/api/base44Client';
+import { writeIdentityRecord } from './identityWrites';
 
 // Allow-list mirrors the landing-page bypass so admin promotion follows
 // the same governance surface. Emails compared case-insensitively.
@@ -44,13 +45,18 @@ export async function ensurePrivilegedAccess(user) {
       (u) => u?.sovereign_flag === true || u?.role === 'SOVEREIGN'
     );
     if (!hasSovereign) {
-      await base44.entities.NUPSUser.create({
-        username: email.split('@')[0],
-        full_name: user.full_name || email,
-        role: 'SOVEREIGN',
-        sovereign_flag: true,
-        status: 'active',
-        created_note: 'Auto-provisioned via privileged access allow-list (DACO-20260702).',
+      await writeIdentityRecord({
+        entity: 'NUPSUser',
+        operation: 'create',
+        intent: 'privileged_access:sovereign_bootstrap',
+        data: {
+          username: email.split('@')[0],
+          full_name: user.full_name || email,
+          role: 'SOVEREIGN',
+          sovereign_flag: true,
+          status: 'active',
+          created_note: 'Auto-provisioned via privileged access allow-list (DACO-20260702).',
+        },
       });
     }
   } catch (err) {
