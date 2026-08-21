@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Plus, BookOpen, Sparkles, Pencil, AlertTriangle, RefreshCw } from 'lucide-react';
 import { DEFAULT_CHART_OF_ACCOUNTS } from '@/lib/accounting/defaultChartOfAccounts';
+import { writeEntity } from '@/lib/nups/writeEntity';
 
 const ACCOUNT_TYPES = ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'CONTRA_REVENUE', 'EXPENSE', 'COGS'];
 
@@ -84,7 +85,15 @@ export default function ChartOfAccountsEditor({ venueId, user }) {
         system_seed: true,
         ...stamp,
       }));
-      await base44.entities.ChartOfAccounts.bulkCreate(payload);
+      const result = await writeEntity({
+        entity: 'ChartOfAccounts',
+        operation: 'bulkCreate',
+        data: payload,
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: 'CHART_OF_ACCOUNTS_SEED_DEFAULTS',
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'Chart of accounts seed was rejected.');
       await refetch();
     } catch (e) {
       setErr(e?.message || 'Seed failed');
@@ -103,11 +112,16 @@ export default function ChartOfAccountsEditor({ venueId, user }) {
     try {
       const stamp = { last_edited_by: user?.email || 'system', last_edited_at: new Date().toISOString() };
       const { id, ...payload } = editing;
-      if (id) {
-        await base44.entities.ChartOfAccounts.update(id, { ...payload, ...stamp });
-      } else {
-        await base44.entities.ChartOfAccounts.create({ ...payload, venue_id: venueId, system_seed: false, ...stamp });
-      }
+      const result = await writeEntity({
+        entity: 'ChartOfAccounts',
+        operation: id ? 'update' : 'create',
+        id,
+        data: id ? { ...payload, venue_id: venueId, ...stamp } : { ...payload, venue_id: venueId, system_seed: false, ...stamp },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: id ? 'CHART_OF_ACCOUNTS_UPDATE' : 'CHART_OF_ACCOUNTS_CREATE',
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'Chart of accounts write was rejected.');
       setEditing(null);
       await refetch();
     } catch (e) {
@@ -119,11 +133,21 @@ export default function ChartOfAccountsEditor({ venueId, user }) {
 
   const handleToggleActive = async (row) => {
     try {
-      await base44.entities.ChartOfAccounts.update(row.id, {
-        active: !row.active,
-        last_edited_by: user?.email || 'system',
-        last_edited_at: new Date().toISOString(),
+      const result = await writeEntity({
+        entity: 'ChartOfAccounts',
+        operation: 'update',
+        id: row.id,
+        data: {
+          venue_id: venueId,
+          active: !row.active,
+          last_edited_by: user?.email || 'system',
+          last_edited_at: new Date().toISOString(),
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: 'CHART_OF_ACCOUNTS_TOGGLE_ACTIVE',
       });
+      if (!result?.ok) throw new Error(result?.block_reason || 'Chart of accounts status update was rejected.');
       await refetch();
     } catch (e) {
       setErr(e?.message || 'Toggle failed');

@@ -1,11 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function StoryChapterNav({ chapters }) {
   const [active, setActive] = useState(0);
-  const refs = useRef([]);
 
   useEffect(() => {
+    const elements = chapters
+      .map((c) => document.getElementById("chapter-" + c.number))
+      .filter(Boolean);
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -18,9 +21,9 @@ export default function StoryChapterNav({ chapters }) {
       { rootMargin: "-30% 0px -55% 0px", threshold: 0 }
     );
 
-    refs.current.forEach((el) => el && observer.observe(el));
+    elements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [chapters.length]);
+  }, [chapters]);
 
   return (
     <div className="lg:sticky lg:top-24">

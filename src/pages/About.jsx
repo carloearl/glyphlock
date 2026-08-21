@@ -38,6 +38,7 @@ import {
 import { motion } from "framer-motion";
 import SEOHead from "../components/SEOHead";
 import AboutConnectionHub from "../components/about/AboutConnectionHub";
+import StoryChapterNav from "../components/about/StoryChapterNav";
 
 const reveal = {
   initial: { opacity: 0, y: 28 },
@@ -686,30 +687,20 @@ export default function About() {
 
           <section className="grid gap-12 py-24 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
             <div>
-              <div className="lg:sticky lg:top-28">
-                <SectionHeading
-                  eyebrow="The origin"
-                  title="The question changed. The principle did not."
-                  body="GlyphLock did not begin as venue software. It began by asking how a digital object could retain identity and history. Real operations revealed that people, agreements, and transactions needed the same thing."
-                />
-                <div className="mt-8 rounded-2xl border border-[#00E4FF]/20 bg-[#00E4FF]/[0.045] p-5">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[#00E4FF]">The through line</p>
-                  <p className="mt-3 text-lg font-bold leading-relaxed text-white">
-                    Identify the subject. Apply permission. Record the action. Preserve the evidence.
-                  </p>
-                </div>
-              </div>
+              <StoryChapterNav chapters={storyChapters} />
             </div>
 
             <div className="relative space-y-3">
               <div className="absolute bottom-6 left-6 top-6 hidden w-px bg-gradient-to-b from-[#00E4FF]/50 via-[#8C4BFF]/40 to-amber-300/40 sm:block" />
-              {storyChapters.map((chapter) => {
+              {storyChapters.map((chapter, index) => {
                 const Icon = chapter.icon;
                 return (
                   <motion.article
                     key={chapter.number}
+                    id={"chapter-" + chapter.number}
+                    data-chapter-index={index}
                     {...reveal}
-                    className="relative rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:pl-16 md:p-6 md:pl-20"
+                    className="relative scroll-mt-24 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:pl-16 md:p-6 md:pl-20"
                   >
                     <div className="mb-3 flex items-center gap-3 sm:absolute sm:left-3 sm:top-5 sm:mb-0 sm:flex-col sm:gap-1.5">
                       <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-black">
