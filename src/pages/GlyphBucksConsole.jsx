@@ -18,7 +18,7 @@ export default function GlyphBucksConsole() {
   const [user, setUser] = useState(null);
   const [entertainers, setEntertainers] = useState([]);
   const activeVenue = useActiveVenue();
-  const venueId = activeVenue?.venue_id || activeVenue?.id || "dream_palace";
+  const venueId = activeVenue?.venue_id || activeVenue?.id || null;
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
