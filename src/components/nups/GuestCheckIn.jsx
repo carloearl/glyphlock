@@ -375,7 +375,7 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
           full_name: form.full_name.trim(),
           date_of_birth: new Date(form.date_of_birth).toISOString(),
           id_type: form.id_type,
-          id_number: form.id_number,
+          id_last4: String(form.id_number || "").replace(/\s/g, "").slice(-4).toUpperCase(),
           id_state: form.id_state.toUpperCase(),
           id_expiration: form.id_expiration,
           address_line1: form.address_line1,
