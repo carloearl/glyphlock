@@ -39,7 +39,7 @@ Verification on 2026-08-20:
 `npm run check:nups-write-gateway` → PASS: `287/287 grandfathered frontend writes remain; no new bypasses.`
 
 ### Meaning
-The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **189/287** after the governed-write migration batches covering employee tips, contractor payouts/tax forms, Z-report creation, GlyphBucks/contract writes, guest/entertainer/driver/staff identity flows, customer profile writes, staff shift clock-outs, barcode-first hardcopy capture, privileged NUPS bootstrap, mode/configuration writes, venue settings, contract-terms editors, VIP session reports, VIP room operational state, and the live product/catalog/inventory layer. Batch 11 also venue-scoped product and inventory reads in Product Management, Inventory Management, the POS register, Owner inventory data, AI Insights, and Daily Settlement. The remaining baseline includes live operational debt plus deliberately retained demo/seed/sandbox/legacy calls; it does not mean those exceptions have disappeared.
+The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **178/287** after the governed-write migration batches covering employee tips, contractor payouts/tax forms, Z-report creation, GlyphBucks/contract writes, guest/entertainer/driver/staff identity flows, customer profile writes, staff shift clock-outs, barcode-first hardcopy capture, privileged NUPS bootstrap, mode/configuration writes, venue settings, contract-terms editors, VIP session reports, VIP room operational state, the live product/catalog/inventory layer, access requests, person archive snapshots, front-door config, marketing campaigns, Chart of Accounts administration, LedgerAccount seeding, and journal reversal-status marking. The remaining baseline includes meaningful explicit security/domain/telemetry audit writes plus live operational debt and deliberately retained demo/seed/sandbox/legacy calls; the raw count is therefore no longer equivalent to unresolved production risk.
 
 ### Required resolution
 Reduce the manifest monotonically, prioritizing financial, identity, contract, credential, payout, mode, and audit writes.
@@ -90,7 +90,7 @@ Production/live paths resolve `venue_id` dynamically.
 - `src/pages/VIPCommandCenter.jsx` falls back to `'dream_palace'`.
 - `src/pages/GlyphBucksConsole.jsx` falls back to `"dream_palace"`.
 - `src/components/nups/glyphbucks/GlyphBucksWorkspace.jsx` falls back to `'dream_palace'`.
-- `NUPSAccessRequest` and `StaffApplication` schemas contain a default `venue_id` of `dream_palace`.
+- `StaffApplication` still contains a default `venue_id` of `dream_palace`. The `NUPSAccessRequest` schema default was removed in Batch 12 and its fallback submission path now requires resolved venue context.
 
 Demo-only `DEMO_VENUE_001` constants are not this defect when they are provably isolated from REAL mode.
 
