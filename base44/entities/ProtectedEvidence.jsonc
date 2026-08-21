@@ -1,0 +1,107 @@
+{
+  "name": "ProtectedEvidence",
+  "type": "object",
+  "description": "Opaque references to protected NUPS identity/tax/biometric/contract evidence. Raw permanent public URLs are not canonical storage.",
+  "properties": {
+    "evidence_id": {
+      "type": "string"
+    },
+    "file_uri": {
+      "type": "string",
+      "description": "Private Base44 file URI. Never expose directly to ordinary clients."
+    },
+    "artifact_type": {
+      "type": "string",
+      "enum": [
+        "government_id_front",
+        "government_id_back",
+        "guest_photo",
+        "entertainer_credential",
+        "w9_scan",
+        "thumbprint",
+        "signed_hardcopy_contract",
+        "signature_image",
+        "verification_media",
+        "other"
+      ]
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "PRIVATE_IDENTITY",
+        "PRIVATE_TAX",
+        "PRIVATE_BIOMETRIC",
+        "PRIVATE_CONTRACT",
+        "UNKNOWN"
+      ]
+    },
+    "subject_entity": {
+      "type": "string"
+    },
+    "subject_id": {
+      "type": "string"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "content_hash": {
+      "type": "string"
+    },
+    "mime_type": {
+      "type": "string"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "default": "REAL"
+    }
+  },
+  "required": [
+    "evidence_id",
+    "file_uri",
+    "artifact_type",
+    "classification",
+    "venue_id",
+    "created_by",
+    "created_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
