@@ -344,7 +344,10 @@ export function useThreatDetection(user) {
   // Disable API key
   const disableApiKey = useCallback(async (keyId) => {
     try {
-      await base44.entities.APIKey.update(keyId, { status: 'disabled' });
+      const action = await base44.functions.invoke('manageAPIKeySecurity', {
+        action: 'disable', key_id: keyId, reason: 'Automated threat-detection response'
+      });
+      if (!action?.data?.success) throw new Error(action?.data?.error || 'Security action rejected');
       queryClient.invalidateQueries(['apiKeys']);
       toast.success('API key disabled');
       
