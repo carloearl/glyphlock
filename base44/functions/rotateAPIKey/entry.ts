@@ -9,7 +9,8 @@ export default Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { keyId } = await req.json();
+    const body = await req.json();
+    const keyId = body.keyId || body.key_id;
     
     if (!keyId) {
       return Response.json({ error: 'keyId is required' }, { status: 400 });
@@ -41,7 +42,7 @@ export default Deno.serve(async (req) => {
     const rand = (len) => cryptoRandom(len, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789');
     const hash = (len) => cryptoRandom(len, '0123456789ABCDEF');
 
-    const envTag = 'LIVE';
+    const envTag = String(existingKey.environment || 'live').toUpperCase();
 
     // Generate NEW secret key (public key stays same)
     const newSecretKey = `GLX-SEC-${envTag}-${hash(6)}-${rand(20)}`;
@@ -54,7 +55,8 @@ export default Deno.serve(async (req) => {
 
     // Update key
     const rotatedKey = await base44.asServiceRole.entities.APIKey.update(keyId, {
-      secret_key_hash: new_secret_key_hash
+      secret_key_hash: new_secret_key_hash,
+      last_rotated: new Date().toISOString()
     });
 
     // Log rotation
