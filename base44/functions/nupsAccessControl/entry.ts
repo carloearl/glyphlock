@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
         venue_id: venue_id || 'dream_palace',
         reason,
         status: 'PENDING_OWNER_APPROVAL',
-        mode: ['TEST', 'DEMO'].includes(mode) ? mode : 'TEST',
+        mode: ['SANDBOX', 'DEMO'].includes(mode) ? mode : 'SANDBOX',
         decision_log: [{ decision: 'SUBMITTED', by: email, note: '', timestamp: new Date().toISOString() }],
       });
       // Owner notification — requests can be approved in-app (NUPSAdminPortal /
@@ -217,7 +217,7 @@ Deno.serve(async (req) => {
             platform_email: r.email,
             approved_by: email,
             status: 'active',
-            is_demo: ['TEST', 'DEMO'].includes(r.mode),
+            is_demo: ['SANDBOX', 'DEMO', 'TEST'].includes(r.mode),
             created_note: `Approved via NUPSAccessRequest ${r.id} (${decision})`,
           });
           nupsUserId = nu.id;
