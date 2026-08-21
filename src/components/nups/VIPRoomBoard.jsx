@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { DoorOpen, Clock, User, DollarSign, Plus, CheckCircle2, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import GuestProfileCard from "@/components/nups/vip/GuestProfileCard";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 function RoomTimer({ startTime }) {
   const [elapsed, setElapsed] = useState(0);
@@ -43,6 +45,8 @@ const STATUS_CONFIG = {
 
 export default function VIPRoomBoard({ user }) {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [openDialog, setOpenDialog] = useState(null); // null | roomId
   const [selectedGuest, setSelectedGuest] = useState(null);
   const [entertainerId, setEntertainerId] = useState('');
@@ -52,8 +56,9 @@ export default function VIPRoomBoard({ user }) {
   const [isClosing, setIsClosing] = useState(null);
 
   const { data: rooms = [], isLoading } = useQuery({
-    queryKey: ['vip-rooms'],
-    queryFn: () => base44.entities.VIPRoom.list(),
+    queryKey: ['vip-rooms', venueId],
+    queryFn: () => venueId ? base44.entities.VIPRoom.filter({ venue_id: venueId }) : Promise.resolve([]),
+    enabled: !!venueId,
     refetchInterval: 30000,
   });
 
@@ -71,16 +76,21 @@ export default function VIPRoomBoard({ user }) {
     queryFn: () => base44.entities.Entertainer.filter({ status: 'active' }),
   });
 
-  const { data: activeVenue } = useQuery({
-    queryKey: ['venue-vip'],
-    queryFn: async () => {
-      const venues = await base44.entities.Venue.list();
-      return venues[0] || null;
-    }
-  });
-
   const openRoom = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.VIPRoom.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      if (!venueId) throw new Error('Active venue is required for VIP room updates.');
+      const result = await writeEntity({
+        entity: 'VIPRoom',
+        operation: 'update',
+        id,
+        data: { ...data, venue_id: venueId },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: 'VIP_ROOM_BOARD_OPEN',
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'VIP room update was rejected.');
+      return result.value;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['vip-rooms']);
       toast.success('Room opened');
@@ -88,7 +98,20 @@ export default function VIPRoomBoard({ user }) {
   });
 
   const closeRoom = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.VIPRoom.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      if (!venueId) throw new Error('Active venue is required for VIP room updates.');
+      const result = await writeEntity({
+        entity: 'VIPRoom',
+        operation: 'update',
+        id,
+        data: { ...data, venue_id: venueId },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: 'VIP_ROOM_BOARD_CLOSE',
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'VIP room update was rejected.');
+      return result.value;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['vip-rooms']);
       toast.success('Room closed');
@@ -96,12 +119,24 @@ export default function VIPRoomBoard({ user }) {
   });
 
   const seedRooms = useMutation({
-    mutationFn: () => base44.entities.VIPRoom.bulkCreate([
-      { room_number: '1', room_name: 'Room 1', status: 'available', rate_per_hour: 300 },
-      { room_number: '2', room_name: 'Room 2', status: 'available', rate_per_hour: 300 },
-      { room_number: '3', room_name: 'Room 3', status: 'available', rate_per_hour: 400 },
-      { room_number: 'VIP', room_name: 'The VIP Suite', status: 'available', rate_per_hour: 600 },
-    ]),
+    mutationFn: async () => {
+      if (!venueId) throw new Error('Active venue is required to set up VIP rooms.');
+      const result = await writeEntity({
+        entity: 'VIPRoom',
+        operation: 'bulkCreate',
+        data: [
+          { room_number: '1', room_name: 'Room 1', status: 'available', rate_per_hour: 300, venue_id: venueId },
+          { room_number: '2', room_name: 'Room 2', status: 'available', rate_per_hour: 300, venue_id: venueId },
+          { room_number: '3', room_name: 'Room 3', status: 'available', rate_per_hour: 400, venue_id: venueId },
+          { room_number: 'VIP', room_name: 'The VIP Suite', status: 'available', rate_per_hour: 600, venue_id: venueId },
+        ],
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: 'VIP_ROOM_SETUP',
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'VIP room setup was rejected.');
+      return result.value;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['vip-rooms']);
       toast.success('Rooms created');
@@ -253,11 +288,21 @@ export default function VIPRoomBoard({ user }) {
         }
       });
       // AUTO-PRINT TRIGGER — DIRECTIVE 5D
-      await base44.entities.VIPRoom.update(room.id, {
-        contract_print_triggered: true,
-        contract_print_triggered_at: new Date().toISOString(),
-        glyphbucks_voucher_triggered: true
+      const printWrite = await writeEntity({
+        entity: 'VIPRoom',
+        operation: 'update',
+        id: room.id,
+        data: {
+          venue_id: venueId,
+          contract_print_triggered: true,
+          contract_print_triggered_at: new Date().toISOString(),
+          glyphbucks_voucher_triggered: true
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: 'VIP_ROOM_PRINT_TRIGGER',
       });
+      if (!printWrite?.ok) throw new Error(printWrite?.block_reason || 'VIP room print trigger was rejected.');
       await base44.entities.SystemAuditLog.create({
         event_type: "VIP_PRINT_TRIGGERED",
         description: `VIP session completed. Print triggered for room_id=${room.id}`,
