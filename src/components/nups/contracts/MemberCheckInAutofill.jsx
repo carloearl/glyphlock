@@ -63,11 +63,11 @@ export default function MemberCheckInAutofill({ onPick, venueId }) {
       member_tier: TIER_MAP[g.tier] || "MEMBER",
       card_last4: g.card_last4 || "",
       card_brand: BRAND_MAP[g.card_type] || "",
-      id_scan_ref: g.id_scan_ref || (g.id_state ? `IDS-${g.id_state}-${String(g.id_number || "").slice(-4) || "0000"}` : ""),
+      id_scan_ref: g.id_scan_ref || (g.id_state ? `IDS-${g.id_state}-${String(g.id_last4 || g.id_number || "").slice(-4) || "0000"}` : ""),
       age_verified: Boolean(g.id_verified),
       date_of_birth: g.date_of_birth || "",
       id_state: g.id_state || "",
-      id_last4: String(g.id_number || "").slice(-4),
+      id_last4: String(g.id_last4 || g.id_number || "").slice(-4),
     });
     setOpen(false);
   };
