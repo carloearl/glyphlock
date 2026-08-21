@@ -16,6 +16,7 @@ import { SHIFT_CLICKWRAP } from "@/constants/shiftClickwrap";
 import useHardwareScanner from "@/hooks/useHardwareScanner";
 import { parseAAMVA } from "@/lib/nups/aamva";
 import { matchEntertainerByLicense } from "@/lib/nups/entertainerPin";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 const ShiftTimer = ({ checkInTime }) => {
   const [elapsed, setElapsed] = useState('');
@@ -145,9 +146,9 @@ export default function EntertainerCheckIn({ user }) {
   // Admin-only: hard-delete an entertainer + their open shift
   const deleteEntertainer = useMutation({
     mutationFn: async (shift) => {
-      await base44.entities.EntertainerShift.delete(shift.id);
+      await writeIdentityRecord({ entity: "EntertainerShift", operation: "delete", id: shift.id, venueId, actor: user, intent: "entertainer:admin_delete_shift", data: { venue_id: venueId } });
       const ent = entertainers.find(e => e.id === shift.entertainer_id);
-      if (ent) await base44.entities.Entertainer.delete(ent.id);
+      if (ent) await writeIdentityRecord({ entity: "Entertainer", operation: "delete", id: ent.id, venueId, actor: user, intent: "entertainer:admin_delete_profile", data: { venue_id: venueId } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-shifts'] });
