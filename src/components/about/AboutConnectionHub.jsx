@@ -1,152 +1,162 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, Fingerprint, QrCode, Workflow, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  Building2,
+  Braces,
+  Check,
+  Image as ImageIcon,
+} from "lucide-react";
 
-const NODES = [
+const PATHWAYS = [
   {
-    icon: Fingerprint,
-    label: "Identity",
-    desc: "Resolve the subject",
-    to: "/SecureQRStudio",
-    accent: "#00E4FF",
-    glow: "rgba(0,228,255,0.18)",
-  },
-  {
-    icon: QrCode,
-    label: "Image",
-    desc: "Carry the content",
+    icon: ImageIcon,
+    label: "Images + QR",
+    prompt: "Protect, activate, or verify creative work",
+    title: "Start with the carrier",
+    body: "Explore concealed-image data experiments, interactive hotspots, provenance context, and a Secure QR catalog containing 91 payload structures.",
+    cta: "Explore image technology",
     to: "/ImageLab",
-    accent: "#8C4BFF",
-    glow: "rgba(140,75,255,0.18)",
+    accent: "#00E4FF",
   },
   {
-    icon: Workflow,
-    label: "Action",
-    desc: "Run the workflow",
+    icon: Bot,
+    label: "GlyphBot",
+    prompt: "Build, inspect, or audit a digital system",
+    title: "Start with assisted intelligence",
+    body: "Use GlyphBot surfaces for guided construction, site building, system inspection, security audits, and human-approved workflows.",
+    cta: "Meet GlyphBot",
+    to: "/GlyphBot",
+    accent: "#B78CFF",
+  },
+  {
+    icon: Building2,
+    label: "Operations",
+    prompt: "Connect the work of a real venue",
+    title: "Start with NUPS",
+    body: "See identity, roles, contracts, registers, closed-loop value, payouts, reconciliation, and audit evidence work inside one venue boundary.",
+    cta: "Explore NUPS",
     to: "/NUPSLanding",
-    accent: "#F5B942",
-    glow: "rgba(245,185,66,0.18)",
+    accent: "#7DE2B8",
   },
   {
-    icon: ShieldCheck,
-    label: "Evidence",
-    desc: "Preserve the proof",
-    to: "/GovernanceHub",
-    accent: "#34D399",
-    glow: "rgba(52,211,153,0.18)",
+    icon: Braces,
+    label: "Integration",
+    prompt: "Connect an enterprise workflow",
+    title: "Start with interoperability",
+    body: "Map authorized payment references, hospitality systems, storage, analytics, hardware, APIs, and governance without erasing provider responsibility.",
+    cta: "Review integration paths",
+    to: "/SDKDocs",
+    accent: "#F4C76B",
   },
 ];
 
 export default function AboutConnectionHub() {
   const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
+  const selected = PATHWAYS[active];
+  const SelectedIcon = selected.icon;
 
   return (
-    <div className="relative mx-auto w-full max-w-[34rem]">
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#071827] via-[#03070d] to-[#150a22] p-5 shadow-[0_35px_100px_rgba(0,0,0,0.55)] sm:p-6">
-        {/* header strip */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-black/80">
-              <span className="bg-gradient-to-br from-[#00E4FF] to-[#8C4BFF] bg-clip-text text-base font-black text-transparent">
-                GL
-              </span>
-            </span>
-            <div className="leading-tight">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white">GlyphLock Core</p>
-              <p className="text-[10px] text-slate-500">Every layer, one evidence architecture</p>
-            </div>
+    <aside
+      aria-label="Choose where to enter the GlyphLock ecosystem"
+      className="relative mx-auto w-full max-w-[35rem]"
+    >
+      <div className="absolute -inset-px rounded-[2rem] bg-gradient-to-b from-white/20 via-[#00E4FF]/10 to-transparent opacity-70" />
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#070A0F]/95 p-5 shadow-[0_35px_100px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-6">
+        <div className="flex items-start justify-between gap-5 border-b border-white/10 pb-5">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#8EEBFF]">
+              Find your entry point
+            </p>
+            <h2 className="mt-2 text-xl font-black tracking-tight text-white sm:text-2xl">
+              What needs to become verifiable?
+            </h2>
           </div>
-          <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-emerald-300">
+          <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
             Interactive
           </span>
         </div>
 
-        {/* node grid */}
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          {NODES.map((node, index) => {
-            const Icon = node.icon;
-            const isActive = active === index;
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          {PATHWAYS.map((pathway, index) => {
+            const Icon = pathway.icon;
+            const isActive = index === active;
             return (
-              <motion.div
-                key={node.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 + index * 0.07 }}
+              <button
+                key={pathway.label}
+                type="button"
+                onClick={() => setActive(index)}
                 onMouseEnter={() => setActive(index)}
+                aria-pressed={isActive}
+                className={
+                  "group flex min-h-[5.25rem] items-start gap-3 rounded-2xl border p-3.5 text-left transition focus:outline-none focus:ring-2 focus:ring-[#00E4FF] " +
+                  (isActive
+                    ? "border-white/25 bg-white/[0.07]"
+                    : "border-white/[0.08] bg-white/[0.025] hover:border-white/15 hover:bg-white/[0.045]")
+                }
               >
-                <Link
-                  to={node.to}
-                  className={
-                    "group relative flex h-full flex-col gap-3 rounded-2xl border p-4 transition-all focus:outline-none focus:ring-2 focus:ring-[#00E4FF] " +
-                    (isActive
-                      ? "border-white/25 bg-white/[0.06]"
-                      : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.045]")
-                  }
-                  style={isActive ? { boxShadow: "0 0 30px " + node.glow } : undefined}
+                <span
+                  className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/60"
+                  style={{ color: pathway.accent }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-black/60"
-                      style={{ color: node.accent }}
-                    >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <ArrowUpRight
-                      className={"h-4 w-4 transition-colors " + (isActive ? "text-white" : "text-slate-600 group-hover:text-slate-400")}
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-black text-white">{node.label}</p>
-                    <p className="mt-0.5 text-[11px] leading-tight text-slate-400">{node.desc}</p>
-                  </div>
-                  <div
-                    className="h-0.5 w-full rounded-full transition-all"
-                    style={{ background: isActive ? node.accent : "rgba(255,255,255,0.08)" }}
-                  />
-                </Link>
-              </motion.div>
+                  <Icon className="h-4.5 w-4.5" aria-hidden="true" />
+                </span>
+                <span>
+                  <span className="block text-xs font-black text-white">{pathway.label}</span>
+                  <span className="mt-1 block text-[10px] leading-relaxed text-slate-500">
+                    {pathway.prompt}
+                  </span>
+                </span>
+              </button>
             );
           })}
         </div>
 
-        {/* connecting flow line */}
-        <div className="mt-5 rounded-2xl border border-white/10 bg-black/40 p-4">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-            The operating pattern
-          </p>
-          <div className="mt-3 flex items-center gap-2 overflow-x-auto">
-            {NODES.map((node, index) => (
-              <React.Fragment key={node.label}>
-                <span
-                  className="shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold"
-                  style={{
-                    color: node.accent,
-                    borderColor: node.accent + "40",
-                    background: node.accent + "12",
-                  }}
-                >
-                  {node.label}
-                </span>
-                {index < NODES.length - 1 ? (
-                  <span className="text-slate-600" aria-hidden="true">→</span>
-                ) : null}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-
-        {/* primary CTA */}
-        <a
-          href="#ecosystem"
-          className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] px-5 py-3 text-sm font-black text-white transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00E4FF] focus:ring-offset-2 focus:ring-offset-black"
+        <motion.div
+          key={selected.label}
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28 }}
+          className="mt-4 rounded-2xl border border-white/10 bg-black/45 p-5"
         >
-          Explore the complete ecosystem
-          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-        </a>
+          <div className="flex items-center gap-3">
+            <span
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.035]"
+              style={{ color: selected.accent }}
+            >
+              <SelectedIcon className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+                Recommended path
+              </p>
+              <h3 className="mt-1 text-base font-black text-white">{selected.title}</h3>
+            </div>
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-slate-400 sm:text-sm">{selected.body}</p>
+          <Link
+            to={selected.to}
+            className="group mt-5 flex items-center justify-between rounded-xl bg-white px-4 py-3 text-sm font-black text-black transition hover:bg-[#DDFBFF] focus:outline-none focus:ring-2 focus:ring-[#00E4FF] focus:ring-offset-2 focus:ring-offset-black"
+          >
+            {selected.cta}
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </Link>
+        </motion.div>
+
+        <div className="mt-4 grid grid-cols-4 gap-1.5" aria-label="GlyphLock evidence sequence">
+          {["Identify", "Permit", "Record", "Verify"].map((label, index) => (
+            <div key={label} className="rounded-lg border border-white/[0.07] bg-white/[0.025] px-2 py-2 text-center">
+              <Check className="mx-auto h-3 w-3 text-[#7DE2B8]" aria-hidden="true" />
+              <span className="mt-1 block text-[8px] font-black uppercase tracking-[0.12em] text-slate-500">
+                {index + 1}. {label}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }
