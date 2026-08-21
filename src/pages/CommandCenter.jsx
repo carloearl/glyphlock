@@ -910,7 +910,7 @@ function SecurityTab({ threatDetection }) {
 function APIKeysTab({ user }) {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
-  const [visibleKeys, setVisibleKeys] = useState({});
+  const [oneTimeSecret, setOneTimeSecret] = useState(null);
   const [newKeyName, setNewKeyName] = useState("");
   const [newKeyEnv, setNewKeyEnv] = useState("live");
 
@@ -937,9 +937,7 @@ function APIKeysTab({ user }) {
       setShowCreate(false);
       setNewKeyName("");
       
-      if (newKey.secret_key) {
-        alert(`🔐 SECRET KEY (save now - won't show again!):\n\n${newKey.secret_key}\n\nPublic Key: ${newKey.public_key}`);
-      }
+      if (newKey.secret_key) setOneTimeSecret({ kind: 'created', public_key: newKey.public_key, secret_key: newKey.secret_key });
       toast.success("API key created");
     }
   });
@@ -950,8 +948,9 @@ function APIKeysTab({ user }) {
       if (!response?.data) throw new Error('API key rotation failed');
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (rotated) => {
       queryClient.invalidateQueries(['apiKeys']);
+      if (rotated?.secret_key) setOneTimeSecret({ kind: 'rotated', public_key: rotated.public_key, secret_key: rotated.secret_key });
       toast.success("API key rotated");
     }
   });
@@ -973,8 +972,6 @@ function APIKeysTab({ user }) {
     toast.success(`${label} copied`);
   };
 
-  const maskKey = (key) => key ? `${key.substring(0, 12)}••••••••${key.substring(key.length - 4)}` : "••••••••";
-
   if (isLoading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-cyan-400" /></div>;
   }
@@ -991,6 +988,16 @@ function APIKeysTab({ user }) {
           Create Key
         </Button>
       </div>
+
+      {oneTimeSecret && (
+        <Card className="bg-amber-950/20 border-amber-500/40">
+          <CardContent className="p-5 space-y-3">
+            <p className="text-amber-200 font-semibold">{oneTimeSecret.kind === 'rotated' ? 'Replacement secret generated' : 'API key created'}</p>
+            <p className="text-sm text-amber-100/70">Save this secret now. It is not stored in the APIKey record and will not be shown again.</p>
+            <div className="flex gap-2"><Input readOnly value={oneTimeSecret.secret_key} className="font-mono bg-slate-950" /><Button onClick={() => copyToClipboard(oneTimeSecret.secret_key, 'One-time secret')}><Copy className="w-4 h-4 mr-2" />Copy</Button><Button variant="outline" onClick={() => setOneTimeSecret(null)}>Dismiss</Button></div>
+          </CardContent>
+        </Card>
+      )}
 
       {showCreate && (
         <Card className="bg-slate-900/50 border-cyan-500/30">
@@ -1056,8 +1063,8 @@ function APIKeysTab({ user }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={key.environment === 'live' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'}>
-                      {key.environment}
+                    <Badge className={(key.environment || 'live') === 'live' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'}>
+                      {key.environment || 'live'}
                     </Badge>
                     <Button size="sm" variant="ghost" onClick={() => rotateKeyMutation.mutate(key.id)} disabled={rotateKeyMutation.isPending}>
                       <RefreshCw className={`w-4 h-4 ${rotateKeyMutation.isPending ? 'animate-spin' : ''}`} />
@@ -1080,17 +1087,7 @@ function APIKeysTab({ user }) {
                   </div>
                   <div>
                     <Label className="text-xs text-slate-500">Secret Key</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <code className="flex-1 bg-slate-800 px-3 py-2 rounded text-xs text-white font-mono truncate">
-                        {visibleKeys[key.id] ? key.secret_key : maskKey(key.secret_key)}
-                      </code>
-                      <Button size="sm" variant="ghost" onClick={() => setVisibleKeys(prev => ({ ...prev, [key.id]: !prev[key.id] }))}>
-                        {visibleKeys[key.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => copyToClipboard(key.secret_key, "Secret key")}>
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <div className="mt-1 bg-slate-800 px-3 py-2 rounded text-xs text-slate-400">Secret shown only at creation or rotation. Stored records contain only its hash.</div>
                   </div>
                 </div>
               </CardContent>
