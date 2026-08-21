@@ -22,6 +22,15 @@
       "type": "string",
       "description": "Owner email"
     },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "live",
+        "test"
+      ],
+      "default": "live",
+      "description": "Safe environment metadata. Plaintext secret material is never stored here."
+    },
     "status": {
       "type": "string",
       "enum": [
