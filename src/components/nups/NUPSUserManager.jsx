@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -185,6 +187,8 @@ function EmployeeRow({ nupsUser, isAdmin, onDelete, onUpdate }) {
 // ─── Main Component ──────────────────────────────────────────────────
 export default function NUPSUserManager({ currentUser }) {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const isAdmin = currentUser?.role === "admin" || currentUser?._highestRole === "PLATFORM_ADMIN";
 
   const [newForm, setNewForm] = useState({ full_name: "", username: "", pin: "", role: "BARTENDER", employee_id: "" });
@@ -196,7 +200,7 @@ export default function NUPSUserManager({ currentUser }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.NUPSUser.create({ ...data, status: "active" }),
+    mutationFn: (data) => writeIdentityRecord({ entity: "NUPSUser", operation: "create", venueId, actor: currentUser, intent: "staff:nups_user_manager:create", data: { ...data, venue_id: venueId, status: "active" } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nups-users-manager'] });
       queryClient.invalidateQueries({ queryKey: ['nups-users-for-pin'] });
@@ -206,7 +210,7 @@ export default function NUPSUserManager({ currentUser }) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.NUPSUser.update(id, data),
+    mutationFn: ({ id, data }) => writeIdentityRecord({ entity: "NUPSUser", operation: "update", id, venueId, actor: currentUser, intent: "staff:nups_user_manager:update", data: { ...data, venue_id: venueId } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nups-users-manager'] });
       queryClient.invalidateQueries({ queryKey: ['nups-users-for-pin'] });
@@ -214,7 +218,7 @@ export default function NUPSUserManager({ currentUser }) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.NUPSUser.delete(id),
+    mutationFn: (id) => writeIdentityRecord({ entity: "NUPSUser", operation: "delete", id, venueId, actor: currentUser, intent: "staff:nups_user_manager:delete", data: { venue_id: venueId } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nups-users-manager'] });
       queryClient.invalidateQueries({ queryKey: ['nups-users-for-pin'] });
