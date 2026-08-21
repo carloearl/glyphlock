@@ -39,7 +39,7 @@ Verification on 2026-08-20:
 `npm run check:nups-write-gateway` → PASS: `287/287 grandfathered frontend writes remain; no new bypasses.`
 
 ### Meaning
-The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **176/287** after Batch 13 moved the live mobile-scanner GuestProfile create/update paths through the identity gateway in addition to the earlier migration batches. The remaining baseline includes meaningful explicit security/domain/telemetry audit writes plus live operational debt and deliberately retained demo/seed/sandbox/legacy calls; the raw count is therefore no longer equivalent to unresolved production risk.
+The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **170/287** after Batch 14 removed the remaining direct frontend APIKey update/delete paths and continued the protected-evidence migration. The remaining baseline includes meaningful explicit security/domain/telemetry audit writes plus live operational debt and deliberately retained demo/seed/sandbox/legacy calls; the raw count is therefore no longer equivalent to unresolved production risk.
 
 ### Required resolution
 Reduce the manifest monotonically, prioritizing financial, identity, contract, credential, payout, mode, and audit writes.
@@ -79,19 +79,21 @@ The active UI boundary is now verified: entertainers are not mounted into employ
 
 **Severity:** HIGH  
 **Invariant:** INV-05  
-**Status:** OPEN
+**Status:** RESOLVED — LIVE VENUE RESOLUTION HARDENED
 
 ### Expected
 Production/live paths resolve `venue_id` dynamically.
 
 ### Observed examples
 
-Batch 13 removed the `StaffApplication` production venue default and changed live staff onboarding, GlyphBucks sale, GlyphBucks contract, and unified contract flows to resolve active venue dynamically. Remaining production/backend hardcodes still exist in functions including `nupsClockIn`, `registerVIPBills`, `vipContractGenerate`, and the Stripe integration health probe. `getSessionVenueId` also carries an explicit allowed-venue list that requires a separate tenancy-policy decision rather than blind deletion.
+Batch 13 removed the `StaffApplication` production venue default and changed live staff onboarding, GlyphBucks sale, GlyphBucks contract, and unified contract flows to resolve active venue dynamically. Batch 14 removed the remaining live backend fixed-venue dependencies from `nupsClockIn`, `registerVIPBills`, `vipContractGenerate`, the Stripe integration health probe, and the source-coded `getSessionVenueId` allow-list.
 
-Demo-only `DEMO_VENUE_001`, demo seeders, sandbox fixtures, historical cleanup functions, and schema-description examples are not this defect when they are provably isolated from REAL mode.
+`nupsClockIn` now resolves pre-auth public mode from a trusted terminal-to-venue binding (`VenuePaymentConfig.terminal_id`) and fails closed when no trusted terminal venue exists. Authenticated staff sessions and shifts use the assigned active Venue. VIP bill registration and contract generation derive venue from the authenticated NUPS identity, with explicit global-role cross-venue validation. `getSessionVenueId` validates against active Venue records rather than a manual source-code list.
 
-### Required resolution
-Replace production fallbacks with active/session venue resolution and fail closed when a required venue cannot be resolved.
+Remaining Dream Palace / DP identifiers are classified as demo/sandbox fixtures, historical cleanup/migration code, documentation/schema examples, a rate-limit action label, or venue-specific legal contract text. None identified by the Batch 14 sweep is a live production `venue_id` fallback.
+
+### Resolution
+Live production venue resolution is dynamic and fail-closed. New venues no longer require source-code allow-list edits for session validation.
 
 ---
 
@@ -200,7 +202,12 @@ This mapping did not prove that every identity upload path forces non-public sto
 Trace entertainer, guest, driver, contract, thumbprint, ID-front/back, W-9, and verification-media upload functions. Prove access control at the storage and retrieval boundary.
 
 ### Batch 13 evidence
-Live paths including `GlyphBucksContract`, `IDScannerCamera`, `BarcodeFirstCapture`, and `ContractorOnboardingPanel` use generic `UploadFile` and persist returned URL strings directly. `FileStorage.file_url` is explicitly described by its schema as a public URL, but these identity paths do not consistently route through `FileStorage`; therefore the underlying access behavior of the returned upload URLs remains UNVERIFIED. Archive/search viewers were hardened to stop emitting raw protected-media URLs or rendering archived ID/thumbprint/hardcopy images directly until an authorized private retrieval path is proven. This is mitigation, not closure.
+Live paths including `GlyphBucksContract`, `IDScannerCamera`, `BarcodeFirstCapture`, and `ContractorOnboardingPanel` used generic `UploadFile` and persisted returned URL strings directly. Archive/search viewers were hardened to stop emitting raw protected-media URLs or rendering archived ID/thumbprint/hardcopy images directly until an authorized private retrieval path could be proven.
+
+### Batch 14 progress
+The application already exposed Base44 private-file primitives (`UploadPrivateFile` + `CreateFileSignedUrl`). Batch 14 introduced `ProtectedEvidence` as the opaque canonical reference layer plus server-side `registerProtectedEvidence` and `getProtectedEvidence` authorization. Live W-9, government-ID, entertainer-license, verification-media, hardcopy-contract, guest-photo, and thumbprint capture paths now use private file URIs; signed URLs are short-lived and generated only for temporary OCR/preview or authorized retrieval. Contract archive queries were additionally venue-scoped.
+
+The issue remains OPEN because anonymous, wrong-role, and wrong-venue retrieval denial have not yet been exercised end-to-end with runtime identities. Static architecture is implemented; adversarial retrieval testing remains required.
 
 ---
 
@@ -225,7 +232,7 @@ Store non-secret evidence and test timestamp. Never promote from settings alone.
 
 **Severity:** CRITICAL  
 **Invariant:** INV-07  
-**Status:** OPEN — SECURITY BOUNDARY REQUIRED
+**Status:** OPEN — PRIVATE BOUNDARY IMPLEMENTED; RUNTIME AUTHZ TESTS PENDING
 
 ### Expected
 Government IDs, entertainer credentials, W-9 scans, signatures, thumbprint imagery, and signed-contract evidence must be stored non-publicly and retrieved only through an authenticated, role/venue-authorized path.
@@ -236,8 +243,31 @@ Several live workflows call generic `UploadFile`, retain the returned `file_url`
 ### Immediate mitigation
 Batch 13 removed direct protected-media links/images from `ContractViewer`, `ContractDetailCard`, and `ContractDetailModal`. Presence and hashes remain visible, but raw archived media URLs are not emitted by those viewers.
 
+### Batch 14 implementation
+`ProtectedEvidence` now stores opaque private Base44 `file_uri` references and evidence metadata. `registerProtectedEvidence` resolves the authenticated NUPS identity and enforces venue/classification registration rules. `getProtectedEvidence` authorizes by role + venue + evidence classification + purpose context, emits explicit security audit events, and returns only a 120-second signed URL. Live protected capture paths store `protected:<evidence-record-id>` references instead of permanent routable media URLs.
+
+### Remaining resolution
+Run synthetic end-to-end authorization tests proving anonymous retrieval denial, wrong-role denial, and wrong-venue denial. Do not re-enable raw archived media viewing until those tests pass.
+
+---
+
+## NUPS-0012 — API-key UI assumes retrievable plaintext secrets
+
+**Severity:** HIGH  
+**Invariant:** INV-07  
+**Status:** OPEN — UI/SECRET-LIFECYCLE DRIFT
+
+### Expected
+API-key plaintext secrets are generated server-side, returned only once during creation/rotation, and never persisted or assumed retrievable from ordinary APIKey list records.
+
+### Observed
+The canonical `APIKey` schema stores `secret_key_hash`, not plaintext `secret_key`, and `generateAPIKey` returns the plaintext secret only at creation. Batch 14 removed client-side secret generation and direct APIKey update/delete security actions, but `DeveloperKeys` still contains legacy display/copy UI that references fields such as `key.secret_key`, `environment`, and `env_key` as though persisted keys were recoverable.
+
+### Risk
+The stale UI can mislead operators about secret recoverability, produce broken copy/export controls, and encourage future code to reintroduce plaintext secret persistence.
+
 ### Required resolution
-Implement or identify a server-authorized private upload/retrieval mechanism, migrate protected identity capture to opaque references/private objects, enforce role + venue + purpose checks, and test unauthenticated retrieval rejection with synthetic evidence before re-enabling protected-media viewing.
+Refactor API-key list/detail UI to display only persisted safe metadata. Show/copy a plaintext secret exclusively from the one-time creation/rotation response and then discard it from client state.
 
 ---
 
