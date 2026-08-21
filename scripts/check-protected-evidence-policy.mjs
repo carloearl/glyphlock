@@ -24,6 +24,7 @@ const contractArchiveUi = [
   'src/components/nups/ContractDetailModal.jsx',
 ].map(read).join('\n');
 const retrieval = read('base44/functions/getProtectedEvidence/entry.ts');
+const vipContract = read('src/pages/VIPContract.jsx');
 
 assert.doesNotMatch(roster, /<img[^>]+license_photo_url/i, 'Credential roster must not render the stored credential reference directly.');
 assert.doesNotMatch(transactionSearch, /href=\{media\.media_url\}/, 'Transaction search must not expose legacy VerificationMedia URLs.');
@@ -31,5 +32,9 @@ assert.doesNotMatch(taxForms, /href=\{r\.form\.scanned_form_url\}/, 'Tax-form li
 assert.doesNotMatch(contractArchiveUi, /<(?:img|a)[^>]+(?:id_photo|thumbprint|signed_hardcopy|guest_photo)_url/i, 'Contract archives must not render stored protected-media references directly.');
 assert.doesNotMatch(retrieval, /metadata\s*:\s*\{[^}]*\b(?:file_uri|signed_url)\b/is, 'Protected-evidence audit metadata must not contain private file URIs or signed URLs.');
 assert.match(retrieval, /expires_in:\s*120/, 'Authorized retrieval must issue a short-lived signed URL.');
+assert.doesNotMatch(vipContract, /Core\.UploadFile/, 'VIP contract signing must not upload identity/biometric evidence through public-file storage.');
+assert.match(vipContract, /uploadProtectedEvidence/, 'VIP contract signing must use the protected-evidence upload path.');
+assert.match(vipContract, /protected:\$\{protectedEvidenceRefs\.thumbprint\}/, 'VIP contract signing must submit an opaque protected thumbprint reference.');
+assert.match(vipContract, /protected:\$\{protectedEvidenceRefs\.id_front\}/, 'VIP contract signing must submit an opaque protected government-ID reference.');
 
 console.log('[check:protected-evidence-policy] passed: role/classification/venue matrix fails closed and protected archive UIs emit no raw evidence URLs.');
