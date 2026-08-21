@@ -1,14 +1,14 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Printer, Star } from "lucide-react";
-
-const BIZ_NAME = "Dream Palace";
-const BIZ_LEGAL = "Liberty Holding Group, L.L.C. dba The Dream Palace";
-const BIZ_ADDRESS = "815 N. Scottsdale Road, Tempe, AZ 85281";
-const BIZ_PHONE = "(602) 536-0372";
-const BIZ_TAX_ID = "Tax ID: 88-1234567";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 export default function VIPReceiptPrinter({ room, guestName, contractNumber, dreamDollarValue = 0, grandTotal = 0 }) {
+  const activeVenue = useActiveVenue();
+  const BIZ_NAME = activeVenue?.name || "Active Venue";
+  const BIZ_LEGAL = activeVenue?.legal_name || activeVenue?.name || "Active Venue";
+  const BIZ_ADDRESS = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(", ");
+  const BIZ_PHONE = activeVenue?.phone || "";
   const printVIPReceipt = () => {
     const now = new Date();
     const html = `<html><head><title>VIP Receipt - ${contractNumber || 'N/A'}</title>
@@ -30,8 +30,7 @@ export default function VIPReceiptPrinter({ room, guestName, contractNumber, dre
         <div style="font-size:9px;">N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE</div>
         <div style="font-size:9px;margin-top:2px;">${BIZ_LEGAL}</div>
         <div style="font-size:10px;font-weight:bold;margin-top:2px;">${BIZ_ADDRESS}</div>
-        <div style="font-size:10px;">Tel: ${BIZ_PHONE}</div>
-        <div style="font-size:9px;">${BIZ_TAX_ID}</div>
+        ${BIZ_PHONE ? `<div style="font-size:10px;">Tel: ${BIZ_PHONE}</div>` : ''}
       </div>
       <div class="double"></div>
       
@@ -51,7 +50,7 @@ export default function VIPReceiptPrinter({ room, guestName, contractNumber, dre
       <table>
         <tr><td>Room Charge:</td><td style="text-align:right;">$${((room?.duration_minutes || 60) / 60 * (room?.rate_per_hour || 300)).toFixed(2)}</td></tr>
         ${dreamDollarValue > 0 ? `
-        <tr><td>Dream Dollars Purchased:</td><td style="text-align:right;">$${dreamDollarValue.toFixed(2)}</td></tr>
+        <tr><td>GlyphBucks Purchased:</td><td style="text-align:right;">$${dreamDollarValue.toFixed(2)}</td></tr>
         <tr><td>Processing Surcharge (30%):</td><td style="text-align:right;">$${(dreamDollarValue * 0.3).toFixed(2)}</td></tr>
         ` : ''}
         <tr><td>Sales Tax (AZ 8%):</td><td style="text-align:right;">$${(grandTotal * 0.08).toFixed(2)}</td></tr>
