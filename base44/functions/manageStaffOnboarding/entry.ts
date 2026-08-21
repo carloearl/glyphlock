@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
     if (body.action !== 'finalizeActivation') return Response.json({ error: 'Unknown action.' }, { status: 400 });
     const application = await E.StaffApplication.get(body.application_id).catch(() => null);
     if (!application) return Response.json({ error: 'Application not found.' }, { status: 404 });
+    if (!application.venue_id) return Response.json({ error: 'Application is missing an active venue assignment.' }, { status: 409 });
     if (application.application_type !== 'W2_EMPLOYEE') return Response.json({ error: 'Independent contractors must use the separate 1099 onboarding workflow.' }, { status: 409 });
     if (application.status === 'ACTIVE' || application.nups_user_id) return Response.json({ error: 'Credentials were already issued for this application.' }, { status: 409 });
 
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
       username: usernameBase + '.' + sequence.slice(-3), full_name: application.full_legal_name,
       display_name: application.preferred_name || application.full_legal_name,
       platform_email: String(application.email).toLowerCase(), phone: application.phone,
-      role: cleanRole, venue_id: application.venue_id || 'dream_palace', employee_id: employeeNumber,
+      role: cleanRole, venue_id: application.venue_id, employee_id: employeeNumber,
       status: 'active', approved_by: caller.email, pin_hash, pin_salt, pin_lookup: lookup,
       pin_must_change: true, pin_issued_at: ts, created_by_manager: true
     });
@@ -85,7 +86,7 @@ Deno.serve(async (req) => {
     });
     await E.AuditEvent.create({
       event_id:crypto.randomUUID(), timestamp:ts, actor_id:caller.email, actor_role:caller.role || 'manager',
-      venue_id:application.venue_id || 'dream_palace', entity_type:'StaffApplication', entity_id:application.id,
+      venue_id:application.venue_id, entity_type:'StaffApplication', entity_id:application.id,
       action:'UPDATE', is_system_action:false, severity:'INFO',
       description:'STAFF_ACTIVATED: onboarding gates verified and temporary credentials issued'
     }).catch(() => null);
