@@ -88,12 +88,12 @@ Production/live paths resolve `venue_id` dynamically.
 
 Batch 13 removed the `StaffApplication` production venue default and changed live staff onboarding, GlyphBucks sale, GlyphBucks contract, and unified contract flows to resolve active venue dynamically. Batch 14 removed the remaining live backend fixed-venue dependencies from `nupsClockIn`, `registerVIPBills`, `vipContractGenerate`, the Stripe integration health probe, and the source-coded `getSessionVenueId` allow-list.
 
-`nupsClockIn` now resolves pre-auth public mode from a trusted terminal-to-venue binding (`VenuePaymentConfig.terminal_id`) and fails closed when no trusted terminal venue exists. Authenticated staff sessions and shifts use the assigned active Venue. VIP bill registration and contract generation derive venue from the authenticated NUPS identity, with explicit global-role cross-venue validation. `getSessionVenueId` validates against active Venue records rather than a manual source-code list.
+`nupsClockIn` now resolves pre-auth public mode from the canonical trusted `VenueTerminal` registry and fails closed when no trusted terminal venue exists. A temporary migration fallback accepts an already configured `VenuePaymentConfig.terminal_id` only when no trusted `VenueTerminal` record exists. Authenticated staff sessions and shifts use the assigned active Venue. VIP bill registration, contract generation, and `vipWorkflow` derive or validate venue from authenticated NUPS/kiosk identity, with explicit global-role cross-venue handling. `getSessionVenueId` validates against active Venue records rather than a manual source-code list.
 
 Remaining Dream Palace / DP identifiers are classified as demo/sandbox fixtures, historical cleanup/migration code, documentation/schema examples, a rate-limit action label, or venue-specific legal contract text. None identified by the Batch 14 sweep is a live production `venue_id` fallback.
 
 ### Resolution
-Live production venue resolution is dynamic and fail-closed. New venues no longer require source-code allow-list edits for session validation.
+Live production venue resolution is dynamic and fail-closed. New venues no longer require source-code allow-list edits for session validation. Batch 15 also removed Dream Palace wording from the live `vipWorkflow` configuration seeder and replaced it with the resolved venue name.
 
 ---
 
