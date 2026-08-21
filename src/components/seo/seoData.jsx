@@ -14,17 +14,17 @@ export const SEO_DATA = {
     internalLinks: ["/master-covenant", "/pricing", "/consultation", "/security-tools"]
   },
   "About": {
-    title: "About GlyphLock Security | Enterprise Cybersecurity Architecture | GlyphLock LLC",
-    description: "GlyphLock LLC builds enterprise-grade quantum-resistant cybersecurity infrastructure with AI-powered threat detection, visual cryptography, and structured compliance readiness. Based in Arizona.",
-    keywords: ["enterprise cybersecurity", "quantum-resistant architecture", "AI security platform", "GlyphLock Security", "post-quantum cryptography"],
-    h1: "Enterprise Security Architecture for the Post-Quantum Era",
+    title: "About GlyphLock | From an Image to Verifiable Operations",
+    description: "GlyphLock began with a question about what an image could prove. Today NUPS, GlyphLock Verification, and GlyphBot connect identity, permission, activity, contracts, transaction references, and audit evidence.",
+    keywords: ["GlyphLock", "NUPS", "Nexus Unified POS System", "venue operations", "QR verification", "digital authorship", "audit evidence", "GlyphBot", "Carlo Rene Earl", "El Mirage Arizona"],
+    h1: "It Started with an Image. It Became a Way to Prove What Happened.",
     url: "/about",
-    ogTitle: "About GlyphLock Security | Enterprise Cybersecurity Architecture",
-    ogDescription: "Building post-quantum resilient security infrastructure with AI-governed defense systems.",
+    ogTitle: "About GlyphLock | Verifiable Creative and Venue Operations",
+    ogDescription: "The story and architecture connecting GlyphLock's identity, verification, NUPS venue operations, assisted construction, and evidence workflows.",
     schemaType: "AboutPage",
     priority: 0.8,
     changefreq: "monthly",
-    internalLinks: ["/partners", "/dream-team", "/roadmap"]
+    internalLinks: ["/NUPSLanding", "/consultation", "/about-carlo", "/roadmap"]
   },
   "Pricing": {
     title: "Enterprise Security Plans | GlyphLock LLC",
