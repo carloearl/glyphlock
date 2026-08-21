@@ -212,8 +212,14 @@ Deno.serve(async (req) => {
     const firstName = nameParts.shift() || String(guest_name).trim();
     const lastName = nameParts.join(' ');
     const profileIdTypeMap = {
-      'Drivers License': 'drivers_license', 'State ID': 'state_id', Passport: 'passport',
-      'Military ID': 'military_id', 'Tribal ID': 'tribal_id'
+      'Drivers License': 'drivers_license', drivers_license: 'drivers_license',
+      'State ID': 'state_id', state_id: 'state_id', Passport: 'passport', passport: 'passport',
+      'Military ID': 'military_id', military_id: 'military_id', 'Tribal ID': 'tribal_id', tribal_id: 'tribal_id'
+    };
+    const vipIdTypeMap = {
+      drivers_license: 'Drivers License', 'Drivers License': 'Drivers License',
+      state_id: 'State ID', 'State ID': 'State ID', passport: 'Passport', Passport: 'Passport',
+      military_id: 'Military ID', 'Military ID': 'Military ID', tribal_id: 'Tribal ID', 'Tribal ID': 'Tribal ID'
     };
     let guestProfile = (await base44.asServiceRole.entities.GuestProfile.filter({ guest_id: guestIdentityKey, venue_id }, null, 1).catch(() => []))?.[0] || null;
     const profileData = {
@@ -255,7 +261,7 @@ Deno.serve(async (req) => {
       full_name: String(guest_name).trim(),
       date_of_birth: dob.toISOString(),
       phone: phone || undefined,
-      id_type: government_id_type || 'Drivers License',
+      id_type: vipIdTypeMap[government_id_type] || 'Drivers License',
       id_last4: normalizedGovernmentId.slice(-4),
       id_state: String(government_id_state || '').toUpperCase() || undefined,
       id_verified: true,
@@ -283,6 +289,11 @@ Deno.serve(async (req) => {
       guest_record_id: guestRecord.id,
       metadata: {
         ...(tokenRecord.metadata || {}),
+        host_name,
+        host_signature_hash: hostSignatureHash,
+        manager_name,
+        manager_signature_hash: managerSignatureHash,
+        signatures_count: 3,
         guest_profile_id: guestProfile.id,
         guest_identity_key: guestIdentityKey,
       },
