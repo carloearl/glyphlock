@@ -16,7 +16,7 @@
     },
     "secret_key_hash": {
       "type": "string",
-      "description": "SHA-256 hash of secret key"
+      "description": "SHA-256 hash of secret key. Plaintext secret is never persisted."
     },
     "owner_id": {
       "type": "string",
@@ -43,6 +43,42 @@
     "last_used": {
       "type": "string",
       "format": "date-time"
+    },
+    "last_rotated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rotation_schedule": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "30_days",
+        "60_days",
+        "90_days"
+      ],
+      "default": "manual"
+    },
+    "geo_lock": {
+      "type": "boolean",
+      "default": false
+    },
+    "device_lock": {
+      "type": "boolean",
+      "default": false
+    },
+    "ip_allowlist": {
+      "type": "string",
+      "description": "Optional comma/newline separated IP/CIDR policy metadata."
+    },
+    "revoked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revoked_by": {
+      "type": "string"
+    },
+    "revoke_reason": {
+      "type": "string"
     }
   },
   "required": [
