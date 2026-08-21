@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 // NOTE: Bar presets (non-door) keep legacy seed amounts. They drive non-door
 // stations only and are NOT subject to the DACO-FRONTDOOR-DRIVER directive.
@@ -38,7 +39,7 @@ const DOOR_PRESETS = [
 const DISCOUNT_PRESETS = [10, 15, 20, 25, 30, 50];
 
 // ─── Quick Add Product (inline form) ─────────────────────────────────────────
-function QuickAddProduct({ onClose }) {
+function QuickAddProduct({ onClose, venueId }) {
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -49,11 +50,24 @@ function QuickAddProduct({ onClose }) {
 
   const save = async () => {
     if (!name || !price) return;
+    if (!venueId) return;
     setSaving(true);
-    await base44.entities.POSProduct.create({ name, price: parseFloat(price), category, is_active: true, stock_quantity: 99, taxable: true, tax_rate: 0.08 });
-    queryClient.invalidateQueries({ queryKey: ['pos-products'] });
-    setSaving(false);
-    onClose();
+    try {
+      const me = await base44.auth.me();
+      const result = await writeEntity({
+        entity: "POSProduct",
+        operation: "create",
+        data: { name, price: parseFloat(price), category, is_active: true, stock_quantity: 99, taxable: true, tax_rate: 0.08, venue_id: venueId },
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+        venue_id: venueId,
+        intent: "QUICK_CHARGE_PRODUCT_CREATE",
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Quick-add product was rejected.");
+      queryClient.invalidateQueries({ queryKey: ['pos-products'] });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -201,7 +215,7 @@ export default function QuickChargePanel({ onAddItem, onSetDiscount, currentDisc
       {/* Quick Add Product — hidden on door */}
       {!isDoor && (
         showQuickAdd ? (
-          <QuickAddProduct onClose={() => setShowQuickAdd(false)} />
+          <QuickAddProduct onClose={() => setShowQuickAdd(false)} venueId={venueId} />
         ) : (
           <button onClick={() => setShowQuickAdd(true)}
             className="w-full h-9 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
