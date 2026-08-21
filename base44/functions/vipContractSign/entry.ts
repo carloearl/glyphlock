@@ -64,9 +64,14 @@ Deno.serve(async (req) => {
     // Resolve NUPSUser by created_by (RLS pattern) to verify the live
     // session maps to an authorized staff record. Only MANAGER-class
     // roles or SOVEREIGN may witness a VIP contract signing.
-    const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
-      created_by: liveUser.email
-    });
+    let nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+      platform_email: String(liveUser.email).toLowerCase(), status: 'active'
+    }, null, 1).catch(() => []);
+    if (!nupsUsers?.length) {
+      nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+        username: String(liveUser.email).split('@')[0].toLowerCase(), status: 'active'
+      }, null, 1).catch(() => []);
+    }
 
     const nupsUser = (nupsUsers && nupsUsers.length > 0) ? nupsUsers[0] : null;
     const isSovereign = nupsUser && (nupsUser.sovereign_flag === true || nupsUser.role === 'SOVEREIGN');
@@ -95,6 +100,24 @@ Deno.serve(async (req) => {
     // ── W3-001 REMEDIATION: Mode resolution ──
     // Resolve from SystemConfig (per-venue → global → default REAL).
     const venue_id = tokenRecord.venue_id || null;
+    if (!venue_id) return Response.json({ error: 'Contract token has no venue assignment' }, { status: 409 });
+    const globalVenueRole = isSovereign || ['PLATFORM_ADMIN'].includes(nupsUser?.role);
+    if (!globalVenueRole && nupsUser?.venue_id !== venue_id) {
+      return Response.json({ error: 'Forbidden: contract belongs to another venue' }, { status: 403 });
+    }
+    const isProtectedReference = (value) => typeof value === 'string' && value.startsWith('protected:') && value.length > 'protected:'.length;
+    if (!isProtectedReference(thumbprint_url) || !isProtectedReference(id_photo_url)) {
+      return Response.json({ error: 'Thumbprint and government-ID evidence must use protected evidence references' }, { status: 400 });
+    }
+    if (id_photo_back_url && !isProtectedReference(id_photo_back_url)) {
+      return Response.json({ error: 'ID back evidence must use a protected evidence reference' }, { status: 400 });
+    }
+    if (guest_photo_url && !isProtectedReference(guest_photo_url)) {
+      return Response.json({ error: 'Guest photo evidence must use a protected evidence reference' }, { status: 400 });
+    }
+    if (!government_id_number || !date_of_birth) {
+      return Response.json({ error: 'Government ID number and date of birth are required for canonical identity binding' }, { status: 400 });
+    }
     let resolvedMode = 'REAL';
     if (venue_id) {
       try {
