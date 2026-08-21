@@ -89,7 +89,8 @@ export default function AccessRequests() {
               <span className="text-slate-500 text-sm">{r.email}</span>
               <Badge className="bg-slate-700 text-white">{r.requested_role}</Badge>
               <Badge className={`${STATUS_COLORS[r.status] || "bg-slate-600"} text-white`}>{r.status.replaceAll("_", " ")}</Badge>
-              {r.mode === "TEST" && <Badge className="bg-amber-700 text-white">TEST</Badge>}
+              {r.mode === "SANDBOX" && <Badge className="bg-indigo-700 text-white">SANDBOX</Badge>}
+              {r.mode === "TEST" && <Badge className="bg-amber-700 text-white">LEGACY TEST</Badge>}
               {r.mode === "DEMO" && <Badge className="bg-emerald-700 text-white">TRAINING</Badge>}
             </div>
             <p className="text-sm text-slate-400 mb-1">{r.reason}</p>
