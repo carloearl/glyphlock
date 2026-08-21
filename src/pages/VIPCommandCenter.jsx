@@ -114,7 +114,7 @@ export default function VIPCommandCenter() {
   // pass a safe empty shape so the live-ops panels render instead of crashing.
   const safeState = state || { contracts: [], entertainers: [], guests: [], sessions: [], rooms: [] };
   const isAdmin = ['admin', 'PLATFORM_ADMIN', 'VENUE_OWNER'].includes(user?.role);
-  const venueId = state?.config?.venue_id || activeVenue?.venue_id || activeVenue?.id || 'dream_palace';
+  const venueId = state?.config?.venue_id || activeVenue?.venue_id || activeVenue?.id || null;
   const isOwner = isOwnerEmail(user?.email);
 
   return (
