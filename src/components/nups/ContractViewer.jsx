@@ -6,14 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollText, Search, Eye, CheckCircle2, Clock, FileText, User, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 export default function ContractViewer() {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
 
   const { data: contracts = [], isLoading } = useQuery({
-    queryKey: ["vip-contract-records"],
-    queryFn: () => base44.entities.VIPContractRecord.list("-created_date", 100),
+    queryKey: ["vip-contract-records", venueId],
+    queryFn: () => venueId ? base44.entities.VIPContractRecord.filter({ venue_id: venueId }, "-created_date", 100) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const filtered = contracts.filter(c =>
