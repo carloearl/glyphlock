@@ -38,7 +38,12 @@
     },
     "id_number": {
       "type": "string",
-      "description": "Government ID number (used to generate guest_id hash)"
+      "description": "LEGACY ONLY: historical government ID number. New operational writes must not persist full ID numbers."
+    },
+    "id_last4": {
+      "type": "string",
+      "maxLength": 4,
+      "description": "Last four characters of the presented government ID. New operational writes retain only this suffix plus guest_id hash."
     },
     "id_state": {
       "type": "string",
