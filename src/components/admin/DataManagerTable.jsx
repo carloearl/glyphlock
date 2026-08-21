@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Trash2, Loader2, RefreshCw, Search, AlertTriangle, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import RecordEditDialog from "@/components/admin/RecordEditDialog";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 /**
  * DataManagerTable — admin record browser + delete for one entity.
@@ -26,8 +27,28 @@ export default function DataManagerTable({ entityName, fields }) {
     queryFn: () => base44.entities[entityName].list("-created_date", 200),
   });
 
+  const deleteRecord = async (record, intent) => {
+    const me = await base44.auth.me();
+    const venueId = record?.venue_id || null;
+    const recordMode = ["REAL", "DEMO", "SANDBOX"].includes(String(record?.mode || "").toUpperCase())
+      ? String(record.mode).toUpperCase()
+      : undefined;
+    const result = await writeEntity({
+      entity: entityName,
+      operation: "delete",
+      id: record.id,
+      data: { venue_id: venueId, is_demo: record?.is_demo === true, mode: recordMode },
+      actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "admin" },
+      venue_id: venueId,
+      requestContext: recordMode ? { mode: recordMode } : undefined,
+      intent,
+    });
+    if (!result?.ok) throw new Error(result?.block_reason || "Governed delete was rejected.");
+    return result.value;
+  };
+
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities[entityName].delete(id),
+    mutationFn: (record) => deleteRecord(record, `ADMIN_DATA_MANAGER_DELETE:${entityName}`),
     onSuccess: () => {
       qc.invalidateQueries(["admin-data", entityName]);
       toast.success("Record deleted");
@@ -42,7 +63,7 @@ export default function DataManagerTable({ entityName, fields }) {
     mutationFn: async () => {
       const demos = records.filter(isDemoRecord);
       for (const r of demos) {
-        await base44.entities[entityName].delete(r.id);
+        await deleteRecord(r, `ADMIN_DATA_MANAGER_PURGE_DEMO:${entityName}`);
       }
       return demos.length;
     },
@@ -155,7 +176,7 @@ export default function DataManagerTable({ entityName, fields }) {
                         <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
                         <Button
                           size="sm"
-                          onClick={() => deleteMutation.mutate(r.id)}
+                          onClick={() => deleteMutation.mutate(r)}
                           disabled={deleteMutation.isPending}
                           className="bg-red-600 hover:bg-red-500 text-white h-7 text-xs px-2"
                         >
