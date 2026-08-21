@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save, AlertCircle, CheckCircle2, FileText } from 'lucide-react';
+import { writeEntity } from '@/lib/nups/writeEntity';
 
 const CONTRACT_TYPES = [
   { value: 'GLYPHBUCKS', label: 'GlyphBucks Order' },
@@ -68,12 +69,17 @@ export default function ContractTermsEditor({ venueId, user }) {
         last_edited_by: user.email,
         last_edited_at: new Date().toISOString(),
       };
-      if (config.id) {
-        await base44.entities.ContractTermsConfig.update(config.id, payload);
-      } else {
-        const created = await base44.entities.ContractTermsConfig.create(payload);
-        setConfig(c => ({ ...c, id: created.id }));
-      }
+      const result = await writeEntity({
+        entity: 'ContractTermsConfig',
+        operation: config.id ? 'update' : 'create',
+        id: config.id,
+        data: payload,
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: config.id ? 'CONTRACT_TERMS_UPDATE' : 'CONTRACT_TERMS_CREATE',
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'Contract terms write was rejected.');
+      if (!config.id && result?.value?.id) setConfig(c => ({ ...c, id: result.value.id }));
       setConfig(c => ({ ...c, version: newVersion }));
       setMsg({ kind: 'ok', text: `Saved as ${newVersion}.` });
     } catch (e) {
