@@ -103,7 +103,7 @@ Replace production fallbacks with active/session venue resolution and fail close
 
 **Severity:** MEDIUM  
 **Invariant:** INV-04  
-**Status:** OPEN — NORMALIZATION REQUIRED
+**Status:** RESOLVED — NEW WRITES NORMALIZED; LEGACY TEST READABLE
 
 ### Expected
 Canonical ledger modes are REAL, DEMO, SANDBOX. TRAINING rides on DEMO.
@@ -121,8 +121,8 @@ Several access/VIP paths still use `TEST`, including:
 ### Risk
 A fourth pseudo-ledger label can create ambiguous isolation rules and reporting mistakes.
 
-### Required resolution
-Define TEST explicitly as workflow/request state or migrate it to DEMO/TRAINING. Never allow TEST to become an independent financial ledger without owner-approved ADR.
+### Resolution
+New access requests now use `SANDBOX` for technical test access and `DEMO` for training. New VIP contracts default to `DEMO`; the backend accepts only REAL/DEMO/SANDBOX for new contract creation. Historical `TEST` rows remain readable/cleanup-compatible and are labeled as legacy rather than treated as a fourth ledger. `MigrationAuditLog.mode` now accepts SANDBOX.
 
 ---
 
@@ -130,7 +130,7 @@ Define TEST explicitly as workflow/request state or migrate it to DEMO/TRAINING.
 
 **Severity:** HIGH  
 **Invariant:** Security/RBAC boundary  
-**Status:** OPEN
+**Status:** RESOLVED — FAIL-CLOSED ROLE MAPPING
 
 ### Expected
 Every persistent NUPS role maps deliberately to a canonical permission role or has a deliberate no-access path.
@@ -140,7 +140,7 @@ Every persistent NUPS role maps deliberately to a canonical permission role or h
 
 `PLATFORM_ADMIN, VENUE_OWNER, VENUE_MANAGER, FLOOR_HOST, HOSTESS, DOOR_GIRL, DOORMAN, DRIVER, PERFORMER, BARTENDER, SECURITY, DJ, KIOSK, DEMO, SOVEREIGN`
 
-`src/config/roles.js` does not explicitly map all of these. Its fallback is `bartender` for unknown role strings. Missing explicit mappings include at least HOSTESS, DOOR_GIRL, DOORMAN, DRIVER and SOVEREIGN in the observed mapping table.
+Resolved 2026-08-20: `src/config/roles.js` now explicitly maps SOVEREIGN, HOSTESS, DOOR_GIRL, DOORMAN and other supported roles; DRIVER and PERFORMER deliberately map to no generic RBAC role. Unknown role strings now return `null` and therefore receive no mapped permissions instead of silently inheriting bartender access.
 
 `PlatformRole` / `UserRoleAssignment` also expose a narrower role set than `NUPSUser`.
 
