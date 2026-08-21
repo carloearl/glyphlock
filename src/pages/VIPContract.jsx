@@ -92,12 +92,16 @@ export default function VIPContract() {
       return () => { active = false; };
     }
     setToken(contractToken);
-    base44.entities.VIPContractRecord.filter({ token: contractToken, record_type: "contract_token" }, "-created_date", 1)
-      .then((records) => {
+    base44.functions.invoke('getVIPContractContext', { token: contractToken })
+      .then((response) => {
         if (!active) return;
-        const venueId = records?.[0]?.venue_id || "";
-        if (!venueId) setError('Contract venue could not be resolved.');
-        setContractVenueId(venueId);
+        const context = response?.data || {};
+        if (!context.success || !context.venue_id) {
+          setError(context.error || 'Contract venue could not be resolved.');
+          return;
+        }
+        setContractVenueId(context.venue_id);
+        setContractRecordId(context.contract_record_id || null);
       })
       .catch(() => active && setError('Contract context could not be loaded.'));
     return () => { active = false; };
