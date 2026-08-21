@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "description": "ACCIDENTAL EMPTY SCHEMA \u2014 created during external-agent tool discovery on 2026-08-20. Do not use. Safe to delete from Base44 entity manager when convenient.",
+  "properties": {
+    "x": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "__noop_should_not_create"
+}

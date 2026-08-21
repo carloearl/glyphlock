@@ -68,5 +68,5 @@ export const mapNUPSRoleToRBAC = (nupsRole) => {
     DEMO: ROLES.MANAGER, // demo sees everything
     admin: ROLES.MANAGER, // base44 admin
   };
-  return map[nupsRole] ?? ROLES.BARTENDER; // safe default: most restricted
+  return map[nupsRole] ?? null; // fail closed: unknown roles receive no mapped permissions
 };
