@@ -874,9 +874,11 @@ export default function About() {
   return (
     <MotionConfig reducedMotion="user">
       <SEOHead
-        title="About GlyphLock | One Evidence Architecture, Every Layer"
-        description="GlyphLock connects hidden-image data, 91 QR payload structures, GlyphBot, automated DJ tools, NUPS, GlyphBucks closed-loop value, ledgers, timestamp evidence, governance, and Oracle/OHIP interoperability through one evidence architecture."
-        keywords="GlyphLock, evidence architecture, LSB steganography, hidden image data, 91 QR payloads, GlyphBot, Site Builder, automated DJ, NUPS, GlyphBucks, closed-loop stored value, operational ledgers, OpenTimestamps, Bitcoin anchoring, Master Covenant, Oracle PartnerNetwork, OHIP, Dream Palace, audit evidence, Carlo Rene Earl, El Mirage Arizona"
+        title="About GlyphLock | From Images to Verifiable Operations"
+        description="Discover how GlyphLock connects concealed-image data, 91 QR payloads, GlyphBot, NUPS, GlyphBucks, ledgers, governance, and OHIP through one evidence architecture."
+        keywords="GlyphLock, evidence infrastructure, evidence architecture, concealed image data, LSB steganography, secure QR, 91 QR payloads, interactive images, GlyphBot, AI site builder, automated DJ, NUPS, venue operations software, GlyphBucks, closed-loop stored value, operational ledgers, OpenTimestamps, Master Covenant, Oracle PartnerNetwork, OHIP integration, Dream Palace, Carlo Rene Earl, El Mirage Arizona"
+        ogTitle="It Started With an Image. Now Every Layer Can Prove Its Work."
+        ogDescription="Explore the complete GlyphLock architecture: image carriers, Secure QR, GlyphBot, NUPS, GlyphBucks, ledgers, governance, timestamp evidence, hardware, and authorized integrations."
         url="/about"
       />
 
@@ -886,7 +888,7 @@ export default function About() {
         <div className="pointer-events-none absolute bottom-[8%] right-[-18rem] h-[38rem] w-[38rem] rounded-full bg-amber-400/[0.06] blur-[150px]" />
 
         <div className="container relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-          <section className="grid min-h-[78vh] items-center gap-12 py-14 lg:grid-cols-[1fr_1fr] lg:py-20">
+          <section className="grid min-h-[82vh] items-center gap-12 py-14 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16 lg:py-20">
             <div>
               <motion.div
                 initial={{ opacity: 0, y: 14 }}
@@ -896,7 +898,7 @@ export default function About() {
               >
                 <Radio className="h-3.5 w-3.5 text-[#00E4FF]" aria-hidden="true" />
                 <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#9AF4FF]">
-                  GlyphLock LLC · El Mirage, Arizona
+                  GlyphLock LLC · Evidence infrastructure · El Mirage, Arizona
                 </span>
               </motion.div>
 
@@ -906,9 +908,9 @@ export default function About() {
                 transition={{ duration: 0.75, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
                 className="mt-7 max-w-4xl text-5xl font-black leading-[0.98] tracking-[-0.045em] sm:text-6xl lg:text-7xl xl:text-[5.25rem] font-space"
               >
-                It started with an image.{" "}
+                What if an image{" "}
                 <span className="bg-gradient-to-r from-[#00E4FF] via-white to-[#B78CFF] bg-clip-text text-transparent">
-                  It became an architecture for proving what happened.
+                  could carry proof?
                 </span>
               </motion.h1>
 
@@ -918,9 +920,10 @@ export default function About() {
                 transition={{ duration: 0.7, delay: 0.18 }}
                 className="mt-7 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl"
               >
-                GlyphLock connects creative technology, identity, assisted intelligence, operations,
-                governance, security, financial accountability, integrations, hardware, and verification
-                so each specialized product contributes to one record that authorized people can reconstruct.
+                GlyphLock began with concealed data, machine-readable identity, links, hotspots,
+                and provenance inside and around an image. It grew into a layered architecture connecting
+                creative work, assisted intelligence, real-world operations, closed-loop value, integrations,
+                and evidence that authorized people can reconstruct.
               </motion.p>
 
               <motion.p
@@ -929,9 +932,10 @@ export default function About() {
                 transition={{ duration: 0.7, delay: 0.26 }}
                 className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-500"
               >
-                NUPS is the first real-world operating proof—not the whole company. Secure QR Studio,
-                Image Lab, GlyphBot, governance controls, security surfaces, integration rails, hardware,
-                and deployment services express the same architecture in different kinds of work.
+                <strong className="font-bold text-white">One architecture. Every layer. Evidence that survives the handoff.</strong>{" "}
+                NUPS is the first real-world operating proof—not the whole company. The image carrier,
+                91-payload Secure QR Studio, GlyphBot, GlyphBucks, ledgers, governance, hardware, and
+                enterprise integration paths all resolve toward the same evidence core.
               </motion.p>
 
               <motion.div
@@ -940,26 +944,26 @@ export default function About() {
                 transition={{ duration: 0.7, delay: 0.34 }}
                 className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap"
               >
-                <Link
-                  to="/consultation"
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] px-6 py-3.5 font-black text-white shadow-[0_14px_45px_rgba(0,228,255,0.14)] transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00E4FF] focus:ring-offset-2 focus:ring-offset-black"
-                >
-                  Map your workflow
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-                </Link>
                 <a
                   href="#layered-system"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-6 py-3.5 font-bold text-white transition-colors hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 font-black text-black shadow-[0_14px_45px_rgba(0,228,255,0.10)] transition hover:bg-[#DDFBFF] focus:outline-none focus:ring-2 focus:ring-[#00E4FF] focus:ring-offset-2 focus:ring-offset-black"
                 >
-                  Explore every layer
+                  Explore the architecture
+                  <ArrowDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
                 </a>
                 <a
-                  href="#ecosystem"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-bold text-slate-400 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
+                  href="#technology-record"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-6 py-3.5 font-bold text-white transition-colors hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
                 >
-                  See how the layers connect
-                  <ArrowDown className="h-4 w-4" aria-hidden="true" />
+                  View the technology record
                 </a>
+                <Link
+                  to="/consultation"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-3.5 text-sm font-bold text-slate-400 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
+                >
+                  Discuss a deployment
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
               </motion.div>
             </div>
 
@@ -1101,7 +1105,7 @@ export default function About() {
               align="center"
             />
             <LayeredArchitecture />
-            <div className="mt-6 rounded-2xl border border-[#00E4FF]/20 bg-[#00E4FF]/[0.035] p-5 text-sm leading-relaxed text-slate-300">
+            <div id="technology-record" className="mt-6 scroll-mt-24 rounded-2xl border border-[#00E4FF]/20 bg-[#00E4FF]/[0.035] p-5 text-sm leading-relaxed text-slate-300">
               <strong className="text-white">Historical technology and filing record · May 2025:</strong>{" "}
               GlyphLock reports that its concealed image-data carrier—using least-significant-bit
               steganography, QR-like payload concepts, interactive links and hotspots, and provenance
