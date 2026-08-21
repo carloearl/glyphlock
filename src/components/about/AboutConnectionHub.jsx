@@ -54,8 +54,8 @@ export default function AboutConnectionHub() {
               </span>
             </span>
             <div className="leading-tight">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white">GL Connect</p>
-              <p className="text-[10px] text-slate-500">One connected record</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white">GlyphLock Core</p>
+              <p className="text-[10px] text-slate-500">Every layer, one evidence architecture</p>
             </div>
           </div>
           <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-emerald-300">
@@ -139,13 +139,13 @@ export default function AboutConnectionHub() {
         </div>
 
         {/* primary CTA */}
-        <Link
-          to="/NUPSLanding"
+        <a
+          href="#ecosystem"
           className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] px-5 py-3 text-sm font-black text-white transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00E4FF] focus:ring-offset-2 focus:ring-offset-black"
         >
-          See it work in NUPS
+          Explore the complete ecosystem
           <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
+        </a>
       </div>
     </div>
   );
