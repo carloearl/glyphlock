@@ -13,7 +13,7 @@ export default function APIKeyVault({ user }) {
   const [keys, setKeys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [visibleKeys, setVisibleKeys] = useState({});
+  const [oneTimeSecret, setOneTimeSecret] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     environment: "live"
@@ -45,10 +45,7 @@ export default function APIKeyVault({ user }) {
       
       const newKey = response.data;
       
-      // Show secret key in modal/alert (only shown once)
-      if (newKey.secret_key) {
-        alert(`🔐 SECRET KEY (save this now - won't be shown again!):\n\n${newKey.secret_key}\n\nPublic Key: ${newKey.public_key}`);
-      }
+      if (newKey.secret_key) setOneTimeSecret({ kind: 'created', public_key: newKey.public_key, secret_key: newKey.secret_key });
       
       toast.success("API key created successfully");
       await loadKeys(); // Reload to show new key in list
@@ -66,9 +63,7 @@ export default function APIKeyVault({ user }) {
       const response = await base44.functions.invoke('rotateAPIKey', { keyId });
       const rotated = response.data;
       
-      if (rotated.secret_key) {
-        alert(`🔐 NEW SECRET KEY (save this now!):\n\n${rotated.secret_key}`);
-      }
+      if (rotated.secret_key) setOneTimeSecret({ kind: 'rotated', public_key: rotated.public_key, secret_key: rotated.secret_key });
       
       toast.success("API key rotated successfully");
       await loadKeys(); // Reload to show updated key
@@ -98,10 +93,6 @@ export default function APIKeyVault({ user }) {
     toast.success(`${label} copied to clipboard`);
   };
 
-  const toggleKeyVisibility = (keyId) => {
-    setVisibleKeys(prev => ({ ...prev, [keyId]: !prev[keyId] }));
-  };
-
   const maskKey = (key) => {
     if (!key) return "••••••••";
     return key.substring(0, 8) + "••••••••" + key.substring(key.length - 4);
@@ -123,6 +114,16 @@ export default function APIKeyVault({ user }) {
           Create New Key
         </Button>
       </div>
+
+      {oneTimeSecret && (
+        <Card className="bg-amber-950/20 border-amber-500/40">
+          <CardContent className="p-5 space-y-3">
+            <p className="text-amber-200 font-semibold">{oneTimeSecret.kind === 'rotated' ? 'Replacement secret generated' : 'API key created'}</p>
+            <p className="text-sm text-amber-100/70">Copy this secret now. It is never stored in the APIKey record and disappears when dismissed.</p>
+            <div className="flex gap-2"><Input readOnly value={oneTimeSecret.secret_key} className="font-mono bg-[#020617]" /><Button onClick={() => copyToClipboard(oneTimeSecret.secret_key, 'One-time secret')}><Copy className="w-4 h-4 mr-2" />Copy</Button><Button variant="outline" onClick={() => setOneTimeSecret(null)}>Dismiss</Button></div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Create Form */}
       {showCreateForm && (
@@ -206,9 +207,9 @@ export default function APIKeyVault({ user }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        key.environment === 'live' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'
+                        (key.environment || 'live') === 'live' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'
                       }`}>
-                        {key.environment}
+                        {key.environment || 'live'}
                       </span>
                       <Button
                         size="sm"
@@ -250,14 +251,12 @@ export default function APIKeyVault({ user }) {
                       </div>
                     </div>
 
-                    {/* Secret Key - Hidden by default */}
+                    {/* Secret lifecycle */}
                     <div>
                       <Label className="text-xs text-white/50">Secret Key</Label>
                       <div className="flex items-center gap-2 mt-1">
-                        <code className="flex-1 bg-[#020617] px-3 py-2 rounded text-sm text-white/40 font-mono">
-                          ••••••••••••••••••••••••••••
-                        </code>
-                        <span className="text-xs text-white/40 italic">Hidden for security</span>
+                        <code className="flex-1 bg-[#020617] px-3 py-2 rounded text-sm text-white/40 font-mono">Not retrievable after creation/rotation</code>
+                        <span className="text-xs text-white/40 italic">Hash stored only</span>
                       </div>
                     </div>
                   </div>
