@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 /**
  * RecordEditDialog — inline admin edit for a single entity record.
@@ -23,7 +24,25 @@ export default function RecordEditDialog({ entityName, record, fields, open, onC
   );
 
   const saveMutation = useMutation({
-    mutationFn: (payload) => base44.entities[entityName].update(record.id, payload),
+    mutationFn: async (payload) => {
+      const me = await base44.auth.me();
+      const venueId = record?.venue_id || payload?.venue_id || null;
+      const recordMode = ["REAL", "DEMO", "SANDBOX"].includes(String(record?.mode || payload?.mode || "").toUpperCase())
+        ? String(record?.mode || payload?.mode).toUpperCase()
+        : undefined;
+      const result = await writeEntity({
+        entity: entityName,
+        operation: "update",
+        id: record.id,
+        data: payload,
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "admin" },
+        venue_id: venueId,
+        requestContext: recordMode ? { mode: recordMode } : undefined,
+        intent: `ADMIN_DATA_MANAGER_UPDATE:${entityName}`,
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Governed update was rejected.");
+      return result.value;
+    },
     onSuccess: () => {
       qc.invalidateQueries(["admin-data", entityName]);
       toast.success("Record updated");
