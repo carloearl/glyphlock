@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   FileText, FileSignature, AlertTriangle, CheckCircle2, Search,
-  Eye, Download, Users2, DollarSign
+  Users2, DollarSign
 } from "lucide-react";
 import ContractorOnboardingPanel from "./ContractorOnboardingPanel";
 
@@ -145,10 +145,7 @@ export default function ContractorTaxFormsList({ currentUser }) {
                     </td>
                     <td className="px-3 py-2.5">
                       {r.form?.scanned_form_url
-                        ? <a href={r.form.scanned_form_url} target="_blank" rel="noopener noreferrer"
-                            className="text-cyan-400 text-[11px] underline inline-flex items-center gap-1">
-                            <Eye className="w-3 h-3" /> View
-                          </a>
+                        ? <span className="text-amber-300 text-[11px]">Protected W-9 scan on file</span>
                         : <span className="text-gray-600 text-[11px]">—</span>}
                     </td>
                     <td className="px-3 py-2.5 font-mono font-bold text-cyan-300">{fmt(r.ytd)}</td>
