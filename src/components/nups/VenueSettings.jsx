@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building2, Save, CheckCircle } from "lucide-react";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 export default function VenueSettings({ user }) {
   const queryClient = useQueryClient();
@@ -67,12 +68,20 @@ export default function VenueSettings({ user }) {
 
   const saveMutation = useMutation({
     mutationFn: async (data) => {
-      const payload = { ...data, venue_id: activeVenue?.venue_id, status: "active" };
-      if (activeVenue?.id) {
-        return base44.entities.Venue.update(activeVenue.id, payload);
-      } else {
-        return base44.entities.Venue.create(payload);
-      }
+      const me = await base44.auth.me();
+      const resolvedVenueId = activeVenue?.venue_id || activeVenue?.id || `VENUE-${crypto.randomUUID()}`;
+      const payload = { ...data, venue_id: resolvedVenueId, status: "active" };
+      const result = await writeEntity({
+        entity: "Venue",
+        operation: activeVenue?.id ? "update" : "create",
+        id: activeVenue?.id,
+        data: payload,
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || user?._highestRole || user?.role || "External" },
+        venue_id: resolvedVenueId,
+        intent: activeVenue?.id ? "VENUE_SETTINGS_UPDATE" : "VENUE_CREATE",
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Venue settings write was rejected.");
+      return result.value;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["venue-settings"] });
