@@ -39,7 +39,7 @@ Verification on 2026-08-20:
 `npm run check:nups-write-gateway` → PASS: `287/287 grandfathered frontend writes remain; no new bypasses.`
 
 ### Meaning
-The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **170/287** after Batch 14 removed the remaining direct frontend APIKey update/delete paths and continued the protected-evidence migration. The remaining baseline includes meaningful explicit security/domain/telemetry audit writes plus live operational debt and deliberately retained demo/seed/sandbox/legacy calls; the raw count is therefore no longer equivalent to unresolved production risk.
+The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **167/287** after Batch 15 migrated the live generic Admin Data Manager update/delete paths through `writeEntity()`. The remaining inventory has been classified in `docs/audits/NUPS-BATCH15-DIRECT-WRITE-CLASSIFICATION.md`: **0 live high-risk NUPS business bypasses**, 6 live-medium NUPS playlist/checklist calls, 33 explicit security/admin audit events, 12 domain events, 13 operational telemetry calls, 41 live writes elsewhere in the combined GlyphLock app, and 62 demo/seed/sandbox/legacy/internal calls. The raw count is therefore not equivalent to unresolved NUPS production risk.
 
 ### Required resolution
 Reduce the manifest monotonically, prioritizing financial, identity, contract, credential, payout, mode, and audit writes.
