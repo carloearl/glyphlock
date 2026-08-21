@@ -193,7 +193,7 @@ const products = [
     output: "Financial activity that can be reconstructed",
     status: "Operational recordkeeping—not banking or acquiring",
     cta: "Review financial accountability",
-    to: "/GlyphLockFinancialPage",
+    to: "/GlyphLockFinancial",
     color: "#FBBF24",
   },
   {
@@ -293,7 +293,7 @@ const architectureLayers = [
     points: ["Generate, print, issue + redeem", "Contract and transaction-linked verification", "Liability ledger + reconciliation"],
     status: "Implemented closed-loop workflows",
     cta: "See GlyphBucks architecture",
-    to: "/NUPSLanding",
+    to: "/GlyphLockFinancial",
     color: "#FBBF24",
   },
   {
@@ -355,6 +355,86 @@ const integrations = [
   { icon: BarChart3, label: "Analytics" },
   { icon: ScanLine, label: "Hardware" },
   { icon: Braces, label: "Enterprise APIs" },
+];
+
+const technicalSystems = [
+  {
+    icon: Radio,
+    eyebrow: "Automated venue media",
+    title: "Automated DJ + Fable visual engine",
+    body: "The NUPS DJ system is a working venue-media surface, not a playlist mockup. It combines AI-assisted playlist planning, provider-aware track resolution, a local track library, dual playback decks, equal-power crossfading, configurable blend timing, crowd and energy tools, diagnostics, and a separate Fable stage for beat-reactive venue visuals.",
+    flow: [
+      "Search, upload, library, or playlist input",
+      "AI playlist and Auto-DJ transition plan",
+      "Dual-deck playback, cueing, BPM context, and crossfade",
+      "Fable visuals, broadcast state, and playback telemetry",
+    ],
+    evidence: "The current mixer includes Auto-DJ promotion logic, YouTube and direct-audio playback paths, crowd tools, playlist generation, diagnostics, and visualizer controls.",
+    status: "Working product surfaces · continuing venue hardening",
+    links: [
+      { label: "Open DJ Pro Mixer", to: "/GlyphBotMixer" },
+      { label: "Open Fable Stage", to: "/FableStage" },
+    ],
+    color: "#F5B942",
+  },
+  {
+    icon: Sparkles,
+    eyebrow: "Concealed and interactive media",
+    title: "Steganographic images + interactive hotspots",
+    body: "GlyphLock's image work uses two complementary methods. Supported LSB experiments modify selected least-significant pixel bits so a machine-readable payload can be encoded and recovered while the visible image remains substantially unchanged. Interactive-image workflows keep typed actions—such as links or text—attached to normalized hotspot regions that remain usable across screen sizes.",
+    flow: [
+      "Source image and permitted payload",
+      "LSB encode/decode experiment or hotspot mapping",
+      "Asset, coordinates, actions, hash, and provenance context",
+      "Shared interactive experience or authorized verification",
+    ],
+    evidence: "The platform contains encode/decode functions, protected-evidence records, hotspot maps, typed hotspot payloads, share/export workflows, and an interactive viewer.",
+    status: "Hotspots working · concealed carrier remains unreleased",
+    links: [
+      { label: "Open Image Lab", to: "/ImageLab" },
+      { label: "Open Interactive Studio", to: "/InteractiveImageStudio" },
+    ],
+    color: "#8C4BFF",
+  },
+  {
+    icon: QrCode,
+    eyebrow: "Structured machine-readable carriers",
+    title: "Secure QR generation, scanning, and verification",
+    body: "Secure QR Studio is a structured carrier system rather than a single URL generator. Its catalog supports 91 payload definitions across identity, access, tickets, links, records, payments, credentials, and operational references. Generation can attach version, security, destination, and audit context; scan and verification paths can validate supported tokens, record scan events, evaluate risk, and dispatch the user to the intended workflow.",
+    flow: [
+      "Choose a defined payload and supply permitted data",
+      "Generate a versioned QR asset and destination",
+      "Scan through mobile, kiosk, camera, or hardware workflows",
+      "Validate, log, and route to the connected record or action",
+    ],
+    evidence: "Current code includes QR asset and key registries, secure-token generation and validation, tamper checks, risk evaluation, scan-event logging, migration support, analytics, and barcode generation.",
+    status: "Working catalog and verification surfaces",
+    links: [
+      { label: "Open Secure QR Studio", to: "/SecureQRStudio" },
+      { label: "Read QR SDK guidance", to: "/SDKDocs#qr" },
+    ],
+    color: "#00E4FF",
+  },
+  {
+    icon: Braces,
+    eyebrow: "Developer and enterprise integration",
+    title: "SDK, API, webhook, and provider integration rail",
+    body: "GlyphLock exposes internal and documented integration surfaces for entities, backend functions, QR operations, verification, audit events, API-key lifecycle, webhooks, analytics, storage, payment-provider adapters, and hospitality connectivity. JavaScript, Python, and Go SDK materials, request examples, key generation and rotation, usage records, and error-handling patterns support controlled implementation without erasing each external provider's authority.",
+    flow: [
+      "Authorized application, key, connector, or provider",
+      "SDK method, API request, webhook, or backend function",
+      "Validation, permission checks, rate controls, and audit",
+      "Structured result returned to the calling workflow",
+    ],
+    evidence: "The project contains SDK documentation, downloadable client materials, API references, API-key vault controls, gateway functions, webhook handlers, connector configuration, and an OHIP partner-sandbox path.",
+    status: "Internal and documented surfaces · production availability verified per integration",
+    links: [
+      { label: "Read SDK documentation", to: "/SDKDocs" },
+      { label: "See NUPS integrations", to: "/NUPSLanding#nups-integrations" },
+      { label: "Review OHIP readiness", to: "/OHIPReadiness" },
+    ],
+    color: "#C084FC",
+  },
 ];
 
 const workflowSteps = [
@@ -531,7 +611,7 @@ function EcosystemMap() {
 
   return (
     <div className="mt-12 rounded-[2rem] border border-white/10 bg-[#03070d]/90 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.45)] sm:p-6 lg:p-8">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" role="group" aria-label="Choose a GlyphLock ecosystem layer">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" role="group" aria-label="Choose a GlyphLock ecosystem capability">
         {products.map((product, index) => {
           const Icon = product.icon;
           const active = index === activeProduct;
@@ -556,7 +636,7 @@ function EcosystemMap() {
               </span>
               <span>
                 <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                  Evidence architecture layer
+                  Ecosystem capability
                 </span>
                 <span className="mt-1 block font-bold text-white">{product.short}</span>
               </span>
@@ -1090,11 +1170,88 @@ export default function About() {
           <section id="ecosystem" className="scroll-mt-24 py-8">
             <SectionHeading
               eyebrow="The ecosystem"
-              title="Ten connected functions. One shared evidence architecture."
-              body="GlyphLock is the architecture—not a pile of unrelated tools. Its products let people create, identify, assist, operate, govern, secure, account, connect, deploy, and verify through the same evidence-centered pattern."
+              title="Ten current capability entry points. One shared evidence architecture."
+              body="These are practical ways into the ecosystem—not ten equal architecture layers and not a limit on what GlyphLock contains. Each capability connects to an evidence core, one or more operating domains, and the same trust and governance controls."
               align="center"
             />
             <EcosystemMap />
+          </section>
+
+          <section id="technical-systems" className="scroll-mt-24 py-24">
+            <SectionHeading
+              eyebrow="Technical systems"
+              title="The engines behind the ecosystem—not just their names."
+              body="These four systems show how creative input, venue activity, machine-readable carriers, automation, and external software become connected, reviewable records."
+              align="center"
+            />
+            <div className="mt-12 grid gap-6 lg:grid-cols-2">
+              {technicalSystems.map((system) => {
+                const Icon = system.icon;
+                return (
+                  <motion.article
+                    key={system.title}
+                    {...reveal}
+                    className="flex flex-col rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.055] to-transparent p-6 md:p-8"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black/55"
+                        style={{ color: system.color }}
+                      >
+                        <Icon className="h-6 w-6" aria-hidden="true" />
+                      </span>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                        {system.eyebrow}
+                      </p>
+                    </div>
+                    <h3 className="mt-6 text-2xl font-black text-white md:text-3xl">{system.title}</h3>
+                    <p className="mt-4 leading-relaxed text-slate-300">{system.body}</p>
+
+                    <div className="mt-6">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00E4FF]">
+                        How it moves
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {system.flow.map((step, index) => (
+                          <div key={step} className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 px-4 py-3">
+                            <span className="mt-0.5 font-mono text-[10px] font-black" style={{ color: system.color }}>
+                              0{index + 1}
+                            </span>
+                            <span className="text-sm leading-relaxed text-slate-300">{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-6 rounded-xl border border-white/10 bg-black/35 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">
+                        Implementation evidence
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-slate-400">{system.evidence}</p>
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap items-center gap-2">
+                      <span className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-200">
+                        {system.status}
+                      </span>
+                    </div>
+
+                    <div className="mt-auto flex flex-wrap gap-2 pt-6">
+                      {system.links.map((link) => (
+                        <Link
+                          key={link.to}
+                          to={link.to}
+                          className="group inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2.5 text-sm font-black text-white transition-colors hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
+                        >
+                          {link.label}
+                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
           </section>
 
           <section id="layered-system" className="scroll-mt-24 py-24">
