@@ -26,6 +26,9 @@ const ROLE_POOLS = {
 const INDEPENDENT_CONTRACTOR_ROLES = new Set(["PERFORMER", "ENTERTAINER"]);
 
 const fmt = (n) => `$${(n || 0).toFixed(2)}`;
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+}[char]));
 
 // ─── Payout Calculator (custom params) ───────────────────────────────
 function computePayoutsCustom(totalTips, byPool, formula) {
@@ -249,6 +252,13 @@ export default function TipBreakdown({ transactions = [] }) {
   };
 
   const handlePrint = () => {
+    const printVenueName = escapeHtml(activeVenue?.name || "NUPS Venue");
+    const printVenueAddress = escapeHtml([
+      activeVenue?.address,
+      activeVenue?.city,
+      activeVenue?.state,
+      activeVenue?.zip_code,
+    ].filter(Boolean).join(", "));
     const rows = POOL_CONFIG.flatMap(cfg => {
       const payout = payouts[cfg.key];
       if (!payout || payout.employees.length === 0) return [];
@@ -275,7 +285,7 @@ export default function TipBreakdown({ transactions = [] }) {
     table{width:100%;border-collapse:collapse;}th{text-align:left;padding:6px 4px;border-bottom:2px solid #000;font-size:11px;text-transform:uppercase;}
     @media print{@page{margin:12mm;size:letter;}}</style></head><body>
     <div style="text-align:center;font-size:18px;font-weight:bold;letter-spacing:2px;">NIGHTLY TIP PAYOUT SHEET</div>
-    <div style="text-align:center;font-size:11px;margin-top:2px;">Dream Palace — 815 N. Scottsdale Rd, Tempe AZ 85281</div>
+    <div style="text-align:center;font-size:11px;margin-top:2px;">${printVenueName}${printVenueAddress ? ` — ${printVenueAddress}` : ""}</div>
     <div style="text-align:center;font-size:11px;">${new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</div>
     <hr style="margin:10px 0;border-top:2px solid #000;"/>
     <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
