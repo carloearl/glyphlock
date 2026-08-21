@@ -1,535 +1,552 @@
-import React, { useRef } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { Button } from "@/components/ui/button";
-import { 
-  Shield, Zap, Brain, Code, Target, Users, 
-  Sparkles, Crown, Lock, Blocks, FileText, 
-  Globe, TrendingUp, Award, DollarSign, CheckCircle2, Info
+import {
+  ArrowRight,
+  Blocks,
+  Bot,
+  Building2,
+  CheckCircle2,
+  CircleDollarSign,
+  Code2,
+  FileCheck2,
+  Fingerprint,
+  Network,
+  QrCode,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  Users,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import SEOHead from "../components/SEOHead";
-import { motion, useInView } from "framer-motion";
 
-export default function About() {
-  const heroRef = useRef(null);
-  const originRef = useRef(null);
-  const missionRef = useRef(null);
-  const pivotRef = useRef(null);
-  const leadershipRef = useRef(null);
-  const techRef = useRef(null);
-  const ctaRef = useRef(null);
-  
-  const heroInView = useInView(heroRef, { once: true, amount: 0.4 });
-  const originInView = useInView(originRef, { once: true, amount: 0.3 });
-  const missionInView = useInView(missionRef, { once: true, amount: 0.3 });
-  const pivotInView = useInView(pivotRef, { once: true, amount: 0.3 });
-  const leadershipInView = useInView(leadershipRef, { once: true, amount: 0.2 });
-  const techInView = useInView(techRef, { once: true, amount: 0.3 });
-  const ctaInView = useInView(ctaRef, { once: true, amount: 0.4 });
+const reveal = {
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+};
 
-  const leadership = [
-    {
-      name: "Carlo Rene Earl",
-      title: "Founder & Chief Executive Officer (CEO)",
-      role: "Carlo Earl is the Founder and Chief Executive Officer of GlyphLock, responsible for shaping the company's core vision, technological direction, and long-term strategic roadmap. With a multidisciplinary background that spans creative design, systems thinking, and security innovation, Carlo leads GlyphLock with a rare combination of technical insight and business acuity. Under his leadership, GlyphLock has developed a proprietary ecosystem centered on quantum-resistant authentication, steganographic glyph technologies, blockchain-anchored audit systems, and secure AI-driven contract automation. Carlo oversees the architecture of the Master Covenant framework, the company's cryptographic compliance infrastructure, and the intellectual property portfolio that forms the backbone of GlyphLock's market advantage. His executive focus lies in enterprise integration, cross-industry scalability, and future-proofed digital identity. Carlo's governance blends creative innovation with operational discipline, positioning GlyphLock as a rising authority in secure identity verification, AI policy, and next-generation authentication ecosystems.",
-      icon: Crown
-    },
-    {
-      name: "Jacub Lough",
-      title: "Chief Financial Officer (CFO) & Chief Strategy Officer (CSO)",
-      role: "As Chief Financial Officer and Chief Strategy Officer, Jacub Lough directs GlyphLock's financial operations, capital structure, strategic planning, and long-range corporate development. A long-term collaborator with Carlo in the music industry and marketing sectors, Jacub is also the owner of IceVault88. He plays a central role in risk management, compliance oversight, and multi-vertical expansion planning across enterprise, government, medical, defense, and high-integrity commercial environments. Jacub brings a deep analytical framework rooted in disciplined financial modeling, operational forecasting, and scalable growth alignment. His background in asset management, organizational architecture, and creative-industry operations enables him to bridge financial precision with practical execution. At the strategic level, Jacub evaluates market positioning, prepares valuation pathways, supports IP-driven expansion, and leads scenario planning for acquisition readiness, licensing partnerships, and international deployment models. His dual role strengthens GlyphLock's foundation for sustainable, compliant, and high-credibility growth in rapidly evolving security and AI markets.",
-      icon: TrendingUp
-    },
-    {
-      name: "Collin Vanderginst",
-      title: "Chief Technology Officer (CTO)",
-      role: "Collin Vanderginst, GlyphLock's Chief Technology Officer, oversees the design, deployment, and engineering integrity of the company's technical infrastructure. His expertise spans advanced systems engineering, security architecture, distributed surveillance networks, and high-availability backend environments. A key contributor to GlyphLock's foundational prototypes, Collin converts conceptual innovations into functional, scalable software systems. He currently manages all Jiffy Lube surveillance SEC systems across Arizona and leads the surveillance chore integration for the NUPS Point of Sale system. He manages engineering operations, DevSecOps processes, platform optimization, and system-level integrations across the GlyphLock ecosystem — including authentication engines, SDK frameworks, and enterprise-grade API infrastructure. Collin brings a disciplined, methodical engineering philosophy that ensures reliability, resilience, and security at every level of the platform. His work underpins the company's stability as GlyphLock continues expanding into mission-critical, compliance-sensitive industries.",
-      icon: Code
-    },
-    {
-      name: "Angel Sticka",
-      title: "Director of Administration, Regulatory Affairs & Operational Compliance",
-      role: "Angel Sticka serves as GlyphLock's Director of Administration, Regulatory Affairs, and Operational Compliance. She manages corporate documentation, legal coordination, organizational governance, and procedural execution across all departments. Angel oversees the administrative systems that support GlyphLock's operational rhythm — including contract handling, licensing paperwork, compliance tracking, and executive scheduling. Her work ensures alignment between product development, legal processes, and organizational structure. Her administrative precision provides stability throughout GlyphLock's rapid innovation cycles, supporting executive leadership and acting as a central point of continuity for filings, deadlines, communications, and organizational records. Angel's role safeguards operational integrity as the company scales into more regulated markets.",
-      icon: Shield
-    }
-  ];
+const productPillars = [
+  {
+    icon: Building2,
+    eyebrow: "Live operating product",
+    title: "NUPS venue operations",
+    body: "Nexus Unified POS System brings identity, staff roles, check-in, registers, contracts, payouts, batches, reconciliation, and audit evidence into one venue-scoped operating system.",
+    points: [
+      "Role-based workspaces for front door, register, management, back office, and ownership",
+      "Guest, staff, driver, and independent-contractor workflows",
+      "Transaction, contract, shift, and settlement records designed for review",
+    ],
+  },
+  {
+    icon: QrCode,
+    eyebrow: "Verification layer",
+    title: "GlyphLock identity and authorship",
+    body: "QR-linked asset identity, interactive image layers, tamper-aware verification, and provenance records make digital work easier to trace, share, and defend.",
+    points: [
+      "QR identity and verification workflows",
+      "Interactive images and hotspot layers",
+      "Authorship, lineage, and exportable proof records",
+    ],
+  },
+  {
+    icon: Bot,
+    eyebrow: "Assisted construction",
+    title: "GlyphBot and creative tooling",
+    body: "AI-assisted tools help users plan, generate, inspect, and improve websites, media, and operational workflows while keeping decisions and evidence visible.",
+    points: [
+      "Site-building and image workflows",
+      "Knowledge-guided assistance and audit support",
+      "Human approval for consequential actions",
+    ],
+  },
+  {
+    icon: Network,
+    eyebrow: "Interoperability",
+    title: "Integration infrastructure",
+    body: "GlyphLock is built to connect with authorized payment providers, hospitality systems, storage, analytics, and enterprise services without collapsing their responsibilities into one vendor.",
+    points: [
+      "Provider-adapter architecture for payment references",
+      "Oracle Hospitality integration work through OHIP environments",
+      "Production access remains subject to provider and customer approval",
+    ],
+  },
+];
 
+const operatingFlow = [
+  {
+    icon: Fingerprint,
+    step: "01",
+    title: "Identify",
+    body: "Resolve the person, role, venue, asset, and operating mode.",
+  },
+  {
+    icon: Blocks,
+    step: "02",
+    title: "Operate",
+    body: "Run the approved workflow with permissions and venue rules applied.",
+  },
+  {
+    icon: FileCheck2,
+    step: "03",
+    title: "Record",
+    body: "Capture the contract, transaction, approval, or activity as structured evidence.",
+  },
+  {
+    icon: ShieldCheck,
+    step: "04",
+    title: "Verify",
+    body: "Preserve the audit trail so authorized reviewers can reconstruct what happened.",
+  },
+];
 
+const leadership = [
+  {
+    name: "Carlo Rene Earl",
+    title: "Founder & Chief Executive Officer",
+    icon: Sparkles,
+    body: "Carlo founded GlyphLock and leads its product architecture, intellectual-property strategy, and long-term direction. He translates real operating problems into systems that connect identity, contracts, money movement records, creative work, and verifiable evidence.",
+  },
+  {
+    name: "Jacub Lough",
+    title: "Chief Financial Officer & Chief Strategy Officer",
+    icon: CircleDollarSign,
+    body: "Jacub leads financial planning, strategic development, risk analysis, and external commercial coordination. He helps shape processor, acquiring, integration, licensing, and growth decisions around clear economics and accountable execution.",
+  },
+  {
+    name: "Collin Vanderginst",
+    title: "Chief Technology Officer",
+    icon: Code2,
+    body: "Collin leads systems engineering, infrastructure reliability, security architecture, and technical integration. His role is to turn GlyphLock concepts into maintainable software and dependable operating systems.",
+  },
+];
 
-  const technologies = [
-    "QR identity imaging",
-    "AI site building engine",
-    "Master Covenant authorship",
-    "Interactive hotspot layers",
-    "Blockchain timestamping",
-    "Image Lab generation",
-    "Open source framework",
-    "Ecosystem-scale verification",
-    "Cross-platform identity",
-    "Creative sovereignty tools",
-    "Decentralized ownership proof",
-    "Extensible infrastructure"
-  ];
+const evidenceGroups = [
+  {
+    label: "Implemented in the current platform",
+    accent: "text-[#00E4FF]",
+    items: [
+      "NUPS role-based venue workflows",
+      "QR and interactive-image tooling",
+      "Contract and verification records",
+      "Audit, reconciliation, and reporting surfaces",
+      "GlyphBot-assisted product workflows",
+    ],
+  },
+  {
+    label: "Integration work",
+    accent: "text-[#8C4BFF]",
+    items: [
+      "Oracle Hospitality / OHIP interoperability",
+      "Payment-provider adapter paths",
+      "Analytics, storage, and business connectors",
+      "Hardware-assisted identity and register workflows",
+      "Enterprise API and SDK surfaces",
+    ],
+  },
+  {
+    label: "GlyphLock frameworks and research",
+    accent: "text-amber-300",
+    items: [
+      "Master Covenant governance architecture",
+      "Creative-sovereignty methods",
+      "Quantum-resistant design research",
+      "Multi-agent audit and control patterns",
+      "Cross-platform provenance models",
+    ],
+  },
+];
 
-  const whatGlyphLockIs = [
-    "A security platform",
-    "A legal engine",
-    "An AI governance system",
-    "A multi-modal truth verification suite",
-    "A POS security system",
-    "A quantum-resistant encryption network",
-    "A digital fraud prevention system",
-    "A global IP shield",
-    "A forensic evidence protocol",
-    "A multi-agent operating framework"
-  ];
+const engagementModels = [
+  {
+    title: "Platform access",
+    body: "For creators, builders, and teams using GlyphLock tools, QR workflows, interactive media, and verification features.",
+  },
+  {
+    title: "Venue deployment",
+    body: "For operators implementing NUPS, including workflow configuration, role mapping, hardware planning, onboarding, and launch support.",
+  },
+  {
+    title: "Enterprise integration",
+    body: "For organizations that need custom interoperability, security review, data boundaries, service levels, or licensing terms.",
+  },
+];
+
+function SectionHeading({ eyebrow, title, body }) {
+  return (
+    <div className="max-w-3xl mb-10">
+      <p className="text-xs font-black uppercase tracking-[0.28em] text-[#00E4FF] mb-3">
+        {eyebrow}
+      </p>
+      <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white font-space">
+        {title}
+      </h2>
+      {body ? (
+        <p className="mt-4 text-base md:text-lg leading-relaxed text-slate-300">
+          {body}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ProductCard({ item }) {
+  const Icon = item.icon;
 
   return (
+    <motion.article
+      {...reveal}
+      className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 md:p-8"
+    >
+      <div className="flex items-start gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#00E4FF]/25 bg-[#00E4FF]/10">
+          <Icon className="h-6 w-6 text-[#00E4FF]" aria-hidden="true" />
+        </div>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#8C4BFF]">
+            {item.eyebrow}
+          </p>
+          <h3 className="mt-2 text-2xl font-bold text-white">{item.title}</h3>
+        </div>
+      </div>
+      <p className="mt-5 leading-relaxed text-slate-300">{item.body}</p>
+      <ul className="mt-5 space-y-3">
+        {item.points.map((point) => (
+          <li key={point} className="flex gap-3 text-sm leading-relaxed text-slate-400">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#00E4FF]" aria-hidden="true" />
+            <span>{point}</span>
+          </li>
+        ))}
+      </ul>
+    </motion.article>
+  );
+}
+
+export default function About() {
+  return (
     <>
-      <SEOHead 
-        title="About GlyphLock - Protected Creative Ecosystem for Verified Digital Worlds"
-        description="Born from a question: What if imagery itself carried intelligence? GlyphLock is an open framework combining QR identity, site building, and Master Covenant architecture for creative sovereignty at scale."
-        keywords="GlyphLock about, creative ecosystem, Carlo Earl founder, open source framework, Master Covenant authorship, QR identity layer, site building infrastructure, verified ownership, digital sovereignty"
+      <SEOHead
+        title="About GlyphLock | Verifiable Infrastructure for Creative and Venue Operations"
+        description="GlyphLock builds verifiable infrastructure for digital creation and real-world operations. Learn about NUPS, GlyphLock verification tools, the Master Covenant, and the team building the platform."
+        keywords="GlyphLock, NUPS, Nexus Unified POS System, venue operations, QR verification, digital authorship, audit evidence, Carlo Earl, GlyphBot, Oracle Hospitality integration"
         url="/about"
       />
-      
-      <div className="min-h-screen bg-black text-white pt-24 pb-24 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#00E4FF]/5 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-[#8C4BFF]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
-          
-          {/* HERO */}
-          <div ref={heroRef} className="text-center mb-16 md:mb-24">
-            <motion.h1 
-              initial={{ opacity: 0, x: -100 }}
-              animate={heroInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-2xl sm:text-4xl md:text-6xl lg:text-8xl font-black mb-4 md:mb-8 tracking-tighter font-space"
+      <main className="relative min-h-screen overflow-hidden bg-black pb-24 pt-24 text-white">
+        <div className="pointer-events-none absolute right-[-15rem] top-[-12rem] h-[38rem] w-[38rem] rounded-full bg-[#00E4FF]/10 blur-[140px]" />
+        <div className="pointer-events-none absolute bottom-[15%] left-[-18rem] h-[42rem] w-[42rem] rounded-full bg-[#8C4BFF]/10 blur-[150px]" />
+
+        <div className="container relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+          <section className="py-12 text-center md:py-20">
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="mb-5 text-xs font-black uppercase tracking-[0.32em] text-[#00E4FF]"
             >
-              ABOUT <span className="text-transparent bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] bg-clip-text">GLYPHLOCK</span>
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, x: 100 }}
-              animate={heroInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-2xl md:text-3xl text-[#00E4FF] font-bold max-w-4xl mx-auto leading-tight"
-            >
-              Protected Creative Ecosystem
+              GlyphLock LLC · El Mirage, Arizona
             </motion.p>
-          </div>
-
-          {/* ORIGIN */}
-          <motion.div 
-            ref={originRef}
-            initial={{ opacity: 0, y: 60 }}
-            animate={originInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="glass-card rounded-2xl p-8 md:p-12 mb-12 border border-[#00E4FF]/20"
-          >
-            <motion.h2 
-              initial={{ opacity: 0, x: -80 }}
-              animate={originInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-3xl md:text-4xl font-bold text-white mb-8 flex items-center gap-4 font-space"
+            <motion.h1
+              initial={{ opacity: 0, y: 26 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="mx-auto max-w-5xl text-4xl font-black tracking-tight sm:text-6xl md:text-7xl lg:text-8xl font-space"
             >
-              <Sparkles className="w-8 h-8 text-[#00E4FF]" />
-              Our Origin
-            </motion.h2>
-            <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
-              <p>
-                GlyphLock did not begin as a company. It began as a rupture in expectation. A moment where a simple conversation forced a reexamination of what images are allowed to be.
-              </p>
-              <p>
-                In early 2025 a discussion about camouflage and military patterning exposed a deeper layer of reality. Patterns do not only hide bodies. Patterns can carry intention. The question that followed was not casual. It was catalytic. <span className="text-[#00E4FF] font-bold italic">What if imagery was not concealment but intelligence itself.</span> What if a surface could store encrypted meaning, respond to the environment, and actively defend the information it contained. That realization did not feel like invention. It felt like discovery. A category that had always existed but had not yet been named. <span className="text-white font-semibold">Images as living infrastructure.</span>
-              </p>
-              <p className="text-white font-semibold">
-                Once seen it could not be unseen.
-              </p>
-              <p>
-                The early path was punishing. Progress slowed under financial pressure. Resources were stretched thin. Collaborators appeared and disappeared. Promises collapsed. Momentum was lost and rebuilt more than once. There were periods where the weight of the project collided directly with the realities of family life, responsibility, and survival. The vision did not fail because it was weak. It nearly failed because building something new demands endurance that most systems are never required to prove.
-              </p>
-              <p>
-                At several points the project stood at the edge of abandonment. Not because the idea lacked power but because the cost of carrying it forward was real. The decision that followed defined everything that came next. <span className="text-[#00E4FF] font-bold">Strip the system to its core. Remove dependency on unreliable actors. Bootstrap the architecture. Trust only what can be built, tested, and verified.</span>
-              </p>
-              <p className="text-white font-semibold">
-                That pivot transformed GlyphLock from an idea into a discipline.
-              </p>
-              <p>
-                Every component from that moment forward had to survive stress. Every design choice had to justify itself under hostile conditions. If a mechanism could be broken it was broken deliberately and rebuilt stronger. If a structure failed it was replaced. Nothing ornamental survived. Only what functioned under pressure remained.
-              </p>
-              <p className="text-white font-semibold">
-                Constraint became the forge.
-              </p>
-              <p>
-                From that environment emerged a protected creative ecosystem engineered for endurance. Encrypted glyph signatures capable of anchoring authorship. Interactive image intelligence that treats visuals as active systems rather than static artifacts. Quantum resistant identity layers built to outlast current attack models. And the Master Covenant, a structural framework that binds authorship verification, auditability, and digital truth into a unified operating architecture.
-              </p>
-              <p>
-                The Master Covenant is not decoration. It is a spine. It ensures that what is created inside the ecosystem carries proof of origin, traceable lineage, and resistance to quiet erasure. <span className="text-white font-semibold">Work cannot simply disappear. Authorship cannot be casually rewritten. Systems cannot drift without record.</span> Integrity is embedded at the structural level.
-              </p>
-              <p>
-                GlyphLock was not assembled for optics. It was not shaped in a boardroom or optimized for investor theater. It was constructed in the presence of pressure, scarcity, and repeated failure. That environment did not weaken the system. It filtered it. What remains is architecture that has already survived adversity before ever meeting the public.
-              </p>
-              <p className="text-[#00E4FF] font-semibold">
-                This origin matters because infrastructure inherits the character of its birth.
-              </p>
-              <p>
-                Systems designed in comfort behave differently than systems forged under constraint. GlyphLock was forced to prove its resilience before it was allowed to scale. That proof is embedded in its design philosophy. Expect stress. Engineer for it. Assume adversarial conditions. Build anyway.
-              </p>
-              <p className="text-white font-semibold">
-                The result is not a product. It is a stance.
-              </p>
-              <p>
-                GlyphLock exists because the idea refused to die and the people carrying it refused to surrender to friction. The ecosystem stands on persistence, technical rigor, and the belief that creators deserve environments where their work is defended as fiercely as it is imagined.
-              </p>
-              <p>
-                Systems born under pressure do not panic when pressure returns. They hold. They adapt. They continue.
-              </p>
-              <p className="text-[#00E4FF] font-bold text-xl">
-                And that is why GlyphLock exists.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* MISSION */}
-          <div ref={missionRef} className="grid md:grid-cols-2 gap-8 mb-12">
-            <motion.div 
-              initial={{ opacity: 0, x: -80 }}
-              animate={missionInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="glass-card rounded-2xl p-8 border border-[#8C4BFF]/20 bg-gradient-to-br from-[#0A0F24] to-black"
+              Infrastructure that makes activity{" "}
+              <span className="bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] bg-clip-text text-transparent">
+                provable.
+              </span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="mx-auto mt-7 max-w-3xl text-lg leading-relaxed text-slate-300 md:text-xl"
             >
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3 font-space">
-                <Target className="w-8 h-8 text-[#8C4BFF]" />
-                Our Mission
-              </h2>
-              <p className="text-gray-300 leading-relaxed mb-6 text-lg">
-                GlyphLock's mission:<br />
-                <span className="text-[#8C4BFF] font-bold text-xl">
-                  Build infrastructure for creative sovereignty. 
-                  Make ownership verifiable. Make authorship provable. 
-                  Make digital worlds trustworthy by design.
-                </span>
-              </p>
-              <p className="text-xl text-white font-bold mt-8">
-                GlyphLock is not a security product.<br/>
-                <span className="text-[#00E4FF]">It is an open framework for verified creation.</span>
-              </p>
+              GlyphLock connects identity, authorship, operations, contracts, and audit evidence
+              so creators and real-world businesses can act with a record they can verify.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.28 }}
+              className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+            >
+              <Link
+                to="/consultation"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] px-6 py-3 font-bold text-white transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
+              >
+                Discuss a deployment
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+              <Link
+                to="/NUPSHub"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-6 py-3 font-bold text-white transition-colors hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white"
+              >
+                Explore NUPS
+              </Link>
             </motion.div>
+          </section>
 
-            <motion.div 
-              initial={{ opacity: 0, x: 80 }}
-              animate={missionInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="glass-card rounded-2xl p-8 border border-cyan-500/20 bg-gradient-to-br from-cyan-950/10 to-black"
-            >
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                <Shield className="w-6 h-6 text-cyan-500" />
-                We Enable
-              </h2>
-              <div className="space-y-3">
+          <motion.section
+            {...reveal}
+            className="mb-20 rounded-3xl border border-[#00E4FF]/20 bg-gradient-to-br from-[#07101d] via-black to-[#10091e] p-7 md:p-12"
+          >
+            <SectionHeading
+              eyebrow="Our origin"
+              title="The idea started with an image."
+              body="In early 2025, a conversation about camouflage raised a different question: what if an image could do more than display information? What if it could carry identity, respond to context, and preserve proof about where it came from?"
+            />
+            <div className="grid gap-8 text-base leading-relaxed text-slate-300 md:grid-cols-2 md:text-lg">
+              <div className="space-y-5">
+                <p>
+                  That question became GlyphLock. The first experiments centered on smart QR
+                  codes, interactive images, hidden data, and authorship. The work quickly
+                  outgrew a single feature and became a broader architecture for verifiable
+                  creation.
+                </p>
+                <p>
+                  The build was shaped by pressure: limited resources, inconsistent help,
+                  family responsibility, and repeated restarts. The practical response was to
+                  strip the system to what could be built, tested, documented, and defended.
+                </p>
+              </div>
+              <div className="space-y-5">
+                <p>
+                  Real venue work then exposed the same problem in a different form. Identity,
+                  contracts, transactions, roles, and approvals existed across disconnected
+                  tools. NUPS grew from the need to make those operations visible and
+                  reconstructable.
+                </p>
+                <p className="font-semibold text-white">
+                  The company still follows that discipline: expect pressure, separate claims
+                  from evidence, preserve the record, and build systems that can explain what
+                  happened.
+                </p>
+              </div>
+            </div>
+          </motion.section>
+
+          <section className="mb-24">
+            <SectionHeading
+              eyebrow="What we build"
+              title="One ecosystem, four working layers"
+              body="GlyphLock is broader than a security product and more concrete than a concept. It is a growing platform with an operating venue system, verification tools, assisted construction, and integration infrastructure."
+            />
+            <div className="grid gap-6 md:grid-cols-2">
+              {productPillars.map((item) => (
+                <ProductCard key={item.title} item={item} />
+              ))}
+            </div>
+          </section>
+
+          <motion.section
+            {...reveal}
+            className="mb-24 rounded-3xl border border-[#8C4BFF]/25 bg-white/[0.025] p-7 md:p-12"
+          >
+            <SectionHeading
+              eyebrow="System model"
+              title="From identity to evidence"
+              body="The same operating pattern connects GlyphLock's creative tools and NUPS workflows."
+            />
+            <div className="grid gap-4 md:grid-cols-4">
+              {operatingFlow.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.title} className="relative rounded-2xl border border-white/10 bg-black/40 p-5">
+                    <div className="mb-5 flex items-center justify-between">
+                      <Icon className="h-6 w-6 text-[#00E4FF]" aria-hidden="true" />
+                      <span className="font-mono text-xs font-bold text-slate-500">{item.step}</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-400">{item.body}</p>
+                    {index < operatingFlow.length - 1 ? (
+                      <ArrowRight
+                        className="absolute -right-3 top-1/2 z-10 hidden h-5 w-5 text-[#8C4BFF] md:block"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </motion.section>
+
+          <section className="mb-24 grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
+            <motion.div {...reveal} className="rounded-3xl border border-white/10 bg-white/[0.035] p-7 md:p-10">
+              <SectionHeading
+                eyebrow="NUPS"
+                title="Built for the work between the swipe and the report"
+                body="NUPS is GlyphLock's venue-operations subsystem. It does not pretend that a POS screen alone can explain a night of business."
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
                 {[
-                  "Verified creative ownership",
-                  "QR-based asset identity",
-                  "AI-powered site building",
-                  "Blockchain authorship proof",
-                  "Interactive image ecosystems",
-                  "Covenant-backed contracts",
-                  "Open source extensibility",
-                  "Cross-platform verification",
-                  "Decentralized creative infrastructure",
-                  "Limitless construction at scale"
-                ].map((capability, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full flex-shrink-0" />
-                    <span className="text-gray-300">{capability}</span>
+                  "Credential-aware profiles and check-in",
+                  "Role-based staff workspaces and timekeeping",
+                  "VIP and entertainer contract evidence",
+                  "Cash and card transaction records",
+                  "Register batches, Z reports, and reconciliation",
+                  "Driver and contractor payout records",
+                  "Audit trails for governed changes",
+                  "Venue- and environment-scoped operations",
+                ].map((item) => (
+                  <div key={item} className="flex gap-3 text-sm leading-relaxed text-slate-300">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#00E4FF]" aria-hidden="true" />
+                    <span>{item}</span>
                   </div>
                 ))}
               </div>
             </motion.div>
-          </div>
 
-          {/* THE PIVOT */}
-          <motion.div 
-            ref={pivotRef}
-            initial={{ opacity: 0, y: 60 }}
-            animate={pivotInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="glass-card rounded-2xl p-8 md:p-12 mb-12 border border-[#00E4FF]/20"
-          >
-            <motion.h2 
-              initial={{ opacity: 0, x: -80 }}
-              animate={pivotInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-3xl md:text-4xl font-bold text-white mb-8 flex items-center gap-4 font-space"
+            <motion.aside
+              {...reveal}
+              className="rounded-3xl border border-amber-400/25 bg-amber-400/[0.06] p-7 md:p-10"
             >
-              <Zap className="w-8 h-8 text-[#00E4FF]" />
-              The Pivot
-            </motion.h2>
-            <p className="text-gray-300 leading-relaxed mb-8 text-lg">
-              GlyphLock did <span className="font-bold text-white">not</span> start as a security company. 
-              It started as an interactive-image experiment. 
-              Carlo and Collin thought they were building "smart QR codes." 
-              Then the technology outgrew the category.
-            </p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-              {[
-                "QR Identity", "Site Builder", "Image Lab", "Blockchain", "Covenant",
-                "Authorship", "Hotzones", "AI Audit", "Open Source", "Ecosystem"
-              ].map((tech, idx) => (
-                <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-3 text-center text-xs font-bold text-[#00E4FF] uppercase tracking-wide">
-                  {tech}
-                </div>
-              ))}
-            </div>
-            
-            <div className="bg-[#00E4FF]/10 border border-[#00E4FF]/30 rounded-xl p-6 text-center">
-              <p className="text-xl text-[#00E4FF] font-bold">
-                From smart QR codes to a complete creative infrastructure. <br/>
-                The framework for building verified digital ecosystems.
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-300">
+                Accounting discipline
               </p>
-            </div>
-          </motion.div>
+              <h3 className="mt-3 text-2xl font-black text-white">The record must mean what it says.</h3>
+              <div className="mt-6 space-y-5 text-sm leading-relaxed text-slate-300">
+                <p>
+                  <strong className="text-white">Sales:</strong> total sales are cash sales plus card sales.
+                </p>
+                <p>
+                  <strong className="text-white">GlyphBucks:</strong> closed-loop stored value is tracked as a liability, not ordinary sales revenue.
+                </p>
+                <p>
+                  <strong className="text-white">Entertainers:</strong> independent-contractor workflows remain separate from employee payroll and tip pools.
+                </p>
+                <p>
+                  <strong className="text-white">Modes:</strong> live, demo, and sandbox activity remain separated.
+                </p>
+              </div>
+            </motion.aside>
+          </section>
 
-          {/* LEADERSHIP */}
-          <div ref={leadershipRef} className="mb-24">
-            <motion.h2 
-              initial={{ opacity: 0, y: 40 }}
-              animate={leadershipInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-4xl md:text-5xl font-black text-white mb-12 text-center font-space"
-            >
-              LEADERSHIP
-            </motion.h2>
-            <div className="grid gap-6">
-              {leadership.map((leader, idx) => {
+          <motion.section
+            {...reveal}
+            className="mb-24 overflow-hidden rounded-3xl border border-[#00E4FF]/25 bg-gradient-to-r from-[#021824] to-[#160a29] p-8 md:p-12"
+          >
+            <Target className="h-8 w-8 text-[#00E4FF]" aria-hidden="true" />
+            <p className="mt-7 text-sm font-black uppercase tracking-[0.26em] text-[#00E4FF]">Our mission</p>
+            <h2 className="mt-4 max-w-5xl text-3xl font-black leading-tight text-white md:text-5xl font-space">
+              Build infrastructure for creative sovereignty and accountable operations.
+              Make ownership verifiable. Make activity reconstructable. Make digital and
+              real-world systems trustworthy by design.
+            </h2>
+          </motion.section>
+
+          <section className="mb-24">
+            <SectionHeading
+              eyebrow="Leadership"
+              title="A small team with direct responsibility"
+              body="GlyphLock's executive team is organized around product direction, financial strategy, and engineering delivery."
+            />
+            <div className="grid gap-6 lg:grid-cols-3">
+              {leadership.map((leader) => {
                 const Icon = leader.icon;
                 return (
-                  <motion.div 
-                    key={idx} 
-                    initial={{ opacity: 0, x: idx % 2 === 0 ? -80 : 80 }}
-                    animate={leadershipInView ? { opacity: 1, x: 0 } : {}}
-                    transition={{ duration: 1, delay: 0.2 + (idx * 0.15), ease: [0.16, 1, 0.3, 1] }}
-                    className="glass-card rounded-xl p-8 border border-[#8C4BFF]/20 hover:border-[#8C4BFF]/50 transition-all"
+                  <motion.article
+                    key={leader.name}
+                    {...reveal}
+                    className="rounded-2xl border border-white/10 bg-white/[0.035] p-7"
                   >
-                    <div className="flex flex-col md:flex-row gap-6 items-start">
-                      <div className="w-20 h-20 bg-gradient-to-br from-[#00E4FF] to-[#8C4BFF] rounded-2xl flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(140,75,255,0.3)]">
-                        <Icon className="w-10 h-10 text-black" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-white mb-1 font-space">{leader.name}</h3>
-                        <div className="text-[#00E4FF] font-bold text-sm uppercase tracking-widest mb-4">{leader.title}</div>
-                        <p className="text-gray-400 leading-relaxed">{leader.role}</p>
-                      </div>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#00E4FF] to-[#8C4BFF]">
+                      <Icon className="h-6 w-6 text-black" aria-hidden="true" />
                     </div>
-                  </motion.div>
+                    <h3 className="mt-6 text-2xl font-bold text-white">{leader.name}</h3>
+                    <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-[#00E4FF]">
+                      {leader.title}
+                    </p>
+                    <p className="mt-5 leading-relaxed text-slate-400">{leader.body}</p>
+                  </motion.article>
                 );
               })}
             </div>
-          </div>
+          </section>
 
-
-
-          {/* TECHNOLOGY STACK */}
-          <motion.div 
-            ref={techRef}
-            initial={{ opacity: 0, y: 60 }}
-            animate={techInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="glass-card rounded-2xl p-8 md:p-12 border border-[#00E4FF]/20 mb-12"
-          >
-            <motion.h2 
-              initial={{ opacity: 0, x: -80 }}
-              animate={techInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-3xl md:text-4xl font-bold text-white mb-8 flex items-center gap-4 font-space"
-            >
-              <Blocks className="w-8 h-8 text-[#00E4FF]" />
-              The Technology Stack
-            </motion.h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {technologies.map((tech, idx) => (
-                <motion.div 
-                  key={idx} 
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={techInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.8, delay: 0.3 + (idx * 0.05), ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-[#00E4FF]/10 hover:border-[#00E4FF]/30 transition-colors"
+          <section className="mb-24">
+            <SectionHeading
+              eyebrow="Evidence before claims"
+              title="Clear about what is built, integrated, and researched"
+              body="GlyphLock separates implemented product capabilities from third-party integration work and internal frameworks. An integration is not presented as an endorsement, certification, or production approval."
+            />
+            <div className="grid gap-6 lg:grid-cols-3">
+              {evidenceGroups.map((group) => (
+                <motion.article
+                  key={group.label}
+                  {...reveal}
+                  className="rounded-2xl border border-white/10 bg-black/50 p-7"
                 >
-                  <div className="w-2 h-2 bg-[#00E4FF] rounded-full flex-shrink-0" />
-                  <span className="text-gray-200 font-medium">{tech}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* SERVICE FEES */}
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="glass-card rounded-2xl p-8 md:p-12 mb-12 border border-[#8C4BFF]/20"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 flex items-center gap-4 font-space">
-              <DollarSign className="w-8 h-8 text-[#8C4BFF]" />
-              Service Fees
-            </h2>
-            <p className="text-gray-400 mb-10 text-lg">
-              Transparent, straightforward pricing across every tier of the GlyphLock ecosystem.
-            </p>
-
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              {[
-                {
-                  tier: "Free",
-                  price: "$0",
-                  period: "/ month",
-                  color: "border-white/20",
-                  accent: "text-white",
-                  badge: null,
-                  features: [
-                    "50 QR generations / mo",
-                    "20 AI images / mo",
-                    "1,000 API calls / mo",
-                    "1 GB storage",
-                    "Basic blockchain tools",
-                    "Community support"
-                  ]
-                },
-                {
-                  tier: "Professional",
-                  price: "$49",
-                  period: "/ month",
-                  color: "border-[#00E4FF]/50",
-                  accent: "text-[#00E4FF]",
-                  badge: "Most Popular",
-                  features: [
-                    "1,000 QR generations / mo",
-                    "500 AI images / mo",
-                    "100,000 API calls / mo",
-                    "50 GB storage",
-                    "Full blockchain suite",
-                    "Priority support",
-                    "Custom voice personas",
-                    "Advanced analytics"
-                  ]
-                },
-                {
-                  tier: "Enterprise",
-                  price: "$199",
-                  period: "/ month",
-                  color: "border-[#8C4BFF]/50",
-                  accent: "text-[#8C4BFF]",
-                  badge: "Full Access",
-                  features: [
-                    "Unlimited QR generations",
-                    "Unlimited AI images",
-                    "Unlimited API calls",
-                    "Unlimited storage",
-                    "Master Covenant suite",
-                    "Dedicated account manager",
-                    "SLA guarantee",
-                    "Custom integrations",
-                    "NUPS POS integration"
-                  ]
-                }
-              ].map((plan, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
-                  className={`relative bg-white/5 border-2 ${plan.color} rounded-2xl p-6 flex flex-col`}
-                >
-                  {plan.badge && (
-                    <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${plan.accent} bg-black border ${plan.color}`}>
-                      {plan.badge}
-                    </div>
-                  )}
-                  <div className="mb-6">
-                    <div className={`text-sm font-bold uppercase tracking-widest mb-2 ${plan.accent}`}>{plan.tier}</div>
-                    <div className="flex items-end gap-1">
-                      <span className="text-4xl font-black text-white">{plan.price}</span>
-                      <span className="text-gray-400 mb-1">{plan.period}</span>
-                    </div>
-                  </div>
-                  <ul className="space-y-2 flex-1">
-                    {plan.features.map((f, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                        <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.accent}`} />
-                        {f}
+                  <h3 className={"text-lg font-bold " + group.accent}>{group.label}</h3>
+                  <ul className="mt-5 space-y-3">
+                    {group.items.map((item) => (
+                      <li key={item} className="flex gap-3 text-sm leading-relaxed text-slate-400">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
+                        <span>{item}</span>
                       </li>
                     ))}
                   </ul>
-                </motion.div>
+                </motion.article>
               ))}
             </div>
+          </section>
 
-            <div className="flex items-start gap-3 bg-[#8C4BFF]/10 border border-[#8C4BFF]/30 rounded-xl p-4">
-              <Info className="w-5 h-5 text-[#8C4BFF] flex-shrink-0 mt-0.5" />
-              <p className="text-gray-400 text-sm">
-                All plans include access to the GlyphLock open framework and core platform tools. Add-ons and custom enterprise agreements available — contact us for details. Usage resets on your monthly billing cycle date.
-              </p>
+          <section className="mb-24">
+            <SectionHeading
+              eyebrow="Work with GlyphLock"
+              title="Engagements are scoped to the actual job"
+              body="The old one-size-fits-all subscription table did not reflect the cost or responsibility of venue deployments and enterprise integration. Access and pricing are now matched to scope."
+            />
+            <div className="grid gap-6 lg:grid-cols-3">
+              {engagementModels.map((model) => (
+                <motion.article
+                  key={model.title}
+                  {...reveal}
+                  className="rounded-2xl border border-white/10 bg-white/[0.035] p-7"
+                >
+                  <Users className="h-6 w-6 text-[#8C4BFF]" aria-hidden="true" />
+                  <h3 className="mt-5 text-2xl font-bold text-white">{model.title}</h3>
+                  <p className="mt-3 leading-relaxed text-slate-400">{model.body}</p>
+                </motion.article>
+              ))}
             </div>
-          </motion.div>
+            <p className="mt-6 text-sm leading-relaxed text-slate-500">
+              Quotes may account for venue count, active modules, hardware, onboarding, integrations,
+              support, compliance review, and service-level requirements. Payment processing and
+              hospitality production access remain subject to the relevant provider's underwriting,
+              contracts, approvals, and technical requirements.
+            </p>
+          </section>
 
-          {/* CTA */}
-          <motion.div 
-            ref={ctaRef}
-            initial={{ opacity: 0, y: 70, scale: 0.92 }}
-            animate={ctaInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-3xl p-12 text-center bg-gradient-to-b from-[#001F54] to-black border border-[#00E4FF]/30 relative overflow-hidden"
+          <motion.section
+            {...reveal}
+            className="relative overflow-hidden rounded-3xl border border-[#00E4FF]/30 bg-gradient-to-b from-[#001F54] to-black p-8 text-center md:p-14"
           >
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-            {/* Purple grid overlay */}
-            <div className="absolute inset-0 opacity-20" style={{
-              backgroundImage: `
-                linear-gradient(rgba(168,85,247,0.7) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(139,92,246,0.7) 1px, transparent 1px)
-              `,
-              backgroundSize: '30px 30px'
-            }} />
+            <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(0,228,255,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(140,75,255,0.3)_1px,transparent_1px)] [background-size:32px_32px]" />
             <div className="relative z-10">
-              <motion.h2 
-                initial={{ opacity: 0, x: -100 }}
-                animate={ctaInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="text-4xl md:text-5xl font-black text-white mb-6 font-space"
+              <p className="text-xs font-black uppercase tracking-[0.28em] text-[#00E4FF]">
+                Build with evidence
+              </p>
+              <h2 className="mx-auto mt-4 max-w-4xl text-3xl font-black text-white md:text-5xl font-space">
+                Bring us the workflow that needs to be trusted.
+              </h2>
+              <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">
+                We will map the people, permissions, money, records, and integrations required
+                to make it operational.
+              </p>
+              <Link
+                to="/consultation"
+                className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] px-7 py-3.5 font-bold text-white transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
               >
-                READY TO BUILD YOUR ECOSYSTEM?
-              </motion.h2>
-              <motion.p 
-                initial={{ opacity: 0, x: 100 }}
-                animate={ctaInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 1.1, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="text-gray-400 mb-10 text-xl max-w-2xl mx-auto"
-              >
-                Start with GlyphLock's open framework for verified creative infrastructure.
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 40, scale: 0.9 }}
-                animate={ctaInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                transition={{ duration: 1, delay: 0.5, type: "spring", stiffness: 100 }}
-              >
-                <Link to={createPageUrl("Consultation")}>
-                  <Button 
-                    className="bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] hover:scale-105 transition-transform text-white text-lg font-bold uppercase tracking-wide px-10 py-6 shadow-[0_0_30px_rgba(0,228,255,0.3)] border-none"
-                    aria-label="Start building with GlyphLock - Request consultation"
-                  >
-                    Start Building
-                  </Button>
-                </Link>
-              </motion.div>
+                Request a consultation
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
             </div>
-          </motion.div>
-
+          </motion.section>
         </div>
-      </div>
+      </main>
     </>
   );
 }
