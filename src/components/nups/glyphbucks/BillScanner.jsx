@@ -126,12 +126,9 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
         }]);
         toast.success(`✓ $${billData.denomination} bill validated — Payout: $${billData.redemption_amount}`);
         
-        // Mark transaction as redeemed
-        if (gbtx.length > 0) {
-          await base44.entities.GlyphBucksTransaction.update(gbtx[0].id, {
-            is_redeemable: false
-          });
-        }
+        // The redemption backend is authoritative: it marks the underlying
+        // GlyphBucksBill redeemed and records the contractor payout. Do not
+        // perform a second client-side financial mutation here.
       } else if (data.duplicates_detected > 0) {
         const dup = data.duplicate_bills[0];
         setScannedBills(prev => [...prev, {
@@ -160,56 +157,7 @@ export default function BillScanner({ contractorId, contractorName, onPayoutComp
       setValidating(false);
       setScanBuffer("");
     }
-    
-    try {
-      const response = await base44.functions.invoke('redeemGlyphBucksBills', {
-        contractor_id: contractorId,
-        contractor_name: contractorName,
-        serial_numbers: [serialNumber],
-        redemption_rate: 0.50,
-        payment_method: "cash"
-      });
 
-      const data = response.data;
-
-      if (data.success && data.bills_redeemed > 0) {
-        const billData = data.payout.bills_redeemed[0];
-        setScannedBills(prev => [...prev, {
-          serial_number: serialNumber,
-          denomination: billData.denomination,
-          redemption_amount: billData.redemption_amount,
-          status: "valid",
-          payout_id: data.payout.payout_id
-        }]);
-        toast.success(`✓ $${billData.denomination} bill validated — Payout: $${billData.redemption_amount}`);
-      } else if (data.duplicates_detected > 0) {
-        const dup = data.duplicate_bills[0];
-        setScannedBills(prev => [...prev, {
-          serial_number: serialNumber,
-          status: "duplicate",
-          redeemed_at: dup.redeemed_at,
-          redeemed_by: dup.redeemed_by
-        }]);
-        toast.error("Bill already redeemed");
-      } else {
-        setScannedBills(prev => [...prev, {
-          serial_number: serialNumber,
-          status: "invalid",
-          error: data.error || "Bill not found"
-        }]);
-        toast.error(data.error || "Invalid bill");
-      }
-    } catch (error) {
-      setScannedBills(prev => [...prev, {
-        serial_number: serialNumber,
-        status: "error",
-        error: error.message
-      }]);
-      toast.error("Validation failed: " + error.message);
-    } finally {
-      setValidating(false);
-      setScanBuffer("");
-    }
   };
 
   const handleManualEntry = () => {
