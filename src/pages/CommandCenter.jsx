@@ -946,11 +946,9 @@ function APIKeysTab({ user }) {
 
   const rotateKeyMutation = useMutation({
     mutationFn: async (keyId) => {
-      const newSecret = `glk_sec_${crypto.randomUUID().replace(/-/g, '')}${crypto.randomUUID().replace(/-/g, '').substring(0, 8)}`;
-      return base44.entities.APIKey.update(keyId, {
-        secret_key: newSecret,
-        last_rotated: new Date().toISOString()
-      });
+      const response = await base44.functions.invoke('rotateAPIKey', { key_id: keyId });
+      if (!response?.data) throw new Error('API key rotation failed');
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['apiKeys']);
@@ -959,10 +957,14 @@ function APIKeysTab({ user }) {
   });
 
   const deleteKeyMutation = useMutation({
-    mutationFn: (keyId) => base44.entities.APIKey.delete(keyId),
+    mutationFn: async (keyId) => {
+      const response = await base44.functions.invoke('manageAPIKeySecurity', { action: 'revoke', key_id: keyId, reason: 'Revoked from Command Center' });
+      if (!response?.data?.success) throw new Error(response?.data?.error || 'API key revocation rejected');
+      return response.data.key;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['apiKeys']);
-      toast.success("API key deleted");
+      toast.success("API key revoked");
     }
   });
 
