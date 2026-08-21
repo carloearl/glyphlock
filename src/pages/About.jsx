@@ -511,6 +511,15 @@ function EcosystemMap() {
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
             <span className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-200">{current.status}</span>
           </div>
+          <div>
+            <Link
+              to={current.to}
+              className="group mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2.5 text-sm font-black text-white transition-colors hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
+            >
+              {current.cta}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            </Link>
+          </div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-black/45 p-5">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-[#00E4FF]">What enters</p>
