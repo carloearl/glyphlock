@@ -23,7 +23,7 @@ import ClubCurrencyPressView from '@/components/nups/press/ClubCurrencyPressView
 export default function GlyphBucksWorkspace() {
   const [user, setUser] = useState(null);
   const activeVenue = useActiveVenue();
-  const venueId = activeVenue?.id || activeVenue?.venue_id || 'dream_palace';
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [demoMode, setDemoMode] = useState(false);
   const [activeTab, setActiveTab] = useState('sales');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
