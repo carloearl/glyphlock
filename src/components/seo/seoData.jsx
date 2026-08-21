@@ -15,16 +15,16 @@ export const SEO_DATA = {
   },
   "About": {
     title: "About GlyphLock | One Evidence Architecture, Every Layer",
-    description: "GlyphLock is an evidence architecture spanning creative technology, identity, GlyphBot, NUPS operations, governance, security, financial accountability, integrations, hardware, and verification.",
-    keywords: ["GlyphLock", "evidence architecture", "creative technology", "NUPS", "GlyphBot", "Secure QR Studio", "Image Lab", "governance", "security", "financial accountability", "systems integration", "hardware deployment", "audit evidence", "Carlo Rene Earl", "El Mirage Arizona"],
+    description: "GlyphLock connects hidden-image data, 91 QR payload structures, GlyphBot, automated DJ tools, NUPS, GlyphBucks closed-loop value, ledgers, timestamp evidence, governance, and Oracle/OHIP interoperability through one evidence architecture.",
+    keywords: ["GlyphLock", "evidence architecture", "LSB steganography", "hidden image data", "91 QR payloads", "GlyphBot", "Site Builder", "automated DJ", "NUPS", "GlyphBucks", "closed-loop stored value", "operational ledgers", "OpenTimestamps", "Bitcoin anchoring", "Master Covenant", "Oracle PartnerNetwork", "OHIP", "Dream Palace", "audit evidence", "Carlo Rene Earl", "El Mirage Arizona"],
     h1: "It Started with an Image. It Became an Architecture for Proving What Happened.",
     url: "/about",
     ogTitle: "About GlyphLock | The Complete Evidence Architecture",
-    ogDescription: "See how GlyphLock connects creative tools, identity, assisted intelligence, NUPS operations, governance, security, financial records, integrations, hardware, and verification.",
+    ogDescription: "Explore the full GlyphLock onion: hidden-image carriers, 91 QR payloads, GlyphBot, Auto-DJ, NUPS, GlyphBucks, ledgers, timestamp evidence, governance, and Oracle/OHIP.",
     schemaType: "AboutPage",
     priority: 0.8,
     changefreq: "monthly",
-    internalLinks: ["/SecureQRStudio", "/ImageLab", "/GlyphBot", "/NUPSLanding", "/GovernanceHub", "/SecurityOperationsCenter", "/SDKDocs", "/consultation"]
+    internalLinks: ["/SecureQRStudio", "/ImageLab", "/GlyphBot", "/GlyphBotMixer", "/NUPSLanding", "/GlyphLockFinancialPage", "/GovernanceHub", "/SecurityOperationsCenter", "/SDKDocs", "/consultation"]
   },
   "Pricing": {
     title: "Enterprise Security Plans | GlyphLock LLC",
