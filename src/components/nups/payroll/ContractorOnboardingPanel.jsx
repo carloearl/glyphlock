@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { FileSignature, Upload, ShieldCheck, Loader2 } from "lucide-react";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 const TAX_CLASSIFICATIONS = [
   { value: "individual_sole_prop", label: "Individual / Sole Proprietor" },
@@ -103,11 +104,15 @@ export default function ContractorOnboardingPanel({ entertainer, existingForm, c
         verified_at:               new Date().toISOString(),
       };
 
-      if (existingForm?.id) {
-        await base44.entities.ContractorTaxForm.update(existingForm.id, payload);
-      } else {
-        await base44.entities.ContractorTaxForm.create(payload);
-      }
+      await writeIdentityRecord({
+        entity: "ContractorTaxForm",
+        operation: existingForm?.id ? "update" : "create",
+        id: existingForm?.id,
+        venueId: entertainer.venue_id,
+        actor: currentUser,
+        intent: existingForm?.id ? "contractor:w9:update" : "contractor:w9:create",
+        data: payload,
+      });
 
       // Audit trail
       await base44.entities.SystemAuditLog.create({
