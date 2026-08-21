@@ -116,10 +116,9 @@ export default function DailySettlementDashboard() {
   // Product catalogue — so every drink / bottle appears itemized, even at zero
   const { data: products = [] } = useQuery({
     queryKey: ['settlement-products', selectedVenue],
-    queryFn: async () => {
-      const all = await base44.entities.POSProduct.list('-created_date', 500);
-      return all.filter(p => !p.venue_id || p.venue_id === selectedVenue);
-    },
+    queryFn: () => selectedVenue
+      ? base44.entities.POSProduct.filter({ venue_id: selectedVenue }, '-created_date', 500)
+      : Promise.resolve([]),
     enabled: !!selectedVenue,
   });
 
