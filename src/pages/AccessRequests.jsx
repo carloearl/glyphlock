@@ -14,10 +14,9 @@ const STATUS_COLORS = {
 };
 
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §5 — Owner approval console.
-// Route is ADMIN-guarded; every action is re-verified server-side (owner authority only).
-// Decision lockdown (owner directive 2026-07-21): only Carlo Earl's accounts
-// see and use the decision buttons. Server enforces the same rule.
-const DECISION_EMAILS = ["carloearl@glyphlock.com", "carloearl@gmail.com"];
+// Route is ADMIN-guarded; every action is re-verified server-side.
+// Decision authority (directive 2026-08-21): sovereign owners plus approved
+// OWNER/ADMINISTRATOR grants — self-approval permitted for owner/admin.
 
 const STAFF_ROLES = ["ENTERTAINER", "HOSTESS", "DOORMAN", "DOOR_GIRL", "BARTENDER", "DJ", "SECURITY", "MANAGER"];
 
@@ -28,8 +27,8 @@ export default function AccessRequests() {
   const [canDecide, setCanDecide] = useState(false);
 
   useEffect(() => {
-    base44.auth.me()
-      .then((me) => setCanDecide(DECISION_EMAILS.includes(String(me?.email || "").toLowerCase())))
+    base44.functions.invoke("nupsAccessControl", { action: "checkAccess" })
+      .then((res) => setCanDecide(res.data?.authorized === true && ["OWNER", "ADMINISTRATOR"].includes(res.data?.granted_role)))
       .catch(() => setCanDecide(false));
   }, []);
 
@@ -72,7 +71,7 @@ export default function AccessRequests() {
         <ShieldCheck className="w-7 h-7 text-violet-400" />
         <div>
           <h1 className="text-xl font-bold">NUPS Access Requests</h1>
-          <p className="text-sm text-slate-500">Approval authority: Carlo Earl only. Self-approval is blocked server-side.</p>
+          <p className="text-sm text-slate-500">Approval authority: owners and administrators — including their own requests.</p>
         </div>
       </header>
 

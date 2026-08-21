@@ -1,8 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §4–7 — Owner/Admin access request, approval, and back-office authorization.
-// Approval authority: Carlo Earl's owner account, plus any expressly approved OWNER.
-// No applicant may self-approve. All decisions append to the request's decision_log.
+// Approval authority: sovereign owner accounts plus any expressly approved
+// OWNER or ADMINISTRATOR. Owners and administrators may approve their own
+// request. All decisions append to the request's decision_log.
 
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
 
@@ -27,19 +28,15 @@ const NUPS_ROLE_MAP = {
   SECURITY: 'SECURITY',
 };
 
-// Decision lockdown (owner directive 2026-07-21): ONLY Carlo Earl's accounts
-// may approve/reject/suspend/revoke owner-admin access requests. Approved
-// OWNERs may still VIEW the list, but cannot decide.
-const DECISION_EMAILS = ['carloearl@glyphlock.com', 'carloearl@gmail.com'];
-
+// Decision authority (owner directive 2026-08-21): sovereign accounts plus
+// any APPROVED OWNER or ADMINISTRATOR may decide — including on their own
+// request (self-approval permitted for owner/admin authority).
 async function isAuthorizedOwner(base44, email) {
   const e = String(email || '').trim().toLowerCase();
   if (!e) return false;
   if (SOVEREIGN_EMAILS.includes(e)) return true;
-  const approved = await base44.asServiceRole.entities.NUPSAccessRequest.filter({
-    email: e, status: 'APPROVED', granted_role: 'OWNER'
-  });
-  return (approved || []).length > 0;
+  const approved = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email: e, status: 'APPROVED' });
+  return (approved || []).some(r => ['OWNER', 'ADMINISTRATOR'].includes(r.granted_role));
 }
 
 function safeRequest(r) {
@@ -176,11 +173,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'decide') {
-      // §5 lockdown — decision authority is Carlo Earl only, regardless of
-      // any granted OWNER role.
-      if (!DECISION_EMAILS.includes(email)) {
-        return Response.json({ error: 'Only Carlo Earl can approve or revoke owner/admin access.' }, { status: 403 });
-      }
+      // Decision authority already verified above (isAuthorizedOwner):
+      // sovereign accounts and approved OWNER/ADMINISTRATOR grants.
+      // Self-approval is permitted for owner/admin authority (directive 2026-08-21).
       const { request_id, decision, note } = body;
       const valid = ['APPROVE_ENTERTAINER', 'APPROVE_STAFF', 'APPROVE_ADMIN', 'APPROVE_OWNER', 'REJECT', 'REQUEST_INFO', 'SUSPEND', 'REVOKE'];
       if (!request_id || !valid.includes(decision)) {
@@ -188,9 +183,6 @@ Deno.serve(async (req) => {
       }
       const r = await base44.asServiceRole.entities.NUPSAccessRequest.get(request_id).catch(() => null);
       if (!r) return Response.json({ error: 'Request not found.' }, { status: 404 });
-      if (String(r.email).toLowerCase() === email) {
-        return Response.json({ error: 'Self-approval is prohibited.' }, { status: 403 });
-      }
 
       const now = new Date().toISOString();
       const log = [...(r.decision_log || []), { decision, by: email, note: note || '', timestamp: now }];
