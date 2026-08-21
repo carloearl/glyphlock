@@ -17,7 +17,10 @@
     "check:integrations": "node scripts/check-integration-boundaries.mjs",
     "preview": "vite preview",
     "check:dj-functions": "node scripts/check-dj-function-sdk.mjs",
-    "check:nups-frozen-rules": "node scripts/check-nups-frozen-rules.mjs"
+    "check:nups-frozen-rules": "node scripts/check-nups-frozen-rules.mjs",
+    "check:nups-protected-evidence": "node scripts/check-protected-evidence-policy.mjs",
+    "check:nups-api-key-secrets": "node scripts/check-api-key-secret-lifecycle.mjs",
+    "check:nups-guest-identity": "node scripts/check-guest-identity-projection.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.43",
