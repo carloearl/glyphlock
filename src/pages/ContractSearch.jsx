@@ -7,8 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, FileText, User, CreditCard, Hash, Calendar, Shield, Loader2, Eye } from "lucide-react";
 import ContractDetailModal from "@/components/nups/ContractDetailModal";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 export default function ContractSearch() {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [searchType, setSearchType] = useState("guest_name");
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -17,7 +20,7 @@ export default function ContractSearch() {
   const [selectedContract, setSelectedContract] = useState(null);
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim() || !venueId) return;
     setLoading(true);
     setSearched(true);
 
@@ -33,6 +36,7 @@ export default function ContractSearch() {
     }
 
     filter.record_type = "contract_token";
+    filter.venue_id = venueId;
 
     const records = await base44.entities.VIPContractRecord.filter(filter, '-signed_at', 50);
     setResults(records);
