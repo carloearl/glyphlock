@@ -5,6 +5,8 @@
  */
 import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -222,6 +224,8 @@ function ContractCard({ contract, entertainers, venue, onTransition, currentUser
 
 export default function VIPContractLifecycle({ currentUser }) {
   const qc = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [showNew, setShowNew] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [newContract, setNewContract] = useState({
@@ -247,18 +251,31 @@ export default function VIPContractLifecycle({ currentUser }) {
   const currentVenue = venues?.[0] || { name: "Venue", address: "", age_requirement: 21 };
 
   const createContract = useMutation({
-    mutationFn: () => base44.entities.ContractorPayout.create({
-      contractor_id: newContract.contractor_id,
-      contractor_name: entertainers.find(e => e.id === newContract.contractor_id)?.stage_name || "",
-      payout_date: new Date().toISOString().split("T")[0],
-      payout_type: newContract.payout_type,
-      total_payout: parseFloat(newContract.total_payout) || 0,
-      payment_method: newContract.payment_method,
-      notes: newContract.notes,
-      redemption_rate: newContract.redemption_rate,
-      approved_by: currentUser?.email,
-      status: "draft",
-    }),
+    mutationFn: async () => {
+      if (!venueId) throw new Error("Select an active venue before creating a contractor payout agreement.");
+      const result = await writeEntity({
+        entity: "ContractorPayout",
+        operation: "create",
+        data: {
+          contractor_id: newContract.contractor_id,
+          contractor_name: entertainers.find(e => e.id === newContract.contractor_id)?.stage_name || "",
+          payout_date: new Date().toISOString().split("T")[0],
+          payout_type: newContract.payout_type,
+          total_payout: parseFloat(newContract.total_payout) || 0,
+          payment_method: newContract.payment_method,
+          notes: newContract.notes,
+          redemption_rate: newContract.redemption_rate,
+          approved_by: currentUser?.email,
+          status: "draft",
+          venue_id: venueId,
+        },
+        actor: { email: currentUser?.email, id: currentUser?.id, role: currentUser?._highestRole || currentUser?.role || "External" },
+        venue_id: venueId,
+        intent: "CONTRACTOR_PAYOUT_AGREEMENT_CREATE",
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Contractor payout agreement was rejected.");
+      return result.value;
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["vip-contract-payouts"] });
       setShowNew(false);
@@ -268,7 +285,9 @@ export default function VIPContractLifecycle({ currentUser }) {
   });
 
   const transition = useMutation({
-    mutationFn: ({ contract, newStatus, sigName }) => {
+    mutationFn: async ({ contract, newStatus, sigName }) => {
+      const effectiveVenueId = contract.venue_id || venueId;
+      if (!effectiveVenueId) throw new Error("Active venue is required to update this contractor payout agreement.");
       const updates = { status: newStatus };
       if (newStatus === "signed") {
         updates.contractor_signature = sigName;
@@ -278,7 +297,17 @@ export default function VIPContractLifecycle({ currentUser }) {
       if (newStatus === "paid") {
         updates.paid_by = currentUser?.email;
       }
-      return base44.entities.ContractorPayout.update(contract.id, updates);
+      const result = await writeEntity({
+        entity: "ContractorPayout",
+        operation: "update",
+        id: contract.id,
+        data: updates,
+        actor: { email: currentUser?.email, id: currentUser?.id, role: currentUser?._highestRole || currentUser?.role || "External" },
+        venue_id: effectiveVenueId,
+        intent: `CONTRACTOR_PAYOUT_AGREEMENT_${String(newStatus).toUpperCase()}`,
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Contractor payout agreement update was rejected.");
+      return result.value;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["vip-contract-payouts"] });
