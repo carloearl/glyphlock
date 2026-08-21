@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 
 const MANAGER_ROLES = new Set(['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER','SOVEREIGN']);
 const DOOR_ROLES = new Set(['DOOR_GIRL','DOORMAN']);
+const VIP_ROLES = new Set(['FLOOR_HOST','HOSTESS']);
 const ALLOWED_CLASSES = new Set(['PRIVATE_IDENTITY','PRIVATE_TAX','PRIVATE_BIOMETRIC','PRIVATE_CONTRACT','UNKNOWN']);
 
 async function resolveNupsUser(base44, email: string) {
@@ -30,8 +31,9 @@ Deno.serve(async (req) => {
 
     const global = nups.role === 'PLATFORM_ADMIN' || nups.role === 'SOVEREIGN';
     if (!global && nups.venue_id !== venueId) return Response.json({ error: 'Cross-venue evidence registration denied' }, { status: 403 });
-    if (!MANAGER_ROLES.has(nups.role) && !DOOR_ROLES.has(nups.role)) return Response.json({ error: 'Role not authorized to register protected evidence' }, { status: 403 });
+    if (!MANAGER_ROLES.has(nups.role) && !DOOR_ROLES.has(nups.role) && !VIP_ROLES.has(nups.role)) return Response.json({ error: 'Role not authorized to register protected evidence' }, { status: 403 });
     if (DOOR_ROLES.has(nups.role) && classification !== 'PRIVATE_IDENTITY') return Response.json({ error: 'Door role may register identity evidence only' }, { status: 403 });
+    if (VIP_ROLES.has(nups.role) && classification === 'PRIVATE_TAX') return Response.json({ error: 'VIP operational roles cannot register tax evidence' }, { status: 403 });
 
     const evidence = await base44.asServiceRole.entities.ProtectedEvidence.create({
       evidence_id: crypto.randomUUID(),
