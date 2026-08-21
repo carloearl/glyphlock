@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Banknote, Plus, Minus, Printer } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const DENOMINATIONS = [
   { label: "$100", value: 100 }, { label: "$50", value: 50 },
@@ -15,6 +16,8 @@ const DENOMINATIONS = [
 ];
 
 export default function CashDrawerLog() {
+  const activeVenue = useActiveVenue();
+  const venueLabel = [activeVenue?.name || "Active Venue", activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(" — ");
   const [counts, setCounts] = useState(DENOMINATIONS.map(() => 0));
   const [reason, setReason] = useState("end_of_shift");
 
@@ -34,7 +37,7 @@ export default function CashDrawerLog() {
     ).filter(Boolean).join('');
     const html = `<html><head><title>Cash Count</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Courier New',monospace;padding:20px;font-size:12px;width:302px;}table{width:100%;border-collapse:collapse;}@media print{@page{margin:0;size:80mm auto;}}</style></head><body>
       <div style="text-align:center;font-weight:bold;font-size:16px;">CASH DRAWER COUNT</div>
-      <div style="text-align:center;font-size:10px;">Dream Palace — 815 N. Scottsdale Road, Tempe, AZ 85281</div>
+      <div style="text-align:center;font-size:10px;">${venueLabel}</div>
       <div style="text-align:center;font-size:10px;">${new Date().toLocaleString()}</div>
       <hr style="margin:8px 0;"/>
       <table><tr style="font-weight:bold;"><td>Denom</td><td style="text-align:center;">Count</td><td style="text-align:right;">Total</td></tr>${rows}</table>
