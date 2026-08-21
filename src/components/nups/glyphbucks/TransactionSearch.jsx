@@ -158,16 +158,15 @@ export default function TransactionSearch({ venue_id }) {
                 <div className="space-y-2">
                   {results.records.verification_media.map(media => (
                     <div key={media.id} className="p-3 rounded-lg glyph-glass border border-white/10 text-sm">
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center gap-3">
                         <span>{media.verification_type}</span>
-                        <a
-                          href={media.media_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-cyan-400 hover:text-cyan-300 underline"
-                        >
-                          View
-                        </a>
+                        <span className="text-[11px] text-amber-300 text-right">
+                          {media.protected_evidence_id
+                            ? "Protected evidence on file"
+                            : media.media_url
+                              ? "Legacy evidence on file — direct viewing disabled"
+                              : "No media reference"}
+                        </span>
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
                         {new Date(media.capture_timestamp).toLocaleString()}
