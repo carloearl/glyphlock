@@ -330,6 +330,44 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
     try {
       const guestId = await hashIdNumber(form.id_number);
       const now = new Date().toISOString();
+      const venueId = activeVenue?.id;
+      if (!venueId) throw new Error("Active venue is required for guest check-in.");
+
+      // Batch 15 identity ownership: GuestProfile is the canonical minimized identity.
+      // VIPGuest is the venue/VIP workflow projection linked by guest_profile_id + guest_id.
+      const canonicalMatches = await base44.entities.GuestProfile.filter({ guest_id: guestId, venue_id: venueId });
+      let canonicalGuest = canonicalMatches?.[0] || null;
+      if (!canonicalGuest) {
+        const nameParts = form.full_name.trim().split(/\s+/);
+        const firstName = nameParts.shift() || form.full_name.trim();
+        const lastName = nameParts.join(" ");
+        canonicalGuest = await writeIdentityRecord({
+          entity: "GuestProfile",
+          operation: "create",
+          venueId,
+          intent: "guest:canonical:create-from-checkin",
+          data: {
+            guest_id: guestId,
+            venue_id: venueId,
+            first_name: firstName,
+            last_name: lastName,
+            dob: form.date_of_birth,
+            license_state: form.id_state.toUpperCase(),
+            id_type: String(form.id_type || "Drivers License").toLowerCase().replace(/ /g, "_").replace("drivers_license", "drivers_license"),
+            last_initial: (lastName || firstName).slice(0, 1).toUpperCase(),
+            license_last4: String(form.id_number || "").replace(/\s/g, "").slice(-4).toUpperCase(),
+            id_expiration: form.id_expiration,
+            id_expired: false,
+            age_verified: age !== null && age >= MIN_AGE,
+            visit_count: 1,
+            first_visit_at: now,
+            last_visit_at: now,
+            status: "active",
+            mode: isDemoMode ? "DEMO" : "REAL",
+          },
+        });
+      }
+      const guestProfileId = canonicalGuest?.id || null;
 
       if (returningGuest) {
         // UPDATE returning guest — increment visit count, mark in-building
@@ -341,6 +379,7 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
           intent: "guest:checkin:returning",
           data: {
             venue_id: activeVenue?.id,
+            guest_profile_id: guestProfileId || returningGuest.guest_profile_id || undefined,
             status: "in_building",
             last_visit: now,
             visit_count: (returningGuest.visit_count || 1) + 1,
@@ -368,6 +407,7 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
           intent: "guest:checkin:new",
           data: {
           guest_id: guestId,
+          guest_profile_id: guestProfileId || undefined,
           venue_id: activeVenue?.id,
           // Mode stamp — a guest checked in while the venue is in DEMO/SANDBOX
           // is demo data and will never surface in REAL mode.
