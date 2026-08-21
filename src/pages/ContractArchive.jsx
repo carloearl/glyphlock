@@ -8,14 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Search, FileText, Shield, User, CreditCard, Calendar, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ContractDetailCard from "@/components/nups/ContractDetailCard";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 export default function ContractArchive() {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedContract, setSelectedContract] = useState(null);
 
   const { data: contracts = [], isLoading } = useQuery({
-    queryKey: ["signed-contracts"],
-    queryFn: () => base44.entities.VIPContractRecord.filter({ status: "signed" }, "-signed_at", 200),
+    queryKey: ["signed-contracts", venueId],
+    queryFn: () => venueId ? base44.entities.VIPContractRecord.filter({ status: "signed", venue_id: venueId }, "-signed_at", 200) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const filtered = contracts.filter(c => {
