@@ -1,0 +1,81 @@
+FAIL
+    '      total_face_value: resolvedBatch.total_face_value,\n' +
+    '      total_charged: resolvedBatch.total_charged,\n' +
+    '      approval_code: resolvedBatch.approval_code || null,\n' +
+    '      processor_reference: resolvedBatch.processor_reference || null,\n' +
+    '      status: resolvedBatch.status,\n' +
+    '      issued_at: resolvedBatch.issued_at || null,\n' +
+    '    } : null;\n' +
+    '    const safeBills = bills.map((bill) => ({\n' +
+    '      id: bill.id,\n' +
+    '      serial_number: bill.serial_number,\n' +
+    '      denomination: bill.denomination,\n' +
+    '      status: bill.status,\n' +
+    '      issued_at: bill.issued_at || null,\n' +
+    '      redeemed_at: bill.redeemed_at || null,\n' +
+    '    }));\n' +
+    '    const safeVerificationMedia = verificationMedia.map((media) => ({\n' +
+    '      id: media.id,\n' +
+    '      media_id: media.media_id,\n' +
+    '      verification_type: media.verification_type,\n' +
+    '      media_type: media.media_type,\n' +
+    '      protected_evidence_id: media.protected_evidence_id || null,\n' +
+    '      has_legacy_reference: !!media.media_url,\n' +
+    '      capture_timestamp: media.capture_timestamp,\n' +
+    '      upload_status: media.upload_status,\n' +
+    '    }));\n' +
+    '    const safeEvidence = evidenceRows[0] ? {\n' +
+    '      id: evidenceRows[0].id,\n' +
+    '      evidence_id: evidenceRows[0].evidence_id,\n' +
+    '      status: evidenceRows[0].status,\n' +
+    '      package_generated_at: evidenceRows[0].package_generated_at,\n' +
+    '    } : null;\n' +
+    '    const safeAudit = auditRows.map((event) => ({\n' +
+    '      id: event.id,\n' +
+    '      event_type: event.event_type || event.action,\n' +
+    '      severity: event.severity,\n' +
+    '      timestamp: event.timestamp,\n' +
+    '      description: event.description,\n' +
+    '    }));\n' +
+    '\n' +
+    '    await E.SystemAuditLog.create({\n' +
+    "      event_type: 'TRANSACTION_LOOKUP',\n" +
+    '      description: `Authorized transaction lookup in venue ${resolvedVenueId}`,\n' +
+    '      actor_email: user.email,\n' +
+    "      status: 'success',\n" +
+    "      severity: 'low',\n" +
+    '      metadata: { venue_id: resolvedVenueId, search_type: searchType, transaction_id: transactionId },\n' +
+    '    }).catch(() => null);\n' +
+    '\n' +
+    '    return Response.json({\n' +
+    '      success: true,\n' +
+    '      transaction_id: transactionId,\n' +
+    '      search_type: searchType,\n' +
+    '      venue_id: resolvedVenueId,\n' +
+    '      records: {\n' +
+    '        order: safeOrder,\n' +
+    '        batch: safeBatch,\n' +
+    '        bills: safeBills,\n' +
+    '        identity: identities[0] ? { present: true, status: identities[0].status || null } : null,\n' +
+    '        verification_media: safeVerificationMedia,\n' +
+    '        evidence: safeEvidence,\n' +
+    '        audit_logs: safeAudit,\n' +
+    '      },\n' +
+    '      summary: {\n' +
+    '        bills_issued: safeBills.length,\n' +
+    "        bills_redeemed: safeBills.filter((bill) => bill.status === 'redeemed').length,\n" +
+    '        verification_media_count: safeVerificationMedia.length,\n' +
+    '        has_id_scan: identities.length > 0,\n' +
+    '        has_evidence_package: !!safeEvidence,\n' +
+    '      },\n' +
+    '    });\n' +
+    '  } catch (error) {\n' +
+    "    console.error('Transaction lookup error:', error);\n" +
+    "    return Response.json({ error: error?.message || 'Transaction lookup failed' }, { status: 500 });\n" +
+    '  }\n' +
+    '});\n',
+  expected: /identity:\s*identities\[0\]/,
+  operator: 'doesNotMatch'
+}
+
+Node.js v20.20.2
