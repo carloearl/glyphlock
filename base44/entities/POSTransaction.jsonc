@@ -249,15 +249,23 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager",
-            "staff"
-          ]
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
+          }
         }
-      }
+      ]
     },
     "read": {
       "$or": [
@@ -266,26 +274,34 @@
         },
         {
           "user_condition": {
-            "role": {
-              "$in": [
-                "admin",
-                "manager",
-                "staff"
-              ]
-            }
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "staff"
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "admin",
-            "manager"
-          ]
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
         }
-      }
+      ]
     },
     "delete": {
       "user_condition": {
