@@ -228,7 +228,7 @@ export default function NUPSKiosk() {
             {panel === "clockIn" && <KioskPinPad mode="clockIn" onSuccess={onClockIn} />}
             {panel === "clockOut" && <KioskPinPad mode="clockOut" onSuccess={onClockOut} />}
             {panel === "admin" && <OwnerAdminSignIn />}
-            {panel === "testRequest" && <AccessRequestForm requestedMode="TEST" />}
+            {panel === "testRequest" && <AccessRequestForm requestedMode="SANDBOX" />}
             {panel === "trainingRequest" && <AccessRequestForm requestedMode="DEMO" />}
           </div>
         )}
