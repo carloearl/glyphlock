@@ -10,6 +10,8 @@ import {
   Shield, AlertTriangle, Trash2
 } from "lucide-react";
 import { toast } from "sonner";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 /**
  * BarcodeFirstCapture — Contract Photo Verification
@@ -29,6 +31,9 @@ export default function BarcodeFirstCapture({
   staffName: initialStaffName = "",
   onComplete
 }) {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+
   // Step 1: barcode
   const [barcode, setBarcode] = useState(serialNumber || "");
   const [barcodeConfirmed, setBarcodeConfirmed] = useState(!!serialNumber);
@@ -121,21 +126,33 @@ export default function BarcodeFirstCapture({
 
     setSaving(true);
     try {
-      // Save all photo metadata to contract record
+      // Save all photo metadata to contract record through the governed contract write path.
       if (contractId) {
-        await base44.entities.VIPContractRecord.update(contractId, {
-          signed_hardcopy_photo_url: capturedPhotos[0]?.file_url,
-          hardcopy_barcode_scan: barcode,
-          hardcopy_logged_at: new Date().toISOString(),
-          hardcopy_logged_by: staffName,
-          verification_photos: capturedPhotos.map(p => ({
-            filename: p.filename,
-            url: p.file_url,
-            type: p.type,
-            barcode: p.barcode,
-            captured_at: p.captured_at
-          }))
+        if (!venueId) throw new Error("Active venue is required to archive contract verification media.");
+        const me = await base44.auth.me().catch(() => null);
+        const write = await writeEntity({
+          entity: "VIPContractRecord",
+          operation: "update",
+          id: contractId,
+          venue_id: venueId,
+          actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+          intent: "VIP_CONTRACT_HARDCOPY_CAPTURE",
+          data: {
+            venue_id: venueId,
+            signed_hardcopy_photo_url: capturedPhotos[0]?.file_url,
+            hardcopy_barcode_scan: barcode,
+            hardcopy_logged_at: new Date().toISOString(),
+            hardcopy_logged_by: staffName,
+            verification_photos: capturedPhotos.map(p => ({
+              filename: p.filename,
+              url: p.file_url,
+              type: p.type,
+              barcode: p.barcode,
+              captured_at: p.captured_at
+            }))
+          }
         });
+        if (!write?.ok) throw new Error(write?.block_reason || "Contract verification-media archive was rejected.");
       }
 
       // Simulate local device wipe — clear blob URLs, revoke object URLs
