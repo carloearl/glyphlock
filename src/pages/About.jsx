@@ -35,7 +35,7 @@ import {
   Users,
   Workflow,
 } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import SEOHead from "../components/SEOHead";
 import AboutConnectionHub from "../components/about/AboutConnectionHub";
 
@@ -320,68 +320,6 @@ function SectionHeading({ eyebrow, title, body, align = "left" }) {
           {body}
         </p>
       ) : null}
-    </div>
-  );
-}
-
-function HeroEvidenceGraphic() {
-  const reduceMotion = useReducedMotion();
-  const nodes = [
-    { icon: QrCode, label: "Image", position: "left-4 top-1/2 -translate-y-1/2", color: "text-[#8C4BFF]" },
-    { icon: Fingerprint, label: "Identity", position: "left-1/2 top-4 -translate-x-1/2", color: "text-[#00E4FF]" },
-    { icon: Workflow, label: "Action", position: "right-4 top-1/2 -translate-y-1/2", color: "text-amber-300" },
-    { icon: ShieldCheck, label: "Evidence", position: "bottom-4 left-1/2 -translate-x-1/2", color: "text-emerald-300" },
-  ];
-
-  return (
-    <div
-      className="relative mx-auto aspect-square w-full max-w-[31rem] overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#071827] via-[#03070d] to-[#150a22] shadow-[0_35px_100px_rgba(0,0,0,0.55)]"
-      role="img"
-      aria-label="GlyphLock connects an image to identity, action, and evidence."
-    >
-      <div className="absolute inset-[13%] rounded-full border border-[#00E4FF]/20" />
-      <div className="absolute inset-[25%] rounded-full border border-[#8C4BFF]/25" />
-      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(0,228,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(140,75,255,0.16)_1px,transparent_1px)] [background-size:28px_28px]" />
-      <motion.div
-        className="absolute inset-[13%] rounded-full border-t border-r border-[#00E4FF]/60"
-        animate={reduceMotion ? undefined : { rotate: 360 }}
-        transition={reduceMotion ? undefined : { duration: 26, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.div
-        className="absolute inset-[25%] rounded-full border-b border-l border-[#8C4BFF]/70"
-        animate={reduceMotion ? undefined : { rotate: -360 }}
-        transition={reduceMotion ? undefined : { duration: 18, repeat: Infinity, ease: "linear" }}
-      />
-      <div className="absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-3xl border border-white/15 bg-black/80 shadow-[0_0_65px_rgba(0,228,255,0.18)]">
-        <span className="bg-gradient-to-br from-[#00E4FF] via-white to-[#8C4BFF] bg-clip-text text-4xl font-black text-transparent font-space">
-          GL
-        </span>
-        <span className="mt-1 text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
-          Connect
-        </span>
-      </div>
-      {nodes.map((node, index) => {
-        const Icon = node.icon;
-        return (
-          <motion.div
-            key={node.label}
-            className={"absolute flex min-w-[6.5rem] items-center gap-2 rounded-xl border border-white/10 bg-black/80 px-3 py-2.5 backdrop-blur " + node.position}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1, y: reduceMotion ? 0 : [0, -5, 0] }}
-            transition={{
-              opacity: { duration: 0.5, delay: 0.25 + index * 0.08 },
-              scale: { duration: 0.5, delay: 0.25 + index * 0.08 },
-              y: reduceMotion ? undefined : { duration: 3.6 + index * 0.25, repeat: Infinity, ease: "easeInOut" },
-            }}
-          >
-            <Icon className={"h-4 w-4 " + node.color} aria-hidden="true" />
-            <span className="text-xs font-bold text-white">{node.label}</span>
-          </motion.div>
-        );
-      })}
-      <div className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-black/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
-        One connected record
-      </div>
     </div>
   );
 }
@@ -763,26 +701,26 @@ export default function About() {
               </div>
             </div>
 
-            <div className="relative space-y-5">
-              <div className="absolute bottom-8 left-6 top-8 hidden w-px bg-gradient-to-b from-[#00E4FF]/50 via-[#8C4BFF]/40 to-amber-300/40 sm:block" />
+            <div className="relative space-y-3">
+              <div className="absolute bottom-6 left-6 top-6 hidden w-px bg-gradient-to-b from-[#00E4FF]/50 via-[#8C4BFF]/40 to-amber-300/40 sm:block" />
               {storyChapters.map((chapter) => {
                 const Icon = chapter.icon;
                 return (
                   <motion.article
                     key={chapter.number}
                     {...reveal}
-                    className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:pl-20 md:p-8 md:pl-24"
+                    className="relative rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:pl-16 md:p-6 md:pl-20"
                   >
-                    <div className="mb-5 flex items-center gap-4 sm:absolute sm:left-4 sm:top-8 sm:mb-0 sm:flex-col sm:gap-2">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-black">
-                        <Icon className="h-5 w-5 text-[#00E4FF]" aria-hidden="true" />
+                    <div className="mb-3 flex items-center gap-3 sm:absolute sm:left-3 sm:top-5 sm:mb-0 sm:flex-col sm:gap-1.5">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-black">
+                        <Icon className="h-4 w-4 text-[#00E4FF]" aria-hidden="true" />
                       </span>
-                      <span className="font-mono text-[10px] font-black text-slate-600">{chapter.number}</span>
+                      <span className="font-mono text-[9px] font-black text-slate-600">{chapter.number}</span>
                     </div>
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B78CFF]">{chapter.label}</p>
-                    <h3 className="mt-3 text-2xl font-black leading-tight text-white md:text-3xl">{chapter.title}</h3>
-                    <p className="mt-5 leading-relaxed text-slate-300">{chapter.body}</p>
-                    <p className="mt-4 leading-relaxed text-slate-400">{chapter.supporting}</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#B78CFF]">{chapter.label}</p>
+                    <h3 className="mt-2 text-xl font-black leading-tight text-white md:text-2xl">{chapter.title}</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-slate-300">{chapter.body}</p>
+                    <p className="mt-2.5 text-sm leading-relaxed text-slate-400">{chapter.supporting}</p>
                   </motion.article>
                 );
               })}

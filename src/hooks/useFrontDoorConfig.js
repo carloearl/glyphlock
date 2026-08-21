@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 // ─── Default tabs — fallback when no FrontDoorConfig exists yet ──────────────
 export const DEFAULT_FRONT_DOOR_TABS = [
@@ -53,10 +54,19 @@ export function useFrontDoorConfig(venueId) {
         notes: next.notes || "",
         last_updated_by: next.last_updated_by || "",
       };
-      if (config?.id) {
-        return base44.entities.FrontDoorConfig.update(config.id, payload);
-      }
-      return base44.entities.FrontDoorConfig.create(payload);
+      if (!venueId) throw new Error("Select an active venue before saving front-door configuration.");
+      const me = await base44.auth.me();
+      const result = await writeEntity({
+        entity: "FrontDoorConfig",
+        operation: config?.id ? "update" : "create",
+        id: config?.id,
+        data: payload,
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+        venue_id: venueId,
+        intent: config?.id ? "FRONT_DOOR_CONFIG_UPDATE" : "FRONT_DOOR_CONFIG_CREATE",
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Front-door configuration write was rejected.");
+      return result.value;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["front-door-config", venueId] }),
   });
