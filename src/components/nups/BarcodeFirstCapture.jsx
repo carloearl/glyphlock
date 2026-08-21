@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { writeEntity } from "@/lib/nups/writeEntity";
+import { uploadProtectedEvidence } from "@/lib/nups/protectedEvidence";
 
 /**
  * BarcodeFirstCapture — Contract Photo Verification
@@ -82,14 +83,22 @@ export default function BarcodeFirstCapture({
     const namedFile = new File([file], `${filename}.${ext}`, { type: file.type });
 
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: namedFile });
-
-      // Verify upload succeeded
-      if (!file_url) throw new Error("Upload returned no URL");
+      if (!venueId) throw new Error("Active venue is required before capturing protected contract evidence.");
+      const protectedFile = await uploadProtectedEvidence({
+        file: namedFile,
+        venueId,
+        artifactType: "signed_hardcopy_contract",
+        classification: "PRIVATE_CONTRACT",
+        subjectEntity: "VIPContractRecord",
+        subjectId: contractId || barcode,
+        purpose: `barcode_capture:${captureType}`,
+        signedUrlTtl: 0,
+      });
 
       const photoRecord = {
         filename: `${filename}.${ext}`,
-        file_url,
+        file_url: `protected:${protectedFile.evidence_id}`,
+        evidence_id: protectedFile.evidence_id,
         type: captureType,
         seq: currentSeq,
         barcode,
