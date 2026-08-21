@@ -2,6 +2,8 @@ import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeEntity } from "@/lib/nups/writeEntity";
 import { logAuditEvent } from "./AuditLogDashboard";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -66,6 +68,8 @@ function detectSuspiciousPatterns(instruments) {
 
 export default function GlyphBuckInventory() {
   const qc = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -117,11 +121,23 @@ export default function GlyphBuckInventory() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ orderId, newStatus, notes, instrument }) => {
-      const result = await base44.entities.GlyphBucksOrder.update(orderId, {
-        status: newStatus === "redeemed" ? "archived" : newStatus === "voided" ? "archived" : "signed",
-        archived_at: newStatus === "redeemed" ? new Date().toISOString() : undefined,
-        archived_by: newStatus === "redeemed" ? "Manual" : undefined,
+      if (!venueId) throw new Error("Active venue is required to update GlyphBucks inventory.");
+      const me = await base44.auth.me().catch(() => null);
+      const write = await writeEntity({
+        entity: "GlyphBucksOrder",
+        operation: "update",
+        id: orderId,
+        data: {
+          status: newStatus === "redeemed" ? "archived" : newStatus === "voided" ? "archived" : "signed",
+          archived_at: newStatus === "redeemed" ? new Date().toISOString() : undefined,
+          archived_by: newStatus === "redeemed" ? "Manual" : undefined,
+        },
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+        venue_id: venueId,
+        intent: `GLYPHBUCKS_INVENTORY_${String(newStatus).toUpperCase()}`,
       });
+      if (!write?.ok) throw new Error(write?.block_reason || "GlyphBucks inventory update was rejected.");
+      const result = write.value;
       await logAuditEvent({
         action: "UPDATE",
         entityType: "GlyphBuck",
@@ -142,14 +158,26 @@ export default function GlyphBuckInventory() {
 
   const flagInstrument = useMutation({
     mutationFn: async ({ serial_number, notes }) => {
-      const result = await base44.entities.VIPContractRecord.create({
-        token: `FLAG-${serial_number}-${Date.now()}`,
-        record_type: "contract_token",
-        serial_number,
-        guest_name: "FLAGGED",
-        status: "revoked",
-        metadata: { notes, flagged_at: new Date().toISOString() },
+      if (!venueId) throw new Error("Active venue is required to flag GlyphBucks inventory.");
+      const me = await base44.auth.me().catch(() => null);
+      const write = await writeEntity({
+        entity: "VIPContractRecord",
+        operation: "create",
+        data: {
+          token: `FLAG-${serial_number}-${Date.now()}`,
+          record_type: "contract_token",
+          serial_number,
+          guest_name: "FLAGGED",
+          status: "revoked",
+          metadata: { notes, flagged_at: new Date().toISOString() },
+          venue_id: venueId,
+        },
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+        venue_id: venueId,
+        intent: "GLYPHBUCKS_INVENTORY_FLAG",
       });
+      if (!write?.ok) throw new Error(write?.block_reason || "GlyphBucks flag write was rejected.");
+      const result = write.value;
       await logAuditEvent({
         action: "UPDATE",
         entityType: "GlyphBuck",
