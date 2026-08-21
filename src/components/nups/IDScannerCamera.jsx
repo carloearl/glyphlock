@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Camera, Upload, CheckCircle, Loader2 } from 'lucide-react';
 import { isDemoMode, DemoDataGenerator } from './pos/DemoModeController';
+import { uploadProtectedEvidence } from '@/lib/nups/protectedEvidence';
 
 /**
  * Camera-based ID scanner with OCR and manual entry fallback.
@@ -103,10 +104,19 @@ export default function IDScannerCamera({ venue_id, onDataExtracted }) {
       }
 
       // Real mode: OCR extraction
-      const uploadResult = await base44.integrations.Core.UploadFile({ file: blob });
+      const namedBlob = new File([blob], `id-front-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const uploadResult = await uploadProtectedEvidence({
+        file: namedBlob,
+        venueId: venue_id,
+        artifactType: 'government_id_front',
+        classification: 'PRIVATE_IDENTITY',
+        subjectEntity: 'GuestProfile',
+        purpose: 'id_ocr_scan',
+        signedUrlTtl: 120,
+      });
       const result = await base44.functions.invoke('scanCustomerID', {
         venue_id,
-        id_scan_front_url: uploadResult.file_url
+        id_scan_front_url: uploadResult.signed_url
       });
 
       if (result.data.success) {
@@ -153,10 +163,18 @@ export default function IDScannerCamera({ venue_id, onDataExtracted }) {
       }
 
       // Real mode: upload and extract via AI
-      const uploadResult = await base44.integrations.Core.UploadFile({ file });
+      const uploadResult = await uploadProtectedEvidence({
+        file,
+        venueId: venue_id,
+        artifactType: 'government_id_front',
+        classification: 'PRIVATE_IDENTITY',
+        subjectEntity: 'GuestProfile',
+        purpose: 'id_ocr_scan',
+        signedUrlTtl: 120,
+      });
       const result = await base44.functions.invoke('scanCustomerID', {
         venue_id,
-        id_scan_front_url: uploadResult.file_url
+        id_scan_front_url: uploadResult.signed_url
       });
 
       if (result.data.success) {
