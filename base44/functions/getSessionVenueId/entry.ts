@@ -15,14 +15,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
  * }
  */
 
-const ALLOWED_VENUES = [
-  'dream_palace',
-  'DEMO_VENUE_001', // Full-platform demo sandbox venue
-  'dream-palace-tempe',
-  'bones-cabaret-scottsdale',
-  'skin-cabaret-scottsdale'
-];
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -59,8 +51,12 @@ Deno.serve(async (req) => {
     const nupsUser = nupsUsers[0];
     const venue_id = nupsUser.venue_id;
 
-    // Validate venue_id is in allowed list
-    if (!venue_id || !ALLOWED_VENUES.includes(venue_id)) {
+    // Validate the assigned venue against the live Venue registry rather than a source-code allow-list.
+    const venueRecord = venue_id
+      ? ((await base44.asServiceRole.entities.Venue.filter({ venue_id, status: 'active' }, null, 1).catch(() => []))?.[0]
+        || await base44.asServiceRole.entities.Venue.get(venue_id).catch(() => null))
+      : null;
+    if (!venue_id || !venueRecord || venueRecord.status === 'inactive') {
       // CRITICAL: Log invalid venue assignment
       await base44.asServiceRole.entities.AuditEvent.create({
         event_id: crypto.randomUUID(),
@@ -72,7 +68,7 @@ Deno.serve(async (req) => {
         entity_id: user.email,
         action: 'ACCESS',
         severity: 'CRITICAL',
-        description: `INVALID VENUE ASSIGNMENT: User ${user.email} has venue_id="${venue_id}" which is not in allowed venues list`
+        description: `INVALID VENUE ASSIGNMENT: User ${user.email} has venue_id="${venue_id}" which is not an active registered venue`
       });
 
       return Response.json({
