@@ -5,6 +5,7 @@
     "check:nups-frozen-rules",
     "check:nups-protected-evidence",
     "check:nups-api-key-secrets",
-    "check:nups-guest-identity"
+    "check:nups-guest-identity",
+    "check:nups-live-venue-boundaries"
   ]
 }
