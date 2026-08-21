@@ -35,7 +35,7 @@ import {
   Users,
   Workflow,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { MotionConfig, motion } from "framer-motion";
 import SEOHead from "../components/SEOHead";
 import AboutConnectionHub from "../components/about/AboutConnectionHub";
 
@@ -669,11 +669,11 @@ function WorkflowExplorer() {
 
 export default function About() {
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <SEOHead
-        title="About GlyphLock | From an Image to Verifiable Operations"
-        description="GlyphLock began with a question about what an image could prove. Today it connects identity, permission, venue operations, contracts, transaction references, and audit evidence through NUPS, verification tools, and GlyphBot."
-        keywords="GlyphLock, NUPS, Nexus Unified POS System, venue operations, QR verification, digital authorship, audit evidence, Carlo Rene Earl, GlyphBot, El Mirage Arizona"
+        title="About GlyphLock | One Evidence Architecture, Every Layer"
+        description="GlyphLock is an evidence architecture spanning creative technology, identity, GlyphBot, NUPS operations, governance, security, financial accountability, integrations, hardware, and verification."
+        keywords="GlyphLock, evidence architecture, creative technology, NUPS, GlyphBot, Secure QR Studio, Image Lab, governance, security, financial accountability, systems integration, hardware deployment, audit evidence, Carlo Rene Earl, El Mirage Arizona"
         url="/about"
       />
 
@@ -705,7 +705,7 @@ export default function About() {
               >
                 It started with an image.{" "}
                 <span className="bg-gradient-to-r from-[#00E4FF] via-white to-[#B78CFF] bg-clip-text text-transparent">
-                  It became a way to prove what happened.
+                  It became an architecture for proving what happened.
                 </span>
               </motion.h1>
 
@@ -715,9 +715,9 @@ export default function About() {
                 transition={{ duration: 0.7, delay: 0.18 }}
                 className="mt-7 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl"
               >
-                GlyphLock connects identity, permission, activity, contracts, transaction references,
-                and audit evidence so a creative work or a night of business can carry a record that
-                authorized people can reconstruct.
+                GlyphLock connects creative technology, identity, assisted intelligence, operations,
+                governance, security, financial accountability, integrations, hardware, and verification
+                so each specialized product contributes to one record that authorized people can reconstruct.
               </motion.p>
 
               <motion.p
@@ -726,8 +726,9 @@ export default function About() {
                 transition={{ duration: 0.7, delay: 0.26 }}
                 className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-500"
               >
-                NUPS is the first operating proof of that idea: a venue system built for the work
-                between the swipe and the report.
+                NUPS is the first real-world operating proof—not the whole company. Secure QR Studio,
+                Image Lab, GlyphBot, governance controls, security surfaces, integration rails, hardware,
+                and deployment services express the same architecture in different kinds of work.
               </motion.p>
 
               <motion.div
@@ -740,7 +741,7 @@ export default function About() {
                   to="/consultation"
                   className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF] px-6 py-3.5 font-black text-white shadow-[0_14px_45px_rgba(0,228,255,0.14)] transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00E4FF] focus:ring-offset-2 focus:ring-offset-black"
                 >
-                  Discuss a deployment
+                  Map your workflow
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </Link>
                 <Link
@@ -878,8 +879,8 @@ export default function About() {
           <section id="ecosystem" className="scroll-mt-24 py-8">
             <SectionHeading
               eyebrow="The ecosystem"
-              title="Three working products. One shared evidence architecture."
-              body="The products are what people use. The operating pattern is how activity moves. The foundation supplies boundaries and controls. External services connect through a separate integration rail."
+              title="Ten connected functions. One shared evidence architecture."
+              body="GlyphLock is the architecture—not a pile of unrelated tools. Its products let people create, identify, assist, operate, govern, secure, account, connect, deploy, and verify through the same evidence-centered pattern."
               align="center"
             />
             <EcosystemMap />
@@ -1048,18 +1049,18 @@ export default function About() {
             <div className="relative z-10">
               <p className="text-xs font-black uppercase tracking-[0.28em] text-[#00E4FF]">Build with evidence</p>
               <h2 className="mx-auto mt-5 max-w-4xl text-3xl font-black leading-tight text-white md:text-6xl font-space">
-                Bring us the workflow that needs to be trusted.
+                Map the workflow. Connect the evidence.
               </h2>
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-                We will map the people, permissions, money, records, and authorized integrations
-                required to make it operational.
+                Bring us the people, creative work, permissions, activity, money records, hardware,
+                and authorized integrations involved. We will map how the full system should connect.
               </p>
               <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link
                   to="/consultation"
                   className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 font-black text-black transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#00E4FF] focus:ring-offset-2 focus:ring-offset-black"
                 >
-                  Request a consultation
+                  Map your workflow
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </Link>
                 <Link
@@ -1073,6 +1074,6 @@ export default function About() {
           </motion.section>
         </div>
       </main>
-    </>
+    </MotionConfig>
   );
 }
