@@ -296,16 +296,16 @@ SECTION 6 — LIABILITY & ASSUMPTION OF RISK
 
 SECTION 7 — DATA RETENTION & PRIVACY
 
-7.1  Biometric data (hashes) shall be retained for a period of three 
-     (3) years from the date of capture, or as required by law, 
-     whichever is longer.
+7.1  Biometric hashes and supporting evidence shall be retained under 
+     the Venue's documented retention schedule and applicable law.
 
-7.2  Government ID photographs shall be retained for one (1) year 
-     for identity verification, then permanently deleted.
+7.2  Government ID photographs are collected for identity verification 
+     and shall not be retained longer than the documented business or 
+     legal purpose permits.
 
-7.3  Guest may request deletion of biometric data by submitting a 
-     written request to management, subject to legal retention 
-     requirements.
+7.3  Guest may submit a written deletion request to management. The 
+     request will be evaluated under the documented retention schedule 
+     and applicable legal-preservation requirements.
 
 7.4  The Venue shall not sell, lease, or trade biometric data to 
      any third party.
