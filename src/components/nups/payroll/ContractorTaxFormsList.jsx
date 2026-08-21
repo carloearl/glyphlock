@@ -11,6 +11,7 @@ import {
   Users2, DollarSign
 } from "lucide-react";
 import ContractorOnboardingPanel from "./ContractorOnboardingPanel";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const fmt = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 
@@ -23,23 +24,28 @@ const fmt = (n) => `$${(Number(n) || 0).toFixed(2)}`;
  */
 export default function ContractorTaxFormsList({ currentUser }) {
   const qc = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [search, setSearch] = useState("");
   const [activeEntertainer, setActiveEntertainer] = useState(null);
   const taxYear = new Date().getFullYear();
 
   const { data: entertainers = [], isLoading } = useQuery({
-    queryKey: ["entertainers-tax"],
-    queryFn: () => base44.entities.Entertainer.list("-created_date", 500),
+    queryKey: ["entertainers-tax", venueId],
+    queryFn: () => venueId ? base44.entities.Entertainer.filter({ venue_id: venueId }, "-created_date", 500) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const { data: taxForms = [] } = useQuery({
-    queryKey: ["contractor-tax-forms", taxYear],
-    queryFn: () => base44.entities.ContractorTaxForm.filter({ tax_year: taxYear }, "-created_date", 500),
+    queryKey: ["contractor-tax-forms", taxYear, venueId],
+    queryFn: () => venueId ? base44.entities.ContractorTaxForm.filter({ tax_year: taxYear, venue_id: venueId }, "-created_date", 500) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const { data: payouts = [] } = useQuery({
-    queryKey: ["contractor-payouts-ytd", taxYear],
-    queryFn: () => base44.entities.ContractorPayout.filter({ tax_year: taxYear }, "-created_date", 1000),
+    queryKey: ["contractor-payouts-ytd", taxYear, venueId],
+    queryFn: () => venueId ? base44.entities.ContractorPayout.filter({ tax_year: taxYear, venue_id: venueId }, "-created_date", 1000) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const rows = useMemo(() => {
