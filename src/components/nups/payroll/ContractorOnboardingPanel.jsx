@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { FileSignature, Upload, ShieldCheck, Loader2 } from "lucide-react";
 import { writeIdentityRecord } from "@/lib/nups/identityWrites";
+import { uploadProtectedEvidence } from "@/lib/nups/protectedEvidence";
 
 const TAX_CLASSIFICATIONS = [
   { value: "individual_sole_prop", label: "Individual / Sole Proprietor" },
@@ -59,8 +60,17 @@ export default function ContractorOnboardingPanel({ entertainer, existingForm, c
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setScannedUrl(file_url);
+      const protectedFile = await uploadProtectedEvidence({
+        file,
+        venueId: entertainer?.venue_id,
+        artifactType: "w9_scan",
+        classification: "PRIVATE_TAX",
+        subjectEntity: "Entertainer",
+        subjectId: entertainer?.id,
+        purpose: "contractor_w9",
+        signedUrlTtl: 0,
+      });
+      setScannedUrl(`protected:${protectedFile.evidence_id}`);
       setScannedFile(file);
       toast.success("Scanned W-9 uploaded.");
     } catch (e) {
