@@ -346,11 +346,11 @@ const evidenceGroups = [
     caption: "Present in the current platform",
     accent: "text-[#00E4FF]",
     items: [
-      "NUPS role-based venue workflows",
-      "QR and interactive-image tooling",
-      "Contract and verification records",
-      "Audit, reconciliation, and reporting surfaces",
-      "GlyphBot-assisted product workflows",
+      "Secure QR Studio, Image Lab, and interactive-media tooling",
+      "GlyphBot-assisted construction and review workflows",
+      "NUPS role-based venue operations",
+      "Contract, verification, audit, reconciliation, and reporting surfaces",
+      "Custom web, application, media, security, and hardware-assisted workflows",
     ],
   },
   {
@@ -359,10 +359,10 @@ const evidenceGroups = [
     accent: "text-[#B78CFF]",
     items: [
       "Oracle Hospitality / OHIP interoperability work",
-      "Payment-provider adapter paths",
-      "Analytics, storage, and business connectors",
-      "Hardware-assisted identity and register workflows",
-      "Enterprise API and SDK surfaces",
+      "Payment-provider adapter and transaction-reference paths",
+      "Analytics, storage, and authorized business connectors",
+      "Scanner, camera, register, printer, and workstation deployment paths",
+      "Enterprise APIs, SDKs, configuration, training, and launch support",
     ],
   },
   {
@@ -897,8 +897,8 @@ export default function About() {
           <section className="py-24">
             <SectionHeading
               eyebrow="NUPS in practice"
-              title="Follow one event from the door to the report."
-              body="This simplified walkthrough shows how NUPS connects context, identity, permission, agreements, transaction references, and management review without exposing genuine personal information."
+              title="NUPS shows the architecture under real operating pressure."
+              body="NUPS is one complete example of the wider GlyphLock model. This privacy-safe walkthrough follows context, identity, permission, agreements, transaction references, and review without exposing genuine personal information."
             />
             <WorkflowExplorer />
           </section>
