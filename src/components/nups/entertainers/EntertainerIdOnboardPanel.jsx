@@ -11,6 +11,7 @@ import useHardwareScanner from "@/hooks/useHardwareScanner";
 import { parseAAMVA } from "@/lib/nups/aamva";
 import { licenseStatus } from "@/lib/nups/licenseStatus";
 import { writeIdentityRecord, snapshotPersonAudited } from "@/lib/nups/identityWrites";
+import { uploadProtectedEvidence } from "@/lib/nups/protectedEvidence";
 import ContractorAgreementBlock from "./ContractorAgreementBlock";
 import { ENTERTAINER_CLICKWRAP } from "@/constants/entertainerClickwrap";
 import { generateUniquePin } from "@/lib/nups/entertainerPin";
@@ -38,6 +39,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
   const [form, setForm] = useState(EMPTY);
   const [scanned, setScanned] = useState(false);
   const [photoUrl, setPhotoUrl] = useState("");
+  const [photoEvidenceId, setPhotoEvidenceId] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [contract, setContract] = useState({ agreed: false, acks: {}, signature: "" });
@@ -67,8 +69,18 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setPhotoUrl(file_url);
+      const protectedFile = await uploadProtectedEvidence({
+        file,
+        venueId,
+        artifactType: "entertainer_credential",
+        classification: "PRIVATE_IDENTITY",
+        subjectEntity: "Entertainer",
+        subjectId: existing?.[0]?.id || "pending",
+        purpose: "entertainer_license_front",
+        signedUrlTtl: 120,
+      });
+      setPhotoEvidenceId(protectedFile.evidence_id);
+      setPhotoUrl(protectedFile.signed_url || "");
       toast.success("License photo attached");
     } catch (e) {
       toast.error(e.message || "Upload failed");
@@ -106,7 +118,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
         license_number_last4: form.license_number_last4 || undefined,
         license_state: form.license_state || undefined,
         license_expiration: form.license_expiration,
-        license_photo_url: photoUrl,
+        license_photo_url: photoEvidenceId ? `protected:${photoEvidenceId}` : undefined,
         id_verified: true,
         id_verified_by: user?.email || "manager",
         id_verified_at: new Date().toISOString(),
@@ -165,6 +177,7 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
       setForm(EMPTY);
       setContract({ agreed: false, acks: {}, signature: "" });
       setPhotoUrl("");
+      setPhotoEvidenceId("");
       setScanned(false);
       onSaved?.(saved);
     } catch (e) {
