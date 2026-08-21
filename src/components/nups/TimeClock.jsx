@@ -10,6 +10,7 @@ import {
   CheckCircle2, AlertCircle, UserCheck
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addWeeks, differenceInMinutes } from "date-fns";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 const PIN_PAD_KEYS = ["1","2","3","4","5","6","7","8","9","CLR","0","OK"];
 
@@ -196,9 +197,18 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
 
   // Admin quick clock-out from the "On Clock Now" list.
   const clockOut = useMutation({
-    mutationFn: (shiftId) => base44.entities.StaffShift.update(shiftId, {
-      check_out_time: new Date().toISOString(),
-      status: 'checked_out'
+    mutationFn: (shiftId) => writeIdentityRecord({
+      entity: "StaffShift",
+      operation: "update",
+      id: shiftId,
+      venueId: sessionVenueId,
+      actor: user,
+      intent: "staff:timeclock:admin_clockout",
+      data: {
+        venue_id: sessionVenueId,
+        check_out_time: new Date().toISOString(),
+        status: 'checked_out'
+      },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-clock-shifts'] });
