@@ -82,10 +82,18 @@ const storyChapters = [
   {
     number: "05",
     label: "The ecosystem",
-    title: "One pattern now connects every GlyphLock product.",
-    body: "Whether the subject is a guest, an employee, an independent contractor, a creative asset, or an enterprise workflow, GlyphLock follows the same sequence: identify the subject, apply permission, record the action, and preserve evidence.",
-    supporting: "NUPS, GlyphLock Verification, and GlyphBot are different working experiences built on that shared foundation. External providers connect through controlled integration paths without surrendering their own responsibilities or becoming one indistinguishable system.",
+    title: "The principle expanded beyond any single product.",
+    body: "Whether the subject is a guest, employee, contractor, creator, image, document, venue, device, or enterprise workflow, GlyphLock follows the same sequence: identify the subject, apply permission, record the action, and preserve evidence.",
+    supporting: "Secure QR Studio, Image Lab, GlyphBot, NUPS, governance controls, security surfaces, financial records, APIs, hardware, and deployment work are specialized expressions of the same architecture.",
     icon: Network,
+  },
+  {
+    number: "06",
+    label: "The connection",
+    title: "The value is not only in each tool. It is in what survives between them.",
+    body: "A creator may begin with an image. A venue may begin with a person at the door. A business may begin with a contract or an integration. GlyphLock connects those starting points to permission, activity, systems, and reviewable outcomes.",
+    supporting: "The future of the company is controlled interoperability across creative, commercial, physical, and enterprise environments—with external providers retaining their own authority and responsibilities.",
+    icon: Layers3,
   },
 ];
 
