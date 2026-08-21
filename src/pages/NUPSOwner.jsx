@@ -199,9 +199,9 @@ export default function NUPSOwner() {
     refetchOnMount: 'always',
   });
   const { data: products = [], isLoading: prodLoading } = useQuery({
-    queryKey: ["pos-products"],
-    queryFn: () => base44.entities.POSProduct.list(),
-    enabled: !!user,
+    queryKey: ["pos-products", venueId],
+    queryFn: () => venueId ? base44.entities.POSProduct.filter({ venue_id: venueId }) : Promise.resolve([]),
+    enabled: !!user && !!venueId,
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: 'always',
