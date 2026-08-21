@@ -35,11 +35,6 @@ export default function MarketingCampaigns() {
     enabled: !!venueId,
   });
 
-  const { data: customers = [] } = useQuery({
-    queryKey: ['pos-customers'],
-    queryFn: () => base44.entities.POSCustomer.list()
-  });
-
   const createCampaign = useMutation({
     mutationFn: async (data) => {
       if (!venueId) throw new Error("Select an active venue before creating a campaign.");
@@ -302,7 +297,8 @@ export default function MarketingCampaigns() {
         <CardContent>
           <div className="space-y-3">
             {campaigns.map((campaign) => {
-              const Icon = getTypeIcon(campaign.campaign_type);
+              const campaignType = campaign.type || campaign.campaign_type || 'promotion';
+              const Icon = getTypeIcon(campaignType);
               return (
                 <div
                   key={campaign.id}
@@ -320,7 +316,7 @@ export default function MarketingCampaigns() {
                             {campaign.status}
                           </Badge>
                           <Badge variant="outline" className="text-xs border-gray-700">
-                            {campaign.campaign_type}
+                            {campaignType}
                           </Badge>
                         </div>
                         <p className="text-sm text-gray-400 mb-2">{campaign.description}</p>
@@ -349,13 +345,12 @@ export default function MarketingCampaigns() {
                       </div>
                     </div>
                   </div>
-                  {campaign.offer && (
+                  {(campaign.discount_type && campaign.discount_type !== 'none') && (
                     <div className="bg-purple-500/10 border border-purple-500/30 rounded p-3">
                       <div className="text-xs text-purple-400 font-semibold mb-1">Offer Details:</div>
                       <div className="text-sm text-gray-300">
-                        {campaign.offer.discount_type === "percentage" && `${campaign.offer.discount_value}% off`}
-                        {campaign.offer.discount_type === "fixed_amount" && `$${campaign.offer.discount_value} off`}
-                        {campaign.offer.discount_type === "buy_x_get_y" && `Buy X Get Y`}
+                        {campaign.discount_type === "percentage" && `${campaign.discount_value || 0}% off`}
+                        {campaign.discount_type === "fixed_amount" && `$${campaign.discount_value || 0} off`}
                       </div>
                     </div>
                   )}
