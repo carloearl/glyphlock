@@ -54,6 +54,7 @@ export default Deno.serve(async (req) => {
       public_key: publicKey,
       secret_key_hash,
       owner_id: user.email,
+      environment,
       status: 'active',
       permissions: ['read', 'write'],
       last_used: null
