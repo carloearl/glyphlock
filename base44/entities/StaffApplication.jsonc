@@ -12,8 +12,7 @@
       "default": "W2_EMPLOYEE"
     },
     "venue_id": {
-      "type": "string",
-      "default": "dream_palace"
+      "type": "string"
     },
     "status": {
       "type": "string",
