@@ -15,6 +15,7 @@ import { CheckCircle2, XCircle, Loader2, ShieldAlert, User, UserPlus, UserCheck,
 import { toast } from 'sonner';
 import useHardwareScanner from '@/hooks/useHardwareScanner';
 import { parseAAMVA } from '@/lib/nups/aamva';
+import { writeIdentityRecord } from '@/lib/nups/identityWrites';
 
 function ageFromDob(dobIso) {
   if (!dobIso) return null;
@@ -91,6 +92,7 @@ export default function ScanTab({ venueId, validationRun }) {
 
   const handleId = async (raw, preParsed = null) => {
     try {
+      if (!venueId) throw new Error('Select an active venue before scanning an ID.');
       const aamva = preParsed || parseAAMVA(raw);
       const parsed = aamva ? {
         license_number: aamva.id_number,
@@ -121,38 +123,52 @@ export default function ScanTab({ venueId, validationRun }) {
 
       if (existing && existing.length > 0) {
         profile = existing[0];
-        await base44.entities.GuestProfile.update(profile.id, {
-          age_verified,
-          visit_count: (profile.visit_count || 0) + 1,
-          last_visit_at: nowIso,
-          first_name: profile.first_name || parsed.first_name,
-          last_name: profile.last_name || parsed.last_name,
-          dob: profile.dob || parsed.dob,
-          license_state: profile.license_state || parsed.license_state,
-          id_type: parsed.id_type,
-          last_initial: parsed.last_initial,
-          license_last4: parsed.license_last4,
-          id_expiration: parsed.id_expiration,
-          id_expired: parsed.id_expired,
+        profile = await writeIdentityRecord({
+          entity: 'GuestProfile',
+          operation: 'update',
+          id: profile.id,
+          venueId,
+          intent: 'MOBILE_SCANNER_GUEST_RESCAN',
+          data: {
+            venue_id: venueId,
+            age_verified,
+            visit_count: (profile.visit_count || 0) + 1,
+            last_visit_at: nowIso,
+            first_name: profile.first_name || parsed.first_name,
+            last_name: profile.last_name || parsed.last_name,
+            dob: profile.dob || parsed.dob,
+            license_state: profile.license_state || parsed.license_state,
+            id_type: parsed.id_type,
+            last_initial: parsed.last_initial,
+            license_last4: parsed.license_last4,
+            id_expiration: parsed.id_expiration,
+            id_expired: parsed.id_expired,
+          },
         });
       } else {
-        profile = await base44.entities.GuestProfile.create({
-          guest_id,
-          venue_id: venueId,
-          first_name: parsed.first_name,
-          last_name: parsed.last_name,
-          dob: parsed.dob,
-          license_state: parsed.license_state,
-          id_type: parsed.id_type,
-          last_initial: parsed.last_initial,
-          license_last4: parsed.license_last4,
-          id_expiration: parsed.id_expiration,
-          id_expired: parsed.id_expired,
-          age_verified,
-          visit_count: 1,
-          first_visit_at: nowIso,
-          last_visit_at: nowIso,
-          status: 'active',
+        profile = await writeIdentityRecord({
+          entity: 'GuestProfile',
+          operation: 'create',
+          venueId,
+          intent: 'MOBILE_SCANNER_GUEST_FIRST_SCAN',
+          data: {
+            guest_id,
+            venue_id: venueId,
+            first_name: parsed.first_name,
+            last_name: parsed.last_name,
+            dob: parsed.dob,
+            license_state: parsed.license_state,
+            id_type: parsed.id_type,
+            last_initial: parsed.last_initial,
+            license_last4: parsed.license_last4,
+            id_expiration: parsed.id_expiration,
+            id_expired: parsed.id_expired,
+            age_verified,
+            visit_count: 1,
+            first_visit_at: nowIso,
+            last_visit_at: nowIso,
+            status: 'active',
+          },
         });
         isNew = true;
       }
