@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, LogIn, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
+import { writeIdentityRecord } from '@/lib/nups/identityWrites';
 
 /**
  * ENTERTAINER SHIFT CLOCK IN/OUT
@@ -19,12 +20,18 @@ export default function ShiftClockInOut({ entertainerId, stageName, currentShift
       const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
       const venue_id = sessionVenue.data?.venue_id;
 
-      await base44.entities.EntertainerShift.create({
-        entertainer_id: entertainerId,
-        venue_id,
-        stage_name: stageName,
-        check_in_time: new Date().toISOString(),
-        status: 'checked_in'
+      await writeIdentityRecord({
+        entity: 'EntertainerShift',
+        operation: 'create',
+        venueId: venue_id,
+        intent: 'entertainer:shift_clock:checkin',
+        data: {
+          entertainer_id: entertainerId,
+          venue_id,
+          stage_name: stageName,
+          check_in_time: new Date().toISOString(),
+          status: 'checked_in'
+        }
       });
 
       toast.success(`${stageName} clocked in`);
@@ -39,9 +46,18 @@ export default function ShiftClockInOut({ entertainerId, stageName, currentShift
   const handleClockOut = async () => {
     setIsLoading(true);
     try {
-      await base44.entities.EntertainerShift.update(currentShift.id, {
-        check_out_time: new Date().toISOString(),
-        status: 'checked_out'
+      const venue_id = currentShift?.venue_id || (await base44.functions.invoke('getSessionVenueId', {})).data?.venue_id;
+      await writeIdentityRecord({
+        entity: 'EntertainerShift',
+        operation: 'update',
+        id: currentShift.id,
+        venueId: venue_id,
+        intent: 'entertainer:shift_clock:checkout',
+        data: {
+          venue_id,
+          check_out_time: new Date().toISOString(),
+          status: 'checked_out'
+        }
       });
 
       toast.success(`${stageName} clocked out`);
