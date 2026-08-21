@@ -6,6 +6,7 @@
     "check:nups-protected-evidence",
     "check:nups-api-key-secrets",
     "check:nups-guest-identity",
-    "check:nups-live-venue-boundaries"
+    "check:nups-live-venue-boundaries",
+    "check:nups-sensitive-reads"
   ]
 }
