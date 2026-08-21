@@ -13,6 +13,7 @@ import { DoorOpen, Video, Clock, DollarSign, User, UserCheck } from "lucide-reac
 import VIPSessionTimer from "./VIPSessionTimer";
 import VIPContractFlow from "./VIPContractFlow";
 import VIPReceiptPrinter from "./VIPReceiptPrinter";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 export default function VIPRoomManagement({ user }) {
   const queryClient = useQueryClient();
@@ -74,17 +75,29 @@ export default function VIPRoomManagement({ user }) {
       const endTime = new Date(startTime.getTime() + data.duration_minutes * 60000);
       const charge = (data.duration_minutes / 60) * selectedRoom.rate_per_hour;
 
-      return base44.entities.VIPRoom.update(selectedRoom.id, {
-        status: 'occupied',
-        entertainer_id: data.entertainer_id,
-        entertainer_name: shiftRecord?.stage_name || 'Unknown',
-        guest_name: data.guest_name,
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        duration_minutes: data.duration_minutes,
-        venue_id: activeVenue?.id || null,
-        total_charge: charge
+      const resolvedVenueId = activeVenue?.id || activeVenue?.venue_id || null;
+      if (!resolvedVenueId) throw new Error('Active venue is required to start a VIP session.');
+      const result = await writeEntity({
+        entity: 'VIPRoom',
+        operation: 'update',
+        id: selectedRoom.id,
+        data: {
+          status: 'occupied',
+          entertainer_id: data.entertainer_id,
+          entertainer_name: shiftRecord?.stage_name || 'Unknown',
+          guest_name: data.guest_name,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          duration_minutes: data.duration_minutes,
+          venue_id: resolvedVenueId,
+          total_charge: charge
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: resolvedVenueId,
+        intent: 'VIP_ROOM_SESSION_START',
       });
+      if (!result?.ok) throw new Error(result?.block_reason || 'VIP room start was rejected.');
+      return result.value;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vip-rooms'] });
@@ -104,14 +117,24 @@ export default function VIPRoomManagement({ user }) {
       const sessionDuration = room.start_time
         ? Math.round((Date.now() - new Date(room.start_time).getTime()) / 60000)
         : null;
-      await base44.entities.VIPRoom.update(room.id, {
-        status: 'available',
-        entertainer_id: null,
-        entertainer_name: null,
-        guest_name: null,
-        start_time: null,
-        end_time: null
+      const roomWrite = await writeEntity({
+        entity: 'VIPRoom',
+        operation: 'update',
+        id: room.id,
+        data: {
+          status: 'available',
+          entertainer_id: null,
+          entertainer_name: null,
+          guest_name: null,
+          start_time: null,
+          end_time: null,
+          venue_id: resolvedVenueId,
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: resolvedVenueId,
+        intent: 'VIP_ROOM_SESSION_END',
       });
+      if (!roomWrite?.ok) throw new Error(roomWrite?.block_reason || 'VIP room end was rejected.');
       await base44.entities.SystemAuditLog.create({
         event_type:  'VIP_SESSION_ENDED',
         entity_type: 'VIPRoom',
