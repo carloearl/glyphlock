@@ -13,6 +13,9 @@ export async function uploadProtectedEvidence({
 }) {
   if (!file) throw new Error('Protected evidence file is required.');
   if (!venueId) throw new Error('Active venue is required for protected evidence.');
+  const bytes = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
+  const content_hash = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
   const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
   if (!file_uri) throw new Error('Private upload returned no file reference.');
   const registration = await base44.functions.invoke('registerProtectedEvidence', {
@@ -24,6 +27,7 @@ export async function uploadProtectedEvidence({
     subject_id: subjectId,
     purpose,
     mode,
+    content_hash,
     mime_type: file.type || '',
     file_name: file.name || '',
   });
