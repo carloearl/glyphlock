@@ -91,8 +91,9 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products', venueId, ...modeQueryKey],
     queryFn: async () => {
-      const rows = await base44.entities.POSProduct.filter({ is_active: true }, 'name', 1000);
-      const venueRows = rows.filter((row) => !venueId || !row.venue_id || row.venue_id === venueId);
+      if (!venueId) return [];
+      const rows = await base44.entities.POSProduct.filter({ is_active: true, venue_id: venueId }, 'name', 1000);
+      const venueRows = rows;
       const scoped = scopeRowsToOperatingMode(venueRows, {
         ledgerMode: modeState.ledgerMode,
         operatingMode: modeState.operatingMode,
