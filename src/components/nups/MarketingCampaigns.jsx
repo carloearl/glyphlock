@@ -50,7 +50,7 @@ export default function MarketingCampaigns() {
           type: data.campaign_type,
           status: "draft",
           target_audience: "all",
-          discount_type: data.discount_type === "buy_x_get_y" ? "none" : data.discount_type,
+          discount_type: data.discount_type,
           discount_value: Number(data.discount_value) || 0,
           start_date: data.start_date,
           end_date: data.end_date,
@@ -351,6 +351,7 @@ export default function MarketingCampaigns() {
                       <div className="text-sm text-gray-300">
                         {campaign.discount_type === "percentage" && `${campaign.discount_value || 0}% off`}
                         {campaign.discount_type === "fixed_amount" && `$${campaign.discount_value || 0} off`}
+                        {campaign.discount_type === "buy_x_get_y" && `Buy X Get Y`}
                       </div>
                     </div>
                   )}
