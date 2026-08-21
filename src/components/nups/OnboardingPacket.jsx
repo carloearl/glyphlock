@@ -19,6 +19,7 @@ import {
   ChevronRight, AlertTriangle, Lock, Users, Star
 } from "lucide-react";
 import { snapshotPerson } from "@/lib/nups/personArchive";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 const ONBOARDING_STEPS = [
   { key: "profile",   label: "Profile Created",       icon: UserPlus,     desc: "Basic info & stage name" },
@@ -91,15 +92,22 @@ export default function OnboardingPacket({ currentUser }) {
   const createProfile = useMutation({
     mutationFn: async () => {
       if (!sessionVenueId) throw new Error("No active venue in session — cannot create profile.");
-      return base44.entities.Entertainer.create({
-        stage_name: newHire.stage_name,
-        legal_name: newHire.legal_name,
-        phone: newHire.phone,
-        email: newHire.email,
-        venue_id: sessionVenueId,
-        is_demo: false,
-        status: "inactive", // blocked until onboarding complete
-        contract_signed: false,
+      return writeIdentityRecord({
+        entity: "Entertainer",
+        operation: "create",
+        venueId: sessionVenueId,
+        intent: "entertainer:onboarding:create_profile",
+        actor: currentUser,
+        data: {
+          stage_name: newHire.stage_name,
+          legal_name: newHire.legal_name,
+          phone: newHire.phone,
+          email: newHire.email,
+          venue_id: sessionVenueId,
+          is_demo: false,
+          status: "inactive", // blocked until onboarding complete
+          contract_signed: false,
+        },
       });
     },
     onError: (e) => toast.error(e.message),
@@ -118,9 +126,7 @@ export default function OnboardingPacket({ currentUser }) {
   });
 
   const completeDocuments = useMutation({
-    mutationFn: () => base44.entities.Entertainer.update(createdEntertainer.id, {
-      notes: `Docs: ${newHire.doc_note || "Uploaded offline"} | ${new Date().toLocaleDateString()}`,
-    }),
+    mutationFn: () => writeIdentityRecord({ entity: "Entertainer", operation: "update", id: createdEntertainer.id, venueId: sessionVenueId, actor: currentUser, intent: "entertainer:onboarding:documents", data: { venue_id: sessionVenueId, notes: `Docs: ${newHire.doc_note || "Uploaded offline"} | ${new Date().toLocaleDateString()}` } }),
     onSuccess: () => { markStep("documents"); toast.success("Documents recorded"); },
   });
 
@@ -129,35 +135,33 @@ export default function OnboardingPacket({ currentUser }) {
       // Write role to UserRoleAssignment entity (RBAC backend persistence)
       const userEmail = createdEntertainer.email ||
         `${createdEntertainer.stage_name.toLowerCase().replace(/\s+/g, '.')}@nups.local`;
-      await base44.entities.UserRoleAssignment.create({
-        user_email: userEmail,
-        role_key: newHire.role,
-        venue_id: sessionVenueId,
-        assigned_by: currentUser?.email || "system",
-        assigned_at: new Date().toISOString(),
-        is_active: false, // blocked until activation step completes
+      await writeIdentityRecord({
+        entity: "UserRoleAssignment",
+        operation: "create",
+        venueId: sessionVenueId,
+        actor: currentUser,
+        intent: "entertainer:onboarding:role_assignment",
+        data: {
+          user_email: userEmail,
+          role_key: newHire.role,
+          venue_id: sessionVenueId,
+          assigned_by: currentUser?.email || "system",
+          assigned_at: new Date().toISOString(),
+          is_active: false, // blocked until activation step completes
+        },
       }).catch(() => {}); // non-fatal: entity may not exist in all envs
-      return base44.entities.Entertainer.update(createdEntertainer.id, {
-        commission_rate: newHire.role === "PERFORMER" ? 0.5 : 0.0,
-      });
+      return writeIdentityRecord({ entity: "Entertainer", operation: "update", id: createdEntertainer.id, venueId: sessionVenueId, actor: currentUser, intent: "entertainer:onboarding:assign_role", data: { venue_id: sessionVenueId, commission_rate: newHire.role === "PERFORMER" ? 0.5 : 0.0 } });
     },
     onSuccess: () => { markStep("role"); toast.success(`Role ${newHire.role} assigned & recorded in RBAC`); },
   });
 
   const issueContract = useMutation({
-    mutationFn: () => base44.entities.Entertainer.update(createdEntertainer.id, {
-      // Mark contract as issued — not yet signed
-      status: "inactive",
-    }),
+    mutationFn: () => writeIdentityRecord({ entity: "Entertainer", operation: "update", id: createdEntertainer.id, venueId: sessionVenueId, actor: currentUser, intent: "entertainer:onboarding:contract_issued", data: { venue_id: sessionVenueId, status: "inactive" } }),
     onSuccess: () => { markStep("contract"); toast.success("Contract issued — pending signature"); },
   });
 
   const managerApprove = useMutation({
-    mutationFn: () => base44.entities.Entertainer.update(createdEntertainer.id, {
-      contract_signed: true,
-      contract_signed_date: new Date().toISOString(),
-      contract_ip_address: "manager-approved",
-    }),
+    mutationFn: () => writeIdentityRecord({ entity: "Entertainer", operation: "update", id: createdEntertainer.id, venueId: sessionVenueId, actor: currentUser, intent: "entertainer:onboarding:manager_approval", data: { venue_id: sessionVenueId, contract_signed: true, contract_signed_date: new Date().toISOString(), contract_ip_address: "manager-approved" } }),
     onSuccess: () => { markStep("approval"); toast.success("Manager approval recorded"); },
   });
 
@@ -168,7 +172,7 @@ export default function OnboardingPacket({ currentUser }) {
         `${createdEntertainer.stage_name.toLowerCase().replace(/\s+/g, '.')}@nups.local`;
       const existing = await base44.entities.UserRoleAssignment.filter({ user_email: userEmail }).catch(() => []);
       if (existing?.length > 0) {
-        await base44.entities.UserRoleAssignment.update(existing[0].id, { is_active: true }).catch(() => {});
+        await writeIdentityRecord({ entity: "UserRoleAssignment", operation: "update", id: existing[0].id, venueId: sessionVenueId, actor: currentUser, intent: "entertainer:onboarding:activate_role", data: { venue_id: sessionVenueId, is_active: true } }).catch(() => {});
       }
       // ID-01 FIX: resolve the approver's real name — never "undefined".
       let approver = currentUser?.full_name || currentUser?.email;
@@ -176,23 +180,39 @@ export default function OnboardingPacket({ currentUser }) {
         const me = await base44.auth.me().catch(() => null);
         approver = me?.full_name || me?.email || "manager";
       }
-      const updated = await base44.entities.Entertainer.update(createdEntertainer.id, {
-        status: "active",
-        contract_status: "VALID",
-        contract_signature: `Activated by ${approver} on ${new Date().toLocaleDateString()}`,
+      const updated = await writeIdentityRecord({
+        entity: "Entertainer",
+        operation: "update",
+        id: createdEntertainer.id,
+        venueId: sessionVenueId,
+        actor: currentUser,
+        intent: "entertainer:onboarding:activate",
+        data: {
+          venue_id: sessionVenueId,
+          status: "active",
+          contract_status: "VALID",
+          contract_signature: `Activated by ${approver} on ${new Date().toLocaleDateString()}`,
+        },
       });
       // Contractor convention: signing IS the check-in. Open a shift so the
       // contractor appears on the active floor roster immediately — same as Lucky.
       try {
-        await base44.entities.EntertainerShift.create({
-          entertainer_id: createdEntertainer.id,
-          entertainer_type: "entertainer",
-          venue_id: sessionVenueId,
-          check_in_time: new Date().toISOString(),
-          location: "Main Floor",
-          status: "checked_in",
-          shift_earnings: 0,
-          vip_sessions: 0,
+        await writeIdentityRecord({
+          entity: "EntertainerShift",
+          operation: "create",
+          venueId: sessionVenueId,
+          actor: currentUser,
+          intent: "entertainer:onboarding:initial_checkin",
+          data: {
+            entertainer_id: createdEntertainer.id,
+            entertainer_type: "entertainer",
+            venue_id: sessionVenueId,
+            check_in_time: new Date().toISOString(),
+            location: "Main Floor",
+            status: "checked_in",
+            shift_earnings: 0,
+            vip_sessions: 0,
+          },
         });
       } catch (e) { /* non-fatal: roster will reconcile on next check-in */ }
       // Permanent archive snapshot for activation + contract signing
