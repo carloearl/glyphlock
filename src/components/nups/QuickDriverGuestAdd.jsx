@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { loadVenueRates, computeDriverPayoutAmount } from "@/lib/nups/venueRateConfig";
 import ManagerPINVerifier from "@/components/nups/ManagerPINVerifier";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 function todayDate() { return new Date().toISOString().split("T")[0]; }
 function safeJSON(s) {
@@ -73,10 +74,19 @@ export default function QuickDriverGuestAdd({ user }) {
       const gross = computeDriverPayoutAmount(rates, { guests: totalGuests, affiliated });
       const netPayout = Math.max(0, gross - promosGiven * promoAmount);
 
-      await base44.entities.DriverPayout.update(session.id, {
-        notes: JSON.stringify({ ...meta, drops, guests: totalGuests }),
-        total_payout: netPayout,
+      const write = await writeEntity({
+        entity: "DriverPayout",
+        operation: "update",
+        id: session.id,
+        data: {
+          notes: JSON.stringify({ ...meta, drops, guests: totalGuests }),
+          total_payout: netPayout,
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "DOOR" },
+        venue_id: venueId,
+        intent: "DRIVER_QUICK_GUEST_ADD",
       });
+      if (!write?.ok) throw new Error(write?.block_reason || "Driver guest add was rejected.");
 
       // Append-only audit trail of the manager-approved add.
       try {
