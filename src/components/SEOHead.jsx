@@ -232,23 +232,23 @@ export default function SEOHead({
       "url": siteUrl,
       "logo": image,
       "image": image,
-      "description": "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.",
-      "foundingDate": "2025-01",
-      "founder": [
+      "description": "GlyphLock LLC builds evidence infrastructure connecting concealed-image data, Secure QR workflows, assisted intelligence, venue operations, closed-loop value records, governance, hardware, and authorized integrations.",
+      "foundingDate": "2025-05-24",
+      "founder": {
+        "@type": "Person",
+        "name": "Carlo Rene Earl",
+        "jobTitle": "Founder & Chief Executive Officer"
+      },
+      "employee": [
         {
           "@type": "Person",
-          "name": "Carlo Rene Earl",
-          "jobTitle": "Founder & Owner"
+          "name": "Jacub Lough",
+          "jobTitle": "Chief Financial Officer & Chief Strategy Officer"
         },
         {
           "@type": "Person",
           "name": "Collin Vanderginst",
           "jobTitle": "Chief Technology Officer"
-        },
-        {
-          "@type": "Person",
-          "name": "Jacub Lough",
-          "jobTitle": "Chief Security Officer & Chief Financial Officer"
         }
       ],
       "address": {
@@ -275,31 +275,32 @@ export default function SEOHead({
         "https://instagram.com/glyphlock",
         "https://tiktok.com/@glyphlock"
       ],
-      "slogan": "Build. Verify. Operate.",
+      "slogan": "Infrastructure that makes activity provable.",
       "areaServed": "Worldwide",
       "keywords": resolvedKeywords,
       "knowsAbout": [
-        "Custom software development",
+        "Evidence infrastructure",
+        "Concealed image data and least-significant-bit steganography",
+        "Secure QR payloads and interactive images",
+        "AI-assisted construction and system auditing",
         "Venue operations software",
-        "Point-of-sale workflows",
-        "QR verification",
-        "AI-assisted workflows",
-        "Systems integration",
-        "Image tooling",
-        "Operational reporting",
-        "Security operations",
-        "Governance documentation"
+        "Closed-loop stored value recordkeeping",
+        "Operational and financial ledgers",
+        "Audit evidence and provenance",
+        "Hospitality interoperability",
+        "Hardware-assisted workflows",
+        "Governance and human approval controls"
       ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
-        "name": "GlyphLock Products & Services",
+        "name": "GlyphLock Engagements",
         "itemListElement": [
           {
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Professional Security Plan",
-              "description": "Visual Cryptography Tools, Blockchain Security Suite, GlyphBot AI Assistant, up to 1,000 QR codes/month",
+              "name": "Platform Access",
+              "description": "Secure QR, interactive image, verification, and GlyphBot-assisted workflows for creators, builders, and teams.",
               "provider": {
                 "@type": "Organization",
                 "name": "GlyphLock LLC"
@@ -310,8 +311,8 @@ export default function SEOHead({
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Enterprise Security Plan",
-              "description": "Unlimited QR Generation, Priority AI Processing, Security Operations Center, N.U.P.S. POS System, 24/7 Premium Support",
+              "name": "Venue Deployment",
+              "description": "NUPS workflow configuration, role mapping, hardware planning, onboarding, and launch support.",
               "provider": {
                 "@type": "Organization",
                 "name": "GlyphLock LLC"
@@ -322,44 +323,8 @@ export default function SEOHead({
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "GlyphBot AI Assistant",
-              "description": "AI-powered cybersecurity assistant for threat detection, code analysis, and security auditing",
-              "provider": {
-                "@type": "Organization",
-                "name": "GlyphLock LLC"
-              }
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "QR Studio",
-              "description": "Generate QR payloads and support scan logging, signing, verification, and operational workflows",
-              "provider": {
-                "@type": "Organization",
-                "name": "GlyphLock LLC"
-              }
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Steganography Tools",
-              "description": "Hide sensitive data within images using advanced cryptographic techniques",
-              "provider": {
-                "@type": "Organization",
-                "name": "GlyphLock LLC"
-              }
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Architecture & Governance Review",
-              "description": "Structured review of architecture, documentation, controls, evidence gaps, and remediation priorities",
+              "name": "Enterprise Integration",
+              "description": "Custom interoperability, data-boundary planning, technical review, licensing, and service-level scoping.",
               "provider": {
                 "@type": "Organization",
                 "name": "GlyphLock LLC"
