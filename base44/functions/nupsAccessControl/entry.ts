@@ -77,8 +77,8 @@ Deno.serve(async (req) => {
     // ─── SUBMIT ACCESS REQUEST (§4) ─────────────────────────────────────────
     if (action === 'submitRequest') {
       const { full_legal_name, phone, requested_role, venue_id, reason, mode } = body;
-      if (!full_legal_name || !requested_role || !reason) {
-        return Response.json({ error: 'Full legal name, requested access type, and reason are required.' }, { status: 400 });
+      if (!full_legal_name || !requested_role || !reason || !venue_id) {
+        return Response.json({ error: 'Full legal name, requested access type, reason, and active venue are required.' }, { status: 400 });
       }
       if (!REQUESTABLE_ROLES.includes(requested_role)) {
         return Response.json({ error: 'Invalid access type.' }, { status: 400 });
@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
         email,
         phone: phone || '',
         requested_role,
-        venue_id: venue_id || 'dream_palace',
+        venue_id,
         reason,
         status: 'PENDING_OWNER_APPROVAL',
         mode: ['SANDBOX', 'DEMO'].includes(mode) ? mode : 'SANDBOX',
