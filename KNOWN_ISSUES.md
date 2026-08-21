@@ -39,7 +39,7 @@ Verification on 2026-08-20:
 `npm run check:nups-write-gateway` → PASS: `287/287 grandfathered frontend writes remain; no new bypasses.`
 
 ### Meaning
-The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **178/287** after the governed-write migration batches covering employee tips, contractor payouts/tax forms, Z-report creation, GlyphBucks/contract writes, guest/entertainer/driver/staff identity flows, customer profile writes, staff shift clock-outs, barcode-first hardcopy capture, privileged NUPS bootstrap, mode/configuration writes, venue settings, contract-terms editors, VIP session reports, VIP room operational state, the live product/catalog/inventory layer, access requests, person archive snapshots, front-door config, marketing campaigns, Chart of Accounts administration, LedgerAccount seeding, and journal reversal-status marking. The remaining baseline includes meaningful explicit security/domain/telemetry audit writes plus live operational debt and deliberately retained demo/seed/sandbox/legacy calls; the raw count is therefore no longer equivalent to unresolved production risk.
+The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **176/287** after Batch 13 moved the live mobile-scanner GuestProfile create/update paths through the identity gateway in addition to the earlier migration batches. The remaining baseline includes meaningful explicit security/domain/telemetry audit writes plus live operational debt and deliberately retained demo/seed/sandbox/legacy calls; the raw count is therefore no longer equivalent to unresolved production risk.
 
 ### Required resolution
 Reduce the manifest monotonically, prioritizing financial, identity, contract, credential, payout, mode, and audit writes.
@@ -86,13 +86,9 @@ Production/live paths resolve `venue_id` dynamically.
 
 ### Observed examples
 
-- `src/lib/nups/accessRequestClient.js` falls back to `"dream_palace"`.
-- `src/pages/VIPCommandCenter.jsx` falls back to `'dream_palace'`.
-- `src/pages/GlyphBucksConsole.jsx` falls back to `"dream_palace"`.
-- `src/components/nups/glyphbucks/GlyphBucksWorkspace.jsx` falls back to `'dream_palace'`.
-- `StaffApplication` still contains a default `venue_id` of `dream_palace`. The `NUPSAccessRequest` schema default was removed in Batch 12 and its fallback submission path now requires resolved venue context.
+Batch 13 removed the `StaffApplication` production venue default and changed live staff onboarding, GlyphBucks sale, GlyphBucks contract, and unified contract flows to resolve active venue dynamically. Remaining production/backend hardcodes still exist in functions including `nupsClockIn`, `registerVIPBills`, `vipContractGenerate`, and the Stripe integration health probe. `getSessionVenueId` also carries an explicit allowed-venue list that requires a separate tenancy-policy decision rather than blind deletion.
 
-Demo-only `DEMO_VENUE_001` constants are not this defect when they are provably isolated from REAL mode.
+Demo-only `DEMO_VENUE_001`, demo seeders, sandbox fixtures, historical cleanup functions, and schema-description examples are not this defect when they are provably isolated from REAL mode.
 
 ### Required resolution
 Replace production fallbacks with active/session venue resolution and fail closed when a required venue cannot be resolved.
@@ -167,6 +163,9 @@ Different workflows can create separate records for the same person, producing s
 ### Required resolution
 Define canonical guest identity ownership and explicit compatibility/projection rules. Do not blindly merge schemas or copy broad PII into `GuestProfile`.
 
+### Batch 13 progress
+Both models already share the deterministic `guest_id` derived from the credential. New `VIPGuest` check-in writes no longer persist the full government ID number; they retain `guest_id` plus `id_last4`, while `GuestProfile` remains the minimized scanner profile. Historical `VIPGuest.id_number` data remains legacy-readable. The issue stays OPEN because the two record types still have overlapping lifecycle ownership and no single canonical cross-workflow projection has been formally adopted.
+
 ---
 
 ## NUPS-0008 — Historical handoff documentation is stale relative to live code
@@ -200,6 +199,9 @@ This mapping did not prove that every identity upload path forces non-public sto
 ### Required resolution
 Trace entertainer, guest, driver, contract, thumbprint, ID-front/back, W-9, and verification-media upload functions. Prove access control at the storage and retrieval boundary.
 
+### Batch 13 evidence
+Live paths including `GlyphBucksContract`, `IDScannerCamera`, `BarcodeFirstCapture`, and `ContractorOnboardingPanel` use generic `UploadFile` and persist returned URL strings directly. `FileStorage.file_url` is explicitly described by its schema as a public URL, but these identity paths do not consistently route through `FileStorage`; therefore the underlying access behavior of the returned upload URLs remains UNVERIFIED. Archive/search viewers were hardened to stop emitting raw protected-media URLs or rendering archived ID/thumbprint/hardcopy images directly until an authorized private retrieval path is proven. This is mitigation, not closure.
+
 ---
 
 ## NUPS-0010 — Integration maturity is not uniformly persisted
@@ -216,6 +218,26 @@ Persist per-integration/per-environment state using the standard ladder:
 `configured → connected → authenticated → request succeeded → response validated → end-to-end verified`
 
 Store non-secret evidence and test timestamp. Never promote from settings alone.
+
+---
+
+## NUPS-0011 — Protected identity uploads lack a verified private retrieval boundary
+
+**Severity:** CRITICAL  
+**Invariant:** INV-07  
+**Status:** OPEN — SECURITY BOUNDARY REQUIRED
+
+### Expected
+Government IDs, entertainer credentials, W-9 scans, signatures, thumbprint imagery, and signed-contract evidence must be stored non-publicly and retrieved only through an authenticated, role/venue-authorized path.
+
+### Observed
+Several live workflows call generic `UploadFile`, retain the returned `file_url`, and later store that URL directly on identity/contract records. The repository does not prove that those returned URLs are signed, temporary, or access-controlled. The generic `FileStorage` schema itself describes `file_url` as a public URL, so its `is_public` metadata flag alone cannot be treated as proof about the underlying object URL.
+
+### Immediate mitigation
+Batch 13 removed direct protected-media links/images from `ContractViewer`, `ContractDetailCard`, and `ContractDetailModal`. Presence and hashes remain visible, but raw archived media URLs are not emitted by those viewers.
+
+### Required resolution
+Implement or identify a server-authorized private upload/retrieval mechanism, migrate protected identity capture to opaque references/private objects, enforce role + venue + purpose checks, and test unauthenticated retrieval rejection with synthetic evidence before re-enabling protected-media viewing.
 
 ---
 
