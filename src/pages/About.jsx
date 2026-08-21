@@ -300,7 +300,7 @@ const architectureLayers = [
     icon: Network,
     label: "Trust + scale",
     title: "Governance and integrations extend the record",
-    body: "Supported sealed GlyphBucks and contract flows can use OpenTimestamps with Bitcoin anchoring, with status tracked per record. The Master Covenant is GlyphLock's governance and AI-communication framework. Oracle PartnerNetwork membership is active and OHIP partner-sandbox validation is complete; Marketplace and production authorization remain separate next steps.",
+    body: "For supported sealed GlyphBucks and contract flows, blockchain is used as a timestamping and evidence tool—not as the venue currency: OpenTimestamps can anchor proof to Bitcoin while status remains explicit per record. The Master Covenant is GlyphLock's governance and AI-communication framework. Oracle PartnerNetwork membership is active and OHIP partner-sandbox validation is complete; Marketplace and production authorization remain separate next steps.",
     points: ["Per-record timestamp and anchoring status", "Master Covenant AI-governance experiments", "Active OPN + validated OHIP sandbox path"],
     status: "Mixed maturity · every claim labeled",
     cta: "Review governance",
@@ -435,11 +435,24 @@ const evidenceGroups = [
     caption: "Present in the current platform",
     accent: "text-[#00E4FF]",
     items: [
-      "Secure QR Studio, Image Lab, and interactive-media tooling",
-      "GlyphBot-assisted construction and review workflows",
-      "NUPS role-based venue operations",
-      "Contract, verification, audit, reconciliation, and reporting surfaces",
-      "Custom web, application, media, security, and hardware-assisted workflows",
+      "Secure QR Studio catalog with exactly 91 payload definitions",
+      "Image Lab, interactive hotspots, and working LSB encode/decode experiments",
+      "GlyphBot audit, construction, and site-builder surfaces",
+      "DJ Pro Mixer, AI playlist generation, Auto-DJ planning, and Fable visuals",
+      "NUPS role-based operations and the GlyphBucks issuance-to-verification system",
+      "Ledgers, contracts, reconciliation, audit, and reporting surfaces",
+    ],
+  },
+  {
+    label: "Active development",
+    caption: "Real work not represented as finished",
+    accent: "text-emerald-300",
+    items: [
+      "Public release path for the hidden-image data carrier",
+      "Production hardening for GlyphBot, Site Builder, and automated DJ workflows",
+      "Broader timestamp attestation coverage beyond supported sealed records",
+      "Oracle Marketplace work and customer production authorization",
+      "Cross-product provenance and evidence portability",
     ],
   },
   {
@@ -447,11 +460,11 @@ const evidenceGroups = [
     caption: "Connected paths, not endorsements",
     accent: "text-[#B78CFF]",
     items: [
-      "Oracle Hospitality / OHIP interoperability work",
-      "Payment-provider adapter and transaction-reference paths",
-      "Analytics, storage, and authorized business connectors",
-      "Scanner, camera, register, printer, and workstation deployment paths",
-      "Enterprise APIs, SDKs, configuration, training, and launch support",
+      "Active Oracle PartnerNetwork Level 0 membership",
+      "OHIP partner-sandbox OAuth and controlled read-only validation complete",
+      "Oracle Marketplace listing and production access not yet approved",
+      "Payment-provider adapters and transaction-reference paths",
+      "Analytics, storage, hardware, enterprise API, and SDK paths",
     ],
   },
   {
@@ -459,11 +472,11 @@ const evidenceGroups = [
     caption: "GlyphLock-authored development",
     accent: "text-amber-300",
     items: [
-      "Master Covenant governance architecture",
-      "Creative-sovereignty methods",
+      "Master Covenant governance and structured AI-communication framework",
+      "Archived AI-model responses as internal experiments—not provider assent",
+      "Creative-sovereignty and cross-platform provenance methods",
       "Quantum-resistant design research",
       "Multi-agent audit and control patterns",
-      "Cross-platform provenance models",
     ],
   },
 ];
@@ -1093,7 +1106,6 @@ export default function About() {
           <section className="py-24">
             <SectionHeading
               eyebrow="One operating proof"
-              title="NUPS shows the architecture under real operating pressure."
               title="NUPS shows the architecture under real operating pressure."
               body="NUPS is one complete example of the wider GlyphLock model. This privacy-safe walkthrough follows context, identity, permission, agreements, transaction references, and review without exposing genuine personal information."
             />
