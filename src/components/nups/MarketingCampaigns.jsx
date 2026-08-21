@@ -11,9 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Target, Plus, TrendingUp, Mail, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 export default function MarketingCampaigns() {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -26,8 +30,9 @@ export default function MarketingCampaigns() {
   });
 
   const { data: campaigns = [] } = useQuery({
-    queryKey: ['pos-campaigns'],
-    queryFn: () => base44.entities.POSCampaign.list('-created_date')
+    queryKey: ['pos-campaigns', venueId],
+    queryFn: () => venueId ? base44.entities.POSCampaign.filter({ venue_id: venueId }, '-created_date') : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const { data: customers = [] } = useQuery({
@@ -36,22 +41,32 @@ export default function MarketingCampaigns() {
   });
 
   const createCampaign = useMutation({
-    mutationFn: (data) => base44.entities.POSCampaign.create({
-      campaign_id: `CAMP-${Date.now()}`,
-      ...data,
-      target_audience: {
-        customer_tags: [],
-        min_spent: 0,
-        favorite_categories: [],
-        customer_status: ["active", "vip"]
-      },
-      offer: {
-        discount_type: data.discount_type,
-        discount_value: data.discount_value,
-        applicable_categories: [],
-        min_purchase: 0
-      }
-    }),
+    mutationFn: async (data) => {
+      if (!venueId) throw new Error("Select an active venue before creating a campaign.");
+      const me = await base44.auth.me();
+      const result = await writeEntity({
+        entity: "POSCampaign",
+        operation: "create",
+        data: {
+          campaign_id: `CAMP-${Date.now()}`,
+          venue_id: venueId,
+          name: data.name,
+          description: data.description || "",
+          type: data.campaign_type,
+          status: "draft",
+          target_audience: "all",
+          discount_type: data.discount_type === "buy_x_get_y" ? "none" : data.discount_type,
+          discount_value: Number(data.discount_value) || 0,
+          start_date: data.start_date,
+          end_date: data.end_date,
+        },
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+        venue_id: venueId,
+        intent: "POS_CAMPAIGN_CREATE",
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Campaign creation was rejected.");
+      return result.value;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pos-campaigns'] });
       setIsDialogOpen(false);
