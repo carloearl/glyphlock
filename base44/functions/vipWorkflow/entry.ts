@@ -189,6 +189,11 @@ Deno.serve(async (req) => {
           const beforeBirthday = today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate());
           if (beforeBirthday) age -= 1;
           const expiration = body.id_expiration ? new Date(body.id_expiration) : null;
+          const profileIdTypeMap = {
+            'Drivers License': 'drivers_license', drivers_license: 'drivers_license',
+            'State ID': 'state_id', state_id: 'state_id', Passport: 'passport', passport: 'passport',
+            'Military ID': 'military_id', military_id: 'military_id', 'Tribal ID': 'tribal_id', tribal_id: 'tribal_id'
+          };
           profile = await E.GuestProfile.create({
             guest_id,
             venue_id: VENUE,
@@ -196,7 +201,7 @@ Deno.serve(async (req) => {
             last_name: lastName,
             dob: String(body.date_of_birth).split('T')[0],
             license_state: String(body.id_state || '').toUpperCase(),
-            id_type: body.id_type || 'drivers_license',
+            id_type: profileIdTypeMap[body.id_type] || 'drivers_license',
             last_initial: (lastName || firstName).slice(0, 1).toUpperCase(),
             license_last4: normalizedId.slice(-4),
             id_expiration: body.id_expiration || undefined,
