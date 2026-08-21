@@ -13,6 +13,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import HardcopyRescan from "@/components/nups/HardcopyRescan";
+import { uploadProtectedEvidence } from "@/lib/nups/protectedEvidence";
 
 function StepIndicator({ current, steps }) {
   return (
@@ -40,6 +41,7 @@ export default function VIPContract() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
   const [token, setToken] = useState("");
+  const [contractVenueId, setContractVenueId] = useState("");
 
   // Step 0 - Identity
   const [guestName, setGuestName] = useState("");
@@ -56,11 +58,13 @@ export default function VIPContract() {
   const [idBackUrl, setIdBackUrl] = useState("");
   const [thumbprintUrl, setThumbprintUrl] = useState("");
   const [guestPhotoUrl, setGuestPhotoUrl] = useState("");
+  const [protectedEvidenceRefs, setProtectedEvidenceRefs] = useState({});
   const [uploading, setUploading] = useState({});
   const idFrontRef = useRef(null);
   const idBackRef = useRef(null);
   const thumbprintRef = useRef(null);
   const guestPhotoRef = useRef(null);
+  const previewUrlsRef = useRef(new Set());
 
   // Step 3 - Guest Signature
   const [signature, setSignature] = useState("");
@@ -80,24 +84,67 @@ export default function VIPContract() {
   const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   useEffect(() => {
+    let active = true;
     const urlParams = new URLSearchParams(window.location.search);
     const contractToken = urlParams.get('token');
-    if (contractToken) {
-      setToken(contractToken);
-    } else {
+    if (!contractToken) {
       setError('Invalid contract link');
+      return () => { active = false; };
     }
+    setToken(contractToken);
+    base44.entities.VIPContractRecord.filter({ token: contractToken, record_type: "contract_token" }, "-created_date", 1)
+      .then((records) => {
+        if (!active) return;
+        const venueId = records?.[0]?.venue_id || "";
+        if (!venueId) setError('Contract venue could not be resolved.');
+        setContractVenueId(venueId);
+      })
+      .catch(() => active && setError('Contract context could not be loaded.'));
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => () => {
+    previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    previewUrlsRef.current.clear();
   }, []);
 
   const handleFileUpload = async (file, field) => {
     if (!file) return;
+    if (!contractVenueId) {
+      setError('Contract venue must be resolved before capturing protected evidence.');
+      return;
+    }
     setUploading(prev => ({ ...prev, [field]: true }));
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    if (field === "id_front") setIdFrontUrl(file_url);
-    else if (field === "id_back") setIdBackUrl(file_url);
-    else if (field === "thumbprint") setThumbprintUrl(file_url);
-    else if (field === "guest_photo") setGuestPhotoUrl(file_url);
-    setUploading(prev => ({ ...prev, [field]: false }));
+    try {
+      const artifactByField = {
+        id_front: ["government_id_front", "PRIVATE_IDENTITY"],
+        id_back: ["government_id_back", "PRIVATE_IDENTITY"],
+        thumbprint: ["thumbprint", "PRIVATE_BIOMETRIC"],
+        guest_photo: ["guest_photo", "PRIVATE_IDENTITY"],
+      };
+      const [artifactType, classification] = artifactByField[field] || ["other", "UNKNOWN"];
+      const evidence = await uploadProtectedEvidence({
+        file,
+        venueId: contractVenueId,
+        artifactType,
+        classification,
+        subjectEntity: "VIPContractRecord",
+        subjectId: token,
+        purpose: `vip_contract_sign:${field}`,
+        signedUrlTtl: 0,
+      });
+      const previewUrl = URL.createObjectURL(file);
+      previewUrlsRef.current.add(previewUrl);
+      setProtectedEvidenceRefs(prev => ({ ...prev, [field]: evidence.evidence_id }));
+      if (field === "id_front") setIdFrontUrl(previewUrl);
+      else if (field === "id_back") setIdBackUrl(previewUrl);
+      else if (field === "thumbprint") setThumbprintUrl(previewUrl);
+      else if (field === "guest_photo") setGuestPhotoUrl(previewUrl);
+    } catch (uploadError) {
+      setError(uploadError?.message || 'Protected evidence upload failed.');
+    } finally {
+      setUploading(prev => ({ ...prev, [field]: false }));
+    }
   };
 
   const contractText = `VIP PRIVATE ENTERTAINMENT AGREEMENT
@@ -316,10 +363,10 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
       card_last_four: cardLast4,
       card_type: cardType,
       phone,
-      id_photo_url: idFrontUrl,
-      id_photo_back_url: idBackUrl,
-      thumbprint_url: thumbprintUrl,
-      guest_photo_url: guestPhotoUrl,
+      id_photo_url: protectedEvidenceRefs.id_front ? `protected:${protectedEvidenceRefs.id_front}` : "",
+      id_photo_back_url: protectedEvidenceRefs.id_back ? `protected:${protectedEvidenceRefs.id_back}` : "",
+      thumbprint_url: protectedEvidenceRefs.thumbprint ? `protected:${protectedEvidenceRefs.thumbprint}` : "",
+      guest_photo_url: protectedEvidenceRefs.guest_photo ? `protected:${protectedEvidenceRefs.guest_photo}` : "",
       host_name: hostName,
       host_signature: hostSignature,
       manager_name: managerName,
