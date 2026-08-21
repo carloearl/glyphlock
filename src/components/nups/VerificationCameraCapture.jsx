@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Camera, Upload, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { uploadProtectedEvidence } from '@/lib/nups/protectedEvidence';
 
 /**
  * Contract verification media capture.
@@ -75,11 +76,17 @@ export default function VerificationCameraCapture({ transaction_id, venue_id, on
     setUploading(true);
     try {
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-      const formData = new FormData();
-      formData.append('file', blob, `verification_${Date.now()}.jpg`);
-
-      const uploadResult = await base44.integrations.Core.UploadFile({ file: blob });
-      const media_url = uploadResult.file_url;
+      const file = new File([blob], `verification_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const protectedFile = await uploadProtectedEvidence({
+        file,
+        venueId: venue_id,
+        artifactType: 'verification_media',
+        classification: 'PRIVATE_CONTRACT',
+        subjectEntity: 'VerificationMedia',
+        subjectId: transaction_id,
+        purpose: verificationType,
+        signedUrlTtl: 0,
+      });
 
       const result = await base44.functions.invoke('captureVerificationMedia', {
         transaction_id,
@@ -87,7 +94,7 @@ export default function VerificationCameraCapture({ transaction_id, venue_id, on
         venue_id,
         media_type: 'photo',
         verification_type: verificationType,
-        media_url,
+        evidence_id: protectedFile.evidence_id,
         geolocation: await getCurrentLocation()
       });
 
@@ -111,8 +118,16 @@ export default function VerificationCameraCapture({ transaction_id, venue_id, on
 
     setUploading(true);
     try {
-      const uploadResult = await base44.integrations.Core.UploadFile({ file });
-      const media_url = uploadResult.file_url;
+      const protectedFile = await uploadProtectedEvidence({
+        file,
+        venueId: venue_id,
+        artifactType: 'verification_media',
+        classification: 'PRIVATE_CONTRACT',
+        subjectEntity: 'VerificationMedia',
+        subjectId: transaction_id,
+        purpose: verificationType,
+        signedUrlTtl: 0,
+      });
 
       const result = await base44.functions.invoke('captureVerificationMedia', {
         transaction_id,
@@ -120,7 +135,7 @@ export default function VerificationCameraCapture({ transaction_id, venue_id, on
         venue_id,
         media_type: file.type.startsWith('video') ? 'video' : 'photo',
         verification_type: verificationType,
-        media_url,
+        evidence_id: protectedFile.evidence_id,
         geolocation: await getCurrentLocation()
       });
 
