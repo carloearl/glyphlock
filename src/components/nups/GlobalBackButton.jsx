@@ -16,6 +16,10 @@ export default function GlobalBackButton({ inline = false }) {
   const home = getOperatorHome();
   const onHomePage = home && location.pathname.toLowerCase() === home.path.toLowerCase();
   const hasBack = canGoBack();
+  // Marketing/content pages where a floating back button is redundant — navbar handles navigation.
+  const isContentPage = ["/about", "/aboutcarlo", "/contact", "/privacy", "/terms", "/faq", "/services", "/pricing", "/roadmap", "/partners"].some(
+    (p) => location.pathname.toLowerCase() === p || location.pathname.toLowerCase().startsWith(p + "/")
+  );
 
   const goBack = () => {
     const prev = popBack();
@@ -25,6 +29,9 @@ export default function GlobalBackButton({ inline = false }) {
 
   // Nothing to go back to AND no role dashboard to fall back to (or already there)
   if (!hasBack && (!home || onHomePage)) return null;
+
+  // Hide on content/marketing pages where the navbar already provides navigation
+  if (isContentPage) return null;
 
   // Inline variant — lives inside the kiosk top strip so it never overlays
   // page content (overlay audit 2026-07-17).

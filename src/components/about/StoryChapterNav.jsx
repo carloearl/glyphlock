@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 
 export default function StoryChapterNav({ chapters }) {
   const [active, setActive] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const elements = chapters
@@ -22,7 +23,23 @@ export default function StoryChapterNav({ chapters }) {
     );
 
     elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+
+    // Scroll progress through the story section
+    const section = document.getElementById("story-section");
+    const onScroll = () => {
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const scrolled = Math.max(0, -rect.top);
+      const max = Math.max(1, rect.height - window.innerHeight * 0.5);
+      setProgress(Math.min(1, scrolled / max));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
   }, [chapters]);
 
   return (
@@ -51,13 +68,28 @@ export default function StoryChapterNav({ chapters }) {
 
       {/* Chapter progress navigator */}
       <nav className="mt-8 hidden lg:block" aria-label="Story chapter progress">
-        <p className="mb-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
-          Chapters
-        </p>
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">
+            Chapters
+          </p>
+          <p className="font-mono text-[10px] font-black text-slate-600">
+            {String(active + 1).padStart(2, "0")} / {String(chapters.length).padStart(2, "0")}
+          </p>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mb-4 h-1 w-full overflow-hidden rounded-full bg-white/5">
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-[#00E4FF] to-[#8C4BFF]"
+            style={{ width: (progress * 100).toFixed(1) + "%" }}
+          />
+        </div>
+
         <ol className="space-y-1">
           {chapters.map((chapter, index) => {
             const Icon = chapter.icon;
             const isActive = active === index;
+            const isPast = active > index;
             return (
               <li key={chapter.number}>
                 <a
@@ -68,10 +100,12 @@ export default function StoryChapterNav({ chapters }) {
                     if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
                   className={
-                    "group flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all " +
+                    "group flex items-center gap-3 rounded-xl border px-3 py-3 transition-all " +
                     (isActive
                       ? "border-[#00E4FF]/40 bg-[#00E4FF]/10"
-                      : "border-transparent hover:border-white/10 hover:bg-white/[0.04]")
+                      : isPast
+                        ? "border-white/5 bg-transparent opacity-50 hover:opacity-100"
+                        : "border-transparent hover:border-white/10 hover:bg-white/[0.04]")
                   }
                 >
                   <span
@@ -79,7 +113,9 @@ export default function StoryChapterNav({ chapters }) {
                       "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors " +
                       (isActive
                         ? "border-[#00E4FF]/50 bg-[#00E4FF]/15 text-[#00E4FF]"
-                        : "border-white/10 bg-black/40 text-slate-500 group-hover:text-slate-300")
+                        : isPast
+                          ? "border-[#8C4BFF]/30 bg-[#8C4BFF]/10 text-[#8C4BFF]/70"
+                          : "border-white/10 bg-black/40 text-slate-500 group-hover:text-slate-300")
                     }
                   >
                     <Icon className="h-4 w-4" aria-hidden="true" />
@@ -91,7 +127,7 @@ export default function StoryChapterNav({ chapters }) {
                     <span
                       className={
                         "block truncate text-xs font-bold transition-colors " +
-                        (isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200")
+                        (isActive ? "text-white" : isPast ? "text-slate-500" : "text-slate-400 group-hover:text-slate-200")
                       }
                     >
                       {chapter.label}

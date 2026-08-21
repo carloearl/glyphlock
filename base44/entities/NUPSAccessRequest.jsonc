@@ -34,8 +34,7 @@
       "default": "ENTERTAINER"
     },
     "venue_id": {
-      "type": "string",
-      "default": "dream_palace"
+      "type": "string"
     },
     "reason": {
       "type": "string",
