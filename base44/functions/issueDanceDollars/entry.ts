@@ -25,7 +25,8 @@ Deno.serve(async (req) => {
     const denomination = Number(body.denomination);          // printed face value on the note
     const face_value = body.face_value != null ? Number(body.face_value) : denomination; // dancer-redeem value
     const quantity = Number(body.quantity);
-    const venue_id = body.venue_id || 'dream_palace';
+    const venue_id = body.venue_id;
+    if (!venue_id) return Response.json({ error: 'Active venue is required.' }, { status: 400 });
     const purchaser_name = String(body.purchaser_name || '').slice(0, 120);
     const redemption_rate = body.redemption_rate != null ? Number(body.redemption_rate) : 1; // dancer gets 100% of face by default
 
