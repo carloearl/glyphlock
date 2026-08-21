@@ -39,7 +39,7 @@ Verification on 2026-08-20:
 `npm run check:nups-write-gateway` → PASS: `287/287 grandfathered frontend writes remain; no new bypasses.`
 
 ### Meaning
-The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **222/287** after the governed-write migration batches covering employee tips, contractor payouts/tax forms, Z-report creation, GlyphBucks/contract writes, guest/entertainer/driver/staff identity flows, customer profile writes, staff shift clock-outs, barcode-first hardcopy capture, and privileged NUPS bootstrap. The remaining baseline includes live operational debt plus deliberately retained demo/seed/sandbox/legacy calls; it does not mean those exceptions have disappeared.
+The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **200/287** after the governed-write migration batches covering employee tips, contractor payouts/tax forms, Z-report creation, GlyphBucks/contract writes, guest/entertainer/driver/staff identity flows, customer profile writes, staff shift clock-outs, barcode-first hardcopy capture, privileged NUPS bootstrap, mode/configuration writes, venue settings, contract-terms editors, VIP session reports, and VIP room operational state. The remaining baseline includes live operational debt plus deliberately retained demo/seed/sandbox/legacy calls; it does not mean those exceptions have disappeared.
 
 ### Required resolution
 Reduce the manifest monotonically, prioritizing financial, identity, contract, credential, payout, mode, and audit writes.
