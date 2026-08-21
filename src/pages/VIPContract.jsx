@@ -723,7 +723,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
                   <li>Photograph the FRONT of your government ID (ensure all text is legible)</li>
                   <li>Take a clear front-facing photo of the guest (face clearly visible)</li>
                   <li>Photograph the BACK of your government ID (optional but recommended)</li>
-                  <li>All images will be cryptographically hashed (SHA-256) and securely stored</li>
+                  <li>Evidence is privately stored under opaque references; stated integrity hashes use SHA-256</li>
                 </ol>
               </div>
 
