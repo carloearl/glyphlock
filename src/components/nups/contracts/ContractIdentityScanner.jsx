@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Camera, CheckCircle2, FileUp, Keyboard, Loader2, X } from "lucide-react";
+import { uploadProtectedEvidence } from "@/lib/nups/protectedEvidence";
 
 const FIELD = "w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm min-h-[44px] text-white outline-none focus:border-cyan-400";
 
@@ -73,10 +74,19 @@ export default function ContractIdentityScanner({ venueId, onVerified }) {
     setBusy(true);
     setError("");
     try {
-      const uploaded = await base44.integrations.Core.UploadFile({ file });
+      if (!venueId) throw new Error("Active venue is required before scanning identity evidence.");
+      const protectedFile = await uploadProtectedEvidence({
+        file,
+        venueId,
+        artifactType: "government_id_front",
+        classification: "PRIVATE_IDENTITY",
+        subjectEntity: "VIPContractRecord",
+        purpose: "contract_identity_scan",
+        signedUrlTtl: 120,
+      });
       const result = await base44.functions.invoke("scanCustomerID", {
         venue_id: venueId,
-        id_scan_front_url: uploaded.file_url,
+        id_scan_front_url: protectedFile.signed_url,
       });
       if (!result.data?.success) throw new Error(result.data?.error || "ID extraction failed.");
       deliver(result.data.autofill_data, "ID_SCAN");
