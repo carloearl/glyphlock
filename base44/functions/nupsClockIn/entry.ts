@@ -392,6 +392,7 @@ Deno.serve(async (req) => {
       }
       const owner = ((await E.NUPSUser.filter({ platform_email: OWNER_EMAIL, status: 'active' })) || [])[0];
       if (!owner) return genericAuthFailure('owner_override_account_unavailable');
+      if (!owner.venue_id) return genericAuthFailure('owner_venue_unassigned');
       await logAttempt('pin_auth', true, '');
       const ts = now();
       // Close ALL existing open owner shifts first — there is only ever ONE
@@ -399,7 +400,6 @@ Deno.serve(async (req) => {
       const ownerOpen = (await E.StaffShift.filter({ user_email: OWNER_EMAIL, status: 'checked_in' })) || [];
       for (const s of ownerOpen) await E.StaffShift.update(s.id, { check_out_time: ts, status: 'checked_out' });
       if (action === 'clockOut') {
-        if (!owner.venue_id) return genericAuthFailure('owner_venue_unassigned');
         return Response.json({ success: true, user: { ...safeUser(owner), venue_id: owner.venue_id, is_demo: false }, clocked_out_at: ts });
       }
       const shift = await E.StaffShift.create({
