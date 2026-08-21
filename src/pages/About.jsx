@@ -256,7 +256,7 @@ const architectureLayers = [
     icon: QrCode,
     label: "Carriers",
     title: "Images and QR structures carry context",
-    body: "GlyphLock began with the literal idea of storing machine-readable information inside an image. Working LSB encode/decode experiments, interactive hotspots, and a 91-payload QR catalog explore visible and concealed carriers for tickets, links, provenance, and protected references.",
+    body: "GlyphLock began with the literal idea of storing machine-readable information inside an image. Working least-significant-bit (LSB) encode/decode experiments, interactive hotspots, and a 91-payload QR catalog explore visible and concealed carriers for tickets, links, provenance, and protected references.",
     points: ["91 QR payload structures", "LSB hidden-image experiments", "Links, tickets, hotspots + provenance"],
     status: "QR + hotspots working · hidden carrier not yet public",
     cta: "Open Secure QR Studio",
@@ -300,7 +300,7 @@ const architectureLayers = [
     icon: Network,
     label: "Trust + scale",
     title: "Governance and integrations extend the record",
-    body: "For supported sealed GlyphBucks and contract flows, blockchain is used as a timestamping and evidence tool—not as the venue currency: OpenTimestamps can anchor proof to Bitcoin while status remains explicit per record. The Master Covenant is GlyphLock's governance and AI-communication framework. Oracle PartnerNetwork membership is active and OHIP partner-sandbox validation is complete; Marketplace and production authorization remain separate next steps.",
+    body: "For supported sealed GlyphBucks and contract flows, blockchain is used as a timestamping and evidence tool—not as the venue currency: OpenTimestamps can anchor proof to Bitcoin while status remains explicit per record. The Master Covenant is GlyphLock's governance and AI-communication framework; it has repeatedly produced structured, archivable responses across AI-model experiments, without being represented as provider assent. Oracle PartnerNetwork membership is active and OHIP partner-sandbox validation is complete; Marketplace and production authorization remain separate next steps.",
     points: ["Per-record timestamp and anchoring status", "Master Covenant AI-governance experiments", "Active OPN + validated OHIP sandbox path"],
     status: "Mixed maturity · every claim labeled",
     cta: "Review governance",
@@ -875,8 +875,8 @@ export default function About() {
     <MotionConfig reducedMotion="user">
       <SEOHead
         title="About GlyphLock | One Evidence Architecture, Every Layer"
-        description="GlyphLock is an evidence architecture spanning creative technology, identity, GlyphBot, NUPS operations, governance, security, financial accountability, integrations, hardware, and verification."
-        keywords="GlyphLock, evidence architecture, creative technology, NUPS, GlyphBot, Secure QR Studio, Image Lab, governance, security, financial accountability, systems integration, hardware deployment, audit evidence, Carlo Rene Earl, El Mirage Arizona"
+        description="GlyphLock connects hidden-image data, 91 QR payload structures, GlyphBot, automated DJ tools, NUPS, GlyphBucks closed-loop value, ledgers, timestamp evidence, governance, and Oracle/OHIP interoperability through one evidence architecture."
+        keywords="GlyphLock, evidence architecture, LSB steganography, hidden image data, 91 QR payloads, GlyphBot, Site Builder, automated DJ, NUPS, GlyphBucks, closed-loop stored value, operational ledgers, OpenTimestamps, Bitcoin anchoring, Master Covenant, Oracle PartnerNetwork, OHIP, Dream Palace, audit evidence, Carlo Rene Earl, El Mirage Arizona"
         url="/about"
       />
 
@@ -1101,6 +1101,13 @@ export default function About() {
               align="center"
             />
             <LayeredArchitecture />
+            <div className="mt-6 rounded-2xl border border-[#00E4FF]/20 bg-[#00E4FF]/[0.035] p-5 text-sm leading-relaxed text-slate-300">
+              <strong className="text-white">Public technology record · August 2026:</strong>{" "}
+              GlyphLock identifies the concealed image-data carrier—built from least-significant-bit
+              steganography, QR-like payload concepts, interactive links and hotspots, and provenance
+              context—as a core company technology direction. Working encode/decode experiments exist;
+              the complete carrier is not represented as publicly released.
+            </div>
           </section>
 
           <section className="py-24">
@@ -1187,7 +1194,7 @@ export default function About() {
               title="Clear about what is built, connected, and still being developed"
               body="An implemented capability is not the same as a production deployment. Integration work is not an endorsement. Internal frameworks and research are identified for what they are."
             />
-            <div className="mt-10 grid gap-6 lg:grid-cols-3">
+            <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
               {evidenceGroups.map((group) => (
                 <motion.article key={group.label} {...reveal} className="rounded-2xl border border-white/10 bg-black/50 p-7">
                   <p className={"text-xs font-black uppercase tracking-[0.2em] " + group.accent}>{group.label}</p>
