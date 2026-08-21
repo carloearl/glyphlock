@@ -11,6 +11,7 @@
 // ============================================================
 
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 // Seed defaults — used ONLY when no VenueRateConfig record exists yet.
 // First write to the entity supersedes these forever.
@@ -82,14 +83,24 @@ export async function ensureVenueRateConfig(venueId, venueName, actorEmail) {
   if (!venueId) return null;
   const existing = await base44.entities.VenueRateConfig.filter({ venue_id: venueId }, "-created_date", 1);
   if (existing?.length > 0) return existing[0];
-  const created = await base44.entities.VenueRateConfig.create({
-    ...SEED_DEFAULTS,
+  const me = await base44.auth.me().catch(() => null);
+  const result = await writeEntity({
+    entity: "VenueRateConfig",
+    operation: "create",
+    data: {
+      ...SEED_DEFAULTS,
+      venue_id: venueId,
+      venue_name: venueName || "",
+      last_edited_by: actorEmail || me?.email || "system",
+      last_edited_at: new Date().toISOString(),
+      notes: "Auto-seeded with defaults. Edit via Venue Settings.",
+    },
+    actor: { email: me?.email || actorEmail, id: me?.id, role: me?._highestRole || me?.role || "External" },
     venue_id: venueId,
-    venue_name: venueName || "",
-    last_edited_by: actorEmail || "system",
-    last_edited_at: new Date().toISOString(),
-    notes: "Auto-seeded with defaults. Edit via Venue Settings.",
+    intent: "VENUE_RATE_CONFIG_AUTO_SEED",
   });
+  if (!result?.ok) throw new Error(result?.block_reason || "Venue rate config seed was rejected.");
+  const created = result.value;
   invalidateRateCache(venueId);
   return created;
 }
