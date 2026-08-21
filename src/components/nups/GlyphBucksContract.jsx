@@ -20,6 +20,7 @@ import RateLimitGuard from "./validation/RateLimitGuard";
 import { GLYPHBUCKS_PURCHASE_AGREEMENT } from '@/constants/contractText';
 import { writeEntity } from '@/lib/nups/writeEntity';
 import { useActiveVenue } from '@/hooks/useActiveVenue';
+import { uploadProtectedEvidence } from '@/lib/nups/protectedEvidence';
 
 const FULL_CONTRACT_TEXT = `1. Orders
 Liberty Holding Group, L.L.C., and Liberty Entertainment Group L.L.C doing business as The Dream Palace [club/Bar] ("we," "our," or "us"), agrees to provide you ("you" or "your"), the customer named in the attached Order / purchase Invoice (the "Order"), with the services, and products ("Services and Products") listed in the Order. GlyphBucks (Club currency). The independent entertainer contractors ("Entertainers") at our Dream Palace Gentleman's Club located at 815 N. Scottsdale Road in Tempe, Arizona ("Club/Bar"), are independent entertainer contractors and are not our employees. You may independently arrange with Entertainers for services not provided by us, provided those services are legal. Entertainers do not have authority to contract for or bind us in any manner.
@@ -213,6 +214,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const [guestPhotoUrl, setGuestPhotoUrl] = useState("");
   const [idPhotoUrl, setIdPhotoUrl] = useState("");
   const [idPhotoBackUrl, setIdPhotoBackUrl] = useState("");
+  const [protectedEvidenceRefs, setProtectedEvidenceRefs] = useState({});
   const thumbRef = useRef(null);
   const photoRef = useRef(null);
   const idFrontRef = useRef(null);
@@ -261,13 +263,38 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
 
   const handleFileUpload = async (file, field) => {
     if (!file) return;
+    const venueId = currentVenue?.id || currentVenue?.venue_id || null;
+    if (!venueId) return toast.error('Select an active venue before capturing protected evidence.');
     setUploading(p => ({ ...p, [field]: true }));
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    if (field === "thumb") setThumbprintUrl(file_url);
-    else if (field === "photo") setGuestPhotoUrl(file_url);
-    else if (field === "id_front") setIdPhotoUrl(file_url);
-    else if (field === "id_back") setIdPhotoBackUrl(file_url);
-    setUploading(p => ({ ...p, [field]: false }));
+    try {
+      const artifactByField = {
+        thumb: ['thumbprint', 'PRIVATE_BIOMETRIC'],
+        photo: ['guest_photo', 'PRIVATE_IDENTITY'],
+        id_front: ['government_id_front', 'PRIVATE_IDENTITY'],
+        id_back: ['government_id_back', 'PRIVATE_IDENTITY'],
+      };
+      const [artifactType, classification] = artifactByField[field] || ['other', 'UNKNOWN'];
+      const protectedFile = await uploadProtectedEvidence({
+        file,
+        venueId,
+        artifactType,
+        classification,
+        subjectEntity: 'VIPContractRecord',
+        subjectId: savedContractId || orderNumber,
+        purpose: `glyphbucks_contract:${field}`,
+        signedUrlTtl: 120,
+      });
+      setProtectedEvidenceRefs((p) => ({ ...p, [field]: protectedFile.evidence_id }));
+      const previewUrl = protectedFile.signed_url || '';
+      if (field === "thumb") setThumbprintUrl(previewUrl);
+      else if (field === "photo") setGuestPhotoUrl(previewUrl);
+      else if (field === "id_front") setIdPhotoUrl(previewUrl);
+      else if (field === "id_back") setIdPhotoBackUrl(previewUrl);
+    } catch (error) {
+      toast.error(error?.message || 'Protected evidence upload failed.');
+    } finally {
+      setUploading(p => ({ ...p, [field]: false }));
+    }
   };
 
   const updateLineItem = (idx, field, val) => {
@@ -418,17 +445,17 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
           grand_total: grandTotal,
           acknowledgments_checked: true,
           customer_signature: signature,
-          thumbprint_url: thumbprintUrl,
-          guest_photo_url: guestPhotoUrl,
-          id_photo_url: idPhotoUrl,
-          id_photo_back_url: idPhotoBackUrl,
+          thumbprint_url: protectedEvidenceRefs.thumb ? `protected:${protectedEvidenceRefs.thumb}` : null,
+          guest_photo_url: protectedEvidenceRefs.photo ? `protected:${protectedEvidenceRefs.photo}` : null,
+          id_photo_url: protectedEvidenceRefs.id_front ? `protected:${protectedEvidenceRefs.id_front}` : null,
+          id_photo_back_url: protectedEvidenceRefs.id_back ? `protected:${protectedEvidenceRefs.id_back}` : null,
         },
         contract: {
           customer_signature: signature,
-          thumbprint_url: thumbprintUrl,
-          guest_photo_url: guestPhotoUrl,
-          id_photo_url: idPhotoUrl,
-          id_photo_back_url: idPhotoBackUrl,
+          thumbprint_url: protectedEvidenceRefs.thumb ? `protected:${protectedEvidenceRefs.thumb}` : null,
+          guest_photo_url: protectedEvidenceRefs.photo ? `protected:${protectedEvidenceRefs.photo}` : null,
+          id_photo_url: protectedEvidenceRefs.id_front ? `protected:${protectedEvidenceRefs.id_front}` : null,
+          id_photo_back_url: protectedEvidenceRefs.id_back ? `protected:${protectedEvidenceRefs.id_back}` : null,
         },
       });
       const finalization = finalizationResponse?.data || {};
