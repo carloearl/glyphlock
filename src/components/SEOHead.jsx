@@ -6,6 +6,8 @@ export default function SEOHead({
   title,
   description,
   keywords,
+  ogTitle,
+  ogDescription,
   image = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
   ogImage = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
   url,
@@ -26,6 +28,8 @@ export default function SEOHead({
 
   const resolvedTitle = title || autoData.title || "GlyphLock | Custom Software, NUPS, AI & Verification Workflows";
   const resolvedDescription = description || autoData.description || "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.";
+  const resolvedOgTitle = ogTitle || autoData.ogTitle || resolvedTitle;
+  const resolvedOgDescription = ogDescription || autoData.ogDescription || resolvedDescription;
   
   // Combine and deduplicate keywords
   const defaultKeywords = "GlyphLock LLC, custom software, NUPS, venue operations, QR verification, AI workflows, GlyphBot, Image Lab, systems integration, operational software, governance tooling, security operations";
@@ -135,13 +139,13 @@ export default function SEOHead({
     // GLYPHLOCK: Enhanced Open Graph
     updateMetaTag('og:type', type, true);
     updateMetaTag('og:url', fullUrl, true);
-    updateMetaTag('og:title', resolvedTitle, true);
-    updateMetaTag('og:description', resolvedDescription, true);
+    updateMetaTag('og:title', resolvedOgTitle, true);
+    updateMetaTag('og:description', resolvedOgDescription, true);
     updateMetaTag('og:image', ogImage, true);
     updateMetaTag('og:image:secure_url', ogImage, true);
     updateMetaTag('og:image:width', '1200', true);
     updateMetaTag('og:image:height', '630', true);
-    updateMetaTag('og:image:alt', resolvedTitle, true);
+    updateMetaTag('og:image:alt', resolvedOgTitle, true);
     updateMetaTag('og:image:type', 'image/png', true);
     updateMetaTag('og:site_name', 'GlyphLock', true);
     updateMetaTag('og:locale', 'en_US', true);
@@ -152,10 +156,10 @@ export default function SEOHead({
     updateMetaTag('twitter:site', '@glyphlock');
     updateMetaTag('twitter:creator', '@glyphlock');
     updateMetaTag('twitter:url', fullUrl);
-    updateMetaTag('twitter:title', resolvedTitle);
-    updateMetaTag('twitter:description', resolvedDescription);
+    updateMetaTag('twitter:title', resolvedOgTitle);
+    updateMetaTag('twitter:description', resolvedOgDescription);
     updateMetaTag('twitter:image', ogImage);
-    updateMetaTag('twitter:image:alt', resolvedTitle);
+    updateMetaTag('twitter:image:alt', resolvedOgTitle);
     updateMetaTag('twitter:domain', 'glyphlock.io');
 
     // Preconnect to Google Fonts for performance
@@ -423,7 +427,7 @@ export default function SEOHead({
       }
     }
 
-  }, [resolvedTitle, resolvedDescription, resolvedKeywords, image, ogImage, fullUrl, type, resolvedSchemaType]);
+  }, [resolvedTitle, resolvedDescription, resolvedOgTitle, resolvedOgDescription, resolvedKeywords, image, ogImage, fullUrl, type, resolvedSchemaType]);
 
   return null;
 }
