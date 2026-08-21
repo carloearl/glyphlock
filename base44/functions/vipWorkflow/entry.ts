@@ -129,8 +129,8 @@ Deno.serve(async (req) => {
         max_discount_pct_without_owner: 25,
         signature_requirements: ['guest', 'entertainer', 'staff'],
         session_warning_minutes: 5,
-        contract_terms: 'VIP suite entertainment agreement — Dream Palace. Non-refundable once the session begins. All services subject to venue policy. Extensions billed at the configured extension rate.',
-        receipt_footer: 'Dream Palace — Thank you.', mode: 'REAL'
+        contract_terms: `VIP suite entertainment agreement — ${venueRecord.name}. Non-refundable once the session begins. All services subject to venue policy. Extensions billed at the configured extension rate.`,
+        receipt_footer: `${venueRecord.name} — Thank you.`, mode: 'REAL'
       });
       return Response.json({ config, created: true });
     }
