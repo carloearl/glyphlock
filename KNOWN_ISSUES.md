@@ -154,19 +154,23 @@ Create one canonical role vocabulary/adapter, explicitly map every persistent ro
 
 **Severity:** MEDIUM  
 **Invariant:** Security / identity consistency  
-**Status:** OPEN — CONSOLIDATION
+**Status:** RESOLVED — CANONICAL IDENTITY + WORKFLOW PROJECTION
 
-### Observed
-`GuestProfile` is a minimized durable door profile using a one-way credential-derived ID and last-four credential storage, while `VIPGuest` retains a broader identity/payment-oriented shape including an `id_number` field.
+### Canonical ownership
+`GuestProfile` is the canonical minimized, venue-scoped identity record. It owns the deterministic credential-derived `guest_id`, legal name components, DOB required for re-verification, credential jurisdiction/type, last four, expiration, age-verification state, visit timestamps, and identity status.
 
-### Risk
-Different workflows can create separate records for the same person, producing search/contract retrieval inconsistencies and inconsistent PII handling.
+`VIPGuest` is the venue/VIP operational projection. It owns current check-in/location, tier, permitted contact/card-last-four metadata, VIP counts/spend aggregates, room/session state, and workflow status. It links to canonical identity through `guest_profile_id` and the shared `guest_id`.
 
-### Required resolution
-Define canonical guest identity ownership and explicit compatibility/projection rules. Do not blindly merge schemas or copy broad PII into `GuestProfile`.
+### Resolution evidence
+Batch 15 changed every identified live frontend and production-backend creation path:
 
-### Batch 13 progress
-Both models already share the deterministic `guest_id` derived from the credential. New `VIPGuest` check-in writes no longer persist the full government ID number; they retain `guest_id` plus `id_last4`, while `GuestProfile` remains the minimized scanner profile. Historical `VIPGuest.id_number` data remains legacy-readable. The issue stays OPEN because the two record types still have overlapping lifecycle ownership and no single canonical cross-workflow projection has been formally adopted.
+- `GuestCheckIn` finds/creates `GuestProfile` before creating or updating `VIPGuest`.
+- `GuestTracking` can no longer create an identity from a typed name; it requires an existing venue-scoped verified `GuestProfile`.
+- `scanCustomerID` uses the same normalized credential hash, does not persist the temporary OCR URL, and stores minimized credential fields.
+- `vipWorkflow.guestIntake` requires a verified ID or canonical profile and creates/updates only a linked VIP projection.
+- `vipContractSign` requires protected evidence references, binds the contract to canonical `GuestProfile`, and does not copy the full government ID, raw signature, or protected media into `VIPGuest`.
+
+`npm run check:nups-guest-identity` passes and scans all non-demo backend `VIPGuest.create()` paths for an explicit canonical-profile link. Historical `VIPGuest.id_number` data remains legacy-readable but is not written by current operational paths.
 
 ---
 
