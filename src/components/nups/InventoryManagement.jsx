@@ -9,9 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Package, AlertTriangle, TrendingDown, Plus, Search } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 export default function InventoryManagement({ products }) {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const venueProducts = venueId ? products.filter(p => p.venue_id === venueId) : [];
   const [showBatchDialog, setShowBatchDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,22 +36,44 @@ export default function InventoryManagement({ products }) {
   });
 
   const { data: batches = [] } = useQuery({
-    queryKey: ['pos-inventory-batches'],
-    queryFn: () => base44.entities.POSInventoryBatch.list('-created_date')
+    queryKey: ['pos-inventory-batches', venueId],
+    queryFn: () => venueId ? base44.entities.POSInventoryBatch.filter({ venue_id: venueId }, '-created_date') : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const createBatch = useMutation({
-    mutationFn: (data) => base44.entities.POSInventoryBatch.create(data),
+    mutationFn: async (data) => {
+      if (!venueId) throw new Error("Select an active venue before receiving inventory.");
+      const product = venueProducts.find(p => p.id === data.product_id);
+      if (!product) throw new Error("Selected product is not available for the active venue.");
+      const me = await base44.auth.me();
+      const actor = { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" };
+      const batchWrite = await writeEntity({
+        entity: "POSInventoryBatch",
+        operation: "create",
+        data: { ...data, venue_id: venueId },
+        actor,
+        venue_id: venueId,
+        intent: "POS_INVENTORY_BATCH_RECEIVE",
+      });
+      if (!batchWrite?.ok) throw new Error(batchWrite?.block_reason || "Inventory batch write was rejected.");
+
+      const newQuantity = Number(product.stock_quantity || 0) + Number(data.quantity || 0);
+      const productWrite = await writeEntity({
+        entity: "POSProduct",
+        operation: "update",
+        id: product.id,
+        data: { venue_id: venueId, stock_quantity: newQuantity },
+        actor,
+        venue_id: venueId,
+        intent: "POS_PRODUCT_STOCK_RECEIPT",
+      });
+      if (!productWrite?.ok) throw new Error(productWrite?.block_reason || "Product stock update was rejected.");
+      return batchWrite.value;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['pos-inventory-batches']);
-      // Update product stock
-      const product = products.find(p => p.id === batchForm.product_id);
-      if (product) {
-        base44.entities.POSProduct.update(product.id, {
-          stock_quantity: product.stock_quantity + batchForm.quantity
-        });
-        queryClient.invalidateQueries(['pos-products']);
-      }
+      queryClient.invalidateQueries(['pos-products']);
       setShowBatchDialog(false);
       setBatchForm({
         batch_id: `BATCH-${Date.now()}`,
@@ -64,11 +91,11 @@ export default function InventoryManagement({ products }) {
     }
   });
 
-  const lowStockProducts = products.filter(p => 
+  const lowStockProducts = venueProducts.filter(p => 
     p.stock_quantity <= (p.low_stock_threshold || 10)
   );
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = venueProducts.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          p.sku?.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -81,7 +108,7 @@ export default function InventoryManagement({ products }) {
   });
 
   const handleProductSelect = (productId) => {
-    const product = products.find(p => p.id === productId);
+    const product = venueProducts.find(p => p.id === productId);
     if (product) {
       setSelectedProduct(product);
       setBatchForm({
@@ -299,7 +326,7 @@ export default function InventoryManagement({ products }) {
                   <SelectValue placeholder="Choose a product" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
-                  {products.map(p => (
+                  {venueProducts.map(p => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.name} (Current: {p.stock_quantity})
                     </SelectItem>
