@@ -25,6 +25,7 @@ const contractArchiveUi = [
 ].map(read).join('\n');
 const retrieval = read('base44/functions/getProtectedEvidence/entry.ts');
 const vipContract = read('src/pages/VIPContract.jsx');
+const transactionLookup = read('base44/functions/transactionLookup/entry.ts');
 
 assert.doesNotMatch(roster, /<img[^>]+license_photo_url/i, 'Credential roster must not render the stored credential reference directly.');
 assert.doesNotMatch(transactionSearch, /href=\{media\.media_url\}/, 'Transaction search must not expose legacy VerificationMedia URLs.');
@@ -36,5 +37,10 @@ assert.doesNotMatch(vipContract, /Core\.UploadFile/, 'VIP contract signing must 
 assert.match(vipContract, /uploadProtectedEvidence/, 'VIP contract signing must use the protected-evidence upload path.');
 assert.match(vipContract, /protected:\$\{protectedEvidenceRefs\.thumbprint\}/, 'VIP contract signing must submit an opaque protected thumbprint reference.');
 assert.match(vipContract, /protected:\$\{protectedEvidenceRefs\.id_front\}/, 'VIP contract signing must submit an opaque protected government-ID reference.');
+assert.match(transactionLookup, /Manager-class NUPS identity required/, 'Transaction evidence lookup must require a manager-class NUPS identity.');
+assert.match(transactionLookup, /Cross-venue transaction search denied/, 'Transaction evidence lookup must reject cross-venue requests.');
+assert.doesNotMatch(transactionLookup, /verification_media:\s*verificationMedia\b/, 'Transaction lookup must not return raw VerificationMedia records.');
+assert.doesNotMatch(transactionLookup, /identity:\s*identities\[0\]/, 'Transaction lookup must not return the raw customer identity record.');
+assert.match(transactionLookup, /has_legacy_reference:\s*!!media\.media_url/, 'Transaction lookup may report legacy evidence presence without returning the URL.');
 
 console.log('[check:protected-evidence-policy] passed: role/classification/venue matrix fails closed and protected archive UIs emit no raw evidence URLs.');
