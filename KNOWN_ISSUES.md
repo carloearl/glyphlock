@@ -46,32 +46,32 @@ Reduce the manifest monotonically, prioritizing financial, identity, contract, c
 
 ---
 
-## NUPS-0003 — Legacy entertainer payroll naming/model remains active
+## NUPS-0003 — Legacy entertainer payroll naming/model remains in historical code
 
-**Severity:** HIGH  
+**Severity:** MEDIUM  
 **Invariant:** INV-03  
-**Status:** OPEN — SEMANTIC / MIGRATION RISK
+**Status:** CONTAINED — ACTIVE UI REMOVED; HISTORICAL MIGRATION DEBT
 
 ### Expected
 Entertainers are independent contractors and never enter employee payroll or employee tip-pool logic.
 
 ### Observed
-The codebase still contains active references to:
+The codebase still contains historical references to:
 
 - `PayrollRecord` with `entertainer_id`, stage name, commissions, tips, withholding and payout fields
-- `src/components/nups/EntertainerPayrollEngine.jsx`, including direct create/update of `PayrollRecord`
-- accounting/report surfaces that read `PayrollRecord`
+- `src/components/nups/EntertainerPayrollEngine.jsx`, including legacy direct create/update of `PayrollRecord`
+- accounting/report surfaces that read historical `PayrollRecord` data
 
-At the same time, the system also has contractor-oriented `ContractorPayout` and `ContractorTaxForm` models, and `NUPSOwner.jsx` describes `PayrollRecord` as legacy/historical.
+However, the active owner dashboard does not import or mount `EntertainerPayrollEngine`. The frozen-rule guard explicitly fails if it is reintroduced there. Current contractor onboarding uses `ContractorTaxForm`, and contractor-specific payout infrastructure exists through `ContractorPayout`.
 
 ### Static evidence
 `npm run check:nups-frozen-rules` passed 2026-08-20 and reports entertainers excluded from employee payroll/tip-pool surfaces.
 
 ### Risk
-The frozen rule currently passes static enforcement, but entity/component naming and active write paths remain semantically dangerous and can cause future agents to reintroduce W-2 treatment accidentally.
+The legacy component and historical entity naming can mislead future agents into reintroducing W-2 treatment if mounted again.
 
-### Required resolution
-Trace every active `PayrollRecord` writer/reader. Migrate contractor payments to contractor-specific models or explicitly classify the remaining record as contractor payout history. Do not delete historical records.
+### Resolution / remaining work
+The active UI boundary is now verified: entertainers are not mounted into employee payroll or employee tip-pool surfaces. Keep `EntertainerPayrollEngine` unmounted and treat its `PayrollRecord` writes as legacy code pending removal/migration. Historical `PayrollRecord` readers may remain for reporting, but new contractor payout functionality must use contractor-specific models. Do not delete historical records.
 
 ---
 
