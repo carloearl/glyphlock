@@ -9,9 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { UserPlus, MapPin, DollarSign, Clock, LogIn, LogOut } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 export default function GuestTracking() {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
   const [guestForm, setGuestForm] = useState({
     guest_name: "",
@@ -28,12 +32,19 @@ export default function GuestTracking() {
   const activeGuests = guests.filter(g => g.status === 'in_building');
 
   const checkInGuest = useMutation({
-    mutationFn: (data) => base44.entities.VIPGuest.create({
-      ...data,
-      status: 'in_building',
-      current_location: 'Lobby',
-      check_in_time: new Date().toISOString(),
-      total_spent_tonight: 0
+    mutationFn: (data) => writeIdentityRecord({
+      entity: "VIPGuest",
+      operation: "create",
+      venueId,
+      intent: "guest:tracking:checkin",
+      data: {
+        ...data,
+        venue_id: venueId,
+        status: 'in_building',
+        current_location: 'Lobby',
+        check_in_time: new Date().toISOString(),
+        total_spent_tonight: 0
+      },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vip-guests'] });
@@ -44,7 +55,7 @@ export default function GuestTracking() {
 
   const updateLocation = useMutation({
     mutationFn: ({ guestId, location }) =>
-      base44.entities.VIPGuest.update(guestId, { current_location: location }),
+      writeIdentityRecord({ entity: "VIPGuest", operation: "update", id: guestId, venueId, intent: "guest:tracking:location", data: { venue_id: venueId, current_location: location } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vip-guests'] });
     }
@@ -52,10 +63,11 @@ export default function GuestTracking() {
 
   const checkOutGuest = useMutation({
     mutationFn: (guestId) =>
-      base44.entities.VIPGuest.update(guestId, { 
+      writeIdentityRecord({ entity: "VIPGuest", operation: "update", id: guestId, venueId, intent: "guest:tracking:checkout", data: { 
+        venue_id: venueId,
         status: 'checked_out',
         current_location: null
-      }),
+      } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vip-guests'] });
     }
