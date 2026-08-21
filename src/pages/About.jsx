@@ -38,7 +38,6 @@ import {
 import { motion } from "framer-motion";
 import SEOHead from "../components/SEOHead";
 import AboutConnectionHub from "../components/about/AboutConnectionHub";
-import StoryChapterNav from "../components/about/StoryChapterNav";
 
 const reveal = {
   initial: { opacity: 0, y: 28 },
@@ -708,11 +707,7 @@ export default function About() {
               </div>
             </div>
 
-            <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[260px_1fr] lg:gap-12">
-              <div>
-                <StoryChapterNav chapters={storyChapters} />
-              </div>
-
+            <div className="mx-auto max-w-5xl">
               <div className="relative space-y-3">
                 <div className="absolute bottom-6 left-6 top-6 hidden w-px bg-gradient-to-b from-[#00E4FF]/50 via-[#8C4BFF]/40 to-amber-300/40 sm:block" />
                 {storyChapters.map((chapter, index) => {
