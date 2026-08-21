@@ -29,7 +29,8 @@ function ageFromDob(dobIso) {
 }
 
 async function hashLicense(licenseNumber) {
-  const buf = new TextEncoder().encode(licenseNumber);
+  const normalized = String(licenseNumber || '').replace(/\s/g, '').trim().toUpperCase();
+  const buf = new TextEncoder().encode(normalized);
   const digest = await crypto.subtle.digest('SHA-256', buf);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
 }
