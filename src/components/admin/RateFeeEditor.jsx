@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, AlertCircle, CheckCircle2, Plus, Trash2 } from 'lucide-react';
+import { writeEntity } from '@/lib/nups/writeEntity';
 
 const NUMERIC_FIELDS = [
   { key: 'cover_charge', label: 'Cover Charge ($)' },
@@ -75,12 +76,17 @@ export default function RateFeeEditor({ venueId, user }) {
         last_edited_by: user.email,
         last_edited_at: new Date().toISOString(),
       };
-      if (config.id) {
-        await base44.entities.VenueRateConfig.update(config.id, payload);
-      } else {
-        const created = await base44.entities.VenueRateConfig.create(payload);
-        setConfig(c => ({ ...c, id: created.id }));
-      }
+      const result = await writeEntity({
+        entity: 'VenueRateConfig',
+        operation: config.id ? 'update' : 'create',
+        id: config.id,
+        data: payload,
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: config.id ? 'RATE_FEE_CONFIG_UPDATE' : 'RATE_FEE_CONFIG_CREATE',
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'Rate configuration write was rejected.');
+      if (!config.id && result?.value?.id) setConfig(c => ({ ...c, id: result.value.id }));
       setMsg({ kind: 'ok', text: 'Rates saved.' });
     } catch (e) {
       setMsg({ kind: 'err', text: e.message });
