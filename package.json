@@ -21,7 +21,8 @@
     "check:nups-protected-evidence": "node scripts/check-protected-evidence-policy.mjs",
     "check:nups-api-key-secrets": "node scripts/check-api-key-secret-lifecycle.mjs",
     "check:nups-guest-identity": "node scripts/check-guest-identity-projection.mjs",
-    "check:nups-live-venue-boundaries": "node scripts/check-nups-live-venue-boundaries.mjs"
+    "check:nups-live-venue-boundaries": "node scripts/check-nups-live-venue-boundaries.mjs",
+    "check:nups-sensitive-reads": "node scripts/check-nups-sensitive-read-boundaries.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.43",
