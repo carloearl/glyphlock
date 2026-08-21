@@ -40,16 +40,12 @@ export default function ContractDetailModal({ contract, onClose }) {
 
         <div className="p-5 space-y-5">
 
-          {/* Guest Photo + Identity */}
+          {/* Protected guest media is not rendered directly until private retrieval is verified. */}
           <div className="flex gap-4">
             <div className="w-24 h-24 rounded-xl bg-gray-800 flex-shrink-0 overflow-hidden border-2 border-purple-500/30">
-              {contract.guest_photo_url ? (
-                <img src={contract.guest_photo_url} alt="Guest" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-10 h-10 text-gray-600" />
-                </div>
-              )}
+              <div className="w-full h-full flex items-center justify-center">
+                <User className="w-10 h-10 text-gray-600" />
+              </div>
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold text-white">{contract.guest_name}</h3>
@@ -85,27 +81,10 @@ export default function ContractDetailModal({ contract, onClose }) {
               valueClass={contract.id_photo_back_url ? "text-green-400" : "text-gray-500"} />
           </Section>
 
-          {/* ID & Thumbprint Images */}
-          {(contract.id_photo_url || contract.thumbprint_url) && (
-            <div className="grid grid-cols-3 gap-3">
-              {contract.thumbprint_url && (
-                <div className="space-y-1">
-                  <p className="text-[10px] text-gray-500 font-bold">THUMBPRINT</p>
-                  <img src={contract.thumbprint_url} alt="Thumbprint" className="w-full rounded-lg border border-purple-500/30" />
-                </div>
-              )}
-              {contract.id_photo_url && (
-                <div className="space-y-1">
-                  <p className="text-[10px] text-gray-500 font-bold">ID FRONT</p>
-                  <img src={contract.id_photo_url} alt="ID Front" className="w-full rounded-lg border border-cyan-500/30" />
-                </div>
-              )}
-              {contract.id_photo_back_url && (
-                <div className="space-y-1">
-                  <p className="text-[10px] text-gray-500 font-bold">ID BACK</p>
-                  <img src={contract.id_photo_back_url} alt="ID Back" className="w-full rounded-lg border border-gray-600" />
-                </div>
-              )}
+          {/* Media presence is visible; raw URLs are intentionally withheld pending private retrieval. */}
+          {(contract.id_photo_url || contract.id_photo_back_url || contract.thumbprint_url || contract.guest_photo_url) && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+              Protected guest/ID/biometric evidence is on file. Direct rendering is disabled until authorized private retrieval is verified.
             </div>
           )}
 
