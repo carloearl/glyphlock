@@ -11,6 +11,8 @@ import {
   Plus, Edit, Trash2, Package, AlertTriangle, Search, Filter,
   CheckSquare, Square, DollarSign, Tag, Layers, Save, X
 } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 // ─── Config ────────────────────────────────────────────────────────────
 const CATEGORIES = ["Food & Beverage", "Spirits", "Beer & Wine", "Mixers", "VIP Service", "Merchandise", "Services", "Other"];
@@ -194,6 +196,8 @@ function ProductFormDialog({ open, onClose, product, onSave, loading }) {
 // ─── Main Component ─────────────────────────────────────────────────────
 export default function ProductManagement() {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [editingProduct, setEditingProduct] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [search, setSearch] = useState("");
@@ -203,22 +207,39 @@ export default function ProductManagement() {
   const [bulkAction, setBulkAction] = useState(null);
 
   const { data: products = [] } = useQuery({
-    queryKey: ['pos-products'],
-    queryFn: () => base44.entities.POSProduct.list()
+    queryKey: ['pos-products', venueId],
+    queryFn: () => venueId ? base44.entities.POSProduct.filter({ venue_id: venueId }) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
+  const governedProductWrite = async ({ operation, id, data, intent }) => {
+    if (!venueId) throw new Error("Select an active venue before changing the product catalog.");
+    const me = await base44.auth.me();
+    const result = await writeEntity({
+      entity: "POSProduct",
+      operation,
+      id,
+      data: operation === "delete" ? undefined : { ...data, venue_id: venueId },
+      actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+      venue_id: venueId,
+      intent,
+    });
+    if (!result?.ok) throw new Error(result?.block_reason || `Product ${operation} was rejected.`);
+    return result.value;
+  };
+
   const createProduct = useMutation({
-    mutationFn: (data) => base44.entities.POSProduct.create(data),
+    mutationFn: (data) => governedProductWrite({ operation: "create", data, intent: "POS_PRODUCT_CREATE" }),
     onSuccess: () => { queryClient.invalidateQueries(['pos-products']); setShowDialog(false); },
   });
 
   const updateProduct = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.POSProduct.update(id, data),
+    mutationFn: ({ id, data }) => governedProductWrite({ operation: "update", id, data, intent: "POS_PRODUCT_UPDATE" }),
     onSuccess: () => { queryClient.invalidateQueries(['pos-products']); setShowDialog(false); setEditingProduct(null); },
   });
 
   const deleteProduct = useMutation({
-    mutationFn: (id) => base44.entities.POSProduct.delete(id),
+    mutationFn: (id) => governedProductWrite({ operation: "delete", id, intent: "POS_PRODUCT_DELETE" }),
     onSuccess: () => queryClient.invalidateQueries(['pos-products']),
   });
 
@@ -251,15 +272,15 @@ export default function ProductManagement() {
     if (!bulkAction || selected.size === 0) return;
     const ids = [...selected];
     if (bulkAction === "activate") {
-      await Promise.all(ids.map(id => base44.entities.POSProduct.update(id, { is_active: true })));
+      await Promise.all(ids.map(id => governedProductWrite({ operation: "update", id, data: { is_active: true }, intent: "POS_PRODUCT_BULK_ACTIVATE" })));
     } else if (bulkAction === "deactivate") {
-      await Promise.all(ids.map(id => base44.entities.POSProduct.update(id, { is_active: false })));
+      await Promise.all(ids.map(id => governedProductWrite({ operation: "update", id, data: { is_active: false }, intent: "POS_PRODUCT_BULK_DEACTIVATE" })));
     } else if (bulkAction === "taxable") {
-      await Promise.all(ids.map(id => base44.entities.POSProduct.update(id, { taxable: true, tax_rate: 0.08 })));
+      await Promise.all(ids.map(id => governedProductWrite({ operation: "update", id, data: { taxable: true, tax_rate: 0.08 }, intent: "POS_PRODUCT_BULK_TAXABLE" })));
     } else if (bulkAction === "non-taxable") {
-      await Promise.all(ids.map(id => base44.entities.POSProduct.update(id, { taxable: false, tax_rate: 0 })));
+      await Promise.all(ids.map(id => governedProductWrite({ operation: "update", id, data: { taxable: false, tax_rate: 0 }, intent: "POS_PRODUCT_BULK_NONTAXABLE" })));
     } else if (bulkAction === "delete") {
-      await Promise.all(ids.map(id => base44.entities.POSProduct.delete(id)));
+      await Promise.all(ids.map(id => governedProductWrite({ operation: "delete", id, intent: "POS_PRODUCT_BULK_DELETE" })));
     }
     queryClient.invalidateQueries(['pos-products']);
     clearSelect();
