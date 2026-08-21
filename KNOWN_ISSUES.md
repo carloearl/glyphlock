@@ -7,30 +7,18 @@
 
 **Severity:** HIGH  
 **Invariant:** INV-06  
-**Status:** OPEN — ADR REQUIRED
+**Status:** RESOLVED — ADR-0002 ACCEPTED
 
-### Expected
-Frozen protocol currently names `SystemAuditLog + AuditEvent` as the dual audit requirement for governed writes.
+### Resolution
+`docs/adr/ADR-0002-nups-audit-ledger-boundaries.md` accepts the live governed-write audit architecture:
 
-### Observed
-`src/lib/nups/writeEntity.js` automatically produces:
+1. `MigrationAuditLog` is the gateway decision/actor evidence ledger.
+2. `AuditEvent` is the append-only observational business-event ledger.
+3. `ActivityLog` is a best-effort operational mirror.
+4. `SystemAuditLog` remains reserved for security/system/administrative events and is not required for every governed business write.
 
-1. `MigrationAuditLog` allow/block decision record
-2. `AuditEvent` observational event
-3. `ActivityLog` operational mirror
-
-The gateway does not directly create `SystemAuditLog`.
-
-### Divergence point
-`src/lib/nups/writeEntity.js` post-write audit section.
-
-### Required resolution
-Owner/ADR must decide whether:
-
-- the intended invariant is specifically SystemAuditLog + AuditEvent, requiring gateway change; or
-- the actual three-ledger design is preferred, requiring an invariant wording change.
-
-Do not silently choose either direction.
+### Evidence
+The decision matches the live entity schemas and `src/lib/nups/writeEntity.js` post-write audit path. INV-06 has been updated to reference ADR-0002.
 
 ---
 
