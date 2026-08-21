@@ -4,7 +4,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 // Single authoritative server-side engine for the chain:
 // Venue → Guest → Entertainer → Room → Contract → Approval → Signatures →
 // Payment → POSTransaction → Receipt → Session → Audit.
-// All test records are isolated: VIPContract/VIPSession mode=TEST,
+// All non-live records are isolated: VIPContract/VIPSession mode=DEMO or SANDBOX,
 // PaymentRecord/POSTransaction mode=SANDBOX + validation_run, Entertainer mode=SANDBOX, VIPGuest is_demo.
 // REAL-mode contracts are rejected while VIPConfig.live_enabled=false. No live processor is ever called.
 
@@ -205,8 +205,9 @@ Deno.serve(async (req) => {
     if (action === 'createContract') {
       const config = await getConfig();
       if (!config) return err('VIP configuration missing for this venue — contract rejected');
-      const mode = body.mode === 'REAL' ? 'REAL' : 'TEST';
-      if (mode === 'REAL' && !config.live_enabled) return err('LIVE mode is not authorized — VIPConfig.live_enabled is false. Use TEST mode.', 403);
+      const requestedMode = String(body.mode || 'DEMO').toUpperCase();
+      const mode = ['REAL', 'DEMO', 'SANDBOX'].includes(requestedMode) ? requestedMode : 'DEMO';
+      if (mode === 'REAL' && !config.live_enabled) return err('LIVE mode is not authorized — VIPConfig.live_enabled is false. Use DEMO mode.', 403);
       if (body.client_request_id) {
         const dupes = await E.VIPContract.filter({ client_request_id: body.client_request_id });
         if (dupes.length) return Response.json({ contract: dupes[0], duplicate_blocked: true });
@@ -316,12 +317,12 @@ Deno.serve(async (req) => {
       if (!isComp) {
         const pr = await E.PaymentRecord.create({
           record_id: ref('PR-DP'), venue_id: VENUE, provider_code: 'manual_external',
-          processor_reference: 'TEST-' + c.contract_id, approval_code: body.approval_code || 'TEST-AUTH',
+          processor_reference: 'DEMO-' + c.contract_id, approval_code: body.approval_code || 'DEMO-AUTH',
           amount, currency: 'USD',
           payment_method: c.payment_method === 'Comp' ? 'Comp' : c.payment_method,
           status: 'EXTERNAL_CONFIRMED', verified_at: now(), verified_by: user.email,
           verification_method: 'manager_manual', linked_order_id: c.contract_id,
-          mode: 'SANDBOX', notes: `VIP-TEST contract ${c.contract_id}`
+          mode: 'SANDBOX', notes: `VIP-DEMO contract ${c.contract_id}`
         });
         payment_id = pr.id;
       }
@@ -337,7 +338,7 @@ Deno.serve(async (req) => {
         payment_method: isComp ? 'Comp' : c.payment_method, status: 'completed',
         cashier_email: user.email, cashier_name: user.full_name || user.email,
         mode: 'SANDBOX', validation_run: true, funds_settled: false,
-        notes: `VIP-TEST contract ${c.contract_id} receipt ${receipt_id}`
+        notes: `VIP-DEMO contract ${c.contract_id} receipt ${receipt_id}`
       });
       transaction_id = tx.id;
       const patch = {
@@ -401,7 +402,7 @@ Deno.serve(async (req) => {
           payment_method: c.payment_method, status: 'completed',
           cashier_email: user.email, cashier_name: user.full_name || user.email,
           mode: 'SANDBOX', validation_run: true, funds_settled: false,
-          notes: `VIP-TEST extension for ${c.contract_id} receipt ${supplemental_receipt}`
+          notes: `VIP-DEMO extension for ${c.contract_id} receipt ${supplemental_receipt}`
         });
         transaction_id = tx.id;
       }
@@ -463,8 +464,8 @@ Deno.serve(async (req) => {
     if (action === 'cleanupTest') {
       if (!backOffice) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const out = {};
-      out.contracts = await E.VIPContract.deleteMany({ mode: 'TEST' });
-      out.sessions = await E.VIPSession.deleteMany({ mode: 'TEST' });
+      out.contracts = await E.VIPContract.deleteMany({ mode: { $in: ['TEST', 'DEMO'] } });
+      out.sessions = await E.VIPSession.deleteMany({ mode: { $in: ['TEST', 'DEMO'] } });
       out.payments = await E.PaymentRecord.deleteMany({ mode: 'SANDBOX', provider_code: 'manual_external' });
       out.transactions = await E.POSTransaction.deleteMany({ mode: 'SANDBOX', station: 'vip' });
       out.entertainers = await E.Entertainer.deleteMany({ venue_id: VENUE, mode: 'SANDBOX' });
