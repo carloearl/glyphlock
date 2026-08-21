@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +11,8 @@ import { FileText, DollarSign, ShoppingCart, Printer, Calendar, Banknote, Users,
 
 export default function ZReportGenerator({ user: userProp }) {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [user, setUser] = useState(userProp || null);
   const [openingCash, setOpeningCash] = useState('');
   const [closingCash, setClosingCash] = useState('');
@@ -201,7 +205,11 @@ export default function ZReportGenerator({ user: userProp }) {
         (b.status === 'closed' || b.status === 'REQUIRES_REVIEW')
       );
 
-      const report = await base44.entities.POSZReport.create({
+      if (!venueId) throw new Error('Active venue is required to generate a Z-Report.');
+      const reportWrite = await writeEntity({
+        entity: 'POSZReport',
+        operation: 'create',
+        data: {
         report_id: `Z-${Date.now()}`,
         report_date: new Date().toISOString().split('T')[0],
         start_time: new Date(new Date().setHours(0,0,0,0)).toISOString(),
@@ -251,8 +259,16 @@ export default function ZReportGenerator({ user: userProp }) {
           door_register_count: doorTransactions.length,
           bar_register_sales: barSales,
           bar_register_count: barTransactions.length,
-        })
+        }),
+          venue_id: venueId,
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: venueId,
+        intent: 'Z_REPORT_GENERATED',
+        requestContext: { mode: 'REAL' },
       });
+      if (!reportWrite?.ok) throw new Error(reportWrite?.block_reason || 'Z-Report write was rejected.');
+      const report = reportWrite.value;
 
       // OMEGA SECTION A — Permanent audit log write on batch close
       await base44.entities.SystemAuditLog.create({
