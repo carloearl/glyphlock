@@ -10,6 +10,7 @@ import ContractIdentityScanner from "@/components/nups/contracts/ContractIdentit
 import { VIP_TERMS, VIP_TERMS_TEXT, VIP_TERMS_VERSION } from "@/constants/vipShowTerms";
 import { printCurrentNupsView, saveLastReceipt } from '@/lib/nups/receiptService';
 import { buildGlyphBucksIdempotencyKey } from "@/lib/nups/glyphbucksIdempotency";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import {
   CheckCircle2,
   Coins,
@@ -124,9 +125,12 @@ function Toggle({ checked, onChange, label }) {
 }
 
 export default function UnifiedContractFlowV2() {
+  const activeVenue = useActiveVenue();
+  const activeVenueId = activeVenue?.id || activeVenue?.venue_id || null;
+  const activeVenueName = activeVenue?.name || "";
   const [mode, setMode] = useState("REAL");
-  const [venueId, setVenueId] = useState("DP-TEMPE-001");
-  const [venue, setVenue] = useState("Diamond Palace Tempe");
+  const [venueId, setVenueId] = useState(activeVenueId);
+  const [venue, setVenue] = useState(activeVenueName);
   const [includeGB, setIncludeGB] = useState(true);
   const [includeVIP, setIncludeVIP] = useState(true);
   const [assent, setAssent] = useState(null);
@@ -139,6 +143,11 @@ export default function UnifiedContractFlowV2() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(null);
+
+  useEffect(() => {
+    if (activeVenueId) setVenueId(activeVenueId);
+    if (activeVenueName) setVenue(activeVenueName);
+  }, [activeVenueId, activeVenueName]);
 
   useEffect(() => {
     try {
@@ -191,6 +200,8 @@ export default function UnifiedContractFlowV2() {
 
   const reset = () => {
     setMode("REAL");
+    setVenueId(activeVenueId);
+    setVenue(activeVenueName);
     setAssent(null);
     setIdentity(BLANK_IDENTITY);
     setIdentityConfirmed(false);
