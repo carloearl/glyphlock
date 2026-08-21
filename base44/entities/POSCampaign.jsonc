@@ -25,7 +25,8 @@
         "sms",
         "loyalty",
         "promotion",
-        "birthday"
+        "birthday",
+        "seasonal"
       ],
       "description": "Campaign type"
     },
@@ -61,6 +62,7 @@
       "enum": [
         "percentage",
         "fixed_amount",
+        "buy_x_get_y",
         "none"
       ],
       "default": "none"
