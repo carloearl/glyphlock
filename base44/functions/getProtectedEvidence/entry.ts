@@ -1,8 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
-
-const GLOBAL_ROLES = new Set(['PLATFORM_ADMIN','SOVEREIGN']);
-const MANAGER_ROLES = new Set(['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER','SOVEREIGN']);
-const DOOR_ROLES = new Set(['DOOR_GIRL','DOORMAN']);
+import { protectedEvidenceDecision } from '../_shared/protectedEvidencePolicy.js';
 
 async function resolveNupsUser(base44, email: string) {
   const E = base44.asServiceRole.entities;
@@ -27,18 +24,15 @@ Deno.serve(async (req) => {
     const evidence = await base44.asServiceRole.entities.ProtectedEvidence.get(evidenceId).catch(() => null);
     if (!evidence) return Response.json({ error: 'Protected evidence not found' }, { status: 404 });
 
-    const sameVenue = nups.venue_id && nups.venue_id === evidence.venue_id;
-    const global = GLOBAL_ROLES.has(nups.role);
-    let allowed = global || (MANAGER_ROLES.has(nups.role) && sameVenue);
-    if (!allowed && DOOR_ROLES.has(nups.role) && sameVenue && evidence.classification === 'PRIVATE_IDENTITY') allowed = true;
+    const decision = protectedEvidenceDecision({ role: nups.role, actorVenueId: nups.venue_id, evidenceVenueId: evidence.venue_id, classification: evidence.classification });
 
-    if (!allowed) {
+    if (!decision.allowed) {
       await base44.asServiceRole.entities.SystemAuditLog.create({
         event_type: 'PROTECTED_EVIDENCE_ACCESS_DENIED',
         description: `Protected evidence access denied for ${evidence.evidence_id}`,
         actor_email: user.email,
         status: 'blocked', severity: 'high',
-        metadata: { evidence_id: evidence.evidence_id, venue_id: evidence.venue_id, classification: evidence.classification, purpose, actor_role: nups.role },
+        metadata: { evidence_id: evidence.evidence_id, venue_id: evidence.venue_id, classification: evidence.classification, purpose, actor_role: nups.role, decision_reason: decision.reason },
       }).catch(() => null);
       return Response.json({ error: 'Protected evidence access denied' }, { status: 403 });
     }
