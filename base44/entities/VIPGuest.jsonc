@@ -157,6 +157,18 @@
       "type": "number",
       "default": 0
     },
+    "current_location": {
+      "type": "string",
+      "description": "Current venue location for the VIP workflow projection."
+    },
+    "check_in_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "total_spent_tonight": {
+      "type": "number",
+      "default": 0
+    },
     "current_room_id": {
       "type": "string",
       "description": "VIPRoom id if currently in session"
