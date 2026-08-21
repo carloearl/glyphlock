@@ -187,6 +187,22 @@ export default function DeveloperKeys() {
         </Card>
       )}
 
+      {oneTimeSecret && (
+        <Card className="border-amber-500/40 bg-amber-950/20">
+          <CardContent className="p-5 space-y-3">
+            <div>
+              <p className="font-semibold text-amber-200">{oneTimeSecret.kind === 'rotated' ? 'Replacement secret generated' : 'API key created'}</p>
+              <p className="text-sm text-amber-100/70">Save this secret now. It will not be shown again after you dismiss this panel.</p>
+            </div>
+            <div className="flex gap-2">
+              <Input readOnly value={oneTimeSecret.secret_key} className="font-mono bg-black/50" />
+              <Button type="button" onClick={() => copyToClipboard(oneTimeSecret.secret_key, 'one-time-secret')}><Copy className="w-4 h-4 mr-2" />Copy</Button>
+              <Button type="button" variant="outline" onClick={() => setOneTimeSecret(null)}>Dismiss</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="space-y-8">
         {keys.length === 0 ? (
           <Card className="bg-gray-900/30 border-dashed border-2 border-gray-700 p-12 flex flex-col items-center justify-center text-center">
@@ -302,100 +318,32 @@ export default function DeveloperKeys() {
                     </div>
                   </div>
 
-                  {/* Secret Key Section */}
+                  {/* Secret lifecycle */}
                   <div className="space-y-3 p-4 rounded-lg bg-purple-950/10 border border-purple-500/10">
                     <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2 text-purple-400">
-                            <Lock className="w-4 h-4" />
-                            <span className="text-sm font-bold tracking-wider">SECRET KEY</span>
-                        </div>
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleReglyph(key.id, 'secret')}
-                            className="h-6 text-[10px] text-purple-400 hover:text-purple-300 hover:bg-purple-900/30"
-                        >
-                            Reglyph Secret
-                        </Button>
-                    </div>
-                    <div className="relative">
-                      <Input 
-                        readOnly 
-                        type={showSecret[key.id] ? "text" : "password"}
-                        value={key.secret_key} 
-                        className="bg-black/60 border-purple-500/20 font-mono text-sm text-purple-300 pr-20 h-11"
-                      />
-                      <div className="absolute right-1 top-1 flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => toggleSecret(key.id)}
-                          className="hover:bg-purple-500/20 text-gray-400 hover:text-white h-9 w-9"
-                        >
-                          {showSecret[key.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => copyToClipboard(key.secret_key, `sk-${key.id}`)}
-                          className="hover:bg-purple-500/20 text-gray-400 hover:text-white h-9 w-9"
-                        >
-                          {copied === `sk-${key.id}` ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                        </Button>
+                      <div className="flex items-center gap-2 text-purple-400">
+                        <Lock className="w-4 h-4" />
+                        <span className="text-sm font-bold tracking-wider">SECRET KEY</span>
                       </div>
+                      <Button variant="ghost" size="sm" onClick={() => handleReglyph(key.id, 'secret')} className="h-6 text-[10px] text-purple-400 hover:text-purple-300 hover:bg-purple-900/30">Rotate Secret</Button>
                     </div>
-                    <div className="flex justify-between text-[10px] text-gray-600">
-                        <span>Entropy: 20-char</span>
-                        <span>Masked by default</span>
+                    <div className="rounded bg-black/50 border border-purple-500/20 p-3 text-sm text-gray-400">
+                      Secret shown only at creation or rotation. Stored key records contain only a SHA-256 secret hash.
                     </div>
                   </div>
 
                 </div>
 
-                {/* Environment Variables Section */}
+                {/* Safe export metadata */}
                 <div className="mt-6 pt-6 border-t border-gray-800/50">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 text-gray-300">
-                       <Server className="w-4 h-4" />
-                       <span className="text-sm font-bold tracking-wider">ENVIRONMENT VARIABLES</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyToClipboard(`export GLX_PUBLIC_KEY="${key.public_key}"\nexport GLX_SECRET_KEY="${key.secret_key}"\nexport GLX_ENV_TAG="${key.environment}"\nexport GLX_DEVICE_SIG="${key.env_key || ''}"`, `env-${key.id}`)}
-                      className="text-xs h-7 border-gray-700 hover:bg-gray-800"
-                    >
-                      {copied === `env-${key.id}` ? <Check className="w-3 h-3 mr-2 text-green-500" /> : <Copy className="w-3 h-3 mr-2" />}
-                      Copy Export Block
-                    </Button>
+                    <div className="flex items-center gap-2 text-gray-300"><Server className="w-4 h-4" /><span className="text-sm font-bold tracking-wider">SAFE ENVIRONMENT METADATA</span></div>
+                    <Button variant="outline" size="sm" onClick={() => copyToClipboard(`export GLX_PUBLIC_KEY="${key.public_key}"\nexport GLX_ENV_TAG="${key.environment || 'live'}"`, `env-${key.id}`)} className="text-xs h-7 border-gray-700 hover:bg-gray-800"><Copy className="w-3 h-3 mr-2" />Copy Safe Export</Button>
                   </div>
-                  
-                  <div className="bg-black/80 rounded-lg p-4 border border-gray-800 font-mono text-xs relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-2 opacity-50">
-                        <Terminal className="w-12 h-12 text-gray-800" />
-                    </div>
-                    <div className="flex flex-col gap-1 relative z-10">
-                      <div className="flex">
-                        <span className="text-purple-400 w-40">GLX_PUBLIC_KEY</span>
-                        <span className="text-gray-500">=</span>
-                        <span className="text-green-400 ml-2">"{key.public_key}"</span>
-                      </div>
-                      <div className="flex">
-                        <span className="text-purple-400 w-40">GLX_SECRET_KEY</span>
-                        <span className="text-gray-500">=</span>
-                        <span className="text-gray-400 ml-2">"{key.secret_key.substring(0, 20)}...{key.secret_key.slice(-4)}"</span>
-                      </div>
-                      <div className="flex">
-                        <span className="text-purple-400 w-40">GLX_ENV_TAG</span>
-                        <span className="text-gray-500">=</span>
-                        <span className="text-blue-400 ml-2">"{key.environment}"</span>
-                      </div>
-                      <div className="flex">
-                        <span className="text-purple-400 w-40">GLX_DEVICE_SIG</span>
-                        <span className="text-gray-500">=</span>
-                        <span className="text-yellow-400 ml-2">"{key.env_key}"</span>
-                      </div>
-                    </div>
+                  <div className="bg-black/80 rounded-lg p-4 border border-gray-800 font-mono text-xs">
+                    <div>GLX_PUBLIC_KEY="{key.public_key}"</div>
+                    <div>GLX_ENV_TAG="{key.environment || 'live'}"</div>
+                    <div className="mt-2 text-gray-500">GLX_SECRET_KEY is intentionally omitted. Use the one-time creation/rotation response.</div>
                   </div>
                 </div>
 
