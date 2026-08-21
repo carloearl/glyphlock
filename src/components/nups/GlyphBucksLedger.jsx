@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ const TYPE_CONFIG = {
 
 export default function GlyphBucksLedger({ user }) {
   const activeVenue = useActiveVenue();
-  const venue_id = activeVenue?.venue_id;
+  const venue_id = activeVenue?.id || activeVenue?.venue_id || null;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [filterType, setFilterType] = useState("all");
@@ -59,7 +60,17 @@ export default function GlyphBucksLedger({ user }) {
         cashier_id: user?.email || "system",
         status: "active",
       };
-      const created = await base44.entities.GlyphBucksTransaction.create(record);
+      if (!venue_id) throw new Error("Select an active venue before recording GlyphBucks activity.");
+      const write = await writeEntity({
+        entity: "GlyphBucksTransaction",
+        operation: "create",
+        data: record,
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" },
+        venue_id,
+        intent: `GLYPHBUCKS_${String(data.transaction_type).toUpperCase()}`,
+      });
+      if (!write?.ok) throw new Error(write?.block_reason || "GlyphBucks transaction was rejected.");
+      const created = write.value;
       // Audit log
       await base44.entities.SystemAuditLog.create({
         event_type: `GLYPHBUCKS_${data.transaction_type.toUpperCase()}`,
