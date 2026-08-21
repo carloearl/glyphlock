@@ -11,7 +11,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 //   so clock-out, suspension, termination, or role change revokes the session immediately.
 // - PINs never appear in responses, logs, or throttle records.
 
-const VENUE_ID = 'dream_palace';
 const DEMO_VENUE_ID = 'DEMO_VENUE_001';
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
 // Optional emergency owner override. The value is server-secret only and is
@@ -60,26 +59,31 @@ Deno.serve(async (req) => {
     const rawTerminalId = String(body.terminal_id || req.headers.get('x-nups-terminal-id') || 'unidentified');
     const terminalId = rawTerminalId.replace(/[^A-Za-z0-9._:-]/g, '').slice(0, 120) || 'unidentified';
     const throttleResourceId = `pin_auth:${terminalId !== 'unidentified' ? terminalId : ip}`;
+    const terminalConfig = terminalId !== 'unidentified'
+      ? ((await E.VenuePaymentConfig.filter({ terminal_id: terminalId, active: true }, '-created_date', 1).catch(() => []))?.[0] || null)
+      : null;
+    const terminalVenueId = String(terminalConfig?.venue_id || '').trim() || null;
 
     // Safe pre-authentication mode indicator. This exposes no roster, secret,
     // credential or payment identifier; it only lets the public kiosk display
     // the authoritative operating boundary before a PIN is entered.
     if (action === 'getPublicMode') {
-      const venues = (await E.Venue.filter({ venue_id: VENUE_ID }, null, 1).catch(() => [])) || [];
+      if (!terminalVenueId) return Response.json({ error: 'Trusted terminal venue is not configured.' }, { status: 409 });
+      const venues = (await E.Venue.filter({ venue_id: terminalVenueId, status: 'active' }, null, 1).catch(() => [])) || [];
       const venueRecordId = venues?.[0]?.id || null;
       const rateRows = venueRecordId
         ? await E.VenueRateConfig.filter({ venue_id: venueRecordId, active: true }, '-created_date', 1).catch(() => [])
         : [];
       const fallbackRateRows = rateRows.length
         ? rateRows
-        : await E.VenueRateConfig.filter({ venue_id: VENUE_ID, active: true }, '-created_date', 1).catch(() => []);
-      const paymentRows = await E.VenuePaymentConfig.filter({ venue_id: VENUE_ID, active: true }, '-created_date', 1).catch(() => []);
+        : await E.VenueRateConfig.filter({ venue_id: terminalVenueId, active: true }, '-created_date', 1).catch(() => []);
+      const paymentRows = await E.VenuePaymentConfig.filter({ venue_id: terminalVenueId, active: true }, '-created_date', 1).catch(() => []);
       const operatingMode = String(fallbackRateRows?.[0]?.mode || 'REAL').toUpperCase();
       const paymentMode = String(paymentRows?.[0]?.mode || 'UNCONFIGURED').toUpperCase();
       const providerCode = paymentRows?.[0]?.primary_provider_code || 'unconfigured';
       return Response.json({
         success: true,
-        venue: venues?.[0]?.name || 'Dream Palace',
+        venue: venues?.[0]?.name || 'Configured Venue',
         operating_mode: operatingMode,
         payment_mode: paymentMode,
         payment_provider: providerCode,
@@ -149,7 +153,7 @@ Deno.serve(async (req) => {
       await E.RateLimitAttempt.create({
         resource_id: resolvedResourceId,
         resource_type: type,
-        venue_id: VENUE_ID,
+        venue_id: terminalVenueId || 'UNRESOLVED',
         actor_id: terminalId,
         terminal_id: terminalId,
         attempt_timestamp: now(),
@@ -196,11 +200,14 @@ Deno.serve(async (req) => {
     };
 
     const shiftEmailFor = (u) => u.platform_email || `${String(u.username || u.id).toLowerCase()}@nups.local`;
-    const safeUser = (u) => ({ id: u.id, full_name: u.full_name, role: u.role, venue_id: u.venue_id || VENUE_ID, is_demo: !!u.is_demo });
-    const issueSession = (u, shiftId) => signToken({
-      sid: crypto.randomUUID(), uid: u.id, role: u.role, venue: u.venue_id || VENUE_ID,
+    const safeUser = (u) => ({ id: u.id, full_name: u.full_name, role: u.role, venue_id: u.venue_id || null, is_demo: !!u.is_demo });
+    const issueSession = (u, shiftId) => {
+      if (!u.venue_id) throw new Error('User venue assignment required for kiosk session.');
+      return signToken({
+      sid: crypto.randomUUID(), uid: u.id, role: u.role, venue: u.venue_id,
       shift_id: shiftId, name: u.full_name, iat: Date.now(), exp: Date.now() + SESSION_TTL_MS,
-    });
+      });
+    };
 
     // ─── VALIDATE SESSION (§3, §6 — called by every guarded route/API) ───────
     if (action === 'validateSession') {
@@ -259,7 +266,7 @@ Deno.serve(async (req) => {
         manager.status === 'active' &&
         manager.is_demo !== true &&
         MANAGER_ROLES.has(manager.role) &&
-        (!manager.venue_id || manager.venue_id === VENUE_ID)
+        manager.venue_id && (!terminalVenueId || manager.venue_id === terminalVenueId)
       );
 
       if (managerAllowed && manager.require_platform_login) {
@@ -392,22 +399,23 @@ Deno.serve(async (req) => {
       const ownerOpen = (await E.StaffShift.filter({ user_email: OWNER_EMAIL, status: 'checked_in' })) || [];
       for (const s of ownerOpen) await E.StaffShift.update(s.id, { check_out_time: ts, status: 'checked_out' });
       if (action === 'clockOut') {
-        return Response.json({ success: true, user: { ...safeUser(owner), venue_id: VENUE_ID, is_demo: false }, clocked_out_at: ts });
+        if (!owner.venue_id) return genericAuthFailure('owner_venue_unassigned');
+        return Response.json({ success: true, user: { ...safeUser(owner), venue_id: owner.venue_id, is_demo: false }, clocked_out_at: ts });
       }
       const shift = await E.StaffShift.create({
         shift_id: crypto.randomUUID(), user_email: OWNER_EMAIL, user_full_name: owner.full_name,
-        role: owner.role, venue_id: VENUE_ID, station: 'office', check_in_time: ts,
+        role: owner.role, venue_id: owner.venue_id, station: 'office', check_in_time: ts,
         last_activity_at: ts, status: 'checked_in', identity_verified: true,
         notes: `universal_pin_clock_in nups_user_id=${owner.id}`, mode: 'REAL',
       });
       await E.NUPSUser.update(owner.id, { last_login: ts });
       const kiosk_session = await signToken({
-        sid: crypto.randomUUID(), uid: owner.id, role: owner.role, venue: VENUE_ID,
+        sid: crypto.randomUUID(), uid: owner.id, role: owner.role, venue: owner.venue_id,
         shift_id: shift.id, name: owner.full_name, iat: Date.now(),
         exp: Date.now() + SESSION_TTL_MS, universal: true,
       });
       return Response.json({
-        success: true, user: { ...safeUser(owner), venue_id: VENUE_ID, is_demo: false, universal: true },
+        success: true, user: { ...safeUser(owner), venue_id: owner.venue_id, is_demo: false, universal: true },
         shift_id: shift.id, clocked_in_at: ts, destination: '/RoleViews',
         workspace: 'Universal Access — All Views', kiosk_session,
       });
@@ -434,9 +442,13 @@ Deno.serve(async (req) => {
         return genericAuthFailure('platform_login_binding_failed');
       }
     }
-    if (nupsUser.venue_id && nupsUser.venue_id !== VENUE_ID && nupsUser.venue_id !== DEMO_VENUE_ID) {
-      return genericAuthFailure('venue_scope_denied');
-    }
+    if (!nupsUser.venue_id) return genericAuthFailure('venue_assignment_missing');
+    const assignedVenue = nupsUser.venue_id === DEMO_VENUE_ID
+      ? { venue_id: DEMO_VENUE_ID, status: 'active' }
+      : ((await E.Venue.filter({ venue_id: nupsUser.venue_id, status: 'active' }, null, 1).catch(() => []))?.[0]
+        || await E.Venue.get(nupsUser.venue_id).catch(() => null));
+    if (!assignedVenue || assignedVenue.status === 'inactive') return genericAuthFailure('venue_scope_denied');
+    if (terminalVenueId && nupsUser.venue_id !== terminalVenueId && nupsUser.venue_id !== DEMO_VENUE_ID) return genericAuthFailure('terminal_venue_mismatch');
     const ws = WORKSPACE_BY_ROLE[nupsUser.role];
     if (!ws) return genericAuthFailure('workspace_not_assigned');
     await logAttempt('pin_auth', true, 'authenticated');
@@ -460,7 +472,7 @@ Deno.serve(async (req) => {
       const shift = await E.StaffShift.create({
         shift_id: crypto.randomUUID(),
         user_email: shiftEmail, user_full_name: nupsUser.full_name,
-        role: nupsUser.role, venue_id: nupsUser.venue_id || VENUE_ID, station: ws.station,
+        role: nupsUser.role, venue_id: nupsUser.venue_id, station: ws.station,
         check_in_time: ts, last_activity_at: ts, status: 'checked_in', identity_verified: true,
         notes: `pin_clock_in nups_user_id=${nupsUser.id}`, mode,
       });
