@@ -81,8 +81,11 @@ export default function APIKeyVault({ user }) {
   const handleDeleteKey = async (keyId, keyName) => {
     if (!confirm(`Delete "${keyName}"? This cannot be undone.`)) return;
     try {
-      await base44.entities.APIKey.delete(keyId);
-      toast.success("API key deleted");
+      const response = await base44.functions.invoke('manageAPIKeySecurity', {
+        action: 'revoke', key_id: keyId, reason: `Revoked from API Key Vault (${keyName})`
+      });
+      if (!response?.data?.success) throw new Error(response?.data?.error || 'Key revocation rejected');
+      toast.success("API key revoked");
       await loadKeys(); // Reload list
     } catch (err) {
       console.error('Delete key error:', err);
