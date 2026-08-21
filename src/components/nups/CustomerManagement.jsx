@@ -10,9 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { User, Plus, Search, Star, Calendar, DollarSign, Eye, Edit } from "lucide-react";
 import { format } from "date-fns";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 export default function CustomerManagement() {
   const queryClient = useQueryClient();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -30,18 +34,25 @@ export default function CustomerManagement() {
   });
 
   const createCustomer = useMutation({
-    mutationFn: (data) => base44.entities.POSCustomer.create({
-      customer_id: `CUST-${Date.now()}`,
-      ...data,
-      preferences: {
-        favorite_categories: [],
-        communication_preferences: {
-          email: true,
-          sms: false,
-          phone: false
-        }
+    mutationFn: (data) => writeIdentityRecord({
+      entity: "POSCustomer",
+      operation: "create",
+      venueId,
+      intent: "customer:management:create",
+      data: {
+        customer_id: `CUST-${Date.now()}`,
+        venue_id: venueId,
+        ...data,
+        preferences: {
+          favorite_categories: [],
+          communication_preferences: {
+            email: true,
+            sms: false,
+            phone: false
+          }
+        },
+        tags: []
       },
-      tags: []
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pos-customers'] });
@@ -57,7 +68,7 @@ export default function CustomerManagement() {
   });
 
   const updateCustomer = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.POSCustomer.update(id, data),
+    mutationFn: ({ id, data }) => writeIdentityRecord({ entity: "POSCustomer", operation: "update", id, venueId, intent: "customer:management:update", data: { ...data, venue_id: venueId } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pos-customers'] });
       setIsDialogOpen(false);
