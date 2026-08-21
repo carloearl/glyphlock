@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { IdCard, AlertTriangle, Ban, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import { licenseStatus, LICENSE_TONE } from "@/lib/nups/licenseStatus";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 /**
  * Credential roster — every entertainer with their license state.
@@ -18,7 +19,7 @@ export default function EntertainerCredentialRoster({ entertainers = [] }) {
 
   const setHold = useMutation({
     mutationFn: async ({ record, hold }) =>
-      base44.entities.Entertainer.update(record.id, { payout_hold: hold }),
+      writeIdentityRecord({ entity: "Entertainer", operation: "update", id: record.id, venueId: record.venue_id, intent: "entertainer:credential:payout_hold", data: { venue_id: record.venue_id, payout_hold: hold } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["entertainers"] });
       toast.success("Payout hold updated");
