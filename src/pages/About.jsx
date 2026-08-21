@@ -778,18 +778,22 @@ export default function About() {
           </section>
 
           <section className="border-y border-white/10 py-8">
-            <div className="grid gap-5 text-center sm:grid-cols-3">
+            <div className="grid gap-5 text-center sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-[#00E4FF]">Origin</p>
-                <p className="mt-2 text-sm text-slate-400">An image, identity, and authorship</p>
+                <p className="mt-2 text-sm text-slate-400">Images, identity, authorship, and provenance</p>
               </div>
-              <div className="border-white/10 sm:border-x">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B78CFF]">Operating proof</p>
-                <p className="mt-2 text-sm text-slate-400">NUPS in real venue workflows</p>
+              <div className="border-white/10 lg:border-x">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B78CFF]">Creative system</p>
+                <p className="mt-2 text-sm text-slate-400">QR, Image Lab, media, websites, and GlyphBot</p>
+              </div>
+              <div className="border-white/10 lg:border-r">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-300">Operating proof</p>
+                <p className="mt-2 text-sm text-slate-400">NUPS under real venue pressure</p>
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Purpose</p>
-                <p className="mt-2 text-sm text-slate-400">Activity that can explain itself</p>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Shared purpose</p>
+                <p className="mt-2 text-sm text-slate-400">Connected activity that can explain itself</p>
               </div>
             </div>
           </section>
