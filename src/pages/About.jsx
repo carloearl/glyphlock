@@ -685,7 +685,7 @@ export default function About() {
             </div>
           </section>
 
-          <section className="grid gap-12 py-24 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
+          <section id="story-section" className="grid gap-12 py-24 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
             <div>
               <StoryChapterNav chapters={storyChapters} />
             </div>
