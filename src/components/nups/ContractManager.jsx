@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,7 +58,7 @@ function resolveContractText(contract, venue) {
 
 export default function ContractManager({ user }) {
   const activeVenue = useActiveVenue();
-  const venue_id = activeVenue?.venue_id;
+  const venue_id = activeVenue?.id || activeVenue?.venue_id || null;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [signingContract, setSigningContract] = useState(null);
@@ -98,35 +99,53 @@ export default function ContractManager({ user }) {
       const activeBatch = batches[0];
       const gbAmount = parseFloat(data.glyphbucks_issued) || 0;
 
-      // Create the contract
-      const contract = await base44.entities.VenueContract.create({
-        ...data,
-        contract_id: contractId,
+      if (!venue_id) throw new Error("Select an active venue before creating a contract.");
+      // Create the contract through the governed financial gateway.
+      const contractWrite = await writeEntity({
+        entity: "VenueContract",
+        operation: "create",
+        data: {
+          ...data,
+          contract_id: contractId,
+          venue_id,
+          contract_amount: parseFloat(data.contract_amount),
+          glyphbucks_issued: gbAmount,
+          batch_id: activeBatch?.id || activeBatch?.batch_id || "",
+          manager_id: user?.email || "system",
+          status: "active",
+          is_printed: false,
+          is_signed: false,
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" },
         venue_id,
-        contract_amount: parseFloat(data.contract_amount),
-        glyphbucks_issued: gbAmount,
-        batch_id: activeBatch?.id || activeBatch?.batch_id || "",
-        manager_id: user?.email || "system",
-        status: "active",
-        is_printed: false,
-        is_signed: false,
+        intent: "VENUE_CONTRACT_CREATE",
       });
+      if (!contractWrite?.ok) throw new Error(contractWrite?.block_reason || "Contract write was rejected.");
+      const contract = contractWrite.value;
 
       // If GlyphBucks issued, create a linked GlyphBucksTransaction
       if (gbAmount > 0) {
-        await base44.entities.GlyphBucksTransaction.create({
-          transaction_id: `GB-${Date.now()}`,
+        const gbWrite = await writeEntity({
+          entity: "GlyphBucksTransaction",
+          operation: "create",
+          data: {
+            transaction_id: `GB-${Date.now()}`,
+            venue_id,
+            transaction_type: "Issue",
+            amount: gbAmount,
+            customer_name: data.customer_name,
+            contract_id: contractId,
+            vip_session_id: data.vip_session_id || "",
+            batch_id: activeBatch?.id || activeBatch?.batch_id || "",
+            cashier_id: user?.email || "system",
+            notes: `Issued via Contract ${contractId}`,
+            status: "active",
+          },
+          actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" },
           venue_id,
-          transaction_type: "Issue",
-          amount: gbAmount,
-          customer_name: data.customer_name,
-          contract_id: contractId,
-          vip_session_id: data.vip_session_id || "",
-          batch_id: activeBatch?.id || activeBatch?.batch_id || "",
-          cashier_id: user?.email || "system",
-          notes: `Issued via Contract ${contractId}`,
-          status: "active",
+          intent: "GLYPHBUCKS_ISSUE_FROM_CONTRACT",
         });
+        if (!gbWrite?.ok) throw new Error(gbWrite?.block_reason || "GlyphBucks issue write was rejected.");
       }
 
       // Audit log
@@ -151,18 +170,43 @@ export default function ContractManager({ user }) {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.VenueContract.update(id, { status }),
+    mutationFn: async ({ id, status }) => {
+      if (!venue_id) throw new Error("Active venue is required to update a contract.");
+      const write = await writeEntity({
+        entity: "VenueContract",
+        operation: "update",
+        id,
+        data: { status },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" },
+        venue_id,
+        intent: `VENUE_CONTRACT_${String(status).toUpperCase()}`,
+      });
+      if (!write?.ok) throw new Error(write?.block_reason || "Contract status update was rejected.");
+      return write.value;
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["venue-contracts"] }),
   });
 
   const signMutation = useMutation({
     mutationFn: async (id) => {
-      const result = await base44.entities.VenueContract.update(id, {
-      is_signed: true,
-      signed_at: new Date().toISOString(),
-        signed_ip: window.location.hostname,
-      customer_signature: `SIGNED-${user?.email || 'staff'}-${Date.now()}`,
-        });
+      if (!venue_id) throw new Error("Active venue is required to sign a contract.");
+      const signedAt = new Date().toISOString();
+      const write = await writeEntity({
+        entity: "VenueContract",
+        operation: "update",
+        id,
+        data: {
+          is_signed: true,
+          signed_at: signedAt,
+          signed_ip: window.location.hostname,
+          customer_signature: `SIGNED-${user?.email || 'staff'}-${Date.now()}`,
+        },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" },
+        venue_id,
+        intent: "VENUE_CONTRACT_SIGN",
+      });
+      if (!write?.ok) throw new Error(write?.block_reason || "Contract signature write was rejected.");
+      const result = write.value;
               // AUDIT LOG — Phase 7 BPAAA: Contract signing must be logged
                     try {
                             await base44.entities.SystemAuditLog.create({
