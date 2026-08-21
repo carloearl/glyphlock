@@ -21,6 +21,7 @@ import IDScannerCamera from "@/components/nups/IDScannerCamera";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { getActiveMode } from "@/lib/nups/modeResolver";
 import { snapshotPerson } from "@/lib/nups/personArchive";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 const MIN_AGE = 21;
 
@@ -172,7 +173,7 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.VIPGuest.delete(id),
+    mutationFn: (id) => writeIdentityRecord({ entity: "VIPGuest", operation: "delete", id, data: { venue_id: activeVenue?.id }, venueId: activeVenue?.id, intent: "guest:delete" }),
     onSuccess: () => {
       queryClient.invalidateQueries(["vip-guests-active"]);
       queryClient.invalidateQueries(["vip-guests"]);
@@ -187,9 +188,17 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
 
   const checkOutMutation = useMutation({
     mutationFn: async (id) => {
-      const updated = await base44.entities.VIPGuest.update(id, {
-        status: "left_building",
-        last_visit: new Date().toISOString(),
+      const updated = await writeIdentityRecord({
+        entity: "VIPGuest",
+        operation: "update",
+        id,
+        venueId: activeVenue?.id,
+        intent: "guest:checkout",
+        data: {
+          venue_id: activeVenue?.id,
+          status: "left_building",
+          last_visit: new Date().toISOString(),
+        },
       });
       // Permanent archive snapshot
       await snapshotPerson({
@@ -324,27 +333,40 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
 
       if (returningGuest) {
         // UPDATE returning guest — increment visit count, mark in-building
-        const updated = await base44.entities.VIPGuest.update(returningGuest.id, {
-          status: "in_building",
-          last_visit: now,
-          visit_count: (returningGuest.visit_count || 1) + 1,
-          id_verified: true,
-          id_verified_at: now,
-          // Update card info if provided
-          ...(form.card_last4 && { card_last4: form.card_last4, card_name: form.card_name, card_exp: form.card_exp, card_type: form.card_type }),
-          ...(form.phone && { phone: form.phone }),
-          ...(form.id_expiration && { id_expiration: form.id_expiration }),
-          ...(form.address_line1 && { address_line1: form.address_line1 }),
-          ...(form.city && { city: form.city }),
-          ...(form.state && { state: form.state.toUpperCase() }),
-          ...(form.zip_code && { zip_code: form.zip_code }),
+        const updated = await writeIdentityRecord({
+          entity: "VIPGuest",
+          operation: "update",
+          id: returningGuest.id,
+          venueId: activeVenue?.id,
+          intent: "guest:checkin:returning",
+          data: {
+            venue_id: activeVenue?.id,
+            status: "in_building",
+            last_visit: now,
+            visit_count: (returningGuest.visit_count || 1) + 1,
+            id_verified: true,
+            id_verified_at: now,
+            // Update card info if provided
+            ...(form.card_last4 && { card_last4: form.card_last4, card_name: form.card_name, card_exp: form.card_exp, card_type: form.card_type }),
+            ...(form.phone && { phone: form.phone }),
+            ...(form.id_expiration && { id_expiration: form.id_expiration }),
+            ...(form.address_line1 && { address_line1: form.address_line1 }),
+            ...(form.city && { city: form.city }),
+            ...(form.state && { state: form.state.toUpperCase() }),
+            ...(form.zip_code && { zip_code: form.zip_code }),
+          },
         });
         // Permanent archive snapshot — survives demo wipes
         await snapshotPerson({ type: "guest", event: "checked_in", record: updated });
         toast.success(`Welcome back, ${form.full_name}! Visit #${(returningGuest.visit_count || 1) + 1}`);
       } else {
         // CREATE new guest profile
-        const created = await base44.entities.VIPGuest.create({
+        const created = await writeIdentityRecord({
+          entity: "VIPGuest",
+          operation: "create",
+          venueId: activeVenue?.id,
+          intent: "guest:checkin:new",
+          data: {
           guest_id: guestId,
           venue_id: activeVenue?.id,
           // Mode stamp — a guest checked in while the venue is in DEMO/SANDBOX
@@ -374,6 +396,7 @@ export default function GuestCheckIn({ initialCameraOpen = false, initialScan = 
           tier: "standard",
           total_spend_lifetime: 0,
           vip_sessions_count: 0,
+          },
         });
         // Permanent archive snapshot for the new guest creation + check-in
         await snapshotPerson({ type: "guest", event: "created", record: created });
