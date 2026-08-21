@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -136,6 +138,8 @@ function PoolSection({ config, payout, tipSignatures, onSign }) {
 // ─── Main Component ───────────────────────────────────────────────────
 export default function TipBreakdown({ transactions = [] }) {
   const today = new Date().toDateString();
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [tipSignatures, setTipSignatures] = useState({});
   const [showSplitEditor, setShowSplitEditor] = useState(false);
   const [formula, setFormula] = useState({ hostessPct: 15, managerBonus: 100, djPct: 50 });
@@ -172,9 +176,22 @@ export default function TipBreakdown({ transactions = [] }) {
   const payouts = useMemo(() => computePayoutsCustom(totalTips, byPool, formula), [totalTips, byPool, formula]);
 
   const saveMutation = useMutation({
-    mutationFn: (data) => base44.entities.TipPayout.create(data),
+    mutationFn: async (data) => {
+      if (!venueId) throw new Error("Select an active venue before saving a tip payout.");
+      const me = await base44.auth.me();
+      const result = await writeEntity({
+        entity: "TipPayout",
+        operation: "create",
+        data: { ...data, venue_id: venueId },
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+        venue_id: venueId,
+        intent: "EMPLOYEE_TIP_PAYOUT",
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "Tip payout was rejected.");
+      return result.value;
+    },
     onSuccess: () => toast.success('Tip payout saved to record.'),
-    onError: () => toast.error('Failed to save payout record.'),
+    onError: (error) => toast.error(error?.message || 'Failed to save payout record.'),
   });
 
   const handleSign = (empId, name) => {
