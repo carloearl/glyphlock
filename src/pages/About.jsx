@@ -934,12 +934,12 @@ export default function About() {
                   Map your workflow
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </Link>
-                <Link
-                  to="/NUPSLanding"
+                <a
+                  href="#layered-system"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-6 py-3.5 font-bold text-white transition-colors hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
                 >
-                  Explore NUPS
-                </Link>
+                  Explore every layer
+                </a>
                 <a
                   href="#ecosystem"
                   className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-bold text-slate-400 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
@@ -1080,9 +1080,20 @@ export default function About() {
             <EcosystemMap />
           </section>
 
+          <section id="layered-system" className="scroll-mt-24 py-24">
+            <SectionHeading
+              eyebrow="The onion model"
+              title="Different outer systems. One evidence core."
+              body="GlyphLock is best understood in layers. Images and QR structures carry context. GlyphBot and automation interpret and construct. NUPS operates. GlyphBucks and the ledgers account. Governance, timestamping, and integrations extend trust. Select a layer to see how it folds into the same record."
+              align="center"
+            />
+            <LayeredArchitecture />
+          </section>
+
           <section className="py-24">
             <SectionHeading
-              eyebrow="NUPS in practice"
+              eyebrow="One operating proof"
+              title="NUPS shows the architecture under real operating pressure."
               title="NUPS shows the architecture under real operating pressure."
               body="NUPS is one complete example of the wider GlyphLock model. This privacy-safe walkthrough follows context, identity, permission, agreements, transaction references, and review without exposing genuine personal information."
             />
@@ -1092,20 +1103,20 @@ export default function About() {
           <section className="mb-24 grid gap-6 lg:grid-cols-[1fr_1fr]">
             <motion.div {...reveal} className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-7 md:p-10">
               <SectionHeading
-                eyebrow="NUPS"
-                title="Traditional POS systems process payments. NUPS processes proof."
-                body="NUPS does not replace the venue's acquiring relationship or claim responsibility that belongs to an external provider. It connects the operational evidence surrounding the transaction."
+                eyebrow="GlyphBucks + ledgers"
+                title="A whole closed-loop value system—not a footnote."
+                body="GlyphBucks is a configurable stored-value generator and operating program. It designs and prints denominated notes, connects issuance to contracts and transactions, verifies and redeems value, rolls the liability forward, and reconciles activity without treating stored value as sales."
               />
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
                 {[
-                  "Credential-aware profiles and check-in",
-                  "Role-based staff workspaces and timekeeping",
-                  "VIP and entertainer agreement evidence",
-                  "Cash and authorized card-reference records",
-                  "Register batches, Z reports, and reconciliation",
-                  "Driver and contractor payout records",
-                  "Audit trails for governed changes",
-                  "Venue- and environment-scoped operations",
+                  "Configurable $10–$1000 denominations",
+                  "Five-sheet note design and printing press",
+                  "Serial, QR, transaction, and contract linkage",
+                  "Issuance, redemption, and public verification",
+                  "Liability roll-forward and reconciliation",
+                  "Ed25519 sealing for supported records",
+                  "OpenTimestamps status per supported seal",
+                  "Separate from cash and card sales",
                 ].map((item) => (
                   <div key={item} className="flex gap-3 rounded-xl border border-white/10 bg-black/25 p-4 text-sm leading-relaxed text-slate-300">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#00E4FF]" aria-hidden="true" />
@@ -1114,10 +1125,10 @@ export default function About() {
                 ))}
               </div>
               <Link
-                to="/NUPSLanding"
+                to="/glyphbucks"
                 className="group mt-8 inline-flex items-center gap-2 font-black text-[#00E4FF] focus:outline-none focus:ring-2 focus:ring-[#00E4FF]"
               >
-                Explore the NUPS operating system
+                Explore the GlyphBucks console
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
               </Link>
             </motion.div>
