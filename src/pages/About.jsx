@@ -421,7 +421,7 @@ function EcosystemMap() {
 
   return (
     <div className="mt-12 rounded-[2rem] border border-white/10 bg-[#03070d]/90 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.45)] sm:p-6 lg:p-8">
-      <div className="grid gap-3 md:grid-cols-3" role="group" aria-label="Choose a GlyphLock product">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" role="group" aria-label="Choose a GlyphLock ecosystem layer">
         {products.map((product, index) => {
           const Icon = product.icon;
           const active = index === activeProduct;
@@ -446,7 +446,7 @@ function EcosystemMap() {
               </span>
               <span>
                 <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                  Working experience
+                  Evidence architecture layer
                 </span>
                 <span className="mt-1 block font-bold text-white">{product.short}</span>
               </span>
@@ -472,6 +472,17 @@ function EcosystemMap() {
           </div>
           <h3 className="mt-4 text-2xl font-black text-white md:text-3xl">{current.title}</h3>
           <p className="mt-4 leading-relaxed text-slate-300">{current.body}</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {current.modules.map((module) => (
+              <span key={module} className="rounded-full border border-white/10 bg-black/35 px-3 py-1.5 text-[11px] font-semibold text-slate-300">
+                {module}
+              </span>
+            ))}
+          </div>
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
+            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-200">{current.status}</span>
+          </div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-black/45 p-5">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-[#00E4FF]">What enters</p>
@@ -495,7 +506,7 @@ function EcosystemMap() {
 
       <div className="relative mt-6">
         <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.26em] text-slate-500">
-          Every product uses the same operating pattern
+          Every layer uses the same operating pattern
         </p>
         <div className="grid gap-3 md:grid-cols-4">
           {operatingFlow.map((item, index) => {
