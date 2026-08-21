@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Clock, Play, Plus, Printer } from "lucide-react";
 import { printVIPSessionReceipt } from "@/components/vip2/sessionReceipt";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 /**
  * RoomTimingModal — manager edits for a VIP room's session timing & status.
@@ -49,7 +50,19 @@ export default function RoomTimingModal({ room, onClose, onSaved }) {
   const save = async (data) => {
     setBusy(true); setErr("");
     try {
-      await base44.entities.VIPRoom.update(room.id, data);
+      const venueId = room?.venue_id || null;
+      if (!venueId) throw new Error("Active venue is required for VIP room timing updates.");
+      const me = await base44.auth.me().catch(() => null);
+      const result = await writeEntity({
+        entity: "VIPRoom",
+        operation: "update",
+        id: room.id,
+        data: { ...data, venue_id: venueId },
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+        venue_id: venueId,
+        intent: "VIP_ROOM_TIMING_UPDATE",
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "VIP room timing update was rejected.");
       onSaved();
     } catch (e) {
       setErr(e.message || "Update failed");
