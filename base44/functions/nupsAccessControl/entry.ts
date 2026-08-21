@@ -197,6 +197,7 @@ Deno.serve(async (req) => {
       const patch = { decided_by: email, decided_at: now, decision_note: note || '', decision_log: log };
 
       if (['APPROVE_ENTERTAINER', 'APPROVE_STAFF', 'APPROVE_ADMIN', 'APPROVE_OWNER'].includes(decision)) {
+        if (!r.venue_id) return Response.json({ error: 'Request is missing an active venue assignment.' }, { status: 409 });
         // APPROVE_STAFF grants exactly the staff role that was requested.
         const grantedRole =
           decision === 'APPROVE_OWNER' ? 'OWNER'
@@ -213,7 +214,7 @@ Deno.serve(async (req) => {
             username: r.email,
             full_name: r.full_legal_name,
             role: nupsRole,
-            venue_id: r.venue_id || 'dream_palace',
+            venue_id: r.venue_id,
             platform_email: r.email,
             approved_by: email,
             status: 'active',
