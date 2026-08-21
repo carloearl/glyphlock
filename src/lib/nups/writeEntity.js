@@ -22,6 +22,7 @@ const FINANCIAL_ENTITIES = new Set([
   'GlyphBucksOrder',
   'VenueContract',
   'DriverPayout',
+  'ContractorPayout',
   'DailySettlement',
   // BPAA-NUPS-ACCT-001 — double-entry GL
   'JournalEntry',
