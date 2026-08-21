@@ -18,7 +18,7 @@ const ENTITY_REGISTRY = [
     entities: [
       { name: "VIPGuest", label: "Guests", fields: [
         { key: "full_name", label: "Name" }, { key: "tier", label: "Tier" },
-        { key: "status", label: "Status" }, { key: "id_number", label: "ID #" },
+        { key: "status", label: "Status" }, { key: "id_last4", label: "ID last 4" },
         { key: "visit_count", label: "Visits" }, { key: "total_spend_lifetime", label: "Lifetime $" },
         { key: "created_date", label: "Created" },
       ]},
