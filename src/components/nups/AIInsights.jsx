@@ -6,19 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Brain, TrendingUp, TrendingDown, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 export default function AIInsights() {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [forecast, setForecast] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const { data: transactions = [] } = useQuery({
-    queryKey: ['pos-transactions'],
-    queryFn: () => base44.entities.POSTransaction.list('-created_date', 100),
+    queryKey: ['pos-transactions', venueId],
+    queryFn: () => venueId ? base44.entities.POSTransaction.filter({ venue_id: venueId }, '-created_date', 100) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const { data: products = [] } = useQuery({
-    queryKey: ['pos-products'],
-    queryFn: () => base44.entities.POSProduct.list(),
+    queryKey: ['pos-products', venueId],
+    queryFn: () => venueId ? base44.entities.POSProduct.filter({ venue_id: venueId }) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const generateForecast = async () => {
