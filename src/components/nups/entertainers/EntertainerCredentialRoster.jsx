@@ -61,7 +61,9 @@ export default function EntertainerCredentialRoster({ entertainers = [] }) {
         {rows.map(({ record, status }) => (
           <div key={record.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-800 bg-gray-900/40 flex-wrap">
             {record.license_photo_url ? (
-              <img src={record.license_photo_url} alt="" className="h-10 w-14 object-cover rounded border border-gray-700" />
+              <div className="h-10 w-14 rounded border border-emerald-500/30 bg-emerald-500/10 flex items-center justify-center text-[9px] text-emerald-300 text-center leading-tight px-1" title="Protected credential evidence is on file">
+                protected photo
+              </div>
             ) : (
               <div className="h-10 w-14 rounded border border-gray-800 bg-gray-900 flex items-center justify-center text-[9px] text-gray-600">
                 no photo
