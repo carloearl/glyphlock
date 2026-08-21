@@ -31,9 +31,13 @@
       ],
       "default": "photo"
     },
+    "protected_evidence_id": {
+      "type": "string",
+      "description": "Canonical ProtectedEvidence record ID for new protected media."
+    },
     "media_url": {
       "type": "string",
-      "description": "Uploaded media file URL"
+      "description": "LEGACY ONLY \u2014 historical URL/reference. New protected evidence must use protected_evidence_id."
     },
     "media_hash": {
       "type": "string",
@@ -106,13 +110,12 @@
         "SANDBOX"
       ],
       "default": "REAL",
-      "description": "DACO WAVE 1 — Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
+      "description": "DACO WAVE 1 \u2014 Ledger mode. REAL = live, DEMO = sandbox demo, SANDBOX = dev. Modes never mix in a report or balance."
     }
   },
   "required": [
     "transaction_id",
-    "media_type",
-    "media_url"
+    "media_type"
   ],
   "rls": {
     "read": {
