@@ -26,6 +26,7 @@ import DoorPOSFinalizationAudit from "./DoorPOSFinalizationAudit";
 import IDScannerCamera from "./IDScannerCamera";
 import GuestCheckIn from "./GuestCheckIn";
 import { writeEntity } from "@/lib/nups/writeEntity";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import { computeReceiptHash } from "@/lib/nups/receiptHash";
 // BPAA-NUPS-AUDIT-001 §3.2 — emit financial_context on door sale finalize
@@ -661,9 +662,18 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
 
       // Never let a practice transaction mutate a live customer profile.
       if (modeState.isLive && selectedCustomer?.id) {
-        await base44.entities.POSCustomer.update(selectedCustomer.id, {
-          visit_count: (selectedCustomer.visit_count || 0) + 1,
-          total_spent: (selectedCustomer.total_spent || 0) + total,
+        await writeIdentityRecord({
+          entity: "POSCustomer",
+          operation: "update",
+          id: selectedCustomer.id,
+          venueId,
+          actor: user,
+          intent: "customer:register:post_sale_update",
+          data: {
+            venue_id: venueId,
+            visit_count: (selectedCustomer.visit_count || 0) + 1,
+            total_spent: (selectedCustomer.total_spent || 0) + total,
+          },
         });
         queryClient.invalidateQueries({ queryKey: ['pos-customers'] });
       }
