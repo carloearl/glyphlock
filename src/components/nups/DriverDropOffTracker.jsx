@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,20 +114,27 @@ export default function DriverDropOffTracker({ user }) {
       if (!venueId) throw new Error("No active venue resolved — cannot onboard.");
       const driver_id = makeDriverId(venueId);
       const qr_code = makeQrToken();
-      const profile = await base44.entities.DriverProfile.create({
-        driver_id,
-        venue_id: venueId,
-        name: data.name,
-        phone: data.phone || "",
-        affiliated: !!data.affiliated,
-        qr_code,
-        ytd_payout_total: 0,
-        ytd_year: thisYear(),
-        ten99_flag: false,
-        ten99_threshold: 600,
-        status: "active",
-        onboarded_by: user?.email || "unknown",
-        last_active_at: new Date().toISOString(),
+      const profile = await writeIdentityRecord({
+        entity: "DriverProfile",
+        operation: "create",
+        venueId,
+        actor: user,
+        intent: "driver:onboard:create_profile",
+        data: {
+          driver_id,
+          venue_id: venueId,
+          name: data.name,
+          phone: data.phone || "",
+          affiliated: !!data.affiliated,
+          qr_code,
+          ytd_payout_total: 0,
+          ytd_year: thisYear(),
+          ten99_flag: false,
+          ten99_threshold: 600,
+          status: "active",
+          onboarded_by: user?.email || "unknown",
+          last_active_at: new Date().toISOString(),
+        },
       });
       // Immediately open a session for tonight
       await openSession.mutateAsync(profile);
@@ -144,39 +153,46 @@ export default function DriverDropOffTracker({ user }) {
   const openSession = useMutation({
     mutationFn: async (profile) => {
       if (!venueId) throw new Error("No active venue.");
-      return base44.entities.DriverPayout.create({
-        payout_id: `DPO-${profile.driver_id}-${Date.now().toString(36).toUpperCase()}`,
-        contractor_id: profile.driver_id,
-        contractor_name: profile.name,
+      const write = await writeEntity({
+        entity: "DriverPayout",
+        operation: "create",
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" },
         venue_id: venueId,
-        payout_date: today,
-        payout_type: "shift_earnings",
-        bills_redeemed: [],
-        total_face_value: 0,
-        redemption_rate: 0,
-        total_payout: 0,
-        payment_method: "cash",
-        status: "pending",
-        tax_year: thisYear(),
-        // Pin disbursement to the open door batch — same transaction window
-        // as POS sales. payment_reference doubles as the join key downstream.
-        payment_reference: batchRef ? `BATCH-${batchRef}` : null,
-        notes: JSON.stringify({
-          source: "driver_drop_session",
-          affiliated: !!profile.affiliated,
-          guests: 0,
-          batch_id: batchId,
-          batch_reference: batchRef,
-          rates_snapshot: rates ? {
-            cover: rates.cover_charge,
-            card_discount: rates.card_discount,
-            per_guest_affiliated: rates.driver_payout_affiliated,
-            per_guest_outside: rates.driver_payout_outside,
-            mode: rates.mode,
-          } : null,
-          drops: [],
-        }),
+        intent: "DRIVER_SESSION_OPEN",
+        data: {
+          payout_id: `DPO-${profile.driver_id}-${Date.now().toString(36).toUpperCase()}`,
+          contractor_id: profile.driver_id,
+          contractor_name: profile.name,
+          venue_id: venueId,
+          payout_date: today,
+          payout_type: "shift_earnings",
+          bills_redeemed: [],
+          total_face_value: 0,
+          redemption_rate: 0,
+          total_payout: 0,
+          payment_method: "cash",
+          status: "pending",
+          tax_year: thisYear(),
+          payment_reference: batchRef ? `BATCH-${batchRef}` : null,
+          notes: JSON.stringify({
+            source: "driver_drop_session",
+            affiliated: !!profile.affiliated,
+            guests: 0,
+            batch_id: batchId,
+            batch_reference: batchRef,
+            rates_snapshot: rates ? {
+              cover: rates.cover_charge,
+              card_discount: rates.card_discount,
+              per_guest_affiliated: rates.driver_payout_affiliated,
+              per_guest_outside: rates.driver_payout_outside,
+              mode: rates.mode,
+            } : null,
+            drops: [],
+          }),
+        },
       });
+      if (!write?.ok) throw new Error(write?.block_reason || "Driver session open was rejected.");
+      return write.value;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
@@ -211,9 +227,9 @@ export default function DriverDropOffTracker({ user }) {
         confirmed_by: user?.email || user?.username || "doorman",
         confirmed_at: new Date().toISOString(),
       };
-      return base44.entities.DriverPayout.update(session.id, {
-        notes: JSON.stringify(newMeta),
-      });
+      const write = await writeEntity({ entity: "DriverPayout", operation: "update", id: session.id, data: { notes: JSON.stringify(newMeta) }, actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" }, venue_id: venueId, intent: "DRIVER_HEADCOUNT_CONFIRMED" });
+      if (!write?.ok) throw new Error(write?.block_reason || "Driver headcount update was rejected.");
+      return write.value;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
@@ -245,10 +261,9 @@ export default function DriverDropOffTracker({ user }) {
       const totalGuests = drops.reduce((s, d) => s + (d.guests || 0), 0);
       const newMeta = { ...meta, drops, guests: totalGuests };
       const netPayout = computeNetPayout(newMeta);
-      return base44.entities.DriverPayout.update(session.id, {
-        notes: JSON.stringify(newMeta),
-        total_payout: netPayout,
-      });
+      const write = await writeEntity({ entity: "DriverPayout", operation: "update", id: session.id, data: { notes: JSON.stringify(newMeta), total_payout: netPayout }, actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" }, venue_id: venueId, intent: "DRIVER_GUEST_COUNT_UPDATED" });
+      if (!write?.ok) throw new Error(write?.block_reason || "Driver guest-count update was rejected.");
+      return write.value;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
@@ -260,21 +275,20 @@ export default function DriverDropOffTracker({ user }) {
       const meta = safeJSON(session.notes);
       const newMeta = { ...meta, promo_cards_given: N };
       const netPayout = computeNetPayout(newMeta);
-      return base44.entities.DriverPayout.update(session.id, {
-        notes: JSON.stringify(newMeta),
-        total_payout: netPayout,
-      });
+      const write = await writeEntity({ entity: "DriverPayout", operation: "update", id: session.id, data: { notes: JSON.stringify(newMeta), total_payout: netPayout }, actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" }, venue_id: venueId, intent: "DRIVER_PROMO_COUNT_UPDATED" });
+      if (!write?.ok) throw new Error(write?.block_reason || "Driver promo update was rejected.");
+      return write.value;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
 
   // ─── Admin delete — sessions and profiles, confirm-gated ─────────────────
   const deleteSession = useMutation({
-    mutationFn: (id) => base44.entities.DriverPayout.delete(id),
+    mutationFn: async (id) => { const write = await writeEntity({ entity: "DriverPayout", operation: "delete", id, data: { venue_id: venueId }, actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" }, venue_id: venueId, intent: "DRIVER_SESSION_DELETE" }); if (!write?.ok) throw new Error(write?.block_reason || "Driver session delete was rejected."); return write.value; },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-sessions"] }),
   });
   const deleteProfile = useMutation({
-    mutationFn: (id) => base44.entities.DriverProfile.delete(id),
+    mutationFn: (id) => writeIdentityRecord({ entity: "DriverProfile", operation: "delete", id, data: { venue_id: venueId }, venueId, actor: user, intent: "driver:profile:delete" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["driver-profiles"] }),
   });
   const requestDeleteSession = (session) => {
@@ -317,18 +331,25 @@ export default function DriverDropOffTracker({ user }) {
       // transaction window in the Z-report.
       const settleBatchRef = batchRef || meta.batch_reference || null;
       const settleBatchId  = batchId  || meta.batch_id        || null;
-      await base44.entities.DriverPayout.update(session.id, {
-        status: "paid",
-        notes: JSON.stringify({
-          ...meta,
-          settled_at: new Date().toISOString(),
-          batch_id: settleBatchId,
-          batch_reference: settleBatchRef,
-        }),
-        payment_reference: settleBatchRef
-          ? `BATCH-${settleBatchRef}`
-          : `DRAWER-${today}`,
+      const payoutWrite = await writeEntity({
+        entity: "DriverPayout",
+        operation: "update",
+        id: session.id,
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || "External" },
+        venue_id: venueId,
+        intent: "DRIVER_PAYOUT_FINALIZED",
+        data: {
+          status: "paid",
+          notes: JSON.stringify({
+            ...meta,
+            settled_at: new Date().toISOString(),
+            batch_id: settleBatchId,
+            batch_reference: settleBatchRef,
+          }),
+          payment_reference: settleBatchRef ? `BATCH-${settleBatchRef}` : `DRAWER-${today}`,
+        },
       });
+      if (!payoutWrite?.ok) throw new Error(payoutWrite?.block_reason || "Driver payout settlement was rejected.");
 
       // 2. Bump DriverProfile YTD (1099 tracking)
       try {
@@ -339,14 +360,15 @@ export default function DriverDropOffTracker({ user }) {
           const sameYear = profile.ytd_year === year;
           const newYtd = (sameYear ? Number(profile.ytd_payout_total) || 0 : 0) + driverPayout;
           const threshold = Number(profile.ten99_threshold) || 600;
-          await base44.entities.DriverProfile.update(profile.id, {
+          await writeIdentityRecord({ entity: "DriverProfile", operation: "update", id: profile.id, venueId, actor: user, intent: "driver:profile:ytd_update", data: {
+            venue_id: venueId,
             ytd_payout_total: newYtd,
             ytd_year: year,
             ten99_flag: newYtd >= threshold,
             lifetime_drops: (Number(profile.lifetime_drops) || 0) + 1,
             lifetime_guests: (Number(profile.lifetime_guests) || 0) + totalGuests,
             last_active_at: new Date().toISOString(),
-          });
+          }});
         }
       } catch (_) { /* non-fatal */ }
 
