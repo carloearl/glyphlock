@@ -19,6 +19,7 @@ import HardcopyRescan from "./HardcopyRescan";
 import RateLimitGuard from "./validation/RateLimitGuard";
 import { GLYPHBUCKS_PURCHASE_AGREEMENT } from '@/constants/contractText';
 import { writeEntity } from '@/lib/nups/writeEntity';
+import { useActiveVenue } from '@/hooks/useActiveVenue';
 
 const FULL_CONTRACT_TEXT = `1. Orders
 Liberty Holding Group, L.L.C., and Liberty Entertainment Group L.L.C doing business as The Dream Palace [club/Bar] ("we," "our," or "us"), agrees to provide you ("you" or "your"), the customer named in the attached Order / purchase Invoice (the "Order"), with the services, and products ("Services and Products") listed in the Order. GlyphBucks (Club currency). The independent entertainer contractors ("Entertainers") at our Dream Palace Gentleman's Club located at 815 N. Scottsdale Road in Tempe, Arizona ("Club/Bar"), are independent entertainer contractors and are not our employees. You may independently arrange with Entertainers for services not provided by us, provided those services are legal. Entertainers do not have authority to contract for or bind us in any manner.
@@ -109,12 +110,7 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  const { data: venues } = useQuery({
-    queryKey: ['venues'],
-    queryFn: () => base44.entities.Venue.list(),
-    initialData: []
-  });
-  const currentVenue = venues?.[0] || { name: 'Club', address: '', age_requirement: 18 };
+  const currentVenue = useActiveVenue();
   const venueAddress = [currentVenue?.address, currentVenue?.city, currentVenue?.state].filter(Boolean).join(', ') || '';
   const venuePhone = currentVenue?.phone || '';
   const venueLegal = currentVenue?.legal_name || currentVenue?.name || 'Club';
