@@ -18,6 +18,7 @@ import OfflineIndicator from "./OfflineIndicator";
 import HardcopyRescan from "./HardcopyRescan";
 import RateLimitGuard from "./validation/RateLimitGuard";
 import { GLYPHBUCKS_PURCHASE_AGREEMENT } from '@/constants/contractText';
+import { writeEntity } from '@/lib/nups/writeEntity';
 
 const FULL_CONTRACT_TEXT = `1. Orders
 Liberty Holding Group, L.L.C., and Liberty Entertainment Group L.L.C doing business as The Dream Palace [club/Bar] ("we," "our," or "us"), agrees to provide you ("you" or "your"), the customer named in the attached Order / purchase Invoice (the "Order"), with the services, and products ("Services and Products") listed in the Order. GlyphBucks (Club currency). The independent entertainer contractors ("Entertainers") at our Dream Palace Gentleman's Club located at 815 N. Scottsdale Road in Tempe, Arizona ("Club/Bar"), are independent entertainer contractors and are not our employees. You may independently arrange with Entertainers for services not provided by us, provided those services are legal. Entertainers do not have authority to contract for or bind us in any manner.
@@ -489,10 +490,19 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
 
   const handleStaffSign = async () => {
     setLoading(true);
-    await base44.entities.GlyphBucksOrder.update(savedOrderId, {
-      manager_signature: managerSignature,
-      hostess_signature: hostessSignature,
+    const orderWrite = await writeEntity({
+      entity: 'GlyphBucksOrder',
+      operation: 'update',
+      id: savedOrderId,
+      data: {
+        manager_signature: managerSignature,
+        hostess_signature: hostessSignature,
+      },
+      actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+      venue_id: currentVenueId,
+      intent: 'GLYPHBUCKS_ORDER_STAFF_SIGN',
     });
+    if (!orderWrite?.ok) throw new Error(orderWrite?.block_reason || 'GlyphBucks order staff-sign write was rejected.');
     if (savedContractId) {
       const nextMetadata = {
         ...(savedContractMetadata || {}),
@@ -500,9 +510,16 @@ export default function GlyphBucksContract({ onComplete, onCurrencyPrint }) {
         hostess_signature: hostessSignature,
         staff_signed_at: new Date().toISOString(),
       };
-      await base44.entities.VIPContractRecord.update(savedContractId, {
-        metadata: nextMetadata,
+      const contractWrite = await writeEntity({
+        entity: 'VIPContractRecord',
+        operation: 'update',
+        id: savedContractId,
+        data: { metadata: nextMetadata },
+        actor: { email: user?.email, id: user?.id, role: user?._highestRole || user?.role || 'External' },
+        venue_id: currentVenueId,
+        intent: 'VIP_CONTRACT_RECORD_STAFF_SIGN',
       });
+      if (!contractWrite?.ok) throw new Error(contractWrite?.block_reason || 'Contract record staff-sign write was rejected.');
       setSavedContractMetadata(nextMetadata);
     }
     setLoading(false);
