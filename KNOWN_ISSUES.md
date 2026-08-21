@@ -39,7 +39,7 @@ Verification on 2026-08-20:
 `npm run check:nups-write-gateway` → PASS: `287/287 grandfathered frontend writes remain; no new bypasses.`
 
 ### Meaning
-The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to 286/287 after migrating `TipBreakdown` → `TipPayout.create` through `writeEntity()`; it does not mean the remaining legacy bypasses have disappeared.
+The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to 277/287 after migrating employee tip payout, contractor payout lifecycle, Z-report creation, GlyphBucks ledger creation, VenueContract create/update/sign writes, and removing the redundant client-side GlyphBucks redemption mutation; it does not mean the remaining legacy bypasses have disappeared.
 
 ### Required resolution
 Reduce the manifest monotonically, prioritizing financial, identity, contract, credential, payout, mode, and audit writes.
