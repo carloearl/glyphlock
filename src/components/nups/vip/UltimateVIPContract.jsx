@@ -12,6 +12,8 @@ import UnifiedContractDesk from "@/components/nups/contracts/UnifiedContractDesk
 import VIPShowVerifyPanel from "@/components/nups/vip/VIPShowVerifyPanel";
 import VIPShowContracts from "@/pages/VIPShowContracts";
 import { VIP_TERMS_TEXT } from "@/constants/vipShowTerms";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
+import { writeEntity } from "@/lib/nups/writeEntity";
 
 /**
  * UltimateVIPContract — ONE editable contract + the full sealing desk.
@@ -33,9 +35,9 @@ function stampVersion() {
   return `v-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
 }
 
-const VENUE_ID = "DP-TEMPE-001";
-
 export default function UltimateVIPContract({ canEdit = false }) {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [config, setConfig] = useState(null);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
@@ -48,8 +50,9 @@ export default function UltimateVIPContract({ canEdit = false }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      if (!venueId) throw new Error("No active venue selected.");
       const rows = await base44.entities.ContractTermsConfig.filter({
-        venue_id: VENUE_ID, contract_type: "VIP",
+        venue_id: venueId, contract_type: "VIP",
       });
       const row = rows?.[0] || null;
       setConfig(row);
@@ -60,7 +63,7 @@ export default function UltimateVIPContract({ canEdit = false }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [venueId]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -73,20 +76,27 @@ export default function UltimateVIPContract({ canEdit = false }) {
     setMsg(null);
     try {
       const version = stampVersion();
+      if (!venueId) throw new Error("Select an active venue before saving VIP contract terms.");
       const payload = {
-        venue_id: VENUE_ID,
+        venue_id: venueId,
         contract_type: "VIP",
         terms_text: draft.trim(),
         version,
         active: true,
         last_edited_at: new Date().toISOString(),
       };
-      let saved;
-      if (config?.id) {
-        saved = await base44.entities.ContractTermsConfig.update(config.id, payload);
-      } else {
-        saved = await base44.entities.ContractTermsConfig.create(payload);
-      }
+      const me = await base44.auth.me();
+      const result = await writeEntity({
+        entity: "ContractTermsConfig",
+        operation: config?.id ? "update" : "create",
+        id: config?.id,
+        data: payload,
+        actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "External" },
+        venue_id: venueId,
+        intent: config?.id ? "VIP_TERMS_UPDATE" : "VIP_TERMS_CREATE",
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || "VIP contract terms write was rejected.");
+      const saved = result.value;
       setConfig({ ...(saved || payload), id: config?.id || saved?.id });
       setTermsRev((r) => r + 1);
       setMsg({ kind: "ok", text: `Saved as ${version}. Every new sealed show now uses this contract.` });
