@@ -83,7 +83,7 @@ export default function StoryChapterNav({ chapters }) {
         />
       </div>
 
-      <ol className="mt-6 flex-1 space-y-1">
+      <ol className="mt-4 space-y-0.5">
         {chapters.map((chapter, index) => {
           const Icon = chapter.icon;
           const isActive = active === index;

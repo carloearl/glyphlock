@@ -709,7 +709,7 @@ export default function About() {
               </div>
             </div>
 
-            <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
+            <div className="grid gap-8 lg:grid-cols-[260px_1fr] lg:gap-12">
               <div>
                 <StoryChapterNav chapters={storyChapters} />
               </div>
