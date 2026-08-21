@@ -162,9 +162,19 @@ export async function postToLedger({
   // If this is a reversal, flip the original entry to REVERSED.
   if (reverses_entry_id) {
     try {
-      await base44.entities.JournalEntry.update(reverses_entry_id, { status: "REVERSED" });
+      const mark = await writeEntity({
+        entity: "JournalEntry",
+        operation: "update",
+        id: reverses_entry_id,
+        data: { status: "REVERSED", venue_id, mode: resolvedMode },
+        actor,
+        venue_id,
+        intent: `postToLedger:mark_reversed:${reverses_entry_id}`,
+        requestContext: { mode: resolvedMode },
+      });
+      if (!mark?.ok) throw new Error(mark?.block_reason || "journal reversal status update rejected");
     } catch (e) {
-      // Don't fail the reversal — log only. The reversal is itself the legal record.
+      // Don't fail the reversal — log only. The reversal entry itself is the legal record.
       console.warn("postToLedger: could_not_mark_original_REVERSED", e?.message);
     }
   }
