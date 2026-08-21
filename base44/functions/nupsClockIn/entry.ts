@@ -59,10 +59,16 @@ Deno.serve(async (req) => {
     const rawTerminalId = String(body.terminal_id || req.headers.get('x-nups-terminal-id') || 'unidentified');
     const terminalId = rawTerminalId.replace(/[^A-Za-z0-9._:-]/g, '').slice(0, 120) || 'unidentified';
     const throttleResourceId = `pin_auth:${terminalId !== 'unidentified' ? terminalId : ip}`;
-    const terminalConfig = terminalId !== 'unidentified'
+    const trustedTerminal = terminalId !== 'unidentified'
+      ? ((await E.VenueTerminal.filter({ terminal_id: terminalId, status: 'active', trusted: true }, '-created_date', 1).catch(() => []))?.[0] || null)
+      : null;
+    const legacyPaymentTerminal = !trustedTerminal && terminalId !== 'unidentified'
       ? ((await E.VenuePaymentConfig.filter({ terminal_id: terminalId, active: true }, '-created_date', 1).catch(() => []))?.[0] || null)
       : null;
-    const terminalVenueId = String(terminalConfig?.venue_id || '').trim() || null;
+    // Batch 15 migration compatibility: VenueTerminal is canonical. Existing payment-terminal bindings remain accepted
+    // until explicitly provisioned into VenueTerminal so deployed kiosks fail closed rather than breaking mid-migration.
+    const terminalVenueId = String(trustedTerminal?.venue_id || legacyPaymentTerminal?.venue_id || '').trim() || null;
+    const terminalBindingSource = trustedTerminal ? 'venue_terminal' : legacyPaymentTerminal ? 'legacy_payment_terminal' : null;
 
     // Safe pre-authentication mode indicator. This exposes no roster, secret,
     // credential or payment identifier; it only lets the public kiosk display
@@ -87,6 +93,7 @@ Deno.serve(async (req) => {
         operating_mode: operatingMode,
         payment_mode: paymentMode,
         payment_provider: providerCode,
+        terminal_binding_source: terminalBindingSource,
         payment_mode_consistent: paymentMode === 'UNCONFIGURED' || paymentMode === operatingMode,
       });
     }
