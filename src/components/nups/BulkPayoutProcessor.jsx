@@ -8,6 +8,7 @@
 
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { writeEntity } from "@/lib/nups/writeEntity";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { CheckCircle2, X, Loader2, Truck, AlertTriangle } from "lucide-react";
@@ -44,7 +45,16 @@ export default function BulkPayoutProcessor({ selectedPayouts = [], currentUser,
           processed_at: nowIso,
         };
 
-        await base44.entities.DriverPayout.update(p.id, updates);
+        const write = await writeEntity({
+          entity: "DriverPayout",
+          operation: "update",
+          id: p.id,
+          data: updates,
+          actor: { email: currentUser?.email, id: currentUser?.id, role: currentUser?._highestRole || currentUser?.role || "External" },
+          venue_id: p.venue_id || null,
+          intent: "DRIVER_PAYOUT_BULK_PROCESSED",
+        });
+        if (!write?.ok) throw new Error(write?.block_reason || "Driver payout bulk update was rejected.");
 
         await logActivity({
           action_type: "PAYOUT_TOGGLE",
