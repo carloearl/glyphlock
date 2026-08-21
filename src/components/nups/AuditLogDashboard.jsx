@@ -9,6 +9,7 @@ import {
   Shield, Search, Download, Filter, AlertTriangle,
   CheckCircle2, Info, Clock, User, RefreshCw, FileText
 } from "lucide-react";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const SEVERITY_CONFIG = {
   CRITICAL: { color: "text-red-400",    bg: "bg-red-500/10",    border: "border-red-500/30",    icon: AlertTriangle },
@@ -123,6 +124,8 @@ function printAuditReport(events, filters) {
 }
 
 export default function AuditLogDashboard({ user }) {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [search, setSearch] = useState("");
   const [severityFilter, setSeverityFilter] = useState("ALL");
   const [actionFilter, setActionFilter] = useState("ALL");
@@ -136,8 +139,9 @@ export default function AuditLogDashboard({ user }) {
   const [expandedId, setExpandedId] = useState(null);
 
   const { data: auditEvents = [], isLoading, refetch } = useQuery({
-    queryKey: ["audit-events"],
-    queryFn: () => base44.entities.AuditEvent.list("-timestamp", 1000),
+    queryKey: ["audit-events", venueId],
+    queryFn: () => venueId ? base44.entities.AuditEvent.filter({ venue_id: venueId }, "-timestamp", 1000) : Promise.resolve([]),
+    enabled: !!venueId,
   });
 
   const filtered = useMemo(() => {
