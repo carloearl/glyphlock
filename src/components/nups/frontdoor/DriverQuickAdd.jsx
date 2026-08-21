@@ -12,6 +12,7 @@ import { loadVenueRates } from "@/lib/nups/venueRateConfig";
 import { useNUPSOperatingMode } from "@/hooks/useNUPSOperatingMode";
 import { scopeRowsToOperatingMode, stampOperationalRecord } from "@/lib/nups/operatingMode";
 import { writeEntity } from "@/lib/nups/writeEntity";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 import DriverPayoutPanel from "@/components/nups/frontdoor/DriverPayoutPanel";
 import DriverIdScanPanel from "@/components/nups/frontdoor/DriverIdScanPanel";
 import DriverQRDeliveryModal from "@/components/nups/frontdoor/DriverQRDeliveryModal";
@@ -258,8 +259,19 @@ export default function DriverQuickAdd({ user }) {
   const deleteDriver = useMutation({
     mutationFn: async (profile) => {
       const session = sessionByDriver.get(profile.driver_id);
-      if (session) await base44.entities.DriverPayout.delete(session.id);
-      await base44.entities.DriverProfile.delete(profile.id);
+      if (session) {
+        const payoutWrite = await writeEntity({
+          entity: "DriverPayout",
+          operation: "delete",
+          id: session.id,
+          data: { venue_id: venueId },
+          actor: { email: me?.email || user?.email, id: me?.id || user?.id, role: me?._highestRole || user?._highestRole || me?.role || user?.role || "External" },
+          venue_id: venueId,
+          intent: "DRIVER_QUICK_DELETE_SESSION",
+        });
+        if (!payoutWrite?.ok) throw new Error(payoutWrite?.block_reason || "Driver session delete was rejected.");
+      }
+      await writeIdentityRecord({ entity: "DriverProfile", operation: "delete", id: profile.id, data: { venue_id: venueId }, venueId, actor: me || user, intent: "driver:quick_delete_profile" });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["driver-profiles"] });
