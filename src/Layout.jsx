@@ -195,7 +195,7 @@ export default function Layout({ children, currentPageName }) {
                   heading: 'Common Issues & Fixes', 
                   text: 'Can\'t sign in? Clear browser cache and try again, or click "Forgot Password" on login screen. Page not loading? Refresh with Ctrl+Shift+R (hard refresh) to clear cached resources. Feature not working? Check if you\'re logged in—some tools require authentication. Mobile layout broken? Rotate device or zoom out—try landscape mode for complex tools. GlyphBot not responding? Close chat, wait 5 seconds, reopen, and try a simpler question. API key not working? Rotate it from Command Center → API Keys → click Rotate icon.',
                   tip: 'If you see "Unauthorized" errors, your session expired—just log out and log back in to refresh your token.',
-                  action: 'Still stuck? Open GlyphBot Jr (right sidebar) and describe your issue—it has access to your account and can diagnose problems.'
+                  action: 'Still stuck? Open GlyphBot Jr and describe the issue. Share only the context needed for guidance; private records are not assumed to be available.'
                 },
                 { 
                   heading: 'Secure Your Account', 
@@ -263,7 +263,7 @@ export default function Layout({ children, currentPageName }) {
                 { 
                   heading: 'Ask GlyphBot Anything', 
                   text: 'How to use GlyphBot: Click "GlyphBot" in top menu → type your question in the chat box → press Enter → wait 3-10 seconds for response. What to ask: "How do I create a QR code?", "Audit my website for vulnerabilities", "Explain this error message", "Help me debug this code", "What are the security risks of X?". GlyphBot Jr (right sidebar): Quick version for simple questions. Click chat icon → ask question → get instant answer. Both bots remember your conversation, so you can ask follow-up questions. How to upload files: Click paperclip icon → select file (image, PDF, code) → GlyphBot analyzes it → ask questions about the file.',
-                  tip: 'GlyphBot understands context from your account. Ask "Why did my last QR generation fail?" and it checks your recent activity automatically.',
+                  tip: 'GlyphBot can use the conversation, files, and project context you intentionally provide. It does not automatically receive unrestricted access to private account activity.',
                   action: 'Test: Open GlyphBot Jr (right sidebar) → type "How do I enable MFA?" → get instant step-by-step answer.'
                 },
                 { 
@@ -285,8 +285,8 @@ export default function Layout({ children, currentPageName }) {
               content: [
                 { 
                   heading: 'Manage Subscription', 
-                  text: 'How to upgrade: Profile icon → Command Center → Billing tab → click "Upgrade Plan" → choose Professional ($49/mo) or Enterprise ($199/mo) → enter payment details → confirm. Current plan shows at top of billing page. How to cancel: Billing tab → scroll to bottom → click "Cancel Subscription" → confirm → access continues until period ends. How to update payment: Billing tab → Payment Methods → click "Update Card" → enter new details → save. How to view invoices: Billing tab → Invoice History → click any invoice to download PDF. Billing issues? Email [carloearl@glyphlock.com](mailto:carloearl@glyphlock.com) with your account email.',
-                  tip: 'Subscription renews automatically. Cancel at least 24 hours before renewal date to avoid next charge.',
+                  text: 'Platform access, venue deployments, and enterprise integrations are scoped to the actual tools, hardware, onboarding, data boundaries, integrations, and support involved. Use the consultation page for a current written scope. If an authorized billing surface is available for your account, rely on the terms displayed there rather than historical plan descriptions.',
+                  tip: 'Review the written order, invoice, or authorized billing surface for the terms that apply to your specific engagement.',
                   action: 'Check current plan: Profile icon → Command Center → Billing tab → see plan name at top.'
                 },
                 { 
@@ -297,9 +297,9 @@ export default function Layout({ children, currentPageName }) {
                 },
                 { 
                   heading: 'Usage Limits & Quotas', 
-                  text: 'How to check usage: Command Center → Dashboard → see real-time counters for QR generations, image generations, API calls, storage used. Free tier limits: 50 QR codes/month, 20 AI images/month, 1,000 API calls/month, 1GB storage. Pro tier limits: 1,000 QR codes/month, 500 images/month, 100k API calls/month, 50GB storage. Enterprise: Unlimited everything. What happens at limit? Free users see upgrade prompt. Pro users can purchase add-ons. Enterprise never hits limits. How to buy add-ons: Billing tab → Add-Ons → select what you need (e.g., +100 QR codes for $10) → pay → quota increases immediately.',
-                  tip: 'Usage resets on your billing cycle date (shown in Billing tab). Plan ahead if you\'re close to limits.',
-                  action: 'Monitor usage: Command Center → Dashboard → check gauges showing % of monthly quota used.'
+                  text: 'Usage availability depends on the current product surface and the written scope for the account or deployment. Where counters are implemented, the Command Center may show relevant activity or storage information. Do not rely on old fixed quotas or unlimited-use language; confirm current capacity, support, and integration requirements in writing.',
+                  tip: 'If a usage meter is present, treat that product surface and the current written terms as authoritative.',
+                  action: 'For current limits or deployment capacity, review the applicable account surface or request written confirmation.'
                 },
                 { 
                   heading: 'Data Export & Backup', 
@@ -354,9 +354,9 @@ export default function Layout({ children, currentPageName }) {
               content: [
                 { 
                   heading: 'Get Help Fast', 
-                  text: 'GlyphBot Jr (right sidebar): Fastest way to get answers. Click chat icon → type question → instant response. Knows your account context. Email Support: [carloearl@glyphlock.com](mailto:carloearl@glyphlock.com) for billing, technical issues, or partnership inquiries. Response within 24 hours (usually faster). Phone: +1-480-886-5588 for urgent issues (enterprise customers only). Knowledge Base: Press ? key anytime to open this guide. Search sections on left sidebar. Community: Check FAQ page (footer → FAQ) for common questions and troubleshooting guides.',
-                  tip: 'Before contacting support: Try GlyphBot Jr first—it resolves 80% of issues instantly and has access to your account data.',
-                  action: 'Need help right now? Click GlyphBot Jr icon (right side) → describe your issue → get immediate assistance with account context.'
+                  text: 'GlyphBot Jr can provide general product guidance from the information you choose to share. For billing, technical issues, or partnership inquiries, use the consultation or contact surfaces and include only the details necessary to explain the request. The knowledge guide remains available from the help control.',
+                  tip: 'Before contacting support, try GlyphBot Jr for general guidance and share only the information necessary to describe the issue.',
+                  action: 'Need help? Open GlyphBot Jr for general guidance or use the contact page for a scoped response.'
                 },
                 { 
                   heading: 'Report Bugs & Feedback', 
