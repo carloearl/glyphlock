@@ -14,16 +14,16 @@ export const SEO_DATA = {
     internalLinks: ["/master-covenant", "/pricing", "/consultation", "/security-tools"]
   },
   "About": {
-    title: "About GlyphLock | One Evidence Architecture, Every Layer",
-    description: "GlyphLock connects hidden-image data, 91 QR payload structures, GlyphBot, automated DJ tools, NUPS, GlyphBucks closed-loop value, ledgers, timestamp evidence, governance, and Oracle/OHIP interoperability through one evidence architecture.",
-    keywords: ["GlyphLock", "evidence architecture", "LSB steganography", "hidden image data", "91 QR payloads", "GlyphBot", "Site Builder", "automated DJ", "NUPS", "GlyphBucks", "closed-loop stored value", "operational ledgers", "OpenTimestamps", "Bitcoin anchoring", "Master Covenant", "Oracle PartnerNetwork", "OHIP", "Dream Palace", "audit evidence", "Carlo Rene Earl", "El Mirage Arizona"],
-    h1: "It Started with an Image. It Became an Architecture for Proving What Happened.",
+    title: "About GlyphLock | From Images to Verifiable Operations",
+    description: "Discover how GlyphLock connects concealed-image data, 91 QR payloads, GlyphBot, NUPS, GlyphBucks, ledgers, governance, and OHIP through one evidence architecture.",
+    keywords: ["GlyphLock", "evidence infrastructure", "evidence architecture", "concealed image data", "LSB steganography", "secure QR", "91 QR payloads", "interactive images", "GlyphBot", "AI site builder", "automated DJ", "NUPS", "venue operations software", "GlyphBucks", "closed-loop stored value", "operational ledgers", "OpenTimestamps", "Master Covenant", "Oracle PartnerNetwork", "OHIP integration", "Dream Palace", "Carlo Rene Earl", "El Mirage Arizona"],
+    h1: "What If an Image Could Carry Proof?",
     url: "/about",
-    ogTitle: "About GlyphLock | The Complete Evidence Architecture",
-    ogDescription: "Explore the full GlyphLock onion: hidden-image carriers, 91 QR payloads, GlyphBot, Auto-DJ, NUPS, GlyphBucks, ledgers, timestamp evidence, governance, and Oracle/OHIP.",
+    ogTitle: "It Started With an Image. Now Every Layer Can Prove Its Work.",
+    ogDescription: "Explore the complete GlyphLock architecture: image carriers, Secure QR, GlyphBot, NUPS, GlyphBucks, ledgers, governance, timestamp evidence, hardware, and authorized integrations.",
     schemaType: "AboutPage",
-    priority: 0.8,
-    changefreq: "monthly",
+    priority: 0.9,
+    changefreq: "weekly",
     internalLinks: ["/SecureQRStudio", "/ImageLab", "/GlyphBot", "/GlyphBotMixer", "/NUPSLanding", "/GlyphLockFinancialPage", "/GovernanceHub", "/SecurityOperationsCenter", "/SDKDocs", "/consultation"]
   },
   "Pricing": {
