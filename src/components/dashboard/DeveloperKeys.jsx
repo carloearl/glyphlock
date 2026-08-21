@@ -17,7 +17,7 @@ import GlyphLoader from "@/components/GlyphLoader";
 import { toast } from "sonner";
 
 export default function DeveloperKeys() {
-  const [showSecret, setShowSecret] = useState({});
+  const [oneTimeSecret, setOneTimeSecret] = useState(null);
   const [copied, setCopied] = useState(null);
   const [newKeyName, setNewKeyName] = useState("");
   const [environment, setEnvironment] = useState("live");
@@ -35,11 +35,12 @@ export default function DeveloperKeys() {
       const response = await base44.functions.invoke("generateAPIKey", data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       setIsCreating(false);
       setNewKeyName("");
-      toast.success("Keys generated successfully");
+      if (created?.secret_key) setOneTimeSecret({ kind: 'created', name: created.name || 'API key', public_key: created.public_key, secret_key: created.secret_key });
+      toast.success("API key generated securely");
     },
     onError: () => {
       toast.error("Failed to generate Keys");
@@ -76,10 +77,11 @@ export default function DeveloperKeys() {
         if (res.status >= 400) throw new Error(res.data.error || "Failed to rotate key");
         return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (rotated) => {
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       setProcessing(null);
-      toast.success("Keys rotated securely");
+      if (rotated?.secret_key) setOneTimeSecret({ kind: 'rotated', name: rotated.name || 'API key', public_key: rotated.public_key, secret_key: rotated.secret_key });
+      toast.success("API key rotated securely");
     },
     onError: (error) => {
       setProcessing(null);
@@ -99,10 +101,6 @@ export default function DeveloperKeys() {
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
     toast.success("Copied to clipboard");
-  };
-
-  const toggleSecret = (id) => {
-    setShowSecret(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleCreateKey = (e) => {
@@ -128,7 +126,7 @@ export default function DeveloperKeys() {
             API Key Management Center
           </h2>
           <p className="text-gray-400 mt-2 text-sm">
-            Manage your Tri-Key cryptographic credentials.
+            Manage API keys. Secrets are shown only once at creation or rotation and are never recoverable from stored key records.
           </p>
         </div>
         <Button 
@@ -144,7 +142,7 @@ export default function DeveloperKeys() {
         <Card className="bg-gray-900/50 border-blue-500/30 backdrop-blur-sm animate-in fade-in slide-in-from-top-4">
           <CardHeader>
             <CardTitle className="text-white">Generate New Key Set</CardTitle>
-            <CardDescription className="text-gray-400">Creates a full set of Public, Secret, and Environment keys.</CardDescription>
+            <CardDescription className="text-gray-400">Creates a public key plus a one-time secret. Only the secret hash is persisted.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreateKey} className="flex gap-4 items-end">
@@ -228,27 +226,27 @@ export default function DeveloperKeys() {
                         </Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-1 font-mono">
-                        <span className="flex items-center gap-1 text-blue-400"><Globe className="w-3 h-3" /> {key.environment.toUpperCase()}</span>
+                        <span className="flex items-center gap-1 text-blue-400"><Globe className="w-3 h-3" /> {(key.environment || 'live').toUpperCase()}</span>
                         <span>•</span>
                         <span>Created: {new Date(key.created_date).toLocaleDateString()}</span>
                         <span>•</span>
-                        <span className="flex items-center gap-1" title="Blockchain Timestamp"><History className="w-3 h-3" /> {key.blockchain_hash ? key.blockchain_hash.slice(0, 10) + '...' : 'Pending'}</span>
+                        <span className="flex items-center gap-1"><History className="w-3 h-3" /> Last used: {key.last_used ? new Date(key.last_used).toLocaleDateString() : 'Never'}</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                      <Select 
-                        value={key.rotation_schedule || 'none'} 
+                        value={key.rotation_schedule || 'manual'} 
                         onValueChange={(val) => updateKeyMutation.mutate({ id: key.id, data: { rotation_schedule: val }})}
                      >
                         <SelectTrigger className="h-8 w-32 bg-black/50 border-gray-700 text-xs">
                             <SelectValue placeholder="Rotation" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="none">Manual Rotation</SelectItem>
-                            <SelectItem value="24h">Every 24h</SelectItem>
-                            <SelectItem value="7d">Every 7 Days</SelectItem>
-                            <SelectItem value="30d">Every 30 Days</SelectItem>
+                            <SelectItem value="manual">Manual Rotation</SelectItem>
+                            <SelectItem value="30_days">Every 30 Days</SelectItem>
+                            <SelectItem value="60_days">Every 60 Days</SelectItem>
+                            <SelectItem value="90_days">Every 90 Days</SelectItem>
                         </SelectContent>
                      </Select>
                      
