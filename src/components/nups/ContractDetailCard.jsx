@@ -14,16 +14,12 @@ export default function ContractDetailCard({ contract }) {
 
   return (
     <div className="space-y-5">
-      {/* Guest Photo + Name Header */}
+      {/* Protected guest media is not rendered as a raw URL until private retrieval is verified. */}
       <div className="flex items-center gap-4">
         <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-500/50 bg-gray-800 flex-shrink-0">
-          {c.guest_photo_url ? (
-            <img src={c.guest_photo_url} alt={c.guest_name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <User className="w-8 h-8 text-gray-600" />
-            </div>
-          )}
+          <div className="w-full h-full flex items-center justify-center">
+            <User className="w-8 h-8 text-gray-600" />
+          </div>
         </div>
         <div>
           <h2 className="text-xl font-bold">{c.guest_name}</h2>
@@ -61,38 +57,12 @@ export default function ContractDetailCard({ contract }) {
         </div>
       </div>
 
-      {/* Photos */}
-      <div>
-        <div className="flex items-center gap-2 text-sm font-bold text-green-400 mb-2">
-          <FileText className="w-4 h-4" /> Archived Photos
+      {/* Protected media presence may be shown, but raw URLs are withheld pending verified private retrieval. */}
+      {(c.guest_photo_url || c.id_photo_url || c.id_photo_back_url || c.thumbprint_url) && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+          Protected guest/ID/biometric evidence is on file. Direct media rendering is disabled until private retrieval is verified.
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {c.guest_photo_url && (
-            <div className="space-y-1">
-              <img src={c.guest_photo_url} alt="Guest" className="w-full rounded-lg border border-green-500/30" />
-              <p className="text-[10px] text-gray-500 text-center">Guest Face</p>
-            </div>
-          )}
-          {c.id_photo_url && (
-            <div className="space-y-1">
-              <img src={c.id_photo_url} alt="ID Front" className="w-full rounded-lg border border-cyan-500/30" />
-              <p className="text-[10px] text-gray-500 text-center">ID Front</p>
-            </div>
-          )}
-          {c.id_photo_back_url && (
-            <div className="space-y-1">
-              <img src={c.id_photo_back_url} alt="ID Back" className="w-full rounded-lg border border-gray-600" />
-              <p className="text-[10px] text-gray-500 text-center">ID Back</p>
-            </div>
-          )}
-          {c.thumbprint_url && (
-            <div className="space-y-1">
-              <img src={c.thumbprint_url} alt="Thumbprint" className="w-full rounded-lg border border-purple-500/30" />
-              <p className="text-[10px] text-gray-500 text-center">Thumbprint</p>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Signatures (from metadata) */}
       {c.metadata && (
@@ -117,7 +87,7 @@ export default function ContractDetailCard({ contract }) {
             <FileText className="w-4 h-4" /> Physical Signed Copy
           </div>
           <div className="bg-gray-900/50 rounded-lg p-3 space-y-2">
-            <img src={c.signed_hardcopy_photo_url} alt="Signed Hardcopy" className="w-full rounded-lg border border-amber-500/30" />
+            <div className="text-xs text-amber-200">Signed hardcopy media is on file; direct rendering is disabled pending verified private retrieval.</div>
             <Row label="Barcode / Serial" value={c.hardcopy_barcode_scan} color="text-purple-400 font-mono text-xs" />
             <Row label="Logged At" value={c.hardcopy_logged_at ? new Date(c.hardcopy_logged_at).toLocaleString() : null} />
             <Row label="Logged By" value={c.hardcopy_logged_by} />
