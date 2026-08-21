@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Venue scope"
     },
+    "guest_profile_id": {
+      "type": "string",
+      "description": "Reference to canonical GuestProfile identity. VIPGuest is the venue/VIP workflow projection, not the canonical government-ID profile."
+    },
     "full_name": {
       "type": "string",
       "description": "Guest full legal name"
