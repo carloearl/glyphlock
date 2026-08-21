@@ -281,6 +281,26 @@ The APIKey entity persists `secret_key_hash`, public key, environment, status, p
 
 ---
 
+## NUPS-0013 — Trusted venue terminal registry is not provisioned
+
+**Severity:** HIGH  
+**Invariant:** INV-05 / INV-07  
+**Status:** OPEN — DEPLOYMENT CONFIGURATION
+
+### Expected
+Every production kiosk/station that needs pre-authentication venue context has an admin-provisioned, active, trusted `VenueTerminal` record. Unknown, inactive, revoked, or unbound terminal IDs fail closed.
+
+### Observed
+Batch 15 created the canonical `VenueTerminal` registry and changed `nupsClockIn` to prefer it. The current entity query returned **0 VenueTerminal records**. The one active `VenuePaymentConfig` record also has no `terminal_id`, so no legitimate binding could be migrated automatically without inventing a device identity.
+
+### Current behavior
+Authenticated staff sessions still derive venue from the assigned NUPS identity. Pre-auth `getPublicMode` correctly returns a configuration error when the calling terminal has no trusted venue binding. A temporary compatibility fallback remains for already-configured payment-terminal IDs, but none currently exists in the active payment configuration.
+
+### Required resolution
+Provision the actual door/clock/DJ/manager/scanner/kiosk terminal IDs through an owner/admin-controlled workflow, verify each venue assignment, then remove the payment-terminal compatibility fallback after all deployed stations use `VenueTerminal`.
+
+---
+
 ## Closed / controlled findings from this mapping
 
 ### NUPS-C001 — No new direct-write bypasses
