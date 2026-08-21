@@ -29,6 +29,7 @@ import { useActiveVenue } from "@/hooks/useActiveVenue";
 import {
   STAFF_STEP, resolveStaffStep, ROLE_TASK_ROUTE, ROLE_TASK_LABEL,
 } from "@/lib/nups/flows/staffFlowState";
+import { writeIdentityRecord } from "@/lib/nups/identityWrites";
 
 function elapsedLabel(fromISO, toISO) {
   const end = toISO ? new Date(toISO).getTime() : Date.now();
@@ -98,10 +99,19 @@ export default function StaffShiftFlow({ user, venueId, station = "door" }) {
     try {
       const p = await verifyLiveIdentity(activeShift.user_email);
       if (!p.ok) { setProbe(p); return; }
-      const updated = await base44.entities.StaffShift.update(activeShift.id, {
-        ...activeShift,
-        check_out_time: new Date().toISOString(),
-        status: "checked_out",
+      const updated = await writeIdentityRecord({
+        entity: "StaffShift",
+        operation: "update",
+        id: activeShift.id,
+        venueId: vId,
+        actor: user,
+        intent: "staff:shift_flow:clockout",
+        data: {
+          ...activeShift,
+          venue_id: vId,
+          check_out_time: new Date().toISOString(),
+          status: "checked_out",
+        },
       });
       setActiveShift(null);
       setClosedShift(updated);
