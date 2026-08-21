@@ -13,36 +13,44 @@ import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
 import { aggregateSpenders, THRESHOLDS } from '@/components/vault/spendAggregator';
 import SpenderRow from '@/components/vault/SpenderRow';
 import EvidenceDrawer from '@/components/vault/EvidenceDrawer';
+import { useActiveVenue } from '@/hooks/useActiveVenue';
 
 export default function ContractLookup() {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.id || activeVenue?.venue_id || null;
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState('spenders'); // 'spenders' | 'contracts'
   const [flagFilter, setFlagFilter] = useState('all'); // 'all' | 'BIG_SPENDER' | 'MULTI_CONTRACT' | 'MULTI_CARD'
   const [selectedProfile, setSelectedProfile] = useState(null);
 
   const { data: venueContracts = [] } = useQuery({
-    queryKey: ['venue-contracts'],
-    queryFn: () => base44.entities.VenueContract.list('-created_date', 300),
+    queryKey: ['venue-contracts', venueId],
+    queryFn: () => venueId ? base44.entities.VenueContract.filter({ venue_id: venueId }, '-created_date', 300) : Promise.resolve([]),
+    enabled: !!venueId,
     initialData: [],
   });
   const { data: vipRecords = [] } = useQuery({
-    queryKey: ['vip-contract-records'],
-    queryFn: () => base44.entities.VIPContractRecord.list('-created_date', 200),
+    queryKey: ['vip-contract-records', venueId],
+    queryFn: () => venueId ? base44.entities.VIPContractRecord.filter({ venue_id: venueId }, '-created_date', 200) : Promise.resolve([]),
+    enabled: !!venueId,
     initialData: [],
   });
   const { data: gbOrders = [] } = useQuery({
-    queryKey: ['glyphbucks-orders'],
-    queryFn: () => base44.entities.GlyphBucksOrder.list('-created_date', 200),
+    queryKey: ['glyphbucks-orders', venueId],
+    queryFn: () => venueId ? base44.entities.GlyphBucksOrder.filter({ venue_id: venueId }, '-created_date', 200) : Promise.resolve([]),
+    enabled: !!venueId,
     initialData: [],
   });
   const { data: posTransactions = [] } = useQuery({
-    queryKey: ['pos-transactions-vault'],
-    queryFn: () => base44.entities.POSTransaction.list('-created_date', 300),
+    queryKey: ['pos-transactions-vault', venueId],
+    queryFn: () => venueId ? base44.entities.POSTransaction.filter({ venue_id: venueId }, '-created_date', 300) : Promise.resolve([]),
+    enabled: !!venueId,
     initialData: [],
   });
   const { data: vipRooms = [] } = useQuery({
-    queryKey: ['vip-rooms-vault'],
-    queryFn: () => base44.entities.VIPRoom.list(),
+    queryKey: ['vip-rooms-vault', venueId],
+    queryFn: () => venueId ? base44.entities.VIPRoom.filter({ venue_id: venueId }) : Promise.resolve([]),
+    enabled: !!venueId,
     initialData: [],
   });
 
