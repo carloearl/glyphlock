@@ -677,6 +677,90 @@ function EcosystemMap() {
   );
 }
 
+function LayeredArchitecture() {
+  const [activeLayer, setActiveLayer] = useState(0);
+  const current = architectureLayers[activeLayer];
+  const CurrentIcon = current.icon;
+
+  return (
+    <div className="mt-12 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#04080d] via-[#07111a] to-[#120a1d] p-5 sm:p-7 lg:p-9">
+      <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div>
+          <p className="text-center text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">
+            Select a layer · outside systems feed the evidence core
+          </p>
+          <div className="mt-5 flex flex-col items-center gap-2" role="group" aria-label="Explore GlyphLock's layered architecture">
+            {architectureLayers.slice().reverse().map((layer, reverseIndex) => {
+              const index = architectureLayers.length - 1 - reverseIndex;
+              const active = index === activeLayer;
+              const Icon = layer.icon;
+              return (
+                <button
+                  key={layer.label}
+                  type="button"
+                  onClick={() => setActiveLayer(index)}
+                  aria-pressed={active}
+                  style={{
+                    width: (100 - reverseIndex * 8) + "%",
+                    borderColor: active ? layer.color : undefined,
+                    color: active ? layer.color : undefined,
+                  }}
+                  className={
+                    "flex min-h-14 items-center gap-3 rounded-xl border bg-black/40 px-4 py-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-[#00E4FF] " +
+                    (active ? "shadow-[0_0_28px_rgba(0,228,255,0.1)]" : "border-white/10 text-slate-400 hover:border-white/25 hover:text-white")
+                  }
+                >
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="text-xs font-black uppercase tracking-[0.13em]">{layer.label}</span>
+                  <span className="ml-auto font-mono text-[9px] opacity-55">L{index + 1}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-5 text-center text-xs leading-relaxed text-slate-500">
+            It looks broad because the outer layers do different jobs. It fits together because each one carries context inward.
+          </p>
+        </div>
+
+        <motion.article
+          key={current.label}
+          initial={{ opacity: 0, x: 12 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="rounded-2xl border border-white/10 bg-black/45 p-6 sm:p-8"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]" style={{ color: current.color }}>
+              <CurrentIcon className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Layer {activeLayer + 1} of {architectureLayers.length}</p>
+              <p className="mt-1 text-sm font-black uppercase tracking-[0.14em]" style={{ color: current.color }}>{current.label}</p>
+            </div>
+          </div>
+          <h3 className="mt-6 text-2xl font-black text-white sm:text-3xl">{current.title}</h3>
+          <p className="mt-4 leading-relaxed text-slate-300">{current.body}</p>
+          <div className="mt-6 grid gap-2 sm:grid-cols-3">
+            {current.points.map((point) => (
+              <div key={point} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs font-semibold leading-relaxed text-slate-300">
+                {point}
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-slate-300">
+              {current.status}
+            </span>
+            <Link to={current.to} className="group inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-black text-white focus:outline-none focus:ring-2 focus:ring-[#00E4FF]">
+              {current.cta}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            </Link>
+          </div>
+        </motion.article>
+      </div>
+    </div>
+  );
+}
+
 function WorkflowExplorer() {
   const [activeStep, setActiveStep] = useState(0);
   const current = workflowSteps[activeStep];
