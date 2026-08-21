@@ -14,17 +14,17 @@ export const SEO_DATA = {
     internalLinks: ["/master-covenant", "/pricing", "/consultation", "/security-tools"]
   },
   "About": {
-    title: "About GlyphLock | From an Image to Verifiable Operations",
-    description: "GlyphLock began with a question about what an image could prove. Today NUPS, GlyphLock Verification, and GlyphBot connect identity, permission, activity, contracts, transaction references, and audit evidence.",
-    keywords: ["GlyphLock", "NUPS", "Nexus Unified POS System", "venue operations", "QR verification", "digital authorship", "audit evidence", "GlyphBot", "Carlo Rene Earl", "El Mirage Arizona"],
-    h1: "It Started with an Image. It Became a Way to Prove What Happened.",
+    title: "About GlyphLock | One Evidence Architecture, Every Layer",
+    description: "GlyphLock is an evidence architecture spanning creative technology, identity, GlyphBot, NUPS operations, governance, security, financial accountability, integrations, hardware, and verification.",
+    keywords: ["GlyphLock", "evidence architecture", "creative technology", "NUPS", "GlyphBot", "Secure QR Studio", "Image Lab", "governance", "security", "financial accountability", "systems integration", "hardware deployment", "audit evidence", "Carlo Rene Earl", "El Mirage Arizona"],
+    h1: "It Started with an Image. It Became an Architecture for Proving What Happened.",
     url: "/about",
-    ogTitle: "About GlyphLock | Verifiable Creative and Venue Operations",
-    ogDescription: "The story and architecture connecting GlyphLock's identity, verification, NUPS venue operations, assisted construction, and evidence workflows.",
+    ogTitle: "About GlyphLock | The Complete Evidence Architecture",
+    ogDescription: "See how GlyphLock connects creative tools, identity, assisted intelligence, NUPS operations, governance, security, financial records, integrations, hardware, and verification.",
     schemaType: "AboutPage",
     priority: 0.8,
     changefreq: "monthly",
-    internalLinks: ["/NUPSLanding", "/consultation", "/about-carlo", "/roadmap"]
+    internalLinks: ["/SecureQRStudio", "/ImageLab", "/GlyphBot", "/NUPSLanding", "/GovernanceHub", "/SecurityOperationsCenter", "/SDKDocs", "/consultation"]
   },
   "Pricing": {
     title: "Enterprise Security Plans | GlyphLock LLC",
