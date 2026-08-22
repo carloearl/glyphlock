@@ -257,12 +257,14 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     if (!song) return;
     const residentSongId = djSession.activeDeck === "B" ? djSession.deckB.songId : djSession.deckA.songId;
     const pausing = playingSongId === songId && residentSongId === songId;
-    requestTransport({
-      requestId: `transport-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      action: pausing ? "pause" : "play",
-      deck: djSession.activeDeck,
-      songId,
-    });
+    if (pausing || residentSongId === songId) {
+      requestTransport({
+        requestId: `transport-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        action: pausing ? "pause" : "play",
+        deck: djSession.activeDeck,
+        songId,
+      });
+    }
     if (pausing) {
       setPlayingSongId(null);
       emitTelemetry("SONG_PAUSE", { songId, profileId: uiState.activeProfileId, timestamp: Date.now() });
