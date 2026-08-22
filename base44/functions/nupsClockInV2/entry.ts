@@ -298,8 +298,8 @@ Deno.serve(async (req) => {
       return Response.json({ valid: true });
     }
 
-    // ─── SWEEP STALE SHIFTS — auto clock-out anyone idle > 30 min ────────────
-    // Safe to call from any dashboard poll; only closes truly-idle shifts.
+    // ─── SWEEP STALE SHIFTS — manager-authorized idle cleanup ────────────────
+    // Only an authenticated manager-class identity may trigger the sweep.
     if (action === 'sweepStale') {
       const live = await base44.auth.me().catch(() => null);
       if (!live?.email) return Response.json({ error: 'Authentication required.' }, { status: 401 });
