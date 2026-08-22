@@ -498,22 +498,22 @@ export default function DJPlayerSection({
           <Button
             size="sm"
             variant="outline"
-            className="h-7 text-[10px] gap-1 border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"
+            className="min-h-10 text-[10px] gap-1 border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"
             onClick={() => openClubTVWindow()}
             title="Open Fable X visualizer — drag onto the TV display or cast the tab"
           >
             <Tv className="w-3 h-3" /> Open Visualizer
           </Button>
-          <Button size="sm" variant="ghost" className="h-6 text-[10px] gap-1 text-slate-400" onClick={handleCueNext}>
+          <Button size="sm" variant="ghost" className="min-h-10 text-[10px] gap-1 text-slate-400" onClick={handleCueNext}>
             Cue Next
           </Button>
-          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSwap} title="Promote cue deck">
+          <Button size="icon" variant="ghost" className="h-10 w-10" onClick={handleSwap} aria-label="Promote cue deck" title="Promote cue deck">
             <ArrowLeftRight className="w-3 h-3 text-slate-400" />
           </Button>
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6 hover:bg-red-500/15 hover:text-red-300"
+            className="h-10 w-10 hover:bg-red-500/15 hover:text-red-300"
             onClick={() => setConfirmStop(true)}
             title="Stop playback (Esc)"
           >
@@ -522,7 +522,7 @@ export default function DJPlayerSection({
         </div>
       </div>
 
-      <div className="flex gap-2 p-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 p-2">
         <PlayerDeck
           ref={deckARef}
           song={deckASong}
