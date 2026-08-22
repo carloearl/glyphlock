@@ -142,37 +142,72 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, venue_id: venueId, terminal: publicTerminal(row) });
     }
 
-    if (action === 'provision') {
+    if (action === 'provision' || action === 'approve') {
       const terminalId = cleanId(body.terminal_id);
       const terminalType = String(body.terminal_type || '').toUpperCase();
-      if (!terminalId) return Response.json({ error: 'Stable terminal_id is required' }, { status: 400 });
+      const station = cleanText(body.station, 160);
+      if (terminalId.length < 8) return Response.json({ error: 'A stable terminal_id of at least 8 characters is required' }, { status: 400 });
       if (!TERMINAL_TYPES.has(terminalType)) return Response.json({ error: 'Invalid terminal_type' }, { status: 400 });
+      if (!station) return Response.json({ error: 'A physical station name is required' }, { status: 400 });
+
       const existing = (await E.VenueTerminal.filter({ terminal_id: terminalId }, '-created_date', 1).catch(() => []))?.[0] || null;
-      if (existing) {
-        if (!allowedVenue(existing.venue_id)) {
-          await audit('TERMINAL_VENUE_MISMATCH', existing, 'terminal_already_assigned');
-          return Response.json({ error: 'Terminal ID is already assigned to another venue' }, { status: 409 });
-        }
-        return Response.json({ success: true, created: false, terminal: publicTerminal(existing) });
+      if (existing && !allowedVenue(existing.venue_id)) {
+        await audit('TERMINAL_VENUE_MISMATCH', existing, 'terminal_already_assigned');
+        return Response.json({ error: 'Terminal ID is already assigned to another venue' }, { status: 409 });
       }
+
+      if (action === 'approve' && existing?.status === 'revoked') {
+        return Response.json({ error: 'Revoked terminals cannot be re-approved. Register a new device identifier after owner review.' }, { status: 409 });
+      }
+
+      if (existing) {
+        if (action === 'provision') {
+          return Response.json({ success: true, created: false, approved: existing.status === 'active' && existing.trusted === true, terminal: publicTerminal(existing) });
+        }
+        const approved = await E.VenueTerminal.update(existing.id, {
+          terminal_type: terminalType,
+          station,
+          status: 'active',
+          trusted: true,
+          last_seen_at: new Date().toISOString(),
+          notes: cleanText(body.notes, 1000),
+          metadata: {
+            ...(existing.metadata || {}),
+            registration_source: cleanText(body.registration_source || 'owner_admin_ui_approval', 120),
+            approved_by: email,
+            approved_at: new Date().toISOString(),
+            browser_generated_identifier: terminalId.startsWith('NUPS-TERM-'),
+          },
+        });
+        await audit('TERMINAL_APPROVED', approved, 'explicit_owner_manager_approval');
+        if (existing.trusted !== true) await audit('TERMINAL_TRUST_CHANGED', approved, 'trusted_on_approval');
+        return Response.json({ success: true, created: false, approved: true, terminal: publicTerminal(approved) });
+      }
+
+      const trusted = action === 'approve';
       const created = await E.VenueTerminal.create({
         terminal_id: terminalId,
         venue_id: venueId,
         terminal_type: terminalType,
-        station: cleanText(body.station, 160),
-        status: 'active',
-        trusted: body.trusted === true,
+        station,
+        status: trusted ? 'active' : 'inactive',
+        trusted,
         last_seen_at: new Date().toISOString(),
         provisioned_by: email,
         notes: cleanText(body.notes, 1000),
         metadata: {
-          registration_source: cleanText(body.registration_source || 'owner_admin_ui', 120),
+          registration_source: cleanText(body.registration_source || (trusted ? 'owner_admin_ui_approval' : 'owner_admin_ui_pending'), 120),
+          approved_by: trusted ? email : null,
+          approved_at: trusted ? new Date().toISOString() : null,
           browser_generated_identifier: terminalId.startsWith('NUPS-TERM-'),
         },
       });
-      await audit('TERMINAL_PROVISIONED', created);
-      if (created.trusted) await audit('TERMINAL_TRUST_CHANGED', created, 'trusted_on_provision');
-      return Response.json({ success: true, created: true, terminal: publicTerminal(created) });
+      await audit('TERMINAL_PROVISIONED', created, trusted ? 'provisioned_and_approved' : 'provisioned_pending_approval');
+      if (trusted) {
+        await audit('TERMINAL_APPROVED', created, 'explicit_owner_manager_approval');
+        await audit('TERMINAL_TRUST_CHANGED', created, 'trusted_on_approval');
+      }
+      return Response.json({ success: true, created: true, approved: trusted, terminal: publicTerminal(created) });
     }
 
     const recordId = cleanText(body.id, 160);
@@ -203,6 +238,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'activate' || action === 'deactivate' || action === 'revoke') {
+      if (action === 'activate' && row.status === 'revoked') {
+        return Response.json({ error: 'Revoked terminals cannot be reactivated through normal venue administration.' }, { status: 409 });
+      }
       const status = action === 'activate' ? 'active' : action === 'deactivate' ? 'inactive' : 'revoked';
       const updated = await E.VenueTerminal.update(row.id, {
         status,
