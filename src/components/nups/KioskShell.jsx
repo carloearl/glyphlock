@@ -129,12 +129,16 @@ export default function KioskShell({ children }) {
         </div>
       )}
 
-      {/* DACO-SIP-001 NUPS-MED-001 remediation (2026-07-31): when the secure
-          display is paused, operational children are UNMOUNTED (not just
-          covered) so no operational data remains in the DOM behind the
-          overlay. */}
-      <div className={showOperationalChrome ? "pb-16" : ""}>
-        {displayPaused ? null : children}
+      {/* The operational surface is fully redacted and made inert while the
+          secure display is paused, but remains mounted so a live DJ engine is
+          not destroyed by an accidental fullscreen exit. Visibility, pointer,
+          focus and accessibility exposure are all removed until resume. */}
+      <div
+        className={`${showOperationalChrome ? "pb-16" : ""} ${displayPaused ? "fixed inset-0 invisible pointer-events-none select-none overflow-hidden" : ""}`}
+        aria-hidden={displayPaused || undefined}
+        inert={displayPaused ? true : undefined}
+      >
+        {children}
       </div>
 
       {displayPaused && (
