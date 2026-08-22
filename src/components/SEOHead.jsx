@@ -15,40 +15,41 @@ export default function SEOHead({
 }) {
   const location = useLocation();
   
-  // Auto-resolve SEO data
-  let autoData = {};
-  const path = location.pathname;
-  // Import SEO_DATA directly to iterate over all entries
-  const allKeys = Object.keys(SEO_DATA);
-  const key = allKeys.find(k => SEO_DATA[k] && SEO_DATA[k].url === path) || (path === "/" ? "Home" : null);
-  
-  if (key) {
-      autoData = getSeoData(key);
-  }
+  // Resolve a single page record regardless of route casing or separators.
+  const path = location.pathname || "/";
+  const normalizeSeoPath = (value = "/") => {
+    const normalized = value.toLowerCase().replace(/\/+$/, "") || "/";
+    return normalized.replace(/[-_]/g, "");
+  };
+  const key = Object.keys(SEO_DATA).find((entryKey) => {
+    const entryUrl = SEO_DATA[entryKey]?.url;
+    return entryUrl && normalizeSeoPath(entryUrl) === normalizeSeoPath(path);
+  }) || (normalizeSeoPath(path) === "/" ? "Home" : null);
+  const autoData = key ? getSeoData(key) : {};
 
-  const resolvedTitle = title || autoData.title || "GlyphLock | Custom Software, NUPS, AI & Verification Workflows";
-  const resolvedDescription = description || autoData.description || "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.";
+  const resolvedTitle = title || autoData.title || "GlyphLock | Evidence Infrastructure, NUPS & Secure Workflows";
+  const resolvedDescription = description || autoData.description || "GlyphLock connects secure image carriers, QR verification, AI-assisted tools, NUPS venue operations, financial records, governance, and authorized integrations.";
   const resolvedOgTitle = ogTitle || autoData.ogTitle || resolvedTitle;
   const resolvedOgDescription = ogDescription || autoData.ogDescription || resolvedDescription;
-  
-  // Combine and deduplicate keywords
-  const defaultKeywords = "GlyphLock LLC, custom software, NUPS, venue operations, QR verification, AI workflows, GlyphBot, Image Lab, systems integration, operational software, governance tooling, security operations";
+
+  // Use the page-specific keyword set as the source of truth. Global keywords
+  // are a fallback only, preventing stale sitewide terms from leaking into pages.
+  const defaultKeywords = "GlyphLock, evidence infrastructure, NUPS, secure QR, interactive images, GlyphBot, venue operations software, API integration, governance";
   const autoKeywords = autoData.keywords ? autoData.keywords.join(", ") : "";
   const propKeywords = Array.isArray(keywords) ? keywords.join(", ") : (keywords || "");
-  
-  const combinedKeywords = [propKeywords, autoKeywords, defaultKeywords]
-    .filter(Boolean)
-    .join(", ")
+  const sourceKeywords = propKeywords || autoKeywords || defaultKeywords;
+  const resolvedKeywords = sourceKeywords
     .split(",")
-    .map(k => k.trim())
-    .filter((v, i, a) => a.indexOf(v) === i && v !== "") // Ensure unique and non-empty
+    .map((keyword) => keyword.trim())
+    .filter((value, index, all) => value && all.indexOf(value) === index)
     .join(", ");
-
-  const resolvedKeywords = combinedKeywords;
   const resolvedSchemaType = autoData.schemaType || "WebSite";
 
   const siteUrl = "https://glyphlock.io";
-  const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
+  const resolvedPath = url || autoData.url || path || "/";
+  const fullUrl = /^https?:\/\//i.test(resolvedPath)
+    ? resolvedPath
+    : `${siteUrl}${resolvedPath.startsWith("/") ? resolvedPath : `/${resolvedPath}`}`;
 
   useEffect(() => {
     // Update title
@@ -85,7 +86,9 @@ export default function SEOHead({
     // Update or create meta tags
     const updateMetaTag = (name, content, property = false) => {
       const attribute = property ? 'property' : 'name';
-      let element = document.querySelector(`meta[${attribute}="${name}"]`);
+      const matches = [...document.querySelectorAll(`meta[${attribute}="${name}"]`)];
+      let element = matches.shift();
+      matches.forEach((duplicate) => duplicate.remove());
       if (!element) {
         element = document.createElement('meta');
         element.setAttribute(attribute, name);
@@ -188,8 +191,10 @@ export default function SEOHead({
       document.head.appendChild(dnsPrefetch);
     }
 
-    // Canonical link
-    let canonical = document.querySelector('link[rel="canonical"]');
+    // Canonical link — keep one canonical and remove stale duplicates.
+    const canonicalLinks = [...document.querySelectorAll('link[rel="canonical"]')];
+    let canonical = canonicalLinks.shift();
+    canonicalLinks.forEach((duplicate) => duplicate.remove());
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
@@ -239,7 +244,7 @@ export default function SEOHead({
         "name": "Carlo Rene Earl",
         "jobTitle": "Founder & Chief Executive Officer"
       },
-      "employee": [
+      "member": [
         {
           "@type": "Person",
           "name": "Jacub Lough",
