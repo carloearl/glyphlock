@@ -1,0 +1,139 @@
+{
+  "name": "AuditEvidence",
+  "type": "object",
+  "description": "Append-only provenance record for external evidence used by GlyphBot Audit. External provider data is corroborative evidence, not an authoritative eligibility decision or identity assertion.",
+  "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "audit_id": {
+      "type": "string",
+      "description": "Audit or AuditReport correlation identifier supplied by the caller."
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "Server-generated identifier for this lookup and its evidence chain."
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "beenverified",
+        "manual",
+        "other"
+      ]
+    },
+    "lookup_type": {
+      "type": "string",
+      "description": "Provider-neutral lookup type requested by GlyphBot Audit."
+    },
+    "query_fingerprint": {
+      "type": "string",
+      "description": "SHA-256 fingerprint of the normalized lookup input. Raw lookup input is intentionally not persisted here."
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "audit",
+        "fraud_investigation",
+        "business_due_diligence",
+        "identity_corroboration"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "configured",
+        "unconfigured",
+        "success",
+        "no_match",
+        "provider_error",
+        "blocked"
+      ]
+    },
+    "retrieved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "GlyphBot Audit confidence after corroboration. Provider presence alone must not set this to 1."
+    },
+    "corroboration_status": {
+      "type": "string",
+      "enum": [
+        "unreviewed",
+        "single_source",
+        "corroborated",
+        "conflict",
+        "insufficient_evidence"
+      ],
+      "default": "unreviewed"
+    },
+    "provider_reference": {
+      "type": "string",
+      "description": "Non-secret provider request/result reference when supplied by the provider."
+    },
+    "evidence_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Minimal normalized evidence required by the audit. Do not place API keys, auth headers, or unrestricted raw provider payloads here."
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "eligibility_use_prohibited": {
+          "type": "boolean",
+          "default": true
+        },
+        "raw_query_stored": {
+          "type": "boolean",
+          "default": false
+        },
+        "provider_is_source_of_truth": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "error_code": {
+      "type": "string"
+    },
+    "event_version": {
+      "type": "integer",
+      "default": 1
+    }
+  },
+  "required": [
+    "correlation_id",
+    "provider",
+    "lookup_type",
+    "query_fingerprint",
+    "purpose",
+    "status",
+    "retrieved_at",
+    "corroboration_status",
+    "policy",
+    "event_version"
+  ],
+  "rls": {
+    "create": false,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}

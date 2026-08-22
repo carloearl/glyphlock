@@ -176,19 +176,8 @@ export default function Footer() {
           </span>
         </div>
 
-        {/* ─── SEO COLLAPSIBLES (crawler-only, minimal UI) ─── */}
+        {/* ─── CRAWLER DISCOVERY ─── */}
         <div className="border-t border-white/[0.06] pt-6 space-y-3">
-          <details className="group">
-            <summary className="cursor-pointer text-center text-[10px] text-slate-600 tracking-wide hover:text-slate-400 transition-colors list-none select-none">
-              <span className="inline-flex items-center gap-1.5">
-                SEO Metadata
-                <svg className="w-3 h-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-              </span>
-            </summary>
-            <div className="mt-3 p-4 rounded-lg text-[10px] text-slate-500 leading-relaxed space-y-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
-              <p>quantum-resistant encryption, post-quantum cryptography, AI cybersecurity, enterprise security platform, visual cryptography, secure QR codes, blockchain security, AI governance framework, Master Covenant, GlyphLock Security, threat detection AI, zero-trust architecture, identity verification, fraud prevention, steganography tools, secure QR code generator, image encryption, NIST post-quantum standards, AI binding protocol, security operations center, SOC 2 aligned, ISO 27001 aligned, GDPR aligned, HIPAA aligned</p>
-            </div>
-          </details>
           <details className="group">
             <summary className="cursor-pointer text-center text-[10px] text-slate-600 tracking-wide hover:text-slate-400 transition-colors list-none select-none">
               <span className="inline-flex items-center gap-1.5">
