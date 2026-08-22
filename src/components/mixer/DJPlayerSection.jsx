@@ -315,6 +315,20 @@ export default function DJPlayerSection({
     onActiveSongChange?.(null, { reason: "source_failure", failedSongId: songId });
   }, [activeDeck, autoDj, deckASongId, deckBSongId, onPlaybackError, onActiveSongChange, performTransition]);
 
+  useEffect(() => {
+    const command = session.transportCommand;
+    if (!command?.requestId || handledTransportIdsRef.current.has(command.requestId)) return;
+    handledTransportIdsRef.current.add(command.requestId);
+    const deck = command.deck || activeDeck;
+    const deckRef = deck === "B" ? deckBRef.current : deckARef.current;
+    if (!deckRef) return;
+    if (command.action === "pause") {
+      deckRef.pause?.();
+      return;
+    }
+    Promise.resolve(deckRef.play?.()).catch((error) => handleDeckPlaybackError(deck, error));
+  }, [session.transportCommand, activeDeck, handleDeckPlaybackError]);
+
   // Auto transition begins when the active track enters the configured fade
   // window. Duration=0 simply means metadata is not ready yet, so we wait.
   // A prewarm phase starts the cue deck ~30s earlier so YouTube pre-roll ads
