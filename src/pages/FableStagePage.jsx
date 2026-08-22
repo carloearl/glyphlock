@@ -9,7 +9,7 @@ import FableControlPanel from "@/components/mixer/fable/FableControlPanel";
 import { DEFAULT_SETTINGS } from "@/components/mixer/fable/fableThemes";
 import { openFableChannel } from "@/components/mixer/fable/fableChannel";
 import useFableSyntheticBeat from "@/components/mixer/fable/useFableSyntheticBeat";
-import { Maximize2, Eye, EyeOff } from "lucide-react";
+import { Maximize2, EyeOff } from "lucide-react";
 
 export default function FableStagePage() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -130,11 +130,10 @@ export default function FableStagePage() {
       ) : (
         <button
           type="button"
+          aria-label="Show controls"
           onClick={() => setShowControls(true)}
-          className="absolute right-4 top-4 z-30 flex h-10 items-center gap-2 rounded-xl border border-white/15 bg-black/60 px-3 text-xs font-bold uppercase tracking-wider text-white/70 hover:bg-black/90"
-        >
-          <Eye className="h-4 w-4" /> Show Controls
-        </button>
+          className="absolute right-3 top-1/2 z-30 h-4 w-4 -translate-y-1/2 rounded-full bg-white/20 transition-colors hover:bg-white/60"
+        />
       )}
     </div>
   );

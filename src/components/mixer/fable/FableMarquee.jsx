@@ -5,11 +5,15 @@
  */
 import React from "react";
 import { getFont } from "./fableThemes";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 export default function FableMarquee({ settings, track, accent }) {
+  const venue = useActiveVenue();
+  const venueName = venue?.name || "Dream Palace";
+  const dayOfWeek = new Date().toLocaleDateString(undefined, { weekday: "long" });
   const copy =
     settings.marqueeText?.trim() ||
-    `${track?.title || "N.U.P.S."} · ${track?.artist || "Autonomous DJ"} · Dream Palace`;
+    `${venueName} · ${dayOfWeek}`;
 
   const rightToLeft = settings.marqueeDirection === "rtl";
 
