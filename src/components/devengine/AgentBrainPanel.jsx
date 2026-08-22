@@ -255,30 +255,17 @@ export default function AgentBrainPanel() {
     setSending(true);
 
     try {
-      // For BUILD/REFACTOR modes, use OMEGA pipeline
-      if (mode === 'build' || mode === 'refactor') {
-        setSending(false);
-        await executeFullPipeline(userInput);
-        return;
-      }
-
-      // For DEBUG mode, use debug analysis
-      if (mode === 'debug') {
-        setSending(false);
-        await executeDebugAnalysis(userInput);
-        return;
-      }
-
-      // For EXPLAIN mode, use the regular agent conversation
-      const modePrefix = '[EXPLAIN MODE - ANALYSIS ONLY] ';
-      const explainMessage = {
+      // All modes route to the live agent. The agent's own instructions
+      // enforce its scope (scan / read / report — no code mutation), so the
+      // mode prefix is only a context hint, not a trust boundary.
+      const modePrefix = `[${mode.toUpperCase()} MODE] `;
+      const agentMessage = {
         role: 'user',
         content: modePrefix + userInput,
         ...(fileUrls.length > 0 && { file_urls: fileUrls })
       };
 
-      await base44.agents.addMessage(activeConversation, explainMessage);
-      toast.success('Agent analyzing...');
+      await base44.agents.addMessage(activeConversation, agentMessage);
     } catch (error) {
       console.error('Send error:', error);
       toast.error('Failed to send message');
