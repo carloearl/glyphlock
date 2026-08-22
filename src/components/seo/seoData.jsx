@@ -5,11 +5,8 @@
 //  - One entry per real public route. URLs use ACTUAL route casing from
 //    pages.config.js / App.jsx (e.g. /SecureQRStudio, /ImageLab, /GlyphBot,
 //    /NUPSLanding, /SDKDocs, /GlyphLockFinancial). No obsolete service slugs.
-//  - No retired/misleading strings: "What If an Image Could Carry Proof?",
-//    "Nexus Unified Portal System", "Dream Dollars", "banking-grade",
-//    "Quantum-Grade"/"quantum-resistant", "revolutionary", "instant payout",
-//    "automated processor split", "public-production API", patent claims,
-//    "DACO¹", preview URLs, stale app IDs.
+//  - No retired/misleading strings (full enumerated list enforced by
+//    scripts/check-seo-metadata.mjs).
 //  - NUPS expands to "Nexus Unified POS System" only.
 //  - Structured data is claims-safe: no unsupported certification, endorsement,
 //    price, rating, partner, patent, or production claims.

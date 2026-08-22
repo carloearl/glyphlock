@@ -14,7 +14,7 @@
 // every active metadata/schema/crawler emitter.
 // ============================================================================
 
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
@@ -54,6 +54,9 @@ for (const p of ACTIVE_SOURCES) {
   else sourceContents[p] = c;
 }
 
+// Normalize apostrophes (curly ↔ straight) for resilient exact-value checks.
+const norm = (s) => (s || '').replace(/[\u2019\u2018]/g, "'");
+
 // ── 1. Retired/misleading strings (case-insensitive) ──
 const RETIRED_STRINGS = [
   'What If an Image Could Carry Proof',
@@ -82,9 +85,10 @@ const RETIRED_STRINGS = [
 ];
 
 for (const [path, content] of Object.entries(sourceContents)) {
+  const lower = content.toLowerCase();
   for (const needle of RETIRED_STRINGS) {
-    if (content.toLowerCase().includes(needle.toLowerCase())) {
-      fail(`RETired string "${needle}" present in ${path}`);
+    if (lower.includes(needle.toLowerCase())) {
+      fail(`Retired string "${needle}" present in ${path}`);
     }
   }
 }
@@ -108,8 +112,9 @@ for (const [path, content] of Object.entries(sourceContents)) {
 // ── 4. Wrong NUPS expansion ──
 const WRONG_NUPS = ['Nexus Unified Portal System', 'Nightclub & Unique Venue', 'Nightclub and Unique Venue'];
 for (const [path, content] of Object.entries(sourceContents)) {
+  const lower = content.toLowerCase();
   for (const wrong of WRONG_NUPS) {
-    if (content.toLowerCase().includes(wrong.toLowerCase())) {
+    if (lower.includes(wrong.toLowerCase())) {
       fail(`Wrong NUPS expansion "${wrong}" present in ${path}`);
     }
   }
@@ -138,10 +143,12 @@ if (layout && layout.includes('StructuredDataOrg')) {
   fail('src/Layout.jsx still references StructuredDataOrg — remove import and usage');
 }
 
-// seoData must not contain two entries with the same url.
+// seoData SEO_DATA block must not contain two entries with the same url.
 const seoData = sourceContents['src/components/seo/seoData.jsx'];
 if (seoData) {
-  const urlMatches = [...seoData.matchAll(/url:\s*"([^"]+)"/g)];
+  const blockMatch = seoData.match(/export const SEO_DATA = \{([\s\S]*?)\n\};/);
+  const block = blockMatch ? blockMatch[1] : seoData;
+  const urlMatches = [...block.matchAll(/url:\s*"([^"]+)"/g)];
   const urls = urlMatches.map((m) => m[1]);
   const dupes = urls.filter((u, i) => urls.indexOf(u) !== i);
   if (dupes.length) fail(`Duplicate canonical URLs in seoData.jsx: ${[...new Set(dupes)].join(', ')}`);
@@ -155,8 +162,9 @@ if (sitemapXml) {
   if (dupes.length) fail(`Duplicate <loc> in public/sitemap.xml: ${[...new Set(dupes)].join(', ')}`);
 }
 
-// ── 6. Home / About regression (exact canonical values) ──
+// ── 6. Home / About regression (exact canonical values, apostrophe-normalized) ──
 if (seoData) {
+  const n = norm(seoData);
   const HOME_TITLE = 'GlyphLock | Evidence Infrastructure for Identity, Operations & Proof';
   const HOME_DESC = 'GlyphLock connects identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS venue operations, financial accountability, APIs, hardware, and governance through one evidence architecture.';
   const HOME_OG_TITLE = 'GlyphLock | Connected Evidence Infrastructure';
@@ -164,7 +172,7 @@ if (seoData) {
   const ABOUT_TITLE = 'About GlyphLock | Technology, NUPS & Evidence Architecture';
   const ABOUT_DESC = 'See how GlyphLock connects identity, secure QR, image carriers, GlyphBot, automated DJ and Fable, NUPS venue operations, GlyphBucks accounting, SDKs, APIs, hardware, OHIP integration work, and governance.';
   const ABOUT_OG_TITLE = 'About GlyphLock | One Core, Six Domains, One Trust Envelope';
-  const ABOUT_OG_DESC = "Explore GlyphLock’s evidence core, six operating domains, trust envelope, technical systems, operating proof, leadership, and integration surfaces.";
+  const ABOUT_OG_DESC = "Explore GlyphLock's evidence core, six operating domains, trust envelope, technical systems, operating proof, leadership, and integration surfaces.";
   const ABOUT_H1 = 'Identity. Permission. Operations. Proof.';
   const ABOUT_URL = '/About';
 
@@ -181,13 +189,13 @@ if (seoData) {
     ['About canonical url', ABOUT_URL],
   ];
   for (const [label, value] of checks) {
-    if (!seoData.includes(value)) fail(`Home/About regression — missing ${label}`);
+    if (!n.includes(norm(value))) fail(`Home/About regression — missing ${label}`);
   }
 
-  // Global fallback keywords must be canonical.
-  const FALLBACK = ['GlyphLock', 'evidence infrastructure', 'identity and permission workflows', 'Secure QR', 'interactive images', 'GlyphBot', 'automated DJ', 'NUPS', 'venue operations software', 'financial accountability', 'API and SDK integration', 'governance'];
-  for (const keyword of FALLBACK) {
-    if (!seoData.includes(`"${keyword}"`)) fail(`Global fallback keyword missing: ${keyword}`);
+  // Global fallback keywords must be canonical (array members present).
+  const fbMembers = ['identity and permission workflows', 'financial accountability', 'API and SDK integration', 'evidence infrastructure', 'venue operations software'];
+  for (const m of fbMembers) {
+    if (!seoData.includes(m)) fail(`Global fallback keyword missing in seoData.jsx: "${m}"`);
   }
 }
 

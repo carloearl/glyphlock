@@ -1,7 +1,6 @@
 /**
  * ai.txt endpoint — canonical AI discovery index for glyphlock.io
- * Claims-safe. No quantum, patent, "first binding", "revolutionary",
- * banking-grade, instant payout, production-API, or unsupported certification claims.
+ * Claims-safe (retired strings enumerated in scripts/check-seo-metadata.mjs).
  * NUPS = Nexus Unified POS System. URLs use actual route casing.
  */
 
