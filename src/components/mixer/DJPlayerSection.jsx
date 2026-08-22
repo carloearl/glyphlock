@@ -224,7 +224,7 @@ export default function DJPlayerSection({
     if (promotedId) onActiveSongChange?.(promotedId, { reason });
   }, [deckASongId, deckBSongId, onActiveSongChange]);
 
-  const performTransition = useCallback((targetDeck, { immediate = false, reason = "auto_transition", prewarmed = false } = {}) => {
+  const performTransition = useCallback(async (targetDeck, { immediate = false, reason = "auto_transition", prewarmed = false } = {}) => {
     if (transitionRef.current || targetDeck === activeDeck) return;
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
     if (!targetId) return;
@@ -242,7 +242,23 @@ export default function DJPlayerSection({
     // swap / failover) still needs a cold play() here, preserving the
     // operator's own cue point.
     if (!prewarmed) {
-      Promise.resolve(toRef.current?.play?.()).catch(() => {});
+      try {
+        await Promise.resolve(toRef.current?.play?.());
+      } catch (error) {
+        transitionRef.current = false;
+        setTransitioning(false);
+        onPlaybackError?.({
+          songId: targetId,
+          deck: targetDeck,
+          active: false,
+          fallbackReady: false,
+          error,
+        });
+        toast.error(`Deck ${targetDeck} could not start`, {
+          description: "Transition cancelled; the live deck remains audible.",
+        });
+        return false;
+      }
     }
 
     if (immediate) {
@@ -268,7 +284,7 @@ export default function DJPlayerSection({
       finishPromotion(targetDeck, reason);
     };
     rafRef.current = requestAnimationFrame(tick);
-  }, [activeDeck, deckASongId, deckBSongId, crossfade, blendSeconds, finishPromotion]);
+  }, [activeDeck, deckASongId, deckBSongId, crossfade, blendSeconds, finishPromotion, onPlaybackError]);
 
   const handlePlayLive = useCallback(() => {
     const liveRef = activeDeck === "A" ? deckARef.current : deckBRef.current;
@@ -295,7 +311,7 @@ export default function DJPlayerSection({
     const targetDeck = deck === "A" ? "B" : "A";
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
     const targetRef = targetDeck === "A" ? deckARef.current : deckBRef.current;
-    const fallbackReady = Boolean(autoDj && isActive && targetId && Number(targetRef?.getDuration?.() || 0) > 0);
+    const fallbackReady = Boolean(blending && isActive && targetId && Number(targetRef?.getDuration?.() || 0) > 0);
 
     onPlaybackError?.({ songId, deck, active: isActive, fallbackReady, error });
 
@@ -313,7 +329,7 @@ export default function DJPlayerSection({
     if (deck === "A") setDeckASongId(null);
     else setDeckBSongId(null);
     onActiveSongChange?.(null, { reason: "source_failure", failedSongId: songId });
-  }, [activeDeck, autoDj, deckASongId, deckBSongId, onPlaybackError, onActiveSongChange, performTransition]);
+  }, [activeDeck, blending, deckASongId, deckBSongId, onPlaybackError, onActiveSongChange, performTransition]);
 
   useEffect(() => {
     const command = session.transportCommand;
