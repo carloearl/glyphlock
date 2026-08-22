@@ -194,7 +194,7 @@ Mark the old handoff historical/superseded or publish a current handoff that poi
 
 **Severity:** HIGH  
 **Invariant:** INV-07  
-**Status:** OPEN — VERIFY
+**Status:** OPEN — AUTHENTICATED MULTI-IDENTITY / EXPIRY PROOF
 
 ### Observed
 Protected identity/credential entities reference uploaded media URLs. Generic `FileStorage` supports an `is_public` flag (default false), while some identity records store direct URL fields.
@@ -211,7 +211,7 @@ Live paths including `GlyphBucksContract`, `IDScannerCamera`, `BarcodeFirstCaptu
 ### Batch 14 progress
 The application already exposed Base44 private-file primitives (`UploadPrivateFile` + `CreateFileSignedUrl`). Batch 14 introduced `ProtectedEvidence` as the opaque canonical reference layer plus server-side `registerProtectedEvidence` and `getProtectedEvidence` authorization. Live W-9, government-ID, entertainer-license, verification-media, hardcopy-contract, guest-photo, and thumbprint capture paths now use private file URIs; signed URLs are short-lived and generated only for temporary OCR/preview or authorized retrieval. Contract archive queries were additionally venue-scoped.
 
-Batch 15 extracted the exact retrieval decision into a shared server policy used by `getProtectedEvidence` and added `npm run check:nups-protected-evidence`. The executable matrix proves fail-closed role/classification and cross-venue decisions, including manager same-venue allow, door identity-only allow, and bartender/wrong-venue/tax/biometric denials. It also verifies that contract archives, entertainer credential rosters, transaction evidence search, and W-9 listings do not emit stored protected references as raw links or images. `VIPContract` now uploads through `ProtectedEvidence`, resolves contract context server-side, and submits opaque references to the signing function. `npm run check:nups-sensitive-reads` separately verifies venue scoping for tax, tip, contract, audit, and evidence reads. The issue remains OPEN because anonymous, wrong-role, wrong-venue, and signed-URL expiry behavior have not yet been exercised against the deployed function with distinct runtime identities. Static/policy architecture is verified; deployed adversarial testing remains required.
+Batch 15 moved the authorization policy into the `getProtectedEvidence` function package so the deployed function and executable test load the same code. This repaired a cross-function-folder import that caused HTTP 502 at function startup. `npm run check:nups-anonymous-protected-evidence` now proves the deployed endpoint starts and rejects anonymous retrieval with HTTP 401 while returning no protected metadata. The executable matrix proves fail-closed role/classification and cross-venue decisions, including manager same-venue allow, door identity-only allow, and bartender/wrong-venue/tax/biometric denials. It also verifies that contract archives, entertainer credential rosters, transaction evidence search, and W-9 listings do not emit stored protected references as raw links or images. `VIPContract` uploads through `ProtectedEvidence`, resolves contract context server-side, and submits opaque references to the signing function. `npm run check:nups-sensitive-reads` verifies venue scoping for tax, tip, contract, audit, and evidence reads. The issue remains OPEN only because distinct deployed authenticated wrong-role/wrong-venue sessions and authenticated signed-URL expiry have not yet been exercised.
 
 ---
 
@@ -236,7 +236,7 @@ Store non-secret evidence and test timestamp. Never promote from settings alone.
 
 **Severity:** CRITICAL  
 **Invariant:** INV-07  
-**Status:** OPEN — PRIVATE BOUNDARY IMPLEMENTED; RUNTIME AUTHZ TESTS PENDING
+**Status:** OPEN — PRIVATE BOUNDARY GREEN; AUTHENTICATED E2E / EXPIRY PENDING
 
 ### Expected
 Government IDs, entertainer credentials, W-9 scans, signatures, thumbprint imagery, and signed-contract evidence must be stored non-publicly and retrieved only through an authenticated, role/venue-authorized path.
@@ -251,10 +251,10 @@ Batch 13 removed direct protected-media links/images from `ContractViewer`, `Con
 `ProtectedEvidence` now stores opaque private Base44 `file_uri` references and evidence metadata. `registerProtectedEvidence` resolves the authenticated NUPS identity and enforces venue/classification registration rules. `getProtectedEvidence` authorizes by role + venue + evidence classification + purpose context, emits explicit security audit events, and returns only a 120-second signed URL. Live protected capture paths store `protected:<evidence-record-id>` references instead of permanent routable media URLs.
 
 ### Batch 15 verification
-`getProtectedEvidence` and `scripts/check-protected-evidence-policy.mjs` now share the same authorization function. The matrix passes for global, manager, door, ordinary staff, classification, and cross-venue cases; access/denial audit payloads contain references and decision metadata, not file URIs, signed URLs, or document content. The test also guards every known protected archive/list surface against raw URL rendering. `transactionLookup` now requires manager-class NUPS identity, rejects cross-venue evidence searches, and returns evidence-presence metadata rather than raw CustomerIdentity or VerificationMedia records. The VIP signing page now uses private uploads and opaque evidence references throughout.
+`getProtectedEvidence` and `scripts/check-protected-evidence-policy.mjs` share the same function-local authorization module. The matrix passes for global, manager, door, ordinary staff, classification, and cross-venue cases; access/denial audit payloads contain references and decision metadata, not file URIs, signed URLs, or document content. The deployed function starts successfully and an anonymous HTTP request is denied with 401. A synthetic private-file URL was also denied to an anonymous fetch immediately, so no public anonymous evidence access was obtained. The test guards every known protected archive/list surface against raw URL rendering. `transactionLookup` requires manager-class NUPS identity, rejects cross-venue evidence searches, and returns evidence-presence metadata rather than raw CustomerIdentity or VerificationMedia records. The VIP signing page uses private uploads and opaque evidence references throughout.
 
 ### Remaining resolution
-Run synthetic deployed end-to-end tests proving anonymous retrieval denial, wrong-role denial, wrong-venue denial, and signed-URL expiration. Do not re-enable raw archived media viewing until those tests pass.
+Run distinct authenticated deployed end-to-end tests proving wrong-role denial, wrong-venue denial, authorized retrieval, and signed-URL expiration. Anonymous denial is already proven. Do not re-enable raw archived media viewing until the authenticated tests pass.
 
 ---
 
