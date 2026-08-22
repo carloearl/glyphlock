@@ -75,9 +75,9 @@ export default function Partners() {
   return (
     <>
       <SEOHead 
-        title="Partners & Investors - GlyphLock | Strategic Partnerships & Licensing"
-        description="Explore GlyphLock partnership opportunities, technology stack, operational case studies, and strategic licensing framework. Financial figures are provided only where supported by current company records."
-        keywords="cybersecurity partnerships, strategic licensing, technology partnerships, investor relations, IP protection, quantum-resistant encryption, enterprise security, partnership opportunities"
+        title="GlyphLock Partners | NUPS, QR, API & Hospitality Integrations"
+        description="Explore GlyphLock partnerships across NUPS venue operations, Secure QR and image workflows, SDK and API connections, hardware, finance, and hospitality interoperability."
+        keywords="GlyphLock partners, NUPS integration, Secure QR partnership, QR SDK, API integration, venue technology, hospitality interoperability, hardware integration"
         url="/partners"
       />
       <div className="min-h-screen bg-black text-white py-24 relative overflow-hidden">
