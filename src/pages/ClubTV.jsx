@@ -11,6 +11,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { subscribeClubTV } from "@/components/mixer/ClubBroadcastChannel";
+import { getClubTVSignalStatus, isClubTVOnAir } from "@/components/mixer/session/clubTVSignal";
 import YouTubePlayer from "@/components/mixer/YouTubePlayer";
 import FableEngineVisualizer from "@/components/mixer/FableEngineVisualizer";
 import { Disc3, Radio, Maximize2, Sparkles, Video, ListMusic } from "lucide-react";
@@ -38,8 +39,7 @@ export default function ClubTV() {
       setSignalStatus("LIVE");
     });
     const liveness = window.setInterval(() => {
-      const age = lastSignalRef.current ? Date.now() - lastSignalRef.current : Infinity;
-      setSignalStatus(age <= 3000 ? "LIVE" : age <= 8000 ? "STALE" : lastSignalRef.current ? "OFFLINE" : "CONNECTING");
+      setSignalStatus(getClubTVSignalStatus({ lastSignalAt: lastSignalRef.current }));
     }, 1000);
     return () => {
       window.clearInterval(liveness);
@@ -64,7 +64,7 @@ export default function ClubTV() {
   const videoId = active?.videoId || null;
   const audioUrl = active?.audioUrl || null;
   const visualDeck = state?.crossfade >= 50 ? "B" : "A";
-  const onAir = signalStatus === "LIVE" && Boolean(active);
+  const onAir = isClubTVOnAir(signalStatus, active);
 
   return (
     <div
