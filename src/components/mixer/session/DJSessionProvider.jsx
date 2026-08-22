@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useReducer } from "react";
 import {
   createDeckCommand,
+  createTransportCommand,
   createInitialDJSessionState,
   djSessionReducer,
   selectActiveDeckSnapshot,
@@ -37,6 +38,12 @@ export function DJSessionProvider({ children }) {
     return command.requestId;
   }, []);
 
+  const requestTransport = useCallback((input) => {
+    const command = createTransportCommand(input);
+    dispatch({ type: "TRANSPORT_COMMAND_REQUESTED", command });
+    return command.requestId;
+  }, []);
+
   const acknowledgeDeckLoad = useCallback((requestId, deck, song) => {
     dispatch({ type: "DECK_LOADED", requestId, deck, songId: song?.id, song });
   }, []);
@@ -57,6 +64,7 @@ export function DJSessionProvider({ children }) {
     scope: state.scope,
     activeDeckSnapshot: selectActiveDeckSnapshot(state),
     requestDeckLoad,
+    requestTransport,
     acknowledgeDeckLoad,
     rejectDeckLoad,
     setDeckSong,
@@ -71,7 +79,7 @@ export function DJSessionProvider({ children }) {
     setAutoDjArmed: (armed) => dispatch({ type: "AUTO_DJ_ARMED", armed }),
     setQueue: (queue) => dispatch({ type: "QUEUE_REPLACED", queue }),
     emergencySilence: () => dispatch({ type: "EMERGENCY_SILENCE" }),
-  }), [state, requestDeckLoad, acknowledgeDeckLoad, rejectDeckLoad, setDeckSong, setProviderState, recordDiagnostic]);
+  }), [state, requestDeckLoad, requestTransport, acknowledgeDeckLoad, rejectDeckLoad, setDeckSong, setProviderState, recordDiagnostic]);
 
   return <DJSessionContext.Provider value={value}>{children}</DJSessionContext.Provider>;
 }
