@@ -41,8 +41,20 @@ assert.match(publicMode.text, /Trusted terminal venue is not configured/i);
 assert.match(publicMode.text, /"terminal_state":"unknown"/i);
 assert.doesNotMatch(publicMode.text, /payment_provider|operating_mode|venue":/i, 'Unknown terminal response leaked venue or payment configuration.');
 
+const unknownClockIn = await invoke('nupsClockInV2', { action: 'clockIn', pin: '0000', terminal_id: unknownTerminalId });
+assert.equal(unknownClockIn.response.status, 409, `Unknown NKS2 terminal must be blocked before PIN verification; got ${unknownClockIn.response.status}: ${unknownClockIn.text.slice(0, 240)}`);
+assert.match(unknownClockIn.text, /TRUSTED_TERMINAL_REQUIRED/);
+assert.doesNotMatch(unknownClockIn.text, /kiosk_session|shift_id|clocked_in_at/i, 'Unknown NKS2 terminal issued a session or shift response.');
+
+const revoked = await invoke('nupsClockInV2', { action: 'getPublicMode', terminal_id: 'B16-SBX-20260821-7F9C2A' });
+assert.equal(revoked.response.status, 403, `Permanently revoked Batch 16 test terminal must remain denied; got ${revoked.response.status}: ${revoked.text.slice(0, 240)}`);
+assert.match(revoked.text, /"terminal_state":"revoked"/i);
+
+const sweep = await invoke('nupsClockInV2', { action: 'sweepStale' });
+assert.equal(sweep.response.status, 401, `Anonymous stale-shift sweep must be denied; got ${sweep.response.status}: ${sweep.text.slice(0, 240)}`);
+
 const legacyPin = await invoke('nupsClockIn', { action: 'clockIn', pin: '0000', terminal_id: unknownTerminalId });
-assert.ok([401, 409].includes(legacyPin.response.status), `Retired NKS1 route must not authenticate a PIN; got ${legacyPin.response.status}: ${legacyPin.text.slice(0, 240)}`);
+assert.ok([401, 404, 409].includes(legacyPin.response.status), `Retired NKS1 route must not authenticate a PIN; got ${legacyPin.response.status}: ${legacyPin.text.slice(0, 240)}`);
 assert.doesNotMatch(legacyPin.text, /kiosk_session|shift_id|clocked_in_at/i, 'Retired NKS1 route issued a session or shift response.');
 
-console.log('[check:nups-batch16-runtime] passed: terminal admin and DJ functions deny anonymous access, NKS2 rejects unknown terminals, and the retired NKS1 route does not issue a session.');
+console.log('[check:nups-batch16-runtime] passed: terminal admin and DJ functions deny anonymous access, NKS2 rejects unknown/revoked terminals before PIN verification, anonymous sweeps are denied, and the retired NKS1 route does not issue a session.');
