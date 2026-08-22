@@ -12,7 +12,8 @@ import { Maximize2 } from "lucide-react";
 
 export default function FableStagePage() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-  const [meta, setMeta] = useState({ track: null, nextTrack: null, bpm: null, deck: "A" });
+  const [meta, setMeta] = useState({ track: null, nextTrack: null, bpm: null, deck: "A", syncSource: "synthetic-grid" });
+  const stageIdRef = useRef(globalThis.crypto?.randomUUID?.() || `stage-${Date.now()}`);
   const frameRef = useRef({ bass: 0, mid: 0, high: 0, energy: 0, bands: [], shape: [], beatCount: 0 });
   const rootRef = useRef(null);
   const lastFrameAtRef = useRef(0);
@@ -39,15 +40,24 @@ export default function FableStagePage() {
     if (!channel) return;
     channel.onmessage = (event) => {
       const msg = event.data || {};
-      if (msg.type === "frame") {
+      if (msg.targetStageId && msg.targetStageId !== stageIdRef.current) return;
+      if (msg.type === "snapshot") {
+        setSettings({ ...DEFAULT_SETTINGS, ...msg.settings });
+        setMeta({
+          track: msg.track, nextTrack: msg.nextTrack, bpm: msg.bpm,
+          deck: msg.deck || "A", syncSource: msg.syncSource || "synthetic-grid",
+        });
+      }
+      else if (msg.type === "frame") {
         frameRef.current = msg.frame;
         lastFrameAtRef.current = performance.now();
       }
       else if (msg.type === "settings") setSettings({ ...DEFAULT_SETTINGS, ...msg.settings });
-      else if (msg.type === "meta") setMeta({
-        track: msg.track, nextTrack: msg.nextTrack, bpm: msg.bpm, deck: msg.deck || "A",
-      });
+      else if (msg.type === "meta") setMeta((previous) => ({
+        ...previous, track: msg.track, nextTrack: msg.nextTrack, bpm: msg.bpm, deck: msg.deck || "A",
+      }));
     };
+    channel.postMessage({ type: "stage-ready", stageId: stageIdRef.current, at: Date.now() });
     return () => { try { channel.close(); } catch { /* noop */ } };
   }, []);
 
@@ -61,6 +71,9 @@ export default function FableStagePage() {
         bpm={meta.bpm || 124}
         deck={meta.deck}
       />
+      <div className="absolute left-4 top-4 z-20 rounded-lg border border-white/10 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white/70">
+        Visual only · {meta.syncSource}
+      </div>
       <button
         type="button"
         onClick={() => {
