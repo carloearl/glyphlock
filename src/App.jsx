@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "@/components/ui/sonner"
@@ -5,7 +6,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
 import NavigationTracker from '@/lib/NavigationTracker'
-import { pagesConfig } from './pages.config'
+import { pagesConfig } from './lazyPagesConfig'
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
@@ -13,88 +14,6 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { recordNavigation } from '@/lib/nups/navStack';
 import { NUPSPermissionsProvider } from '@/components/nups/hooks/useNUPSPermissions';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import AnalyticsDashboard from './pages/AnalyticsDashboard';
-import SettlementReports from './pages/SettlementReports';
-import GovernanceHub from './pages/GovernanceHub';
-import CodeOfEthics from './pages/CodeOfEthics';
-import EmailDeliveryLogPage from './pages/EmailDeliveryLogPage';
-import NUPSPostLogin from './pages/NUPSPostLogin';
-import SystemAudit from './pages/SystemAudit';
-import OfficialChecks from './pages/OfficialChecks';
-import NUPSLanding from './pages/NUPSLanding';
-import NUPSSandbox from './pages/NUPSSandbox';
-import NUPSPaymentReturn from './pages/NUPSPaymentReturn';
-import NUPSTraining from './pages/NUPSTraining';
-import NUPSOwner from './pages/NUPSOwner';
-import NUPSStaff from './pages/NUPSStaff';
-import NUPSPostImplementationReport from './pages/NUPSPostImplementationReport';
-import CaseStudyNUPS from './pages/CaseStudyNUPS';
-import CaseStudyOracleOHIP from './pages/CaseStudyOracleOHIP';
-import NUPSDemoManager from './pages/NUPSDemoManager';
-import NUPSStateDiff from './pages/NUPSStateDiff';
-import DailyPerformanceReport from './pages/DailyPerformanceReport';
-import NUPSMISReport from './pages/NUPSMISReport';
-import ImageShare from './pages/ImageShare';
-import ContractLookup from './pages/ContractLookup';
-import Unauthorized from './pages/Unauthorized';
-import NUPSInfrastructurePage from './pages/NUPSInfrastructurePage';
-import GlyphLockFinancialPage from './pages/GlyphLockFinancialPage';
-import DemoGate from './pages/DemoGate';
-import CommandCenterDemo from './pages/CommandCenterDemo';
-import DemoFloorStatus from './pages/DemoFloorStatus';
-import DemoOpenNightPreview from './pages/DemoOpenNightPreview';
-import DemoVipBoardPreview from './pages/DemoVipBoardPreview';
-import DemoPosRegisterPreview from './pages/DemoPosRegisterPreview';
-import DemoCloseNightPreview from './pages/DemoCloseNightPreview';
-import DemoCompliancePreview from './pages/DemoCompliancePreview';
-import ClubTV from './pages/ClubTV';
-import FableStagePage from './pages/FableStagePage';
-import ActivityLogViewer from './pages/ActivityLogViewer';
-import DailySettlementDashboard from './pages/DailySettlementDashboard';
-import DriverPayoutHistory from './pages/DriverPayoutHistory';
-import FrontDoor from './pages/FrontDoor';
-import BarRegister from './pages/BarRegister';
-import Accounting from './pages/Accounting';
-import AuditIntegrity from './pages/AuditIntegrity';
-import PaymentReconciliation from './pages/PaymentReconciliation';
-import FinancialResolution from './pages/FinancialResolution';
-import UnifiedSearch from './pages/UnifiedSearch';
-import Tonight from './pages/Tonight';
-import VenueAdminSettings from './pages/VenueAdminSettings';
-import MobileScanner from './pages/MobileScanner';
-import ContractsHub from './pages/ContractsHub';
-import VIPBillPrinter from './pages/VIPBillPrinter';
-import GlyphBucksConsole from './pages/GlyphBucksConsole';
-import RegisterConsole from './pages/RegisterConsole';
-import Receipts from './pages/Receipts';
-import DriverPayouts from './pages/DriverPayouts';
-import NUPSHub from './pages/NUPSHub';
-import BotAnalytics from './pages/BotAnalytics';
-import EntertainerCheckIn from './pages/EntertainerCheckIn';
-import StaffHome from './pages/StaffHome';
-import HostessHome from './pages/HostessHome';
-import DoormanHome from './pages/DoormanHome';
-import EntertainerHome from './pages/EntertainerHome';
-import ManagerConsole from './pages/ManagerConsole';
-import PeopleArchive from './pages/PeopleArchive';
-import LedgerTrialBalance from './pages/LedgerTrialBalance';
-import AccountingHub from './pages/AccountingHub';
-import RegistryAdmin from './pages/RegistryAdmin';
-import AdminDataManager from './pages/AdminDataManager';
-import ArchitecturalDecisionRegister from './pages/ArchitecturalDecisionRegister';
-import NUPSAdminPortal from './pages/NUPSAdminPortal';
-import VIPShowVerify from './pages/VIPShowVerify';
-import OfflineVerify from './pages/OfflineVerify';
-import VerifyDispatch from './pages/VerifyDispatch';
-import VIPShowContracts from './pages/VIPShowContracts';
-import VIPCommandCenter from './pages/VIPCommandCenter';
-import NUPSKiosk from './pages/NUPSKiosk';
-import VIPSale from './pages/VIPSale';
-import AccessRequests from './pages/AccessRequests';
-import RoleViews from './pages/RoleViews';
-import DJHome from './pages/DJHome';
-import GlyphBotMixer from './pages/GlyphBotMixer';
-import SecureQRStudio from './pages/SecureQRStudio';
 import KioskShell from './components/nups/KioskShell';
 import KioskSessionGuard from './components/nups/KioskSessionGuard';
 import RoleClassGuard from './components/nups/RoleClassGuard';
@@ -105,6 +24,27 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 
 import '@/styles/nups-print.css';
 const { Pages, Layout, mainPage } = pagesConfig;
+const {
+  AnalyticsDashboard, SettlementReports, GovernanceHub, CodeOfEthics,
+  EmailDeliveryLogPage, NUPSPostLogin, SystemAudit, OfficialChecks, NUPSLanding,
+  NUPSSandbox, NUPSPaymentReturn, NUPSTraining, NUPSOwner, NUPSStaff,
+  NUPSPostImplementationReport, CaseStudyNUPS, CaseStudyOracleOHIP,
+  NUPSDemoManager, NUPSStateDiff, DailyPerformanceReport, NUPSMISReport,
+  ImageShare, ContractLookup, Unauthorized, NUPSInfrastructurePage,
+  GlyphLockFinancialPage, DemoGate, CommandCenterDemo, DemoFloorStatus,
+  DemoOpenNightPreview, DemoVipBoardPreview, DemoPosRegisterPreview,
+  DemoCloseNightPreview, DemoCompliancePreview, ClubTV, FableStagePage,
+  ActivityLogViewer, DailySettlementDashboard, DriverPayoutHistory, FrontDoor,
+  BarRegister, Accounting, AuditIntegrity, PaymentReconciliation,
+  FinancialResolution, UnifiedSearch, Tonight, VenueAdminSettings, MobileScanner,
+  ContractsHub, VIPBillPrinter, GlyphBucksConsole, RegisterConsole, Receipts,
+  DriverPayouts, NUPSHub, BotAnalytics, EntertainerCheckIn, StaffHome,
+  HostessHome, DoormanHome, EntertainerHome, ManagerConsole, PeopleArchive,
+  LedgerTrialBalance, AccountingHub, RegistryAdmin, AdminDataManager,
+  ArchitecturalDecisionRegister, NUPSAdminPortal, VIPShowVerify, OfflineVerify,
+  VerifyDispatch, VIPShowContracts, VIPCommandCenter, NUPSKiosk, VIPSale,
+  AccessRequests, RoleViews, DJHome, GlyphBotMixer, SecureQRStudio,
+} = Pages;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
@@ -424,7 +364,9 @@ function App() {
           <NavigationTracker />
           <ErrorBoundary>
             <NUPSPermissionsProvider>
-              <AuthenticatedApp />
+              <Suspense fallback={<div className="fixed inset-0 grid place-items-center bg-slate-950 text-cyan-200">Loading secure workspace…</div>}>
+                <AuthenticatedApp />
+              </Suspense>
             </NUPSPermissionsProvider>
           </ErrorBoundary>
         </Router>
