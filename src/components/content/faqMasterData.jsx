@@ -38,7 +38,7 @@ export const FAQ_MASTER_DATA = [
     icon: "Eye",
     q: "What are the image-carrier tools?",
     a: [
-      "Secure QR Studio provides structured QR workflows, while permitted image-carrier experiments can encode and recover selected data through least-significant pixel bits."
+      "Secure QR Studio provides structured QR workflows, while permitted image-carrier experiments can encode and recover selected data through least-significant pixel bits.",
       "Restricted to credentialed operators. Access requires provisioned credentials.",
       "Provides tamper detection, AI threat scoring, and blockchain audit trails."
     ]

@@ -32,7 +32,7 @@ const MODULES = [
     color: "yellow"
   },
   {
-    title: "Blockchain Verification",
+    title: "Record Verification",
     subtitle: "On-Chain Proof & Analysis",
     description: "Hash generation, Merkle tree construction, block mining simulation, and cryptographic verification tools for digital asset integrity.",
     features: ["SHA-256 hash generator", "Merkle tree builder", "Block mining demo", "Proof export & verify"],
