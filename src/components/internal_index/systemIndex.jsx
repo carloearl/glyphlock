@@ -122,7 +122,7 @@ export const SYSTEM_INDEX = {
     version: '5.0.0',
     phase: 5,
     last_updated: '2025-01-27',
-    description: 'Quantum-resistant cybersecurity platform with AI-powered threat detection'
+    description: 'Evidence infrastructure connecting image carriers, Secure QR, GlyphBot, NUPS operations, value records, integrations, and governance'
   }
 };
 
