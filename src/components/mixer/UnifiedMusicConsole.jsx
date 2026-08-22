@@ -38,7 +38,7 @@ import { DJSessionProvider, useDJSession, useOptionalDJSession } from "@/compone
 import DJDiagnosticsTimeline from "@/components/mixer/session/DJDiagnosticsTimeline";
 import ProviderCapabilityMatrix from "@/components/mixer/session/ProviderCapabilityMatrix";
 import useMediaQuery from "@/components/mixer/session/useMediaQuery";
-import { createScopedLayoutKey, WORKBENCH_PRESETS } from "@/components/mixer/session/djLayout";
+import { createScopedLayoutKey } from "@/components/mixer/session/djLayout";
 
 const NAV = [
   { key: "mixer",    label: "Auto-DJ Mixer",  icon: Disc3,    accent: "from-purple-500 to-fuchsia-500", ring: "border-purple-500/60 bg-purple-500/15 text-purple-200" },
@@ -177,11 +177,22 @@ function UnifiedMusicConsoleInner() {
     [scope?.venueId, scope?.operatorId, scope?.deviceId],
   );
   const applyWorkbenchPreset = useCallback((name) => {
-    const preset = WORKBENCH_PRESETS[name] || WORKBENCH_PRESETS.performance;
-    const performanceSize = Math.max(35, Math.min(82, preset.performance + preset.library));
+    const performanceSize = {
+      performance: 82,
+      library: 48,
+      visual: 42,
+      compact: 68,
+    }[name] ?? 82;
+    const matchingView = {
+      performance: "mixer",
+      library: "tracks",
+      visual: "visuals",
+      compact: active,
+    }[name] || "mixer";
+    setActive(matchingView);
     performancePanelRef.current?.resize?.(performanceSize);
     utilityPanelRef.current?.resize?.(100 - performanceSize);
-  }, []);
+  }, [active]);
 
   return (
     <div className="flex flex-col gap-3">
