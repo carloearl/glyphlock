@@ -15,7 +15,7 @@ export default function FableVisualizerTab() {
   const live = useLivePlayerTrack();
   const {
     settings, setSettings, running, setRunning, startEngine, frameRef,
-    launchStage, stageOpen, liveBpm, micStatus, micError,
+    launchStage, stageOpen, liveBpm, micStatus, micError, syncSource,
   } = useFableHost({
     track: live.track,
     nextTrack: live.nextTrack,
@@ -40,6 +40,9 @@ export default function FableVisualizerTab() {
             <div className="text-sm text-slate-400">
               Start it here, or launch the stage window and drag it to the HDMI display.
               Deck {live.deck} · {liveLabel || "no track loaded yet"}
+            </div>
+            <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-cyan-300">
+              Sync: {syncSource}
             </div>
           </div>
         </div>
