@@ -32,7 +32,7 @@ export const SEO_DATA = {
     keywords: ["Carlo Rene Earl", "GlyphLock founder", "GlyphLock product architect", "Arizona technology founder", "evidence infrastructure", "secure image carriers", "Secure QR Studio", "NUPS architecture", "venue operations technology", "nightclub DJ technology", "creative systems", "El Mirage Arizona"],
     h1: "Carlo Rene Earl — Founder and Product Architect",
     url: "/about-carlo",
-    ogTitle: "Carlo Rene Earl — Founder and Product Architect of GlyphLock",
+    ogTitle: "Carlo Rene Earl — GlyphLock Founder & Product Architect",
     ogDescription: "The founder story behind GlyphLock’s image carriers, Secure QR, GlyphBot, NUPS, value records, integrations, and governed evidence architecture.",
     schemaType: "ProfilePage",
     priority: 0.8,
@@ -95,7 +95,7 @@ export const SEO_DATA = {
   },
   "Steganography": {
     title: "Image Carrier Experiments | LSB Encode & Decode | GlyphLock",
-    description: "Explore permitted image-carrier experiments that encode and recover structured data through selected least-significant pixel bits while keeping the image recognizable.",
+    description: "Explore permitted image-carrier tests that encode and recover structured data through least-significant pixel bits while keeping the image recognizable.",
     keywords: ["image carrier", "LSB encode", "LSB decode", "least significant bit", "concealed image data", "structured image payload", "GlyphLock image technology"],
     h1: "LSB Image Carrier Encode and Decode Experiments",
     url: "/services/steganography",
