@@ -12,12 +12,14 @@ import React, { useEffect, useState, useRef } from "react";
 import { subscribeClubTV } from "@/components/mixer/ClubBroadcastChannel";
 import YouTubePlayer from "@/components/mixer/YouTubePlayer";
 import FableEngineVisualizer from "@/components/mixer/FableEngineVisualizer";
-import { Disc3, Radio, Maximize2, Sparkles, Video } from "lucide-react";
+import { Disc3, Radio, Maximize2, Sparkles, Video, ListMusic } from "lucide-react";
 
 export default function ClubTV() {
   const [state, setState] = useState(null); // { deckA, deckB, crossfade }
   const [fs, setFs] = useState(false);
   const [view, setView] = useState("fable");
+  const [playlistId, setPlaylistId] = useState("LM");
+  const [playlistMuted, setPlaylistMuted] = useState(false);
   const rootRef = useRef(null);
 
   useEffect(() => {
@@ -79,7 +81,34 @@ export default function ClubTV() {
             >
               <Video className="h-3 w-3" /> Video
             </button>
+            <button
+              type="button"
+              onClick={() => setView("playlist")}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${view === "playlist" ? "bg-emerald-500/25 text-emerald-100" : "text-white/45 hover:text-white/80"}`}
+              title="Continuous YouTube Music playlist — gapless stopgap"
+            >
+              <ListMusic className="h-3 w-3" /> Playlist
+            </button>
           </div>
+          {view === "playlist" && (
+            <div className="flex items-center gap-2">
+              <input
+                value={playlistId}
+                onChange={(e) => setPlaylistId(e.target.value.trim())}
+                placeholder="Playlist ID"
+                className="h-7 w-28 rounded-md border border-emerald-500/30 bg-black/50 px-2 text-[11px] text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-400/60"
+                title="YouTube playlist list ID (LM = Liked Music, or paste any public playlist ID)"
+              />
+              <button
+                type="button"
+                onClick={() => setPlaylistMuted((m) => !m)}
+                className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${playlistMuted ? "border-red-500/40 bg-red-500/10 text-red-300" : "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"}`}
+                title={playlistMuted ? "Unmute playlist audio" : "Mute playlist audio"}
+              >
+                {playlistMuted ? "Unmute" : "Mute"}
+              </button>
+            </div>
+          )}
           <button
             type="button"
             onClick={enterFullscreen}
@@ -93,7 +122,21 @@ export default function ClubTV() {
 
       {/* Main stage */}
       <div className="flex-1 relative flex items-center justify-center overflow-hidden">
-        {videoId && (
+        {view === "playlist" && (
+          <div className="absolute inset-0 bg-black">
+            <iframe
+              key={`pl-${playlistId}-${playlistMuted ? "m" : "u"}`}
+              className="h-full w-full"
+              src={`https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(playlistId || "LM")}&autoplay=1&mute=${playlistMuted ? 1 : 0}&loop=1&rel=0&modestbranding=1&playsinline=1`}
+              title="NUPS Playlist"
+              frameBorder="0"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        )}
+
+        {view !== "playlist" && videoId && (
           <div className={view === "video"
             ? "w-full max-w-[1600px] aspect-video m-6 shadow-[0_0_120px_rgba(168,85,247,0.4)] border-2 border-purple-500/30 rounded-2xl overflow-hidden"
             : "absolute inset-0 h-px w-px overflow-hidden opacity-0 pointer-events-none"
@@ -108,7 +151,7 @@ export default function ClubTV() {
           </div>
         )}
 
-        {view === "fable" ? (
+        {view !== "playlist" && (view === "fable" ? (
           <div className="absolute inset-0 bg-black">
             <FableEngineVisualizer
               track={active}
@@ -133,7 +176,7 @@ export default function ClubTV() {
               Waiting for a deck to load a track from the mixer.
             </div>
           </div>
-        ) : null}
+        ) : null)}
       </div>
 
       {/* Bottom ticker */}
