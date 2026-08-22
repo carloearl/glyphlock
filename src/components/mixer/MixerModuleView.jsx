@@ -736,8 +736,12 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
                 <MusicSearchPanel
                   onAddTrack={(trackData) => handleUploadedSong(trackData)}
                   onPreviewTrack={(track) => {
-                    // Find existing or create new, then load on Deck A
-                    const existing = songs.find(s => s.uploadUrl === track.audio_url);
+                    // Find existing or create new, then load on Deck A.
+                    // YouTube tracks key on their watch URL; direct-audio
+                    // tracks key on their audio URL.
+                    const isYt = track.source === "youtube";
+                    const matchKey = isYt ? (track.watch_url || track.embed_url) : track.audio_url;
+                    const existing = songs.find(s => isYt ? s.youtubeUrl === matchKey : s.uploadUrl === matchKey);
                     if (existing) {
                       setPlayingSongId(existing.id);
                       setPlayerCollapsed(false);
@@ -746,8 +750,9 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
                     const tempSong = createSongEntry({
                       title: track.title || 'Unknown Track',
                       artist: track.artist || 'Unknown Artist',
-                      uploadUrl: track.audio_url,
-                      imageUrl: track.image_url || '',
+                      youtubeUrl: isYt ? (track.watch_url || track.embed_url || '') : '',
+                      uploadUrl: isYt ? '' : (track.audio_url || track.embed_url || ''),
+                      imageUrl: track.thumbnail || track.image_url || '',
                       album: track.album || '',
                       genre: track.genre || '',
                     });
