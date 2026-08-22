@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
 
     // ── DACO-NUPS-RBAC-CORRECTION-20260717 §3–5 — authorization guard ──────
     // Two accepted identities, nothing else:
-    //  1. Signed kiosk session (NKS1) issued by nupsClockIn — role-gated per action,
+    //  1. Signed kiosk session (NKS2) issued by nupsClockInV2 — role-gated per action,
     //     revalidated against the live shift + account on every call.
     //  2. Platform-authenticated user holding an explicit NUPS back-office grant
     //     (Carlo's Owner identity or an APPROVED NUPSAccessRequest).
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     const verifyKiosk = async (token) => {
       try {
         const [v, p, s] = String(token || '').split('.');
-        if (v !== 'NKS1' || !p || !s || !PEPPER) return null;
+        if (v !== 'NKS2' || !p || !s || !PEPPER) return null;
         const key = await crypto.subtle.importKey('raw', te.encode(PEPPER), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
         const ok = await crypto.subtle.verify('HMAC', key, b64uToBytes(s), te.encode(p));
         if (!ok) return null;

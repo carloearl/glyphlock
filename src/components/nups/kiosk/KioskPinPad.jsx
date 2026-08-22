@@ -83,7 +83,7 @@ export default function KioskPinPad({ mode, onSuccess }) {
     setBusy(true);
     setError("");
     try {
-      const response = await base44.functions.invoke("nupsClockIn", {
+      const response = await base44.functions.invoke("nupsClockInV2", {
         action: mode,
         pin,
         terminal_id: terminalId,
@@ -118,7 +118,7 @@ export default function KioskPinPad({ mode, onSuccess }) {
     }
     setBusy(true); setError("");
     try {
-      const response = await base44.functions.invoke("nupsClockIn", { action:"changeTemporaryPin", current_pin:temporaryPin, new_pin:newPin, terminal_id:terminalId });
+      const response = await base44.functions.invoke("nupsClockInV2", { action:"changeTemporaryPin", current_pin:temporaryPin, new_pin:newPin, terminal_id:terminalId });
       if (!response?.data?.success) throw new Error("PIN change failed.");
       setPinChangeRequired(false); setTemporaryPin(""); setNewPin(""); setConfirmPin(""); setError("PIN changed. Enter your new PIN to clock in.");
     } catch (cause) { setError(responseData(cause)?.error || cause.message || "PIN change failed."); }
@@ -130,7 +130,7 @@ export default function KioskPinPad({ mode, onSuccess }) {
     setManagerBusy(true);
     setManagerError("");
     try {
-      const response = await base44.functions.invoke("nupsClockIn", {
+      const response = await base44.functions.invoke("nupsClockInV2", {
         action: "managerUnlockTerminal",
         pin: managerPin,
         terminal_id: terminalId,

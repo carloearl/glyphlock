@@ -175,7 +175,7 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
   }, []);
 
   // Staff punch clock reads StaffShift (the canonical record written by the
-  // secure nupsClockIn service). Rows are mapped to the display shape
+  // secure nupsClockInV2 service). Rows are mapped to the display shape
   // (stage_name) the log/payroll views expect.
   // ID-01 FIX-2: venue-scoped read — never a global list.
   const session = JSON.parse(localStorage.getItem('nups_session') || sessionStorage.getItem('nups_session') || '{}');
@@ -218,7 +218,7 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
 
   const [pinBusy, setPinBusy] = useState(false);
 
-  // PIN verification + clock action run SERVER-SIDE via nupsClockIn —
+  // PIN verification + clock action run SERVER-SIDE via nupsClockInV2 —
   // PBKDF2-hashed PINs, throttling, email binding. No client-side PIN
   // comparison exists anymore (plaintext u.pin was removed by the
   // RBAC correction, which is why the old check always failed).
@@ -227,7 +227,7 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
     setPinError("");
     setPinBusy(true);
     try {
-      const res = await base44.functions.invoke("nupsClockIn", {
+      const res = await base44.functions.invoke("nupsClockInV2", {
         action: action === "in" ? "clockIn" : "clockOut",
         pin,
       });

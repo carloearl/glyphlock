@@ -14,7 +14,7 @@ function responseData(error) {
 
 /**
  * Manager-authorized exit from the fullscreen NUPS kiosk.
- * Verification is performed by nupsClockIn against the hashed manager PIN;
+ * Verification is performed by nupsClockInV2 against the hashed manager PIN;
  * this component never queries NUPSUser PIN fields or persists the entered PIN.
  */
 export default function KioskExitModal({ onUnlock, onCancel }) {
@@ -38,7 +38,7 @@ export default function KioskExitModal({ onUnlock, onCancel }) {
     setLoading(true);
     setError("");
     try {
-      const response = await base44.functions.invoke("nupsClockIn", {
+      const response = await base44.functions.invoke("nupsClockInV2", {
         action: "verifyManagerPin",
         pin,
         terminal_id: terminalId,

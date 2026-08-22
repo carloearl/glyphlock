@@ -33,13 +33,13 @@ export default function RoleClassGuard({ allow = [], children }) {
       // DACO-SIP-001 NUPS-HIGH-003 remediation (2026-07-31): the kiosk operator
       // role is no longer trusted straight from sessionStorage (client-writable).
       // When an operator session token is present we validate it server-side via
-      // nupsClockIn/validateSession and gate on the SERVER-returned role. A
+      // nupsClockInV2/validateSession and gate on the SERVER-returned role. A
       // clocked-in operator (even an admin PIN-clocked as staff) is scoped to
       // that role until clock-out.
       const token = sessionStorage.getItem("nups_kiosk_session");
       if (token) {
         try {
-          const res = await base44.functions.invoke("nupsClockIn", {
+          const res = await base44.functions.invoke("nupsClockInV2", {
             action: "validateSession", kiosk_session: token,
           });
           if (cancelled) return;

@@ -24,7 +24,7 @@ export default function KioskSessionGuard({ roles = [], children }) {
       const token = sessionStorage.getItem("nups_kiosk_session");
       if (token) {
         try {
-          const res = await base44.functions.invoke("nupsClockIn", {
+          const res = await base44.functions.invoke("nupsClockInV2", {
             action: "validateSession", kiosk_session: token, allowed_roles: roles,
           });
           if (res.data?.valid) { if (alive) setState("ok"); return; }

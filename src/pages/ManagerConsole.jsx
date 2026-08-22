@@ -93,7 +93,7 @@ export default function ManagerConsole() {
   // Runs on mount and every 5 minutes.
   useEffect(() => {
     const sweep = () =>
-      base44.functions.invoke("nupsClockIn", { action: "sweepStale" }).catch(() => {});
+      base44.functions.invoke("nupsClockInV2", { action: "sweepStale" }).catch(() => {});
     sweep();
     const id = setInterval(sweep, 5 * 60 * 1000);
     return () => clearInterval(id);

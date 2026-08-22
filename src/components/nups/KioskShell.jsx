@@ -68,7 +68,7 @@ export default function KioskShell({ children }) {
       const token = sessionStorage.getItem("nups_kiosk_session");
       if (!token) return;
       try {
-        const res = await base44.functions.invoke("nupsClockIn", {
+        const res = await base44.functions.invoke("nupsClockInV2", {
           action: "heartbeat",
           kiosk_session: token,
         });
