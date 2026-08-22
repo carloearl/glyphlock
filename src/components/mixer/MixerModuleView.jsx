@@ -29,12 +29,15 @@ import TrackLibraryDock from "@/components/mixer/TrackLibraryDock";
 import EntertainerPlaylistDock from "@/components/mixer/EntertainerPlaylistDock";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
+import { useNUPSPermissions } from "@/components/nups/hooks/useNUPSPermissions";
 import useMediaQuery from "@/components/mixer/session/useMediaQuery";
 
 export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent, libraryTracks = [] }) {
   const { state: djSession, scope, setQueue, rejectDeckLoad, requestDeckLoad, requestTransport } = useDJSession();
-  // Only a clocked-in DJ may remove tracks from their persona-tailored playlist.
-  const canDelete = !!scope?.operatorId && scope.operatorId !== "anonymous";
+  // Admins/owners can override anything; otherwise a clocked-in DJ may remove
+  // tracks from their persona-tailored playlist.
+  const { isOwnerTier } = useNUPSPermissions();
+  const canDelete = isOwnerTier() || (!!scope?.operatorId && scope.operatorId !== "anonymous");
   const deckLoadRequest = djSession.pendingCommand;
   // ─── State hydration ───
   const [storageScope, setStorageScope] = useState(readMixerStorageScope);
