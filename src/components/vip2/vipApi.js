@@ -5,7 +5,7 @@ import { getActiveVenueId } from '@/hooks/useActiveVenue';
 // the frontend never writes chain records directly.
 export async function vip(action, payload = {}) {
   try {
-    // Server-issued kiosk session (NKS1) — the backend validates it on every call.
+    // Server-issued kiosk session (NKS2) — the backend validates it on every call.
     const kiosk_session = sessionStorage.getItem('nups_kiosk_session');
     const venue_id = payload.venue_id || getActiveVenueId();
     if (!venue_id) return { error: 'Select an active venue before using the VIP workflow.' };
