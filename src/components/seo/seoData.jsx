@@ -27,11 +27,11 @@ export const SEO_DATA = {
     internalLinks: ["/SecureQRStudio", "/ImageLab", "/InteractiveImageStudio", "/GlyphBot", "/GlyphBotMixer", "/NUPSLanding", "/GlyphLockFinancial", "/GovernanceHub", "/SecurityOperationsCenter", "/SDKDocs", "/AboutCarlo", "/Consultation"]
   },
   "AboutCarlo": {
-    title: "Carlo René Earl | Founder of GlyphLock and Creator of NUPS",
-    description: "Carlo René Earl built GlyphLock and NUPS from firsthand venue experience—connecting identity, operations, agreements, transaction evidence, and audit history in one accountable system.",
-    keywords: ["Carlo René Earl", "Carlo Rene Earl", "GlyphLock founder", "NUPS creator", "venue operations founder", "hospitality technology", "transaction evidence", "identity workflows", "Arizona technology founder"],
-    h1: "This Is Not a Resume",
-    url: "/AboutCarlo",
+    title: "Carlo René Earl | GlyphLock Founder & NUPS Creator",
+    description: "Carlo René Earl built GlyphLock and NUPS from venue experience, connecting identity, operations, agreements, transaction evidence, and audit history.",
+    keywords: ["Carlo René Earl", "Carlo Rene Earl", "GlyphLock founder", "NUPS creator", "GlyphLock product architect", "venue operations founder", "hospitality technology", "transaction evidence", "identity workflows", "Arizona technology founder"],
+    h1: "Carlo René Earl — Founder and Product Architect",
+    url: "/about-carlo",
     ogTitle: "The Founder Story Behind GlyphLock and NUPS",
     ogDescription: "From nightlife operations and a concealed-image experiment to a live venue platform and an Oracle integration path: the documented story behind GlyphLock.",
     schemaType: "ProfilePage",
