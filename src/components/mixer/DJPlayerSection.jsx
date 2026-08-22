@@ -62,6 +62,12 @@ export default function DJPlayerSection({
   const deckBBaseVol = session.deckBBaseVolume;
   const masterVolume = session.masterVolume;
   const masterMuted = session.masterMuted;
+  const setDeckAMuted = useCallback((value) => setDeckMuted("A", typeof value === "function" ? value(deckAMuted) : value), [deckAMuted, setDeckMuted]);
+  const setDeckBMuted = useCallback((value) => setDeckMuted("B", typeof value === "function" ? value(deckBMuted) : value), [deckBMuted, setDeckMuted]);
+  const setDeckABaseVol = useCallback((value) => setDeckVolume("A", value), [setDeckVolume]);
+  const setDeckBBaseVol = useCallback((value) => setDeckVolume("B", value), [setDeckVolume]);
+  const setMasterVolume = useCallback((value) => setMaster({ volume: value }), [setMaster]);
+  const setMasterMuted = useCallback((value) => setMaster({ muted: typeof value === "function" ? value(masterMuted) : value }), [masterMuted, setMaster]);
   const [transitioning, setTransitioning] = useState(false);
   // Auto Blend runs the smoothstep crossfade at track end even when AUTO-DJ is
   // disarmed, so the crossfader never has to be ridden by hand.
