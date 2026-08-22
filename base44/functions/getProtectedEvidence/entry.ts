@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
-import { protectedEvidenceDecision } from '../_shared/protectedEvidencePolicy.js';
+import { protectedEvidenceDecision } from './protectedEvidencePolicy.js';
 
 async function resolveNupsUser(base44, email: string) {
   const E = base44.asServiceRole.entities;
