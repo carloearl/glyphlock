@@ -35,10 +35,25 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A", autoSt
   const frameRef = useRef(EMPTY_FRAME);
   const channelRef = useRef(null);
   const lastPublishRef = useRef(0);
+  const snapshotRef = useRef({ settings, track, nextTrack, bpm, deck, running });
 
   useEffect(() => {
-    channelRef.current = openFableChannel();
-    return () => { try { channelRef.current?.close(); } catch { /* noop */ } };
+    const channel = openFableChannel();
+    channelRef.current = channel;
+    if (channel) {
+      channel.onmessage = (event) => {
+        const message = event.data || {};
+        if (message.type === "stage-ready") {
+          publishFable(channel, {
+            type: "snapshot",
+            targetStageId: message.stageId,
+            ...snapshotRef.current,
+          });
+          setStageOpen(true);
+        }
+      };
+    }
+    return () => { try { channel?.close(); } catch { /* noop */ } };
   }, []);
 
   const handleFrame = useCallback((frame) => {
@@ -64,6 +79,22 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A", autoSt
   });
 
   const liveBpm = deckBpm || micBpm || Number(bpm) || Number(track?.bpm) || null;
+
+  useEffect(() => {
+    snapshotRef.current = {
+      settings,
+      track: track ? {
+        title: track.title, artist: track.artist, source: track.source,
+        source_id: track.source_id, embed_url: track.embed_url, file_url: track.file_url,
+        youtubeUrl: track.youtubeUrl, uploadUrl: track.uploadUrl,
+      } : null,
+      nextTrack: nextTrack ? { title: nextTrack.title, artist: nextTrack.artist } : null,
+      bpm: liveBpm,
+      deck,
+      running,
+      syncSource: deckConnected ? "deck-audio" : listening ? "room-mic" : "synthetic-grid",
+    };
+  }, [settings, track, nextTrack, liveBpm, deck, running, deckConnected, listening]);
 
   // Last resort so the stage is never a dead screen: drive the visuals from the
   // known tempo when neither the deck tap nor the mic is measuring anything.
@@ -106,11 +137,8 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A", autoSt
     if (win) {
       setStageOpen(true);
       try { win.focus(); } catch { /* noop */ }
-      // Re-push state once the window has mounted its channel listener.
-      setTimeout(() => {
-        publishFable(channelRef.current, { type: "settings", settings });
-        publishMeta();
-      }, 900);
+      // The stage announces readiness and receives a full snapshot. No timeout
+      // and no second audio owner are involved.
     }
     return !!win;
   }, [settings, publishMeta]);
@@ -132,7 +160,7 @@ export default function useFableHost({ track, nextTrack, bpm, deck = "A", autoSt
     launchStage,
     stageOpen,
     liveBpm,
-    syncSource: deckConnected ? "deck" : listening ? "mic" : "none",
+    syncSource: deckConnected ? "deck-audio" : listening ? "room-mic" : "synthetic-grid",
     micStatus: deckConnected ? "deck" : listening ? "listening" : micError ? "error" : running ? "auto" : "idle",
     micError: deckConnected ? null : micError,
   };
