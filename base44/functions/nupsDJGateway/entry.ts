@@ -97,12 +97,10 @@ Deno.serve(async (req) => {
     const requestedVenueId = String(body.venue_id || "").trim();
     const globalRole = GLOBAL_ROLES.has(operator.role);
     const boundVenueId = String(operator?.venue_id || "").trim() || null;
-    // Global roles (PLATFORM_ADMIN / SOVEREIGN) may target any active venue.
-    // Bound roles (DJ / VENUE_MANAGER / VENUE_OWNER) fail closed when a client
-    // asks for a venue other than the operator's authorized venue.
-    if (!globalRole && requestedVenueId && requestedVenueId !== boundVenueId) {
-      return Response.json({ error: "DJ operation is bound to another venue." }, { status: 403 });
-    }
+    // Bound DJs/venue staff always operate on their authoritative kiosk-session
+    // venue — a stale client-side venue_id is ignored rather than rejected, so a
+    // cached/switched venue in the browser never locks the DJ out of their own
+    // booth (DACO DJ-GATEWAY-VENUE-BIND). Global roles may target any active venue.
     let venueId = boundVenueId;
     if (globalRole && requestedVenueId) venueId = requestedVenueId;
     if (VENUE_REQUIRED_ACTIONS.has(action) && !venueId) {
