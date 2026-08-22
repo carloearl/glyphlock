@@ -56,7 +56,7 @@ export default function FinancialFooter() {
           <p className="text-[10px] text-gray-600">
             © {new Date().getFullYear()} GlyphLock Financial, LLC. All rights reserved. 
             A subsidiary of the GlyphLock ecosystem. Not affiliated with any government financial institution.
-            Club Currency (Dream Dollars) are not legal tender and are valid only at participating establishments.
+            GlyphBucks are not legal tender and are valid only at participating establishments.
           </p>
         </div>
       </div>
