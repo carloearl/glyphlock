@@ -1,14 +1,7 @@
 import React from "react";
 import SEOHead from "@/components/SEOHead";
 import InteractiveWebGrid from "@/components/global/InteractiveWebGrid";
-import CarloHero from "@/components/about/carlo/CarloHero";
-import CarloOriginStory from "@/components/about/carlo/CarloOriginStory";
-import FounderArc from "@/components/about/carlo/FounderArc";
-import PrototypeToLiveWorkflow from "@/components/about/carlo/PrototypeToLiveWorkflow";
-import NUPSArchitectureMap from "@/components/about/carlo/NUPSArchitectureMap";
-import LeadershipTeam from "@/components/about/carlo/LeadershipTeam";
-import OpportunityPaths from "@/components/about/carlo/OpportunityPaths";
-import ThrivalSignature from "@/components/about/carlo/ThrivalSignature";
+import FounderStoryNarrative from "@/components/about/carlo/FounderStoryNarrative";
 
 export default function AboutCarloPage() {
   return (
@@ -20,27 +13,20 @@ export default function AboutCarloPage() {
         className="min-h-screen w-full text-white flex flex-col items-center pt-20 pb-24 px-4 relative z-10"
         style={{ background: 'transparent' }}
       >
-        <CarloHero />
-        <CarloOriginStory />
-        <FounderArc />
-        <PrototypeToLiveWorkflow />
-        <NUPSArchitectureMap />
-        <LeadershipTeam />
-        <OpportunityPaths />
-        <ThrivalSignature />
+        <FounderStoryNarrative />
 
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
             "name": "Carlo René Earl",
-            "jobTitle": "Founder, Owner, Chief Executive Officer",
+            "jobTitle": "Founder, Owner, Chief Executive Officer and Directing Architectural Control Officer",
             "worksFor": {
               "@type": "Organization",
               "name": "GlyphLock LLC",
               "url": "https://glyphlock.io"
             },
-            "description": "Founder and product architect of GlyphLock LLC and the Nexus Unified POS System (NUPS), a venue operating system for hospitality and entertainment operations.",
+            "description": "Founder of GlyphLock LLC and creator of NUPS, shaped by firsthand experience in venue operations, identity, transaction evidence, agreements, and accountability.",
             "url": "https://glyphlock.io/AboutCarlo",
             "knowsAbout": [
               "Venue operations",
