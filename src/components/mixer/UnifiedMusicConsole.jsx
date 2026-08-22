@@ -285,7 +285,7 @@ function UnifiedMusicConsoleInner() {
           subscribers around it; they never create a page-local player. */}
       <ResizablePanelGroup
         direction={isWide ? "horizontal" : "vertical"}
-        autoSaveId={layoutStorageId}
+        autoSaveId={`${layoutStorageId}:${isWide ? "wide" : "narrow"}`}
         className="min-h-[760px] overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-950/40"
       >
         <ResizablePanel ref={performancePanelRef} defaultSize={isWide ? 72 : 62} minSize={isWide ? 35 : 45} className="min-h-0 overflow-hidden">
