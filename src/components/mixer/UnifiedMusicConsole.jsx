@@ -183,7 +183,7 @@ function UnifiedMusicConsoleInner() {
   }, []);
 
   return (
-    <div className="h-full flex flex-col gap-3 overflow-hidden">
+    <div className="h-[100dvh] flex flex-col gap-3 overflow-hidden">
       {/* ── AUTO-DJ Command Header ── */}
       <div className="relative overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-900 p-4">
         <div className="absolute inset-0 opacity-20 pointer-events-none"
