@@ -8,6 +8,8 @@
     "check:nups-guest-identity",
     "check:nups-live-venue-boundaries",
     "check:nups-sensitive-reads",
-    "check:nups-anonymous-protected-evidence"
+    "check:nups-anonymous-protected-evidence",
+    "check:nups-batch16-operational",
+    "check:nups-batch16-runtime"
   ]
 }
