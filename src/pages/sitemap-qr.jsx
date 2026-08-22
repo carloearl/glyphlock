@@ -79,7 +79,7 @@ export default function SitemapQr() {
 
         <div className="mt-6 flex gap-4">
           <a 
-            href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/sitemapQr" 
+            href="https://app.base44.com/api/apps/697a087fb354faebb72df54b/sitemapQr" 
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm transition-colors flex items-center gap-2"
