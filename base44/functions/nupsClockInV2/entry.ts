@@ -65,14 +65,11 @@ Deno.serve(async (req) => {
     const trustedTerminal = terminalRecord && terminalRecord.status === 'active' && terminalRecord.trusted === true
       ? terminalRecord
       : null;
-    // Compatibility is allowed only when no VenueTerminal record exists at all.
-    // An explicit inactive/revoked/untrusted record must never fall through to a
-    // payment-terminal binding and accidentally regain trust.
-    const legacyPaymentTerminal = !terminalRecord && terminalId !== 'unidentified'
-      ? ((await E.VenuePaymentConfig.filter({ terminal_id: terminalId, active: true }, '-created_date', 1).catch(() => []))?.[0] || null)
-      : null;
-    const terminalVenueId = String(trustedTerminal?.venue_id || legacyPaymentTerminal?.venue_id || '').trim() || null;
-    const terminalBindingSource = trustedTerminal ? 'venue_terminal' : legacyPaymentTerminal ? 'legacy_payment_terminal' : null;
+    // Batch 16 final boundary: VenueTerminal is the only accepted pre-auth
+    // device-to-venue binding. Payment configuration must never confer device
+    // trust, even when it happens to contain a terminal identifier.
+    const terminalVenueId = String(trustedTerminal?.venue_id || '').trim() || null;
+    const terminalBindingSource = trustedTerminal ? 'venue_terminal' : null;
     const terminalState = trustedTerminal
       ? 'trusted_active'
       : terminalRecord?.status === 'revoked'
@@ -81,9 +78,10 @@ Deno.serve(async (req) => {
           ? 'inactive'
           : terminalRecord && terminalRecord.trusted !== true
             ? 'untrusted'
-            : legacyPaymentTerminal
-              ? 'legacy_payment_terminal'
-              : 'unknown';
+            : 'unknown';
+    if (trustedTerminal?.id) {
+      await E.VenueTerminal.update(trustedTerminal.id, { last_seen_at: now() }).catch(() => null);
+    }
     const logTerminalBoundary = async (eventType, reason, severity = 'high') => {
       await E.SystemAuditLog.create({
         event_type: eventType,
@@ -95,7 +93,7 @@ Deno.serve(async (req) => {
         metadata: {
           terminal_id: terminalId,
           terminal_state: terminalState,
-          terminal_venue_id: terminalRecord?.venue_id || legacyPaymentTerminal?.venue_id || null,
+          terminal_venue_id: terminalRecord?.venue_id || null,
           binding_source: terminalBindingSource,
           ip_address: ip,
         },
