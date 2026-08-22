@@ -27,17 +27,17 @@ export const SEO_DATA = {
     internalLinks: ["/SecureQRStudio", "/ImageLab", "/InteractiveImageStudio", "/GlyphBot", "/GlyphBotMixer", "/NUPSLanding", "/GlyphLockFinancial", "/GovernanceHub", "/SecurityOperationsCenter", "/SDKDocs", "/AboutCarlo", "/Consultation"]
   },
   "AboutCarlo": {
-    title: "Carlo Rene Earl | GlyphLock Founder & Product Architect",
-    description: "Meet Carlo Rene Earl, GlyphLock founder and product architect, whose music, DJ, venue, security, and operations experience shaped its evidence systems.",
-    keywords: ["Carlo Rene Earl", "GlyphLock founder", "GlyphLock product architect", "Arizona technology founder", "evidence infrastructure", "secure image carriers", "Secure QR Studio", "NUPS architecture", "venue operations technology", "nightclub DJ technology", "creative systems", "El Mirage Arizona"],
-    h1: "Carlo Rene Earl — Founder and Product Architect",
-    url: "/about-carlo",
-    ogTitle: "Carlo Rene Earl — GlyphLock Founder & Product Architect",
-    ogDescription: "The founder story behind GlyphLock’s image carriers, Secure QR, GlyphBot, NUPS, value records, integrations, and governed evidence architecture.",
+    title: "Carlo René Earl | Founder of GlyphLock and Creator of NUPS",
+    description: "Carlo René Earl built GlyphLock and NUPS from firsthand venue experience—connecting identity, operations, agreements, transaction evidence, and audit history in one accountable system.",
+    keywords: ["Carlo René Earl", "Carlo Rene Earl", "GlyphLock founder", "NUPS creator", "venue operations founder", "hospitality technology", "transaction evidence", "identity workflows", "Arizona technology founder"],
+    h1: "This Is Not a Resume",
+    url: "/AboutCarlo",
+    ogTitle: "The Founder Story Behind GlyphLock and NUPS",
+    ogDescription: "From nightlife operations and a concealed-image experiment to a live venue platform and an Oracle integration path: the documented story behind GlyphLock.",
     schemaType: "ProfilePage",
     priority: 0.8,
     changefreq: "monthly",
-    internalLinks: ["/about", "/SecureQRStudio", "/ImageLab", "/NUPSLanding", "/GovernanceHub", "/Consultation"]
+    internalLinks: ["/NUPSReport", "/partners", "/contact", "/about"]
   },
   "Pricing": {
     title: "GlyphLock Plans | Evidence Infrastructure & NUPS",
