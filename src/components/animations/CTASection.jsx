@@ -12,7 +12,7 @@ import { ScrollReveal, HorizontalReveal, GlowReveal, TextReveal, ParallaxScroll 
 
 export function CTASection({
   title = "Ready to Secure Your Future?",
-  subtitle = "Join the quantum-resistant revolution",
+  subtitle = "Connect evidence across every handoff",
   description = "Get started with GlyphLock's enterprise-grade security platform today.",
   primaryCTA = { label: "Get Started", href: "Consultation" },
   secondaryCTA = { label: "Learn More", href: "About" },
