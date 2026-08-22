@@ -312,10 +312,10 @@ export default function AgentBrainPanel() {
           <CardContent className="grid grid-cols-2 md:grid-cols-1 gap-2 pt-3">
             {['explain', 'build', 'refactor', 'debug'].map(m => {
               const config = {
-                explain: { color: 'bg-cyan-500', icon: '💡', tooltip: 'Review and report without making changes' },
-                build: { color: 'bg-blue-500', icon: '🔨', tooltip: 'Execution blocked in manual-only mode' },
-                refactor: { color: 'bg-indigo-500', icon: '♻️', tooltip: 'Execution blocked in manual-only mode' },
-                debug: { color: 'bg-red-500', icon: '🐛', tooltip: 'Report errors without auto-fixing' }
+                explain: { color: 'bg-cyan-500', icon: '💡', tooltip: 'Ask questions and get analysis' },
+                build: { color: 'bg-blue-500', icon: '🔨', tooltip: 'Plan builds and generate code suggestions' },
+                refactor: { color: 'bg-indigo-500', icon: '♻️', tooltip: 'Plan refactors and restructure code' },
+                debug: { color: 'bg-red-500', icon: '🐛', tooltip: 'Diagnose errors and suggest fixes' }
               }[m];
               return (
                 <HoverTooltip key={m} content={config.tooltip} side="right">
