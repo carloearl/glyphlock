@@ -35,10 +35,14 @@ assert.match(dj.text, /authorized dj|manager identity|required/i);
 assert.doesNotMatch(dj.text, /playlist_id|entertainer_id|ordered_tracks/i, 'Anonymous DJ denial leaked playlist data.');
 
 const unknownTerminalId = `BATCH16-UNKNOWN-${Date.now()}`;
-const publicMode = await invoke('nupsClockIn', { action: 'getPublicMode', terminal_id: unknownTerminalId });
-assert.equal(publicMode.response.status, 409, `Unknown terminal must fail closed with 409; got ${publicMode.response.status}: ${publicMode.text.slice(0, 240)}`);
+const publicMode = await invoke('nupsClockInV2', { action: 'getPublicMode', terminal_id: unknownTerminalId });
+assert.equal(publicMode.response.status, 409, `Unknown NKS2 terminal must fail closed with 409; got ${publicMode.response.status}: ${publicMode.text.slice(0, 240)}`);
 assert.match(publicMode.text, /Trusted terminal venue is not configured/i);
 assert.match(publicMode.text, /"terminal_state":"unknown"/i);
 assert.doesNotMatch(publicMode.text, /payment_provider|operating_mode|venue":/i, 'Unknown terminal response leaked venue or payment configuration.');
 
-console.log('[check:nups-batch16-runtime] passed: terminal admin and DJ functions start, anonymous access is denied, and unknown terminals fail closed.');
+const legacyPin = await invoke('nupsClockIn', { action: 'clockIn', pin: '0000', terminal_id: unknownTerminalId });
+assert.ok([401, 409].includes(legacyPin.response.status), `Retired NKS1 route must not authenticate a PIN; got ${legacyPin.response.status}: ${legacyPin.text.slice(0, 240)}`);
+assert.doesNotMatch(legacyPin.text, /kiosk_session|shift_id|clocked_in_at/i, 'Retired NKS1 route issued a session or shift response.');
+
+console.log('[check:nups-batch16-runtime] passed: terminal admin and DJ functions deny anonymous access, NKS2 rejects unknown terminals, and the retired NKS1 route does not issue a session.');
