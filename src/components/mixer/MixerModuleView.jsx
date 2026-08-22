@@ -8,10 +8,11 @@ import { Disc3, Sparkles, ListMusic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { createSongEntry, createDancerProfile, DialogMode, ViewMode } from "@/components/mixer/types/mixerTypes";
-import { loadSongs, saveSongs, loadProfiles, saveProfiles, loadState, saveState } from "@/components/mixer/services/storageService";
+import { loadSongs, saveSongs, loadProfiles, saveProfiles, loadState, saveState, readMixerStorageScope, buildMixerStorageKey } from "@/components/mixer/services/storageService";
 import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 import { trackEntityToMixerSong } from "@/lib/djTrackAdapter";
+import { MODE_CHANGE_EVENT } from "@/lib/nups/operatingMode";
 
 import ProfilePanel from "@/components/mixer/ProfilePanel";
 import SongDeck from "@/components/mixer/SongDeck";
@@ -34,9 +35,11 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   const { state: djSession, setQueue, rejectDeckLoad, requestDeckLoad, requestTransport } = useDJSession();
   const deckLoadRequest = djSession.pendingCommand;
   // ─── State hydration ───
-  const [songs, setSongs] = useState(() => loadSongs());
-  const [profiles, setProfiles] = useState(() => loadProfiles());
-  const [uiState, setUiState] = useState(() => loadState());
+  const [storageScope, setStorageScope] = useState(readMixerStorageScope);
+  const storageScopeId = buildMixerStorageKey("scope", storageScope);
+  const [songs, setSongs] = useState(() => loadSongs(storageScope));
+  const [profiles, setProfiles] = useState(() => loadProfiles(storageScope));
+  const [uiState, setUiState] = useState(() => loadState(storageScope));
 
   const [playingSongId, setPlayingSongId] = useState(null);
   const [selectedSongId, setSelectedSongId] = useState(null);
@@ -118,10 +121,28 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     setQueue(profileSongs.map((song) => song.id));
   }, [profileSongs, setQueue]);
 
+  // Rehydrate atomically when the operating mode changes. This prevents the
+  // previous mode's in-memory cache from being written under the new key.
+  useEffect(() => {
+    const handleModeChange = () => {
+      const nextScope = readMixerStorageScope();
+      const nextScopeId = buildMixerStorageKey("scope", nextScope);
+      if (nextScopeId === storageScopeId) return;
+      setStorageScope(nextScope);
+      setSongs(loadSongs(nextScope));
+      setProfiles(loadProfiles(nextScope));
+      setUiState(loadState(nextScope));
+      setPlayingSongId(null);
+      setSelectedSongId(null);
+    };
+    window.addEventListener(MODE_CHANGE_EVENT, handleModeChange);
+    return () => window.removeEventListener(MODE_CHANGE_EVENT, handleModeChange);
+  }, [storageScopeId]);
+
   // ─── Auto-save on mutations ───
-  useEffect(() => { saveSongs(songs); }, [songs]);
-  useEffect(() => { saveProfiles(profiles); }, [profiles]);
-  useEffect(() => { saveState(uiState); }, [uiState]);
+  useEffect(() => { saveSongs(songs, storageScope); }, [songs, storageScopeId]);
+  useEffect(() => { saveProfiles(profiles, storageScope); }, [profiles, storageScopeId]);
+  useEffect(() => { saveState(uiState, storageScope); }, [uiState, storageScopeId]);
 
   // ─── Autonomous idle-start ───
   // The decision engine may only take the deck when AUTO-DJ is armed, nothing
