@@ -423,12 +423,7 @@ function CommandCTA() {
 export default function Home() {
   return (
     <>
-      <SEOHead
-        title="GlyphLock — Build. Verify. Operate."
-        description="GlyphLock is an infrastructure platform for creating, operating, verifying, protecting, governing, and connecting digital and real-world systems. Explore NUPS, QR Studio, GlyphBot, Image Lab, Financial, Security Operations, Governance, and creator tools."
-        keywords="GlyphLock, NUPS, QR Studio, GlyphBot, Image Lab, DJ Pro Mixer, custom software, AI workflows, venue operations, verification infrastructure, systems integration"
-        url="/"
-      />
+      <SEOHead />
 
       <main className="gl-home min-h-screen overflow-hidden bg-transparent text-white">
         <GlyphHoverEngine />
