@@ -15,6 +15,17 @@ const [
   fableStage,
   clubTv,
   capability,
+  kiosk,
+  clubChannel,
+  deckGraph,
+  audioVisualizer,
+  fableDeckAudio,
+  beatInput,
+  audioIo,
+  storage,
+  app,
+  navigationTracker,
+  lazyPages,
 ] = await Promise.all([
   source("src/pages/DJHome.jsx"),
   source("src/components/mixer/UnifiedMusicConsole.jsx"),
@@ -25,6 +36,17 @@ const [
   source("src/pages/FableStagePage.jsx"),
   source("src/pages/ClubTV.jsx"),
   source("src/components/mixer/session/providerCapabilities.js"),
+  source("src/components/nups/KioskShell.jsx"),
+  source("src/components/mixer/ClubBroadcastChannel.jsx"),
+  source("src/components/mixer/deckAudioGraph.js"),
+  source("src/components/mixer/AudioVisualizer.jsx"),
+  source("src/components/mixer/fable/useFableDeckAudio.js"),
+  source("src/components/mixer/fable/useFableBeat.js"),
+  source("src/components/mixer/AudioIOPreferences.jsx"),
+  source("src/components/mixer/services/storageService.jsx"),
+  source("src/App.jsx"),
+  source("src/lib/NavigationTracker.jsx"),
+  source("src/lazyPagesConfig.js"),
 ]);
 
 assert.match(home, /<DJSessionProvider>/, "DJ route must own one persistent session provider");
@@ -50,5 +72,31 @@ assert.doesNotMatch(clubTv, /<audio\b/, "ClubTV must not create a second audible
 assert.match(clubTv, /volume=\{0\}[\s\S]*muted/, "ClubTV YouTube video must be muted");
 assert.match(capability, /spotify:[\s\S]*play: false/, "Spotify must stay discovery/import only");
 assert.match(capability, /apple_music:[\s\S]*play: false/, "Apple Music must stay discovery/import only");
+assert.doesNotMatch(kiosk, /displayPaused\s*\?\s*null\s*:\s*children/, "secure display must not unmount the playback subtree");
+assert.match(kiosk, /aria-hidden=\{displayPaused\}/, "secure display must redact the operational accessibility tree");
+assert.match(kiosk, /inert=\{displayPaused/, "secure display must make the operational surface inert");
+assert.match(consoleSource, /hidden=\{active !== "visuals"\}/, "Fable host must remain mounted across utility tab changes");
+assert.doesNotMatch(consoleSource, /active === "visuals"\s*&&\s*\(/, "visual utility view must not be conditionally unmounted");
+assert.match(clubChannel, /receiver-ready/, "Club TV must request an immediate state snapshot");
+assert.match(clubChannel, /heartbeat/, "Club TV signal must have a liveness heartbeat");
+assert.equal(
+  (deckGraph.match(/createMediaElementSource\(/g) || []).length +
+    (audioVisualizer.match(/createMediaElementSource\(/g) || []).length +
+    (fableDeckAudio.match(/createMediaElementSource\(/g) || []).length,
+  1,
+  "one canonical MediaElementSource owner is required",
+);
+assert.match(fableDeckAudio, /getDeckAudioGraph/, "Fable must subscribe to the canonical analyser");
+assert.match(beatInput, /deviceId:\s*\{ exact:/, "Fable input must honor the selected microphone");
+assert.match(audioIo, /YouTube iframe audio follows your browser or OS output/, "audio routing limits must be disclosed truthfully");
+assert.match(playerSection, /canFailoverToCue/, "manual Auto Blend failover must use the tested safety predicate");
+assert.match(playerSection, /nextTransitionAfterCueStart/, "cue rejection must preserve the live crossfade");
+assert.doesNotMatch(playerSection, /cueRef\?\.play\?\.\(\)\)\.catch\(\(\) => \{\}\)/, "cue prewarm failures must not be swallowed");
+assert.match(playerSection, /session\.transportCommand/, "deck transport must consume the authoritative session command");
+assert.match(storage, /buildMixerStorageKey\(kind, readMixerStorageScope\(\)\)/, "mixer cache must use the full scoped key");
+assert.match(playerSection, /grid-cols-1 lg:grid-cols-2/, "both decks must remain mounted in the mobile layout");
+assert.doesNotMatch(app, /from "\.\/pages\.config"/, "App must not eagerly import every page");
+assert.doesNotMatch(navigationTracker, /from ["']@\/pages\.config/, "navigation tracking must not pull eager pages into the entry chunk");
+assert.match(lazyPages, /import\.meta\.glob/, "pages must be route-lazy");
 
 console.log("NUPS DJ continuity contracts: PASS");
