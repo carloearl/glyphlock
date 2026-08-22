@@ -447,6 +447,26 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     toast.success("Track removed from playlist");
   }, [activeProfile, profiles, playingSongId, selectedSongId]);
 
+  // Wipe every track from the active (persona) playlist in one action — used to
+  // clear out junk uploads. Songs referenced by other profiles are retained.
+  const handleClearAll = useCallback(() => {
+    if (!activeProfile) return;
+    setProfiles((prev) => prev.map((p) =>
+      p.id === activeProfile.id ? { ...p, songIds: [] } : p
+    ));
+    setSongs((prev) => {
+      const usedElsewhere = new Set();
+      profiles.forEach((p) => {
+        if (p.id !== activeProfile.id) p.songIds.forEach((id) => usedElsewhere.add(id));
+      });
+      return prev.filter((s) => usedElsewhere.has(s.id));
+    });
+    if (playingSongId) setPlayingSongId(null);
+    setSelectedSongId(null);
+    emitTelemetry("PLAYLIST_CLEAR", { profileId: activeProfile.id });
+    toast.success("Cleared all tracks from playlist");
+  }, [activeProfile, profiles, playingSongId]);
+
   const handleUnarchive = useCallback((songId) => {
     setSongs((prev) => prev.map((s) => (s.id === songId ? { ...s, archivedFlag: false } : s)));
     emitTelemetry("ARCHIVE_TOGGLE", { songId, archived: false });
@@ -684,6 +704,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
             onEdit={(song) => { setEditingSong(song); setDialogMode(DialogMode.editSong); }}
             onDelete={handleDelete}
             canDelete={canDelete}
+            onClearAll={handleClearAll}
             onSelectSong={setSelectedSongId}
             onFocusZone={setFocusZone}
           />

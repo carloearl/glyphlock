@@ -4,7 +4,9 @@
  */
 import React, { useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Music } from "lucide-react";
+import { Music, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import SongCard from "@/components/mixer/SongCard";
 import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 
@@ -24,6 +26,7 @@ export default function SongDeck({
   onEdit,
   onDelete,
   canDelete = false,
+  onClearAll,
   onSelectSong,
   onFocusZone,
 }) {
@@ -76,6 +79,22 @@ export default function SongDeck({
         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: profile.colorTheme }} />
         <span className="text-sm font-semibold text-white">{profile.name}</span>
         <span className="text-xs text-slate-500">· {filtered.length} tracks</span>
+        <div className="ml-auto">
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={!canDelete || filtered.length === 0}
+            onClick={() => {
+              if (!canDelete) { toast.error("Clock in to clear the playlist"); return; }
+              if (window.confirm(`Remove ALL ${filtered.length} tracks from "${profile.name}"? This cannot be undone.`)) onClearAll?.();
+            }}
+            className="h-7 gap-1 text-[10px] text-rose-400 hover:bg-rose-500/10"
+            title={canDelete ? "Clear all tracks from this playlist" : "Clock in to clear"}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Clear
+          </Button>
+        </div>
       </div>
 
       {/* Song list — capped so a long playlist scrolls inside this window
