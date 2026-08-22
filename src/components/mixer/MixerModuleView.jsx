@@ -27,8 +27,12 @@ import MusicSearchPanel from "@/components/mixer/MusicSearchPanel";
 import TrackLibraryDock from "@/components/mixer/TrackLibraryDock";
 import EntertainerPlaylistDock from "@/components/mixer/EntertainerPlaylistDock";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
+import useMediaQuery from "@/components/mixer/session/useMediaQuery";
 
 export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent, libraryTracks = [] }) {
+  const { state: djSession, setQueue, rejectDeckLoad } = useDJSession();
+  const deckLoadRequest = djSession.pendingCommand;
   // ─── State hydration ───
   const [songs, setSongs] = useState(() => loadSongs());
   const [profiles, setProfiles] = useState(() => loadProfiles());
@@ -95,6 +99,24 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
       ? previous
       : [...previous, automationNextSong]);
   }, [automationNextSong?.id]);
+
+  // Typed commands from search/import are registered here, then consumed by
+  // the persistent deck owner. The queue/profile state is never cleared.
+  useEffect(() => {
+    if (!deckLoadRequest?.requestId) return;
+    if (!deckLoadRequest.song?.id) {
+      rejectDeckLoad(deckLoadRequest.requestId, deckLoadRequest.targetDeck, "The track did not contain a normalized playable id.");
+      return;
+    }
+    setSongs((previous) => previous.some((song) => song.id === deckLoadRequest.song.id)
+      ? previous
+      : [...previous, deckLoadRequest.song]);
+    setPlayerCollapsed(false);
+  }, [deckLoadRequest, rejectDeckLoad]);
+
+  useEffect(() => {
+    setQueue(profileSongs.map((song) => song.id));
+  }, [profileSongs, setQueue]);
 
   // ─── Auto-save on mutations ───
   useEffect(() => { saveSongs(songs); }, [songs]);
@@ -520,11 +542,10 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     return () => window.removeEventListener("keydown", handler);
   }, [dialogMode, focusZone, selectedSongId, profileSongs, songs, handlePlay, handleFavorite, handleArchive]);
 
-  const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1200;
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col bg-transparent overflow-hidden rounded-xl border border-slate-700/50">
+    <div className="h-full min-h-[720px] flex flex-col bg-transparent overflow-hidden rounded-xl border border-slate-700/50">
       {/* Top bar */}
       <div className="h-14 flex-shrink-0 flex items-center gap-3 px-4 border-b border-slate-700/50 bg-slate-900/80">
         <Disc3 className="w-5 h-5 text-purple-400 animate-spin" style={{ animationDuration: "3s" }} />
