@@ -996,7 +996,7 @@ export default function Blockchain() {
             {/* Features Grid */}
             <div ref={featuresRef} className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { icon: Shield, title: "Immutable", desc: "Tamper-proof verification" },
+                { icon: Shield, title: "Traceable", desc: "Hash and provenance references" },
                 { icon: Hash, title: "Cryptographic", desc: "Industry-standard algorithms" },
                 { icon: CheckCircle2, title: "Verified", desc: "Mathematically proven" },
                 { icon: Blocks, title: "Merkle Trees", desc: "Efficient data structures" }
