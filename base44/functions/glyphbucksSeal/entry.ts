@@ -331,6 +331,7 @@ Deno.serve(async (req) => {
     // --- WRITES (append-only seal) ---
     const sealed = await base44.asServiceRole.entities.SealRecord.create({
       verify_ref: verifyRef, venue_id: body.venue_id, agreement_no: agreementNo,
+      idempotency_key: idempotencyKey,
       terms_version: GB_TERMS_VERSION, terms_hash: termsHash,
       prev_block_hash: prevBlockHash, chain_hash: chainHash,
       ed25519_pub_id: pubId, public_key_hex: publicHex, signed_token: signedToken,
@@ -363,6 +364,7 @@ Deno.serve(async (req) => {
       const saleId = `GBS-${ymd}-${seq}`;
       await base44.asServiceRole.entities.GlyphBucksSale.create({
         sale_id: saleId, agreement_no: agreementNo, receipt_no: receiptNo, verify_ref: verifyRef,
+        idempotency_key: idempotencyKey,
         venue_id: body.venue_id, purchaser_name: body.purchaser_name || null,
         purchaser_member_id: body.purchaser_member_id || null,
         gb_account_last4: body.gb_account_last4 || null,
