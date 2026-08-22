@@ -22,17 +22,6 @@ export async function searchLocalTracks(query, limit = 12, source) {
   }));
 }
 
-export async function probePlaylistWriteDirect() {
-  const probe = await base44.entities.Playlist.create({
-    name: "DJ permission probe",
-    entertainer_id: "diagnostic-permission-probe",
-    ordered_tracks: [],
-    status: "archived",
-  });
-  await base44.entities.Playlist.delete(probe.id);
-  return { success: true, detail: "authenticated create + immediate delete permitted · direct data path" };
-}
-
 export function isBackendUnavailable(error) {
   return [502, 503, 504].includes(Number(error?.response?.status || error?.status || 0));
 }
