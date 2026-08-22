@@ -17,7 +17,7 @@ const socials = [
   { href: "https://twitter.com/glyphlock", icon: Twitter, label: "Twitter" },
   { href: "https://linkedin.com/company/glyphlock", icon: Linkedin, label: "LinkedIn" },
   { href: "https://instagram.com/glyphlock", icon: Instagram, label: "Instagram" },
-  { href: "https://github.com/glyphlock", icon: Github, label: "GitHub" },
+  { href: "https://github.com/carloearl/glyphlock", icon: Github, label: "GitHub" },
 ];
 
 const CLEAN_FOOTER_LINKS = Object.fromEntries(
@@ -187,11 +187,11 @@ export default function Footer() {
             </summary>
             <nav aria-label="Sitemap Discovery" className="mt-3 p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
               <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[10px]">
-                <a href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/sitemap" target="_blank" rel="noopener" className="text-slate-500 hover:text-blue-400 underline">sitemap.xml</a>
-                <a href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/robotsTxt" target="_blank" rel="noopener" className="text-slate-500 hover:text-blue-400 underline">robots.txt</a>
-                <a href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/llmsTxt" target="_blank" rel="noopener" className="text-slate-500 hover:text-blue-400 underline">llms.txt</a>
-                <a href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/aiTxtEnhanced" target="_blank" rel="noopener" className="text-slate-500 hover:text-blue-400 underline">ai.txt</a>
-                <a href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/glyphlockKnowledge" target="_blank" rel="noopener" className="text-slate-500 hover:text-blue-400 underline">knowledge.json</a>
+                <a href="https://glyphlock.io/sitemap.xml" className="text-slate-500 hover:text-blue-400 underline">sitemap.xml</a>
+                <a href="https://glyphlock.io/robots.txt" className="text-slate-500 hover:text-blue-400 underline">robots.txt</a>
+                <a href="https://glyphlock.io/llms.txt" className="text-slate-500 hover:text-blue-400 underline">llms.txt</a>
+                <a href="https://glyphlock.io/ai.txt" className="text-slate-500 hover:text-blue-400 underline">ai.txt</a>
+                <a href="https://glyphlock.io/api/glyphlockKnowledge" className="text-slate-500 hover:text-blue-400 underline">knowledge.json</a>
                 <Link to={createPageUrl('Sitemap')} className="text-slate-500 hover:text-blue-400 underline">HTML Sitemap</Link>
               </div>
             </nav>

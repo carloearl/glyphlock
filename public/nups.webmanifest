@@ -1,7 +1,7 @@
 {
-  "name": "NUPS by GlyphLock",
+  "name": "GlyphLock NUPS — Nexus Unified POS System",
   "short_name": "NUPS",
-  "description": "GlyphLock Nexus Unified POS System",
+  "description": "GlyphLock NUPS (Nexus Unified POS System) — connected venue operations, identity, contracts, POS, payouts, reconciliation, and audit trails.",
   "start_url": "/NUPSKiosk",
   "display": "standalone",
   "background_color": "#020617",

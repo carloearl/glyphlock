@@ -27,14 +27,14 @@ export default function SEOHead({
   }) || (normalizeSeoPath(path) === "/" ? "Home" : null);
   const autoData = key ? getSeoData(key) : {};
 
-  const resolvedTitle = title || autoData.title || "GlyphLock | Evidence Infrastructure, NUPS & Secure Workflows";
-  const resolvedDescription = description || autoData.description || "GlyphLock connects secure image carriers, QR verification, AI-assisted tools, NUPS venue operations, financial records, governance, and authorized integrations.";
-  const resolvedOgTitle = ogTitle || autoData.ogTitle || resolvedTitle;
-  const resolvedOgDescription = ogDescription || autoData.ogDescription || resolvedDescription;
+  const resolvedTitle = title || autoData.title || "GlyphLock | Evidence Infrastructure for Identity, Operations & Proof";
+  const resolvedDescription = description || autoData.description || "GlyphLock connects identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS venue operations, financial accountability, APIs, hardware, and governance through one evidence architecture.";
+  const resolvedOgTitle = ogTitle || autoData.ogTitle || "GlyphLock | Connected Evidence Infrastructure";
+  const resolvedOgDescription = ogDescription || autoData.ogDescription || "From Secure QR and interactive media to automated DJ, NUPS, financial records, SDKs, APIs, hardware, and governance—GlyphLock connects the full operating event.";
 
   // Use the page-specific keyword set as the source of truth. Global keywords
   // are a fallback only, preventing stale sitewide terms from leaking into pages.
-  const defaultKeywords = "GlyphLock, evidence infrastructure, NUPS, secure QR, interactive images, GlyphBot, venue operations software, API integration, governance";
+  const defaultKeywords = "GlyphLock, evidence infrastructure, identity and permission workflows, Secure QR, interactive images, GlyphBot, automated DJ, NUPS, venue operations software, financial accountability, API and SDK integration, governance";
   const autoKeywords = autoData.keywords ? autoData.keywords.join(", ") : "";
   const propKeywords = Array.isArray(keywords) ? keywords.join(", ") : (keywords || "");
   const sourceKeywords = propKeywords || autoKeywords || defaultKeywords;
@@ -81,7 +81,7 @@ export default function SEOHead({
       manifest.setAttribute('rel', 'manifest');
       document.head.appendChild(manifest);
     }
-    manifest.setAttribute('href', '/site.webmanifest');
+    manifest.setAttribute('href', '/nups.webmanifest');
 
     // Update or create meta tags
     const updateMetaTag = (name, content, property = false) => {
@@ -237,7 +237,7 @@ export default function SEOHead({
       "url": siteUrl,
       "logo": image,
       "image": image,
-      "description": "GlyphLock LLC builds evidence infrastructure connecting concealed-image data, Secure QR workflows, assisted intelligence, venue operations, closed-loop value records, governance, hardware, and authorized integrations.",
+      "description": "GlyphLock LLC builds evidence infrastructure connecting identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS (Nexus Unified POS System) venue operations, financial accountability, APIs, hardware, and governance.",
       "foundingDate": "2025-05-24",
       "founder": {
         "@type": "Person",
@@ -277,6 +277,7 @@ export default function SEOHead({
         }
       ],
       "sameAs": [
+        "https://github.com/carloearl/glyphlock",
         "https://instagram.com/glyphlock",
         "https://tiktok.com/@glyphlock"
       ],

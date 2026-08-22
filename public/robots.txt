@@ -1,13 +1,199 @@
+# GlyphLock LLC — robots.txt
+# Canonical origin: https://glyphlock.io
+# NUPS = Nexus Unified POS System
+# Generated: 2026-08-22
+
 User-agent: *
 Allow: /
+
+# ── Public indexable pages (actual route casing) ──
+Allow: /$
+Allow: /About
+Allow: /AboutCarlo
+Allow: /Services
+Allow: /Solutions
+Allow: /Pricing
+Allow: /Contact
+Allow: /Consultation
+Allow: /SecureQRStudio
+Allow: /ImageLab
+Allow: /ImageGenerator
+Allow: /InteractiveImageStudio
+Allow: /GlyphBot
+Allow: /GlyphBotMixer
+Allow: /SecurityTools
+Allow: /SecurityOperationsCenter
+Allow: /Blockchain
+Allow: /SDKDocs
+Allow: /SecurityDocs
+Allow: /Roadmap
+Allow: /Partners
+Allow: /DreamTeam
+Allow: /FAQ
+Allow: /GovernanceHub
+Allow: /MasterCovenant
+Allow: /TrustSecurity
+Allow: /NISTChallenge
+Allow: /CaseStudies
+Allow: /CaseStudyTruthStrike
+Allow: /CaseStudyAIBinding
+Allow: /CaseStudyCovenantVictory
+Allow: /GlyphLockFinancial
+Allow: /NUPSLanding
+Allow: /VideoUpload
+Allow: /ProviderConsole
+Allow: /Privacy
+Allow: /Terms
+Allow: /Cookies
+Allow: /Accessibility
+Allow: /CodeOfEthics
+
+# ── Noindex: admin / private / authenticated / payment-result / test / sandbox / internal audit ──
+Disallow: /Dashboard
+Disallow: /CommandCenter
+Disallow: /ProjectUpdates
+Disallow: /AccountSecurity
+Disallow: /BillingAndPayments
+Disallow: /ManageSubscription
+Disallow: /PaymentSuccess
+Disallow: /PaymentCancel
+Disallow: /ConsultationSuccess
+Disallow: /EmergencyBackup
+Disallow: /FullExport
+Disallow: /GlyphLockAudit
+Disallow: /GlyphLockPlayground
+Disallow: /IntegrationTests
+Disallow: /SystemAudit
+Disallow: /SettlementReports
+Disallow: /AnalyticsDashboard
+Disallow: /NUPSDemoManager
 Disallow: /NUPSOwner
+Disallow: /NUPSPostLogin
+Disallow: /NUPSReport
+Disallow: /NUPSSandbox
 Disallow: /NUPSStaff
-Disallow: /RegisterConsole
-Disallow: /ManagerConsole
-Disallow: /NUPSKiosk
-Disallow: /Accounting
-Disallow: /AdminPortal
+Disallow: /NUPSAudit
+Disallow: /NUPSInfrastructurePage
+Disallow: /SiteBuilder
+Disallow: /SiteBuilderTest
+Disallow: /SiteAudit
+Disallow: /Sie
+Disallow: /ClubCurrencyPress
+Disallow: /ContractArchive
+Disallow: /ContractSearch
+Disallow: /StrategicScale
+Disallow: /OHIPReadiness
+Disallow: /VIPContract
+Disallow: /Sitemap
+Disallow: /SitemapApp
+Disallow: /SitemapDynamic
+Disallow: /SitemapImages
+Disallow: /SitemapInteractive
+Disallow: /SitemapQr
+Disallow: /sitemap-qr
+Disallow: /Robots
+Disallow: /NotFound
 Disallow: /api/
 Disallow: /functions/
+Disallow: /admin/
+Disallow: /nupskiosk
+Disallow: /nupshub
+Disallow: /register
+Disallow: /registerconsole
+Disallow: /barregister
+Disallow: /receipts
+Disallow: /driverpayouts
+Disallow: /glyphbucks
+Disallow: /accounting
+Disallow: /tonight
+Disallow: /contracts
+Disallow: /contractshub
+Disallow: /vipbillprinter
+Disallow: /managerconsole
+Disallow: /peoplearchive
+Disallow: /ledgertrialbalance
+Disallow: /frontdoor
+Disallow: /entertainercheckin
+Disallow: /djhome
+Disallow: /vipsale
+Disallow: /vipcommand
+Disallow: /vipshowcontracts
+Disallow: /v/
+Disallow: /offlineverify
+Disallow: /mobilescanner
+Disallow: /clubtv
+Disallow: /fablestage
 
+# ── Duplicate-case route variants (noindex to avoid canonical duplication) ──
+Disallow: /about
+Disallow: /aboutcarlo
+Disallow: /services
+Disallow: /solutions
+Disallow: /pricing
+Disallow: /contact
+Disallow: /consultation
+Disallow: /secureqrstudio
+Disallow: /imagelab
+Disallow: /imagegenerator
+Disallow: /interactiveimagestudio
+Disallow: /glyphbot
+Disallow: /glyphbotmixer
+Disallow: /securitytools
+Disallow: /securityoperationscenter
+Disallow: /blockchain
+Disallow: /sdkdocs
+Disallow: /securitydocs
+Disallow: /roadmap
+Disallow: /partners
+Disallow: /dreamteam
+Disallow: /faq
+Disallow: /governancehub
+Disallow: /mastercovenant
+Disallow: /trustsecurity
+Disallow: /nistchallenge
+Disallow: /casestudies
+Disallow: /glyphlockfinancial
+Disallow: /nupslanding
+
+# ── Discovery ──
 Sitemap: https://glyphlock.io/sitemap.xml
+
+# Crawl-delay for politeness
+Crawl-delay: 1
+
+# ── AI crawlers ──
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: ChatGPT-User
+Allow: /
+Crawl-delay: 2
+
+User-agent: anthropic-ai
+Allow: /
+Crawl-delay: 2
+
+User-agent: Claude-Web
+Allow: /
+Crawl-delay: 2
+
+User-agent: Google-Extended
+Allow: /
+Crawl-delay: 2
+
+User-agent: PerplexityBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: CCBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
