@@ -39,10 +39,20 @@ Verification on 2026-08-20:
 `npm run check:nups-write-gateway` → PASS: `287/287 grandfathered frontend writes remain; no new bypasses.`
 
 ### Meaning
-The migration guard prevents entropy: new bypasses fail CI. As of 2026-08-21 the baseline has decreased to **167/287** after Batch 15 migrated the live generic Admin Data Manager update/delete paths through `writeEntity()`. The remaining inventory has been classified in `docs/audits/NUPS-BATCH15-DIRECT-WRITE-CLASSIFICATION.md`: **0 live high-risk NUPS business bypasses**, 6 live-medium NUPS playlist/checklist calls, 33 explicit security/admin audit events, 12 domain events, 13 operational telemetry calls, 41 live writes elsewhere in the combined GlyphLock app, and 62 demo/seed/sandbox/legacy/internal calls. The raw count is therefore not equivalent to unresolved NUPS production risk.
+The migration guard prevents entropy: new bypasses fail CI. Batch 16 reduced the baseline to **161/287** by migrating the final six live-medium NUPS writes: DailyChecklistConfig create/update, entertainer Playlist create/update, and the diagnostic Playlist create/delete probe. The current classification is recorded in `docs/audits/NUPS-BATCH16-DIRECT-WRITE-CLASSIFICATION.md`:
+
+- live high-risk NUPS business bypasses: **0**
+- live-medium NUPS business bypasses: **0**
+- explicit security/admin audit events: 33
+- domain events: 12
+- operational telemetry: 13
+- live writes elsewhere in the combined GlyphLock app: 41
+- demo/seed/sandbox/legacy/internal calls: 62
+
+The raw count is therefore not equivalent to unresolved NUPS production risk.
 
 ### Required resolution
-Reduce the manifest monotonically, prioritizing financial, identity, contract, credential, payout, mode, and audit writes.
+The live NUPS operational migration objective is met. Continue monotonic reduction only under separately scoped work for app-wide GlyphLock persistence, explicit audit/event architecture, or demo/seed/legacy maintenance. Do not delete retained evidence merely to lower the number.
 
 ---
 
