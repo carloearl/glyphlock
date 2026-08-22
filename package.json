@@ -30,7 +30,9 @@
     "check:nups-batch16-runtime-boundaries": "node scripts/check-nups-batch16-runtime-boundaries.mjs",
     "check:nups-batch16-operational": "node scripts/check-nups-batch16-operational.mjs",
     "check:nups-batch16-runtime": "node scripts/check-nups-batch16-runtime.mjs",
-    "check:nups-batch16": "node scripts/check-nups-batch16.mjs"
+    "check:nups-batch16": "node scripts/check-nups-batch16.mjs",
+    "test:dj": "node --test src/components/mixer/session/djSessionState.test.js",
+    "check:nups-dj-continuity": "node scripts/check-nups-dj-continuity.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.43",
