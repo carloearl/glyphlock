@@ -57,7 +57,10 @@ assert.match(clockV2, /pin_lookup_v2/, 'Clock-in V2 must use the versioned PIN i
 assert.doesNotMatch(clockV2, /\bpin_lookup\b(?!_v2)/, 'Clock-in V2 still references the retired PIN index.');
 assert.match(nupsUserSchema, /"pin_lookup_v2"/, 'NUPSUser schema lacks the NKS2 PIN index.');
 assert.doesNotMatch(nupsUserSchema, /"pin_lookup"\s*:/, 'Legacy PIN index remains in the NUPSUser schema.');
-assert.equal(fs.existsSync('base44/functions/nupsClockIn'), false, 'Retired nupsClockIn function source still exists.');
+const retiredClock = read('base44/functions/nupsClockIn/entry.ts');
+assert.match(retiredClock, /NKS1_ENDPOINT_RETIRED/, 'Retired nupsClockIn route must be an explicit tombstone.');
+assert.match(retiredClock, /status:\s*410/, 'Retired nupsClockIn tombstone must return HTTP 410.');
+assert.doesNotMatch(retiredClock, /NUPSUser|StaffShift|pin_lookup|sweepStale|getPublicMode/, 'Retired nupsClockIn tombstone must contain no operational logic.');
 
 const exts = new Set(['.js', '.jsx', '.ts', '.tsx']);
 function walk(dir, out = []) {
