@@ -66,7 +66,7 @@ function UnifiedMusicConsoleInner() {
   const isWide = useMediaQuery("(min-width: 1100px)");
   const performancePanelRef = useRef(null);
   const utilityPanelRef = useRef(null);
-  const [active, setActive] = useState("visuals");
+  const [active, setActive] = useState("mixer");
   // Deliberately disarmed on page load. The operator's explicit click both
   // authorizes autonomous playback and satisfies browser media gesture rules.
   const [autoDj, setAutoDj] = useState(false);
@@ -304,7 +304,7 @@ function UnifiedMusicConsoleInner() {
             <div className="text-[10px] font-black uppercase tracking-[0.25em] text-fuchsia-300/80">
               {activeNav.label}
             </div>
-            <SuiteErrorBoundary key={active}>
+            <SuiteErrorBoundary>
               {active === "mixer"   && <DJDiagnosticsTimeline compact />}
               {active === "tracks"  && <TracksTab />}
               {active === "radio"   && <RadioTab />}
@@ -313,7 +313,9 @@ function UnifiedMusicConsoleInner() {
               {active === "playlist" && <PlaylistGenTab />}
               {active === "crowd"   && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
               {active === "jukebox" && <JukeboxTab />}
-              {active === "visuals" && <FableVisualizerTab />}
+              <div className={active === "visuals" ? "block" : "hidden"} aria-hidden={active !== "visuals"}>
+                <FableVisualizerTab />
+              </div>
               {active === "health"  && (
                 <div className="space-y-3">
                   <TrackHealthTab />
