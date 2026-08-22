@@ -7,17 +7,14 @@
 import { toast } from "sonner";
 import { emitTelemetry } from "@/components/mixer/events/mixerTelemetry";
 import { getCurrentOperatingMode } from "@/lib/nups/operatingMode";
+import { buildMixerStorageKey } from "@/components/mixer/session/mixerStorageScope";
+export { buildMixerStorageKey } from "@/components/mixer/session/mixerStorageScope";
 
 const LEGACY_KEYS = Object.freeze([
   "glyphbot_mixer_songs_v1",
   "glyphbot_mixer_profiles_v1",
   "glyphbot_mixer_state_v1",
 ]);
-
-function clean(value, fallback) {
-  const normalized = String(value || fallback).trim().replace(/[^a-zA-Z0-9._-]/g, "_");
-  return normalized || fallback;
-}
 
 export function readMixerStorageScope() {
   let venueId = "no-venue";
@@ -31,27 +28,16 @@ export function readMixerStorageScope() {
     operatorId = operator.id || operator.user_id || operator.email || operator.name || operatorId;
   } catch { /* isolated fallback */ }
   return {
-    venueId: clean(venueId, "no-venue"),
-    operatorId: clean(operatorId, "anonymous"),
-    deviceId: clean(localStorage.getItem("nups_dj_device_id"), "default-device"),
-    mode: clean(getCurrentOperatingMode("LIVE"), "LIVE").toUpperCase(),
+    venueId,
+    operatorId,
+    deviceId: localStorage.getItem("nups_dj_device_id") || "default-device",
+    mode: getCurrentOperatingMode("LIVE"),
   };
-}
-
-export function buildMixerStorageKey(kind, scope = readMixerStorageScope()) {
-  return [
-    "nups.dj.cache.v2",
-    clean(scope.venueId, "no-venue"),
-    clean(scope.operatorId, "anonymous"),
-    clean(scope.deviceId, "default-device"),
-    clean(scope.mode, "LIVE").toUpperCase(),
-    clean(kind, "state"),
-  ].join(":");
 }
 
 function safeRead(kind, fallback) {
   try {
-    const raw = localStorage.getItem(buildMixerStorageKey(kind));
+    const raw = localStorage.getItem(buildMixerStorageKey(kind, readMixerStorageScope()));
     return raw ? JSON.parse(raw) : fallback;
   } catch (error) {
     console.warn(`[MixerStorage] Failed to read ${kind}:`, error);
@@ -61,7 +47,7 @@ function safeRead(kind, fallback) {
 
 function safeWrite(kind, data) {
   try {
-    localStorage.setItem(buildMixerStorageKey(kind), JSON.stringify(data));
+    localStorage.setItem(buildMixerStorageKey(kind, readMixerStorageScope()), JSON.stringify(data));
   } catch (error) {
     console.error(`[MixerStorage] Failed to write ${kind}:`, error);
     emitTelemetry("STORAGE_ERROR", { operation: "write", kind, message: error.message });
