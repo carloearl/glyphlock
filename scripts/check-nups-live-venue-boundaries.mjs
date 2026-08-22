@@ -41,8 +41,17 @@ if (!/NKS2\./.test(clockIn) || /NKS1\./.test(clockIn)) {
 if (!/pin_lookup_v2/.test(clockIn) || /\bpin_lookup\b(?!_v2)/.test(clockIn)) {
   failures.push('nupsClockInV2: only the versioned PIN lookup index may be used.');
 }
-if (fs.existsSync('base44/functions/nupsClockIn')) {
-  failures.push('Retired nupsClockIn function directory still exists.');
+const legacyClockPath = 'base44/functions/nupsClockIn/entry.ts';
+if (!fs.existsSync(legacyClockPath)) {
+  failures.push('Retired nupsClockIn route must remain represented by an explicit 410 tombstone.');
+} else {
+  const legacyClock = fs.readFileSync(legacyClockPath, 'utf8');
+  if (!/NKS1_ENDPOINT_RETIRED/.test(legacyClock) || !/status:\s*410/.test(legacyClock)) {
+    failures.push('Retired nupsClockIn route is not a 410 NKS1 tombstone.');
+  }
+  if (/NUPSUser|StaffShift|pin_lookup|sweepStale|getPublicMode/.test(legacyClock)) {
+    failures.push('Retired nupsClockIn tombstone contains operational authentication, shift, PIN, or venue logic.');
+  }
 }
 
 const sourceExtensions = new Set(['.js', '.jsx', '.ts', '.tsx']);
