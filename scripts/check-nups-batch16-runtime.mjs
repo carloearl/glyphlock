@@ -53,8 +53,9 @@ assert.match(revoked.text, /"terminal_state":"revoked"/i);
 const sweep = await invoke('nupsClockInV2', { action: 'sweepStale' });
 assert.equal(sweep.response.status, 401, `Anonymous stale-shift sweep must be denied; got ${sweep.response.status}: ${sweep.text.slice(0, 240)}`);
 
-const legacyPin = await invoke('nupsClockIn', { action: 'clockIn', pin: '0000', terminal_id: unknownTerminalId });
-assert.ok([401, 404, 409, 410].includes(legacyPin.response.status), `Retired NKS1 route must not authenticate a PIN; got ${legacyPin.response.status}: ${legacyPin.text.slice(0, 240)}`);
-assert.doesNotMatch(legacyPin.text, /kiosk_session|shift_id|clocked_in_at/i, 'Retired NKS1 route issued a session or shift response.');
+const retiredNks1 = await invoke('nupsClockIn', { action: 'retirementStatus' });
+assert.equal(retiredNks1.response.status, 410, `Retired NKS1 route must return 410 Gone; got ${retiredNks1.response.status}: ${retiredNks1.text.slice(0, 240)}`);
+assert.match(retiredNks1.text, /NKS1_ENDPOINT_RETIRED/);
+assert.doesNotMatch(retiredNks1.text, /kiosk_session|shift_id|clocked_in_at|operating_mode|payment_provider/i, 'Retired NKS1 route leaked operational data.');
 
-console.log('[check:nups-batch16-runtime] passed: terminal admin and DJ functions deny anonymous access, NKS2 rejects unknown/revoked terminals before PIN verification, anonymous NKS2 sweeps are denied, and the isolated NKS1 route cannot issue an ordinary PIN session.');
+console.log('[check:nups-batch16-runtime] passed: terminal admin and DJ functions deny anonymous access, NKS2 rejects unknown/revoked terminals before PIN verification, anonymous NKS2 sweeps are denied, and NKS1 returns 410 Gone.');
