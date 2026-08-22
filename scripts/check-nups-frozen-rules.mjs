@@ -16,6 +16,7 @@ const unifiedMusic = read("src/components/mixer/UnifiedMusicConsole.jsx");
 const register = read("src/pages/RegisterConsole.jsx");
 const contractV1 = read("src/components/nups/contracts/UnifiedContractFlow.jsx");
 const contractV2 = read("src/components/nups/contracts/UnifiedContractFlowV2.jsx");
+const glyphbucksSeal = read("base44/functions/glyphbucksSeal/entry.ts");
 const robots = read("public/robots.txt");
 const sitemap = read("public/sitemap.xml");
 
@@ -93,6 +94,16 @@ for (const [label, source] of [["UnifiedContractFlow", contractV1], ["UnifiedCon
     /glyphbucksSeal[\s\S]*idempotency_key:\s*idempotencyKey/,
   );
 }
+requireMatch(
+  "glyphbucksSeal must persist the caller key on SealRecord",
+  glyphbucksSeal,
+  /SealRecord\.create\(\{[\s\S]*?idempotency_key:\s*idempotencyKey/,
+);
+requireMatch(
+  "glyphbucksSeal must persist the caller key on GlyphBucksSale",
+  glyphbucksSeal,
+  /GlyphBucksSale\.create\(\{[\s\S]*?idempotency_key:\s*idempotencyKey/,
+);
 
 requireMatch("robots.txt must advertise the canonical sitemap", robots, /Sitemap:\s*https:\/\/glyphlock\.io\/sitemap\.xml/);
 requireMatch("robots.txt must keep owner operations out of crawl", robots, /Disallow:\s*\/NUPSOwner/);
