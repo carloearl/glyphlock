@@ -13,7 +13,7 @@
  *
  * Mounted inside NUPS Owner → DJ tab and NUPS Staff → DJ tab.
  */
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Disc3, Music, Youtube, Disc, Zap, Activity, Radio, RadioTower, Stethoscope, Sparkles, Power, MonitorPlay,
 } from "lucide-react";
@@ -33,6 +33,12 @@ import DJAutomationDeck from "@/components/mixer/automation/DJAutomationDeck";
 import useDJOperationalState from "@/components/mixer/automation/useDJOperationalState";
 import { buildAutoDJPlan } from "@/lib/djAutoEngine";
 import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { DJSessionProvider, useDJSession, useOptionalDJSession } from "@/components/mixer/session/DJSessionProvider";
+import DJDiagnosticsTimeline from "@/components/mixer/session/DJDiagnosticsTimeline";
+import ProviderCapabilityMatrix from "@/components/mixer/session/ProviderCapabilityMatrix";
+import useMediaQuery from "@/components/mixer/session/useMediaQuery";
+import { createScopedLayoutKey, WORKBENCH_PRESETS } from "@/components/mixer/session/djLayout";
 
 const NAV = [
   { key: "mixer",    label: "Auto-DJ Mixer",  icon: Disc3,    accent: "from-purple-500 to-fuchsia-500", ring: "border-purple-500/60 bg-purple-500/15 text-purple-200" },
@@ -48,14 +54,25 @@ const NAV = [
 ];
 
 export default function UnifiedMusicConsole() {
-  const [active, setActive] = useState("mixer");
+  const parentSession = useOptionalDJSession();
+  if (!parentSession) {
+    return <DJSessionProvider><UnifiedMusicConsoleInner /></DJSessionProvider>;
+  }
+  return <UnifiedMusicConsoleInner />;
+}
+
+function UnifiedMusicConsoleInner() {
+  const { state: djSession, scope, requestDeckLoad, setAutoDjArmed, setView } = useDJSession();
+  const isWide = useMediaQuery("(min-width: 1100px)");
+  const performancePanelRef = useRef(null);
+  const utilityPanelRef = useRef(null);
+  const [active, setActive] = useState("visuals");
   // Deliberately disarmed on page load. The operator's explicit click both
   // authorizes autonomous playback and satisfies browser media gesture rules.
   const [autoDj, setAutoDj] = useState(false);
   const [playHistory, setPlayHistory] = useState([]);
   const [runtimeBlockedTrackIds, setRuntimeBlockedTrackIds] = useState([]);
   const [performerOverrideId, setPerformerOverrideId] = useState("");
-  const [deckLoadRequest, setDeckLoadRequest] = useState(null);
   const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
 
   const activeNav = NAV.find((n) => n.key === active) || NAV[0];
