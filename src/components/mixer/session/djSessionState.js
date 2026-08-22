@@ -27,6 +27,7 @@ export function createInitialDJSessionState(seed = {}) {
     autoDjArmed: false,
     queue: seed.queue || [],
     pendingCommand: null,
+    transportCommand: null,
     commandAcks: [],
     diagnostics: [],
     transitionCount: 0,
@@ -65,6 +66,13 @@ function acknowledge(state, ack) {
   };
 }
 
+export function createTransportCommand({ requestId, action, deck = null, songId = null }) {
+  if (!requestId) throw new Error("A transport command requires requestId");
+  if (!["play", "pause"].includes(action)) throw new Error("Transport action must be play or pause");
+  if (deck && !["A", "B"].includes(deck)) throw new Error("Transport deck must be A or B");
+  return { requestId: String(requestId), action, deck, songId, createdAt: Date.now() };
+}
+
 export function djSessionReducer(state, action) {
   switch (action.type) {
     case "VIEW_CHANGED":
@@ -79,6 +87,17 @@ export function djSessionReducer(state, action) {
           requestId: action.command.requestId,
           deck: action.command.targetDeck,
           source: action.command.source,
+        }),
+      };
+    case "TRANSPORT_COMMAND_REQUESTED":
+      return {
+        ...state,
+        transportCommand: action.command,
+        diagnostics: boundedDiagnostics(state.diagnostics, {
+          event: `transport_${action.command.action}_requested`,
+          requestId: action.command.requestId,
+          deck: action.command.deck || state.activeDeck,
+          songId: action.command.songId || null,
         }),
       };
     case "DECK_LOADED": {
