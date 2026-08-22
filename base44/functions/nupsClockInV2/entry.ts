@@ -139,6 +139,21 @@ Deno.serve(async (req) => {
       });
     }
 
+    const terminalRequiredActions = new Set([
+      'clockIn', 'clockOut', 'verifyManagerPin', 'managerUnlockTerminal', 'changeTemporaryPin',
+    ]);
+    if (terminalRequiredActions.has(action) && !terminalVenueId) {
+      const eventType = terminalState === 'unknown' ? 'UNKNOWN_TERMINAL_BLOCKED' : 'TERMINAL_ACCESS_BLOCKED';
+      await logTerminalBoundary(eventType, `PIN/session action ${action} blocked: ${terminalState}`);
+      return Response.json({
+        error: terminalState === 'unknown'
+          ? 'This device must be approved by a venue manager before staff authentication.'
+          : `Terminal is ${terminalState} and cannot authenticate staff.`,
+        code: 'TRUSTED_TERMINAL_REQUIRED',
+        terminal_state: terminalState,
+      }, { status: terminalState === 'unknown' ? 409 : 403 });
+    }
+
     const PEPPER = Deno.env.get('KEY_PEPPER') || '';
     if (!PEPPER) return Response.json({ error: 'Server configuration error.' }, { status: 500 });
     const te = new TextEncoder();
@@ -286,6 +301,16 @@ Deno.serve(async (req) => {
     // ─── SWEEP STALE SHIFTS — auto clock-out anyone idle > 30 min ────────────
     // Safe to call from any dashboard poll; only closes truly-idle shifts.
     if (action === 'sweepStale') {
+      const live = await base44.auth.me().catch(() => null);
+      if (!live?.email) return Response.json({ error: 'Authentication required.' }, { status: 401 });
+      const liveEmail = String(live.email).toLowerCase();
+      const operators = (await E.NUPSUser.filter({ platform_email: liveEmail, status: 'active' }, null, 1).catch(() => [])) || [];
+      const operator = operators[0]
+        || ((await E.NUPSUser.filter({ username: liveEmail.split('@')[0], status: 'active' }, null, 1).catch(() => [])) || [])[0]
+        || null;
+      const sweepRoles = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
+      const allowed = liveEmail === OWNER_EMAIL || live.role === 'admin' || (operator && sweepRoles.has(operator.role));
+      if (!allowed) return Response.json({ error: 'Manager authorization required.' }, { status: 403 });
       const closed = await sweepStaleShifts();
       return Response.json({ success: true, closed });
     }
