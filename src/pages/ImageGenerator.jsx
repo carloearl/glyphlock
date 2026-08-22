@@ -120,8 +120,10 @@ export default function ImageGenerator() {
   return (
     <PaywallGuard serviceName="Quantum Image Forge" requirePlan="professional">
       <SEOHead
-        title="Quantum Image Forge - GlyphLock AI Image Laboratory"
-        description="Enterprise-grade AI image generation with advanced controls, batch processing, and multimodal capabilities. Transform prompts into stunning visuals."
+        title="GlyphLock AI Image Generator | Creation Context & Workflows"
+        description="Generate visual assets, retain prompt and creation settings, and route approved images into carrier, hotspot, Secure QR, and record workflows."
+        keywords="GlyphLock AI image generator, image creation context, image carrier workflow, interactive hotspots, Secure QR images, visual asset records"
+        url="/image-generator"
       />
       
       <ImageLabLayout>
