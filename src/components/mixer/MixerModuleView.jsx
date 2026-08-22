@@ -624,7 +624,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
       </div>
 
       {/* Main panels — VirtualDJ-style: Library on the left, decks stay anchored */}
-      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v2" className="flex-1 overflow-hidden">
+      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v2" className="flex-1 min-h-0 max-h-[48vh] min-h-[240px] overflow-hidden">
         {/* Left: Track Library — scrollable browser sidebar */}
         {!isMobile && (
           <>
