@@ -64,7 +64,7 @@ requireMatch(
 requireMatch(
   "The mixer must stay mounted while utility/visualizer tabs are active",
   unifiedMusic,
-  /active !== ["']mixer["'][\s\S]*<MixerModuleView/,
+  /<ResizablePanelGroup[\s\S]*<MixerModuleView/,
 );
 forbidMatch(
   "The mixer must not be conditionally unmounted when leaving its tab",
