@@ -446,7 +446,7 @@ export default function CountdownPill() {
 
             {/* Header tagline — above the GlyphLock banner */}
             <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.05em] text-violet-400 leading-relaxed font-mono mb-3">
-              QUANTUM-RESISTANT SECURITY · PROTECTING DATA, IDENTITY &amp; DIGITAL ASSETS<br />
+              CONNECTED EVIDENCE · LINKING DATA, IDENTITY &amp; OPERATIONAL RECORDS<br />
               TECHNOLOGY SERVICES BUILT AROUND YOUR OPERATIONS
             </p>
 
@@ -572,7 +572,7 @@ export default function CountdownPill() {
 
             <div className="text-[8px] sm:text-[9px] text-white/25 font-mono">
               OPERATIONAL SINCE <span className="text-cyan-400/60">JAN 1, 2026</span><br />
-              QUANTUM-RESISTANT · ZERO-TRUST
+              EVIDENCE-CONNECTED · HUMAN-GOVERNED
             </div>
           </div>
         </div>
