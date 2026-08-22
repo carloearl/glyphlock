@@ -16,6 +16,7 @@ export default function Crossfader({
   onBlendSecondsChange,
   onBlendNow,
   transitioning = false,
+  cueAvailable = true,
 }) {
   return (
     <div className="flex flex-wrap items-center gap-3 px-4 py-2">
@@ -73,8 +74,8 @@ export default function Crossfader({
           variant="outline"
           className="h-7 text-[10px] gap-1 border-purple-500/40 text-purple-300 hover:bg-purple-500/10"
           onClick={onBlendNow}
-          disabled={transitioning}
-          title="Blend into the cue deck now over the blend time"
+          disabled={transitioning || !cueAvailable}
+          title={cueAvailable ? "Blend into the cue deck now over the blend time" : "Load a track on the cue deck first"}
         >
           <Shuffle className="w-3 h-3" />
           {transitioning ? "Blending…" : "Blend Now"}

@@ -4,7 +4,7 @@
  * Falls back to YouTube iframe for YouTube URLs.
  */
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Volume2, VolumeX, Waves, WavesIcon } from "lucide-react";
+import { Volume2, VolumeX, Waves } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
@@ -170,7 +170,7 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, deckId, volume,
               <AudioVisualizer
                 audioEl={audioEl}
                 active={visualizerOn && !!audioEl}
-                palette={label === "Deck B" ? "cyan" : "purple"}
+                palette={deckId === "B" ? "cyan" : "purple"}
               />
               {/* Track title overlay */}
               <div className="absolute bottom-2 left-2 right-2 text-white pointer-events-none">

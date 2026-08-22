@@ -277,7 +277,7 @@ function UnifiedMusicConsoleInner() {
           Reset Layout
         </button>
         <span className="ml-auto text-[10px] text-slate-500">
-          One playback owner · {djSession.commandAcks.length} deck commands acknowledged
+          One playback owner · {djSession.commandAcks?.length ?? 0} deck commands acknowledged
         </span>
       </div>
 

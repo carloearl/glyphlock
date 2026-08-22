@@ -86,6 +86,9 @@ export default function DJPlayerSection({
   // comes up — no dead air at the transition.
   const prewarmSeconds = 30;
   const prewarmedDeckRef = useRef(null); // "A" | "B" | null — cue deck already started
+  // True after an explicit stop (X / Esc). Blocks the auto-blend interval from
+  // restarting the cue deck and silences the beforeunload warning until Play resumes.
+  const stoppedRef = useRef(false);
   // Stop guard: playback only halts on an explicit X / Esc confirmation.
   const [confirmStop, setConfirmStop] = useState(false);
   const sectionRef = useRef(null);
@@ -125,7 +128,21 @@ export default function DJPlayerSection({
   // song is already resident on either deck (e.g. after an Auto-DJ promotion),
   // do not remount it and accidentally restart playback.
   useEffect(() => {
-    if (!playingSongId || playingSongId === deckASongId || playingSongId === deckBSongId) return;
+    if (!playingSongId) return;
+    // If the selected track is already on the cue deck, promote that deck to
+    // live instead of bailing — otherwise clicking play on a cued track is a
+    // no-op and the old deck keeps playing.
+    if (playingSongId === deckBSongId && activeDeck === "A") {
+      setActiveDeck("B");
+      setCrossfade(100);
+      return;
+    }
+    if (playingSongId === deckASongId && activeDeck === "B") {
+      setActiveDeck("A");
+      setCrossfade(0);
+      return;
+    }
+    if (playingSongId === deckASongId || playingSongId === deckBSongId) return;
     if (activeDeck === "A") {
       setDeckASongId(playingSongId);
       setCrossfade(0);
@@ -254,7 +271,11 @@ export default function DJPlayerSection({
   const handlePlayLive = useCallback(() => {
     const liveRef = activeDeck === "A" ? deckARef.current : deckBRef.current;
     if (!liveRef || !activeSongId) return;
+    stoppedRef.current = false;
     setMasterMuted(false);
+    // Move the fader to the live deck so Play Live is always audible — without
+    // this, pressing Play on deck A while the crossfader sits at B plays silently.
+    setCrossfade(activeDeck === "A" ? 0 : 100);
     if (activeDeck === "A") {
       setDeckAMuted(false);
       if (deckABaseVol === 0) setDeckABaseVol(1);
@@ -301,7 +322,7 @@ export default function DJPlayerSection({
     if (!blending) return undefined;
     const fadeWindow = Math.max(2, Number(blendSeconds || 6));
     const timer = setInterval(() => {
-      if (transitionRef.current) return;
+      if (transitionRef.current || stoppedRef.current) return;
       const targetDeck = activeDeck === "A" ? "B" : "A";
       const targetId = activeDeck === "A" ? deckBSongId : deckASongId;
       if (!targetId) return;
@@ -339,8 +360,10 @@ export default function DJPlayerSection({
   // A new live deck means a fresh cue target — reset the prewarm tracker so
   // the next cue deck gets its own 30s warm-up.
   useEffect(() => {
+    // Reset the prewarm tracker whenever the live deck OR either deck's song
+    // changes — a fresh recommendation on the cue deck needs its own 30s warm-up.
     prewarmedDeckRef.current = null;
-  }, [activeDeck]);
+  }, [activeDeck, deckASongId, deckBSongId]);
 
   useEffect(() => () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -379,6 +402,7 @@ export default function DJPlayerSection({
   // room. Confirming pauses both decks and mutes the master.
   const handleStopPlayback = useCallback(() => {
     setConfirmStop(false);
+    stoppedRef.current = true;
     try { deckARef.current?.pause?.(); } catch { /* provider between states */ }
     try { deckBRef.current?.pause?.(); } catch { /* provider between states */ }
     setMasterMuted(true);
@@ -402,7 +426,7 @@ export default function DJPlayerSection({
   // Warn before closing/navigating the tab while audio is live.
   useEffect(() => {
     const onBeforeUnload = (e) => {
-      if (!activeSongId) return;
+      if (!activeSongId || stoppedRef.current) return;
       e.preventDefault();
       e.returnValue = "";
     };
@@ -429,7 +453,14 @@ export default function DJPlayerSection({
             volume={masterVolume}
             muted={masterMuted}
             onPlay={handlePlayLive}
-            onMute={() => setMasterMuted((value) => !value)}
+            onMute={() => {
+              if (masterMuted) {
+                setMasterMuted(false);
+                if (masterVolume === 0) setMasterVolume(1);
+              } else {
+                setMasterMuted(true);
+              }
+            }}
             onVolumeChange={(value) => { setMasterVolume(value); setMasterMuted(value === 0); }}
           />
           <Button
@@ -514,6 +545,7 @@ export default function DJPlayerSection({
         onBlendSecondsChange={(seconds) => setBlendSeconds(Math.max(2, seconds))}
         onBlendNow={handleSwap}
         transitioning={transitioning}
+        cueAvailable={Boolean(inactiveSongId)}
       />
 
       {confirmStop && (
