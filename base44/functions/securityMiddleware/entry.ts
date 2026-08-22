@@ -11,12 +11,12 @@ Deno.serve(async (req) => {
   const securityHeaders = {
     'Content-Security-Policy': [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com https://js.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com https://js.stripe.com https://hcaptcha.com https://*.hcaptcha.com https://www.youtube.com https://s.ytimg.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://api.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
-      "frame-src https://js.stripe.com https://hooks.stripe.com https://hcaptcha.com https://*.hcaptcha.com",
+      "connect-src 'self' https://*.supabase.co https://api.stripe.com https://hcaptcha.com https://*.hcaptcha.com https://www.youtube.com https://www.googleapis.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://hcaptcha.com https://*.hcaptcha.com https://www.youtube.com https://www.youtube-nocookie.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'"
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    'Permissions-Policy': 'camera=(self), microphone=(self), geolocation=()',
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
   };
 
