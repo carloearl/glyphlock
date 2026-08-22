@@ -467,39 +467,39 @@ export default function AgentBrainPanel() {
                 <div className="flex items-center justify-center min-h-[400px]">
                   <div className="text-center px-4 max-w-2xl">
                   <BrainCircuit className="w-12 h-12 md:w-16 md:h-16 text-blue-400 mx-auto mb-4 opacity-50 animate-pulse" />
-                  <h3 className="text-lg md:text-xl font-bold text-white mb-2">🚀 Manual-Only Reporting Active</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-2">🚀 Agent Brain Ready</h3>
                   <p className="text-sm md:text-base text-blue-300/80 mb-2">
                     Mode: <span className="font-bold">{modeConfig.label}</span> {modeConfig.icon}
                   </p>
                   <p className="text-xs text-green-400/80 mb-2">
-                    ✅ Errors can be reviewed and reported safely
+                    ✅ Connected to the Site Builder agent
                   </p>
-                  <p className="text-xs text-amber-400/60 mb-6">
-                    ⚠️ Manual-only mode: no agents, no auto-fix, no background execution
+                  <p className="text-xs text-blue-300/60 mb-6">
+                    The agent scans, reads, and reports — code changes still need your approval
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
                   <div className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/15 transition-colors">
                   <div className="text-sm text-white font-semibold mb-1">💡 Explain</div>
                   <p className="text-xs text-cyan-300">
-                    Reviews issues • No execution
+                    Ask questions • Get analysis
                   </p>
                   </div>
                   <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/15 transition-colors">
                   <div className="text-sm text-white font-semibold mb-1">🔨 Build</div>
                   <p className="text-xs text-blue-300">
-                    Build requests are blocked • Report only
+                    Plan builds • Generate suggestions
                   </p>
                   </div>
                   <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/15 transition-colors">
                   <div className="text-sm text-white font-semibold mb-1">♻️ Refactor</div>
                   <p className="text-xs text-indigo-300">
-                    Refactor requests are blocked • Report only
+                    Plan refactors • Restructure code
                   </p>
                   </div>
                   <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/15 transition-colors">
                   <div className="text-sm text-white font-semibold mb-1">🐛 Debug</div>
                   <p className="text-xs text-red-300">
-                    Debug requests are blocked • Report only
+                    Diagnose errors • Suggest fixes
                   </p>
                   </div>
                   </div>

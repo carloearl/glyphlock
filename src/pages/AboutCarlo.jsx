@@ -27,7 +27,7 @@ export default function AboutCarloPage() {
               "url": "https://glyphlock.io"
             },
             "description": "Founder of GlyphLock LLC and creator of NUPS, shaped by firsthand experience in venue operations, identity, transaction evidence, agreements, and accountability.",
-            "url": "https://glyphlock.io/AboutCarlo",
+            "url": "https://glyphlock.io/about-carlo",
             "knowsAbout": [
               "Venue operations",
               "Point of sale systems",
