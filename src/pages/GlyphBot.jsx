@@ -691,9 +691,10 @@ export default function GlyphBotPage() {
       ]}
     />
     <div className="min-h-screen text-white flex flex-col pt-16 pb-0 relative" style={{ color: '#ffffff', background: 'transparent', zIndex: 200, position: 'relative', pointerEvents: 'auto' }}>
-      <SEOHead 
-        title="GlyphBot - AI Security Assistant | GlyphLock"
-        description="Chat with GlyphBot, your AI security assistant for code auditing, blockchain analysis, threat detection, and debugging."
+      <SEOHead
+        title="GlyphBot | Governed AI Assistant for Connected Workflows"
+        description="Use GlyphBot to build, inspect, explain, and audit connected GlyphLock workflows with explicit direction, recorded context, and human review."
+        keywords="GlyphBot, governed AI assistant, workflow assistant, human review, NUPS assistant, AI audit support, GlyphLock AI"
         url="/glyphbot"
       />
       
