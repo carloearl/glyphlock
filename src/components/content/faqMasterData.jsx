@@ -6,7 +6,7 @@ export const FAQ_MASTER_DATA = [
     q: "What is GlyphLock?",
     a: [
       "GlyphLock is a protocol authority operating under the Master Covenant governance framework.",
-      "We provide credentialed verification modules for visual cryptography, blockchain integrity, and autonomous threat suppression.",
+      "We provide connected workflows for image carriers, Secure QR, governed AI assistance, NUPS venue operations, value records, integrations, and audit context.",
       "Access is provisioned through protocol-governed credential review, not SaaS subscriptions."
     ]
   },
@@ -36,9 +36,9 @@ export const FAQ_MASTER_DATA = [
     id: "visual-crypto-module",
     category: "Verification Modules",
     icon: "Eye",
-    q: "What is the Visual Cryptography Module?",
+    q: "What are the image-carrier tools?",
     a: [
-      "Protocol-governed QR verification with quantum-resistant encoding and steganographic layers.",
+      "Secure QR Studio provides structured QR workflows, while permitted image-carrier experiments can encode and recover selected data through least-significant pixel bits."
       "Restricted to credentialed operators. Access requires provisioned credentials.",
       "Provides tamper detection, AI threat scoring, and blockchain audit trails."
     ]
