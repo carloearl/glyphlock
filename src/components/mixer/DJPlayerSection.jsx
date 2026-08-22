@@ -16,6 +16,7 @@ import { ArrowLeftRight, ChevronUp, ChevronDown, Tv, WandSparkles } from "lucide
 import { getClubTVSender, openClubTVWindow } from "@/components/mixer/ClubBroadcastChannel";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
+import { toast } from "sonner";
 
 function extractVideoId(url) {
   if (!url) return null;
@@ -100,8 +101,10 @@ export default function DJPlayerSection({
     const song = songs.find((item) => item.id === command.song?.id) || command.song;
     if (!song?.id) return;
     if (!song.youtubeUrl && !song.uploadUrl) {
+      const message = "This discovery item is not matched to an authorized playable source.";
       handledCommandIdsRef.current.add(command.requestId);
-      rejectDeckLoad(command.requestId, command.targetDeck, "This discovery item is not matched to an authorized playable source.");
+      rejectDeckLoad(command.requestId, command.targetDeck, message);
+      toast.error(`Deck ${command.targetDeck} load blocked`, { description: message });
       return;
     }
     if (command.targetDeck === "B") setDeckBSongId(song.id);
