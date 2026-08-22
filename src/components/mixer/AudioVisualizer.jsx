@@ -11,6 +11,8 @@
  *  - mode: "bars" | "wave" | "combo" (default "combo")
  */
 import React, { useEffect, useRef } from "react";
+import { getDeckAudioGraph, resumeDeckAudioContext } from "@/components/mixer/deckAudioGraph";
+export { setDeckAudioFx } from "@/components/mixer/deckAudioGraph";
 
 const PALETTES = {
   purple:  ["#7c3aed", "#a855f7", "#d946ef"],
@@ -18,96 +20,6 @@ const PALETTES = {
   fuchsia: ["#be185d", "#ec4899", "#f472b6"],
   amber:   ["#d97706", "#f59e0b", "#fbbf24"],
 };
-
-// One shared AudioContext per page — some browsers cap total contexts
-let sharedCtx = null;
-function getSharedCtx() {
-  if (typeof window === "undefined") return null;
-  if (sharedCtx) return sharedCtx;
-  const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return null;
-  sharedCtx = new AC();
-  // Browsers create AudioContexts suspended until a user gesture. Since the
-  // whole deck output is routed through this context, a suspended context
-  // means the track "plays" with zero sound. Resume on the next gesture.
-  const resumeOnGesture = () => {
-    if (sharedCtx && sharedCtx.state === "suspended") {
-      sharedCtx.resume().catch(() => {});
-    }
-    if (sharedCtx && sharedCtx.state === "running") {
-      window.removeEventListener("pointerdown", resumeOnGesture);
-      window.removeEventListener("keydown", resumeOnGesture);
-    }
-  };
-  window.addEventListener("pointerdown", resumeOnGesture);
-  window.addEventListener("keydown", resumeOnGesture);
-  return sharedCtx;
-}
-
-// Keep track of which <audio> elements we've already wired to avoid
-// the "HTMLMediaElement already connected" error. The same graph powers both
-// the visualizer and the real deck FX so we never double-connect an element.
-const wiredElements = new WeakMap();
-
-function wireAudio(audioEl) {
-  if (!audioEl) return null;
-  if (wiredElements.has(audioEl)) return wiredElements.get(audioEl);
-
-  const ctx = getSharedCtx();
-  if (!ctx) return null;
-
-  try {
-    const source = ctx.createMediaElementSource(audioEl);
-    const low = ctx.createBiquadFilter();
-    low.type = 'lowshelf'; low.frequency.value = 180;
-    const mid = ctx.createBiquadFilter();
-    mid.type = 'peaking'; mid.frequency.value = 1200; mid.Q.value = 0.8;
-    const high = ctx.createBiquadFilter();
-    high.type = 'highshelf'; high.frequency.value = 6500;
-    const sweep = ctx.createBiquadFilter();
-    sweep.type = 'lowpass'; sweep.frequency.value = 20000; sweep.Q.value = 0.7;
-    const dry = ctx.createGain(); dry.gain.value = 1;
-    const delay = ctx.createDelay(1.5); delay.delayTime.value = 0.28;
-    const feedback = ctx.createGain(); feedback.gain.value = 0;
-    const wet = ctx.createGain(); wet.gain.value = 0;
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 512;
-    analyser.smoothingTimeConstant = 0.75;
-
-    source.connect(low); low.connect(mid); mid.connect(high); high.connect(sweep);
-    sweep.connect(dry); dry.connect(analyser);
-    sweep.connect(delay); delay.connect(feedback); feedback.connect(delay); delay.connect(wet); wet.connect(analyser);
-    analyser.connect(ctx.destination);
-
-    const entry = { source, analyser, low, mid, high, sweep, dry, delay, feedback, wet };
-    wiredElements.set(audioEl, entry);
-    return entry;
-  } catch (err) {
-    return null;
-  }
-}
-
-export function setDeckAudioFx(audioEl, fx = {}) {
-  const entry = wireAudio(audioEl);
-  const ctx = getSharedCtx();
-  if (!entry || !ctx) return false;
-  if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-  const now = ctx.currentTime;
-  const ramp = (param, value) => {
-    try { param.cancelScheduledValues(now); param.setTargetAtTime(value, now, 0.025); } catch (_) { param.value = value; }
-  };
-  ramp(entry.low.gain, Number(fx.low ?? 0));
-  ramp(entry.mid.gain, Number(fx.mid ?? 0));
-  ramp(entry.high.gain, Number(fx.high ?? 0));
-  const filterPct = Math.max(0, Math.min(100, Number(fx.filter ?? 100)));
-  const hz = 180 * Math.pow(20000 / 180, filterPct / 100);
-  ramp(entry.sweep.frequency, hz);
-  const echo = Math.max(0, Math.min(100, Number(fx.echo ?? 0))) / 100;
-  ramp(entry.wet.gain, echo * 0.7);
-  ramp(entry.feedback.gain, echo * 0.62);
-  ramp(entry.delay.delayTime, Math.max(0.08, Math.min(0.72, Number(fx.delay ?? 0.28))));
-  return true;
-}
 
 export default function AudioVisualizer({ audioEl, active = true, palette = "purple", mode = "combo" }) {
   const canvasRef = useRef(null);
@@ -117,11 +29,8 @@ export default function AudioVisualizer({ audioEl, active = true, palette = "pur
   useEffect(() => {
     if (!active || !audioEl || !canvasRef.current) return;
 
-    const ctx = getSharedCtx();
-    // Some browsers require a user-gesture resume
-    if (ctx?.state === "suspended") ctx.resume().catch(() => {});
-
-    const entry = wireAudio(audioEl);
+    resumeDeckAudioContext();
+    const entry = getDeckAudioGraph(audioEl);
     const canvas = canvasRef.current;
     const g = canvas.getContext("2d");
     if (!g) return;
