@@ -325,6 +325,36 @@ No real physical terminal is currently registered as active and trusted. Provisi
 
 ---
 
+## NUPS-0014 — Retired NKS1 function remains registered until explicit deployment
+
+**Severity:** HIGH  
+**Invariant:** Security / operational availability boundary  
+**Status:** OPEN — PLATFORM FUNCTION RETIREMENT DEPLOYMENT REQUIRED
+
+### Expected
+The legacy `nupsClockIn` resource returns an explicit HTTP 410 tombstone. All supported authentication and session traffic uses `nupsClockInV2`, `pin_lookup_v2`, and NKS2 tokens.
+
+### Observed
+Batch 16 removed every supported frontend/backend invocation of `nupsClockIn`, migrated all populated PIN lookup values to `pin_lookup_v2`, removed the legacy field from the NUPSUser schema, and placed a 410 tombstone at `base44/functions/nupsClockIn/entry.ts`.
+
+The Base44 preview runtime continues serving the previously registered NKS1 implementation until an explicit function deployment occurs. A deployed probe still received the old `Unknown action` response, and the historical anonymous `sweepStale` action remained reachable. Ordinary staff PIN authentication is contained because the lookup field used by NKS1 no longer exists in schema or records, and the runtime probe confirms the old route does not issue an ordinary PIN session.
+
+### Risk
+The old resource cannot resolve ordinary staff PINs after the index migration, but its stale public maintenance and mode endpoints remain remotely addressable until the platform resource is replaced. This is avoidable legacy attack surface and operational ambiguity.
+
+### Required resolution
+During an explicitly authorized Base44 function deployment, deploy the repository tombstone for `nupsClockIn`. Verify:
+
+```text
+any action → HTTP 410
+code = NKS1_ENDPOINT_RETIRED
+no venue/payment/session/shift data returned
+```
+
+Then keep the permanent runtime assertion in CI and close this issue. Production publishing was explicitly prohibited during Batch 16, so this deployment was not forced from the current run.
+
+---
+
 ## Closed / controlled findings from this mapping
 
 ### NUPS-C001 — No new direct-write bypasses
