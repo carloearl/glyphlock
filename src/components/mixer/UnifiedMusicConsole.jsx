@@ -75,6 +75,9 @@ function UnifiedMusicConsoleInner() {
   const [performerOverrideId, setPerformerOverrideId] = useState("");
   const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
 
+  useEffect(() => { setAutoDjArmed(autoDj); }, [autoDj, setAutoDjArmed]);
+  useEffect(() => { setView(active); }, [active, setView]);
+
   const activeNav = NAV.find((n) => n.key === active) || NAV[0];
   const performerChoices = useMemo(() => {
     const seen = new Set();
@@ -135,9 +138,13 @@ function UnifiedMusicConsoleInner() {
       source: track.source || (youtubeUrl ? 'youtube' : 'url'),
       _entityTrackId: track.library_track_id || null,
     };
-    setDeckLoadRequest({ requestId: Date.now(), deck, song });
-    setActive('mixer');
-  }, []);
+    requestDeckLoad({
+      requestId: `deck-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      targetDeck: deck,
+      song,
+      entityTrackId: track.library_track_id || track.id || null,
+    });
+  }, [requestDeckLoad]);
 
   const handlePlaybackEvent = useCallback((event) => {
     if (!event) return;
