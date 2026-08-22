@@ -77,9 +77,32 @@ export default function DJPlayerSection({
 
   const deckASong = useMemo(() => songs.find((song) => song.id === deckASongId), [songs, deckASongId]);
   const deckBSong = useMemo(() => songs.find((song) => song.id === deckBSongId), [songs, deckBSongId]);
+  const setDeckASongId = useCallback((songId) => {
+    setDeckSong("A", songId ? songs.find((song) => song.id === songId) || null : null);
+  }, [songs, setDeckSong]);
+  const setDeckBSongId = useCallback((songId) => {
+    setDeckSong("B", songId ? songs.find((song) => song.id === songId) || null : null);
+  }, [songs, setDeckSong]);
+  const handledCommandIdsRef = useRef(new Set());
   const activeSongId = activeDeck === "A" ? deckASongId : deckBSongId;
   const activeSong = activeDeck === "A" ? deckASong : deckBSong;
   const inactiveSongId = activeDeck === "A" ? deckBSongId : deckASongId;
+
+  useEffect(() => {
+    const command = session.pendingCommand;
+    if (!command?.requestId || handledCommandIdsRef.current.has(command.requestId)) return;
+    const song = songs.find((item) => item.id === command.song?.id) || command.song;
+    if (!song?.id) return;
+    if (!song.youtubeUrl && !song.uploadUrl) {
+      handledCommandIdsRef.current.add(command.requestId);
+      rejectDeckLoad(command.requestId, command.targetDeck, "This discovery item is not matched to an authorized playable source.");
+      return;
+    }
+    if (command.targetDeck === "B") setDeckBSongId(song.id);
+    else setDeckASongId(song.id);
+    handledCommandIdsRef.current.add(command.requestId);
+    acknowledgeDeckLoad(command.requestId, command.targetDeck, song);
+  }, [session.pendingCommand, songs, acknowledgeDeckLoad, rejectDeckLoad, setDeckASongId, setDeckBSongId]);
 
   // External/manual song selections load onto the active deck. If the requested
   // song is already resident on either deck (e.g. after an Auto-DJ promotion),
