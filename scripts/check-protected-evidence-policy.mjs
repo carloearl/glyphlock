@@ -40,7 +40,8 @@ assert.match(vipContract, /protected:\$\{protectedEvidenceRefs\.id_front\}/, 'VI
 assert.match(transactionLookup, /Manager-class NUPS identity required/, 'Transaction evidence lookup must require a manager-class NUPS identity.');
 assert.match(transactionLookup, /Cross-venue transaction search denied/, 'Transaction evidence lookup must reject cross-venue requests.');
 assert.doesNotMatch(transactionLookup, /verification_media:\s*verificationMedia\b/, 'Transaction lookup must not return raw VerificationMedia records.');
-assert.doesNotMatch(transactionLookup, /identity:\s*identities\[0\]/, 'Transaction lookup must not return the raw customer identity record.');
+assert.doesNotMatch(transactionLookup, /identity:\s*identities\[0\]\s*[,}]/, 'Transaction lookup must not return the raw customer identity record.');
+assert.match(transactionLookup, /identity:\s*identities\[0\]\s*\?\s*\{\s*present:\s*true,\s*status:/s, 'Transaction lookup must project identity presence/status only.');
 assert.match(transactionLookup, /has_legacy_reference:\s*!!media\.media_url/, 'Transaction lookup may report legacy evidence presence without returning the URL.');
 
 console.log('[check:protected-evidence-policy] passed: role/classification/venue matrix fails closed and protected archive UIs emit no raw evidence URLs.');
