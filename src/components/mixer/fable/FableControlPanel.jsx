@@ -74,6 +74,7 @@ export default function FableControlPanel({
   micStatus,
   bpm,
   liveTrackLabel,
+  hideLaunch = false,
 }) {
   const set = (key) => (value) => onChange({ ...settings, [key]: value });
 
@@ -90,14 +91,16 @@ export default function FableControlPanel({
           {running ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           {running ? "Stop Visualizer" : "Start Visualizer"}
         </button>
-        <button
-          type="button"
-          onClick={onLaunch}
-          className="flex h-11 items-center gap-2 rounded-xl bg-fuchsia-600 px-5 text-sm font-black uppercase tracking-wider text-white hover:bg-fuchsia-500"
-        >
-          <ExternalLink className="h-4 w-4" />
-          {stageOpen ? "Reopen Stage Window" : "Launch Stage On 2nd Screen"}
-        </button>
+        {!hideLaunch && (
+          <button
+            type="button"
+            onClick={onLaunch}
+            className="flex h-11 items-center gap-2 rounded-xl bg-fuchsia-600 px-5 text-sm font-black uppercase tracking-wider text-white hover:bg-fuchsia-500"
+          >
+            <ExternalLink className="h-4 w-4" />
+            {stageOpen ? "Reopen Stage Window" : "Launch Stage On 2nd Screen"}
+          </button>
+        )}
         <div className="ml-auto flex items-center gap-2 text-xs font-mono text-slate-400">
           {micStatus === "deck" ? (
             <><Activity className="h-4 w-4 text-cyan-400" /> Deck synced {bpm ? `${bpm} BPM` : "…"}</>
