@@ -24,6 +24,7 @@ assert.match(settings, /<VenueTerminalManager\s+venueId=\{selectedVenue\}/, 'Ter
 
 assert.match(clock, /VenueTerminal\.filter\(\{\s*terminal_id:\s*terminalId,\s*status:\s*'active',\s*trusted:\s*true\s*\}/, 'Pre-auth clock-in must resolve only an active trusted terminal.');
 assert.match(clock, /Trusted terminal venue is not configured/, 'Unknown terminal behavior must fail closed.');
+assert.match(clock, /UNKNOWN_TERMINAL_BLOCKED/, 'Unknown terminal blocks must emit explicit security evidence.');
 
 assert.deepEqual(schema?.properties?.status?.enum, ['active', 'inactive', 'revoked'], 'Terminal schema must preserve active/inactive/revoked states.');
 assert.equal(schema?.properties?.trusted?.type, 'boolean', 'Terminal trust must be explicit boolean state.');
