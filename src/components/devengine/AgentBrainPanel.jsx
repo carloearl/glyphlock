@@ -29,34 +29,6 @@ export default function AgentBrainPanel() {
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const executeFullPipeline = async (userRequest) => {
-    setIsExecuting(true);
-    try {
-      const reportMessage = {
-        role: 'assistant',
-        content: `Auto-repair is disabled by the OMEGA directive.\n\nRequest received: ${userRequest}\n\nNo plan was executed, no code was generated, and no files were created or modified.\n\nThis panel is now report-only for build/refactor requests.`
-      };
-      setMessages(prev => [...prev, reportMessage]);
-      toast.info('Auto-repair disabled: report-only mode');
-    } finally {
-      setIsExecuting(false);
-    }
-  };
-
-  const executeDebugAnalysis = async (errorInfo) => {
-    setIsExecuting(true);
-    try {
-      const debugMessage = {
-        role: 'assistant',
-        content: `## 🐛 Error Report Only\n\nDetected issue: ${errorInfo}\n\nAuto-debug and auto-repair execution are disabled by the OMEGA directive.\n\nNo dev functions were invoked and no fix was attempted.`
-      };
-      setMessages(prev => [...prev, debugMessage]);
-      toast.info('Auto-debug disabled: report-only mode');
-    } finally {
-      setIsExecuting(false);
-    }
-  };
-
   // Safety guards - ensure arrays are always valid
   const safeMessages = Array.isArray(messages) ? messages : [];
   const safePlan = Array.isArray(plan) ? plan : [];
