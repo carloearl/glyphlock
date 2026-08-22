@@ -10,7 +10,7 @@ export default function FeaturesSection() {
     {
       icon: Shield,
       title: "Cryptography Roadmap",
-      description: "Current security controls use standard encryption, with post-quantum migration treated as a readiness and evaluation track."
+      description: "Current controls use documented platform and provider capabilities, with future cryptographic migration treated as a scoped evaluation track."
     },
     {
       icon: Zap,
