@@ -117,12 +117,7 @@ const CASE_STUDIES = [
 export default function CaseStudies() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1324] via-[#1a244b] to-[#1e293b] py-20">
-      <SEOHead
-        title="Case Studies & Research - GlyphLock Security"
-        description="Explore GlyphLock's internal research, technical validations, reported filings, and governance case studies in AI accountability and cybersecurity."
-        keywords={['GlyphLock case studies', 'Master Covenant litigation', 'AI accountability research', 'legal tech victories', 'cybersecurity validation']}
-        url="/case-studies"
-      />
+      <SEOHead />
 
       <div className="container mx-auto px-4">
         {/* Header */}
