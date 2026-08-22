@@ -53,7 +53,7 @@ Existing active playlists without a venue field remain migration-compatible. The
 
 ### DJ diagnostic
 
-The former create/delete Playlist permission probe was removed. The diagnostic now invokes the non-mutating `probePlaylistPermission` action on the canonical `nupsDJGateway`. The unused duplicate `manageEntertainerPlaylist` writer was replaced in source by an explicit HTTP 410 tombstone so playlist authorization cannot drift across two backends. During preview-resource synchronization the previously deployed copy still denies anonymous access with HTTP 401 and has no supported caller; the runtime guard accepts only that closed state or the final HTTP 410 tombstone.
+The former create/delete Playlist permission probe was removed. The diagnostic now invokes the non-mutating `probePlaylistPermission` action on the canonical `nupsDJGateway`. The unused duplicate `manageEntertainerPlaylist` writer was replaced by an explicit HTTP 410 tombstone so playlist authorization cannot drift across two backends. The deployed preview resource now returns `PLAYLIST_ENDPOINT_RETIRED` with HTTP 410.
 
 ## VenueTerminal governance
 
@@ -123,7 +123,7 @@ Verified against deployed functions:
 | Scenario | Result |
 |---|---|
 | Anonymous `manageVenueTerminal` | PASS — HTTP 401 |
-| Unused `manageEntertainerPlaylist` preview resource | PASS — anonymous HTTP 401 while committed 410 tombstone synchronizes; no supported caller |
+| Retired `manageEntertainerPlaylist` resource | PASS — HTTP 410, `PLAYLIST_ENDPOINT_RETIRED` |
 | Unknown pre-auth terminal public-mode request | PASS — HTTP 409 |
 | Unknown-terminal response exposes venue | PASS — no venue disclosed |
 | Unknown-terminal response exposes payment provider | PASS — no payment configuration disclosed |
