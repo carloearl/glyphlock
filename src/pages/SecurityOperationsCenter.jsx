@@ -72,7 +72,12 @@ export default function SecurityOperationsCenter() {
 
   return (
     <>
-      <SEOHead title="Security Operations Center | GlyphLock" description="Real-time security monitoring and threat intelligence" />
+      <SEOHead
+        title="GlyphLock Security Operations | Events, Audits & Evidence"
+        description="Authorized operators can review recorded QR events, audit results, security-related activity, and combined evidence-ledger entries."
+        keywords="GlyphLock security operations, QR events, audit results, security activity, evidence ledger, authorized operators"
+        url="/security-operations-center"
+      />
       <div className="min-h-screen bg-black text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
