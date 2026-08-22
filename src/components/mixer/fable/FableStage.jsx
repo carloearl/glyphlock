@@ -2,8 +2,14 @@
  * FableStage — the visual output surface (no audio, ever).
  * Renders background + spectrum on canvas and toggleable text overlays on top.
  * Reads live beat data from a ref so it never re-renders per frame.
+ *
+ * Optimization: the rAF draw loop mounts ONCE and reads every changing value
+ * (settings, theme, background, visual, autoStep, mediaOn) from refs that a
+ * layout effect keeps in sync. Previously the effect re-ran on every settings
+ * tweak and every auto-rotation step, tearing down the loop, the ResizeObserver
+ * and the particle field each time — which caused the visible stutter/flicker.
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { getTheme, getFont, THEMES, VISUALS } from "./fableThemes";
 import { makeParticles, drawBackground, drawVisual } from "./fableRenderers";
 import FableMediaLayer from "./FableMediaLayer";
@@ -42,15 +48,38 @@ export default function FableStage({
   // When a video backdrop is showing, the canvas must stay see-through.
   const mediaOn = !!resolveFableMedia(settings, track).kind;
 
+  // Refs mirror the render-derived values so the draw loop never restarts.
+  const settingsRef = useRef(settings);
+  const themeRef = useRef(theme);
+  const backgroundRef = useRef(background);
+  const visualRef = useRef(visual);
+  const autoRef = useRef(auto);
+  const autoStepRef = useRef(autoStep);
+  const mediaOnRef = useRef(mediaOn);
+
+  useLayoutEffect(() => {
+    settingsRef.current = settings;
+    themeRef.current = theme;
+    backgroundRef.current = background;
+    visualRef.current = visual;
+    autoRef.current = auto;
+    autoStepRef.current = autoStep;
+    mediaOnRef.current = mediaOn;
+  }, [settings, theme, background, visual, auto, autoStep, mediaOn]);
+
+  // Single stable rAF loop. Reads everything from refs, so a settings tweak
+  // or an auto-rotation step updates the look without cancelling/recreating
+  // the animation frame, the ResizeObserver or the particle field.
   useEffect(() => {
     const canvas = canvasRef.current;
     const g = canvas?.getContext("2d");
-    if (!g) return;
+    if (!g) return undefined;
 
     let raf = null;
     let particles = [];
     let lastBeat = 0;
     let flash = 0;
+    let lastAutoStep = autoStepRef.current;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -72,21 +101,32 @@ export default function FableStage({
       const t = performance.now();
       const frame = frameRef?.current || EMPTY_FRAME;
 
-      if (mediaOn) {
+      const s = settingsRef.current;
+      const isAuto = autoRef.current;
+      const step = autoStepRef.current;
+      const media = mediaOnRef.current;
+      // Resolve the live look from the latest autoStep (refs stay fresh via the
+      // layout effect; recomputing here also covers the one frame between a
+      // setAutoStep and the next sync without restarting the loop).
+      const liveTheme = isAuto ? THEMES[step % THEMES.length] : themeRef.current;
+      const liveBg = isAuto ? liveTheme.bg : backgroundRef.current;
+      const liveVisual = isAuto ? AUTO_VISUALS[step % AUTO_VISUALS.length] : visualRef.current;
+
+      if (media) {
         g.clearRect(0, 0, W, H);
-      } else if (settings.trails) {
-        g.fillStyle = `${theme.tint}66`;
+      } else if (s.trails) {
+        g.fillStyle = `${liveTheme.tint}66`;
         g.fillRect(0, 0, W, H);
       } else {
-        g.fillStyle = theme.tint;
+        g.fillStyle = liveTheme.tint;
         g.fillRect(0, 0, W, H);
       }
 
-      if (!mediaOn) drawBackground(g, W, H, t, frame, theme, background, particles);
+      if (!media) drawBackground(g, W, H, t, frame, liveTheme, liveBg, particles);
 
-      g.shadowBlur = settings.bloom ? 24 : 0;
-      g.shadowColor = theme.colors[1];
-      drawVisual(g, W, H, t, frame, theme, visual, Number(settings.intensity) || 1);
+      g.shadowBlur = s.bloom ? 24 : 0;
+      g.shadowColor = liveTheme.colors[1];
+      drawVisual(g, W, H, t, frame, liveTheme, liveVisual, Number(s.intensity) || 1);
       g.shadowBlur = 0;
 
       // Beat reactions
@@ -96,26 +136,29 @@ export default function FableStage({
       flash *= 0.86;
 
       if (flashRef.current) {
-        const on = settings.beatFlash || settings.strobe;
-        flashRef.current.style.opacity = on ? String(flash * (settings.strobe ? 0.55 : 0.22)) : "0";
-        flashRef.current.style.background = settings.strobe ? "#ffffff" : theme.colors[2];
+        const on = s.beatFlash || s.strobe;
+        flashRef.current.style.opacity = on ? String(flash * (s.strobe ? 0.55 : 0.22)) : "0";
+        flashRef.current.style.background = s.strobe ? "#ffffff" : liveTheme.colors[2];
       }
       if (shellRef.current) {
-        const shake = settings.beatShake ? flash * 6 : 0;
+        const shake = s.beatShake ? flash * 6 : 0;
         shellRef.current.style.transform = shake
           ? `translate3d(${(Math.random() - 0.5) * shake}px, ${(Math.random() - 0.5) * shake}px, 0)`
           : "none";
       }
-      if (countRef.current && settings.showBeatCounter) {
+      if (countRef.current && s.showBeatCounter) {
         countRef.current.textContent = `${frame.beatInBar || 1} / 4`;
         countRef.current.style.opacity = String(0.45 + flash * 0.55);
       }
-      if (auto) {
-        const bars = Math.max(1, Number(settings.autoBars) || 8);
-        const step = Math.floor((frame.barCount || 0) / bars);
-        if (step !== autoStep) setAutoStep(step);
+      if (isAuto) {
+        const bars = Math.max(1, Number(s.autoBars) || 8);
+        const nextStep = Math.floor((frame.barCount || 0) / bars);
+        if (nextStep !== lastAutoStep) {
+          lastAutoStep = nextStep;
+          setAutoStep(nextStep);
+        }
       }
-      if (clockRef.current && settings.showClock) {
+      if (clockRef.current && s.showClock) {
         clockRef.current.textContent = new Date().toLocaleTimeString("en-US", {
           hour: "numeric", minute: "2-digit", timeZone: "America/Phoenix",
         });
@@ -127,7 +170,8 @@ export default function FableStage({
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [settings, theme, background, visual, auto, autoStep, frameRef, mediaOn]);
+    // frameRef is a stable ref object; the loop reads its .current each frame.
+  }, [frameRef]);
 
   const accent = theme.colors[2];
 

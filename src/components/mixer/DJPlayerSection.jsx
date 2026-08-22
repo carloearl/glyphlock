@@ -12,7 +12,7 @@ import PlayerDeck from "@/components/mixer/PlayerDeck";
 import Crossfader from "@/components/mixer/Crossfader";
 import DJMasterAudioControls from "@/components/mixer/DJMasterAudioControls";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftRight, ChevronUp, ChevronDown, Tv, WandSparkles } from "lucide-react";
+import { ArrowLeftRight, Tv, WandSparkles, X } from "lucide-react";
 import { getClubTVSender, openClubTVWindow } from "@/components/mixer/ClubBroadcastChannel";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
@@ -81,6 +81,14 @@ export default function DJPlayerSection({
   const deckBRef = useRef(null);
   const transitionRef = useRef(false);
   const rafRef = useRef(null);
+  // YouTube pre-roll ads play out silently this many seconds before the fade
+  // window so the cue deck is past its ad and buffered by the time the fader
+  // comes up — no dead air at the transition.
+  const prewarmSeconds = 30;
+  const prewarmedDeckRef = useRef(null); // "A" | "B" | null — cue deck already started
+  // Stop guard: playback only halts on an explicit X / Esc confirmation.
+  const [confirmStop, setConfirmStop] = useState(false);
+  const sectionRef = useRef(null);
 
   const deckASong = useMemo(() => songs.find((song) => song.id === deckASongId), [songs, deckASongId]);
   const deckBSong = useMemo(() => songs.find((song) => song.id === deckBSongId), [songs, deckBSongId]);
@@ -197,7 +205,7 @@ export default function DJPlayerSection({
     if (promotedId) onActiveSongChange?.(promotedId, { reason });
   }, [deckASongId, deckBSongId, onActiveSongChange]);
 
-  const performTransition = useCallback((targetDeck, { immediate = false, reason = "auto_transition" } = {}) => {
+  const performTransition = useCallback((targetDeck, { immediate = false, reason = "auto_transition", prewarmed = false } = {}) => {
     if (transitionRef.current || targetDeck === activeDeck) return;
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
     if (!targetId) return;
@@ -208,7 +216,15 @@ export default function DJPlayerSection({
     const toRef = targetDeck === "A" ? deckARef : deckBRef;
     const targetCrossfade = targetDeck === "A" ? 0 : 100;
 
-    Promise.resolve(toRef.current?.play?.()).catch(() => {});
+    // A prewarmed cue deck was started ~30s early to clear YouTube pre-roll
+    // ads. It is already playing (silently, at volume 0 via the crossfader), so
+    // let it continue from its now-ad-free position and simply rise with the
+    // fader — no seek, no second play() call. A non-prewarmed deck (manual
+    // swap / failover) still needs a cold play() here, preserving the
+    // operator's own cue point.
+    if (!prewarmed) {
+      Promise.resolve(toRef.current?.play?.()).catch(() => {});
+    }
 
     if (immediate) {
       setCrossfade(targetCrossfade);
@@ -278,8 +294,12 @@ export default function DJPlayerSection({
 
   // Auto transition begins when the active track enters the configured fade
   // window. Duration=0 simply means metadata is not ready yet, so we wait.
+  // A prewarm phase starts the cue deck ~30s earlier so YouTube pre-roll ads
+  // play out silently (the crossfader keeps the cue deck at 0 volume) and the
+  // deck is buffered by the time the fader moves.
   useEffect(() => {
     if (!blending) return undefined;
+    const fadeWindow = Math.max(2, Number(blendSeconds || 6));
     const timer = setInterval(() => {
       if (transitionRef.current) return;
       const targetDeck = activeDeck === "A" ? "B" : "A";
@@ -290,17 +310,37 @@ export default function DJPlayerSection({
       const current = Number(ref?.getCurrentTime?.() || 0);
       if (!duration || current < 1) return;
       const remaining = duration - current;
-      if (remaining > 0 && remaining <= Math.max(2, Number(blendSeconds || 6))) {
+
+      // Prewarm: start the cue deck before the fade window so any pre-roll ad
+      // is already over. The cue deck is silent because the crossfader keeps
+      // the inactive deck at volume 0. Only prewarm once per cue target.
+      if (
+        remaining > fadeWindow &&
+        remaining <= fadeWindow + prewarmSeconds &&
+        prewarmedDeckRef.current !== targetDeck
+      ) {
+        const cueRef = targetDeck === "A" ? deckARef.current : deckBRef.current;
+        Promise.resolve(cueRef?.play?.()).catch(() => {});
+        prewarmedDeckRef.current = targetDeck;
+      }
+
+      if (remaining > 0 && remaining <= fadeWindow) {
         // Start the transition even if the cue deck has not reported metadata
         // yet. YouTube frequently reports duration late; waiting for a non-zero
-        // cue duration caused the visible fader to never move. performTransition
-        // issues play() first and the deck's source-error path still provides
-        // failover if the cue cannot actually start.
-        performTransition(targetDeck);
+        // cue duration caused the visible fader to never move. A prewarmed cue
+        // is already past its ad, so the fader rises seamlessly; the source-error
+        // path still provides failover if the cue cannot actually start.
+        performTransition(targetDeck, { prewarmed: prewarmedDeckRef.current === targetDeck });
       }
     }, 400);
     return () => clearInterval(timer);
-  }, [blending, activeDeck, deckASongId, deckBSongId, blendSeconds, performTransition]);
+  }, [blending, activeDeck, deckASongId, deckBSongId, blendSeconds, performTransition, prewarmSeconds]);
+
+  // A new live deck means a fresh cue target — reset the prewarm tracker so
+  // the next cue deck gets its own 30s warm-up.
+  useEffect(() => {
+    prewarmedDeckRef.current = null;
+  }, [activeDeck]);
 
   useEffect(() => () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -313,7 +353,7 @@ export default function DJPlayerSection({
     if (blending && targetId) {
       // Ramp the cue deck up instead of snapping the fader across — the
       // outgoing track has finished, so the incoming one fades in cleanly.
-      performTransition(targetDeck, { reason: "natural_end" });
+      performTransition(targetDeck, { reason: "natural_end", prewarmed: prewarmedDeckRef.current === targetDeck });
       return;
     }
     onSkip?.(activeSongId, "ended");
@@ -334,38 +374,47 @@ export default function DJPlayerSection({
     if (targetId) performTransition(targetDeck, { reason: "manual_swap" });
   }, [activeDeck, deckASongId, deckBSongId, performTransition]);
 
-  if (collapsed) {
-    return (
-      <div
-        className="h-10 flex-shrink-0 border-t border-slate-700/50 bg-slate-900/60 flex items-center justify-between px-4 cursor-pointer"
-        onClick={onToggleCollapse}
-        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
-        onDrop={(e) => {
-          e.preventDefault();
-          const songId = e.dataTransfer.getData("application/mixer-song-id");
-          if (songId) { onPlay?.(songId); onToggleCollapse?.(); }
-        }}
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          {activeSong && (
-            <div className="flex gap-0.5">
-              <span className="w-1.5 h-3 bg-purple-400 rounded-full animate-pulse" />
-              <span className="w-1.5 h-4 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
-            </div>
-          )}
-          <span className="text-xs text-white font-medium truncate max-w-[300px]">
-            {activeSong ? `${activeSong.title} — ${activeSong.artist}` : "No track loaded"}
-          </span>
-          {autoDj && <span className="text-[9px] font-mono text-emerald-400">AUTO · {activeDeck}</span>}
-        </div>
-        <ChevronUp className="w-4 h-4 text-slate-500" />
-      </div>
-    );
-  }
+  // The decks stay mounted and audible at all times. The only way to stop is
+  // an explicit X / Esc confirmation, so a stray click or key never kills the
+  // room. Confirming pauses both decks and mutes the master.
+  const handleStopPlayback = useCallback(() => {
+    setConfirmStop(false);
+    try { deckARef.current?.pause?.(); } catch { /* provider between states */ }
+    try { deckBRef.current?.pause?.(); } catch { /* provider between states */ }
+    setMasterMuted(true);
+  }, [setMasterMuted]);
+
+  // Esc opens the stop confirmation — but never while the operator is typing
+  // (let the search field keep its own Esc-to-clear) or mid-transition.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      const tag = e.target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || e.target?.isContentEditable) return;
+      if (transitionRef.current || !activeSongId) return;
+      e.preventDefault();
+      setConfirmStop(true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeSongId]);
+
+  // Warn before closing/navigating the tab while audio is live.
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (!activeSongId) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [activeSongId]);
+
+  // Decks are always rendered (never collapsed/unmounted) so playback is
+  // continuous. The `collapsed` prop is intentionally ignored.
 
   return (
-    <div className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/60">
+    <div ref={sectionRef} className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/60">
       <div className="flex items-center justify-between px-4 py-1 border-b border-slate-700/30">
         <div className="flex items-center gap-2">
           <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">DJ Player</span>
@@ -398,8 +447,14 @@ export default function DJPlayerSection({
           <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSwap} title="Promote cue deck">
             <ArrowLeftRight className="w-3 h-3 text-slate-400" />
           </Button>
-          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={onToggleCollapse}>
-            <ChevronDown className="w-3 h-3 text-slate-500" />
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6 hover:bg-red-500/15 hover:text-red-300"
+            onClick={() => setConfirmStop(true)}
+            title="Stop playback (Esc)"
+          >
+            <X className="w-3 h-3 text-slate-400" />
           </Button>
         </div>
       </div>
@@ -460,6 +515,28 @@ export default function DJPlayerSection({
         onBlendNow={handleSwap}
         transitioning={transitioning}
       />
+
+      {confirmStop && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="w-[min(92vw,420px)] rounded-2xl border border-red-500/40 bg-slate-900 p-5 shadow-2xl">
+            <div className="flex items-center gap-2 text-red-300">
+              <X className="h-5 w-5" />
+              <h3 className="text-base font-black uppercase tracking-wider">Stop playback?</h3>
+            </div>
+            <p className="mt-2 text-sm text-slate-300">
+              Both decks will pause and the master bus mutes. The decks stay loaded and visible — press Play to resume.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="ghost" className="h-9" onClick={() => setConfirmStop(false)}>
+                Keep Playing
+              </Button>
+              <Button variant="destructive" className="h-9" onClick={handleStopPlayback}>
+                Yes, Stop
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

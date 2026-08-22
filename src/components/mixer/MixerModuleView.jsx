@@ -555,7 +555,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   const isMobile = useMediaQuery("(max-width: 767px)");
 
   return (
-    <div className="h-full min-h-[720px] flex flex-col bg-transparent overflow-hidden rounded-xl border border-slate-700/50">
+    <div className="h-full min-h-0 flex flex-col bg-transparent overflow-hidden rounded-xl border border-slate-700/50">
       {/* Top bar */}
       <div className="h-14 flex-shrink-0 flex items-center gap-3 px-4 border-b border-slate-700/50 bg-slate-900/80">
         <Disc3 className="w-5 h-5 text-purple-400 animate-spin" style={{ animationDuration: "3s" }} />

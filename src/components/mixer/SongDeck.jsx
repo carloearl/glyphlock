@@ -76,8 +76,9 @@ export default function SongDeck({
         <span className="text-xs text-slate-500">· {filtered.length} tracks</span>
       </div>
 
-      {/* Song list */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+      {/* Song list — capped so a long playlist scrolls inside this window
+          instead of stretching the whole console and pushing the decks away. */}
+      <div className="flex-1 overflow-y-auto p-2 space-y-1 max-h-[55vh]">
         {filtered.length === 0 ? (
           <div className="text-center py-12 text-slate-500 text-xs">
             {profileSongs.length === 0 ? "No songs in this deck. Add some!" : "No songs match your filters."}
