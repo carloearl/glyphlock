@@ -221,7 +221,9 @@ Live paths including `GlyphBucksContract`, `IDScannerCamera`, `BarcodeFirstCaptu
 ### Batch 14 progress
 The application already exposed Base44 private-file primitives (`UploadPrivateFile` + `CreateFileSignedUrl`). Batch 14 introduced `ProtectedEvidence` as the opaque canonical reference layer plus server-side `registerProtectedEvidence` and `getProtectedEvidence` authorization. Live W-9, government-ID, entertainer-license, verification-media, hardcopy-contract, guest-photo, and thumbprint capture paths now use private file URIs; signed URLs are short-lived and generated only for temporary OCR/preview or authorized retrieval. Contract archive queries were additionally venue-scoped.
 
-Batch 15 moved the authorization policy into the `getProtectedEvidence` function package so the deployed function and executable test load the same code. This repaired a cross-function-folder import that caused HTTP 502 at function startup. `npm run check:nups-anonymous-protected-evidence` now proves the deployed endpoint starts and rejects anonymous retrieval with HTTP 401 while returning no protected metadata. The executable matrix proves fail-closed role/classification and cross-venue decisions, including manager same-venue allow, door identity-only allow, and bartender/wrong-venue/tax/biometric denials. It also verifies that contract archives, entertainer credential rosters, transaction evidence search, and W-9 listings do not emit stored protected references as raw links or images. `VIPContract` uploads through `ProtectedEvidence`, resolves contract context server-side, and submits opaque references to the signing function. `npm run check:nups-sensitive-reads` verifies venue scoping for tax, tip, contract, audit, and evidence reads. The issue remains OPEN only because distinct deployed authenticated wrong-role/wrong-venue sessions and authenticated signed-URL expiry have not yet been exercised.
+Batch 15 moved the authorization policy into the `getProtectedEvidence` function package so the deployed function and executable test load the same code. This repaired a cross-function-folder import that caused HTTP 502 at function startup. `npm run check:nups-anonymous-protected-evidence` now proves the deployed endpoint starts and rejects anonymous retrieval with HTTP 401 while returning no protected metadata. The executable matrix proves fail-closed role/classification and cross-venue decisions, including manager same-venue allow, door identity-only allow, and bartender/wrong-venue/tax/biometric denials. It also verifies that contract archives, entertainer credential rosters, transaction evidence search, and W-9 listings do not emit stored protected references as raw links or images. `VIPContract` uploads through `ProtectedEvidence`, resolves contract context server-side, and submits opaque references to the signing function. `npm run check:nups-sensitive-reads` verifies venue scoping for tax, tip, contract, audit, and evidence reads.
+
+Batch 16 reruns these checks inside `check:nups-batch16` and confirms no regression while adding no new public evidence viewer. Distinct deployed authenticated sessions for authorized, wrong-role and wrong-venue actors are still unavailable in the current execution boundary, so authenticated signed-URL issuance and expiry remain the exact missing proof.
 
 ---
 
@@ -260,8 +262,8 @@ Batch 13 removed direct protected-media links/images from `ContractViewer`, `Con
 ### Batch 14 implementation
 `ProtectedEvidence` now stores opaque private Base44 `file_uri` references and evidence metadata. `registerProtectedEvidence` resolves the authenticated NUPS identity and enforces venue/classification registration rules. `getProtectedEvidence` authorizes by role + venue + evidence classification + purpose context, emits explicit security audit events, and returns only a 120-second signed URL. Live protected capture paths store `protected:<evidence-record-id>` references instead of permanent routable media URLs.
 
-### Batch 15 verification
-`getProtectedEvidence` and `scripts/check-protected-evidence-policy.mjs` share the same function-local authorization module. The matrix passes for global, manager, door, ordinary staff, classification, and cross-venue cases; access/denial audit payloads contain references and decision metadata, not file URIs, signed URLs, or document content. The deployed function starts successfully and an anonymous HTTP request is denied with 401. A synthetic private-file URL was also denied to an anonymous fetch immediately, so no public anonymous evidence access was obtained. The test guards every known protected archive/list surface against raw URL rendering. `transactionLookup` requires manager-class NUPS identity, rejects cross-venue evidence searches, and returns evidence-presence metadata rather than raw CustomerIdentity or VerificationMedia records. The VIP signing page uses private uploads and opaque evidence references throughout.
+### Batch 15–16 verification
+`getProtectedEvidence` and `scripts/check-protected-evidence-policy.mjs` share the same function-local authorization module. The matrix passes for global, manager, door, ordinary staff, classification, and cross-venue cases; access/denial audit payloads contain references and decision metadata, not file URIs, signed URLs, or document content. The deployed function starts successfully and an anonymous HTTP request is denied with 401. A synthetic private-file URL was also denied to an anonymous fetch immediately, so no public anonymous evidence access was obtained. The test guards every known protected archive/list surface against raw URL rendering. `transactionLookup` requires manager-class NUPS identity, rejects cross-venue evidence searches, and returns evidence-presence metadata rather than raw CustomerIdentity or VerificationMedia records. The VIP signing page uses private uploads and opaque evidence references throughout. Batch 16 includes the complete protected-evidence and sensitive-read suite in its aggregate green check.
 
 ### Remaining resolution
 Run distinct authenticated deployed end-to-end tests proving wrong-role denial, wrong-venue denial, authorized retrieval, and signed-URL expiration. Anonymous denial is already proven. Do not re-enable raw archived media viewing until the authenticated tests pass.
@@ -291,23 +293,35 @@ The APIKey entity persists `secret_key_hash`, public key, environment, status, p
 
 ---
 
-## NUPS-0013 — Trusted venue terminal registry is not provisioned
+## NUPS-0013 — Trusted venue terminal registry is not provisioned on physical devices
 
 **Severity:** HIGH  
 **Invariant:** INV-05 / INV-07  
-**Status:** OPEN — DEPLOYMENT CONFIGURATION
+**Status:** OPEN — REAL DEVICE APPROVAL PENDING
 
 ### Expected
-Every production kiosk/station that needs pre-authentication venue context has an admin-provisioned, active, trusted `VenueTerminal` record. Unknown, inactive, revoked, or unbound terminal IDs fail closed.
+Every production kiosk/station that needs pre-authentication venue context has an admin-provisioned, active, trusted `VenueTerminal` record. Unknown, inactive, untrusted, revoked or unbound terminal IDs fail closed.
 
-### Observed
-Batch 15 created the canonical `VenueTerminal` registry and changed `nupsClockIn` to prefer it. The current entity query returned **0 VenueTerminal records**. The one active `VenuePaymentConfig` record also has no `terminal_id`, so no legitimate binding could be migrated automatically without inventing a device identity.
+### Batch 16 implementation
+Batch 16 added the authenticated `manageVenueTerminal` backend and mounted `TerminalManagementEditor` in Venue Admin Settings. Authorized managers can list, provision, edit, activate, deactivate and revoke terminals without hard-deleting security history. Browser-generated IDs remain untrusted until an authorized manager explicitly approves them. Provisioning, trust changes and revocation produce explicit `SystemAuditLog` events.
 
-### Current behavior
-Authenticated staff sessions still derive venue from the assigned NUPS identity. Pre-auth `getPublicMode` correctly returns a configuration error when the calling terminal has no trusted venue binding. A temporary compatibility fallback remains for already-configured payment-terminal IDs, but none currently exists in the active payment configuration.
+The supported application path now uses `nupsClockInV2` and NKS2 sessions. All frontend and backend callers were cut over. The NUPSUser PIN lookup index was migrated from `pin_lookup` to `pin_lookup_v2`, and the legacy field was removed from schema and records so the stale NKS1 implementation cannot authenticate ordinary staff PINs.
 
-### Required resolution
-Provision the actual door/clock/DJ/manager/scanner/kiosk terminal IDs through an owner/admin-controlled workflow, verify each venue assignment, then remove the payment-terminal compatibility fallback after all deployed stations use `VenueTerminal`.
+### Runtime evidence
+A clearly marked synthetic SANDBOX terminal was used to prove:
+
+- trusted active terminal → public mode succeeds
+- unknown terminal → 409 fail-closed
+- inactive terminal → 403
+- untrusted terminal → 403
+- revoked terminal → 403
+- PIN authentication from an unknown terminal is blocked before PIN verification
+- anonymous stale-shift sweep on NKS2 is denied
+
+The synthetic record is permanently revoked and cannot establish venue trust. The deployed terminal-management endpoint also rejects anonymous access.
+
+### Remaining resolution
+No real physical terminal is currently registered as active and trusted. Provision the actual door, clock, DJ, manager, scanner, VIP and kiosk device IDs through the new owner/admin UI. After all deployed stations are represented in `VenueTerminal`, remove the temporary `VenuePaymentConfig.terminal_id` compatibility fallback.
 
 ---
 
