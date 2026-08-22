@@ -34,6 +34,7 @@ function statusTone(status) {
 export default function VenueTerminalManager({ venueId }) {
   const qc = useQueryClient();
   const localTerminalId = useMemo(getLocalTerminalId, []);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     terminal_id: localTerminalId,
     terminal_type: 'KIOSK',
@@ -62,8 +63,9 @@ export default function VenueTerminalManager({ venueId }) {
     onSuccess: (_result, variables) => {
       qc.invalidateQueries({ queryKey: ['venue-terminals', venueId] });
       toast.success(variables.action === 'provision' ? 'Terminal provisioned' : 'Terminal updated');
-      if (variables.action === 'provision') {
-        setForm((current) => ({ ...current, station: '', notes: '', trusted: false }));
+      if (variables.action === 'provision' || variables.action === 'update') {
+        setEditingId(null);
+        setForm({ terminal_id: localTerminalId, terminal_type: 'KIOSK', station: '', trusted: false, notes: '' });
       }
     },
     onError: (error) => toast.error(error?.message || 'Terminal action failed.'),
@@ -71,11 +73,39 @@ export default function VenueTerminalManager({ venueId }) {
 
   const terminals = data?.terminals || [];
 
-  const provision = () => {
+  const saveTerminal = () => {
     if (!venueId) return toast.error('Select a venue first.');
     if (!form.terminal_id || form.terminal_id.length < 8) return toast.error('A stable terminal ID is required.');
     if (!form.station.trim()) return toast.error('Enter a station name.');
+    if (editingId) {
+      mutate.mutate({
+        action: 'update',
+        id: editingId,
+        terminal_type: form.terminal_type,
+        station: form.station,
+        trusted: form.trusted,
+        notes: form.notes,
+        reason: 'Venue administrator edited terminal configuration',
+      });
+      return;
+    }
     mutate.mutate({ action: 'provision', ...form, reason: 'Explicit terminal approval from venue settings' });
+  };
+
+  const startEdit = (terminal) => {
+    setEditingId(terminal.id);
+    setForm({
+      terminal_id: terminal.terminal_id,
+      terminal_type: terminal.terminal_type || 'OTHER',
+      station: terminal.station || '',
+      trusted: terminal.trusted === true,
+      notes: terminal.notes || '',
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm({ terminal_id: localTerminalId, terminal_type: 'KIOSK', station: '', trusted: false, notes: '' });
   };
 
   const updateStatus = (terminal, action) => {
@@ -107,6 +137,7 @@ export default function VenueTerminalManager({ venueId }) {
             <div className="flex gap-2">
               <Input
                 value={form.terminal_id}
+                disabled={!!editingId}
                 onChange={(event) => setForm((state) => ({ ...state, terminal_id: event.target.value }))}
                 className="bg-slate-800 border-slate-700 font-mono"
                 placeholder="Stable device or station identifier"
@@ -115,6 +146,7 @@ export default function VenueTerminalManager({ venueId }) {
                 type="button"
                 variant="outline"
                 onClick={() => setForm((state) => ({ ...state, terminal_id: localTerminalId }))}
+                disabled={!!editingId}
                 className="border-slate-700 text-slate-300 shrink-0"
               >
                 <Laptop className="w-4 h-4 mr-1" /> This Browser
@@ -160,10 +192,17 @@ export default function VenueTerminalManager({ venueId }) {
           </div>
         </div>
 
-        <Button onClick={provision} disabled={!venueId || mutate.isPending} className="bg-cyan-600 hover:bg-cyan-500">
-          {mutate.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <KeyRound className="w-4 h-4 mr-2" />}
-          Provision Terminal
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={saveTerminal} disabled={!venueId || mutate.isPending} className="bg-cyan-600 hover:bg-cyan-500">
+            {mutate.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <KeyRound className="w-4 h-4 mr-2" />}
+            {editingId ? 'Save Terminal Changes' : 'Provision Terminal'}
+          </Button>
+          {editingId && (
+            <Button type="button" variant="outline" onClick={cancelEdit} className="border-slate-700 text-slate-300">
+              Cancel Edit
+            </Button>
+          )}
+        </div>
 
         <div className="border-t border-slate-800 pt-4 space-y-3">
           <div className="flex items-center justify-between">
@@ -199,6 +238,13 @@ export default function VenueTerminalManager({ venueId }) {
               {terminal.notes && <p className="text-xs text-slate-500">{terminal.notes}</p>}
 
               <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={mutate.isPending}
+                  onClick={() => startEdit(terminal)}
+                  className="border-cyan-500/30 text-cyan-300"
+                >Edit</Button>
                 <Button
                   size="sm"
                   variant="outline"
