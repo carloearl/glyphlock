@@ -10,7 +10,7 @@ export default function Terms() {
     },
     {
       title: "2. Service Description",
-      content: "GlyphLock provides cybersecurity tools and services including visual cryptography, blockchain security, AI assistance, and security operations monitoring."
+      content: "GlyphLock provides connected image-carrier, Secure QR, AI-assisted, NUPS venue-operations, value-record, integration, governance, and related software services."
     },
     {
       title: "3. User Obligations",
