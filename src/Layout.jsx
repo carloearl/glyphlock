@@ -315,13 +315,13 @@ export default function Layout({ children, currentPageName }) {
                 { 
                   heading: 'Hash Generator', 
                   text: 'How to create hash: Navigate to Security Tools → Blockchain tab → find "Hash Generator" section → paste or type your text → select algorithm (SHA-256 recommended) → click "Generate Hash" → hash appears instantly → click "Copy" icon to clipboard. Use cases: Verify file integrity (hash file before/after transfer—if hashes match, file unmodified), Password hashing (never store plain passwords), Digital signatures, Data verification. Supported algorithms: SHA-256 (most secure), SHA-512, MD5 (legacy only), SHA-1 (legacy only).',
-                  tip: 'SHA-256 is quantum-resistant and industry standard. Avoid MD5/SHA-1 for new projects—they\'re crackable.',
+                  tip: 'Use current, supported cryptographic primitives and provider guidance. Avoid deprecated hashes such as MD5 and SHA-1 for new integrity workflows.',
                   action: 'Try: Blockchain page → Hash Generator → type "hello world" → generate SHA-256 hash → copy result.'
                 },
                 { 
-                  heading: 'Blockchain Verification', 
+                  heading: 'Record Verification', 
                   text: 'How to create proof: Blockchain page → "Create Proof" button → enter data to verify (text, file hash, transaction ID) → click "Generate Proof" → blockchain record created with timestamp → download proof bundle (JSON file). How to verify proof: Blockchain page → "Verify Proof" tab → upload proof bundle JSON → click "Verify" → see result (Valid/Invalid/Tampered) with original data and timestamp. Use cases: Prove document existed at specific time (legal evidence), Verify contract wasn\'t altered after signing, Timestamping intellectual property before public disclosure.',
-                  tip: 'Blockchain proofs are immutable. Once created, they\'re permanent evidence of data state at creation time.',
+                  tip: 'Treat generated proofs as traceable record references. Their strength depends on the recorded inputs, anchoring method, retained evidence, and verification procedure.',
                   action: 'Create proof: Blockchain page → Create tab → paste "Important document hash: abc123" → generate → download proof.json → share with recipient.'
                 },
                 { 
