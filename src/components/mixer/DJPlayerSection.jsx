@@ -16,6 +16,7 @@ import { ArrowLeftRight, Tv, WandSparkles, X } from "lucide-react";
 import { getClubTVSender, openClubTVWindow } from "@/components/mixer/ClubBroadcastChannel";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
+import { canFailoverToCue, nextTransitionAfterCueStart } from "@/components/mixer/session/transitionSafety";
 import { toast } from "sonner";
 
 function extractVideoId(url) {
@@ -241,24 +242,34 @@ export default function DJPlayerSection({
     // fader — no seek, no second play() call. A non-prewarmed deck (manual
     // swap / failover) still needs a cold play() here, preserving the
     // operator's own cue point.
+    let cueStartError = null;
     if (!prewarmed) {
       try {
         await Promise.resolve(toRef.current?.play?.());
       } catch (error) {
-        transitionRef.current = false;
-        setTransitioning(false);
-        onPlaybackError?.({
-          songId: targetId,
-          deck: targetDeck,
-          active: false,
-          fallbackReady: false,
-          error,
-        });
-        toast.error(`Deck ${targetDeck} could not start`, {
-          description: "Transition cancelled; the live deck remains audible.",
-        });
-        return false;
+        cueStartError = error;
       }
+    }
+    const cueDecision = nextTransitionAfterCueStart({
+      started: prewarmed || !cueStartError,
+      currentCrossfade: crossfade,
+      targetCrossfade,
+    });
+    if (!cueDecision.proceed) {
+      setCrossfade(cueDecision.crossfade);
+      transitionRef.current = false;
+      setTransitioning(false);
+      onPlaybackError?.({
+        songId: targetId,
+        deck: targetDeck,
+        active: false,
+        fallbackReady: false,
+        error: cueStartError,
+      });
+      toast.error(`Deck ${targetDeck} could not start`, {
+        description: "Transition cancelled; the live deck remains audible.",
+      });
+      return false;
     }
 
     if (immediate) {
@@ -311,7 +322,12 @@ export default function DJPlayerSection({
     const targetDeck = deck === "A" ? "B" : "A";
     const targetId = targetDeck === "A" ? deckASongId : deckBSongId;
     const targetRef = targetDeck === "A" ? deckARef.current : deckBRef.current;
-    const fallbackReady = Boolean(blending && isActive && targetId && Number(targetRef?.getDuration?.() || 0) > 0);
+    const fallbackReady = canFailoverToCue({
+      blending,
+      active: isActive,
+      targetId,
+      targetDuration: targetRef?.getDuration?.(),
+    });
 
     onPlaybackError?.({ songId, deck, active: isActive, fallbackReady, error });
 
@@ -373,8 +389,9 @@ export default function DJPlayerSection({
         prewarmedDeckRef.current !== targetDeck
       ) {
         const cueRef = targetDeck === "A" ? deckARef.current : deckBRef.current;
-        Promise.resolve(cueRef?.play?.()).catch(() => {});
-        prewarmedDeckRef.current = targetDeck;
+        Promise.resolve(cueRef?.play?.())
+          .then(() => { prewarmedDeckRef.current = targetDeck; })
+          .catch((error) => handleDeckPlaybackError(targetDeck, error));
       }
 
       if (remaining > 0 && remaining <= fadeWindow) {
@@ -387,7 +404,7 @@ export default function DJPlayerSection({
       }
     }, 400);
     return () => clearInterval(timer);
-  }, [blending, activeDeck, deckASongId, deckBSongId, blendSeconds, performTransition, prewarmSeconds]);
+  }, [blending, activeDeck, deckASongId, deckBSongId, blendSeconds, performTransition, prewarmSeconds, handleDeckPlaybackError]);
 
   // A new live deck means a fresh cue target — reset the prewarm tracker so
   // the next cue deck gets its own 30s warm-up.
