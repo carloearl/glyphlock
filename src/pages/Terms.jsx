@@ -66,7 +66,7 @@ export default function Terms() {
     <>
       <SEOHead 
         title="Terms of Service | GlyphLock"
-        description="Terms and conditions for using GlyphLock security services."
+        description="Terms governing use of GlyphLock image, QR, AI-assisted, NUPS, payment, hospitality-integration, recordkeeping, and related services."
         url="/terms"
       />
       <div className="min-h-screen bg-gradient-to-br from-black via-purple-950/20 to-black text-white py-32 relative overflow-hidden">
