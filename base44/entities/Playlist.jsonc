@@ -9,6 +9,10 @@
     "name": {
       "type": "string"
     },
+    "venue_id": {
+      "type": "string",
+      "description": "Venue scope for the entertainer playlist."
+    },
     "entertainer_id": {
       "type": "string"
     },
@@ -32,6 +36,13 @@
       "type": "string",
       "format": "date-time"
     },
+    "updated_by": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -43,6 +54,7 @@
     }
   },
   "required": [
+    "venue_id",
     "entertainer_id"
   ],
   "rls": {
