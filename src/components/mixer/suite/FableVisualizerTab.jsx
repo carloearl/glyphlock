@@ -21,7 +21,7 @@ export default function FableVisualizerTab() {
     nextTrack: live.nextTrack,
     bpm: live.track?.bpm,
     deck: live.deck,
-    autoStart: true,
+    autoStart: false,
   });
 
   const liveLabel = live.track
