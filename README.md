@@ -2,7 +2,7 @@
 
 GlyphLock is the canonical source repository for the GlyphLock platform and its Base44 application.
 
-GlyphLock builds custom software, AI-assisted workflows, verification tooling, operational systems, and the flagship **NUPS (Nexus Unified Portal System)** venue-operations platform.
+GlyphLock builds custom software, AI-assisted workflows, verification tooling, operational systems, and the flagship **NUPS (Nexus Unified POS System)** venue-operations platform.
 
 ## Canonical project
 

@@ -1,143 +1,83 @@
 /**
- * robots.txt endpoint
- * Serves the robots.txt file for search engine crawlers
- * Access at: https://glyphlock.io/robots.txt
+ * robots.txt endpoint — canonical same-origin robots for glyphlock.io
+ * NUPS = Nexus Unified POS System.
+ * Noindex: admin / private / authenticated / payment-result / test / sandbox / internal audit
+ * plus duplicate-case route variants to avoid canonical duplication.
  */
 
 const SITE_URL = 'https://glyphlock.io';
 
-Deno.serve(async (req) => {
-  const robotsContent = `# GlyphLock LLC - robots.txt
-# https://glyphlock.io
-# Quantum-Grade Security for the AI Era
+const PUBLIC_ALLOW = [
+  '/About', '/AboutCarlo', '/Services', '/Solutions', '/Pricing',
+  '/Contact', '/Consultation', '/SecureQRStudio', '/ImageLab', '/ImageGenerator',
+  '/InteractiveImageStudio', '/GlyphBot', '/GlyphBotMixer', '/SecurityTools',
+  '/SecurityOperationsCenter', '/Blockchain', '/SDKDocs', '/SecurityDocs',
+  '/Roadmap', '/Partners', '/DreamTeam', '/FAQ', '/GovernanceHub',
+  '/MasterCovenant', '/TrustSecurity', '/NISTChallenge', '/CaseStudies',
+  '/CaseStudyTruthStrike', '/CaseStudyAIBinding', '/CaseStudyCovenantVictory',
+  '/GlyphLockFinancial', '/NUPSLanding', '/VideoUpload', '/ProviderConsole',
+  '/Privacy', '/Terms', '/Cookies', '/Accessibility', '/CodeOfEthics',
+];
+
+const NOINDEX = [
+  '/Dashboard', '/CommandCenter', '/ProjectUpdates', '/AccountSecurity',
+  '/BillingAndPayments', '/ManageSubscription', '/PaymentSuccess', '/PaymentCancel',
+  '/ConsultationSuccess', '/EmergencyBackup', '/FullExport', '/GlyphLockAudit',
+  '/GlyphLockPlayground', '/IntegrationTests', '/SystemAudit', '/SettlementReports',
+  '/AnalyticsDashboard', '/NUPSDemoManager', '/NUPSOwner', '/NUPSPostLogin',
+  '/NUPSReport', '/NUPSSandbox', '/NUPSStaff', '/NUPSAudit', '/NUPSInfrastructurePage',
+  '/SiteBuilder', '/SiteBuilderTest', '/SiteAudit', '/Sie', '/ClubCurrencyPress',
+  '/ContractArchive', '/ContractSearch', '/StrategicScale', '/OHIPReadiness',
+  '/VIPContract', '/Sitemap', '/SitemapApp', '/SitemapDynamic', '/SitemapImages',
+  '/SitemapInteractive', '/SitemapQr', '/sitemap-qr', '/Robots', '/NotFound',
+  '/api/', '/functions/', '/admin/',
+  '/nupskiosk', '/nupshub', '/register', '/registerconsole', '/barregister',
+  '/receipts', '/driverpayouts', '/glyphbucks', '/accounting', '/tonight',
+  '/contracts', '/contractshub', '/vipbillprinter', '/managerconsole',
+  '/peoplearchive', '/ledgertrialbalance', '/frontdoor', '/entertainercheckin',
+  '/djhome', '/vipsale', '/vipcommand', '/vipshowcontracts', '/v/',
+  '/offlineverify', '/mobilescanner', '/clubtv', '/fablestage',
+];
+
+// Duplicate-case variants of public routes (noindex to avoid canonical duplication).
+const DUP_CASE = [
+  '/about', '/aboutcarlo', '/services', '/solutions', '/pricing', '/contact',
+  '/consultation', '/secureqrstudio', '/imagelab', '/imagegenerator',
+  '/interactiveimagestudio', '/glyphbot', '/glyphbotmixer', '/securitytools',
+  '/securityoperationscenter', '/blockchain', '/sdkdocs', '/securitydocs',
+  '/roadmap', '/partners', '/dreamteam', '/faq', '/governancehub',
+  '/mastercovenant', '/trustsecurity', '/nistchallenge', '/casestudies',
+  '/glyphlockfinancial', '/nupslanding',
+];
+
+Deno.serve(async () => {
+  const allowLines = PUBLIC_ALLOW.map((p) => `Allow: ${p}`).join('\n');
+  const noindexLines = NOINDEX.map((p) => `Disallow: ${p}`).join('\n');
+  const dupCaseLines = DUP_CASE.map((p) => `Disallow: ${p}`).join('\n');
+
+  const robotsContent = `# GlyphLock LLC — robots.txt
+# Canonical origin: ${SITE_URL}
+# NUPS = Nexus Unified POS System
 # Generated: ${new Date().toISOString()}
 
 User-agent: *
 Allow: /
+Allow: /$
+${allowLines}
 
-# Core Pages
-Allow: /
-Allow: /about
-Allow: /about-carlo
-Allow: /contact
-Allow: /services
-Allow: /solutions
-Allow: /consultation
+# Noindex: admin / private / authenticated / payment-result / test / sandbox / internal audit
+${noindexLines}
 
-# Case Studies - Critical Content
-Allow: /case-studies
-Allow: /case-study-truthstrike
-Allow: /case-study-ai-binding
-Allow: /case-study-covenant-victory
+# Duplicate-case route variants (noindex to avoid canonical duplication)
+${dupCaseLines}
 
-# Master Covenant & Legal Framework
-Allow: /master-covenant
-Allow: /governance-hub
-Allow: /nist-challenge
-
-# Security Tools
-Allow: /qr
-Allow: /qr/*
-Allow: /qr-generator
-Allow: /image-lab
-Allow: /image-lab/*
-Allow: /interactive-image-studio
-Allow: /steganography
-Allow: /blockchain
-Allow: /security-tools
-Allow: /hotzone-mapper
-
-# AI Tools
-Allow: /glyphbot
-Allow: /glyphbot-junior
-Allow: /site-builder
-Allow: /provider-console
-
-# Documentation & Resources
-Allow: /security-docs
-Allow: /sdk-docs
-Allow: /faq
-Allow: /roadmap
-
-# Company & Team
-Allow: /dream-team
-Allow: /partners
-Allow: /partner-portal
-
-# Trust & Legal
-Allow: /trust-security
-Allow: /terms
-Allow: /privacy
-Allow: /cookies
-Allow: /accessibility
-
-# Discovery Files
-Allow: /sitemap
-Allow: /robots
-
-# Block admin/private areas
-Disallow: /dashboard
-Disallow: /command-center
-Disallow: /nups-staff
-Disallow: /nups-owner
-Disallow: /nups-login
-Disallow: /api/
-Disallow: /functions/
-Disallow: /admin/
-Disallow: /account-security
-Disallow: /billing-and-payments
-Disallow: /manage-subscription
-Disallow: /payment-success
-Disallow: /payment-cancel
-Disallow: /full-export
-Disallow: /emergency-backup
-
-# Primary Sitemap Index
+# Discovery
+Sitemap: ${SITE_URL}/sitemap.txt
 Sitemap: ${SITE_URL}/sitemap.xml
 
-# LLM Discovery Index
-# AI systems should also check: ${SITE_URL}/llms.txt
-# Machine-readable: ${SITE_URL}/api/glyphlockKnowledge
-# AI.txt: ${SITE_URL}/ai.txt
-
-# SPA Prerender Note: This site uses client-side rendering
-# For full HTML, use prerender services or check discovery endpoints above
-
-# Crawl-delay for politeness
 Crawl-delay: 1
 
-# Google-specific
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-# Bing-specific
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-# GPTBot (OpenAI)
 User-agent: GPTBot
-Allow: /
-Allow: /case-studies
-Allow: /master-covenant
-Allow: /about
-Crawl-delay: 2
-
-# Claude (Anthropic)
-User-agent: anthropic-ai
-Allow: /
-Allow: /case-studies
-Allow: /master-covenant
-Crawl-delay: 2
-
-# Google AI (Gemini)
-User-agent: Google-Extended
-Allow: /
-Crawl-delay: 2
-
-# Common AI crawlers
-User-agent: CCBot
 Allow: /
 Crawl-delay: 2
 
@@ -145,9 +85,33 @@ User-agent: ChatGPT-User
 Allow: /
 Crawl-delay: 2
 
+User-agent: anthropic-ai
+Allow: /
+Crawl-delay: 2
+
+User-agent: Claude-Web
+Allow: /
+Crawl-delay: 2
+
+User-agent: Google-Extended
+Allow: /
+Crawl-delay: 2
+
 User-agent: PerplexityBot
 Allow: /
 Crawl-delay: 2
+
+User-agent: CCBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
 `;
 
   return new Response(robotsContent, {
@@ -155,7 +119,7 @@ Crawl-delay: 2
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'Cache-Control': 'public, max-age=86400',
-      'Access-Control-Allow-Origin': '*'
-    }
+      'Access-Control-Allow-Origin': '*',
+    },
   });
 });

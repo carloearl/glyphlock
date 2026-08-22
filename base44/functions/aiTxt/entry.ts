@@ -1,76 +1,86 @@
 /**
- * /ai.txt endpoint for LLM ingestion
- * Provides plain text summary of GlyphLock for AI crawlers
+ * /ai.txt endpoint — canonical AI crawler index for glyphlock.io
+ * Claims-safe. No quantum, patent, "first binding", banking-grade,
+ * instant payout, production-API, or unsupported certification claims.
+ * NUPS = Nexus Unified POS System. URLs use actual route casing.
  */
 
 const SITE_URL = 'https://glyphlock.io';
 
-Deno.serve(async (req) => {
-  const content = `# GlyphLock LLC - AI Crawler Index
-${SITE_URL}
-Generated: ${new Date().toISOString()}
+Deno.serve(async () => {
+  const content = `# GlyphLock LLC — AI Crawler Index
+# ${SITE_URL}
+# Generated: ${new Date().toISOString()}
 
 ## COMPANY
 GlyphLock LLC
-Founded: January 2025
+Founded: 2025
 Location: El Mirage, Arizona, United States
 Contact: carloearl@glyphlock.com | (480) 886-5588
+GitHub: https://github.com/carloearl/glyphlock
 
-## CORE TECHNOLOGY
-Credentialed Integrity System - Protocol-Governed Access Control
-- Quantum-resistant cryptographic verification
-- AI-driven autonomous threat suppression
-- Blockchain immutability enforcement
-- Visual steganographic encoding
-- Master Covenant governance framework
+## CORE CAPABILITIES
+Evidence infrastructure connecting identity and permission, secure QR and image carriers, AI-assisted workflows, automated DJ and the Fable visual engine, NUPS (Nexus Unified POS System) venue operations, GlyphBucks closed-loop stored value, SDK and API integration, hardware integration, Oracle Hospitality (OHIP) integration work, audit trails, and governance.
 
 ## SYSTEM MODULES
-1. QR Verification Module - ${SITE_URL}/qr
-   Cryptographic QR generation with steganographic encoding
-   
-2. GlyphBot Intelligence Module - ${SITE_URL}/glyphbot
-   Autonomous security analysis with AI-driven threat suppression
-   
-3. Image Processing Module - ${SITE_URL}/image-lab
-   Steganographic encoding system with protocol-governed authorization
-   
-4. Blockchain Verification Module - ${SITE_URL}/blockchain
-   Immutable ledger integrity with cryptographic governance
-   
-5. NUPS Transaction Verification - ${SITE_URL}/nups-login
-   Protocol-governed transaction module for authorized venues
-   
-6. Security Operations Module - ${SITE_URL}/security-operations-center
-   System-enforced threat monitoring with credentialed command authority
+1. Secure QR Studio — ${SITE_URL}/SecureQRStudio
+   Structured QR payloads, signing, verification, and vault workflows.
+
+2. GlyphBot Intelligence — ${SITE_URL}/GlyphBot
+   Governed AI assistant for building, inspecting, explaining, and auditing connected workflows with human review.
+
+3. Image Lab — ${SITE_URL}/ImageLab
+   Image creation, permitted LSB carrier experiments, responsive typed hotspots, and Secure QR connections.
+
+4. Interactive Image Studio — ${SITE_URL}/InteractiveImageStudio
+   Normalized hotspot regions, typed links or text actions, and shareable image context.
+
+5. NUPS (Nexus Unified POS System) — ${SITE_URL}/NUPSLanding
+   Venue operations across identity, roles, contracts, POS, payouts, reconciliation, and audit trails.
+
+6. Security Operations — ${SITE_URL}/SecurityOperationsCenter
+   Access controls, activity visibility, audit events, and alerting.
+
+7. Blockchain References — ${SITE_URL}/Blockchain
+   Record references, hashes, and provenance context for digital assets and documentation.
+
+8. GlyphLock Financial — ${SITE_URL}/GlyphLockFinancial
+   Settlement, payout, and financial record workflows with reconciliation.
 
 ## KEY PAGES
-- Company Overview: ${SITE_URL}/about
-- Credential Request: ${SITE_URL}/consultation
-- Contact: ${SITE_URL}/contact
-- Legal Framework: ${SITE_URL}/terms
-- Privacy Protocol: ${SITE_URL}/privacy
-- Case Studies: ${SITE_URL}/case-studies
-- NIST Validation: ${SITE_URL}/nist-challenge
-- Dream Team: ${SITE_URL}/dream-team
-- Partners: ${SITE_URL}/partners
-- Roadmap: ${SITE_URL}/roadmap
+- Home: ${SITE_URL}/
+- About: ${SITE_URL}/About
+- Founder Story: ${SITE_URL}/AboutCarlo
+- Leadership: ${SITE_URL}/DreamTeam
+- Services: ${SITE_URL}/Services
+- Solutions: ${SITE_URL}/Solutions
+- Contact: ${SITE_URL}/Contact
+- Consultation: ${SITE_URL}/Consultation
+- Pricing: ${SITE_URL}/Pricing
+- Partners: ${SITE_URL}/Partners
+- Security Docs: ${SITE_URL}/SecurityDocs
+- SDK Docs: ${SITE_URL}/SDKDocs
+- FAQ: ${SITE_URL}/FAQ
+- Roadmap: ${SITE_URL}/Roadmap
+- Governance Hub: ${SITE_URL}/GovernanceHub
+- Master Covenant: ${SITE_URL}/MasterCovenant
+- Trust & Security: ${SITE_URL}/TrustSecurity
+- Case Studies: ${SITE_URL}/CaseStudies
+- Terms: ${SITE_URL}/Terms
+- Privacy: ${SITE_URL}/Privacy
 
 ## ACCESS MODEL
-Provisioned credentials only - no self-service
-Protocol-governed licensing - no equity available
-System-enforced verification - credentialed operators only
+Provisioned credentials and role-based access. Protocol-governed verification for authorized operators.
 
-## COMPLIANCE
-SOC 2 Type II | GDPR | ISO 27001 | PCI DSS | HIPAA
-
-## INTELLECTUAL PROPERTY
-Master Covenant Framework (Patent Pending)
-BPAA Certification Protocol
-CAB Legal Binding System
+## DISCOVERY
+Sitemap: ${SITE_URL}/sitemap.xml
+Robots: ${SITE_URL}/robots.txt
+LLMs.txt: ${SITE_URL}/llms.txt
+Knowledge JSON: ${SITE_URL}/api/glyphlockKnowledge
 
 ---
-For credential provisioning: ${SITE_URL}/consultation
-For technical documentation: ${SITE_URL}/security-docs
+For consultation: ${SITE_URL}/Consultation
+For technical documentation: ${SITE_URL}/SecurityDocs
 `;
 
   return new Response(content, {
@@ -79,7 +89,7 @@ For technical documentation: ${SITE_URL}/security-docs
       'Content-Type': 'text/plain; charset=utf-8',
       'Cache-Control': 'public, max-age=86400',
       'Access-Control-Allow-Origin': '*',
-      'X-Robots-Tag': 'noarchive'
-    }
+      'X-Robots-Tag': 'index, follow',
+    },
   });
 });
