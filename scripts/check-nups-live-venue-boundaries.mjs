@@ -21,11 +21,18 @@ for (const path of targets) {
 }
 
 const clockIn = fs.readFileSync('base44/functions/nupsClockIn/entry.ts', 'utf8');
-if (!/VenueTerminal\.filter\(\{\s*terminal_id:\s*terminalId,\s*status:\s*'active',\s*trusted:\s*true/.test(clockIn)) {
-  failures.push('nupsClockIn: trusted pre-auth venue binding must use active VenueTerminal records.');
+if (!/VenueTerminal\.filter\(\{\s*terminal_id:\s*terminalId\s*\}/.test(clockIn)
+  || !/terminalRecord\.status\s*===\s*'active'/.test(clockIn)
+  || !/terminalRecord\.trusted\s*===\s*true/.test(clockIn)) {
+  failures.push('nupsClockIn: trusted pre-auth venue binding must require an active trusted VenueTerminal record.');
 }
-if (!/Trusted terminal venue is not configured/.test(clockIn)) {
-  failures.push('nupsClockIn: missing terminal venue must fail closed.');
+if (!/legacyPaymentTerminal\s*=\s*!terminalRecord/.test(clockIn)) {
+  failures.push('nupsClockIn: inactive/revoked/untrusted terminal records must not regain trust through the legacy payment-terminal fallback.');
+}
+if (!/Trusted terminal venue is not configured/.test(clockIn)
+  || !/UNKNOWN_TERMINAL_BLOCKED/.test(clockIn)
+  || !/TERMINAL_ACCESS_BLOCKED/.test(clockIn)) {
+  failures.push('nupsClockIn: unknown and non-trusted terminal states must fail closed with security evidence.');
 }
 
 const sessionVenue = fs.readFileSync('base44/functions/getSessionVenueId/entry.ts', 'utf8');
