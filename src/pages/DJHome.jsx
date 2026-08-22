@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UnifiedMusicConsole from "@/components/mixer/UnifiedMusicConsole";
+import { DJSessionProvider } from "@/components/mixer/session/DJSessionProvider";
 import DJDiagnosticsPanel from "@/components/mixer/diagnostics/DJDiagnosticsPanel";
 import { Badge } from "@/components/ui/badge";
 import { Activity, Disc3, LogOut, Tv } from "lucide-react";
@@ -25,9 +26,7 @@ export default function DJHome() {
   }, []);
 
   return (
-
-    <>
-
+    <DJSessionProvider>
       <NUPSActionSafety />
     <div className="min-h-screen bg-slate-950 text-white">
       <header className="border-b border-violet-900/50 bg-slate-900/80 px-4 py-3 flex flex-wrap items-center gap-3">
@@ -76,7 +75,6 @@ export default function DJHome() {
     </div>
 
       <NUPSOperatorAssistant />
-
-    </>
+    </DJSessionProvider>
   );
 }
