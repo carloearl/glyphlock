@@ -121,9 +121,9 @@ export default function Solutions() {
   return (
     <>
       <SEOHead 
-        title="Industry Solutions - Cybersecurity for Every Sector | GlyphLock"
-        description="Tailored cybersecurity solutions for hospitality, healthcare, finance, retail, technology, and enterprise, with post-quantum readiness and industry-specific control mapping."
-        keywords="industry cybersecurity solutions, healthcare HIPAA security, financial PCI DSS compliance, retail fraud prevention, technology IP protection, enterprise SOC, hospitality POS security, government classified data"
+        title="GlyphLock Solutions | Connected Evidence & Operations"
+        description="Explore GlyphLock workflows for venues and connected organizations across identity, access, QR, image carriers, AI assistance, transactions, records, APIs, and governance."
+        keywords="GlyphLock solutions, NUPS venue operations, identity workflows, Secure QR, image carriers, GlyphBot, transaction records, API integration, governance"
         url="/solutions"
       />
       
