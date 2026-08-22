@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
-import { Disc3, Sparkles } from "lucide-react";
+import { Disc3, Sparkles, ListMusic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { createSongEntry, createDancerProfile, DialogMode, ViewMode } from "@/components/mixer/types/mixerTypes";
@@ -48,7 +48,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   const [playerCollapsed, setPlayerCollapsed] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showAIPlaylist, setShowAIPlaylist] = useState(false);
-  const [rightTab, setRightTab] = useState("library"); // "library" | "ai" | "search"
+  const [rightTab, setRightTab] = useState("profiles"); // "profiles" | "ai" | "search"
 
   const activeProfile = useMemo(() => profiles.find((p) => p.id === uiState.activeProfileId), [profiles, uiState.activeProfileId]);
 
@@ -579,36 +579,30 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         )}
       </div>
 
-      {/* Main panels — drag the dividers to resize any window */}
-      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v1" className="flex-1 overflow-hidden">
-        {/* Left: Profiles + checked-in entertainer playlists */}
+      {/* Main panels — VirtualDJ-style: Library on the left, decks stay anchored */}
+      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v2" className="flex-1 overflow-hidden">
+        {/* Left: Track Library — scrollable browser sidebar */}
         {!isMobile && (
           <>
-            <ResizablePanel defaultSize={22} minSize={12} maxSize={40} collapsible collapsedSize={0} className="flex flex-col min-h-0">
-              <div className="flex-1 min-h-0 overflow-hidden">
-                <ProfilePanel
-                  profiles={profiles}
-                  activeProfileId={uiState.activeProfileId}
-                  songs={songs}
-                  onSwitchProfile={handleSwitchProfile}
-                  onOpenProfileManager={(p) => { setEditingProfile(p); setDialogMode(DialogMode.profileManager); }}
-                  onDeleteProfile={handleDeleteProfile}
-                  onDuplicateProfile={handleDuplicateProfile}
-                  onFocusZone={setFocusZone}
-                />
+            <ResizablePanel defaultSize={24} minSize={14} maxSize={40} collapsible collapsedSize={0} className="flex flex-col min-h-0 border-r border-slate-700/30">
+              <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-slate-700/30 bg-slate-900/80">
+                <ListMusic className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400">Library</span>
               </div>
-              <EntertainerPlaylistDock
-                activeProfileName={activeProfile?.name}
-                profileSongs={profileSongs}
-                onLoadPlaylist={handleLoadEntertainerPlaylist}
+              <TrackLibraryDock
+                tracks={libraryTracks}
+                onPlay={handleLibraryPlay}
+                onQueue={handleQueueSongs}
+                onQueueAll={handleQueueSongs}
+                onLoadDeck={handleLibraryDeckLoad}
               />
             </ResizablePanel>
-            <ResizableHandle withHandle className="bg-slate-700/60 hover:bg-purple-500/60 transition-colors" />
+            <ResizableHandle withHandle className="bg-slate-700/60 hover:bg-emerald-500/60 transition-colors" />
           </>
         )}
 
-        {/* Center: Song Deck */}
-        <ResizablePanel defaultSize={isMobile ? 100 : 52} minSize={25} className="flex min-h-0 overflow-hidden">
+        {/* Center: Song Deck (active playlist) */}
+        <ResizablePanel defaultSize={isMobile ? 100 : 44} minSize={25} className="flex min-h-0 overflow-hidden">
           <SongDeck
             songs={songs}
             profile={activeProfile}
@@ -628,16 +622,16 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
           />
         </ResizablePanel>
 
-        {/* Right: Library / AI panel / Music Search (desktop + tablet) */}
+        {/* Right: Profiles / AI / Music Search (desktop + tablet) */}
         {!isMobile && (
           <>
             <ResizableHandle withHandle className="bg-slate-700/60 hover:bg-cyan-500/60 transition-colors" />
-            <ResizablePanel defaultSize={26} minSize={14} maxSize={45} collapsible collapsedSize={0} className="flex flex-col min-h-0 border-l border-slate-700/30">
-              {/* Tab toggle between Library, AI and Search */}
+            <ResizablePanel defaultSize={32} minSize={16} maxSize={50} collapsible collapsedSize={0} className="flex flex-col min-h-0 border-l border-slate-700/30">
+              {/* Tab toggle between Profiles, AI and Search */}
               <div className="flex border-b border-slate-700/30 bg-slate-900/80">
                 {[
-                  { key: "library", label: "🎵 Library", color: "text-emerald-400 border-emerald-400" },
-                  { key: "ai", label: "AI Assistant", color: "text-purple-400 border-purple-400" },
+                  { key: "profiles", label: "Profiles", color: "text-purple-400 border-purple-400" },
+                  { key: "ai", label: "AI Assistant", color: "text-fuchsia-400 border-fuchsia-400" },
                   { key: "search", label: "🔍 Music API", color: "text-cyan-400 border-cyan-400" },
                 ].map((tab) => (
                   <button
@@ -651,14 +645,26 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
                   </button>
                 ))}
               </div>
-              {rightTab === "library" ? (
-                <TrackLibraryDock
-                  tracks={libraryTracks}
-                  onPlay={handleLibraryPlay}
-                  onQueue={handleQueueSongs}
-                  onQueueAll={handleQueueSongs}
-                  onLoadDeck={handleLibraryDeckLoad}
-                />
+              {rightTab === "profiles" ? (
+                <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+                  <div className="flex-1 min-h-0 overflow-hidden">
+                    <ProfilePanel
+                      profiles={profiles}
+                      activeProfileId={uiState.activeProfileId}
+                      songs={songs}
+                      onSwitchProfile={handleSwitchProfile}
+                      onOpenProfileManager={(p) => { setEditingProfile(p); setDialogMode(DialogMode.profileManager); }}
+                      onDeleteProfile={handleDeleteProfile}
+                      onDuplicateProfile={handleDuplicateProfile}
+                      onFocusZone={setFocusZone}
+                    />
+                  </div>
+                  <EntertainerPlaylistDock
+                    activeProfileName={activeProfile?.name}
+                    profileSongs={profileSongs}
+                    onLoadPlaylist={handleLoadEntertainerPlaylist}
+                  />
+                </div>
               ) : rightTab === "search" ? (
                 <MusicSearchPanel
                   onAddTrack={(trackData) => handleUploadedSong(trackData)}
