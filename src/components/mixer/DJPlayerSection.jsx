@@ -405,6 +405,7 @@ export default function DJPlayerSection({
         <PlayerDeck
           ref={deckARef}
           song={deckASong}
+          deckId="A"
           label={`Deck A${activeDeck === "A" ? " · LIVE" : " · CUE"}`}
           autoPlay={activeDeck === "A"}
           volume={deckAVolume}
@@ -413,6 +414,7 @@ export default function DJPlayerSection({
           onVolumeChange={(value, isMuted) => { setDeckABaseVol(value); setDeckAMuted(isMuted); }}
           onEnded={() => handleDeckEnded("A")}
           onPlaybackError={(error) => handleDeckPlaybackError("A", error)}
+          onProviderState={(event) => setProviderState({ ...event, deck: "A", effectiveVolume: deckAVolume, muted: deckAMuted || masterMuted })}
           onDropSong={(songId) => {
             setDeckASongId(songId);
             if (activeDeck === "A") onPlay?.(songId);
@@ -427,6 +429,7 @@ export default function DJPlayerSection({
         <PlayerDeck
           ref={deckBRef}
           song={deckBSong}
+          deckId="B"
           label={`Deck B${activeDeck === "B" ? " · LIVE" : " · CUE"}`}
           autoPlay={activeDeck === "B"}
           volume={deckBVolume}
@@ -435,6 +438,7 @@ export default function DJPlayerSection({
           onVolumeChange={(value, isMuted) => { setDeckBBaseVol(value); setDeckBMuted(isMuted); }}
           onEnded={() => handleDeckEnded("B")}
           onPlaybackError={(error) => handleDeckPlaybackError("B", error)}
+          onProviderState={(event) => setProviderState({ ...event, deck: "B", effectiveVolume: deckBVolume, muted: deckBMuted || masterMuted })}
           onDropSong={(songId) => setDeckBSongId(songId)}
           onDropExternalSong={(dropped) => {
             const id = onRegisterSong?.(dropped) || dropped?.id;
