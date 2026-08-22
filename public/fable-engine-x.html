@@ -2741,7 +2741,7 @@ window.addEventListener('message', (event) => {
   const data = event.data;
   if (!data || data.type !== 'NUPS_FABLE_STATE') return;
 
-  const title = cleanHostText(data.title, 'N.U.P.S.', 72);
+  const title = cleanHostText(data.title, 'NUPS', 72);
   const artist = cleanHostText(data.artist, 'AUTONOMOUS DJ', 72);
   const deck = data.activeDeck === 'B' ? 'DECK B' : 'DECK A';
   const marquee = cleanHostText(
@@ -2762,7 +2762,7 @@ window.addEventListener('message', (event) => {
     syncHostInput('l1Txt', title);
     syncHostInput('l2Txt', artist);
     syncHostInput('mqTxt', marquee);
-    if (ST.auto && title !== 'N.U.P.S.') nextCombo();
+    if (ST.auto && title !== 'NUPS') nextCombo();
   } else if (MQ.text !== marquee) {
     MQ.text = marquee;
     MQ.dirty = true;

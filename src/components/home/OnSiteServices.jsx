@@ -14,7 +14,7 @@ const SERVICES = [
   { title: 'Web Development', desc: 'Fast, secure, mobile-first sites and web apps end to end.', icon: Globe, color: '#4f46e5' },
   { title: 'Hardware & Networking', desc: 'Servers, workstations, cabling, routers, cameras, and Wi-Fi.', icon: Cpu, color: '#10b981' },
   { title: 'POS Systems', desc: 'Register hardware, receipt printers, card readers, and setup.', icon: CreditCard, color: '#f59e0b' },
-  { title: 'N.U.P.S. Deployment', desc: 'Full venue operating system — POS, accounting, and compliance.', icon: Building2, color: '#ec4899' },
+  { title: 'NUPS Deployment', desc: 'Full venue operating system — POS, accounting, and compliance.', icon: Building2, color: '#ec4899' },
   { title: 'Recording & Engineering', desc: 'Studio recording, mixing, mastering, and live audio engineering.', icon: Mic, color: '#a855f7' },
   { title: 'Install & Configuration', desc: 'Software and hardware installed, configured, and tested on-site.', icon: Wrench, color: '#06b6d4' },
 ];
