@@ -80,9 +80,9 @@ assert.doesNotMatch(consoleSource, /active === "visuals"\s*&&\s*\(/, "visual uti
 assert.match(clubChannel, /receiver-ready/, "Club TV must request an immediate state snapshot");
 assert.match(clubChannel, /heartbeat/, "Club TV signal must have a liveness heartbeat");
 assert.equal(
-  (deckGraph.match(/createMediaElementSource\(/g) || []).length +
-    (audioVisualizer.match(/createMediaElementSource\(/g) || []).length +
-    (fableDeckAudio.match(/createMediaElementSource\(/g) || []).length,
+  (deckGraph.match(/\w+\.createMediaElementSource\(/g) || []).length +
+    (audioVisualizer.match(/\w+\.createMediaElementSource\(/g) || []).length +
+    (fableDeckAudio.match(/\w+\.createMediaElementSource\(/g) || []).length,
   1,
   "one canonical MediaElementSource owner is required",
 );
