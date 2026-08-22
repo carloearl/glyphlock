@@ -17,12 +17,7 @@ export default function AboutCarloPage() {
 
   return (
     <>
-      <SEOHead
-        title="This Is Not a Resume | Carlo Rene Earl - GlyphLock Founder"
-        description="The covenant behind GlyphLock. Carlo Rene Earl doesn't invent from comfort—he forges under pressure, turning pain into design and truth into unbreakable architecture."
-        url="/AboutCarlo"
-        keywords={["Carlo Rene Earl", "GlyphLock founder", "cybersecurity founder", "Master Covenant", "visual cryptography", "Arizona tech founder", "quantum security", "truth architecture"]}
-      />
+      <SEOHead />
 
       {/* Interactive Web Grid Background */}
       <InteractiveWebGrid />
@@ -565,21 +560,23 @@ export default function AboutCarloPage() {
             "@context": "https://schema.org",
             "@type": "Person",
             "name": "Carlo Rene Earl",
-            "jobTitle": "Founder & CEO",
+            "jobTitle": "Founder & Chief Executive Officer",
             "worksFor": {
               "@type": "Organization",
               "name": "GlyphLock LLC",
               "url": "https://glyphlock.io"
             },
-            "description": "Creator and architect of GlyphLock, turning pressure into systems and pain into design for quantum-resistant cybersecurity.",
-            "url": "https://glyphlock.io/AboutCarlo",
+            "description": "Founder and primary product architect of GlyphLock LLC, connecting creative media, secure carriers, assisted intelligence, venue operations, financial recordkeeping, integrations, and governance.",
+            "url": "https://glyphlock.io/about-carlo",
             "knowsAbout": [
-              "Cybersecurity",
-              "Quantum-resistant encryption",
-              "Visual cryptography",
-              "Blockchain security",
-              "AI security",
-              "Identity protection"
+              "Evidence infrastructure",
+              "Secure image carriers",
+              "Secure QR workflows",
+              "Interactive image systems",
+              "NUPS venue operations",
+              "Operational and financial recordkeeping",
+              "AI governance",
+              "Music, DJ, and venue workflows"
             ]
           })}
         </script>
