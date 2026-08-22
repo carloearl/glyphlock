@@ -11,6 +11,7 @@ import { getProviderCapability, canUseAsVenueDeckSource } from "./providerCapabi
 import { createScopedLayoutKey, normalizeLayout, WORKBENCH_PRESETS } from "./djLayout.js";
 import { matchImportedTrack } from "./playlistMatching.js";
 import {
+  YOUTUBE_STATES,
   classifyYouTubeError,
   createYouTubeCommandGate,
   createYouTubeWatchdogState,
@@ -84,6 +85,16 @@ test("playlist import matches ISRC first and never silently substitutes", () => 
 });
 
 test("YouTube health classifies provider errors, deduplicates commands, and retries once", () => {
+  const expectedErrors = [2, 5, 100, 101, 150, 153];
+  for (const code of expectedErrors) {
+    const error = classifyYouTubeError(code);
+    assert.equal(error.code, code);
+    assert.ok(error.message.length > 12);
+  }
+  assert.equal(YOUTUBE_STATES[3], "BUFFERING");
+  assert.equal(YOUTUBE_STATES[1], "PLAYING");
+  assert.equal(YOUTUBE_STATES[2], "PAUSED");
+  assert.equal(YOUTUBE_STATES[0], "ENDED");
   assert.match(classifyYouTubeError(153).message, /Referer|identity/i);
   assert.equal(classifyYouTubeError(101).retryable, false);
   const gate = createYouTubeCommandGate({ volumeCadenceMs: 100, volumeDelta: 2 });
