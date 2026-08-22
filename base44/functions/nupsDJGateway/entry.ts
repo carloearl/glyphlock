@@ -247,42 +247,135 @@ Deno.serve(async (req) => {
     }
 
     if (action === "probePlaylistPermission") {
-      let created = null;
-      try {
-        created = await E.Playlist.create({
-          name: `NUPS DJ gateway diagnostic ${new Date().toISOString()}`,
-          entertainer_id: "diagnostic-probe",
-          ordered_tracks: [],
-          crowd_energy_score: 0,
-          generation_timestamp: new Date().toISOString(),
-          status: "archived",
-        });
-        if (!created?.id) throw new Error("Playlist probe created no record id.");
-        await E.Playlist.delete(created.id);
-        return Response.json({ success: true, detail: "secure create + immediate delete permitted" });
-      } catch (error) {
-        if (created?.id) await E.Playlist.delete(created.id).catch(() => null);
-        throw error;
+      // Non-mutating capability check. The old implementation created and
+      // immediately deleted a Playlist record merely to ask whether writes
+      // were possible, which polluted audit history and could fail halfway.
+      const sample = await E.Playlist.filter({ venue_id: canonicalVenueId }, "-updated_date", 1).catch(() => []);
+      return Response.json({
+        success: true,
+        detail: "playlist gateway reachable; authorization and venue boundary verified without mutation",
+        capability: {
+          read: true,
+          write: PLAYLIST_ROLES.has(operator.role),
+          venue_id: canonicalVenueId,
+          role: operator.role,
+          sample_count: sample.length,
+        },
+      });
+    }
+
+    if (action === "listCheckedInEntertainers") {
+      const shiftRows = [];
+      const entertainerRows = [];
+      for (const alias of venueAliases) {
+        shiftRows.push(...await E.EntertainerShift.filter({ venue_id: alias }, "-check_in_time", 200).catch(() => []));
+        entertainerRows.push(...await E.Entertainer.filter({ venue_id: alias, status: "active" }, "-created_date", 500).catch(() => []));
       }
+      const shiftById = new Map(shiftRows.map((row) => [row.id, row]));
+      const entertainerById = new Map(entertainerRows.map((row) => [row.id, row]));
+      const activeStatuses = new Set(["checked_in", "on_floor", "in_vip", "on_break"]);
+      const seen = new Set();
+      const roster = [];
+      for (const shift of [...shiftById.values()]) {
+        const active = activeStatuses.has(shift.status) || (!shift.check_out_time && shift.status !== "checked_out");
+        if (!active || !shift.entertainer_id || seen.has(shift.entertainer_id)) continue;
+        const entertainer = entertainerById.get(shift.entertainer_id);
+        if (!entertainer || !venueAliases.has(entertainer.venue_id)) continue;
+        seen.add(shift.entertainer_id);
+        roster.push({
+          shiftId: shift.id,
+          entertainerId: entertainer.id,
+          name: entertainer.stage_name || entertainer.legal_name || "Unknown entertainer",
+          checkInTime: shift.check_in_time || null,
+          location: shift.location || "",
+          venue_id: canonicalVenueId,
+        });
+      }
+      return Response.json({ success: true, venue_id: canonicalVenueId, entertainers: roster });
+    }
+
+    if (action === "getEntertainerPlaylist") {
+      const entertainerId = String(body.entertainer_id || "").trim();
+      if (!entertainerId) return Response.json({ error: "entertainer_id is required." }, { status: 400 });
+      const entertainer = await E.Entertainer.get(entertainerId).catch(() => null);
+      if (!entertainer || !venueAliases.has(entertainer.venue_id)) {
+        return Response.json({ error: "Entertainer does not belong to this venue." }, { status: 403 });
+      }
+      const rows = await E.Playlist.filter({ entertainer_id: entertainerId, status: "active" }, "-updated_date", 20).catch(() => []);
+      const playlist = rows.find((row) => !row.venue_id || venueAliases.has(row.venue_id)) || null;
+      return Response.json({ success: true, venue_id: canonicalVenueId, playlist });
     }
 
     if (action === "savePlaylist") {
       const playlist = body.playlist || {};
-      if (!playlist.entertainer_id) {
+      const entertainerId = String(playlist.entertainer_id || "").trim();
+      if (!entertainerId) {
         return Response.json({ error: "entertainer_id is required to save a playlist." }, { status: 400 });
       }
-      const status = ["active", "completed", "archived"].includes(playlist.status) ? playlist.status : "active";
-      const created = await E.Playlist.create({
-        name: String(playlist.name || `Auto-DJ ${new Date().toISOString()}`).slice(0, 160),
-        entertainer_id: String(playlist.entertainer_id).slice(0, 160),
+      const entertainer = await E.Entertainer.get(entertainerId).catch(() => null);
+      if (!entertainer || !venueAliases.has(entertainer.venue_id)) {
+        return Response.json({ error: "Entertainer does not belong to this venue." }, { status: 403 });
+      }
+
+      const now = new Date().toISOString();
+      const orderedTracks = (Array.isArray(playlist.ordered_tracks) ? playlist.ordered_tracks : [])
+        .slice(0, 200)
+        .map((track, index) => ({
+          position: index,
+          track_id: String(track?.track_id || "").slice(0, 200),
+          title: String(track?.title || "").slice(0, 250),
+          artist: String(track?.artist || "").slice(0, 250),
+          youtubeUrl: String(track?.youtubeUrl || "").slice(0, 1000),
+          uploadUrl: String(track?.uploadUrl || "").slice(0, 1000),
+          vibeTag: String(track?.vibeTag || "").slice(0, 100),
+          energyLevel: Math.max(0, Math.min(10, Number(track?.energyLevel) || 5)),
+        }));
+      const payload = {
+        venue_id: canonicalVenueId,
+        name: String(playlist.name || `${entertainer.stage_name || "Entertainer"} playlist`).slice(0, 160),
+        entertainer_id: entertainerId,
         persona_id: playlist.persona_id ? String(playlist.persona_id).slice(0, 160) : undefined,
         session_id: playlist.session_id ? String(playlist.session_id).slice(0, 160) : (operator?.shift_id || undefined),
-        ordered_tracks: Array.isArray(playlist.ordered_tracks) ? playlist.ordered_tracks.slice(0, 200) : [],
+        ordered_tracks: orderedTracks,
         crowd_energy_score: Number.isFinite(Number(playlist.crowd_energy_score)) ? Number(playlist.crowd_energy_score) : 5,
-        generation_timestamp: playlist.generation_timestamp || new Date().toISOString(),
-        status,
-      });
-      return Response.json({ success: true, playlist: created });
+        generation_timestamp: playlist.generation_timestamp || now,
+        updated_by: operator?.email || operator?.name || operator?.role || "nups-dj",
+        updated_at: now,
+        status: "active",
+      };
+
+      const candidates = await E.Playlist.filter({ entertainer_id: entertainerId, status: "active" }, "-updated_date", 20).catch(() => []);
+      const matching = candidates.filter((row) => !row.venue_id || venueAliases.has(row.venue_id));
+      const existing = matching[0] || null;
+      const saved = existing
+        ? await E.Playlist.update(existing.id, payload)
+        : await E.Playlist.create(payload);
+      for (const duplicate of matching.slice(1)) {
+        await E.Playlist.update(duplicate.id, {
+          status: "archived",
+          venue_id: canonicalVenueId,
+          updated_by: payload.updated_by,
+          updated_at: now,
+        }).catch(() => null);
+      }
+
+      await E.SystemAuditLog.create({
+        event_type: existing ? "ENTERTAINER_PLAYLIST_UPDATED" : "ENTERTAINER_PLAYLIST_CREATED",
+        description: `${existing ? "Updated" : "Created"} playlist for entertainer ${entertainerId}`,
+        actor_email: operator?.email || operator?.name || "nups-dj",
+        resource_id: saved.id,
+        status: "success",
+        severity: "low",
+        metadata: {
+          venue_id: canonicalVenueId,
+          entertainer_id: entertainerId,
+          playlist_id: saved.id,
+          track_count: orderedTracks.length,
+          actor_role: operator.role,
+        },
+      }).catch(() => null);
+
+      return Response.json({ success: true, venue_id: canonicalVenueId, playlist: saved, created: !existing });
     }
 
     if (action === "setJukeboxStatus") {
