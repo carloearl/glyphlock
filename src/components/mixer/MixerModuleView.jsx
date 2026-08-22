@@ -31,7 +31,7 @@ import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
 import useMediaQuery from "@/components/mixer/session/useMediaQuery";
 
 export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent, libraryTracks = [] }) {
-  const { state: djSession, setQueue, rejectDeckLoad, requestDeckLoad } = useDJSession();
+  const { state: djSession, setQueue, rejectDeckLoad, requestDeckLoad, requestTransport } = useDJSession();
   const deckLoadRequest = djSession.pendingCommand;
   // ─── State hydration ───
   const [songs, setSongs] = useState(() => loadSongs());
@@ -253,25 +253,46 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   }, [activeProfile]);
 
   const handlePlay = useCallback((songId) => {
-    setPlayingSongId((prev) => (prev === songId ? null : songId));
-    const song = songs.find((s) => s.id === songId);
-    if (song) {
-      // Auto-expand the player when a song starts
-      setPlayerCollapsed(false);
-      setSongs((prev) => prev.map((s) => (s.id === songId ? { ...s, lastPlayed: Date.now() } : s)));
-      emitTelemetry("SONG_PLAY", { songId, profileId: uiState.activeProfileId, timestamp: Date.now() });
+    const song = songs.find((item) => item.id === songId);
+    if (!song) return;
+    const residentSongId = djSession.activeDeck === "B" ? djSession.deckB.songId : djSession.deckA.songId;
+    const pausing = playingSongId === songId && residentSongId === songId;
+    requestTransport({
+      requestId: `transport-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      action: pausing ? "pause" : "play",
+      deck: djSession.activeDeck,
+      songId,
+    });
+    if (pausing) {
+      setPlayingSongId(null);
+      emitTelemetry("SONG_PAUSE", { songId, profileId: uiState.activeProfileId, timestamp: Date.now() });
       onPlaybackEvent?.({
-        type: "play",
+        type: "pause",
         source: "manual",
-        track_id: song._entityTrackId || songId,
         entityTrackId: song._entityTrackId || null,
         songId,
         title: song.title,
         artist: song.artist,
         at: Date.now(),
       });
+      return;
     }
-  }, [songs, uiState.activeProfileId, onPlaybackEvent]);
+
+    setPlayingSongId(songId);
+    setPlayerCollapsed(false);
+    setSongs((previous) => previous.map((item) => item.id === songId ? { ...item, lastPlayed: Date.now() } : item));
+    emitTelemetry("SONG_PLAY", { songId, profileId: uiState.activeProfileId, timestamp: Date.now() });
+    onPlaybackEvent?.({
+      type: "play",
+      source: "manual",
+      track_id: song._entityTrackId || songId,
+      entityTrackId: song._entityTrackId || null,
+      songId,
+      title: song.title,
+      artist: song.artist,
+      at: Date.now(),
+    });
+  }, [songs, playingSongId, djSession.activeDeck, djSession.deckA.songId, djSession.deckB.songId, requestTransport, uiState.activeProfileId, onPlaybackEvent]);
 
   const handleAutomationTransition = useCallback((songId, meta = {}) => {
     if (!songId) {
