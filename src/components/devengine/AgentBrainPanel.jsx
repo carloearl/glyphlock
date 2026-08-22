@@ -287,10 +287,10 @@ export default function AgentBrainPanel() {
 
   const getModeConfig = () => {
     const configs = {
-      explain: { color: 'bg-cyan-500', label: 'Explain', icon: '💡', desc: 'Report only' },
-      build: { color: 'bg-blue-500', label: 'Build', icon: '🔨', desc: 'Execution locked' },
-      refactor: { color: 'bg-indigo-500', label: 'Refactor', icon: '♻️', desc: 'Execution locked' },
-      debug: { color: 'bg-red-500', label: 'Debug', icon: '🐛', desc: 'Report only' }
+      explain: { color: 'bg-cyan-500', label: 'Explain', icon: '💡', desc: 'Analysis & answers' },
+      build: { color: 'bg-blue-500', label: 'Build', icon: '🔨', desc: 'Plan & generate' },
+      refactor: { color: 'bg-indigo-500', label: 'Refactor', icon: '♻️', desc: 'Restructure plan' },
+      debug: { color: 'bg-red-500', label: 'Debug', icon: '🐛', desc: 'Diagnose issues' }
     };
     return configs[mode] || configs.build;
   };
