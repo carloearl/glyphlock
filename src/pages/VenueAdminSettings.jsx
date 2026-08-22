@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Lock, Settings, ClipboardCheck, FileText, DollarSign, Database, BookOpen, Receipt } from 'lucide-react';
+import { Lock, Settings, ClipboardCheck, FileText, DollarSign, Database, BookOpen, Receipt, MonitorCog } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { hasOwnerPreview } from '@/lib/nups/previewBypass';
 import RateFeeEditor from '@/components/admin/RateFeeEditor';
@@ -21,6 +21,7 @@ import DailyChecklistEditor from '@/components/admin/DailyChecklistEditor';
 import ContractTermsEditor from '@/components/admin/ContractTermsEditor';
 import ChartOfAccountsEditor from '@/components/admin/ChartOfAccountsEditor';
 import ReceiptConfigEditor from '@/components/admin/ReceiptConfigEditor';
+import TerminalManagementEditor from '@/components/admin/TerminalManagementEditor';
 
 export default function VenueAdminSettings() {
   const [selectedVenue, setSelectedVenue] = useState('');
@@ -33,14 +34,14 @@ export default function VenueAdminSettings() {
   const { data: venues = [] } = useQuery({
     queryKey: ['venue-configs-list'],
     queryFn: async () => {
-      try { return await base44.entities.VenueRateConfig.list('-created_date', 100); }
+      try { return await base44.entities.Venue.filter({ status: 'active' }, '-created_date', 100); }
       catch { return []; }
     },
   });
 
   useEffect(() => {
     if (!selectedVenue && venues.length > 0) {
-      setSelectedVenue(venues[0].venue_id);
+      setSelectedVenue(venues[0].venue_id || venues[0].id);
     }
   }, [venues, selectedVenue]);
 
@@ -92,9 +93,9 @@ export default function VenueAdminSettings() {
                 <SelectValue placeholder="Select venue…" />
               </SelectTrigger>
               <SelectContent>
-                {venues.length === 0 && <SelectItem value="__none__" disabled>No venues — create a VenueRateConfig first</SelectItem>}
+                {venues.length === 0 && <SelectItem value="__none__" disabled>No active venues</SelectItem>}
                 {venues.map(v => (
-                  <SelectItem key={v.id} value={v.venue_id}>{v.venue_name || v.venue_id}</SelectItem>
+                  <SelectItem key={v.id} value={v.venue_id || v.id}>{v.name || v.venue_id || v.id}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -119,6 +120,9 @@ export default function VenueAdminSettings() {
               <TabsTrigger value="coa" className="data-[state=active]:bg-slate-800">
                 <BookOpen className="w-3 h-3 mr-1" /> Chart of Accounts
               </TabsTrigger>
+              <TabsTrigger value="terminals" className="data-[state=active]:bg-slate-800">
+                <MonitorCog className="w-3 h-3 mr-1" /> Terminals
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="rates">
@@ -135,6 +139,9 @@ export default function VenueAdminSettings() {
             </TabsContent>
             <TabsContent value="coa">
               <ChartOfAccountsEditor venueId={selectedVenue} user={user} />
+            </TabsContent>
+            <TabsContent value="terminals">
+              <TerminalManagementEditor venueId={selectedVenue} user={user} />
             </TabsContent>
           </Tabs>
         ) : (
