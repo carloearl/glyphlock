@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addWeeks, differenceInMinutes } from "date-fns";
 import { writeIdentityRecord } from "@/lib/nups/identityWrites";
+import { getNUPSTerminalId } from "@/lib/nups/terminalIdentity";
 
 const PIN_PAD_KEYS = ["1","2","3","4","5","6","7","8","9","CLR","0","OK"];
 
@@ -161,6 +162,7 @@ function PayrollReport({ shifts, weekStart }) {
 // Flow: idle → choose action (clock in / clock out) → enter PIN → confirm → done
 export default function TimeClock({ user, role = "staff", onClockStatusChange }) {
   const queryClient = useQueryClient();
+  const [terminalId] = useState(() => getNUPSTerminalId());
   const [now, setNow] = useState(new Date());
   const [mode, setMode] = useState("clock");      // clock | payroll
   const [step, setStep] = useState("idle");        // idle | pin | confirm | success | error
@@ -230,6 +232,7 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
       const res = await base44.functions.invoke("nupsClockInV2", {
         action: action === "in" ? "clockIn" : "clockOut",
         pin,
+        terminal_id: terminalId,
       });
       // Persist the kiosk operator session (same contract as NUPSKiosk) so
       // the shell scopes chrome to the clocked-in staff member's role —
@@ -270,7 +273,7 @@ export default function TimeClock({ user, role = "staff", onClockStatusChange })
     } finally {
       setPinBusy(false);
     }
-  }, [action, pinBusy, queryClient, onClockStatusChange]);
+  }, [action, pinBusy, queryClient, onClockStatusChange, terminalId]);
 
   const reset = () => {
     setStep("idle");
