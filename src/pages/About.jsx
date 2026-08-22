@@ -19,13 +19,7 @@ import {
 export default function About() {
   return (
     <>
-      <SEOHead
-        title="About GlyphLock | Identity, Permission, Operations & Proof"
-        description="See how GlyphLock connects machine-readable media, assisted intelligence, venue operations, financial records, integrations, and evidence through one governed architecture."
-        url="/About"
-        ogTitle="About GlyphLock — One Evidence Core, Six Operating Domains"
-        ogDescription="Explore GlyphLock’s origin, canonical architecture, automated DJ, image carriers, Secure QR, SDK/API integrations, NUPS operating proof, financial rules, and maturity record."
-      />
+      <SEOHead />
       <MotionConfig reducedMotion="user">
         <main id="about-top" className="min-h-screen overflow-x-clip bg-[#020407] text-white">
           <AboutHero />
