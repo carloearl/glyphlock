@@ -98,6 +98,10 @@ export default function FableStage({
       const rect = canvas.getBoundingClientRect();
       const W = rect.width;
       const H = rect.height;
+      // Hidden tab (display:none) yields a 0×0 canvas; drawing now produces
+      // NaN radii (e.g. `x % (W*1.6)` → "non-finite" createRadialGradient). Skip
+      // the frame — the loop already rescheduled above and resumes once visible.
+      if (W <= 0 || H <= 0) return;
       const t = performance.now();
       const frame = frameRef?.current || EMPTY_FRAME;
 
