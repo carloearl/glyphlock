@@ -5,6 +5,7 @@ import { providerLabel, searchMusicSources } from "@/lib/musicDiscovery";
 import { computeCrowdEnergyScore, generatePlaylist } from "@/lib/playlistEngine";
 import { buildAutoDJPlan } from "@/lib/djAutoEngine";
 import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const nowMs = () => (typeof performance !== "undefined" && performance.now ? performance.now() : Date.now());
 
@@ -17,13 +18,13 @@ function errorMessage(error) {
   return raw.replace(/\s+/g, " ").trim().slice(0, 180);
 }
 
-async function checkDJGateway() {
-  const data = await invokeDJGateway("snapshot");
+async function checkDJGateway(venueId) {
+  const data = await invokeDJGateway("snapshot", { venue_id: venueId || undefined });
   return `secure snapshot · ${data.quality?.unique_track_count ?? data.tracks?.length ?? 0} unique tracks · ${data.jukebox_requests?.length || 0} pending`;
 }
 
-async function checkTrackLibrary() {
-  const data = await invokeDJGateway("snapshot");
+async function checkTrackLibrary(venueId) {
+  const data = await invokeDJGateway("snapshot", { venue_id: venueId || undefined });
   const unique = data.quality?.unique_track_count ?? data.tracks?.length ?? 0;
   const raw = data.quality?.raw_track_count ?? unique;
   return `${unique} unique track${unique === 1 ? "" : "s"} · ${raw} raw rows`;
@@ -44,21 +45,22 @@ async function checkMusicDiscoveryFallback() {
   return `${healthy.map((p) => providerLabel(p.provider)).join(" + ")} · ${playable.length} playable result${playable.length === 1 ? "" : "s"}`;
 }
 
-async function checkJukeboxQueue() {
-  const data = await invokeDJGateway("snapshot");
+async function checkJukeboxQueue(venueId) {
+  const data = await invokeDJGateway("snapshot", { venue_id: venueId || undefined });
   const rows = data.jukebox_requests || [];
   return `${rows.length} pending request${rows.length === 1 ? "" : "s"}`;
 }
 
-async function checkPersonas() {
-  const data = await invokeDJGateway("snapshot");
+async function checkPersonas(venueId) {
+  const data = await invokeDJGateway("snapshot", { venue_id: venueId || undefined });
   const rows = data.personas || [];
   return `${rows.length} AI persona${rows.length === 1 ? "" : "s"}`;
 }
 
-async function checkPlaylistPermission() {
-  const data = await invokeDJGateway("probePlaylistPermission");
-  return data.detail || "secure create + immediate delete permitted";
+async function checkPlaylistPermission(venueId) {
+  if (!venueId) throw new Error("Active venue is required for the playlist capability check");
+  const data = await invokeDJGateway("probePlaylistPermission", { venue_id: venueId });
+  return data.detail || "authenticated non-mutating playlist capability check passed";
 }
 
 async function checkPlaylistEngine() {
@@ -122,6 +124,8 @@ function StatusBadge({ status }) {
 }
 
 export default function DJDiagnosticsPanel({ open, onOpenChange, runId = 0 }) {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.venue_id || activeVenue?.id || null;
   const [rows, setRows] = useState(() => makeRows("running"));
   const [running, setRunning] = useState(false);
   const [lastRun, setLastRun] = useState(null);
@@ -135,7 +139,7 @@ export default function DJDiagnosticsPanel({ open, onOpenChange, runId = 0 }) {
     const tasks = CHECKS.map(async (check) => {
       const started = nowMs();
       try {
-        const detail = await check.run();
+        const detail = await check.run(venueId);
         const result = {
           id: check.id,
           label: check.label,
@@ -172,7 +176,7 @@ export default function DJDiagnosticsPanel({ open, onOpenChange, runId = 0 }) {
     setRows(finalRows);
     setLastRun(new Date());
     setRunning(false);
-  }, []);
+  }, [venueId]);
 
   useEffect(() => {
     if (open && runId > 0) runDiagnostics();
