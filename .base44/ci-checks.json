@@ -13,6 +13,8 @@
     "check:nups-terminal-governance",
     "check:nups-batch16-runtime-boundaries",
     "check:nups-batch16-operational",
-    "check:nups-batch16-runtime"
+    "check:nups-batch16-runtime",
+    "test:dj",
+    "check:nups-dj-continuity"
   ]
 }
