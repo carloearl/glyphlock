@@ -85,7 +85,7 @@ export function djSessionReducer(state, action) {
       const deckKey = action.deck === "B" ? "deckB" : "deckA";
       return acknowledge({
         ...state,
-        [deckKey]: { ...state[deckKey], songId: action.songId, health: "ready" },
+        [deckKey]: { ...state[deckKey], songId: action.songId, song: action.song || state[deckKey].song || null, health: "ready" },
       }, {
         requestId: action.requestId,
         deck: action.deck,
@@ -104,7 +104,7 @@ export function djSessionReducer(state, action) {
       const deckKey = action.deck === "B" ? "deckB" : "deckA";
       return {
         ...state,
-        [deckKey]: { ...state[deckKey], songId: action.songId, health: "ready" },
+        [deckKey]: { ...state[deckKey], songId: action.songId, song: action.song || null, health: action.songId ? "ready" : "idle" },
       };
     }
     case "DECK_PROVIDER_STATE": {
