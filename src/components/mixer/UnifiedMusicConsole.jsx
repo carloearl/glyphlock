@@ -185,7 +185,7 @@ function UnifiedMusicConsoleInner() {
   return (
     <div className="h-[100dvh] flex flex-col gap-3 overflow-hidden">
       {/* ── AUTO-DJ Command Header ── */}
-      <div className="relative overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-900 p-4">
+      <div className="relative flex-shrink-0 overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-900 p-4">
         <div className="absolute inset-0 opacity-20 pointer-events-none"
           style={{ background: "radial-gradient(600px circle at 20% 0%, rgba(168,85,247,0.35), transparent 60%)" }}
         />
@@ -220,26 +220,28 @@ function UnifiedMusicConsoleInner() {
         </div>
       </div>
 
-      <DJAutomationDeck
-        autoDj={autoDj}
-        loading={loading}
-        error={error}
-        snapshot={snapshot}
-        plan={automationPlan}
-        activePersona={activePersona}
-        activeEntertainer={activeEntertainer}
-        activeCrowd={activeCrowd}
-        performerChoices={performerChoices}
-        performerOverrideId={performerOverrideId}
-        onPerformerOverride={setPerformerOverrideId}
-        runtimeBlockedCount={runtimeBlockedTrackIds.length}
-        onClearRuntimeBlocks={() => setRuntimeBlockedTrackIds([])}
-        lastUpdated={lastUpdated}
-        onRefresh={refresh}
-      />
+      <div className="flex-shrink-0 max-h-[26vh] overflow-y-auto rounded-xl">
+        <DJAutomationDeck
+          autoDj={autoDj}
+          loading={loading}
+          error={error}
+          snapshot={snapshot}
+          plan={automationPlan}
+          activePersona={activePersona}
+          activeEntertainer={activeEntertainer}
+          activeCrowd={activeCrowd}
+          performerChoices={performerChoices}
+          performerOverrideId={performerOverrideId}
+          onPerformerOverride={setPerformerOverrideId}
+          runtimeBlockedCount={runtimeBlockedTrackIds.length}
+          onClearRuntimeBlocks={() => setRuntimeBlockedTrackIds([])}
+          lastUpdated={lastUpdated}
+          onRefresh={refresh}
+        />
+      </div>
 
       {/* ── Module Rail ── */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-700/50 pb-3 overflow-x-auto">
+      <div className="flex flex-shrink-0 flex-wrap gap-2 border-b border-slate-700/50 pb-3 overflow-x-auto">
         {NAV.map(({ key, label, icon: Icon, ring }) => {
           const isActive = active === key;
           return (
@@ -259,7 +261,7 @@ function UnifiedMusicConsoleInner() {
         })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-700/50 bg-slate-900/60 p-2">
+      <div className="flex flex-shrink-0 flex-wrap items-center gap-2 rounded-xl border border-slate-700/50 bg-slate-900/60 p-2">
         <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Workbench</span>
         {[
           ["performance", "Performance"],
