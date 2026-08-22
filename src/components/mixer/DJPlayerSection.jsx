@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftRight, ChevronUp, ChevronDown, Tv, WandSparkles } from "lucide-react";
 import { getClubTVSender, openClubTVWindow } from "@/components/mixer/ClubBroadcastChannel";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
+import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
 
 function extractVideoId(url) {
   if (!url) return null;
@@ -39,17 +40,29 @@ export default function DJPlayerSection({
   onRegisterSong,
   transitionSeconds = 6,
 }) {
-  const [crossfade, setCrossfade] = useState(0);
-  const [deckASongId, setDeckASongId] = useState(playingSongId || null);
-  const [deckBSongId, setDeckBSongId] = useState(null);
-  const [activeDeck, setActiveDeck] = useState("A");
+  const {
+    state: session,
+    setDeckSong,
+    setActiveDeck,
+    setCrossfade,
+    setDeckMuted,
+    setDeckVolume,
+    setMaster,
+    acknowledgeDeckLoad,
+    rejectDeckLoad,
+    setProviderState,
+  } = useDJSession();
+  const crossfade = session.crossfade;
+  const deckASongId = session.deckA.songId;
+  const deckBSongId = session.deckB.songId;
+  const activeDeck = session.activeDeck;
+  const deckAMuted = session.deckAMuted;
+  const deckBMuted = session.deckBMuted;
+  const deckABaseVol = session.deckABaseVolume;
+  const deckBBaseVol = session.deckBBaseVolume;
+  const masterVolume = session.masterVolume;
+  const masterMuted = session.masterMuted;
   const [transitioning, setTransitioning] = useState(false);
-  const [deckAMuted, setDeckAMuted] = useState(false);
-  const [deckBMuted, setDeckBMuted] = useState(false);
-  const [deckABaseVol, setDeckABaseVol] = useState(1);
-  const [deckBBaseVol, setDeckBBaseVol] = useState(1);
-  const [masterVolume, setMasterVolume] = useState(1);
-  const [masterMuted, setMasterMuted] = useState(false);
   // Auto Blend runs the smoothstep crossfade at track end even when AUTO-DJ is
   // disarmed, so the crossfader never has to be ridden by hand.
   const [autoBlend, setAutoBlend] = useState(true);
