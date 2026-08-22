@@ -1,6 +1,14 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.38";
 
 const OWNER_EMAIL = "carloearl@glyphlock.com";
+const PLAYLIST_ROLES = new Set(["DJ", "VENUE_MANAGER", "VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN"]);
+const GLOBAL_ROLES = new Set(["PLATFORM_ADMIN", "SOVEREIGN"]);
+const VENUE_REQUIRED_ACTIONS = new Set([
+  "probePlaylistPermission",
+  "listCheckedInEntertainers",
+  "getEntertainerPlaylist",
+  "savePlaylist",
+]);
 
 function normalizeText(value = "") {
   return String(value || "").trim().toLowerCase();
@@ -54,29 +62,60 @@ Deno.serve(async (req) => {
           operator = validation.data.operator || null;
         }
       } catch (_) {
-        // Fall through to authenticated owner/admin authorization.
+        // Fall through to authenticated back-office authorization.
       }
     }
 
     if (!authorized) {
       const me = await base44.auth.me().catch(() => null);
       const email = normalizeText(me?.email);
-      if (email === OWNER_EMAIL || me?.role === "admin") {
+      let nupsUser = null;
+      if (email) {
+        nupsUser = (await E.NUPSUser.filter({ platform_email: email, status: "active" }, null, 1).catch(() => []))?.[0]
+          || (await E.NUPSUser.filter({ username: email.split("@")[0], status: "active" }, null, 1).catch(() => []))?.[0]
+          || null;
+      }
+      const ownerFallback = email === OWNER_EMAIL;
+      const platformAdminFallback = me?.role === "admin";
+      const resolvedRole = nupsUser?.role || (ownerFallback ? "SOVEREIGN" : platformAdminFallback ? "PLATFORM_ADMIN" : null);
+      if (me && resolvedRole && PLAYLIST_ROLES.has(resolvedRole)) {
         authorized = true;
         operator = {
-          name: me?.full_name || me?.name || me?.email || "NUPS Admin",
-          role: me?.role === "admin" ? "PLATFORM_ADMIN" : "VENUE_OWNER",
-          venue_id: body.venue_id || null,
+          name: nupsUser?.full_name || me?.full_name || me?.name || me?.email || "NUPS Admin",
+          email: me?.email || null,
+          role: resolvedRole,
+          venue_id: nupsUser?.venue_id || null,
           shift_id: null,
         };
       }
     }
 
-    if (!authorized) {
-      return Response.json({ error: "DJ session or NUPS administrator authorization required." }, { status: 403 });
+    if (!authorized || !PLAYLIST_ROLES.has(operator?.role)) {
+      return Response.json({ error: "Authorized DJ or NUPS manager identity required." }, { status: 403 });
     }
 
-    const venueId = operator?.venue_id || body.venue_id || null;
+    const requestedVenueId = String(body.venue_id || "").trim();
+    const globalRole = GLOBAL_ROLES.has(operator.role);
+    let venueId = String(operator?.venue_id || "").trim() || null;
+    if (globalRole && requestedVenueId) venueId = requestedVenueId;
+    if (!globalRole && requestedVenueId && venueId !== requestedVenueId) {
+      return Response.json({ error: "DJ operation is bound to another venue." }, { status: 403 });
+    }
+    if (VENUE_REQUIRED_ACTIONS.has(action) && !venueId) {
+      return Response.json({ error: "Active venue is required for playlist operations." }, { status: 400 });
+    }
+
+    let venueRecord = null;
+    let canonicalVenueId = venueId;
+    if (venueId) {
+      venueRecord = (await E.Venue.filter({ venue_id: venueId, status: "active" }, null, 1).catch(() => []))?.[0]
+        || await E.Venue.get(venueId).catch(() => null);
+      if ((!venueRecord || venueRecord.status === "inactive") && VENUE_REQUIRED_ACTIONS.has(action)) {
+        return Response.json({ error: "Playlist venue is not active." }, { status: 403 });
+      }
+      canonicalVenueId = venueRecord?.venue_id || venueId;
+    }
+    const venueAliases = new Set([venueId, canonicalVenueId, venueRecord?.id].filter(Boolean));
 
     if (action === "createTrack") {
       const track = body.track || {};
