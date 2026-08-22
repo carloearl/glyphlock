@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { trackEntityToMixerSong, isEntityTrackPlayable } from "@/lib/djTrackAdapter";
 
-export default function TrackLibraryDock({ tracks = [], onPlay, onQueue, onQueueAll }) {
+export default function TrackLibraryDock({ tracks = [], onPlay, onQueue, onQueueAll, onLoadDeck }) {
   const [query, setQuery] = useState("");
 
   const playable = useMemo(() => tracks.filter(isEntityTrackPlayable), [tracks]);
@@ -79,6 +79,19 @@ export default function TrackLibraryDock({ tracks = [], onPlay, onQueue, onQueue
               <div className="text-xs font-semibold text-white truncate">{track.title}</div>
               <div className="text-[10px] text-slate-400 truncate">{track.artist || "—"}{track.bpm ? ` · ${track.bpm} BPM` : ""}</div>
             </div>
+            {["A", "B"].map((deck) => (
+              <Button
+                key={deck}
+                size="sm"
+                variant="outline"
+                className="h-7 min-w-7 px-1 text-[9px] font-black text-violet-300"
+                onClick={() => onLoadDeck?.(trackEntityToMixerSong(track), deck)}
+                aria-label={`Load ${track.title} to Deck ${deck}`}
+                title={`Load Deck ${deck}`}
+              >
+                {deck}
+              </Button>
+            ))}
             <Button
               size="icon"
               variant="ghost"
