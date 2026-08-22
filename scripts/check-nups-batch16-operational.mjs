@@ -13,6 +13,8 @@ const playlistSchema = read('base44/entities/Playlist.jsonc');
 const terminalFunction = read('base44/functions/manageVenueTerminal/entry.ts');
 const terminalUi = read('src/components/admin/TerminalManagementEditor.jsx');
 const venueSettings = read('src/pages/VenueAdminSettings.jsx');
+const kioskPinPad = read('src/components/nups/kiosk/KioskPinPad.jsx');
+const timeClock = read('src/components/nups/TimeClock.jsx');
 const clockV2 = read('base44/functions/nupsClockInV2/entry.ts');
 const nupsUserSchema = read('base44/entities/NUPSUser.jsonc');
 
@@ -38,18 +40,26 @@ assert.match(djGateway, /matching\.slice\(1\)/, 'Duplicate active playlists must
 assert.match(playlistSchema, /"venue_id"/, 'Playlist schema must be venue scoped.');
 assert.match(playlistSchema, /"required"\s*:\s*\[[\s\S]*"venue_id"/, 'Playlist venue must be required.');
 
-for (const action of ['list', 'getCurrentBinding', 'provision', 'update', 'activate', 'deactivate', 'revoke']) {
+for (const action of ['list', 'getCurrentBinding', 'provision', 'approve', 'update', 'activate', 'deactivate', 'revoke']) {
   assert.match(terminalFunction, new RegExp(`action === ['"]${action}['"]|\\[.*['"]${action}['"]`), `Terminal backend is missing ${action}.`);
 }
 assert.match(terminalFunction, /ADMIN_ROLES/, 'Terminal backend must enforce administrative NUPS roles.');
 assert.match(terminalFunction, /Cross-venue terminal administration denied/, 'Terminal backend must deny cross-venue management.');
 assert.match(terminalFunction, /TERMINAL_PROVISIONED/, 'Terminal provisioning must be audited.');
+assert.match(terminalFunction, /TERMINAL_APPROVED/, 'Terminal approval must be audited.');
 assert.match(terminalFunction, /TERMINAL_REVOKED/, 'Terminal revocation must be audited.');
 assert.doesNotMatch(terminalFunction, /VenueTerminal\.delete/, 'Normal terminal management must preserve history rather than hard delete.');
 assert.match(terminalUi, /getNUPSTerminalId/, 'Terminal UI must use a stable browser terminal identifier.');
-assert.match(terminalUi, /Provision Terminal/, 'Terminal provisioning UI is missing.');
+assert.match(terminalUi, /Approve This Device/, 'Terminal UI must provide a clear current-device approval action.');
+assert.match(terminalUi, /Register Pending/, 'Terminal UI must distinguish registration from approval.');
 assert.match(terminalUi, /Revoke/, 'Terminal revocation UI is missing.');
 assert.match(venueSettings, /TerminalManagementEditor/, 'Terminal management is not mounted in venue settings.');
+assert.doesNotMatch(venueSettings, /VenueTerminalManager/, 'Duplicate terminal management UI remains mounted.');
+assert.equal(fs.existsSync('src/components/admin/VenueTerminalManager.jsx'), false, 'Duplicate terminal manager source remains.');
+assert.match(kioskPinPad, /Device Approval Required/, 'Kiosk must explain an unapproved device instead of treating it as a bad PIN.');
+assert.match(kioskPinPad, /action:\s*["']getPublicMode["'][\s\S]*terminal_id:\s*terminalId/, 'Kiosk must preflight the terminal boundary.');
+assert.match(timeClock, /terminal_id:\s*terminalId/, 'TimeClock must send the canonical terminal ID.');
+assert.doesNotMatch(clockV2, /VenuePaymentConfig\.filter\(\{\s*terminal_id|legacyPaymentTerminal/, 'Payment configuration must not confer terminal trust.');
 
 assert.match(clockV2, /NKS2\./, 'Clock-in V2 must issue NKS2 sessions.');
 assert.doesNotMatch(clockV2, /NKS1\./, 'Clock-in V2 must not accept NKS1 sessions.');
