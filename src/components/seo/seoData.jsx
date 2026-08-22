@@ -15,7 +15,7 @@ export const SEO_DATA = {
   },
   "About": {
     title: "About GlyphLock | Evidence Infrastructure & NUPS",
-    description: "Explore GlyphLock’s evidence architecture across secure image carriers, 91 QR payloads, GlyphBot, automated DJ, NUPS, GlyphBucks, APIs, governance, and leadership.",
+    description: "Explore GlyphLock’s evidence architecture across image carriers, 91 QR payloads, GlyphBot, automated DJ, NUPS, GlyphBucks, APIs, governance, and leadership.",
     keywords: ["GlyphLock", "evidence infrastructure", "provenance architecture", "secure image carriers", "concealed image data", "LSB steganography", "interactive images", "Secure QR Studio", "QR code SDK", "91 QR payload types", "GlyphBot", "automated DJ", "NUPS", "Nexus Unified POS System", "venue operations software", "identity verification workflows", "digital contracts", "GlyphBucks", "closed-loop value ledger", "reconciliation software", "API integration", "SDK integration", "OHIP integration", "hospitality interoperability", "audit trails", "human-governed AI", "Carlo Rene Earl", "Jacub Lough", "Collin Vanderginst", "El Mirage Arizona"],
     h1: "What If an Image Could Carry Proof?",
     url: "/about",
@@ -28,7 +28,7 @@ export const SEO_DATA = {
   },
   "AboutCarlo": {
     title: "Carlo Rene Earl | GlyphLock Founder & Product Architect",
-    description: "Meet Carlo Rene Earl, GlyphLock’s founder and product architect, whose music, DJ, venue, security, and operations experience shaped the company’s evidence systems.",
+    description: "Meet Carlo Rene Earl, GlyphLock founder and product architect, whose music, DJ, venue, security, and operations experience shaped its evidence systems.",
     keywords: ["Carlo Rene Earl", "GlyphLock founder", "GlyphLock product architect", "Arizona technology founder", "evidence infrastructure", "secure image carriers", "Secure QR Studio", "NUPS architecture", "venue operations technology", "nightclub DJ technology", "creative systems", "El Mirage Arizona"],
     h1: "Carlo Rene Earl — Founder and Product Architect",
     url: "/about-carlo",
@@ -95,7 +95,7 @@ export const SEO_DATA = {
   },
   "Steganography": {
     title: "Image Carrier Experiments | LSB Encode & Decode | GlyphLock",
-    description: "Explore permitted image-carrier experiments that encode and recover structured data through selected least-significant pixel bits while preserving a recognizable image.",
+    description: "Explore permitted image-carrier experiments that encode and recover structured data through selected least-significant pixel bits while keeping the image recognizable.",
     keywords: ["image carrier", "LSB encode", "LSB decode", "least significant bit", "concealed image data", "structured image payload", "GlyphLock image technology"],
     h1: "LSB Image Carrier Encode and Decode Experiments",
     url: "/services/steganography",
@@ -108,7 +108,7 @@ export const SEO_DATA = {
   },
   "Blockchain": {
     title: "Record Anchoring & Provenance References | GlyphLock",
-    description: "Create verifiable record references for digital assets, identity events, and documentation using hashes, timestamps, source context, and available anchoring workflows.",
+    description: "Create record references for digital assets, identity events, and documents using hashes, timestamps, source context, and supported anchoring workflows.",
     keywords: ["record anchoring", "provenance reference", "cryptographic hash", "timestamped record", "digital asset record", "audit reference"],
     h1: "Record Anchoring and Provenance References",
     url: "/services/blockchain",
@@ -174,7 +174,7 @@ export const SEO_DATA = {
     internalLinks: ["/ai/content-generator", "/services/hotzone-mapper"]
   },
   "ContentGenerator": {
-    title: "Assisted Content Studio | Recorded Creation Context | GlyphLock",
+    title: "Assisted Content Studio | GlyphLock",
     description: "Draft content with AI assistance, retain prompts and source context, route work through human review, and connect approved outputs to GlyphLock records.",
     keywords: ["assisted content studio", "AI content drafting", "recorded prompt context", "human review", "content provenance", "GlyphLock records"],
     h1: "Assisted Content Creation with Recorded Context",
@@ -187,7 +187,7 @@ export const SEO_DATA = {
     internalLinks: ["/ai/image-generator", "/services/blockchain"]
   },
   "ImageGenerator": {
-    title: "AI Image Generator | Create & Record Visual Assets | GlyphLock",
+    title: "AI Image Generator | GlyphLock",
     description: "Generate visual assets, retain prompt and creation context, and route approved images into GlyphLock carrier, hotspot, QR, and record workflows.",
     keywords: ["AI image generation", "image creation context", "image carrier workflow", "interactive image", "Secure QR image", "visual asset record"],
     h1: "AI Image Generation with Recorded Context",
@@ -229,7 +229,7 @@ export const SEO_DATA = {
   },
   "Roadmap": {
     title: "Product Roadmap | GlyphLock LLC",
-    description: "Current GlyphLock product roadmap separating shipped capabilities, active work, hardening priorities, and planned development across NUPS, QR, AI, image, governance, financial, and security modules.",
+    description: "See shipped, active, hardening, and planned GlyphLock work across NUPS, QR, AI, image, governance, financial, integration, and security modules.",
     keywords: ["GlyphLock roadmap", "NUPS roadmap", "product development", "AI workflows", "QR verification", "operational software"],
     h1: "GlyphLock Product Roadmap",
     url: "/roadmap",
@@ -241,8 +241,8 @@ export const SEO_DATA = {
     internalLinks: ["/about", "/partners"]
   },
   "Partners": {
-    title: "GlyphLock Partners | NUPS, QR, API & Hospitality Integrations",
-    description: "Explore partnership and integration opportunities across GlyphLock carriers, NUPS venue operations, SDK and API connections, hardware, finance, and hospitality systems.",
+    title: "GlyphLock Partners | NUPS, QR, API & Hospitality",
+    description: "Explore GlyphLock partnerships across image carriers, NUPS operations, SDK and API connections, hardware, finance, and hospitality systems.",
     keywords: ["GlyphLock partners", "NUPS integration", "hospitality integration", "QR SDK", "API partnership", "venue technology", "hardware integration"],
     h1: "Partnership and Integration Opportunities",
     url: "/partners",
@@ -254,8 +254,8 @@ export const SEO_DATA = {
     internalLinks: ["/contact", "/dream-team"]
   },
   "MasterCovenant": {
-    title: "Master Covenant | Internal Governance Framework | GlyphLock LLC",
-    description: "The Master Covenant is GlyphLock's 71-clause internal governance and drafting framework for AI accountability concepts. External enforceability depends on applicable law, actual assent, and conventional agreements.",
+    title: "Master Covenant | Governance Framework | GlyphLock",
+    description: "GlyphLock’s 71-clause internal AI governance and drafting framework. External enforceability depends on law, actual assent, and conventional agreements.",
     keywords: ["Master Covenant", "AI governance framework", "governance research", "AI accountability", "contract drafting", "GlyphLock"],
     h1: "The Master Covenant — AI Governance Framework",
     url: "/governance/covenant",
@@ -269,7 +269,7 @@ export const SEO_DATA = {
 
   // --- ACCOUNT ---
   "AccountSecurity": {
-    title: "Account Security | MFA & Authentication Settings | GlyphLock LLC",
+    title: "Account Security & MFA | GlyphLock",
     description: "Manage GlyphLock account access settings, multi-factor authentication, TOTP setup, session controls, and available account protection options.",
     keywords: ["GlyphLock account security", "multi-factor authentication", "TOTP setup", "session controls", "account access"],
     h1: "Account Security & Authentication",
@@ -313,7 +313,7 @@ export const SEO_DATA = {
   // --- DASHBOARD ---
   "Dashboard": {
     title: "GlyphLock Command Center | Connected Tools & Records",
-    description: "Open authorized GlyphLock tools, monitor available workflows, review operational records, and move between image, QR, AI, NUPS, financial, and governance modules.",
+    description: "Open authorized GlyphLock tools, review operational records, and move among image, QR, AI, NUPS, financial, integration, and governance modules.",
     keywords: ["GlyphLock command center", "connected workflows", "operational records", "Secure QR", "GlyphBot", "NUPS dashboard", "governance tools"],
     h1: "GlyphLock Connected Command Center",
     url: "/dashboard",
@@ -325,7 +325,7 @@ export const SEO_DATA = {
     internalLinks: ["/SecureQRStudio", "/image-lab", "/glyphbot"]
   },
   "SiteBuilder": {
-    title: "Site Builder Assistant | Human-Directed Development | GlyphLock",
+    title: "Site Builder Assistant | GlyphLock",
     description: "Use a human-directed development assistant for visual planning, code generation, review, and documented changes within supported GlyphLock workflows.",
     keywords: ["site builder assistant", "human-directed development", "AI code assistance", "visual planning", "documented changes"],
     h1: "Human-Directed Site Builder Assistant",
@@ -351,8 +351,8 @@ export const SEO_DATA = {
     internalLinks: ["/site-builder", "/security-operations-center"]
   },
   "DreamTeam": {
-    title: "GlyphLock Leadership | Carlo Earl, Jacub Lough & Collin Vanderginst",
-    description: "Meet GlyphLock’s leadership team: Carlo Rene Earl across product and venue operations, Jacub Lough across finance and strategy, and Collin Vanderginst across engineering and systems.",
+    title: "GlyphLock Leadership | Carlo, Jacub & Collin",
+    description: "Meet Carlo Rene Earl in product and venue operations, Jacub Lough in finance and strategy, and Collin Vanderginst in engineering and systems.",
     keywords: ["GlyphLock leadership", "Carlo Rene Earl", "Jacub Lough", "Collin Vanderginst", "technology leadership", "venue operations leadership", "financial strategy", "systems engineering", "evidence infrastructure"],
     h1: "Three Disciplines. Direct Responsibility.",
     url: "/dream-team",
@@ -365,7 +365,7 @@ export const SEO_DATA = {
   },
   "NISTChallenge": {
     title: "NIST Research Archive | GlyphLock Technical Record",
-    description: "Review an archived GlyphLock technical research page retained for historical context. Current product capabilities and claims are documented on active product and architecture pages.",
+    description: "Review an archived GlyphLock technical research page kept for context. Current capabilities and claims appear on active product and architecture pages.",
     keywords: ["GlyphLock research archive", "NIST research", "technical record", "architecture history"],
     h1: "GlyphLock NIST Research Archive",
     url: "/nist-challenge",
@@ -380,7 +380,7 @@ export const SEO_DATA = {
   // --- CASE STUDIES ---
   "CaseStudies": {
     title: "Case Studies & Research | GlyphLock LLC",
-    description: "GlyphLock case studies covering internal governance research, reported incidents, archived system outputs, litigation simulations, and operational software work. Third-party validation is identified separately when available.",
+    description: "Explore GlyphLock internal research, reported incidents, archived outputs, simulations, operational software work, and separately identified validation.",
     keywords: ["GlyphLock case studies", "AI governance research", "Master Covenant", "incident documentation", "operational software", "archived system outputs"],
     h1: "Case Studies & Security Research",
     url: "/case-studies",
@@ -393,7 +393,7 @@ export const SEO_DATA = {
   },
   "CaseStudyTruthStrike": {
     title: "TruthStrike Incident Record | GlyphLock LLC",
-    description: "GlyphLock incident documentation describing reported events, archived evidence, internal PROBE classifications, and a reported IC3 complaint submission. Filing does not establish agency validation.",
+    description: "Review reported events, archived evidence, internal PROBE classifications, and a reported IC3 complaint. Filing does not establish agency validation.",
     keywords: ["TruthStrike incident record", "incident documentation", "archived evidence", "PROBE classification", "reported IC3 complaint"],
     h1: "TruthStrike Incident Documentation",
     url: "/case-study-truthstrike",
@@ -405,8 +405,8 @@ export const SEO_DATA = {
     internalLinks: ["/case-studies", "/master-covenant", "/case-study-ai-binding"]
   },
   "CaseStudyAIBinding": {
-    title: "AI Governance Acknowledgment Case Study | Master Covenant | GlyphLock LLC",
-    description: "Internal case study documenting AI-system outputs and acknowledgments classified under GlyphLock's 71-clause Master Covenant governance framework. No provider-level contractual assent is claimed.",
+    title: "AI Governance Case Study | Master Covenant | GlyphLock",
+    description: "Internal study of AI-system outputs classified under GlyphLock’s Master Covenant. It does not claim contractual assent by any AI provider.",
     keywords: ["AI governance", "AI workflow records", "Master Covenant", "AI governance framework", "GlyphLock research"],
     h1: "AI Governance Acknowledgments Under the Master Covenant",
     url: "/case-study-ai-binding",
@@ -418,8 +418,8 @@ export const SEO_DATA = {
     internalLinks: ["/case-studies", "/master-covenant", "/case-study-covenant-victory"]
   },
   "CaseStudyCovenantVictory": {
-    title: "Master Covenant Litigation Simulation | Governance Case Study | GlyphLock LLC",
-    description: "Internal litigation-simulation research evaluating Master Covenant governance, operator-liability, contract-incorporation, and IP-notice theories. Not a court ruling.",
+    title: "Master Covenant Litigation Simulation | GlyphLock",
+    description: "Internal simulation evaluating Master Covenant governance, operator liability, contract incorporation, and IP-notice theories. Not a court ruling.",
     keywords: ["Master Covenant", "litigation simulation", "AI governance research", "IP notice", "operator liability"],
     h1: "Master Covenant Litigation Simulation",
     url: "/case-study-covenant-victory",
