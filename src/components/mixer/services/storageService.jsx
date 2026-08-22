@@ -35,9 +35,9 @@ export function readMixerStorageScope() {
   };
 }
 
-function safeRead(kind, fallback) {
+function safeRead(kind, fallback, scope = readMixerStorageScope()) {
   try {
-    const raw = localStorage.getItem(buildMixerStorageKey(kind, readMixerStorageScope()));
+    const raw = localStorage.getItem(buildMixerStorageKey(kind, scope));
     return raw ? JSON.parse(raw) : fallback;
   } catch (error) {
     console.warn(`[MixerStorage] Failed to read ${kind}:`, error);
@@ -45,9 +45,9 @@ function safeRead(kind, fallback) {
   }
 }
 
-function safeWrite(kind, data) {
+function safeWrite(kind, data, scope = readMixerStorageScope()) {
   try {
-    localStorage.setItem(buildMixerStorageKey(kind, readMixerStorageScope()), JSON.stringify(data));
+    localStorage.setItem(buildMixerStorageKey(kind, scope), JSON.stringify(data));
   } catch (error) {
     console.error(`[MixerStorage] Failed to write ${kind}:`, error);
     emitTelemetry("STORAGE_ERROR", { operation: "write", kind, message: error.message });
@@ -59,31 +59,31 @@ export function hasQuarantinedLegacyMixerCache() {
   try { return LEGACY_KEYS.some((key) => localStorage.getItem(key)); } catch { return false; }
 }
 
-export function loadSongs() {
-  return safeRead("songs", []);
+export function loadSongs(scope) {
+  return safeRead("songs", [], scope);
 }
 
-export function saveSongs(songs) {
-  safeWrite("songs", songs);
+export function saveSongs(songs, scope) {
+  safeWrite("songs", songs, scope);
 }
 
-export function loadProfiles() {
-  return safeRead("profiles", []);
+export function loadProfiles(scope) {
+  return safeRead("profiles", [], scope);
 }
 
-export function saveProfiles(profiles) {
-  safeWrite("profiles", profiles);
+export function saveProfiles(profiles, scope) {
+  safeWrite("profiles", profiles, scope);
 }
 
-export function loadState() {
+export function loadState(scope) {
   return safeRead("state", {
     activeProfileId: undefined,
     viewMode: "list",
     vibeFilter: "all",
     searchQuery: "",
-  });
+  }, scope);
 }
 
-export function saveState(partial) {
-  safeWrite("state", { ...loadState(), ...partial });
+export function saveState(partial, scope) {
+  safeWrite("state", { ...loadState(scope), ...partial }, scope);
 }
