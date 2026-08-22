@@ -40,9 +40,9 @@ export default function FAQ() {
   return (
     <>
       <SEOHead 
-        title="FAQ - Frequently Asked Questions | GlyphLock Security"
-        description="Find answers about GlyphLock's quantum-resistant security platform, QR verification tools, GlyphBot AI, Image Lab, N.U.P.S. POS system, Master Covenant governance, and enterprise compliance alignment."
-        keywords="FAQ, help center, quantum security, QR verification, GlyphBot AI, Image Lab, NUPS POS, Master Covenant, blockchain verification, enterprise security, AI governance"
+        title="GlyphLock FAQ | QR, Images, GlyphBot, NUPS & Integrations"
+        description="Find answers about Secure QR, image carriers and hotspots, GlyphBot, automated DJ workflows, NUPS venue operations, value records, APIs, SDKs, and governance."
+        keywords="GlyphLock FAQ, Secure QR, image carriers, interactive hotspots, GlyphBot, automated DJ, NUPS, GlyphBucks, API integration, SDK integration, governance"
         url="/faq"
       />
       
