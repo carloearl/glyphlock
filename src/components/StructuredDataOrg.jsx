@@ -11,14 +11,14 @@ export default function StructuredDataOrg() {
       "legalName": "GlyphLock LLC",
       "url": "https://glyphlock.io",
       "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
-      "description": "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.",
+      "description": "GlyphLock LLC builds evidence infrastructure connecting secure image carriers, structured QR workflows, governed AI assistance, NUPS venue operations, value records, authorized integrations, and governance.",
       "foundingDate": "2025-01",
       "founders": [
         {
           "@type": "Person",
           "name": "Carlo Rene Earl",
           "jobTitle": "Founder & Owner, DACO¹",
-          "description": "Creator of the Master Covenant AI governance framework"
+          "description": "Founder and product architect connecting image-carrier research, Secure QR, GlyphBot, NUPS operations, value records, integrations, and governance"
         },
         {
           "@type": "Person",
@@ -66,17 +66,18 @@ export default function StructuredDataOrg() {
       "areaServed": "Worldwide",
       "numberOfEmployees": "3",
       "knowsAbout": [
-        "Custom software development",
+        "Evidence infrastructure",
+        "Secure image carriers",
+        "LSB image carrier experiments",
+        "Secure QR Studio and structured QR payloads",
+        "GlyphBot governed AI assistance",
+        "Automated DJ workflows",
         "NUPS venue operations",
-        "Point-of-sale workflows",
-        "QR verification",
-        "AI-assisted workflows",
-        "Image tooling",
-        "Operational reporting",
-        "Systems integration",
-        "Security operations",
-        "Governance documentation",
-        "Master Covenant Framework"
+        "Identity and contract workflows",
+        "Operational and value records",
+        "SDK and API integration",
+        "Hospitality interoperability",
+        "Governance documentation"
       ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
@@ -95,15 +96,15 @@ export default function StructuredDataOrg() {
             "itemOffered": {
               "@type": "SoftwareApplication",
               "name": "GlyphBot AI Assistant",
-              "description": "Multi-provider LLM security assistant with Dream Team AI integration"
+              "description": "Governed assistant for building, inspecting, explaining, and auditing connected GlyphLock workflows with human review"
             }
           },
           {
             "@type": "Offer",
             "itemOffered": {
               "@type": "SoftwareApplication",
-              "name": "QR Studio",
-              "description": "QR generation, scan logging, signing options, verification, and operational workflows"
+              "name": "Secure QR Studio",
+              "description": "Structured QR creation and workflow support across 91 payload definitions for links, identity, tickets, credentials, records, actions, and operational references"
             }
           },
           {
@@ -111,7 +112,7 @@ export default function StructuredDataOrg() {
             "itemOffered": {
               "@type": "SoftwareApplication",
               "name": "Image Lab",
-              "description": "AI image generation with interactive hotspots and visual cryptography"
+              "description": "Image creation, permitted LSB carrier experiments, responsive typed hotspots, Secure QR connections, and recorded provenance context"
             }
           }
         ]
