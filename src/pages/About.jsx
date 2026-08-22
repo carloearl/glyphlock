@@ -8,6 +8,7 @@ import AboutArchitecture from "../components/about/AboutArchitecture";
 import TechnicalProofSystems from "../components/about/TechnicalProofSystems";
 import ScenarioFlowExplorer from "../components/about/ScenarioFlowExplorer";
 import NUPSOperatingProof from "../components/about/NUPSOperatingProof";
+import FounderStoryLink from "../components/about/FounderStoryLink";
 import {
   FinancialAccountability,
   TechnologyRecord,
@@ -33,6 +34,7 @@ export default function About() {
           <FinancialAccountability />
           <TechnologyRecord />
           <MaturityLedger />
+          <FounderStoryLink />
           <Leadership />
           <FinalCTA />
         </main>
