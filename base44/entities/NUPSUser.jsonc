@@ -22,10 +22,6 @@
       "type": "string",
       "description": "Unique random 16-byte salt (hex) for this account's PBKDF2 PIN hash."
     },
-    "pin_lookup": {
-      "type": "string",
-      "description": "LEGACY NKS1 lookup index. Batch 16 retires this field after NKS2 cutover so the stale nupsClockIn route cannot authenticate ordinary staff PINs."
-    },
     "pin_lookup_v2": {
       "type": "string",
       "description": "NKS2 HMAC-SHA256(pin, KEY_PEPPER) lookup index used only by nupsClockInV2. Never returned to clients or logs."
