@@ -171,6 +171,17 @@ function UnifiedMusicConsoleInner() {
     }).then(() => refresh()).catch((err) => console.debug("[AutoDJ analytics]", err?.message || err));
   }, [activeEntertainer?.id, activeCrowd?.energy_score, activeCrowd?.tips_last_30min, refresh]);
 
+  const layoutStorageId = useMemo(
+    () => createScopedLayoutKey(scope),
+    [scope?.venueId, scope?.operatorId, scope?.deviceId],
+  );
+  const applyWorkbenchPreset = useCallback((name) => {
+    const preset = WORKBENCH_PRESETS[name] || WORKBENCH_PRESETS.performance;
+    const performanceSize = Math.max(35, Math.min(82, preset.performance + preset.library));
+    performancePanelRef.current?.resize?.(performanceSize);
+    utilityPanelRef.current?.resize?.(100 - performanceSize);
+  }, []);
+
   return (
     <div className="space-y-4">
       {/* ── AUTO-DJ Command Header ── */}
@@ -248,42 +259,72 @@ function UnifiedMusicConsoleInner() {
         })}
       </div>
 
-      {/* ── Persistent mixer ──
-          The decks own the live <audio>/YouTube player instances. Keep them
-          mounted while another module is visible so switching to Visuals,
-          Tracks, Search, etc. cannot tear down the current performance. */}
-      <SuiteErrorBoundary>
-        <div
-          className={active === "mixer"
-            ? ""
-            : "fixed left-[-200vw] top-0 z-[-1] w-screen max-w-[1600px] pointer-events-none opacity-0"}
-          aria-hidden={active !== "mixer"}
-          inert={active !== "mixer" ? true : undefined}
-        >
-          <MixerModuleView
-            autoDj={autoDj}
-            automationPlan={automationPlan}
-            onPlaybackEvent={handlePlaybackEvent}
-            libraryTracks={snapshot?.tracks || []}
-            deckLoadRequest={deckLoadRequest}
-          />
-        </div>
-      </SuiteErrorBoundary>
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-700/50 bg-slate-900/60 p-2">
+        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Workbench</span>
+        {[
+          ["performance", "Performance"],
+          ["library", "Library Focus"],
+          ["visual", "Visual Focus"],
+          ["compact", "Compact"],
+        ].map(([key, label]) => (
+          <button key={key} type="button" onClick={() => applyWorkbenchPreset(key)}
+            className="rounded-lg border border-slate-700 px-2 py-1 text-[10px] text-slate-300 hover:border-violet-400">
+            {label}
+          </button>
+        ))}
+        <button type="button" onClick={() => applyWorkbenchPreset("performance")}
+          className="rounded-lg border border-cyan-500/40 px-2 py-1 text-[10px] text-cyan-200">
+          Reset Layout
+        </button>
+        <span className="ml-auto text-[10px] text-slate-500">
+          One playback owner · {djSession.commandAcks.length} deck commands acknowledged
+        </span>
+      </div>
 
-      {/* ── Active utility panel ── */}
-      {active !== "mixer" && (
-        <SuiteErrorBoundary key={active}>
-          {active === "tracks"   && <TracksTab />}
-          {active === "radio"    && <RadioTab />}
-          {active === "search"   && <MusicSearchTab onLoadToMixerDeck={handleLoadToMixerDeck} />}
-          {active === "personas" && <PersonasTab />}
-          {active === "playlist" && <PlaylistGenTab />}
-          {active === "crowd"    && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
-          {active === "jukebox"  && <JukeboxTab />}
-          {active === "visuals"  && <FableVisualizerTab />}
-          {active === "health"   && <TrackHealthTab />}
-        </SuiteErrorBoundary>
-      )}
+      {/* The playback subtree stays mounted. Layout and utility changes resize
+          subscribers around it; they never create a page-local player. */}
+      <ResizablePanelGroup
+        direction={isWide ? "horizontal" : "vertical"}
+        autoSaveId={layoutStorageId}
+        className="min-h-[760px] overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-950/40"
+      >
+        <ResizablePanel ref={performancePanelRef} defaultSize={isWide ? 72 : 62} minSize={isWide ? 35 : 45} className="min-h-0 overflow-hidden">
+          <SuiteErrorBoundary>
+            <MixerModuleView
+              autoDj={autoDj}
+              automationPlan={automationPlan}
+              onPlaybackEvent={handlePlaybackEvent}
+              libraryTracks={snapshot?.tracks || []}
+            />
+          </SuiteErrorBoundary>
+        </ResizablePanel>
+        <ResizableHandle withHandle className="bg-slate-700/70 hover:bg-fuchsia-500/70" />
+        <ResizablePanel ref={utilityPanelRef} defaultSize={isWide ? 28 : 38} minSize={18} collapsible collapsedSize={0} className="min-h-0 overflow-auto">
+          <div className="min-h-full space-y-3 p-3">
+            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-fuchsia-300/80">
+              {activeNav.label}
+            </div>
+            <SuiteErrorBoundary key={active}>
+              {active === "mixer"   && <DJDiagnosticsTimeline compact />}
+              {active === "tracks"  && <TracksTab />}
+              {active === "radio"   && <RadioTab />}
+              {active === "search"  && <MusicSearchTab onLoadToMixerDeck={handleLoadToMixerDeck} />}
+              {active === "personas" && <PersonasTab />}
+              {active === "playlist" && <PlaylistGenTab />}
+              {active === "crowd"   && <CrowdTab entertainerId={activeEntertainer?.id || null} />}
+              {active === "jukebox" && <JukeboxTab />}
+              {active === "visuals" && <FableVisualizerTab />}
+              {active === "health"  && (
+                <div className="space-y-3">
+                  <TrackHealthTab />
+                  <DJDiagnosticsTimeline />
+                  <ProviderCapabilityMatrix />
+                </div>
+              )}
+            </SuiteErrorBoundary>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
