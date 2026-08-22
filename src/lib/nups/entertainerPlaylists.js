@@ -1,54 +1,44 @@
 /**
- * Entertainer playlist persistence — server-side source of truth.
+ * Entertainer playlist persistence — authenticated, venue-scoped gateway.
  *
- * A dancer's playlist is stored on the Playlist entity keyed by entertainer_id
- * so it survives browsers/devices and is available to the DJ booth the moment
- * that entertainer checks in for a shift.
+ * Guest identity and money are not involved here, but the playlist still
+ * belongs to one venue and one entertainer. The DJ gateway resolves the live
+ * actor/session server-side, validates the entertainer's venue, and preserves
+ * one active playlist per entertainer.
  */
-import { base44 } from "@/api/base44Client";
+import { invokeDJGateway } from "@/components/mixer/automation/djGatewayClient";
 
-/** Entertainers with an open shift (checked in, not checked out). */
-export async function loadCheckedInEntertainers() {
-  const shifts = await base44.entities.EntertainerShift.list("-check_in_time", 100);
-  const open = shifts.filter((shift) => shift.status !== "checked_out" && !shift.check_out_time);
-  if (!open.length) return [];
-
-  const entertainers = await base44.entities.Entertainer.list("-created_date", 300);
-  const byId = new Map(entertainers.map((entertainer) => [entertainer.id, entertainer]));
-
-  const seen = new Set();
-  const result = [];
-  for (const shift of open) {
-    if (!shift.entertainer_id || seen.has(shift.entertainer_id)) continue;
-    seen.add(shift.entertainer_id);
-    result.push({
-      shiftId: shift.id,
-      entertainerId: shift.entertainer_id,
-      name: byId.get(shift.entertainer_id)?.stage_name || "Unknown entertainer",
-      checkInTime: shift.check_in_time,
-      location: shift.location || "",
-    });
-  }
-  return result;
+function requireVenueId(venueId) {
+  const value = String(venueId || "").trim();
+  if (!value) throw new Error("Active venue is required for entertainer playlists.");
+  return value;
 }
 
-/** The entertainer's saved (active) playlist, or null. */
-export async function loadEntertainerPlaylist(entertainerId) {
+/** Entertainers with an open shift in the active venue. */
+export async function loadCheckedInEntertainers(venueId) {
+  const resolvedVenueId = requireVenueId(venueId);
+  const data = await invokeDJGateway("listCheckedInEntertainers", { venue_id: resolvedVenueId });
+  return Array.isArray(data?.entertainers) ? data.entertainers : [];
+}
+
+/** The entertainer's saved active playlist for the active venue, or null. */
+export async function loadEntertainerPlaylist(entertainerId, venueId) {
   if (!entertainerId) return null;
-  const rows = await base44.entities.Playlist.filter(
-    { entertainer_id: entertainerId, status: "active" },
-    "-updated_date",
-    1,
-  );
-  return rows[0] || null;
+  const resolvedVenueId = requireVenueId(venueId);
+  const data = await invokeDJGateway("getEntertainerPlaylist", {
+    venue_id: resolvedVenueId,
+    entertainer_id: entertainerId,
+  });
+  return data?.playlist || null;
 }
 
 /** Create or overwrite the entertainer's active playlist from mixer songs. */
-export async function saveEntertainerPlaylist({ entertainerId, name, songs }) {
+export async function saveEntertainerPlaylist({ entertainerId, name, songs, venueId }) {
   if (!entertainerId) throw new Error("entertainerId is required");
+  const resolvedVenueId = requireVenueId(venueId);
   const ordered_tracks = (songs || []).map((song, index) => ({
     position: index,
-    track_id: song._entityTrackId || song.id,
+    track_id: song._entityTrackId || song.id || "",
     title: song.title || "",
     artist: song.artist || "",
     youtubeUrl: song.youtubeUrl || "",
@@ -57,18 +47,17 @@ export async function saveEntertainerPlaylist({ entertainerId, name, songs }) {
     energyLevel: song.energyLevel || 5,
   }));
 
-  const payload = {
-    entertainer_id: entertainerId,
-    name: name || "Shift playlist",
-    ordered_tracks,
-    status: "active",
-    generation_timestamp: new Date().toISOString(),
-  };
-
-  const existing = await loadEntertainerPlaylist(entertainerId);
-  return existing
-    ? base44.entities.Playlist.update(existing.id, payload)
-    : base44.entities.Playlist.create(payload);
+  const data = await invokeDJGateway("savePlaylist", {
+    venue_id: resolvedVenueId,
+    playlist: {
+      entertainer_id: entertainerId,
+      name: name || "Shift playlist",
+      ordered_tracks,
+      status: "active",
+      generation_timestamp: new Date().toISOString(),
+    },
+  });
+  return data?.playlist || null;
 }
 
 /** Playlist record → plain song descriptors the mixer can hydrate. */
