@@ -13,6 +13,15 @@ function getContext() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
   sharedContext = new AC();
+  const resumeOnGesture = () => {
+    if (sharedContext?.state === "suspended") sharedContext.resume().catch(() => undefined);
+    if (sharedContext?.state === "running") {
+      window.removeEventListener("pointerdown", resumeOnGesture);
+      window.removeEventListener("keydown", resumeOnGesture);
+    }
+  };
+  window.addEventListener("pointerdown", resumeOnGesture);
+  window.addEventListener("keydown", resumeOnGesture);
   return sharedContext;
 }
 
