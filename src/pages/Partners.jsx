@@ -74,12 +74,7 @@ export default function Partners() {
 
   return (
     <>
-      <SEOHead 
-        title="GlyphLock Partners | NUPS, QR, API & Hospitality Integrations"
-        description="Explore GlyphLock partnerships across NUPS venue operations, Secure QR and image workflows, SDK and API connections, hardware, finance, and hospitality interoperability."
-        keywords="GlyphLock partners, NUPS integration, Secure QR partnership, QR SDK, API integration, venue technology, hospitality interoperability, hardware integration"
-        url="/partners"
-      />
+      <SEOHead />
       <div className="min-h-screen bg-black text-white py-24 relative overflow-hidden">
       {/* Background effects */}
       <div className="pointer-events-none fixed inset-0 opacity-30 mix-blend-screen">
