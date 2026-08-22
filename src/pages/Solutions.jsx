@@ -37,7 +37,7 @@ export default function Solutions() {
         "Secure medical record storage",
         "Audit logging and compliance reporting",
         "Multi-factor authentication",
-        "Post-quantum readiness architecture"
+        "Documented encryption and migration planning"
       ],
       cta: "Healthcare Security",
       page: "SecurityOperationsCenter",
@@ -110,7 +110,7 @@ export default function Solutions() {
   ];
 
   const benefits = [
-    "Post-quantum readiness planning for future cryptographic migration",
+    "Documented encryption controls and future migration planning",
     "AI-powered threat detection with real-time monitoring",
     "Blockchain verification for transaction immutability",
     "Multi-layer security combining cryptography and legal frameworks",
