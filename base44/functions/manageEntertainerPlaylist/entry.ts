@@ -94,11 +94,16 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'get') {
-      const rows = await E.Playlist.filter({ entertainer_id: entertainerId, venue_id: resolvedVenueId, status: 'active' }, '-updated_date', 2).catch(() => []);
-      if ((rows || []).length > 1) {
+      const scoped = await E.Playlist.filter({ entertainer_id: entertainerId, venue_id: resolvedVenueId, status: 'active' }, '-updated_date', 3).catch(() => []);
+      const legacy = scoped.length
+        ? []
+        : (await E.Playlist.filter({ entertainer_id: entertainerId, status: 'active' }, '-updated_date', 10).catch(() => []))
+            .filter((row: any) => !row.venue_id);
+      const rows = [...scoped, ...legacy];
+      if (rows.length > 1) {
         return Response.json({ error: 'Multiple active playlists require manager cleanup' }, { status: 409 });
       }
-      return Response.json({ success: true, venue_id: resolvedVenueId, playlist: rows?.[0] || null });
+      return Response.json({ success: true, venue_id: resolvedVenueId, playlist: rows?.[0] || null, legacy_unscoped: !!rows?.[0] && !rows[0].venue_id });
     }
 
     if (action !== 'save') return Response.json({ error: 'Unsupported playlist action' }, { status: 400 });
@@ -106,8 +111,13 @@ Deno.serve(async (req) => {
     const sourceTracks = Array.isArray(body.ordered_tracks) ? body.ordered_tracks : [];
     if (sourceTracks.length > 500) return Response.json({ error: 'Playlist exceeds 500 tracks' }, { status: 400 });
     const orderedTracks = sourceTracks.map(sanitizeTrack);
-    const existing = await E.Playlist.filter({ entertainer_id: entertainerId, venue_id: resolvedVenueId, status: 'active' }, '-updated_date', 3).catch(() => []);
-    if ((existing || []).length > 1) {
+    const scopedExisting = await E.Playlist.filter({ entertainer_id: entertainerId, venue_id: resolvedVenueId, status: 'active' }, '-updated_date', 3).catch(() => []);
+    const legacyExisting = scopedExisting.length
+      ? []
+      : (await E.Playlist.filter({ entertainer_id: entertainerId, status: 'active' }, '-updated_date', 10).catch(() => []))
+          .filter((row: any) => !row.venue_id);
+    const existing = [...scopedExisting, ...legacyExisting];
+    if (existing.length > 1) {
       return Response.json({ error: 'Multiple active playlists require manager cleanup' }, { status: 409 });
     }
 
