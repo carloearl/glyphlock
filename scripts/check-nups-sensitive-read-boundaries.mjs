@@ -36,7 +36,8 @@ assert.match(contractLookup, /POSTransaction\.filter\(\{\s*venue_id:\s*venueId\s
 
 assert.match(transactionLookup, /Manager-class NUPS identity required/, 'Evidence transaction lookup must require a manager-class NUPS identity.');
 assert.match(transactionLookup, /Cross-venue transaction search denied/, 'Evidence transaction lookup must deny cross-venue search.');
-assert.doesNotMatch(transactionLookup, /records:\s*\{[^}]*identity:\s*identit(?:y|ies)/s, 'Evidence lookup must not return raw identity records.');
+assert.doesNotMatch(transactionLookup, /identity:\s*identities\[0\]\s*[,}]/, 'Evidence lookup must not return a raw identity record.');
+assert.match(transactionLookup, /identity:\s*identities\[0\]\s*\?\s*\{\s*present:\s*true,\s*status:/s, 'Evidence lookup must project identity presence/status only.');
 assert.doesNotMatch(transactionLookup, /records:\s*\{[^}]*verification_media:\s*verificationMedia/s, 'Evidence lookup must not return raw verification-media records.');
 
 console.log('[check:nups-sensitive-read-boundaries] passed: tax, tip, contract, audit, and evidence reads are venue scoped and protected references are not emitted directly.');
