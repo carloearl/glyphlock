@@ -102,6 +102,7 @@ export default function DJPlayerSection({
     setDeckSong("B", songId ? songs.find((song) => song.id === songId) || null : null);
   }, [songs, setDeckSong]);
   const handledCommandIdsRef = useRef(new Set());
+  const handledTransportIdsRef = useRef(new Set());
   const activeSongId = activeDeck === "A" ? deckASongId : deckBSongId;
   const activeSong = activeDeck === "A" ? deckASong : deckBSong;
   const inactiveSongId = activeDeck === "A" ? deckBSongId : deckASongId;
@@ -180,6 +181,7 @@ export default function DJPlayerSection({
   useEffect(() => {
     const sender = getClubTVSender();
     sender.publish({
+      sessionId: session.sessionId,
       crossfade,
       activeDeck,
       transitioning,
@@ -198,7 +200,7 @@ export default function DJPlayerSection({
         audioUrl: deckBSong.uploadUrl || null,
       } : null,
     });
-  }, [deckASong, deckBSong, crossfade, activeDeck, transitioning]);
+  }, [session.sessionId, deckASong, deckBSong, crossfade, activeDeck, transitioning]);
 
   // Equal-power crossfade avoids the +6 dB-ish perceived bump of two linear
   // full-volume decks meeting at center. 0 = full A, 100 = full B.
