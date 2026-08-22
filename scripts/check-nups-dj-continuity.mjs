@@ -88,7 +88,7 @@ assert.equal(
 );
 assert.match(fableDeckAudio, /getDeckAudioGraph/, "Fable must subscribe to the canonical analyser");
 assert.match(beatInput, /deviceId:\s*\{ exact:/, "Fable input must honor the selected microphone");
-assert.match(audioIo, /YouTube iframe audio follows your browser or OS output/, "audio routing limits must be disclosed truthfully");
+assert.match(audioIo, /YouTube iframe audio follows the browser or operating-system output/, "audio routing limits must be disclosed truthfully");
 assert.match(playerSection, /canFailoverToCue/, "manual Auto Blend failover must use the tested safety predicate");
 assert.match(playerSection, /nextTransitionAfterCueStart/, "cue rejection must preserve the live crossfade");
 assert.doesNotMatch(playerSection, /cueRef\?\.play\?\.\(\)\)\.catch\(\(\) => \{\}\)/, "cue prewarm failures must not be swallowed");
