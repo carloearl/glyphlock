@@ -81,9 +81,9 @@ export default function TrustSecurity() {
   return (
     <>
       <SEOHead
-        title="Trust & Infrastructure - GlyphLock Ecosystem Resilience & Compliance"
-        description="GlyphLock's infrastructure architecture, audit-ready controls, and compliance framework. Transparent documentation of the protection layer securing independent creators and verified ecosystems."
-        keywords="infrastructure resilience, audit trails, creator protection, blockchain ledgers, AI accountability, SOC 2, ISO 27001, GDPR, tamper-resistant systems"
+        title="GlyphLock Trust & Infrastructure | Controls & Boundaries"
+        description="Review GlyphLock’s current access controls, evidence practices, audit records, infrastructure safeguards, framework references, limitations, and hardening roadmap."
+        keywords="GlyphLock trust, infrastructure controls, access boundaries, evidence practices, audit records, security roadmap, framework references, product limitations"
         url="/trust-security"
       />
 
