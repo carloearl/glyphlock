@@ -73,8 +73,8 @@ assert.match(clubTv, /volume=\{0\}[\s\S]*muted/, "ClubTV YouTube video must be m
 assert.match(capability, /spotify:[\s\S]*play: false/, "Spotify must stay discovery/import only");
 assert.match(capability, /apple_music:[\s\S]*play: false/, "Apple Music must stay discovery/import only");
 assert.doesNotMatch(kiosk, /displayPaused\s*\?\s*null\s*:\s*children/, "secure display must not unmount the playback subtree");
-assert.match(kiosk, /aria-hidden=\{displayPaused\}/, "secure display must redact the operational accessibility tree");
-assert.match(kiosk, /inert=\{displayPaused/, "secure display must make the operational surface inert");
+assert.match(kiosk, /aria-hidden=\{displayPaused \|\| undefined\}/, "secure display must redact the operational accessibility tree");
+assert.match(kiosk, /inert=\{displayPaused \? true : undefined\}/, "secure display must make the operational surface inert");
 assert.match(consoleSource, /hidden=\{active !== "visuals"\}/, "Fable host must remain mounted across utility tab changes");
 assert.doesNotMatch(consoleSource, /active === "visuals"\s*&&\s*\(/, "visual utility view must not be conditionally unmounted");
 assert.match(clubChannel, /receiver-ready/, "Club TV must request an immediate state snapshot");
