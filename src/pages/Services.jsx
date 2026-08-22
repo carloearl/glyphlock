@@ -285,7 +285,7 @@ export default function Services() {
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-green-400" />
-                <span>Quantum-Resistant</span>
+                <span>Evidence-Connected</span>
               </div>
               <div className="flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-violet-400" />
