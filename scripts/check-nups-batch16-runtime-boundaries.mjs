@@ -48,12 +48,8 @@ assert.equal(retiredNks1.data?.code, 'NKS1_ENDPOINT_RETIRED');
 assert.doesNotMatch(retiredNks1.text, /venue|payment_provider|kiosk_session|shift_id/i, 'Retired NKS1 endpoint leaked operational data.');
 
 const retiredPlaylist = await invokeAnonymous('manageEntertainerPlaylist', { action: 'capability' });
-assert.ok([401, 410].includes(retiredPlaylist.status), `Unused playlist endpoint must be closed to anonymous callers while its 410 tombstone synchronizes; got ${retiredPlaylist.status}: ${retiredPlaylist.text.slice(0, 240)}`);
-if (retiredPlaylist.status === 410) {
-  assert.equal(retiredPlaylist.data?.code, 'PLAYLIST_ENDPOINT_RETIRED');
-} else {
-  assert.match(String(retiredPlaylist.data?.error || ''), /Authentication required/i);
-}
-assert.doesNotMatch(retiredPlaylist.text, /playlist_id|ordered_tracks|entertainer_id|venue_id/i, 'Unused playlist endpoint leaked operational data.');
+assert.equal(retiredPlaylist.status, 410, `Retired playlist endpoint must return 410 Gone; got ${retiredPlaylist.status}: ${retiredPlaylist.text.slice(0, 240)}`);
+assert.equal(retiredPlaylist.data?.code, 'PLAYLIST_ENDPOINT_RETIRED');
+assert.doesNotMatch(retiredPlaylist.text, /playlist_id|ordered_tracks|entertainer_id|venue_id/i, 'Retired playlist endpoint leaked operational data.');
 
-console.log('[check:nups-batch16-runtime-boundaries] passed: admin endpoints deny anonymous access, unknown NKS2 terminals fail closed, NKS1 returns 410, and the unused playlist endpoint is closed during tombstone synchronization.');
+console.log('[check:nups-batch16-runtime-boundaries] passed: admin endpoints deny anonymous access, unknown NKS2 terminals fail closed, and both retired endpoints return 410 Gone.');
