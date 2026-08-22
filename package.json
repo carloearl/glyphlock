@@ -25,6 +25,9 @@
     "check:nups-sensitive-reads": "node scripts/check-nups-sensitive-read-boundaries.mjs",
     "check:nups-anonymous-protected-evidence": "node scripts/check-nups-anonymous-protected-evidence.mjs",
     "check:nups-batch15": "node scripts/check-nups-batch15.mjs",
+    "check:nups-final-operational-writes": "node scripts/check-nups-final-operational-writes.mjs",
+    "check:nups-terminal-governance": "node scripts/check-nups-terminal-governance.mjs",
+    "check:nups-batch16-runtime-boundaries": "node scripts/check-nups-batch16-runtime-boundaries.mjs",
     "check:nups-batch16-operational": "node scripts/check-nups-batch16-operational.mjs",
     "check:nups-batch16-runtime": "node scripts/check-nups-batch16-runtime.mjs",
     "check:nups-batch16": "node scripts/check-nups-batch16.mjs"
