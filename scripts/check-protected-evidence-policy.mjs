@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { protectedEvidenceDecision } from '../base44/functions/_shared/protectedEvidencePolicy.js';
+import { protectedEvidenceDecision } from '../base44/functions/getProtectedEvidence/protectedEvidencePolicy.js';
 
 const allow = (input) => assert.equal(protectedEvidenceDecision(input).allowed, true, JSON.stringify(input));
 const deny = (input) => assert.equal(protectedEvidenceDecision(input).allowed, false, JSON.stringify(input));
