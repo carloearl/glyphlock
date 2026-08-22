@@ -183,7 +183,7 @@ function UnifiedMusicConsoleInner() {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="h-full flex flex-col gap-3 overflow-hidden">
       {/* ── AUTO-DJ Command Header ── */}
       <div className="relative overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-900 p-4">
         <div className="absolute inset-0 opacity-20 pointer-events-none"
@@ -286,7 +286,7 @@ function UnifiedMusicConsoleInner() {
       <ResizablePanelGroup
         direction={isWide ? "horizontal" : "vertical"}
         autoSaveId={`${layoutStorageId}:${isWide ? "wide" : "narrow"}`}
-        className="min-h-[760px] overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-950/40"
+        className="h-auto flex-1 min-h-0 overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-950/40"
       >
         <ResizablePanel ref={performancePanelRef} defaultSize={isWide ? 72 : 62} minSize={isWide ? 35 : 45} className="min-h-0 overflow-hidden">
           <SuiteErrorBoundary>

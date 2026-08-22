@@ -9,12 +9,14 @@
  *   • Uses browser "Cast…" to mirror the tab to a Chromecast / AirPlay display.
  */
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { subscribeClubTV } from "@/components/mixer/ClubBroadcastChannel";
 import YouTubePlayer from "@/components/mixer/YouTubePlayer";
 import FableEngineVisualizer from "@/components/mixer/FableEngineVisualizer";
 import { Disc3, Radio, Maximize2, Sparkles, Video, ListMusic } from "lucide-react";
 
 export default function ClubTV() {
+  const navigate = useNavigate();
   const [state, setState] = useState(null); // { deckA, deckB, crossfade }
   const [fs, setFs] = useState(false);
   const [view, setView] = useState("fable");
@@ -64,6 +66,14 @@ export default function ClubTV() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate("/DJHome")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 text-cyan-200 text-xs font-bold hover:bg-cyan-500/20"
+            title="Return to the DJ Booth / mixer"
+          >
+            ← Back to Booth
+          </button>
           <div className="flex items-center rounded-lg border border-purple-500/30 bg-black/50 p-0.5">
             <button
               type="button"
