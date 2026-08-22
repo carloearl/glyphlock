@@ -141,10 +141,10 @@ export default function Services() {
 
   return (
     <>
-      <SEOHead 
-        title="Services - Creative Infrastructure Modules | GlyphLock Ecosystem"
-        description="Explore GlyphLock's creative infrastructure: QR Identity Studio, Image Lab, GlyphBot AI builder, Site Building tools, Blockchain authorship, and Master Covenant verification. Open framework for verified digital worlds."
-        keywords="creative infrastructure, QR identity, image generation, site building, GlyphBot AI, blockchain authorship, Master Covenant, verified ownership, digital ecosystem, open source framework"
+      <SEOHead
+        title="GlyphLock Services | Images, QR, GlyphBot, NUPS & Integrations"
+        description="Explore GlyphLock services across image carriers, responsive hotspots, Secure QR, GlyphBot, NUPS venue operations, records, SDKs, APIs, and governance."
+        keywords="GlyphLock services, image carriers, interactive hotspots, Secure QR, GlyphBot, NUPS, venue operations, SDK integration, API integration, governance"
         url="/services"
       />
       
