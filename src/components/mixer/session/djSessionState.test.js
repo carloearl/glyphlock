@@ -5,11 +5,15 @@ import {
   createInitialDJSessionState,
   djSessionReducer,
   createDeckCommand,
+  createTransportCommand,
   selectActiveDeckSnapshot,
 } from "./djSessionState.js";
 import { getProviderCapability, canUseAsVenueDeckSource } from "./providerCapabilities.js";
 import { createScopedLayoutKey, normalizeLayout, WORKBENCH_PRESETS } from "./djLayout.js";
 import { matchImportedTrack } from "./playlistMatching.js";
+import { buildMixerStorageKey } from "./mixerStorageScope.js";
+import { getClubTVSignalStatus, isClubTVOnAir } from "./clubTVSignal.js";
+import { canFailoverToCue, nextTransitionAfterCueStart } from "./transitionSafety.js";
 import {
   YOUTUBE_STATES,
   classifyYouTubeError,
@@ -49,6 +53,54 @@ test("50 view changes and 20 accelerated transitions preserve one session identi
   assert.equal(state.transitionCount, 20);
   assert.equal(state.diagnostics.length <= 200, true);
   assert.equal(selectActiveDeckSnapshot(state).songId, "soak-19");
+});
+
+test("play and pause transport commands preserve resident decks and queue", () => {
+  let state = createInitialDJSessionState({ queue: ["one", "two"] });
+  state = djSessionReducer(state, { type: "DECK_LOADED_DIRECT", deck: "A", songId: "resident-a" });
+  const pause = createTransportCommand({ requestId: "transport-1", action: "pause", deck: "A", songId: "resident-a" });
+  state = djSessionReducer(state, { type: "TRANSPORT_COMMAND_REQUESTED", command: pause });
+  assert.equal(state.transportCommand.action, "pause");
+  assert.equal(state.deckA.songId, "resident-a");
+  assert.deepEqual(state.queue, ["one", "two"]);
+  const play = createTransportCommand({ requestId: "transport-2", action: "play", deck: "A", songId: "resident-a" });
+  state = djSessionReducer(state, { type: "TRANSPORT_COMMAND_REQUESTED", command: play });
+  assert.equal(state.transportCommand.action, "play");
+  assert.throws(() => createTransportCommand({ requestId: "bad", action: "stop" }), /play or pause/);
+});
+
+test("mixer cache keys isolate venue operator device and mode", () => {
+  const base = { venueId: "venue-a", operatorId: "op-1", deviceId: "desk-1", mode: "LIVE" };
+  const key = buildMixerStorageKey("songs", base);
+  assert.notEqual(key, buildMixerStorageKey("songs", { ...base, venueId: "venue-b" }));
+  assert.notEqual(key, buildMixerStorageKey("songs", { ...base, operatorId: "op-2" }));
+  assert.notEqual(key, buildMixerStorageKey("songs", { ...base, deviceId: "desk-2" }));
+  assert.notEqual(key, buildMixerStorageKey("songs", { ...base, mode: "SANDBOX" }));
+});
+
+test("Club TV liveness never claims ON AIR for stale state", () => {
+  const now = 10_000;
+  assert.equal(getClubTVSignalStatus({ now, lastSignalAt: 0 }), "CONNECTING");
+  assert.equal(getClubTVSignalStatus({ now, lastSignalAt: 9_000 }), "LIVE");
+  assert.equal(getClubTVSignalStatus({ now, lastSignalAt: 5_000 }), "STALE");
+  assert.equal(getClubTVSignalStatus({ now, lastSignalAt: 1_000 }), "OFFLINE");
+  assert.equal(isClubTVOnAir("LIVE", { id: "track" }), true);
+  assert.equal(isClubTVOnAir("STALE", { id: "track" }), false);
+  assert.equal(isClubTVOnAir("LIVE", null), false);
+});
+
+test("manual Auto Blend can fail over and rejected cue starts keep live crossfade", () => {
+  assert.equal(canFailoverToCue({ blending: true, active: true, targetId: "cue", targetDuration: 180 }), true);
+  assert.equal(canFailoverToCue({ blending: false, active: true, targetId: "cue", targetDuration: 180 }), false);
+  assert.equal(canFailoverToCue({ blending: true, active: true, targetId: null, targetDuration: 180 }), false);
+  assert.deepEqual(
+    nextTransitionAfterCueStart({ started: false, currentCrossfade: 17, targetCrossfade: 100 }),
+    { proceed: false, crossfade: 17 },
+  );
+  assert.deepEqual(
+    nextTransitionAfterCueStart({ started: true, currentCrossfade: 17, targetCrossfade: 100 }),
+    { proceed: true, crossfade: 100 },
+  );
 });
 
 test("provider capability truth forbids consumer catalog sources as venue decks", () => {
