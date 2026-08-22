@@ -53,7 +53,7 @@ Existing active playlists without a venue field remain migration-compatible. The
 
 ### DJ diagnostic
 
-The former create/delete Playlist permission probe was removed. The diagnostic now invokes the non-mutating `capability` action on `manageEntertainerPlaylist`.
+The former create/delete Playlist permission probe was removed. The diagnostic now invokes the non-mutating `probePlaylistPermission` action on the canonical `nupsDJGateway`. The unused duplicate `manageEntertainerPlaylist` writer was replaced by an explicit HTTP 410 tombstone so playlist authorization cannot drift across two backends.
 
 ## VenueTerminal governance
 
@@ -62,7 +62,8 @@ The former create/delete Playlist permission probe was removed. The diagnostic n
 `manageVenueTerminal` implements:
 
 - list;
-- provision;
+- pending registration (`provision`);
+- explicit approval (`approve`);
 - update;
 - activate;
 - deactivate;
@@ -74,6 +75,7 @@ The backend resolves the authenticated NUPS identity, validates the target venue
 Security events include:
 
 - `TERMINAL_PROVISIONED`;
+- `TERMINAL_APPROVED`;
 - `TERMINAL_UPDATED`;
 - `TERMINAL_TRUST_CHANGED`;
 - `TERMINAL_ACTIVATED`;
@@ -83,25 +85,30 @@ Security events include:
 
 ### UI
 
-`VenueTerminalManager` is mounted in Venue Admin Settings.
+One `TerminalManagementEditor` is mounted in the dedicated **Venue Admin Settings → Terminals** tab. The duplicate terminal panel was removed.
 
 It supports:
 
-- displaying the current browser's stable registration candidate;
-- manually entering a known physical device ID;
-- selecting terminal type and station;
-- recording notes;
-- explicit trust approval;
-- editing terminal configuration;
-- activate, deactivate and revoke actions.
+- displaying the current browser’s stable device ID and current server state;
+- copying that non-secret ID from a blocked kiosk;
+- manually entering a different physical device ID;
+- selecting terminal type and physical station;
+- recording approval notes;
+- **Register Pending** without granting staff-login access;
+- **Approve This Device** for the browser currently in use;
+- **Approve & Activate** for a different copied device ID;
+- editing details, deactivation and permanent revocation;
+- re-checking approval from the kiosk without refreshing.
 
-The browser-generated ID is untrusted by default. Local generation does not grant server trust.
+Approval means the server has an exact device/venue record with `status = active` and `trusted = true`. Local ID generation, possession of the ID, or knowledge of a staff PIN grants no trust.
 
 ### Provisioning state
 
-No fake production terminal record was created. Real door, clock, DJ, manager, scanner, VIP and kiosk IDs remain to be physically identified and approved through the new control.
+No fake production terminal record was created. Real door, clock, DJ, manager, scanner, VIP and kiosk IDs remain to be physically identified and commissioned once.
 
-The temporary `VenuePaymentConfig.terminal_id` compatibility fallback remains because no deployed terminal has yet been proven migrated to `VenueTerminal`.
+`VenuePaymentConfig.terminal_id` no longer confers device trust. `VenueTerminal` is the sole accepted pre-authentication device-to-venue boundary. The kiosk now explains an unapproved device before PIN entry, and the legacy TimeClock submits the same canonical device ID.
+
+The exact physical device ID exists in that browser’s local storage, so commissioning must occur on the device or by copying its displayed ID to an authorized manager. This is an installation step, not missing Batch 16 application logic. The exact procedure is recorded in `docs/runbooks/NUPS-TERMINAL-APPROVAL.md`.
 
 ## Runtime boundary evidence
 
@@ -137,7 +144,7 @@ The available execution boundary did not expose distinct deployed authenticated 
 - door-role tax/biometric denial;
 - Venue A actor against Venue B evidence;
 - authorized signed URL before and after expiry;
-- physical trusted terminal recognition.
+- authorized physical-terminal recognition after the real device is commissioned.
 
 Those scenarios remain `NOT VERIFIED`, not inferred from policy tests.
 
@@ -193,7 +200,8 @@ GREEN PASS
 - `NUPS-0002`: OPEN — controlled migration now `161/287`; zero live high/medium NUPS business bypasses.
 - `NUPS-0009`: OPEN — authenticated multi-identity and signed-expiry proof remains.
 - `NUPS-0011`: OPEN — private boundary and anonymous runtime denial are green; authenticated E2E remains.
-- `NUPS-0013`: OPEN — provisioning control is implemented; real physical terminal approval remains.
+- `NUPS-0013`: CONTROL COMPLETE — software approval boundary is complete; one-time real-device commissioning remains.
+- `NUPS-0014`: RESOLVED — deployed NKS1 endpoint returns HTTP 410 with `NKS1_ENDPOINT_RETIRED`.
 
 ## Frozen invariants
 
@@ -209,12 +217,18 @@ GREEN PASS
 | Identity privacy | Preserved; authenticated E2E remains open |
 | Accounting balance semantics | Untouched |
 | API credential secrecy | PASS |
-| Trusted terminal boundary | Implemented and fail-closed; real devices pending |
+| Trusted terminal boundary | COMPLETE and fail-closed; physical devices require one-time commissioning |
 
 ## Status
 
-`PARTIAL`
+`BATCH 16 ENGINEERING COMPLETE — OPERATIONAL ACCEPTANCE ITEMS RECORDED`
 
-All implementation, static checks, deployed anonymous/runtime boundary probes, repository audits, lint, typecheck and production build are green. Completion remains partial only because distinct authenticated runtime identities, signed-URL expiry and real physical terminal IDs are external to the available execution boundary.
+All scoped implementation, static controls, deployed anonymous/runtime boundaries, repository audits, lint, typecheck and production build are green. The terminal trust design, explicit approval flow, NKS2 cutover, NKS1 retirement, final operational-write migration and CI controls are complete.
+
+The following are installation or separate acceptance evidence rather than unfinished Batch 16 code:
+
+- commissioning each real venue device using the exact ID generated in that browser;
+- executing the full browser click-through on installed venue hardware;
+- exercising protected-evidence retrieval with distinct authenticated role accounts and waiting through signed-URL expiry.
 
 No production publish was triggered.
