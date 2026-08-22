@@ -128,7 +128,6 @@ Deno.serve(async (req) => {
       ordered_tracks: orderedTracks,
       status: 'active',
       generation_timestamp: new Date().toISOString(),
-      updated_by: user.email,
     };
     const playlist = existing?.[0]
       ? await E.Playlist.update(existing[0].id, payload)
