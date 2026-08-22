@@ -27,8 +27,8 @@ if (!/VenueTerminal\.filter\(\{\s*terminal_id:\s*terminalId\s*\}/.test(clockIn)
   || !/terminalRecord\.trusted\s*===\s*true/.test(clockIn)) {
   failures.push('nupsClockInV2: trusted pre-auth venue binding must require an active trusted VenueTerminal record.');
 }
-if (!/legacyPaymentTerminal\s*=\s*!terminalRecord/.test(clockIn)) {
-  failures.push('nupsClockInV2: inactive/revoked/untrusted terminal records must not regain trust through the legacy payment-terminal fallback.');
+if (/VenuePaymentConfig\.filter\(\{\s*terminal_id/.test(clockIn) || /legacyPaymentTerminal/.test(clockIn)) {
+  failures.push('nupsClockInV2: payment configuration must not confer pre-authentication terminal trust.');
 }
 if (!/Trusted terminal venue is not configured/.test(clockIn)
   || !/UNKNOWN_TERMINAL_BLOCKED/.test(clockIn)
