@@ -1,6 +1,5 @@
 import { base44 } from "@/api/base44Client";
 import { loadAuthenticatedDJFallback } from "@/components/mixer/automation/djSnapshotFallback";
-import { probePlaylistWriteDirect } from "@/components/mixer/automation/djDirectFallbacks";
 
 export async function invokeDJGateway(action, payload = {}) {
   const kioskSession = typeof window !== "undefined" ? sessionStorage.getItem("nups_kiosk_session") : null;
@@ -23,9 +22,6 @@ export async function invokeDJGateway(action, payload = {}) {
       if (action === "snapshot" && [502, 503, 504].includes(status)) {
         const fallback = await loadAuthenticatedDJFallback();
         if (fallback) return fallback;
-      }
-      if (action === "probePlaylistPermission" && [502, 503, 504].includes(status)) {
-        return probePlaylistWriteDirect();
       }
       const retryable = [502, 503, 504].includes(status);
       if (!retryable || attempt === 3) break;
