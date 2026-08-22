@@ -22,12 +22,29 @@ export default function ClubTV() {
   const [view, setView] = useState("fable");
   const [playlistId, setPlaylistId] = useState("LM");
   const [playlistMuted, setPlaylistMuted] = useState(false);
+  const [signalStatus, setSignalStatus] = useState("CONNECTING");
   const rootRef = useRef(null);
+  const lastSignalRef = useRef(0);
 
   useEffect(() => {
     document.title = "NUPS · Club TV";
-    const unsub = subscribeClubTV((payload) => setState(payload));
-    return unsub;
+    const unsubscribe = subscribeClubTV((payload, meta = {}) => {
+      if (meta.type === "unsupported") {
+        setSignalStatus("OFFLINE");
+        return;
+      }
+      lastSignalRef.current = Number(meta.ts) || Date.now();
+      if (payload) setState(payload);
+      setSignalStatus("LIVE");
+    });
+    const liveness = window.setInterval(() => {
+      const age = lastSignalRef.current ? Date.now() - lastSignalRef.current : Infinity;
+      setSignalStatus(age <= 3000 ? "LIVE" : age <= 8000 ? "STALE" : lastSignalRef.current ? "OFFLINE" : "CONNECTING");
+    }, 1000);
+    return () => {
+      window.clearInterval(liveness);
+      unsubscribe();
+    };
   }, []);
 
   const enterFullscreen = async () => {
@@ -47,6 +64,7 @@ export default function ClubTV() {
   const videoId = active?.videoId || null;
   const audioUrl = active?.audioUrl || null;
   const visualDeck = state?.crossfade >= 50 ? "B" : "A";
+  const onAir = signalStatus === "LIVE" && Boolean(active);
 
   return (
     <div
@@ -192,8 +210,9 @@ export default function ClubTV() {
       {/* Bottom ticker */}
       <div className="px-6 py-3 bg-gradient-to-r from-black via-purple-950/40 to-black border-t border-purple-500/30 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/50 text-red-300 text-[10px] font-bold uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> ON AIR
+          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-widest ${onAir ? "bg-red-500/20 border-red-500/50 text-red-300" : signalStatus === "STALE" ? "bg-amber-500/20 border-amber-500/50 text-amber-300" : "bg-slate-800 border-slate-600 text-slate-300"}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${onAir ? "bg-red-500 animate-pulse" : signalStatus === "STALE" ? "bg-amber-400" : "bg-slate-500"}`} />
+            {onAir ? "ON AIR" : signalStatus}
           </span>
           <div className="min-w-0">
             <div className="text-sm font-bold text-white truncate">
