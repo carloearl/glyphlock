@@ -18,7 +18,6 @@ import { Label } from '@/components/ui/label';
 import { hasOwnerPreview } from '@/lib/nups/previewBypass';
 import RateFeeEditor from '@/components/admin/RateFeeEditor';
 import DailyChecklistEditor from '@/components/admin/DailyChecklistEditor';
-import VenueTerminalManager from '@/components/admin/VenueTerminalManager';
 import ContractTermsEditor from '@/components/admin/ContractTermsEditor';
 import ChartOfAccountsEditor from '@/components/admin/ChartOfAccountsEditor';
 import ReceiptConfigEditor from '@/components/admin/ReceiptConfigEditor';
@@ -134,7 +133,6 @@ export default function VenueAdminSettings() {
             </TabsContent>
             <TabsContent value="checklist">
               <DailyChecklistEditor venueId={selectedVenue} user={user} />
-              <VenueTerminalManager venueId={selectedVenue} />
             </TabsContent>
             <TabsContent value="contracts">
               <ContractTermsEditor venueId={selectedVenue} user={user} />
