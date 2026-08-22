@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 // GitHub repository URL
-const GITHUB_SDK_URL = "https://github.com/glyphlock/sdk-javascript";
+const GITHUB_SDK_URL = "https://github.com/carloearl/glyphlock";
 
 const CodeBlock = ({ code, language = "typescript", title }) => {
   const [copied, setCopied] = useState(false);

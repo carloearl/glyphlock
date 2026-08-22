@@ -15,9 +15,9 @@ import { JAVASCRIPT_SDK, PYTHON_SDK, GO_SDK, SDK_DOCS } from "@/components/sdk/S
 
 // GitHub repository URLs for each SDK
 const GITHUB_REPOS = {
-  javascript: "https://github.com/glyphlock/sdk-javascript",
-  python: "https://github.com/glyphlock/sdk-python",
-  go: "https://github.com/glyphlock/sdk-go"
+  javascript: "https://github.com/carloearl/glyphlock",
+  python: "https://github.com/carloearl/glyphlock",
+  go: "https://github.com/carloearl/glyphlock"
 };
 
 // Language icons component

@@ -1,39 +1,64 @@
 import React from 'react';
 import { FileCode, ExternalLink, CheckCircle2 } from 'lucide-react';
 
-const ROBOTS_CONTENT = `# GlyphLock LLC - robots.txt
-# https://glyphlock.io
+const ROBOTS_CONTENT = `# GlyphLock LLC — robots.txt
+# Canonical origin: https://glyphlock.io
+# NUPS = Nexus Unified POS System
 
 User-agent: *
 Allow: /
-
-# Public Tools
+Allow: /About
 Allow: /SecureQRStudio
-Allow: /SecureQRStudio/*
-Allow: /image-lab
-Allow: /steganography
-Allow: /blockchain
-Allow: /glyphbot
-Allow: /glyphbot-junior
+Allow: /ImageLab
+Allow: /InteractiveImageStudio
+Allow: /GlyphBot
+Allow: /GlyphBotMixer
+Allow: /SecurityTools
+Allow: /SecurityOperationsCenter
+Allow: /Blockchain
+Allow: /SDKDocs
+Allow: /SecurityDocs
+Allow: /NUPSLanding
+Allow: /GlyphLockFinancial
+Allow: /GovernanceHub
+Allow: /MasterCovenant
+Allow: /CaseStudies
+Allow: /Roadmap
+Allow: /Partners
+Allow: /DreamTeam
+Allow: /FAQ
+Allow: /Contact
+Allow: /Consultation
+Allow: /Services
+Allow: /Solutions
+Allow: /Pricing
+Allow: /Privacy
+Allow: /Terms
+Allow: /Accessibility
+Allow: /CodeOfEthics
 
-# Block admin/private areas
-Disallow: /dashboard
-Disallow: /command-center
-Disallow: /nups-staff
-Disallow: /nups-owner
+# Noindex: admin / private / authenticated / payment-result / test / sandbox / internal audit
+Disallow: /Dashboard
+Disallow: /CommandCenter
+Disallow: /AccountSecurity
+Disallow: /PaymentSuccess
+Disallow: /PaymentCancel
+Disallow: /NUPSOwner
+Disallow: /NUPSSandbox
+Disallow: /NUPSStaff
+Disallow: /SiteBuilder
 Disallow: /api/
 Disallow: /functions/
 Disallow: /admin/
 
-# Crawl-delay for politeness
+Sitemap: https://glyphlock.io/sitemap.xml
+
 Crawl-delay: 1
 
-# Google-specific
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 0
 
-# Bing-specific
 User-agent: Bingbot
 Allow: /
 Crawl-delay: 1`;
@@ -57,7 +82,7 @@ export default function Robots() {
             <span className="text-green-400 font-semibold">Production Ready</span>
           </div>
           <p className="text-gray-400 text-sm mt-1">
-            robots.txt is served via backend function at <code className="text-cyan-300">https://app.base44.com/api/apps/697a087fb354faebb72df54b/robotsTxt</code>
+            robots.txt is served at <code className="text-cyan-300">https://glyphlock.io/robots.txt</code>
           </p>
         </div>
 
@@ -72,22 +97,18 @@ export default function Robots() {
 
         <div className="mt-6 flex flex-wrap gap-4">
           <a 
-            href="https://app.base44.com/api/apps/697a087fb354faebb72df54b/robotsTxt" 
-            target="_blank"
-            rel="noopener noreferrer"
+            href="https://glyphlock.io/robots.txt"
             className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm transition-colors flex items-center gap-2"
           >
             <ExternalLink className="w-4 h-4" />
             View Raw robots.txt
           </a>
-          <a 
-            href="https://app.base44.com/api/apps/697a087fb354faebb72df54b/sitemap" 
-            target="_blank"
-            rel="noopener noreferrer"
+          <a
+            href="https://glyphlock.io/sitemap.xml"
             className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm transition-colors flex items-center gap-2"
           >
             <FileCode className="w-4 h-4" />
-            View Sitemap Index
+            View Sitemap
           </a>
         </div>
 

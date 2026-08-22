@@ -39,6 +39,13 @@ const ACTIVE_SOURCES = [
   'base44/functions/sitemap/entry.ts',
   'base44/functions/sitemapIndex/entry.ts',
   'base44/functions/generateSitemapXML/entry.ts',
+  'src/pages/Robots.jsx',
+  'src/pages/sitemap-qr.jsx',
+  'src/pages/SDKDocs.jsx',
+  'src/pages/CaseStudyTruthStrike.jsx',
+  'src/components/about/carlo/FounderStoryNarrative.jsx',
+  'src/components/sdk/SDKFiles.jsx',
+  'src/components/console/SDKDownloadCenter.jsx',
 ];
 
 function read(path) {
@@ -82,6 +89,9 @@ const RETIRED_STRINGS = [
   "humanity's first",
   'first successful binding',
   'N.U.P.S.',
+  'github.com/glyphlock/',
+  'github.com/glyphlock"',
+  "github.com/glyphlock'",
 ];
 
 for (const [path, content] of Object.entries(sourceContents)) {
@@ -210,6 +220,10 @@ if (footer && !footer.includes('https://github.com/carloearl/glyphlock')) {
 const seoHead = sourceContents['src/components/SEOHead.jsx'];
 if (seoHead && !seoHead.includes('https://github.com/carloearl/glyphlock')) {
   fail('SEOHead sameAs must include https://github.com/carloearl/glyphlock');
+}
+const sdkDocs = sourceContents['src/pages/SDKDocs.jsx'];
+if (sdkDocs && !sdkDocs.includes('https://github.com/carloearl/glyphlock')) {
+  fail('SDKDocs GitHub URL must be https://github.com/carloearl/glyphlock');
 }
 
 // ── 8. NUPS expansion present in canonical sources ──

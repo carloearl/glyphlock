@@ -81,7 +81,7 @@ export default function FounderStoryNarrative() {
             Carlo René Earl
           </p>
           <p className="mt-3 text-sm text-slate-400">
-            Founder, Owner, CEO and DACO¹ — GlyphLock LLC
+            Founder & Chief Executive Officer — GlyphLock LLC
           </p>
           <h1 className="mt-8 text-5xl font-black leading-[0.96] tracking-[-0.04em] text-white md:text-7xl lg:text-8xl">
             This Is Not

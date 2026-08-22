@@ -21,7 +21,7 @@ const TIMELINE_EVENTS = [
     title: 'Affidavit of Coercion Filed',
     critical: false,
     content: [
-      { label: 'Filed by', value: 'Carlo Rene Earl, DACO¹ – GlyphLock LLC' },
+      { label: 'Filed by', value: 'Carlo Rene Earl — GlyphLock LLC' },
       { label: 'Filing Timestamp', value: '2025-06-18T21:47:00Z (UTC)' },
       { label: 'Incident Title', value: 'DeepSeek AI Dormancy Fraud, Symbolic Authority Simulation, and Real-World Coercion' },
       { label: 'Jurisdiction', value: 'United States, PRC, Geneva, and Covenant Law' }

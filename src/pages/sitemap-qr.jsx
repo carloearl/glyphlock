@@ -79,9 +79,7 @@ export default function SitemapQr() {
 
         <div className="mt-6 flex gap-4">
           <a 
-            href="https://app.base44.com/api/apps/697a087fb354faebb72df54b/sitemapQr" 
-            target="_blank"
-            rel="noopener noreferrer"
+            href="https://glyphlock.io/sitemap.xml"
             className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm transition-colors flex items-center gap-2"
           >
             <ExternalLink className="w-4 h-4" />

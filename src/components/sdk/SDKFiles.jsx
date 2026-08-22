@@ -892,10 +892,10 @@ export const GO_SDK = `// GlyphLock Security SDK for Go
 // Version: 1.0.0
 //
 // Installation:
-//     go get github.com/glyphlock/sdk-go
+//     go get github.com/carloearl/glyphlock
 //
 // Usage:
-//     import "github.com/glyphlock/sdk-go"
+//     import "github.com/carloearl/glyphlock"
 //     client := glyphlock.NewClient("glk_pub_...", "glk_sec_...")
 
 package glyphlock
@@ -1428,12 +1428,12 @@ key = client.keys.create(
   go: {
     name: "Go",
     version: "1.0.0",
-    installation: "go get github.com/glyphlock/sdk-go",
+    installation: "go get github.com/carloearl/glyphlock",
     quickstart: `package main
 
 import (
     "fmt"
-    glyphlock "github.com/glyphlock/sdk-go"
+    glyphlock "github.com/carloearl/glyphlock"
 )
 
 func main() {
